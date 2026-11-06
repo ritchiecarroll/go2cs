@@ -66,10 +66,8 @@ public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
     @in = h.inner.Sum(@in);
 
     if (h.marshaled) {
-        {
-            var err = h.outer._<marshalable>().UnmarshalBinary(h.opad); if (err != nil) {
-                throw panic(err);
-            }
+        var err = h.outer._<marshalable>().UnmarshalBinary(h.opad); if (err != nil) {
+            throw panic(err);
         }
     } else {
         h.outer.Reset();
@@ -93,10 +91,8 @@ public static nint BlockSize(this ref HMAC h) {
 
 public static void Reset(this ref HMAC h) {
     if (h.marshaled) {
-        {
-            var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != nil) {
-                throw panic(errΔ1);
-            }
+        var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != nil) {
+            throw panic(errΔ1);
         }
         return;
     }

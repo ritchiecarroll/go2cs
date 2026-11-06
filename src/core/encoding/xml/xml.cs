@@ -239,10 +239,8 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 // NewTokenDecoder creates a new XML parser using an underlying token stream.
 public static ж<Decoder> NewTokenDecoder(TokenReader t) {
     // Is it already a Decoder?
-    {
-        var (dΔ1, ok) = t._<ж<Decoder>>(ᐧ); if (ok) {
-            return dΔ1;
-        }
+    var (dΔ1, ok) = t._<ж<Decoder>>(ᐧ); if (ok) {
+        return dΔ1;
     }
     var d = Ꮡ(new Decoder(
         ns: new map<@string, @string>(),
@@ -294,24 +292,20 @@ public static (ΔToken, error) Token(this ref Decoder d) {
         t = d.nextToken;
         d.nextToken = default;
     } else {
-        {
-            (t, err) = d.rawToken(); if (t == nil && err != nil) {
-                if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
-                    err = d.syntaxError(unexpectedEofˢ);
-                }
-                return (default, err);
+        (t, err) = d.rawToken(); if (t == nil && err != nil) {
+            if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
+                err = d.syntaxError(unexpectedEofˢ);
             }
+            return (default, err);
         }
         // We still have a token to process, so clear any
         // errors (e.g. EOF) and proceed.
         err = default;
     }
     if (!d.Strict) {
-        {
-            var (t1, ok) = d.autoClose(t); if (ok) {
-                d.nextToken = t;
-                t = t1;
-            }
+        var (t1, ok) = d.autoClose(t); if (ok) {
+            d.nextToken = t;
+            t = t1;
         }
     }
     switch (t.type()) {
@@ -381,12 +375,10 @@ internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElement
     case {} when n.Space == ""u8 && n.Local == xmlnsPrefix: {
         return;
     }}
-    {
-        var (v, ok) = d.ns[n.Space, ꟷ]; if (ok) {
-            n.Space = v;
-        } else if (n.Space == ""u8) {
-            n.Space = d.DefaultSpace;
-        }
+    var (v, ok) = d.ns[n.Space, ꟷ]; if (ok) {
+        n.Space = v;
+    } else if (n.Space == ""u8) {
+        n.Space = d.DefaultSpace;
     }
 }
 
@@ -395,12 +387,10 @@ internal static void switchToReader(this ref Decoder d, io.Reader r) {
     // Assume that if reader has its own
     // ReadByte, it's efficient enough.
     // Otherwise, use bufio.
-    {
-        var (rb, ok) = r._<io.ByteReader>(ᐧ); if (ok) {
-            d.r = rb;
-        } else {
-            d.r = new bufio_ReaderжByteReader(bufio.NewReader(r));
-        }
+    var (rb, ok) = r._<io.ByteReader>(ᐧ); if (ok) {
+        d.r = rb;
+    } else {
+        d.r = new bufio_ReaderжByteReader(bufio.NewReader(r));
     }
 }
 
@@ -643,28 +633,22 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         return ((CharData)data, default);
     }
 
-    {
-        (b, ok) = d.mustgetc(); if (!ok) {
-            return (default, d.err);
-        }
+    (b, ok) = d.mustgetc(); if (!ok) {
+        return (default, d.err);
     }
     switch (b) {
     case (byte)'/': {
         // </: End element
         Name nameΔ2 = default;
-        {
-            (nameΔ2, ok) = d.nsname(); if (!ok) {
-                if (d.err == nil) {
-                    d.err = d.syntaxError(expectedElementNameAfterˢ);
-                }
-                return (default, d.err);
+        (nameΔ2, ok) = d.nsname(); if (!ok) {
+            if (d.err == nil) {
+                d.err = d.syntaxError(expectedElementNameAfterˢ);
             }
+            return (default, d.err);
         }
         d.space();
-        {
-            (b, ok) = d.mustgetc(); if (!ok) {
-                return (default, d.err);
-            }
+        (b, ok) = d.mustgetc(); if (!ok) {
+            return (default, d.err);
         }
         if (b != '>') {
             d.err = d.syntaxError("invalid characters between </"u8 + nameΔ2.Local + " and >"u8);
@@ -675,22 +659,18 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
     case (byte)'?': {
         // <?: Processing instruction.
         @string targetΔ1 = default;
-        {
-            (targetΔ1, ok) = d.name(); if (!ok) {
-                if (d.err == nil) {
-                    d.err = d.syntaxError(expectedTargetNameAfterˢ);
-                }
-                return (default, d.err);
+        (targetΔ1, ok) = d.name(); if (!ok) {
+            if (d.err == nil) {
+                d.err = d.syntaxError(expectedTargetNameAfterˢ);
             }
+            return (default, d.err);
         }
         d.space();
         d.buf.Reset();
         byte b0 = default;
         for (;;) {
-            {
-                (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default, d.err);
-                }
+            (b, ok) = d.mustgetc(); if (!ok) {
+                return (default, d.err);
             }
             d.buf.WriteByte(b);
             if (b0 == '?' && b == '>') {
@@ -729,18 +709,14 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
     }
     case (byte)'!': {
         // <!: Maybe comment, maybe CDATA.
-        {
-            (b, ok) = d.mustgetc(); if (!ok) {
-                return (default, d.err);
-            }
+        (b, ok) = d.mustgetc(); if (!ok) {
+            return (default, d.err);
         }
         switch (b) {
         case (byte)'-': { // <!-
             // Probably <!-- for a comment.
-            {
-                (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default, d.err);
-                }
+            (b, ok) = d.mustgetc(); if (!ok) {
+                return (default, d.err);
             }
             if (b != '-') {
                 d.err = d.syntaxError(invalidSequenceNotPartOfˢ);
@@ -751,10 +727,8 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             byte b0 = default;
             byte b1 = default;
             for (;;) {
-                {
-                    (b, ok) = d.mustgetc(); if (!ok) {
-                        return (default, d.err);
-                    }
+                (b, ok) = d.mustgetc(); if (!ok) {
+                    return (default, d.err);
                 }
                 d.buf.WriteByte(b);
                 if (b0 == '-' && b1 == '-') {
@@ -774,10 +748,8 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         case (byte)'[': { // <![
             // Probably <![CDATA[.
             for (nint i = 0; i < 6; i++) {
-                {
-                    (b, ok) = d.mustgetc(); if (!ok) {
-                        return (default, d.err);
-                    }
+                (b, ok) = d.mustgetc(); if (!ok) {
+                    return (default, d.err);
                 }
                 if (b != LiteralByteAt("CDATA["u8, i)) {
                     d.err = d.syntaxError(invalidSequenceˢ);
@@ -800,10 +772,8 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         var inquote = (uint8)0;
         nint depth = 0;
         for (;;) {
-            {
-                (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default, d.err);
-                }
+            (b, ok) = d.mustgetc(); if (!ok) {
+                return (default, d.err);
             }
             if (inquote == 0 && b == '>' && depth == 0) {
                 break;
@@ -831,10 +801,8 @@ HandleB:
                 // Look for <!-- to begin comment.
                 @string s = "!--";
                 for (nint i = 0; i < len(s); i++) {
-                    {
-                        (b, ok) = d.mustgetc(); if (!ok) {
-                            return (default, d.err);
-                        }
+                    (b, ok) = d.mustgetc(); if (!ok) {
+                        return (default, d.err);
                     }
                     if (b != s[i]) {
                         for (nint j = 0; j < i; j++) {
@@ -852,10 +820,8 @@ HandleB:
                 byte b0 = default;
                 byte b1 = default;
                 for (;;) {
-                    {
-                        (b, ok) = d.mustgetc(); if (!ok) {
-                            return (default, d.err);
-                        }
+                    (b, ok) = d.mustgetc(); if (!ok) {
+                        return (default, d.err);
                     }
                     if (b0 == '-' && b1 == '-' && b == '>') {
                         break;
@@ -880,29 +846,23 @@ HandleB:
     Name name = default;
     bool empty = default;
     slice<Attr> attr = default;
-    {
-        (name, ok) = d.nsname(); if (!ok) {
-            if (d.err == nil) {
-                d.err = d.syntaxError(expectedElementNameAfterˢ2);
-            }
-            return (default, d.err);
+    (name, ok) = d.nsname(); if (!ok) {
+        if (d.err == nil) {
+            d.err = d.syntaxError(expectedElementNameAfterˢ2);
         }
+        return (default, d.err);
     }
 
     attr = slice<Attr>([]);
     for (;;) {
         d.space();
-        {
-            (b, ok) = d.mustgetc(); if (!ok) {
-                return (default, d.err);
-            }
+        (b, ok) = d.mustgetc(); if (!ok) {
+            return (default, d.err);
         }
         if (b == '/') {
             empty = true;
-            {
-                (b, ok) = d.mustgetc(); if (!ok) {
-                    return (default, d.err);
-                }
+            (b, ok) = d.mustgetc(); if (!ok) {
+                return (default, d.err);
             }
             if (b != '>') {
                 d.err = d.syntaxError(expectedInElementˢ);
@@ -916,19 +876,15 @@ HandleB:
         d.ungetc(b);
 
         var a = new Attr();
-        {
-            (a.Name, ok) = d.nsname(); if (!ok) {
-                if (d.err == nil) {
-                    d.err = d.syntaxError(expectedAttributeNameInˢ);
-                }
-                return (default, d.err);
+        (a.Name, ok) = d.nsname(); if (!ok) {
+            if (d.err == nil) {
+                d.err = d.syntaxError(expectedAttributeNameInˢ);
             }
+            return (default, d.err);
         }
         d.space();
-        {
-            (b, ok) = d.mustgetc(); if (!ok) {
-                return (default, d.err);
-            }
+        (b, ok) = d.mustgetc(); if (!ok) {
+            return (default, d.err);
         }
         if (b != '=') {
             if (d.Strict) {
@@ -1071,11 +1027,9 @@ internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
     byte b = default;
     bool ok = default;
 
-    {
-        (b, ok) = d.getc(); if (!ok) {
-            if (AreEqual(d.err, io.EOF)) {
-                d.err = d.syntaxError(unexpectedEofˢ);
-            }
+    (b, ok) = d.getc(); if (!ok) {
+        if (AreEqual(d.err, io.EOF)) {
+            d.err = d.syntaxError(unexpectedEofˢ);
         }
     }
     return (b, ok);
@@ -1165,35 +1119,27 @@ Input:
             bool okΔ1 = default;
             @string text = default;
             bool haveText = default;
-            {
-                (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                    return default;
-                }
+            (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
+                return default;
             }
             if (b == '#') {
                 d.buf.WriteByte(b);
-                {
-                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                        return default;
-                    }
+                (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
+                    return default;
                 }
                 nint @base = 10;
                 if (b == 'x') {
                     @base = 16;
                     d.buf.WriteByte(b);
-                    {
-                        (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                            return default;
-                        }
+                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
+                        return default;
                     }
                 }
                 nint start = d.buf.Len();
                 while ('0' <= b && b <= '9' || @base == 16 && 'a' <= b && b <= 'f' || @base == 16 && 'A' <= b && b <= 'F') {
                     d.buf.WriteByte(b);
-                    {
-                        (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                            return default;
-                        }
+                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
+                        return default;
                     }
                 }
                 if (b != ';') {
@@ -1214,10 +1160,8 @@ Input:
                         return default;
                     }
                 }
-                {
-                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
-                        return default;
-                    }
+                (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
+                    return default;
                 }
                 if (b != ';') {
                     d.ungetc(b);
@@ -1226,13 +1170,11 @@ Input:
                     d.buf.WriteByte((byte)';');
                     if (isName(name)) {
                         @string s = (@string)name;
-                        {
-                            var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2) {
-                                text = (@string)r;
-                                haveText = true;
-                            } else if (d.Entity != nil) {
-                                (text, haveText) = d.Entity[s, ꟷ];
-                            }
+                        var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2) {
+                            text = (@string)r;
+                            haveText = true;
+                        } else if (d.Entity != nil) {
+                            (text, haveText) = d.Entity[s, ꟷ];
                         }
                     }
                 }
@@ -1309,13 +1251,11 @@ internal static (Name name, bool ok) nsname(this ref Decoder d) {
     }
     if (strings.Count(s, ":") > 1) {
         return (name, false);
+    } else if (strings.Cut(s, ":") is var (space, local, okΔ1) && (!okΔ1 || space == ""u8 || local == ""u8)) {
+        name.Local = s;
     } else {
-        var (space, local, okΔ1) = strings.Cut(s, ":"); if (!okΔ1 || space == ""u8 || local == ""u8) {
-            name.Local = s;
-        } else {
-            name.Space = space;
-            name.Local = local;
-        }
+        name.Space = space;
+        name.Local = local;
     }
     return (name, true);
 }
@@ -1345,10 +1285,8 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
     bool ok = default;
 
     byte b = default;
-    {
-        (b, ok) = d.mustgetc(); if (!ok) {
-            return ok;
-        }
+    (b, ok) = d.mustgetc(); if (!ok) {
+        return ok;
     }
     if (b < utf8.RuneSelf && !isNameByte(b)) {
         d.ungetc(b);
@@ -1357,10 +1295,8 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
     d.buf.WriteByte(b);
 
     for (;;) {
-        {
-            (b, ok) = d.mustgetc(); if (!ok) {
-                return ok;
-            }
+        (b, ok) = d.mustgetc(); if (!ok) {
+            return ok;
         }
         if (b < utf8.RuneSelf && !isNameByte(b)) {
             d.ungetc(b);
@@ -2106,15 +2042,11 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             continue;
             break;
         }}
-        {
-            var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != nil) {
+            return errΔ1;
         }
-        {
-            var (_, errΔ2) = w.Write(esc); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var (_, errΔ2) = w.Write(esc); if (errΔ2 != nil) {
+            return errΔ2;
         }
         last = i;
     }
@@ -2195,10 +2127,8 @@ internal static error emitCDATA(io.Writer w, slice<byte> s) {
     if (len(s) == 0) {
         return default;
     }
-    {
-        var (_, errΔ1) = w.Write(cdataStart); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = w.Write(cdataStart); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     for (;;) {
@@ -2207,23 +2137,17 @@ internal static error emitCDATA(io.Writer w, slice<byte> s) {
             break;
         }
         // Found a nested CDATA directive end.
-        {
-            var (_, errΔ2) = w.Write(before); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var (_, errΔ2) = w.Write(before); if (errΔ2 != nil) {
+            return errΔ2;
         }
-        {
-            var (_, errΔ3) = w.Write(cdataEscape); if (errΔ3 != nil) {
-                return errΔ3;
-            }
+        var (_, errΔ3) = w.Write(cdataEscape); if (errΔ3 != nil) {
+            return errΔ3;
         }
         s = after;
     }
 
-    {
-        var (_, errΔ4) = w.Write(s); if (errΔ4 != nil) {
-            return errΔ4;
-        }
+    var (_, errΔ4) = w.Write(s); if (errΔ4 != nil) {
+        return errΔ4;
     }
 
     var (_, err) = w.Write(cdataEnd);
@@ -2246,11 +2170,9 @@ internal static @string procInst(@string param, @string s) {
             return ""u8;
         }
         i += lenp + k + 1;
-        {
-            var c = sub[lenp + k]; if (c == '\'' || c == '"') {
-                sep = c;
-                break;
-            }
+        var c = sub[lenp + k]; if (c == '\'' || c == '"') {
+            sep = c;
+            break;
         }
     }
     if (sep == 0) {

@@ -33,7 +33,7 @@ at run time and panics with the `runtime.Error` "negative shift amount" (`runtim
 below zero. Widened to `uint64` as the guard above widens a count, a negative count would read as a huge one
 and the shift would quietly give 0, or -1 for a signed right shift of a negative value. So the converter widens
 a SIGNED count to `int64` (`one.Lsh((int64)(neg))`, `x.LshAssign((int64)(neg))`, and `(int64)(c)`
-for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:51 (`arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
+for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:49 (`arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
 `RuntimeErrorPanic.NegativeShiftAmount`. The runtime registers its own `shiftError` as the value, so
 `recover()` sees a `runtime.Error` whose text is Go's. A count of zero or more defers to the unsigned
 guard.
@@ -135,7 +135,7 @@ operand. In these examples `a` is an `int8` holding 100 and `u` is a `uint8` hol
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:66 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:64 -->
 ```csharp
 any x = (int8)(a + a);
 ```
@@ -189,7 +189,7 @@ and width, so a guarded shift needs no cast of its own.
 ```go
 var x int8 = (a + a) >> n
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:166 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:164 -->
 ```csharp
 int8 x = (int8)(((int8)(a + a)).Rsh(n));
 ```
@@ -237,7 +237,7 @@ that never goes through a pointer). Otherwise it is `a * 0`, so `f() % -1` still
 ```go
 arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:122 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:118 -->
 ```csharp
 arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
@@ -260,7 +260,7 @@ prints its result under the label.
 ```go
 sl[counted(1)] /= m1
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:157 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:153 -->
 ```csharp
 sl[counted(1)].QuoAssign(m1);
 ```

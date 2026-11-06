@@ -24,10 +24,8 @@ internal partial interface classify_type /*dyn*/ :
 }
 
 internal static @string classify(error err) {
-    {
-        var (te, ok) = err._<classify_type>(ᐧ); if (ok) {
-            return fmt.Sprintf("temporary=%v msg=%v"u8, te.Temporary(), te.Error());
-        }
+    var (te, ok) = err._<classify_type>(ᐧ); if (ok) {
+        return fmt.Sprintf("temporary=%v msg=%v"u8, te.Temporary(), te.Error());
     }
 
     return "not temporary";
@@ -65,10 +63,8 @@ internal partial interface describe_type /*dyn*/ :
 }
 
 internal static @string describe(any v) {
-    {
-        var (d, ok) = v._<describe_type>(ᐧ); if (ok) {
-            return fmt.Sprintf("%v %v %v"u8, d.String(), d.Name(), d.Depth());
-        }
+    var (d, ok) = v._<describe_type>(ᐧ); if (ok) {
+        return fmt.Sprintf("%v %v %v"u8, d.String(), d.Name(), d.Depth());
     }
 
     return "not deep";

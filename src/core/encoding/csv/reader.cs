@@ -265,11 +265,9 @@ internal static (slice<byte>, error) readLine(this ref Reader r) {
     r.numLine++;
     r.offset += (int64)readSize;
     // Normalize \r\n to \n on all input lines.
-    {
-        nint n = len(line); if (n >= 2 && line[n - 2] == '\r' && line[n - 1] == '\n') {
-            line[n - 2] = (byte)'\n';
-            line = line.slice(0, n - 1);
-        }
+    nint n = len(line); if (n >= 2 && line[n - 2] == '\r' && line[n - 1] == '\n') {
+        line[n - 2] = (byte)'\n';
+        line = line.slice(0, n - 1);
     }
     return (line, err);
 }
@@ -343,12 +341,10 @@ parseField:
             }
             // Check to make sure a quote does not appear in field.
             if (!r.LazyQuotes) {
-                {
-                    nint j = bytes.IndexByte(field, (byte)'"'); if (j >= 0) {
-                        ref var col = ref heap<nint>(pos.col + j, out var Ꮡcol);
-                        err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: col, Err: ErrBareQuote)));
-                        goto break_parseField;
-                    }
+                nint j = bytes.IndexByte(field, (byte)'"'); if (j >= 0) {
+                    ref var col = ref heap<nint>(pos.col + j, out var Ꮡcol);
+                    err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: col, Err: ErrBareQuote)));
+                    goto break_parseField;
                 }
             }
             r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, field);
@@ -372,44 +368,42 @@ parseField:
                     r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line.slice(0, i));
                     line = line.slice(i + quoteLen);
                     pos.col += i + quoteLen;
-                    {
-                        var rn = nextRune(line);
-                        switch (ᐧ) {
-                        case {} when rn is '"': {
-                            // `""` sequence (append quote).
-                            r.recordBuffer = append(r.recordBuffer, (byte)'"');
-                            line = line[(int)(quoteLen)..];
-                            pos.col += quoteLen;
-                            break;
-                        }
-                        case {} when rn == r.Comma: {
-                            // `",` sequence (end of field).
-                            line = line.slice(commaLen);
-                            pos.col += commaLen;
-                            r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
-                            r.fieldPositions = append(r.fieldPositions, fieldPos);
-                            goto continue_parseField;
-                            break;
-                        }
-                        case {} when lengthNL(line) == len(line): {
-                            // `"\n` sequence (end of line).
-                            r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
-                            r.fieldPositions = append(r.fieldPositions, fieldPos);
-                            goto break_parseField;
-                            break;
-                        }
-                        case {} when r.LazyQuotes: {
-                            // `"` sequence (bare quote).
-                            r.recordBuffer = append(r.recordBuffer, (byte)'"');
-                            break;
-                        }
-                        default: {
-                            // `"*` sequence (invalid non-escaped quote).
-                            err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote)));
-                            goto break_parseField;
-                            break;
-                        }}
+                    var rn = nextRune(line);
+                    switch (ᐧ) {
+                    case {} when rn is '"': {
+                        // `""` sequence (append quote).
+                        r.recordBuffer = append(r.recordBuffer, (byte)'"');
+                        line = line[(int)(quoteLen)..];
+                        pos.col += quoteLen;
+                        break;
                     }
+                    case {} when rn == r.Comma: {
+                        // `",` sequence (end of field).
+                        line = line.slice(commaLen);
+                        pos.col += commaLen;
+                        r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
+                        r.fieldPositions = append(r.fieldPositions, fieldPos);
+                        goto continue_parseField;
+                        break;
+                    }
+                    case {} when lengthNL(line) == len(line): {
+                        // `"\n` sequence (end of line).
+                        r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
+                        r.fieldPositions = append(r.fieldPositions, fieldPos);
+                        goto break_parseField;
+                        break;
+                    }
+                    case {} when r.LazyQuotes: {
+                        // `"` sequence (bare quote).
+                        r.recordBuffer = append(r.recordBuffer, (byte)'"');
+                        break;
+                    }
+                    default: {
+                        // `"*` sequence (invalid non-escaped quote).
+                        err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote)));
+                        goto break_parseField;
+                        break;
+                    }}
                 } else if (len(line) > 0) {
                     // Hit end of line (copy all data so far).
                     r.recordBuffer = appendꓸꓸꓸ(r.recordBuffer, line);

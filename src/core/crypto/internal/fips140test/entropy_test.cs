@@ -332,7 +332,7 @@ public static partial void TestEntropyRace(ж<testing.T> t) {
     foreach (var _ᴛ1 in range(16)) {
         goǃ(() => {
             (_, _) = entropy.Seed(Ꮡmemory);
-        }, GoStack.Bounded);
+        });
     }
     // Same, with the higher-level DRBG.
     foreach (var _ᴛ2 in range(16)) {

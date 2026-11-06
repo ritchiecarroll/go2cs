@@ -290,31 +290,25 @@ public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data
         return err;
     }
     (_, err) = f.Write(data);
-    {
-        var err1 = f.Close(); if (err == nil) {
-            err = err1;
-        }
+    var err1 = f.Close(); if (err == nil) {
+        err = err1;
     }
     return err;
 }
 
 internal static void logOpen(this ref Root r, @string name) {
-    {
-        var log = testlog.Logger(); if (log != nil) {
-            // This won't be right if r's name has changed since it was opened,
-            // but it's the best we can do.
-            log.Open(joinPath(r.Name(), name));
-        }
+    var log = testlog.Logger(); if (log != nil) {
+        // This won't be right if r's name has changed since it was opened,
+        // but it's the best we can do.
+        log.Open(joinPath(r.Name(), name));
     }
 }
 
 internal static void logStat(this ref Root r, @string name) {
-    {
-        var log = testlog.Logger(); if (log != nil) {
-            // This won't be right if r's name has changed since it was opened,
-            // but it's the best we can do.
-            log.Stat(joinPath(r.Name(), name));
-        }
+    var log = testlog.Logger(); if (log != nil) {
+        // This won't be right if r's name has changed since it was opened,
+        // but it's the best we can do.
+        log.Stat(joinPath(r.Name(), name));
     }
 }
 

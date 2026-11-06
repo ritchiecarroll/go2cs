@@ -84,20 +84,18 @@ internal static termlist norm(this termlist xl) {
             if (xj == nil || used[j]) {
                 continue;
             }
-            {
-                var (u1, u2) = xi.union(xj); if (u2 == nil) {
-                    // If we encounter a 𝓤 term, the entire list is 𝓤.
-                    // Exit early.
-                    // (Note that this is not just an optimization;
-                    // if we continue, we may end up with a 𝓤 term
-                    // and other terms and the result would not be
-                    // in normal form.)
-                    if (u1.typ == nil) {
-                        return allTermlist;
-                    }
-                    xi = u1;
-                    used[j] = true; // xj is now unioned into xi - ignore it in future iterations
+            var (u1, u2) = xi.union(xj); if (u2 == nil) {
+                // If we encounter a 𝓤 term, the entire list is 𝓤.
+                // Exit early.
+                // (Note that this is not just an optimization;
+                // if we continue, we may end up with a 𝓤 term
+                // and other terms and the result would not be
+                // in normal form.)
+                if (u1.typ == nil) {
+                    return allTermlist;
                 }
+                xi = u1;
+                used[j] = true; // xj is now unioned into xi - ignore it in future iterations
             }
         }
         rl = append(rlᴷ, rl, xi);
@@ -124,10 +122,8 @@ internal static termlist intersect(this termlist xl, termlist yl) {
     termlist rl = default;
     foreach (var (_, x) in xl) {
         foreach (var (_, y) in yl) {
-            {
-                var r = x.intersect(y); if (r != nil) {
-                    rl = append(rlᴷ, rl, r);
-                }
+            var r = x.intersect(y); if (r != nil) {
+                rl = append(rlᴷ, rl, r);
             }
         }
     }

@@ -333,18 +333,12 @@ internal static bool recordTypes(this ref ΔInfo info) {
 // TypeOf returns the type of expression e, or nil if not found.
 // Precondition: the Types, Uses and Defs maps are populated.
 public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
-    {
-        var (t, ok) = info.Types[e, ꟷ]; if (ok) {
-            return t.Type;
-        }
+    var (t, ok) = info.Types[e, ꟷ]; if (ok) {
+        return t.Type;
     }
-    {
-        var (id, _) = e._<ж<ast.Ident>>(ᐧ); if (id != nil) {
-            {
-                var obj = info.ObjectOf(id); if (obj != nil) {
-                    return obj.Type();
-                }
-            }
+    var (id, _) = e._<ж<ast.Ident>>(ᐧ); if (id != nil) {
+        var obj = info.ObjectOf(id); if (obj != nil) {
+            return obj.Type();
         }
     }
     return default;
@@ -358,10 +352,8 @@ public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
 //
 // Precondition: the Uses and Defs maps are populated.
 public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> id) {
-    {
-        var obj = info.Defs[id]; if (obj != nil) {
-            return obj;
-        }
+    var obj = info.Defs[id]; if (obj != nil) {
+        return obj;
     }
     return info.Uses[id];
 }

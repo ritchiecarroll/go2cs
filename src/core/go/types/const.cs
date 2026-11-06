@@ -98,72 +98,68 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         if (Ꮡrounded != nil) {
             rounded = xΔ3;
         }
-        {
-            var (xΔ4, ok) = constant.Int64Val(xΔ3); if (ok) {
-                switch (typ.kind) {
-                case var ᴛ when ᴛ == Int: {
-                    nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
-                    return ((int64)(-1)).Lsh((s - 1)) <= xΔ4 && xΔ4 <= ((int64)1).Lsh((s - 1)) - 1;
-                }
-                case var ᴛ when ᴛ == Int8: {
-                    UntypedInt s = 8;
-                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
-                }
-                case var ᴛ when ᴛ == Int16: {
-                    UntypedInt s = 16;
-                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
-                }
-                case var ᴛ when ᴛ == Int32: {
-                    UntypedInt s = 32;
-                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
-                }
-                case var ᴛ when ᴛ == Int64 || ᴛ == ΔUntypedInt: {
-                    return true;
-                }
-                case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
-                    {
-                        nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8; if (s < 64) {
-                            return 0 <= xΔ4 && xΔ4 <= ((int64)1).Lsh(s) - 1;
-                        }
-                    }
-                    return 0 <= xΔ4;
-                }
-                case var ᴛ when ᴛ == Uint8: {
-                    UntypedInt s = 8;
-                    return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
-                }
-                case var ᴛ when ᴛ == Uint16: {
-                    UntypedInt s = 16;
-                    return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
-                }
-                case var ᴛ when ᴛ == Uint32: {
-                    UntypedInt s = 32;
-                    return 0 <= xΔ4 && xΔ4 <= (int64)4294967295L;
-                }
-                case var ᴛ when ᴛ == Uint64: {
-                    return 0 <= xΔ4;
-                }
-                default: {
-                    throw panic("unreachable");
-                    break;
-                }}
-            }
-        }
-        // x does not fit into int64
-        {
-            nint n = constant.BitLen(xΔ3);
+        var (xΔ4, ok) = constant.Int64Val(xΔ3); if (ok) {
             switch (typ.kind) {
-            case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
+            case var ᴛ when ᴛ == Int: {
                 nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
-                return constant.Sign(xΔ3) >= 0 && n <= (nint)s;
+                return ((int64)(-1)).Lsh((s - 1)) <= xΔ4 && xΔ4 <= ((int64)1).Lsh((s - 1)) - 1;
+            }
+            case var ᴛ when ᴛ == Int8: {
+                UntypedInt s = 8;
+                return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
+            }
+            case var ᴛ when ᴛ == Int16: {
+                UntypedInt s = 16;
+                return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
+            }
+            case var ᴛ when ᴛ == Int32: {
+                UntypedInt s = 32;
+                return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
+            }
+            case var ᴛ when ᴛ == Int64 || ᴛ == ΔUntypedInt: {
+                return true;
+            }
+            case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
+                {
+                    nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8; if (s < 64) {
+                        return 0 <= xΔ4 && xΔ4 <= ((int64)1).Lsh(s) - 1;
+                    }
+                }
+                return 0 <= xΔ4;
+            }
+            case var ᴛ when ᴛ == Uint8: {
+                UntypedInt s = 8;
+                return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
+            }
+            case var ᴛ when ᴛ == Uint16: {
+                UntypedInt s = 16;
+                return 0 <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s)) - 1);
+            }
+            case var ᴛ when ᴛ == Uint32: {
+                UntypedInt s = 32;
+                return 0 <= xΔ4 && xΔ4 <= (int64)4294967295L;
             }
             case var ᴛ when ᴛ == Uint64: {
-                return constant.Sign(xΔ3) >= 0 && n <= 64;
+                return 0 <= xΔ4;
             }
-            case var ᴛ when ᴛ == ΔUntypedInt: {
-                return true;
+            default: {
+                throw panic("unreachable");
+                break;
             }}
         }
+        // x does not fit into int64
+        nint n = constant.BitLen(xΔ3);
+        switch (typ.kind) {
+        case var ᴛ when ᴛ == Uint || ᴛ == Uintptr: {
+            nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
+            return constant.Sign(xΔ3) >= 0 && n <= (nint)s;
+        }
+        case var ᴛ when ᴛ == Uint64: {
+            return constant.Sign(xΔ3) >= 0 && n <= 64;
+        }
+        case var ᴛ when ᴛ == ΔUntypedInt: {
+            return true;
+        }}
         break;
     }
     case {} when isFloat(new BasicжΔType(Ꮡtyp)): {

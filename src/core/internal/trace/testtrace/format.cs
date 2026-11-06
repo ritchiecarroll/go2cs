@@ -46,10 +46,8 @@ public static (io.Reader, version.Version, ж<Expectation>, error) ParseFile(@st
         if (errΔ1 != nil) {
             return (default, 0, default, fmt.Errorf("malformed test %s: bad trace file: %v"u8, testPath, errΔ1));
         }
-        {
-            var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
-                return (default, 0, default, fmt.Errorf("internal error during %s: failed to write trace bytes: %v"u8, testPath, errΔ2));
-            }
+        var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
+            return (default, 0, default, fmt.Errorf("internal error during %s: failed to write trace bytes: %v"u8, testPath, errΔ2));
         }
     }
     (var exp, err) = ParseExpectation(ar.Files[0].Data);

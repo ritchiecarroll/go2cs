@@ -43,10 +43,8 @@ internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(name, "PANIC", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(name, "PANIC", r);
             }
         }, ref ᒐ);
         f();
@@ -93,7 +91,7 @@ internal static void Main() {
         goǃ(() => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ1);
-        }, GoStack.Bounded);
+        });
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println("parked receive:", len(v.vals), v.vals[3], ok);
     });
@@ -103,7 +101,7 @@ internal static void Main() {
         goǃ(() => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ2);
-        }, GoStack.Bounded);
+        });
         var v = ᐸꟷ(ch);
         fmt.Println("parked bare receive:", len(v.vals), v.vals[3]);
     });

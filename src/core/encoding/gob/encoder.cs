@@ -102,10 +102,8 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
-    {
-        var (_, alreadySent) = enc.sent[actual, ꟷ]; if (alreadySent) {
-            return false;
-        }
+    var (_, alreadySent) = enc.sent[actual, ꟷ]; if (alreadySent) {
+        return false;
     }
     var (info, err) = getTypeInfo(ref (Ꮡut).DerefOrNull());
     if (err != nil) {
@@ -128,27 +126,25 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
         enc.sent[ut.user] = info.id;
     }
     // Now send the inner types
-    {
-        var st = actual;
-        switch (st.Kind()) {
-        case var ᴛ when ᴛ == reflect.Struct: {
-            for (nint i = 0; i < st.NumField(); i++) {
-                if (isExported(st.Field(i).Name)) {
-                    Ꮡenc.sendType(w, Ꮡstate, st.Field(i).Type);
-                }
+    var st = actual;
+    switch (st.Kind()) {
+    case var ᴛ when ᴛ == reflect.Struct: {
+        for (nint i = 0; i < st.NumField(); i++) {
+            if (isExported(st.Field(i).Name)) {
+                Ꮡenc.sendType(w, Ꮡstate, st.Field(i).Type);
             }
-            break;
         }
-        case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
-            Ꮡenc.sendType(w, Ꮡstate, st.Elem());
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Map: {
-            Ꮡenc.sendType(w, Ꮡstate, st.Key());
-            Ꮡenc.sendType(w, Ꮡstate, st.Elem());
-            break;
-        }}
+        break;
     }
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
+        Ꮡenc.sendType(w, Ꮡstate, st.Elem());
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Map: {
+        Ꮡenc.sendType(w, Ꮡstate, st.Key());
+        Ꮡenc.sendType(w, Ꮡstate, st.Elem());
+        break;
+    }}
     return true;
 }
 
@@ -164,42 +160,40 @@ internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<
     }
 
     // It's a concrete value, so drill down to the base type.
-    {
-        var rt = ut.@base;
-        switch (rt.Kind()) {
-        default: {
-            // Basic types and interfaces do not need to be described.
-            return sent;
-        }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
-            // If it's []uint8, don't send; it's considered basic.
-            if (rt.Elem().Kind() == reflect.Uint8) {
-                return sent;
-            }
-            // Otherwise we do send.
-            break;
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Array: {
-            // arrays must be sent so we know their lengths and element types.
-            break;
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Map: {
-            // maps must be sent so we know their lengths and key/value types.
-            break;
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Struct: {
-            // structs must be sent so we know their fields.
-            break;
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func: {
-            // If we get here, it's a field of a struct; ignore it.
-            return sent;
-        }}
+    var rt = ut.@base;
+    switch (rt.Kind()) {
+    default: {
+        // Basic types and interfaces do not need to be described.
+        return sent;
     }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        // If it's []uint8, don't send; it's considered basic.
+        if (rt.Elem().Kind() == reflect.Uint8) {
+            return sent;
+        }
+        // Otherwise we do send.
+        break;
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Array: {
+        // arrays must be sent so we know their lengths and element types.
+        break;
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Map: {
+        // maps must be sent so we know their lengths and key/value types.
+        break;
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Struct: {
+        // structs must be sent so we know their fields.
+        break;
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func: {
+        // If we get here, it's a field of a struct; ignore it.
+        return sent;
+    }}
 
     return Ꮡenc.sendActualType(w, state, ut, ut.@base);
 }
@@ -224,24 +218,22 @@ internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж
     if (ut.externalEnc != 0) {
         rt = ut.user;
     }
-    {
-        var (_, alreadySent) = enc.sent[rt, ꟷ]; if (!alreadySent) {
-            // No, so send it.
-            var sent = Ꮡenc.sendType(w, state, rt);
-            if (enc.err != nil) {
+    var (_, alreadySent) = enc.sent[rt, ꟷ]; if (!alreadySent) {
+        // No, so send it.
+        var sent = Ꮡenc.sendType(w, state, rt);
+        if (enc.err != nil) {
+            return;
+        }
+        // If the type info has still not been transmitted, it means we have
+        // a singleton basic type (int, []byte etc.) at top level. We don't
+        // need to send the type info but we do need to update enc.sent.
+        if (!sent) {
+            var (info, err) = getTypeInfo(ref (Ꮡut).DerefOrNull());
+            if (err != nil) {
+                enc.setError(err);
                 return;
             }
-            // If the type info has still not been transmitted, it means we have
-            // a singleton basic type (int, []byte etc.) at top level. We don't
-            // need to send the type info but we do need to update enc.sent.
-            if (!sent) {
-                var (info, err) = getTypeInfo(ref (Ꮡut).DerefOrNull());
-                if (err != nil) {
-                    enc.setError(err);
-                    return;
-                }
-                enc.sent[rt] = info.id;
-            }
+            enc.sent[rt] = info.id;
         }
     }
 }

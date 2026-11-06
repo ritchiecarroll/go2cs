@@ -202,10 +202,8 @@ public static (E, bool) AsType<E>(error err) {
 
 internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
     for (;;) {
-        {
-            var (e, ok) = err._<E>(ᐧ); if (ok) {
-                return (e, true);
-            }
+        if (err._<E>(out var e)) {
+            return (e, true);
         }
         {
             var (x, ok) = err._<as_type>(ᐧ); if (ok) {
@@ -230,10 +228,8 @@ internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
                 if (errΔ1 == nil) {
                     continue;
                 }
-                {
-                    var (xΔ1, ok) = asType(errΔ1, ref ppe); if (ok) {
-                        return (xΔ1, true);
-                    }
+                var (xΔ1, ok) = asType(errΔ1, ref ppe); if (ok) {
+                    return (xΔ1, true);
                 }
             }
             return (default, default);

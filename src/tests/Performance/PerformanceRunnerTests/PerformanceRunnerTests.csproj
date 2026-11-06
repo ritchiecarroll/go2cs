@@ -25,6 +25,7 @@
     <Compile Include="../PerformanceRunner/ReleaseLegs.cs" Link="ReleaseLegs.cs" />
     <Compile Include="../PerformanceRunner/AotPublishReuse.cs" Link="AotPublishReuse.cs" />
     <Compile Include="../PerformanceRunner/HeadlineSettings.cs" Link="HeadlineSettings.cs" />
+    <Compile Include="../PerformanceRunner/TimingLines.cs" Link="TimingLines.cs" />
   </ItemGroup>
 
 </Project>

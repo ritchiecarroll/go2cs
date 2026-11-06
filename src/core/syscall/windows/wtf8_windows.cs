@@ -45,13 +45,11 @@ internal static slice<uint16> encodeWTF16(@string s, slice<uint16> buf) {
         var (r, size) = utf8.DecodeRuneInString(s.slice(i));
         if (r == utf8.RuneError) {
             // Check if s[i:] contains a valid WTF-8 encoded surrogate.
-            {
-                @string sc = s.slice(i); if (len(sc) >= 3 && sc[0] == 0xED && 0xA0 <= sc[1] && sc[1] <= 0xBF && 0x80 <= sc[2] && sc[2] <= 0xBF) {
-                    r = ((rune)((byte)(sc[0] & (byte)mask3)) << 12) + ((rune)((byte)(sc[1] & (byte)maskx)) << 6) + (rune)((byte)(sc[2] & (byte)maskx));
-                    buf = append(buf, (uint16)r);
-                    i += 3;
-                    continue;
-                }
+            @string sc = s.slice(i); if (len(sc) >= 3 && sc[0] == 0xED && 0xA0 <= sc[1] && sc[1] <= 0xBF && 0x80 <= sc[2] && sc[2] <= 0xBF) {
+                r = ((rune)((byte)(sc[0] & (byte)mask3)) << 12) + ((rune)((byte)(sc[1] & (byte)maskx)) << 6) + (rune)((byte)(sc[2] & (byte)maskx));
+                buf = append(buf, (uint16)r);
+                i += 3;
+                continue;
             }
         }
         i += size;
@@ -65,33 +63,31 @@ internal static slice<uint16> encodeWTF16(@string s, slice<uint16> buf) {
 internal static slice<byte> decodeWTF16(slice<uint16> s, slice<byte> buf) {
     for (nint i = 0; i < len(s); i++) {
         rune ar = default;
-        {
-            var r = s[i];
-            switch (ᐧ) {
-            case {} when (r < surr1) || (surr3 <= r): {
-                // normal rune
-                ar = (rune)r;
-                break;
-            }
-            case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
-                // valid surrogate sequence
-                ar = utf16.DecodeRune((rune)r, (rune)s[i + 1]);
-                i++;
-                break;
-            }
-            default: {
-                // WTF-8 fallback.
-                // This only handles the 3-byte case of utf8.AppendRune,
-                // as surrogates always fall in that case.
-                ar = (rune)r;
-                if (ar > utf8.MaxRune) {
-                    ar = utf8.RuneError;
-                }
-                buf = append(buf, (byte)((byte)t3 | (byte)(ar >> 12)), (byte)((byte)tx | (byte)((byte)(ar >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)ar & (byte)maskx)));
-                continue;
-                break;
-            }}
+        var r = s[i];
+        switch (ᐧ) {
+        case {} when (r < surr1) || (surr3 <= r): {
+            // normal rune
+            ar = (rune)r;
+            break;
         }
+        case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
+            // valid surrogate sequence
+            ar = utf16.DecodeRune((rune)r, (rune)s[i + 1]);
+            i++;
+            break;
+        }
+        default: {
+            // WTF-8 fallback.
+            // This only handles the 3-byte case of utf8.AppendRune,
+            // as surrogates always fall in that case.
+            ar = (rune)r;
+            if (ar > utf8.MaxRune) {
+                ar = utf8.RuneError;
+            }
+            buf = append(buf, (byte)((byte)t3 | (byte)(ar >> 12)), (byte)((byte)tx | (byte)((byte)(ar >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)ar & (byte)maskx)));
+            continue;
+            break;
+        }}
         buf = utf8.AppendRune(buf, ar);
     }
     return buf;

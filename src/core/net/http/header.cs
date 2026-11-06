@@ -63,10 +63,8 @@ public static slice<@string> Values(this ΔHeader h, @string key) {
 
 // get is like Get, but key must already be in CanonicalHeaderKey form.
 internal static @string get(this ΔHeader h, @string key) {
-    {
-        var v = h[key]; if (builtin.len(v) > 0) {
-            return v[0];
-        }
+    var v = h[key]; if (builtin.len(v) > 0) {
+        return v[0];
     }
     return ""u8;
 }
@@ -222,11 +220,9 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
             v = headerNewlineToSpace.Replace(v);
             v = textproto.TrimString(v);
             foreach (var (_, s) in slice<@string>([kv.key, ": ", v, "\r\n"])) {
-                {
-                    var (_, err) = ws.WriteString(s); if (err != nil) {
-                        ᏑheaderSorterPool.Put(sorter.OrTypedNil());
-                        return err;
-                    }
+                var (_, err) = ws.WriteString(s); if (err != nil) {
+                    ᏑheaderSorterPool.Put(sorter.OrTypedNil());
+                    return err;
                 }
             }
             if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
@@ -271,20 +267,16 @@ internal static bool hasToken(@string v, @string token) {
         // position if both the first byte and its potential
         // ASCII uppercase equivalent (b|0x20) don't match.
         // False positives ('^' => '~') are caught by EqualFold.
-        {
-            var b = v[sp]; if (b != token[0] && (byte)(b | 0x20) != token[0]) {
-                continue;
-            }
+        var b = v[sp]; if (b != token[0] && (byte)(b | 0x20) != token[0]) {
+            continue;
         }
         // Check that start pos is on a valid token boundary.
         if (sp > 0 && !isTokenBoundary(v[sp - 1])) {
             continue;
         }
         // Check that end pos is on a valid token boundary.
-        {
-            nint endPos = sp + builtin.len(token); if (endPos != builtin.len(v) && !isTokenBoundary(v[endPos])) {
-                continue;
-            }
+        nint endPos = sp + builtin.len(token); if (endPos != builtin.len(v) && !isTokenBoundary(v[endPos])) {
+            continue;
         }
         if (ascii.EqualFold(v.slice(sp, sp + builtin.len(token)), token)) {
             return true;

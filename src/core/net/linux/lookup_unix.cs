@@ -27,28 +27,20 @@ internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.Onc
 
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // tcp    6   TCP    # transmission control protocol
-            {
-                nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
-                    line = line.slice(0, i);
-                }
+            nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
+                line = line.slice(0, i);
             }
             var f = getFields(line);
             if (len(f) < 2) {
                 continue;
             }
-            {
-                var (proto, _, okΔ1) = dtoi(f[1]); if (okΔ1) {
-                    {
-                        var (_, okΔ2) = protocols[f[0], ꟷ]; if (!okΔ2) {
-                            protocols[f[0]] = proto;
-                        }
-                    }
-                    foreach (var (_, alias) in f[2..]) {
-                        {
-                            var (_, okΔ3) = protocols[alias, ꟷ]; if (!okΔ3) {
-                                protocols[alias] = proto;
-                            }
-                        }
+            var (proto, _, okΔ1) = dtoi(f[1]); if (okΔ1) {
+                var (_, okΔ2) = protocols[f[0], ꟷ]; if (!okΔ2) {
+                    protocols[f[0]] = proto;
+                }
+                foreach (var (_, alias) in f[2..]) {
+                    var (_, okΔ3) = protocols[alias, ꟷ]; if (!okΔ3) {
+                        protocols[alias] = proto;
                     }
                 }
             }
@@ -92,10 +84,8 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
         if (err != nil) {
             // Issue 18213: if cgo fails, first check to see whether we
             // have the answer baked-in to the net package.
-            {
-                var (portΔ1, errΔ1) = goLookupPort(network, service); if (errΔ1 == nil) {
-                    return (portΔ1, default);
-                }
+            var (portΔ1, errΔ1) = goLookupPort(network, service); if (errΔ1 == nil) {
+                return (portΔ1, default);
             }
         }
         return (port, err);
@@ -106,10 +96,8 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
 internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name);
     if (order == hostLookupCgo) {
-        {
-            var (cname, err) = cgoLookupCNAME(ctx, name); if (err == nil) {
-                return (cname, default);
-            }
+        var (cname, err) = cgoLookupCNAME(ctx, name); if (err == nil) {
+            return (cname, default);
         }
     }
     return Ꮡr.goLookupCNAME(ctx, name, order, conf);

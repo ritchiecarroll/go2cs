@@ -69,10 +69,8 @@ internal static net.Listener newLocalListener() {
     }
     var (l, err) = net.Listen(tcpˢ, "127.0.0.1:0");
     if (err != nil) {
-        {
-            (l, err) = net.Listen(tcp6ˢ, "[::1]:0"); if (err != nil) {
-                throw panic(fmt.Sprintf("httptest: failed to listen on a port: %v"u8, err));
-            }
+        (l, err) = net.Listen(tcp6ˢ, "[::1]:0"); if (err != nil) {
+            throw panic(fmt.Sprintf("httptest: failed to listen on a port: %v"u8, err));
         }
     }
     return l;
@@ -296,10 +294,8 @@ public static void Close(this ж<Server> Ꮡs) {
 
         // Also close the client idle connections.
         if (s.client != nil) {
-            {
-                var (t, ok) = s.client.Transport._<closeIdleTransport>(ᐧ); if (ok) {
-                    t.CloseIdleConnections();
-                }
+            var (t, ok) = s.client.Transport._<closeIdleTransport>(ᐧ); if (ok) {
+                t.CloseIdleConnections();
             }
         }
 
@@ -416,10 +412,8 @@ internal static void wrap(this ж<Server> Ꮡs) {
 
             switch (cs) {
             case var ᴛ when ᴛ == http.StateNew: {
-                {
-                    var (_, exists) = Ꮡs.Value.conns[c, ꟷ]; if (exists) {
-                        throw panic("invalid state transition");
-                    }
+                var (_, exists) = Ꮡs.Value.conns[c, ꟷ]; if (exists) {
+                    throw panic("invalid state transition");
                 }
                 if (Ꮡs.Value.conns == nil) {
                     Ꮡs.Value.conns = new map<net.Conn, http.ConnState>();

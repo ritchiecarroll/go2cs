@@ -21,10 +21,8 @@ internal partial interface describe_type /*dyn*/ {
 }
 
 internal static @string describe(any x) {
-    {
-        var (g, ok) = x._<describe_type>(ᐧ); if (ok) {
-            return "string getter: "u8 + g.Get();
-        }
+    var (g, ok) = x._<describe_type>(ᐧ); if (ok) {
+        return "string getter: "u8 + g.Get();
     }
 
     return "not a string getter";

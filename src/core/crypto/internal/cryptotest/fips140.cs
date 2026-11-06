@@ -11,10 +11,8 @@ partial class cryptotest_package {
 
 public static void MustSupportFIPS140(ж<testing.T> t) {
     t.Helper();
-    {
-        var err = Δfips140.Supported(); if (err != nil) {
-            t.Skipf("test requires FIPS 140 mode: %v", err);
-        }
+    var err = Δfips140.Supported(); if (err != nil) {
+        t.Skipf("test requires FIPS 140 mode: %v", err);
     }
 }
 

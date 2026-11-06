@@ -262,12 +262,13 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags purego by default; pass an explicit -tags to override)")
-	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package killed early is reported as a failed package")
+	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package that hits it stops the run (exit 1), and failed_packages.txt lists it with every package not yet converted, for a resume")
 	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
 	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")
 	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, "Per-test deadline for the CONVERTED host under -test-action run/compare/all: a top-level test still running this long after it started is reported failed and ABANDONED (labelled so in the comparison), and the run goes on to the next test. Without it a hung test held the host to -test-timeout and every later test went unmeasured. 0 disables it. The Go side is unbounded, as `go test` is. A row whose own legitimate test outlasts the default takes a per-row floor (run-validated-sweep.ps1 $testDeadlineFloors)")
 	testFilterCmd := commandLine.String("test-filter", "", "Regex handed VERBATIM to BOTH sides of a -test-action compare (go test -run and the converted host --run), so the two runs filter identically. Intended for the block-gated census: exclude a test that BLOCKS the suite by passing an anchored alternation of the parents to keep. A gated census is DIAGNOSTIC ONLY and must never bank a row -- the row banks from an ungated run, after the block is rooted or the divergence disclosed")
+	testOracleGOARCHCmd := commandLine.String("test-oracle-goarch", "", "The GOARCH the -tests compare's ORACLE (`go test`) runs at, when it must differ from the target's: the arch the converted host process runs at. Empty (the default) is the target's own. The conversion, the converted host and the manifest keep the target. For a host whose native arch differs from the corpus target's, osx-arm64 running the darwin/amd64 corpus, where the default ran the oracle under Rosetta and read Rosetta's own behaviour as the package's. Recorded as oracleGoarch in the comparison record when it differs")
 	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
 	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
 	testBuildMaxCPUCmd := commandLine.Int("test-build-maxcpu", 0, "Cap the MSBuild nodes of the converted test host's dotnet publish, the only dotnet command a -tests run starts, by passing it -m:N. 0 (the default) passes no -m, and MSBuild uses one node per logical processor. Only an explicit -m on the command line caps it: a Directory.Build.rsp or MSBUILDNODECOUNT in the tree did not (measured on the i9, 2026-10-18)")
@@ -574,6 +575,7 @@ Examples:
 		testTimeout:         *testTimeoutCmd,
 		testDeadline:        *testDeadlineCmd,
 		testFilter:          strings.TrimSpace(*testFilterCmd),
+		testOracleGOARCH:    strings.TrimSpace(*testOracleGOARCHCmd),
 		testConfig:          canonicalTestConfig(*testConfigCmd),
 		testTiered:          *testTieredCmd,
 		testPublishBinlog:   *testPublishBinlogCmd,
@@ -657,6 +659,12 @@ Examples:
 
 		if options.testDeadline < 0 {
 			log.Fatalln("-test-deadline must be zero (none) or greater than zero")
+		}
+
+		// A GOARCH is a lowercase word (amd64, arm64, 386, mips64le); anything else would reach `go test` as an
+		// environment value Go rejects in its own words, after the conversion has already run.
+		if options.testOracleGOARCH != "" && !regexp.MustCompile(`^[a-z0-9]+$`).MatchString(options.testOracleGOARCH) {
+			log.Fatalf("Invalid -test-oracle-goarch %q: expected a GOARCH such as arm64\n", options.testOracleGOARCH)
 		}
 
 		// Same fail-fast posture as -test-timeout above: a filter that cannot compile must die

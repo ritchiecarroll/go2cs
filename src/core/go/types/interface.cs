@@ -64,10 +64,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     // set method receivers if necessary
     var typ = (((ж<Checker>)nil)).newInterface();
     foreach (var (_, m) in methods) {
-        {
-            var sig = m.typ._<ж<ΔSignature>>(); if (sig.recv == nil) {
-                sig.recv = newVar(RecvVar, m.pos, m.pkg, ""u8, new InterfaceжΔType(typ));
-            }
+        var sig = m.typ._<ж<ΔSignature>>(); if (sig.recv == nil) {
+            sig.recv = newVar(RecvVar, m.pos, m.pkg, ""u8, new InterfaceжΔType(typ));
         }
     }
 
@@ -242,10 +240,8 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         // The go/parser doesn't accept method type parameters but an ast.FuncType may have them.
         if (sig.tparams != nil) {
             positioner at = new ast_Exprᴠpositioner(f.Type);
-            {
-                var (ftyp, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && ftyp.TypeParams != nil) {
-                    at = new ast_FieldListжpositioner(ftyp.TypeParams);
-                }
+            var (ftyp, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && ftyp.TypeParams != nil) {
+                at = new ast_FieldListжpositioner(ftyp.TypeParams);
             }
             Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢ);
         }
@@ -253,10 +249,8 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         // use named receiver type if available (for better error messages)
         ΔType recvTyp = new InterfaceжΔType(Ꮡityp);
         if (Ꮡdef != nil) {
-            {
-                var named = asNamed(def.typ); if (named != nil) {
-                    recvTyp = new NamedжΔType(named);
-                }
+            var named = asNamed(def.typ); if (named != nil) {
+                recvTyp = new NamedжΔType(named);
             }
         }
         sig.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);

@@ -57,7 +57,7 @@ using static go.crypto.@internal.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/rand/rand.go", "rand.cs", "ABUogoKAgqSUggAHEAABFAAIAqacwoKCgpSUrLKC")]
+[assembly: GoPositionMap("crypto/internal/rand/rand.go", "rand.cs", "ABUogoKClJSCAAcQAAEUAAgCppzCgoKClJSssoI=")]
 [assembly: GoPositionMap("crypto/internal/rand/rand_fips140v1.26.go", "rand_fips140v1.26.cs", "AAwcgg==")]
 // </GoSourcePositionMaps>
 

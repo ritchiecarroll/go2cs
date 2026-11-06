@@ -83,10 +83,8 @@ public static @string PackageName(this ref Sym s) {
         pathend = 0;
     }
 
-    {
-        nint i = strings.Index(name.slice(pathend), "."); if (i != -1) {
-            return name.slice(0, pathend + i);
-        }
+    nint i = strings.Index(name.slice(pathend), "."); if (i != -1) {
+        return name.slice(0, pathend + i);
     }
     return ""u8;
 }
@@ -121,20 +119,18 @@ public static @string ReceiverName(this ref Sym s) {
 // BaseName returns the symbol name without the package or receiver name.
 public static @string BaseName(this ref Sym s) {
     @string name = s.nameWithoutInst();
-    {
-        nint i = strings.LastIndex(name, "."); if (i != -1) {
-            if (s.Name != name) {
-                nint brack = strings.Index(s.Name, "[");
-                if (i > brack) {
-                    // BaseName is a method name after the brackets, so
-                    // recalculate for s.Name. Otherwise, i applies
-                    // correctly to s.Name, since it is before the
-                    // brackets.
-                    i = strings.LastIndex(s.Name, ".");
-                }
+    nint i = strings.LastIndex(name, "."); if (i != -1) {
+        if (s.Name != name) {
+            nint brack = strings.Index(s.Name, "[");
+            if (i > brack) {
+                // BaseName is a method name after the brackets, so
+                // recalculate for s.Name. Otherwise, i applies
+                // correctly to s.Name, since it is before the
+                // brackets.
+                i = strings.LastIndex(s.Name, ".");
             }
-            return s.Name.slice(i + 1);
         }
+        return s.Name.slice(i + 1);
     }
     return s.Name;
 }
@@ -404,10 +400,8 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                 if (!ok) {
                     return new DecodingErrorжerror(Ꮡ(new DecodingError(-1, "bad filename code", eltIdx)));
                 }
-                {
-                    nint nΔ3 = len(ts.Name); if (nΔ3 > 0 && ts.Name[nΔ3 - 1] != '/') {
-                        ts.Name += "/"u8;
-                    }
+                nint nΔ3 = len(ts.Name); if (nΔ3 > 0 && ts.Name[nΔ3 - 1] != '/') {
+                    ts.Name += "/"u8;
                 }
                 ts.Name += elt;
             }
@@ -467,10 +461,8 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             // Count & copy path symbols
             nint endΔ1 = default;
             for (endΔ1 = i + 1; endΔ1 < len(t.Syms); endΔ1++) {
-                {
-                    var c = t.Syms[endΔ1].Type; if (c != 'Z' && c != 'z') {
-                        break;
-                    }
+                var c = t.Syms[endΔ1].Type; if (c != 'Z' && c != 'z') {
+                    break;
                 }
             }
             obj.Paths = t.Syms.slice(i, endΔ1);
@@ -492,10 +484,8 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             break;
         }
         case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l': { // text symbol
-            {
-                nint nΔ10 = len(t.Funcs); if (nΔ10 > 0) {
-                    t.Funcs[nΔ10 - 1].End = sym.Value.Value;
-                }
+            nint nΔ10 = len(t.Funcs); if (nΔ10 > 0) {
+                t.Funcs[nΔ10 - 1].End = sym.Value.Value;
             }
             if (sym.Name == "runtime.etext"u8 || sym.Name == "etext"u8) {
                 continue;
@@ -607,10 +597,8 @@ public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t,
     nint line = default;
     ж<Func> fn = default;
 
-    {
-        fn = t.PCToFunc(pc); if (fn == nil) {
-            return (@file, line, fn);
-        }
+    fn = t.PCToFunc(pc); if (fn == nil) {
+        return (@file, line, fn);
     }
     if (t.go12line != nil) {
         @file = t.go12line.go12PCToFile(pc);

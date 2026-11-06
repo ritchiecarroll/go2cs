@@ -103,15 +103,13 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
         // size are passed by reference.
         throw panic("compileCallback: argument size is larger than uintptr");
     }
-    {
-        var k = t.Kind(); if (GOARCH != "386"u8 && (k == abi.Float32 || k == abi.Float64)) {
-            // In fastcall, floating-point arguments in
-            // the first four positions are passed in
-            // floating-point registers, which we don't
-            // currently spill.
-            // So basically we only support 386.
-            throw panic("compileCallback: float arguments not supported");
-        }
+    var k = t.Kind(); if (GOARCH != "386"u8 && (k == abi.Float32 || k == abi.Float64)) {
+        // In fastcall, floating-point arguments in
+        // the first four positions are passed in
+        // floating-point registers, which we don't
+        // currently spill.
+        // So basically we only support 386.
+        throw panic("compileCallback: float arguments not supported");
     }
 
     if (t.Size_ == 0) {
@@ -176,38 +174,36 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
 internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var k = t.Kind();
-        switch (k) {
-        case var ᴛ when ᴛ == abi.Bool || ᴛ == abi.Int || ᴛ == abi.Int8 || ᴛ == abi.Int16 || ᴛ == abi.Int32 || ᴛ == abi.Uint || ᴛ == abi.Uint8 || ᴛ == abi.Uint16 || ᴛ == abi.Uint32 || ᴛ == abi.Uintptr || ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
-            // Assign a register for all these types.
+    var k = t.Kind();
+    switch (k) {
+    case var ᴛ when ᴛ == abi.Bool || ᴛ == abi.Int || ᴛ == abi.Int8 || ᴛ == abi.Int16 || ᴛ == abi.Int32 || ᴛ == abi.Uint || ᴛ == abi.Uint8 || ᴛ == abi.Uint16 || ᴛ == abi.Uint32 || ᴛ == abi.Uintptr || ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
+        // Assign a register for all these types.
+        return Δp.assignReg(t.Size_, offset);
+    }
+    case var ᴛ when ᴛ == abi.Int64 || ᴛ == abi.Uint64: {
+        // Only register-assign if the registers are big enough.
+        if (goarch.PtrSize == 8) {
             return Δp.assignReg(t.Size_, offset);
         }
-        case var ᴛ when ᴛ == abi.Int64 || ᴛ == abi.Uint64: {
-            // Only register-assign if the registers are big enough.
-            if (goarch.PtrSize == 8) {
-                return Δp.assignReg(t.Size_, offset);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == abi.Array: {
-            var at = Ꮡt.Reinterpret<_type, arraytype>();
-            if (at.of(arraytype.ᏑLen).Value == 1) {
-                return Δp.tryRegAssignArg(at.of(arraytype.ᏑElem).Value, offset); // TODO fix when runtime is fully commoned up w/ abi.Type
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == abi.Struct: {
-            var st = Ꮡt.Reinterpret<_type, structtype>();
-            foreach (var i in range(st.Fields)) {
-                var f = Ꮡ(st.Fields, i);
-                if (!Δp.tryRegAssignArg(f.Typ, offset + f.Offset)) {
-                    return false;
-                }
-            }
-            return true;
-        }}
+        break;
     }
+    case var ᴛ when ᴛ == abi.Array: {
+        var at = Ꮡt.Reinterpret<_type, arraytype>();
+        if (at.of(arraytype.ᏑLen).Value == 1) {
+            return Δp.tryRegAssignArg(at.of(arraytype.ᏑElem).Value, offset); // TODO fix when runtime is fully commoned up w/ abi.Type
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == abi.Struct: {
+        var st = Ꮡt.Reinterpret<_type, structtype>();
+        foreach (var i in range(st.Fields)) {
+            var f = Ꮡ(st.Fields, i);
+            if (!Δp.tryRegAssignArg(f.Typ, offset + f.Offset)) {
+                return false;
+            }
+        }
+        return true;
+    }}
     // Pointer-sized types such as maps and channels are currently
     // not supported.
     throw panic("compileCallback: type " + toRType(Ꮡt).@string() + " is currently not supported for use in system callbacks");
@@ -310,13 +306,11 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     if (ft.OutSlice()[0].Size_ != goarch.PtrSize) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
-    {
-        var k = ft.OutSlice()[0].Kind(); if (k == abi.Float32 || k == abi.Float64) {
-            // In cdecl and stdcall, float results are returned in
-            // ST(0). In fastcall, they're returned in XMM0.
-            // Either way, it's not AX.
-            throw panic("compileCallback: float results not supported");
-        }
+    var k = ft.OutSlice()[0].Kind(); if (k == abi.Float32 || k == abi.Float64) {
+        // In cdecl and stdcall, float results are returned in
+        // ST(0). In fastcall, they're returned in XMM0.
+        // Either way, it's not AX.
+        throw panic("compileCallback: float results not supported");
     }
     if (intArgRegs == 0) {
         // Make room for the uintptr-sized result.
@@ -345,11 +339,9 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     cbsLock();
 
     // Check if this callback is already registered.
-    {
-        var (nΔ1, ok) = cbs.index[key, ꟷ]; if (ok) {
-            cbsUnlock();
-            return callbackasmAddr(nΔ1);
-        }
+    var (nΔ1, ok) = cbs.index[key, ꟷ]; if (ok) {
+        cbsUnlock();
+        return callbackasmAddr(nΔ1);
     }
 
     // Register the callback.

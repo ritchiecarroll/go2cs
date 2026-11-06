@@ -93,13 +93,13 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         lastEv = ev;
 
         // Process the event.
-        switch ((~ev).Kind()) {
+        switch (ev.Kind()) {
         case var ᴛ when ᴛ == EventSync: {
-            nSync = (~ev).Sync().N;
+            nSync = ev.Sync().N;
             break;
         }
         case var ᴛ when ᴛ == EventMetric: {
-            var m = (~ev).Metric();
+            var m = ev.Metric();
             if (m.Name != "/sched/gomaxprocs:threads"u8) {
                 break;
             }
@@ -108,7 +108,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 if ((UtilFlags)(flags & UtilPerProc) != 0) {
                     // End each P's series.
                     foreach (var (_, p) in ps.slice(gomaxprocs)) {
-                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), 0D));
+                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)ev.Time(), 0D));
                     }
                 }
                 ps = ps.slice(0, gomaxprocs);
@@ -118,12 +118,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 nint series = 0;
                 if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
                     series = len(@out);
-                    @out = builtin.append(outᴷ, @out, slice<MutatorUtil>([new((int64)(~ev).Time(), 1D)]));
+                    @out = builtin.append(outᴷ, @out, slice<MutatorUtil>([new((int64)ev.Time(), 1D)]));
                 }
                 ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
             }
             if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+                procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)ev.Time(), n: gomaxprocs));
             }
             break;
         }}
@@ -134,7 +134,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             continue;
         }
 
-        var exprᴛ2 = (~ev).Kind();
+        var exprᴛ2 = ev.Kind();
         var matchᴛ1 = false;
         if (exprᴛ2 == EventRangeActive) { matchᴛ1 = true;
             do {
@@ -148,11 +148,11 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 // for this since we just found out about it now. Fix up the mutator utilization.
                 //
                 // N.B. A trace can't start during a STW, so we don't handle it here.
-                var r = (~ev).Range();
+                var r = ev.Range();
                 var matchᴛ2 = false;
                 if (handleMarkAssist(r)) {
                     do {
-                        if (!states[(~ev).Goroutine()].Executing()) {
+                        if (!states[ev.Goroutine()].Executing()) {
                             // If the goroutine isn't executing, then the fact that it was in mark
                             // assist doesn't actually count.
                             break;
@@ -198,38 +198,34 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             } while (false);
         }
         if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin) { matchᴛ1 = true;
-            var r = (~ev).Range();
+            var r = ev.Range();
             if (handleSTW(r)) {
                 stw++;
             } else if (handleSweep(r)) {
-                ps[(nint)((~ev).Proc())].gc++;
+                ps[(nint)(ev.Proc())].gc++;
             } else if (handleMarkAssist(r)) {
-                ps[(nint)((~ev).Proc())].gc++;
-                {
-                    var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
-                        inGC[g] = true;
-                    }
+                ps[(nint)(ev.Proc())].gc++;
+                var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
+                    inGC[g] = true;
                 }
             }
         }
         else if (exprᴛ2 == EventRangeEnd) { matchᴛ1 = true;
-            var r = (~ev).Range();
+            var r = ev.Range();
             if (handleSTW(r)) {
                 stw--;
             } else if (handleSweep(r)) {
-                ps[(nint)((~ev).Proc())].gc--;
+                ps[(nint)(ev.Proc())].gc--;
             } else if (handleMarkAssist(r)) {
-                ps[(nint)((~ev).Proc())].gc--;
-                {
-                    var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
-                        delete(inGC, g);
-                    }
+                ps[(nint)(ev.Proc())].gc--;
+                var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
+                    delete(inGC, g);
                 }
             }
         }
         else if (exprᴛ2 == EventStateTransition) {
             do {
-                var st = (~ev).StateTransition();
+                var st = ev.StateTransition();
                 if (st.Resource.Kind != ResourceGoroutine) {
                     break;
                 }
@@ -238,17 +234,17 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 if (inGC[g] || bgMark[g]) {
                     if (!old.Executing() && @new.Executing()) {
                         // Started running while doing GC things.
-                        ps[(nint)((~ev).Proc())].gc++;
+                        ps[(nint)(ev.Proc())].gc++;
                     } else if (old.Executing() && !@new.Executing()) {
                         // Stopped running while doing GC things.
-                        ps[(nint)((~ev).Proc())].gc--;
+                        ps[(nint)(ev.Proc())].gc--;
                     }
                 }
                 states[g] = @new;
             } while (false);
         }
         else if (exprᴛ2 == EventLabel) { matchᴛ1 = true;
-            var l = (~ev).Label();
+            var l = ev.Label();
             if ((UtilFlags)(flags & UtilBackground) != 0 && strings.HasPrefix(l.ΔΔLabel, "GC ") && l.ΔΔLabel != "GC (idle)"u8) {
                 // Background mark worker.
                 //
@@ -258,8 +254,8 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 // that P, so don't directly
                 // contribute to goroutine latency.
                 if (!((UtilFlags)(flags & UtilPerProc) != 0 && l.ΔΔLabel == "GC (dedicated)"u8)) {
-                    bgMark[(~ev).Goroutine()] = true;
-                    ps[(nint)((~ev).Proc())].gc++;
+                    bgMark[ev.Goroutine()] = true;
+                    ps[(nint)(ev.Proc())].gc++;
                 }
             }
         }
@@ -279,7 +275,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     }
                 }
             }
-            var muΔ1 = new MutatorUtil((int64)(~ev).Time(), 1D - (float64)gcPs / (float64)len(ps));
+            var muΔ1 = new MutatorUtil((int64)ev.Time(), 1D - (float64)gcPs / (float64)len(ps));
 
             // Record the utilization change. (Since
             // len(ps) == len(out), we know len(out) > 0.)
@@ -292,7 +288,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 if (stw > 0 || p.gc > 0) {
                     util = 0.0D;
                 }
-                @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), util));
+                @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)ev.Time(), util));
             }
         }
     }
@@ -306,7 +302,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     // is important to mark the end of the trace. The exact value
     // shouldn't matter since no window should extend beyond this,
     // but using 0 is symmetric with the start of the trace.
-    var mu = new MutatorUtil((int64)(~lastEv).Time(), 0D);
+    var mu = new MutatorUtil((int64)lastEv.Time(), 0D);
     foreach (var i in range(ps)) {
         @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
     }
@@ -602,15 +598,13 @@ keep:;
             acc.mud.add(acc.lastMU, mu, (float64)(timeΔ1 - acc.lastTime));
         }
         (acc.lastTime, acc.lastMU) = (timeΔ1, mu);
-        {
-            var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok) {
-                acc.bound = math.Max(acc.bound, mudBound);
-            } else {
-                // We haven't accumulated enough total precise
-                // mass yet to even reach our goal, so keep
-                // accumulating.
-                acc.bound = 1D;
-            }
+        var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok) {
+            acc.bound = math.Max(acc.bound, mudBound);
+        } else {
+            // We haven't accumulated enough total precise
+            // mass yet to even reach our goal, so keep
+            // accumulating.
+            acc.bound = 1D;
         }
         // It's not worth checking percentiles every time, so
         // just keep accumulating this band.
@@ -736,10 +730,8 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         var s = vᴛ1;
 
         windows[i] = window;
-        {
-            var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
-                windows[i] = max;
-            }
+        var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
+            windows[i] = max;
         }
 
         var bandU1 = (bandUtilHeap)s.mkBandUtil(i, windows[i]);
@@ -855,10 +847,8 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
     var left = c.bands[bandIdx].integrator;
     var right = left;
     var (timeΔ1, endTime) = c.bandTime(bandIdx);
-    {
-        var utilEnd = util[len(util) - 1].Time - (int64)window; if (utilEnd < endTime) {
-            endTime = utilEnd;
-        }
+    var utilEnd = util[len(util) - 1].Time - (int64)window; if (utilEnd < endTime) {
+        endTime = utilEnd;
     }
     acc.resetTime();
     for (;;) {
@@ -880,12 +870,10 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
         // Advance the window to the next time where either
         // the left or right edge of the window encounters a
         // change in the utilization curve.
-        {
-            var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2) {
-                timeΔ1 = t1;
-            } else {
-                timeΔ1 = t2;
-            }
+        var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2) {
+            timeΔ1 = t1;
+        } else {
+            timeΔ1 = t2;
         }
         if (timeΔ1 < minTime) {
             timeΔ1 = minTime;

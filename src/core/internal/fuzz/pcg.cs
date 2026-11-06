@@ -68,10 +68,8 @@ internal static ж<nint> godebugSeed() {
 internal static ж<pcgRand> newPcgRand() {
     var r = @new<pcgRand>();
     var now = (uint64)time.Now().UnixNano();
-    {
-        var seed = godebugSeed(); if (seed != nil) {
-            now = (uint64)(seed.Value);
-        }
+    var seed = godebugSeed(); if (seed != nil) {
+        now = (uint64)(seed.Value);
     }
     var inc = ᏑglobalInc.Add(1);
     r.state = now;

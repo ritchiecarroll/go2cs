@@ -394,26 +394,18 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     // altproto map) so we can call CloseIdleConnections on it if
     // requested. (Issue 22891)
     var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
-    {
-        var rv = reflect.ValueOf(altProto[httpsˢ]); if (rv.IsValid() && rv.Type().Kind() == reflect.Struct && rv.Type().NumField() == 1) {
-            {
-                var v = rv.Field(0); if (v.CanInterface()) {
-                    {
-                        var (h2i, ok) = v.Interface()._<h2Transport>(ᐧ); if (ok) {
-                            t.h2transport = h2i;
-                            return;
-                        }
-                    }
-                }
+    var rv = reflect.ValueOf(altProto[httpsˢ]); if (rv.IsValid() && rv.Type().Kind() == reflect.Struct && rv.Type().NumField() == 1) {
+        var v = rv.Field(0); if (v.CanInterface()) {
+            var (h2i, ok) = v.Interface()._<h2Transport>(ᐧ); if (ok) {
+                t.h2transport = h2i;
+                return;
             }
         }
     }
 
-    {
-        var (_, ok) = t.TLSNextProto["h2", ꟷ]; if (ok) {
-            // There's an existing HTTP/2 implementation installed.
-            return;
-        }
+    if (t.TLSNextProto["h2", ꟷ] is (_, true)) {
+        // There's an existing HTTP/2 implementation installed.
+        return;
     }
     var protocols = t.protocols();
     if (!protocols.HTTP2() && !protocols.UnencryptedHTTP2()) {
@@ -435,14 +427,12 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     //
     // TODO: also add this to x/net/http2.Configure Transport, behind
     // a +build go1.7 build tag:
-    {
-        var limit1 = t.MaxResponseHeaderBytes; if (limit1 != 0 && t2.MaxHeaderListSize == 0) {
-            UntypedInt h2max = /* 1<<32 - 1 */ 4294967295;
-            if (limit1 >= h2max) {
-                t2.MaxHeaderListSize = h2max;
-            } else {
-                t2.MaxHeaderListSize = (uint32)limit1;
-            }
+    var limit1 = t.MaxResponseHeaderBytes; if (limit1 != 0 && t2.MaxHeaderListSize == 0) {
+        UntypedInt h2max = /* 1<<32 - 1 */ 4294967295;
+        if (limit1 >= h2max) {
+            t2.MaxHeaderListSize = h2max;
+        } else {
+            t2.MaxHeaderListSize = (uint32)limit1;
         }
     }
 
@@ -620,37 +610,29 @@ internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> �
         var isHTTP = scheme == "http"u8 || scheme == "https"u8;
         if (isHTTP) {
             // Validate the outgoing headers.
-            {
-                @string errΔ1 = validateHeaders(req.Header); if (errΔ1 != ""u8) {
-                    req.closeBody();
-                    (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid header %s"u8, errΔ1)); goto ᒐdone;
-                }
+            @string errΔ1 = validateHeaders(req.Header); if (errΔ1 != ""u8) {
+                req.closeBody();
+                (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid header %s"u8, errΔ1)); goto ᒐdone;
             }
 
             // Validate the outgoing trailers too.
-            {
-                @string errΔ2 = validateHeaders(req.Trailer); if (errΔ2 != ""u8) {
-                    req.closeBody();
-                    (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid trailer %s"u8, errΔ2)); goto ᒐdone;
-                }
+            @string errΔ2 = validateHeaders(req.Trailer); if (errΔ2 != ""u8) {
+                req.closeBody();
+                (_ᴛ1, err) = (default, fmt.Errorf("net/http: invalid trailer %s"u8, errΔ2)); goto ᒐdone;
             }
         }
 
         var origReq = Ꮡreq;
         Ꮡreq = setupRewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
 
-        {
-            var altRT = Ꮡt.alternateRoundTripper(Ꮡreq); if (altRT != nil) {
-                {
-                    var (resp, errΔ3) = altRT.RoundTrip(Ꮡreq); if (!AreEqual(errΔ3, ErrSkipAltProtocol)) {
-                        (_ᴛ1, err) = (resp, errΔ3); goto ᒐdone;
-                    }
-                }
-                error errΔ4 = default;
-                (Ꮡreq, errΔ4) = rewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
-                if (errΔ4 != nil) {
-                    (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
-                }
+        var altRT = Ꮡt.alternateRoundTripper(Ꮡreq); if (altRT != nil) {
+            var (resp, errΔ3) = altRT.RoundTrip(Ꮡreq); if (!AreEqual(errΔ3, ErrSkipAltProtocol)) {
+                (_ᴛ1, err) = (resp, errΔ3); goto ᒐdone;
+            }
+            error errΔ4 = default;
+            (Ꮡreq, errΔ4) = rewindBody(Ꮡreq); req = ref Ꮡreq.DerefOrNull();
+            if (errΔ4 != nil) {
+                (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
             }
         }
         if (!isHTTP) {
@@ -891,23 +873,19 @@ internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> 
         // our request (as opposed to sending an error).
         return false;
     }
-    {
-        var (_, ok) = err._<nothingWrittenError>(ᐧ); if (ok) {
-            // We never wrote anything, so it's safe to retry, if there's no body or we
-            // can "rewind" the body with GetBody.
-            return req.outgoingLength() == 0 || req.GetBody != nil;
-        }
+    if (err._<nothingWrittenError>(out _)) {
+        // We never wrote anything, so it's safe to retry, if there's no body or we
+        // can "rewind" the body with GetBody.
+        return req.outgoingLength() == 0 || req.GetBody != nil;
     }
     if (!req.isReplayable()) {
         // Don't retry non-idempotent requests.
         return false;
     }
-    {
-        var (_, ok) = err._<transportReadFromServerError>(ᐧ); if (ok) {
-            // We got some non-EOF net.Conn.Read failure reading
-            // the 1st response byte from the server.
-            return true;
-        }
+    if (err._<transportReadFromServerError>(out _)) {
+        // We got some non-EOF net.Conn.Read failure reading
+        // the 1st response byte from the server.
+        return true;
     }
     if (AreEqual(err, errServerClosedIdle)) {
         // The server replied with io.EOF while we were trying to
@@ -940,10 +918,8 @@ public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, Rou
         t.altMu.Lock();
         ᒐd1 = true;
         var (oldMap, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
-        {
-            var (_, exists) = oldMap[scheme, ꟷ]; if (exists) {
-                throw panic("protocol " + scheme + " already registered");
-            }
+        var (_, exists) = oldMap[scheme, ꟷ]; if (exists) {
+            throw panic("protocol " + scheme + " already registered");
         }
         var newMap = maps.Clone<map<@string, RoundTripper>, @string, RoundTripper>(oldMap);
         if (newMap == nil) {
@@ -982,10 +958,8 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
         }
     });
     t.connsPerHostMu.Unlock();
-    {
-        var t2 = t.h2transport; if (t2 != nil) {
-            t2.CloseIdleConnections();
-        }
+    var t2 = t.h2transport; if (t2 != nil) {
+        t2.CloseIdleConnections();
     }
 }
 
@@ -1073,12 +1047,10 @@ internal static @string proxyAuth(this ref connectMethod cm) {
     if (cm.proxyURL == nil) {
         return ""u8;
     }
-    {
-        var u = cm.proxyURL.User; if (u != nil) {
-            @string username = u.Username();
-            var (password, _) = u.Password();
-            return "Basic "u8 + basicAuth(username, password);
-        }
+    var u = cm.proxyURL.User; if (u != nil) {
+        @string username = u.Username();
+        var (password, _) = u.Password();
+        return "Basic "u8 + basicAuth(username, password);
     }
     return ""u8;
 }
@@ -1120,18 +1092,14 @@ internal static @string Error(this transportReadFromServerError e) {
 }
 
 internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> pconn) {
-    {
-        var err = Ꮡt.tryPutIdleConn(pconn); if (err != nil) {
-            pconn.close(err);
-        }
+    var err = Ꮡt.tryPutIdleConn(pconn); if (err != nil) {
+        pconn.close(err);
     }
 }
 
 internal static nint maxIdleConnsPerHost(this ref Transport t) {
-    {
-        nint v = t.MaxIdleConnsPerHost; if (v != 0) {
-            return v;
-        }
+    nint v = t.MaxIdleConnsPerHost; if (v != 0) {
+        return v;
     }
     return DefaultMaxIdleConnsPerHost;
 }
@@ -1190,37 +1158,35 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         // Chrome calls this socket late binding.
         // See https://www.chromium.org/developers/design-documents/network-stack#TOC-Connection-Management.)
         var key = pconn.cacheKey;
-        {
-            var (q, ok) = t.idleConnWait[key, ꟷ]; if (ok) {
-                var done = false;
-                if (pconn.alt == nil) {
-                    // HTTP/1.
-                    // Loop over the waiting list until we find a w that isn't done already, and hand it pconn.
-                    while (q.len() > 0) {
-                        var w = q.popFront();
-                        if (w.tryDeliver(Ꮡpconn, default, new time.Time())) {
-                            done = true;
-                            break;
-                        }
-                    }
-                } else {
-                    // HTTP/2.
-                    // Can hand the same pconn to everyone in the waiting list,
-                    // and we still won't be done: we want to put it in the idle
-                    // list unconditionally, for any future clients too.
-                    while (q.len() > 0) {
-                        var w = q.popFront();
-                        w.tryDeliver(Ꮡpconn, default, new time.Time());
+        var (q, ok) = t.idleConnWait[key, ꟷ]; if (ok) {
+            var done = false;
+            if (pconn.alt == nil) {
+                // HTTP/1.
+                // Loop over the waiting list until we find a w that isn't done already, and hand it pconn.
+                while (q.len() > 0) {
+                    var w = q.popFront();
+                    if (w.tryDeliver(Ꮡpconn, default, new time.Time())) {
+                        done = true;
+                        break;
                     }
                 }
-                if (q.len() == 0) {
-                    delete(t.idleConnWait, key);
-                } else {
-                    t.idleConnWait[key] = q;
+            } else {
+                // HTTP/2.
+                // Can hand the same pconn to everyone in the waiting list,
+                // and we still won't be done: we want to put it in the idle
+                // list unconditionally, for any future clients too.
+                while (q.len() > 0) {
+                    var w = q.popFront();
+                    w.tryDeliver(Ꮡpconn, default, new time.Time());
                 }
-                if (done) {
-                    return default;
-                }
+            }
+            if (q.len() == 0) {
+                delete(t.idleConnWait, key);
+            } else {
+                t.idleConnWait[key] = q;
+            }
+            if (done) {
+                return default;
             }
         }
 
@@ -1547,10 +1513,8 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) {
     w.mu.Lock();
     ж<persistConn> pc = default;
     if (w.done) {
-        {
-            var (r, ok) = ᐸꟷ(w.result, ꟷ); if (ok) {
-                pc = r.pc;
-            }
+        var (r, ok) = ᐸꟷ(w.result, ꟷ); if (ok) {
+            pc = r.pc;
         }
     } else {
         builtin.close(w.result);
@@ -1718,10 +1682,8 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
         }, ref ᒐ);
 
         // Queue for idle connection.
-        {
-            var delivered = Ꮡt.queueForIdleConn(w); if (!delivered) {
-                Ꮡt.queueForDial(w);
-            }
+        var delivered = Ꮡt.queueForIdleConn(w); if (!delivered) {
+            Ꮡt.queueForDial(w);
         }
 
         // Wait for completion or cancellation.
@@ -1794,15 +1756,13 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
             return;
         }
 
-        {
-            nint n = t.connsPerHost[w.key]; if (n < t.MaxConnsPerHost) {
-                if (t.connsPerHost == nil) {
-                    t.connsPerHost = new map<connectMethodKey, nint>();
-                }
-                t.connsPerHost[w.key] = n + 1;
-                Ꮡt.startDialConnForLocked(Ꮡw);
-                return;
+        nint n = t.connsPerHost[w.key]; if (n < t.MaxConnsPerHost) {
+            if (t.connsPerHost == nil) {
+                t.connsPerHost = new map<connectMethodKey, nint>();
             }
+            t.connsPerHost[w.key] = n + 1;
+            Ꮡt.startDialConnForLocked(Ꮡw);
+            return;
         }
 
         if (t.connsPerHostWait == nil) {
@@ -1894,37 +1854,33 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
         // (Some goroutines on the wait list may have timed out or
         // gotten a connection another way. If they're all gone,
         // we don't want to kick off any spurious dial operations.)
-        {
-            var q = t.connsPerHostWait[key]; if (q.len() > 0) {
-                var done = false;
-                while (q.len() > 0) {
-                    var w = q.popFront();
-                    if (w.waiting()) {
-                        Ꮡt.startDialConnForLocked(w);
-                        done = true;
-                        break;
-                    }
+        var q = t.connsPerHostWait[key]; if (q.len() > 0) {
+            var done = false;
+            while (q.len() > 0) {
+                var w = q.popFront();
+                if (w.waiting()) {
+                    Ꮡt.startDialConnForLocked(w);
+                    done = true;
+                    break;
                 }
-                if (q.len() == 0) {
-                    delete(t.connsPerHostWait, key);
-                } else {
-                    // q is a value (like a slice), so we have to store
-                    // the updated q back into the map.
-                    t.connsPerHostWait[key] = q;
-                }
-                if (done) {
-                    return;
-                }
+            }
+            if (q.len() == 0) {
+                delete(t.connsPerHostWait, key);
+            } else {
+                // q is a value (like a slice), so we have to store
+                // the updated q back into the map.
+                t.connsPerHostWait[key] = q;
+            }
+            if (done) {
+                return;
             }
         }
 
         // Otherwise, decrement the recorded count.
-        {
-            n--; if (n == 0) {
-                delete(t.connsPerHost, key);
-            } else {
-                t.connsPerHost[key] = n;
-            }
+        n--; if (n == 0) {
+            delete(t.connsPerHost, key);
+        } else {
+            t.connsPerHost[key] = n;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2072,15 +2028,11 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             pconn.conn = conn;
             if (cm.scheme() == "https"u8) {
                 @string firstTLSHost = default;
-                {
-                    (firstTLSHost, _, errΔ4) = net.SplitHostPort(cm.addr()); if (errΔ4 != nil) {
-                        (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
-                    }
+                (firstTLSHost, _, errΔ4) = net.SplitHostPort(cm.addr()); if (errΔ4 != nil) {
+                    (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
                 }
-                {
-                    errΔ4 = pconn.addTLS(ctx, firstTLSHost, trace); if (errΔ4 != nil) {
-                        (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
-                    }
+                errΔ4 = pconn.addTLS(ctx, firstTLSHost, trace); if (errΔ4 != nil) {
+                    (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
                 }
             }
         }
@@ -2108,11 +2060,9 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                                         d.Authenticate = (context.Context p1, io.ReadWriter p2, socksAuthMethod p3) => authʗ1.Authenticate(p1, p2, p3);
                 }
             }
-            {
-                var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢ, cm.targetAddr); if (errΔ8 != nil) {
-                    conn.Close();
-                    (pconn, err) = (default, errΔ8); goto ᒐdone;
-                }
+            var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢ, cm.targetAddr); if (errΔ8 != nil) {
+                conn.Close();
+                (pconn, err) = (default, errΔ8); goto ᒐdone;
             }
             break;
         }
@@ -2223,15 +2173,13 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
         }}
 
         if (cm.proxyURL != nil && cm.targetScheme == "https"u8) {
-            {
-                var errΔ11 = pconn.addTLS(ctx, cm.tlsHost(), trace); if (errΔ11 != nil) {
-                    (pconn, err) = (default, errΔ11); goto ᒐdone;
-                }
+            var errΔ11 = pconn.addTLS(ctx, cm.tlsHost(), trace); if (errΔ11 != nil) {
+                (pconn, err) = (default, errΔ11); goto ᒐdone;
             }
         }
 
         // Possible unencrypted HTTP/2 with prior knowledge.
-        var unencryptedHTTP2 = pconn.tlsState == nil && t.Protocols != nil && (~t.Protocols).UnencryptedHTTP2() && !(~t.Protocols).HTTP1();
+        var unencryptedHTTP2 = pconn.tlsState == nil && t.Protocols != nil && t.Protocols.UnencryptedHTTP2() && !t.Protocols.HTTP1();
 
         if (isClientConn && (unencryptedHTTP2 || (pconn.tlsState != nil && pconn.tlsState.NegotiatedProtocol == "h2"u8))) {
             var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
@@ -2253,29 +2201,21 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                 (pconn, err) = (default, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
             }
             var alt = next(cm.targetAddr, unencryptedTLSConn(pconn.conn));
-            {
-                var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
-                    // pconn.conn was closed by next (http2configureTransports.upgradeFn).
-                    (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
-                }
+            var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
+                // pconn.conn was closed by next (http2configureTransports.upgradeFn).
+                (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
             }
             (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt)), default); goto ᒐdone;
         }
 
-        {
-            var s = pconn.tlsState; if (s != nil && s.NegotiatedProtocolIsMutual && s.NegotiatedProtocol != ""u8) {
-                {
-                    var (next, ok) = t.TLSNextProto[s.NegotiatedProtocol, ꟷ]; if (ok) {
-                        var alt = next(cm.targetAddr, pconn.conn._<ж<tls.Conn>>());
-                        {
-                            var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
-                                // pconn.conn was closed by next (http2configureTransports.upgradeFn).
-                                (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
-                            }
-                        }
-                        (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt)), default); goto ᒐdone;
-                    }
+        var s = pconn.tlsState; if (s != nil && s.NegotiatedProtocolIsMutual && s.NegotiatedProtocol != ""u8) {
+            var (next, ok) = t.TLSNextProto[s.NegotiatedProtocol, ꟷ]; if (ok) {
+                var alt = next(cm.targetAddr, pconn.conn._<ж<tls.Conn>>());
+                var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
+                    // pconn.conn was closed by next (http2configureTransports.upgradeFn).
+                    (pconn, err) = (default, e.RoundTripErr()); goto ᒐdone;
                 }
+                (pconn, err) = (Ꮡ(new persistConn(t: Ꮡt, cacheKey: pconn.cacheKey, alt: alt)), default); goto ᒐdone;
             }
         }
 
@@ -2541,11 +2481,9 @@ internal static void closeConnIfStillIdle(this ж<persistConn> Ꮡpc) {
         t.ᏑidleMu.Lock();
         var tʗ1 = t;
         defer(tʗ1.ᏑidleMu.Unlock, ref ᒐ);
-        {
-            var (_, ok) = t.idleLRU.m[Ꮡpc, ꟷ]; if (!ok) {
-                // Not idle.
-                return;
-            }
+        var (_, ok) = t.idleLRU.m[Ꮡpc, ꟷ]; if (!ok) {
+            // Not idle.
+            return;
         }
         t.removeIdleConnLocked(Ꮡpc);
         Ꮡpc.close(errIdleConnTimeout);
@@ -2582,10 +2520,8 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
     // If the request was canceled, that's better than network
     // failures that were likely the result of tearing down the
     // connection.
-    {
-        var cerr = Ꮡpc.canceled(); if (cerr != nil) {
-            return cerr;
-        }
+    var cerr = Ꮡpc.canceled(); if (cerr != nil) {
+        return cerr;
     }
 
     // See if an error was set explicitly.
@@ -2601,14 +2537,12 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
         return err;
     }
 
-    {
-        var (_, ok) = err._<transportReadFromServerError>(ᐧ); if (ok) {
-            if (pc.nwrite == startBytesWritten) {
-                return new nothingWrittenError(err);
-            }
-            // Don't decorate
-            return err;
+    var (_, ok) = err._<transportReadFromServerError>(ᐧ); if (ok) {
+        if (pc.nwrite == startBytesWritten) {
+            return new nothingWrittenError(err);
         }
+        // Don't decorate
+        return err;
     }
     if (Ꮡpc.isBroken()) {
         if (pc.nwrite == startBytesWritten) {
@@ -2640,14 +2574,12 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
 
         bool tryPutIdleConn(ж<transportRequest> treq) {
             var trace = treq.trace;
-            {
-                var err = Ꮡpc.Value.t.tryPutIdleConn(Ꮡpc); if (err != nil) {
-                    ᏑcloseErr.ValueSlot = err;
-                    if (trace != nil && trace.PutIdleConn != nil && !AreEqual(err, errKeepAlivesDisabled)) {
-                        trace.PutIdleConn(err);
-                    }
-                    return false;
+            var err = Ꮡpc.Value.t.tryPutIdleConn(Ꮡpc); if (err != nil) {
+                ᏑcloseErr.ValueSlot = err;
+                if (trace != nil && trace.PutIdleConn != nil && !AreEqual(err, errKeepAlivesDisabled)) {
+                    trace.PutIdleConn(err);
                 }
+                return false;
             }
             if (trace != nil && trace.PutIdleConn != nil) {
                 trace.PutIdleConn(default);
@@ -2777,10 +2709,8 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
                     if (isEOF) {
                         ᐸꟷ(eofcʗ2); // see comment above eofc declaration
                     } else if (errΔ1 != nil) {
-                        {
-                            var cerr = Ꮡpc.canceled(); if (cerr != nil) {
-                                return cerr;
-                            }
+                        var cerr = Ꮡpc.canceled(); if (cerr != nil) {
+                            return cerr;
                         }
                     }
                     return errΔ1;
@@ -2842,15 +2772,13 @@ internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekE
     if (pc.closed != nil) {
         return;
     }
-    {
-        nint n = pc.br.Buffered(); if (n > 0) {
-            var (buf, _) = pc.br.Peek(n);
-            if (is408Message(buf)) {
-                pc.closeLocked(errServerClosedIdle);
-                return;
-            } else {
-                log.Printf("Unsolicited response received on idle HTTP channel starting with %q; err=%v", buf, peekErr);
-            }
+    nint n = pc.br.Buffered(); if (n > 0) {
+        var (buf, _) = pc.br.Peek(n);
+        if (is408Message(buf)) {
+            pc.closeLocked(errServerClosedIdle);
+            return;
+        } else {
+            log.Printf("Unsolicited response received on idle HTTP channel starting with %q; err=%v", buf, peekErr);
         }
     }
     if (AreEqual(peekErr, io.EOF)) {
@@ -2883,10 +2811,8 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     if (Ꮡtrace != nil && trace.GotFirstResponseByte != nil) {
-        {
-            var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == nil && builtin.len(peek) == 1) {
-                trace.GotFirstResponseByte();
-            }
+        var (peek, errΔ1) = pc.br.Peek(1); if (errΔ1 == nil && builtin.len(peek) == 1) {
+            trace.GotFirstResponseByte();
         }
     }
 
@@ -2909,10 +2835,8 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
         var is1xxNonTerminal = is1xx && resCode != StatusSwitchingProtocols;
         if (is1xxNonTerminal) {
             if (Ꮡtrace != nil && trace.Got1xxResponse != nil) {
-                {
-                    var errΔ2 = trace.Got1xxResponse(resCode, (textproto.MIMEHeader)(map<@string, slice<@string>>)resp.Header); if (errΔ2 != nil) {
-                        return (default, errΔ2);
-                    }
+                var errΔ2 = trace.Got1xxResponse(resCode, (textproto.MIMEHeader)(map<@string, slice<@string>>)resp.Header); if (errΔ2 != nil) {
+                    return (default, errΔ2);
                 }
                 // If the 1xx response was delivered to the user,
                 // then they're responsible for limiting the number of
@@ -3023,10 +2947,8 @@ internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<b
     error err = default;
 
     if (b.br != nil) {
-        {
-            nint nΔ1 = b.br.Buffered(); if (builtin.len(p) > nΔ1) {
-                p = p.slice(0, nΔ1);
-            }
+        nint nΔ1 = b.br.Buffered(); if (builtin.len(p) > nΔ1) {
+            p = p.slice(0, nΔ1);
         }
         (n, err) = b.br.Read(p);
         if (b.br.Buffered() == 0) {
@@ -3042,10 +2964,8 @@ internal partial interface CloseWrite_type /*dyn*/ {
 }
 
 internal static error CloseWrite(this ref readWriteCloserBody b) {
-    {
-        var (cw, ok) = b.ReadWriteCloser._<CloseWrite_type>(ᐧ); if (ok) {
-            return cw.CloseWrite();
-        }
+    var (cw, ok) = b.ReadWriteCloser._<CloseWrite_type>(ᐧ); if (ok) {
+        return cw.CloseWrite();
     }
     return fmt.Errorf("CloseWrite: %w"u8, ErrNotSupported.OrTypedNil());
 }
@@ -3072,18 +2992,16 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
             case 0 when selᴛ119.ꟷᐳ(out var wr): {
                 var startBytesWritten = pc.nwrite;
                 var err = wr.req.Request.write(new bufio_WriterжWriter(pc.bw), pc.isProxy, wr.req.extra, Ꮡpc.waitForContinue(wr.continueCh));
-                {
-                    var (bre, ok) = err._<requestBodyReadError>(ᐧ); if (ok) {
-                        err = bre.error;
-                        // Errors reading from the user's
-                        // Request.Body are high priority.
-                        // Set it here before sending on the
-                        // channels below or calling
-                        // pc.close() which tears down
-                        // connections and causes other
-                        // errors.
-                        wr.req.setError(err);
-                    }
+                var (bre, ok) = err._<requestBodyReadError>(ᐧ); if (ok) {
+                    err = bre.error;
+                    // Errors reading from the user's
+                    // Request.Body are high priority.
+                    // Set it here before sending on the
+                    // channels below or calling
+                    // pc.close() which tears down
+                    // connections and causes other
+                    // errors.
+                    wr.req.setError(err);
                 }
                 if (err == nil) {
                     err = pc.bw.Flush();
@@ -3286,10 +3204,8 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
         if (pc.isClientConn) {
             if (!pc.reserved) {
                 pc.mu.Unlock();
-                {
-                    var errΔ1 = pc.waitForAvailability(req.ctx); if (errΔ1 != nil) {
-                        (resp, err) = (default, errΔ1); goto ᒐdone;
-                    }
+                var errΔ1 = pc.waitForAvailability(req.ctx); if (errΔ1 != nil) {
+                    (resp, err) = (default, errΔ1); goto ᒐdone;
                 }
                 pc.mu.Lock();
             }
@@ -3458,10 +3374,8 @@ partial struct tLogKey {
 internal static void logf(this ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    {
-        var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
-            logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);
-        }
+    var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
+        logf(time.Now().Format(time.RFC3339Nano) + ": "u8 + format, args.ꓸꓸꓸ);
     }
 }
 
@@ -3534,10 +3448,8 @@ internal static @string idnaASCIIFromURL(ж<url.URL> Ꮡurl) {
     ref var urlΔ1 = ref Ꮡurl.DerefOrNull();
 
     @string addr = urlΔ1.Hostname();
-    {
-        var (v, err) = idnaASCII(addr); if (err == nil) {
-            addr = v;
-        }
+    var (v, err) = idnaASCII(addr); if (err == nil) {
+        addr = v;
     }
     return addr;
 }
@@ -3670,11 +3582,9 @@ internal static ref sync.Pool gzipPool => ref ((StaticBox<sync.Pool>)ᏑgzipPool
 // gzipPoolGet gets a gzip.Reader from the pool and resets it to read from r.
 internal static (ж<gzip.Reader>, error) gzipPoolGet(io.Reader r) {
     var zr = ᏑgzipPool.Get()._<ж<gzip.Reader>>();
-    {
-        var err = zr.Reset(r); if (err != nil) {
-            gzipPoolPut(zr);
-            return (default, err);
-        }
+    var err = zr.Reset(r); if (err != nil) {
+        gzipPoolPut(zr);
+        return (default, err);
     }
     return (zr, default);
 }
@@ -3846,10 +3756,8 @@ internal static void add(this ref connLRU cl, ж<persistConn> pc) {
         cl.m = new map<ж<persistConn>, ж<list.Element>>();
     }
     var ele = cl.ll.PushFront(pc.OrTypedNil());
-    {
-        var (_, ok) = cl.m[pc, ꟷ]; if (ok) {
-            throw panic("persistConn was already in LRU");
-        }
+    var (_, ok) = cl.m[pc, ꟷ]; if (ok) {
+        throw panic("persistConn was already in LRU");
     }
     cl.m[pc] = ele;
 }
@@ -3864,11 +3772,9 @@ internal static ж<persistConn> removeOldest(this ref connLRU cl) {
 
 // remove removes pc from cl.
 internal static void remove(this ref connLRU cl, ж<persistConn> pc) {
-    {
-        var (ele, ok) = cl.m[pc, ꟷ]; if (ok) {
-            cl.ll.Remove(ele);
-            delete(cl.m, pc);
-        }
+    var (ele, ok) = cl.m[pc, ꟷ]; if (ok) {
+        cl.ll.Remove(ele);
+        delete(cl.m, pc);
     }
 }
 

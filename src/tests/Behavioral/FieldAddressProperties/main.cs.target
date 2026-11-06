@@ -45,10 +45,8 @@ public static ж<Element> Front(this ref List l) {
 }
 
 public static ж<Element> Next(this ref Element e) {
-    {
-        var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
-            return p;
-        }
+    var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
+        return p;
     }
     return default;
 }

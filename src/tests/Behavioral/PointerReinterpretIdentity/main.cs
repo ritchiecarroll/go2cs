@@ -45,10 +45,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("caught:", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("caught:", r);
                 }
             }, ref ᒐ);
             ref var src = ref heap(new builder(), out var Ꮡsrc);

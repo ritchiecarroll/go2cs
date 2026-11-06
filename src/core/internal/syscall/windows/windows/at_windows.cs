@@ -121,10 +121,8 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     if ((fileFlags & (uint32)O_FILE_FLAG_POSIX_SEMANTICS) == 0) {
         objAttrs.Attributes |= (uint32)(OBJ_CASE_INSENSITIVE);
     }
-    {
-        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
-            return (syscall.InvalidHandle, errΔ1);
-        }
+    var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
+        return (syscall.InvalidHandle, errΔ1);
     }
 
     // We don't use FILE_OVERWRITE/FILE_OVERWRITE_IF, because when opening
@@ -184,10 +182,8 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
             // ERROR_INVALID_PARAMETER means truncation is not supported on this file handle.
             // Unix's O_TRUNC specification says to ignore O_TRUNC on named pipes and terminal devices.
             // We do the same here.
-            {
-                var (t, err1) = syscall.GetFileType(h); if (err1 == nil && (t == syscall.FILE_TYPE_PIPE || t == syscall.FILE_TYPE_CHAR)) {
-                    err = default;
-                }
+            var (t, err1) = syscall.GetFileType(h); if (err1 == nil && (t == syscall.FILE_TYPE_PIPE || t == syscall.FILE_TYPE_CHAR)) {
+                err = default;
             }
         }
         if (err != nil) {
@@ -307,10 +303,8 @@ internal static error ntCreateFileError(error err, uint64 flag) {
 
 public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
     var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
-    {
-        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
+        return errΔ1;
     }
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     var err = NtCreateFile(
@@ -341,10 +335,8 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             return syscall.EINVAL;
         }
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
-        {
-            var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
+            return errΔ1;
         }
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         var err = NtOpenFile(
@@ -355,10 +347,8 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
             (uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options);
         if (err != nil) {
-            {
-                var (ntStatus, ok) = err._<NTStatus>(ᐧ); if (!ok || ntStatus != STATUS_ACCESS_DENIED) {
-                    return ntCreateFileError(err, 0);
-                }
+            var (ntStatus, ok) = err._<NTStatus>(ᐧ); if (!ok || ntStatus != STATUS_ACCESS_DENIED) {
+                return ntCreateFileError(err, 0);
             }
 
             // Access denied, try opening with DELETE only.
@@ -432,28 +422,26 @@ public static ref bool TestDeleteatFallback => ref ((StaticBox<bool>)ᏑTestDele
 // over performance.
 internal static error deleteatFallback(syscallꓸHandle h) {
     ref var data = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡdata);
-    {
-        var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == nil && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
-            // Remove read-only attribute. Reopen the file, as it was previously open without FILE_WRITE_ATTRIBUTES access
-            // in order to maximize compatibility in the happy path.
-            var (wh, errΔ1) = ReOpenFile(h,
-                FILE_WRITE_ATTRIBUTES,
-                (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
-                (uint32)((uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT | (uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS));
-            if (errΔ1 != nil) {
-                return errΔ1;
-            }
-            errΔ1 = SetFileInformationByHandle(
-                wh,
-                FileBasicInfo,
-                @unsafe.Pointer.FromPinnedBox(Ꮡ(new FILE_BASIC_INFO(
-                    FileAttributes: (data.FileAttributes & ~(uint32)FILE_ATTRIBUTE_READONLY)
-                ))),
-                (uint32)/* unsafe.Sizeof(FILE_BASIC_INFO{}) */ (uintptr)40);
-            syscall.CloseHandle(wh);
-            if (errΔ1 != nil) {
-                return errΔ1;
-            }
+    var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == nil && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
+        // Remove read-only attribute. Reopen the file, as it was previously open without FILE_WRITE_ATTRIBUTES access
+        // in order to maximize compatibility in the happy path.
+        var (wh, errΔ1) = ReOpenFile(h,
+            FILE_WRITE_ATTRIBUTES,
+            (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
+            (uint32)((uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT | (uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS));
+        if (errΔ1 != nil) {
+            return errΔ1;
+        }
+        errΔ1 = SetFileInformationByHandle(
+            wh,
+            FileBasicInfo,
+            @unsafe.Pointer.FromPinnedBox(Ꮡ(new FILE_BASIC_INFO(
+                FileAttributes: (data.FileAttributes & ~(uint32)FILE_ATTRIBUTE_READONLY)
+            ))),
+            (uint32)/* unsafe.Sizeof(FILE_BASIC_INFO{}) */ (uintptr)40);
+        syscall.CloseHandle(wh);
+        if (errΔ1 != nil) {
+            return errΔ1;
         }
     }
 
@@ -470,10 +458,8 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
     GoFrame ᒐ = default;
     try {
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
-        {
-            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
+            return errΔ1;
         }
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         var err = NtOpenFile(
@@ -532,10 +518,8 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
             @unsafe.Pointer.FromPinnedBox(ᏑrenameInfo),
             (uint32)/* unsafe.Sizeof(FILE_RENAME_INFORMATION{}) */ (uintptr)544,
             FileRenameInformation);
-        {
-            var (st, ok) = err._<NTStatus>(ᐧ); if (ok) {
-                return st.Errno();
-            }
+        var (st, ok) = err._<NTStatus>(ᐧ); if (ok) {
+            return st.Errno();
         }
         return err;
     }
@@ -547,10 +531,8 @@ public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscall�
     GoFrame ᒐ = default;
     try {
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
-        {
-            var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
+            return errΔ1;
         }
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         var err = NtOpenFile(
@@ -585,10 +567,8 @@ public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscall�
             @unsafe.Pointer.FromPinnedBox(ᏑlinkInfo),
             (uint32)/* unsafe.Sizeof(FILE_LINK_INFORMATION{}) */ (uintptr)544,
             FileLinkInformation);
-        {
-            var (st, ok) = err._<NTStatus>(ᐧ); if (ok) {
-                return st.Errno();
-            }
+        var (st, ok) = err._<NTStatus>(ᐧ); if (ok) {
+            return st.Errno();
         }
         return err;
     }
@@ -650,10 +630,8 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
         }
 
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
-        {
-            var errΔ1 = objAttrs.init(newdirfd, newname); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = objAttrs.init(newdirfd, newname); if (errΔ1 != nil) {
+            return errΔ1;
         }
         ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
         err = NtCreateFile(

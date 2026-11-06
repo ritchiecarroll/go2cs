@@ -20,9 +20,9 @@ internal static void loop(this ref tracker t) { t.done.ᐸꟷ(t.n); }
 internal static void loopArg(this ref tracker t, nint k) { t.done.ᐸꟷ(k); }
 internal static void bump(this ref tracker t) { t.n++; }
 
-internal static partial void start(this ж<tracker> Ꮡt) { goǃ(Ꮡt.loop, GoStack.Bounded); }
-internal static partial void startArg(this ж<tracker> Ꮡt) { goǃ(Ꮡt.loopArg, (nint)9, GoStack.Bounded); }
-internal static partial void startInner(this ж<tracker> Ꮡt) { goǃ(Ꮡt.Ꮡin.send, GoStack.Bounded); }
+internal static partial void start(this ж<tracker> Ꮡt) { goǃ(Ꮡt.loop); }
+internal static partial void startArg(this ж<tracker> Ꮡt) { goǃ(Ꮡt.loopArg, (nint)9); }
+internal static partial void startInner(this ж<tracker> Ꮡt) { goǃ(Ꮡt.Ꮡin.send); }
 
 internal static void stop(this ж<tracker> Ꮡt) {
     GoFrame ᒐ = default;
@@ -33,7 +33,7 @@ internal static void stop(this ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void other(this ref tracker t, ж<tracker> o) { goǃ(o.loop, GoStack.Bounded); }
+internal static partial void other(this ref tracker t, ж<tracker> o) { goǃ(o.loop); }
 
 internal static void Main() {
     var t = Ꮡ(new tracker(done: new channel<nint>(0), n: 7, @in: new inner(ch: new channel<nint>(0))));

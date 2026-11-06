@@ -39,11 +39,9 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
         }
         defer(syscall.Closesocket, server, ref ᒐ);
 
-        {
-            var errΔ1 = syscall.Bind(server, bindTo); if (errΔ1 != nil) {
-                fmt.Printf("%s: bind failed\n"u8, label);
-                return;
-            }
+        var errΔ1 = syscall.Bind(server, bindTo); if (errΔ1 != nil) {
+            fmt.Printf("%s: bind failed\n"u8, label);
+            return;
         }
 
         (var bound, err) = syscall.Getsockname(server);
@@ -59,11 +57,9 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
         }
         fmt.Printf("%s bound: addr=%s portAssigned=%v\n"u8, label, boundAddr, boundPort > 0);
 
-        {
-            var errΔ2 = syscall.Listen(server, 1); if (errΔ2 != nil) {
-                fmt.Printf("%s: listen failed\n"u8, label);
-                return;
-            }
+        var errΔ2 = syscall.Listen(server, 1); if (errΔ2 != nil) {
+            fmt.Printf("%s: listen failed\n"u8, label);
+            return;
         }
 
         (var client, err) = syscall.Socket(family, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
@@ -73,11 +69,9 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
         }
         defer(syscall.Closesocket, client, ref ᒐ);
 
-        {
-            var errΔ3 = syscall.Connect(client, bound); if (errΔ3 != nil) {
-                fmt.Printf("%s: connect failed\n"u8, label);
-                return;
-            }
+        var errΔ3 = syscall.Connect(client, bound); if (errΔ3 != nil) {
+            fmt.Printf("%s: connect failed\n"u8, label);
+            return;
         }
 
         (var peer, err) = syscall.Getpeername(client);
@@ -160,11 +154,9 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
-        {
-            var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != nil) {
-                fmt.Println("WSAStartup failed");
-                return;
-            }
+        var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != nil) {
+            fmt.Println("WSAStartup failed");
+            return;
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
 

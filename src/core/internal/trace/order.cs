@@ -182,31 +182,29 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
         return (curCtx, false, fmt.Errorf("invalid status for proc %d: %d"u8, pid, status));
     }
     var oldState = tracev2ProcStatus2ProcState[status];
-    {
-        var (s, ok) = o.pStates[pid, ꟷ]; if (ok) {
-            if (status == tracev2.ProcSyscallAbandoned && s.status == tracev2.ProcSyscall) {
-                // ProcSyscallAbandoned is a special case of ProcSyscall. It indicates a
-                // potential loss of information, but if we're already in ProcSyscall,
-                // we haven't lost the relevant information. Promote the status and advance.
-                oldState = ProcRunning;
-                ev.args[1] = (uint64)tracev2.ProcSyscall;
-            } else if (status == tracev2.ProcSyscallAbandoned && s.status == tracev2.ProcSyscallAbandoned) {
-                // If we're passing through ProcSyscallAbandoned, then there's no promotion
-                // to do. We've lost the M that this P is associated with. However it got there,
-                // it's going to appear as idle in the API, so pass through as idle.
-                oldState = ProcIdle;
-                ev.args[1] = (uint64)tracev2.ProcSyscallAbandoned;
-            } else if (s.status != status) {
-                return (curCtx, false, fmt.Errorf("inconsistent status for proc %d: old %v vs. new %v"u8, pid, s.status, status));
-            }
-            s.seq = makeSeq(gen, 0); // Reset seq.
+    var (s, ok) = o.pStates[pid, ꟷ]; if (ok) {
+        if (status == tracev2.ProcSyscallAbandoned && s.status == tracev2.ProcSyscall) {
+            // ProcSyscallAbandoned is a special case of ProcSyscall. It indicates a
+            // potential loss of information, but if we're already in ProcSyscall,
+            // we haven't lost the relevant information. Promote the status and advance.
+            oldState = ProcRunning;
+            ev.args[1] = (uint64)tracev2.ProcSyscall;
+        } else if (status == tracev2.ProcSyscallAbandoned && s.status == tracev2.ProcSyscallAbandoned) {
+            // If we're passing through ProcSyscallAbandoned, then there's no promotion
+            // to do. We've lost the M that this P is associated with. However it got there,
+            // it's going to appear as idle in the API, so pass through as idle.
+            oldState = ProcIdle;
+            ev.args[1] = (uint64)tracev2.ProcSyscallAbandoned;
+        } else if (s.status != status) {
+            return (curCtx, false, fmt.Errorf("inconsistent status for proc %d: old %v vs. new %v"u8, pid, s.status, status));
+        }
+        s.seq = makeSeq(gen, 0); // Reset seq.
+    } else {
+        o.pStates[pid] = Ꮡ(new pState(id: pid, status: status, seq: makeSeq(gen, 0)));
+        if (gen == o.initialGen) {
+            oldState = ProcUndetermined;
         } else {
-            o.pStates[pid] = Ꮡ(new pState(id: pid, status: status, seq: makeSeq(gen, 0)));
-            if (gen == o.initialGen) {
-                oldState = ProcUndetermined;
-            } else {
-                oldState = ProcNotExist;
-            }
+            oldState = ProcNotExist;
         }
     }
     ev.extra(version.Go122)[0] = (uint64)oldState; // Smuggle in the old state for StateTransition.
@@ -263,10 +261,8 @@ internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж
     //
     // We might have a goroutine if a goroutine is exiting a syscall.
     var reqs = new schedReqs(M: mustHave, P: mustNotHave, G: mayHave);
-    {
-        var err = validateCtx(curCtx, reqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, reqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     state.status = tracev2.ProcRunning;
     state.seq = seq;
@@ -296,10 +292,8 @@ internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<
         return (curCtx, false, fmt.Errorf("%s event for proc that's not %s or %s"u8, o.evName(ev.typ), tracev2.ProcRunning, tracev2.ProcSyscall));
     }
     var reqs = new schedReqs(M: mustHave, P: mustHave, G: mayHave);
-    {
-        var err = validateCtx(curCtx, reqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, reqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     state.status = tracev2.ProcIdle;
     var newCtx = curCtx;
@@ -322,10 +316,8 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     }
     // We can advance this P. Check some invariants.
     var reqs = new schedReqs(M: mustHave, P: mayHave, G: mayHave);
-    {
-        var err = validateCtx(curCtx, reqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, reqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     // Smuggle in the P state that let us advance so we can surface information to the event.
     // Specifically, we need to make sure that the event is interpreted not as a transition of
@@ -394,19 +386,17 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
         return (curCtx, false, fmt.Errorf("invalid status for goroutine %d: %d"u8, gid, status));
     }
     var oldState = tracev2GoStatus2GoState[status];
-    {
-        var (s, ok) = o.gStates[gid, ꟷ]; if (ok) {
-            if (s.status != status) {
-                return (curCtx, false, fmt.Errorf("inconsistent status for goroutine %d: old %v vs. new %v"u8, gid, s.status, status));
-            }
-            s.seq = makeSeq(gen, 0); // Reset seq.
-        } else if (gen == o.initialGen) {
-            // Set the state.
-            o.gStates[gid] = Ꮡ(new gState(id: gid, status: status, seq: makeSeq(gen, 0)));
-            oldState = GoUndetermined;
-        } else {
-            return (curCtx, false, fmt.Errorf("found goroutine status for new goroutine after the first generation: id=%v status=%v"u8, gid, status));
+    if (o.gStates[gid, ꟷ] is (var s, true)) {
+        if (s.status != status) {
+            return (curCtx, false, fmt.Errorf("inconsistent status for goroutine %d: old %v vs. new %v"u8, gid, s.status, status));
         }
+        s.seq = makeSeq(gen, 0); // Reset seq.
+    } else if (gen == o.initialGen) {
+        // Set the state.
+        o.gStates[gid] = Ꮡ(new gState(id: gid, status: status, seq: makeSeq(gen, 0)));
+        oldState = GoUndetermined;
+    } else {
+        return (curCtx, false, fmt.Errorf("found goroutine status for new goroutine after the first generation: id=%v status=%v"u8, gid, status));
     }
     ev.args[2] = (uint64)oldState << 32 | (uint64)status; // Smuggle in the old state for StateTransition.
 
@@ -473,23 +463,17 @@ internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<
     // Goroutines must be created on a running P, but may or may not be created
     // by a running goroutine.
     var reqs = new schedReqs(M: mustHave, P: mustHave, G: mayHave);
-    {
-        var err = validateCtx(curCtx, reqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, reqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     // If we have a goroutine, it must be running.
-    {
-        var (state, ok) = o.gStates[curCtx.G, ꟷ]; if (ok && state.status != tracev2.GoRunning) {
-            return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
-        }
+    var (state, ok) = o.gStates[curCtx.G, ꟷ]; if (ok && state.status != tracev2.GoRunning) {
+        return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
     // This goroutine created another. Add a state for it.
     ref var newgid = ref heap<GoID>((GoID)(int64)ev.args[0], out var Ꮡnewgid);
-    {
-        var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
-            return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) that already exists"u8, newgid));
-        }
+    if (o.gStates[newgid, ꟷ] is (_, true)) {
+        return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) that already exists"u8, newgid));
     }
     ref var status = ref heap<tracev2.GoStatus>(tracev2.GoRunnable, out var Ꮡstatus);
     if (ev.typ == tracev2.EvGoCreateBlocked) {
@@ -506,10 +490,8 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
     // These are goroutine events that all require an active running
     // goroutine on some thread. They must *always* be advance-able,
     // since running goroutines are bound to their M.
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -558,10 +540,8 @@ internal static (schedCtx, bool, error) advanceGoStart(this ref ordering o, ж<b
     }
     // We can advance this goroutine. Check some invariants.
     var reqs = new schedReqs(M: mustHave, P: mustHave, G: mustNotHave);
-    {
-        var err = validateCtx(curCtx, reqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, reqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     state.status = tracev2.GoRunning;
     state.seq = seq;
@@ -604,10 +584,8 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
     // only advance it if the sequence numbers line up.
     //
     // The current goroutine on the thread must be actively running.
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     var (curGState, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -666,10 +644,8 @@ internal static (schedCtx, bool, error) advanceGoSyscallBegin(this ref ordering 
 
     // Entering a syscall requires an active running goroutine with a
     // proc on some thread. It is always advancable.
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -711,10 +687,8 @@ internal static (schedCtx, bool, error) advanceGoSyscallEnd(this ref ordering o,
     // This event is always advance-able because it happens on the same
     // thread that EvGoSyscallStart happened, and the goroutine can't leave
     // that thread until its done.
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -762,10 +736,8 @@ internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked(this ref orde
     }
     // As mentioned above, we may have a P here if we ProcStart
     // before this event.
-    {
-        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != nil) {
+        return (curCtx, false, err);
     }
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -787,17 +759,13 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall(this ref ordering
     // This event indicates that a goroutine is effectively
     // being created out of a cgo callback. Such a goroutine
     // is 'created' in the syscall state.
-    {
-        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustNotHave)); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustNotHave)); if (err != nil) {
+        return (curCtx, false, err);
     }
     // This goroutine is effectively being created. Add a state for it.
     ref var newgid = ref heap<GoID>((GoID)(int64)ev.args[0], out var Ꮡnewgid);
-    {
-        var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
-            return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) in syscall that already exists"u8, newgid));
-        }
+    var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
+        return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) in syscall that already exists"u8, newgid));
     }
     o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: tracev2.GoSyscall, seq: makeSeq(gen, 0)));
     // Goroutine is executing. Bind it to the context.
@@ -826,10 +794,8 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
     // Note: we might have a P here. The P might not be released
     // eagerly by the runtime, and it might get stolen back later
     // (or never again, if the program is going to exit).
-    {
-        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mustHave)); if (err != nil) {
+        return (curCtx, false, err);
     }
     // Check to make sure the goroutine exists in the right state.
     var (state, ok) = o.gStates[curCtx.G, ꟷ];
@@ -878,10 +844,8 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     // after it had already begun. Task IDs are allowed to be
     // reused, so we don't care about a Begin after an End.
     var id = (TaskID)ev.args[0];
-    {
-        var (_, okΔ1) = o.activeTasks[id, ꟷ]; if (okΔ1) {
-            return (curCtx, false, fmt.Errorf("task ID conflict: %d"u8, id));
-        }
+    var (_, okΔ1) = o.activeTasks[id, ꟷ]; if (okΔ1) {
+        return (curCtx, false, fmt.Errorf("task ID conflict: %d"u8, id));
     }
     // Get the parent ID, but don't validate it. There's no guarantee
     // we actually have information on whether it's active.
@@ -902,10 +866,8 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
     }
     o.activeTasks[id] = new taskState(name: name, parentID: parentID);
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -916,24 +878,20 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, 
     ref var evt = ref Ꮡevt.DerefOrNull();
 
     var id = (TaskID)ev.args[0];
-    {
-        var (ts, ok) = o.activeTasks[id, ꟷ]; if (ok) {
-            // Smuggle the task info. This may happen in a different generation,
-            // which may not have the name in its string table. Add it to the extra
-            // strings table so we can look it up later.
-            ev.extra(version.Go122)[0] = (uint64)ts.parentID;
-            ev.extra(version.Go122)[1] = (uint64)evt.addExtraString(ts.name);
-            delete(o.activeTasks, id);
-        } else {
-            // Explicitly clear the task info.
-            ev.extra(version.Go122)[0] = (uint64)NoTask;
-            ev.extra(version.Go122)[1] = (uint64)evt.addExtraString(""u8);
-        }
+    var (ts, ok) = o.activeTasks[id, ꟷ]; if (ok) {
+        // Smuggle the task info. This may happen in a different generation,
+        // which may not have the name in its string table. Add it to the extra
+        // strings table so we can look it up later.
+        ev.extra(version.Go122)[0] = (uint64)ts.parentID;
+        ev.extra(version.Go122)[1] = (uint64)evt.addExtraString(ts.name);
+        delete(o.activeTasks, id);
+    } else {
+        // Explicitly clear the task info.
+        ev.extra(version.Go122)[0] = (uint64)NoTask;
+        ev.extra(version.Go122)[1] = (uint64)evt.addExtraString(""u8);
     }
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1023,10 +981,8 @@ internal static (schedCtx, bool, error) advanceGCActive(this ref ordering o, ж<
         return (curCtx, false, fmt.Errorf("encountered GCActive while GC was not in progress"u8));
     }
     o.gcSeq = seq;
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1051,10 +1007,8 @@ internal static (schedCtx, bool, error) advanceGCBegin(this ref ordering o, ж<b
     }
     o.gcSeq = seq;
     o.gcState = gcRunning;
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1076,10 +1030,8 @@ internal static (schedCtx, bool, error) advanceGCEnd(this ref ordering o, ж<bas
     }
     o.gcSeq = seq;
     o.gcState = gcNotRunning;
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1089,10 +1041,8 @@ internal static (schedCtx, bool, error) advanceAnnotation(this ref ordering o, �
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that require a G.
-    {
-        var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1102,10 +1052,8 @@ internal static (schedCtx, bool, error) advanceHeapMetric(this ref ordering o, �
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle allocation metrics, which don't require a G.
-    {
-        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1141,10 +1089,8 @@ internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o
     if (!ok) {
         return (curCtx, false, fmt.Errorf("encountered GCSweepActive for unknown proc %d"u8, pid));
     }
-    {
-        var err = pState.of(trace_package.pState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = pState.of(trace_package.pState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1153,10 +1099,8 @@ internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o
 internal static (schedCtx, bool, error) advanceGCSweepEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    {
-        var errΔ1 = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (errΔ1 != nil) {
-            return (curCtx, false, errΔ1);
-        }
+    var errΔ1 = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (errΔ1 != nil) {
+        return (curCtx, false, errΔ1);
     }
     var (_, err) = o.pStates[curCtx.P].of(pState.ᏑrangeState).endRange(ev.typ);
     if (err != nil) {
@@ -1203,10 +1147,8 @@ internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o
     if (!ok) {
         return (curCtx, false, fmt.Errorf("uninitialized goroutine %d found during %s"u8, gid, o.evName(ev.typ)));
     }
-    {
-        var err = gState.of(trace_package.gState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = gState.of(trace_package.gState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1215,10 +1157,8 @@ internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o
 internal static (schedCtx, bool, error) advanceGoRangeEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    {
-        var errΔ1 = validateCtx(curCtx, userGoReqs); if (errΔ1 != nil) {
-            return (curCtx, false, errΔ1);
-        }
+    var errΔ1 = validateCtx(curCtx, userGoReqs); if (errΔ1 != nil) {
+        return (curCtx, false, errΔ1);
     }
     var (gState, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -1241,10 +1181,8 @@ internal static (schedCtx, bool, error) advanceAllocFree(this ref ordering o, ж
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that may or may not have a P.
-    {
-        var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mayHave)); if (err != nil) {
-            return (curCtx, false, err);
-        }
+    var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mayHave)); if (err != nil) {
+        return (curCtx, false, err);
     }
     o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
@@ -1343,10 +1281,8 @@ partial struct rangeType {
 
 // makeRangeType constructs a new rangeType.
 internal static rangeType makeRangeType(tracev2.EventType typ, stringID desc) {
-    {
-        var styp = tracev2.Specs()[typ].StartEv; if (styp != tracev2.EvNone) {
-            typ = styp;
-        }
+    var styp = tracev2.Specs()[typ].StartEv; if (styp != tracev2.EvNone) {
+        typ = styp;
     }
     return new rangeType(typ, desc);
 }
@@ -1374,10 +1310,8 @@ internal static error endRegion(this ref gState s, userRegion r) {
         // We do not know about regions that began before tracing started.
         return default;
     }
-    {
-        var next = s.regions[len(s.regions) - 1]; if (next != r) {
-            return fmt.Errorf("misuse of region in goroutine %v: region end %v when the inner-most active region start event is %v"u8, s.id, r, next);
-        }
+    var next = s.regions[len(s.regions) - 1]; if (next != r) {
+        return fmt.Errorf("misuse of region in goroutine %v: region end %v when the inner-most active region start event is %v"u8, s.id, r, next);
     }
     s.regions = s.regions.slice(0, len(s.regions) - 1);
     return default;

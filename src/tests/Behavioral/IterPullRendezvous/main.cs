@@ -30,11 +30,9 @@ internal static void @catch(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s panicked: %v\n"u8, label, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s panicked: %v\n"u8, label, r);
+                return;
             }
             fmt.Printf("%s did not panic\n"u8, label);
         }, ref ᒐ);
@@ -96,10 +94,8 @@ internal static iter.Seq<nint> doubleNext() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Printf("double next panicked: %v\n"u8, r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Printf("double next panicked: %v\n"u8, r);
                 }
             }, ref ᒐ);
 

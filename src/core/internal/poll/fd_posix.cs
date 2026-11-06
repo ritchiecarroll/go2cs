@@ -25,10 +25,8 @@ public static error Shutdown(this ж<FD> Ꮡfd, nint how) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.Shutdown(fd.Sysfd, how);
@@ -42,10 +40,8 @@ public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Fchown(Ꮡfd.Value.Sysfd, uid, gid));
@@ -59,10 +55,8 @@ public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Ftruncate(Ꮡfd.Value.Sysfd, size));
@@ -79,10 +73,8 @@ public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         f((uintptr)fd.Sysfd);

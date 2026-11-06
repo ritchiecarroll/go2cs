@@ -224,10 +224,8 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => 
         if (err != nil) {
             return err;
         }
-        {
-            var errΔ1 = verifyPKCS1v15(k.PublicKey(), "SHA-256", hash, sig); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = verifyPKCS1v15(k.PublicKey(), "SHA-256", hash, sig); if (errΔ1 != nil) {
+            return errΔ1;
         }
         if (!bytes.Equal(sig, want)) {
             return errors.New("unexpected result");

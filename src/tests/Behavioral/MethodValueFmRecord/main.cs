@@ -17,10 +17,8 @@ internal static @string nameOf(any fn) {
     if (f == nil) {
         return "<nil Func>";
     }
-    {
-        @string name = f.Name(); if (name != ""u8) {
-            return name;
-        }
+    @string name = f.Name(); if (name != ""u8) {
+        return name;
     }
     return "<empty name>";
 }

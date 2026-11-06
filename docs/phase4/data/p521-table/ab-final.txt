@@ -1,0 +1,81 @@
+round 0 go p256_first_us 0 p521_first_us 6980 p521_second_us 667 p521_steady_median_us 646 n 50 
+round 0 jitbase jit_first_us 106211 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 324751 p521_first_us 211180 p521_second_us 7440 p521_steady_median_us 6897 n 50 
+round 0 jitcut jit_first_us 96868 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 321007 p521_first_us 136338 p521_second_us 3050 p521_steady_median_us 2493 n 50 
+round 0 r2rbase jit_first_us 759 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64132 p521_first_us 565431 p521_second_us 37059 p521_steady_median_us 36586 n 50 
+round 0 r2rcut jit_first_us 744 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60992 p521_first_us 46588 p521_second_us 3468 p521_steady_median_us 3144 n 50 
+round 1 go p256_first_us 0 p521_first_us 9446 p521_second_us 552 p521_steady_median_us 556 n 50 
+round 1 jitbase jit_first_us 99902 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 308442 p521_first_us 199377 p521_second_us 7247 p521_steady_median_us 6734 n 50 
+round 1 jitcut jit_first_us 92044 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 307656 p521_first_us 123775 p521_second_us 2988 p521_steady_median_us 2404 n 50 
+round 1 r2rbase jit_first_us 847 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 69413 p521_first_us 579002 p521_second_us 38210 p521_steady_median_us 36112 n 50 
+round 1 r2rcut jit_first_us 771 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60786 p521_first_us 46525 p521_second_us 3508 p521_steady_median_us 3017 n 50 
+round 2 go p256_first_us 0 p521_first_us 10992 p521_second_us 647 p521_steady_median_us 575 n 50 
+round 2 jitbase jit_first_us 100290 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 311875 p521_first_us 200765 p521_second_us 7309 p521_steady_median_us 6763 n 50 
+round 2 jitcut jit_first_us 90336 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 305985 p521_first_us 121985 p521_second_us 2844 p521_steady_median_us 2368 n 50 
+round 2 r2rbase jit_first_us 761 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60908 p521_first_us 541302 p521_second_us 37099 p521_steady_median_us 36128 n 50 
+round 2 r2rcut jit_first_us 784 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64770 p521_first_us 48721 p521_second_us 3679 p521_steady_median_us 3177 n 50 
+round 3 go p256_first_us 0 p521_first_us 8635 p521_second_us 568 p521_steady_median_us 562 n 50 
+round 3 jitbase jit_first_us 104609 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 315593 p521_first_us 206724 p521_second_us 7252 p521_steady_median_us 6730 n 50 
+round 3 jitcut jit_first_us 91219 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 317588 p521_first_us 123728 p521_second_us 2913 p521_steady_median_us 2407 n 50 
+round 3 r2rbase jit_first_us 1227 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 65125 p521_first_us 557875 p521_second_us 36623 p521_steady_median_us 36259 n 50 
+round 3 r2rcut jit_first_us 732 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64037 p521_first_us 46938 p521_second_us 3451 p521_steady_median_us 3231 n 50 
+round 4 go p256_first_us 562 p521_first_us 8788 p521_second_us 554 p521_steady_median_us 558 n 50 
+round 4 jitbase jit_first_us 104291 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 311049 p521_first_us 205687 p521_second_us 7470 p521_steady_median_us 6915 n 50 
+round 4 jitcut jit_first_us 92997 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 308585 p521_first_us 125584 p521_second_us 2954 p521_steady_median_us 2424 n 50 
+round 4 r2rbase jit_first_us 744 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61553 p521_first_us 565454 p521_second_us 37655 p521_steady_median_us 37111 n 50 
+round 4 r2rcut jit_first_us 744 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60721 p521_first_us 47172 p521_second_us 3645 p521_steady_median_us 3107 n 50 
+round 5 go p256_first_us 563 p521_first_us 8792 p521_second_us 558 p521_steady_median_us 561 n 50 
+round 5 jitbase jit_first_us 100962 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 308311 p521_first_us 203046 p521_second_us 7402 p521_steady_median_us 6963 n 50 
+round 5 jitcut jit_first_us 90974 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 304514 p521_first_us 122606 p521_second_us 2837 p521_steady_median_us 2475 n 50 
+round 5 r2rbase jit_first_us 755 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60744 p521_first_us 552305 p521_second_us 39827 p521_steady_median_us 36381 n 50 
+round 5 r2rcut jit_first_us 750 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61858 p521_first_us 46178 p521_second_us 3409 p521_steady_median_us 3005 n 50 
+round 6 go p256_first_us 569 p521_first_us 8355 p521_second_us 1081 p521_steady_median_us 585 n 50 
+round 6 jitbase jit_first_us 101165 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306599 p521_first_us 201691 p521_second_us 7271 p521_steady_median_us 6937 n 50 
+round 6 jitcut jit_first_us 93136 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 305794 p521_first_us 125453 p521_second_us 3135 p521_steady_median_us 2402 n 50 
+round 6 r2rbase jit_first_us 758 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61326 p521_first_us 549734 p521_second_us 38106 p521_steady_median_us 36097 n 50 
+round 6 r2rcut jit_first_us 740 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60935 p521_first_us 46531 p521_second_us 3436 p521_steady_median_us 3089 n 50 
+round 7 go p256_first_us 671 p521_first_us 7735 p521_second_us 562 p521_steady_median_us 570 n 50 
+round 7 jitbase jit_first_us 99993 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 305153 p521_first_us 198030 p521_second_us 7210 p521_steady_median_us 6720 n 50 
+round 7 jitcut jit_first_us 93117 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 308077 p521_first_us 125161 p521_second_us 2950 p521_steady_median_us 2408 n 50 
+round 7 r2rbase jit_first_us 773 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 62515 p521_first_us 745530 p521_second_us 56538 p521_steady_median_us 36932 n 50 
+round 7 r2rcut jit_first_us 748 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61060 p521_first_us 46634 p521_second_us 3574 p521_steady_median_us 3061 n 50 
+round 8 go p256_first_us 0 p521_first_us 7769 p521_second_us 597 p521_steady_median_us 642 n 50 
+round 8 jitbase jit_first_us 100335 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306038 p521_first_us 198546 p521_second_us 7266 p521_steady_median_us 6688 n 50 
+round 8 jitcut jit_first_us 90501 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 308713 p521_first_us 122409 p521_second_us 3138 p521_steady_median_us 2388 n 50 
+round 8 r2rbase jit_first_us 761 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 63939 p521_first_us 553731 p521_second_us 36624 p521_steady_median_us 36580 n 50 
+round 8 r2rcut jit_first_us 742 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61217 p521_first_us 46411 p521_second_us 3459 p521_steady_median_us 3283 n 50 
+round 9 go p256_first_us 0 p521_first_us 7615 p521_second_us 597 p521_steady_median_us 648 n 50 
+round 9 jitbase jit_first_us 102345 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 311709 p521_first_us 203452 p521_second_us 7444 p521_steady_median_us 6782 n 50 
+round 9 jitcut jit_first_us 90288 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 314238 p521_first_us 122006 p521_second_us 2893 p521_steady_median_us 2400 n 50 
+round 9 r2rbase jit_first_us 903 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 67447 p521_first_us 589628 p521_second_us 37345 p521_steady_median_us 36525 n 50 
+round 9 r2rcut jit_first_us 759 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61431 p521_first_us 46490 p521_second_us 3482 p521_steady_median_us 3164 n 50 
+round 10 go p256_first_us 613 p521_first_us 7085 p521_second_us 1139 p521_steady_median_us 561 n 50 
+round 10 jitbase jit_first_us 101270 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 307846 p521_first_us 202751 p521_second_us 7393 p521_steady_median_us 6764 n 50 
+round 10 jitcut jit_first_us 91983 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 307313 p521_first_us 124421 p521_second_us 2831 p521_steady_median_us 2391 n 50 
+round 10 r2rbase jit_first_us 807 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61188 p521_first_us 559518 p521_second_us 37703 p521_steady_median_us 37181 n 50 
+round 10 r2rcut jit_first_us 741 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61957 p521_first_us 46815 p521_second_us 3464 p521_steady_median_us 3137 n 50 
+round 11 go p256_first_us 0 p521_first_us 9022 p521_second_us 585 p521_steady_median_us 572 n 50 
+round 11 jitbase jit_first_us 100685 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306923 p521_first_us 201202 p521_second_us 7311 p521_steady_median_us 6823 n 50 
+round 11 jitcut jit_first_us 90570 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 304929 p521_first_us 122097 p521_second_us 3075 p521_steady_median_us 2417 n 50 
+round 11 r2rbase jit_first_us 772 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60970 p521_first_us 558162 p521_second_us 37088 p521_steady_median_us 36628 n 50 
+round 11 r2rcut jit_first_us 767 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64873 p521_first_us 48509 p521_second_us 3629 p521_steady_median_us 3140 n 50 
+round 12 go p256_first_us 0 p521_first_us 8512 p521_second_us 536 p521_steady_median_us 651 n 50 
+round 12 jitbase jit_first_us 103500 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 311485 p521_first_us 203961 p521_second_us 7305 p521_steady_median_us 6664 n 50 
+round 12 jitcut jit_first_us 90297 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306669 p521_first_us 121998 p521_second_us 2831 p521_steady_median_us 2695 n 50 
+round 12 r2rbase jit_first_us 752 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64080 p521_first_us 550222 p521_second_us 38261 p521_steady_median_us 35854 n 50 
+round 12 r2rcut jit_first_us 742 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61116 p521_first_us 48043 p521_second_us 3609 p521_steady_median_us 3192 n 50 
+round 13 go p256_first_us 524 p521_first_us 7263 p521_second_us 568 p521_steady_median_us 651 n 50 
+round 13 jitbase jit_first_us 105192 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306087 p521_first_us 207751 p521_second_us 7384 p521_steady_median_us 6816 n 50 
+round 13 jitcut jit_first_us 100757 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 388383 p521_first_us 135247 p521_second_us 3057 p521_steady_median_us 2552 n 50 
+round 13 r2rbase jit_first_us 771 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 64326 p521_first_us 555290 p521_second_us 39444 p521_steady_median_us 37709 n 50 
+round 13 r2rcut jit_first_us 758 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 61956 p521_first_us 46433 p521_second_us 3891 p521_steady_median_us 3274 n 50 
+round 14 go p256_first_us 561 p521_first_us 7083 p521_second_us 557 p521_steady_median_us 575 n 50 
+round 14 jitbase jit_first_us 104009 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306818 p521_first_us 209306 p521_second_us 7755 p521_steady_median_us 6862 n 50 
+round 14 jitcut jit_first_us 98669 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 334217 p521_first_us 132898 p521_second_us 3323 p521_steady_median_us 2520 n 50 
+round 14 r2rbase jit_first_us 752 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 63125 p521_first_us 564491 p521_second_us 37053 p521_steady_median_us 36723 n 50 
+round 14 r2rcut jit_first_us 761 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 62937 p521_first_us 47397 p521_second_us 3493 p521_steady_median_us 3197 n 50 
+round 15 go p256_first_us 566 p521_first_us 6690 p521_second_us 0 p521_steady_median_us 652 n 50 
+round 15 jitbase jit_first_us 101979 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 302301 p521_first_us 205004 p521_second_us 7579 p521_steady_median_us 6891 n 50 
+round 15 jitcut jit_first_us 92186 jit_first_methods 88 jit_second_us 0 jit_second_methods 0 p256_first_us 306395 p521_first_us 124559 p521_second_us 2968 p521_steady_median_us 2415 n 50 
+round 15 r2rbase jit_first_us 750 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 62688 p521_first_us 557796 p521_second_us 37231 p521_steady_median_us 36292 n 50 
+round 15 r2rcut jit_first_us 762 jit_first_methods 5 jit_second_us 0 jit_second_methods 0 p256_first_us 60790 p521_first_us 48511 p521_second_us 3667 p521_steady_median_us 3103 n 50 
+done

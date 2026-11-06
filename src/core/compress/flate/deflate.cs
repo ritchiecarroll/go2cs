@@ -274,10 +274,8 @@ internal static (nint length, nint offset, bool ok) findMatch(this ref compresso
 }
 
 internal static error writeStoredBlock(this ref compressor d, slice<byte> buf) {
-    {
-        d.w.writeStoredHeader(len(buf), false); if (d.w.err != nil) {
-            return d.w.err;
-        }
+    d.w.writeStoredHeader(len(buf), false); if (d.w.err != nil) {
+        return d.w.err;
     }
     d.w.writeBytes(buf);
     return d.w.err;
@@ -404,10 +402,8 @@ Loop:
                     d.byteAvailable = false;
                 }
                 if (len(d.tokens) > 0) {
-                    {
-                        d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
-                            return;
-                        }
+                    d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
+                        return;
                     }
                     d.tokens = d.tokens[..0];
                 }
@@ -432,11 +428,9 @@ Loop:
         }
 
         if (d.chainHead - d.hashOffset >= minIndex && (d.fastSkipHashing != skipNever && lookahead > (nint)(minMatchLength - 1) || d.fastSkipHashing == skipNever && lookahead > prevLength && prevLength < d.lazy)) {
-            {
-                var (newLength, newOffset, ok) = d.findMatch(d.index, d.chainHead - d.hashOffset, minMatchLength - 1, lookahead); if (ok) {
-                    d.length = newLength;
-                    d.offset = newOffset;
-                }
+            var (newLength, newOffset, ok) = d.findMatch(d.index, d.chainHead - d.hashOffset, minMatchLength - 1, lookahead); if (ok) {
+                d.length = newLength;
+                d.offset = newOffset;
             }
         }
         if (d.fastSkipHashing != skipNever && d.length >= minMatchLength || d.fastSkipHashing == skipNever && prevLength >= minMatchLength && d.length <= prevLength) {
@@ -483,10 +477,8 @@ Loop:
             }
             if (len(d.tokens) == maxFlateBlockTokens) {
                 // The block includes the current character
-                {
-                    d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
-                        return;
-                    }
+                d.err = d.writeBlock(d.tokens, d.index); if (d.err != nil) {
+                    return;
                 }
                 d.tokens = d.tokens[..0];
             }
@@ -498,10 +490,8 @@ Loop:
                 }
                 d.tokens = append(d.tokens, literalToken((uint32)d.window[i]));
                 if (len(d.tokens) == maxFlateBlockTokens) {
-                    {
-                        d.err = d.writeBlock(d.tokens, i + 1); if (d.err != nil) {
-                            return;
-                        }
+                    d.err = d.writeBlock(d.tokens, i + 1); if (d.err != nil) {
+                        return;
                     }
                     d.tokens = d.tokens[..0];
                 }
@@ -658,10 +648,8 @@ internal static error close(this ж<compressor> Ꮡd) {
     if (d.err != nil) {
         return d.err;
     }
-    {
-        d.w.writeStoredHeader(0, true); if (d.w.err != nil) {
-            return d.w.err;
-        }
+    d.w.writeStoredHeader(0, true); if (d.w.err != nil) {
+        return d.w.err;
     }
     d.w.flush();
     if (d.w.err != nil) {
@@ -685,10 +673,8 @@ internal static error close(this ж<compressor> Ꮡd) {
 // Otherwise the error returned will be non-nil.
 public static (ж<Writer>, error) NewWriter(io.Writer w, nint level) {
     ref var dw = ref heap(new Writer(), out var Ꮡdw);
-    {
-        var err = dw.d.init(w, level); if (err != nil) {
-            return (default, err);
-        }
+    var err = dw.d.init(w, level); if (err != nil) {
+        return (default, err);
     }
     return (Ꮡdw, default);
 }
@@ -757,16 +743,14 @@ public static error Close(this ж<Writer> Ꮡw) {
 // the result of [NewWriter] or [NewWriterDict] called with dst
 // and w's level and dictionary.
 public static void Reset(this ref Writer w, io.Writer dst) {
-    {
-        var (dw, ok) = w.d.w.writer._<ж<dictWriter>>(ᐧ); if (ok) {
-            // w was created with NewWriterDict
-            dw.w = dst;
-            w.d.reset(new dictWriterжWriter(dw));
-            w.d.fillWindow(w.dict);
-        } else {
-            // w was created with NewWriter
-            w.d.reset(dst);
-        }
+    var (dw, ok) = w.d.w.writer._<ж<dictWriter>>(ᐧ); if (ok) {
+        // w was created with NewWriterDict
+        dw.w = dst;
+        w.d.reset(new dictWriterжWriter(dw));
+        w.d.fillWindow(w.dict);
+    } else {
+        // w was created with NewWriter
+        w.d.reset(dst);
     }
 }
 

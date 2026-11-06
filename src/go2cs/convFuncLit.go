@@ -430,6 +430,10 @@ func (v *Visitor) objectOnlyCalled(obj types.Object, root ast.Node) bool {
 }
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
+	// The literal a defer statement hands straight to defer (visitDeferStmt's deferredClosureLit), decided here, before
+	// the body converts: a defer inside the body re-enters visitDeferStmt for a literal of its own.
+	deferredClosure := funcLit == v.deferredClosureLit && !context.isIIFE && context.localFuncName == ""
+
 	if v.currentFuncSignature == nil {
 		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
 		v.funcSignatureIsLiteralSeed = true
@@ -972,7 +976,10 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// A collapsed body has no emitted line of its own — it lands on the enclosing statement's
 		// line, which already carries that statement's sentinel — so the collapse DROPS them
 		// rather than relocating them, and the block-body path below keeps the original text.
-		collapsible := stripPositionSentinels(body)
+		// A BOUNDED sentinel is not a position: it is the only mark a bounded go statement inside
+		// the returned expression has, and dropping it would start that goroutine on the default
+		// reservation (goroutineStackRecords.go), so it is kept; it only ever follows the `return`.
+		collapsible := stripPositionSentinelsKeepingBounded(body)
 
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(collapsible, "return ")
@@ -1443,6 +1450,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			if hasReturn && (!hasFullyTypedArm || mixedIntConflict || hasConvertedForward || hasUnconvertibleLiteral) {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
+		}
+
+		// A deferred closure's lambda is marked where its first sequence point lands, so its file's record lists it.
+		if deferredClosure {
+			inner = v.markDeferredClosureBody(inner)
 		}
 
 		result.WriteString(v.litNoInliningPrefix(funcLit) + returnTypePrefix + "(" + parameterSignature + ") => " + inner)

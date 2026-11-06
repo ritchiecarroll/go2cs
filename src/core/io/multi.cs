@@ -26,11 +26,9 @@ internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p)
     while (len(mr.readers) > 0) {
         // Optimization to flatten nested multiReaders (Issue 13558).
         if (len(mr.readers) == 1) {
-            {
-                var (r, ok) = mr.readers[0]._<ж<multiReader>>(ᐧ); if (ok) {
-                    mr.readers = r.readers;
-                    continue;
-                }
+            var (r, ok) = mr.readers[0]._<ж<multiReader>>(ᐧ); if (ok) {
+                mr.readers = r.readers;
+                continue;
             }
         }
         (n, err) = mr.readers[0].Read(p);
@@ -61,12 +59,10 @@ internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr
 
     foreach (var (i, r) in mr.readers) {
         int64 n = default;
-        {
-            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok) { // reuse buffer with nested multiReaders
-                (n, err) = subMr.writeToWithBuffer(w, buf);
-            } else {
-                (n, err) = copyBuffer(w, r, buf);
-            }
+        var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok) { // reuse buffer with nested multiReaders
+            (n, err) = subMr.writeToWithBuffer(w, buf);
+        } else {
+            (n, err) = copyBuffer(w, r, buf);
         }
         sum += n;
         if (err != nil) {
@@ -122,15 +118,13 @@ internal static (nint n, error err) WriteString(this ref multiWriter t, @string 
 
     slice<byte> p = default; // lazily initialized if/when needed
     foreach (var (_, w) in t.writers) {
-        {
-            var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
-                (n, err) = sw.WriteString(s);
-            } else {
-                if (p == nil) {
-                    p = slice<byte>(s);
-                }
-                (n, err) = w.Write(p);
+        var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
+            (n, err) = sw.WriteString(s);
+        } else {
+            if (p == nil) {
+                p = slice<byte>(s);
             }
+            (n, err) = w.Write(p);
         }
         if (err != nil) {
             return (n, err);
@@ -154,12 +148,10 @@ public static Writer MultiWriter(params ꓸꓸꓸWriter writersʗp) {
 
     var allWriters = new slice<Writer>(0, len(writers));
     foreach (var (_, w) in writers) {
-        {
-            var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok) {
-                allWriters = appendꓸꓸꓸ(allWriters, mw.writers);
-            } else {
-                allWriters = append(allWriters, w);
-            }
+        var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok) {
+            allWriters = appendꓸꓸꓸ(allWriters, mw.writers);
+        } else {
+            allWriters = append(allWriters, w);
         }
     }
     return new multiWriterжWriter(Ꮡ(new multiWriter(allWriters)));

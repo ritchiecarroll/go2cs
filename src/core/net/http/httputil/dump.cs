@@ -30,15 +30,11 @@ internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.Rea
         return (http.NoBody, http.NoBody, default);
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        (_, err) = buf.ReadFrom(b); if (err != nil) {
-            return (default, b, err);
-        }
+    (_, err) = buf.ReadFrom(b); if (err != nil) {
+        return (default, b, err);
     }
-    {
-        err = b.Close(); if (err != nil) {
-            return (default, b, err);
-        }
+    err = b.Close(); if (err != nil) {
+        return (default, b, err);
     }
     return (io.NopCloser(new bytes_BufferжReader(Ꮡbuf)), io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))), default);
 }
@@ -203,10 +199,8 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         // a debug function, so this is acceptable for now. We could
         // discard the body earlier if this matters.
         if (dummyBody) {
-            {
-                nint i = bytes.Index(dump, slice<byte>("\r\n\r\n"u8)); if (i >= 0) {
-                    dump = dump.slice(0, i + 4);
-                }
+            nint i = bytes.Index(dump, slice<byte>("\r\n\r\n"u8)); if (i >= 0) {
+                dump = dump.slice(0, i + 4);
             }
         }
         return (dump, default);
@@ -226,10 +220,8 @@ partial struct delegateReader {
 internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == nil) {
         bool ok = default;
-        {
-            (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
-                return (0, r.err);
-            }
+        (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
+            return (0, r.err);
         }
     }
     return r.r.Read(p);

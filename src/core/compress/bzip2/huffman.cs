@@ -106,10 +106,8 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     }
 
     slices.SortFunc(pairs, (huffmanSymbolLengthPair a, huffmanSymbolLengthPair b) => {
-        {
-            nint c = cmp.Compare(a.length, b.length); if (c != 0) {
-                return c;
-            }
+        nint c = cmp.Compare(a.length, b.length); if (c != 0) {
+            return c;
         }
         return cmp.Compare(a.value, b.value);
     });

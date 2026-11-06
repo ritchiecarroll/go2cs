@@ -17,7 +17,7 @@ var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 
 In `syscall_windows.cs` the variable is a bare field beside the method that sets it:
 
-<!-- source: src/core/syscall/windows/syscall_windows.cs:566-567 -->
+<!-- source: src/core/syscall/windows/syscall_windows.cs:558-559 -->
 ```csharp
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"); }
@@ -108,7 +108,7 @@ internal static @string pipeLabel;
 internal static void initᴛpipeLabel() { pipeLabel = ((@string)labelPipe) + "!"u8; }
 ```
 
-**Where the edge came from, and what it kept.** The defect that exposed it was `regexp/syntax`'s `opNames` — a 19-entry table index-keyed by the `Op` constants declared in a later file, every key read as zero, the whole table collapsing to one slot so `Parse("a").Dump()` printed the numeric fallback `op3{a}` where Go prints `lit{a}`. `Op` is a named `uint8`, so the property rule removes *that* hazard at the source, and an over-broad predicate naming every non-`const` form would draw an edge for a shape that no longer has one. Scoped to the residue, the edge relocates `internal/buildcfg`'s initializers that read a string const in `zbootstrap.go` (`GOARCH`, `GOOS` and `GO386`, each `envOr("…", default…)`, and `GO_LDSO` and `Version`, each a plain read) and `net/http`'s `timeFormats`.<!-- Re-cited at the end regen: src/core/internal/buildcfg/cfg.cs:30 (`internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH", defaultGOARCH); }`), :66 (`internal static void initᴛGO_LDSO() { GO_LDSO = defaultGO_LDSO; }`), :72 (`internal static void initᴛVersion() { Version = version; }`); src/core/net/http/header.cs:125 (`internal static void initᴛtimeFormats() { timeFormats = slice<@string>([`). --> Both were latent zero-value const reads that compiled cleanly.
+**Where the edge came from, and what it kept.** The defect that exposed it was `regexp/syntax`'s `opNames` — a 19-entry table index-keyed by the `Op` constants declared in a later file, every key read as zero, the whole table collapsing to one slot so `Parse("a").Dump()` printed the numeric fallback `op3{a}` where Go prints `lit{a}`. `Op` is a named `uint8`, so the property rule removes *that* hazard at the source, and an over-broad predicate naming every non-`const` form would draw an edge for a shape that no longer has one. Scoped to the residue, the edge relocates `internal/buildcfg`'s initializers that read a string const in `zbootstrap.go` (`GOARCH`, `GOOS` and `GO386`, each `envOr("…", default…)`, and `GO_LDSO` and `Version`, each a plain read) and `net/http`'s `timeFormats`.<!-- Re-cited at the end regen: src/core/internal/buildcfg/cfg.cs:30 (`internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH", defaultGOARCH); }`), :66 (`internal static void initᴛGO_LDSO() { GO_LDSO = defaultGO_LDSO; }`), :72 (`internal static void initᴛVersion() { Version = version; }`); src/core/net/http/header.cs:123 (`internal static void initᴛtimeFormats() { timeFormats = slice<@string>([`). --> Both were latent zero-value const reads that compiled cleanly.
 
 Guarded by the `PackageVarInitOrder` behavioral test, which carries both halves: neutering the predicate collapses `pipeLabel` onto an empty `@string` (stdout mismatch), and neutering the property rule allocates a fixed-array field at length 0 and panics on the first indexed write (exit code 2). Neither is redundant.
 
@@ -257,7 +257,7 @@ per allocation, func literal values, and an address taken before a var's first r
      (`cannot be built on its first read: %s`), :745 (`its initializer spills a hoisted holder`). The reader's gate, at
      go1.26.10: GOROOT/src/runtime/malloc.go:1039 (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`).
      package_init.cs: src/go2cs/initOrderOperations.go:504 (`func retireStalePackageInitFile(outputDir string) error {`),
-     src/go2cs/platformEmit.go:1337 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
+     src/go2cs/platformEmit.go:1541 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
      Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :502
      (`func TestLazyPackageVarRefusesByName(t *testing.T) {`), :412 (`func TestLazyPackageVarCarriesItsBox(t *testing.T) {`);
      src/tests/GolibTests/MallocDispatchTablesTests.cs:82 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).

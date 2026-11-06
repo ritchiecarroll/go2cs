@@ -99,10 +99,8 @@ internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
                 d.state = wstateBeginLine;
             }
         }
-        {
-            err = bw.WriteByte(c); if (err != nil) {
-                break;
-            }
+        err = bw.WriteByte(c); if (err != nil) {
+            break;
         }
         n++;
     }

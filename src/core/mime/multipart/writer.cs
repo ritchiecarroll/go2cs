@@ -112,10 +112,8 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.lastpart != nil) {
-        {
-            var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
@@ -205,10 +203,8 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
 // boundary end line to the output.
 public static error Close(this ref Writer w) {
     if (w.lastpart != nil) {
-        {
-            var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         w.lastpart = default;
     }

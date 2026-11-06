@@ -24,10 +24,8 @@ partial class sha256_package {
         ]);
         var h = New();
         h.Write(input);
-        {
-            var got = h.Sum(default); if (!bytes.Equal(got, want)) {
-                return errors.New("unexpected result");
-            }
+        var got = h.Sum(default); if (!bytes.Equal(got, want)) {
+            return errors.New("unexpected result");
         }
         return default;
     });

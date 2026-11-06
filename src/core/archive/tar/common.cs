@@ -429,11 +429,9 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         }
         if (!isASCII(s) || tooLong) {
             var canSplitUSTAR = paxKey == paxPath;
-            {
-                var (_, _, ok) = splitUSTARPath(s); if (!canSplitUSTAR || !ok) {
-                    whyNoUSTAR = fmt.Sprintf("USTAR cannot encode %s=%q"u8, name, s);
-                    format.mustNotBe(FormatUSTAR);
-                }
+            var (_, _, ok) = splitUSTARPath(s); if (!canSplitUSTAR || !ok) {
+                whyNoUSTAR = fmt.Sprintf("USTAR cannot encode %s=%q"u8, name, s);
+                format.mustNotBe(FormatUSTAR);
             }
             if (paxKey == paxNone) {
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%q"u8, name, s);
@@ -465,10 +463,8 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                 paxHdrsʗ2[paxKey] = strconv.FormatInt(n, 10);
             }
         }
-        {
-            var (v, ok) = hʗ2.PAXRecords[paxKey, ꟷ]; if (ok && v == strconv.FormatInt(n, 10)) {
-                paxHdrsʗ2[paxKey] = v;
-            }
+        var (v, ok) = hʗ2.PAXRecords[paxKey, ꟷ]; if (ok && v == strconv.FormatInt(n, 10)) {
+            paxHdrsʗ2[paxKey] = v;
         }
     }
     var hʗ3 = h;
@@ -497,10 +493,8 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                 paxHdrsʗ3[paxKey] = formatPAXTime(ts);
             }
         }
-        {
-            var (v, ok) = hʗ3.PAXRecords[paxKey, ꟷ]; if (ok && v == formatPAXTime(ts)) {
-                paxHdrsʗ3[paxKey] = v;
-            }
+        var (v, ok) = hʗ3.PAXRecords[paxKey, ꟷ]; if (ok && v == formatPAXTime(ts)) {
+            paxHdrsʗ3[paxKey] = v;
         }
     }
 
@@ -560,22 +554,20 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     }
     if (len(h.PAXRecords) > 0) {
         foreach (var (k, v) in h.PAXRecords) {
-            {
-                var (_, exists) = paxHdrs[k, ꟷ];
-                switch (ᐧ) {
-                case {} when exists: {
-                    continue; // Do not overwrite existing records
-                    break;
-                }
-                case {} when h.Typeflag == TypeXGlobalHeader: {
-                    paxHdrs[k] = v; // Copy all records
-                    break;
-                }
-                case {} when !basicKeys[k] && !strings.HasPrefix(k, paxGNUSparse): {
-                    paxHdrs[k] = v; // Ignore local records that may conflict
-                    break;
-                }}
+            var (_, exists) = paxHdrs[k, ꟷ];
+            switch (ᐧ) {
+            case {} when exists: {
+                continue; // Do not overwrite existing records
+                break;
             }
+            case {} when h.Typeflag == TypeXGlobalHeader: {
+                paxHdrs[k] = v; // Copy all records
+                break;
+            }
+            case {} when !basicKeys[k] && !strings.HasPrefix(k, paxGNUSparse): {
+                paxHdrs[k] = v; // Ignore local records that may conflict
+                break;
+            }}
         }
         whyOnlyPAX = onlyPaxSupportsˢ2;
         format.mayOnlyBe(FormatPAX);
@@ -610,13 +602,11 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
 	*/
 
     // Check desired format.
-    {
-        Format wantFormat = h.Format; if (wantFormat != FormatUnknown) {
-            if (wantFormat.has(FormatPAX) && !preferPAX) {
-                wantFormat.mayBe(FormatUSTAR); // PAX implies USTAR allowed too
-            }
-            format.mayOnlyBe(wantFormat); // Set union of formats allowed and format wanted
+    Format wantFormat = h.Format; if (wantFormat != FormatUnknown) {
+        if (wantFormat.has(FormatPAX) && !preferPAX) {
+            wantFormat.mayBe(FormatUSTAR); // PAX implies USTAR allowed too
         }
+        format.mayOnlyBe(wantFormat); // Set union of formats allowed and format wanted
     }
     if (format == FormatUnknown) {
         switch (h.Format) {
@@ -693,35 +683,33 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
     }
 
     // Set file mode bits; clear perm, setuid, setgid, and sticky bits.
-    {
-        var m = (fs.FileMode)(((fs.FileMode)(uint32)fi.h.Mode) & ~4095);
-        switch (m) {
-        case var ᴛ when ᴛ == c_ISDIR: {
-            mode |= (fs.FileMode)(fs.ModeDir);
-            break;
-        }
-        case var ᴛ when ᴛ == c_ISFIFO: {
-            mode |= (fs.FileMode)(fs.ModeNamedPipe);
-            break;
-        }
-        case var ᴛ when ᴛ == c_ISLNK: {
-            mode |= (fs.FileMode)(fs.ModeSymlink);
-            break;
-        }
-        case var ᴛ when ᴛ == c_ISBLK: {
-            mode |= (fs.FileMode)(fs.ModeDevice);
-            break;
-        }
-        case var ᴛ when ᴛ == c_ISCHR: {
-            mode |= (fs.FileMode)(fs.ModeDevice);
-            mode |= (fs.FileMode)(fs.ModeCharDevice);
-            break;
-        }
-        case var ᴛ when ᴛ == c_ISSOCK: {
-            mode |= (fs.FileMode)(fs.ModeSocket);
-            break;
-        }}
+    var m = (fs.FileMode)(((fs.FileMode)(uint32)fi.h.Mode) & ~4095);
+    switch (m) {
+    case var ᴛ when ᴛ == c_ISDIR: {
+        mode |= (fs.FileMode)(fs.ModeDir);
+        break;
     }
+    case var ᴛ when ᴛ == c_ISFIFO: {
+        mode |= (fs.FileMode)(fs.ModeNamedPipe);
+        break;
+    }
+    case var ᴛ when ᴛ == c_ISLNK: {
+        mode |= (fs.FileMode)(fs.ModeSymlink);
+        break;
+    }
+    case var ᴛ when ᴛ == c_ISBLK: {
+        mode |= (fs.FileMode)(fs.ModeDevice);
+        break;
+    }
+    case var ᴛ when ᴛ == c_ISCHR: {
+        mode |= (fs.FileMode)(fs.ModeDevice);
+        mode |= (fs.FileMode)(fs.ModeCharDevice);
+        break;
+    }
+    case var ᴛ when ᴛ == c_ISSOCK: {
+        mode |= (fs.FileMode)(fs.ModeSocket);
+        break;
+    }}
 
     switch (fi.h.Typeflag) {
     case var ᴛ when ᴛ == TypeSymlink: {
@@ -842,39 +830,35 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
     }
     // If possible, populate additional fields from OS-specific
     // FileInfo fields.
-    {
-        var (sys, ok) = fi.Sys()._<ж<Header>>(ᐧ); if (ok) {
-            // This FileInfo came from a Header (not the OS). Use the
-            // original Header to populate all remaining fields.
-            h.Uid = sys.Uid;
-            h.Gid = sys.Gid;
-            h.Uname = sys.Uname;
-            h.Gname = sys.Gname;
-            h.AccessTime = sys.AccessTime;
-            h.ChangeTime = sys.ChangeTime;
-            h.Xattrs = maps.Clone<map<@string, @string>, @string, @string>(sys.Xattrs);
-            if (sys.Typeflag == TypeLink) {
-                // hard link
-                h.Typeflag = TypeLink;
-                h.Size = 0;
-                h.Linkname = sys.Linkname;
-            }
-            h.PAXRecords = maps.Clone<map<@string, @string>, @string, @string>(sys.PAXRecords);
+    if (fi.Sys()._<ж<Header>>(out var sys)) {
+        // This FileInfo came from a Header (not the OS). Use the
+        // original Header to populate all remaining fields.
+        h.Uid = sys.Uid;
+        h.Gid = sys.Gid;
+        h.Uname = sys.Uname;
+        h.Gname = sys.Gname;
+        h.AccessTime = sys.AccessTime;
+        h.ChangeTime = sys.ChangeTime;
+        h.Xattrs = maps.Clone<map<@string, @string>, @string, @string>(sys.Xattrs);
+        if (sys.Typeflag == TypeLink) {
+            // hard link
+            h.Typeflag = TypeLink;
+            h.Size = 0;
+            h.Linkname = sys.Linkname;
         }
+        h.PAXRecords = maps.Clone<map<@string, @string>, @string, @string>(sys.PAXRecords);
     }
     bool doNameLookups = true;
-    {
-        var (iface, ok) = fi._<FileInfoNames>(ᐧ); if (ok) {
-            doNameLookups = false;
-            error err = default;
-            (h.Gname, err) = iface.Gname();
-            if (err != nil) {
-                return (default, err);
-            }
-            (h.Uname, err) = iface.Uname();
-            if (err != nil) {
-                return (default, err);
-            }
+    if (fi._<FileInfoNames>(out var iface)) {
+        doNameLookups = false;
+        error err = default;
+        (h.Gname, err) = iface.Gname();
+        if (err != nil) {
+            return (default, err);
+        }
+        (h.Uname, err) = iface.Uname();
+        if (err != nil) {
+            return (default, err);
         }
     }
     if (sysStat != nil) {

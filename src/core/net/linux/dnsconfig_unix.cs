@@ -42,15 +42,13 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
-        {
-            var (fi, errΔ1) = Δfile.ΔΔfile.Stat(); if (errΔ1 == nil) {
-                conf.mtime = fi.ModTime();
-            } else {
-                conf.servers = defaultNS;
-                conf.search = dnsDefaultSearch();
-                conf.err = errΔ1;
-                return conf;
-            }
+        var (fi, errΔ1) = Δfile.ΔΔfile.Stat(); if (errΔ1 == nil) {
+            conf.mtime = fi.ModTime();
+        } else {
+            conf.servers = defaultNS;
+            conf.search = dnsDefaultSearch();
+            conf.err = errΔ1;
+            return conf;
         }
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             if (len(line) > 0 && (line[0] == ';' || line[0] == '#')) {
@@ -68,10 +66,8 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                     // One more check: make sure server name is
                     // just an IP address. Otherwise we need DNS
                     // to look it up.
-                    {
-                        var (_, errΔ3) = netip.ParseAddr(f[1]); if (errΔ3 == nil) {
-                            conf.servers = append(conf.servers, JoinHostPort(f[1], "53"));
-                        }
+                    var (_, errΔ3) = netip.ParseAddr(f[1]); if (errΔ3 == nil) {
+                        conf.servers = append(conf.servers, JoinHostPort(f[1], "53"));
                     }
                 }
                 break;
@@ -195,10 +191,8 @@ internal static slice<@string> dnsDefaultSearch() {
         // best effort
         return default;
     }
-    {
-        nint i = bytealg.IndexByteString(hn, (byte)'.'); if (i >= 0 && i < len(hn) - 1) {
-            return slice<@string>([ensureRooted(hn.slice(i + 1))]);
-        }
+    nint i = bytealg.IndexByteString(hn, (byte)'.'); if (i >= 0 && i < len(hn) - 1) {
+        return slice<@string>([ensureRooted(hn.slice(i + 1))]);
     }
     return default;
 }

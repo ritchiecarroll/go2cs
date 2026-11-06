@@ -59,7 +59,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("MultiPointerEmbedPromotion.go", "MultiPointerEmbedPromotion.cs", "AAxCooKClIKCpoKCAAcSgoKmgoKmggAHFoKAgqQAFz6CgoKYlIKClIKWlpiCgpaClIKCgpiCgg==")]
+[assembly: GoPositionMap("MultiPointerEmbedPromotion.go", "MultiPointerEmbedPromotion.cs", "AAxCooKClIKCpoKCAAcSgoKmgoKmggAHFoKClAAXPoKCgpiUgoKUgpaWmIKCloKUgoKCmIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

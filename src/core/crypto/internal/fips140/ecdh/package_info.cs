@@ -65,7 +65,7 @@ using static go.crypto.@internal.fips140.ecdh_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABAelILcAAoW3IKCgoKUgpQ=")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSuIKCgILauIKmgoIACxiSgoKUgpSm+PiCpoKmpoK4poLm1ILugIK2pqKCggAIBqKClILugsqCgriAgtqokoKClKqigtyClIKCqJKCgrg=", "174-183:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSuIKCgILauIKmgoIACxiSgoKUgpSm+PiCpoKmpoK4poLm1ILugqamooKCAAgGooKUgu6CyoKCuILKqJKCgpSqooLcgpSCgqiSgoK4", "174-183:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

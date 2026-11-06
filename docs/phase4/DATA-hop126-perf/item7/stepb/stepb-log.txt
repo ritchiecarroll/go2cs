@@ -1,0 +1,27 @@
+start 2026-11-05 21:54:03
+hashes ok: v3 37ed6e8aa9269754dd7ac6af8cf19b3cff0998447880c31dbe0abe36d4758cfa d26 7ac2b53c0aa89c93
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== stepb-warm-ctl.tsv 21:54:07
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== stepb-ctl-start.tsv 21:54:11
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== stepb-tls.tsv 21:54:15
+TLS: verified 4 arms, output equal
+TLS: 11 rounds done
+== stepb-ctl-end.tsv 21:57:07
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-05 21:57:13 rc=0

@@ -154,10 +154,8 @@ internal static void probe(@string label, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: PANIC %v\n"u8, label, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, label, r);
             }
         }, ref ᒐ);
 

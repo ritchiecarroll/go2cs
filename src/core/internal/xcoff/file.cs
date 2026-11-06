@@ -402,10 +402,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
         // Read csect auxiliary entry (by convention, it is the last).
         if (!needAuxFcn) {
-            {
-                var (_, err) = sr.Seek((int64)(numaux - 1) * (int64)SYMESZ, io.SeekCurrent); if (err != nil) {
-                    return (default, err);
-                }
+            var (_, err) = sr.Seek((int64)(numaux - 1) * (int64)SYMESZ, io.SeekCurrent); if (err != nil) {
+                return (default, err);
             }
         }
         i += numaux;
@@ -539,17 +537,15 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 public static slice<byte> CSect(this ref File f, @string name) {
     foreach (var (_, sym) in f.Symbols) {
         if (sym.Name == name && sym.AuxCSect.SymbolType == XTY_SD) {
-            {
-                nint i = sym.SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
-                    var s = f.Sections[i];
-                    if ((~sym).Value + (uint64)sym.AuxCSect.Length <= s.Size) {
-                        var dat = new slice<byte>((nint)(sym.AuxCSect.Length));
-                        var (_, err) = s.sr.ReadAt(dat, (int64)(~sym).Value);
-                        if (err != nil) {
-                            return default;
-                        }
-                        return dat;
+            nint i = sym.SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
+                var s = f.Sections[i];
+                if ((~sym).Value + (uint64)sym.AuxCSect.Length <= s.Size) {
+                    var dat = new slice<byte>((nint)(sym.AuxCSect.Length));
+                    var (_, err) = s.sr.ReadAt(dat, (int64)(~sym).Value);
+                    if (err != nil) {
+                        return default;
                     }
+                    return dat;
                 }
             }
             break;
@@ -667,10 +663,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
         return (default, default);
     }
     // Read loader header
-    {
-        var (_, errΔ1) = s.sr.Seek(0, io.SeekStart); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = s.sr.Seek(0, io.SeekStart); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     uint32 stlen = default;
     uint64 stoff = default;
@@ -679,10 +673,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     switch (f.TargetMachine) {
     case var ᴛ when ᴛ == U802TOCMAGIC: {
         var lhdr = @new<LoaderHeader32>();
-        {
-            var errΔ4 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, lhdr.OrTypedNil()); if (errΔ4 != nil) {
-                return (default, errΔ4);
-            }
+        var errΔ4 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, lhdr.OrTypedNil()); if (errΔ4 != nil) {
+            return (default, errΔ4);
         }
         stlen = lhdr.Lstlen;
         stoff = (uint64)lhdr.Lstoff;
@@ -692,10 +684,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     }
     case var ᴛ when ᴛ == U64_TOCMAGIC: {
         var lhdr = @new<LoaderHeader64>();
-        {
-            var errΔ5 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, lhdr.OrTypedNil()); if (errΔ5 != nil) {
-                return (default, errΔ5);
-            }
+        var errΔ5 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, lhdr.OrTypedNil()); if (errΔ5 != nil) {
+            return (default, errΔ5);
         }
         stlen = lhdr.Lstlen;
         stoff = lhdr.Lstoff;
@@ -705,16 +695,12 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     }}
 
     // Read loader section string table
-    {
-        var (_, errΔ6) = s.sr.Seek((int64)stoff, io.SeekStart); if (errΔ6 != nil) {
-            return (default, errΔ6);
-        }
+    var (_, errΔ6) = s.sr.Seek((int64)stoff, io.SeekStart); if (errΔ6 != nil) {
+        return (default, errΔ6);
     }
     var st = new slice<byte>((nint)(stlen));
-    {
-        var (_, errΔ7) = io.ReadFull(new io.SectionReaderжReader(s.sr), st); if (errΔ7 != nil) {
-            return (default, errΔ7);
-        }
+    var (_, errΔ7) = io.ReadFull(new io.SectionReaderжReader(s.sr), st); if (errΔ7 != nil) {
+        return (default, errΔ7);
     }
 
     // Read imported libraries
@@ -724,10 +710,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     }
 
     // Read loader symbol table
-    {
-        var (_, errΔ8) = s.sr.Seek((int64)symoff, io.SeekStart); if (errΔ8 != nil) {
-            return (default, errΔ8);
-        }
+    var (_, errΔ8) = s.sr.Seek((int64)symoff, io.SeekStart); if (errΔ8 != nil) {
+        return (default, errΔ8);
     }
     var all = new slice<ImportedSymbol>(0);
     for (nint i = 0; i < (nint)nsyms; i++) {
@@ -737,10 +721,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
         switch (f.TargetMachine) {
         case var ᴛ when ᴛ == U802TOCMAGIC: {
             var ldsym = @new<LoaderSymbol32>();
-            {
-                var errΔ11 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, ldsym.OrTypedNil()); if (errΔ11 != nil) {
-                    return (default, errΔ11);
-                }
+            var errΔ11 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, ldsym.OrTypedNil()); if (errΔ11 != nil) {
+                return (default, errΔ11);
             }
             if ((uint8)(ldsym.Lsmtype & 0x40) == 0) {
                 continue; // Imported symbols only
@@ -760,10 +742,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
         }
         case var ᴛ when ᴛ == U64_TOCMAGIC: {
             var ldsym = @new<LoaderSymbol64>();
-            {
-                var errΔ12 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, ldsym.OrTypedNil()); if (errΔ12 != nil) {
-                    return (default, errΔ12);
-                }
+            var errΔ12 = binary.Read(new io.SectionReaderжReader(s.sr), binary.BigEndian, ldsym.OrTypedNil()); if (errΔ12 != nil) {
+                return (default, errΔ12);
             }
             if ((uint8)(ldsym.Lsmtype & 0x40) == 0) {
                 continue; // Imported symbols only

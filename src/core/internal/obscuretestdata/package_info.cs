@@ -56,7 +56,7 @@ using static go.@internal.obscuretestdata_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/obscuretestdata/obscuretestdata.go", "obscuretestdata.cs", "ABAikoKCgpS0tuzygoKUpIKClICCgoKkgIKCpOiygoKUkg==", "", "", "", "52:21,87:21")]
+[assembly: GoPositionMap("internal/obscuretestdata/obscuretestdata.go", "obscuretestdata.cs", "ABAikoKCgpS0tuzygoKUpIKClIKCgpSCgpTosoKClJI=", "", "", "", "52:21,83:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

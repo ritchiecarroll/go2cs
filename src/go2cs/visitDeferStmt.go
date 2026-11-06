@@ -205,7 +205,24 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	result := strings.Builder{}
 	wroteDecls := false
 
+	savedCallSelector := v.deferGoCallSelector
+	v.deferGoCallSelector, _ = ast.Unparen(deferStmt.Call.Fun).(*ast.SelectorExpr)
+
+	// A Go func literal handed straight to defer is its own deferred function, and convFuncLit marks its lambda so the
+	// file's record lists it (markDeferredClosureBody). Not the variadic form, whose thunk invokes the literal, so the
+	// deferred function is the thunk; saved and restored, since the literal's body may hold a defer of its own.
+	savedDeferredClosure := v.deferredClosureLit
+
+	if funcLit, ok := ast.Unparen(deferStmt.Call.Fun).(*ast.FuncLit); ok && !renderLambdaParams {
+		v.deferredClosureLit = funcLit
+	} else {
+		v.deferredClosureLit = nil
+	}
+
 	callExpr := strings.TrimSpace(v.convCallExpr(deferStmt.Call, lambdaContext))
+	v.deferGoCallSelector = savedCallSelector
+
+	v.deferredClosureLit = savedDeferredClosure
 
 	// The receiver snapshot (see recvSnapshot): under the temp-parameter form the call renders as
 	// `<receiver>.<method>(ᴛ1, …)`, so the receiver is exactly the text before the method name once that

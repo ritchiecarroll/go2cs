@@ -13,10 +13,8 @@ partial class net_package {
 
 internal static error joinIPv4Group(ж<netFD> fd, ж<Interface> ifi, IP ip) {
     var mreq = Ꮡ(new syscall.IPMreq(Multiaddr: new byte[]{ip[0], ip[1], ip[2], ip[3]}.array()));
-    {
-        var errΔ1 = setIPv4MreqToInterface(ref (mreq).DerefOrNull(), ifi); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = setIPv4MreqToInterface(ref (mreq).DerefOrNull(), ifi); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var err = fd.Ꮡpfd.SetsockoptIPMreq(syscall.IPPROTO_IP, syscall.IP_ADD_MEMBERSHIP, mreq);
     runtime.KeepAlive(fd.OrTypedNil());

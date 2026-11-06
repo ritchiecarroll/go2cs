@@ -48,10 +48,8 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
             // Not a surrogate for another named entity, because it isn't any kind of reparse point.
             // The information we got from GetFileAttributesEx is good enough for now.
             var fs = newFileStatFromWin32FileAttributeData(ref fa);
-            {
-                var errΔ1 = fs.saveInfoFromPath(name); if (errΔ1 != nil) {
-                    return (default, errΔ1);
-                }
+            var errΔ1 = fs.saveInfoFromPath(name); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             return (new fileStatжFileInfo(fs), default);
         }
@@ -68,10 +66,8 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
             if ((fd.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
                 // Not a surrogate for another named entity. FindFirstFile is good enough.
                 var fs = newFileStatFromWin32finddata(ref fd);
-                {
-                    var errΔ3 = fs.saveInfoFromPath(name); if (errΔ3 != nil) {
-                        return (default, errΔ3);
-                    }
+                var errΔ3 = fs.saveInfoFromPath(name); if (errΔ3 != nil) {
+                    return (default, errΔ3);
                 }
                 return (new fileStatжFileInfo(fs), default);
             }

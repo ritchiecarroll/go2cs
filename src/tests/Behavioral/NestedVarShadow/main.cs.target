@@ -33,19 +33,15 @@ internal static (nint, error) check(@string s) {
 }
 
 internal static @string g(@string s) {
-    {
-        nint n = len(s); if (n >= 0) {
-            var (vΔ1, errΔ1) = check("");
-            if (errΔ1 != nil) {
-                {
-                    var (e, ok) = errΔ1._<ж<tagErr>>(ᐧ); if (ok) {
-                        e.tag = "inner";
-                    }
-                }
-                return errΔ1.Error();
+    nint n = len(s); if (n >= 0) {
+        var (vΔ1, errΔ1) = check("");
+        if (errΔ1 != nil) {
+            var (e, ok) = errΔ1._<ж<tagErr>>(ᐧ); if (ok) {
+                e.tag = "inner";
             }
-            _ = vΔ1;
+            return errΔ1.Error();
         }
+        _ = vΔ1;
     }
     var (v, err) = check(s);
     if (err != nil) {
@@ -104,11 +100,9 @@ internal static nint forwardOk() {
         total += v;
     }
     for (nint n = 0; n < 2; n++) {
-        {
-            var (vΔ1, okΔ1) = m["b", ꟷ]; if (okΔ1) {
-                total += vΔ1;
-                continue;
-            }
+        var (vΔ1, okΔ1) = m["b", ꟷ]; if (okΔ1) {
+            total += vΔ1;
+            continue;
         }
         var (vΔ2, okΔ2) = m["c", ꟷ];
         if (!okΔ2) {

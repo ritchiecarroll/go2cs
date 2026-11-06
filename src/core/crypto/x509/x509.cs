@@ -82,17 +82,13 @@ private static readonly @string x509TrailingDataAfterAsnˢᵇ = "x509: trailing 
 // This kind of key is commonly encoded in PEM blocks of type "PUBLIC KEY".
 public static (any pub, error err) ParsePKIXPublicKey(slice<byte> derBytes) {
     ref var pki = ref heap(new publicKeyInfo(), out var Ꮡpki);
-    {
-        var (rest, errΔ1) = asn1.Unmarshal(derBytes, Ꮡpki); if (errΔ1 != nil) {
-            {
-                var (_, errΔ2) = asn1.Unmarshal(derBytes, Ꮡ(new pkcs1PublicKey())); if (errΔ2 == nil) {
-                    return (default, errors.New(x509FailedToParsePublicˢ2));
-                }
-            }
-            return (default, errΔ1);
-        } else if (builtin.len(rest) != 0) {
-            return (default, errors.New(x509TrailingDataAfterAsnˢ));
+    var (rest, errΔ1) = asn1.Unmarshal(derBytes, Ꮡpki); if (errΔ1 != nil) {
+        var (_, errΔ2) = asn1.Unmarshal(derBytes, Ꮡ(new pkcs1PublicKey())); if (errΔ2 == nil) {
+            return (default, errors.New(x509FailedToParsePublicˢ2));
         }
+        return (default, errΔ1);
+    } else if (builtin.len(rest) != 0) {
+        return (default, errors.New(x509TrailingDataAfterAsnˢ));
     }
     return parsePublicKey(ref pki);
 }
@@ -181,10 +177,8 @@ public static (slice<byte>, error) MarshalPKIXPublicKey(any pub) {
     pkix.AlgorithmIdentifier publicKeyAlgorithm = default;
     error err = default;
 
-    {
-        (publicKeyBytes, publicKeyAlgorithm, err) = marshalPublicKey(pub); if (err != nil) {
-            return (default, err);
-        }
+    (publicKeyBytes, publicKeyAlgorithm, err) = marshalPublicKey(pub); if (err != nil) {
+        return (default, err);
     }
 
     var pkixΔ1 = new pkixPublicKey(
@@ -1192,18 +1186,14 @@ internal static bool oidInExtensions(asn1.ObjectIdentifier oid, slice<pkix.Exten
 internal static (slice<byte> derBytes, error err) marshalSANs(slice<@string> dnsNames, slice<@string> emailAddresses, slice<net.IP> ipAddresses, slice<ж<url.URL>> uris) {
     slice<asn1.RawValue> rawValues = default;
     foreach (var (_, name) in dnsNames) {
-        {
-            var errΔ1 = isIA5String(name); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = isIA5String(name); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeDNS, Class: 2, Bytes: slice<byte>(name)));
     }
     foreach (var (_, email) in emailAddresses) {
-        {
-            var errΔ2 = isIA5String(email); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var errΔ2 = isIA5String(email); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeEmail, Class: 2, Bytes: slice<byte>(email)));
     }
@@ -1217,10 +1207,8 @@ internal static (slice<byte> derBytes, error err) marshalSANs(slice<@string> dns
     }
     foreach (var (_, uri) in uris) {
         @string uriStr = uri.String();
-        {
-            var errΔ3 = isIA5String(uriStr); if (errΔ3 != nil) {
-                return (default, errΔ3);
-            }
+        var errΔ3 = isIA5String(uriStr); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeURI, Class: 2, Bytes: slice<byte>(uriStr)));
     }
@@ -1352,10 +1340,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
 
             foreach (var (_, name) in dns) {
-                {
-                    errΔ1 = isIA5String(name); if (errΔ1 != nil) {
-                        return (default, errΔ1);
-                    }
+                errΔ1 = isIA5String(name); if (errΔ1 != nil) {
+                    return (default, errΔ1);
                 }
 
                 ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ2) => {
@@ -1378,10 +1364,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             }
 
             foreach (var (_, email) in emails) {
-                {
-                    errΔ1 = isIA5String(email); if (errΔ1 != nil) {
-                        return (default, errΔ1);
-                    }
+                errΔ1 = isIA5String(email); if (errΔ1 != nil) {
+                    return (default, errΔ1);
                 }
 
                 ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ6) => {
@@ -1392,10 +1376,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             }
 
             foreach (var (_, uriDomain) in uriDomains) {
-                {
-                    errΔ1 = isIA5String(uriDomain); if (errΔ1 != nil) {
-                        return (default, errΔ1);
-                    }
+                errΔ1 = isIA5String(uriDomain); if (errΔ1 != nil) {
+                    return (default, errΔ1);
                 }
 
                 ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ8) => {
@@ -1500,12 +1482,10 @@ internal static (pkix.Extension, error) marshalExtKeyUsage(slice<ExtKeyUsage> ex
 
     var oids = new slice<asn1.ObjectIdentifier>(builtin.len(extUsages) + builtin.len(unknownUsages));
     foreach (var (i, u) in extUsages) {
-        {
-            var (oid, ok) = oidFromExtKeyUsage(u); if (ok) {
-                oids[i] = oid;
-            } else {
-                return (ext, errors.New(x509UnknownExtendedKeyˢ));
-            }
+        var (oid, ok) = oidFromExtKeyUsage(u); if (ok) {
+            oids[i] = oid;
+        } else {
+            return (ext, errors.New(x509UnknownExtendedKeyˢ));
         }
     }
 
@@ -1694,10 +1674,8 @@ internal static (slice<byte>, error) signTBS(slice<byte> tbs, crypto.Signer key,
     }
 
     // Check the signature to ensure the crypto.Signer behaved correctly.
-    {
-        var errΔ1 = checkSignature(sigAlg, tbs, signature, key.Public(), true); if (errΔ1 != nil) {
-            return (default, fmt.Errorf("x509: signature returned by signer is invalid: %w"u8, errΔ1));
-        }
+    var errΔ1 = checkSignature(sigAlg, tbs, signature, key.Public(), true); if (errΔ1 != nil) {
+        return (default, fmt.Errorf("x509: signature returned by signer is invalid: %w"u8, errΔ1));
     }
 
     return (signature, default);
@@ -1799,10 +1777,8 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
         // is not provided. The serial number must be positive and at most 20
         // octets *when encoded*.
         var serialBytes = new slice<byte>(20);
-        {
-            var (_, errΔ1) = io.ReadFull(rand, serialBytes); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var (_, errΔ1) = io.ReadFull(rand, serialBytes); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         // If the top bit is set, the serial will be padded with a leading zero
         // byte during encoding, so that it's not interpreted as a negative
@@ -1876,12 +1852,10 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
             subjectKeyId = h[..20];
         }
     }
-    {
-        var (privPub, okΔ1) = key.Public()._<alreadyInChain_pubKeyEqual>(ᐧ); if (!okΔ1) {
-            return (default, errors.New(x509InternalErrorˢ));
-        } else if (parent.PublicKey != nil && !privPub.Equal(parent.PublicKey)) {
-            return (default, errors.New(x509ProvidedPrivateKeyˢ));
-        }
+    var (privPub, okΔ1) = key.Public()._<alreadyInChain_pubKeyEqual>(ᐧ); if (!okΔ1) {
+        return (default, errors.New(x509InternalErrorˢ));
+    } else if (parent.PublicKey != nil && !privPub.Equal(parent.PublicKey)) {
+        return (default, errors.New(x509ProvidedPrivateKeyˢ));
     }
 
     (var extensions, err) = buildCertExtensions(ref (Ꮡtemplate).DerefOrNull(), bytes.Equal(asn1Subject, emptyASN1Subject), authorityKeyId, subjectKeyId);
@@ -1953,12 +1927,10 @@ private static readonly @string x509TrailingDataAfterCrlˢᵇ = "x509: trailing 
 // Deprecated: Use [ParseRevocationList] instead.
 public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes) {
     var certList = @new<pkix.CertificateList>();
-    {
-        var (rest, err) = asn1.Unmarshal(derBytes, certList.OrTypedNil()); if (err != nil) {
-            return (default, err);
-        } else if (builtin.len(rest) != 0) {
-            return (default, errors.New(x509TrailingDataAfterCrlˢ));
-        }
+    var (rest, err) = asn1.Unmarshal(derBytes, certList.OrTypedNil()); if (err != nil) {
+        return (default, err);
+    } else if (builtin.len(rest) != 0) {
+        return (default, errors.New(x509TrailingDataAfterCrlˢ));
     }
     return (certList, default);
 }
@@ -2292,10 +2264,8 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
         }
 
         ref var rawValue = ref heap(new asn1.RawValue(), out var ᏑrawValue);
-        {
-            var (_, errΔ2) = asn1.Unmarshal(b, ᏑrawValue); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var (_, errΔ2) = asn1.Unmarshal(b, ᏑrawValue); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
 
         rawAttributes = append(rawAttributes, rawValue);
@@ -2384,20 +2354,16 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
     }
 
     ref var subject = ref heap<pkix.RDNSequence>(out var Ꮡsubject);
-    {
-        var (rest, errΔ1) = asn1.Unmarshal(@in.TBSCSR.Subject.FullBytes, Ꮡsubject); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        } else if (builtin.len(rest) != 0) {
-            return (default, errors.New(x509TrailingDataAfterXˢ));
-        }
+    var (rest, errΔ1) = asn1.Unmarshal(@in.TBSCSR.Subject.FullBytes, Ꮡsubject); if (errΔ1 != nil) {
+        return (default, errΔ1);
+    } else if (builtin.len(rest) != 0) {
+        return (default, errors.New(x509TrailingDataAfterXˢ));
     }
 
     @out.ᏑSubject.FillFromRDNSequence(Ꮡsubject);
 
-    {
-        (@out.Extensions, err) = parseCSRExtensions(@in.TBSCSR.RawAttributes); if (err != nil) {
-            return (default, err);
-        }
+    (@out.Extensions, err) = parseCSRExtensions(@in.TBSCSR.RawAttributes); if (err != nil) {
+        return (default, err);
     }
 
     foreach (var (_, extension) in @out.Extensions) {
@@ -2659,10 +2625,8 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
         return (default, err);
     }
 
-    {
-        var numBytes = template.Number.Bytes(); if (builtin.len(numBytes) > 20 || (builtin.len(numBytes) == 20 && (byte)(numBytes[0] & 0x80) != 0)) {
-            return (default, errors.New(x509CrlNumberExceeds20ˢ));
-        }
+    var numBytes = template.Number.Bytes(); if (builtin.len(numBytes) > 20 || (builtin.len(numBytes) == 20 && (byte)(numBytes[0] & 0x80) != 0)) {
+        return (default, errors.New(x509CrlNumberExceeds20ˢ));
     }
     (var crlNum, err) = asn1.Marshal(template.Number.OrTypedNil());
     if (err != nil) {

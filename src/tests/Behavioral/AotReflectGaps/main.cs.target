@@ -35,10 +35,8 @@ internal static void run(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: recovered: %v\n"u8, name, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: recovered: %v\n"u8, name, r);
             }
         }, ref ᒐ);
         f();

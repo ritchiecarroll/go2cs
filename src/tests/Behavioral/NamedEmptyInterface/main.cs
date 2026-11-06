@@ -61,10 +61,8 @@ internal static void Main() {
 
     e = a;
     fmt.Println(AreEqual(e, a), AreEqual(e, b), e == nil);
-    {
-        var (n, ok) = b._<nint>(ᐧ); if (ok) {
-            fmt.Println("int", n + 1);
-        }
+    var (n, ok) = b._<nint>(ᐧ); if (ok) {
+        fmt.Println("int", n + 1);
     }
     switch (d.type()) {
     case point v: {

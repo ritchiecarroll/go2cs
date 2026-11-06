@@ -79,10 +79,8 @@ internal static @string /*msg*/ probe(Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    msg = fmt.Sprint(r);
-                }
+            var r = recover(); if (r != nil) {
+                msg = fmt.Sprint(r);
             }
         }, ref ᒐ);
         f();

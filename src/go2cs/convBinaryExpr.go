@@ -873,10 +873,15 @@ func (v *Visitor) shiftReceiverRendersAsCast(expr ast.Expr) bool {
 	return ok && v.callExprIsTypeConversion(call)
 }
 
-// literalShiftCount reports whether a compound shift-assign's count is a constant rendered as a plain decimal
-// integer literal within C#'s int range. C# already takes such a literal as the `int` its compound shift wants,
-// so the `(int)(N)` cast is dropped (visual-parity train #27): `x <<= 3`. A NAMED-numeric or type-parameter left
-// operand keeps the cast, for the generated count overloads (batch 43) a bare literal could also bind.
+// literalShiftCount reports whether a compound shift-assign's count is a constant rendered as a plain integer
+// literal within C#'s int range: decimal, or hex or binary as Go wrote it, the forms C# reads as the same value. C#
+// already takes such a literal as the `int` its compound shift wants, so the `(int)(N)` cast is dropped and the count
+// reads as Go writes it (visual-parity train #27; seat A of the next train): `x <<= 3`, `w >>= 0x8`. Both are the
+// same IL. A NAMED-numeric target takes the bare literal too: its wrapper's generated `operator <<(T, int)` binds an
+// int literal exactly, ahead of the wide uint64/int64 overloads (batch 43), as the binary form `w << 4` already
+// does. A TYPE-PARAMETER target takes it below the narrowest width its type set holds (typeParamShiftWidth), a count
+// in [0, width) for every type argument. No target reaches here with a constant count at or past its width: the
+// guard (generic, for a type parameter), or a named wrapper's wide operator, takes that count first.
 func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
 	tv, ok := v.info.Types[rhs]
 
@@ -886,16 +891,40 @@ func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
 
 	value, exact := constant.Int64Val(constant.ToInt(tv.Value))
 
-	if !exact || value < 0 || value > math.MaxInt32 || rendered != strconv.FormatInt(value, 10) {
+	if !exact || value < 0 || value > math.MaxInt32 || !rendersAsIntLiteral(rendered, value) {
 		return false
 	}
 
-	switch types.Unalias(v.info.TypeOf(lhs)).(type) {
-	case *types.Named, *types.TypeParam, nil:
+	switch target := types.Unalias(v.info.TypeOf(lhs)).(type) {
+	case *types.TypeParam:
+		width, ok := typeParamShiftWidth(target)
+		return ok && value < int64(width)
+	case nil:
 		return false
 	}
 
 	return true
+}
+
+// rendersAsIntLiteral reports whether a rendered shift count is a plain integer literal whose value C# reads the same
+// as Go: canonical decimal, or a `0x`/`0b` literal. A leading-zero octal is not one (C# has no octal literal and
+// reads `010` as ten), nor is a literal with digit separators.
+func rendersAsIntLiteral(rendered string, value int64) bool {
+	if rendered == strconv.FormatInt(value, 10) {
+		return true
+	}
+
+	if len(rendered) < 3 || rendered[0] != '0' || strings.ContainsRune(rendered, '_') {
+		return false
+	}
+
+	switch rendered[1] {
+	case 'x', 'X', 'b', 'B':
+		parsed, err := strconv.ParseInt(rendered, 0, 64)
+		return err == nil && parsed == value
+	}
+
+	return false
 }
 
 // shiftCountUint64Operand renders the shift count widened for the guard, so its FULL magnitude is seen

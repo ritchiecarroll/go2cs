@@ -15,10 +15,8 @@ public static (nint major, nint minor) KernelVersion() {
     nint minor = default;
 
     ref var uname = ref heap(new syscall.Utsname(), out var Ꮡuname);
-    {
-        var err = syscall.Uname(Ꮡuname); if (err != nil) {
-            return (major, minor);
-        }
+    var err = syscall.Uname(Ꮡuname); if (err != nil) {
+        return (major, minor);
     }
 
     array<nint> values = new(2);

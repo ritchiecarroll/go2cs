@@ -47,6 +47,7 @@
     <None Include="$(MSBuildThisFileDirectory)blankImportTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)boundedGoOrdinal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildInfoStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)buildInfoStamp_test.go" />
@@ -149,6 +150,7 @@
     <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)singleFileComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deadPointerParamAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)declaredNotImplemented_test.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
@@ -157,8 +159,10 @@
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferLambdaReceiverCopy_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)deferReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkers_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)deferredClosureSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredSyscallFunnel_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dependencyGraph.go" />
     <None Include="$(MSBuildThisFileDirectory)dependencyGraph_test.go" />
@@ -230,6 +234,7 @@
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goroutineStackRecords.go" />
     <None Include="$(MSBuildThisFileDirectory)goStmtReceiverBoxMethodGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
@@ -262,6 +267,8 @@
     <None Include="$(MSBuildThisFileDirectory)incrementalWrites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)initScopeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)initScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />
@@ -302,6 +309,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\classify.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\corpus.go" />
@@ -337,9 +346,12 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnSourcePins_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\interceptorBuildGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
@@ -458,6 +470,7 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapSourceWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oracleArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />
@@ -477,6 +490,7 @@
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)parityShiftCountCast_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainHeapFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainPatternSwitch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainSmallFour_test.go" />
@@ -541,6 +555,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmePackageDoc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
@@ -666,6 +681,7 @@
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueReceiverBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicGlobalAliasElement_test.go" />

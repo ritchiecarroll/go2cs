@@ -64,10 +64,8 @@ internal static error writeLSB(this ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
-        {
-            var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
-                return err;
-            }
+        var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
+            return err;
         }
         w.bits >>= 8;
         w.nBits -= 8;
@@ -80,10 +78,8 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
-        {
-            var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != nil) {
-                return err;
-            }
+        var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != nil) {
+            return err;
         }
         w.bits <<= 8;
         w.nBits -= 8;
@@ -108,10 +104,8 @@ internal static error incHi(this ж<Writer> Ꮡw) {
     }
     if (w.hi == maxCode) {
         var clear = ((uint32)1).Lsh(w.litWidth);
-        {
-            var err = w.write(Ꮡw, clear); if (err != nil) {
-                return err;
-            }
+        var err = w.write(Ꮡw, clear); if (err != nil) {
+            return err;
         }
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
@@ -139,13 +133,11 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
-    {
-        var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
-            foreach (var (_, x) in p) {
-                if (x > maxLit) {
-                    w.err = errors.New(lzwInputByteTooLargeForˢ);
-                    return (0, w.err);
-                }
+    var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
+        foreach (var (_, x) in p) {
+            if (x > maxLit) {
+                w.err = errors.New(lzwInputByteTooLargeForˢ);
+                return (0, w.err);
             }
         }
     }
@@ -160,10 +152,8 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         // LZW compression isn't only used by GIF, but it's cheap to follow
         // that directive unconditionally.
         var clear = ((uint32)1).Lsh(w.litWidth);
-        {
-            var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         // After the starting clear code, the next code sent (for non-empty
         // input) is always a literal code.
@@ -186,22 +176,18 @@ loop:
         }
         // Otherwise, write the current code, and literal becomes the start of
         // the next emitted code.
-        {
-            w.err = w.write(Ꮡw, code); if (w.err != nil) {
-                return (0, w.err);
-            }
+        w.err = w.write(Ꮡw, code); if (w.err != nil) {
+            return (0, w.err);
         }
         code = literal;
         // Increment e.hi, the next implied code. If we run out of codes, reset
         // the writer state (including clearing the hash table) and continue.
-        {
-            var err1 = Ꮡw.incHi(); if (err1 != nil) {
-                if (AreEqual(err1, errOutOfCodes)) {
-                    continue;
-                }
-                w.err = err1;
-                return (0, w.err);
+        var err1 = Ꮡw.incHi(); if (err1 != nil) {
+            if (AreEqual(err1, errOutOfCodes)) {
+                continue;
             }
+            w.err = err1;
+            return (0, w.err);
         }
         // Otherwise, insert key -> e.hi into the map that e.table represents.
         for (;;) {
@@ -246,10 +232,8 @@ public static error Close(this ж<Writer> Ꮡw) {
     } else {
         // Write the starting clear code, as w.Write did not.
         var clear = ((uint32)1).Lsh(w.litWidth);
-        {
-            var err = w.write(Ꮡw, clear); if (err != nil) {
-                return err;
-            }
+        var err = w.write(Ꮡw, clear); if (err != nil) {
+            return err;
         }
     }
     // Write the eof code.
@@ -264,10 +248,8 @@ public static error Close(this ж<Writer> Ꮡw) {
         if (w.order == MSB) {
             w.bits >>= 24;
         }
-        {
-            var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
-                return err;
-            }
+        var err = w.w.WriteByte((uint8)w.bits); if (err != nil) {
+            return err;
         }
     }
     return w.w.Flush();

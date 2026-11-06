@@ -234,10 +234,8 @@ internal static partial nint movedIfInit(nint n) {
         p = append(pᴷ, p, (ж<nint>)(nil));
     }
     p = move2heap(pᴷ, p);
-    {
-        var t = p; if (len(t) > 0) {
-            return cap(t);
-        }
+    var t = p; if (len(t) > 0) {
+        return cap(t);
     }
     return 0;
 }

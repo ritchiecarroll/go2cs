@@ -24,29 +24,25 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     var constArg = x.mode == constant_;
 
     bool constConvertibleTo(ΔType TΔ1, ж<constant.Value> val) {
-        {
-            var (t, _) = TΔ1.Underlying()._<ж<Basic>>(ᐧ);
-            switch (ᐧ) {
-            case {} when t == nil: {
-                // nothing to do
-                break;
-            }
-            case {} when representableConst(Ꮡx.Value.val, Ꮡcheck, t, val): {
-                return true;
-            }
-            case {} when isInteger(Ꮡx.Value.typ) && isString(new BasicжΔType(t)): {
-                rune codepoint = unicode.ReplacementChar;
-                {
-                    var (i, okΔ2) = constant.Uint64Val(Ꮡx.Value.val); if (okΔ2 && i <= unicode.MaxRune) {
-                        codepoint = (rune)i;
-                    }
-                }
-                if (val != nil) {
-                    val.ValueSlot = constant.MakeString((@string)codepoint);
-                }
-                return true;
-            }}
+        var (t, _) = TΔ1.Underlying()._<ж<Basic>>(ᐧ);
+        switch (ᐧ) {
+        case {} when t == nil: {
+            // nothing to do
+            break;
         }
+        case {} when representableConst(Ꮡx.Value.val, Ꮡcheck, t, val): {
+            return true;
+        }
+        case {} when isInteger(Ꮡx.Value.typ) && isString(new BasicжΔType(t)): {
+            rune codepoint = unicode.ReplacementChar;
+            var (i, okΔ2) = constant.Uint64Val(Ꮡx.Value.val); if (okΔ2 && i <= unicode.MaxRune) {
+                codepoint = (rune)i;
+            }
+            if (val != nil) {
+                val.ValueSlot = constant.MakeString((@string)codepoint);
+            }
+            return true;
+        }}
         return false;
     }
 
@@ -165,10 +161,8 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     // "x is assignable to T"
-    {
-        var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, T, Ꮡcause); if (ok) {
-            return true;
-        }
+    var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, T, Ꮡcause); if (ok) {
+        return true;
     }
 
     var origT = T;
@@ -188,14 +182,10 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     // "V and T are unnamed pointer types and their pointer base types
     // have identical underlying types if tags are ignored
     // and their pointer base types are not type parameters"
-    {
-        var (VΔ1, ok) = V._<ж<Pointer>>(ᐧ); if (ok) {
-            {
-                var (TΔ1, okΔ1) = T._<ж<Pointer>>(ᐧ); if (okΔ1) {
-                    if (IdenticalIgnoreTags(VΔ1.@base.Underlying(), TΔ1.@base.Underlying()) && !isTypeParam(VΔ1.@base) && !isTypeParam(TΔ1.@base)) {
-                        return true;
-                    }
-                }
+    if (V._<ж<Pointer>>(out var VΔ1)) {
+        var (TΔ1, okΔ1) = T._<ж<Pointer>>(ᐧ); if (okΔ1) {
+            if (IdenticalIgnoreTags(VΔ1.@base.Underlying(), TΔ1.@base.Underlying()) && !isTypeParam(VΔ1.@base) && !isTypeParam(TΔ1.@base)) {
+                return true;
             }
         }
     }
@@ -232,41 +222,37 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
 
     // "V is a slice, T is an array or pointer-to-array type,
     // and the slice and array types have identical element types."
-    {
-        var (s, _) = Vu._<ж<Slice>>(ᐧ); if (s != nil) {
-            switch (Tu.type()) {
-            case ж<Array> a: {
-                if (Identical(s.Elem(), a.Elem())) {
-                    if (Ꮡcheck == nil || check.allowVersion(go1_20)) {
+    var (s, _) = Vu._<ж<Slice>>(ᐧ); if (s != nil) {
+        switch (Tu.type()) {
+        case ж<Array> a: {
+            if (Identical(s.Elem(), a.Elem())) {
+                if (Ꮡcheck == nil || check.allowVersion(go1_20)) {
+                    return true;
+                }
+                // check != nil
+                if (Ꮡcause != nil) {
+                    // TODO(gri) consider restructuring versionErrorf so we can use it here and below
+                    cause = conversionOfSliceToArrayˢ;
+                }
+                return false;
+            }
+            break;
+        }
+        case ж<Pointer> a: {
+            var (aΔ1, _) = a.Elem().Underlying()._<ж<Array>>(ᐧ); if (aΔ1 != nil) {
+                if (Identical(s.Elem(), aΔ1.Elem())) {
+                    if (Ꮡcheck == nil || check.allowVersion(go1_17)) {
                         return true;
                     }
                     // check != nil
                     if (Ꮡcause != nil) {
-                        // TODO(gri) consider restructuring versionErrorf so we can use it here and below
-                        cause = conversionOfSliceToArrayˢ;
+                        cause = conversionOfSliceToArrayˢ2;
                     }
                     return false;
                 }
-                break;
             }
-            case ж<Pointer> a: {
-                {
-                    var (aΔ1, _) = a.Elem().Underlying()._<ж<Array>>(ᐧ); if (aΔ1 != nil) {
-                        if (Identical(s.Elem(), aΔ1.Elem())) {
-                            if (Ꮡcheck == nil || check.allowVersion(go1_17)) {
-                                return true;
-                            }
-                            // check != nil
-                            if (Ꮡcause != nil) {
-                                cause = conversionOfSliceToArrayˢ2;
-                            }
-                            return false;
-                        }
-                    }
-                }
-                break;
-            }}
-        }
+            break;
+        }}
     }
 
     // optimization: if we don't have type parameters, we're done
@@ -364,11 +350,9 @@ internal static bool isPointer(ΔType typ) {
 }
 
 internal static bool isBytesOrRunes(ΔType typ) {
-    {
-        var (s, _) = typ.Underlying()._<ж<Slice>>(ᐧ); if (s != nil) {
-            var (t, _) = s.elem.Underlying()._<ж<Basic>>(ᐧ);
-            return t != nil && (t.kind == Byte || t.kind == Rune);
-        }
+    var (s, _) = typ.Underlying()._<ж<Slice>>(ᐧ); if (s != nil) {
+        var (t, _) = s.elem.Underlying()._<ж<Basic>>(ᐧ);
+        return t != nil && (t.kind == Byte || t.kind == Rune);
     }
     return false;
 }

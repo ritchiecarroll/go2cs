@@ -481,7 +481,7 @@ var pʗ1 = p;
     var pʗ2 = pʗ1;
     goǃ(() => {
         outʗ2.ᐸꟷ(pʗ2.sum());
-    }, GoStack.Bounded);
+    });
 }
 ```
 
@@ -516,7 +516,7 @@ A **MAP** composite literal whose value or key type is a pointer boxes its eleme
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:795-798 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:787-790 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -595,17 +595,15 @@ Roslyn compiles a local function that is never converted to a delegate with a **
 
 A literal that **defers or recovers** is no bar: its frame is an ordinary local of the local function, declared in the local function's own body like any other, so the whole shape stays allocation-free —
 
-<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:77-96 -->
+<!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:77-94 -->
 ```csharp
 nint /*r*/ guard(nint n) {
     nint r = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    r = -1;
-                }
+            var e = recover(); if (e != nil) {
+                r = -1;
             }
         }, ref ᒐ);
         if (n < 0) {
@@ -768,7 +766,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:362, 368 -->
+<!-- source: src/core/debug/elf/file.cs:360, 364 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -2813,7 +2811,7 @@ program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
 func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
 func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
 ```
-<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:33-40 -->
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:31-38 -->
 ```csharp
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

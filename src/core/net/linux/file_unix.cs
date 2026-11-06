@@ -25,11 +25,9 @@ internal static (nint, error) dupFileSocket(ж<os.File> f) {
         }
         return (-1, err);
     }
-    {
-        var errΔ1 = syscall.SetNonblock(s, true); if (errΔ1 != nil) {
-            poll.CloseFunc(s);
-            return (-1, os.NewSyscallError(setnonblockˢ, errΔ1));
-        }
+    var errΔ1 = syscall.SetNonblock(s, true); if (errΔ1 != nil) {
+        poll.CloseFunc(s);
+        return (-1, os.NewSyscallError(setnonblockˢ, errΔ1));
     }
     return (s, default);
 }

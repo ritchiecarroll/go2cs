@@ -57,7 +57,7 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "AC9cAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKAgqSokoKAgqSokgAJGKKCqJCowoKCgpSCgoKUqMKClIKUtIKClLSk7oKCgriigoKCgpSCgriUyoKCgoKUgKS0tIKCxpSmooKCgoKUgoKClMqCgoKClICktLSCgsaU")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "AC9cAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKClKiSgoKUqJIACRiigqiQqMKCgoKUgoKClKjCgpSClLSCgpS0pO6CgoK4ooKCgoKUgoK4lMqCgoKClKS0tIKCtpSmooKCgoKUgoKClMqCgoKClKS0tIKCtpQ=")]
 [assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule10.0.0.go", "bidirule10.0.0.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 

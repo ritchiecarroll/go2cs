@@ -19,12 +19,10 @@ public static iter.Seq<@string> Lines(@string s) {
     return (Func<@string, bool> yield) => {
         while (len(s) > 0) {
             @string line = default;
-            {
-                nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
-                    (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
-                } else {
-                    (line, s) = (s, "");
-                }
+            nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
+                (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
+            } else {
+                (line, s) = (s, "");
             }
             if (!yield(line)) {
                 return;

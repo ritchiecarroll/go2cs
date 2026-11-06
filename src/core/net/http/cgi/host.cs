@@ -108,14 +108,12 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
 
     foreach (var (i, e) in env) {
         var found = false;
-        {
-            nint eq = strings.IndexByte(e, (byte)'='); if (eq != -1) {
-                @string keq = e.slice(0, eq + 1); // "key="
-                foreach (var (_, e2) in env.slice(i + 1)) {
-                    if (strings.HasPrefix(e2, keq)) {
-                        found = true;
-                        break;
-                    }
+        nint eq = strings.IndexByte(e, (byte)'='); if (eq != -1) {
+            @string keq = e.slice(0, eq + 1); // "key="
+            foreach (var (_, e2) in env.slice(i + 1)) {
+                if (strings.HasPrefix(e2, keq)) {
+                    found = true;
+                    break;
                 }
             }
         }
@@ -154,10 +152,8 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         if (req.TLS != nil) {
             port = "443";
         }
-        {
-            var matches = trailingPort.FindStringSubmatch(req.Host); if (len(matches) != 0) {
-                port = matches[1];
-            }
+        var matches = trailingPort.FindStringSubmatch(req.Host); if (len(matches) != 0) {
+            port = matches[1];
         }
 
         var env = slice<@string>([
@@ -174,21 +170,17 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             "SERVER_PORT="u8 + port
         ]);
 
-        {
-            var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == nil) {
-                env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST=" + remoteIP, "REMOTE_PORT=" + remotePort);
-            } else {
-                // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
-                env = append(env, "REMOTE_ADDR="u8 + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
-            }
+        var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == nil) {
+            env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST=" + remoteIP, "REMOTE_PORT=" + remotePort);
+        } else {
+            // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
+            env = append(env, "REMOTE_ADDR="u8 + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
         }
 
-        {
-            var (hostDomain, _, errΔ2) = net.SplitHostPort(req.Host); if (errΔ2 == nil) {
-                env = append(env, "SERVER_NAME="u8 + hostDomain);
-            } else {
-                env = append(env, "SERVER_NAME="u8 + req.Host);
-            }
+        var (hostDomain, _, errΔ2) = net.SplitHostPort(req.Host); if (errΔ2 == nil) {
+            env = append(env, "SERVER_NAME="u8 + hostDomain);
+        } else {
+            env = append(env, "SERVER_NAME="u8 + req.Host);
         }
 
         if (req.TLS != nil) {
@@ -213,10 +205,8 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         if (req.ContentLength > 0) {
             env = append(env, fmt.Sprintf("CONTENT_LENGTH=%d"u8, req.ContentLength));
         }
-        {
-            @string ctype = req.Header.Get(contentTypeˢ2); if (ctype != ""u8) {
-                env = append(env, "CONTENT_TYPE="u8 + ctype);
-            }
+        @string ctype = req.Header.Get(contentTypeˢ2); if (ctype != ""u8) {
+            env = append(env, "CONTENT_TYPE="u8 + ctype);
         }
 
         @string envPath = os.Getenv(pathˢ);
@@ -226,18 +216,14 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         env = append(env, "PATH="u8 + envPath);
 
         foreach (var (_, e) in h.InheritEnv) {
-            {
-                @string v = os.Getenv(e); if (v != ""u8) {
-                    env = append(env, e + "="u8 + v);
-                }
+            @string v = os.Getenv(e); if (v != ""u8) {
+                env = append(env, e + "="u8 + v);
             }
         }
 
         foreach (var (_, e) in osDefaultInheritEnv) {
-            {
-                @string v = os.Getenv(e); if (v != ""u8) {
-                    env = append(env, e + "="u8 + v);
-                }
+            @string v = os.Getenv(e); if (v != ""u8) {
+                env = append(env, e + "="u8 + v);
             }
         }
 
@@ -285,10 +271,8 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             internalError(err);
             return;
         }
-        {
-            var hook = testHookStartProcess; if (hook != nil) {
-                hook(cmd.Process);
-            }
+        var hook = testHookStartProcess; if (hook != nil) {
+            hook(cmd.Process);
         }
         var cmdʗ1 = cmd;
         defer(() => cmdʗ1.Wait(), ref ᒐ);
@@ -356,15 +340,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             return;
         }
 
-        {
-            @string loc = headers.Get(locationˢ); if (loc != ""u8) {
-                if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != nil) {
-                    h.handleInternalRedirect(rw, Ꮡreq, loc);
-                    return;
-                }
-                if (statusCode == 0) {
-                    statusCode = http.StatusFound;
-                }
+        @string loc = headers.Get(locationˢ); if (loc != ""u8) {
+            if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != nil) {
+                h.handleInternalRedirect(rw, Ꮡreq, loc);
+                return;
+            }
+            if (statusCode == 0) {
+                statusCode = http.StatusFound;
             }
         }
 

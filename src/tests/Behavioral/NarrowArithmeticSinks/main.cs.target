@@ -46,10 +46,8 @@ internal static void arm(@string @class, Func<@string> f) {
         }
 
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(@class + ": panic:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(@class + ": panic:", r);
             }
         }, ref ᒐ);
 

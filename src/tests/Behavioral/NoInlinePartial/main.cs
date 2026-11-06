@@ -70,7 +70,7 @@ internal static partial void Main() {
     fmt.Println(name, n);
     fmt.Println(generic<nint>(1));
     fmt.Println(c.ptr());
-    fmt.Println((~c).val());
+    fmt.Println(c.val());
     fmt.Println(b.get());
     fmt.Println(fromInit);
     fmt.Println(call(lit));

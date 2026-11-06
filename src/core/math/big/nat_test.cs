@@ -487,7 +487,7 @@ public static void TestNLZ(ж<testing.T> t) {
         if ((nint)nlz(x) != i) {
             t.Errorf("failed at %x: got %d want %d", x, nlz(x), i);
         }
-        x >>= (int)(1);
+        x >>= 1;
     }
 }
 

@@ -41,6 +41,10 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("main.cs", 117, 5, 10)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAwimIKUpKSkpKSktLiUlJSUuIKCptiUwoCCxKSCgpSClIKUgpSClIKUgpSClIKUgoKClIKSlIKSpqKCgoKCgoKCoqSigtaCgoKC", "", "", "", "85:15,88:15,91:15,94:15,97:15,100:15,103:15,106:15,109:15,113:15,132:21,133:21,134:21,135:21,136:27,147:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAwimIKUpKSkpKSktLiUlJSUuIKCptiUwoK0pIKClIKUgpSClIKUgpSClIKUgpSCgoKUgpKUgpKmooKCgoKCgoKipKKC1oKCgoI=", "", "", "", "83:15,86:15,89:15,92:15,95:15,98:15,101:15,104:15,107:15,111:15,130:21,131:21,132:21,133:21,134:27,145:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

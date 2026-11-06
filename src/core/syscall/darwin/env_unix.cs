@@ -33,16 +33,14 @@ internal static Action copyenv = Δsync.OnceFunc(() => {
         for (nint j = 0; j < len(s); j++) {
             if (s[j] == '=') {
                 @string key = s.slice(0, j);
-                {
-                    var (_, ok) = env[key, ꟷ]; if (!ok) {
-                        env[key] = i; // first mention of key
-                    } else {
-                        // Clear duplicate keys. This permits Unsetenv to
-                        // safely delete only the first item without
-                        // worrying about unshadowing a later one,
-                        // which might be a security problem.
-                        envs[i] = "";
-                    }
+                var (_, ok) = env[key, ꟷ]; if (!ok) {
+                    env[key] = i; // first mention of key
+                } else {
+                    // Clear duplicate keys. This permits Unsetenv to
+                    // safely delete only the first item without
+                    // worrying about unshadowing a later one,
+                    // which might be a security problem.
+                    envs[i] = "";
                 }
                 break;
             }
@@ -58,11 +56,9 @@ public static error Unsetenv(@string key) {
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
 
-        {
-            var (i, ok) = env[key, ꟷ]; if (ok) {
-                envs[i] = ""u8;
-                delete(env, key);
-            }
+        var (i, ok) = env[key, ꟷ]; if (ok) {
+            envs[i] = ""u8;
+            delete(env, key);
         }
         runtimeUnsetenv(key);
         return default;

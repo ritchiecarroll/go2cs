@@ -99,18 +99,16 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
     }
 
     // Update mass tracking.
-    {
-        var thresh = (float64)d.trackBucket / (float64)mudDegree; if (l < thresh) {
-            if (r < thresh) {
-                d.trackSum += area;
-            } else {
-                d.trackSum += area * (thresh - l) / (r - l);
-            }
-            if (d.trackSum >= d.trackMass) {
-                // The tracked mass now falls in a different
-                // bucket. Recompute the inverse cumulative sum.
-                d.setTrackMass(d.trackMass);
-            }
+    var thresh = (float64)d.trackBucket / (float64)mudDegree; if (l < thresh) {
+        if (r < thresh) {
+            d.trackSum += area;
+        } else {
+            d.trackSum += area * (thresh - l) / (r - l);
+        }
+        if (d.trackSum >= d.trackMass) {
+            // The tracked mass now falls in a different
+            // bucket. Recompute the inverse cumulative sum.
+            d.setTrackMass(d.trackMass);
         }
     }
 }

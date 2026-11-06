@@ -130,15 +130,13 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
     }
 
     fips140.RecordApproved();
-    {
-        var err = open(@out, Ꮡg, nonce, ciphertext, data); if (err != nil) {
-            // We sometimes decrypt and authenticate concurrently, so we overwrite
-            // dst in the event of a tag mismatch. To be consistent across platforms
-            // and to avoid releasing unauthenticated plaintext, we clear the buffer
-            // in the event of an error.
-            clear(@out);
-            return (default, err);
-        }
+    var err = open(@out, Ꮡg, nonce, ciphertext, data); if (err != nil) {
+        // We sometimes decrypt and authenticate concurrently, so we overwrite
+        // dst in the event of a tag mismatch. To be consistent across platforms
+        // and to avoid releasing unauthenticated plaintext, we clear the buffer
+        // in the event of an error.
+        clear(@out);
+        return (default, err);
     }
     return (ret, default);
 }
@@ -151,13 +149,11 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     slice<byte> head = default;
     slice<byte> tail = default;
 
-    {
-        nint total = len(@in) + n; if (cap(@in) >= total) {
-            head = @in.slice(0, total);
-        } else {
-            head = new slice<byte>(total);
-            copy(head, @in);
-        }
+    nint total = len(@in) + n; if (cap(@in) >= total) {
+        head = @in.slice(0, total);
+    } else {
+        head = new slice<byte>(total);
+        copy(head, @in);
     }
     tail = head.slice(len(@in));
     return (head, tail);

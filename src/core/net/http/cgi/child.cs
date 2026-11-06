@@ -39,10 +39,8 @@ public static (ж<http.Request>, error) Request() {
 internal static map<@string, @string> envMap(slice<@string> env) {
     var m = new map<@string, @string>();
     foreach (var (_, kv) in env) {
-        {
-            var (k, v, ok) = strings.Cut(kv, "="); if (ok) {
-                m[k] = v;
-            }
+        var (k, v, ok) = strings.Cut(kv, "="); if (ok) {
+            m[k] = v;
         }
     }
     return m;
@@ -101,20 +99,16 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
 
     r.Host = @params[httpHostˢ];
 
-    {
-        @string lenstr = @params[contentLengthˢ]; if (lenstr != ""u8) {
-            var (clen, err) = strconv.ParseInt(lenstr, 10, 64);
-            if (err != nil) {
-                return (default, errors.New("cgi: bad CONTENT_LENGTH in environment: "u8 + lenstr));
-            }
-            r.ContentLength = clen;
+    @string lenstr = @params[contentLengthˢ]; if (lenstr != ""u8) {
+        var (clen, err) = strconv.ParseInt(lenstr, 10, 64);
+        if (err != nil) {
+            return (default, errors.New("cgi: bad CONTENT_LENGTH in environment: "u8 + lenstr));
         }
+        r.ContentLength = clen;
     }
 
-    {
-        @string ct = @params[contentTypeˢ]; if (ct != ""u8) {
-            r.Header.Set(contentTypeˢ2, ct);
-        }
+    @string ct = @params[contentTypeˢ]; if (ct != ""u8) {
+        r.Header.Set(contentTypeˢ2, ct);
     }
 
     // Copy "HTTP_FOO_BAR" variables to "Foo-Bar" Headers
@@ -122,10 +116,8 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
         if (k == "HTTP_HOST"u8) {
             continue;
         }
-        {
-            var (after, found) = strings.CutPrefix(k, httpˢ); if (found) {
-                r.Header.Add(strings.ReplaceAll(after, "_", "-"), v);
-            }
+        var (after, found) = strings.CutPrefix(k, httpˢ); if (found) {
+            r.Header.Add(strings.ReplaceAll(after, "_", "-"), v);
         }
     }
 
@@ -201,10 +193,8 @@ public static error Serve(httpꓸHandler handler) {
     ));
     handler.ServeHTTP(new responseжResponseWriter(rw), req);
     rw.Write(default); // make sure a response is sent
-    {
-        err = rw.bufw.Flush(); if (err != nil) {
-            return err;
-        }
+    err = rw.bufw.Flush(); if (err != nil) {
+        return err;
     }
     return default;
 }
@@ -256,10 +246,8 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufio_WriterжWriter(r.bufw), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    {
-        var (_, hasType) = r.header[contentTypeˢ2, ꟷ]; if (!hasType) {
-            r.header.Set(contentTypeˢ2, http.DetectContentType(p));
-        }
+    var (_, hasType) = r.header[contentTypeˢ2, ꟷ]; if (!hasType) {
+        r.header.Set(contentTypeˢ2, http.DetectContentType(p));
     }
     r.header.Write(new bufio_WriterжWriter(r.bufw));
     r.bufw.WriteString("\r\n");

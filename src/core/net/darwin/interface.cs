@@ -210,10 +210,8 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
         zc.lastFetched = now;
         if (len(ift) == 0) {
             error err = default;
-            {
-                (ift, err) = interfaceTable(0); if (err != nil) {
-                    updated = false; goto ᒐdone;
-                }
+            (ift, err) = interfaceTable(0); if (err != nil) {
+                updated = false; goto ᒐdone;
             }
         }
         zc.toIndex = new map<@string, nint>(len(ift));
@@ -221,10 +219,8 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
         foreach (var (_, ifi) in ift) {
             if (ifi.Name != ""u8) {
                 zc.toIndex[ifi.Name] = ifi.Index;
-                {
-                    var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {
-                        zc.toName[ifi.Index] = ifi.Name;
-                    }
+                var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {
+                    zc.toName[ifi.Index] = ifi.Name;
                 }
             }
         }

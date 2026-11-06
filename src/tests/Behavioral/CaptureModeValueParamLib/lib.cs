@@ -17,10 +17,8 @@ internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string
         ref var cfg = ref Ꮡcfg.DerefOrNull();
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    err = fmt.Errorf("panic: %v"u8, e);
-                }
+            var e = recover(); if (e != nil) {
+                err = fmt.Errorf("panic: %v"u8, e);
             }
         }, ref ᒐ);
         cfg.trace = fmt.Sprintf("%s|%s"u8, cfg.trace, label);

@@ -24,7 +24,7 @@ internal static void Main() {
 }
 
 internal static partial void child() {
-    goǃ(worker, GoStack.Bounded);
+    goǃ(worker);
     time.Sleep(time.ΔMinute);
 }
 
@@ -44,10 +44,8 @@ internal static void parent() {
     var err = cmd.Run();
 
     nint code = -1;
-    {
-        var (exit, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
-            code = exit.Value.ProcessState.ExitCode();
-        }
+    var (exit, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+        code = exit.Value.ProcessState.ExitCode();
     }
     fmt.Println("child exit code:", code);
 
@@ -76,15 +74,11 @@ internal static void parent() {
             fmt.Println(line);
             if (i + 1 < len(lines)) {
                 @string position = strings.TrimPrefix(lines[i + 1], "\t");
-                {
-                    nint space = strings.IndexByte(position, (byte)' '); if (space >= 0) {
-                        position = position.slice(0, space);
-                    }
+                nint space = strings.IndexByte(position, (byte)' '); if (space >= 0) {
+                    position = position.slice(0, space);
                 }
-                {
-                    nint colon = strings.LastIndexByte(position, (byte)':'); if (colon >= 0) {
-                        position = position.slice(0, colon);
-                    }
+                nint colon = strings.LastIndexByte(position, (byte)':'); if (colon >= 0) {
+                    position = position.slice(0, colon);
                 }
                 fmt.Println("created at file:", filepath.Base(position));
             }

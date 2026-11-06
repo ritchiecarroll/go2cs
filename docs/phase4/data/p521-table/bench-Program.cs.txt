@@ -1,0 +1,70 @@
+// Scratch instrument, never committed: times the converted P-521 operations through their public API.
+using System;
+using System.Diagnostics;
+using go;
+using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
+using nistec = go.crypto.@internal.fips140.nistec_package;
+using static go.crypto.@internal.fips140.nistec_package;
+using static go.crypto.@internal.fips140.nistec.fiat_package;
+
+static class P521Bench
+{
+    static double Run(string name, int iters, Action body, int rounds = 7)
+    {
+        body(); body();
+        var r = new double[rounds];
+        for (int k = 0; k < rounds; k++)
+        {
+            var sw = Stopwatch.StartNew();
+            for (int i = 0; i < iters; i++) body();
+            r[k] = sw.Elapsed.TotalNanoseconds / iters;
+        }
+        Array.Sort(r);
+        Console.WriteLine($"{name,-22} min {r[0],12:F1} ns  median {r[rounds / 2],12:F1} ns");
+        return r[rounds / 2];
+    }
+
+    static void Main(string[] args)
+    {
+        if (args.Length > 0 && args[0] == "proto") { Proto.Run(); return; }
+        Main2();
+    }
+
+    static void Main2()
+    {
+        // The first ScalarBaseMult builds the generator table: time it before anything else touches P-521 points.
+        var scalar = new byte[66]; scalar[65] = 7;
+        var sl = new slice<byte>(scalar);
+        long jt0 = (long)System.Runtime.JitInfo.GetCompilationTime(false).TotalMicroseconds;
+        var sw = Stopwatch.StartNew();
+        nistec.NewP521Point().ScalarBaseMult(sl);
+        double cold = sw.Elapsed.TotalMicroseconds;
+        long jt1 = (long)System.Runtime.JitInfo.GetCompilationTime(false).TotalMicroseconds;
+        sw.Restart();
+        nistec.NewP521Point().ScalarBaseMult(sl);
+        double warm = sw.Elapsed.TotalMicroseconds;
+        Console.WriteLine($"first_SBM_us {cold:F0} second_SBM_us {warm:F0} jit_in_first_us {jt1 - jt0}");
+
+        var x = builtin.@new<fiat.P521Element>().One();
+        Run("fiat Mul", 200_000, () => x.Mul(x, x));
+        Run("fiat Square", 200_000, () => x.Square(x));
+        Run("fiat Add", 200_000, () => x.Add(x, x));
+        Run("@new P521Element", 200_000, () => builtin.@new<fiat.P521Element>());
+        var g = nistec.NewP521Point().SetGenerator();
+        var q = nistec.NewP521Point().SetGenerator();
+        Run("NewP521Point", 100_000, () => nistec.NewP521Point());
+        Run("point Add", 20_000, () => q.Add(q, g));
+        Run("point Double", 20_000, () => q.Double(q));
+        Run("ScalarBaseMult", 200, () => nistec.NewP521Point().ScalarBaseMult(sl));
+        var x384 = builtin.@new<fiat.P384Element>().One();
+        Run("fiat P384 Mul", 200_000, () => x384.Mul(x384, x384));
+        Run("fiat P384 Square", 200_000, () => x384.Square(x384));
+        var s384 = new byte[48]; s384[47] = 7; var sl384 = new slice<byte>(s384);
+        long j0 = (long)System.Runtime.JitInfo.GetCompilationTime(false).TotalMicroseconds;
+        var sw384 = Stopwatch.StartNew(); nistec.NewP384Point().ScalarBaseMult(sl384); double c384 = sw384.Elapsed.TotalMicroseconds;
+        long j1 = (long)System.Runtime.JitInfo.GetCompilationTime(false).TotalMicroseconds;
+        Console.WriteLine($"P384 first_SBM_us {c384:F0} jit_us {j1 - j0}");
+        Run("P384 ScalarBaseMult", 200, () => nistec.NewP384Point().ScalarBaseMult(sl384));
+        Console.WriteLine($"gc0 {GC.CollectionCount(0)} gc1 {GC.CollectionCount(1)} gc2 {GC.CollectionCount(2)}");
+    }
+}

@@ -281,10 +281,8 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
         ᒐd1 = true;
 
         if (w.conn != nil) {
-            {
-                var (n, err) = w.write(pr, s); if (err == nil) {
-                    return (n, default);
-                }
+            var (n, err) = w.write(pr, s); if (err == nil) {
+                return (n, default);
             }
         }
         {

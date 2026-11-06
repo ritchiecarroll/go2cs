@@ -153,7 +153,9 @@ internal class InterfaceImplTemplate : TemplateBase
             string structPart = StructName.Split('<')[0].Replace("@", "");
             string interfacePart = GetSimpleName(InterfaceName).Replace("@", "");
 
-            return $"\r\n\r\ninternal static class {packagePart}{TempVarMarker}{structPart}{TempVarMarker}{interfacePart}{TempVarMarker}promoted\r\n{{{twins}\r\n}}";
+            string className = DeclareExtensionHost($"{packagePart}{TempVarMarker}{structPart}{TempVarMarker}{interfacePart}{TempVarMarker}promoted");
+
+            return $"\r\n\r\ninternal static class {className}\r\n{{{twins}\r\n}}";
         }
     }
 

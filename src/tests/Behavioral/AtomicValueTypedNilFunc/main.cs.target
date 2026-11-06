@@ -10,11 +10,9 @@ internal static void recovered(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: PANIC %v\n"u8, label, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, label, r);
+                return;
             }
             fmt.Printf("%s: ok\n"u8, label);
         }, ref ᒐ);
@@ -65,10 +63,8 @@ internal static void Main() {
 
     ref var v6 = ref heap(new atomic.Value(), out var Ꮡv6);
     Ꮡv6.Store(nint (nint fd) => fd * 2);
-    {
-        var (f, ok) = Ꮡv6.Load()._<Func<nint, nint>>(ᐧ); if (ok) {
-            fmt.Println("loaded and called:", f(21));
-        }
+    var (f, ok) = Ꮡv6.Load()._<Func<nint, nint>>(ᐧ); if (ok) {
+        fmt.Println("loaded and called:", f(21));
     }
 }
 

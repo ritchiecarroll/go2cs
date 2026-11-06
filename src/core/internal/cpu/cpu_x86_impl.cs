@@ -185,16 +185,18 @@ partial class cpu_package
 
     /// <summary>
     /// GolibTests' probe (InternalCpuGodebugTests): applies <paramref name="godebug"/> through
-    /// processOptions over doinit's option table exactly as start-up does off Windows, returns each
-    /// option's name and resulting flag, then restores the flags and the table.
+    /// processOptions over this process's doinit option table (x86's, or arm64's on an arm64 process:
+    /// cpu_arm64_impl.cs) exactly as start-up does off Windows, returns each option's name and
+    /// resulting flag, then restores the flags and the table.
     /// </summary>
     public static (string name, bool enabled)[] GoCpuOptionsProbe(string godebug)
     {
         X86ᴛ1 saved = X86;
+        ARM64ᴛ1 savedArm64 = ARM64;
 
         try
         {
-            registerX86Options();
+            registerProcessOptions();
             processOptions(godebug);
 
             (string, bool)[] result = new (string, bool)[len(options)];
@@ -207,7 +209,8 @@ partial class cpu_package
         finally
         {
             X86 = saved;
-            registerX86Options();
+            ARM64 = savedArm64;
+            registerProcessOptions();
         }
     }
 

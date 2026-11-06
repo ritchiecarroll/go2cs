@@ -36,6 +36,10 @@ using static global::go.math.rand_test_package;
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 [assembly: GoFieldAccess(typeof(statsResults))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("default_test.cs", 184, 5, 5)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

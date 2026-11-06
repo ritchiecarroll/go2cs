@@ -60,11 +60,9 @@ internal static (ж<netFD>, error) newFileFD(ж<os.File> f) {
     var laddr = fd.addrFunc()(lsa);
     var raddr = fd.addrFunc()(rsa);
     fd.net = laddr.Network();
-    {
-        var errΔ1 = fd.init(); if (errΔ1 != nil) {
-            fd.Close();
-            return (default, errΔ1);
-        }
+    var errΔ1 = fd.init(); if (errΔ1 != nil) {
+        fd.Close();
+        return (default, errΔ1);
     }
     fd.setAddr(laddr, raddr);
     return (fd, default);

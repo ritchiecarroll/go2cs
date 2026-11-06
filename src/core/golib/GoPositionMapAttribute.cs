@@ -100,6 +100,18 @@ namespace go;
 /// frame of its own, and the converter emits it as a block lambda whose first sequence point is the line
 /// below its <c>=&gt; {</c>.
 /// </para>
+/// <para>
+/// <paramref name="closures"/> is the DEFERRED-CLOSURE list, emitted only when the file defers a Go func literal
+/// directly (<c>defer func() { r := recover(); panic(r) }()</c>, emitted <c>defer(() =&gt; { … }, ref ᒐ)</c>): one
+/// <c>&lt;csLine&gt;:&lt;column&gt;</c> list, comma-joined, of each such literal's possible first sequence points, 1-based
+/// in UTF-16 units: a block body's <c>{</c>, where a Debug build puts it, and its first statement, where a Release build
+/// does, or the expression of a collapsed body, the same in both. A panic such a
+/// closure raises has no deferring frame of its own, so the deferring function's <c>GoFrame.Run</c> catches it
+/// first, exactly as it catches a panic a converter thunk raises; Go prints the closure's frame (<c>main.main.func1</c>)
+/// and elides the thunk. The list is what tells the two apart, so runtime.Callers and the crash traceback splice a
+/// closure's chain and still refuse a thunk's. A file without the list (an older artifact, or no symbol file to
+/// read a lambda's position from) keeps the refusal.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class GoPositionMapAttribute : Attribute
@@ -125,9 +137,18 @@ public sealed class GoPositionMapAttribute : Attribute
     }
 
     /// <summary>
-    /// Initializes a record carrying a thunk list.
+    /// Initializes a record carrying a thunk list and no deferred-closure list. Kept as its own constructor for
+    /// the same reason as the five-argument one.
     /// </summary>
     public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits, string methodValues, string calls, string thunks)
+        : this(goFile, csFile, table, funcLits, methodValues, calls, thunks, "")
+    {
+    }
+
+    /// <summary>
+    /// Initializes a record carrying a deferred-closure list.
+    /// </summary>
+    public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits, string methodValues, string calls, string thunks, string closures)
     {
         GoFile = goFile;
         CsFile = csFile;
@@ -136,6 +157,7 @@ public sealed class GoPositionMapAttribute : Attribute
         MethodValues = methodValues;
         Calls = calls;
         Thunks = thunks;
+        Closures = closures;
     }
 
     /// <summary>
@@ -175,4 +197,9 @@ public sealed class GoPositionMapAttribute : Attribute
     /// Gets the encoded thunk list, or an empty string when the file wraps no go or defer call in a thunk.
     /// </summary>
     public string Thunks { get; }
+
+    /// <summary>
+    /// Gets the encoded deferred-closure list, or an empty string when the file defers no Go func literal.
+    /// </summary>
+    public string Closures { get; }
 }

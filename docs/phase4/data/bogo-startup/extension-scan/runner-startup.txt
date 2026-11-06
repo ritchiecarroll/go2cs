@@ -1,0 +1,10 @@
+In-tree runner: PerformanceRunner --filter PerfStartup --no-aot --runs 24 (1 warm-up + 24), GoTargetOS=linux,
+GOFLAGS and GOMEMLIMIT unset, PerfStartup bin/obj purged before each round. Execution time is median wall ms;
+peak memory is working set MB. The runner has no ReadyToRun column; the R2R arm is in walls.tsv (measure r2r).
+
+| arm | commit | Go ms | C# JIT ms | Go MB | C# JIT MB |
+|:--|:--|--:|--:|--:|--:|
+| base | b0b48783dc | 1.9 | 445.9 | 0.8 | 79.4 |
+| a | 567025cae1 | 2.0 | 442.3 | 0.9 | 79.5 |
+| b | 3761a45377 | 1.9 | 438.3 | 0.9 | 79.5 |
+| c | 72c5159700 | 2.1 | 441.3 | 0.9 | 79.5 |

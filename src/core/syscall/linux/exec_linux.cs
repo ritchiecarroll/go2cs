@@ -160,10 +160,8 @@ internal static (nint pid, Errno err) forkAndExecInChild(ж<byte> argv0, slice<�
         // uid/gid mappings will be written after fork and unshare(2) for user
         // namespaces.
         if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) == 0) {
-            {
-                var errΔ1 = writeUidGidMappings(pid, ref sys); if (errΔ1 != nil) {
-                    err2 = errΔ1._<Errno>();
-                }
+            var errΔ1 = writeUidGidMappings(pid, ref sys); if (errΔ1 != nil) {
+                err2 = errΔ1._<Errno>();
             }
         }
         var ᴋ0 = @unsafe.Pointer.FromBox(Ꮡerr2);
@@ -318,11 +316,9 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     // Allocate another pipe for parent to child communication for
     // synchronizing writing of User ID/Group ID mappings.
     if (sys.UidMappings != nil || sys.GidMappings != nil) {
-        {
-            var err = forkExecPipe(mapPipe[..]); if (err != nil) {
-                err1 = err._<Errno>();
-                return (pid, pidfd, err1, mapPipe, locked);
-            }
+        var err = forkExecPipe(mapPipe[..]); if (err != nil) {
+            err1 = err._<Errno>();
+            return (pid, pidfd, err1, mapPipe, locked);
         }
     }
 
@@ -386,10 +382,8 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
 
     // Wait for User ID/Group ID mappings to be written.
     if (sys.UidMappings != nil || sys.GidMappings != nil) {
-        {
-            (_, _, err1) = RawSyscall(SYS_CLOSE, (uintptr)mapPipe[1], 0, 0); if (err1 != 0) {
-                goto childerror;
-            }
+        (_, _, err1) = RawSyscall(SYS_CLOSE, (uintptr)mapPipe[1], 0, 0); if (err1 != 0) {
+            goto childerror;
         }
         var ᴋ1 = @unsafe.Pointer.FromBox(Ꮡerr2);
                 (c, _, err1) = RawSyscall(SYS_READ, (uintptr)mapPipe[0], (uintptr)ᴋ1, /* unsafe.Sizeof(err2) */ (uintptr)8);
@@ -454,12 +448,10 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
 
         if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.GidMappings != nil) {
             dirfd = (nint)_AT_FDCWD;
-            {
-                var ᴋ3 = Ꮡ(psetgroups, 0);
-                                (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ3, (uintptr)O_WRONLY, 0, 0, 0);
-                System.GC.KeepAlive(ᴋ3); if (err1 != 0) {
-                    goto childerror;
-                }
+            var ᴋ3 = Ꮡ(psetgroups, 0);
+                        (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ3, (uintptr)O_WRONLY, 0, 0, 0);
+            System.GC.KeepAlive(ᴋ3); if (err1 != 0) {
+                goto childerror;
             }
             var ᴋ4 = Ꮡ(setgroups, 0);
                         (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ4, (uintptr)len(setgroups));
@@ -467,18 +459,14 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             if (err1 != 0) {
                 goto childerror;
             }
-            {
-                (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
-                    goto childerror;
-                }
+            (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
+                goto childerror;
             }
 
-            {
-                var ᴋ5 = Ꮡ(pgid, 0);
-                                (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ5, (uintptr)O_WRONLY, 0, 0, 0);
-                System.GC.KeepAlive(ᴋ5); if (err1 != 0) {
-                    goto childerror;
-                }
+            var ᴋ5 = Ꮡ(pgid, 0);
+                        (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ5, (uintptr)O_WRONLY, 0, 0, 0);
+            System.GC.KeepAlive(ᴋ5); if (err1 != 0) {
+                goto childerror;
             }
             var ᴋ6 = Ꮡ(gidmap, 0);
                         (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ6, (uintptr)len(gidmap));
@@ -486,21 +474,17 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             if (err1 != 0) {
                 goto childerror;
             }
-            {
-                (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
-                    goto childerror;
-                }
+            (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
+                goto childerror;
             }
         }
 
         if ((uintptr)(sys.Unshareflags & (uintptr)CLONE_NEWUSER) != 0 && sys.UidMappings != nil) {
             dirfd = (nint)_AT_FDCWD;
-            {
-                var ᴋ7 = Ꮡ(puid, 0);
-                                (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ7, (uintptr)O_WRONLY, 0, 0, 0);
-                System.GC.KeepAlive(ᴋ7); if (err1 != 0) {
-                    goto childerror;
-                }
+            var ᴋ7 = Ꮡ(puid, 0);
+                        (fd1, _, err1) = RawSyscall6(SYS_OPENAT, (uintptr)dirfd, (uintptr)ᴋ7, (uintptr)O_WRONLY, 0, 0, 0);
+            System.GC.KeepAlive(ᴋ7); if (err1 != 0) {
+                goto childerror;
             }
             var ᴋ8 = Ꮡ(uidmap, 0);
                         (_, _, err1) = RawSyscall(SYS_WRITE, fd1, (uintptr)ᴋ8, (uintptr)len(uidmap));
@@ -508,10 +492,8 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             if (err1 != 0) {
                 goto childerror;
             }
-            {
-                (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
-                    goto childerror;
-                }
+            (_, _, err1) = RawSyscall(SYS_CLOSE, fd1, 0, 0); if (err1 != 0) {
+                goto childerror;
             }
         }
 
@@ -545,27 +527,25 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     }
 
     // User and groups
-    {
-        cred = sys.Credential; if (cred != nil) {
-            ngroups = (uintptr)len((~cred).Groups);
-            groups = (uintptr)0;
-            if (ngroups > 0) {
-                groups = (uintptr)Ꮡ((~cred).Groups, 0);
-            }
-            if (!(sys.GidMappings != nil && !sys.GidMappingsEnableSetgroups && ngroups == 0) && !(~cred).NoSetGroups) {
-                (_, _, err1) = RawSyscall(_SYS_setgroups, ngroups, groups, 0);
-                if (err1 != 0) {
-                    goto childerror;
-                }
-            }
-            (_, _, err1) = RawSyscall(sys_SETGID, (uintptr)(~cred).Gid, 0, 0);
+    cred = sys.Credential; if (cred != nil) {
+        ngroups = (uintptr)len((~cred).Groups);
+        groups = (uintptr)0;
+        if (ngroups > 0) {
+            groups = (uintptr)Ꮡ((~cred).Groups, 0);
+        }
+        if (!(sys.GidMappings != nil && !sys.GidMappingsEnableSetgroups && ngroups == 0) && !(~cred).NoSetGroups) {
+            (_, _, err1) = RawSyscall(_SYS_setgroups, ngroups, groups, 0);
             if (err1 != 0) {
                 goto childerror;
             }
-            (_, _, err1) = RawSyscall(sys_SETUID, (uintptr)(~cred).Uid, 0, 0);
-            if (err1 != 0) {
-                goto childerror;
-            }
+        }
+        (_, _, err1) = RawSyscall(sys_SETGID, (uintptr)(~cred).Gid, 0, 0);
+        if (err1 != 0) {
+            goto childerror;
+        }
+        (_, _, err1) = RawSyscall(sys_SETUID, (uintptr)(~cred).Uid, 0, 0);
+        if (err1 != 0) {
+            goto childerror;
         }
     }
 
@@ -574,14 +554,12 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
         // so it is safe to always use _LINUX_CAPABILITY_VERSION_3.
         caps.hdr.version = _LINUX_CAPABILITY_VERSION_3;
 
-        {
-            var ᴋ12 = Ꮡcaps.Ꮡhdr;
-            var ᴋ13 = Ꮡcaps.at(syscall_package.caps.Ꮡdata, 0);
-                        (_, _, err1) = RawSyscall(SYS_CAPGET, (uintptr)ᴋ12, (uintptr)ᴋ13, 0);
-            System.GC.KeepAlive(ᴋ12);
-            System.GC.KeepAlive(ᴋ13); if (err1 != 0) {
-                goto childerror;
-            }
+        var ᴋ12 = Ꮡcaps.Ꮡhdr;
+        var ᴋ13 = Ꮡcaps.at(syscall_package.caps.Ꮡdata, 0);
+                (_, _, err1) = RawSyscall(SYS_CAPGET, (uintptr)ᴋ12, (uintptr)ᴋ13, 0);
+        System.GC.KeepAlive(ᴋ12);
+        System.GC.KeepAlive(ᴋ13); if (err1 != 0) {
+            goto childerror;
         }
 
         foreach (var (_, vᴛ1) in sys.AmbientCaps) {
@@ -593,14 +571,12 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             caps.data[capToIndex(c)].inheritable |= (uint32)(capToMask(c));
         }
 
-        {
-            var ᴋ14 = Ꮡcaps.Ꮡhdr;
-            var ᴋ15 = Ꮡcaps.at(syscall_package.caps.Ꮡdata, 0);
-                        (_, _, err1) = RawSyscall(SYS_CAPSET, (uintptr)ᴋ14, (uintptr)ᴋ15, 0);
-            System.GC.KeepAlive(ᴋ14);
-            System.GC.KeepAlive(ᴋ15); if (err1 != 0) {
-                goto childerror;
-            }
+        var ᴋ14 = Ꮡcaps.Ꮡhdr;
+        var ᴋ15 = Ꮡcaps.at(syscall_package.caps.Ꮡdata, 0);
+                (_, _, err1) = RawSyscall(SYS_CAPSET, (uintptr)ᴋ14, (uintptr)ᴋ15, 0);
+        System.GC.KeepAlive(ᴋ14);
+        System.GC.KeepAlive(ᴋ15); if (err1 != 0) {
+            goto childerror;
         }
 
         foreach (var (_, vᴛ2) in sys.AmbientCaps) {
@@ -780,17 +756,13 @@ internal static error writeIDMappings(@string path, slice<SysProcIDMap> idMap) {
         return err;
     }
 
-    {
-        var (_, errΔ1) = Write(fd, formatIDMappings(idMap)); if (errΔ1 != nil) {
-            Close(fd);
-            return errΔ1;
-        }
+    var (_, errΔ1) = Write(fd, formatIDMappings(idMap)); if (errΔ1 != nil) {
+        Close(fd);
+        return errΔ1;
     }
 
-    {
-        var errΔ2 = Close(fd); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = Close(fd); if (errΔ2 != nil) {
+        return errΔ2;
     }
 
     return default;
@@ -814,11 +786,9 @@ internal static error writeSetgroups(nint pid, bool enable) {
         data = slice<byte>("deny"u8);
     }
 
-    {
-        var (_, errΔ1) = Write(fd, data); if (errΔ1 != nil) {
-            Close(fd);
-            return errΔ1;
-        }
+    var (_, errΔ1) = Write(fd, data); if (errΔ1 != nil) {
+        Close(fd);
+        return errΔ1;
     }
 
     return Close(fd);
@@ -829,10 +799,8 @@ internal static error writeSetgroups(nint pid, bool enable) {
 internal static error writeUidGidMappings(nint pid, ref SysProcAttr sys) {
     if (sys.UidMappings != nil) {
         @string uidf = "/proc/"u8 + strconv.Itoa(pid) + "/uid_map"u8;
-        {
-            var err = writeIDMappings(uidf, sys.UidMappings); if (err != nil) {
-                return err;
-            }
+        var err = writeIDMappings(uidf, sys.UidMappings); if (err != nil) {
+            return err;
         }
     }
 

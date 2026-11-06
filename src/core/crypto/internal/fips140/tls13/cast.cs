@@ -31,10 +31,8 @@ partial class tls13_package {
         var ms = hs.MasterSecret();
         var transcript = sha256.New();
         transcript.Write(input);
-        {
-            var got = ms.ResumptionMasterSecret(new sha256_DigestжHash(transcript)); if (!bytes.Equal(got, want)) {
-                return errors.New("unexpected result");
-            }
+        var got = ms.ResumptionMasterSecret(new sha256_DigestжHash(transcript)); if (!bytes.Equal(got, want)) {
+            return errors.New("unexpected result");
         }
         return default;
     });

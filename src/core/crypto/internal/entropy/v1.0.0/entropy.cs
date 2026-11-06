@@ -43,10 +43,8 @@ public static (array<byte>, error) Seed(ж<ScratchBuffer> memory) {
     // bits of entropy, for a total of hᵢₙ = w × h = 512 bits of entropy, over
     // nᵢₙ = w × n = 8192 bits of input data.
     ref var samples = ref heap(new array<byte>(1024), out var Ꮡsamples);
-    {
-        var err = Samples(samples[..], memory); if (err != nil) {
-            return (new byte[]{}.array(48), err);
-        }
+    var err = Samples(samples[..], memory); if (err != nil) {
+        return (new byte[]{}.array(48), err);
     }
 
     // Use a vetted unkeyed conditioning component, SHA-384, with nw = 384 and

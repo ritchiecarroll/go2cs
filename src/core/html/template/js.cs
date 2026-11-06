@@ -42,81 +42,79 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     }
 
     // All cases below are in the single-byte UTF-8 group.
-    {
-        var c = s[len(s) - 1];
-        nint n = len(s);
-        switch (c) {
-        case (byte)'+' or (byte)'-': {
-            // ++ and -- are not regexp preceders, but + and - are whether
-            // they are used as infix or prefix operators.
-            nint start = n - 1;
-            // Count the number of adjacent dashes or pluses.
-            while (start > 0 && s[start - 1] == c) {
-                start--;
-            }
-            if (((n - start) & 1) == 1) {
-                // Reached for trailing minus signs since "---" is the
-                // same as "-- -".
-                return jsCtxRegexp;
-            }
+    var c = s[len(s) - 1];
+    nint n = len(s);
+    switch (c) {
+    case (byte)'+' or (byte)'-': {
+        // ++ and -- are not regexp preceders, but + and - are whether
+        // they are used as infix or prefix operators.
+        nint start = n - 1;
+        // Count the number of adjacent dashes or pluses.
+        while (start > 0 && s[start - 1] == c) {
+            start--;
+        }
+        if (((n - start) & 1) == 1) {
+            // Reached for trailing minus signs since "---" is the
+            // same as "-- -".
+            return jsCtxRegexp;
+        }
+        return jsCtxDivOp;
+    }
+    case (byte)'.': {
+        // Handle "42."
+        if (n != 1 && '0' <= s[n - 2] && s[n - 2] <= '9') {
             return jsCtxDivOp;
         }
-        case (byte)'.': {
-            // Handle "42."
-            if (n != 1 && '0' <= s[n - 2] && s[n - 2] <= '9') {
-                return jsCtxDivOp;
-            }
-            return jsCtxRegexp;
-        }
-        // Suffixes for all punctuators from section 7.7 of the language spec
-        // that only end binary operators not handled above.
-        case (byte)',' or (byte)'<' or (byte)'>' or (byte)'=' or (byte)'*' or (byte)'%' or (byte)'&' or (byte)'|' or (byte)'^' or (byte)'?': {
-            return jsCtxRegexp;
-        }
-        // Suffixes for all punctuators from section 7.7 of the language spec
-        // that are prefix operators not handled above.
-        case (byte)'!' or (byte)'~': {
-            return jsCtxRegexp;
-        }
-        // Matches all the punctuators from section 7.7 of the language spec
-        // that are open brackets not handled above.
-        case (byte)'(' or (byte)'[': {
-            return jsCtxRegexp;
-        }
-        // Matches all the punctuators from section 7.7 of the language spec
-        // that precede expression starts.
-        case (byte)':' or (byte)';' or (byte)'{': {
-            return jsCtxRegexp;
-        }
-        // CAVEAT: the close punctuators ('}', ']', ')') precede div ops and
-        // are handled in the default except for '}' which can precede a
-        // division op as in
-        //    ({ valueOf: function () { return 42 } } / 2
-        // which is valid, but, in practice, developers don't divide object
-        // literals, so our heuristic works well for code like
-        //    function () { ... }  /foo/.test(x) && sideEffect();
-        // The ')' punctuator can precede a regular expression as in
-        //     if (b) /foo/.test(x) && ...
-        // but this is much less likely than
-        //     (a + b) / c
-        case (byte)'}': {
-            return jsCtxRegexp;
-        }
-        default: {
-            // Look for an IdentifierName and see if it is a keyword that
-            // can precede a regular expression.
-            nint j = n;
-            while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
-                j--;
-            }
-            // An IdentifierName after a property-access dot is a property name,
-            // which precedes a div op.
-            if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
-                return jsCtxRegexp;
-            }
-            break;
-        }}
+        return jsCtxRegexp;
     }
+    // Suffixes for all punctuators from section 7.7 of the language spec
+    // that only end binary operators not handled above.
+    case (byte)',' or (byte)'<' or (byte)'>' or (byte)'=' or (byte)'*' or (byte)'%' or (byte)'&' or (byte)'|' or (byte)'^' or (byte)'?': {
+        return jsCtxRegexp;
+    }
+    // Suffixes for all punctuators from section 7.7 of the language spec
+    // that are prefix operators not handled above.
+    case (byte)'!' or (byte)'~': {
+        return jsCtxRegexp;
+    }
+    // Matches all the punctuators from section 7.7 of the language spec
+    // that are open brackets not handled above.
+    case (byte)'(' or (byte)'[': {
+        return jsCtxRegexp;
+    }
+    // Matches all the punctuators from section 7.7 of the language spec
+    // that precede expression starts.
+    case (byte)':' or (byte)';' or (byte)'{': {
+        return jsCtxRegexp;
+    }
+    // CAVEAT: the close punctuators ('}', ']', ')') precede div ops and
+    // are handled in the default except for '}' which can precede a
+    // division op as in
+    //    ({ valueOf: function () { return 42 } } / 2
+    // which is valid, but, in practice, developers don't divide object
+    // literals, so our heuristic works well for code like
+    //    function () { ... }  /foo/.test(x) && sideEffect();
+    // The ')' punctuator can precede a regular expression as in
+    //     if (b) /foo/.test(x) && ...
+    // but this is much less likely than
+    //     (a + b) / c
+    case (byte)'}': {
+        return jsCtxRegexp;
+    }
+    default: {
+        // Look for an IdentifierName and see if it is a keyword that
+        // can precede a regular expression.
+        nint j = n;
+        while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
+            j--;
+        }
+        // An IdentifierName after a property-access dot is a property name,
+        // which precedes a div op.
+        if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
+            return jsCtxRegexp;
+        }
+        break;
+    }}
     // Otherwise is a punctuator not listed above, or
     // a string which precedes a div op, or an identifier
     // which precedes a div op.

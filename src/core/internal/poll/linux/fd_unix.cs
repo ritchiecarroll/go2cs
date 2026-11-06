@@ -123,10 +123,8 @@ public static error SetBlocking(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         // Atomic store so that concurrent calls to SetBlocking
@@ -180,10 +178,8 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) {
             if (err != nil) {
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -202,10 +198,8 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     // Call incref, not readLock, because since pread specifies the
     // offset it is independent from other reads.
     // Similarly, using the poller doesn't make sense for pread.
-    {
-        var errΔ1 = Ꮡfd.incref(); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡfd.incref(); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     if (fd.IsStream && len(p) > maxRW) {
         p = p[..(int)(maxRW)];
@@ -246,10 +240,8 @@ public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slic
                 }
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -287,10 +279,8 @@ public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<�
                 }
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -328,10 +318,8 @@ public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<�
                 }
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -369,10 +357,8 @@ public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> 
                 }
                 // TODO(dfc) should n and oobn be set to 0
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -410,10 +396,8 @@ public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<by
                 }
                 // TODO(dfc) should n and oobn be set to 0
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -451,10 +435,8 @@ public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<by
                 }
                 // TODO(dfc) should n and oobn be set to 0
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -506,10 +488,8 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
                 return (nn, err);
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -592,10 +572,8 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δ
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -632,10 +610,8 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δ
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -672,10 +648,8 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -712,10 +686,8 @@ public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, sli
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -752,10 +724,8 @@ public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -792,10 +762,8 @@ public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p
                 continue;
             }
             if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                {
-                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                        continue;
-                    }
+                err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                    continue;
                 }
             }
             if (err != nil) {
@@ -839,10 +807,8 @@ public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡf
             }
             case var ᴛ when AreEqual(ᴛ, Δsyscall.EAGAIN): {
                 if (fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
                 break;
@@ -866,10 +832,8 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Fchmod(Ꮡfd.Value.Sysfd, mode));
@@ -883,10 +847,8 @@ public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Fstat(Ꮡfd.Value.Sysfd, s));
@@ -932,10 +894,8 @@ public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return (-1, "", err);
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return (-1, "", err);
         }
         ᒐd1 = true;
         return DupCloseOnExec(fd.Sysfd);
@@ -958,10 +918,8 @@ public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.writeLock(); if (err != nil) {
-                return (0, err);
-            }
+        var err = Ꮡfd.writeLock(); if (err != nil) {
+            return (0, err);
         }
         ᒐd1 = true;
         return ignoringEINTRIO(Δsyscall.Write, fd.Sysfd, p);
@@ -992,10 +950,8 @@ public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
             if (f((uintptr)fd.Sysfd)) {
                 return default;
             }
-            {
-                var err = fd.pd.waitRead(fd.isFile); if (err != nil) {
-                    return err;
-                }
+            var err = fd.pd.waitRead(fd.isFile); if (err != nil) {
+                return err;
             }
         }
     }
@@ -1025,10 +981,8 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
             if (f((uintptr)fd.Sysfd)) {
                 return default;
             }
-            {
-                var err = fd.pd.waitWrite(fd.isFile); if (err != nil) {
-                    return err;
-                }
+            var err = fd.pd.waitWrite(fd.isFile); if (err != nil) {
+                return err;
             }
         }
     }

@@ -215,7 +215,9 @@ converted program (`-p:PublishProfile=linux-x64` and the others) set
 `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`, so a profile publish keeps ReadyToRun and is not
 affected. A program converted by a go2cs earlier than 1.26.10.2 has profiles that turn ReadyToRun off instead,
 since go2cs never overwrites a profile; replace their `<PublishReadyToRun>false</PublishReadyToRun>` with that
-line to get ReadyToRun's faster start back. On the command line, turn the composite image off yourself:
+line to get ReadyToRun's faster start back. A converted program's project carries the same line, so a plain
+single-file publish is not affected either. A project converted by an earlier go2cs does not; on its command line,
+turn the composite image off yourself:
 
 ```
 dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRunComposite=false

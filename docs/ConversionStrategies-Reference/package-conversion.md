@@ -498,7 +498,7 @@ src/core/internal/goos/darwin/…
 
 Such a package's `.csproj` gains exactly two blocks — the selector, and the include that reads it:
 
-<!-- source: src/core/internal/goos/internal.goos.csproj:170-172 -->
+<!-- source: src/core/internal/goos/internal.goos.csproj:172-174 -->
 ```xml
 <PropertyGroup Condition="'$(GoTargetOS)'==''">
   <GoTargetOS>windows</GoTargetOS>
@@ -1071,7 +1071,7 @@ import (
 )
 type fsOnly struct{ fs.FS }
 ```
-<!-- source: src/core/testing/fstest/mapfs.cs:7, 221 -->
+<!-- source: src/core/testing/fstest/mapfs.cs:7, 219 -->
 ```csharp
 using fs = go.io.fs_package;
 …
@@ -1438,7 +1438,7 @@ The remedy is one hook, seeded into `package_test_info.cs`'s anchor class by
 `referenceModelTestPackageInfoSeed`, using the same `RunModuleConstructor` mechanism as the import
 hooks:
 
-<!-- source: src/core/net/http/pprof/package_test_info.cs:59-61, 95-102 -->
+<!-- source: src/core/net/http/pprof/package_test_info.cs:63-106 -->
 ```csharp
 [GoPackage("pprof")]
 public static partial class pprof_internal_test_package

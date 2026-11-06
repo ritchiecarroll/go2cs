@@ -208,12 +208,10 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Add buffering if r does not provide ReadByte.
-    {
-        var (rr, ok) = r._<reader>(ᐧ); if (ok) {
-            d.r = rr;
-        } else {
-            d.r = new bufio_Readerжreader(bufio.NewReader(r));
-        }
+    var (rr, ok) = r._<reader>(ᐧ); if (ok) {
+        d.r = rr;
+    } else {
+        d.r = new bufio_Readerжreader(bufio.NewReader(r));
     }
 
     d.loopCount = -1;
@@ -233,18 +231,14 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
         }
         switch (c) {
         case var ᴛ when ᴛ == sExtension: {
-            {
-                errΔ1 = d.readExtension(); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            errΔ1 = d.readExtension(); if (errΔ1 != nil) {
+                return errΔ1;
             }
             break;
         }
         case var ᴛ when ᴛ == sImageDescriptor: {
-            {
-                errΔ1 = Ꮡd.readImageDescriptor(keepAllFrames); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            errΔ1 = Ꮡd.readImageDescriptor(keepAllFrames); if (errΔ1 != nil) {
+                return errΔ1;
             }
 
             if (!keepAllFrames && len(d.image) == 1) {
@@ -275,15 +269,11 @@ internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     }
     d.width = (nint)d.tmp[6] + ((nint)d.tmp[7] << 8);
     d.height = (nint)d.tmp[8] + ((nint)d.tmp[9] << 8);
-    {
-        var fields = d.tmp[10]; if ((byte)(fields & (byte)fColorTable) != 0) {
-            d.backgroundIndex = d.tmp[11];
-            // readColorTable overwrites the contents of d.tmp, but that's OK.
-            {
-                (d.globalColorTable, err) = d.readColorTable(fields); if (err != nil) {
-                    return err;
-                }
-            }
+    var fields = d.tmp[10]; if ((byte)(fields & (byte)fColorTable) != 0) {
+        d.backgroundIndex = d.tmp[11];
+        // readColorTable overwrites the contents of d.tmp, but that's OK.
+        (d.globalColorTable, err) = d.readColorTable(fields); if (err != nil) {
+            return err;
         }
     }
     // d.tmp[12] is the Pixel Aspect Ratio, which is ignored.
@@ -336,10 +326,8 @@ internal static error readExtension(this ref decoder d) {
         return fmt.Errorf("gif: unknown extension 0x%.2x"u8, extension);
     }}
     if (size > 0) {
-        {
-            var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != nil) {
-                return fmt.Errorf("gif: reading extension: %v"u8, errΔ3);
-            }
+        var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != nil) {
+            return fmt.Errorf("gif: reading extension: %v"u8, errΔ3);
         }
     }
 
@@ -369,10 +357,8 @@ internal static error readExtension(this ref decoder d) {
 }
 
 internal static error readGraphicControl(this ref decoder d) {
-    {
-        var err = readFull(d.r, d.tmp[..6]); if (err != nil) {
-            return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
-        }
+    var err = readFull(d.r, d.tmp[..6]); if (err != nil) {
+        return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
     }
     if (d.tmp[0] != 4) {
         return fmt.Errorf("gif: invalid graphic control extension block size: %d"u8, d.tmp[0]);
@@ -420,21 +406,19 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 // Clone the global color table.
                 m.Palette = appendꓸꓸꓸ((Δcolor.Palette)default, d.globalColorTable);
             }
-            {
-                nint ti = (nint)d.transparentIndex; if (ti < len(m.Palette)) {
-                    m.Palette[ti] = new colorꓸRGBA();
-                } else {
-                    // The transparentIndex is out of range, which is an error
-                    // according to the spec, but Firefox and Google Chrome
-                    // seem OK with this, so we enlarge the palette with
-                    // transparent colors. See golang.org/issue/15059.
-                    var p = new Δcolor.Palette(ti + 1);
-                    copy(p, m.Palette);
-                    for (nint i = len(m.Palette); i < len(p); i++) {
-                        p[i] = new colorꓸRGBA();
-                    }
-                    m.Palette = p;
+            nint ti = (nint)d.transparentIndex; if (ti < len(m.Palette)) {
+                m.Palette[ti] = new colorꓸRGBA();
+            } else {
+                // The transparentIndex is out of range, which is an error
+                // according to the spec, but Firefox and Google Chrome
+                // seem OK with this, so we enlarge the palette with
+                // transparent colors. See golang.org/issue/15059.
+                var p = new Δcolor.Palette(ti + 1);
+                copy(p, m.Palette);
+                for (nint i = len(m.Palette); i < len(p); i++) {
+                    p[i] = new colorꓸRGBA();
                 }
+                m.Palette = p;
             }
         }
         (var litWidth, err) = readByte(d.r);
@@ -449,13 +433,11 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         var lzwr = lzw.NewReader(new blockReaderжReader(br), lzw.LSB, (nint)litWidth);
         var lzwrʗ1 = lzwr;
         defer(() => lzwrʗ1.Close(), ref ᒐ);
-        {
-            err = readFull(lzwr, m.Pix); if (err != nil) {
-                if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-                    return fmt.Errorf("gif: reading image data: %v"u8, err);
-                }
-                return errNotEnough;
+        err = readFull(lzwr, m.Pix); if (err != nil) {
+            if (!AreEqual(err, io.ErrUnexpectedEOF)) {
+                return fmt.Errorf("gif: reading image data: %v"u8, err);
             }
+            return errNotEnough;
         }
         // In theory, both lzwr and br should be exhausted. Reading from them
         // should yield (0, io.EOF).
@@ -468,23 +450,19 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         // before the LZW decoder saw an explicit end code), provided that
         // the io.ReadFull call above successfully read len(m.Pix) bytes.
         // See https://golang.org/issue/9856 for an example GIF.
-        {
-            var (n, errΔ1) = lzwr.Read(d.tmp[256..257]); if (n != 0 || (!AreEqual(errΔ1, io.EOF) && !AreEqual(errΔ1, io.ErrUnexpectedEOF))) {
-                if (errΔ1 != nil) {
-                    return fmt.Errorf("gif: reading image data: %v"u8, errΔ1);
-                }
-                return errTooMuch;
+        var (n, errΔ1) = lzwr.Read(d.tmp[256..257]); if (n != 0 || (!AreEqual(errΔ1, io.EOF) && !AreEqual(errΔ1, io.ErrUnexpectedEOF))) {
+            if (errΔ1 != nil) {
+                return fmt.Errorf("gif: reading image data: %v"u8, errΔ1);
             }
+            return errTooMuch;
         }
 
         // In practice, some GIFs have an extra byte in the data sub-block
         // stream, which we ignore. See https://golang.org/issue/16146.
-        {
-            var errΔ2 = br.close(); if (AreEqual(errΔ2, errTooMuch)) {
-                return errTooMuch;
-            } else if (errΔ2 != nil) {
-                return fmt.Errorf("gif: reading image data: %v"u8, errΔ2);
-            }
+        var errΔ2 = br.close(); if (AreEqual(errΔ2, errTooMuch)) {
+            return errTooMuch;
+        } else if (errΔ2 != nil) {
+            return fmt.Errorf("gif: reading image data: %v"u8, errΔ2);
         }
 
         // Check that the color indexes are inside the palette.
@@ -522,10 +500,8 @@ internal static ref readonly @string gifFrameBoundsLargerThanˢ => ref gifFrameB
 private static readonly @string gifFrameBoundsLargerThanˢᵇ = "gif: frame bounds larger than image bounds"u8;
 
 internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) {
-    {
-        var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
-            return (default, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
-        }
+    var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
+        return (default, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
     }
     nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << 8);
     nint top = (nint)d.tmp[2] + ((nint)d.tmp[3] << 8);
@@ -563,10 +539,8 @@ internal static (nint, error) readBlock(this ref decoder d) {
     if (n == 0 || err != nil) {
         return (0, err);
     }
-    {
-        var errΔ1 = readFull(d.r, d.tmp.slice(0, n)); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = readFull(d.r, d.tmp.slice(0, n)); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     return ((nint)n, default);
 }
@@ -608,10 +582,8 @@ internal static void uninterlace(ж<image.Paletted> Ꮡm) {
 // image as an [image.Image].
 public static (image.Image, error) Decode(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
-    {
-        var err = Ꮡd.decode(r, false, false); if (err != nil) {
-            return (default, err);
-        }
+    var err = Ꮡd.decode(r, false, false); if (err != nil) {
+        return (default, err);
     }
     return (new image.PalettedжImage(d.image[0]), default);
 }
@@ -650,10 +622,8 @@ partial struct GIF {
 // and timing information.
 public static (ж<GIF>, error) DecodeAll(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
-    {
-        var err = Ꮡd.decode(r, false, true); if (err != nil) {
-            return (default, err);
-        }
+    var err = Ꮡd.decode(r, false, true); if (err != nil) {
+        return (default, err);
     }
     var gif = Ꮡ(new GIF(
         Image: d.image,
@@ -674,10 +644,8 @@ public static (ж<GIF>, error) DecodeAll(io.Reader r) {
 // without decoding the entire image.
 public static (image.Config, error) DecodeConfig(io.Reader r) {
     ref var d = ref heap(new decoder(), out var Ꮡd);
-    {
-        var err = Ꮡd.decode(r, true, false); if (err != nil) {
-            return (new image.Config(), err);
-        }
+    var err = Ꮡd.decode(r, true, false); if (err != nil) {
+        return (new image.Config(), err);
     }
     return (new image.Config(
         ColorModel: d.globalColorTable,

@@ -63,14 +63,10 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             // multipartfiles.IncNonDefault() // TODO: uncomment after documenting
         }
         nint maxParts = 1000;
-        {
-            @string s = multipartmaxparts.Value(); if (s != ""u8) {
-                {
-                    var (v, errΔ1) = strconv.Atoi(s); if (errΔ1 == nil && v >= 0) {
-                        maxParts = v;
-                        multipartmaxparts.IncNonDefault();
-                    }
-                }
+        @string s = multipartmaxparts.Value(); if (s != ""u8) {
+            var (v, errΔ1) = strconv.Atoi(s); if (errΔ1 == nil && v >= 0) {
+                maxParts = v;
+                multipartmaxparts.IncNonDefault();
             }
         }
         var maxHeaders = maxMIMEHeaders();
@@ -78,10 +74,8 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         var formʗ1 = form;
         defer(() => {
             if (Ꮡfile.ValueSlot != nil) {
-                {
-                    var cerr = Ꮡfile.ValueSlot.Close(); if (err == nil) {
-                        err = cerr;
-                    }
+                var cerr = Ꮡfile.ValueSlot.Close(); if (err == nil) {
+                    err = cerr;
                 }
             }
             if (combineFiles && numDiskFiles > 1) {
@@ -198,10 +192,8 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                     }
                 }
                 numDiskFiles++;
-                {
-                    var (_, errΔ4) = @file.Write(b.Bytes()); if (errΔ4 != nil) {
-                        (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
-                    }
+                var (_, errΔ4) = @file.Write(b.Bytes()); if (errΔ4 != nil) {
+                    (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
                 }
                 if (copyBuf == nil) {
                     copyBuf = new slice<byte>(32 * 1024); // same buffer size as io.Copy uses
@@ -215,10 +207,8 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                 fh.tmpoff = fileOff;
                 fileOff += fh.Size;
                 if (!combineFiles) {
-                    {
-                        var errΔ6 = @file.Close(); if (errΔ6 != nil) {
-                            (_ᴛ1, err) = (default, errΔ6); goto ᒐdone;
-                        }
+                    var errΔ6 = @file.Close(); if (errΔ6 != nil) {
+                        (_ᴛ1, err) = (default, errΔ6); goto ᒐdone;
                     }
                     @file = default;
                 }
@@ -291,11 +281,9 @@ partial struct FileHeader {
 
 // Open opens and returns the [FileHeader]'s associated File.
 public static (File, error) Open(this ref FileHeader fh) {
-    {
-        var b = fh.content; if (b != nil) {
-            var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
-            return (new sectionReadCloser(r, default), default);
-        }
+    var b = fh.content; if (b != nil) {
+        var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
+        return (new sectionReadCloser(r, default), default);
     }
     if (fh.tmpshared) {
         var (f, err) = os.Open(fh.tmpfile);

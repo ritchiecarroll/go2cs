@@ -108,14 +108,12 @@ internal static void init(this ref machine m, nint ncap) {
 // It uses the free pool if possible.
 internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) {
     ж<thread> t = default;
-    {
-        nint n = len(m.pool); if (n > 0) {
-            t = m.pool[n - 1];
-            m.pool = m.pool.slice(0, n - 1);
-        } else {
-            t = @new<thread>();
-            t.cap = new slice<nint>(len(m.matchcap), cap(m.matchcap));
-        }
+    nint n = len(m.pool); if (n > 0) {
+        t = m.pool[n - 1];
+        m.pool = m.pool.slice(0, n - 1);
+    } else {
+        t = @new<thread>();
+        t.cap = new slice<nint>(len(m.matchcap), cap(m.matchcap));
     }
     t.inst = i;
     return t;
@@ -346,10 +344,8 @@ Again:
     if (pc == 0) {
         return Ꮡt;
     }
-    {
-        var jΔ1 = q.sparse[pc]; if (jΔ1 < (uint32)len(q.dense) && q.dense[jΔ1].pc == pc) {
-            return Ꮡt;
-        }
+    var jΔ1 = q.sparse[pc]; if (jΔ1 < (uint32)len(q.dense) && q.dense[jΔ1].pc == pc) {
+        return Ꮡt;
     }
 
     nint j = len(q.dense);

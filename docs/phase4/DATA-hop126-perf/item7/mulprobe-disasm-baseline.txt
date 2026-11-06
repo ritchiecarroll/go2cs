@@ -1,0 +1,86 @@
+# dumpbin /disasm of mulprobe.exe, default instruction set (ILC 10.0.11, SDK 10.0.400); the four spelling bodies, then the fallback they call
+mulprobe_P__A_BigMulOut:
+  0000000140035290: 48 83 EC 28        sub         rsp,28h
+  0000000140035294: E8 97 F4 FC FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  000000014003529A: 48 83 C4 28        add         rsp,28h
+  000000014003529E: C3                 ret
+mulprobe_P__B_BigMul128:
+  00000001400352A0: 53                 push        rbx
+  00000001400352A1: 48 83 EC 30        sub         rsp,30h
+  00000001400352A5: 48 8B D9           mov         rbx,rcx
+  00000001400352A8: 49 8B C0           mov         rax,r8
+  00000001400352AB: 4C 8D 44 24 28     lea         r8,[rsp+28h]
+  00000001400352B0: 48 8B CA           mov         rcx,rdx
+  00000001400352B3: 48 8B D0           mov         rdx,rax
+  00000001400352B6: E8 75 F4 FC FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  00000001400352BB: 48 8B 4C 24 28     mov         rcx,qword ptr [rsp+28h]
+  00000001400352C0: 48 89 0B           mov         qword ptr [rbx],rcx
+  00000001400352C3: 48 89 43 08        mov         qword ptr [rbx+8],rax
+  00000001400352C7: 48 8B C3           mov         rax,rbx
+  00000001400352CA: 48 83 C4 30        add         rsp,30h
+  00000001400352CE: 5B                 pop         rbx
+  00000001400352CF: C3                 ret
+mulprobe_P__C_Widen:
+  00000001400352D0: 53                 push        rbx
+  00000001400352D1: 48 83 EC 30        sub         rsp,30h
+  00000001400352D5: 48 8B D9           mov         rbx,rcx
+  00000001400352D8: 49 8B C0           mov         rax,r8
+  00000001400352DB: 4C 8D 44 24 28     lea         r8,[rsp+28h]
+  00000001400352E0: 48 8B CA           mov         rcx,rdx
+  00000001400352E3: 48 8B D0           mov         rdx,rax
+  00000001400352E6: E8 45 F4 FC FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  00000001400352EB: 48 8B 4C 24 28     mov         rcx,qword ptr [rsp+28h]
+  00000001400352F0: 48 89 0B           mov         qword ptr [rbx],rcx
+  00000001400352F3: 48 89 43 08        mov         qword ptr [rbx+8],rax
+  00000001400352F7: 48 8B C3           mov         rax,rbx
+  00000001400352FA: 48 83 C4 30        add         rsp,30h
+  00000001400352FE: 5B                 pop         rbx
+  00000001400352FF: C3                 ret
+mulprobe_P__D_WidenSplit:
+  0000000140035300: 53                 push        rbx
+  0000000140035301: 48 83 EC 50        sub         rsp,50h
+  0000000140035305: 33 C0              xor         eax,eax
+  0000000140035307: 48 89 44 24 38     mov         qword ptr [rsp+38h],rax
+  000000014003530C: 49 8B D8           mov         rbx,r8
+  000000014003530F: 4C 8D 44 24 38     lea         r8,[rsp+38h]
+  0000000140035314: E8 17 F4 FC FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  0000000140035319: 48 8B 54 24 38     mov         rdx,qword ptr [rsp+38h]
+  000000014003531E: 48 89 13           mov         qword ptr [rbx],rdx
+  0000000140035321: 48 89 54 24 28     mov         qword ptr [rsp+28h],rdx
+  0000000140035326: 48 89 44 24 30     mov         qword ptr [rsp+30h],rax
+  000000014003532B: 48 8D 54 24 28     lea         rdx,[rsp+28h]
+  0000000140035330: 48 8D 4C 24 40     lea         rcx,[rsp+40h]
+  0000000140035335: 41 B8 40 00 00 00  mov         r8d,40h
+  000000014003533B: E8 40 90 FD FF     call        S_P_CoreLib_System_UInt128__op_UnsignedRightShift
+  0000000140035340: 48 8B 44 24 40     mov         rax,qword ptr [rsp+40h]
+  0000000140035345: 48 83 C4 50        add         rsp,50h
+  0000000140035349: 5B                 pop         rbx
+  000000014003534A: C3                 ret
+S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0:
+  0000000140004730: 48 8B C1           mov         rax,rcx
+  0000000140004733: 48 C1 E8 20        shr         rax,20h
+  0000000140004737: 44 8B D2           mov         r10d,edx
+  000000014000473A: 48 C1 EA 20        shr         rdx,20h
+  000000014000473E: 8B C9              mov         ecx,ecx
+  0000000140004740: 4C 8B C9           mov         r9,rcx
+  0000000140004743: 4D 0F AF CA        imul        r9,r10
+  0000000140004747: 8B C0              mov         eax,eax
+  0000000140004749: 4C 0F AF D0        imul        r10,rax
+  000000014000474D: 4D 8B D9           mov         r11,r9
+  0000000140004750: 49 C1 EB 20        shr         r11,20h
+  0000000140004754: 4D 03 D3           add         r10,r11
+  0000000140004757: 8B D2              mov         edx,edx
+  0000000140004759: 48 0F AF CA        imul        rcx,rdx
+  000000014000475D: 45 8B DA           mov         r11d,r10d
+  0000000140004760: 49 03 CB           add         rcx,r11
+  0000000140004763: 4C 8B D9           mov         r11,rcx
+  0000000140004766: 49 C1 E3 20        shl         r11,20h
+  000000014000476A: 45 8B C9           mov         r9d,r9d
+  000000014000476D: 4D 0B CB           or          r9,r11
+  0000000140004770: 4D 89 08           mov         qword ptr [r8],r9
+  0000000140004773: 48 0F AF C2        imul        rax,rdx
+  0000000140004777: 49 C1 EA 20        shr         r10,20h
+  000000014000477B: 49 03 C2           add         rax,r10
+  000000014000477E: 48 C1 E9 20        shr         rcx,20h
+  0000000140004782: 48 03 C1           add         rax,rcx
+  0000000140004785: C3                 ret

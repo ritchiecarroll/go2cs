@@ -149,27 +149,25 @@ public static @string Error(this HostnameError h) {
     }
 
     ref var valid = ref heap(new strings.Builder(), out var Ꮡvalid);
-    {
-        var ip = net.ParseIP(h.Host); if (ip != nil) {
-            // Trying to validate an IP
-            if (builtin.len(c.IPAddresses) == 0) {
-                return "x509: cannot validate certificate for "u8 + h.Host + " because it doesn't contain any IP SANs"u8;
-            }
-            if (builtin.len(c.IPAddresses) >= maxNamesIncluded) {
-                return fmt.Sprintf("x509: certificate is valid for %d IP SANs, but none matched %s"u8, builtin.len(c.IPAddresses), h.Host);
-            }
-            foreach (var (_, san) in c.IPAddresses) {
-                if (valid.Len() > 0) {
-                    Ꮡvalid.WriteString(", ");
-                }
-                Ꮡvalid.WriteString(san.String());
-            }
-        } else {
-            if (builtin.len(c.DNSNames) >= maxNamesIncluded) {
-                return fmt.Sprintf("x509: certificate is valid for %d names, but none matched %s"u8, builtin.len(c.DNSNames), h.Host);
-            }
-            Ꮡvalid.WriteString(strings.Join(c.DNSNames, ", "));
+    var ip = net.ParseIP(h.Host); if (ip != nil) {
+        // Trying to validate an IP
+        if (builtin.len(c.IPAddresses) == 0) {
+            return "x509: cannot validate certificate for "u8 + h.Host + " because it doesn't contain any IP SANs"u8;
         }
+        if (builtin.len(c.IPAddresses) >= maxNamesIncluded) {
+            return fmt.Sprintf("x509: certificate is valid for %d IP SANs, but none matched %s"u8, builtin.len(c.IPAddresses), h.Host);
+        }
+        foreach (var (_, san) in c.IPAddresses) {
+            if (valid.Len() > 0) {
+                Ꮡvalid.WriteString(", ");
+            }
+            Ꮡvalid.WriteString(san.String());
+        }
+    } else {
+        if (builtin.len(c.DNSNames) >= maxNamesIncluded) {
+            return fmt.Sprintf("x509: certificate is valid for %d names, but none matched %s"u8, builtin.len(c.DNSNames), h.Host);
+        }
+        Ꮡvalid.WriteString(strings.Join(c.DNSNames, ", "));
     }
 
     if (valid.Len() == 0) {
@@ -415,10 +413,8 @@ break_NextChar:;
     // The RFC species a format for domains, but that's known to be
     // violated in practice so we accept that anything after an '@' is the
     // domain part.
-    {
-        var (_, okΔ1) = domainToReverseLabels(@in); if (!okΔ1) {
-            return (mailbox, false);
-        }
+    var (_, okΔ1) = domainToReverseLabels(@in); if (!okΔ1) {
+        return (mailbox, false);
     }
 
     mailbox.local = (@string)localPartBytes;
@@ -433,18 +429,16 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
 
     reverseLabels = new slice<@string>(0, strings.Count(domain, ".") + 1);
     while (builtin.len(domain) > 0) {
-        {
-            nint i = strings.LastIndexByte(domain, (byte)'.'); if (i == -1) {
-                reverseLabels = append(reverseLabels, domain);
-                domain = ""u8;
-            } else {
-                reverseLabels = append(reverseLabels, domain.slice(i + 1));
-                domain = domain.slice(0, i);
-                if (i == 0) { // domain == ""
-                    // domain is prefixed with an empty label, append an empty
-                    // string to reverseLabels to indicate this.
-                    reverseLabels = append(reverseLabels, ""u8);
-                }
+        nint i = strings.LastIndexByte(domain, (byte)'.'); if (i == -1) {
+            reverseLabels = append(reverseLabels, domain);
+            domain = ""u8;
+        } else {
+            reverseLabels = append(reverseLabels, domain.slice(i + 1));
+            domain = domain.slice(0, i);
+            if (i == 0) { // domain == ""
+                // domain is prefixed with an empty label, append an empty
+                // string to reverseLabels to indicate this.
+                reverseLabels = append(reverseLabels, ""u8);
             }
         }
     }
@@ -674,13 +668,11 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
             incompatibleKeyUsageChains++;
             return true;
         }
-        {
-            var errΔ3 = checkChainConstraints(chain); if (errΔ3 != nil) {
-                if (ᏑconstraintsHintErr.ValueSlot == nil) {
-                    ᏑconstraintsHintErr.ValueSlot = new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, errΔ3.Error());
-                }
-                return true;
+        var errΔ3 = checkChainConstraints(chain); if (errΔ3 != nil) {
+            if (ᏑconstraintsHintErr.ValueSlot == nil) {
+                ᏑconstraintsHintErr.ValueSlot = new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, errΔ3.Error());
             }
+            return true;
         }
         if (containsDistrustedSPKIHash(chain)) {
             return true;
@@ -805,14 +797,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(th
             return;
         }
 
-        {
-            var errΔ1 = Ꮡc.Value.CheckSignatureFrom(candidate.cert); if (errΔ1 != nil) {
-                if (ᏑhintErr.ValueSlot == nil) {
-                    ᏑhintErr.ValueSlot = errΔ1;
-                    ᏑhintCert.ValueSlot = candidate.cert;
-                }
-                return;
+        var errΔ1 = Ꮡc.Value.CheckSignatureFrom(candidate.cert); if (errΔ1 != nil) {
+            if (ᏑhintErr.ValueSlot == nil) {
+                ᏑhintErr.ValueSlot = errΔ1;
+                ᏑhintCert.ValueSlot = candidate.cert;
             }
+            return;
         }
 
         err = candidate.cert.isValid(certType, currentChainʗ1, Ꮡopts);
@@ -825,14 +815,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(th
         }
 
         if (candidate.constraint != nil) {
-            {
-                var errΔ2 = candidate.constraint(currentChainʗ1); if (errΔ2 != nil) {
-                    if (ᏑhintErr.ValueSlot == nil) {
-                        ᏑhintErr.ValueSlot = errΔ2;
-                        ᏑhintCert.ValueSlot = candidate.cert;
-                    }
-                    return;
+            var errΔ2 = candidate.constraint(currentChainʗ1); if (errΔ2 != nil) {
+                if (ᏑhintErr.ValueSlot == nil) {
+                    ᏑhintErr.ValueSlot = errΔ2;
+                    ᏑhintCert.ValueSlot = candidate.cert;
                 }
+                return;
             }
         }
 
@@ -1015,17 +1003,15 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
     if (builtin.len(h) >= 3 && h[0] == '[' && h[builtin.len(h) - 1] == ']') {
         candidateIP = h.slice(1, builtin.len(h) - 1);
     }
-    {
-        var ip = net.ParseIP(candidateIP); if (ip != nil) {
-            // We only match IP addresses against IP SANs.
-            // See RFC 6125, Appendix B.2.
-            foreach (var (_, candidate) in c.IPAddresses) {
-                if (ip.Equal(candidate)) {
-                    return default;
-                }
+    var ip = net.ParseIP(candidateIP); if (ip != nil) {
+        // We only match IP addresses against IP SANs.
+        // See RFC 6125, Appendix B.2.
+        foreach (var (_, candidate) in c.IPAddresses) {
+            if (ip.Equal(candidate)) {
+                return default;
             }
-            return new HostnameError(Ꮡc, candidateIP);
         }
+        return new HostnameError(Ꮡc, candidateIP);
     }
 
     @string candidateName = toLowerCaseASCII(h); // Save allocations inside the loop.
@@ -1340,10 +1326,8 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                 var parents = pg.parentsWithExpected(policy);
                 if (builtin.len(parents) == 0) {
                     // 6.1.3 (d) (1) (ii) -- as updated by RFC 9618
-                    {
-                        var anyParent = pg.parentWithAnyPolicy(); if (anyParent != nil) {
-                            parents = slice<ж<policyGraphNode>>([anyParent]);
-                        }
+                    var anyParent = pg.parentWithAnyPolicy(); if (anyParent != nil) {
+                        parents = slice<ж<policyGraphNode>>([anyParent]);
                     }
                 }
                 if (builtin.len(parents) > 0) {
@@ -1399,17 +1383,13 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 
                     foreach (var (issuerStr, subjectPolicies) in mappings) {
                         // 6.1.4 (b) (1) -- as updated by RFC 9618
-                        {
-                            var matching = pg.leafWithPolicy(new ΔOID(der: slice<byte>(issuerStr))); if (matching != nil) {
-                                matching.expectedPolicySet = subjectPolicies;
-                            } else {
-                                var matchingΔ1 = pg.leafWithPolicy(anyPolicyOID); if (matchingΔ1 != nil) {
-                                    // 6.1.4 (b) (2) -- as updated by RFC 9618
-                                    var nΔ1 = newPolicyGraphNode(new ΔOID(der: slice<byte>(issuerStr)), slice<ж<policyGraphNode>>([matchingΔ1]));
-                                    nΔ1.expectedPolicySet = subjectPolicies;
-                                    pg.insert(nΔ1);
-                                }
-                            }
+                        var matching = pg.leafWithPolicy(new ΔOID(der: slice<byte>(issuerStr))); if (matching != nil) {
+                            matching.expectedPolicySet = subjectPolicies;
+                        } else if (pg.leafWithPolicy(anyPolicyOID) is var matchingΔ1 && matchingΔ1 != nil) {
+                            // 6.1.4 (b) (2) -- as updated by RFC 9618
+                            var nΔ1 = newPolicyGraphNode(new ΔOID(der: slice<byte>(issuerStr)), slice<ж<policyGraphNode>>([matchingΔ1]));
+                            nΔ1.expectedPolicySet = subjectPolicies;
+                            pg.insert(nΔ1);
                         }
                     }
                 }
@@ -1460,10 +1440,8 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     if (pg != nil) {
         validPolicyNodeSet = pg.validPolicyNodes();
         // 6.1.5 (g) (3) -- as updated by RFC 9618
-        {
-            var currentAny = pg.leafWithPolicy(anyPolicyOID); if (currentAny != nil) {
-                validPolicyNodeSet = append(validPolicyNodeSetᴷ, validPolicyNodeSet, currentAny);
-            }
+        var currentAny = pg.leafWithPolicy(anyPolicyOID); if (currentAny != nil) {
+            validPolicyNodeSet = append(validPolicyNodeSetᴷ, validPolicyNodeSet, currentAny);
         }
     }
 
@@ -1516,10 +1494,8 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 internal static bool containsDistrustedSPKIHash(slice<ж<Certificate>> chain) {
     foreach (var (_, c) in chain) {
         var h = sha256.Sum256(c.RawSubjectPublicKeyInfo);
-        {
-            var (_, ok) = distrustedSPKIHashes[hex.EncodeToString(h[..]), ꟷ]; if (ok) {
-                return true;
-            }
+        var (_, ok) = distrustedSPKIHashes[hex.EncodeToString(h[..]), ꟷ]; if (ok) {
+            return true;
         }
     }
     return false;

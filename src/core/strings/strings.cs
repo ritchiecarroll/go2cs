@@ -182,10 +182,8 @@ next:
 fallback:
         if (haveFastIndex) {
             // see comment in ../bytes/bytes.go
-            {
-                nint j = bytealg.IndexString(s.slice(i - last), (@string)r); if (j >= 0) {
-                    return i + j - last;
-                }
+            nint j = bytealg.IndexString(s.slice(i - last), (@string)r); if (j >= 0) {
+                return i + j - last;
             }
         } else {
             var c0 = rs[last];
@@ -224,15 +222,13 @@ public static nint IndexAny(@string s, @string chars) {
         return IndexRune(s, r);
     }
     if (len(s) > 8) {
-        {
-            var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
-                for (nint i = 0; i < len(s); i++) {
-                    if (@as.contains(s[i])) {
-                        return i;
-                    }
+        var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
+            for (nint i = 0; i < len(s); i++) {
+                if (@as.contains(s[i])) {
+                    return i;
                 }
-                return -1;
             }
+            return -1;
         }
     }
     foreach (var (i, c) in s) {
@@ -262,15 +258,13 @@ public static nint LastIndexAny(@string s, @string chars) {
         return -1;
     }
     if (len(s) > 8) {
-        {
-            var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
-                for (nint i = len(s) - 1; i >= 0; i--) {
-                    if (@as.contains(s[i])) {
-                        return i;
-                    }
+        var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
+            for (nint i = len(s) - 1; i >= 0; i--) {
+                if (@as.contains(s[i])) {
+                    return i;
                 }
-                return -1;
             }
+            return -1;
         }
     }
     if (len(chars) == 1) {
@@ -1018,11 +1012,9 @@ public static @string Trim(@string s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimLeftByte(trimRightByte(s, cutset[0]), cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimLeftASCII(trimRightASCII(s, Ꮡas), Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimLeftASCII(trimRightASCII(s, Ꮡas), Ꮡas);
     }
     return trimLeftUnicode(trimRightUnicode(s, cutset), cutset);
 }
@@ -1038,11 +1030,9 @@ public static @string TrimLeft(@string s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimLeftByte(s, cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimLeftASCII(s, Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimLeftASCII(s, Ꮡas);
     }
     return trimLeftUnicode(s, cutset);
 }
@@ -1088,11 +1078,9 @@ public static @string TrimRight(@string s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimRightByte(s, cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimRightASCII(s, Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimRightASCII(s, Ꮡas);
     }
     return trimRightUnicode(s, cutset);
 }
@@ -1187,12 +1175,10 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
     }
 
     // Compute number of replacements.
-    {
-        nint m = Count(s, old); if (m == 0) {
-            return s; // avoid allocation
-        } else if (n < 0 || m < n) {
-            n = m;
-        }
+    nint m = Count(s, old); if (m == 0) {
+        return s; // avoid allocation
+    } else if (n < 0 || m < n) {
+        n = m;
     }
 
     // Apply replacements to buffer.

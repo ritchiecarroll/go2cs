@@ -50,10 +50,8 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             // what appendLocsForStack expects.
             if (hideRuntime) {
                 foreach (var (i, addr) in stk) {
-                    {
-                        var f = runtime.FuncForPC(addr); if (f != nil && (strings_package.HasPrefix(f.Name(), runtimeˢ) || strings_package.HasPrefix(f.Name(), internalRuntimeˢ))) {
-                            continue;
-                        }
+                    var f = runtime.FuncForPC(addr); if (f != nil && (strings_package.HasPrefix(f.Name(), runtimeˢ) || strings_package.HasPrefix(f.Name(), internalRuntimeˢ))) {
+                        continue;
                     }
                     // Found non-runtime. Show any runtime uses above it.
                     stk = stk.slice(i);

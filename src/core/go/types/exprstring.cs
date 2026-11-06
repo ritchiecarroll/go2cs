@@ -255,11 +255,9 @@ internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>
         writeIdentList(Ꮡbuf, f.Names);
 
         // types of interface methods consist of signatures only
-        {
-            var (sig, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (sig != nil && iface) {
-                writeSigExpr(Ꮡbuf, ref (sig).DerefOrNull());
-                continue;
-            }
+        var (sig, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (sig != nil && iface) {
+            writeSigExpr(Ꮡbuf, ref (sig).DerefOrNull());
+            continue;
         }
 
         // named fields are separated with a blank from the field type

@@ -54,28 +54,22 @@ public static Interface Logger() {
 
 // Getenv calls Logger().Getenv, if a logger has been set.
 public static void Getenv(@string name) {
-    {
-        var log = Logger(); if (log != nil) {
-            log.Getenv(name);
-        }
+    var log = Logger(); if (log != nil) {
+        log.Getenv(name);
     }
 }
 
 // Open calls Logger().Open, if a logger has been set.
 public static void Open(@string name) {
-    {
-        var log = Logger(); if (log != nil) {
-            log.Open(name);
-        }
+    var log = Logger(); if (log != nil) {
+        log.Open(name);
     }
 }
 
 // Stat calls Logger().Stat, if a logger has been set.
 public static void Stat(@string name) {
-    {
-        var log = Logger(); if (log != nil) {
-            log.Stat(name);
-        }
+    var log = Logger(); if (log != nil) {
+        log.Stat(name);
     }
 }
 

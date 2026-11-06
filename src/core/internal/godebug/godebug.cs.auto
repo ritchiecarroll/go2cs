@@ -268,10 +268,8 @@ internal static void update(@string def, @string env) {
         var did = new map<@string, bool>();
         var didʗ1 = did;
         Ꮡcache.Range((any name, any s) => {
-            {
-                var info = s._<ж<setting>>().Value.info; if (info != nil && info.Immutable) {
-                    didʗ1[name._<@string>()] = true;
-                }
+            var info = s._<ж<setting>>().Value.info; if (info != nil && info.Immutable) {
+                didʗ1[name._<@string>()] = true;
             }
             return true;
         });

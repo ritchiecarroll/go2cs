@@ -70,7 +70,7 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_other_x86.go", "cpu_other_x86.cs", "AAgSgg==")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_x86.go", "cpu_x86.cs", "AAwaggAyZoSUlIKmgpSCgoKCgoKCgoKClKSClJSUpriUgqaCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgoKCgqaCgqaCgoKUgoKCyoI=")]
-[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/parse.go", "parse.cs", "AAkcAAsEgoKCuIKCgoKCpoKClICCpICCpII=", "23-34:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/parse.go", "parse.cs", "AAkcAAsEgoKCuIKCgoKCpoKClIKUgpSC", "23-34:1")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/runtime_auxv.go", "runtime_auxv.cs", "AAsWgoKU")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/runtime_auxv_go121.go", "runtime_auxv_go121.cs", "AAocpII=")]
 // </GoSourcePositionMaps>

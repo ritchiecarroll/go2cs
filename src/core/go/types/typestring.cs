@@ -150,11 +150,9 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             // exported basic types go into package unsafe
             // (currently this is just unsafe.Pointer)
             if (isExported(t.name)) {
-                {
-                    var (obj, _) = Unsafe.scope.Lookup(t.name)._<ж<TypeName>>(ᐧ); if (obj != nil) {
-                        w.typeName(obj);
-                        break;
-                    }
+                var (obj, _) = Unsafe.scope.Lookup(t.name)._<ж<TypeName>>(ᐧ); if (obj != nil) {
+                    w.typeName(obj);
+                    break;
                 }
             }
             w.@string(t.name);
@@ -201,14 +199,12 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                     w.@string(f.pkg.Path());
                     w.@string(" */ ");
                 }
-                {
-                    @string tag = t.Tag(i); if (tag != ""u8) {
-                        w.@byte((byte)' ');
-                        // TODO(gri) If tag contains blanks, replacing them with '#'
-                        //           in Context.TypeHash may produce another tag
-                        //           accidentally.
-                        w.@string(strconv.Quote(tag));
-                    }
+                @string tag = t.Tag(i); if (tag != ""u8) {
+                    w.@byte((byte)' ');
+                    // TODO(gri) If tag contains blanks, replacing them with '#'
+                    //           in Context.TypeHash may produce another tag
+                    //           accidentally.
+                    w.@string(strconv.Quote(tag));
                 }
             }
             w.@byte((byte)'}');
@@ -308,10 +304,8 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             case var ᴛ when ᴛ == SendRecv: {
                 s = chanˢ3;
                 // chan (<-chan T) requires parentheses
-                {
-                    var (c, _) = t.elem._<ж<Chan>>(ᐧ); if (c != nil && c.dir == RecvOnly) {
-                        parens = true;
-                    }
+                var (c, _) = t.elem._<ж<Chan>>(ᐧ); if (c != nil && c.dir == RecvOnly) {
+                    parens = true;
                 }
                 break;
             }
@@ -388,14 +382,12 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
         }
         case ж<Alias> t: {
             w.typeName(t.obj);
-            {
-                var list = t.targs.list(); if (len(list) != 0) {
-                    // instantiated type
-                    Ꮡw.typeList(list);
-                } else if (w.ctxt == nil && t.TypeParams().Len() != 0) { // For type hashing, don't need to format the TypeParams
-                    // parameterized type
-                    Ꮡw.tParamList(t.TypeParams().list());
-                }
+            var list = t.targs.list(); if (len(list) != 0) {
+                // instantiated type
+                Ꮡw.typeList(list);
+            } else if (w.ctxt == nil && t.TypeParams().Len() != 0) { // For type hashing, don't need to format the TypeParams
+                // parameterized type
+                Ꮡw.tParamList(t.TypeParams().list());
             }
             if (w.ctxt != nil) {
                 // TODO(gri) do we need to print the alias type name, too?
@@ -532,23 +524,21 @@ internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool vari
             }
             var typ = v.typ;
             if (variadic && i == len(tup.vars) - 1) {
-                {
-                    var (Δslice, ok) = typ._<ж<Slice>>(ᐧ); if (ok) {
-                        w.@string("...");
-                        Ꮡw.typ(Δslice.elem);
-                    } else {
-                        // append(slice, str...) entails various special
-                        // cases, especially in conjunction with generics.
-                        // str may be:
-                        // - a string,
-                        // - a TypeParam whose typeset includes string, or
-                        // - a named []byte slice type B resulting from
-                        //   a client instantiating append([]byte, T) at T=B.
-                        // For such cases we use the irregular notation
-                        // func([]byte, T...), with the dots after the type.
-                        Ꮡw.typ(typ);
-                        w.@string("...");
-                    }
+                var (Δslice, ok) = typ._<ж<Slice>>(ᐧ); if (ok) {
+                    w.@string("...");
+                    Ꮡw.typ(Δslice.elem);
+                } else {
+                    // append(slice, str...) entails various special
+                    // cases, especially in conjunction with generics.
+                    // str may be:
+                    // - a string,
+                    // - a TypeParam whose typeset includes string, or
+                    // - a named []byte slice type B resulting from
+                    //   a client instantiating append([]byte, T) at T=B.
+                    // For such cases we use the irregular notation
+                    // func([]byte, T...), with the dots after the type.
+                    Ꮡw.typ(typ);
+                    w.@string("...");
                 }
             } else {
                 Ꮡw.typ(typ);

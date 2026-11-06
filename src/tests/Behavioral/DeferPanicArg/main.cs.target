@@ -59,12 +59,10 @@ internal static void pointerValue() {
     try {
         defer(() => {
             var r = recover();
-            {
-                var (e, ok) = r._<ж<myErr>>(ᐧ); if (ok) {
-                    fmt.Println("pointerValue recovered typed:", e.msg);
-                } else {
-                    fmt.Println("pointerValue recovered UNTYPED:", r);
-                }
+            var (e, ok) = r._<ж<myErr>>(ᐧ); if (ok) {
+                fmt.Println("pointerValue recovered typed:", e.msg);
+            } else {
+                fmt.Println("pointerValue recovered UNTYPED:", r);
             }
         }, ref ᒐ);
         var p = Ꮡ(new myErr(msg: "boxed"));

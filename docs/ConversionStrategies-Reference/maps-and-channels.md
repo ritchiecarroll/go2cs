@@ -421,7 +421,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11, 49-51 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11, 47-49 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
 …
@@ -861,7 +861,7 @@ local's form). A plain `out var result` in the comm-clause label would leave `�
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
-<!-- source: src/core/internal/fuzz/fuzz.cs:267-268 -->
+<!-- source: src/core/internal/fuzz/fuzz.cs:265-266 -->
 ```csharp
 case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);

@@ -216,11 +216,9 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
     acquireForkLock();
 
     // Allocate child status pipe close on exec.
-    {
-        err = forkExecPipe(p[..]); if (err != nil) {
-            releaseForkLock();
-            return (0, err);
-        }
+    err = forkExecPipe(p[..]); if (err != nil) {
+        releaseForkLock();
+        return (0, err);
     }
 
     // Kick off child.

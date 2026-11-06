@@ -29,10 +29,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -151,10 +149,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -167,10 +163,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -192,10 +186,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -314,10 +306,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -330,10 +320,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -355,10 +343,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -477,10 +463,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -493,10 +477,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -518,10 +500,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -640,10 +620,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -656,10 +634,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -681,10 +657,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -803,10 +777,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -819,10 +791,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -844,10 +814,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -966,10 +934,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -982,10 +948,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1007,10 +971,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1129,10 +1091,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1145,10 +1105,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1170,10 +1128,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1292,10 +1248,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1308,10 +1262,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1333,10 +1285,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1455,10 +1405,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1471,10 +1419,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1496,10 +1442,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1618,10 +1562,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1634,10 +1576,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1659,10 +1599,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1781,10 +1719,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1797,10 +1733,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1822,10 +1756,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1944,10 +1876,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -1960,10 +1890,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -1985,10 +1913,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2107,10 +2033,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2123,10 +2047,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2148,10 +2070,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2270,10 +2190,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2286,10 +2204,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2311,10 +2227,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2433,10 +2347,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2449,10 +2361,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2474,10 +2384,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2596,10 +2504,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2612,10 +2518,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2637,10 +2541,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2759,10 +2661,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2775,10 +2675,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2800,10 +2698,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -2922,10 +2818,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -2938,10 +2832,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -2963,10 +2855,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3085,10 +2975,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3101,10 +2989,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3126,10 +3012,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3248,10 +3132,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3264,10 +3146,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3289,10 +3169,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3411,10 +3289,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3427,10 +3303,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3452,10 +3326,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3574,10 +3446,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3590,10 +3460,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3615,10 +3483,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3737,10 +3603,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3753,10 +3617,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3778,10 +3640,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -3900,10 +3760,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -3916,10 +3774,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -3941,10 +3797,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4063,10 +3917,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -4079,10 +3931,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4104,10 +3954,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4226,10 +4074,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -4242,10 +4088,8 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4270,10 +4114,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4316,10 +4158,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -4380,10 +4220,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -4395,10 +4233,8 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4423,10 +4259,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4469,10 +4303,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -4533,10 +4365,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -4548,10 +4378,8 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4576,10 +4404,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4622,10 +4448,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -4686,10 +4510,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -4701,10 +4523,8 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4729,10 +4549,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4775,10 +4593,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -4839,10 +4655,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -4854,10 +4668,8 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -4882,10 +4694,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -4928,10 +4738,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -4992,10 +4800,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5007,10 +4813,8 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5035,10 +4839,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5081,10 +4883,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5145,10 +4945,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5160,10 +4958,8 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5188,10 +4984,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5234,10 +5028,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5298,10 +5090,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5313,10 +5103,8 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5341,10 +5129,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5387,10 +5173,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5451,10 +5235,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5466,10 +5248,8 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5494,10 +5274,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5540,10 +5318,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5604,10 +5380,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5619,10 +5393,8 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> typ, b
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5647,10 +5419,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5693,10 +5463,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5757,10 +5525,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5772,10 +5538,8 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5800,10 +5564,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5846,10 +5608,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -5910,10 +5670,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -5925,10 +5683,8 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -5953,10 +5709,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -5999,10 +5753,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -6063,10 +5815,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -6078,10 +5828,8 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6106,10 +5854,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6152,10 +5898,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -6216,10 +5960,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -6231,10 +5973,8 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6259,10 +5999,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6305,10 +6043,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -6369,10 +6105,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -6384,10 +6118,8 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6412,10 +6144,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6458,10 +6188,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
             }
 
             if (gcBlackenEnabled != 0 && elemsizeΔ1 != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsizeΔ1 - size);
                 }
             }
 
@@ -6522,10 +6250,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -6537,10 +6263,8 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> typ, 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6560,10 +6284,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6602,10 +6324,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -6655,10 +6375,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -6671,10 +6389,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6694,10 +6410,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6736,10 +6450,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -6789,10 +6501,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -6805,10 +6515,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6828,10 +6536,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -6870,10 +6576,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -6923,10 +6627,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -6939,10 +6641,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -6962,10 +6662,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7004,10 +6702,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7057,10 +6753,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7073,10 +6767,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7096,10 +6788,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7138,10 +6828,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7191,10 +6879,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7207,10 +6893,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7230,10 +6914,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7272,10 +6954,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7325,10 +7005,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7341,10 +7019,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7364,10 +7040,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7406,10 +7080,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7459,10 +7131,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7475,10 +7145,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7498,10 +7166,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> t
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7540,10 +7206,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> t
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7593,10 +7257,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> t
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7609,10 +7271,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> t
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7632,10 +7292,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7674,10 +7332,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7727,10 +7383,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7743,10 +7397,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7766,10 +7418,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7808,10 +7458,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7861,10 +7509,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -7877,10 +7523,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -7900,10 +7544,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -7942,10 +7584,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -7995,10 +7635,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8011,10 +7649,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8034,10 +7670,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8076,10 +7710,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8129,10 +7761,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8145,10 +7775,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8168,10 +7796,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8210,10 +7836,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8263,10 +7887,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8279,10 +7901,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8302,10 +7922,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8344,10 +7962,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8397,10 +8013,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8413,10 +8027,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8436,10 +8048,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8478,10 +8088,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8531,10 +8139,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8547,10 +8153,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8570,10 +8174,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8612,10 +8214,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8665,10 +8265,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8681,10 +8279,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8704,10 +8300,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8746,10 +8340,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8799,10 +8391,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8815,10 +8405,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8838,10 +8426,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -8880,10 +8466,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -8933,10 +8517,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -8949,10 +8531,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -8972,10 +8552,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9014,10 +8592,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9067,10 +8643,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9083,10 +8657,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9106,10 +8678,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9148,10 +8718,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9201,10 +8769,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9217,10 +8783,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9240,10 +8804,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9282,10 +8844,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9335,10 +8895,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9351,10 +8909,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9374,10 +8930,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9416,10 +8970,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9469,10 +9021,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9485,10 +9035,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9508,10 +9056,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9550,10 +9096,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9603,10 +9147,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9619,10 +9161,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9642,10 +9182,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9684,10 +9222,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9737,10 +9273,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9753,10 +9287,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 
@@ -9776,10 +9308,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
     lockRankMayQueueFinalizer();
 
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -9818,10 +9348,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
             }
 
             if (gcBlackenEnabled != 0 && elemsize != 0) {
-                {
-                    var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                        assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-                    }
+                var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+                    assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
                 }
             }
 
@@ -9871,10 +9399,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     var gp = getg();
@@ -9887,10 +9413,8 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
     }
 
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)((uintptr)elemsize - size);
         }
     }
 

@@ -162,10 +162,8 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
 
             // Report overlapping (non-disjoint) terms such as
             // a|a, a|~a, ~a|~a, and ~a|A (where under(A) == a).
-            {
-                nint j = overlappingTerm(termsʗ1.slice(0, i), t); if (j >= 0) {
-                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "overlapping terms %s and %s", t.OrTypedNil(), termsʗ1[j].OrTypedNil());
-                }
+            nint j = overlappingTerm(termsʗ1.slice(0, i), t); if (j >= 0) {
+                Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "overlapping terms %s and %s", t.OrTypedNil(), termsʗ1[j].OrTypedNil());
             }
         }
     }).describef(new ast_Exprᴠpositioner(uexpr), "check term validity %s", uexpr);
@@ -182,11 +180,9 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
 
     var x = tx;
     bool tilde = default;
-    {
-        var (op, _) = x._<ж<ast.UnaryExpr>>(ᐧ); if (op != nil && op.Op == token.TILDE) {
-            x = op.X;
-            tilde = true;
-        }
+    var (op, _) = x._<ж<ast.UnaryExpr>>(ᐧ); if (op != nil && op.Op == token.TILDE) {
+        x = op.X;
+        tilde = true;
     }
     var typ = Ꮡcheck.typ(x);
     // Embedding stand-alone type parameters is not permitted (go.dev/issue/47127).
@@ -241,12 +237,10 @@ internal static (slice<ast.Expr> blist, slice<ast.Expr> tlist) flattenUnion(slic
     slice<ast.Expr> blist = default;
     slice<ast.Expr> tlist = default;
 
-    {
-        var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && o.Op == token.OR) {
-            (blist, tlist) = flattenUnion(list, o.X);
-            blist = append(blist, (ast.Expr)(new ast.BinaryExprжExpr(o)));
-            x = o.Y;
-        }
+    var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && o.Op == token.OR) {
+        (blist, tlist) = flattenUnion(list, o.X);
+        blist = append(blist, (ast.Expr)(new ast.BinaryExprжExpr(o)));
+        x = o.Y;
     }
     return (blist, append(tlist, x));
 }

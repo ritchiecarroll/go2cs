@@ -599,7 +599,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				} else if fileEntry.manualConversion {
 					// The `.cs.auto` review sibling follows its hand-owned `.cs` into whichever
 					// folder layout L3 put that file in, so the pair stays together.
-					outputFileName = platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName+".cs") + ".auto"
+					outputFileName = reviewSiblingLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName)
 				} else {
 					outputFileName = platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName+".cs")
 				}

@@ -22,10 +22,8 @@ public static bool Equal<M1, M2, K, V>(M1 m1, M2 m2)
         return false;
     }
     foreach (var (k, v1) in m1) {
-        {
-            var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
-                return false;
-            }
+        var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
+            return false;
         }
     }
     return true;
@@ -41,10 +39,8 @@ public static bool EqualFunc<M1, M2, K, V1, V2>(M1 m1, M2 m2, Func<V1, V2, bool>
         return false;
     }
     foreach (var (k, v1) in m1) {
-        {
-            var (v2, ok) = m2[k, ꟷ]; if (!ok || !eq(v1, v2)) {
-                return false;
-            }
+        var (v2, ok) = m2[k, ꟷ]; if (!ok || !eq(v1, v2)) {
+            return false;
         }
     }
     return true;

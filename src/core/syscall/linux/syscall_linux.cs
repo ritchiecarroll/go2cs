@@ -181,10 +181,8 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     //
     // [1] https://cs.android.com/android/platform/superproject/+/master:bionic/libc/SECCOMP_BLOCKLIST_APP.TXT;l=4;drc=dbb8670dfdcc677f7e3b9262e93800fa14c4e417
     if (runtime.GOOS != "android"u8) {
-        {
-            var errΔ1 = faccessat2(dirfd, path, mode, flags); if (!AreEqual(errΔ1, ENOSYS) && !AreEqual(errΔ1, EPERM)) {
-                return errΔ1;
-            }
+        var errΔ1 = faccessat2(dirfd, path, mode, flags); if (!AreEqual(errΔ1, ENOSYS) && !AreEqual(errΔ1, EPERM)) {
+            return errΔ1;
         }
     }
 
@@ -199,10 +197,8 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     }
 
     ref var st = ref heap(new Stat_t(), out var Ꮡst);
-    {
-        var errΔ2 = fstatat(dirfd, path, Ꮡst, flags & (nint)_AT_SYMLINK_NOFOLLOW); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = fstatat(dirfd, path, Ꮡst, flags & (nint)_AT_SYMLINK_NOFOLLOW); if (errΔ2 != nil) {
+        return errΔ2;
     }
 
     mode &= (uint32)(7);
@@ -677,10 +673,8 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     }
     msg.Iov = Ꮡiov;
     msg.Iovlen = 1;
-    {
-        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
-            return (0, err);
-        }
+    (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
+        return (0, err);
     }
     if (len(oob) > 0 && len(p) == 0) {
         n = 0;
@@ -1017,15 +1011,11 @@ public static error /*err*/ Setegid(nint egid) {
     error err = default;
 
     if (cgo_libc_setegid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(SYS_SETRESGID, minus1, (uintptr)egid, minus1); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(SYS_SETRESGID, minus1, (uintptr)egid, minus1); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setegid, (uintptr)egid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setegid, (uintptr)egid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1036,15 +1026,11 @@ public static error /*err*/ Seteuid(nint euid) {
     error err = default;
 
     if (cgo_libc_seteuid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(SYS_SETRESUID, minus1, (uintptr)euid, minus1); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(SYS_SETRESUID, minus1, (uintptr)euid, minus1); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_seteuid, (uintptr)euid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_seteuid, (uintptr)euid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1055,15 +1041,11 @@ public static error /*err*/ Setgid(nint gid) {
     error err = default;
 
     if (cgo_libc_setgid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETGID, (uintptr)gid, 0, 0); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETGID, (uintptr)gid, 0, 0); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setgid, (uintptr)gid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setgid, (uintptr)gid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1074,15 +1056,11 @@ public static error /*err*/ Setregid(nint rgid, nint egid) {
     error err = default;
 
     if (cgo_libc_setregid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETREGID, (uintptr)rgid, (uintptr)egid, 0); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETREGID, (uintptr)rgid, (uintptr)egid, 0); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setregid, (uintptr)rgid, (uintptr)egid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setregid, (uintptr)rgid, (uintptr)egid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1093,15 +1071,11 @@ public static error /*err*/ Setresgid(nint rgid, nint egid, nint sgid) {
     error err = default;
 
     if (cgo_libc_setresgid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETRESGID, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETRESGID, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setresgid, (uintptr)rgid, (uintptr)egid, (uintptr)sgid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setresgid, (uintptr)rgid, (uintptr)egid, (uintptr)sgid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1112,15 +1086,11 @@ public static error /*err*/ Setresuid(nint ruid, nint euid, nint suid) {
     error err = default;
 
     if (cgo_libc_setresuid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETRESUID, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETRESUID, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setresuid, (uintptr)ruid, (uintptr)euid, (uintptr)suid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setresuid, (uintptr)ruid, (uintptr)euid, (uintptr)suid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1131,15 +1101,11 @@ public static error /*err*/ Setreuid(nint ruid, nint euid) {
     error err = default;
 
     if (cgo_libc_setreuid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETREUID, (uintptr)ruid, (uintptr)euid, 0); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETREUID, (uintptr)ruid, (uintptr)euid, 0); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setreuid, (uintptr)ruid, (uintptr)euid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setreuid, (uintptr)ruid, (uintptr)euid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }
@@ -1150,15 +1116,11 @@ public static error /*err*/ Setuid(nint uid) {
     error err = default;
 
     if (cgo_libc_setuid == nil) {
-        {
-            var (_, _, e1) = AllThreadsSyscall(sys_SETUID, (uintptr)uid, 0, 0); if (e1 != 0) {
-                err = errnoErr(e1);
-            }
+        var (_, _, e1) = AllThreadsSyscall(sys_SETUID, (uintptr)uid, 0, 0); if (e1 != 0) {
+            err = errnoErr(e1);
         }
-    } else {
-        var ret = cgocaller(cgo_libc_setuid, (uintptr)uid); if (ret != 0) {
-            err = errnoErr((Errno)ret);
-        }
+    } else if (cgocaller(cgo_libc_setuid, (uintptr)uid) is var ret && ret != 0) {
+        err = errnoErr((Errno)ret);
     }
     return err;
 }

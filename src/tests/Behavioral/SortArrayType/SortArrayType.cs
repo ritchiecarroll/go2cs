@@ -205,7 +205,7 @@ internal static void Main() {
 
     var pb = @new<PeopleByAge>();
     pb.ValueSlot = byAge[1..4];
-    fmt.Println((~pb).Len());
+    fmt.Println(pb.Len());
 
     var ros = (Roster)(slice<Person>)(byAge[0..2]);
     fmt.Println(ros.headcount(), len(ros));

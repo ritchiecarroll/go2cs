@@ -104,10 +104,8 @@ partial struct environment {
 // whose parent is the scope of the package that exported them.
 internal static (ж<ΔScope>, Object) lookupScope(this ref environment env, @string name) {
     for (var s = env.scope; s != nil; s = s.parent) {
-        {
-            var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
-                return (s, obj);
-            }
+        var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
+            return (s, obj);
         }
     }
     return (default, default);
@@ -219,10 +217,8 @@ internal static void addDeclDep(this ref Checker check, Object to) {
     if (from == nil) {
         return; // not in a package-level init expression
     }
-    {
-        var (_, found) = check.objMap[to, ꟷ]; if (!found) {
-            return; // to is not a package-level object
-        }
+    var (_, found) = check.objMap[to, ꟷ]; if (!found) {
+        return; // to is not a package-level object
     }
     from.addDep(to);
 }
@@ -380,25 +376,23 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     // determine package name and collect valid files
     var pkg = check.pkg;
     foreach (var (_, @file) in files) {
-        {
-            @string name = @file.Name.Name;
-            var exprᴛ1 = pkg.name;
-            var matchᴛ1 = false;
-            if (exprᴛ1 == ""u8) { matchᴛ1 = true;
-                if (name != "_"u8) {
-                    pkg.name = name;
-                } else {
-                    Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢ);
-                }
-                fallthrough = true;
+        @string name = @file.Name.Name;
+        var exprᴛ1 = pkg.name;
+        var matchᴛ1 = false;
+        if (exprᴛ1 == ""u8) { matchᴛ1 = true;
+            if (name != "_"u8) {
+                pkg.name = name;
+            } else {
+                Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢ);
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == name) {
-                check.files = append(check.files, @file);
-            }
-            else if (!matchᴛ1) { /* default: */
-                Ꮡcheck.errorf((atPos)@file.Package, MismatchedPkgName, "package %s; expected package %s", name, pkg.name);
-                // ignore this file
-            }
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == name) {
+            check.files = append(check.files, @file);
+        }
+        else if (!matchᴛ1) { /* default: */
+            Ꮡcheck.errorf((atPos)@file.Package, MismatchedPkgName, "package %s; expected package %s", name, pkg.name);
+            // ignore this file
         }
     }
 
@@ -423,28 +417,26 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
         @string v = check.conf.GoVersion;
 
         // If the file specifies a version, use max(fileVersion, go1.21).
-        {
-            goVersion fileVersion = asGoVersion(@file.GoVersion); if (fileVersion.isValid()) {
-                // Go 1.21 introduced the feature of setting the go.mod
-                // go line to an early version of Go and allowing //go:build lines
-                // to set the Go version in a given file. Versions Go 1.21 and later
-                // can be set backwards compatibly as that was the first version
-                // files with go1.21 or later build tags could be built with.
-                //
-                // Set the version to max(fileVersion, go1.21): That will allow a
-                // downgrade to a version before go1.22, where the for loop semantics
-                // change was made, while being backwards compatible with versions of
-                // go before the new //go:build semantics were introduced.
-                v = (@string)versionMax(fileVersion, go1_21);
+        goVersion fileVersion = asGoVersion(@file.GoVersion); if (fileVersion.isValid()) {
+            // Go 1.21 introduced the feature of setting the go.mod
+            // go line to an early version of Go and allowing //go:build lines
+            // to set the Go version in a given file. Versions Go 1.21 and later
+            // can be set backwards compatibly as that was the first version
+            // files with go1.21 or later build tags could be built with.
+            //
+            // Set the version to max(fileVersion, go1.21): That will allow a
+            // downgrade to a version before go1.22, where the for loop semantics
+            // change was made, while being backwards compatible with versions of
+            // go before the new //go:build semantics were introduced.
+            v = (@string)versionMax(fileVersion, go1_21);
 
-                // Report a specific error for each tagged file that's too new.
-                // (Normally the build system will have filtered files by version,
-                // but clients can present arbitrary files to the type checker.)
-                if (fileVersion.cmp(go_current) > 0) {
-                    // Use position of 'package [p]' for types/types2 consistency.
-                    // (Ideally we would use the //build tag itself.)
-                    Ꮡcheck.errorf(new ast_Identжpositioner(@file.Name), TooNew, "file requires newer Go version %v (application built with %v)", fileVersion, go_current);
-                }
+            // Report a specific error for each tagged file that's too new.
+            // (Normally the build system will have filtered files by version,
+            // but clients can present arbitrary files to the type checker.)
+            if (fileVersion.cmp(go_current) > 0) {
+                // Use position of 'package [p]' for types/types2 consistency.
+                // (Ideally we would use the //build tag itself.)
+                Ꮡcheck.errorf(new ast_Identжpositioner(@file.Name), TooNew, "file requires newer Go version %v (application built with %v)", fileVersion, go_current);
             }
         }
         versions[@file] = v;

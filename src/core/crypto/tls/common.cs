@@ -999,10 +999,8 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
         Ꮡc.Ꮡmutex.Lock();
         ᒐd2 = true;
         if (c.SessionTicketKey == new byte[]{}.array(32)) {
-            {
-                var (_, err) = io.ReadFull(c.rand(), c.SessionTicketKey[..]); if (err != nil) {
-                    throw panic(fmt.Sprintf("tls: unable to generate random session ticket key: %v"u8, err));
-                }
+            var (_, err) = io.ReadFull(c.rand(), c.SessionTicketKey[..]); if (err != nil) {
+                throw panic(fmt.Sprintf("tls: unable to generate random session ticket key: %v"u8, err));
             }
             // Write the deprecated prefix at the beginning so we know we created
             // it. This key with the DEPRECATED prefix isn't used as an actual
@@ -1074,10 +1072,8 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         // Re-check the condition in case it changed since obtaining the new lock.
         if (len(c.autoSessionTicketKeys) == 0 || c.time().Sub(c.autoSessionTicketKeys[0].created) >= ticketKeyRotation) {
             array<byte> newKey = new(32);
-            {
-                var (_, err) = io.ReadFull(c.rand(), newKey[..]); if (err != nil) {
-                    throw panic(fmt.Sprintf("unable to generate random session ticket key: %v"u8, err));
-                }
+            var (_, err) = io.ReadFull(c.rand(), newKey[..]); if (err != nil) {
+                throw panic(fmt.Sprintf("unable to generate random session ticket key: %v"u8, err));
             }
             var valid = new slice<ticketKey>(0, () => new(), len(c.autoSessionTicketKeys) + 1);
             valid = append(valid, c.ticketKeyFromBytes(newKey));
@@ -1308,10 +1304,8 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
             var labels = strings.Split(name, ".");
             labels[0] = "*";
             @string wildcardName = strings.Join(labels, ".");
-            {
-                var (cert, ok) = c.NameToCertificate[wildcardName, ꟷ]; if (ok) {
-                    return (cert, default);
-                }
+            var (cert, ok) = c.NameToCertificate[wildcardName, ꟷ]; if (ok) {
+                return (cert, default);
             }
         }
     }
@@ -1320,10 +1314,8 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
         ref var cert = ref heap(new Certificate(), out var Ꮡcert);
         cert = vᴛ1;
 
-        {
-            var err = ᏑclientHello.SupportsCertificate(Ꮡcert); if (err == nil) {
-                return (Ꮡcert, default);
-            }
+        var err = ᏑclientHello.SupportsCertificate(Ꮡcert); if (err == nil) {
+            return (Ꮡcert, default);
         }
     }
 
@@ -1379,10 +1371,8 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         if (errΔ1 != nil) {
             return fmt.Errorf("failed to parse certificate: %w"u8, errΔ1);
         }
-        {
-            var errΔ2 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ2 != nil) {
-                return fmt.Errorf("certificate is not valid for requested server name: %w"u8, errΔ2);
-            }
+        var errΔ2 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ2 != nil) {
+            return fmt.Errorf("certificate is not valid for requested server name: %w"u8, errΔ2);
         }
     }
 
@@ -1399,16 +1389,12 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         // The static RSA key exchange works by decrypting a challenge with the
         // RSA private key, not by signing, so check the PrivateKey implements
         // crypto.Decrypter, like *rsa.PrivateKey does.
-        {
-            var (priv, okΔ1) = Ꮡc.Value.PrivateKey._<crypto.Decrypter>(ᐧ); if (okΔ1) {
-                {
-                    var (_, okΔ2) = priv.Public()._<ж<rsa.PublicKey>>(ᐧ); if (!okΔ2) {
-                        return unsupported;
-                    }
-                }
-            } else {
+        var (priv, okΔ1) = Ꮡc.Value.PrivateKey._<crypto.Decrypter>(ᐧ); if (okΔ1) {
+            var (_, okΔ2) = priv.Public()._<ж<rsa.PublicKey>>(ᐧ); if (!okΔ2) {
                 return unsupported;
             }
+        } else {
+            return unsupported;
         }
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
@@ -1430,10 +1416,8 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // If the client sent the signature_algorithms extension, ensure it supports
     // schemes we can use with this certificate and TLS version.
     if (len(chi.SignatureSchemes) > 0) {
-        {
-            var (_, errΔ3) = selectSignatureScheme(vers, Ꮡc, chi.SignatureSchemes); if (errΔ3 != nil) {
-                return supportsRSAFallback(errΔ3);
-            }
+        var (_, errΔ3) = selectSignatureScheme(vers, Ꮡc, chi.SignatureSchemes); if (errΔ3 != nil) {
+            return supportsRSAFallback(errΔ3);
         }
     }
 
@@ -1562,10 +1546,8 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
         // chain.Leaf was nil.
         if (j != 0 || x509Cert == nil) {
             error err = default;
-            {
-                (x509Cert, err) = Δx509.ParseCertificate(cert); if (err != nil) {
-                    return fmt.Errorf("failed to parse certificate #%d in the chain: %w"u8, j, err);
-                }
+            (x509Cert, err) = Δx509.ParseCertificate(cert); if (err != nil) {
+                return fmt.Errorf("failed to parse certificate #%d in the chain: %w"u8, j, err);
             }
         }
 
@@ -1726,18 +1708,16 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
         Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
         ᒐd1 = true;
 
-        {
-            var (elemΔ1, ok) = c.m[sessionKey, ꟷ]; if (ok) {
-                if (cs == nil) {
-                    c.q.Remove(elemΔ1);
-                    delete(c.m, sessionKey);
-                } else {
-                    var entryΔ1 = (~elemΔ1).Value._<ж<lruSessionCacheEntry>>();
-                    entryΔ1.state = cs;
-                    c.q.MoveToFront(elemΔ1);
-                }
-                return;
+        var (elemΔ1, ok) = c.m[sessionKey, ꟷ]; if (ok) {
+            if (cs == nil) {
+                c.q.Remove(elemΔ1);
+                delete(c.m, sessionKey);
+            } else {
+                var entryΔ1 = (~elemΔ1).Value._<ж<lruSessionCacheEntry>>();
+                entryΔ1.state = cs;
+                c.q.MoveToFront(elemΔ1);
             }
+            return;
         }
 
         if (c.q.Len() < c.capacity) {
@@ -1769,11 +1749,9 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
         Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
         ᒐd1 = true;
 
-        {
-            var (elem, ok) = c.m[sessionKey, ꟷ]; if (ok) {
-                c.q.MoveToFront(elem);
-                return ((~elem).Value._<ж<lruSessionCacheEntry>>().state, true);
-            }
+        var (elem, ok) = c.m[sessionKey, ꟷ]; if (ok) {
+            c.q.MoveToFront(elem);
+            return ((~elem).Value._<ж<lruSessionCacheEntry>>().state, true);
         }
         return (default, false);
     }
@@ -1933,17 +1911,13 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
                 opts.Intermediates.AddCert(cert);
             }
             var leaf = chain[0];
-            {
-                var (_, err) = leaf.Verify(opts); if (err == nil) {
-                    return true;
-                }
+            var (_, err) = leaf.Verify(opts); if (err == nil) {
+                return true;
             }
         } else {
             var root = chain[len(chain) - 1];
-            {
-                var (_, err) = root.Verify(opts); if (err == nil) {
-                    return true;
-                }
+            var (_, err) = root.Verify(opts); if (err == nil) {
+                return true;
             }
         }
     }

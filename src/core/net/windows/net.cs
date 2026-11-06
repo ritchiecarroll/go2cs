@@ -261,10 +261,8 @@ internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
     if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.SetDeadline(t); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
-        }
+    var err = c.fd.SetDeadline(t); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return default;
 }
@@ -276,10 +274,8 @@ internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
     if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.SetReadDeadline(t); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
-        }
+    var err = c.fd.SetReadDeadline(t); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return default;
 }
@@ -291,10 +287,8 @@ internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
     if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.SetWriteDeadline(t); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
-        }
+    var err = c.fd.SetWriteDeadline(t); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return default;
 }
@@ -307,10 +301,8 @@ internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
     if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setReadBuffer(c.fd, bytes); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
-        }
+    var err = setReadBuffer(c.fd, bytes); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return default;
 }
@@ -323,10 +315,8 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
     if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setWriteBuffer(c.fd, bytes); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
-        }
+    var err = setWriteBuffer(c.fd, bytes); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: default, Addr: c.fd.laddr, Err: err)));
     }
     return default;
 }
@@ -577,11 +567,9 @@ partial interface timeout {
 }
 
 public static bool Timeout(this ref OpError e) {
-    {
-        var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
-            var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
-            return okΔ2 && tΔ1.Timeout();
-        }
+    var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
+        var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
+        return okΔ2 && tΔ1.Timeout();
     }
     var (t, ok) = e.Err._<timeout>(ᐧ);
     return ok && t.Timeout();
@@ -598,11 +586,9 @@ public static bool Temporary(this ref OpError e) {
         return true;
     }
 
-    {
-        var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
-            var (tΔ1, okΔ2) = ne.Err._<temporary>(ᐧ);
-            return okΔ2 && tΔ1.Temporary();
-        }
+    var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
+        var (tΔ1, okΔ2) = ne.Err._<temporary>(ᐧ);
+        return okΔ2 && tΔ1.Temporary();
     }
     var (t, ok) = e.Err._<temporary>(ᐧ);
     return ok && t.Temporary();
@@ -794,11 +780,9 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ref var isTemporary = ref heap(new bool(), out var ᏑisTemporary);
     error unwrapErr = default;
 
-    {
-        var (errΔ1, ok) = err._<ΔError>(ᐧ); if (ok) {
-            isTimeout = errΔ1.Timeout();
-            isTemporary = errΔ1.Temporary();
-        }
+    var (errΔ1, ok) = err._<ΔError>(ᐧ); if (ok) {
+        isTimeout = errΔ1.Timeout();
+        isTemporary = errΔ1.Temporary();
     }
 
     // At this time, the only errors we wrap are context errors, to allow
@@ -973,10 +957,8 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
     int64 n = default;
     ref var v = ref Ꮡv.DerefOrNull();
 
-    {
-        var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
-            return wv.writeBuffers(Ꮡv);
-        }
+    var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
+        return wv.writeBuffers(Ꮡv);
     }
     foreach (var (_, b) in v) {
         var (nb, errΔ1) = w.Write(b);

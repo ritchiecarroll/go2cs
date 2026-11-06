@@ -1,0 +1,7 @@
+ 145: JIT compiled go.math.bits_package:Mul(nuint,nuint) [FullOpts, IL size=20, code size=38]
+ 151: JIT compiled go.math.bits_package:Sub(nuint,nuint,nuint) [FullOpts, IL size=62, code size=51]
+ 159: JIT compiled go.crypto.internal.fips140.nistec.fiat_package:p256Mul(byref,byref,byref) [FullOpts, IL size=3523, code size=6667]
+ 160: JIT compiled go.crypto.internal.fips140.nistec.fiat_package:p256FromMontgomery(byref,byref) [FullOpts, IL size=1812, code size=2601]
+ 161: JIT compiled go.crypto.internal.fips140.nistec.fiat_package:p256ToMontgomery(byref,byref) [FullOpts, IL size=3391, code size=4108]
+ 162: JIT compiled go.crypto.internal.fips140.nistec.fiat_package:p256Square(byref,byref) [FullOpts, IL size=3523, code size=6666]
+ 167: JIT compiled go.math.bits_package:Mul64(ulong,ulong) [FullOpts, IL size=16, code size=38]

@@ -41,10 +41,8 @@ internal static positioner dddErrPos(ref ast.CallExpr call) {
 // isdddArray reports whether atyp is of the form [...]E.
 internal static bool isdddArray(ref ast.ArrayType atyp) {
     if (atyp.Len != nil) {
-        {
-            var (ddd, _) = atyp.Len._<ж<ast.Ellipsis>>(ᐧ); if (ddd != nil && ddd.Elt == nil) {
-                return true;
-            }
+        var (ddd, _) = atyp.Len._<ж<ast.Ellipsis>>(ᐧ); if (ddd != nil && ddd.Elt == nil) {
+            return true;
         }
     }
     return false;

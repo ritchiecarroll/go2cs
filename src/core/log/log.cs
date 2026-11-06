@@ -368,10 +368,8 @@ public static void SetFlags(this ж<Logger> Ꮡl, nint flag) {
 
 // Prefix returns the output prefix for the logger.
 public static @string Prefix(this ж<Logger> Ꮡl) {
-    {
-        var p = Ꮡl.Ꮡprefix.Load(); if (p != nil) {
-            return p.Value;
-        }
+    var p = Ꮡl.Ꮡprefix.Load(); if (p != nil) {
+        return p.Value;
     }
     return ""u8;
 }

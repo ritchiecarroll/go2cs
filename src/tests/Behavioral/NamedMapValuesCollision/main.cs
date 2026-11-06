@@ -7,10 +7,8 @@ partial class main_package {
 partial struct Values /*map[@string, slice<@string>]*/;
 
 public static @string Get(this Values v, @string key) {
-    {
-        var vs = v[key]; if (len(vs) > 0) {
-            return vs[0];
-        }
+    var vs = v[key]; if (len(vs) > 0) {
+        return vs[0];
     }
     return "";
 }

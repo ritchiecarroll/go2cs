@@ -37,6 +37,27 @@ public static class GeneratedSource
         context.AddSource(hintName, Normalize(source));
 
     /// <summary>
+    /// The metadata name of golib's <c>GoExtensionHostAttribute</c>; a compilation that cannot resolve it gets no list.
+    /// </summary>
+    public const string ExtensionHostAttributeMetadataName = "go.GoExtensionHostAttribute";
+
+    /// <summary>
+    /// The assembly attribute that marks this assembly's extension-host list complete, written once per assembly by
+    /// <see cref="ExtensionHostListGenerator"/>.
+    /// </summary>
+    public const string ExtensionHostListDeclaration = "[assembly: global::go.GoExtensionHostList]";
+
+    /// <summary>
+    /// The assembly attribute that lists <paramref name="fullyQualifiedTypeName"/> (a <c>global::</c> name) as a class
+    /// that declares extension methods, which golib's extension-method scan reads under Native AOT
+    /// (docs/phase4/DESIGN-extension-host-list.md). A generator that adds such a class writes this line in the same
+    /// file, before its namespace: C# takes assembly attributes only there (CS1730), and only that file can name a
+    /// <c>file</c> class.
+    /// </summary>
+    public static string ExtensionHostDeclaration(string fullyQualifiedTypeName) =>
+        $"[assembly: global::go.GoExtensionHost(typeof({fullyQualifiedTypeName}))]";
+
+    /// <summary>
     /// <paramref name="source"/> with CRLF line endings, no trailing whitespace, no run of blank lines, no leading or
     /// trailing blank line, and one final line break; unchanged when it holds a verbatim or raw string literal.
     /// </summary>

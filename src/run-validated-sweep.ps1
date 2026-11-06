@@ -140,6 +140,12 @@ param(
     # warm reflect publish (12.0 s -> 16.2 s, +35%), so it is not the default. It changes no verdict and
     # no config: it is added after the execution args on either path below.
     [switch] $PublishBinlog,
+    # Threads the converter's -test-oracle-goarch to every row: the GOARCH each row's ORACLE `go test` runs at, when it
+    # must differ from the target's. The osx-arm64 legs pass arm64: the darwin corpus is converted for darwin/amd64 and
+    # its converted host runs as a native arm64 process there, so an oracle at the target's arch ran under Rosetta and
+    # read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat, ruling (A)). Empty, the default, adds
+    # nothing to any row's arguments.
+    [string] $TestOracleGoarch = '',
     # Split the (already Filter/Exact/Applicable-filtered) row set into -ShardCount contiguous,
     # roster-order pieces and run only the -ShardIndex'th (1-based) -- owner ruling 2026-09-02, this
     # host's own known thermal limit: a ~2-hour continuous full-roster run is exactly the load that
@@ -1476,6 +1482,10 @@ foreach ($row in $rows) {
         $execSuffix = if ($row.Execution) { " [$($row.Execution)]" } else { '' }
     }
     if ($PublishBinlog) { $execArgs += '-test-publish-binlog' }
+    if ($TestOracleGoarch) {
+        $execArgs += @('-test-oracle-goarch', $TestOracleGoarch)
+        $execSuffix += " [oracle-goarch=$TestOracleGoarch]"
+    }
 
     # The per-test deadline, in the converter arguments of every row so a re-run repeats it exactly.
     $rowTestDeadline = Resolve-RowTestDeadline $TestDeadline $testDeadlineFloors[$pkg]

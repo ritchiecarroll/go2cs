@@ -34,19 +34,17 @@ internal static binary.ByteOrder randByteOrder(this ref mutator m) {
 // chooseLen chooses length of range mutation in range [1,n]. It gives
 // preference to shorter ranges.
 internal static nint chooseLen(this ref mutator m, nint n) {
-    {
-        nint x = m.rand(100);
-        switch (ᐧ) {
-        case {} when x is < 90: {
-            return m.rand(min(8, n)) + 1;
-        }
-        case {} when x is < 99: {
-            return m.rand(min(32, n)) + 1;
-        }
-        default: {
-            return m.rand(n) + 1;
-        }}
+    nint x = m.rand(100);
+    switch (ᐧ) {
+    case {} when x is < 90: {
+        return m.rand(min(8, n)) + 1;
     }
+    case {} when x is < 99: {
+        return m.rand(min(32, n)) + 1;
+    }
+    default: {
+        return m.rand(n) + 1;
+    }}
 }
 
 // mutate performs several mutations on the provided values.
@@ -314,11 +312,9 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
 
         for (;;) {
             var mut = byteSliceMutators[m.rand(len(byteSliceMutators))];
-            {
-                var mutated = mut(Ꮡm, b); if (mutated != nil) {
-                    b = mutated;
-                    return;
-                }
+            var mutated = mut(Ꮡm, b); if (mutated != nil) {
+                b = mutated;
+                return;
             }
         }
     }

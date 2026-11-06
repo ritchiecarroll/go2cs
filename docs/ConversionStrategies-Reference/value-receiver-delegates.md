@@ -60,7 +60,7 @@ The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`
 var checker func(*driver.NamedValue) error
 checker = nvc.CheckNamedValue   // reassign a method value
 ```
-<!-- source: src/core/database/sql/convert.cs:188-189 -->
+<!-- source: src/core/database/sql/convert.cs:182-183 -->
 ```csharp
 var nvcʗ1 = nvc;
             checker = nvcʗ1.CheckNamedValue;
@@ -268,7 +268,9 @@ bare-ident early return, because for a pointer ident the once-evaluated renderin
 BOX — a different value from the pointee, so hoisting it is not the "second copy of one evaluation" that
 return exists to prevent.
 
-Two narrowings, each matching a rule the CALL path (`(~z).make(n)`) already proved: a deref-**aliased**
+Two narrowings, each matching a rule the CALL path (`z.make(n)` through a pointer local, which binds the method's
+generated box twin; [Implicit Pointer Dereferencing](implicit-dereferencing.md#implicit-pointer-dereferencing))
+already proved: a deref-**aliased**
 receiver expression — a pointer parameter, or the enclosing method's pointer receiver — already renders
 as the value, so a second `~` would dereference a non-pointer (CS0023) and the temp takes the plain
 rendering (`var recvʗ1 = p;`); and a **promoted** method reaches its receiver through the `.of(…)` hop

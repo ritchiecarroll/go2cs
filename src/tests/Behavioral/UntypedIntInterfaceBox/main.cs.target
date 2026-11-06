@@ -52,10 +52,8 @@ internal static void Main() {
 
     fmt.Println(classify((nint)1), classify((int32)1));
 
-    {
-        var (n, ok) = store((nint)11)._<nint>(ᐧ); if (ok) {
-            fmt.Println("ok", n);
-        }
+    var (n, ok) = store((nint)11)._<nint>(ᐧ); if (ok) {
+        fmt.Println("ok", n);
     }
 }
 

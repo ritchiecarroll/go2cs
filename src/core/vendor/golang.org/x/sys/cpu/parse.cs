@@ -38,15 +38,11 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
         rel = ""u8;
         return (ver, err == nil);
     }
-    {
-        (major, ok) = next(); if (!ok || rel == ""u8) {
-            return (major, minor, patch, ok);
-        }
+    (major, ok) = next(); if (!ok || rel == ""u8) {
+        return (major, minor, patch, ok);
     }
-    {
-        (minor, ok) = next(); if (!ok || rel == ""u8) {
-            return (major, minor, patch, ok);
-        }
+    (minor, ok) = next(); if (!ok || rel == ""u8) {
+        return (major, minor, patch, ok);
     }
     (patch, ok) = next();
     return (major, minor, patch, ok);

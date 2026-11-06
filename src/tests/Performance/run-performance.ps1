@@ -70,8 +70,12 @@ $runnerExit = $LASTEXITCODE
 if ($runnerExit -eq 0) {
     $readme   = Join-Path $PSScriptRoot "README.md"
     $docsCopy = Join-Path $RepoRoot 'docs/Performance.md'
-    $banner   = "`r`n<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->`r`n"
-    [IO.File]::WriteAllText($docsCopy, [IO.File]::ReadAllText($readme) + $banner)
+    $text     = [IO.File]::ReadAllText($readme)
+    # The banner takes the README's own line ending: a checkout materializes LF on linux and macOS and CRLF on
+    # Windows, and a fixed CRLF banner left the copy's last two lines dirty on every non-Windows run.
+    $nl       = if ($text.Contains("`r`n")) { "`r`n" } else { "`n" }
+    $banner   = "$nl<!-- AUTO-COPIED from src/tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->$nl"
+    [IO.File]::WriteAllText($docsCopy, $text + $banner)
     Write-Host "==> mirrored README.md to docs/Performance.md" -ForegroundColor Cyan
 }
 exit $runnerExit

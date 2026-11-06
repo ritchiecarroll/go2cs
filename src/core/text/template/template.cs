@@ -257,10 +257,8 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
     }
     // Add the newly parsed trees, including the one for t, into our common structure.
     foreach (var (name, tree) in trees) {
-        {
-            var (_, errΔ1) = Ꮡt.AddParseTree(name, tree); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var (_, errΔ1) = Ꮡt.AddParseTree(name, tree); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     return (Ꮡt, default);
@@ -276,12 +274,10 @@ internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<pars
     if (@new.common != t.common) {
         throw panic("internal error: associate not common");
     }
-    {
-        var old = t.tmpl[@new.name]; if (old != nil && parse.IsEmptyTree(new parse.ListNodeжNode(tree.Root)) && old.Tree != nil) {
-            // If a template by that name exists,
-            // don't replace it with an empty template.
-            return false;
-        }
+    var old = t.tmpl[@new.name]; if (old != nil && parse.IsEmptyTree(new parse.ListNodeжNode(tree.Root)) && old.Tree != nil) {
+        // If a template by that name exists,
+        // don't replace it with an empty template.
+        return false;
     }
     t.tmpl[@new.name] = Ꮡnew;
     return true;

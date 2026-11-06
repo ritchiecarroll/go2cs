@@ -93,11 +93,9 @@ internal static (nint code, @string msg) guarded(bool boom) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    code = -1;
-                    msg = "recovered";
-                }
+            var r = recover(); if (r != nil) {
+                code = -1;
+                msg = "recovered";
             }
         }, ref ᒐ);
         if (boom) {
@@ -117,10 +115,8 @@ internal static (ж<box>, error err) parseLimited(nint n) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    err = fmt.Errorf("too big: %v"u8, r);
-                }
+            var r = recover(); if (r != nil) {
+                err = fmt.Errorf("too big: %v"u8, r);
             }
         }, ref ᒐ);
         if (n > 10) {
@@ -157,10 +153,8 @@ internal static void Main() {
     var (c2, m2) = guarded(true);
     fmt.Println(c2, m2);
 
-    {
-        var (bΔ1, err) = parseLimited(4); if (err == nil) {
-            fmt.Println("parseLimited(4):", bΔ1.v, err);
-        }
+    var (bΔ1, err) = parseLimited(4); if (err == nil) {
+        fmt.Println("parseLimited(4):", bΔ1.v, err);
     }
     var (b2, err2) = parseLimited(99);
     fmt.Println("parseLimited(99):", b2 == nil, err2);

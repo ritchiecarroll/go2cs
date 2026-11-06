@@ -131,7 +131,7 @@ public static void TestCleanup(ж<testing.T> t) {
         goǃ(() => {
             ᐸꟷ(chʗ2);
             done = true;
-        }, GoStack.Bounded);
+        });
     });
     if (!done) {
         t.Fatalf("background goroutine did not return");

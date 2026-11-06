@@ -41,10 +41,8 @@ internal static void testBlockModePair(ж<testing.T> t, cipher.Block b, Func<cip
         var rng = newRandReader(tΔ3);
 
         nint blockSize = enc(b, ivʗ3).BlockSize();
-        {
-            nint decBlockSize = dec(b, ivʗ3).BlockSize(); if (decBlockSize != blockSize) {
-                tΔ3.Errorf("decryption blocksize different than encryption's; got %d, want %d", decBlockSize, blockSize);
-            }
+        nint decBlockSize = dec(b, ivʗ3).BlockSize(); if (decBlockSize != blockSize) {
+            tΔ3.Errorf("decryption blocksize different than encryption's; got %d, want %d", decBlockSize, blockSize);
         }
 
         var (before, dst, after) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));

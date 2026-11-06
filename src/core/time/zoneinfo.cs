@@ -168,15 +168,13 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
         return (name, offset, start, end, isDST);
     }
 
-    {
-        var zoneΔ1 = l.cacheZone; if (zoneΔ1 != nil && l.cacheStart <= sec && sec < l.cacheEnd) {
-            name = zoneΔ1.name;
-            offset = zoneΔ1.offset;
-            start = l.cacheStart;
-            end = l.cacheEnd;
-            isDST = zoneΔ1.isDST;
-            return (name, offset, start, end, isDST);
-        }
+    var zoneΔ1 = l.cacheZone; if (zoneΔ1 != nil && l.cacheStart <= sec && sec < l.cacheEnd) {
+        name = zoneΔ1.name;
+        offset = zoneΔ1.offset;
+        start = l.cacheStart;
+        end = l.cacheEnd;
+        isDST = zoneΔ1.isDST;
+        return (name, offset, start, end, isDST);
     }
 
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
@@ -219,10 +217,8 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     // If we're at the end of the known zone transitions,
     // try the extend string.
     if (lo == len(tx) - 1 && l.extend != ""u8) {
-        {
-            var (ename, eoffset, estart, eend, eisDST, ok) = tzset(l.extend, start, sec); if (ok) {
-                return (ename, eoffset, estart, eend, eisDST);
-            }
+        var (ename, eoffset, estart, eend, eisDST, ok) = tzset(l.extend, start, sec); if (ok) {
+            return (ename, eoffset, estart, eend, eisDST);
         }
     }
 
@@ -715,17 +711,13 @@ public static (ж<ΔLocation>, error) LoadLocation(@string name) {
     });
     error firstErr = default;
     if (zoneinfo.Value != ""u8) {
-        {
-            var (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.Value, name); if (err == nil) {
-                {
-                    var (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == nil) {
-                        return (z, default);
-                    }
-                }
-                firstErr = err;
-            } else if (!AreEqual(err, syscall.ENOENT)) {
-                firstErr = err;
+        var (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.Value, name); if (err == nil) {
+            var (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == nil) {
+                return (z, default);
             }
+            firstErr = err;
+        } else if (!AreEqual(err, syscall.ENOENT)) {
+            firstErr = err;
         }
     }
     {

@@ -144,9 +144,9 @@ public class LiteralInterceptorGeneratorTests
         ];
     }
 
-    private sealed record Run(Compilation Updated, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<GeneratedSourceResult> Sources);
+    internal sealed record Run(Compilation Updated, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<GeneratedSourceResult> Sources);
 
-    private static Run Generate(string body, string path = "main.cs", string? assemblyAttributes = null, bool runGenerator = true, IIncrementalGenerator? sibling = null)
+    internal static Run Generate(string body, string path = "main.cs", string? assemblyAttributes = null, bool runGenerator = true, IIncrementalGenerator? sibling = null)
     {
         string source =
             $$"""
@@ -187,7 +187,7 @@ public class LiteralInterceptorGeneratorTests
     }
 
     // Emits the compilation, runs main_package.Body() and answers its result.
-    private static string Execute(Compilation compilation)
+    internal static string Execute(Compilation compilation)
     {
         using MemoryStream image = new();
         EmitResult emitted = compilation.Emit(image);

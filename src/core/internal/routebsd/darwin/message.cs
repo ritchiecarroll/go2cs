@@ -32,19 +32,17 @@ internal static (slice<Message>, error) parseRIB(slice<byte> b) {
             b = b.slice(l);
             continue;
         }
-        {
-            var (w, ok) = wireFormats[(nint)b[3], ꟷ]; if (!ok) {
+        var (w, ok) = wireFormats[(nint)b[3], ꟷ]; if (!ok) {
+            nskips++;
+        } else {
+            var (m, err) = w.parse(b.slice(0, l));
+            if (err != nil) {
+                return (default, err);
+            }
+            if (m == nil) {
                 nskips++;
             } else {
-                var (m, err) = w.parse(b.slice(0, l));
-                if (err != nil) {
-                    return (default, err);
-                }
-                if (m == nil) {
-                    nskips++;
-                } else {
-                    msgs = append(msgsᴷ, msgs, m);
-                }
+                msgs = append(msgsᴷ, msgs, m);
             }
         }
         b = b.slice(l);

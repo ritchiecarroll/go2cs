@@ -108,12 +108,10 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     // x.typ is typed
 
     // A generic (non-instantiated) function value cannot be assigned to a variable.
-    {
-        var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s", Ꮡx.OrTypedNil(), context);
-            x.mode = invalid;
-            return;
-        }
+    var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s", Ꮡx.OrTypedNil(), context);
+        x.mode = invalid;
+        return;
     }
 
     // spec: "If a left-hand side is the blank identifier, any typed or
@@ -231,17 +229,13 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
     ж<Var> v = default;
     bool v_used = default;
     if (ident != nil) {
-        {
-            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name); if (obj != nil) {
-                // It's ok to mark non-local variables, but ignore variables
-                // from other packages to avoid potential race conditions with
-                // dot-imported variables.
-                {
-                    var (w, _) = obj._<ж<Var>>(ᐧ); if (w != nil && w.pkg == check.pkg) {
-                        v = w;
-                        v_used = check.usedVars[v];
-                    }
-                }
+        var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name); if (obj != nil) {
+            // It's ok to mark non-local variables, but ignore variables
+            // from other packages to avoid potential race conditions with
+            // dot-imported variables.
+            var (w, _) = obj._<ж<Var>>(ᐧ); if (w != nil && w.pkg == check.pkg) {
+                v = w;
+                v_used = check.usedVars[v];
             }
         }
     }
@@ -268,14 +262,12 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
         break;
     }
     default: {
-        {
-            var (sel, ok) = x.expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
-                ref var op = ref heap(new operand(), out var Ꮡop);
-                Ꮡcheck.expr(nil, Ꮡop, sel.X);
-                if (op.mode == mapindex) {
-                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableFieldAssign, "cannot assign to struct field %s in map", ExprString(x.expr));
-                    return new BasicжΔType(Typ[Invalid]);
-                }
+        var (sel, ok) = x.expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
+            ref var op = ref heap(new operand(), out var Ꮡop);
+            Ꮡcheck.expr(nil, Ꮡop, sel.X);
+            if (op.mode == mapindex) {
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableFieldAssign, "cannot assign to struct field %s in map", ExprString(x.expr));
+                return new BasicжΔType(Typ[Invalid]);
             }
         }
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnassignableOperand, "cannot assign to %s (neither addressable nor a map index expression)", x.expr);
@@ -309,10 +301,8 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         ж<target> target = default;
         // avoid calling ExprString if not needed
         if (T != nil) {
-            {
-                var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
-                    target = newTarget(T, ExprString(lhs));
-                }
+            var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
+                target = newTarget(T, ExprString(lhs));
             }
         }
         Ꮡx = @new<operand>(); x = ref Ꮡx.DerefOrNull();
@@ -399,10 +389,8 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
             switch (ᐧ) {
             case {} when variadic: {
                 // In correct code, the parameter type is a slice, but be careful.
-                {
-                    var (tΔ2, _) = t._<ж<Slice>>(ᐧ); if (tΔ2 != nil) {
-                        s = Ꮡcheck.sprintf("%s", tΔ2.elem);
-                    }
+                var (tΔ2, _) = t._<ж<Slice>>(ᐧ); if (tΔ2 != nil) {
+                    s = Ꮡcheck.sprintf("%s", tΔ2.elem);
                 }
                 s = "..."u8 + s;
                 break;
@@ -436,11 +424,9 @@ internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs,
     var rhs0 = rhs[0];
 
     if (len(rhs) == 1) {
-        {
-            var (call, _) = ast.Unparen(rhs0)._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(rhs0), WrongAssignCount, "assignment mismatch: %s but %s returns %s", vars, call.Fun, vals);
-                return;
-            }
+        var (call, _) = ast.Unparen(rhs0)._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(rhs0), WrongAssignCount, "assignment mismatch: %s but %s returns %s", vars, call.Fun, vals);
+            return;
         }
     }
     Ꮡcheck.errorf(new ast_Exprᴠpositioner(rhs0), WrongAssignCount, "assignment mismatch: %s but %s", vars, vals);
@@ -661,20 +647,16 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
         // variable's scope starts after the declaration; so we
         // must use Scope.Lookup here and call Scope.Insert
         // (via check.declare) later.
-        {
-            var alt = scope.Lookup(name); if (alt != nil) {
-                check.recordUse(ident, alt);
-                // redeclared object must be a variable
-                {
-                    var (objΔ1, _) = alt._<ж<Var>>(ᐧ); if (objΔ1 != nil) {
-                        lhsVars[i] = objΔ1;
-                    } else {
-                        Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), UnassignableOperand, "cannot assign to %s", lhsΔ1);
-                        hasErr = true;
-                    }
-                }
-                continue;
+        var alt = scope.Lookup(name); if (alt != nil) {
+            check.recordUse(ident, alt);
+            // redeclared object must be a variable
+            var (objΔ1, _) = alt._<ж<Var>>(ᐧ); if (objΔ1 != nil) {
+                lhsVars[i] = objΔ1;
+            } else {
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), UnassignableOperand, "cannot assign to %s", lhsΔ1);
+                hasErr = true;
             }
+            continue;
         }
 
         // declare new variable

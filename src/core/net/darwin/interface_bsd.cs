@@ -34,11 +34,9 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
             ift[n].Index = mΔ1.Index;
             ift[n].Name = mΔ1.Name;
             ift[n].Flags = linkFlags(mΔ1.Flags);
-            {
-                var (sa, ok) = mΔ1.Addrs[syscall.RTAX_IFP]._<ж<routebsd.LinkAddr>>(ᐧ); if (ok && len(sa.Addr) > 0) {
-                    ift[n].HardwareAddr = new slice<byte>(len(sa.Addr));
-                    copy(ift[n].HardwareAddr, sa.Addr);
-                }
+            var (sa, ok) = mΔ1.Addrs[syscall.RTAX_IFP]._<ж<routebsd.LinkAddr>>(ᐧ); if (ok && len(sa.Addr) > 0) {
+                ift[n].HardwareAddr = new slice<byte>(len(sa.Addr));
+                copy(ift[n].HardwareAddr, sa.Addr);
             }
             ift[n].MTU = mΔ1.MTU();
             n++;

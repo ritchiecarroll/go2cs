@@ -57,11 +57,9 @@ public static void SortImports(ж<token.FileSet> fset, ж<File> Ꮡf) {
     // Make File.Imports order consistent.
     f.Imports = f.Imports[..0];
     foreach (var (_, decl) in f.Decls) {
-        {
-            var (declΔ1, ok) = decl._<ж<GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.IMPORT) {
-                foreach (var (_, spec) in declΔ1.Specs) {
-                    f.Imports = append(f.Imports, spec._<ж<ImportSpec>>());
-                }
+        var (declΔ1, ok) = decl._<ж<GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.IMPORT) {
+            foreach (var (_, spec) in declΔ1.Specs) {
+                f.Imports = append(f.Imports, spec._<ж<ImportSpec>>());
             }
         }
     }
@@ -213,10 +211,8 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
             tokenꓸPos p = s.Pos();
             // This function is exited early when len(specs) <= 1,
             // so d.Rparen must be populated (d.Rparen.IsValid() == true).
-            {
-                nint l = lineAt(fset, p); if (l != lineAt(fset, d.Rparen)) {
-                    fset.File(p).MergeLine(l);
-                }
+            nint l = lineAt(fset, p); if (l != lineAt(fset, d.Rparen)) {
+                fset.File(p).MergeLine(l);
             }
         }
     }

@@ -31,28 +31,22 @@ internal partial interface main_typeᴛ2 /*dyn*/ {
 internal static void Main() {
     speaker s = new thingжspeaker(Ꮡ(new thing(7)));
 
-    {
-        var (p, ok) = s._<main_type>(ᐧ); if (ok) {
-            fmt.Println("ping-ok", p.Ping());
-        } else {
-            fmt.Println("ping-missed");
-        }
+    if (s._<main_type>(out var p)) {
+        fmt.Println("ping-ok", p.Ping());
+    } else {
+        fmt.Println("ping-missed");
     }
 
-    {
-        var (b, ok) = s._<main_typeᴛ1>(ᐧ); if (ok) {
-            fmt.Println("both-ok", b.Ping(), b.Pong());
-        } else {
-            fmt.Println("both-missed");
-        }
+    if (s._<main_typeᴛ1>(out var b)) {
+        fmt.Println("both-ok", b.Ping(), b.Pong());
+    } else {
+        fmt.Println("both-missed");
     }
 
-    {
-        var (_, ok) = s._<main_typeᴛ2>(ᐧ); if (ok) {
-            fmt.Println("quit-matched-wrong");
-        } else {
-            fmt.Println("quit-missed-ok");
-        }
+    if (s._<main_typeᴛ2>(out _)) {
+        fmt.Println("quit-matched-wrong");
+    } else {
+        fmt.Println("quit-missed-ok");
     }
 }
 

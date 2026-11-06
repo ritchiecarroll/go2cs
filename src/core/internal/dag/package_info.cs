@@ -61,7 +61,7 @@ using static go.@internal.dag_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
-[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgIKkgoKCpoKmgqaCpqKCgpSGrLKClIKCqJKSlIKCgpSCgoKUgpSCgpSAgpT+goKC3IKCgoK4lO6CgoKC3IKmAAsYggAICNKCgpSkxLaUgoKCgoKClJSClIKCgoKUgpSWAAwWkuiygoKkgpSklJSCggAIDqKCgpSkgoKmgpSCpoKClIKmgqSCpoKClIKCgg==", "88-90:1;108-110:1;196-206:1")]
+[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgpSCgoKmgqaCpoKmooKClIassoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgALGIIACAjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLosoKCpIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "208:21,209:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

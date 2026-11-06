@@ -299,12 +299,10 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
             };
             // Recover and propagate panics from seq.
             defer(() => {
-                {
-                    var p = recover(); if (p != nil) {
-                        Ꮡpull.Value.panicValue = p;
-                    } else if (!Ꮡpull.Value.seqDone) {
-                        Ꮡpull.Value.panicValue = goexitPanicValue;
-                    }
+                var p = recover(); if (p != nil) {
+                    Ꮡpull.Value.panicValue = p;
+                } else if (!Ꮡpull.Value.seqDone) {
+                    Ꮡpull.Value.panicValue = goexitPanicValue;
                 }
                 Ꮡpull.Value.done = true; // Invalidate iterator
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
@@ -431,12 +429,10 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
             };
             // Recover and propagate panics from seq.
             defer(() => {
-                {
-                    var p = recover(); if (p != nil) {
-                        Ꮡpull.Value.panicValue = p;
-                    } else if (!Ꮡpull.Value.seqDone) {
-                        Ꮡpull.Value.panicValue = goexitPanicValue;
-                    }
+                var p = recover(); if (p != nil) {
+                    Ꮡpull.Value.panicValue = p;
+                } else if (!Ꮡpull.Value.seqDone) {
+                    Ꮡpull.Value.panicValue = goexitPanicValue;
                 }
                 Ꮡpull.Value.done = true; // Invalidate iterator.
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));

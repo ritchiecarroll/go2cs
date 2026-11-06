@@ -31,13 +31,13 @@ public class RecvGenerator : ISourceGenerator
             Debugger.Launch();
     #endif
 
-        // Register to find the Go pointer-receiver methods emitted `this ref T`
+        // Register to find the Go pointer-receiver methods emitted `this ref T`, and the value-receiver ones
         context.RegisterForSyntaxNotifications(() => new PointerReceiverFinder());
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxContextReceiver is not PointerReceiverFinder { Methods.Count: > 0 } finder)
+        if (context.SyntaxContextReceiver is not PointerReceiverFinder finder || finder.Methods.Count + finder.ValueMethods.Count == 0)
             return;
 
         // Roslyn hintNames are compared case-INSENSITIVELY, and Go routinely pairs an exported
@@ -130,6 +130,57 @@ public class RecvGenerator : ISourceGenerator
             // Add the source code to the compilation
             context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
         }
+
+        // THE VALUE-RECEIVER TWINS. Go's *T method set holds T's value methods, so `p.M()` on a pointer is legal
+        // Go and calls M on a copy of *p. Each Go value method of a type this compilation declares gets a
+        // `M(this ж<T>, ...)` twin that dereferences and copies (ReceiverMethodTemplate.ValueReceiver), so the
+        // converter writes `p.M()` as Go does. A hand-owned package has none: its methods are Go methods by
+        // attribute alone, and the converter never relies on a twin there.
+        if (handOwnedPackage)
+            return;
+
+        foreach (MethodDeclarationSyntax methodSyntax in finder.ValueMethods)
+        {
+            SyntaxTree syntaxTree = methodSyntax.SyntaxTree;
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
+
+            if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol { IsExtensionMethod: true, Parameters.Length: > 0, ReturnsByRef: false, ReturnsByRefReadonly: false } methodSymbol)
+                continue;
+
+            // Only a receiver TYPE this compilation declares: a Go method's receiver is a type of its own package. A
+            // hand-written helper extension over a golib or BCL type is not a Go method and gets no twin.
+            if (methodSymbol.Parameters[0].Type is not INamedTypeSymbol receiverType ||
+                !SymbolEqualityComparer.Default.Equals(receiverType.ContainingAssembly, context.Compilation.Assembly) ||
+                receiverType.TypeKind is TypeKind.Interface || receiverType.Name == PointerPrefix)
+                continue;
+
+            if (HasDeclaredPointerTwin(semanticModel, methodSyntax))
+                continue;
+
+            string packageNamespace = methodSyntax.GetNamespaceName();
+            string packageClassName = methodSyntax.GetParentClassName();
+            string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
+            string identifier = methodSyntax.Identifier.Text;
+            string scope = GetExplicitAccessModifier(methodSyntax) ?? GetScope(identifier);
+            MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
+
+            string generatedSource = new ReceiverMethodTemplate
+            {
+                PackageNamespace = packageNamespace,
+                PackageName = packageName,
+                Scope = scope,
+                Method = method,
+                ReceiverTypeIsPublic = EffectiveScopeIsPublic(receiverType, GetSimpleName(method.Parameters[0].type)),
+                NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
+                CallerFrame = callerFrame,
+                OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                ValueReceiver = true,
+                UsingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel)
+            }
+            .Generate();
+
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.value.g.cs")), generatedSource);
+        }
     }
 
     // Whether the method's own class DECLARES its pointer twin: a same-named method whose receiver is
@@ -174,6 +225,10 @@ public class RecvGenerator : ISourceGenerator
     {
         public List<MethodDeclarationSyntax> Methods { get; } = [];
 
+        // The Go VALUE-receiver methods: an extension in a package class whose receiver is not in the pointer
+        // set (no ref/in, or a by-ref receiver marked [GoCopyBound]).
+        public List<MethodDeclarationSyntax> ValueMethods { get; } = [];
+
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
             if (context.Node is not MethodDeclarationSyntax { ParameterList.Parameters.Count: > 0 } method)
@@ -181,8 +236,14 @@ public class RecvGenerator : ISourceGenerator
 
             SyntaxTokenList modifiers = method.ParameterList.Parameters[0].Modifiers;
 
-            if (modifiers.Any(SyntaxKind.ThisKeyword) && modifiers.Any(SyntaxKind.RefKeyword) && method.IsPointerSetMethod(handOwnedPackage: false))
+            if (!modifiers.Any(SyntaxKind.ThisKeyword))
+                return;
+
+            if (modifiers.Any(SyntaxKind.RefKeyword) && method.IsPointerSetMethod(handOwnedPackage: false))
                 Methods.Add(method);
+            else if (!method.IsPointerSetMethod(handOwnedPackage: false) && method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                     method.Parent is ClassDeclarationSyntax { Identifier.Text: var className } && className.EndsWith(PackageSuffix, StringComparison.Ordinal))
+                ValueMethods.Add(method);
         }
     }
 

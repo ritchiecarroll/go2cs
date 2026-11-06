@@ -55,7 +55,7 @@ using static go.@internal.stringslite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/stringslite/strings.go", "strings.cs", "ABAggqaCpoKmgoKUpKSClKS2gpSCgoKCgoKmgoKUlIKUgpSCgoKUppSCgoKCgoKCgoKUlIKUgoKUgoKUpqaCgIKkpoKClKaCgpSmgoKUpoKClKaCgpSCgg==")]
+[assembly: GoPositionMap("internal/stringslite/strings.go", "strings.cs", "ABAggqaCpoKmgoKUpKSClKS2gpSCgoKCgoKmgoKUlIKUgpSCgoKUppSCgoKCgoKCgoKUlIKUgoKUgoKUpqaCgpSmgoKUpoKClKaCgpSmgoKUpoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

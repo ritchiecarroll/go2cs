@@ -29,22 +29,20 @@ internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ((StaticBox<a
 // which Go of course has no choice but to respect.
 [GoInit] internal static void init() {
     ref var lim = ref heap(new Rlimit(), out var Ꮡlim);
-    {
-        var err = Getrlimit(RLIMIT_NOFILE, Ꮡlim); if (err == nil && lim.Max > 0 && lim.Cur < lim.Max - 1) {
-            ᏑorigRlimitNofile.Store(Ꮡlim);
-            ref var nlim = ref heap<Rlimit>(lim, out var Ꮡnlim);
+    var err = Getrlimit(RLIMIT_NOFILE, Ꮡlim); if (err == nil && lim.Max > 0 && lim.Cur < lim.Max - 1) {
+        ᏑorigRlimitNofile.Store(Ꮡlim);
+        ref var nlim = ref heap<Rlimit>(lim, out var Ꮡnlim);
 
-            // We set Cur to Max - 1 so that we are more likely to
-            // detect cases where another process uses prlimit
-            // to change our resource limits. The theory is that
-            // using prlimit to change to Cur == Max is more likely
-            // than using prlimit to change to Cur == Max - 1.
-            // The place we check for this is in exec_linux.go.
-            nlim.Cur = nlim.Max - 1;
+        // We set Cur to Max - 1 so that we are more likely to
+        // detect cases where another process uses prlimit
+        // to change our resource limits. The theory is that
+        // using prlimit to change to Cur == Max is more likely
+        // than using prlimit to change to Cur == Max - 1.
+        // The place we check for this is in exec_linux.go.
+        nlim.Cur = nlim.Max - 1;
 
-            adjustFileLimit(ref nlim);
-            setrlimit(RLIMIT_NOFILE, Ꮡnlim);
-        }
+        adjustFileLimit(ref nlim);
+        setrlimit(RLIMIT_NOFILE, Ꮡnlim);
     }
 }
 

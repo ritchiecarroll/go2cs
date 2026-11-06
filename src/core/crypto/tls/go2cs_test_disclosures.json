@@ -18,5 +18,8 @@
       "hostConditional": "The GO side is decided by network reachability of the pinned boringssl module, which `go test` downloads and builds BoringSSL's own runner from, and by how far that runner gets inside the 10-minute deadline Go's test binary carries by default — so per host and per run the Go baseline passes, expands into its 3,243-row case matrix, or fails.",
       "hostConditionalSignature": "failed to download boringssl"
     }
+  ],
+  "notes": [
+    "On Apple silicon (osx-arm64) the converted package prefers the AES-GCM cipher suites, as Go does there. The converted standard library is built for amd64 and runs as a native arm64 process on Apple silicon, so it reads the processor's AES and PMULL support from internal/cpu's arm64 flags, which are filled as Go's darwin start-up fills them. Before they were filled, the package found no AES hardware on Apple silicon and preferred ChaCha20-Poly1305, where Go on the same machine prefers AES-GCM. On every other platform the preference is unchanged."
   ]
 }

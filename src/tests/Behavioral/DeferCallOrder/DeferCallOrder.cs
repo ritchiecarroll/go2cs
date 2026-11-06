@@ -85,7 +85,7 @@ internal static partial void watchAndSend(ж<sema> Ꮡs) {
 
         s.@out = new channel<nint>(2);
         s.held = true;
-        goǃ(Ꮡs.send, (nint)7, GoStack.Bounded);
+        goǃ(Ꮡs.send, (nint)7);
         fmt.Println("sent-first:", ᐸꟷ(s.@out));
         defer(Ꮡs.send, (nint)9, ref ᒐ);
         defer(Ꮡs.release, ref ᒐ);
@@ -136,10 +136,8 @@ internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
         ref var a = ref Ꮡa.DerefOrNull();
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    err = fmt.Errorf("boom"u8);
-                }
+            var e = recover(); if (e != nil) {
+                err = fmt.Errorf("boom"u8);
             }
         }, ref ᒐ);
         a.total += n;

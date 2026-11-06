@@ -70,6 +70,8 @@
     <TrimMode Condition="'$(TrimMode)'==''">partial</TrimMode>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- Per-assembly ReadyToRun for a single file: the SDK's composite default, compressed, costs seconds of start-up. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)'==''">false</PublishReadyToRunComposite>
     <!-- Opt-in for Ubuntu's packaged .NET 10, where on-stack replacement can end a program early (0x80131506 or a silent
          exit 0); costs about 90 ms of startup; becomes the default if a converted program reproduces it. https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md -->
     <!-- <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops> -->

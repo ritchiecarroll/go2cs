@@ -26,10 +26,8 @@ internal static partial void assert(bool p) {
         @string msg = assertionFailedˢ;
         // Include information about the assertion location. Due to panic recovery,
         // this location is otherwise buried in the middle of the panicking stack.
-        {
-            var (_, @file, line, ok) = runtime.Caller(1); if (ok) {
-                msg = fmt.Sprintf("%s:%d: %s"u8, @file, line, msg);
-            }
+        var (_, @file, line, ok) = runtime.Caller(1); if (ok) {
+            msg = fmt.Sprintf("%s:%d: %s"u8, @file, line, msg);
         }
         throw panic(msg);
     }
@@ -73,13 +71,11 @@ internal static void addf(this ref error_ err, positioner at, @string format, pa
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
 internal static void addAltDecl(this ref error_ err, Object obj) {
-    {
-        tokenꓸPos pos = obj.Pos(); if (pos.IsValid()) {
-            // We use "other" rather than "previous" here because
-            // the first declaration seen may not be textually
-            // earlier in the source.
-            err.addf(new Objectᴠpositioner(obj), "other declaration of %s", obj.Name());
-        }
+    tokenꓸPos pos = obj.Pos(); if (pos.IsValid()) {
+        // We use "other" rather than "previous" here because
+        // the first declaration seen may not be textually
+        // earlier in the source.
+        err.addf(new Objectᴠpositioner(obj), "other declaration of %s", obj.Name());
     }
 }
 
@@ -200,12 +196,10 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         // If we have a URL for error codes, add a link to the first line.
         if (check.conf._ErrorURL != ""u8) {
             @string url = fmt.Sprintf(check.conf._ErrorURL, code);
-            {
-                nint i = strings.Index(msg, "\n"); if (i >= 0) {
-                    msg = msg.slice(0, i) + url + msg.slice(i);
-                } else {
-                    msg += url;
-                }
+            nint i = strings.Index(msg, "\n"); if (i >= 0) {
+                msg = msg.slice(0, i) + url + msg.slice(i);
+            } else {
+                msg += url;
             }
         }
     } else {

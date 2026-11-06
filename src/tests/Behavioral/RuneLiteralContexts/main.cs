@@ -121,7 +121,7 @@ internal static partial void Main() {
     var doneʗ1 = done;
     goǃ((rune rΔ2) => {
         doneʗ1.ᐸꟷ(rΔ2);
-    }, (rune)'g', GoStack.Bounded);
+    }, (rune)'g');
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
 
     foreach (var (_, c) in slice<byte>("a_7."u8)) {
@@ -144,14 +144,12 @@ internal static partial void Main() {
             break;
         }}
 
-        {
-            var d = c;
-            switch (ᐧ) {
-            case {} when d is (byte)'.': {
-                fmt.Println("true-tag dot");
-                break;
-            }}
-        }
+        var d = c;
+        switch (ᐧ) {
+        case {} when d is (byte)'.': {
+            fmt.Println("true-tag dot");
+            break;
+        }}
 
     }
 }

@@ -71,10 +71,8 @@ internal static void @catch(@string tag) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var r = recover(calledByDefer); if (r != nil) {
-                fmt.Println(tag, "recovered:", r);
-            }
+        var r = recover(calledByDefer); if (r != nil) {
+            fmt.Println(tag, "recovered:", r);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -116,7 +114,7 @@ internal static partial void spawned() {
 
     var b = Ꮡ(new box(name: "b"));
     var bʗ1 = b;
-    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);
+    goǃ(bʗ1.say, (@string)"hello");
     fmt.Println(ᐸꟷ(results));
 
     var f = report;

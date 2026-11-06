@@ -263,7 +263,7 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> t) {
             }
             atomic.AddUint64(Ꮡcount, c);
             Ꮡg.Done();
-        }, GoStack.Bounded);
+        });
     }
     Ꮡg.Wait();
     {

@@ -122,3 +122,6 @@ the deferral visible, and the `OnGoroutine` flag is the hook a live-goroutine re
 
 > **Amended 2026-10-25 (lane C2):** option A has a PROPOSED design, [Goexit from the main goroutine](../DESIGN-goexit-main.md),
 > ruled for the first .2 seat. Until it lands, option C above is the shape golib ships.
+>
+> **Amended 2026-11-05 (C1, D1):** option A is IMPLEMENTED (`claude/c1-goexit-main`), as the design's "As built"
+> section records. Option C's gate remains only for a thread with no goroutine identity at all.

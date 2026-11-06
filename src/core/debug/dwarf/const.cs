@@ -137,10 +137,8 @@ public static Attr AttrDefaulted => 0x8B;
 public static Attr AttrLoclistsBase => 0x8C;
 
 public static @string GoString(this Attr a) {
-    {
-        var (str, ok) = _Attr_map[a, ꟷ]; if (ok) {
-            return "dwarf.Attr"u8 + str;
-        }
+    var (str, ok) = _Attr_map[a, ꟷ]; if (ok) {
+        return "dwarf.Attr"u8 + str;
     }
     return "dwarf."u8 + a.String();
 }

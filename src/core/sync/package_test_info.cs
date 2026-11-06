@@ -40,6 +40,22 @@ using static global::go.sync_test_package;
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 [assembly: GoFieldAccess(typeof(sync_package.Cond))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("cond_test.cs", 266, 9, 7)]
+[assembly: GoBoundedGoroutine("example_test.cs", 56, 9, 0)]
+[assembly: GoBoundedGoroutine("map_test.cs", 427, 9, 3)]
+[assembly: GoBoundedGoroutine("mutex_test.cs", 112, 13, 3)]
+[assembly: GoBoundedGoroutine("mutex_test.cs", 243, 9, 4)]
+[assembly: GoBoundedGoroutine("mutex_test.cs", 260, 9, 5)]
+[assembly: GoBoundedGoroutine("mutex_test.cs", 366, 17, 6)]
+[assembly: GoBoundedGoroutine("rwmutex_test.cs", 37, 9, 0)]
+[assembly: GoBoundedGoroutine("waitgroup_test.cs", 34, 9, 0)]
+[assembly: GoBoundedGoroutine("waitgroup_test.cs", 102, 9, 1)]
+[assembly: GoBoundedGoroutine("waitgroup_test.cs", 110, 9, 2)]
+[assembly: GoBoundedGoroutine("waitgroup_test.cs", 130, 5, 3)]
+[assembly: GoBoundedGoroutine("waitgroup_test.cs", 253, 13, 4)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

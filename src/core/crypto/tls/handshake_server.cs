@@ -210,13 +210,11 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
     var originalConfig = c.config;
     if (c.config.GetConfigForClient != nil) {
         var chi = clientHelloInfo(ctx, ref (Ꮡc).DerefOrNull(), ref (clientHello).DerefOrNull());
-        {
-            (configForClient, err) = c.config.GetConfigForClient(chi); if (err != nil) {
-                Ꮡc.sendAlert(alertInternalError);
-                return (default, default, err);
-            } else if (configForClient != nil) {
-                c.config = configForClient;
-            }
+        (configForClient, err) = c.config.GetConfigForClient(chi); if (err != nil) {
+            Ꮡc.sendAlert(alertInternalError);
+            return (default, default, err);
+        } else if (configForClient != nil) {
+            c.config = configForClient;
         }
     }
     c.ticketKeys = originalConfig.ticketKeys(configForClient);
@@ -669,11 +667,9 @@ internal static error doResumeHandshake(this ж<serverHandshakeState> Ꮡhs) {
     }
 
     if (c.config.VerifyConnection != nil) {
-        {
-            var err = c.config.VerifyConnection(c.connectionStateLocked()); if (err != nil) {
-                c.sendAlert(alertBadCertificate);
-                return err;
-            }
+        var err = c.config.VerifyConnection(c.connectionStateLocked()); if (err != nil) {
+            c.sendAlert(alertBadCertificate);
+            return err;
         }
     }
 
@@ -708,32 +704,24 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         // certificates won't be used.
         hs.finishedHash.discardHandshakeBuffer();
     }
-    {
-        var errΔ1 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var (_, errΔ2) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var (_, errΔ2) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
+        return errΔ2;
     }
 
     var certMsg = @new<certificateMsg>();
     certMsg.certificates = hs.cert.ΔCertificate;
-    {
-        var (_, errΔ3) = hs.c.writeHandshakeRecord(new certificateMsgжhandshakeMessage(certMsg), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var (_, errΔ3) = hs.c.writeHandshakeRecord(new certificateMsgжhandshakeMessage(certMsg), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ3 != nil) {
+        return errΔ3;
     }
 
     if (hs.hello.ocspStapling) {
         var certStatus = @new<certificateStatusMsg>();
         certStatus.response = hs.cert.OCSPStaple;
-        {
-            var (_, errΔ4) = hs.c.writeHandshakeRecord(new certificateStatusMsgжhandshakeMessage(certStatus), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ4 != nil) {
-                return errΔ4;
-            }
+        var (_, errΔ4) = hs.c.writeHandshakeRecord(new certificateStatusMsgжhandshakeMessage(certStatus), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ4 != nil) {
+            return errΔ4;
         }
     }
 
@@ -744,16 +732,12 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         return err;
     }
     if (skx != nil) {
-        {
-            var (keyAgreementΔ1, okΔ1) = keyAgreement._<ж<ecdheKeyAgreement>>(ᐧ); if (okΔ1) {
-                c.curveID = keyAgreementΔ1.curveID;
-                c.peerSigAlg = keyAgreementΔ1.signatureAlgorithm;
-            }
+        var (keyAgreementΔ1, okΔ1) = keyAgreement._<ж<ecdheKeyAgreement>>(ᐧ); if (okΔ1) {
+            c.curveID = keyAgreementΔ1.curveID;
+            c.peerSigAlg = keyAgreementΔ1.signatureAlgorithm;
         }
-        {
-            var (_, errΔ5) = hs.c.writeHandshakeRecord(new serverKeyExchangeMsgжhandshakeMessage(skx), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ5 != nil) {
-                return errΔ5;
-            }
+        var (_, errΔ5) = hs.c.writeHandshakeRecord(new serverKeyExchangeMsgжhandshakeMessage(skx), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ5 != nil) {
+            return errΔ5;
         }
     }
 
@@ -778,24 +762,18 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         if (c.config.ClientCAs != nil) {
             certReq.certificateAuthorities = c.config.ClientCAs.Subjects();
         }
-        {
-            var (_, errΔ6) = hs.c.writeHandshakeRecord(new certificateRequestMsgжhandshakeMessage(certReq), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ6 != nil) {
-                return errΔ6;
-            }
+        var (_, errΔ6) = hs.c.writeHandshakeRecord(new certificateRequestMsgжhandshakeMessage(certReq), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ6 != nil) {
+            return errΔ6;
         }
     }
 
     var helloDone = @new<serverHelloDoneMsg>();
-    {
-        var (_, errΔ7) = hs.c.writeHandshakeRecord(new serverHelloDoneMsgжhandshakeMessage(helloDone), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ7 != nil) {
-            return errΔ7;
-        }
+    var (_, errΔ7) = hs.c.writeHandshakeRecord(new serverHelloDoneMsgжhandshakeMessage(helloDone), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ7 != nil) {
+        return errΔ7;
     }
 
-    {
-        var (_, errΔ8) = c.flush(); if (errΔ8 != nil) {
-            return errΔ8;
-        }
+    var (_, errΔ8) = c.flush(); if (errΔ8 != nil) {
+        return errΔ8;
     }
 
     cryptoꓸPublicKey pub = default; // public key for client auth, if any
@@ -814,12 +792,10 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
             return unexpectedMessageError(certMsgΔ1.OrTypedNil(), msg);
         }
 
-        {
-            var errΔ9 = c.processCertsFromClient(new Certificate(
-                ΔCertificate: certMsgΔ1.certificates
-            )); if (errΔ9 != nil) {
-                return errΔ9;
-            }
+        var errΔ9 = c.processCertsFromClient(new Certificate(
+            ΔCertificate: certMsgΔ1.certificates
+        )); if (errΔ9 != nil) {
+            return errΔ9;
         }
         if (len(certMsgΔ1.certificates) != 0) {
             pub = c.peerCertificates[0].PublicKey;
@@ -831,11 +807,9 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         }
     }
     if (c.config.VerifyConnection != nil) {
-        {
-            var errΔ10 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ10 != nil) {
-                c.sendAlert(alertBadCertificate);
-                return errΔ10;
-            }
+        var errΔ10 = c.config.VerifyConnection(c.connectionStateLocked()); if (errΔ10 != nil) {
+            c.sendAlert(alertBadCertificate);
+            return errΔ10;
         }
     }
 
@@ -866,11 +840,9 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
         hs.masterSecret = masterFromPreMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
             hs.clientHello.random, hs.hello.random);
     }
-    {
-        var errΔ11 = c.config.writeKeyLog(keyLogLabelTLS12, hs.clientHello.random, hs.masterSecret); if (errΔ11 != nil) {
-            c.sendAlert(alertInternalError);
-            return errΔ11;
-        }
+    var errΔ11 = c.config.writeKeyLog(keyLogLabelTLS12, hs.clientHello.random, hs.masterSecret); if (errΔ11 != nil) {
+        c.sendAlert(alertInternalError);
+        return errΔ11;
     }
 
     // If we received a client cert in response to our certificate request message,
@@ -912,11 +884,9 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
                 c.sendAlert(alertInternalError);
                 return errors.New(tlsInternalErrorDidNotˢ);
             }
-            {
-                var errΔ12 = verifyHandshakeSignature(sigType, pub, sigHash, hs.finishedHash.buffer, certVerify.signature); if (errΔ12 != nil) {
-                    c.sendAlert(alertDecryptError);
-                    return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ12.Error());
-                }
+            var errΔ12 = verifyHandshakeSignature(sigType, pub, sigHash, hs.finishedHash.buffer, certVerify.signature); if (errΔ12 != nil) {
+                c.sendAlert(alertDecryptError);
+                return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ12.Error());
             }
         } else {
             (sigType, sigHash, err) = legacyTypeAndHashFromPublicKey(pub);
@@ -925,20 +895,16 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
                 return err;
             }
             var signed = hs.finishedHash.hashForClientCertificate(sigType);
-            {
-                var errΔ13 = verifyLegacyHandshakeSignature(sigType, pub, sigHash, signed, certVerify.signature); if (errΔ13 != nil) {
-                    c.sendAlert(alertDecryptError);
-                    return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ13.Error());
-                }
+            var errΔ13 = verifyLegacyHandshakeSignature(sigType, pub, sigHash, signed, certVerify.signature); if (errΔ13 != nil) {
+                c.sendAlert(alertDecryptError);
+                return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ13.Error());
             }
         }
 
         c.peerSigAlg = certVerify.signatureAlgorithm;
 
-        {
-            var errΔ14 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ14 != nil) {
-                return errΔ14;
-            }
+        var errΔ14 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ14 != nil) {
+            return errΔ14;
         }
     }
 
@@ -982,10 +948,8 @@ internal static error readFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
 
     var c = hs.c;
 
-    {
-        var errΔ1 = c.readChangeCipherSpec(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = c.readChangeCipherSpec(); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     // finishedMsg is included in the transcript, but not until after we
@@ -1007,10 +971,8 @@ internal static error readFinished(this ж<serverHandshakeState> Ꮡhs, slice<by
         return errors.New(tlsClientSFinishedˢ);
     }
 
-    {
-        var errΔ2 = transcriptMsg(new finishedMsgжhandshakeMessage(clientFinished), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = transcriptMsg(new finishedMsgжhandshakeMessage(clientFinished), new ΔfinishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
+        return errΔ2;
     }
 
     copy(@out, verify);
@@ -1097,19 +1059,15 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
     var certs = new slice<ж<Δx509.Certificate>>(len(certificates));
     error err = default;
     foreach (var (i, asn1Data) in certificates) {
-        {
-            (certs[i], err) = Δx509.ParseCertificate(asn1Data); if (err != nil) {
-                Ꮡc.sendAlert(alertDecodeError);
-                return errors.New("tls: failed to parse client certificate: "u8 + err.Error());
-            }
+        (certs[i], err) = Δx509.ParseCertificate(asn1Data); if (err != nil) {
+            Ꮡc.sendAlert(alertDecodeError);
+            return errors.New("tls: failed to parse client certificate: "u8 + err.Error());
         }
         if (certs[i].PublicKeyAlgorithm == Δx509.RSA) {
             nint n = certs[i].PublicKey._<ж<rsa.PublicKey>>().N.BitLen();
-            {
-                var (max, ok) = checkKeySize(n); if (!ok) {
-                    Ꮡc.sendAlert(alertBadCertificate);
-                    return fmt.Errorf("tls: client sent certificate containing RSA key larger than %d bits"u8, max);
-                }
+            var (max, ok) = checkKeySize(n); if (!ok) {
+                Ꮡc.sendAlert(alertBadCertificate);
+                return fmt.Errorf("tls: client sent certificate containing RSA key larger than %d bits"u8, max);
             }
         }
     }
@@ -1137,16 +1095,12 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
 
         var (chains, errΔ1) = certs[0].Verify(opts);
         if (errΔ1 != nil) {
-            {
-                var (_, ok) = errors.AsType<Δx509.UnknownAuthorityError>(errΔ1); if (ok) {
-                    Ꮡc.sendAlert(alertUnknownCA);
-                } else {
-                    var (errCertificateInvalid, okΔ1) = errors.AsType<Δx509.CertificateInvalidError>(errΔ1); if (okΔ1 && errCertificateInvalid.Reason == Δx509.Expired) {
-                        Ꮡc.sendAlert(alertCertificateExpired);
-                    } else {
-                        Ꮡc.sendAlert(alertBadCertificate);
-                    }
-                }
+            var (_, ok) = errors.AsType<Δx509.UnknownAuthorityError>(errΔ1); if (ok) {
+                Ꮡc.sendAlert(alertUnknownCA);
+            } else if (errors.AsType<Δx509.CertificateInvalidError>(errΔ1) is var (errCertificateInvalid, okΔ1) && okΔ1 && errCertificateInvalid.Reason == Δx509.Expired) {
+                Ꮡc.sendAlert(alertCertificateExpired);
+            } else {
+                Ꮡc.sendAlert(alertBadCertificate);
             }
             return new CertificateVerificationErrorжerror(Ꮡ(new CertificateVerificationError(UnverifiedCertificates: certs, Err: errΔ1)));
         }
@@ -1176,11 +1130,9 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
     }
 
     if (c.config.VerifyPeerCertificate != nil) {
-        {
-            var errΔ2 = c.config.VerifyPeerCertificate(certificates, c.verifiedChains); if (errΔ2 != nil) {
-                Ꮡc.sendAlert(alertBadCertificate);
-                return errΔ2;
-            }
+        var errΔ2 = c.config.VerifyPeerCertificate(certificates, c.verifiedChains); if (errΔ2 != nil) {
+            Ꮡc.sendAlert(alertBadCertificate);
+            return errΔ2;
         }
     }
 

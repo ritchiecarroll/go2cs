@@ -146,10 +146,8 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     // Find a nice starting point for the plot.
     var xMin = time.ΔSecond;
     while (xMin > 1) {
-        {
-            var mmu = mmuCurve.MMU(xMin); if (mmu < 0.0001D) {
-                break;
-            }
+        var mmu = mmuCurve.MMU(xMin); if (mmu < 0.0001D) {
+            break;
         }
         xMin /= 1000;
     }
@@ -165,10 +163,8 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
             maxEvent = mu1[len(mu1) - 1].Time;
         }
     }
-    {
-        var maxMax = (time.Duration)(maxEvent - minEvent); if (xMax > maxMax) {
-            xMax = maxMax;
-        }
+    var maxMax = (time.Duration)(maxEvent - minEvent); if (xMax > maxMax) {
+        xMax = maxMax;
     }
     // Compute MMU curve.
     var (logMin, logMax) = (math.Log((float64)xMin), math.Log((float64)xMax));

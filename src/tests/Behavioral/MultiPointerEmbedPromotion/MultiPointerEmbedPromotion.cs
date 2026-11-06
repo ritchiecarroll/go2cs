@@ -52,10 +52,8 @@ partial struct duplex {
 }
 
 internal static error Close(this ref duplex d) {
-    {
-        var err = d.reader.Close(); if (err != nil) {
-            return err;
-        }
+    var err = d.reader.Close(); if (err != nil) {
+        return err;
     }
     return d.writer.Close();
 }

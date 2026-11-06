@@ -174,10 +174,8 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
     // Try to steal one element from other procs.
     for (nint i = 0; i < (nint)size; i++) {
         var lΔ1 = indexLocal(locals, rem((pid + i + 1), (nint)size));
-        {
-            var (x, _) = lΔ1.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
-                return x;
-            }
+        var (x, _) = lΔ1.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
+            return x;
         }
     }
 
@@ -198,10 +196,8 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
     }
     for (nint i = 0; i < (nint)size; i++) {
         var lΔ2 = indexLocal(locals, rem((pid + i), (nint)size));
-        {
-            var (x, _) = lΔ2.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
-                return x;
-            }
+        var (x, _) = lΔ2.of(poolLocal.Ꮡshared).popTail(); if (x != nil) {
+            return x;
         }
     }
 

@@ -296,58 +296,56 @@ Found:
     if ((~s).acquiretime != 0) {
         now = cputicks();
     }
-    {
-        var t = s.Value.waitlink; if (t != nil) {
-            // Substitute t, also waiting on addr, for s in root tree of unique addrs.
-            ps.ValueSlot = t;
-            t.Value.ticket = s.Value.ticket;
-            t.Value.parent = s.Value.parent;
-            t.Value.prev = s.Value.prev;
-            if ((~t).prev != nil) {
-                t.Value.prev.Value.parent = t;
-            }
-            t.Value.next = s.Value.next;
-            if ((~t).next != nil) {
-                t.Value.next.Value.parent = t;
-            }
-            if ((~t).waitlink != nil) {
-                t.Value.waittail = s.Value.waittail;
-            } else {
-                t.Value.waittail = default;
-            }
-            t.Value.waiters = s.Value.waiters;
-            if ((~t).waiters > 1) {
-                t.Value.waiters--;
-            }
-            // Set head and tail acquire time to 'now',
-            // because the caller will take care of charging
-            // the delays before now for all entries in the list.
-            t.Value.acquiretime = now;
-            tailtime = s.Value.waittail.Value.acquiretime;
-            s.Value.waittail.Value.acquiretime = now;
-            s.Value.waitlink = default;
-            s.Value.waittail = default;
-        } else {
-            // Rotate s down to be leaf of tree for removal, respecting priorities.
-            while ((~s).next != nil || (~s).prev != nil) {
-                if ((~s).next == nil || (~s).prev != nil && (~(~s).prev).ticket < (~(~s).next).ticket) {
-                    root.rotateRight(s);
-                } else {
-                    root.rotateLeft(s);
-                }
-            }
-            // Remove s, now a leaf.
-            if ((~s).parent != nil) {
-                if ((~(~s).parent).prev == s) {
-                    s.Value.parent.Value.prev = default;
-                } else {
-                    s.Value.parent.Value.next = default;
-                }
-            } else {
-                root.treap = default;
-            }
-            tailtime = s.Value.acquiretime;
+    var t = s.Value.waitlink; if (t != nil) {
+        // Substitute t, also waiting on addr, for s in root tree of unique addrs.
+        ps.ValueSlot = t;
+        t.Value.ticket = s.Value.ticket;
+        t.Value.parent = s.Value.parent;
+        t.Value.prev = s.Value.prev;
+        if ((~t).prev != nil) {
+            t.Value.prev.Value.parent = t;
         }
+        t.Value.next = s.Value.next;
+        if ((~t).next != nil) {
+            t.Value.next.Value.parent = t;
+        }
+        if ((~t).waitlink != nil) {
+            t.Value.waittail = s.Value.waittail;
+        } else {
+            t.Value.waittail = default;
+        }
+        t.Value.waiters = s.Value.waiters;
+        if ((~t).waiters > 1) {
+            t.Value.waiters--;
+        }
+        // Set head and tail acquire time to 'now',
+        // because the caller will take care of charging
+        // the delays before now for all entries in the list.
+        t.Value.acquiretime = now;
+        tailtime = s.Value.waittail.Value.acquiretime;
+        s.Value.waittail.Value.acquiretime = now;
+        s.Value.waitlink = default;
+        s.Value.waittail = default;
+    } else {
+        // Rotate s down to be leaf of tree for removal, respecting priorities.
+        while ((~s).next != nil || (~s).prev != nil) {
+            if ((~s).next == nil || (~s).prev != nil && (~(~s).prev).ticket < (~(~s).next).ticket) {
+                root.rotateRight(s);
+            } else {
+                root.rotateLeft(s);
+            }
+        }
+        // Remove s, now a leaf.
+        if ((~s).parent != nil) {
+            if ((~(~s).parent).prev == s) {
+                s.Value.parent.Value.prev = default;
+            } else {
+                s.Value.parent.Value.next = default;
+            }
+        } else {
+            root.treap = default;
+        }
+        tailtime = s.Value.acquiretime;
     }
     // Goroutine is no longer blocked. Clear the waiting pointer.
     s.Value.g.Value.waiting = default;

@@ -165,10 +165,8 @@ internal static void iterate_finq(Action<ж<funcval>, @unsafe.Pointer, uintptr, 
 }
 
 internal static ж<g> wakefing() {
-    {
-        var ok = ᏑfingStatus.CompareAndSwap((uint32)((uint32)(fingCreated | fingWait) | fingWake), fingCreated); if (ok) {
-            return fing;
-        }
+    var ok = ᏑfingStatus.CompareAndSwap((uint32)((uint32)(fingCreated | fingWait) | fingWake), fingCreated); if (ok) {
+        return fing;
     }
     return default;
 }
@@ -535,10 +533,8 @@ public static void SetFinalizer(any objʗp, any finalizerʗp) {
             // ok - satisfies empty interface
             goto okarg;
         }
-        {
-            var itab = assertE2I2(ityp, (~efaceOf(Ꮡobj))._type); if (itab != nil) {
-                goto okarg;
-            }
+        var itab = assertE2I2(ityp, (~efaceOf(Ꮡobj))._type); if (itab != nil) {
+            goto okarg;
         }
         break;
     }}

@@ -59,20 +59,18 @@ partial class cmplx_package {
 
 // Tan returns the tangent of x.
 public static complex128 Tan(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when math.IsInf(im, 0): {
         switch (ᐧ) {
-        case {} when math.IsInf(im, 0): {
-            switch (ᐧ) {
-            case {} when math.IsInf(re, 0) || math.IsNaN(re): {
-                return complex(math.Copysign(0D, re), math.Copysign(1D, im));
-            }}
-            return complex(math.Copysign(0D, math.Sin(2D * re)), math.Copysign(1D, im));
-        }
-        case {} when re == 0D && math.IsNaN(im): {
-            return x;
+        case {} when math.IsInf(re, 0) || math.IsNaN(re): {
+            return complex(math.Copysign(0D, re), math.Copysign(1D, im));
         }}
+        return complex(math.Copysign(0D, math.Sin(2D * re)), math.Copysign(1D, im));
     }
+    case {} when re == 0D && math.IsNaN(im): {
+        return x;
+    }}
     var d = math.Cos(2D * real(x)) + math.Cosh(2D * imag(x));
     if (math.Abs(d) < 0.25D) {
         d = tanSeries(x);
@@ -97,20 +95,18 @@ public static complex128 Tan(complex128 x) {
 
 // Tanh returns the hyperbolic tangent of x.
 public static complex128 Tanh(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when math.IsInf(re, 0): {
         switch (ᐧ) {
-        case {} when math.IsInf(re, 0): {
-            switch (ᐧ) {
-            case {} when math.IsInf(im, 0) || math.IsNaN(im): {
-                return complex(math.Copysign(1D, re), math.Copysign(0D, im));
-            }}
-            return complex(math.Copysign(1D, re), math.Copysign(0D, math.Sin(2D * im)));
-        }
-        case {} when im == 0D && math.IsNaN(re): {
-            return x;
+        case {} when math.IsInf(im, 0) || math.IsNaN(im): {
+            return complex(math.Copysign(1D, re), math.Copysign(0D, im));
         }}
+        return complex(math.Copysign(1D, re), math.Copysign(0D, math.Sin(2D * im)));
     }
+    case {} when im == 0D && math.IsNaN(re): {
+        return x;
+    }}
     var d = math.Cosh(2D * real(x)) + math.Cos(2D * imag(x));
     if (d == 0D) {
         return Inf();

@@ -27,10 +27,8 @@ internal static (slice<@string>, error) listGroups(ref User u) {
     if (rv == -1) {
         // Mac is the only Unix that does not set n properly when rv == -1, so
         // we need to use different logic for Mac vs. the other OS's.
-        {
-            var errΔ1 = groupRetry(u.Username, nameC, userGID, ᏑgidsC, Ꮡn); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = groupRetry(u.Username, nameC, userGID, ᏑgidsC, Ꮡn); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     gidsC = gidsC.slice(0, n);

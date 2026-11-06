@@ -744,7 +744,7 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> t) {
                 garbageʗ1[i] = 42;
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         ᐸꟷ(done);
 
         ref var prof = ref builtin.heap(new bytes.Buffer(), out var Ꮡprof);
@@ -1362,7 +1362,7 @@ internal static partial void blockMutexN(ж<testing.T> t, nint n, time.Duration 
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }
@@ -1713,15 +1713,15 @@ public static partial void TestGoroutineCounts(ж<testing.T> t) {
         for (nint i = 0; i < 100; i++) {
             switch (ᐧ) {
             case {} when i % 10 is 0: {
-                goǃ(func1, c, GoStack.Bounded);
+                goǃ(func1, c);
                 break;
             }
             case {} when i % 2 is 0: {
-                goǃ(func2, c, GoStack.Bounded);
+                goǃ(func2, c);
                 break;
             }
             default: {
-                goǃ(func3, c, GoStack.Bounded);
+                goǃ(func3, c);
                 break;
             }}
             // Let goroutines block on channel
@@ -1738,15 +1738,15 @@ public static partial void TestGoroutineCounts(ж<testing.T> t) {
             for (nint i = 0; i < 89; i++) {
                 switch (ᐧ) {
                 case {} when i % 10 is 0: {
-                    goǃ(func1, cʗ1, GoStack.Bounded);
+                    goǃ(func1, cʗ1);
                     break;
                 }
                 case {} when i % 2 is 0: {
-                    goǃ(func2, cʗ1, GoStack.Bounded);
+                    goǃ(func2, cʗ1);
                     break;
                 }
                 default: {
-                    goǃ(func3, cʗ1, GoStack.Bounded);
+                    goǃ(func3, cʗ1);
                     break;
                 }}
                 // Let goroutines block on channel
@@ -2018,13 +2018,13 @@ public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> t) 
     // Leak some goroutines that will feature in the goroutine leak profile
     UntypedInt totalLeaked = /* leakCount * 2 */ 6;
     for (nint i = 0; i < leakCount; i++) {
-        goǃ(goroutineLeakExample, GoStack.Bounded);
+        goǃ(goroutineLeakExample);
         goǃ(() => {
             // Leak another goroutine that will feature a slightly different stack.
             // This includes the frame runtime/pprof.TestGoroutineLeakProfileConcurrency.func1.
             goroutineLeakExample();
             throw panic("unreachable");
-        }, GoStack.Bounded);
+        });
     }
 
     // Wait for the goroutines to leak. We might wait here until the timeout,
@@ -2365,7 +2365,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> t) {
                         goǃ(() => {
                             ᐸꟷ(chʗ2);
                             Ꮡdone.Done();
-                        }, GoStack.Bounded);
+                        });
                         for (nint j = 0; j < i; j++) {
                             // Spin for longer and longer as the test goes on. This
                             // goroutine will do O(N^2) work with the number of
@@ -2582,7 +2582,7 @@ public static void BenchmarkGoroutine(ж<testing.B> b) {
                         Ꮡready.Done();
                         ᐸꟷ(cʗ2);
                         Ꮡdone.Done();
-                    }, GoStack.Bounded);
+                    });
                 }
                 // Let goroutines block on channel
                 Ꮡready.Wait();
@@ -3039,7 +3039,7 @@ public static partial void TestTracebackAll(ж<testing.T> t) {
             var chʗ1 = ch;
             goǃ(() => {
                 ᐸꟷ(chʗ1); // block
-            }, GoStack.Bounded);
+            });
         }
 
         nint N = 10000;
@@ -3494,7 +3494,7 @@ internal static partial void blockMutexDeep(ж<testing.T> t, nint n) {
     goǃ(() => {
         Ꮡmu.Lock();
         Ꮡmu.Lock();
-    }, GoStack.Bounded);
+    });
     awaitBlockedGoroutine(t, syncMutexLockˢ, blockMutexDeepˢ, 1);
     Ꮡmu.Unlock();
 }
@@ -3606,7 +3606,7 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> t) {
                     Ꮡm.Unlock();
                 }
                 Ꮡwg.Done();
-            }, GoStack.Bounded);
+            });
         }
         Ꮡwg.Wait();
 
@@ -3698,10 +3698,10 @@ public static partial void TestBlockMutexProfileInlineExpansion(ж<testing.T> t)
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(2);
         Ꮡmu.Lock();
-        goǃ(inlineA, Ꮡmu, Ꮡwg, GoStack.Bounded);
+        goǃ(inlineA, Ꮡmu, Ꮡwg);
         awaitBlockedGoroutine(t, syncMutexLockˢ, inlineCˢ, 1);
         // inlineD will unblock inlineA
-        goǃ(inlineD, Ꮡmu, Ꮡwg, GoStack.Bounded);
+        goǃ(inlineD, Ꮡmu, Ꮡwg);
         Ꮡwg.Wait();
 
         var tcs = slice<TestBlockMutexProfileInlineExpansion_tcs>([

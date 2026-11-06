@@ -109,10 +109,8 @@ internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Commen
             // not all comments on the same line
             return true;
         }
-        {
-            @string t = c.Text; if (len(t) >= 2 && (t[1] == '/' || strings.Contains(t, "\n"))) {
-                return true;
-            }
+        @string t = c.Text; if (len(t) >= 2 && (t[1] == '/' || strings.Contains(t, "\n"))) {
+            return true;
         }
     }
     _ = line;
@@ -123,13 +121,11 @@ internal static void nextComment(this ref printer p) {
     while (p.cindex < len(p.comments)) {
         var c = p.comments[p.cindex];
         p.cindex++;
-        {
-            var list = c.List; if (len(list) > 0) {
-                p.comment = c;
-                p.commentOffset = p.posFor(list[0].Pos()).Offset;
-                p.commentNewline = p.commentsHaveNewline(list);
-                return;
-            }
+        var list = c.List; if (len(list) > 0) {
+            p.comment = c;
+            p.commentOffset = p.posFor(list[0].Pos()).Offset;
+            p.commentNewline = p.commentsHaveNewline(list);
+            return;
         }
         // we should not reach here (correct ASTs don't have empty
         // ast.CommentGroup nodes), but be conservative and try again
@@ -321,16 +317,14 @@ internal static void writeString(this ref printer p, tokenꓸPosition pos, @stri
     nint li = default; // index of last newline; valid if nlines > 0
     for (nint i = 0; i < len(s); i++) {
         // Raw string literals may contain any character except back quote (`).
-        {
-            var ch = s[i]; if (ch == '\n' || ch == '\f') {
-                // account for line break
-                nlines++;
-                li = i;
-                // A line break inside a literal will break whatever column
-                // formatting is in place; ignore any further alignment through
-                // the end of the line.
-                p.endAlignment = true;
-            }
+        var ch = s[i]; if (ch == '\n' || ch == '\f') {
+            // account for line break
+            nlines++;
+            li = i;
+            // A line break inside a literal will break whatever column
+            // formatting is in place; ignore any further alignment through
+            // the end of the line.
+            p.endAlignment = true;
         }
     }
     p.pos.Offset += len(s);
@@ -574,54 +568,52 @@ internal static void stripCommonPrefix(slice<@string> lines) {
 	 * Check for vertical "line of stars" and correct prefix accordingly.
 	 */
     var lineOfStars = false;
-    {
-        var (p, _, ok) = strings.Cut(prefix, "*"); if (ok) {
-            // remove trailing blank from prefix so stars remain aligned
-            prefix = strings.TrimSuffix(p, " ");
-            lineOfStars = true;
-        } else {
-            // No line of stars present.
-            // Determine the white space on the first line after the /*
-            // and before the beginning of the comment text, assume two
-            // blanks instead of the /* unless the first character after
-            // the /* is a tab. If the first comment line is empty but
-            // for the opening /*, assume up to 3 blanks or a tab. This
-            // whitespace may be found as suffix in the common prefix.
-            @string first = lines[0];
-            if (isBlank(first[2..])) {
-                // no comment text on the first line:
-                // reduce prefix by up to 3 blanks or a tab
-                // if present - this keeps comment text indented
-                // relative to the /* and */'s if it was indented
-                // in the first place
-                nint i = len(prefix);
-                for (nint n = 0; n < 3 && i > 0 && prefix[i - 1] == ' '; n++) {
-                    i--;
-                }
-                if (i == len(prefix) && i > 0 && prefix[i - 1] == '\t') {
-                    i--;
-                }
-                prefix = prefix.slice(0, i);
-            } else {
-                // comment text on the first line
-                var suffix = new slice<byte>(len(first));
-                nint n = 2; // start after opening /*
-                while (n < len(first) && first[n] <= ' ') {
-                    suffix[n] = first[n];
-                    n++;
-                }
-                if (n > 2 && suffix[2] == '\t') {
-                    // assume the '\t' compensates for the /*
-                    suffix = suffix.slice(2, n);
-                } else {
-                    // otherwise assume two blanks
-                    (suffix[0], suffix[1]) = ((byte)' ', (byte)' ');
-                    suffix = suffix.slice(0, n);
-                }
-                // Shorten the computed common prefix by the length of
-                // suffix, if it is found as suffix of the prefix.
-                prefix = strings.TrimSuffix(prefix, (@string)suffix);
+    var (p, _, ok) = strings.Cut(prefix, "*"); if (ok) {
+        // remove trailing blank from prefix so stars remain aligned
+        prefix = strings.TrimSuffix(p, " ");
+        lineOfStars = true;
+    } else {
+        // No line of stars present.
+        // Determine the white space on the first line after the /*
+        // and before the beginning of the comment text, assume two
+        // blanks instead of the /* unless the first character after
+        // the /* is a tab. If the first comment line is empty but
+        // for the opening /*, assume up to 3 blanks or a tab. This
+        // whitespace may be found as suffix in the common prefix.
+        @string first = lines[0];
+        if (isBlank(first[2..])) {
+            // no comment text on the first line:
+            // reduce prefix by up to 3 blanks or a tab
+            // if present - this keeps comment text indented
+            // relative to the /* and */'s if it was indented
+            // in the first place
+            nint i = len(prefix);
+            for (nint n = 0; n < 3 && i > 0 && prefix[i - 1] == ' '; n++) {
+                i--;
             }
+            if (i == len(prefix) && i > 0 && prefix[i - 1] == '\t') {
+                i--;
+            }
+            prefix = prefix.slice(0, i);
+        } else {
+            // comment text on the first line
+            var suffix = new slice<byte>(len(first));
+            nint n = 2; // start after opening /*
+            while (n < len(first) && first[n] <= ' ') {
+                suffix[n] = first[n];
+                n++;
+            }
+            if (n > 2 && suffix[2] == '\t') {
+                // assume the '\t' compensates for the /*
+                suffix = suffix.slice(2, n);
+            } else {
+                // otherwise assume two blanks
+                (suffix[0], suffix[1]) = ((byte)' ', (byte)' ');
+                suffix = suffix.slice(0, n);
+            }
+            // Shorten the computed common prefix by the length of
+            // suffix, if it is found as suffix of the prefix.
+            prefix = strings.TrimSuffix(prefix, (@string)suffix);
         }
     }
 
@@ -868,45 +860,43 @@ internal static readonly object negativeIndentationˢ = (@string)"negative inden
 internal static void writeWhitespace(this ref printer p, nint n) {
     // write entries
     for (nint i = 0; i < n; i++) {
-        {
-            var ch = p.wsbuf[i];
-            var exprᴛ1 = ch;
-            var matchᴛ1 = false;
-            if (exprᴛ1 == ignore) { matchᴛ1 = true;
-                // ignore!
+        var ch = p.wsbuf[i];
+        var exprᴛ1 = ch;
+        var matchᴛ1 = false;
+        if (exprᴛ1 == ignore) { matchᴛ1 = true;
+            // ignore!
+        }
+        else if (exprᴛ1 == indent) { matchᴛ1 = true;
+            p.indent++;
+        }
+        else if (exprᴛ1 == unindent) { matchᴛ1 = true;
+            p.indent--;
+            if (p.indent < 0) {
+                p.internalError(negativeIndentationˢ, p.indent);
+                p.indent = 0;
             }
-            else if (exprᴛ1 == indent) { matchᴛ1 = true;
-                p.indent++;
+        }
+        else if (exprᴛ1 == newline || exprᴛ1 == formfeed) { matchᴛ1 = true;
+            // A line break immediately followed by a "correcting"
+            // unindent is swapped with the unindent - this permits
+            // proper label positioning. If a comment is between
+            // the line break and the label, the unindent is not
+            // part of the comment whitespace prefix and the comment
+            // will be positioned correctly indented.
+            if (i + 1 < n && p.wsbuf[i + 1] == unindent) {
+                // Use a formfeed to terminate the current section.
+                // Otherwise, a long label name on the next line leading
+                // to a wide column may increase the indentation column
+                // of lines before the label; effectively leading to wrong
+                // indentation.
+                (p.wsbuf[i], p.wsbuf[i + 1]) = (unindent, formfeed);
+                i--; // do it again
+                continue;
             }
-            else if (exprᴛ1 == unindent) { matchᴛ1 = true;
-                p.indent--;
-                if (p.indent < 0) {
-                    p.internalError(negativeIndentationˢ, p.indent);
-                    p.indent = 0;
-                }
-            }
-            else if (exprᴛ1 == newline || exprᴛ1 == formfeed) { matchᴛ1 = true;
-                // A line break immediately followed by a "correcting"
-                // unindent is swapped with the unindent - this permits
-                // proper label positioning. If a comment is between
-                // the line break and the label, the unindent is not
-                // part of the comment whitespace prefix and the comment
-                // will be positioned correctly indented.
-                if (i + 1 < n && p.wsbuf[i + 1] == unindent) {
-                    // Use a formfeed to terminate the current section.
-                    // Otherwise, a long label name on the next line leading
-                    // to a wide column may increase the indentation column
-                    // of lines before the label; effectively leading to wrong
-                    // indentation.
-                    (p.wsbuf[i], p.wsbuf[i + 1]) = (unindent, formfeed);
-                    i--; // do it again
-                    continue;
-                }
-                fallthrough = true;
-            }
-            if (fallthrough || !matchᴛ1) { /* default: */
-                p.writeByte((byte)ch, 1);
-            }
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1) { /* default: */
+            p.writeByte((byte)ch, 1);
         }
     }
 
@@ -1201,11 +1191,9 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
 
     // unpack *CommentedNode, if any
     slice<ж<ast.CommentGroup>> comments = default;
-    {
-        var (cnode, ok) = node._<ж<CommentedNode>>(ᐧ); if (ok) {
-            node = cnode.Node;
-            comments = cnode.Comments;
-        }
+    if (node._<ж<CommentedNode>>(out var cnode)) {
+        node = cnode.Node;
+        comments = cnode.Comments;
     }
 
     if (comments != nil) {
@@ -1220,18 +1208,12 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
         // include that commentgroup in the range
         // (the comment list is sorted in the order
         // of the comment appearance in the source code)
-        {
-            var doc = getDoc(n); if (doc != nil) {
-                beg = doc.Pos();
-            }
+        var doc = getDoc(n); if (doc != nil) {
+            beg = doc.Pos();
         }
-        {
-            var com = getLastComment(n); if (com != nil) {
-                {
-                    tokenꓸPos e = com.End(); if (e > end) {
-                        end = e;
-                    }
-                }
+        var com = getLastComment(n); if (com != nil) {
+            tokenꓸPos e = com.End(); if (e > end) {
+                end = e;
             }
         }
         // token.Pos values are global offsets, we can
@@ -1247,11 +1229,9 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
         if (i < j) {
             p.comments = comments.slice(i, j);
         }
-    } else {
-        var (n, ok) = node._<ж<ast.File>>(ᐧ); if (ok) {
-            // use ast.File comments, if any
-            p.comments = n.Comments;
-        }
+    } else if (node._<ж<ast.File>>(out var n)) {
+        // use ast.File comments, if any
+        p.comments = n.Comments;
     }
 
     // if there are no comments, use node comments
@@ -1271,10 +1251,8 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
     case {} Δn when Δn._<ast.Stmt>(out var n): {
         // A labeled statement will un-indent to position the label.
         // Set p.indent to 1 so we don't get indent "underflow".
-        {
-            var (_, ok) = n._<ж<ast.LabeledStmt>>(ᐧ); if (ok) {
-                p.indent = 1;
-            }
+        if (n._<ж<ast.LabeledStmt>>(out _)) {
+            p.indent = 1;
         }
         Ꮡp.stmt(n, false);
         break;
@@ -1291,10 +1269,8 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
         // A labeled statement will un-indent to position the label.
         // Set p.indent to 1 so we don't get indent "underflow".
         foreach (var (_, s) in n) {
-            {
-                var (_, ok) = s._<ж<ast.LabeledStmt>>(ᐧ); if (ok) {
-                    p.indent = 1;
-                }
+            var (_, ok) = s._<ж<ast.LabeledStmt>>(ᐧ); if (ok) {
+                p.indent = 1;
             }
         }
         Ꮡp.stmtList(n, 0, false);
@@ -1527,10 +1503,8 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
         var p = newPrinter(ref (Ꮡcfg).DerefOrNull(), fset, nodeSizes);
         var pʗ1 = p;
         defer(pʗ1.free, ref ᒐ);
-        {
-            err = p.printNode(node); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = p.printNode(node); if (err != nil) {
+            goto ᒐdone;
         }
         // print outstanding comments
         p.impliedSemi = false; // EOF acts like a newline
@@ -1565,17 +1539,13 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
         }
 
         // write printer result via tabwriter/trimmer to output
-        {
-            (_, err) = output.Write(p.output); if (err != nil) {
-                goto ᒐdone;
-            }
+        (_, err) = output.Write(p.output); if (err != nil) {
+            goto ᒐdone;
         }
 
         // flush tabwriter, if any
-        {
-            var (tw, _) = output._<ж<tabwriter.Writer>>(ᐧ); if (tw != nil) {
-                err = tw.Flush();
-            }
+        var (tw, _) = output._<ж<tabwriter.Writer>>(ᐧ); if (tw != nil) {
+            err = tw.Flush();
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

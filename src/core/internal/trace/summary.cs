@@ -380,12 +380,10 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 //
                 // N.B. ev.Goroutine() will always be NoGoroutine for the
                 // Undetermined case, so this is will simply not fire.
-                {
-                    var creatorG = s.gs[ev.Goroutine()]; if (creatorG != nil && len(creatorG.activeRegions) > 0) {
-                        var regions = creatorG.activeRegions;
-                        var sΔ8 = regions[len(regions) - 1];
-                        g.activeRegions = slice<ж<UserRegionSummary>>([Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: Ꮡev))]);
-                    }
+                var creatorG = s.gs[ev.Goroutine()]; if (creatorG != nil && len(creatorG.activeRegions) > 0) {
+                    var regions = creatorG.activeRegions;
+                    var sΔ8 = regions[len(regions) - 1];
+                    g.activeRegions = slice<ж<UserRegionSummary>>([Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: Ꮡev))]);
                 }
                 s.gs[g.ID] = g;
                 break;
@@ -487,12 +485,10 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
             var id = st.Resource.Proc();
             var (old, @new) = st.Proc();
             if (old != @new && @new == ProcIdle) {
-                {
-                    var (goid, ok) = s.syscallingP[id, ꟷ]; if (ok) {
-                        var g = s.gs[goid];
-                        g.lastSyscallBlockTime = ev.Time();
-                        delete(s.syscallingP, id);
-                    }
+                var (goid, ok) = s.syscallingP[id, ꟷ]; if (ok) {
+                    var g = s.gs[goid];
+                    g.lastSyscallBlockTime = ev.Time();
+                    delete(s.syscallingP, id);
                 }
             }
             break;
@@ -527,10 +523,8 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
             break;
         }
         if (ev.Kind() == EventRangeActive) {
-            {
-                var ts = g.lastRangeTime[r.Name]; if (ts != 0) {
-                    g.RangeTime[r.Name] += s.syncTs.Sub(ts);
-                }
+            var ts = g.lastRangeTime[r.Name]; if (ts != 0) {
+                g.RangeTime[r.Name] += s.syncTs.Sub(ts);
             }
             g.lastRangeTime[r.Name] = s.syncTs;
         } else {
@@ -548,15 +542,13 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         }
         case var ᴛ2 when ᴛ2 == ResourceProc: {
             var rp = new rangeP(id: r.Scope.Proc(), name: r.Name);
-            {
-                var (goid, ok) = s.rangesP[rp, ꟷ]; if (ok) {
-                    if (goid == ev.Goroutine()) {
-                        // As the comment in the RangeBegin case states, this is only OK
-                        // if we finish on the same goroutine we started on.
-                        g = s.gs[goid];
-                    }
-                    delete(s.rangesP, rp);
+            var (goid, ok) = s.rangesP[rp, ꟷ]; if (ok) {
+                if (goid == ev.Goroutine()) {
+                    // As the comment in the RangeBegin case states, this is only OK
+                    // if we finish on the same goroutine we started on.
+                    g = s.gs[goid];
                 }
+                delete(s.rangesP, rp);
             }
             break;
         }}
@@ -592,22 +584,20 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         var g = s.gs[ev.Goroutine()];
         var r = ev.Region();
         ж<UserRegionSummary> sd = default;
-        {
-            var regionStk = g.activeRegions; if (len(regionStk) > 0) {
-                // Pop the top region from the stack since that's what must have ended.
-                nint n = len(regionStk);
-                sd = regionStk[n - 1];
-                regionStk = regionStk.slice(0, n - 1);
-                g.activeRegions = regionStk;
-                // N.B. No need to add the region to a task; the EventRegionBegin already handled it.
-            } else {
-                // This is an "end" without a start. Just fabricate the region now.
-                sd = Ꮡ(new UserRegionSummary(Name: r.Type, TaskID: r.Task));
-                // Associate the region and current goroutine to the task.
-                var task = s.getOrAddTask(r.Task);
-                task.Goroutines[g.ID] = g;
-                task.Regions = builtin.append(task.Regions, sd);
-            }
+        var regionStk = g.activeRegions; if (len(regionStk) > 0) {
+            // Pop the top region from the stack since that's what must have ended.
+            nint n = len(regionStk);
+            sd = regionStk[n - 1];
+            regionStk = regionStk.slice(0, n - 1);
+            g.activeRegions = regionStk;
+            // N.B. No need to add the region to a task; the EventRegionBegin already handled it.
+        } else {
+            // This is an "end" without a start. Just fabricate the region now.
+            sd = Ꮡ(new UserRegionSummary(Name: r.Type, TaskID: r.Task));
+            // Associate the region and current goroutine to the task.
+            var task = s.getOrAddTask(r.Task);
+            task.Goroutines[g.ID] = g;
+            task.Regions = builtin.append(task.Regions, sd);
         }
         sd.GoroutineExecStats = g.snapshotStat(ev.Time()).sub(sd.GoroutineExecStats);
         sd.End = Ꮡev;
@@ -675,7 +665,7 @@ public static ж<Summary> ΔFinalize(this ref Summarizer s) {
             if (y == nil) {
                 return +1;
             }
-            return cmp.Compare((~x).Time(), (~y).Time());
+            return cmp.Compare(x.Time(), y.Time());
         });
         g.goroutineSummary = default;
     }
@@ -735,10 +725,8 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
             gmap1[g] = new EmptyStruct();
         }
         foreach (var (_, edge) in unblockEdges) {
-            {
-                var (_, ok) = gmap[edge.operand, ꟷ]; if (ok) {
-                    gmap1[edge.@operator] = new EmptyStruct();
-                }
+            var (_, ok) = gmap[edge.operand, ꟷ]; if (ok) {
+                gmap1[edge.@operator] = new EmptyStruct();
             }
         }
         gmap = gmap1;

@@ -411,10 +411,8 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     }
     case var ᴛ when ᴛ == scanBeginArray: {
         if (v.IsValid()) {
-            {
-                var err = Ꮡd.Δarray(v); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡd.Δarray(v); if (err != nil) {
+                return err;
             }
         } else {
             Ꮡd.skip();
@@ -424,10 +422,8 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     }
     case var ᴛ when ᴛ == scanBeginObject: {
         if (v.IsValid()) {
-            {
-                var err = Ꮡd.@object(v); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡd.@object(v); if (err != nil) {
+                return err;
             }
         } else {
             Ꮡd.skip();
@@ -441,10 +437,8 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         Ꮡd.rescanLiteral();
 
         if (v.IsValid()) {
-            {
-                var err = d.literalStore(d.data.slice(start, d.readIndex()), v, false); if (err != nil) {
-                    return err;
-                }
+            var err = d.literalStore(d.data.slice(start, d.readIndex()), v, false); if (err != nil) {
+                return err;
             }
         }
         break;
@@ -548,10 +542,8 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
                 }
             }
             if (!decodingNull) {
-                {
-                    var (u, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(v); if (ok) {
-                        return (default, u, new reflectꓸValue());
-                    }
+                var (u, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(v); if (ok) {
+                    return (default, u, new reflectꓸValue());
                 }
             }
         }
@@ -629,17 +621,13 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
 
         if (i < v.Len()) {
             // Decode into element.
-            {
-                var err = Ꮡd.value(v.Index(i)); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡd.value(v.Index(i)); if (err != nil) {
+                return err;
             }
         } else {
             // Ran out of fixed array: skip.
-            {
-                var err = Ꮡd.value(new reflectꓸValue()); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡd.value(new reflectꓸValue()); if (err != nil) {
+                return err;
             }
         }
         i++;
@@ -857,10 +845,8 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                 break;
             }}
         } else {
-            {
-                var err = Ꮡd.value(subv); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡd.value(subv); if (err != nil) {
+                return err;
             }
         }
 
@@ -871,10 +857,8 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
             reflectꓸValue kv = new(nil);
             if (reflect.PointerTo(kt).Implements(textUnmarshalerType)) {
                 kv = reflect.New(kt);
-                {
-                    var err = d.literalStore(item, kv, true); if (err != nil) {
-                        return err;
-                    }
+                var err = d.literalStore(item, kv, true); if (err != nil) {
+                    return err;
                 }
                 kv = kv.Elem();
             } else {
@@ -1008,164 +992,162 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
 
     v = pv;
 
-    {
-        var c = item[0];
-        switch (c) {
-        case (byte)'n': { // null
-            // The main parser checks that only true and false can reach here,
-            // but if this was a quoted string input, it could be anything.
-            if (fromQuoted && ((sstring)item) != "null"u8) {
-                d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
-                break;
-            }
-            switch (v.Kind()) {
-            case var ᴛ when ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice: {
-                v.SetZero();
-                // otherwise, ignore null for primitives/string
-                break;
-            }}
+    var c = item[0];
+    switch (c) {
+    case (byte)'n': { // null
+        // The main parser checks that only true and false can reach here,
+        // but if this was a quoted string input, it could be anything.
+        if (fromQuoted && ((sstring)item) != "null"u8) {
+            d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
             break;
         }
-        case (byte)'t' or (byte)'f': { // true, false
-            var value = item[0] == 't';
-            // The main parser checks that only true and false can reach here,
-            // but if this was a quoted string input, it could be anything.
-            if (fromQuoted && ((sstring)item) != "true"u8 && ((sstring)item) != "false"u8) {
-                d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
-                break;
-            }
-            switch (v.Kind()) {
-            default: {
-                if (fromQuoted) {
-                    d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
-                } else {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool", Type: v.Type(), Offset: (int64)d.readIndex()))));
-                }
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔBool: {
-                v.SetBool(value);
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔInterface: {
-                if (v.NumMethod() == 0) {
-                    v.Set(reflect.ValueOf(value));
-                } else {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool", Type: v.Type(), Offset: (int64)d.readIndex()))));
-                }
-                break;
-            }}
+        switch (v.Kind()) {
+        case var ᴛ when ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice: {
+            v.SetZero();
+            // otherwise, ignore null for primitives/string
+            break;
+        }}
+        break;
+    }
+    case (byte)'t' or (byte)'f': { // true, false
+        var value = item[0] == 't';
+        // The main parser checks that only true and false can reach here,
+        // but if this was a quoted string input, it could be anything.
+        if (fromQuoted && ((sstring)item) != "true"u8 && ((sstring)item) != "false"u8) {
+            d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
             break;
         }
-        case (byte)'"': { // string
-            var (s, ok) = unquoteBytes(item);
-            if (!ok) {
-                if (fromQuoted) {
-                    return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
-                }
-                throw panic(phasePanicMsg);
+        switch (v.Kind()) {
+        default: {
+            if (fromQuoted) {
+                d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
+            } else {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool", Type: v.Type(), Offset: (int64)d.readIndex()))));
             }
-            switch (v.Kind()) {
-            default: {
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔBool: {
+            v.SetBool(value);
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔInterface: {
+            if (v.NumMethod() == 0) {
+                v.Set(reflect.ValueOf(value));
+            } else {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool", Type: v.Type(), Offset: (int64)d.readIndex()))));
+            }
+            break;
+        }}
+        break;
+    }
+    case (byte)'"': { // string
+        var (s, ok) = unquoteBytes(item);
+        if (!ok) {
+            if (fromQuoted) {
+                return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
+            }
+            throw panic(phasePanicMsg);
+        }
+        switch (v.Kind()) {
+        default: {
+            d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
+            if (v.Type().Elem().Kind() != reflect.Uint8) {
                 d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔSlice: {
-                if (v.Type().Elem().Kind() != reflect.Uint8) {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
-                    break;
-                }
-                var b = new slice<byte>(base64.StdEncoding.DecodedLen(len(s)));
-                var (n, err) = base64.StdEncoding.Decode(b, s);
-                if (err != nil) {
-                    d.saveError(err);
-                    break;
-                }
-                v.SetBytes(b.slice(0, n));
+            var b = new slice<byte>(base64.StdEncoding.DecodedLen(len(s)));
+            var (n, err) = base64.StdEncoding.Decode(b, s);
+            if (err != nil) {
+                d.saveError(err);
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔString: {
-                @string t = (@string)s;
-                if (AreEqual(v.Type(), numberType) && !isValidNumber(t)) {
-                    return fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number"u8, item);
-                }
-                v.SetString(t);
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔInterface: {
-                if (v.NumMethod() == 0) {
-                    v.Set(reflect.ValueOf((@string)s));
-                } else {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
-                }
-                break;
-            }}
+            v.SetBytes(b.slice(0, n));
             break;
         }
-        default: { // number
-            if (c != '-' && (c < '0' || c > '9')) {
-                if (fromQuoted) {
-                    return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
-                }
-                throw panic(phasePanicMsg);
+        case var ᴛ when ᴛ == reflect.ΔString: {
+            @string t = (@string)s;
+            if (AreEqual(v.Type(), numberType) && !isValidNumber(t)) {
+                return fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number"u8, item);
             }
-            switch (v.Kind()) {
-            default: {
-                if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
-                    // s must be a valid number, because it's
-                    // already been tokenized.
-                    v.SetString((@string)item);
-                    break;
-                }
-                if (fromQuoted) {
-                    return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
-                }
+            v.SetString(t);
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔInterface: {
+            if (v.NumMethod() == 0) {
+                v.Set(reflect.ValueOf((@string)s));
+            } else {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
+            }
+            break;
+        }}
+        break;
+    }
+    default: { // number
+        if (c != '-' && (c < '0' || c > '9')) {
+            if (fromQuoted) {
+                return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
+            }
+            throw panic(phasePanicMsg);
+        }
+        switch (v.Kind()) {
+        default: {
+            if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
+                // s must be a valid number, because it's
+                // already been tokenized.
+                v.SetString((@string)item);
+                break;
+            }
+            if (fromQuoted) {
+                return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
+            }
+            d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: v.Type(), Offset: (int64)d.readIndex()))));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔInterface: {
+            var (n, err) = d.convertNumber((@string)item);
+            if (err != nil) {
+                d.saveError(err);
+                break;
+            }
+            if (v.NumMethod() != 0) {
                 d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔInterface: {
-                var (n, err) = d.convertNumber((@string)item);
-                if (err != nil) {
-                    d.saveError(err);
-                    break;
-                }
-                if (v.NumMethod() != 0) {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: v.Type(), Offset: (int64)d.readIndex()))));
-                    break;
-                }
-                v.Set(reflect.ValueOf(n));
+            v.Set(reflect.ValueOf(n));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+            var (n, err) = strconv.ParseInt((@string)item, 10, 64);
+            if (err != nil || v.OverflowInt(n)) {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-                var (n, err) = strconv.ParseInt((@string)item, 10, 64);
-                if (err != nil || v.OverflowInt(n)) {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
-                    break;
-                }
-                v.SetInt(n);
+            v.SetInt(n);
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+            var (n, err) = strconv.ParseUint((@string)item, 10, 64);
+            if (err != nil || v.OverflowUint(n)) {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
-                var (n, err) = strconv.ParseUint((@string)item, 10, 64);
-                if (err != nil || v.OverflowUint(n)) {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
-                    break;
-                }
-                v.SetUint(n);
+            v.SetUint(n);
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+            var (n, err) = strconv.ParseFloat((@string)item, v.Type().Bits());
+            if (err != nil || v.OverflowFloat(n)) {
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
             }
-            case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
-                var (n, err) = strconv.ParseFloat((@string)item, v.Type().Bits());
-                if (err != nil || v.OverflowFloat(n)) {
-                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
-                    break;
-                }
-                v.SetFloat(n);
-                break;
-            }}
+            v.SetFloat(n);
             break;
         }}
-    }
+        break;
+    }}
     return default;
 }
 
@@ -1291,33 +1273,31 @@ internal static any literalInterface(this ж<decodeState> Ꮡd) {
 
     var item = d.data.slice(start, d.readIndex());
 
-    {
-        var c = item[0];
-        switch (c) {
-        case (byte)'n': { // null
-            return default;
-        }
-        case (byte)'t' or (byte)'f': { // true, false
-            return c == 't';
-        }
-        case (byte)'"': { // string
-            var (s, ok) = unquote(item);
-            if (!ok) {
-                throw panic(phasePanicMsg);
-            }
-            return s;
-        }
-        default: { // number
-            if (c != '-' && (c < '0' || c > '9')) {
-                throw panic(phasePanicMsg);
-            }
-            var (n, err) = d.convertNumber((@string)item);
-            if (err != nil) {
-                d.saveError(err);
-            }
-            return n;
-        }}
+    var c = item[0];
+    switch (c) {
+    case (byte)'n': { // null
+        return default;
     }
+    case (byte)'t' or (byte)'f': { // true, false
+        return c == 't';
+    }
+    case (byte)'"': { // string
+        var (s, ok) = unquote(item);
+        if (!ok) {
+            throw panic(phasePanicMsg);
+        }
+        return s;
+    }
+    default: { // number
+        if (c != '-' && (c < '0' || c > '9')) {
+            throw panic(phasePanicMsg);
+        }
+        var (n, err) = d.convertNumber((@string)item);
+        if (err != nil) {
+            d.saveError(err);
+        }
+        return n;
+    }}
 }
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
@@ -1401,98 +1381,94 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
             copy(nb, b.slice(0, w));
             b = nb;
         }
-        {
-            var c = s[r];
-            switch (ᐧ) {
-            case {} when c is (byte)'\\': {
-                r++;
-                if (r >= len(s)) {
-                    return (t, ok);
-                }
-                switch (s[r]) {
-                default: {
-                    return (t, ok);
-                }
-                case (byte)'"' or (byte)'\\' or (byte)'/' or (byte)'\'': {
-                    b[w] = s[r];
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'b': {
-                    b[w] = (byte)'\b';
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'f': {
-                    b[w] = (byte)'\f';
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'n': {
-                    b[w] = (byte)'\n';
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'r': {
-                    b[w] = (byte)'\r';
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'t': {
-                    b[w] = (byte)'\t';
-                    r++;
-                    w++;
-                    break;
-                }
-                case (byte)'u': {
-                    r--;
-                    var rr = getu4(s.slice(r));
-                    if (rr < 0) {
-                        return (t, ok);
-                    }
-                    r += 6;
-                    if (utf16.IsSurrogate(rr)) {
-                        var rr1 = getu4(s.slice(r));
-                        {
-                            var dec = utf16.DecodeRune(rr, rr1); if (dec != unicode.ReplacementChar) {
-                                // A valid pair; consume.
-                                r += 6;
-                                w += utf8.EncodeRune(b.slice(w), dec);
-                                break;
-                            }
-                        }
-                        // Invalid surrogate; fall back to replacement rune.
-                        rr = unicode.ReplacementChar;
-                    }
-                    w += utf8.EncodeRune(b.slice(w), rr);
-                    break;
-                }}
-                break;
-            }
-            // Quote, control characters are invalid.
-            case {} when c is (byte)'"' or < (byte)' ': {
+        var c = s[r];
+        switch (ᐧ) {
+        case {} when c is (byte)'\\': {
+            r++;
+            if (r >= len(s)) {
                 return (t, ok);
             }
-            // ASCII
-            case {} when c < utf8.RuneSelf: {
-                b[w] = c;
+            switch (s[r]) {
+            default: {
+                return (t, ok);
+            }
+            case (byte)'"' or (byte)'\\' or (byte)'/' or (byte)'\'': {
+                b[w] = s[r];
                 r++;
                 w++;
                 break;
             }
-            // Coerce to well-formed UTF-8.
-            default: {
-                var (rr, size) = utf8.DecodeRune(s.slice(r));
-                r += size;
+            case (byte)'b': {
+                b[w] = (byte)'\b';
+                r++;
+                w++;
+                break;
+            }
+            case (byte)'f': {
+                b[w] = (byte)'\f';
+                r++;
+                w++;
+                break;
+            }
+            case (byte)'n': {
+                b[w] = (byte)'\n';
+                r++;
+                w++;
+                break;
+            }
+            case (byte)'r': {
+                b[w] = (byte)'\r';
+                r++;
+                w++;
+                break;
+            }
+            case (byte)'t': {
+                b[w] = (byte)'\t';
+                r++;
+                w++;
+                break;
+            }
+            case (byte)'u': {
+                r--;
+                var rr = getu4(s.slice(r));
+                if (rr < 0) {
+                    return (t, ok);
+                }
+                r += 6;
+                if (utf16.IsSurrogate(rr)) {
+                    var rr1 = getu4(s.slice(r));
+                    var dec = utf16.DecodeRune(rr, rr1); if (dec != unicode.ReplacementChar) {
+                        // A valid pair; consume.
+                        r += 6;
+                        w += utf8.EncodeRune(b.slice(w), dec);
+                        break;
+                    }
+                    // Invalid surrogate; fall back to replacement rune.
+                    rr = unicode.ReplacementChar;
+                }
                 w += utf8.EncodeRune(b.slice(w), rr);
                 break;
             }}
+            break;
         }
+        // Quote, control characters are invalid.
+        case {} when c is (byte)'"' or < (byte)' ': {
+            return (t, ok);
+        }
+        // ASCII
+        case {} when c < utf8.RuneSelf: {
+            b[w] = c;
+            r++;
+            w++;
+            break;
+        }
+        // Coerce to well-formed UTF-8.
+        default: {
+            var (rr, size) = utf8.DecodeRune(s.slice(r));
+            r += size;
+            w += utf8.EncodeRune(b.slice(w), rr);
+            break;
+        }}
     }
     return (b.slice(0, w), true);
 }

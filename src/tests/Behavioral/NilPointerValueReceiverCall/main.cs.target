@@ -28,10 +28,8 @@ internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(name, "panicked:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(name, "panicked:", r);
             }
         }, ref ᒐ);
         fmt.Println(name, "returned:", f());
@@ -43,9 +41,9 @@ internal static void @try(@string name, Func<@string> f) {
 internal static void Main() {
     ж<T> p = default;
     var pʗ1 = p;
-    @try("value receiver, receiver unused", () => (~pʗ1).Hello());
+    @try("value receiver, receiver unused", () => pʗ1.Hello());
     var pʗ2 = p;
-    @try("value receiver, reads a field", () => fmt.Sprint((~pʗ2).N()));
+    @try("value receiver, reads a field", () => fmt.Sprint(pʗ2.N()));
     var pʗ3 = p;
     @try("pointer receiver, receiver unused", () => pʗ3.PtrHello());
     var pʗ4 = p;
@@ -66,7 +64,7 @@ internal static void Main() {
 
     var q = Ꮡ(new T(n: 7));
     var qʗ1 = q;
-    @try("value receiver via non-nil pointer", () => fmt.Sprint((~qʗ1).Hello(), " ", (~qʗ1).N()));
+    @try("value receiver via non-nil pointer", () => fmt.Sprint(qʗ1.Hello(), " ", qʗ1.N()));
 }
 
 } // end main_package

@@ -75,7 +75,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
-<!-- source: src/core/net/darwin/dial.cs:914-915 -->
+<!-- source: src/core/net/darwin/dial.cs:908-909 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
@@ -726,7 +726,7 @@ case StartElement:
     d.translate(&t1.Name, true)    // write must land in t1
     t = t1                          // …because Go reads it back out
 ```
-<!-- source: src/core/encoding/xml/xml.cs:318-319, 339, 343 -->
+<!-- source: src/core/encoding/xml/xml.cs:312-313, 333, 337 -->
 ```csharp
 case StartElement t1ᴛ1: {
     ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);

@@ -59,7 +59,7 @@ using static go.crypto.@internal.fips140cache_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABhA8oKAgoKCtoKClICCpKaC")]
+[assembly: GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABhA8oKCgoKmgoKUgIKkpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

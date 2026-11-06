@@ -49,7 +49,7 @@ using static go.NamedInterfaceLateAssert.latelib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABg+goCCpKaCgIKkpoKAgqSmgoCCpA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABg+goKUpoKClKaCgpSmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.NamedInterfaceLateAssert;

@@ -55,7 +55,7 @@ using static go.@internal.platform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/platform/supported.go", "supported.cs", "AA0cggACENKkpKSkvKKkpKS8oqSkvKKkpLyitqS8ooLIyILIpNq4pILGgrassoKmgIK2gqSmpKTIAAgQxpSmrpSmpqYAAhKUpqSUpqqUpriCqpSssqSkppSklKqipJQAChiSqqKqog==")]
+[assembly: GoPositionMap("internal/platform/supported.go", "supported.cs", "AA0cggACENKkpKSkvKKkpKS8oqSkvKKkpLyitqS8ooLIyILIpNq4pILGgrassoKmgqaCpKakpMgACBDGlKaulKampgACEpSmpJSmqpSmuIKqlKyypKSmlKSUqqKklAAKGJKqoqqi")]
 [assembly: GoPositionMap("internal/platform/zosarch.go", "zosarch.cs", "AAkUADVq")]
 // </GoSourcePositionMaps>
 

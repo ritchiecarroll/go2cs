@@ -180,10 +180,8 @@ private static readonly @string localhostˢᵇ = "localhost"u8;
 
 internal static bool isLocalhost(@string host) {
     host = strings.TrimSuffix(host, ".");
-    {
-        nint idx = strings.LastIndex(host, "."); if (idx >= 0) {
-            host = host.slice(idx + 1);
-        }
+    nint idx = strings.LastIndex(host, "."); if (idx >= 0) {
+        host = host.slice(idx + 1);
     }
     return ascii.EqualFold(host, localhostˢ);
 }
@@ -323,11 +321,9 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
             @string id = e.id();
             if (remove) {
                 if (submap != nil) {
-                    {
-                        var (_, ok) = submap[id, ꟷ]; if (ok) {
-                            delete(submap, id);
-                            modified = true;
-                        }
+                    var (_, ok) = submap[id, ꟷ]; if (ok) {
+                        delete(submap, id);
+                        modified = true;
                     }
                 }
                 continue;
@@ -336,15 +332,13 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
                 submap = new map<@string, entry>();
             }
 
-            {
-                var (old, ok) = submap[id, ꟷ]; if (ok) {
-                    e.Creation = old.Creation;
-                    e.seqNum = old.seqNum;
-                } else {
-                    e.Creation = now;
-                    e.seqNum = j.nextSeqNum;
-                    j.nextSeqNum++;
-                }
+            if (submap[id, ꟷ] is (var old, true)) {
+                e.Creation = old.Creation;
+                e.seqNum = old.seqNum;
+            } else {
+                e.Creation = now;
+                e.seqNum = j.nextSeqNum;
+                j.nextSeqNum++;
             }
             e.LastAccess = now;
             submap[id] = e;
@@ -608,15 +602,13 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
 
     // See RFC 6265 section 5.3 #5.
     if (j.psList != nil) {
-        {
-            @string ps = j.psList.PublicSuffix(domain); if (ps != ""u8 && !hasDotSuffix(domain, ps)) {
-                if (host == domain) {
-                    // This is the one exception in which a cookie
-                    // with a domain attribute is a host cookie.
-                    return (host, true, default);
-                }
-                return ("", false, errIllegalDomain);
+        @string ps = j.psList.PublicSuffix(domain); if (ps != ""u8 && !hasDotSuffix(domain, ps)) {
+            if (host == domain) {
+                // This is the one exception in which a cookie
+                // with a domain attribute is a host cookie.
+                return (host, true, default);
             }
+            return ("", false, errIllegalDomain);
         }
     }
 

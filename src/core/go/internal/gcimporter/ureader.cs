@@ -173,10 +173,8 @@ internal static @string posBase(this ж<reader> Ꮡr) {
 internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
-    {
-        @string bΔ1 = pr.posBases[idx]; if (bΔ1 != ""u8) {
-            return bΔ1;
-        }
+    @string bΔ1 = pr.posBases[idx]; if (bΔ1 != ""u8) {
+        return bΔ1;
     }
 
     @string filename = default;
@@ -222,10 +220,8 @@ internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index
 
     // TODO(mdempsky): Consider using some non-nil pointer to indicate
     // the universe scope, so we don't need to keep re-reading it.
-    {
-        var pkgΔ1 = pr.pkgs[idx]; if (pkgΔ1 != nil) {
-            return pkgΔ1;
-        }
+    var pkgΔ1 = pr.pkgs[idx]; if (pkgΔ1 != nil) {
+        return pkgΔ1;
     }
 
     var pkg = Ꮡpr.newReader(pkgbits.SectionPkg, idx, pkgbits.SyncPkgDef).doPkg();
@@ -250,10 +246,8 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
         return types.Unsafe;
     }}
 
-    {
-        var pkgΔ1 = r.p.imports[path]; if (pkgΔ1 != nil) {
-            return pkgΔ1;
-        }
+    var pkgΔ1 = r.p.imports[path]; if (pkgΔ1 != nil) {
+        return pkgΔ1;
     }
 
     @string name = Ꮡr.of(reader.ᏑDecoder).String();
@@ -292,10 +286,8 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
         where = Ꮡ(pr.typs, idx);
     }
 
-    {
-        var typΔ1 = where.ValueSlot; if (typΔ1 != nil) {
-            return typΔ1;
-        }
+    var typΔ1 = where.ValueSlot; if (typΔ1 != nil) {
+        return typΔ1;
     }
 
     typesꓸType typ = default;
@@ -308,10 +300,8 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
         pr.retireReader(r);
     }
     // See comment in pkgReader.typIdx explaining how this happens.
-    {
-        var prev = where.ValueSlot; if (prev != nil) {
-            return prev;
-        }
+    var prev = where.ValueSlot; if (prev != nil) {
+        return prev;
     }
 
     where.ValueSlot = typ;
@@ -321,59 +311,57 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
 internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        pkgbits.CodeType tag = (pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType);
-        switch (tag) {
-        default: {
-            errorf("unhandled type tag: %v", tag);
-            throw panic("unreachable");
-            break;
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeBasic: {
-            return new types.BasicжΔType(types.Typ[Ꮡr.of(reader.ᏑDecoder).Len()]);
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeNamed: {
-            var (obj, targs) = Ꮡr.obj();
-            var name = obj._<ж<types.TypeName>>();
-            if (len(targs) != 0) {
-                var (t, _) = types.Instantiate(r.p.ctxt, name.Type(), targs, false);
-                return t;
-            }
-            return name.Type();
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeTypeParam: {
-            return new types.TypeParamжΔType(r.dict.tparams[Ꮡr.of(reader.ᏑDecoder).Len()]);
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeArray: {
-            var lenΔ2 = (int64)Ꮡr.of(reader.ᏑDecoder).Uint64();
-            return new types.ArrayжΔType(types.NewArray(Ꮡr.typ(), lenΔ2));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeChan: {
-            types.ChanDir dir = (types.ChanDir)Ꮡr.of(reader.ᏑDecoder).Len();
-            return new types.ChanжΔType(types.NewChan(dir, Ꮡr.typ()));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeMap: {
-            return new types.MapжΔType(types.NewMap(Ꮡr.typ(), Ꮡr.typ()));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypePointer: {
-            return new types.PointerжΔType(types.NewPointer(Ꮡr.typ()));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeSignature: {
-            return new types.ΔSignatureжΔType(Ꮡr.signature(nil, default, default));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeSlice: {
-            return new types.SliceжΔType(types.NewSlice(Ꮡr.typ()));
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeStruct: {
-            return new types.StructжΔType(Ꮡr.structType());
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeInterface: {
-            return new types.InterfaceжΔType(Ꮡr.interfaceType());
-        }
-        case var ᴛ when ᴛ == pkgbits.TypeUnion: {
-            return new types.UnionжΔType(Ꮡr.unionType());
-        }}
+    pkgbits.CodeType tag = (pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType);
+    switch (tag) {
+    default: {
+        errorf("unhandled type tag: %v", tag);
+        throw panic("unreachable");
+        break;
     }
+    case var ᴛ when ᴛ == pkgbits.TypeBasic: {
+        return new types.BasicжΔType(types.Typ[Ꮡr.of(reader.ᏑDecoder).Len()]);
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeNamed: {
+        var (obj, targs) = Ꮡr.obj();
+        var name = obj._<ж<types.TypeName>>();
+        if (len(targs) != 0) {
+            var (t, _) = types.Instantiate(r.p.ctxt, name.Type(), targs, false);
+            return t;
+        }
+        return name.Type();
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeTypeParam: {
+        return new types.TypeParamжΔType(r.dict.tparams[Ꮡr.of(reader.ᏑDecoder).Len()]);
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeArray: {
+        var lenΔ2 = (int64)Ꮡr.of(reader.ᏑDecoder).Uint64();
+        return new types.ArrayжΔType(types.NewArray(Ꮡr.typ(), lenΔ2));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeChan: {
+        types.ChanDir dir = (types.ChanDir)Ꮡr.of(reader.ᏑDecoder).Len();
+        return new types.ChanжΔType(types.NewChan(dir, Ꮡr.typ()));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeMap: {
+        return new types.MapжΔType(types.NewMap(Ꮡr.typ(), Ꮡr.typ()));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypePointer: {
+        return new types.PointerжΔType(types.NewPointer(Ꮡr.typ()));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeSignature: {
+        return new types.ΔSignatureжΔType(Ꮡr.signature(nil, default, default));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeSlice: {
+        return new types.SliceжΔType(types.NewSlice(Ꮡr.typ()));
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeStruct: {
+        return new types.StructжΔType(Ꮡr.structType());
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeInterface: {
+        return new types.InterfaceжΔType(Ꮡr.interfaceType());
+    }
+    case var ᴛ when ᴛ == pkgbits.TypeUnion: {
+        return new types.UnionжΔType(Ꮡr.unionType());
+    }}
 }
 
 internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
@@ -516,10 +504,8 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
     }
 
     // Ignore local types promoted to global scope (#55110).
-    {
-        var (_, suffix) = splitVargenSuffix(objName); if (suffix != ""u8) {
-            return (objPkg, objName);
-        }
+    var (_, suffix) = splitVargenSuffix(objName); if (suffix != ""u8) {
+        return (objPkg, objName);
     }
 
     if (objPkg.Scope().Lookup(objName) == nil) {
@@ -576,27 +562,25 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
             // If the underlying type is an interface, we need to
             // duplicate its methods so we can replace the receiver
             // parameter's type (#49906).
-            {
-                var (iface, ok) = underlying._<ж<types.Interface>>(ᐧ); if (ok && iface.NumExplicitMethods() != 0) {
-                    var methods = new slice<ж<types.Func>>(iface.NumExplicitMethods());
-                    foreach (var i in range(methods)) {
-                        var fn = iface.ExplicitMethod(i);
-                        var sig = fn.Signature();
+            var (iface, ok) = underlying._<ж<types.Interface>>(ᐧ); if (ok && iface.NumExplicitMethods() != 0) {
+                var methods = new slice<ж<types.Func>>(iface.NumExplicitMethods());
+                foreach (var i in range(methods)) {
+                    var fn = iface.ExplicitMethod(i);
+                    var sig = fn.Signature();
 
-                        var recv = types.NewVar(fn.Pos(), fn.Pkg(), ""u8, new types.NamedжΔType(named));
-                        recv.SetKind(types.RecvVar);
-                        methods[i] = types.NewFunc(fn.Pos(), fn.Pkg(), fn.Name(), types.NewSignature(recv, sig.Params(), sig.Results(), sig.Variadic()));
-                    }
-
-                    var embeds = new slice<typesꓸType>(iface.NumEmbeddeds());
-                    foreach (var i in range(embeds)) {
-                        embeds[i] = iface.EmbeddedType(i);
-                    }
-
-                    var newIface = types.NewInterfaceType(methods, embeds);
-                    r.p.ifaces = append(r.p.ifaces, newIface);
-                    underlying = new types.InterfaceжΔType(newIface);
+                    var recv = types.NewVar(fn.Pos(), fn.Pkg(), ""u8, new types.NamedжΔType(named));
+                    recv.SetKind(types.RecvVar);
+                    methods[i] = types.NewFunc(fn.Pos(), fn.Pkg(), fn.Name(), types.NewSignature(recv, sig.Params(), sig.Results(), sig.Variadic()));
                 }
+
+                var embeds = new slice<typesꓸType>(iface.NumEmbeddeds());
+                foreach (var i in range(embeds)) {
+                    embeds[i] = iface.EmbeddedType(i);
+                }
+
+                var newIface = types.NewInterfaceType(methods, embeds);
+                r.p.ifaces = append(r.p.ifaces, newIface);
+                underlying = new types.InterfaceжΔType(newIface);
             }
 
             named.SetUnderlying(underlying);
@@ -624,10 +608,8 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
 
     {
         var r = Ꮡpr.tempReader(pkgbits.SectionObjDict, idx, pkgbits.SyncObject1);
-        {
-            nint implicits = r.of(reader.ᏑDecoder).Len(); if (implicits != 0) {
-                errorf("unexpected object with %v implicit type parameter(s)", implicits);
-            }
+        nint implicits = r.of(reader.ᏑDecoder).Len(); if (implicits != 0) {
+            errorf("unexpected object with %v implicit type parameter(s)", implicits);
         }
 
         dict.bounds = new slice<typeInfo>(r.of(reader.ᏑDecoder).Len());

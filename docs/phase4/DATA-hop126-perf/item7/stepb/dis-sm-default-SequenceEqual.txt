@@ -1,0 +1,72 @@
+14008B200  cmp         r8,8
+14008B204  jb          000000014008B29E
+14008B20A  cmp         rcx,rdx
+14008B20D  je          000000014008B298
+14008B213  cmp         r8,10h
+14008B217  jae         000000014008B239
+14008B219  add         r8,0FFFFFFFFFFFFFFF8h
+14008B21D  mov         rax,qword ptr [rcx]
+14008B220  sub         rax,qword ptr [rdx]
+14008B223  mov         rcx,qword ptr [rcx+r8]
+14008B227  sub         rcx,qword ptr [rdx+r8]
+14008B22B  or          rax,rcx
+14008B22E  sete        al
+14008B231  movzx       eax,al
+14008B234  jmp         000000014008B2EF
+14008B239  xor         eax,eax
+14008B23B  add         r8,0FFFFFFFFFFFFFFF0h
+14008B23F  je          000000014008B27F
+14008B241  movups      xmm0,xmmword ptr [rcx]
+14008B244  movups      xmm1,xmmword ptr [rdx]
+14008B247  pcmpeqb     xmm0,xmm1
+14008B24B  pmovmskb    r10d,xmm0
+14008B250  cmp         r10d,0FFFFh
+14008B257  jne         000000014008B27C
+14008B259  add         rax,10h
+14008B25D  cmp         r8,rax
+14008B260  jbe         000000014008B27F
+14008B262  movups      xmm0,xmmword ptr [rcx+rax]
+14008B266  movups      xmm1,xmmword ptr [rdx+rax]
+14008B26A  pcmpeqb     xmm0,xmm1
+14008B26E  pmovmskb    r10d,xmm0
+14008B273  cmp         r10d,0FFFFh
+14008B27A  je          000000014008B259
+14008B27C  xor         eax,eax
+14008B27E  ret
+14008B27F  movups      xmm0,xmmword ptr [rcx+r8]
+14008B284  movups      xmm1,xmmword ptr [rdx+r8]
+14008B289  pcmpeqb     xmm0,xmm1
+14008B28D  pmovmskb    eax,xmm0
+14008B291  cmp         eax,0FFFFh
+14008B296  jne         000000014008B27C
+14008B298  mov         eax,1
+14008B29D  ret
+14008B29E  cmp         r8,4
+14008B2A2  jb          000000014008B2BE
+14008B2A4  add         r8,0FFFFFFFFFFFFFFFCh
+14008B2A8  mov         eax,dword ptr [rcx]
+14008B2AA  sub         eax,dword ptr [rdx]
+14008B2AC  mov         ecx,dword ptr [rcx+r8]
+14008B2B0  sub         ecx,dword ptr [rdx+r8]
+14008B2B4  or          eax,ecx
+14008B2B6  sete        al
+14008B2B9  movzx       eax,al
+14008B2BC  jmp         000000014008B2EF
+14008B2BE  xor         eax,eax
+14008B2C0  mov         r10,r8
+14008B2C3  and         r10,2
+14008B2C7  je          000000014008B2D3
+14008B2C9  movzx       eax,word ptr [rcx]
+14008B2CC  movzx       r9d,word ptr [rdx]
+14008B2D0  sub         eax,r9d
+14008B2D3  test        r8b,1
+14008B2D7  je          000000014008B2E7
+14008B2D9  movzx       ecx,byte ptr [rcx+r10]
+14008B2DE  movzx       edx,byte ptr [rdx+r10]
+14008B2E3  sub         ecx,edx
+14008B2E5  or          eax,ecx
+14008B2E7  test        eax,eax
+14008B2E9  sete        al
+14008B2EC  movzx       eax,al
+14008B2EF  ret
+14008B2F0  nop

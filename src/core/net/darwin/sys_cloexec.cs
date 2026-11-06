@@ -30,11 +30,9 @@ internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     if (err != nil) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }
-    {
-        err = syscall.SetNonblock(s, true); if (err != nil) {
-            poll.CloseFunc(s);
-            return (-1, os.NewSyscallError(setnonblockˢ, err));
-        }
+    err = syscall.SetNonblock(s, true); if (err != nil) {
+        poll.CloseFunc(s);
+        return (-1, os.NewSyscallError(setnonblockˢ, err));
     }
     return (s, default);
 }

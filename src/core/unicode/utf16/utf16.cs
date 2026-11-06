@@ -132,26 +132,24 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
 
     for (nint i = 0; i < len(s); i++) {
         rune ar = default;
-        {
-            var r = s[i];
-            switch (ᐧ) {
-            case {} when (r < surr1) || (surr3 <= r): {
-                // normal rune
-                ar = (rune)r;
-                break;
-            }
-            case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
-                // valid surrogate sequence
-                ar = DecodeRune((rune)r, (rune)s[i + 1]);
-                i++;
-                break;
-            }
-            default: {
-                // invalid surrogate sequence
-                ar = replacementChar;
-                break;
-            }}
+        var r = s[i];
+        switch (ᐧ) {
+        case {} when (r < surr1) || (surr3 <= r): {
+            // normal rune
+            ar = (rune)r;
+            break;
         }
+        case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
+            // valid surrogate sequence
+            ar = DecodeRune((rune)r, (rune)s[i + 1]);
+            i++;
+            break;
+        }
+        default: {
+            // invalid surrogate sequence
+            ar = replacementChar;
+            break;
+        }}
         buf = append(bufᴷ, buf, ar);
     }
     buf = move2heap(bufᴷ, buf);

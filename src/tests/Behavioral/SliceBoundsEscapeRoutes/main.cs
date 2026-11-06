@@ -10,10 +10,8 @@ internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(name, "recovered:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(name, "recovered:", r);
             }
         }, ref ᒐ);
         f();

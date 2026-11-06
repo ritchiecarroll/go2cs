@@ -98,10 +98,8 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
     if (len(@out) == 0) {
         return fmt.Errorf("%v: no tool reported"u8, cmd.OrTypedNil());
     }
-    {
-        var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     if (platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, false)) {
@@ -202,15 +200,13 @@ public static @string GoToolPath(testing.TB t) {
 
 internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string path, error err) () => {
     error err = default;
-    {
-        @string pathΔ1 = Δruntime.GOROOT(); if (pathΔ1 != ""u8) {
-            // If runtime.GOROOT() is non-empty, assume that it is valid.
-            //
-            // (It might not be: for example, the user may have explicitly set GOROOT
-            // to the wrong directory. But this case is
-            // rare, and if that happens the user can fix what they broke.)
-            return (pathΔ1, default);
-        }
+    @string pathΔ1 = Δruntime.GOROOT(); if (pathΔ1 != ""u8) {
+        // If runtime.GOROOT() is non-empty, assume that it is valid.
+        //
+        // (It might not be: for example, the user may have explicitly set GOROOT
+        // to the wrong directory. But this case is
+        // rare, and if that happens the user can fix what they broke.)
+        return (pathΔ1, default);
     }
 
     // runtime.GOROOT doesn't know where GOROOT is (perhaps because the test
@@ -238,11 +234,9 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
             return ("", fmt.Errorf("failed to locate GOROOT/src in any parent directory"u8));
         }
 
-        {
-            @string @base = filepath.Base(dir); if (@base != "src"u8) {
-                dir = parent;
-                continue; // dir cannot be GOROOT/src if it doesn't end in "src".
-            }
+        @string @base = filepath.Base(dir); if (@base != "src"u8) {
+            dir = parent;
+            continue; // dir cannot be GOROOT/src if it doesn't end in "src".
         }
 
         var (b, errΔ1) = os.ReadFile(filepath.Join(dir, "go.mod"));
@@ -465,11 +459,9 @@ private static readonly @string goBuilderFlakyNetˢᵇ = "GO_BUILDER_FLAKY_NET"u
 private static readonly object skippingTestOnBuilderˢ = (@string)"skipping test on builder known to have frequent network failures"u8;
 
 public static void SkipFlakyNet(testing.TB t) {
-    {
-        var (v, _) = strconv.ParseBool(os.Getenv(goBuilderFlakyNetˢ)); if (v) {
-            t.Helper();
-            t.Skip(skippingTestOnBuilderˢ);
-        }
+    var (v, _) = strconv.ParseBool(os.Getenv(goBuilderFlakyNetˢ)); if (v) {
+        t.Helper();
+        t.Skip(skippingTestOnBuilderˢ);
     }
 }
 

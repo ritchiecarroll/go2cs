@@ -121,7 +121,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:262 -->
+<!-- source: src/core/net/windows/fd_windows.cs:256 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
@@ -1091,7 +1091,7 @@ arm). Go's own `slices` tests depend on it.<!-- At the landing: slices validated
 without allocating the `make`, which is why `slices.Grow` says it "allocates only once". The emission
 renders exactly that operand as the length-only `makeꓸꓸꓸ<T>(n)`, and nothing else in the call changes:
 
-<!-- source: src/core/slices/slices.cs:473 -->
+<!-- source: src/core/slices/slices.cs:466 -->
 ```csharp
 s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
 ```
@@ -1800,7 +1800,7 @@ keep the emission unchanged where it is already right — a NAMED array element 
 its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
 assignment TARGET, which carries a value and needs no zero. In the converted standard library the one
 such read is the `entity2` read in `html/escape.cs`.<!-- measured at the
-landing: one line, the read now at html/escape.cs:153 (`entity2[tmpstring(entityName), () => new array<rune>(2)]`) -->
+landing: one line, the read now at html/escape.cs:151 (`entity2[tmpstring(entityName), () => new array<rune>(2)]`) -->
 
 (Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
 nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,

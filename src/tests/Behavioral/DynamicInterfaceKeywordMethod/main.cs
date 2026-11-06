@@ -25,13 +25,11 @@ internal partial interface commandContext_type /*dyn*/ :
 }
 
 internal static void commandContext(TB t) {
-    {
-        var (td, ok) = t._<commandContext_type>(ᐧ); if (ok) {
-            var (d, _) = td.Deadline();
-            fmt.Println("Name:", td.Name(), "deadline:", d);
-        } else {
-            fmt.Println("no deadline");
-        }
+    var (td, ok) = t._<commandContext_type>(ᐧ); if (ok) {
+        var (d, _) = td.Deadline();
+        fmt.Println("Name:", td.Name(), "deadline:", d);
+    } else {
+        fmt.Println("no deadline");
     }
 }
 
@@ -48,13 +46,11 @@ internal partial interface direct_type /*dyn*/ {
 }
 
 internal static void direct(any v) {
-    {
-        var (d, ok) = v._<direct_type>(ᐧ); if (ok) {
-            d.@private();
-            fmt.Println("direct:", d.Kind());
-        } else {
-            fmt.Println("no direct");
-        }
+    var (d, ok) = v._<direct_type>(ᐧ); if (ok) {
+        d.@private();
+        fmt.Println("direct:", d.Kind());
+    } else {
+        fmt.Println("no direct");
     }
 }
 internal static void Main() {

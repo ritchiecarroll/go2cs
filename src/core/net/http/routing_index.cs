@@ -82,10 +82,8 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
 
     // Our simple indexing scheme doesn't try to prune multi patterns; assume
     // any of them can match the argument.
-    {
-        var errΔ1 = apply(idx.multis); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = apply(idx.multis); if (errΔ1 != nil) {
+        return errΔ1;
     }
     if (pat.lastSegment().s == "/"u8) {
         // All paths that a dollar pattern matches end in a slash; no paths that
@@ -111,12 +109,10 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
             hasLit = true;
             var lpats = idx.segments[new routingIndexKey(s: seg.s, pos: i)];
             var wpats = idx.segments[new routingIndexKey(s: "", pos: i)];
-            {
-                nint sum = builtin.len(lpats) + builtin.len(wpats); if (sum < min) {
-                    lmin = lpats;
-                    wmin = wpats;
-                    min = sum;
-                }
+            nint sum = builtin.len(lpats) + builtin.len(wpats); if (sum < min) {
+                lmin = lpats;
+                wmin = wpats;
+                min = sum;
             }
         }
     }

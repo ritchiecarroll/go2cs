@@ -1133,7 +1133,7 @@ borrow expressions; each word-size function is a single expression with no `Uint
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
 <!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
      :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2778 (`"math/bits": {`);
+     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2798 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub
@@ -1188,7 +1188,7 @@ all: with tzdata registered, `loadLocation` falls back to the embedded database 
 
 **A linkname target implemented as a golib BUILTIN forwards to a bare, unqualified call** (`linknameForwardBuiltins`, a sibling map of Go linkname target → golib builtin name). Some Go compiler intrinsics live in `runtime` and are linked into another package by symbol, but their go2cs implementation is a golib builtin — in scope UNQUALIFIED via each converted project's `using static go.builtin`, so the forwarder emits `<builtin>(args)` with no package qualifier (an empty alias is the sentinel `writeLinknameForwarder` reads to drop the `<alias>.` prefix). The canonical case is **`maps.Clone`**: Go implements its worker as `runtime.mapclone` (`//go:linkname mapclone maps.clone`) and the `maps` package pulls it as a bodyless `func clone(m any) any` carrying `//go:linkname clone maps.clone` — a *same-package-named* target (`maps.clone`) whose real definition is elsewhere, so it is neither a native whitelist target nor a normal pull, and was left a **throwing** `PartialStubGenerator` stub (every `maps.Clone`/`maps.Copy`/`maps.DeleteFunc` test threw `NotImplementedException: clone: external (assembly or cgo) function is not implemented`). It now forwards:
 
-<!-- source: src/core/maps/maps.cs:55-58 -->
+<!-- source: src/core/maps/maps.cs:51-54 -->
 ```csharp
 //go:linkname clone maps.clone
 /*linkname*/ internal static partial any clone(any m) {
@@ -3248,14 +3248,18 @@ package's `managed_impl.cs` (`manualConversionFuncs`), since the converted body 
 the `GoexitDefers` behavioral test (defers run across frames, `recover()` sees nil, other goroutines
 still run, main continues) and by sync's `TestOnceFuncGoexit`, which this unblocked.
 
-**Goexit from the MAIN goroutine stays gated — at runtime, not statically.** There, Go ends `main`
-without returning while the *program continues* running its other goroutines, crashing with
-"no goroutines" once they all exit; that needs a live-goroutine registry and a main-thread parking
-protocol the managed model does not have (`docs/phase4/DESIGN-goexit.md` option C). The distinction is
-not statically decidable — a function's call graph says nothing about which goroutine will run it — so
-`Goroutine.OnGoroutine` (a `[ThreadStatic]` the root sets and restores, because goroutines run on
-pooled threads) answers it at the call, and the main-goroutine case throws a loud
-`NotSupportedException` naming the design doc rather than silently doing something else. Consequently
+**Goexit from the MAIN goroutine is decided at the call, not statically.** There, Go ends `main` without
+returning while the *program continues* running its other goroutines, and dies with `fatal error: no
+goroutines (main called runtime.Goexit) - deadlock!` once none can run (or "all goroutines are asleep" when the
+ones left are blocked). Which goroutine runs a function is not statically decidable, so the hand-owned
+`runtime.Goexit` asks the registry (`Goroutine.Current is { IsMain: true }`) and throws a `GoexitException` marked
+`FromMain`. Main has no goroutine root, and an exception nothing catches runs no `finally`, so every deferring frame
+catches that exception: `GoFrame.IsPanic` answers it with an internal marker `recover()` cannot read, the frame's
+`Run` runs its deferred calls and throws a fresh from-main Goexit from its `finally`. Past the outermost deferring
+frame, golib's backstop parks the main thread (`MainGoexit.Park`) until no other goroutine is left, and a goroutine
+left in a forever wait reports the deadlock itself, since the dead-program check counts an exited main as blocked
+(`docs/DESIGN-goexit-main.md`). The test host catches it around `TestMain` and parks the same way. Guarded by the
+`GoexitFromMain` behavioral test (six arms against `go run`) and GolibTests `MainGoexitTests`. Consequently
 `unsupportedRuntimeCapabilities` (`testConversion.go`) is now **empty**: the mechanism remains — a test
 whose transitive closure reaches a listed symbol converts as `unsupported`, disclosed by name, the
 same gate an unsupported `testing.*` member uses — with `TestUnsupportedRuntimeCapabilityGate` as its
@@ -3632,7 +3636,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4837 (`INLINED PANIC SITES`), :4845 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:4993 (`INLINED PANIC SITES`), :5001 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -3792,10 +3796,31 @@ that closure (`defer(() => where("x"), ref ᒐ)`, `goǃ(ᴛ1 => f(ᴛ1, "c"), v)
 carries no mark on it. The file's `GoPositionMap` record does instead: its seventh argument lists each
 thunk by its body's 1-based line and UTF-16 column, which is the lambda's first sequence point. The
 Go-frame filter elides a compiler-generated lambda whose first sequence point is a listed site. A Go
-func literal is never listed: the converter emits it as a block lambda whose first sequence point is the
-line below its `=> {`, so it cannot sit at a thunk's position even when the Go source puts both on one
-line. The behavioral `DeferThunkFrames` (tiering on) and `LineMarkerDeferEndTC0` (tiering off) pin every
-shape against `go run`.
+func literal is never listed there: the converter emits it as a block lambda, whose first sequence point is
+its `{` in a Debug build and its first statement in a Release build, never the expression that follows a
+thunk's `=> `, so it cannot sit at a thunk's position even when the Go source puts both on one line. The
+behavioral `DeferThunkFrames` (tiering on) and `LineMarkerDeferEndTC0` (tiering off) pin every shape
+against `go run`.
+
+**A panic a deferred Go CLOSURE raises shows Go's chain.** When a deferred call panics, the rest of the
+deferred sequence runs on top of `runtime.gopanic`, so Go's `runtime.Callers` from inside a later deferred
+call, and its crash traceback, read that call, then `gopanic`, then the deferred function that raised the
+panic, then the deferring function (`f.func1 | runtime.gopanic | f.func2 | f`, where `func2` raised). The runtime splices that chain where it can prove which
+deferred function raised it. A Go func literal handed straight to `defer` is caught first by the deferring
+function's own `GoFrame.Run`, exactly as a converter thunk is, and Go prints the closure's frame where it
+elides the thunk. So the converter records each such literal in the file's `GoPositionMap` record: its
+eighth argument lists the lambda's `{` and its first statement, the first sequence point in each
+configuration. A site whose last Go frame is a listed closure is spliced; any other closure is not. The
+literal is listed in its plain, parenthesized and argument forms
+(`defer((@string v) => { … }, "argument", ref ᒐ)`). It is not listed in the variadic or multi-value spread
+forms, where a thunk invokes the literal (`defer((ᴛ1, ᴛ2) => ((Action…)((…) => { … }))(ᴛ1, ᴛ2), …)`), so
+the thunk is the deferred function. That chain is not spliced: Go shows the literal's frame there, and this
+prints the deferring function alone. A missing splice, never a wrong frame. The same holds for a literal
+inside a function hand-converted in a `*_impl.cs`, which the converter does not emit, and for an assembly
+whose records predate the eighth argument. The read is the thunk rule's symbol read and shares its
+no-symbol-file behavior: no PDB, no splice. Pinned by the behavioral `DeferredClosurePanicChain` against
+`go run`, by GolibTests' `DeferredClosureChainTests` (Debug and Release positions, the unrecorded, no-PDB
+and thunk refusals), and by the converter's `TestDeferredClosureSitesAreRecordedAndNothingElse`.<!-- B1, 2026-11-05, the BOARD row of 2026-10-24 ("a panic raised by a deferred Go CLOSURE loses its frames", option B): the record half is positionMapOperations.go's markDeferredClosureBody/ClosureSentinelMark; the splice is managed_impl.cs's isRecordedDeferredClosure in spliceableSite. -->
 
 The position is a symbol-file property, so this is the **one symbol read a capture makes**. It is asked
 only of a lambda in an assembly whose records list a thunk, and the answer is cached per method: an
@@ -4563,6 +4588,57 @@ accommodation retires with the converter fix.<!-- routed to the Q49 bridge class
 and the prediction on record: `docs/phase4/DESIGN-runtime-pinner.md`; guards: GolibTests
 `RuntimePinnerTests` (every "passes" arm followed by the same check with the pin removed, which must
 go red), and runtime's own `pinner_test.go` through the `-tests` pipeline.
+
+## A displaced body may re-implement the algorithm, and then its Go source text is pinned
+
+Most displacements replace a body that cannot run under the CLR (a syscall, a reinterpret, an init) with a .NET
+seam bound to the Go function's contract. A displacement may instead replace a body that converts correctly
+but runs too slowly, with hand-written code computing the same result. That hand-own re-implements the
+algorithm, so it is bound to the upstream text as well as to the contract.
+
+The case is fiat-crypto's P-521 field multiply. Its generated body declares more locals than the JIT will
+inline into, so every 64-bit multiply, carry add and limb read in it stays a call. The registry displaces
+`p521Mul` and `p521Square`, and the converter emits a placeholder for each:
+
+<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs:80-82 -->
+```csharp
+// go2cs generated this placeholder — func p521Mul is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+// go2cs generated this placeholder — func p521Square is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+```
+
+`fiat/p521_impl.cs` keeps fiat's signature and contract: Montgomery-domain arguments below p, the fully reduced
+product times R⁻¹ out. Its body is a straight-line Montgomery multiply generated by a script kept beside the
+measurement record. It is constant time, like fiat's: no loop, no branch, constant limb indexes, carries by
+`math/bits`' own formulas, and a masked final subtraction. Square is the same multiply:
+
+<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_impl.cs:435-437 -->
+```csharp
+internal static void p521Square(ref p521MontgomeryDomainFieldElement out1, ref p521MontgomeryDomainFieldElement arg1) {
+    p521Mul(ref out1, ref arg1, ref arg1);
+}
+```
+
+**The Go text is pinned.** A release hop that changes a displaced function keeps the placeholder and the
+hand-own compiling, so nothing else would notice that the port still carries the old algorithm. A repoguard
+test holds the SHA-256 of each re-implemented Go function's source text, from `func` to its closing brace, at
+the pinned toolchain. It fails on any change and names the hand-owned file to re-derive. A doc-comment change
+does not fire it. A displacement that is a .NET seam is not pinned, because it follows the contract, not the
+text.
+
+**Limits.** The hand-own is checked against an independent oracle, never against itself: big-integer
+arithmetic at every boundary fiat's input contract admits, and Go's own output for whole ECDH, ECDSA and
+`crypto/elliptic` operations. P-384's fiat multiply has the same shape off the start-up path and is not
+displaced.
+
+Guarded by: `TestHandOwnedReimplementationsMatchPinnedGoSource` and its positive control
+`TestHandOwnSourcePinScannerFires` (repoguard), GolibTests `P521FieldDifferentialTests`, the `P521CurveBytes`
+behavioral test, and `TestManualConversionRegistrationsHaveBodies`.
+<!-- Seat claude/h-p521-table, COORD ruling 2026-11-06. Measured on H at 642621b43f (win-x64, runtime 10.0.13):
+     the converted p521Mul declares 1,006 locals against the JIT's 512-local inlining cut-off and makes 1,250
+     calls per field multiply; a multiply took 2.37 us JIT / 13.7 us ReadyToRun against Go's 190 ns, and the
+     P-521 generator-table build 523 ms ReadyToRun against Go's 6 ms. Record and scores:
+     docs/phase4/DATA-p521-table.md. -->
 
 ---
 

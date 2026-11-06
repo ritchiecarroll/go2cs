@@ -115,17 +115,25 @@ public class ReceiverMarkTests
             "[GoRecv], which hand-written files keep, still means pointer receiver");
     }
 
+    // A VALUE-set method gets a ж twin too (ValueReceiverBoxTwinTests), and it is not a pointer twin: it dereferences
+    // the box and calls the method on that copy, so no write reaches the pointee.
     [TestMethod]
-    public void ACopyBoundRefReceiverGetsNoPointerTwin()
+    public void ACopyBoundRefReceiverGetsAValueTwinNotAPointerTwin()
     {
-        Assert.AreEqual(0, TwinsFor(Run(new RecvGenerator()), "Peek").Length,
-            "a [GoCopyBound] receiver is VALUE-set: it has no pointer twin");
+        string[] twins = TwinsFor(Run(new RecvGenerator()), "Peek");
+
+        Assert.AreEqual(1, twins.Length, "a [GoCopyBound] receiver is VALUE-set: its ж twin copies the pointee");
+        StringAssert.Contains(twins[0], "var i = ~Ꮡi;");
     }
 
     [TestMethod]
-    public void AValueReceiverGetsNoPointerTwin()
+    public void AValueReceiverGetsAValueTwinNotAPointerTwin()
     {
-        Assert.AreEqual(0, TwinsFor(Run(new RecvGenerator()), "Get").Length);
+        string[] twins = TwinsFor(Run(new RecvGenerator()), "Get");
+
+        Assert.AreEqual(1, twins.Length);
+        StringAssert.Contains(twins[0], "var i = ~Ꮡi;");
+        Assert.IsFalse(TwinsFor(Run(new RecvGenerator()), "Bump").Single().Contains("~Ꮡi"), "a pointer twin never copies");
     }
 
     [TestMethod]

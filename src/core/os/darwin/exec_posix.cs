@@ -34,12 +34,10 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     // UID/GID), double-check existence of the directory we want
     // to chdir into. We can make the error clearer this way.
     if (Ꮡattr != nil && attr.Sys == nil && attr.Dir != ""u8) {
-        {
-            var (_, errΔ1) = Stat(attr.Dir); if (errΔ1 != nil) {
-                var pe = errΔ1._<ж<PathError>>();
-                pe.Op = chdirˢ;
-                return (default, new fs.PathErrorжerror(pe));
-            }
+        var (_, errΔ1) = Stat(attr.Dir); if (errΔ1 != nil) {
+            var pe = errΔ1._<ж<PathError>>();
+            pe.Op = chdirˢ;
+            return (default, new fs.PathErrorжerror(pe));
         }
     }
 
