@@ -34,6 +34,8 @@ func TestSliceLiteralsAtTargetedPositionsAreCollectionExpressions(t *testing.T) 
 
 	writeModuleFile(t, filepath.Join(appDir, "main.go"), `package main
 
+import "unsafe"
+
 type pt struct {
 	xs   []int
 	name string
@@ -73,8 +75,9 @@ func main() {
 	for _, v := range []int{19} {
 		println(v)
 	}
+	data := unsafe.SliceData([]byte{20})
 	println(len(local), len(nested), len(p.xs), len(q.xs), len(m), len(withCall), len(empty), len(n), len(fn()))
-	println(len(pkg), len(pkgTyped), pkgAny != nil, len(one()))
+	println(len(pkg), len(pkgTyped), pkgAny != nil, len(one()), data != nil)
 }
 `)
 
@@ -184,6 +187,7 @@ func ranges() {
 		`slice<nint>([17])`,
 		`slice<nint>([18])`,
 		`range(slice<nint>([19]))`,
+		`@unsafe.SliceData(slice<byte>([20]))`, // a builtin reached through its package
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q: an untargeted slice literal keeps the builtin:\n%s", want, mainCs)
