@@ -1,0 +1,46 @@
+// PerfP521Probe times the P-521 generator-table build in its start-up role: crypto/tls's test
+// package parses a P-521 ECDSA key at start, and the first ScalarBaseMult builds the table.
+package main
+
+import (
+	"crypto/x509"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"time"
+)
+
+// The two keys of crypto/tls handshake_test.go: testECDSAPrivateKey (P-521) and testP256PrivateKey.
+const p521Key = "3081dc0201010442019883e909ad0ac9ea3d33f9eae661f1785206970f8ca9a91672f1eedca7a8ef12bd6561bb246dda5df4b4d5e7e3a92649bc5d83a0bf92972e00e62067d0c7bd99d7a00706052b81040023a18189038186000400c4a1edbe98f90b4873367ec316561122f23d53c33b4d213dcd6b75e6f6b0dc9adf26c1bcb287f072327cb3642f1c90bcea6823107efee325c0483a69e0286dd33700ef0462dd0da09c706283d881d36431aa9e9731bd96b068c09b23de76643f1a5c7fe9120e5858b65f70dd9bd8ead5d7f5d5ccb9b69f30665b669a20e227e5bffe3b"
+const p256Key = "30770201010420012f3b52bc54c36ba3577ad45034e2e8efe1e6999851284cb848725cfe029991a00a06082a8648ce3d030107a14403420004c02c61c9b16283bbcc14956d886d79b358aa614596975f78cece787146abf74c2d5dc578c0992b4f3c631373479ebf3892efe53d21c4f4f1cc9a11c3536b7f75"
+
+func parse(der []byte) int64 {
+	t := time.Now()
+	if _, err := x509.ParseECPrivateKey(der); err != nil {
+		panic(err)
+	}
+	return time.Since(t).Nanoseconds()
+}
+
+func main() {
+	n := 50
+	if len(os.Args) > 1 {
+		n, _ = strconv.Atoi(os.Args[1])
+	}
+	p521, _ := hex.DecodeString(p521Key)
+	p256, _ := hex.DecodeString(p256Key)
+
+	// P-256 first, so one-time ECDSA set-up is outside the P-521 numbers.
+	p256First := parse(p256)
+	first := parse(p521)
+	second := parse(p521)
+	steady := make([]int64, n)
+	for i := range steady {
+		steady[i] = parse(p521)
+	}
+	sort.Slice(steady, func(i, j int) bool { return steady[i] < steady[j] })
+	fmt.Printf("p256_first_us %d p521_first_us %d p521_second_us %d p521_steady_median_us %d n %d\n",
+		p256First/1000, first/1000, second/1000, steady[n/2]/1000, n)
+}

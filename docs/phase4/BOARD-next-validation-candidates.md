@@ -33897,4 +33897,118 @@ through a pointer keeps the twin.
 
 — C2 (2026-11-05)
 
+## 2026-11-06 — H (COORD ruling, claude/h-p521-table): P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built
+
+**The shape.** fiat's converted p384Mul declares 460 named locals before the converter's tuple temporaries, against
+the JIT's 512-local cut-off for inlining into a method. It inlines part-way: crossgen2's listing keeps 522 calls,
+against 1,250 in the converted p521Mul and 136 in p256Mul. Those are 227 p384Uint1 conversions, 137 bits.Add64,
+78 bits.Mul64, 30 limb get_Item, 18 materializeValue, 18 array get_Item, 7 bits.Sub64 and 6 p384CmovznzU64.
+
+**The size** (H, win-x64, runtime 10.0.13, DOTNET_TieredCompilation=0):
+
+| P-384 | Go | C# JIT | C# ReadyToRun |
+|:--|--:|--:|--:|
+| field Mul | 55 ns | 946 ns (17x) | 1.03 to 1.17 us (19 to 21x) |
+| field Square | 49 ns | 939 ns | 996 ns to 1.01 us |
+| ScalarBaseMult, warm | 127 us | 1.67 ms (13x) | 2.23 ms (18x) |
+| the first ScalarBaseMult, which builds the table | | 74 to 81 ms, of which 46 to 52 ms is JIT | 57 to 59 ms, of which 15 ms is JIT |
+
+Go is read from its own benchmark_test.go (go test -bench, 3 runs), C# from the seat's microbenchmark (medians of 7
+rounds, 2 processes per arm). The P-521 seat's measured cure reached 718 ns (ReadyToRun) and 618 to 665 ns (JIT)
+per P-521 multiply. A P-384 hand-own of the same shape would land near 350 to 450 ns, with 36 products in place of
+81; that is an ESTIMATE, not a measurement.
+
+**Why not built.** No P-384 key is evaluated at crypto/tls's test-package start, so the start-up lever does not reach
+it; a handshake on a P-384 certificate or curve pays it per handshake. The cure would be the p521-table seat's
+shape: a manualConversionFuncs displacement onto a straight-line hand-own with fiat's contract, pinned by source
+hash. P-384's prime is not a Mersenne prime, so the reduction keeps its multiplies.
+
+— H (2026-11-06)
+
+## 2026-11-06 — H (COORD ruling, claude/h-p521-table): a named numeric type's conversion operators become uninlined calls in any method past 512 locals — OPEN, no owner
+
+**The class.** Go's `uint64(p521Uint1(x))` is free. The converter emits `(uint64)((p521Uint1)x)`, and go2cs-gen gives
+p521Uint1 two implicit operators. Those are trivial and inline wherever the JIT inlines. In a method with more
+than 512 locals the JIT inlines nothing, so each conversion is a call: 655 of the converted p521Mul's 1,250 calls
+per field multiply. The same holds for every other trivial member a converted body calls there: a generated
+wrapper's indexer and `Value` getter, golib helpers, `bits.*`.
+
+**The population is unmeasured.** Known instances: fiat's p521Mul and p521Square (displaced by the p521-table seat)
+and p384Mul (the row above, part-way). A census needs the emitted local count per method across the corpus, over
+the converted .cs or the compiled IL. Whether any other converted body crosses 512 is not known.
+
+**The emission levers, none ruled:** fold an identity conversion pair through a same-underlying named type, which
+changes visible code across every fiat curve; or split a straight-line function, which has no visible-code
+spelling. The p521-table seat's measurement found neither worth it there.
+
+— H (2026-11-06)
+
+## 2026-11-06 — H (claude/h-p521-table): ReadyToRun discards a precompiled body that uses an instruction-set-dependent intrinsic, so `Math.BigMul` callers JIT at start-up — ROOTED (composite ReadyToRun); the lever is OPEN, priced by the i9 and G
+
+**What was measured** (H, win-x64, runtime and crossgen2 10.0.13, the BoGo host's publish shape: self-contained,
+single file, PublishReadyToRun, `--enable-generic-cycle-detection`; DOTNET_TieredCompilation=0, read with
+DOTNET_JitDisasmSummary). A precompiled method body that calls `Math.BigMul` is not used: the runtime JIT-compiles
+the method at its first call. The same holds for `Bmi2.X64.MultiplyNoFlags` behind `IsSupported` and for `UInt128`
+multiplication. The p521-table seat measured five spellings of its multiply:
+
+| spelling | precompiled body kept? | JIT at the first call |
+|:--|:--|--:|
+| `Math.BigMul` | no | 8 to 13 ms |
+| `Math.BigMul`, limb access through non-inlined helpers | no | 7.6 ms |
+| `Bmi2.X64.MultiplyNoFlags` behind `IsSupported` | no | 17.6 ms |
+| `(UInt128)x * y` | no | 18.7 ms |
+| four 32x32 products (the landed body) | **yes** | 0 |
+
+The same publish without single file kept the `Math.BigMul` body, so the shape matters. crossgen2 compiles each
+of these bodies; the runtime discards them.
+
+**Already paying it, in every ReadyToRun host of this shape:** `math/bits.Mul64`, `bits.Mul` and `bits.Sub` are
+JIT-compiled at run time, and so are fiat's `p256Mul`, `p256Square`, `p256FromMontgomery` and `p256ToMontgomery`.
+That is P1's "27 ms of P-256 JIT" in DATA-bogo-startup.md §8.2 (lever 2b). Whether the P-256 four share this cause
+is NOT established. They call no `Math.BigMul` directly.
+
+**ROOTED by the i9's discriminator** (dispatched 2026-11-06, measurement only; i9-13900K, runtime 10.0.14,
+crossgen2 10.0.14, SDK 10.0.403; records on the i9 under `logs\r2r-probe`). The carrier is crossgen2 in
+**composite** mode, which the SDK turns on for a self-contained single-file publish. Single-file packaging itself
+is not the cause:
+- single file at the default instruction set: the `Math.BigMul` body is JIT-compiled, the four-product body kept;
+- single file with `-p:PublishReadyToRunComposite=false`: the `Math.BigMul` body is kept;
+- not single file: kept at both instruction sets;
+- composite with `--instruction-set:x86-64-v3`: kept;
+- a converted single-file host JIT-compiles `bits.Mul64` and `bits.Mul` at their first call, while `bits.Add64`
+  and `bits.Reverse8` in the same assembly are kept;
+- `UInt128` multiplication is JIT-compiled even in the non-composite v3 arm, which is unexplained.
+
+H's own reading agrees: its non-single-file publish of the same `Math.BigMul` body kept it. The X86Base fixup in
+crossgen2's map does not discriminate, because kept images carry it too.
+
+**The lever is OPEN:** composite off for single-file hosts, being priced by the i9 and G as start-up against
+throughput. The four-product body landed by the p521-table seat is kept in every arm, so it stands either way.
+
+**Not this row's to decide:** the host instruction set is the owner's call, and it rides on the item-7 decision
+([DATA-hop126-perf.md §11.4](DATA-hop126-perf.md), Step B and the `x86-64-v3` level). An in-assembly spelling per
+site, as the p521-table seat did, needs no ruling.
+
+— H (2026-11-06)
+
+## 2026-11-06 — H (claude/h-p521-table): the comment census silently skips every converted file that carries a displacement placeholder — OPEN, no owner
+
+**The instrument.** `internal/commentcensus` pairs each converted production `.cs` with its Go source. It skips
+hand-owned files by testing whether the file's TEXT contains `GoManualConversion` (census.go, the `FindPairs`
+walk). The converter's displacement placeholder says "... hand-converted with managed semantics in the
+package's *_impl.cs ([module: GoManualConversion])", so a converted file with even one displaced declaration
+drops out of the census whole, and its remaining comments are unguarded.
+
+**The population, read at the p521-table seat's tip:** 124 converted production `.cs` under `src/core` carry a
+placeholder, all 124 contain the string, and none of them carries a `[module: GoManualConversion]` line. The
+seat added one: fiat's `p521_fiat64.cs` left the census (1,727 to 1,726 files, 46,711 to 46,695 Go comment
+groups), and the baseline fell by one in `eol:split` and in `top:go-none-cs-blank`. The fall was re-baselined
+with this cause named.
+
+**The fix is small and moves the baseline:** match the attribute line (`[module: GoManualConversion]` at the start
+of a line) instead of the substring. Every one of the 124 files then re-enters the census and the baseline moves
+in every class they touch, so it wants its own seat and its own re-baseline, not a ride on a crypto seat.
+
+— H (2026-11-06)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

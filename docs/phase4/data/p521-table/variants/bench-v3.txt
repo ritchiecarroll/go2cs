@@ -1,0 +1,10 @@
+first_SBM_us 52209 second_SBM_us 1931 jit_in_first_us 17559
+fiat Mul               min        247.3 ns  median        257.3 ns
+fiat Square            min        229.2 ns  median        240.5 ns
+fiat Add               min         91.4 ns  median         93.1 ns
+@new P521Element       min         31.5 ns  median         32.4 ns
+NewP521Point           min        159.5 ns  median        161.5 ns
+point Add              min       7862.7 ns  median       7903.3 ns
+point Double           min       6267.3 ns  median       6435.6 ns
+ScalarBaseMult         min    1466598.0 ns  median    1504704.0 ns
+gc0 326 gc1 1 gc2 0
