@@ -1,0 +1,4 @@
+TLS	D26	C:\go2cs-perf\drop1262\go1.26.10.2\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\v3
+TLS	D26-AA	C:\go2cs-perf\drop1262\go1.26.10.2\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\v3
+TLS	V3	C:\go2cs\scratch\p1262\v3\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\v3
+TLS	V3-AA	C:\go2cs\scratch\p1262\v3\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\v3
