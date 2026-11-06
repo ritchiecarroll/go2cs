@@ -1,0 +1,25 @@
+P1AVDBG object go.main_package+TT: no object shell
+P1AVDBG generic go.main_package+TT -> go.main_package+Δmain_type`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_type`1[go.main_package+TT]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+1 TT    Error(...any)         : false
+2 TT    Name() string         : true
+P1AVDBG object go.main_package+TT: no object shell
+P1AVDBG generic go.main_package+TT -> go.main_package+Δmain_typeᴛ2`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_typeᴛ2`1[go.main_package+TT]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+3 TT    Logf(string, ...any)  : false
+4 TT    Failed() bool         : true
+P1AVDBG object go.main_package+TT: no object shell
+P1AVDBG generic go.main_package+TT -> go.main_package+ΔErrorer`1[ΔTTarget]: NotSupportedException: 'go.main_package+ΔErrorer`1[go.main_package+TT]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+5 TT    Errorer (named)       : false
+P1AVDBG generic go.StandardBox`1[go.main_package+TT] -> go.main_package+Δmain_type`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_type`1[go.main_package+TT]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+P1AVDBG object go.StandardBox`1[go.main_package+TT]: no object shell
+6 *TT   Error(...any)         : false
+P1AVDBG generic go.StandardBox`1[go.testing_package+T] -> go.main_package+Δmain_type`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_type`1[go.testing_package+T]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+P1AVDBG object go.StandardBox`1[go.testing_package+T]: no object shell
+7 *T    Error(...any)         : false
+P1AVDBG generic go.StandardBox`1[go.testing_package+T] -> go.main_package+Δmain_typeᴛ1`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_typeᴛ1`1[go.testing_package+T]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+8 *T    Name() string         : true
+P1AVDBG object go.main_package+LL: no object shell
+P1AVDBG generic go.main_package+LL -> go.main_package+Δmain_type`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_type`1[go.main_package+LL]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+9 LL    Error(...any)         : false
+P1AVDBG object go.main_package+V: no object shell
+P1AVDBG generic go.main_package+V -> go.main_package+Δmain_type`1[ΔTTarget]: NotSupportedException: 'go.main_package+Δmain_type`1[go.main_package+V]' is missing native code or metadata. This can happen for code that is not compatible with trimming or AOT. Inspect and fix trimming and AOT related warnings that were generated when the app was published. For more information see https://aka.ms/nativeaot-compatibility
+10 V    Error(...any)         : false

@@ -34167,5 +34167,21 @@ cause before any fix.
 
 — P1 (2026-11-06)
 
+**Amended 2026-11-06 (P1, COORD ruling: the AOT variadic shell seat) — the framing was too narrow; FIXED on
+`claude/p1-aot-variadic-shell`, closes when it lands.** The gap is not about `testing`, promotion or a second
+assembly. Any runtime assert of a struct value, or a pointer to one, to an interface with a variadic method read false
+under Native AOT when no compile-time `GoImplement` covered the pair: a local value method `V.Error(...any)` missed
+too. go2cs-gen gave such interfaces no object shell, since a `params Span<T>` tail cannot ride a boxed invoker. The
+binder then fell to the generic shell's `MakeGenericType` over the struct, which Native AOT has no code for.
+The fix binds each variadic member through the type's compiled `IGoMethodSet` arm, or, for the hand-owned
+`testing.T`/`B`/`F`, `Delegate.CreateDelegate` over the box overload. Native AOT at the fix, against Go:
+`Behavioral/VariadicInterfaceAssert` (new) reads 15/15 asserts, up from 5/15, and XpkgPromotedMethodSet 61/61, up from
+60/61. AOT image size is +0.025% on PerfStartup. No generic limit was read: `G[int]` to `Error(...any)` reads true
+under AOT at the fix and the call arrives, and a go/ast census of go1.26.10 `src` finds 0 of 294 variadic receiver
+methods on a generic type and no generic struct embedding a type with one. Record:
+[`DATA-aot-variadic-shell.md`](DATA-aot-variadic-shell.md).
+
+— P1 (2026-11-06)
+
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
