@@ -44,13 +44,11 @@ internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж
         t.flightRecorder = r;
         t.subscribersMu.Unlock();
 
-        {
-            var err = Ꮡt.addedSubscriber(); if (err != nil) {
-                t.subscribersMu.Lock();
-                t.flightRecorder = default;
-                t.subscribersMu.Unlock();
-                return err;
-            }
+        var err = Ꮡt.addedSubscriber(); if (err != nil) {
+            t.subscribersMu.Lock();
+            t.flightRecorder = default;
+            t.subscribersMu.Unlock();
+            return err;
         }
         return default;
     }
@@ -101,13 +99,11 @@ internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, 
         t.traceStartWriter = w;
         t.subscribersMu.Unlock();
 
-        {
-            var err = Ꮡt.addedSubscriber(); if (err != nil) {
-                t.subscribersMu.Lock();
-                t.traceStartWriter = default;
-                t.subscribersMu.Unlock();
-                return err;
-            }
+        var err = Ꮡt.addedSubscriber(); if (err != nil) {
+            t.subscribersMu.Lock();
+            t.traceStartWriter = default;
+            t.subscribersMu.Unlock();
+            return err;
         }
         return default;
     }
@@ -148,10 +144,8 @@ internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
         // This is necessary for the trace reader goroutine to pick up on the new subscriber.
         runtime_traceAdvance(false);
     } else {
-        {
-            var err = Ꮡt.startLocked(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡt.startLocked(); if (err != nil) {
+            return err;
         }
     }
     t.subscribers++;
@@ -184,10 +178,8 @@ internal static void removedSubscriber(this ref traceMultiplexer t) {
 internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var err = runtime.StartTrace(); if (err != nil) {
-            return err;
-        }
+    var err = runtime.StartTrace(); if (err != nil) {
+        return err;
     }
 
     // Grab the trace reader goroutine's subscribers.

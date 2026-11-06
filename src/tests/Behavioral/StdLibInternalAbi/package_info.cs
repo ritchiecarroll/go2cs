@@ -67,7 +67,7 @@ using static go.main_package;
 [assembly: GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
 [assembly: GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: GoPositionMap("switch.go", "switch.cs", "ABtAgoKYpKQ=")]
-[assembly: GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
+[assembly: GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoKUpoCkgqiApoKogqaCABEuooKUpqKClAACFIIADiSigpSmggAUMqKCgpQAKgiigpSUpKysrKysrKwABBKilIKkgqSCpIKkgqSoooKUqKKClKiigpSoooKUqKKClKiApoCkgAAIEIKCgpSmooKClKiAAA4igqSCpIKkgqSCpqKClAANMoKmgqaCpoKmooKClIKUpKKCgpSCgpSmggANHIIADFKCqoKogqiCqIKqgoKCgoKCzIKClIKsgoKCgoKClLqCgpSCqIKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go;

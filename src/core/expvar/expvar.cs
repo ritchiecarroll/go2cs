@@ -222,14 +222,10 @@ public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
     // Before we store the value, check to see whether the key is new. Try a Load
     // before LoadOrStore: LoadOrStore causes the key interface to escape even on
     // the Load path.
-    {
-        var (_, ok) = Ꮡv.Ꮡm.Load(key); if (!ok) {
-            {
-                var (_, dup) = Ꮡv.Ꮡm.LoadOrStore(key, av); if (!dup) {
-                    Ꮡv.addKey(key);
-                    return;
-                }
-            }
+    var (_, ok) = Ꮡv.Ꮡm.Load(key); if (!ok) {
+        var (_, dup) = Ꮡv.Ꮡm.LoadOrStore(key, av); if (!dup) {
+            Ꮡv.addKey(key);
+            return;
         }
     }
 
@@ -248,10 +244,8 @@ public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
     }
 
     // Add to Int; ignore otherwise.
-    {
-        var (iv, okΔ1) = i._<ж<Int>>(ᐧ); if (okΔ1) {
-            iv.Add(delta);
-        }
+    var (iv, okΔ1) = i._<ж<Int>>(ᐧ); if (okΔ1) {
+        iv.Add(delta);
     }
 }
 
@@ -267,10 +261,8 @@ public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
     }
 
     // Add to Float; ignore otherwise.
-    {
-        var (iv, okΔ1) = i._<ж<Float>>(ᐧ); if (okΔ1) {
-            iv.Add(delta);
-        }
+    var (iv, okΔ1) = i._<ж<Float>>(ᐧ); if (okΔ1) {
+        iv.Add(delta);
     }
 }
 
@@ -364,10 +356,8 @@ internal static readonly object reuseOfExportedVarNameˢ = (@string)"Reuse of ex
 public static void Publish(@string name, Var v) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, dup) = Ꮡvars.Ꮡm.LoadOrStore(name, v); if (dup) {
-                Δlog.Panicln(reuseOfExportedVarNameˢ, name);
-            }
+        var (_, dup) = Ꮡvars.Ꮡm.LoadOrStore(name, v); if (dup) {
+            Δlog.Panicln(reuseOfExportedVarNameˢ, name);
         }
         Ꮡvars.ᏑkeysMu.Lock();
         defer(Ꮡvars.ᏑkeysMu.Unlock, ref ᒐ);

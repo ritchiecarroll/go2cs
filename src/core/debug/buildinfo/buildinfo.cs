@@ -77,12 +77,10 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
         ref var err = ref Ꮡerr.ValueSlot;
 
         defer(() => {
-            {
-                var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok) {
-                    Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
-                } else if (Ꮡerr.ValueSlot != nil) {
-                    Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info from %s: %w"u8, name, Ꮡerr.ValueSlot);
-                }
+            var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok) {
+                Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
+            } else if (Ꮡerr.ValueSlot != nil) {
+                Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info from %s: %w"u8, name, Ꮡerr.ValueSlot);
             }
         }, ref ᒐ);
 
@@ -136,10 +134,8 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     // Read the first bytes of the file to identify the format, then delegate to
     // a format-specific function to load segment and section headers.
     var ident = new slice<byte>(16);
-    {
-        var (n, errΔ1) = r.ReadAt(ident, 0); if (n < len(ident) || errΔ1 != nil) {
-            return ("", "", errUnrecognizedFormat);
-        }
+    var (n, errΔ1) = r.ReadAt(ident, 0); if (n < len(ident) || errΔ1 != nil) {
+        return ("", "", errUnrecognizedFormat);
     }
 
     exe x = default;
@@ -606,10 +602,8 @@ internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr
 }
 
 internal static (uint64, uint64) DataStart(this ref xcoffExe x) {
-    {
-        var s = x.f.SectionByType(xcoff.STYP_DATA); if (s != nil) {
-            return (s.VirtualAddress, s.Size);
-        }
+    var s = x.f.SectionByType(xcoff.STYP_DATA); if (s != nil) {
+        return (s.VirtualAddress, s.Size);
     }
     return (0, 0);
 }
@@ -624,10 +618,8 @@ internal static ref readonly @string dataˢ => ref dataˢᵇ;
 private static readonly @string dataˢᵇ = "data"u8;
 
 internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
-    {
-        var s = x.f.Section(dataˢ); if (s != nil) {
-            return ((uint64)s.Offset, (uint64)s.Size);
-        }
+    var s = x.f.Section(dataˢ); if (s != nil) {
+        return ((uint64)s.Offset, (uint64)s.Size);
     }
     return (0, 0);
 }

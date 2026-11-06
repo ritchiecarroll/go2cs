@@ -61,14 +61,12 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawsyscalln(uintpt
         c.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
     }
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallN_trampoline), @unsafe.Pointer.FromPinnedBox(c));
-    {
-        var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil) {
-            err = (uintptr)((~(~gp).m).errnoAddr.Value);
-        } else {
-            ref var errnoAddr = ref heap<ж<int32>>(out var ᏑerrnoAddr);
-            libc_error_addr(ᏑerrnoAddr);
-            err = (uintptr)(errnoAddr.Value);
-        }
+    var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil) {
+        err = (uintptr)((~(~gp).m).errnoAddr.Value);
+    } else {
+        ref var errnoAddr = ref heap<ж<int32>>(out var ᏑerrnoAddr);
+        libc_error_addr(ᏑerrnoAddr);
+        err = (uintptr)(errnoAddr.Value);
     }
     return (c.r1, c.r2, err);
 }

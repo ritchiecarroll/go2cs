@@ -24,10 +24,8 @@ partial class sha3_package {
         ]);
         var h = NewCShake128(input, input);
         h.Write(input);
-        {
-            var got = h.Sum(default); if (!bytes.Equal(got, want)) {
-                return errors.New("unexpected result");
-            }
+        var got = h.Sum(default); if (!bytes.Equal(got, want)) {
+            return errors.New("unexpected result");
         }
         return default;
     });

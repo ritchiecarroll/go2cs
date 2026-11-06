@@ -60,10 +60,8 @@ internal static ж<Graph> newGraph() {
 }
 
 internal static bool addNode(this ref Graph g, @string label) {
-    {
-        var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
-            return false;
-        }
+    var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
+        return false;
     }
     g.byLabel[label] = len(g.Nodes);
     g.Nodes = append(g.Nodes, label);
@@ -129,12 +127,10 @@ public static (ж<Graph>, error) Parse(@string dag) {
                 if (less == "NONE"u8) {
                     continue;
                 }
-                {
-                    var (_, ok) = g.byLabel[less, ꟷ]; if (!ok) {
-                        errorf("use of %s before its definition", less);
-                    } else {
-                        g.AddEdge(def, less);
-                    }
+                var (_, ok) = g.byLabel[less, ꟷ]; if (!ok) {
+                    errorf("use of %s before its definition", less);
+                } else {
+                    g.AddEdge(def, less);
                 }
             }
         }

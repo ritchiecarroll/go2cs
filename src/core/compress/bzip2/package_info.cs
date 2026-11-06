@@ -65,8 +65,8 @@ using static go.compress.bzip2_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
-[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggAQELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUgIIAIQ7CgoKCgoKClMqCgoKCgoKCgoLclLiCgsqCuIKCgoKCgpSUgpTKgoKCgoKmlIKmgpSCgoKClIKUgpSmlIKCuIKClIKUgsqCppSCgoKClIKUgoKmgpSUgpSCuIKUpqaClIKCgoKUprgACBKCgpSCgqaCyoKCgoKClAACGgAKAoKCgqaCgoKmAAYQgoKCgoKClKa8ooKClA==")]
-[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgIKk7oKUgoKClIKCpsqYgoIAFSbypoKCgoK4gpQADBqC3MqmgpSmgoKUlIKUpoKmlIKUpg==", "106-111:1;135-137:2")]
+[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggAQELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUggAgDsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
+[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgpTugpSCgoKUgoKmypiCggAVJvKmgoKCgriClAAMGoLcyqaClKaCgpSUgpSmgqaUgpSm", "106-111:1;135-137:2")]
 [assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
 // </GoSourcePositionMaps>
 

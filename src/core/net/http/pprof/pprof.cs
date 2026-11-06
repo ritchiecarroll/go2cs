@@ -191,13 +191,11 @@ public static void Profile(http.ResponseWriter w, ж<http.Request> r) {
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
     w.Header().Set(contentDispositionˢ, attachmentFilenameˢ);
-    {
-        var errΔ1 = pprof.StartCPUProfile(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
-            // StartCPUProfile failed, so no writes yet.
-            serveError(w, http.StatusInternalServerError,
-                fmt.Sprintf("Could not enable CPU profiling: %s"u8, errΔ1));
-            return;
-        }
+    var errΔ1 = pprof.StartCPUProfile(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
+        // StartCPUProfile failed, so no writes yet.
+        serveError(w, http.StatusInternalServerError,
+            fmt.Sprintf("Could not enable CPU profiling: %s"u8, errΔ1));
+        return;
     }
     sleep(r, ((time.Duration)sec) * time.ΔSecond);
     pprof.StopCPUProfile();
@@ -223,13 +221,11 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> r) {
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
     w.Header().Set(contentDispositionˢ, attachmentFilenameTraceˢ);
-    {
-        var errΔ1 = trace.Start(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
-            // trace.Start failed, so no writes yet.
-            serveError(w, http.StatusInternalServerError,
-                fmt.Sprintf("Could not enable tracing: %s"u8, errΔ1));
-            return;
-        }
+    var errΔ1 = trace.Start(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
+        // trace.Start failed, so no writes yet.
+        serveError(w, http.StatusInternalServerError,
+            fmt.Sprintf("Could not enable tracing: %s"u8, errΔ1));
+        return;
     }
     sleep(r, (time.Duration)(int64)(sec * (float64)time.ΔSecond));
     trace.Stop();
@@ -307,11 +303,9 @@ internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http
         serveError(w, http.StatusNotFound, unknownProfileˢ);
         return;
     }
-    {
-        @string sec = r.FormValue(secondsˢ); if (sec != ""u8) {
-            name.serveDeltaProfile(w, r, p, sec);
-            return;
-        }
+    @string sec = r.FormValue(secondsˢ); if (sec != ""u8) {
+        name.serveDeltaProfile(w, r, p, sec);
+        return;
     }
     var (gc, _) = strconv.Atoi(r.FormValue("gc"));
     if (name == "heap"u8 && gc > 0) {
@@ -417,10 +411,8 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
 
 internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> p) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = p.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = p.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     var ts = time.Now().UnixNano();
     var (p0, err) = profile.Parse(new bytes_BufferжReader(Ꮡbuf));
@@ -480,12 +472,10 @@ private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=u
 public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        var (name, found) = strings.CutPrefix(r.URL.Path, debugPprofˢ); if (found) {
-            if (name != ""u8) {
-                ((handler)name).ServeHTTP(w, Ꮡr);
-                return;
-            }
+    var (name, found) = strings.CutPrefix(r.URL.Path, debugPprofˢ); if (found) {
+        if (name != ""u8) {
+            ((handler)name).ServeHTTP(w, Ꮡr);
+            return;
         }
     }
 
@@ -513,10 +503,8 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 
     slices.SortFunc(profiles, (profileEntry a, profileEntry b) => strings.Compare(a.Name, b.Name));
 
-    {
-        var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != nil) {
-            log.Print(err);
-        }
+    var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != nil) {
+        log.Print(err);
     }
 }
 

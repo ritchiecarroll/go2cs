@@ -130,10 +130,8 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
             return (n, err);
         }
         nint nout = Encode(e.@out[0..], e.buf[0..]);
-        {
-            (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
-                return (n, e.err);
-            }
+        (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
+            return (n, e.err);
         }
         e.nbuf = 0;
     }
@@ -147,10 +145,8 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         nn -= nn % 4;
         if (nn > 0) {
             nint nout = Encode(e.@out[0..], p.slice(0, nn));
-            {
-                (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
-                    return (n, e.err);
-                }
+            (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
+                return (n, e.err);
             }
         }
         n += nn;

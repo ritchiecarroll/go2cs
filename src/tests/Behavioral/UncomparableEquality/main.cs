@@ -55,11 +55,9 @@ internal static void check(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%-24s PANIC: %v\n"u8, name, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%-24s PANIC: %v\n"u8, name, r);
+                return;
             }
             fmt.Printf("%-24s no panic\n"u8, name);
         }, ref ᒐ);
@@ -73,11 +71,9 @@ internal static void checkPanicOnly(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%-24s PANIC\n"u8, name);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%-24s PANIC\n"u8, name);
+                return;
             }
             fmt.Printf("%-24s no panic\n"u8, name);
         }, ref ᒐ);

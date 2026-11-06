@@ -393,35 +393,31 @@ internal static uintptr sweepone() {
             noMoreWork = ᏑΔsweep.Ꮡactive.markDrained();
             break;
         }
-        {
-            var state = s.Ꮡstate.get(); if (state != mSpanInUse) {
-                // This can happen if direct sweeping already
-                // swept this span, but in that case the sweep
-                // generation should always be up-to-date.
-                if (!(s.sweepgen == sl.sweepGen || s.sweepgen == sl.sweepGen + 3)) {
-                    print((@string)"runtime: bad span s.state=", state, (@string)" s.sweepgen=", s.sweepgen, (@string)" sweepgen=", sl.sweepGen, (@string)"\n");
-                    @throw(nonInUseSpanInUnsweptˢ);
-                }
-                continue;
+        var state = s.Ꮡstate.get(); if (state != mSpanInUse) {
+            // This can happen if direct sweeping already
+            // swept this span, but in that case the sweep
+            // generation should always be up-to-date.
+            if (!(s.sweepgen == sl.sweepGen || s.sweepgen == sl.sweepGen + 3)) {
+                print((@string)"runtime: bad span s.state=", state, (@string)" s.sweepgen=", s.sweepgen, (@string)" sweepgen=", sl.sweepGen, (@string)"\n");
+                @throw(nonInUseSpanInUnsweptˢ);
             }
+            continue;
         }
-        {
-            var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
-                // Sweep the span we found.
-                npages = sΔ1.npages;
-                if (sΔ1.sweep(false)) {
-                    // Whole span was freed. Count it toward the
-                    // page reclaimer credit since these pages can
-                    // now be used for span allocation.
-                    Ꮡmheap_.ᏑreclaimCredit.Add(npages);
-                } else {
-                    // Span is still in-use, so this returned no
-                    // pages to the heap and the span needs to
-                    // move to the swept in-use list.
-                    npages = 0;
-                }
-                break;
+        var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
+            // Sweep the span we found.
+            npages = sΔ1.npages;
+            if (sΔ1.sweep(false)) {
+                // Whole span was freed. Count it toward the
+                // page reclaimer credit since these pages can
+                // now be used for span allocation.
+                Ꮡmheap_.ᏑreclaimCredit.Add(npages);
+            } else {
+                // Span is still in-use, so this returned no
+                // pages to the heap and the span needs to
+                // move to the swept in-use list.
+                npages = 0;
             }
+            break;
         }
     }
     ᏑΔsweep.Ꮡactive.end(sl);
@@ -498,12 +494,10 @@ internal static void ensureSwept(this ж<mspan> Ꮡs) {
     var sl = ᏑΔsweep.Ꮡactive.begin();
     if (sl.valid) {
         // The caller must be sure that the span is a mSpanInUse span.
-        {
-            var (sΔ1, ok) = sl.tryAcquire(Ꮡs); if (ok) {
-                sΔ1.sweep(false);
-                ᏑΔsweep.Ꮡactive.end(sl);
-                return;
-            }
+        var (sΔ1, ok) = sl.tryAcquire(Ꮡs); if (ok) {
+            sΔ1.sweep(false);
+            ᏑΔsweep.Ꮡactive.end(sl);
+            return;
         }
         ᏑΔsweep.Ꮡactive.end(sl);
     }

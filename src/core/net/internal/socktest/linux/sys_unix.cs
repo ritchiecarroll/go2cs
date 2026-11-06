@@ -28,13 +28,11 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
             (s, err) = (-1, err); goto ᒐdone;
         }
         (s, so.Err) = syscall.Socket(family, sotype, proto);
-        {
-            err = af.apply(so); if (err != nil) {
-                if (so.Err == nil) {
-                    syscall.Close(s);
-                }
-                (s, err) = (-1, err); goto ᒐdone;
+        err = af.apply(so); if (err != nil) {
+            if (so.Err == nil) {
+                syscall.Close(s);
             }
+            (s, err) = (-1, err); goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -72,10 +70,8 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
             goto ᒐdone;
         }
         so.Err = syscall.Close(s);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -113,10 +109,8 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
             goto ᒐdone;
         }
         so.Err = syscall.Connect(s, sa);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -153,10 +147,8 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
             goto ᒐdone;
         }
         so.Err = syscall.Listen(s, backlog);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -195,13 +187,11 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
             (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
         (ns, sa, so.Err) = syscall.Accept(s);
-        {
-            err = af.apply(so); if (err != nil) {
-                if (so.Err == nil) {
-                    syscall.Close(ns);
-                }
-                (ns, sa, err) = (-1, default, err); goto ᒐdone;
+        err = af.apply(so); if (err != nil) {
+            if (so.Err == nil) {
+                syscall.Close(ns);
             }
+            (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -239,10 +229,8 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     }
     (soerr, so.Err) = syscall.GetsockoptInt(s, level, opt);
     so.SocketErr = ((syscall.Errno)(uintptr)soerr);
-    {
-        err = af.apply(so); if (err != nil) {
-            return (-1, err);
-        }
+    err = af.apply(so); if (err != nil) {
+        return (-1, err);
     }
 
     if (so.Err != nil) {

@@ -43,10 +43,8 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
             i = 0;
         }
         if (i > 0) {
-            {
-                (_, err) = w.w.Write(w.buf.slice(0, i)); if (err != nil) {
-                    break;
-                }
+            (_, err) = w.w.Write(w.buf.slice(0, i)); if (err != nil) {
+                break;
             }
             nint bn = copy(w.buf, w.buf.slice(i));
             w.buf = w.buf.slice(0, bn);

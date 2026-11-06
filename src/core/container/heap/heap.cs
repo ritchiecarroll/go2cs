@@ -108,10 +108,8 @@ internal static bool down(Interface h, nint i0, nint n) {
             break;
         }
         nint j = j1; // left child
-        {
-            nint j2 = j1 + 1; if (j2 < n && h.Less(j2, j1)) {
-                j = j2; // = 2*i + 2  // right child
-            }
+        nint j2 = j1 + 1; if (j2 < n && h.Less(j2, j1)) {
+            j = j2; // = 2*i + 2  // right child
         }
         if (!h.Less(j, i)) {
             break;

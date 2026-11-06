@@ -134,23 +134,21 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Don't call this "g"; it's too easy get "g" and "gp" confused.
-    {
-        var ourg = getg(); if (ourg == Ꮡgp && ourg == (~(~ourg).m).curg) {
-            // The starting sp has been passed in as a uintptr, and the caller may
-            // have other uintptr-typed stack references as well.
-            // If during one of the calls that got us here or during one of the
-            // callbacks below the stack must be grown, all these uintptr references
-            // to the stack will not be updated, and traceback will continue
-            // to inspect the old stack memory, which may no longer be valid.
-            // Even if all the variables were updated correctly, it is not clear that
-            // we want to expose a traceback that begins on one stack and ends
-            // on another stack. That could confuse callers quite a bit.
-            // Instead, we require that initAt and any other function that
-            // accepts an sp for the current goroutine (typically obtained by
-            // calling GetCallerSP) must not run on that goroutine's stack but
-            // instead on the g0 stack.
-            @throw(cannotTraceUserGoroutineˢ);
-        }
+    var ourg = getg(); if (ourg == Ꮡgp && ourg == (~(~ourg).m).curg) {
+        // The starting sp has been passed in as a uintptr, and the caller may
+        // have other uintptr-typed stack references as well.
+        // If during one of the calls that got us here or during one of the
+        // callbacks below the stack must be grown, all these uintptr references
+        // to the stack will not be updated, and traceback will continue
+        // to inspect the old stack memory, which may no longer be valid.
+        // Even if all the variables were updated correctly, it is not clear that
+        // we want to expose a traceback that begins on one stack and ends
+        // on another stack. That could confuse callers quite a bit.
+        // Instead, we require that initAt and any other function that
+        // accepts an sp for the current goroutine (typically obtained by
+        // calling GetCallerSP) must not run on that goroutine's stack but
+        // instead on the g0 stack.
+        @throw(cannotTraceUserGoroutineˢ);
     }
 
     if (pc0 == ~(uintptr)0 && sp0 == ~(uintptr)0) { // Signal to fetch saved values from gp.
@@ -1032,12 +1030,10 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
                 continue;
             }
 
-            {
-                var (pr, stop) = commitFrame(); if (stop) {
-                    return (n, lastN);
-                } else if (!pr) {
-                    continue;
-                }
+            var (pr, stop) = commitFrame(); if (stop) {
+                return (n, lastN);
+            } else if (!pr) {
+                continue;
             }
 
             @string name = sf.name();
@@ -1068,36 +1064,32 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
         }
 
         // Print cgo frames.
-        {
-            nint cgoN = u.cgoCallers(cgoBuf[..]); if (cgoN > 0) {
-                ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
-                var anySymbolized = false;
-                var stop = false;
-                foreach (var (_, pc) in cgoBuf.slice(0, cgoN)) {
-                    if (!cgoSymbolizerAvailable()) {
-                        {
-                            var (pr, stopΔ1) = commitFrame(); if (stopΔ1) {
-                                break;
-                            } else if (pr) {
-                                print((@string)"non-Go function at pc=", (Δhex)(uint64)pc, (@string)"\n");
-                            }
-                        }
-                    } else {
-                        stop = printOneCgoTraceback(pc, commitFrame, Ꮡarg);
-                        anySymbolized = true;
-                        if (stop) {
-                            break;
-                        }
+        nint cgoN = u.cgoCallers(cgoBuf[..]); if (cgoN > 0) {
+            ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
+            var anySymbolized = false;
+            var stop = false;
+            foreach (var (_, pc) in cgoBuf.slice(0, cgoN)) {
+                if (!cgoSymbolizerAvailable()) {
+                    var (pr, stopΔ1) = commitFrame(); if (stopΔ1) {
+                        break;
+                    } else if (pr) {
+                        print((@string)"non-Go function at pc=", (Δhex)(uint64)pc, (@string)"\n");
+                    }
+                } else {
+                    stop = printOneCgoTraceback(pc, commitFrame, Ꮡarg);
+                    anySymbolized = true;
+                    if (stop) {
+                        break;
                     }
                 }
-                if (anySymbolized) {
-                    // Free symbolization state.
-                    arg.pc = 0;
-                    callCgoSymbolizer(Ꮡarg);
-                }
-                if (stop) {
-                    return (n, lastN);
-                }
+            }
+            if (anySymbolized) {
+                // Free symbolization state.
+                arg.pc = 0;
+                callCgoSymbolizer(Ꮡarg);
+            }
+            if (stop) {
+                return (n, lastN);
             }
         }
     }
@@ -1362,10 +1354,8 @@ internal static void tracebacksomeothers(ж<g> me, Func<ж<g>, bool> showf) {
         if (gp == me || gp == curgpʗ1) {
             return;
         }
-        {
-            var status = readgstatus(gp); if (status == _Gdead || status == _Gdeadextra) {
-                return;
-            }
+        var status = readgstatus(gp); if (status == _Gdead || status == _Gdeadextra) {
+            return;
         }
         if (!showf(gp)) {
             return;
@@ -1761,12 +1751,10 @@ internal static bool printOneCgoTraceback(uintptr pc, Func<(bool, bool)> commitF
 
     arg.pc = pc;
     for (;;) {
-        {
-            var (pr, stop) = commitFrame(); if (stop) {
-                return true;
-            } else if (!pr) {
-                continue;
-            }
+        var (pr, stop) = commitFrame(); if (stop) {
+            return true;
+        } else if (!pr) {
+            continue;
         }
 
         callCgoSymbolizer(Ꮡarg);

@@ -88,10 +88,8 @@ internal static @string Error(this importError e) {
 }
 
 internal static void error(this ref parser p, any err) {
-    {
-        var (s, ok) = err._<@string>(ᐧ); if (ok) {
-            err = errors.New(s);
-        }
+    var (s, ok) = err._<@string>(ᐧ); if (ok) {
+        err = errors.New(s);
     }
     // panic with a runtime.Error if err is not an error
     throw panic(new importError(p.scanner.Pos(), err._<error>()));
@@ -258,10 +256,8 @@ internal static @string parseName(this ref parser p) {
 }
 
 internal static typesꓸType deref(typesꓸType typ) {
-    {
-        var (p, _) = typ._<ж<types.Pointer>>(ᐧ); if (p != nil) {
-            typ = p.Elem();
-        }
+    var (p, _) = typ._<ж<types.Pointer>>(ᐧ); if (p != nil) {
+        typ = p.Elem();
     }
     return typ;
 }
@@ -281,26 +277,24 @@ internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> �
     if (name == ""u8) {
         anon = true;
         // Alias?
-        {
-            var (aname, ok) = p.aliases[n, ꟷ]; if (ok) {
-                name = aname;
-            } else {
-                var switchᴛ1 = deref(typ);
-                switch (switchᴛ1.type()) {
-                case ж<types.Basic> typΔ1: {
-                    name = typΔ1.Name();
-                    break;
-                }
-                case ж<types.Named> typΔ1: {
-                    name = typΔ1.Obj().Name();
-                    break;
-                }
-                default: {
-                    var typΔ1 = switchᴛ1;
-                    p.error(embeddedFieldExpectedˢ);
-                    break;
-                }}
+        var (aname, ok) = p.aliases[n, ꟷ]; if (ok) {
+            name = aname;
+        } else {
+            var switchᴛ1 = deref(typ);
+            switch (switchᴛ1.type()) {
+            case ж<types.Basic> typΔ1: {
+                name = typΔ1.Name();
+                break;
             }
+            case ж<types.Named> typΔ1: {
+                name = typΔ1.Obj().Name();
+                break;
+            }
+            default: {
+                var typΔ1 = switchᴛ1;
+                p.error(embeddedFieldExpectedˢ);
+                break;
+            }}
         }
     }
     field = types.NewField(token.NoPos, pkg, name, typ, anon);
@@ -1496,10 +1490,8 @@ internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) {
     }
     p.fixups = default;
     foreach (var (_, typ) in p.typeList) {
-        {
-            var (it, ok) = typ._<ж<types.Interface>>(ᐧ); if (ok) {
-                it.Complete();
-            }
+        var (it, ok) = typ._<ж<types.Interface>>(ᐧ); if (ok) {
+            it.Complete();
         }
     }
     p.pkg.MarkComplete();

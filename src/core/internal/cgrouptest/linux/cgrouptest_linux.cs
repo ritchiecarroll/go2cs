@@ -99,12 +99,10 @@ public static void InCgroupV2(ж<testing.T> t, Action<ж<CgroupV2>> fn) {
         // we can clean up if it throws or otherwise doesn't run the defers.
         var pathʗ1 = path;
         defer(() => {
-            {
-                var errΔ1 = os.Remove(pathʗ1); if (errΔ1 != nil) {
-                    // Not much we can do, but at least inform of the
-                    // problem.
-                    t.Errorf("Error removing cgroup directory: %v", errΔ1);
-                }
+            var errΔ1 = os.Remove(pathʗ1); if (errΔ1 != nil) {
+                // Not much we can do, but at least inform of the
+                // problem.
+                t.Errorf("Error removing cgroup directory: %v", errΔ1);
             }
         }, ref ᒐ);
 
@@ -225,10 +223,8 @@ private static readonly @string cgroupProcsˢᵇ = "cgroup.procs"u8;
 // Migrate the current process to the cgroup directory dst.
 internal static void migrateTo(ж<testing.T> t, @string dst) {
     var pid = slice<byte>(strconv.FormatInt((int64)os.Getpid(), 10));
-    {
-        var err = os.WriteFile(filepath.Join(dst, cgroupProcsˢ), pid, 0); if (err != nil) {
-            t.Skipf("Unable to migrate into %s: %v", dst, err);
-        }
+    var err = os.WriteFile(filepath.Join(dst, cgroupProcsˢ), pid, 0); if (err != nil) {
+        t.Skipf("Unable to migrate into %s: %v", dst, err);
     }
 }
 

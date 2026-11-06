@@ -253,16 +253,14 @@ internal static @string String(this floatVal x) {
 
     // Use exact fmt formatting if in float64 range (common case):
     // proceed if f doesn't underflow to 0 or overflow to inf.
-    {
-        var (xΔ1, _) = f.Float64(); if (f.Sign() == 0 == (xΔ1 == 0D) && !math.IsInf(xΔ1, 0)) {
-            @string s = fmt.Sprintf("%.6g"u8, xΔ1);
-            if (!f.IsInt() && strings.IndexByte(s, (byte)'.') < 0) {
-                // f is not an integer, but its string representation
-                // doesn't reflect that. Use more digits. See issue 56220.
-                s = fmt.Sprintf("%g"u8, xΔ1);
-            }
-            return s;
+    var (xΔ1, _) = f.Float64(); if (f.Sign() == 0 == (xΔ1 == 0D) && !math.IsInf(xΔ1, 0)) {
+        @string s = fmt.Sprintf("%.6g"u8, xΔ1);
+        if (!f.IsInt() && strings.IndexByte(s, (byte)'.') < 0) {
+            // f is not an integer, but its string representation
+            // doesn't reflect that. Use more digits. See issue 56220.
+            s = fmt.Sprintf("%g"u8, xΔ1);
         }
+        return s;
     }
 
     // Out of float64 range. Do approximate manual to decimal
@@ -282,23 +280,21 @@ internal static @string String(this floatVal x) {
     m *= math.Pow(10D, d - (float64)e);
 
     // ensure 1 <= |m| < 10
-    {
-        var am = math.Abs(m);
-        switch (ᐧ) {
-        case {} when am < 1D - 0.5e-6D: {
-            // The %.6g format below rounds m to 5 digits after the
-            // decimal point. Make sure that m*10 < 10 even after
-            // rounding up: m*10 + 0.5e-5 < 10 => m < 1 - 0.5e6.
-            m *= 10D;
-            e--;
-            break;
-        }
-        case {} when am is >= 10D: {
-            m /= 10D;
-            e++;
-            break;
-        }}
+    var am = math.Abs(m);
+    switch (ᐧ) {
+    case {} when am < 1D - 0.5e-6D: {
+        // The %.6g format below rounds m to 5 digits after the
+        // decimal point. Make sure that m*10 < 10 even after
+        // rounding up: m*10 + 0.5e-5 < 10 => m < 1 - 0.5e6.
+        m *= 10D;
+        e--;
+        break;
     }
+    case {} when am is >= 10D: {
+        m /= 10D;
+        e++;
+        break;
+    }}
 
     return fmt.Sprintf("%.6ge%+d"u8, m, e);
 }
@@ -453,26 +449,22 @@ internal static Value makeComplex(Value re, Value im) {
 }
 
 internal static Value makeFloatFromLiteral(@string lit) {
-    {
-        var (f, ok) = newFloat().SetString(lit); if (ok) {
-            if (smallFloat(f)) {
-                // ok to use rationals
-                if (f.Sign() == 0) {
-                    // Issue 20228: If the float underflowed to zero, parse just "0".
-                    // Otherwise, lit might contain a value with a large negative exponent,
-                    // such as -6e-1886451601. As a float, that will underflow to 0,
-                    // but it'll take forever to parse as a Rat.
-                    lit = "0";
-                }
-                {
-                    var (r, okΔ1) = newRat().SetString(lit); if (okΔ1) {
-                        return new ratVal(r);
-                    }
-                }
+    var (f, ok) = newFloat().SetString(lit); if (ok) {
+        if (smallFloat(f)) {
+            // ok to use rationals
+            if (f.Sign() == 0) {
+                // Issue 20228: If the float underflowed to zero, parse just "0".
+                // Otherwise, lit might contain a value with a large negative exponent,
+                // such as -6e-1886451601. As a float, that will underflow to 0,
+                // but it'll take forever to parse as a Rat.
+                lit = "0";
             }
-            // otherwise use floats
-            return makeFloat(f);
+            var (r, okΔ1) = newRat().SetString(lit); if (okΔ1) {
+                return new ratVal(r);
+            }
         }
+        // otherwise use floats
+        return makeFloat(f);
     }
     return default;
 }
@@ -596,10 +588,8 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
     case var ᴛ when ᴛ == token.IMAG: {
         {
             nint n = len(lit); if (n > 0 && lit[n - 1] == 'i') {
-                {
-                    var im = makeFloatFromLiteral(lit.slice(0, n - 1)); if (im != nil) {
-                        return makeComplex((int64Val)0, im);
-                    }
+                var im = makeFloatFromLiteral(lit.slice(0, n - 1)); if (im != nil) {
+                    return makeComplex((int64Val)0, im);
                 }
             }
         }
@@ -608,10 +598,8 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
     case var ᴛ when ᴛ == token.CHAR: {
         {
             nint n = len(lit); if (n >= 2) {
-                {
-                    var (code, _, _, err) = strconv.UnquoteChar(lit.slice(1, n - 1), (byte)'\''); if (err == nil) {
-                        return MakeInt64((int64)code);
-                    }
+                var (code, _, _, err) = strconv.UnquoteChar(lit.slice(1, n - 1), (byte)'\''); if (err == nil) {
+                    return MakeInt64((int64)code);
                 }
             }
         }
@@ -970,13 +958,11 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     nuint s = default;
     foreach (var (_, b) in bytes) {
         w |= (big.Word)((((big.Word)(nuint)b) << s));
-        {
-            s += 8; if (s == (nuint)(wordSize * 8)) {
-                words[i] = w;
-                i++;
-                w = 0;
-                s = 0;
-            }
+        s += 8; if (s == (nuint)(wordSize * 8)) {
+            words[i] = w;
+            i++;
+            w = 0;
+            s = 0;
         }
     }
     // store last word
@@ -1182,10 +1168,8 @@ public static Value ToInt(Value x) {
         break;
     }
     case complexVal xΔ1: {
-        {
-            var re = ToFloat(xΔ1); if (re.Kind() == Float) {
-                return ToInt(re);
-            }
+        var re = ToFloat(xΔ1); if (re.Kind() == Float) {
+            return ToInt(re);
         }
         break;
     }}
@@ -1276,10 +1260,8 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
             return yΔ4;
         }
         case int64Val yΔ4: {
-            {
-                var z = -yΔ4; if (z != yΔ4) {
-                    return z; // no overflow
-                }
+            var z = -yΔ4; if (z != yΔ4) {
+                return z; // no overflow
             }
             return makeInt(newInt().Neg(big.NewInt((int64)yΔ4)));
         }
@@ -1377,19 +1359,17 @@ internal static nint ord(Value x) {
 // numeric, both of them must be numeric. If one of them is Unknown
 // or invalid (say, nil) both results are that value.
 internal static (Value, Value) match(Value x, Value y) {
-    {
-        nint ox = ord(x);
-        nint oy = ord(y);
-        switch (ᐧ) {
-        case {} when ox < oy: {
-            (x, y) = match0(x, y);
-            break;
-        }
-        case {} when ox > oy: {
-            (y, x) = match0(y, x);
-            break;
-        }}
+    nint ox = ord(x);
+    nint oy = ord(y);
+    switch (ᐧ) {
+    case {} when ox < oy: {
+        (x, y) = match0(x, y);
+        break;
     }
+    case {} when ox > oy: {
+        (y, x) = match0(y, x);
+        break;
+    }}
     return (x, y);
 }
 

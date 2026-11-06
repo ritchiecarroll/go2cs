@@ -28,10 +28,8 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
-    {
-        var err = decode(Ꮡss); if (err != nil) {
-            return err;
-        }
+    var err = decode(Ꮡss); if (err != nil) {
+        return err;
     }
 
     Ꮡs.Ꮡmutex.Lock();

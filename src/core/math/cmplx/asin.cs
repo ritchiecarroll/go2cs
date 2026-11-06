@@ -49,45 +49,43 @@ partial class cmplx_package {
 
 // Asin returns the inverse sine of x.
 public static complex128 Asin(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when im == 0D && math.Abs(re) <= 1D: {
+        return complex(math.Asin(re), im);
+    }
+    case {} when re == 0D && math.Abs(im) <= 1D: {
+        return complex(re, math.Asinh(im));
+    }
+    case {} when math.IsNaN(im): {
         switch (ᐧ) {
-        case {} when im == 0D && math.Abs(re) <= 1D: {
-            return complex(math.Asin(re), im);
-        }
-        case {} when re == 0D && math.Abs(im) <= 1D: {
-            return complex(re, math.Asinh(im));
-        }
-        case {} when math.IsNaN(im): {
-            switch (ᐧ) {
-            case {} when re is 0D: {
-                return complex(re, math.NaN());
-            }
-            case {} when math.IsInf(re, 0): {
-                return complex(math.NaN(), re);
-            }
-            default: {
-                return NaN();
-            }}
-            break;
-        }
-        case {} when math.IsInf(im, 0): {
-            switch (ᐧ) {
-            case {} when math.IsNaN(re): {
-                return x;
-            }
-            case {} when math.IsInf(re, 0): {
-                return complex(math.Copysign(math.Pi / 4D, re), im);
-            }
-            default: {
-                return complex(math.Copysign(0D, re), im);
-            }}
-            break;
+        case {} when re is 0D: {
+            return complex(re, math.NaN());
         }
         case {} when math.IsInf(re, 0): {
-            return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(re, im));
+            return complex(math.NaN(), re);
+        }
+        default: {
+            return NaN();
         }}
+        break;
     }
+    case {} when math.IsInf(im, 0): {
+        switch (ᐧ) {
+        case {} when math.IsNaN(re): {
+            return x;
+        }
+        case {} when math.IsInf(re, 0): {
+            return complex(math.Copysign(math.Pi / 4D, re), im);
+        }
+        default: {
+            return complex(math.Copysign(0D, re), im);
+        }}
+        break;
+    }
+    case {} when math.IsInf(re, 0): {
+        return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(re, im));
+    }}
     var ct = complex(-imag(x), real(x)); // i * x
     var xx = x * x;
     var x1 = complex(1D - real(xx), -imag(xx)); // 1 - x*x
@@ -98,45 +96,43 @@ public static complex128 Asin(complex128 x) {
 
 // Asinh returns the inverse hyperbolic sine of x.
 public static complex128 Asinh(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when im == 0D && math.Abs(re) <= 1D: {
+        return complex(math.Asinh(re), im);
+    }
+    case {} when re == 0D && math.Abs(im) <= 1D: {
+        return complex(re, math.Asin(im));
+    }
+    case {} when math.IsInf(re, 0): {
         switch (ᐧ) {
-        case {} when im == 0D && math.Abs(re) <= 1D: {
-            return complex(math.Asinh(re), im);
+        case {} when math.IsInf(im, 0): {
+            return complex(re, math.Copysign(math.Pi / 4D, im));
         }
-        case {} when re == 0D && math.Abs(im) <= 1D: {
-            return complex(re, math.Asin(im));
+        case {} when math.IsNaN(im): {
+            return x;
         }
-        case {} when math.IsInf(re, 0): {
-            switch (ᐧ) {
-            case {} when math.IsInf(im, 0): {
-                return complex(re, math.Copysign(math.Pi / 4D, im));
-            }
-            case {} when math.IsNaN(im): {
-                return x;
-            }
-            default: {
-                return complex(re, math.Copysign(0.0D, im));
-            }}
-            break;
-        }
-        case {} when math.IsNaN(re): {
-            switch (ᐧ) {
-            case {} when im is 0D: {
-                return x;
-            }
-            case {} when math.IsInf(im, 0): {
-                return complex(im, re);
-            }
-            default: {
-                return NaN();
-            }}
-            break;
+        default: {
+            return complex(re, math.Copysign(0.0D, im));
+        }}
+        break;
+    }
+    case {} when math.IsNaN(re): {
+        switch (ᐧ) {
+        case {} when im is 0D: {
+            return x;
         }
         case {} when math.IsInf(im, 0): {
-            return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2D, im));
+            return complex(im, re);
+        }
+        default: {
+            return NaN();
         }}
+        break;
     }
+    case {} when math.IsInf(im, 0): {
+        return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2D, im));
+    }}
     var xx = x * x;
     var x1 = complex(1D + real(xx), imag(xx)); // 1 + x*x
     return Log(x + Sqrt(x1));                  // log(x + sqrt(1 + x*x))
@@ -208,25 +204,23 @@ public static complex128 Acosh(complex128 x) {
 
 // Atan returns the inverse tangent of x.
 public static complex128 Atan(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
-        switch (ᐧ) {
-        case {} when im is 0D: {
-            return complex(math.Atan(re), im);
-        }
-        case {} when re == 0D && math.Abs(im) <= 1D: {
-            return complex(re, math.Atanh(im));
-        }
-        case {} when math.IsInf(im, 0) || math.IsInf(re, 0): {
-            if (math.IsNaN(re)) {
-                return complex(math.NaN(), math.Copysign(0D, im));
-            }
-            return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(0D, im));
-        }
-        case {} when math.IsNaN(re) || math.IsNaN(im): {
-            return NaN();
-        }}
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when im is 0D: {
+        return complex(math.Atan(re), im);
     }
+    case {} when re == 0D && math.Abs(im) <= 1D: {
+        return complex(re, math.Atanh(im));
+    }
+    case {} when math.IsInf(im, 0) || math.IsInf(re, 0): {
+        if (math.IsNaN(re)) {
+            return complex(math.NaN(), math.Copysign(0D, im));
+        }
+        return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(0D, im));
+    }
+    case {} when math.IsNaN(re) || math.IsNaN(im): {
+        return NaN();
+    }}
     var x2 = real(x) * real(x);
     var a = 1D - x2 - imag(x) * imag(x);
     if (a == 0D) {

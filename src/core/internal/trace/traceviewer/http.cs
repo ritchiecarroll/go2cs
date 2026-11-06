@@ -18,11 +18,9 @@ partial class traceviewer_package {
 public static httpꓸHandler MainHandler(slice<View> views) {
     var viewsʗ1 = views;
     return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _) => {
-        {
-            var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != nil) {
-                http.Error(w, err.Error(), http.StatusInternalServerError);
-                return;
-            }
+        var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != nil) {
+            http.Error(w, err.Error(), http.StatusInternalServerError);
+            return;
         }
     }));
 }
@@ -295,11 +293,9 @@ private static readonly @string paramsˢᵇ = "{{PARAMS}}"u8;
 
 public static httpꓸHandler TraceHandler() {
     return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
-        {
-            var err = r.ParseForm(); if (err != nil) {
-                http.Error(w, err.Error(), http.StatusInternalServerError);
-                return;
-            }
+        var err = r.ParseForm(); if (err != nil) {
+            http.Error(w, err.Error(), http.StatusInternalServerError);
+            return;
         }
         @string html = strings.ReplaceAll(templTrace, paramsˢ, r.Form.Encode());
         w.Write(slice<byte>(html));

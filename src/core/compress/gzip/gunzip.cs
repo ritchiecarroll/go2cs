@@ -90,10 +90,8 @@ partial struct Reader {
 // The Reader.[Header] fields will be valid in the [Reader] returned.
 public static (ж<Reader>, error) NewReader(io.Reader r) {
     var z = @new<Reader>();
-    {
-        var err = z.Reset(r); if (err != nil) {
-            return (default, err);
-        }
+    var err = z.Reset(r); if (err != nil) {
+        return (default, err);
     }
     return (z, default);
 }
@@ -106,12 +104,10 @@ public static error Reset(this ref Reader z, io.Reader r) {
         decompressor: z.decompressor,
         multistream: true
     );
-    {
-        var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
-            z.r = rr;
-        } else {
-            z.r = new bufio_ReaderжReader(bufio.NewReader(r));
-        }
+    var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
+        z.r = rr;
+    } else {
+        z.r = new bufio_ReaderжReader(bufio.NewReader(r));
     }
     (z.Header, z.err) = z.readHeader();
     return z.err;
@@ -180,45 +176,37 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
     Header hdr = default;
     error err = default;
 
-    {
-        (_, err) = io.ReadFull(z.r, z.buf[..10]); if (err != nil) {
-            // RFC 1952, section 2.2, says the following:
-            //	A gzip file consists of a series of "members" (compressed data sets).
-            //
-            // Other than this, the specification does not clarify whether a
-            // "series" is defined as "one or more" or "zero or more". To err on the
-            // side of caution, Go interprets this to mean "zero or more".
-            // Thus, it is okay to return io.EOF here.
-            return (hdr, err);
-        }
+    (_, err) = io.ReadFull(z.r, z.buf[..10]); if (err != nil) {
+        // RFC 1952, section 2.2, says the following:
+        //	A gzip file consists of a series of "members" (compressed data sets).
+        //
+        // Other than this, the specification does not clarify whether a
+        // "series" is defined as "one or more" or "zero or more". To err on the
+        // side of caution, Go interprets this to mean "zero or more".
+        // Thus, it is okay to return io.EOF here.
+        return (hdr, err);
     }
     if (z.buf[0] != gzipID1 || z.buf[1] != gzipID2 || z.buf[2] != gzipDeflate) {
         return (hdr, ErrHeader);
     }
     var flg = z.buf[3];
-    {
-        var t = (int64)le.Uint32(z.buf[4..8]); if (t > 0) {
-            // Section 2.3.1, the zero value for MTIME means that the
-            // modified time is not set.
-            hdr.ModTime = time.Unix(t, 0);
-        }
+    var t = (int64)le.Uint32(z.buf[4..8]); if (t > 0) {
+        // Section 2.3.1, the zero value for MTIME means that the
+        // modified time is not set.
+        hdr.ModTime = time.Unix(t, 0);
     }
     // z.buf[8] is XFL and is currently ignored.
     hdr.OS = z.buf[9];
     z.digest = crc32.ChecksumIEEE(z.buf[..10]);
 
     if ((byte)(flg & (byte)flagExtra) != 0) {
-        {
-            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
-                return (hdr, noEOF(err));
-            }
+        (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
+            return (hdr, noEOF(err));
         }
         z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf[..2]);
         var data = new slice<byte>(le.Uint16(z.buf[..2]));
-        {
-            (_, err) = io.ReadFull(z.r, data); if (err != nil) {
-                return (hdr, noEOF(err));
-            }
+        (_, err) = io.ReadFull(z.r, data); if (err != nil) {
+            return (hdr, noEOF(err));
         }
         z.digest = crc32.Update(z.digest, crc32.IEEETable, data);
         hdr.Extra = data;
@@ -226,28 +214,22 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
 
     @string s = default;
     if ((byte)(flg & (byte)flagName) != 0) {
-        {
-            (s, err) = z.readString(); if (err != nil) {
-                return (hdr, noEOF(err));
-            }
+        (s, err) = z.readString(); if (err != nil) {
+            return (hdr, noEOF(err));
         }
         hdr.Name = s;
     }
 
     if ((byte)(flg & (byte)flagComment) != 0) {
-        {
-            (s, err) = z.readString(); if (err != nil) {
-                return (hdr, noEOF(err));
-            }
+        (s, err) = z.readString(); if (err != nil) {
+            return (hdr, noEOF(err));
         }
         hdr.Comment = s;
     }
 
     if ((byte)(flg & (byte)flagHdrCrc) != 0) {
-        {
-            (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
-                return (hdr, noEOF(err));
-            }
+        (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != nil) {
+            return (hdr, noEOF(err));
         }
         var digest = le.Uint16(z.buf[..2]);
         if (digest != (uint16)z.digest) {
@@ -282,11 +264,9 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
         }
 
         // Finished file; check checksum and size.
-        {
-            var (_, errΔ1) = io.ReadFull(z.r, z.buf[..8]); if (errΔ1 != nil) {
-                z.err = noEOF(errΔ1);
-                return (n, z.err);
-            }
+        var (_, errΔ1) = io.ReadFull(z.r, z.buf[..8]); if (errΔ1 != nil) {
+            z.err = noEOF(errΔ1);
+            return (n, z.err);
         }
         var digest = le.Uint32(z.buf[..4]);
         var size = le.Uint32(z.buf[4..8]);
@@ -302,10 +282,8 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
         }
         z.err = default; // Remove io.EOF
 
-        {
-            (_, z.err) = z.readHeader(); if (z.err != nil) {
-                return (n, z.err);
-            }
+        (_, z.err) = z.readHeader(); if (z.err != nil) {
+            return (n, z.err);
         }
     }
 

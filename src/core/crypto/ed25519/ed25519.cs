@@ -115,10 +115,8 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
     }
     crypto.Hash hash = opts.HashFunc();
     @string context = ""u8;
-    {
-        var (optsΔ1, ok) = opts._<ж<Options>>(ᐧ); if (ok) {
-            context = optsΔ1.Context;
-        }
+    var (optsΔ1, ok) = opts._<ж<Options>>(ᐧ); if (ok) {
+        context = optsΔ1.Context;
     }
     switch (ᐧ) {
     case {} when hash == crypto.SHA512: { // Ed25519ph
@@ -177,10 +175,8 @@ public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader random) {
     }
 
     var seed = new slice<byte>(SeedSize);
-    {
-        var (_, err) = io.ReadFull(random, seed); if (err != nil) {
-            return (default, default, err);
-        }
+    var (_, err) = io.ReadFull(random, seed); if (err != nil) {
+        return (default, default, err);
     }
 
     var privateKey = NewKeyFromSeed(seed);
@@ -257,10 +253,8 @@ private static readonly @string ed25519ExpectedOptsHashˢᵇ = "ed25519: expecte
 public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, slice<byte> sig, ж<Options> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
-    {
-        nint l = len(publicKey); if (l != PublicKeySize) {
-            throw panic("ed25519: bad public key length: " + strconv.Itoa(l));
-        }
+    nint l = len(publicKey); if (l != PublicKeySize) {
+        throw panic("ed25519: bad public key length: " + strconv.Itoa(l));
     }
     var (k, err) = ed25519.NewPublicKey(publicKey);
     if (err != nil) {

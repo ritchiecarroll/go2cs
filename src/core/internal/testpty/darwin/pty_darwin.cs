@@ -30,17 +30,13 @@ internal static (ж<os.File> pty, @string processTTY, error err) open() {
     if (err != nil) {
         return (default, "", new PtyErrorжerror(ptyError(posixOpenptˢ, err)));
     }
-    {
-        var errΔ1 = unix.Grantpt(m); if (errΔ1 != nil) {
-            Δsyscall.Close(m);
-            return (default, "", new PtyErrorжerror(ptyError(grantptˢ, errΔ1)));
-        }
+    var errΔ1 = unix.Grantpt(m); if (errΔ1 != nil) {
+        Δsyscall.Close(m);
+        return (default, "", new PtyErrorжerror(ptyError(grantptˢ, errΔ1)));
     }
-    {
-        var errΔ2 = unix.Unlockpt(m); if (errΔ2 != nil) {
-            Δsyscall.Close(m);
-            return (default, "", new PtyErrorжerror(ptyError(unlockptˢ, errΔ2)));
-        }
+    var errΔ2 = unix.Unlockpt(m); if (errΔ2 != nil) {
+        Δsyscall.Close(m);
+        return (default, "", new PtyErrorжerror(ptyError(unlockptˢ, errΔ2)));
     }
     (processTTY, err) = unix.Ptsname(m);
     if (err != nil) {

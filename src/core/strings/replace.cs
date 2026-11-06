@@ -535,12 +535,10 @@ internal static @string Replace(this ref byteStringReplacer r, @string s) {
     // Is it faster to use Count?
     if (len(r.toReplace) * (nint)countCutOff <= len(s)) {
         foreach (var (_, x) in r.toReplace) {
-            {
-                nint c = Count(s, x); if (c != 0) {
-                    // The -1 is because we are replacing 1 byte with len(replacements[b]) bytes.
-                    newSize += c * (len(r.replacements[x[0]]) - 1);
-                    anyChanges = true;
-                }
+            nint c = Count(s, x); if (c != 0) {
+                // The -1 is because we are replacing 1 byte with len(replacements[b]) bytes.
+                newSize += c * (len(r.replacements[x[0]]) - 1);
+                anyChanges = true;
             }
         }
     } else {

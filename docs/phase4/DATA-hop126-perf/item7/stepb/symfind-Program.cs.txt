@@ -1,0 +1,40 @@
+// symfind <image.exe> <pdb-dir> <name>... | --enum <mask> -- item 7 Step B: the reverse of symres. Look each symbol NAME up in the image's PDB
+// through dbghelp (image loaded at its preferred base, so addresses are the VAs dumpbin /disasm /range takes) and print
+// "name<TAB>start-VA<TAB>end-VA<TAB>size", or "name<TAB>NOT FOUND".
+using System.Runtime.InteropServices;
+
+static class P
+{
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern bool SymInitializeW(IntPtr h, string? path, bool invade);
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern ulong SymLoadModuleExW(IntPtr h, IntPtr file, string image, string? module, ulong baseAddr, uint size, IntPtr data, uint flags);
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern bool SymFromNameW(IntPtr h, string name, IntPtr symbol);
+    [DllImport("dbghelp.dll")] static extern uint SymSetOptions(uint o);
+    delegate bool EnumCb(IntPtr sym, uint size, IntPtr ctx);
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern bool SymEnumSymbolsW(IntPtr h, ulong modBase, string mask, EnumCb cb, IntPtr ctx);
+
+    static int Main(string[] a)
+    {
+        IntPtr h = new(0x7172);
+        SymSetOptions(0x2 | 0x10);
+        if (!SymInitializeW(h, a[1], false)) { Console.Error.WriteLine($"SymInitialize failed {Marshal.GetLastWin32Error()}"); return 2; }
+        if (SymLoadModuleExW(h, IntPtr.Zero, a[0], null, 0x140000000, 0, IntPtr.Zero, 0) == 0) { Console.Error.WriteLine($"SymLoadModuleEx failed {Marshal.GetLastWin32Error()}"); return 3; }
+        if (a.Length > 3 && a[2] == "--enum")
+        {
+            // --enum <mask>: every symbol matching the dbghelp wildcard mask, as "name<TAB>start-VA<TAB>size", sorted by name.
+            var rows = new List<string>();
+            SymEnumSymbolsW(h, 0x140000000, a[3], (s, size, c) => { int len = Marshal.ReadInt32(s, 76); ulong ad = (ulong)Marshal.ReadInt64(s, 56); rows.Add($"{Marshal.PtrToStringUni(s + 84, len)?.TrimEnd((char)0)}	0x{ad:X}	{size}"); return true; }, IntPtr.Zero);
+            foreach (string r in rows.OrderBy(r => r, StringComparer.Ordinal)) Console.WriteLine(r);
+            return rows.Count > 0 ? 0 : 1;
+        }
+        const int maxName = 2000; IntPtr buf = Marshal.AllocHGlobal(88 + maxName * 2); int missing = 0;
+        foreach (string name in a.Skip(2))
+        {
+            for (int i = 0; i < 88 + maxName * 2; i++) Marshal.WriteByte(buf, i, 0);
+            Marshal.WriteInt32(buf, 0, 88); Marshal.WriteInt32(buf, 80, maxName);
+            if (!SymFromNameW(h, name, buf)) { Console.WriteLine($"{name}\tNOT FOUND"); missing++; continue; }
+            ulong addr = (ulong)Marshal.ReadInt64(buf, 56); uint size = (uint)Marshal.ReadInt32(buf, 28);
+            Console.WriteLine($"{name}\t0x{addr:X}\t0x{addr + size:X}\t{size}");
+        }
+        return missing == 0 ? 0 : 1;
+    }
+}

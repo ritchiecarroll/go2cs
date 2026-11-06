@@ -52,7 +52,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("LocalTypeAliasScope.go", "LocalTypeAliasScope.cs", "ABE8gAAKBoIAARiClLTIAAsMggAAGpSUgpS0yAACHIKGlAAGKIKGloKUpoKCgoKCgg==")]
-[assembly: GoPositionMap("LocalTypeAliasScopeSecond.go", "LocalTypeAliasScopeSecond.cs", "AA4cggAAEpSUgoCCyICCtqqCmA==")]
+[assembly: GoPositionMap("LocalTypeAliasScopeSecond.go", "LocalTypeAliasScopeSecond.cs", "AA4cggAAEpSUgoK4gIK2qoKY")]
 // </GoSourcePositionMaps>
 
 namespace go;

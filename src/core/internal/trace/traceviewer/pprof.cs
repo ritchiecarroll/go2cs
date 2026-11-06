@@ -69,11 +69,9 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
                     failf("failed to get records: %v", errΔ1);
                     return;
                 }
-                {
-                    var errΔ2 = BuildProfile(recordsΔ1).Write(new http_ResponseWriterᴠWriter(w)); if (errΔ2 != nil) {
-                        failf("failed to write profile: %v", errΔ2);
-                        return;
-                    }
+                var errΔ2 = BuildProfile(recordsΔ1).Write(new http_ResponseWriterᴠWriter(w)); if (errΔ2 != nil) {
+                    failf("failed to write profile: %v", errΔ2);
+                    return;
                 }
                 return;
             }
@@ -105,18 +103,14 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
                     return;
                 }
             }
-            {
-                var errΔ3 = blockf.Close(); if (errΔ3 != nil) {
-                    http.Error(w, fmt.Sprintf("failed to close temp file: %v"u8, errΔ3), http.StatusInternalServerError);
-                    return;
-                }
+            var errΔ3 = blockf.Close(); if (errΔ3 != nil) {
+                http.Error(w, fmt.Sprintf("failed to close temp file: %v"u8, errΔ3), http.StatusInternalServerError);
+                return;
             }
             @string svgFilename = blockf.Name() + ".svg"u8;
-            {
-                var (output, errΔ4) = exec.Command(goCmd(), toolˢ, pprofˢ, svgˢ, outputˢ, svgFilename, blockf.Name()).CombinedOutput(); if (errΔ4 != nil) {
-                    http.Error(w, fmt.Sprintf("failed to execute go tool pprof: %v\n%s"u8, errΔ4, output), http.StatusInternalServerError);
-                    return;
-                }
+            var (output, errΔ4) = exec.Command(goCmd(), toolˢ, pprofˢ, svgˢ, outputˢ, svgFilename, blockf.Name()).CombinedOutput(); if (errΔ4 != nil) {
+                http.Error(w, fmt.Sprintf("failed to execute go tool pprof: %v\n%s"u8, errΔ4, output), http.StatusInternalServerError);
+                return;
             }
             defer(os.Remove, svgFilename, ref ᒐ);
             w.Header().Set(contentTypeˢ, imageSvgXmlˢ);
@@ -195,10 +189,8 @@ internal static @string goCmd() {
         exeSuffix = exeˢ;
     }
     @string path = filepath.Join(runtime.GOROOT(), binˢ, "go" + exeSuffix);
-    {
-        var (_, err) = os.Stat(path); if (err == nil) {
-            return path;
-        }
+    var (_, err) = os.Stat(path); if (err == nil) {
+        return path;
     }
     return "go";
 }

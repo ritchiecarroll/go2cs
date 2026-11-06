@@ -301,10 +301,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read and decode ELF identifier
     array<uint8> ident = new(16);
-    {
-        var (_, errΔ1) = r.ReadAt(ident[0..], 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = r.ReadAt(ident[0..], 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     if (ident[0] != '\x7f' || ident[1] != 'E' || ident[2] != 'L' || ident[3] != 'F') {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "bad magic number", ident[0..4]))));
@@ -360,10 +358,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     case var ᴛ when ᴛ == ELFCLASS32: {
         Header32 hdr = new();
         var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
-        {
-            var (_, errΔ4) = sr.ReadAt(data, 0); if (errΔ4 != nil) {
-                return (default, errΔ4);
-            }
+        var (_, errΔ4) = sr.ReadAt(data, 0); if (errΔ4 != nil) {
+            return (default, errΔ4);
         }
         f.Type = (Type)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Type) */ (uintptr)16)..]);
         f.Machine = (Machine)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Machine) */ (uintptr)18)..]);
@@ -385,10 +381,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     case var ᴛ when ᴛ == ELFCLASS64: {
         Header64 hdr = new();
         var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)64));
-        {
-            var (_, errΔ5) = sr.ReadAt(data, 0); if (errΔ5 != nil) {
-                return (default, errΔ5);
-            }
+        var (_, errΔ5) = sr.ReadAt(data, 0); if (errΔ5 != nil) {
+            return (default, errΔ5);
         }
         f.Type = (Type)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Type) */ (uintptr)16)..]);
         f.Machine = (Machine)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Machine) */ (uintptr)18)..]);
@@ -500,10 +494,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         switch (f.Class) {
         case var ᴛ when ᴛ == ELFCLASS32: {
             var sh = @new<Section32>();
-            {
-                var errΔ8 = binary.Read(new io.SectionReaderжReader(sr), bo, sh.OrTypedNil()); if (errΔ8 != nil) {
-                    return (default, errΔ8);
-                }
+            var errΔ8 = binary.Read(new io.SectionReaderжReader(sr), bo, sh.OrTypedNil()); if (errΔ8 != nil) {
+                return (default, errΔ8);
             }
             shnum = (nint)sh.Size;
             typ = sh.Type;
@@ -512,10 +504,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         }
         case var ᴛ when ᴛ == ELFCLASS64: {
             var sh = @new<Section64>();
-            {
-                var errΔ9 = binary.Read(new io.SectionReaderжReader(sr), bo, sh.OrTypedNil()); if (errΔ9 != nil) {
-                    return (default, errΔ9);
-                }
+            var errΔ9 = binary.Read(new io.SectionReaderжReader(sr), bo, sh.OrTypedNil()); if (errΔ9 != nil) {
+                return (default, errΔ9);
             }
             shnum = (nint)sh.Size;
             typ = sh.Type;
@@ -614,10 +604,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             case var ᴛ when ᴛ == ELFCLASS32: {
                 Chdr32 ch = default;
                 var chdata = new slice<byte>((nint)(/* unsafe.Sizeof(ch) */ (uintptr)12));
-                {
-                    var (_, errΔ12) = s.sr.ReadAt(chdata, 0); if (errΔ12 != nil) {
-                        return (default, errΔ12);
-                    }
+                var (_, errΔ12) = s.sr.ReadAt(chdata, 0); if (errΔ12 != nil) {
+                    return (default, errΔ12);
                 }
                 s.compressionType = (CompressionType)(nint)bo.Uint32(chdata[(int)(/* unsafe.Offsetof(ch.Type) */ (uintptr)0)..]);
                 s.Size = (uint64)bo.Uint32(chdata[(int)(/* unsafe.Offsetof(ch.Size) */ (uintptr)4)..]);
@@ -628,10 +616,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             case var ᴛ when ᴛ == ELFCLASS64: {
                 Chdr64 ch = default;
                 var chdata = new slice<byte>((nint)(/* unsafe.Sizeof(ch) */ (uintptr)24));
-                {
-                    var (_, errΔ13) = s.sr.ReadAt(chdata, 0); if (errΔ13 != nil) {
-                        return (default, errΔ13);
-                    }
+                var (_, errΔ13) = s.sr.ReadAt(chdata, 0); if (errΔ13 != nil) {
+                    return (default, errΔ13);
                 }
                 s.compressionType = (CompressionType)(nint)bo.Uint32(chdata[(int)(/* unsafe.Offsetof(ch.Type) */ (uintptr)0)..]);
                 s.Size = bo.Uint64(chdata[(int)(/* unsafe.Offsetof(ch.Size) */ (uintptr)8)..]);
@@ -1454,10 +1440,8 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
+            continue;
         }
         var (b, errΔ3) = sectionData(i, s);
         if (errΔ3 != nil) {
@@ -1477,11 +1461,9 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (ok) {
-                // Already handled.
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (ok) {
+            // Already handled.
+            continue;
         }
 
         var (b, errΔ4) = sectionData(i, s);
@@ -1490,16 +1472,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         }
 
         if (suffix == "types"u8) {
-            {
-                var errΔ5 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b); if (errΔ5 != nil) {
-                    return (default, errΔ5);
-                }
+            var errΔ5 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b); if (errΔ5 != nil) {
+                return (default, errΔ5);
             }
         } else {
-            {
-                var errΔ6 = d.AddSection(".debug_"u8 + suffix, b); if (errΔ6 != nil) {
-                    return (default, errΔ6);
-                }
+            var errΔ6 = d.AddSection(".debug_"u8 + suffix, b); if (errΔ6 != nil) {
+                return (default, errΔ6);
             }
         }
     }
@@ -1559,10 +1537,8 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     if (err != nil) {
         return (default, err);
     }
-    {
-        var (_, errΔ1) = f.gnuVersionInit(str); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = f.gnuVersionInit(str); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     slice<ImportedSymbol> all = default;
     foreach (var (i, s) in sym) {

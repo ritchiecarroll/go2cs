@@ -52,10 +52,8 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
         tmp: new slice<byte>(256)
     ));
 
-    {
-        var err = r.readFileHeader(); if (err != nil) {
-            return (default, err);
-        }
+    var err = r.readFileHeader(); if (err != nil) {
+        return (default, err);
     }
     return (r, default);
 }
@@ -68,10 +66,8 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     r.fileRdr = bufio.NewReader(new os_FileжReader(r.f));
 
     // Read file header.
-    {
-        var errΔ1 = binary.Read(new bufio_ReaderжReader(r.fileRdr), binary.LittleEndian, Ꮡr.Ꮡhdr); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = binary.Read(new bufio_ReaderжReader(r.fileRdr), binary.LittleEndian, Ꮡr.Ꮡhdr); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     // Verify magic string
@@ -90,10 +86,8 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     // Read package offsets for good measure
     r.pkgOffsets = new slice<uint64>((nint)(r.hdr.Entries));
     for (var i = (uint64)0; i < r.hdr.Entries; i++) {
-        {
-            (r.pkgOffsets[i], err) = r.rdUint64(); if (err != nil) {
-                return err;
-            }
+        (r.pkgOffsets[i], err) = r.rdUint64(); if (err != nil) {
+            return err;
         }
         if (r.pkgOffsets[i] > r.hdr.TotalLength) {
             return fmt.Errorf("insane pkg offset %d: %d > totlen %d"u8,
@@ -102,10 +96,8 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     }
     r.pkgLengths = new slice<uint64>((nint)(r.hdr.Entries));
     for (var i = (uint64)0; i < r.hdr.Entries; i++) {
-        {
-            (r.pkgLengths[i], err) = r.rdUint64(); if (err != nil) {
-                return err;
-            }
+        (r.pkgLengths[i], err) = r.rdUint64(); if (err != nil) {
+            return err;
         }
         if (r.pkgLengths[i] > r.hdr.TotalLength) {
             return fmt.Errorf("insane pkg length %d: %d > totlen %d"u8,

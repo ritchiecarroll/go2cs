@@ -213,12 +213,10 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         foreach (var (_, u) in units) {
             var count = p.unitTable[u];
             @string @file = p.funcs[u.fnfid].@file;
-            {
-                var (_, err) = fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n"u8,
-                    @file, u.StLine, u.StCol,
-                    u.EnLine, u.EnCol, u.NxStmts, count); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n"u8,
+                @file, u.StLine, u.StCol,
+                u.EnLine, u.EnCol, u.NxStmts, count); if (err != nil) {
+                return err;
             }
         }
     }
@@ -240,17 +238,13 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
 
     error rep(uint64 cov, uint64 tot) {
         if (tot != 0) {
-            {
-                var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
-                    100.0D * (float64)cov / (float64)tot, inpkgs); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
+                100.0D * (float64)cov / (float64)tot, inpkgs); if (err != nil) {
+                return err;
             }
         } else if (noteEmpty) {
-            {
-                var (_, err) = fmt.Fprintf(w, "coverage: [no statements]\n"u8); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = fmt.Fprintf(w, "coverage: [no statements]\n"u8); if (err != nil) {
+                return err;
             }
         }
         return default;
@@ -288,10 +282,8 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         }
     }
     if (aggregate) {
-        {
-            var err = rep(coveredStmts, totalStmts); if (err != nil) {
-                return err;
-            }
+        var err = rep(coveredStmts, totalStmts); if (err != nil) {
+            return err;
         }
     }
 
@@ -366,11 +358,9 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
                 // Don't emit entries for function literals (see discussion
                 // in function header comment above).
                 if (!flit) {
-                    {
-                        var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabberʗ2), "%s:%d:\t%s\t%.1f%%\n"u8,
-                            ffile, fline, fname, percʗ1(cstmts, tstmts)); if (err != nil) {
-                            return err;
-                        }
+                    var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabberʗ2), "%s:%d:\t%s\t%.1f%%\n"u8,
+                        ffile, fline, fname, percʗ1(cstmts, tstmts)); if (err != nil) {
+                        return err;
                     }
                 }
                 captureFuncStartʗ1(u);
@@ -386,10 +376,8 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
                 } else {
                     if (fname != p.funcs[u.fnfid].fname) {
                         // New function; emit entry for previous one.
-                        {
-                            var err = emitFunc(u); if (err != nil) {
-                                return err;
-                            }
+                        var err = emitFunc(u); if (err != nil) {
+                            return err;
                         }
                     }
                 }

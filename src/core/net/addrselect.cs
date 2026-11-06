@@ -52,10 +52,8 @@ internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
         dst.Zone = addrs[i].Zone;
         var (c, err) = DialUDP(udpˢ, nil, Ꮡdst);
         if (err == nil) {
-            {
-                var (src, ok) = c.of(UDPConn.Ꮡconn).LocalAddr()._<ж<UDPAddr>>(ᐧ); if (ok) {
-                    (srcs[i], _) = netip.AddrFromSlice(src.IP);
-                }
+            var (src, ok) = c.of(UDPConn.Ꮡconn).LocalAddr()._<ж<UDPAddr>>(ᐧ); if (ok) {
+                (srcs[i], _) = netip.AddrFromSlice(src.IP);
             }
             c.of(UDPConn.Ꮡconn).Close();
         }
@@ -339,10 +337,8 @@ internal static scope classifyScope(netipꓸAddr ip) {
 internal static nint /*cpl*/ commonPrefixLen(netipꓸAddr a, IP b) {
     nint cpl = default;
 
-    {
-        var b4 = b.To4(); if (b4 != nil) {
-            b = b4;
-        }
+    var b4 = b.To4(); if (b4 != nil) {
+        b = b4;
     }
     var aAsSlice = a.AsSlice();
     if (len(aAsSlice) != len(b)) {

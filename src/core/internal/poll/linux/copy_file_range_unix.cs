@@ -61,16 +61,12 @@ internal static (int64 written, error err) copyFileRange(ж<FD> dst, ж<FD> src,
         //
         // That is why we must acquire locks for both file descriptors (and why
         // this whole machinery is in the internal/poll package to begin with).
-        {
-            var errΔ1 = dst.writeLock(); if (errΔ1 != nil) {
-                (written, err) = (0, errΔ1); goto ᒐdone;
-            }
+        var errΔ1 = dst.writeLock(); if (errΔ1 != nil) {
+            (written, err) = (0, errΔ1); goto ᒐdone;
         }
         defer(dst.writeUnlock, ref ᒐ);
-        {
-            var errΔ2 = src.readLock(); if (errΔ2 != nil) {
-                (written, err) = (0, errΔ2); goto ᒐdone;
-            }
+        var errΔ2 = src.readLock(); if (errΔ2 != nil) {
+            (written, err) = (0, errΔ2); goto ᒐdone;
         }
         defer(src.readUnlock, ref ᒐ);
         (written, err) = ignoringEINTR2((int64, error) () => {

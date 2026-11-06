@@ -175,28 +175,26 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     drawCMYK(ref (dst0).DerefOrNull(), r, ref (src0).DerefOrNull(), sp);
                     return;
                 }}
-            } else {
-                var (mask0, ok) = mask._<ж<image.Alpha>>(ᐧ); if (ok) {
-                    switch (src.type()) {
-                    case ж<image.Uniform> src0: {
-                        drawGlyphOver(dst0, r, src0, mask0, mp);
-                        return;
-                    }
-                    case ж<imageꓸRGBA> src0: {
-                        drawRGBAMaskOver(dst0, r, src0, sp, mask0, mp);
-                        return;
-                    }
-                    case ж<image.Gray> src0: {
-                        drawGrayMaskOver(dst0, r, src0, sp, mask0, mp);
-                        return;
-                    }
-                    // Case order matters. The next case (image.RGBA64Image) is an
-                    // interface type that the concrete types above also implement.
-                    case {} Δsrc0 when Δsrc0._<image.RGBA64Image>(out var src0): {
-                        drawRGBA64ImageMaskOver(dst0, r, src0, sp, mask0, mp);
-                        return;
-                    }}
+            } else if (mask._<ж<image.Alpha>>(out var mask0)) {
+                switch (src.type()) {
+                case ж<image.Uniform> src0: {
+                    drawGlyphOver(dst0, r, src0, mask0, mp);
+                    return;
                 }
+                case ж<imageꓸRGBA> src0: {
+                    drawRGBAMaskOver(dst0, r, src0, sp, mask0, mp);
+                    return;
+                }
+                case ж<image.Gray> src0: {
+                    drawGrayMaskOver(dst0, r, src0, sp, mask0, mp);
+                    return;
+                }
+                // Case order matters. The next case (image.RGBA64Image) is an
+                // interface type that the concrete types above also implement.
+                case {} Δsrc0 when Δsrc0._<image.RGBA64Image>(out var src0): {
+                    drawRGBA64ImageMaskOver(dst0, r, src0, sp, mask0, mp);
+                    return;
+                }}
             }
         } else {
             if (mask == nil) {
@@ -238,53 +236,47 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     }
     case ж<image.Paletted> dst0: {
         if (op == Src && mask == nil) {
-            {
-                var (src0, ok) = src._<ж<image.Uniform>>(ᐧ); if (ok) {
-                    var colorIndex = (uint8)dst0.Palette.Index(src0.C);
-                    nint i0 = dst0.PixOffset(r.Min.X, r.Min.Y);
-                    nint i1 = i0 + r.Dx();
-                    for (nint i = i0; i < i1; i++) {
-                        dst0.Pix[i] = colorIndex;
-                    }
-                    var firstRow = dst0.Pix.slice(i0, i1);
-                    for (nint y = r.Min.Y + 1; y < r.Max.Y; y++) {
-                        i0 += dst0.Stride;
-                        i1 += dst0.Stride;
-                        copy(dst0.Pix.slice(i0, i1), firstRow);
-                    }
-                    return;
-                } else if (!processBackward(dst, r, src, sp)) {
-                    drawPaletted(new image_PalettedжImage(dst0), r, src, sp, false);
-                    return;
+            var (src0, ok) = src._<ж<image.Uniform>>(ᐧ); if (ok) {
+                var colorIndex = (uint8)dst0.Palette.Index(src0.C);
+                nint i0 = dst0.PixOffset(r.Min.X, r.Min.Y);
+                nint i1 = i0 + r.Dx();
+                for (nint i = i0; i < i1; i++) {
+                    dst0.Pix[i] = colorIndex;
                 }
+                var firstRow = dst0.Pix.slice(i0, i1);
+                for (nint y = r.Min.Y + 1; y < r.Max.Y; y++) {
+                    i0 += dst0.Stride;
+                    i1 += dst0.Stride;
+                    copy(dst0.Pix.slice(i0, i1), firstRow);
+                }
+                return;
+            } else if (!processBackward(dst, r, src, sp)) {
+                drawPaletted(new image_PalettedжImage(dst0), r, src, sp, false);
+                return;
             }
         }
         break;
     }
     case ж<image.NRGBA> dst0: {
         if (op == Src && mask == nil) {
-            {
-                var (src0, ok) = src._<ж<image.NRGBA>>(ᐧ); if (ok) {
-                    nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
-                    nint s0 = src0.PixOffset(sp.X, sp.Y);
-                    drawCopySrc(
-                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
-                    return;
-                }
+            var (src0, ok) = src._<ж<image.NRGBA>>(ᐧ); if (ok) {
+                nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
+                nint s0 = src0.PixOffset(sp.X, sp.Y);
+                drawCopySrc(
+                    dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
+                return;
             }
         }
         break;
     }
     case ж<image.NRGBA64> dst0: {
         if (op == Src && mask == nil) {
-            {
-                var (src0, ok) = src._<ж<image.NRGBA64>>(ᐧ); if (ok) {
-                    nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
-                    nint s0 = src0.PixOffset(sp.X, sp.Y);
-                    drawCopySrc(
-                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 8 * r.Dx());
-                    return;
-                }
+            var (src0, ok) = src._<ж<image.NRGBA64>>(ᐧ); if (ok) {
+                nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
+                nint s0 = src0.PixOffset(sp.X, sp.Y);
+                drawCopySrc(
+                    dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 8 * r.Dx());
+                return;
             }
         }
         break;
@@ -310,79 +302,75 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
 
     {
         var (dst0, _) = dst._<RGBA64Image>(ᐧ); if (dst0 != nil) {
-            {
-                var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
-                    if (mask == nil) {
-                        nint syΔ1 = sp.Y + y0 - r.Min.Y;
-                        nint myΔ1 = mp.Y + y0 - r.Min.Y;
-                        for (nint y = y0; y != y1; (y, syΔ1, myΔ1) = (y + dy, syΔ1 + dy, myΔ1 + dy)) {
-                            nint sx = sp.X + x0 - r.Min.X;
-                            nint mx = mp.X + x0 - r.Min.X;
-                            for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
-                                if (op == Src) {
-                                    dst0.SetRGBA64(x, y, src0.RGBA64At(sx, syΔ1));
-                                } else {
-                                    var srgba = src0.RGBA64At(sx, syΔ1);
-                                    var a = (uint32)m - (uint32)srgba.A;
-                                    var drgba = dst0.RGBA64At(x, y);
-                                    dst0.SetRGBA64(x, y, new color.RGBA64(
-                                        R: (uint16)((uint16)(((uint32)drgba.R * a) / (uint32)m) + srgba.R),
-                                        G: (uint16)((uint16)(((uint32)drgba.G * a) / (uint32)m) + srgba.G),
-                                        B: (uint16)((uint16)(((uint32)drgba.B * a) / (uint32)m) + srgba.B),
-                                        A: (uint16)((uint16)(((uint32)drgba.A * a) / (uint32)m) + srgba.A)
-                                    ));
-                                }
+            var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
+                if (mask == nil) {
+                    nint syΔ1 = sp.Y + y0 - r.Min.Y;
+                    nint myΔ1 = mp.Y + y0 - r.Min.Y;
+                    for (nint y = y0; y != y1; (y, syΔ1, myΔ1) = (y + dy, syΔ1 + dy, myΔ1 + dy)) {
+                        nint sx = sp.X + x0 - r.Min.X;
+                        nint mx = mp.X + x0 - r.Min.X;
+                        for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
+                            if (op == Src) {
+                                dst0.SetRGBA64(x, y, src0.RGBA64At(sx, syΔ1));
+                            } else {
+                                var srgba = src0.RGBA64At(sx, syΔ1);
+                                var a = (uint32)m - (uint32)srgba.A;
+                                var drgba = dst0.RGBA64At(x, y);
+                                dst0.SetRGBA64(x, y, new color.RGBA64(
+                                    R: (uint16)((uint16)(((uint32)drgba.R * a) / (uint32)m) + srgba.R),
+                                    G: (uint16)((uint16)(((uint32)drgba.G * a) / (uint32)m) + srgba.G),
+                                    B: (uint16)((uint16)(((uint32)drgba.B * a) / (uint32)m) + srgba.B),
+                                    A: (uint16)((uint16)(((uint32)drgba.A * a) / (uint32)m) + srgba.A)
+                                ));
                             }
-                        }
-                        return;
-                    } else {
-                        var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != nil) {
-                            nint syΔ2 = sp.Y + y0 - r.Min.Y;
-                            nint myΔ2 = mp.Y + y0 - r.Min.Y;
-                            for (nint y = y0; y != y1; (y, syΔ2, myΔ2) = (y + dy, syΔ2 + dy, myΔ2 + dy)) {
-                                nint sx = sp.X + x0 - r.Min.X;
-                                nint mx = mp.X + x0 - r.Min.X;
-                                for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
-                                    var ma = (uint32)mask0.RGBA64At(mx, myΔ2).A;
-                                    switch (ᐧ) {
-                                    case {} when ma is 0: {
-                                        if (op == Over) {
-                                            // No-op.
-                                        } else {
-                                            dst0.SetRGBA64(x, y, new color.RGBA64());
-                                        }
-                                        break;
-                                    }
-                                    case {} when ma == m && op == Src: {
-                                        dst0.SetRGBA64(x, y, src0.RGBA64At(sx, syΔ2));
-                                        break;
-                                    }
-                                    default: {
-                                        var srgba = src0.RGBA64At(sx, syΔ2);
-                                        if (op == Over) {
-                                            var drgba = dst0.RGBA64At(x, y);
-                                            var a = (uint32)m - ((uint32)srgba.A * ma / (uint32)m);
-                                            dst0.SetRGBA64(x, y, new color.RGBA64(
-                                                R: (uint16)(((uint32)drgba.R * a + (uint32)srgba.R * ma) / (uint32)m),
-                                                G: (uint16)(((uint32)drgba.G * a + (uint32)srgba.G * ma) / (uint32)m),
-                                                B: (uint16)(((uint32)drgba.B * a + (uint32)srgba.B * ma) / (uint32)m),
-                                                A: (uint16)(((uint32)drgba.A * a + (uint32)srgba.A * ma) / (uint32)m)
-                                            ));
-                                        } else {
-                                            dst0.SetRGBA64(x, y, new color.RGBA64(
-                                                R: (uint16)((uint32)srgba.R * ma / (uint32)m),
-                                                G: (uint16)((uint32)srgba.G * ma / (uint32)m),
-                                                B: (uint16)((uint32)srgba.B * ma / (uint32)m),
-                                                A: (uint16)((uint32)srgba.A * ma / (uint32)m)
-                                            ));
-                                        }
-                                        break;
-                                    }}
-                                }
-                            }
-                            return;
                         }
                     }
+                    return;
+                } else if (mask._<image.RGBA64Image>(ᐧ) is var (mask0, _) && mask0 != nil) {
+                    nint syΔ2 = sp.Y + y0 - r.Min.Y;
+                    nint myΔ2 = mp.Y + y0 - r.Min.Y;
+                    for (nint y = y0; y != y1; (y, syΔ2, myΔ2) = (y + dy, syΔ2 + dy, myΔ2 + dy)) {
+                        nint sx = sp.X + x0 - r.Min.X;
+                        nint mx = mp.X + x0 - r.Min.X;
+                        for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
+                            var ma = (uint32)mask0.RGBA64At(mx, myΔ2).A;
+                            switch (ᐧ) {
+                            case {} when ma is 0: {
+                                if (op == Over) {
+                                    // No-op.
+                                } else {
+                                    dst0.SetRGBA64(x, y, new color.RGBA64());
+                                }
+                                break;
+                            }
+                            case {} when ma == m && op == Src: {
+                                dst0.SetRGBA64(x, y, src0.RGBA64At(sx, syΔ2));
+                                break;
+                            }
+                            default: {
+                                var srgba = src0.RGBA64At(sx, syΔ2);
+                                if (op == Over) {
+                                    var drgba = dst0.RGBA64At(x, y);
+                                    var a = (uint32)m - ((uint32)srgba.A * ma / (uint32)m);
+                                    dst0.SetRGBA64(x, y, new color.RGBA64(
+                                        R: (uint16)(((uint32)drgba.R * a + (uint32)srgba.R * ma) / (uint32)m),
+                                        G: (uint16)(((uint32)drgba.G * a + (uint32)srgba.G * ma) / (uint32)m),
+                                        B: (uint16)(((uint32)drgba.B * a + (uint32)srgba.B * ma) / (uint32)m),
+                                        A: (uint16)(((uint32)drgba.A * a + (uint32)srgba.A * ma) / (uint32)m)
+                                    ));
+                                } else {
+                                    dst0.SetRGBA64(x, y, new color.RGBA64(
+                                        R: (uint16)((uint32)srgba.R * ma / (uint32)m),
+                                        G: (uint16)((uint32)srgba.G * ma / (uint32)m),
+                                        B: (uint16)((uint32)srgba.B * ma / (uint32)m),
+                                        A: (uint16)((uint32)srgba.A * ma / (uint32)m)
+                                    ));
+                                }
+                                break;
+                            }}
+                        }
+                    }
+                    return;
                 }
             }
         }
@@ -915,77 +903,73 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
     // This optimization is similar to how FALLBACK1.17 optimizes FALLBACK1.0
     // in DrawMask, except here the concrete type of dst is known to be
     // *image.RGBA.
-    {
-        var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
-            if (mask == nil) {
-                if (op == Over) {
-                    for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
-                        for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
-                            var srgba = src0.RGBA64At(sx, sy);
-                            var d = dst.Pix.slice(i, i + 4, i + 4);
-                            var dr = (uint32)d[0];
-                            var dg = (uint32)d[1];
-                            var db = (uint32)d[2];
-                            var da = (uint32)d[3];
-                            var a = ((uint32)m - (uint32)srgba.A) * 0x101;
-                            d[0] = (uint8)((dr * a / (uint32)m + (uint32)srgba.R) >> 8);
-                            d[1] = (uint8)((dg * a / (uint32)m + (uint32)srgba.G) >> 8);
-                            d[2] = (uint8)((db * a / (uint32)m + (uint32)srgba.B) >> 8);
-                            d[3] = (uint8)((da * a / (uint32)m + (uint32)srgba.A) >> 8);
-                        }
-                        i0 += dy * dst.Stride;
+    var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
+        if (mask == nil) {
+            if (op == Over) {
+                for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
+                    for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
+                        var srgba = src0.RGBA64At(sx, sy);
+                        var d = dst.Pix.slice(i, i + 4, i + 4);
+                        var dr = (uint32)d[0];
+                        var dg = (uint32)d[1];
+                        var db = (uint32)d[2];
+                        var da = (uint32)d[3];
+                        var a = ((uint32)m - (uint32)srgba.A) * 0x101;
+                        d[0] = (uint8)((dr * a / (uint32)m + (uint32)srgba.R) >> 8);
+                        d[1] = (uint8)((dg * a / (uint32)m + (uint32)srgba.G) >> 8);
+                        d[2] = (uint8)((db * a / (uint32)m + (uint32)srgba.B) >> 8);
+                        d[3] = (uint8)((da * a / (uint32)m + (uint32)srgba.A) >> 8);
                     }
-                } else {
-                    for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
-                        for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
-                            var srgba = src0.RGBA64At(sx, sy);
-                            var d = dst.Pix.slice(i, i + 4, i + 4);
-                            d[0] = (uint8)(srgba.R >> 8);
-                            d[1] = (uint8)(srgba.G >> 8);
-                            d[2] = (uint8)(srgba.B >> 8);
-                            d[3] = (uint8)(srgba.A >> 8);
-                        }
-                        i0 += dy * dst.Stride;
-                    }
+                    i0 += dy * dst.Stride;
                 }
-                return;
             } else {
-                var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != nil) {
-                    if (op == Over) {
-                        for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
-                            for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
-                                var ma = (uint32)mask0.RGBA64At(mx, my).A;
-                                var srgba = src0.RGBA64At(sx, sy);
-                                var d = dst.Pix.slice(i, i + 4, i + 4);
-                                var dr = (uint32)d[0];
-                                var dg = (uint32)d[1];
-                                var db = (uint32)d[2];
-                                var da = (uint32)d[3];
-                                var a = ((uint32)m - ((uint32)srgba.A * ma / (uint32)m)) * 0x101;
-                                d[0] = (uint8)((dr * a + (uint32)srgba.R * ma) / (uint32)m >> 8);
-                                d[1] = (uint8)((dg * a + (uint32)srgba.G * ma) / (uint32)m >> 8);
-                                d[2] = (uint8)((db * a + (uint32)srgba.B * ma) / (uint32)m >> 8);
-                                d[3] = (uint8)((da * a + (uint32)srgba.A * ma) / (uint32)m >> 8);
-                            }
-                            i0 += dy * dst.Stride;
-                        }
-                    } else {
-                        for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
-                            for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
-                                var ma = (uint32)mask0.RGBA64At(mx, my).A;
-                                var srgba = src0.RGBA64At(sx, sy);
-                                var d = dst.Pix.slice(i, i + 4, i + 4);
-                                d[0] = (uint8)((uint32)srgba.R * ma / (uint32)m >> 8);
-                                d[1] = (uint8)((uint32)srgba.G * ma / (uint32)m >> 8);
-                                d[2] = (uint8)((uint32)srgba.B * ma / (uint32)m >> 8);
-                                d[3] = (uint8)((uint32)srgba.A * ma / (uint32)m >> 8);
-                            }
-                            i0 += dy * dst.Stride;
-                        }
+                for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
+                    for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
+                        var srgba = src0.RGBA64At(sx, sy);
+                        var d = dst.Pix.slice(i, i + 4, i + 4);
+                        d[0] = (uint8)(srgba.R >> 8);
+                        d[1] = (uint8)(srgba.G >> 8);
+                        d[2] = (uint8)(srgba.B >> 8);
+                        d[3] = (uint8)(srgba.A >> 8);
                     }
-                    return;
+                    i0 += dy * dst.Stride;
                 }
             }
+            return;
+        } else if (mask._<image.RGBA64Image>(ᐧ) is var (mask0, _) && mask0 != nil) {
+            if (op == Over) {
+                for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
+                    for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
+                        var ma = (uint32)mask0.RGBA64At(mx, my).A;
+                        var srgba = src0.RGBA64At(sx, sy);
+                        var d = dst.Pix.slice(i, i + 4, i + 4);
+                        var dr = (uint32)d[0];
+                        var dg = (uint32)d[1];
+                        var db = (uint32)d[2];
+                        var da = (uint32)d[3];
+                        var a = ((uint32)m - ((uint32)srgba.A * ma / (uint32)m)) * 0x101;
+                        d[0] = (uint8)((dr * a + (uint32)srgba.R * ma) / (uint32)m >> 8);
+                        d[1] = (uint8)((dg * a + (uint32)srgba.G * ma) / (uint32)m >> 8);
+                        d[2] = (uint8)((db * a + (uint32)srgba.B * ma) / (uint32)m >> 8);
+                        d[3] = (uint8)((da * a + (uint32)srgba.A * ma) / (uint32)m >> 8);
+                    }
+                    i0 += dy * dst.Stride;
+                }
+            } else {
+                for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
+                    for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
+                        var ma = (uint32)mask0.RGBA64At(mx, my).A;
+                        var srgba = src0.RGBA64At(sx, sy);
+                        var d = dst.Pix.slice(i, i + 4, i + 4);
+                        d[0] = (uint8)((uint32)srgba.R * ma / (uint32)m >> 8);
+                        d[1] = (uint8)((uint32)srgba.G * ma / (uint32)m >> 8);
+                        d[2] = (uint8)((uint32)srgba.B * ma / (uint32)m >> 8);
+                        d[3] = (uint8)((uint32)srgba.A * ma / (uint32)m >> 8);
+                    }
+                    i0 += dy * dst.Stride;
+                }
+            }
+            return;
         }
     }
 

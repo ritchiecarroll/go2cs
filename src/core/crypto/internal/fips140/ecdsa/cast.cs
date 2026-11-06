@@ -103,10 +103,8 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => 
         if (err != nil) {
             return err;
         }
-        {
-            var errΔ1 = verify<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k.Ꮡpub).DerefOrNull(), hash, ref (got).DerefOrNull()); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = verify<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k.Ꮡpub).DerefOrNull(), hash, ref (got).DerefOrNull()); if (errΔ1 != nil) {
+            return errΔ1;
         }
         if (!bytes.Equal(got.R, want.R) || !bytes.Equal(got.S, want.S)) {
             return errors.New("unexpected result");
@@ -138,10 +136,8 @@ internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterminis
         if (err != nil) {
             return err;
         }
-        {
-            var errΔ1 = verify<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k.Ꮡpub).DerefOrNull(), hash, ref (got).DerefOrNull()); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = verify<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k.Ꮡpub).DerefOrNull(), hash, ref (got).DerefOrNull()); if (errΔ1 != nil) {
+            return errΔ1;
         }
         if (!bytes.Equal(got.R, want.R) || !bytes.Equal(got.S, want.S)) {
             return errors.New("unexpected result");

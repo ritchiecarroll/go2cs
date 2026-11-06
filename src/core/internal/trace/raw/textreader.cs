@@ -126,10 +126,8 @@ public static (Event, error) ReadEvent(this ref TextReader r) {
 internal static (@string, error) nextLine(this ref TextReader r) {
     for (;;) {
         if (!r.s.Scan()) {
-            {
-                var err = r.s.Err(); if (err != nil) {
-                    return ("", err);
-                }
+            var err = r.s.Err(); if (err != nil) {
+                return ("", err);
             }
             return ("", io.EOF);
         }

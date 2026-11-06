@@ -113,10 +113,8 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
 
     // Try partial swept spans first.
     var sg = mheap_.sweepgen;
-    {
-        s = c.partialSwept(sg).pop(); if (s != nil) {
-            goto havespan;
-        }
+    s = c.partialSwept(sg).pop(); if (s != nil) {
+        goto havespan;
     }
 
     sl = ᏑΔsweep.Ꮡactive.begin();
@@ -127,13 +125,11 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             if (s == nil) {
                 break;
             }
-            {
-                var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
-                    // We got ownership of the span, so let's sweep it and use it.
-                    sΔ1.sweep(true);
-                    ᏑΔsweep.Ꮡactive.end(sl);
-                    goto havespan;
-                }
+            var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
+                // We got ownership of the span, so let's sweep it and use it.
+                sΔ1.sweep(true);
+                ᏑΔsweep.Ꮡactive.end(sl);
+                goto havespan;
             }
             // We failed to get ownership of the span, which means it's being or
             // has been swept by an asynchronous sweeper that just couldn't remove it
@@ -149,20 +145,18 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             if (s == nil) {
                 break;
             }
-            {
-                var (sΔ2, ok) = sl.tryAcquire(s); if (ok) {
-                    // We got ownership of the span, so let's sweep it.
-                    sΔ2.sweep(true);
-                    // Check if there's any free space.
-                    var freeIndex = sΔ2.nextFreeIndex();
-                    if (freeIndex != sΔ2.nelems) {
-                        sΔ2.freeindex = freeIndex;
-                        ᏑΔsweep.Ꮡactive.end(sl);
-                        goto havespan;
-                    }
-                    // Add it to the swept list, because sweeping didn't give us any free space.
-                    c.fullSwept(sg).push(sΔ2.mspan);
+            var (sΔ2, ok) = sl.tryAcquire(s); if (ok) {
+                // We got ownership of the span, so let's sweep it.
+                sΔ2.sweep(true);
+                // Check if there's any free space.
+                var freeIndex = sΔ2.nextFreeIndex();
+                if (freeIndex != sΔ2.nelems) {
+                    sΔ2.freeindex = freeIndex;
+                    ᏑΔsweep.Ꮡactive.end(sl);
+                    goto havespan;
                 }
+                // Add it to the swept list, because sweeping didn't give us any free space.
+                c.fullSwept(sg).push(sΔ2.mspan);
             }
             // See comment for partial unswept spans.
         }

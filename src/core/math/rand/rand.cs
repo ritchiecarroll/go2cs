@@ -87,11 +87,9 @@ public static ж<Rand> New(Source src) {
 public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        var (lk, ok) = r.src._<ж<lockedSource>>(ᐧ); if (ok) {
-            lk.seedPos(seed, Ꮡr.ᏑreadPos);
-            return;
-        }
+    var (lk, ok) = r.src._<ж<lockedSource>>(ᐧ); if (ok) {
+        lk.seedPos(seed, Ꮡr.ᏑreadPos);
+        return;
     }
 
     r.src.Seed(seed);
@@ -338,10 +336,8 @@ internal static ж<godebug.Setting> randseednop = godebug.New("randseednop");
 // globalRand returns the generator to use for the top-level convenience
 // functions.
 internal static ж<Rand> globalRand() {
-    {
-        var rΔ1 = ᏑglobalRandGenerator.Load(); if (rΔ1 != nil) {
-            return rΔ1;
-        }
+    var rΔ1 = ᏑglobalRandGenerator.Load(); if (rΔ1 != nil) {
+        return rΔ1;
     }
 
     // This is the first call. Initialize based on GODEBUG.
@@ -432,11 +428,9 @@ public static void Seed(int64 seed) {
 
     // If we are already using a lockedSource, we can just re-seed it.
     if (orig != nil) {
-        {
-            var (_, ok) = orig.src._<ж<lockedSource>>(ᐧ); if (ok) {
-                orig.Seed(seed);
-                return;
-            }
+        var (_, ok) = orig.src._<ж<lockedSource>>(ᐧ); if (ok) {
+            orig.Seed(seed);
+            return;
         }
     }
 

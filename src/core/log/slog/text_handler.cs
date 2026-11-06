@@ -112,23 +112,19 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
         break;
     }
     case var ᴛ when ᴛ == KindAny: {
-        {
-            var (tm, ok) = v.any._<encoding.TextMarshaler>(ᐧ); if (ok) {
-                var (data, err) = tm.MarshalText();
-                if (err != nil) {
-                    return err;
-                }
-                // TODO: avoid the conversion to string.
-                s.appendString((@string)data);
-                return default;
+        if (v.any._<encoding.TextMarshaler>(out var tm)) {
+            var (data, err) = tm.MarshalText();
+            if (err != nil) {
+                return err;
             }
+            // TODO: avoid the conversion to string.
+            s.appendString((@string)data);
+            return default;
         }
-        {
-            var (bs, ok) = byteSlice(v.any); if (ok) {
-                // As of Go 1.19, this only allocates for strings longer than 32 bytes.
-                s.buf.WriteString(strconv.Quote((@string)bs));
-                return default;
-            }
+        var (bs, ok) = byteSlice(v.any); if (ok) {
+            // As of Go 1.19, this only allocates for strings longer than 32 bytes.
+            s.buf.WriteString(strconv.Quote((@string)bs));
+            return default;
         }
         s.appendString(fmt.Sprintf("%+v"u8, v.Any()));
         break;
@@ -144,10 +140,8 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
 // underlying type is []byte, along with a second return value of true.
 // Otherwise it returns nil, false.
 internal static (slice<byte>, bool) byteSlice(any a) {
-    {
-        var (bs, ok) = a._<slice<byte>>(ᐧ); if (ok) {
-            return (bs, true);
-        }
+    var (bs, ok) = a._<slice<byte>>(ᐧ); if (ok) {
+        return (bs, true);
     }
     // Like Printf's %s, we allow both the slice type and the byte element type to be named.
     var t = reflect.TypeOf(a);

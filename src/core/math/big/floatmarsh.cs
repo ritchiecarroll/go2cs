@@ -108,10 +108,8 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
         Ꮡz.SetPrec((nuint)oldPrec);
     }
 
-    {
-        @string msg = Ꮡz.validate0(); if (msg != ""u8) {
-            return errors.New("Float.GobDecode: "u8 + msg);
-        }
+    @string msg = Ꮡz.validate0(); if (msg != ""u8) {
+        return errors.New("Float.GobDecode: "u8 + msg);
     }
 
     return default;

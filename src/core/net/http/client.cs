@@ -194,10 +194,8 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this 
         return (default, didTimeout, err);
     }
     if (c.Jar != nil) {
-        {
-            var rc = resp.Cookies(); if (builtin.len(rc) > 0) {
-                c.Jar.SetCookies(cookieURL, rc);
-            }
+        var rc = resp.Cookies(); if (builtin.len(rc) > 0) {
+            c.Jar.SetCookies(cookieURL, rc);
         }
     }
     return (resp, default, default);
@@ -272,14 +270,12 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
         req.Header = new ΔHeader(0);
     }
 
-    {
-        var u = req.URL.User; if (u != nil && req.Header.Get(authorizationˢ) == ""u8) {
-            @string username = u.Username();
-            var (password, _) = u.Password();
-            forkReq();
-            req.Header = cloneOrMakeHeader(ireq.Header);
-            req.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
-        }
+    var u = req.URL.User; if (u != nil && req.Header.Get(authorizationˢ) == ""u8) {
+        @string username = u.Username();
+        var (password, _) = u.Password();
+        forkReq();
+        req.Header = cloneOrMakeHeader(ireq.Header);
+        req.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
     }
 
     if (!deadline.IsZero()) {
@@ -293,14 +289,12 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
         if (resp != nil) {
             log.Printf("RoundTripper returned a response & error; ignoring response");
         }
-        {
-            var (tlsErr, ok) = err._<tls.RecordHeaderError>(ᐧ); if (ok) {
-                // If we get a bad TLS record header, check to see if the
-                // response looks like HTTP and give a more helpful error.
-                // See golang.org/issue/11111.
-                if (((sstring)(tlsErr.RecordHeader[..])) == "HTTP/"u8) {
-                    err = ErrSchemeMismatch;
-                }
+        var (tlsErr, ok) = err._<tls.RecordHeaderError>(ᐧ); if (ok) {
+            // If we get a bad TLS record header, check to see if the
+            // response looks like HTTP and give a more helpful error.
+            // See golang.org/issue/11111.
+            if (((sstring)(tlsErr.RecordHeader[..])) == "HTTP/"u8) {
+                err = ErrSchemeMismatch;
             }
         }
         return (default, didTimeout, err);
@@ -353,10 +347,8 @@ internal static bool timeBeforeContextDeadline(time.Time t, context.Context ctx)
 internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> req) {
     switch (rt.type()) {
     case ж<Transport> t: {
-        {
-            var altRT = t.alternateRoundTripper(req); if (altRT != nil) {
-                return knownRoundTripperImpl(altRT, req);
-            }
+        var altRT = t.alternateRoundTripper(req); if (altRT != nil) {
+            return knownRoundTripperImpl(altRT, req);
         }
         return true;
     }
@@ -428,10 +420,8 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     void doCancel() {
         // The second way in the func comment above:
         builtin.close(cancelʗ1);
-        {
-            var (v, ok) = rt._<setRequestCancel_canceler>(ᐧ); if (ok) {
-                v.CancelRequest(Ꮡreq);
-            }
+        var (v, ok) = rt._<setRequestCancel_canceler>(ᐧ); if (ok) {
+            v.CancelRequest(Ꮡreq);
         }
     }
 
@@ -622,10 +612,8 @@ internal static @string urlErrorOp(@string method) {
     if (method == ""u8) {
         return getˢ2;
     }
-    {
-        var (lowerMethod, ok) = ascii.ToLower(method); if (ok) {
-            return method[..1] + lowerMethod[1..];
-        }
+    var (lowerMethod, ok) = ascii.ToLower(method); if (ok) {
+        return method[..1] + lowerMethod[1..];
     }
     return method;
 }
@@ -749,10 +737,8 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                     // If the caller specified a custom Host header and the
                     // redirect location is relative, preserve the Host header
                     // through the redirect. See issue #22233.
-                    {
-                        var (uΔ1, _) = url.Parse(loc); if (uΔ1 != nil && !uΔ1.IsAbs()) {
-                            host = req.Host;
-                        }
+                    var (uΔ1, _) = url.Parse(loc); if (uΔ1 != nil && !uΔ1.IsAbs()) {
+                        host = req.Host;
                     }
                 }
                 var ireq = reqs[0];
@@ -787,10 +773,8 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 copyHeaders(Ꮡreq, stripSensitiveHeaders, !includeBody);
                 // Add the Referer header from the most recent
                 // request URL to the new one, if it's not https->http:
-                {
-                    @string @ref = refererForURL(reqs[builtin.len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
-                        req.Header.Set(refererˢ, @ref);
-                    }
+                @string @ref = refererForURL(reqs[builtin.len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
+                    req.Header.Set(refererˢ, @ref);
                 }
                 errΔ1 = c.checkRedirect(Ꮡreq, reqs);
 
@@ -826,15 +810,13 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
             reqs = append(reqs, Ꮡreq);
             error err = default;
             Func<bool> didTimeout = default;
-            {
-                (resp, didTimeout, err) = c.send(Ꮡreq, deadline); if (err != nil) {
-                    // c.send() always closes req.Body
-                    reqBodyClosed = true;
-                    if (!deadline.IsZero() && didTimeout()) {
-                        err = new timeoutErrorжerror(Ꮡ(new timeoutError(err.Error() + " (Client.Timeout exceeded while awaiting headers)"u8)));
-                    }
-                    (retres, reterr) = (default, uerr(err)); goto ᒐdone;
+            (resp, didTimeout, err) = c.send(Ꮡreq, deadline); if (err != nil) {
+                // c.send() always closes req.Body
+                reqBodyClosed = true;
+                if (!deadline.IsZero() && didTimeout()) {
+                    err = new timeoutErrorжerror(Ꮡ(new timeoutError(err.Error() + " (Client.Timeout exceeded while awaiting headers)"u8)));
                 }
+                (retres, reterr) = (default, uerr(err)); goto ᒐdone;
             }
 
             bool shouldRedirect = default;
@@ -898,11 +880,9 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
             bool changed = default;
             var resp = req.Response; // The response that caused the upcoming redirect
             foreach (var (_, cΔ2) in resp.Cookies()) {
-                {
-                    var (_, ok) = icookiesʗ1[cΔ2.Name, ꟷ]; if (ok) {
-                        delete(icookiesʗ1, cΔ2.Name);
-                        changed = true;
-                    }
+                var (_, ok) = icookiesʗ1[cΔ2.Name, ꟷ]; if (ok) {
+                    delete(icookiesʗ1, cΔ2.Name);
+                    changed = true;
                 }
             }
             if (changed) {
@@ -1103,10 +1083,8 @@ internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
 // If [Client.Transport] does not have a [Client.CloseIdleConnections] method
 // then this method does nothing.
 public static void CloseIdleConnections(this ref Client c) {
-    {
-        var (tr, ok) = c.transport()._<CloseIdleConnections_closeIdler>(ᐧ); if (ok) {
-            tr.CloseIdleConnections();
-        }
+    var (tr, ok) = c.transport()._<CloseIdleConnections_closeIdler>(ᐧ); if (ok) {
+        tr.CloseIdleConnections();
     }
 }
 

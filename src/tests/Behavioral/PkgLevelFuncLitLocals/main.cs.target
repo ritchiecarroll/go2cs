@@ -46,23 +46,19 @@ partial struct entry {
         return total;
     }),
     new("if-init", () => {
-        {
-            ref var c = ref heap<counter>((new counter(n: 7)), out var Ꮡc); if (c.get() > 0) {
-                Ꮡc.inc(2);
-                return c.get();
-            }
+        ref var c = ref heap<counter>((new counter(n: 7)), out var Ꮡc); if (c.get() > 0) {
+            Ꮡc.inc(2);
+            return c.get();
         }
         return -1;
     }),
     new("switch-init", () => {
-        {
-            ref var c = ref heap<counter>((new counter(n: 20)), out var Ꮡc);
-            switch (ᐧ) {
-            default: {
-                Ꮡc.inc(2);
-                return c.get();
-            }}
-        }
+        ref var c = ref heap<counter>((new counter(n: 20)), out var Ꮡc);
+        switch (ᐧ) {
+        default: {
+            Ꮡc.inc(2);
+            return c.get();
+        }}
 
     }),
     new("range-value", () => {

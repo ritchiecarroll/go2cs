@@ -82,10 +82,8 @@ public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byt
         if (err != nil) {
             return (default, err);
         }
-        {
-            var errΔ1 = p224CheckOnCurve(x, y); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = p224CheckOnCurve(x, y); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         p.x.Set(x);
         p.y.Set(y);

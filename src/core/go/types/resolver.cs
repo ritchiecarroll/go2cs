@@ -153,10 +153,8 @@ internal static void declarePkgObj(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡi
 // filename returns a filename suitable for debugging output.
 internal static @string filename(this ref Checker check, nint fileNo) {
     var @file = check.files[fileNo];
-    {
-        tokenꓸPos pos = @file.Pos(); if (pos.IsValid()) {
-            return check.fset.File(pos).Name();
-        }
+    tokenꓸPos pos = @file.Pos(); if (pos.IsValid()) {
+        return check.fset.File(pos).Name();
     }
     return fmt.Sprintf("file[%d]"u8, fileNo);
 }
@@ -190,21 +188,17 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
     } else {
         // ordinary import
         error err = default;
-        {
-            var importer = check.conf.Importer; if (importer == nil) {
-                err = fmt.Errorf("Config.Importer not installed"u8);
-            } else {
-                var (importerFrom, ok) = importer._<ImporterFrom>(ᐧ); if (ok) {
-                    (imp, err) = importerFrom.ImportFrom(path, dir, 0);
-                    if (imp == nil && err == nil) {
-                        err = fmt.Errorf("Config.Importer.ImportFrom(%s, %s, 0) returned nil but no error"u8, path, dir);
-                    }
-                } else {
-                    (imp, err) = importer.Import(path);
-                    if (imp == nil && err == nil) {
-                        err = fmt.Errorf("Config.Importer.Import(%s) returned nil but no error"u8, path);
-                    }
-                }
+        var importer = check.conf.Importer; if (importer == nil) {
+            err = fmt.Errorf("Config.Importer not installed"u8);
+        } else if (importer._<ImporterFrom>(out var importerFrom)) {
+            (imp, err) = importerFrom.ImportFrom(path, dir, 0);
+            if (imp == nil && err == nil) {
+                err = fmt.Errorf("Config.Importer.ImportFrom(%s, %s, 0) returned nil but no error"u8, path, dir);
+            }
+        } else {
+            (imp, err) = importer.Import(path);
+            if (imp == nil && err == nil) {
+                err = fmt.Errorf("Config.Importer.Import(%s) returned nil but no error"u8, path);
             }
         }
         // make sure we have a valid package name
@@ -299,10 +293,8 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         // Be conservative and use the *ast.File extent if we don't have a *token.File.
         tokenꓸPos pos = @file.Pos();
         tokenꓸPos end = @file.End();
-        {
-            var f = check.fset.File(@file.Pos()); if (f != nil) {
-                (pos, end) = ((tokenꓸPos)f.Base(), f.End());
-            }
+        var f = check.fset.File(@file.Pos()); if (f != nil) {
+            (pos, end) = ((tokenꓸPos)f.Base(), f.End());
         }
         var fileScope = NewScope(pkg.scope, pos, end, check.filename(fileNo));
         fileScopes[fileNo] = fileScope;
@@ -391,16 +383,14 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                             // via Object.setScopePos, which leads to a race condition;
                             // the object may be imported into more than one file scope
                             // concurrently. See go.dev/issue/32154.)
-                            {
-                                var alt = fileScopeʗ1.Lookup(nameΔ1); if (alt != nil) {
-                                    var errΔ1 = Ꮡcheck.newError(DuplicateDecl);
-                                    errΔ1.addf(new ast_Identжpositioner(dΔ1.spec.Name), "%s redeclared in this block", alt.Name());
-                                    errΔ1.addAltDecl(alt);
-                                    errΔ1.report();
-                                } else {
-                                    fileScopeʗ1.insert(nameΔ1, obj);
-                                    Ꮡcheck.Value.dotImportMap[new dotImportKey(fileScopeʗ1, nameΔ1)] = pkgName;
-                                }
+                            var alt = fileScopeʗ1.Lookup(nameΔ1); if (alt != nil) {
+                                var errΔ1 = Ꮡcheck.newError(DuplicateDecl);
+                                errΔ1.addf(new ast_Identжpositioner(dΔ1.spec.Name), "%s redeclared in this block", alt.Name());
+                                errΔ1.addAltDecl(alt);
+                                errΔ1.report();
+                            } else {
+                                fileScopeʗ1.insert(nameΔ1, obj);
+                                Ꮡcheck.Value.dotImportMap[new dotImportKey(fileScopeʗ1, nameΔ1)] = pkgName;
                             }
                         }
                     }
@@ -483,11 +473,9 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                             Ꮡcheck.softErrorf(new ast_Fieldжpositioner(dΔ1.decl.Type.TypeParams.List[0]), code, "func %s must have no type parameters", name);
                             hasTParamError = true;
                         }
-                        {
-                            var t = dΔ1.decl.Type; if (t.Params.NumFields() != 0 || t.Results != nil) {
-                                // TODO(rFindley) Should this be a hard error?
-                                Ꮡcheck.softErrorf(new ast_Identжpositioner(dΔ1.decl.Name), code, "func %s must have no arguments and no return values", name);
-                            }
+                        var t = dΔ1.decl.Type; if (t.Params.NumFields() != 0 || t.Results != nil) {
+                            // TODO(rFindley) Should this be a hard error?
+                            Ꮡcheck.softErrorf(new ast_Identжpositioner(dΔ1.decl.Name), code, "func %s must have no arguments and no return values", name);
                         }
                     }
                     if (name == "init"u8) {
@@ -512,10 +500,8 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     // (Methods with invalid receiver cannot be associated to a type, and
                     // methods with blank _ names are never found; no need to collect any
                     // of them. They will still be type-checked with all the other functions.)
-                    {
-                        var (recv, _) = @base._<ж<ast.Ident>>(ᐧ); if (recv != nil && name != "_"u8) {
-                            Ꮡmethods.ValueSlot = append(Ꮡmethods.ValueSlot, new collectObjects_methodInfo(obj, ptr, recv));
-                        }
+                    var (recv, _) = @base._<ж<ast.Ident>>(ᐧ); if (recv != nil && name != "_"u8) {
+                        Ꮡmethods.ValueSlot = append(Ꮡmethods.ValueSlot, new collectObjects_methodInfo(obj, ptr, recv));
                     }
                     Ꮡcheck.Value.recordDef(dΔ1.decl.Name, new FuncжObject(obj));
                 }
@@ -537,22 +523,18 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         foreach (var (name, vᴛ1) in scope.elems) {
             var obj = vᴛ1;
 
-            {
-                var alt = pkg.scope.Lookup(name); if (alt != nil) {
-                    obj = resolve(name, obj);
-                    var err = Ꮡcheck.newError(DuplicateDecl);
-                    {
-                        var (pkgΔ1, ok) = obj._<ж<PkgName>>(ᐧ); if (ok) {
-                            err.addf(new Objectᴠpositioner(alt), "%s already declared through import of %s", alt.Name(), pkgΔ1.Imported().OrTypedNil());
-                            err.addAltDecl(new PkgNameжObject(pkgΔ1));
-                        } else {
-                            err.addf(new Objectᴠpositioner(alt), "%s already declared through dot-import of %s", alt.Name(), obj.Pkg().OrTypedNil());
-                            // TODO(gri) dot-imported objects don't have a position; addAltDecl won't print anything
-                            err.addAltDecl(obj);
-                        }
-                    }
-                    err.report();
+            var alt = pkg.scope.Lookup(name); if (alt != nil) {
+                obj = resolve(name, obj);
+                var err = Ꮡcheck.newError(DuplicateDecl);
+                var (pkgΔ1, ok) = obj._<ж<PkgName>>(ᐧ); if (ok) {
+                    err.addf(new Objectᴠpositioner(alt), "%s already declared through import of %s", alt.Name(), pkgΔ1.Imported().OrTypedNil());
+                    err.addAltDecl(new PkgNameжObject(pkgΔ1));
+                } else {
+                    err.addf(new Objectᴠpositioner(alt), "%s already declared through dot-import of %s", alt.Name(), obj.Pkg().OrTypedNil());
+                    // TODO(gri) dot-imported objects don't have a position; addAltDecl won't print anything
+                    err.addAltDecl(obj);
                 }
+                err.report();
             }
         }
     }
@@ -609,11 +591,9 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
 
     // unpack receiver type
     @base = ast.Unparen(rtyp);
-    {
-        var (t, _) = @base._<ж<ast.StarExpr>>(ᐧ); if (t != nil) {
-            ptr = true;
-            @base = ast.Unparen(t.X);
-        }
+    var (t, _) = @base._<ж<ast.StarExpr>>(ᐧ); if (t != nil) {
+        ptr = true;
+        @base = ast.Unparen(t.X);
     }
 
     // unpack type parameters, if any
@@ -709,15 +689,13 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
         var typ = ast.Unparen(tdecl.Type);
 
         // dereference a pointer type
-        {
-            var (pexpr, _) = typ._<ж<ast.StarExpr>>(ᐧ); if (pexpr != nil) {
-                // if we've already seen a pointer, we're done
-                if (ptr) {
-                    break;
-                }
-                ptr = true;
-                typ = ast.Unparen(pexpr.X); // continue with pointer base type
+        var (pexpr, _) = typ._<ж<ast.StarExpr>>(ᐧ); if (pexpr != nil) {
+            // if we've already seen a pointer, we're done
+            if (ptr) {
+                break;
             }
+            ptr = true;
+            typ = ast.Unparen(pexpr.X); // continue with pointer base type
         }
 
         // After dereferencing, typ must be a locally defined type name.
@@ -742,10 +720,8 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
 
     // add new methods to already type-checked types (from a prior Checker.Files call)
     foreach (var (_, obj) in check.objList) {
-        {
-            var (objΔ1, _) = obj._<ж<TypeName>>(ᐧ); if (objΔ1 != nil && objΔ1.typ != nil) {
-                Ꮡcheck.collectMethods(objΔ1);
-            }
+        var (objΔ1, _) = obj._<ж<TypeName>>(ᐧ); if (objΔ1 != nil && objΔ1.typ != nil) {
+            Ꮡcheck.collectMethods(objΔ1);
         }
     }
 
@@ -779,16 +755,14 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         slice<Object> othersList = default; // everything that's not a type
         // phase 1: non-alias type declarations
         foreach (var (_, obj) in check.objList) {
-            {
-                var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil) {
-                    if (check.objMap[new TypeNameжObject(tname)].tdecl.Assign.IsValid()) {
-                        aliasList = append(aliasListᴷ, aliasList, tname);
-                    } else {
-                        Ꮡcheck.objDecl(obj);
-                    }
+            var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil) {
+                if (check.objMap[new TypeNameжObject(tname)].tdecl.Assign.IsValid()) {
+                    aliasList = append(aliasListᴷ, aliasList, tname);
                 } else {
-                    othersList = append(othersListᴷ, othersList, obj);
+                    Ꮡcheck.objDecl(obj);
                 }
+            } else {
+                othersList = append(othersListᴷ, othersList, obj);
             }
         }
         // phase 2: alias type declarations
@@ -841,10 +815,8 @@ internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡob
     // paths always use forward slashes.
     @string path = obj.imported.path;
     @string elem = path;
-    {
-        nint i = strings.LastIndex(elem, "/"); if (i >= 0) {
-            elem = elem.slice(i + 1);
-        }
+    nint i = strings.LastIndex(elem, "/"); if (i >= 0) {
+        elem = elem.slice(i + 1);
     }
     if (obj.name == ""u8 || obj.name == "."u8 || obj.name == elem) {
         Ꮡcheck.softErrorf(new PkgNameжpositioner(Ꮡobj), UnusedImport, "%q imported and not used", path);
@@ -858,10 +830,8 @@ internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡob
 // (Per the go/build package dependency tests, we cannot import
 // path/filepath and simply use filepath.Dir.)
 internal static @string dir(@string path) {
-    {
-        nint i = strings.LastIndexAny(path, @"/\"); if (i > 0) {
-            return path.slice(0, i);
-        }
+    nint i = strings.LastIndexAny(path, @"/\"); if (i > 0) {
+        return path.slice(0, i);
     }
     // i <= 0
     return ".";

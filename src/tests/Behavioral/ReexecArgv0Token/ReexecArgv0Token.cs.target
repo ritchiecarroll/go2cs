@@ -41,10 +41,8 @@ internal static void Main() {
 }
 
 internal static @string tail(@string s) {
-    {
-        nint i = strings.LastIndex(s, "/"); if (i >= 0) {
-            return s.slice(i + 1);
-        }
+    nint i = strings.LastIndex(s, "/"); if (i >= 0) {
+        return s.slice(i + 1);
     }
     return s;
 }

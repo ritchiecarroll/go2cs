@@ -325,17 +325,15 @@ public static error Cause(Context c) {
     if (err == nil) {
         return default;
     }
-    {
-        var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
-            cc.Ꮡmu.Lock();
-            var cause = cc.cause;
-            cc.Ꮡmu.Unlock();
-            if (cause != nil) {
-                return cause;
-            }
-            // The parent cancelCtx doesn't have a cause,
-            // so c must have been canceled in some custom context implementation.
+    var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
+        cc.Ꮡmu.Lock();
+        var cause = cc.cause;
+        cc.Ꮡmu.Unlock();
+        if (cause != nil) {
+            return cause;
         }
+        // The parent cancelCtx doesn't have a cause,
+        // so c must have been canceled in some custom context implementation.
     }
     // We don't have a cause to return from a parent cancelCtx,
     // so return the context's error.
@@ -439,11 +437,9 @@ internal static (ж<cancelCtx>, bool) parentCancelCtx(Context parent) {
 
 // removeChild removes a context from its parent.
 internal static void removeChild(Context parent, canceler child) {
-    {
-        var (s, okΔ1) = parent._<stopCtx>(ᐧ); if (okΔ1) {
-            s.stop();
-            return;
-        }
+    var (s, okΔ1) = parent._<stopCtx>(ᐧ); if (okΔ1) {
+        s.stop();
+        return;
     }
     var (p, ok) = parentCancelCtx(parent);
     if (!ok) {
@@ -519,12 +515,10 @@ internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
 
 internal static error Err(this ж<cancelCtx> Ꮡc) {
     // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
-    {
-        var err = Ꮡc.Ꮡerr.Load(); if (err != nil) {
-            // Ensure the done channel has been closed before returning a non-nil error.
-            ᐸꟷ(Ꮡc.Done());
-            return err._<error>();
-        }
+    var err = Ꮡc.Ꮡerr.Load(); if (err != nil) {
+        // Ensure the done channel has been closed before returning a non-nil error.
+        ᐸꟷ(Ꮡc.Done());
+        return err._<error>();
     }
     return default;
 }
@@ -556,16 +550,14 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
         var (p, ok) = parentCancelCtx(parent); if (ok) {
             // parent is a *cancelCtx, or derives from one.
             p.Ꮡmu.Lock();
-            {
-                var err = p.Ꮡerr.Load(); if (err != nil) {
-                    // parent has already been canceled
-                    child.cancel(false, err._<error>(), p.cause);
-                } else {
-                    if (p.children == nil) {
-                        p.children = new map<canceler, EmptyStruct>();
-                    }
-                    p.children[child] = new EmptyStruct();
+            var err = p.Ꮡerr.Load(); if (err != nil) {
+                // parent has already been canceled
+                child.cancel(false, err._<error>(), p.cause);
+            } else {
+                if (p.children == nil) {
+                    p.children = new map<canceler, EmptyStruct>();
                 }
+                p.children[child] = new EmptyStruct();
             }
             p.Ꮡmu.Unlock();
             return;
@@ -608,10 +600,8 @@ partial interface stringer {
 }
 
 internal static @string contextName(Context c) {
-    {
-        var (s, ok) = c._<stringer>(ᐧ); if (ok) {
-            return s.String();
-        }
+    var (s, ok) = c._<stringer>(ᐧ); if (ok) {
+        return s.String();
     }
     return reflectlite.TypeOf(c).String();
 }
@@ -717,11 +707,9 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
         if (parent == nil) {
             throw panic("cannot create context from nil parent");
         }
-        {
-            var (cur, ok) = parent.Deadline(); if (ok && cur.Before(d)) {
-                // The current deadline is already sooner than the new one.
-                return WithCancel(parent);
-            }
+        var (cur, ok) = parent.Deadline(); if (ok && cur.Before(d)) {
+            // The current deadline is already sooner than the new one.
+            return WithCancel(parent);
         }
         var c = Ꮡ(new timerCtx(
             deadline: d

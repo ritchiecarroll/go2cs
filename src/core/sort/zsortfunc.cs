@@ -347,10 +347,8 @@ internal static void stable_func(lessSwap data, nint n) {
             a = b;
             b += 2 * blockSize;
         }
-        {
-            nint m = a + blockSize; if (m < n) {
-                symMerge_func(data, a, m, n);
-            }
+        nint m = a + blockSize; if (m < n) {
+            symMerge_func(data, a, m, n);
         }
         blockSize *= 2;
     }

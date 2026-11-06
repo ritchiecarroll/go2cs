@@ -288,10 +288,8 @@ public static tokenꓸPos End(this ref FieldList f) {
     }
     // the list should not be empty in this case;
     // be conservative and guard against bad ASTs
-    {
-        nint n = len(f.List); if (n > 0) {
-            return f.List[n - 1].End();
-        }
+    nint n = len(f.List); if (n > 0) {
+        return f.List[n - 1].End();
     }
     return token.NoPos;
 }
@@ -1122,10 +1120,8 @@ public static tokenꓸPos End(this ref DeferStmt s) {
 }
 
 public static tokenꓸPos End(this ref ReturnStmt s) {
-    {
-        nint n = len(s.Results); if (n > 0) {
-            return s.Results[n - 1].End();
-        }
+    nint n = len(s.Results); if (n > 0) {
+        return s.Results[n - 1].End();
     }
     return s.Return + 6; // len("return")
 }
@@ -1141,10 +1137,8 @@ public static tokenꓸPos End(this ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
     }
-    {
-        nint n = len(s.List); if (n > 0) {
-            return s.List[n - 1].End();
-        }
+    nint n = len(s.List); if (n > 0) {
+        return s.List[n - 1].End();
     }
     return s.Lbrace + 1;
 }
@@ -1157,10 +1151,8 @@ public static tokenꓸPos End(this ref IfStmt s) {
 }
 
 public static tokenꓸPos End(this ref CaseClause s) {
-    {
-        nint n = len(s.Body); if (n > 0) {
-            return s.Body[n - 1].End();
-        }
+    nint n = len(s.Body); if (n > 0) {
+        return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
@@ -1174,10 +1166,8 @@ public static tokenꓸPos End(this ref TypeSwitchStmt s) {
 }
 
 public static tokenꓸPos End(this ref CommClause s) {
-    {
-        nint n = len(s.Body); if (n > 0) {
-            return s.Body[n - 1].End();
-        }
+    nint n = len(s.Body); if (n > 0) {
+        return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
@@ -1325,10 +1315,8 @@ public static tokenꓸPos End(this ref ImportSpec s) {
 }
 
 public static tokenꓸPos End(this ref ValueSpec s) {
-    {
-        nint n = len(s.Values); if (n > 0) {
-            return s.Values[n - 1].End();
-        }
+    nint n = len(s.Values); if (n > 0) {
+        return s.Values[n - 1].End();
     }
     if (s.Type != nil) {
         return s.Type.End();
@@ -1481,10 +1469,8 @@ public static tokenꓸPos Pos(this ref File f) {
 //
 // (Use FileEnd for the end of the entire file. It is always valid.)
 public static tokenꓸPos End(this ref File f) {
-    {
-        nint n = len(f.Decls); if (n > 0) {
-            return f.Decls[n - 1].End();
-        }
+    nint n = len(f.Decls); if (n > 0) {
+        return f.Decls[n - 1].End();
     }
     return f.Name.End();
 }
@@ -1541,13 +1527,9 @@ internal static (@string, bool) generator(ref File @file) {
             @string prefix = prefixᶜ;
             if (strings.Contains(comment.Text, prefix)) {
                 foreach (var line in range<@string>(strings.SplitSeq(comment.Text, "\n").Invoke)) {
-                    {
-                        var (rest, ok) = strings.CutPrefix(line, prefix); if (ok) {
-                            {
-                                var (gen, okΔ1) = strings.CutSuffix(rest, doNotEditˢ); if (okΔ1) {
-                                    return (gen, true);
-                                }
-                            }
+                    var (rest, ok) = strings.CutPrefix(line, prefix); if (ok) {
+                        var (gen, okΔ1) = strings.CutSuffix(rest, doNotEditˢ); if (okΔ1) {
+                            return (gen, true);
                         }
                     }
                 }

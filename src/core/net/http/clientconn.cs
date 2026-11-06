@@ -284,11 +284,9 @@ public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Requ
         ref var cc = ref Ꮡcc.DerefOrNull();
 
         defer(Ꮡcc.maybeRunStateHook, ref ᒐ);
-        {
-            var err = validateClientConnRequest(ref (req).DerefOrNull()); if (err != nil) {
-                Ꮡcc.Release();
-                return (default, err);
-            }
+        var err = validateClientConnRequest(ref (req).DerefOrNull()); if (err != nil) {
+            Ꮡcc.Release();
+            return (default, err);
         }
         return cc.cc.RoundTrip(req);
     }

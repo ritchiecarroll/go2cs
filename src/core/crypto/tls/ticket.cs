@@ -359,10 +359,8 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
     var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
     var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
 
-    {
-        var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     var key = ticketKeys[0].ΔClone();
     var (block, err) = aes.NewCipher(key.aesKey[..]);

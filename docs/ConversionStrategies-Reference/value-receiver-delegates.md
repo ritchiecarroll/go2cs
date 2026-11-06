@@ -60,7 +60,7 @@ The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`
 var checker func(*driver.NamedValue) error
 checker = nvc.CheckNamedValue   // reassign a method value
 ```
-<!-- source: src/core/database/sql/convert.cs:188-189 -->
+<!-- source: src/core/database/sql/convert.cs:182-183 -->
 ```csharp
 var nvcʗ1 = nvc;
             checker = nvcʗ1.CheckNamedValue;

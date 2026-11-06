@@ -35,11 +35,9 @@ internal static void Main() {
     }
 
     foreach (var (_, s) in sentinels) {
-        {
-            var err = os.Setenv(s.name, s.value); if (err != nil) {
-                fmt.Println("FATAL Setenv", s.name, err);
-                os.Exit(1);
-            }
+        var err = os.Setenv(s.name, s.value); if (err != nil) {
+            fmt.Println("FATAL Setenv", s.name, err);
+            os.Exit(1);
         }
     }
 
@@ -104,10 +102,8 @@ internal static bool getenvAgrees(slice<@string> env) {
         if (strings.HasPrefix(name, "=")) {
             continue;
         }
-        {
-            var (got, ok) = syscall.Getenv(name); if (!ok || got != e.slice(i + 2)) {
-                return false;
-            }
+        var (got, ok) = syscall.Getenv(name); if (!ok || got != e.slice(i + 2)) {
+            return false;
         }
     }
     return true;

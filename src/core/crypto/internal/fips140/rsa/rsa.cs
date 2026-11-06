@@ -109,10 +109,8 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint
         d: d, p: Ꮡp, q: Ꮡq,
         dP: dP, dQ: dQ, qInv: qInv
     ));
-    {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (pk, default);
 }
@@ -148,10 +146,8 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
         d: dN, p: p, q: q,
         dP: dP, dQ: dQ, qInv: qInvNat
     ));
-    {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (pk, default);
 }
@@ -174,10 +170,8 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
         ),
         d: dN
     ));
-    {
-        var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkPrivateKey(ref (pk).DerefOrNull()); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (pk, default);
 }
@@ -235,12 +229,10 @@ private static readonly @string cryptoRsaDTooSmallˢᵇ = "crypto/rsa: d too sma
 internal static error checkPrivateKey(ref PrivateKey priv) {
     priv.fipsApproved = true;
 
-    {
-        var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != nil) {
-            return errΔ1;
-        } else if (!fipsApproved) {
-            priv.fipsApproved = false;
-        }
+    var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != nil) {
+        return errΔ1;
+    } else if (!fipsApproved) {
+        priv.fipsApproved = false;
     }
 
     if (priv.dP == nil) {
@@ -260,16 +252,12 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
 
     // Check that pq ≡ 1 mod N (and that p < N and q < N).
     var pN = bigmod.NewNat().ExpandFor(N);
-    {
-        var (_, errΔ2) = pN.SetBytes(p.Nat().Bytes(p), N); if (errΔ2 != nil) {
-            return errors.New(cryptoRsaInvalidPrimeˢ);
-        }
+    var (_, errΔ2) = pN.SetBytes(p.Nat().Bytes(p), N); if (errΔ2 != nil) {
+        return errors.New(cryptoRsaInvalidPrimeˢ);
     }
     var qN = bigmod.NewNat().ExpandFor(N);
-    {
-        var (_, errΔ3) = qN.SetBytes(q.Nat().Bytes(q), N); if (errΔ3 != nil) {
-            return errors.New(cryptoRsaInvalidPrimeˢ);
-        }
+    var (_, errΔ3) = qN.SetBytes(q.Nat().Bytes(q), N); if (errΔ3 != nil) {
+        return errors.New(cryptoRsaInvalidPrimeˢ);
     }
     if (pN.Mul(qN, N).IsZero() != 1) {
         return errors.New(cryptoRsaPQNˢ);
@@ -340,20 +328,18 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     // do generate such keys. See Hanno Böck, Fermat Factorization in the Wild,
     // https://eprint.iacr.org/2023/026.pdf.
     var diff = bigmod.NewNat();
-    {
-        var (qPΔ1, errΔ4) = bigmod.NewNat().SetBytes(q.Nat().Bytes(q), p); if (errΔ4 != nil) {
-            // q > p
-            var (pQ, errΔ5) = bigmod.NewNat().SetBytes(p.Nat().Bytes(p), q);
-            if (errΔ5 != nil) {
-                return errors.New(cryptoRsaPQˢ);
-            }
-            // diff = 0 - p mod q = q - p
-            diff.ExpandFor(q).Sub(pQ, q);
-        } else {
-            // p > q
-            // diff = 0 - q mod p = p - q
-            diff.ExpandFor(p).Sub(qPΔ1, p);
+    var (qPΔ1, errΔ4) = bigmod.NewNat().SetBytes(q.Nat().Bytes(q), p); if (errΔ4 != nil) {
+        // q > p
+        var (pQ, errΔ5) = bigmod.NewNat().SetBytes(p.Nat().Bytes(p), q);
+        if (errΔ5 != nil) {
+            return errors.New(cryptoRsaPQˢ);
         }
+        // diff = 0 - p mod q = q - p
+        diff.ExpandFor(q).Sub(pQ, q);
+    } else {
+        // p > q
+        // diff = 0 - q mod p = p - q
+        diff.ExpandFor(p).Sub(qPΔ1, p);
     }
     // A tiny bit of leakage is acceptable because it's not adaptive, an
     // attacker only learns the magnitude of p - q.
@@ -431,10 +417,8 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
 // Encrypt performs the RSA public key operation.
 public static (slice<byte>, error) Encrypt(ж<ΔPublicKey> pub, slice<byte> plaintext) {
     fips140.RecordNonApproved();
-    {
-        var (_, err) = checkPublicKey(ref (pub).DerefOrNull()); if (err != nil) {
-            return (default, err);
-        }
+    var (_, err) = checkPublicKey(ref (pub).DerefOrNull()); if (err != nil) {
+        return (default, err);
     }
     return encrypt(ref (pub).DerefOrNull(), plaintext);
 }

@@ -102,10 +102,8 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
     for (;;) {
         // Start or restart the worker if it's not running.
         if (!w.isRunning()) {
-            {
-                var err = Ꮡw.startAndPing(ctx); if (err != nil) {
-                    return err;
-                }
+            var err = Ꮡw.startAndPing(ctx); if (err != nil) {
+                return err;
             }
         }
 
@@ -175,15 +173,13 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
                     // Report an error, but don't record a crasher.
                     return fmt.Errorf("communicating with fuzzing process: %v"u8, err);
                 }
-                {
-                    var (sig, ok) = terminationSignal(w.waitErr); if (ok && !isCrashSignal(sig)) {
-                        // Worker terminated by a signal that probably wasn't caused by a
-                        // specific input to the fuzz function. For example, on Linux,
-                        // the kernel (OOM killer) may send SIGKILL to a process using a lot
-                        // of memory. Or the shell might send SIGHUP when the terminal
-                        // is closed. Don't record a crasher.
-                        return fmt.Errorf("fuzzing process terminated by unexpected signal; no crash will be recorded: %v"u8, w.waitErr);
-                    }
+                var (sig, ok) = terminationSignal(w.waitErr); if (ok && !isCrashSignal(sig)) {
+                    // Worker terminated by a signal that probably wasn't caused by a
+                    // specific input to the fuzz function. For example, on Linux,
+                    // the kernel (OOM killer) may send SIGKILL to a process using a lot
+                    // of memory. Or the shell might send SIGHUP when the terminal
+                    // is closed. Don't record a crasher.
+                    return fmt.Errorf("fuzzing process terminated by unexpected signal; no crash will be recorded: %v"u8, w.waitErr);
                 }
                 if (isInternalError) {
                     // An internal error occurred which shouldn't be considered
@@ -403,12 +399,10 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
         setWorkerComm(ref (cmd).DerefOrNull(), new workerComm(fuzzIn: fuzzInR, fuzzOut: fuzzOutW, memMu: w.memMu));
 
         // Start the worker process.
-        {
-            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                fuzzInW.Close();
-                fuzzOutR.Close();
-                err = errΔ1; goto ᒐdone;
-            }
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            fuzzInW.Close();
+            fuzzOutR.Close();
+            err = errΔ1; goto ᒐdone;
         }
 
         // Worker started successfully.
@@ -1332,10 +1326,8 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
 internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) {
     var enc = json.NewEncoder(new os.FileжWriter(wc.fuzzIn));
     var dec = json.NewDecoder(new contextReaderжReader(Ꮡ(new contextReader(ctx: ctx, r: new os_FileжReader(wc.fuzzOut)))));
-    {
-        var errΔ1 = enc.Encode(c); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = enc.Encode(c); if (errΔ1 != nil) {
+        return errΔ1;
     }
     return dec.Decode(resp);
 }
@@ -1356,10 +1348,8 @@ partial struct contextReader {
 internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
-    {
-        var ctxErr = cr.ctx.Err(); if (ctxErr != nil) {
-            return (0, ctxErr);
-        }
+    var ctxErr = cr.ctx.Err(); if (ctxErr != nil) {
+        return (0, ctxErr);
     }
     var done = new channel<EmptyStruct>(0);
 

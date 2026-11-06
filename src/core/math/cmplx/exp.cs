@@ -49,31 +49,29 @@ partial class cmplx_package {
 
 // Exp returns e**x, the base-e exponential of x.
 public static complex128 Exp(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when math.IsInf(re, 0): {
         switch (ᐧ) {
-        case {} when math.IsInf(re, 0): {
-            switch (ᐧ) {
-            case {} when re > 0D && im == 0D: {
-                return x;
-            }
-            case {} when math.IsInf(im, 0) || math.IsNaN(im): {
-                if (re < 0D) {
-                    return complex(0D, math.Copysign(0D, im));
-                } else {
-                    return complex(math.Inf(1), math.NaN());
-                }
-                break;
-            }}
-            break;
+        case {} when re > 0D && im == 0D: {
+            return x;
         }
-        case {} when math.IsNaN(re): {
-            if (im == 0D) {
-                return complex(math.NaN(), im);
+        case {} when math.IsInf(im, 0) || math.IsNaN(im): {
+            if (re < 0D) {
+                return complex(0D, math.Copysign(0D, im));
+            } else {
+                return complex(math.Inf(1), math.NaN());
             }
             break;
         }}
+        break;
     }
+    case {} when math.IsNaN(re): {
+        if (im == 0D) {
+            return complex(math.NaN(), im);
+        }
+        break;
+    }}
     var r = math.Exp(real(x));
     var (s, c) = math.Sincos(imag(x));
     return complex(r * c, r * s);

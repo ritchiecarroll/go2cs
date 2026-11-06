@@ -56,11 +56,9 @@ private static readonly @string mailtoˢᵇ = "mailto"u8;
 // isSafeURL is true if s is a relative URL or if URL has a protocol in
 // (http, https, mailto).
 internal static bool isSafeURL(@string s) {
-    {
-        var (protocol, _, ok) = strings.Cut(s, ":"); if (ok && !strings.Contains(protocol, "/")) {
-            if (!strings.EqualFold(protocol, httpˢ) && !strings.EqualFold(protocol, httpsˢ) && !strings.EqualFold(protocol, mailtoˢ)) {
-                return false;
-            }
+    var (protocol, _, ok) = strings.Cut(s, ":"); if (ok && !strings.Contains(protocol, "/")) {
+        if (!strings.EqualFold(protocol, httpˢ) && !strings.EqualFold(protocol, httpsˢ) && !strings.EqualFold(protocol, mailtoˢ)) {
+            return false;
         }
     }
     return true;
@@ -224,23 +222,21 @@ internal static void filterSrcsetElement(@string s, nint left, nint right, ж<st
             break;
         }
     }
-    {
-        @string url = s.slice(start, end); if (isSafeURL(url)) {
-            // If image metadata is only spaces or alnums then
-            // we don't need to URL normalize it.
-            var metadataOk = true;
-            for (nint i = end; i < right; i++) {
-                if (!isHTMLSpaceOrASCIIAlnum(s[i])) {
-                    metadataOk = false;
-                    break;
-                }
+    @string url = s.slice(start, end); if (isSafeURL(url)) {
+        // If image metadata is only spaces or alnums then
+        // we don't need to URL normalize it.
+        var metadataOk = true;
+        for (nint i = end; i < right; i++) {
+            if (!isHTMLSpaceOrASCIIAlnum(s[i])) {
+                metadataOk = false;
+                break;
             }
-            if (metadataOk) {
-                b.WriteString(s.slice(left, start));
-                processURLOnto(url, true, b);
-                b.WriteString(s.slice(end, right));
-                return;
-            }
+        }
+        if (metadataOk) {
+            b.WriteString(s.slice(left, start));
+            processURLOnto(url, true, b);
+            b.WriteString(s.slice(end, right));
+            return;
         }
     }
     b.WriteString("#");

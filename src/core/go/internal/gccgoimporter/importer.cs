@@ -189,10 +189,8 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
             @string fpath = default;
             io.ReadCloser rc = default;
             if (lookup != nil) {
-                {
-                    var p = imports[pkgpath]; if (p != nil && p.Complete()) {
-                        (pkg, err) = (p, default); goto ᒐdone;
-                    }
+                var p = imports[pkgpath]; if (p != nil && p.Complete()) {
+                    (pkg, err) = (p, default); goto ᒐdone;
                 }
                 (rc, err) = lookup(pkgpath);
                 if (err != nil) {
@@ -209,10 +207,8 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                 reader = rs;
                 fpath = "<lookup "u8 + pkgpath + ">"u8;
                 // Take name from Name method (like on os.File) if present.
-                {
-                    var (n, okΔ1) = rc._<GetImporter_type>(ᐧ); if (okΔ1) {
-                        fpath = n.Name();
-                    }
+                var (n, okΔ1) = rc._<GetImporter_type>(ᐧ); if (okΔ1) {
+                    fpath = n.Name();
                 }
             } else {
                 (fpath, err) = findExportFile(searchpathsʗ1, pkgpath);

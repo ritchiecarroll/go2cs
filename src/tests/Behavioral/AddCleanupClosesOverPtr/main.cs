@@ -28,10 +28,8 @@ internal static void @try(@string name, Action register) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: panic: %v\n"u8, name, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: panic: %v\n"u8, name, r);
             }
         }, ref ᒐ);
         register();

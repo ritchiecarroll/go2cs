@@ -15,10 +15,8 @@ partial struct tracker {
 internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var (s, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
-            return s;
-        }
+    var (s, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
+        return s;
     }
     return "unknown";
 }
@@ -42,10 +40,8 @@ internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         defer(ᴛ1 => fmt.Println("closed", ᴛ1), c.id, ref ᒐ);
-        {
-            var (_, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
-                delete(t.m, Ꮡc);
-            }
+        var (_, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
+            delete(t.m, Ꮡc);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

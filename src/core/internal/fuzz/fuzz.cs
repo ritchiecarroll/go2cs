@@ -90,10 +90,8 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        {
-            var errΔ1 = ctx.Err(); if (errΔ1 != nil) {
-                err = errΔ1; goto ᒐdone;
-            }
+        var errΔ1 = ctx.Err(); if (errΔ1 != nil) {
+            err = errΔ1; goto ᒐdone;
         }
         if (opts.Log == nil) {
             opts.Log = io.Discard;
@@ -337,59 +335,57 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                                     countBits(c.coverageMask));
                             }
                         }
-                    } else {
-                        var keepCoverage = diffCoverage(c.coverageMask, result.coverageData); if (keepCoverage != nil) {
-                            // Found a value that expanded coverage.
-                            // It's not a crasher, but we may want to add it to the on-disk
-                            // corpus and prioritize it for future fuzzing.
-                            // TODO(jayconrod, katiehockman): Prioritize fuzzing these
-                            // values which expanded coverage, perhaps based on the
-                            // number of new edges that this result expanded.
-                            // TODO(jayconrod, katiehockman): Don't write a value that's already
-                            // in the corpus.
-                            if (c.canMinimize() && result.canMinimize && c.crashMinimizing == nil) {
-                                // Send back to workers to find a smaller value that preserves
-                                // at least one new coverage bit.
-                                c.queueForMinimization(result, keepCoverage);
-                            } else {
-                                // Update the coordinator's coverage mask and save the value.
-                                nint inputSize = len(result.entry.Data);
-                                var (entryNew, errΔ7) = c.addCorpusEntries(true, result.entry);
-                                if (errΔ7 != nil) {
-                                    stop(errΔ7);
-                                    break;
-                                }
-                                if (!entryNew) {
-                                    if (shouldPrintDebugInfo()) {
-                                        c.debugLogf(
-                                            "ignoring duplicate input which increased coverage, id: %s",
-                                            result.entry.Path);
-                                    }
-                                    break;
-                                }
-                                c.updateCoverage(keepCoverage);
-                                c.ᏑinputQueue.enqueue(result.entry);
-                                c.interestingCount++;
+                    } else if (diffCoverage(c.coverageMask, result.coverageData) is var keepCoverage && keepCoverage != nil) {
+                        // Found a value that expanded coverage.
+                        // It's not a crasher, but we may want to add it to the on-disk
+                        // corpus and prioritize it for future fuzzing.
+                        // TODO(jayconrod, katiehockman): Prioritize fuzzing these
+                        // values which expanded coverage, perhaps based on the
+                        // number of new edges that this result expanded.
+                        // TODO(jayconrod, katiehockman): Don't write a value that's already
+                        // in the corpus.
+                        if (c.canMinimize() && result.canMinimize && c.crashMinimizing == nil) {
+                            // Send back to workers to find a smaller value that preserves
+                            // at least one new coverage bit.
+                            c.queueForMinimization(result, keepCoverage);
+                        } else {
+                            // Update the coordinator's coverage mask and save the value.
+                            nint inputSize = len(result.entry.Data);
+                            var (entryNew, errΔ7) = c.addCorpusEntries(true, result.entry);
+                            if (errΔ7 != nil) {
+                                stop(errΔ7);
+                                break;
+                            }
+                            if (!entryNew) {
                                 if (shouldPrintDebugInfo()) {
                                     c.debugLogf(
-                                        "new interesting input, id: %s, parent: %s, gen: %d, new bits: %d, total bits: %d, size: %d, exec time: %s",
-                                        result.entry.Path,
-                                        result.entry.Parent,
-                                        result.entry.Generation,
-                                        countBits(keepCoverage),
-                                        countBits(c.coverageMask),
-                                        inputSize,
-                                        result.entryDuration);
+                                        "ignoring duplicate input which increased coverage, id: %s",
+                                        result.entry.Path);
                                 }
+                                break;
                             }
-                        } else {
+                            c.updateCoverage(keepCoverage);
+                            c.ᏑinputQueue.enqueue(result.entry);
+                            c.interestingCount++;
                             if (shouldPrintDebugInfo()) {
                                 c.debugLogf(
-                                    "worker reported interesting input that doesn't expand coverage, id: %s, parent: %s, canMinimize: %t",
+                                    "new interesting input, id: %s, parent: %s, gen: %d, new bits: %d, total bits: %d, size: %d, exec time: %s",
                                     result.entry.Path,
                                     result.entry.Parent,
-                                    result.canMinimize);
+                                    result.entry.Generation,
+                                    countBits(keepCoverage),
+                                    countBits(c.coverageMask),
+                                    inputSize,
+                                    result.entryDuration);
                             }
+                        }
+                    } else {
+                        if (shouldPrintDebugInfo()) {
+                            c.debugLogf(
+                                "worker reported interesting input that doesn't expand coverage, id: %s, parent: %s, canMinimize: %t",
+                                result.entry.Path,
+                                result.entry.Parent,
+                                result.canMinimize);
                         }
                     }
                 } else if (c.warmupRun()) {
@@ -478,10 +474,8 @@ internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addT
             continue;
         }
         if (addToCache) {
-            {
-                var errΔ1 = writeToCorpus(Ꮡe, c.opts.CacheDir); if (errΔ1 != nil) {
-                    return (false, errΔ1);
-                }
+            var errΔ1 = writeToCorpus(Ꮡe, c.opts.CacheDir); if (errΔ1 != nil) {
+                return (false, errΔ1);
             }
             // For entries written to disk, we don't hold onto the bytes,
             // since the corpus would consume a significant amount of
@@ -672,10 +666,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         timeLastLog: time.Now(),
         corpus: new corpus(hashes: new map<array<byte>, bool>())
     ));
-    {
-        var err = c.readCache(); if (err != nil) {
-            return (default, err);
-        }
+    var err = c.readCache(); if (err != nil) {
+        return (default, err);
     }
     if (opts.MinimizeLimit > 0 || opts.MinimizeTimeout > 0) {
         foreach (var (_, t) in opts.Types) {
@@ -939,28 +931,22 @@ internal static time.Duration elapsed(this ref coordinator c) {
 // TODO(fuzzing): need a mechanism that can remove values that
 // aren't useful anymore, for example, because they have the wrong type.
 internal static error readCache(this ref coordinator c) {
-    {
-        var (_, errΔ1) = c.addCorpusEntries(false, c.opts.Seed.ꓸꓸꓸ); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = c.addCorpusEntries(false, c.opts.Seed.ꓸꓸꓸ); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (entries, err) = ReadCorpus(c.opts.CacheDir, c.opts.Types);
     if (err != nil) {
-        {
-            var (_, ok) = err._<ж<MalformedCorpusError>>(ᐧ); if (!ok) {
-                // It's okay if some files in the cache directory are malformed and
-                // are not included in the corpus, but fail if it's an I/O error.
-                return err;
-            }
+        var (_, ok) = err._<ж<MalformedCorpusError>>(ᐧ); if (!ok) {
+            // It's okay if some files in the cache directory are malformed and
+            // are not included in the corpus, but fail if it's an I/O error.
+            return err;
         }
         // TODO(jayconrod,katiehockman): consider printing some kind of warning
         // indicating the number of files which were skipped because they are
         // malformed.
     }
-    {
-        var (_, errΔ2) = c.addCorpusEntries(false, entries.ꓸꓸꓸ); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var (_, errΔ2) = c.addCorpusEntries(false, entries.ꓸꓸꓸ); if (errΔ2 != nil) {
+        return errΔ2;
     }
     return default;
 }
@@ -1028,10 +1014,8 @@ internal static (slice<any>, error) readCorpusData(slice<byte> data, slice<refle
     if (err != nil) {
         return (default, fmt.Errorf("unmarshal: %v"u8, err));
     }
-    {
-        err = CheckCorpus(vals, types); if (err != nil) {
-            return (default, err);
-        }
+    err = CheckCorpus(vals, types); if (err != nil) {
+        return (default, err);
     }
     return (vals, default);
 }
@@ -1063,16 +1047,12 @@ internal static error /*err*/ writeToCorpus(ж<CorpusEntry> Ꮡentry, @string di
 
     @string sum = fmt.Sprintf("%x"u8, sha256.Sum256(entry.Data))[..16];
     entry.Path = filepath.Join(dir, sum);
-    {
-        var errΔ1 = os.MkdirAll(dir, 511); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = os.MkdirAll(dir, 511); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var errΔ2 = os.WriteFile(entry.Path, entry.Data, 438); if (errΔ2 != nil) {
-            os.Remove(entry.Path); // remove partially written file
-            return errΔ2;
-        }
+    var errΔ2 = os.WriteFile(entry.Path, entry.Data, 438); if (errΔ2 != nil) {
+        os.Remove(entry.Path); // remove partially written file
+        return errΔ2;
     }
     return default;
 }

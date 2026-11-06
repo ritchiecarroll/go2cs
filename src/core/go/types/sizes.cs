@@ -85,10 +85,8 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
             // field f of x, but at least 1."
             var max = (int64)1;
             foreach (var (_, f) in t.fields) {
-                {
-                    var aΔ1 = Ꮡs.Alignof(f.typ); if (aΔ1 > max) {
-                        max = aΔ1;
-                    }
+                var aΔ1 = Ꮡs.Alignof(f.typ); if (aΔ1 > max) {
+                    max = aΔ1;
                 }
             }
             result = max; goto ᒐdone;
@@ -157,12 +155,10 @@ public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fiel
         var a = Ꮡs.Alignof(f.typ);
         offs = align(offs, a); // possibly < 0 if align overflows
         offsets[i] = offs;
-        {
-            var d = Ꮡs.Sizeof(f.typ); if (d >= 0 && offs >= 0) {
-                offs += d; // ok to overflow to < 0
-            } else {
-                offs = -1; // f.typ or offs is too large
-            }
+        var d = Ꮡs.Sizeof(f.typ); if (d >= 0 && offs >= 0) {
+            offs += d; // ok to overflow to < 0
+        } else {
+            offs = -1; // f.typ or offs is too large
         }
     }
     return offsets;
@@ -193,10 +189,8 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
         assert(isTyped(T));
         BasicKind k = t.kind;
         if ((nint)k < len(basicSizes)) {
-            {
-                var sΔ1 = basicSizes[k]; if (sΔ1 > 0) {
-                    return (int64)sΔ1;
-                }
+            var sΔ1 = basicSizes[k]; if (sΔ1 > 0) {
+                return (int64)sΔ1;
             }
         }
         if (k == ΔString) {
@@ -322,10 +316,8 @@ internal static int64 alignof(this ref Config conf, ΔType T) {
     if (conf.Sizes != nil) {
         f = conf.Sizes.Alignof;
     }
-    {
-        var a = f(T); if (a >= 1) {
-            return a;
-        }
+    var a = f(T); if (a >= 1) {
+        return a;
     }
     throw panic("implementation of alignof returned an alignment < 1");
 }

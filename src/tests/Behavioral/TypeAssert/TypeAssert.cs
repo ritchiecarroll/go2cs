@@ -21,10 +21,8 @@ internal static void Main() {
 internal static void pointerAssertion() {
     any i = Ꮡ(new box(n: 7));
 
-    {
-        var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
-            fmt.Println("Value is a *box:", bΔ1.n);
-        }
+    var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
+        fmt.Println("Value is a *box:", bΔ1.n);
     }
 
     var b = i._<ж<box>>();
@@ -37,20 +35,16 @@ private static readonly object helloˢ = (@string)"hello"u8;
 internal static void safeAssertions() {
     any i = helloˢ;
 
-    {
-        var (s, ok) = i._<@string>(ᐧ); if (ok) {
-            fmt.Println("Value is a string:", s);
-        } else {
-            fmt.Println("Value is not a string");
-        }
+    if (i._<@string>(out var s)) {
+        fmt.Println("Value is a string:", s);
+    } else {
+        fmt.Println("Value is not a string");
     }
 
-    {
-        var (n, ok) = i._<nint>(ᐧ); if (ok) {
-            fmt.Println("Value is an int:", n);
-        } else {
-            fmt.Println("Value is not an int");
-        }
+    if (i._<nint>(out var n)) {
+        fmt.Println("Value is an int:", n);
+    } else {
+        fmt.Println("Value is not an int");
     }
 }
 
@@ -58,10 +52,8 @@ internal static void assertionsWithPanic() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println("Recovered from panic:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println("Recovered from panic:", r);
             }
         }, ref ᒐ);
 

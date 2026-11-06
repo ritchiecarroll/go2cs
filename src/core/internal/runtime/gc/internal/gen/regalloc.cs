@@ -221,11 +221,9 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     var opIndexesʗ1 = opIndexes;
     var regUsedʗ1 = regUsed;
     void assign(ж<op> o, loc l) {
-        {
-            var (have, ok) = locsʗ1[o, ꟷ]; if (ok) {
-                fatalf("op %+v already assigned location %v (new %v)", o.OrTypedNil(), have, l);
-                return;
-            }
+        var (have, ok) = locsʗ1[o, ꟷ]; if (ok) {
+            fatalf("op %+v already assigned location %v (new %v)", o.OrTypedNil(), have, l);
+            return;
         }
         if (o == canonʗ1[o]) {
             // Mark this location used over o's live range
@@ -301,11 +299,9 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
             log.Printf("assign %+v", o.OrTypedNil());
         }
 
-        {
-            var (_, ok) = locs[o, ꟷ]; if (ok) {
-                // Already assigned a fixed location above.
-                continue;
-            }
+        if (locs[o, ꟷ] is (_, true)) {
+            // Already assigned a fixed location above.
+            continue;
         }
 
         if (o.Δop == "deref"u8) {
@@ -327,10 +323,8 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
         }
         // Below here we know that o is already a canonical op.
 
-        {
-            var (_, ok) = opRMW[o.Δop, ꟷ]; if (ok) {
-                fatalf("read-modify-write op not canonicalized");
-            }
+        if (opRMW[o.Δop, ꟷ] is (_, true)) {
+            fatalf("read-modify-write op not canonicalized");
         }
 
         // Find a free register of the right class.

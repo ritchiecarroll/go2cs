@@ -503,16 +503,14 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
         // Query the existing skip-success mode so we don't wait for a
         // suppressed completion or skip waiting for an expected one.
         ref var info = ref heap(new windows.FILE_IO_COMPLETION_NOTIFICATION_INFORMATION(), out var Ꮡinfo);
-        {
-            var errΔ1 = windows.NtQueryInformationFile(fd.Sysfd, Ꮡ(new windows.IO_STATUS_BLOCK()),
-                @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileIoCompletionNotificationInformation); if (errΔ1 != nil) {
-                // Without knowing the modes, neither waiting for a completion
-                // packet on success nor skipping it is safe. Leave the handle
-                // unassociated and use explicit events for pending I/O instead.
-                // Inline success needs no wait, and deadlines are unavailable.
-                fd.skipSyncNotif = true;
-                return default;
-            }
+        var errΔ1 = windows.NtQueryInformationFile(fd.Sysfd, Ꮡ(new windows.IO_STATUS_BLOCK()),
+            @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileIoCompletionNotificationInformation); if (errΔ1 != nil) {
+            // Without knowing the modes, neither waiting for a completion
+            // packet on success nor skipping it is safe. Leave the handle
+            // unassociated and use explicit events for pending I/O instead.
+            // Inline success needs no wait, and deadlines are unavailable.
+            fd.skipSyncNotif = true;
+            return default;
         }
         fd.skipSyncNotif = (info.Flags & (uint32)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0;
     }
@@ -595,17 +593,13 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         if (fd.kind == kindFile) {
-            {
-                var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
-                    return (0, errΔ1);
-                }
+            var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
+                return (0, errΔ1);
             }
             ᒐd1 = true;
         } else {
-            {
-                var errΔ2 = Ꮡfd.readLock(); if (errΔ2 != nil) {
-                    return (0, errΔ2);
-                }
+            var errΔ2 = Ꮡfd.readLock(); if (errΔ2 != nil) {
+                return (0, errΔ2);
             }
             ᒐd2 = true;
         }
@@ -757,10 +751,8 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> buf, int64 off)
             return (0, Δsyscall.ESPIPE);
         }
 
-        {
-            var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         defer(Ꮡfd.readWriteUnlock, ref ᒐ);
 
@@ -820,10 +812,8 @@ public static (nint, syscallꓸSockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slic
         if (len(buf) > maxRW) {
             buf = buf[..(int)(maxRW)];
         }
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, default, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, default, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -863,10 +853,8 @@ public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж
         if (len(buf) > maxRW) {
             buf = buf[..(int)(maxRW)];
         }
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -906,10 +894,8 @@ public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж
         if (len(buf) > maxRW) {
             buf = buf[..(int)(maxRW)];
         }
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -946,17 +932,13 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         if (fd.kind == kindFile) {
-            {
-                var err = Ꮡfd.readWriteLock(); if (err != nil) {
-                    return (0, err);
-                }
+            var err = Ꮡfd.readWriteLock(); if (err != nil) {
+                return (0, err);
             }
             ᒐd1 = true;
         } else {
-            {
-                var err = Ꮡfd.writeLock(); if (err != nil) {
-                    return (0, err);
-                }
+            var err = Ꮡfd.writeLock(); if (err != nil) {
+                return (0, err);
             }
             ᒐd2 = true;
         }
@@ -1136,10 +1118,8 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
         if (len(buf) == 0) {
             return (0, default);
         }
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         defer(Ꮡfd.writeUnlock, ref ᒐ);
         if (race.Enabled) {
@@ -1412,10 +1392,8 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
         if (fd.kind == kindPipe) {
             return (0, Δsyscall.ESPIPE);
         }
-        {
-            var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readWriteLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         ᒐd1 = true;
 
@@ -1434,10 +1412,8 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
             }
             case var ᴛ when ᴛ == io.SeekEnd: {
                 ref var size = ref heap(new int64(), out var Ꮡsize);
-                {
-                    var errΔ3 = windows.GetFileSizeEx(fd.Sysfd, Ꮡsize); if (errΔ3 != nil) {
-                        return (0, errΔ3);
-                    }
+                var errΔ3 = windows.GetFileSizeEx(fd.Sysfd, Ꮡsize); if (errΔ3 != nil) {
+                    return (0, errΔ3);
                 }
                 newOffset = size + offset;
                 break;
@@ -1504,10 +1480,8 @@ public static error Fchdir(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.Fchdir(fd.Sysfd);
@@ -1523,10 +1497,8 @@ public static (uint32, error) GetFileType(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return (0, err);
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return (0, err);
         }
         ᒐd1 = true;
         return Δsyscall.GetFileType(fd.Sysfd);
@@ -1542,10 +1514,8 @@ public static error GetFileInformationByHandle(this ж<FD> Ꮡfd, ж<Δsyscall.B
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.GetFileInformationByHandle(fd.Sysfd, data);
@@ -1602,10 +1572,8 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.writeLock(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.writeLock(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
 
@@ -1650,10 +1618,8 @@ public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> 
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, 0, 0, default, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, 0, 0, default, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -1689,10 +1655,8 @@ public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<by
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, 0, 0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, 0, 0, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -1727,10 +1691,8 @@ public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<by
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
-                return (0, 0, 0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != nil) {
+            return (0, 0, 0, errΔ1);
         }
         defer(Ꮡfd.readUnlock, ref ᒐ);
 
@@ -1771,10 +1733,8 @@ public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, sli
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
 
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                return (0, 0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            return (0, 0, errΔ1);
         }
         defer(Ꮡfd.writeUnlock, ref ᒐ);
 
@@ -1811,10 +1771,8 @@ public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
 
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                return (0, 0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            return (0, 0, errΔ1);
         }
         defer(Ꮡfd.writeUnlock, ref ᒐ);
 
@@ -1847,10 +1805,8 @@ public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
 
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                return (0, 0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            return (0, 0, errΔ1);
         }
         defer(Ꮡfd.writeUnlock, ref ᒐ);
 
@@ -1889,10 +1845,8 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
 
     ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
-    {
-        var errΔ1 = Δsyscall.DuplicateHandle(proc, (syscallꓸHandle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != nil) {
-            return (0, duplicateHandleˢ, errΔ1);
-        }
+    var errΔ1 = Δsyscall.DuplicateHandle(proc, (syscallꓸHandle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != nil) {
+        return (0, duplicateHandleˢ, errΔ1);
     }
     return ((nint)nfd, "", default);
 }

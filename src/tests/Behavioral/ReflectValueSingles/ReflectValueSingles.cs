@@ -47,10 +47,8 @@ internal static void convRow(@string label, any x, any want) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%-34s PANIC: %v\n"u8, label, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%-34s PANIC: %v\n"u8, label, r);
             }
         }, ref ᒐ);
         var v = reflect.ValueOf(x).Convert(reflect.TypeOf(want));
@@ -259,10 +257,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Printf("%-38s PANIC: %v\n"u8, label, r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Printf("%-38s PANIC: %v\n"u8, label, r);
                 }
             }, ref ᒐ);
             var v = reflect.New(slotΔ1).Elem();

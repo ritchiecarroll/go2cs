@@ -23,11 +23,9 @@ internal static void clearenv_c() {
 internal static void syscall_runtimeClearenv(map<@string, nint> env) {
     clearenv_c();
     // Did we just unset GODEBUG?
-    {
-        var (_, ok) = env[godebugˢ, ꟷ]; if (ok) {
-            ᏑgodebugEnv.Store(nil);
-            godebugNotify(true);
-        }
+    var (_, ok) = env[godebugˢ, ꟷ]; if (ok) {
+        ᏑgodebugEnv.Store(nil);
+        godebugNotify(true);
     }
 }
 

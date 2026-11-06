@@ -103,12 +103,10 @@ internal static void Main() {
     ch.ᐸꟷ(dp.OrTypedNil());
     fmt.Println("chan==nil", (ᐸꟷ(ch)) == nil);
 
-    {
-        var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok) {
-            fmt.Println("assert-ok", q == nil);
-        } else {
-            fmt.Println("assert-failed");
-        }
+    var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok) {
+        fmt.Println("assert-ok", q == nil);
+    } else {
+        fmt.Println("assert-failed");
     }
 
     fmt.Println(panicked());
@@ -140,12 +138,10 @@ internal static @string /*msg*/ panicked() {
     try {
         defer(() => {
             var r = recover();
-            {
-                var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok) {
-                    msg = fmt.Sprintf("panic-recovered *AErr nil=%v"u8, q == nil);
-                } else {
-                    msg = fmt.Sprintf("panic-recovered other %T %v"u8, r, r == nil);
-                }
+            var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok) {
+                msg = fmt.Sprintf("panic-recovered *AErr nil=%v"u8, q == nil);
+            } else {
+                msg = fmt.Sprintf("panic-recovered other %T %v"u8, r, r == nil);
             }
         }, ref ᒐ);
 

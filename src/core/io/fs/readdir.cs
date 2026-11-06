@@ -33,10 +33,8 @@ private static readonly @string notImplementedˢᵇ = "not implemented"u8;
 public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (fsysΔ1, okΔ1) = fsys._<ReadDirFS>(ᐧ); if (okΔ1) {
-                return fsysΔ1.ReadDir(name);
-            }
+        var (fsysΔ1, okΔ1) = fsys._<ReadDirFS>(ᐧ); if (okΔ1) {
+            return fsysΔ1.ReadDir(name);
         }
 
         var (@file, err) = fsys.Open(name);

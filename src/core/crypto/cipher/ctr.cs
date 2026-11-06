@@ -38,10 +38,8 @@ partial interface ctrAble {
 // NewCTR returns a [Stream] which encrypts/decrypts using the given [Block] in
 // counter mode. The length of iv must be the same as the [Block]'s block size.
 public static Stream NewCTR(Block block, slice<byte> iv) {
-    {
-        var (blockΔ1, ok) = block._<ж<aes.Block>>(ᐧ); if (ok) {
-            return new aesCtrWrapper(aes.NewCTR(blockΔ1, iv));
-        }
+    if (block._<ж<aes.Block>>(out var blockΔ1)) {
+        return new aesCtrWrapper(aes.NewCTR(blockΔ1, iv));
     }
     if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CTR with non-AES ciphers is not allowed in FIPS 140-only mode");
@@ -103,10 +101,8 @@ internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> s
     if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
-    {
-        var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
-            throw panic("crypto/cipher: internal error: generic CTR used with AES");
-        }
+    var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
+        throw panic("crypto/cipher: internal error: generic CTR used with AES");
     }
     while (len(src) > 0) {
         if (x.outUsed >= len(x.@out) - x.b.BlockSize()) {

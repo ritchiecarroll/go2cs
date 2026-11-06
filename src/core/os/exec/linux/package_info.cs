@@ -74,10 +74,10 @@ using static go.os.exec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AHzuAYKmgNoABxCCpoIA2gHcA5IABzAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKUAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAPEgANCIKmgoKClIKCgriClIKClJSCgrgAASAADgKCgriClIKk6oKCgpSCgoKUgoKClIKUgoKm3IKUpoKChIqCgqKUgoKUgoKUuAAIEoKCgqYABRTytNiCgoC4gsrsgoKmgtjYgoDKgoLsgsiCAA0YpoKC7KYAEiiCAAgoABMCgpSCpoKClJSCgoK4griAuKSClAACFAAMAoKClKaCpoKCprb8prSmgqYACxLygpSClIKCpoKCgIK26sKClIKUgoKCggAIEuKClIKUgoKUgoKCAAYWAAgCgpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIADSjygqaAgoKkpoKCgoKCgqaqwoCCgoKkAAgGgoKUgpSCgoKCgoKCgqyylIKCgoK4ggAPGoCCgoL8goKUqrSCAAIQ0uy2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCpuyygpSCgoKUlKYACRSYoqSU", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
+[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AHzuAYKmgNoABxCCpoIA2gHcA5IABzAAGALKgIKmgoKCgoKUpoKUpoKCgoKUgoKClNqCgriUgpQACBKClKYAAhgACwKClIKClq7ClKaCgoKClKrCgpTWgoKUpqKCgoKUgqaAgraCgqaCgpKCgpSClJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoKUAA8SAA0IgqaCgoKUgoKCuIKUgoKUlIKCuAABIAAOAoKCuIKUgqTqgoKClIKCgpSCgoKUgpSCgqbcgpSmgoKEioKCopSCgpSCgpS4AAgSgoKCpgAFFPK02IKCuILK3IKCpoLY2ILKgoLcgsiCAA0YpoKC7KYAEiiCAAgoABMCgpSCpoKClJSCgoK4gri4lIKUAAIUAAwCgoKUpoKmgoKmtvymtKaCpgALEvKClIKUgoKmgoKCpurCgpSClIKCgoIACBLigpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIABhYACAKClIKUgoKUgoKCAA0o8oKmgoKUpoKCgoKCgqaqwoKCgpQACAaCgpSClIKCgoKCgoKCrLKUgoKCgriCAA8agoKC7IKClKq0ggACENLstqKCgoK4goKmgriUgriUlIKClIKmgriCgqbssoKUgoKClJSmAAkUmKKklA==", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
 [assembly: GoPositionMap("os/exec/exec_unix.go", "exec_unix.cs", "AAwg2II=")]
 [assembly: GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
-[assembly: GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClObKgIK2goKClJSCopSUgoCCgoKUlLaqog==")]
+[assembly: GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClObKgIK2goKClJSCopSUgoKCgpSUpqqi")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

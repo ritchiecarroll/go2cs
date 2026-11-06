@@ -121,10 +121,8 @@ internal static (nint, error) spliceDrain(nint pipefd, ж<FD> Ꮡsock, nint max)
                 return (n, err);
             }
             if (sock.pd.pollable()) {
-                {
-                    var errΔ1 = sock.pd.waitRead(sock.isFile); if (errΔ1 != nil) {
-                        return (n, errΔ1);
-                    }
+                var errΔ1 = sock.pd.waitRead(sock.isFile); if (errΔ1 != nil) {
+                    return (n, errΔ1);
                 }
             }
         }
@@ -183,10 +181,8 @@ internal static (nint, error) splicePump(ж<FD> Ꮡsock, nint pipefd, nint inPip
                 return (written, err);
             }
             if (sock.pd.pollable()) {
-                {
-                    var errΔ1 = sock.pd.waitWrite(sock.isFile); if (errΔ1 != nil) {
-                        return (written, errΔ1);
-                    }
+                var errΔ1 = sock.pd.waitWrite(sock.isFile); if (errΔ1 != nil) {
+                    return (written, errΔ1);
                 }
             }
         }
@@ -263,10 +259,8 @@ internal static void putPipe(ж<splicePipe> Ꮡp) {
 // newPipe sets up a pipe for a splice operation.
 internal static ж<splicePipe> newPipe() {
     array<nint> fds = new(2);
-    {
-        var err = Δsyscall.Pipe2(fds[..], (nint)((nint)Δsyscall.O_CLOEXEC | (nint)Δsyscall.O_NONBLOCK)); if (err != nil) {
-            return default;
-        }
+    var err = Δsyscall.Pipe2(fds[..], (nint)((nint)Δsyscall.O_CLOEXEC | (nint)Δsyscall.O_NONBLOCK)); if (err != nil) {
+        return default;
     }
 
     // Splice will loop writing maxSpliceSize bytes from the source to the pipe,

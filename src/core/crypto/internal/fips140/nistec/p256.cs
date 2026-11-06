@@ -85,10 +85,8 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
         if (err != nil) {
             return (default, err);
         }
-        {
-            var errΔ1 = p256CheckOnCurve(x, y); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = p256CheckOnCurve(x, y); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         Ꮡp.Ꮡx.Set(x);
         Ꮡp.Ꮡy.Set(y);
@@ -471,10 +469,8 @@ internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) {
     n = n % 64;
     var res = s.Value[i].Rsh((int64)(n));
     // Shift in the more significant limb, if present.
-    {
-        nint iΔ1 = i + 1; if (iΔ1 < 4) {
-            res |= (uint64)(s.Value[iΔ1].Lsh((int64)(64 - n)));
-        }
+    nint iΔ1 = i + 1; if (iΔ1 < 4) {
+        res |= (uint64)(s.Value[iΔ1].Lsh((int64)(64 - n)));
     }
     return res;
 }

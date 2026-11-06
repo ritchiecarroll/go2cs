@@ -193,30 +193,24 @@ public static Model GrayModel = ModelFunc(grayModel);
 public static Model Gray16Model = ModelFunc(gray16Model);
 
 internal static Color rgbaModel(Color c) {
-    {
-        var (_, ok) = c._<ΔRGBA>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<ΔRGBA>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, a) = c.RGBA();
     return new ΔRGBA((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8), (uint8)(a >> 8));
 }
 
 internal static Color rgba64Model(Color c) {
-    {
-        var (_, ok) = c._<RGBA64>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<RGBA64>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, a) = c.RGBA();
     return new RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 internal static Color nrgbaModel(Color c) {
-    {
-        var (_, ok) = c._<NRGBA>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<NRGBA>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, a) = c.RGBA();
     if (a == 0xffff) {
@@ -233,10 +227,8 @@ internal static Color nrgbaModel(Color c) {
 }
 
 internal static Color nrgba64Model(Color c) {
-    {
-        var (_, ok) = c._<NRGBA64>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<NRGBA64>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, a) = c.RGBA();
     if (a == 0xffff) {
@@ -253,30 +245,24 @@ internal static Color nrgba64Model(Color c) {
 }
 
 internal static Color alphaModel(Color c) {
-    {
-        var (_, ok) = c._<Alpha>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<Alpha>(ᐧ); if (ok) {
+        return c;
     }
     var (_, _, _, a) = c.RGBA();
     return new Alpha((uint8)(a >> 8));
 }
 
 internal static Color alpha16Model(Color c) {
-    {
-        var (_, ok) = c._<Alpha16>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<Alpha16>(ᐧ); if (ok) {
+        return c;
     }
     var (_, _, _, a) = c.RGBA();
     return new Alpha16((uint16)a);
 }
 
 internal static Color grayModel(Color c) {
-    {
-        var (_, ok) = c._<Gray>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<Gray>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, _) = c.RGBA();
 
@@ -294,10 +280,8 @@ internal static Color grayModel(Color c) {
 }
 
 internal static Color gray16Model(Color c) {
-    {
-        var (_, ok) = c._<Gray16>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<Gray16>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, _) = c.RGBA();
 

@@ -19,10 +19,8 @@ internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).Valu
 // be valid for success. If the operation failed, the value of z is undefined
 // but the returned value is nil.
 public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
-    {
-        var (f, _, err) = Ꮡz.Parse(s, 0); if (err == nil) {
-            return (f, true);
-        }
+    var (f, _, err) = Ꮡz.Parse(s, 0); if (err == nil) {
+        return (f, true);
     }
     return (default, false);
 }
@@ -288,19 +286,15 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
     }
 
     var r = strings.NewReader(s);
-    {
-        (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != nil) {
-            return (f, b, err);
-        }
+    (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != nil) {
+        return (f, b, err);
     }
 
     // entire string must have been consumed
-    {
-        var (ch, err2) = r.ReadByte(); if (err2 == nil) {
-            err = fmt.Errorf("expected end of string, found %q"u8, ch);
-        } else if (!AreEqual(err2, io.EOF)) {
-            err = err2;
-        }
+    var (ch, err2) = r.ReadByte(); if (err2 == nil) {
+        err = fmt.Errorf("expected end of string, found %q"u8, ch);
+    } else if (!AreEqual(err2, io.EOF)) {
+        err = err2;
     }
 
     return (f, b, err);

@@ -796,18 +796,16 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
     var locked = false;
     while (npage > 0) {
         // Pull from accumulated credit first.
-        {
-            var credit = Ꮡh.ᏑreclaimCredit.Load(); if (credit > 0) {
-                var take = credit;
-                if (take > npage) {
-                    // Take only what we need.
-                    take = npage;
-                }
-                if (Ꮡh.ᏑreclaimCredit.CompareAndSwap(credit, credit - take)) {
-                    npage -= take;
-                }
-                continue;
+        var credit = Ꮡh.ᏑreclaimCredit.Load(); if (credit > 0) {
+            var take = credit;
+            if (take > npage) {
+                // Take only what we need.
+                take = npage;
             }
+            if (Ꮡh.ᏑreclaimCredit.CompareAndSwap(credit, credit - take)) {
+                npage -= take;
+            }
+            continue;
         }
 
         // Claim a chunk of work.
@@ -892,20 +890,18 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
             for (nuint j = (nuint)0; j < 8; j++) {
                 if ((uint8)(inUseUnmarked & (((uint8)1).Lsh(j))) != 0) {
                     var s = ha.spans[arenaPage + (nuint)i * 8 + j];
-                    {
-                        var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
-                            var npages = sΔ1.npages;
-                            unlock(Ꮡh.Ꮡlock);
-                            if (sΔ1.sweep(false)) {
-                                nFreed += npages;
-                            }
-                            @lock(Ꮡh.Ꮡlock);
-                            // Reload inUse. It's possible nearby
-                            // spans were freed when we dropped the
-                            // lock and we don't want to get stale
-                            // pointers from the spans array.
-                            inUseUnmarked = (uint8)(atomic.Load8(Ꮡ(inUse, i)) & ~marked[i]);
+                    var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
+                        var npages = sΔ1.npages;
+                        unlock(Ꮡh.Ꮡlock);
+                        if (sΔ1.sweep(false)) {
+                            nFreed += npages;
                         }
+                        @lock(Ꮡh.Ꮡlock);
+                        // Reload inUse. It's possible nearby
+                        // spans were freed when we dropped the
+                        // lock and we don't want to get stale
+                        // pointers from the spans array.
+                        inUseUnmarked = (uint8)(atomic.Load8(Ꮡ(inUse, i)) & ~marked[i]);
                     }
                 }
             }
@@ -1293,45 +1289,37 @@ HaveSpan:
     // pages not to get touched until we return. Simultaneously, it's important
     // to do this before calling sysUsed because that may commit address space.
     var forceScavenge = false;
-    {
-        var limit = ᏑgcController.ᏑmemoryLimit.Load(); if (!ᏑgcCPULimiter.limiting()) {
-            // Assist with scavenging to maintain the memory limit by the amount
-            // that we expect to page in.
-            var inuse = ᏑgcController.ᏑmappedReady.Load();
-            // Be careful about overflow, especially with uintptrs. Even on 32-bit platforms
-            // someone can set a really big memory limit that isn't math.MaxInt64.
-            if ((uint64)scav + inuse > (uint64)limit) {
-                bytesToScavenge = (uintptr)((uint64)scav + inuse - (uint64)limit);
-                forceScavenge = true;
-            }
+    var limit = ᏑgcController.ᏑmemoryLimit.Load(); if (!ᏑgcCPULimiter.limiting()) {
+        // Assist with scavenging to maintain the memory limit by the amount
+        // that we expect to page in.
+        var inuse = ᏑgcController.ᏑmappedReady.Load();
+        // Be careful about overflow, especially with uintptrs. Even on 32-bit platforms
+        // someone can set a really big memory limit that isn't math.MaxInt64.
+        if ((uint64)scav + inuse > (uint64)limit) {
+            bytesToScavenge = (uintptr)((uint64)scav + inuse - (uint64)limit);
+            forceScavenge = true;
         }
     }
-    {
-        var goal = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑgcPercentGoal).Load(); if (goal != ~(uint64)0 && growth > 0) {
-            // We just caused a heap growth, so scavenge down what will soon be used.
-            // By scavenging inline we deal with the failure to allocate out of
-            // memory fragments by scavenging the memory fragments that are least
-            // likely to be re-used.
-            //
-            // Only bother with this because we're not using a memory limit. We don't
-            // care about heap growths as long as we're under the memory limit, and the
-            // previous check for scaving already handles that.
-            {
-                var retained = heapRetained(); if (retained + (uint64)growth > goal) {
-                    // The scavenging algorithm requires the heap lock to be dropped so it
-                    // can acquire it only sparingly. This is a potentially expensive operation
-                    // so it frees up other goroutines to allocate in the meanwhile. In fact,
-                    // they can make use of the growth we just created.
-                    var todo = growth;
-                    {
-                        var overage = (uintptr)(retained + (uint64)growth - goal); if (todo > overage) {
-                            todo = overage;
-                        }
-                    }
-                    if (todo > bytesToScavenge) {
-                        bytesToScavenge = todo;
-                    }
-                }
+    var goal = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑgcPercentGoal).Load(); if (goal != ~(uint64)0 && growth > 0) {
+        // We just caused a heap growth, so scavenge down what will soon be used.
+        // By scavenging inline we deal with the failure to allocate out of
+        // memory fragments by scavenging the memory fragments that are least
+        // likely to be re-used.
+        //
+        // Only bother with this because we're not using a memory limit. We don't
+        // care about heap growths as long as we're under the memory limit, and the
+        // previous check for scaving already handles that.
+        var retained = heapRetained(); if (retained + (uint64)growth > goal) {
+            // The scavenging algorithm requires the heap lock to be dropped so it
+            // can acquire it only sparingly. This is a potentially expensive operation
+            // so it frees up other goroutines to allocate in the meanwhile. In fact,
+            // they can make use of the growth we just created.
+            var todo = growth;
+            var overage = (uintptr)(retained + (uint64)growth - goal); if (todo > overage) {
+                todo = overage;
+            }
+            if (todo > bytesToScavenge) {
+                bytesToScavenge = todo;
             }
         }
     }
@@ -1438,34 +1426,32 @@ internal static void initSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType
         // We must set span properties before the span is published anywhere
         // since we're not holding the heap lock.
         s.spanclass = spanclass;
-        {
-            var sizeclass = spanclass.sizeclass(); if (sizeclass == 0) {
-                s.elemsize = nbytes;
-                s.nelems = 1;
-                s.divMul = 0;
-            } else {
-                s.elemsize = (uintptr)gc.SizeClassToSize[sizeclass];
-                if (goexperiment.GreenTeaGC) {
-                    uintptr reserve = default;
-                    if (gcUsesSpanInlineMarkBits(s.elemsize)) {
-                        // Reserve space for the inline mark bits.
-                        reserve += /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128;
-                    }
-                    if (heapBitsInSpan(s.elemsize) && !s.spanclass.noscan()) {
-                        // Reserve space for the pointer/scan bitmap at the end.
-                        reserve += nbytes / (uintptr)goarch.PtrSize / 8;
-                    }
-                    s.nelems = (uint16)((nbytes - reserve) / s.elemsize);
-                } else {
-                    if (!s.spanclass.noscan() && heapBitsInSpan(s.elemsize)) {
-                        // Reserve space for the pointer/scan bitmap at the end.
-                        s.nelems = (uint16)((nbytes - (nbytes / (uintptr)goarch.PtrSize / 8)) / s.elemsize);
-                    } else {
-                        s.nelems = (uint16)(nbytes / s.elemsize);
-                    }
+        var sizeclass = spanclass.sizeclass(); if (sizeclass == 0) {
+            s.elemsize = nbytes;
+            s.nelems = 1;
+            s.divMul = 0;
+        } else {
+            s.elemsize = (uintptr)gc.SizeClassToSize[sizeclass];
+            if (goexperiment.GreenTeaGC) {
+                uintptr reserve = default;
+                if (gcUsesSpanInlineMarkBits(s.elemsize)) {
+                    // Reserve space for the inline mark bits.
+                    reserve += /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128;
                 }
-                s.divMul = gc.SizeClassToDivMagic[sizeclass];
+                if (heapBitsInSpan(s.elemsize) && !s.spanclass.noscan()) {
+                    // Reserve space for the pointer/scan bitmap at the end.
+                    reserve += nbytes / (uintptr)goarch.PtrSize / 8;
+                }
+                s.nelems = (uint16)((nbytes - reserve) / s.elemsize);
+            } else {
+                if (!s.spanclass.noscan() && heapBitsInSpan(s.elemsize)) {
+                    // Reserve space for the pointer/scan bitmap at the end.
+                    s.nelems = (uint16)((nbytes - (nbytes / (uintptr)goarch.PtrSize / 8)) / s.elemsize);
+                } else {
+                    s.nelems = (uint16)(nbytes / s.elemsize);
+                }
             }
+            s.divMul = gc.SizeClassToDivMagic[sizeclass];
         }
 
         // Initialize mark and allocation structures.
@@ -1570,21 +1556,19 @@ internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
             // The new space is discontiguous. Track what
             // remains of the current space and switch to
             // the new space. This should be rare.
-            {
-                var size = h.curArena.end - h.curArena.@base; if (size != 0) {
-                    // Transition this space from Reserved to Prepared and mark it
-                    // as released since we'll be able to start using it after updating
-                    // the page allocator and releasing the lock at any time.
-                    sysMap((@unsafe.Pointer)h.curArena.@base, size, ᏑgcController.ᏑheapReleased, heapˢ);
-                    // Update stats.
-                    var statsΔ1 = Ꮡmemstats.ᏑheapStats.acquire();
-                    atomic.Xaddint64(statsΔ1.Ꮡreleased, (int64)size);
-                    Ꮡmemstats.ᏑheapStats.release();
-                    // Update the page allocator's structures to make this
-                    // space ready for allocation.
-                    Ꮡh.Ꮡpages.grow(h.curArena.@base, size);
-                    totalGrowth += size;
-                }
+            var size = h.curArena.end - h.curArena.@base; if (size != 0) {
+                // Transition this space from Reserved to Prepared and mark it
+                // as released since we'll be able to start using it after updating
+                // the page allocator and releasing the lock at any time.
+                sysMap((@unsafe.Pointer)h.curArena.@base, size, ᏑgcController.ᏑheapReleased, heapˢ);
+                // Update stats.
+                var statsΔ1 = Ꮡmemstats.ᏑheapStats.acquire();
+                atomic.Xaddint64(statsΔ1.Ꮡreleased, (int64)size);
+                Ꮡmemstats.ᏑheapStats.release();
+                // Update the page allocator's structures to make this
+                // space ready for allocation.
+                Ꮡh.Ꮡpages.grow(h.curArena.@base, size);
+                totalGrowth += size;
             }
             // Switch to the new space.
             h.curArena.@base = (uintptr)av;
@@ -2592,13 +2576,11 @@ internal static ж<atomic.Uintptr> getOrAddWeakHandle(@unsafe.Pointer Δp) {
     }
 
     // First try to retrieve without allocating.
-    {
-        var handleΔ2 = getWeakHandle(Δp); if (handleΔ2 != nil) {
-            // Keep p alive for the duration of the function to ensure
-            // that it cannot die while we're trying to do this.
-            KeepAlive(@unsafe.Pointer.OrTypedNil(Δp));
-            return handleΔ2;
-        }
+    var handleΔ2 = getWeakHandle(Δp); if (handleΔ2 != nil) {
+        // Keep p alive for the duration of the function to ensure
+        // that it cannot die while we're trying to do this.
+        KeepAlive(@unsafe.Pointer.OrTypedNil(Δp));
+        return handleΔ2;
     }
 
     @lock(Ꮡmheap_.Ꮡspeciallock);
@@ -3033,10 +3015,8 @@ internal static ж<gcBits> newMarkBits(uintptr nelems) {
 
     // Try directly allocating from the current head arena.
     var head = (ж<gcBitsArena>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡnext))));
-    {
-        var pΔ1 = head.tryAlloc(bytesNeeded); if (pΔ1 != nil) {
-            return pΔ1;
-        }
+    var pΔ1 = head.tryAlloc(bytesNeeded); if (pΔ1 != nil) {
+        return pΔ1;
     }
 
     // There's not enough room in the head arena. We may need to
@@ -3045,11 +3025,9 @@ internal static ж<gcBits> newMarkBits(uintptr nelems) {
     // Try the head arena again, since it may have changed. Now
     // that we hold the lock, the list head can't change, but its
     // free position still can.
-    {
-        var pΔ2 = gcBitsArenas.next.tryAlloc(bytesNeeded); if (pΔ2 != nil) {
-            unlock(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock));
-            return pΔ2;
-        }
+    var pΔ2 = gcBitsArenas.next.tryAlloc(bytesNeeded); if (pΔ2 != nil) {
+        unlock(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock));
+        return pΔ2;
     }
 
     // Allocate a new arena. This may temporarily drop the lock.
@@ -3057,15 +3035,13 @@ internal static ж<gcBits> newMarkBits(uintptr nelems) {
     // If newArenaMayUnlock dropped the lock, another thread may
     // have put a fresh arena on the "next" list. Try allocating
     // from next again.
-    {
-        var pΔ3 = gcBitsArenas.next.tryAlloc(bytesNeeded); if (pΔ3 != nil) {
-            // Put fresh back on the free list.
-            // TODO: Mark it "already zeroed"
-            fresh.next = gcBitsArenas.free;
-            gcBitsArenas.free = fresh;
-            unlock(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock));
-            return pΔ3;
-        }
+    var pΔ3 = gcBitsArenas.next.tryAlloc(bytesNeeded); if (pΔ3 != nil) {
+        // Put fresh back on the free list.
+        // TODO: Mark it "already zeroed"
+        fresh.next = gcBitsArenas.free;
+        gcBitsArenas.free = fresh;
+        unlock(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock));
+        return pΔ3;
     }
 
     // Allocate from the fresh arena. We haven't linked it in yet, so

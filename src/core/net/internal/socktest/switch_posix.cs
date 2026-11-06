@@ -66,10 +66,8 @@ internal static @string typeString(nint sotype) {
         s = fmt.Sprintf("%d"u8, sotype & 0xff);
         break;
     }}
-    {
-        nuint flags = (nuint)((nuint)sotype & (nuint)~(nuint)0xff); if (flags != 0) {
-            s += fmt.Sprintf("|%#x"u8, flags);
-        }
+    nuint flags = (nuint)((nuint)sotype & (nuint)~(nuint)0xff); if (flags != 0) {
+        s += fmt.Sprintf("|%#x"u8, flags);
     }
     return s;
 }

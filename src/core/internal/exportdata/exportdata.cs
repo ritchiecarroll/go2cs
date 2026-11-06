@@ -114,11 +114,9 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
     if (err != nil) {
         return (data, err);
     }
-    {
-        @string s = (@string)(suffix[..]); if (s != marker) {
-            err = fmt.Errorf("read %q instead of end-of-section marker (%q)"u8, s, marker);
-            return (data, err);
-        }
+    @string s = (@string)(suffix[..]); if (s != marker) {
+        err = fmt.Errorf("read %q instead of end-of-section marker (%q)"u8, s, marker);
+        return (data, err);
     }
 
     return (data, err);
@@ -187,11 +185,9 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
     slice<byte> line = default;
 
     // objapi header should be the first line
-    {
-        (line, err) = r.ReadSlice((byte)'\n'); if (err != nil) {
-            err = fmt.Errorf("can't find export data (%v)"u8, err);
-            return (objapi, headers, err);
-        }
+    (line, err) = r.ReadSlice((byte)'\n'); if (err != nil) {
+        err = fmt.Errorf("can't find export data (%v)"u8, err);
+        return (objapi, headers, err);
     }
     objapi = (@string)line;
 
@@ -297,10 +293,8 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
     default: {
         // "x" -> "$GOPATH/pkg/$GOOS_$GOARCH/x.ext", "x"
         // Don't require the source files to be present.
-        {
-            var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == nil) { // see issue 14282
-                srcDir = abs;
-            }
+        var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == nil) { // see issue 14282
+            srcDir = abs;
         }
         ж<build.Package> bp = default;
         (bp, err) = build.Import(path, srcDir, (build.ImportMode)(build.FindOnly | build.AllowBinary));
@@ -397,10 +391,8 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
                 slice<byte> output = default;
                 (output, Ꮡerr.ValueSlot) = cmd.Output();
                 if (Ꮡerr.ValueSlot != nil) {
-                    {
-                        var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len(ee.Stderr) > 0) {
-                            Ꮡerr.ValueSlot = errors.New((@string)ee.Stderr);
-                        }
+                    var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len(ee.Stderr) > 0) {
+                        Ꮡerr.ValueSlot = errors.New((@string)ee.Stderr);
                     }
                     return;
                 }

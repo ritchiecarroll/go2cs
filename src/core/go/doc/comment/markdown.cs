@@ -61,12 +61,10 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
     case ж<Heading> xΔ1: {
         @out.WriteString(p.headingPrefix);
         Ꮡp.text(Ꮡout, xΔ1.Text);
-        {
-            @string id = p.headingID(xΔ1); if (id != ""u8) {
-                @out.WriteString(" {#");
-                @out.WriteString(id);
-                @out.WriteString("}");
-            }
+        @string id = p.headingID(xΔ1); if (id != ""u8) {
+            @out.WriteString(" {#");
+            @out.WriteString(id);
+            @out.WriteString("}");
         }
         @out.WriteString("\n");
         break;
@@ -90,14 +88,12 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
             if (i > 0 && loose) {
                 @out.WriteString("\n");
             }
-            {
-                @string n = item.Number; if (n != ""u8) {
-                    @out.WriteString(" ");
-                    @out.WriteString(n);
-                    @out.WriteString(". ");
-                } else {
-                    @out.WriteString("  - "); // SP SP - SP
-                }
+            @string n = item.Number; if (n != ""u8) {
+                @out.WriteString(" ");
+                @out.WriteString(n);
+                @out.WriteString(". ");
+            } else {
+                @out.WriteString("  - "); // SP SP - SP
             }
             foreach (var (iΔ1, blk) in item.Content) {
                 @string fourSpace = fourSpaceᶜ;

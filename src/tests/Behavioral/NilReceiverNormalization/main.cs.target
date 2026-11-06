@@ -77,10 +77,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("recovered");
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("recovered");
                 }
             }, ref ᒐ);
             fmt.Println(nilLocʗ1.firstUseReads());

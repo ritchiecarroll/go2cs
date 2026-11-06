@@ -102,18 +102,14 @@ public static void TestHashWithoutClone(ж<testing.T> t, Func<hash.Hash> mh) {
             }
 
             // Check that the appended sum wasn't affected by the prefix
-            {
-                var expectedSum = getSum(tΔ1, h, default); if (!bytes.Equal(sum.slice(len(prefix)), expectedSum)) {
-                    tΔ1.Errorf("Sum behavior affected by data in the input buffer; got %x, want %x", sum.slice(len(prefix)), expectedSum);
-                }
+            var expectedSum = getSum(tΔ1, h, default); if (!bytes.Equal(sum.slice(len(prefix)), expectedSum)) {
+                tΔ1.Errorf("Sum behavior affected by data in the input buffer; got %x, want %x", sum.slice(len(prefix)), expectedSum);
             }
 
             // Check size of append
-            {
-                nint got = len(sum) - len(prefix);
-                nint want = h.Size(); if (got != want) {
-                    tΔ1.Errorf("Sum appends number of bytes != Size; got %v , want %v", got, want);
-                }
+            nint got = len(sum) - len(prefix);
+            nint want = h.Size(); if (got != want) {
+                tΔ1.Errorf("Sum appends number of bytes != Size; got %v , want %v", got, want);
             }
         }
     });

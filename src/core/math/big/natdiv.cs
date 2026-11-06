@@ -912,15 +912,13 @@ internal static void divRecursiveStep(this Δnat z, ж<stack> Ꮡstk, Δnat u, �
         qhatv = qhatv.mul(Ꮡstk, qhat, v.slice(0, s));
         // Set the correct remainder as before.
         for (nint i = 0; i < 2; i++) {
-            {
-                nint e = qhatv.cmp(u.norm()); if (e > 0) {
-                    subVW(qhat, qhat, 1);
-                    Word cΔ3 = subVV(qhatv.slice(0, s), qhatv.slice(0, s), v.slice(0, s));
-                    if (len(qhatv) > s) {
-                        subVW(qhatv.slice(s), qhatv.slice(s), cΔ3);
-                    }
-                    addTo(u.slice(s), v.slice(s));
+            nint e = qhatv.cmp(u.norm()); if (e > 0) {
+                subVW(qhat, qhat, 1);
+                Word cΔ3 = subVV(qhatv.slice(0, s), qhatv.slice(0, s), v.slice(0, s));
+                if (len(qhatv) > s) {
+                    subVW(qhatv.slice(s), qhatv.slice(s), cΔ3);
                 }
+                addTo(u.slice(s), v.slice(s));
             }
         }
         if (qhatv.cmp(u.norm()) > 0) {

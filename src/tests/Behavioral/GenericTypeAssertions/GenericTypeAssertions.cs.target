@@ -24,18 +24,14 @@ public static any GetValue(nint index) {
 internal static void Main() {
     var value = GetValue(0);
 
-    {
-        var (intBox, ok) = value._<Box<nint>>(ᐧ); if (ok) {
-            fmt.Printf("Found an int box with value: %d\n"u8, intBox.Value);
-        }
+    if (value._<Box<nint>>(out var intBox)) {
+        fmt.Printf("Found an int box with value: %d\n"u8, intBox.Value);
     }
 
-    {
-        var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok) {
-            fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
-        } else {
-            fmt.Println("Not a string box");
-        }
+    if (value._<Box<@string>>(out var strBox)) {
+        fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
+    } else {
+        fmt.Println("Not a string box");
     }
 
     var switchᴛ1 = GetValue(1);

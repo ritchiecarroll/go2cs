@@ -107,11 +107,9 @@ internal static void init(this ref gccgoDirs gd) {
     @string prefix = prefixᶜ;
     slice<@string> dirs = default;
     foreach (var (_, dirEntry) in dirsEntries) {
-        {
-            var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
-                dirs = filepath.SplitList(after);
-                break;
-            }
+        var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
+            dirs = filepath.SplitList(after);
+            break;
         }
     }
     if (len(dirs) == 0) {
@@ -125,10 +123,8 @@ internal static void init(this ref gccgoDirs gd) {
             var (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
                 gd.dirs = append(gd.dirs, goDir);
                 goDir = filepath.Join(goDir, machine);
-                {
-                    (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
-                        gd.dirs = append(gd.dirs, goDir);
-                    }
+                (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
+                    gd.dirs = append(gd.dirs, goDir);
                 }
             }
         }
@@ -170,10 +166,8 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
 
     foreach (var (_, dir) in gd.dirs) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
-        {
-            var (fi, err) = os.Stat(full); if (err == nil && !fi.IsDir()) {
-                return true;
-            }
+        var (fi, err) = os.Stat(full); if (err == nil && !fi.IsDir()) {
+            return true;
         }
     }
 

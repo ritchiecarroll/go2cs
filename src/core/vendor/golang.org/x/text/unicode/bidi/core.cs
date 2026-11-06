@@ -99,25 +99,17 @@ partial struct paragraph {
 // may be supplied to encode embedding levels of styled text.
 internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<bracketType> pairTypes, slice<rune> pairValues, level levels) {
     error err = default;
-    {
-        err = validateTypes(types); if (err != nil) {
-            return (default, err);
-        }
+    err = validateTypes(types); if (err != nil) {
+        return (default, err);
     }
-    {
-        err = validatePbTypes(pairTypes); if (err != nil) {
-            return (default, err);
-        }
+    err = validatePbTypes(pairTypes); if (err != nil) {
+        return (default, err);
     }
-    {
-        err = validatePbValues(pairValues, pairTypes); if (err != nil) {
-            return (default, err);
-        }
+    err = validatePbValues(pairValues, pairTypes); if (err != nil) {
+        return (default, err);
     }
-    {
-        err = validateParagraphEmbeddingLevel(levels); if (err != nil) {
-            return (default, err);
-        }
+    err = validateParagraphEmbeddingLevel(levels); if (err != nil) {
+        return (default, err);
     }
 
     var p = Ꮡ(new paragraph(
@@ -221,27 +213,21 @@ internal static void determineMatchingIsolates(this ref paragraph p) {
     foreach (var i in range(p.matchingPDI)) {
         p.matchingPDI[i] = -1;
 
-        {
-            ΔClass t = p.resultTypes[i]; if (t.@in(LRI, RLI, FSI)) {
-                nint depthCounter = 1;
-                for (nint j = i + 1; j < p.Len(); j++) {
-                    {
-                        ΔClass u = p.resultTypes[j]; if (u.@in(LRI, RLI, FSI)) {
-                            depthCounter++;
-                        } else if (u == PDI) {
-                            {
-                                depthCounter--; if (depthCounter == 0) {
-                                    p.matchingPDI[i] = j;
-                                    p.matchingIsolateInitiator[j] = i;
-                                    break;
-                                }
-                            }
-                        }
+        ΔClass t = p.resultTypes[i]; if (t.@in(LRI, RLI, FSI)) {
+            nint depthCounter = 1;
+            for (nint j = i + 1; j < p.Len(); j++) {
+                ΔClass u = p.resultTypes[j]; if (u.@in(LRI, RLI, FSI)) {
+                    depthCounter++;
+                } else if (u == PDI) {
+                    depthCounter--; if (depthCounter == 0) {
+                        p.matchingPDI[i] = j;
+                        p.matchingIsolateInitiator[j] = i;
+                        break;
                     }
                 }
-                if (p.matchingPDI[i] == -1) {
-                    p.matchingPDI[i] = p.Len();
-                }
+            }
+            if (p.matchingPDI[i] == -1) {
+                p.matchingPDI[i] = p.Len();
             }
         }
     }
@@ -260,15 +246,13 @@ internal static level determineParagraphEmbeddingLevel(this ref paragraph p, nin
 
     // Rule P2.
     for (nint i = start; i < end; i++) {
-        {
-            ΔClass t = p.resultTypes[i]; if (t.@in(L, AL, R)) {
-                strongType = t;
-                break;
-            } else if (t.@in(FSI, LRI, RLI)) {
-                i = p.matchingPDI[i]; // skip over to the matching PDI
-                if (i > end) {
-                    log.Panic(assertIEndˢ);
-                }
+        ΔClass t = p.resultTypes[i]; if (t.@in(L, AL, R)) {
+            strongType = t;
+            break;
+        } else if (t.@in(FSI, LRI, RLI)) {
+            i = p.matchingPDI[i]; // skip over to the matching PDI
+            if (i > end) {
+                log.Panic(assertIEndˢ);
             }
         }
     }
@@ -542,13 +526,11 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     foreach (var (i, t) in s.types) {
         if (t == EN) {
             for (nint j = i - 1; j >= 0; j--) {
-                {
-                    ΔClass tΔ1 = s.types[j]; if (tΔ1.@in(L, R, AL)) {
-                        if (tΔ1 == AL) {
-                            s.types[i] = AN;
-                        }
-                        break;
+                ΔClass tΔ1 = s.types[j]; if (tΔ1.@in(L, R, AL)) {
+                    if (tΔ1 == AL) {
+                        s.types[i] = AN;
                     }
+                    break;
                 }
             }
         }

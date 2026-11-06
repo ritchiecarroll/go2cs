@@ -68,10 +68,8 @@ internal static void Main() {
     var i = Ꮡ(new Int());
     i.Label = "int";
     Node ni = new IntжNode(i);
-    {
-        var (bi, okI) = ni._<main_type>(ᐧ); if (okI) {
-            bi.Basic().BitSize = 32;
-        }
+    var (bi, okI) = ni._<main_type>(ᐧ); if (okI) {
+        bi.Basic().BitSize = 32;
     }
     fmt.Println("int after write through promoted pointer:", i.BitSize, i.Label);
 

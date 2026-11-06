@@ -44,11 +44,9 @@ internal static ssState next(this ref streamSafe ss, ΔProperties p) {
         throw panic("streamSafe was not reset");
     }
     var n = p.nLeadingNonStarters();
-    {
-        ss += ((streamSafe)n); if (ss > maxNonStarters) {
-            ss = 0;
-            return ssOverflow;
-        }
+    ss += ((streamSafe)n); if (ss > maxNonStarters) {
+        ss = 0;
+        return ssOverflow;
     }
     // The Stream-Safe Text Processing prescribes that the counting can stop
     // as soon as a starter is encountered. However, there are some starters,
@@ -219,11 +217,9 @@ internal static insertErr iShortSrc => -2;
 internal static insertErr insertFlush(this ж<reorderBuffer> Ꮡrb, input src, nint i, ΔProperties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
-    {
-        var rune = src.hangul(i); if (rune != 0) {
-            rb.decomposeHangul(rune);
-            return iSuccess;
-        }
+    var rune = src.hangul(i); if (rune != 0) {
+        rb.decomposeHangul(rune);
+        return iSuccess;
     }
     if (info.hasDecomposition()) {
         return Ꮡrb.insertDecomposed(info.Decomposition());
@@ -239,10 +235,8 @@ internal static insertErr insertFlush(this ж<reorderBuffer> Ꮡrb, input src, n
 internal static void insertUnsafe(this ж<reorderBuffer> Ꮡrb, input src, nint i, ΔProperties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
-    {
-        var rune = src.hangul(i); if (rune != 0) {
-            rb.decomposeHangul(rune);
-        }
+    var rune = src.hangul(i); if (rune != 0) {
+        rb.decomposeHangul(rune);
     }
     if (info.hasDecomposition()) {
         // TODO: inline.

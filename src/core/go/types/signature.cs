@@ -200,11 +200,9 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         ж<TypeParamList> rparams = default;
         if (ᏑrecvPar != nil && ᏑrecvPar.NumFields() > 0) {
             // We have at least one receiver; make sure we don't have more than one.
-            {
-                nint n = len(recvPar.List); if (n > 1) {
-                    Ꮡcheck.error(new ast_Fieldжpositioner(recvPar.List[n - 1]), InvalidRecv, methodHasMultipleˢ);
-                    // continue with first one
-                }
+            nint n = len(recvPar.List); if (n > 1) {
+                Ꮡcheck.error(new ast_Fieldжpositioner(recvPar.List[n - 1]), InvalidRecv, methodHasMultipleˢ);
+                // continue with first one
             }
             // all type parameters' scopes start after the method name
             tokenꓸPos scopePosΔ1 = ftyp.Pos();
@@ -276,12 +274,10 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         var (a, _) = unpointer(recvType)._<ж<Alias>>(ᐧ); // recvType is not generic per above
         while (a != nil) {
             var baseType = unpointer(a.fromRHS);
-            {
-                var (g, _) = baseType._<ΔgenericType>(ᐧ); if (g != nil && g.TypeParams() != nil) {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on instantiated type %s", g);
-                    recvType = new BasicжΔType(Typ[Invalid]); // avoid follow-on errors by Checker.validRecv
-                    break;
-                }
+            var (g, _) = baseType._<ΔgenericType>(ᐧ); if (g != nil && g.TypeParams() != nil) {
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on instantiated type %s", g);
+                recvType = new BasicжΔType(Typ[Invalid]); // avoid follow-on errors by Checker.validRecv
+                break;
             }
             (a, _) = baseType._<ж<Alias>>(ᐧ);
         }
@@ -291,34 +287,32 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         // parameters (which may have the same name, see below).
         ж<Named> baseType = default; // nil if not valid
         ref var cause = ref heap(new @string(), out var Ꮡcause);
-        {
-            var t = Ꮡcheck.genericType(rbase, Ꮡcause); if (isValid(t)) {
-                switch (t.type()) {
-                case ж<Named> tΔ1: {
-                    baseType = tΔ1;
-                    break;
-                }
-                case ж<Alias> tΔ1: {
-                    // Methods on generic aliases are not permitted.
-                    // Only report an error if the alias type is valid.
-                    if (isValid(new AliasжΔType(tΔ1))) {
-                        Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on generic alias type %s", tΔ1.OrTypedNil());
-                    }
-                    // Ok to continue but do not set basetype in this case so that
-                    // recvType remains invalid (was bug, see go.dev/issue/70417).
-                    break;
-                }
-                default: {
-                    var tΔ1 = t;
-                    throw panic("unreachable");
-                    break;
-                }}
-            } else {
-                if (cause != ""u8) {
-                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "%s", cause);
-                }
-                // Ok to continue but do not set baseType (see comment above).
+        var t = Ꮡcheck.genericType(rbase, Ꮡcause); if (isValid(t)) {
+            switch (t.type()) {
+            case ж<Named> tΔ1: {
+                baseType = tΔ1;
+                break;
             }
+            case ж<Alias> tΔ1: {
+                // Methods on generic aliases are not permitted.
+                // Only report an error if the alias type is valid.
+                if (isValid(new AliasжΔType(tΔ1))) {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on generic alias type %s", tΔ1.OrTypedNil());
+                }
+                // Ok to continue but do not set basetype in this case so that
+                // recvType remains invalid (was bug, see go.dev/issue/70417).
+                break;
+            }
+            default: {
+                var tΔ1 = t;
+                throw panic("unreachable");
+                break;
+            }}
+        } else {
+            if (cause != ""u8) {
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "%s", cause);
+            }
+            // Ok to continue but do not set baseType (see comment above).
         }
 
         // Collect the type parameters declared by the receiver (see also
@@ -377,13 +371,11 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
 
     // Make sure we have no more than one receiver name.
     ж<ast.Ident> rname = default;
-    {
-        nint n = len(rparam.Names); if (n >= 1) {
-            if (n > 1) {
-                Ꮡcheck.error(new ast_Identжpositioner(rparam.Names[n - 1]), InvalidRecv, methodHasMultipleˢ);
-            }
-            rname = rparam.Names[0];
+    nint n = len(rparam.Names); if (n >= 1) {
+        if (n > 1) {
+            Ꮡcheck.error(new ast_Identжpositioner(rparam.Names[n - 1]), InvalidRecv, methodHasMultipleˢ);
         }
+        rname = rparam.Names[0];
     }
 
     // Create the receiver parameter.
@@ -483,15 +475,13 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
     bool anonymous = default;
     foreach (var (i, field) in list.List) {
         var ftype = field.Type;
-        {
-            var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
-                ftype = t.Elt;
-                if (kind == ParamVar && i == len(list.List) - 1 && len(field.Names) <= 1) {
-                    variadic = true;
-                } else {
-                    Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), InvalidSyntaxTree, "invalid use of ...");
-                    // ignore ... and continue
-                }
+        var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
+            ftype = t.Elt;
+            if (kind == ParamVar && i == len(list.List) - 1 && len(field.Names) <= 1) {
+                variadic = true;
+            } else {
+                Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), InvalidSyntaxTree, "invalid use of ...");
+                // ignore ... and continue
             }
         }
         var typ = Ꮡcheck.varType(ftype);

@@ -52,23 +52,19 @@ internal static void initLocal() {
             tz = tz[1..];
         }
         if (tz != ""u8 && tz[0] == '/') {
-            {
-                var (z, err) = loadLocation(tz, slice<@string>([""])); if (err == nil) {
-                    localLoc = z.Value;
-                    if (tz == "/etc/localtime"u8) {
-                        localLoc.name = localˢ;
-                    } else {
-                        localLoc.name = tz;
-                    }
-                    return;
+            var (z, err) = loadLocation(tz, slice<@string>([""])); if (err == nil) {
+                localLoc = z.Value;
+                if (tz == "/etc/localtime"u8) {
+                    localLoc.name = localˢ;
+                } else {
+                    localLoc.name = tz;
                 }
+                return;
             }
         } else if (tz != ""u8 && tz != "UTC"u8) {
-            {
-                var (z, err) = loadLocation(tz, platformZoneSources); if (err == nil) {
-                    localLoc = z.Value;
-                    return;
-                }
+            var (z, err) = loadLocation(tz, platformZoneSources); if (err == nil) {
+                localLoc = z.Value;
+                return;
             }
         }
         break;

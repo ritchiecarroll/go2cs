@@ -467,34 +467,32 @@ public static constant.Value Value(this ж<Decoder> Ꮡr) {
 }
 
 internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
-    {
-        CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
-        switch (tag) {
-        default: {
-            throw panic(fmt.Errorf("unexpected scalar tag: %v"u8, tag));
-            break;
-        }
-        case var ᴛ when ᴛ == ValBool: {
-            return constant.MakeBool(Ꮡr.Bool());
-        }
-        case var ᴛ when ᴛ == ValString: {
-            return constant.MakeString(Ꮡr.String());
-        }
-        case var ᴛ when ᴛ == ValInt64: {
-            return constant.MakeInt64(Ꮡr.Int64());
-        }
-        case var ᴛ when ᴛ == ValBigInt: {
-            return constant.Make(Ꮡr.bigInt().OrTypedNil());
-        }
-        case var ᴛ when ᴛ == ValBigRat: {
-            var num = Ꮡr.bigInt();
-            var denom = Ꮡr.bigInt();
-            return constant.Make(@new<bigꓸRat>().SetFrac(num, denom).OrTypedNil());
-        }
-        case var ᴛ when ᴛ == ValBigFloat: {
-            return constant.Make(Ꮡr.bigFloat().OrTypedNil());
-        }}
+    CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
+    switch (tag) {
+    default: {
+        throw panic(fmt.Errorf("unexpected scalar tag: %v"u8, tag));
+        break;
     }
+    case var ᴛ when ᴛ == ValBool: {
+        return constant.MakeBool(Ꮡr.Bool());
+    }
+    case var ᴛ when ᴛ == ValString: {
+        return constant.MakeString(Ꮡr.String());
+    }
+    case var ᴛ when ᴛ == ValInt64: {
+        return constant.MakeInt64(Ꮡr.Int64());
+    }
+    case var ᴛ when ᴛ == ValBigInt: {
+        return constant.Make(Ꮡr.bigInt().OrTypedNil());
+    }
+    case var ᴛ when ᴛ == ValBigRat: {
+        var num = Ꮡr.bigInt();
+        var denom = Ꮡr.bigInt();
+        return constant.Make(@new<bigꓸRat>().SetFrac(num, denom).OrTypedNil());
+    }
+    case var ᴛ when ᴛ == ValBigFloat: {
+        return constant.Make(Ꮡr.bigFloat().OrTypedNil());
+    }}
 }
 
 internal static ж<bigꓸInt> bigInt(this ж<Decoder> Ꮡr) {

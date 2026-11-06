@@ -21,10 +21,8 @@ partial struct weakCertCache {
 internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> Ꮡwcc, slice<byte> der) {
     {
         var (entry, ok) = Ꮡwcc.of(weakCertCache.ᏑMap).Load((@string)der); if (ok) {
-            {
-                var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
-                    return (v, default);
-                }
+            var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
+                return (v, default);
             }
         }
     }
@@ -42,17 +40,15 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
             runtime.AddCleanup(cert, (any _) => {
                 Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ1, entryʗ1);
             }, (any)((@string)der), new object?[] { Ꮡwcc, entry });
+        } else if (entry._<weak.Pointer<Δx509.Certificate>>().Value() is var v && v != nil) {
+            return (v, default);
         } else {
-            var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
-                return (v, default);
-            } else {
-                if (Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndSwap((@string)der, entry, wp)) {
-                    var derʗ2 = der;
-                    var wpʗ1 = wp;
-                    runtime.AddCleanup(cert, (any _) => {
-                        Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ2, wpʗ1);
-                    }, (any)((@string)der), new object?[] { Ꮡwcc }, new object?[] { wp });
-                }
+            if (Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndSwap((@string)der, entry, wp)) {
+                var derʗ2 = der;
+                var wpʗ1 = wp;
+                runtime.AddCleanup(cert, (any _) => {
+                    Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ2, wpʗ1);
+                }, (any)((@string)der), new object?[] { Ꮡwcc }, new object?[] { wp });
             }
         }
     }

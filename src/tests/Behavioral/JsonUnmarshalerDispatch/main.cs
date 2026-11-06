@@ -11,10 +11,8 @@ partial struct Celsius /*num:float64*/;
 
 public static error UnmarshalJSON(this ref Celsius c, slice<byte> data) {
     ref var f = ref heap(new float64(), out var Ꮡf);
-    {
-        var err = json.Unmarshal(data, Ꮡf); if (err != nil) {
-            return err;
-        }
+    var err = json.Unmarshal(data, Ꮡf); if (err != nil) {
+        return err;
     }
     c = ((Celsius)f) + 100D;
     return default;

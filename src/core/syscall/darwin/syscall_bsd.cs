@@ -287,10 +287,8 @@ internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte>
     }
     msg.Iov = Ꮡiov;
     msg.Iovlen = 1;
-    {
-        (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
-            return (0, err);
-        }
+    (n, err) = sendmsg(fd, Ꮡmsg, flags); if (err != nil) {
+        return (0, err);
     }
     if (len(oob) > 0 && len(p) == 0) {
         n = 0;
@@ -322,10 +320,8 @@ public static (@string value, error err) Sysctl(@string name) {
 
     // Find size.
     ref var n = ref heap<uintptr>((uintptr)0, out var Ꮡn);
-    {
-        err = sysctl(mib, nil, Ꮡn, nil, 0); if (err != nil) {
-            return ("", err);
-        }
+    err = sysctl(mib, nil, Ꮡn, nil, 0); if (err != nil) {
+        return ("", err);
     }
     if (n == 0) {
         return ("", default);
@@ -333,10 +329,8 @@ public static (@string value, error err) Sysctl(@string name) {
 
     // Read into buffer of that size.
     var buf = new slice<byte>((nint)(n));
-    {
-        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
-            return ("", err);
-        }
+    err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
+        return ("", err);
     }
 
     // Throw away terminating NUL.
@@ -358,10 +352,8 @@ public static (uint32 value, error err) SysctlUint32(@string name) {
     // Read into buffer of that size.
     ref var n = ref heap<uintptr>((uintptr)4, out var Ꮡn);
     var buf = new slice<byte>(4);
-    {
-        err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
-            return (0, err);
-        }
+    err = sysctl(mib, Ꮡ(buf, 0), Ꮡn, nil, 0); if (err != nil) {
+        return (0, err);
     }
     if (n != 4) {
         return (0, EIO);

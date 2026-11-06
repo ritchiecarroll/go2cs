@@ -83,11 +83,9 @@ internal static void walkChain(slice<byte> der) {
         defer(ᴛ1 => syscall.CertCloseStore(ᴛ1, 0), store, ref ᒐ);
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
-        {
-            var errΔ1 = syscall.CertAddCertificateContextToStore(store, ctx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx); if (errΔ1 != nil) {
-                fmt.Println("add to store error:", errΔ1);
-                return;
-            }
+        var errΔ1 = syscall.CertAddCertificateContextToStore(store, ctx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx); if (errΔ1 != nil) {
+            fmt.Println("add to store error:", errΔ1);
+            return;
         }
         defer(syscall.CertFreeCertificateContext, storeCtx, ref ᒐ);
 
@@ -105,11 +103,9 @@ internal static void walkChain(slice<byte> der) {
         para.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
 
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
-        {
-            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, storeCtx.Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
-                fmt.Println("get chain error:", errΔ2);
-                return;
-            }
+        var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, storeCtx.Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
+            fmt.Println("get chain error:", errΔ2);
+            return;
         }
         defer(syscall.CertFreeCertificateChain, chainCtx, ref ᒐ);
 
@@ -158,10 +154,8 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> chainCtx, @s
     para.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
 
     ref var status = ref heap<syscall.CertChainPolicyStatus>(new syscall.CertChainPolicyStatus(), out var Ꮡstatus);
-    {
-        var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, chainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
-            return "call error: "u8 + errΔ1.Error();
-        }
+    var errΔ1 = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, chainCtx, para, Ꮡstatus); if (errΔ1 != nil) {
+        return "call error: "u8 + errΔ1.Error();
     }
 
     switch (status.Error) {

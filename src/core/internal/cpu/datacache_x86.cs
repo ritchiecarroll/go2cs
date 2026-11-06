@@ -104,19 +104,15 @@ internal static slice<uintptr> getDataCacheSizesAMD() {
     caches = append(caches, l1dSize);
 
     // Check that L2 cache is present.
-    {
-        var l2Assoc = extractBits(ecx6, 12, 15); if (l2Assoc == 0) {
-            return caches;
-        }
+    var l2Assoc = extractBits(ecx6, 12, 15); if (l2Assoc == 0) {
+        return caches;
     }
     var l2Size = (uintptr)(extractBits(ecx6, 16, 31) << 10);
     caches = append(caches, l2Size);
 
     // Check that L3 cache is present.
-    {
-        var l3Assoc = extractBits(edx6, 12, 15); if (l3Assoc == 0) {
-            return caches;
-        }
+    var l3Assoc = extractBits(edx6, 12, 15); if (l3Assoc == 0) {
+        return caches;
     }
     // Specifies the L3 cache size is within the following range:
     // (L3Size[31:18] * 512KB) <= L3 cache size < ((L3Size[31:18]+1) * 512KB).

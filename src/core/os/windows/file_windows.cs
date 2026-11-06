@@ -202,19 +202,15 @@ internal static error close(this ж<@file> Ꮡfile) {
     if (Ꮡfile == nil) {
         return syscall.EINVAL;
     }
-    {
-        var info = Ꮡfile.Ꮡdirinfo.Swap(nil); if (info != nil) {
-            info.close();
-        }
+    var info = Ꮡfile.Ꮡdirinfo.Swap(nil); if (info != nil) {
+        info.close();
     }
     error err = default;
-    {
-        var e = Ꮡfile.Ꮡpfd.Close(); if (e != nil) {
-            if (AreEqual(e, poll.ErrFileClosing)) {
-                e = ErrClosed;
-            }
-            err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close", Path: @file.name, Err: e)));
+    var e = Ꮡfile.Ꮡpfd.Close(); if (e != nil) {
+        if (AreEqual(e, poll.ErrFileClosing)) {
+            e = ErrClosed;
         }
+        err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close", Path: @file.name, Err: e)));
     }
 
     // no need for a finalizer anymore
@@ -230,12 +226,10 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     int64 ret = default;
     error err = default;
 
-    {
-        var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
-            // Free cached dirinfo, so we allocate a new one if we
-            // access this file as a directory again. See #35767 and #37161.
-            info.close();
-        }
+    var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
+        // Free cached dirinfo, so we allocate a new one if we
+        // access this file as a directory again. See #35767 and #37161.
+        info.close();
     }
     (ret, err) = Ꮡf.of(File.Ꮡpfd).Seek(offset, whence);
     runtime.KeepAlive(Ꮡf.OrTypedNil());
@@ -291,13 +285,9 @@ public static error Remove(@string name) {
             if ((a & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
                 e = e1;
             } else if ((a & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
-                {
-                    e1 = syscall.SetFileAttributes(p, a & ~(uint32)syscall.FILE_ATTRIBUTE_READONLY); if (e1 == nil) {
-                        {
-                            e = syscall.DeleteFile(p); if (e == nil) {
-                                return default;
-                            }
-                        }
+                e1 = syscall.SetFileAttributes(p, a & ~(uint32)syscall.FILE_ATTRIBUTE_READONLY); if (e1 == nil) {
+                    e = syscall.DeleteFile(p); if (e == nil) {
+                        return default;
                     }
                 }
             }
@@ -379,21 +369,17 @@ public static error Symlink(@string oldname, @string newname) {
 
     // need the exact location of the oldname when it's relative to determine if it's a directory
     @string destpath = oldname;
-    {
-        @string v = filepathlite.VolumeName(oldname); if (v == ""u8) {
-            if (len(oldname) > 0 && IsPathSeparator(oldname[0])) {
-                // oldname is relative to the volume containing newname.
-                {
-                    v = filepathlite.VolumeName(newname); if (v != ""u8) {
-                        // Prepend the volume explicitly, because it may be different from the
-                        // volume of the current working directory.
-                        destpath = v + oldname;
-                    }
-                }
-            } else {
-                // oldname is relative to newname.
-                destpath = dirname(newname) + @"\"u8 + oldname;
+    @string v = filepathlite.VolumeName(oldname); if (v == ""u8) {
+        if (len(oldname) > 0 && IsPathSeparator(oldname[0])) {
+            // oldname is relative to the volume containing newname.
+            v = filepathlite.VolumeName(newname); if (v != ""u8) {
+                // Prepend the volume explicitly, because it may be different from the
+                // volume of the current working directory.
+                destpath = v + oldname;
             }
+        } else {
+            // oldname is relative to newname.
+            destpath = dirname(newname) + @"\"u8 + oldname;
         }
     }
 

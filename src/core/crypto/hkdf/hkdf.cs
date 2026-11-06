@@ -30,10 +30,8 @@ public static (slice<byte>, error) Extract<H>(Func<H> h, slice<byte> secret, sli
     where H : hash.Hash
 {
     var fh = fips140hash.UnwrapNew(h);
-    {
-        var err = checkFIPS140Only(fh, secret); if (err != nil) {
-            return (default, err);
-        }
+    var err = checkFIPS140Only(fh, secret); if (err != nil) {
+        return (default, err);
     }
     return (hkdf.Extract(fh, secret, salt), default);
 }
@@ -53,10 +51,8 @@ public static (slice<byte>, error) Expand<H>(Func<H> h, slice<byte> pseudorandom
     where H : hash.Hash
 {
     var fh = fips140hash.UnwrapNew(h);
-    {
-        var err = checkFIPS140Only(fh, pseudorandomKey); if (err != nil) {
-            return (default, err);
-        }
+    var err = checkFIPS140Only(fh, pseudorandomKey); if (err != nil) {
+        return (default, err);
     }
 
     nint limit = fh().Size() * 255;
@@ -74,10 +70,8 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, slice<byte> secret, s
     where Hash : hash.Hash
 {
     var fh = fips140hash.UnwrapNew(h);
-    {
-        var err = checkFIPS140Only(fh, secret); if (err != nil) {
-            return (default, err);
-        }
+    var err = checkFIPS140Only(fh, secret); if (err != nil) {
+        return (default, err);
     }
 
     nint limit = fh().Size() * 255;

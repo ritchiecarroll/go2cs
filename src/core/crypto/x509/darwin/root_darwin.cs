@@ -63,10 +63,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         if (!opts.CurrentTime.IsZero()) {
             var dateRef = macos.TimeToCFDateRef(opts.CurrentTime);
             defer(macos.CFRelease, dateRef, ref ᒐ);
-            {
-                var errΔ2 = macos.SecTrustSetVerifyDate(trustObj, dateRef); if (errΔ2 != nil) {
-                    (chains, err) = (default, errΔ2); goto ᒐdone;
-                }
+            var errΔ2 = macos.SecTrustSetVerifyDate(trustObj, dateRef); if (errΔ2 != nil) {
+                (chains, err) = (default, errΔ2); goto ᒐdone;
             }
         }
 
@@ -75,22 +73,20 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         // always enforce its SCT requirements, and there are still _some_ people
         // using TLS or OCSP for that.
 
-        {
-            var (ret, errΔ3) = macos.SecTrustEvaluateWithError(trustObj); if (errΔ3 != nil) {
-                switch (ret) {
-                case var ᴛ when ᴛ == macos.ErrSecCertificateExpired: {
-                    (chains, err) = (default, new CertificateInvalidError(Ꮡc, Expired, errΔ3.Error())); goto ᒐdone;
-                }
-                case var ᴛ when ᴛ == macos.ErrSecHostNameMismatch: {
-                    (chains, err) = (default, new HostnameError(Ꮡc, opts.DNSName)); goto ᒐdone;
-                }
-                case var ᴛ when ᴛ == macos.ErrSecNotTrusted: {
-                    (chains, err) = (default, new UnknownAuthorityError(Cert: Ꮡc)); goto ᒐdone;
-                }
-                default: {
-                    (chains, err) = (default, fmt.Errorf("x509: %s"u8, errΔ3)); goto ᒐdone;
-                }}
+        var (ret, errΔ3) = macos.SecTrustEvaluateWithError(trustObj); if (errΔ3 != nil) {
+            switch (ret) {
+            case var ᴛ when ᴛ == macos.ErrSecCertificateExpired: {
+                (chains, err) = (default, new CertificateInvalidError(Ꮡc, Expired, errΔ3.Error())); goto ᒐdone;
             }
+            case var ᴛ when ᴛ == macos.ErrSecHostNameMismatch: {
+                (chains, err) = (default, new HostnameError(Ꮡc, opts.DNSName)); goto ᒐdone;
+            }
+            case var ᴛ when ᴛ == macos.ErrSecNotTrusted: {
+                (chains, err) = (default, new UnknownAuthorityError(Cert: Ꮡc)); goto ᒐdone;
+            }
+            default: {
+                (chains, err) = (default, fmt.Errorf("x509: %s"u8, errΔ3)); goto ᒐdone;
+            }}
         }
 
         var chain = slice<slice<ж<Certificate>>>([slice<ж<Certificate>>([])]);
@@ -119,10 +115,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         if (opts.DNSName != ""u8) {
             // If we have a DNS name, apply our own name verification
-            {
-                var errΔ5 = chain[0][0].VerifyHostname(opts.DNSName); if (errΔ5 != nil) {
-                    (chains, err) = (default, errΔ5); goto ᒐdone;
-                }
+            var errΔ5 = chain[0][0].VerifyHostname(opts.DNSName); if (errΔ5 != nil) {
+                (chains, err) = (default, errΔ5); goto ᒐdone;
             }
         }
 

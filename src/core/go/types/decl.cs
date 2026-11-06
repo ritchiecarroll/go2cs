@@ -23,14 +23,12 @@ internal static void declare(this ж<Checker> Ꮡcheck, ж<ΔScope> scope, ж<as
     // identifier but the declaration does not introduce a new
     // binding."
     if (obj.Name() != "_"u8) {
-        {
-            var alt = scope.Insert(obj); if (alt != nil) {
-                var err = Ꮡcheck.newError(DuplicateDecl);
-                err.addf(new Objectᴠpositioner(obj), "%s redeclared in this block", obj.Name());
-                err.addAltDecl(alt);
-                err.report();
-                return;
-            }
+        var alt = scope.Insert(obj); if (alt != nil) {
+            var err = Ꮡcheck.newError(DuplicateDecl);
+            err.addf(new Objectᴠpositioner(obj), "%s redeclared in this block", obj.Name());
+            err.addAltDecl(alt);
+            err.report();
+            return;
         }
         obj.setScopePos(pos);
     }
@@ -65,10 +63,8 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
             check.pushPos((atPos)obj.Pos());
             defer(() => {
                 // If we're panicking, keep stack of source positions.
-                {
-                    var p = recover(); if (p != nil) {
-                        throw panic(p);
-                    }
+                var p = recover(); if (p != nil) {
+                    throw panic(p);
                 }
                 Ꮡcheck.Value.popPos();
             }, ref ᒐ);
@@ -115,41 +111,39 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
         // determining initialization order.
         //
         // TODO(gri) Report cycle here and simplify initialization order code.
-        {
-            var (_, okΔ1) = check.objPathIdx[obj, ꟷ]; if (okΔ1) {
-                switch (obj.type()) {
-                case ж<Const> _:
-                case ж<Var> _: {
-                    var objΔ1 = obj;
-                    if (!Ꮡcheck.validCycle(objΔ1) || objΔ1.Type() == nil) {
-                        objΔ1.setType(new BasicжΔType(Typ[Invalid]));
-                    }
-                    break;
+        var (_, okΔ1) = check.objPathIdx[obj, ꟷ]; if (okΔ1) {
+            switch (obj.type()) {
+            case ж<Const> _:
+            case ж<Var> _: {
+                var objΔ1 = obj;
+                if (!Ꮡcheck.validCycle(objΔ1) || objΔ1.Type() == nil) {
+                    objΔ1.setType(new BasicжΔType(Typ[Invalid]));
                 }
-                case ж<TypeName> objΔ1: {
-                    if (!Ꮡcheck.validCycle(new TypeNameжObject(objΔ1))) {
-                        objΔ1.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
-                    }
-                    break;
-                }
-                case ж<Func> objΔ1: {
-                    if (!Ꮡcheck.validCycle(new FuncжObject(objΔ1))) {
-                        // Don't set type to Typ[Invalid]; plenty of code asserts that
-                        // functions have a *Signature type. Instead, leave the type
-                        // as an empty signature, which makes it impossible to
-                        // initialize a variable with the function.
-                    }
-                    break;
-                }
-                default: {
-                    var objΔ1 = obj;
-                    throw panic("unreachable");
-                    break;
-                }}
-
-                assert(obj.Type() != nil);
-                return;
+                break;
             }
+            case ж<TypeName> objΔ1: {
+                if (!Ꮡcheck.validCycle(new TypeNameжObject(objΔ1))) {
+                    objΔ1.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
+                }
+                break;
+            }
+            case ж<Func> objΔ1: {
+                if (!Ꮡcheck.validCycle(new FuncжObject(objΔ1))) {
+                    // Don't set type to Typ[Invalid]; plenty of code asserts that
+                    // functions have a *Signature type. Instead, leave the type
+                    // as an empty signature, which makes it impossible to
+                    // initialize a variable with the function.
+                }
+                break;
+            }
+            default: {
+                var objΔ1 = obj;
+                throw panic("unreachable");
+                break;
+            }}
+
+            assert(obj.Type() != nil);
+            return;
         }
 
         if (obj.Type() != nil) { // black, meaning it's already type-checked
@@ -278,12 +272,10 @@ loop:
                 if (check.conf._EnableAlias) {
                     alias = objΔ2.IsAlias();
                 } else {
-                    {
-                        var d = check.objMap[new TypeNameжObject(objΔ2)]; if (d != nil) {
-                            alias = d.tdecl.Assign.IsValid(); // package-level object
-                        } else {
-                            alias = objΔ2.IsAlias(); // function local object
-                        }
+                    var d = check.objMap[new TypeNameжObject(objΔ2)]; if (d != nil) {
+                        alias = d.tdecl.Assign.IsValid(); // package-level object
+                    } else {
+                        alias = objΔ2.IsAlias(); // function local object
                     }
                 }
                 if (!alias) {
@@ -362,10 +354,8 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     var (tname, _) = obj._<ж<TypeName>>(ᐧ);
     if (tname != nil) {
         if (check.conf._EnableAlias) {
-            {
-                var (a, ok) = tname.of(TypeName.Ꮡobject).Type()._<ж<Alias>>(ᐧ); if (ok) {
-                    a.fromRHS = new BasicжΔType(Typ[Invalid]);
-                }
+            var (a, ok) = tname.of(TypeName.Ꮡobject).Type()._<ж<Alias>>(ᐧ); if (ok) {
+                a.fromRHS = new BasicжΔType(Typ[Invalid]);
             }
         } else {
             if (tname.IsAlias()) {
@@ -681,10 +671,8 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
 
         ref var rhs = ref heap<ΔType>(out var Ꮡrhs);
         check.later(() => {
-            {
-                var t = asNamed(Ꮡobj.Value.typ); if (t != nil) { // type may be invalid
-                    Ꮡcheck.validType(t);
-                }
+            var t = asNamed(Ꮡobj.Value.typ); if (t != nil) { // type may be invalid
+                Ꮡcheck.validType(t);
             }
             // If typ is local, an error was already reported where typ is specified/defined.
             _ = !versionErr && Ꮡcheck.Value.isImportedConstraint(Ꮡrhs.ValueSlot) && Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(Ꮡtdecl.Value.Type), go1_18, "using type constraint %s", Ꮡrhs.ValueSlot);
@@ -733,11 +721,9 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
 
                 // spec: In an alias declaration the given type cannot be a type parameter declared in the same declaration."
                 // (see also go.dev/issue/75884, go.dev/issue/#75885)
-                {
-                    var (tpar, ok) = rhs._<ж<TypeParam>>(ᐧ); if (ok && alias.tparams != nil && slices.Index(alias.tparams.list(), tpar) >= 0) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢ);
-                        alias.fromRHS = new BasicжΔType(Typ[Invalid]);
-                    }
+                var (tpar, ok) = rhs._<ж<TypeParam>>(ᐧ); if (ok && alias.tparams != nil && slices.Index(alias.tparams.list(), tpar) >= 0) {
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢ);
+                    alias.fromRHS = new BasicжΔType(Typ[Invalid]);
                 }
             } else {
                 // With Go1.23, the default behavior is to use Alias nodes,
@@ -888,10 +874,8 @@ internal static ΔType bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
         x = new ast.InterfaceTypeжExpr(Ꮡ(new ast.InterfaceType(Methods: Ꮡ(new ast.FieldList(List: slice<ж<ast.Field>>([Ꮡ(new ast.Field(Type: x))]))))));
         var t = Ꮡcheck.typ(x);
         // mark t as implicit interface if all went well
-        {
-            var (tΔ1, _) = t._<ж<Interface>>(ᐧ); if (tΔ1 != nil) {
-                tΔ1.@implicit = true;
-            }
+        var (tΔ1, _) = t._<ж<Interface>>(ᐧ); if (tΔ1 != nil) {
+            tΔ1.@implicit = true;
         }
         return t;
     }
@@ -960,15 +944,13 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
         // spec: "For a base type, the non-blank names of methods bound
         // to it must be unique."
         assert(m.name != "_"u8);
-        {
-            var alt = mset.insert(new FuncжObject(m)); if (alt != nil) {
-                if (alt.Pos().IsValid()) {
-                    Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared at %v", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name, alt.Pos());
-                } else {
-                    Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name);
-                }
-                continue;
+        var alt = mset.insert(new FuncжObject(m)); if (alt != nil) {
+            if (alt.Pos().IsValid()) {
+                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared at %v", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name, alt.Pos());
+            } else {
+                Ꮡcheck.errorf(new Funcжpositioner(m), DuplicateMethod, "method %s.%s already declared", Ꮡobj.of(TypeName.Ꮡobject).Name(), m.name);
             }
+            continue;
         }
 
         if (@base != nil) {
@@ -978,33 +960,29 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
 }
 
 internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @base) {
-    {
-        var (t, _) = @base.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
-            objset mset = default;
-            for (nint i = 0; i < @base.NumMethods(); i++) {
-                var m = @base.Method(i);
-                assert(m.name != "_"u8);
-                assert(mset.insert(new FuncжObject(m)) == nil);
-            }
+    var (t, _) = @base.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
+        objset mset = default;
+        for (nint i = 0; i < @base.NumMethods(); i++) {
+            var m = @base.Method(i);
+            assert(m.name != "_"u8);
+            assert(mset.insert(new FuncжObject(m)) == nil);
+        }
 
-            // Check that any non-blank field names of base are distinct from its
-            // method names.
-            foreach (var (_, fld) in t.fields) {
-                if (fld.name != "_"u8) {
-                    {
-                        var alt = mset.insert(new VarжObject(fld)); if (alt != nil) {
-                            // Struct fields should already be unique, so we should only
-                            // encounter an alternate via collision with a method name.
-                            _ = alt._<ж<Func>>();
+        // Check that any non-blank field names of base are distinct from its
+        // method names.
+        foreach (var (_, fld) in t.fields) {
+            if (fld.name != "_"u8) {
+                var alt = mset.insert(new VarжObject(fld)); if (alt != nil) {
+                    // Struct fields should already be unique, so we should only
+                    // encounter an alternate via collision with a method name.
+                    _ = alt._<ж<Func>>();
 
-                            // For historical consistency, we report the primary error on the
-                            // method, and the alt decl on the field.
-                            var err = Ꮡcheck.newError(DuplicateFieldAndMethod);
-                            err.addf(new Objectᴠpositioner(alt), "field and method with the same name %s", fld.name);
-                            err.addAltDecl(new VarжObject(fld));
-                            err.report();
-                        }
-                    }
+                    // For historical consistency, we report the primary error on the
+                    // method, and the alt decl on the field.
+                    var err = Ꮡcheck.newError(DuplicateFieldAndMethod);
+                    err.addf(new Objectᴠpositioner(alt), "field and method with the same name %s", fld.name);
+                    err.addAltDecl(new VarжObject(fld));
+                    err.report();
                 }
             }
         }

@@ -10,11 +10,9 @@ internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println("  recovered:", r);
-                    (result, recovered) = (-1, true);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println("  recovered:", r);
+                (result, recovered) = (-1, true);
             }
         }, ref ᒐ);
         result = quo(a, b);
@@ -31,10 +29,8 @@ internal static (nint result, bool recovered) safeMod(nint a, nint b) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    (result, recovered) = (-2, true);
-                }
+            var r = recover(); if (r != nil) {
+                (result, recovered) = (-2, true);
             }
         }, ref ᒐ);
         result = rem(a, b);

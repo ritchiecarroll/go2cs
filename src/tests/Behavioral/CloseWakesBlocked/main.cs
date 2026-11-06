@@ -41,10 +41,8 @@ internal static partial void Main() {
         try {
             var res2ʗ2 = res2ʗ1;
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        res2ʗ2.ᐸꟷ(fmt.Sprintf("sender panicked: %v"u8, r));
-                    }
+                var r = recover(); if (r != nil) {
+                    res2ʗ2.ᐸꟷ(fmt.Sprintf("sender panicked: %v"u8, r));
                 }
             }, ref ᒐ);
             ch2ʗ1.ᐸꟷ(1);
@@ -89,10 +87,8 @@ internal static partial void Main() {
         try {
             var res4ʗ2 = res4ʗ1;
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
-                    }
+                var r = recover(); if (r != nil) {
+                    res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
                 }
             }, ref ᒐ);
             var selᴛ3 = ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ);

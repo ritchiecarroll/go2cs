@@ -756,11 +756,9 @@ internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> �
         // If n is an instance, we may not have yet instantiated all of its methods.
         // Look up the method index in orig, and only instantiate method at the
         // matching index (if any).
-        {
-            nint i = Ꮡn.Origin().methodIndex(name, foldCase); if (i >= 0) {
-                // For instances, m.Method(i) will be different from the orig method.
-                return (i, Ꮡn.Method(i));
-            }
+        nint i = Ꮡn.Origin().methodIndex(name, foldCase); if (i >= 0) {
+            // For instances, m.Method(i) will be different from the orig method.
+            return (i, Ꮡn.Method(i));
         }
     }
     return (-1, default);
@@ -859,33 +857,29 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
         // TODO(markfreeman): Can we handle this in substitution?
         // If the RHS is an interface, we must set the receiver of interface methods
         // to the named type.
-        {
-            var (iface, _) = rhs._<ж<Interface>>(ᐧ); if (iface != nil) {
-                {
-                    var (methods, copied) = replaceRecvType(iface.methods, new NamedжΔType(orig), new NamedжΔType(Ꮡn)); if (copied) {
-                        // If the RHS doesn't use type parameters, it may not have been
-                        // substituted; we need to craft a new interface first.
-                        if (AreEqual(iface, orig.rhs())) {
-                            assert(iface.complete); // otherwise we are copying incomplete data
+        var (iface, _) = rhs._<ж<Interface>>(ᐧ); if (iface != nil) {
+            var (methods, copied) = replaceRecvType(iface.methods, new NamedжΔType(orig), new NamedжΔType(Ꮡn)); if (copied) {
+                // If the RHS doesn't use type parameters, it may not have been
+                // substituted; we need to craft a new interface first.
+                if (AreEqual(iface, orig.rhs())) {
+                    assert(iface.complete); // otherwise we are copying incomplete data
 
-                            var crafted = check.newInterface();
-                            crafted.complete = true;
-                            crafted.@implicit = false;
-                            crafted.embeddeds = iface.embeddeds;
+                    var crafted = check.newInterface();
+                    crafted.complete = true;
+                    crafted.@implicit = false;
+                    crafted.embeddeds = iface.embeddeds;
 
-                            iface = crafted;
-                        }
-                        iface.methods = methods;
-                        iface.tset = default; // recompute type set with new methods
-
-                        // go.dev/issue/61561: We have to complete the interface even without a checker.
-                        if (check == nil) {
-                            iface.typeSet();
-                        }
-
-                        rhs = new InterfaceжΔType(iface); goto ᒐdone;
-                    }
+                    iface = crafted;
                 }
+                iface.methods = methods;
+                iface.tset = default; // recompute type set with new methods
+
+                // go.dev/issue/61561: We have to complete the interface even without a checker.
+                if (check == nil) {
+                    iface.typeSet();
+                }
+
+                rhs = new InterfaceжΔType(iface); goto ᒐdone;
             }
         }
     }
@@ -899,10 +893,8 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
 //
 // TODO(rfindley): eliminate this function or give it a better name.
 internal static ΔType safeUnderlying(ΔType typ) {
-    {
-        var t = asNamed(typ); if (t != nil) {
-            return t.underlying;
-        }
+    var t = asNamed(typ); if (t != nil) {
+        return t.underlying;
     }
     return typ.Underlying();
 }

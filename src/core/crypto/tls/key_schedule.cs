@@ -218,10 +218,8 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this
         return (default, default, err);
     }
     var seed = new slice<byte>(mlkem.SeedSize);
-    {
-        var (_, errΔ1) = io.ReadFull(rand, seed); if (errΔ1 != nil) {
-            return (default, default, errΔ1);
-        }
+    var (_, errΔ1) = io.ReadFull(rand, seed); if (errΔ1 != nil) {
+        return (default, default, errΔ1);
     }
     (priv.mlkem, err) = ke.newMLKEMPrivateKey(seed);
     if (err != nil) {

@@ -148,10 +148,8 @@ internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) {
             var rem = of % 4;
             if (rem != 0) {
                 var pad = 4 - rem;
-                {
-                    var (_, errΔ1) = cdr.mr.Seek(pad, io.SeekCurrent); if (errΔ1 != nil) {
-                        return errΔ1;
-                    }
+                var (_, errΔ1) = cdr.mr.Seek(pad, io.SeekCurrent); if (errΔ1 != nil) {
+                    return errΔ1;
                 }
             }
         }
@@ -213,35 +211,27 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
         if (errv != nil) {
             return errv;
         }
-        {
-            var (_, ok) = cdr.args[k, ꟷ]; if (ok) {
-                return fmt.Errorf("malformed args table"u8);
-            }
+        var (_, ok) = cdr.args[k, ꟷ]; if (ok) {
+            return fmt.Errorf("malformed args table"u8);
         }
         cdr.args[k] = v;
     }
-    {
-        var (argcs, ok) = cdr.args[argcˢ, ꟷ]; if (ok) {
-            var (argc, errΔ1) = strconv.Atoi(argcs);
-            if (errΔ1 != nil) {
-                return fmt.Errorf("malformed argc in counter data file args section"u8);
-            }
-            cdr.osargs = new slice<@string>(0, argc);
-            for (nint i = 0; i < argc; i++) {
-                @string arg = cdr.args[fmt.Sprintf("argv%d"u8, i)];
-                cdr.osargs = append(cdr.osargs, arg);
-            }
+    if (cdr.args[argcˢ, ꟷ] is (var argcs, true)) {
+        var (argc, errΔ1) = strconv.Atoi(argcs);
+        if (errΔ1 != nil) {
+            return fmt.Errorf("malformed argc in counter data file args section"u8);
+        }
+        cdr.osargs = new slice<@string>(0, argc);
+        for (nint i = 0; i < argc; i++) {
+            @string arg = cdr.args[fmt.Sprintf("argv%d"u8, i)];
+            cdr.osargs = append(cdr.osargs, arg);
         }
     }
-    {
-        var (goos, ok) = cdr.args[goosˢ, ꟷ]; if (ok) {
-            cdr.goos = goos;
-        }
+    if (cdr.args[goosˢ, ꟷ] is (var goos, true)) {
+        cdr.goos = goos;
     }
-    {
-        var (goarch, ok) = cdr.args[goarchˢ, ꟷ]; if (ok) {
-            cdr.goarch = goarch;
-        }
+    if (cdr.args[goarchˢ, ꟷ] is (var goarch, true)) {
+        cdr.goarch = goarch;
     }
     return default;
 }

@@ -60,28 +60,22 @@ internal static (ж<netFD>, error) unixSocket(context.Context ctx, @string net, 
 }
 
 internal static ΔAddr sockaddrToUnix(syscallꓸSockaddr sa) {
-    {
-        var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
-            return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unix")));
-        }
+    var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
+        return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unix")));
     }
     return default;
 }
 
 internal static ΔAddr sockaddrToUnixgram(syscallꓸSockaddr sa) {
-    {
-        var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
-            return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unixgram")));
-        }
+    var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
+        return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unixgram")));
     }
     return default;
 }
 
 internal static ΔAddr sockaddrToUnixpacket(syscallꓸSockaddr sa) {
-    {
-        var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
-            return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unixpacket")));
-        }
+    var (s, ok) = sa._<ж<syscall.SockaddrUnix>>(ᐧ); if (ok) {
+        return new UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: s.Name, Net: "unixpacket")));
     }
     return default;
 }

@@ -53,10 +53,8 @@ public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
 // Close closes the underlying Writer and returns its Close return value, if the Writer
 // is also an io.Closer. Otherwise it returns nil.
 public static error Close(this StreamWriter w) {
-    {
-        var (c, ok) = w.W._<io.Closer>(ᐧ); if (ok) {
-            return c.Close();
-        }
+    var (c, ok) = w.W._<io.Closer>(ᐧ); if (ok) {
+        return c.Close();
     }
     return default;
 }

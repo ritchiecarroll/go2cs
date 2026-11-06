@@ -178,10 +178,8 @@ internal static error rootSymlink(ref Root r, @string oldname, @string newname) 
 // This race condition is unfortunate, but does not permit escaping a root:
 // We may act on the wrong file, but that file will be contained within the root.
 internal static error afterResolvingSymlink(nint parent, @string name, Func<error> f) {
-    {
-        var err = checkSymlink(parent, name, default); if (err != nil) {
-            return err;
-        }
+    var err = checkSymlink(parent, name, default); if (err != nil) {
+        return err;
     }
     return f();
 }
@@ -259,10 +257,8 @@ internal static (FileInfo, error) lstatat(nint parent, @string name) {
 
 internal static (FileInfo, error) lstatatWithName(nint parent, @string origName, @string name) {
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
-    {
-        var err = unix.Fstatat(parent, name, Ꮡfs.Ꮡsys, unix.AT_SYMLINK_NOFOLLOW); if (err != nil) {
-            return (default, err);
-        }
+    var err = unix.Fstatat(parent, name, Ꮡfs.Ꮡsys, unix.AT_SYMLINK_NOFOLLOW); if (err != nil) {
+        return (default, err);
     }
     fillFileStatFromSys(Ꮡfs, origName);
     return (new fileStatжFileInfo(Ꮡfs), default);

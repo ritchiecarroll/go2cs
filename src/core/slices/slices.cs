@@ -69,10 +69,8 @@ public static nint Compare<S, E>(S s1, S s2)
             return +1;
         }
         var v2 = s2[i];
-        {
-            nint c = cmp.Compare(v1, v2); if (c != 0) {
-                return c;
-            }
+        nint c = cmp.Compare(v1, v2); if (c != 0) {
+            return c;
         }
     }
     if (len(s1) < len(s2)) {
@@ -95,10 +93,8 @@ public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> 
             return +1;
         }
         var v2 = s2[i];
-        {
-            nint c = cmp(v1, v2); if (c != 0) {
-                return c;
-            }
+        nint c = cmp(v1, v2); if (c != 0) {
+            return c;
         }
     }
     if (len(s1) < len(s2)) {
@@ -275,11 +271,9 @@ public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
     }
     // Don't start copying elements until we find one to delete.
     for (nint j = i + 1; j < len(s); j++) {
-        {
-            var v = s[j]; if (!del(v)) {
-                s[i] = v;
-                i++;
-            }
+        var v = s[j]; if (!del(v)) {
+            s[i] = v;
+            i++;
         }
     }
     clear(subslice<S, E>(s, i)); // zero/nil out the obsolete elements, for GC
@@ -467,11 +461,9 @@ public static S Grow<S, E>(S s, nint n)
     if (n < 0) {
         throw panic("cannot be negative");
     }
-    {
-        n -= cap(s) - len(s); if (n > 0) {
-            // This expression allocates only once (see test).
-            s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
-        }
+    n -= cap(s) - len(s); if (n > 0) {
+        // This expression allocates only once (see test).
+        s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸꓸꓸ<E>(n)), 0, len(s));
     }
     return s;
 }

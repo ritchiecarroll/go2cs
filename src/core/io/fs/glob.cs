@@ -43,23 +43,17 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
     if (depth > pathSeparatorsLimit) {
         return (default, path.ErrBadPattern);
     }
-    {
-        var (fsysΔ1, ok) = fsys._<GlobFS>(ᐧ); if (ok) {
-            return fsysΔ1.Glob(pattern);
-        }
+    var (fsysΔ1, ok) = fsys._<GlobFS>(ᐧ); if (ok) {
+        return fsysΔ1.Glob(pattern);
     }
 
     // Check pattern is well-formed.
-    {
-        var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     if (!hasMeta(pattern)) {
-        {
-            (_, err) = Stat(fsys, pattern); if (err != nil) {
-                return (default, default);
-            }
+        (_, err) = Stat(fsys, pattern); if (err != nil) {
+            return (default, default);
         }
         return (slice<@string>([pattern]), default);
     }

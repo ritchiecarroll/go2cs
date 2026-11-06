@@ -223,10 +223,8 @@ internal static int64 calcSize(this ref parser p, ж<Regexp> Ꮡre, bool force) 
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
-        {
-            var (sizeΔ1, ok) = p.size[Ꮡre, ꟷ]; if (ok) {
-                return sizeΔ1;
-            }
+        var (sizeΔ1, ok) = p.size[Ꮡre, ꟷ]; if (ok) {
+            return sizeΔ1;
         }
     }
 
@@ -299,10 +297,8 @@ internal static nint calcHeight(this ref parser p, ж<Regexp> Ꮡre, bool force)
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
-        {
-            var (hΔ1, ok) = p.height[Ꮡre, ꟷ]; if (ok) {
-                return hΔ1;
-            }
+        var (hΔ1, ok) = p.height[Ꮡre, ꟷ]; if (ok) {
+            return hΔ1;
         }
     }
     nint h = 1;
@@ -937,34 +933,30 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover();
-                switch (r) {
-                default: {
-                    throw panic(r);
-                    break;
-                }
-                case var ᴛ when AreEqual(ᴛ, default): {
-                    // ok
-                    break;
-                }
-                case var ᴛ when AreEqual(ᴛ, ErrLarge): { // too big
-                    err = new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrLarge, Expr: s)));
-                    break;
-                }
-                case var ᴛ when AreEqual(ᴛ, ErrNestingDepth): {
-                    err = new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrNestingDepth, Expr: s)));
-                    break;
-                }}
+            var r = recover();
+            switch (r) {
+            default: {
+                throw panic(r);
+                break;
             }
+            case var ᴛ when AreEqual(ᴛ, default): {
+                // ok
+                break;
+            }
+            case var ᴛ when AreEqual(ᴛ, ErrLarge): { // too big
+                err = new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrLarge, Expr: s)));
+                break;
+            }
+            case var ᴛ when AreEqual(ᴛ, ErrNestingDepth): {
+                err = new ΔErrorжerror(Ꮡ(new ΔError(Code: ErrNestingDepth, Expr: s)));
+                break;
+            }}
         }, ref ᒐ);
 
         if ((Flags)(flags & Literal) != 0) {
             // Trivial parser for literal string.
-            {
-                var errΔ1 = checkUTF8(s); if (errΔ1 != nil) {
-                    (_ᴛ1, err) = (default, errΔ1); goto ᒐdone;
-                }
+            var errΔ1 = checkUTF8(s); if (errΔ1 != nil) {
+                (_ᴛ1, err) = (default, errΔ1); goto ᒐdone;
             }
             (_ᴛ1, err) = (literalRegexp(s, flags), default); goto ᒐdone;
         }
@@ -982,10 +974,8 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
 BigSwitch:
             switch (t[0]) {
             default: {
-                {
-                    (c, t, err) = nextRune(t); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                (c, t, err) = nextRune(t); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 p.literal(c);
                 break;
@@ -993,10 +983,8 @@ BigSwitch:
             case (byte)'(': {
                 if ((Flags)(p.flags & PerlX) != 0 && len(t) >= 2 && t[1] == '?') {
                     // Flag changes and non-capturing groups.
-                    {
-                        (t, err) = p.parsePerlFlags(t); if (err != nil) {
-                            (_ᴛ1, err) = (default, err); goto ᒐdone;
-                        }
+                    (t, err) = p.parsePerlFlags(t); if (err != nil) {
+                        (_ᴛ1, err) = (default, err); goto ᒐdone;
                     }
                     break;
                 }
@@ -1011,10 +999,8 @@ BigSwitch:
                 break;
             }
             case (byte)')': {
-                {
-                    err = p.parseRightParen(); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                err = p.parseRightParen(); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 t = t[1..];
                 break;
@@ -1047,10 +1033,8 @@ BigSwitch:
                 break;
             }
             case (byte)'[': {
-                {
-                    (t, err) = Ꮡp.parseClass(t); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                (t, err) = Ꮡp.parseClass(t); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 break;
             }
@@ -1070,10 +1054,8 @@ BigSwitch:
                     break;
                 }}
                 @string afterΔ1 = t[1..];
-                {
-                    (afterΔ1, err) = p.repeat(op, 0, 0, before, afterΔ1, lastRepeat); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                (afterΔ1, err) = p.repeat(op, 0, 0, before, afterΔ1, lastRepeat); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 repeat = before;
                 t = afterΔ1;
@@ -1093,10 +1075,8 @@ BigSwitch:
                     // Numbers were too big, or max is present and min > max.
                     (_ᴛ1, err) = (default, new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidRepeatSize, before.slice(0, len(before) - len(after)))))); goto ᒐdone;
                 }
-                {
-                    (after, err) = p.repeat(op, min, max, before, after, lastRepeat); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                (after, err) = p.repeat(op, min, max, before, after, lastRepeat); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 repeat = before;
                 t = after;
@@ -1179,10 +1159,8 @@ BigSwitch:
                 p.reuse(re);
 
                 // Ordinary single-character escape.
-                {
-                    (c, t, err) = p.parseEscape(t); if (err != nil) {
-                        (_ᴛ1, err) = (default, err); goto ᒐdone;
-                    }
+                (c, t, err) = p.parseEscape(t); if (err != nil) {
+                    (_ᴛ1, err) = (default, err); goto ᒐdone;
                 }
                 p.literal(c);
                 break;
@@ -1223,10 +1201,8 @@ internal static (nint min, nint max, @string rest, bool ok) parseRepeat(this ref
     }
     s = s[1..];
     bool ok1 = default;
-    {
-        (min, s, ok1) = p.parseInt(s); if (!ok1) {
-            return (min, max, rest, ok);
-        }
+    (min, s, ok1) = p.parseInt(s); if (!ok1) {
+        return (min, max, rest, ok);
     }
     if (s == ""u8) {
         return (min, max, rest, ok);
@@ -1293,20 +1269,16 @@ internal static (@string rest, error err) parsePerlFlags(this ref parser p, @str
         // Pull out name.
         nint end = strings.IndexRune(t, '>');
         if (end < 0) {
-            {
-                err = checkUTF8(t); if (err != nil) {
-                    return ("", err);
-                }
+            err = checkUTF8(t); if (err != nil) {
+                return ("", err);
             }
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidNamedCapture, s))));
         }
 
         ref var capture = ref heap<@string>(t.slice(0, end + 1), out var Ꮡcapture); // "(?P<name>" or "(?<name>"
         @string name = t.slice(exprStartPos, end);                                  // "name"
-        {
-            err = checkUTF8(name); if (err != nil) {
-                return ("", err);
-            }
+        err = checkUTF8(name); if (err != nil) {
+            return ("", err);
         }
         if (!isValidCaptureName(name)) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidNamedCapture, capture))));
@@ -1328,10 +1300,8 @@ internal static (@string rest, error err) parsePerlFlags(this ref parser p, @str
     var sawFlag = false;
 Loop:
     while (t != ""u8) {
-        {
-            (c, t, err) = nextRune(t); if (err != nil) {
-                return ("", err);
-            }
+        (c, t, err) = nextRune(t); if (err != nil) {
+            return ("", err);
         }
         switch (c) {
         default: {
@@ -1648,10 +1618,8 @@ Switch:
             if (t == ""u8) {
                 break;
             }
-            {
-                (c, t, err) = nextRune(t); if (err != nil) {
-                    return (0, "", err);
-                }
+            (c, t, err) = nextRune(t); if (err != nil) {
+                return (0, "", err);
             }
             if (c == '{') {
                 // Any number of digits in braces.
@@ -1664,10 +1632,8 @@ Switch:
                     if (t == ""u8) {
                         goto break_Switch;
                     }
-                    {
-                        (c, t, err) = nextRune(t); if (err != nil) {
-                            return (0, "", err);
-                        }
+                    (c, t, err) = nextRune(t); if (err != nil) {
+                        return (0, "", err);
                     }
                     if (c == '}') {
                         break;
@@ -1690,10 +1656,8 @@ Switch:
 
             // Easy case: two hex digits.
             var x = unhex(c);
-            {
-                (c, t, err) = nextRune(t); if (err != nil) {
-                    return (0, "", err);
-                }
+            (c, t, err) = nextRune(t); if (err != nil) {
+                return (0, "", err);
             }
             var y = unhex(c);
             if (x < 0 || y < 0) {
@@ -1941,11 +1905,9 @@ internal static (ж<unicode.RangeTable> tab, ж<unicode.RangeTable> fold, nint s
     // (they are defined that way by Unicode), but we want to match ignoring
     // the underscores, so make our own map with canonical names.
     ᏑcategoryAliases.of(categoryAliasesᴛ1.Ꮡonce).Do(initCategoryAliases);
-    {
-        @string actual = categoryAliases.m[name]; if (actual != ""u8) {
-            var t = unicode.Categories[actual];
-            return (t, unicode.FoldCategory[actual], +1);
-        }
+    @string actual = categoryAliases.m[name]; if (actual != ""u8) {
+        var t = unicode.Categories[actual];
+        return (t, unicode.FoldCategory[actual], +1);
     }
     return (default, default, 0);
 }
@@ -1983,19 +1945,15 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(th
         // Name is in braces.
         nint end = strings.IndexRune(s, '}');
         if (end < 0) {
-            {
-                err = checkUTF8(s); if (err != nil) {
-                    return (@out, rest, err);
-                }
+            err = checkUTF8(s); if (err != nil) {
+                return (@out, rest, err);
             }
             return (default, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidCharRange, s))));
         }
         (seq, t) = (s.slice(0, end + 1), s.slice(end + 1));
         name = s.slice(3, end);
-        {
-            err = checkUTF8(name); if (err != nil) {
-                return (@out, rest, err);
-            }
+        err = checkUTF8(name); if (err != nil) {
+            return (@out, rest, err);
         }
     }
 
@@ -2104,19 +2062,15 @@ internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @stri
         ref var rng = ref heap<@string>(t, out var Ꮡrng);
         rune lo = default;
         rune hi = default;
-        {
-            (lo, t, errΔ2) = p.parseClassChar(t, s); if (errΔ2 != nil) {
-                return ("", errΔ2);
-            }
+        (lo, t, errΔ2) = p.parseClassChar(t, s); if (errΔ2 != nil) {
+            return ("", errΔ2);
         }
         hi = lo;
         // [a-] means (a|-) so check for final ].
         if (len(t) >= 2 && t[0] == '-' && t[1] != ']') {
             t = t[1..];
-            {
-                (hi, t, errΔ2) = p.parseClassChar(t, s); if (errΔ2 != nil) {
-                    return ("", errΔ2);
-                }
+            (hi, t, errΔ2) = p.parseClassChar(t, s); if (errΔ2 != nil) {
+                return ("", errΔ2);
             }
             if (hi < lo) {
                 rng = rng.slice(0, len(rng) - len(t));

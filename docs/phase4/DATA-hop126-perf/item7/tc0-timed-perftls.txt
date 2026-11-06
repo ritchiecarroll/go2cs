@@ -1,0 +1,94 @@
+PerfTlsHandshake.exe (31164),      14050,       0.07,            "Unknown"!"Unknown"
+PerfTlsHandshake.exe (31164),       1993,       0.01,         kernel32.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       2020,       0.01,         ucrtbase.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       4000,       0.02,       KernelBase.dll!"Unknown"
+PerfTlsHandshake.exe (31164),      27803,       0.15, System.Private.CoreLib.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01, System.Private.CoreLib.dll!System.Threading.Thread::GetThreadStaticsBase 0x0
+PerfTlsHandshake.exe (31164),      12569,       0.07,           clrjit.dll!"Unknown"
+PerfTlsHandshake.exe (31164),     251362,       1.32,          coreclr.dll!"Unknown"
+PerfTlsHandshake.exe (31164),      53909,       0.28,            ntdll.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       1001,       0.01,            golib.dll!go.builtin::appendBuffered 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.GoSizeClasses::RoundUpSize 0x0
+PerfTlsHandshake.exe (31164),        389,       0.00,            golib.dll!go.slice`1[System.Byte]::.ctor 0x0
+PerfTlsHandshake.exe (31164),       2000,       0.01,            golib.dll!go.slice`1[System.Byte]::Append 0x0
+PerfTlsHandshake.exe (31164),       2711,       0.01,            golib.dll!go.slice`1[System.Byte]::Window 0x0
+PerfTlsHandshake.exe (31164),      98785,       0.52,            golib.dll!go.ElementWindow::TryGet 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.StandardBox`1[go.crypto.tls_package+Conn]::get_Value 0x0
+PerfTlsHandshake.exe (31164),      15947,       0.08,            golib.dll!go.ElemRefBox`1[System.UIntPtr]::TryGetElementStorage 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.StandardBox`1[go.crypto.tls_package+Conn]::get_ValueSlot 0x0
+PerfTlsHandshake.exe (31164),        994,       0.01,            golib.dll!go.builtin::AreEqual 0x0
+PerfTlsHandshake.exe (31164),        999,       0.01,            golib.dll!go.builtin::copy 0x0
+PerfTlsHandshake.exe (31164),        989,       0.01,            golib.dll!go.builtin::clear 0x0
+PerfTlsHandshake.exe (31164),      34738,       0.18,            golib.dll!go.slice`1[System.UIntPtr]::.ctor 0x0
+PerfTlsHandshake.exe (31164),       7001,       0.04,            golib.dll!go.GoSliceLimit::ExceedsManagedSpan 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.slice`1[System.Byte]::get_Item 0x0
+PerfTlsHandshake.exe (31164),      16372,       0.09,            golib.dll!go.slice`1[System.UIntPtr]::Window 0x0
+PerfTlsHandshake.exe (31164),       1011,       0.01,            golib.dll!go.slice`1[System.UInt32]::get_Item 0x0
+PerfTlsHandshake.exe (31164),      99337,       0.52,            golib.dll!go.slice`1[System.UIntPtr]::get_Item 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.builtin::_ 0x0
+PerfTlsHandshake.exe (31164),       1994,       0.01,            golib.dll!go.builtin::new 0x0
+PerfTlsHandshake.exe (31164),       1998,       0.01,            golib.dll!go.builtin::max 0x0
+PerfTlsHandshake.exe (31164),      22944,       0.12,            golib.dll!go.builtin::PerfTlsHandshake.exe (31164),       5001,       0.03,            golib.dll!go.StandardBox`1[go.crypto.internal.fips140.bigmod_package+PerfTlsHandshake.exe (31164),       2937,       0.02,            golib.dll!go.StandardBox`1[go.crypto.internal.fips140.hmac_package+HMAC]::get_Value 0x0
+PerfTlsHandshake.exe (31164),       4000,       0.02,            golib.dll!go.StandardBox`1[go.crypto.internal.fips140.edwards25519.field_package+Element]::get_ValueSlot 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.ElemRefBox`1[System.Byte]::get_NamesZeroBase 0x0
+PerfTlsHandshake.exe (31164),       2992,       0.02,            golib.dll!go.PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.ElemRefBox`1[System.Byte]::CanonicalPair 0x0
+PerfTlsHandshake.exe (31164),       2989,       0.02,            golib.dll!go.ElemRefBox`1[System.UIntPtr]::FastIndex 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.slice`1+Enumerator[System.Byte]::get_Current 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,            golib.dll!go.FieldRefBox`1[go.sync.atomic_package+Pointer`1[go.internal.godebug_package+value]]::go.INativeRooted.get_NativeGoFieldAddress 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,       crypto.tls.dll!go.crypto.tls_package::checkKeySize 0x0
+PerfTlsHandshake.exe (31164),        998,       0.01,       crypto.tls.dll!go.crypto.tls_package::sendServerFinished 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,          runtime.dll!go.runtime_package::getg 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,          runtime.dll!go.runtime_package::parkTransition 0x0
+PerfTlsHandshake.exe (31164),      70426,       0.37,           unsafe.dll!go.unsafe_package::Slice 0x0
+PerfTlsHandshake.exe (31164),      22354,       0.12,           unsafe.dll!go.unsafe_package::SpanLength 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.sha256.dll!go.crypto.internal.fips140.sha256_package::checkSum 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.sha256.dll!go.crypto.internal.fips140.sha256_package+Digest::.ctor 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.sha256.dll!go.crypto.internal.fips140.sha256_package::Write 0x0
+PerfTlsHandshake.exe (31164),      14756,       0.08, crypto.internal.fips140.sha256.dll!go.crypto.internal.fips140.sha256_package::blockGeneric 0x0
+PerfTlsHandshake.exe (31164),       1003,       0.01, crypto.internal.fips140.hmac.dll!go.crypto.internal.fips140.hmac_package::New 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.aes.dll!go.crypto.internal.fips140.aes_package::expandKeyGeneric 0x0
+PerfTlsHandshake.exe (31164),      15411,       0.08, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::addMul19 0x0
+PerfTlsHandshake.exe (31164),       9034,       0.05, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::addMul 0x0
+PerfTlsHandshake.exe (31164),       6000,       0.03, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::addMul38 0x0
+PerfTlsHandshake.exe (31164),       2000,       0.01, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::Add 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::mul 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::Mult32 0x0
+PerfTlsHandshake.exe (31164),       3000,       0.02, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::Subtract 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::Multiply 0x0
+PerfTlsHandshake.exe (31164),      34840,       0.18, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::feMulGeneric 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::carryPropagate 0x0
+PerfTlsHandshake.exe (31164),      14125,       0.07, crypto.internal.fips140.edwards25519.field.dll!go.crypto.internal.fips140.edwards25519.field_package::feSquareGeneric 0x0
+PerfTlsHandshake.exe (31164),       1003,       0.01, crypto.internal.fips140.aes.gcm.dll!go.crypto.internal.fips140.aes.gcm_package::ghashMul 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.aes.gcm.dll!go.crypto.internal.fips140.aes.gcm_package::Seal 0x0
+PerfTlsHandshake.exe (31164),       1015,       0.01, crypto.internal.fips140.aes.gcm.dll!go.crypto.internal.fips140.aes.gcm_package::newGCM 0x0
+PerfTlsHandshake.exe (31164),     352204,       1.85, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::addMulVVW 0x0
+PerfTlsHandshake.exe (31164),      21556,       0.11, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::assign 0x0
+PerfTlsHandshake.exe (31164),       1002,       0.01, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::reset 0x0
+PerfTlsHandshake.exe (31164),       4023,       0.02, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::NewNat 0x0
+PerfTlsHandshake.exe (31164),      17602,       0.09, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::shiftIn 0x0
+PerfTlsHandshake.exe (31164),      45069,       0.24, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::montgomeryMul 0x0
+PerfTlsHandshake.exe (31164),      13821,       0.07, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::addMulVVW1024 0x0
+PerfTlsHandshake.exe (31164),       1003,       0.01, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::Exp 0x0
+PerfTlsHandshake.exe (31164),       9005,       0.05, crypto.internal.fips140.bigmod.dll!go.crypto.internal.fips140.bigmod_package::sub 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, internal.byteorder.dll!go.internal.byteorder_package::BEUint32 0x0
+PerfTlsHandshake.exe (31164),       2000,       0.01, internal.byteorder.dll!go.internal.byteorder_package::BEPutUint32 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01, crypto.internal.fips140.tls13.dll!go.crypto.internal.fips140.tls13_package::ExpandLabel 0x0
+PerfTlsHandshake.exe (31164),       5986,       0.03,        math.bits.dll!go.math.bits_package::Sub 0x0
+PerfTlsHandshake.exe (31164),       6590,       0.03,        math.bits.dll!go.math.bits_package::RotateLeft32 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,        net.netip.dll!go.net.netip_package::parseIPv4 0x0
+PerfTlsHandshake.exe (31164),        992,       0.01,            bytes.dll!go.bytes_package::tryGrowByReslice 0x0
+PerfTlsHandshake.exe (31164),       1000,       0.01,    internal.poll.dll!go.internal.poll_package::convertErr 0x0
+PerfTlsHandshake.exe (31164),        919,       0.00,              net.dll!go.net_package::Write 0x0
+PerfTlsHandshake.exe (31164),       1078,       0.01,           ws2_32.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       2000,       0.01,          mswsock.dll!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01,              fse.sys!"Unknown"
+PerfTlsHandshake.exe (31164),      22102,       0.12,            netio.sys!"Unknown"
+PerfTlsHandshake.exe (31164),     123409,       0.65,         ntoskrnl.exe!"Unknown"
+PerfTlsHandshake.exe (31164),        985,       0.01,           FLTMGR.SYS!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01,             ndis.sys!"Unknown"
+PerfTlsHandshake.exe (31164),      11805,       0.06,            tcpip.sys!"Unknown"
+PerfTlsHandshake.exe (31164),       1815,       0.01,              afd.sys!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01,       win32kfull.sys!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01,         WdNisDrv.sys!"Unknown"
+PerfTlsHandshake.exe (31164),       1005,       0.01,              wtd.sys!"Unknown"
+PerfTlsHandshake.exe (31164),       1000,       0.01,            ipnat.sys!"Unknown"

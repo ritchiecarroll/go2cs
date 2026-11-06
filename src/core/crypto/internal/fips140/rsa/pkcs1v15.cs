@@ -106,12 +106,10 @@ public static error VerifyPKCS1v15(ж<ΔPublicKey> pub, @string hash, slice<byte
 internal static error verifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice<byte> hashed, slice<byte> sig) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    {
-        var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
-            return errΔ1;
-        } else if (!fipsApproved) {
-            fips140.RecordNonApproved();
-        }
+    var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
+        return errΔ1;
+    } else if (!fipsApproved) {
+        fips140.RecordNonApproved();
     }
 
     // RFC 8017 Section 8.2.2: If the length of the signature S is not k

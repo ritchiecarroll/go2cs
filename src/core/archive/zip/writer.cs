@@ -86,10 +86,8 @@ private static readonly @string zipWriterClosedTwiceˢᵇ = "zip: writer closed 
 // It does not close the underlying writer.
 public static error Close(this ref Writer w) {
     if (w.last != nil && !w.last.closed) {
-        {
-            var err = w.last.close(); if (err != nil) {
-                return err;
-            }
+        var err = w.last.close(); if (err != nil) {
+            return err;
         }
         w.last = default;
     }
@@ -169,10 +167,8 @@ public static error Close(this ref Writer w) {
     var size = (uint64)(end - start);
     var offset = (uint64)start;
 
-    {
-        var f = w.testHookCloseSizeOffset; if (f != nil) {
-            f(size, offset);
-        }
+    var f = w.testHookCloseSizeOffset; if (f != nil) {
+        f(size, offset);
     }
 
     if (records >= uint16max || size >= uint32max || offset >= uint32max) {
@@ -197,10 +193,8 @@ public static error Close(this ref Writer w) {
         bΔ2.uint64((uint64)end); // relative offset of the zip64 end of central directory record
         bΔ2.uint32(1);           // total number of disks
 
-        {
-            var (_, err) = w.cw.Write(bufΔ3[..]); if (err != nil) {
-                return err;
-            }
+        var (_, err) = w.cw.Write(bufΔ3[..]); if (err != nil) {
+            return err;
         }
 
         // store max values in the regular end record to signal
@@ -285,10 +279,8 @@ private static readonly @string archiveZipInvalidˢᵇ = "archive/zip: invalid d
 // CreateHeader and CreateRaw.
 internal static error prepare(this ref Writer w, ж<FileHeader> fh) {
     if (w.last != nil && !w.last.closed) {
-        {
-            var err = w.last.close(); if (err != nil) {
-                return err;
-            }
+        var err = w.last.close(); if (err != nil) {
+            return err;
         }
     }
     if (len(w.dir) > 0 && w.dir[len(w.dir) - 1].FileHeader == fh) {
@@ -462,15 +454,11 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     }
     b.uint16((uint16)len(h.Name));
     b.uint16((uint16)len(h.Extra));
-    {
-        var (_, errΔ1) = w.Write(buf[..]); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = w.Write(buf[..]); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var (_, errΔ2) = io.WriteString(w, h.Name); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var (_, errΔ2) = io.WriteString(w, h.Name); if (errΔ2 != nil) {
+        return errΔ2;
     }
     var (_, err) = w.Write(h.Extra);
     return err;
@@ -666,10 +654,8 @@ internal static error close(this ref fileWriter w) {
     if (w.raw) {
         return w.writeDataDescriptor();
     }
-    {
-        var err = w.comp.Close(); if (err != nil) {
-            return err;
-        }
+    var err = w.comp.Close(); if (err != nil) {
+        return err;
     }
 
     // update FileHeader

@@ -71,10 +71,8 @@ internal static error ensureNBits(this ref decoder d, int32 n) {
 // F.2.2.1.
 internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
     if (d.bits.n < (int32)t) {
-        {
-            var err = d.ensureNBits((int32)t); if (err != nil) {
-                return (0, err);
-            }
+        var err = d.ensureNBits((int32)t); if (err != nil) {
+            return (0, err);
         }
     }
     d.bits.n -= (int32)t;
@@ -206,37 +204,31 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
     }
 
     if (d.bits.n < 8) {
-        {
-            var err = d.ensureNBits(8); if (err != nil) {
-                if (!AreEqual(err, errMissingFF00) && !AreEqual(err, errShortHuffmanData)) {
-                    return (0, err);
-                }
-                // There are no more bytes of data in this segment, but we may still
-                // be able to read the next symbol out of the previously read bits.
-                // First, undo the readByte that the ensureNBits call made.
-                if (d.bytes.nUnreadable != 0) {
-                    d.unreadByteStuffedByte();
-                }
-                goto slowPath;
+        var err = d.ensureNBits(8); if (err != nil) {
+            if (!AreEqual(err, errMissingFF00) && !AreEqual(err, errShortHuffmanData)) {
+                return (0, err);
             }
+            // There are no more bytes of data in this segment, but we may still
+            // be able to read the next symbol out of the previously read bits.
+            // First, undo the readByte that the ensureNBits call made.
+            if (d.bytes.nUnreadable != 0) {
+                d.unreadByteStuffedByte();
+            }
+            goto slowPath;
         }
     }
-    {
-        var v = h.lut[((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff)]; if (v != 0) {
-            var n = (uint16)(((uint16)(v & 0xff)) - 1);
-            d.bits.n -= (int32)n;
-            d.bits.m.RshAssign((uint64)(n));
-            return ((uint8)(v >> 8), default);
-        }
+    var v = h.lut[((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff)]; if (v != 0) {
+        var n = (uint16)(((uint16)(v & 0xff)) - 1);
+        d.bits.n -= (int32)n;
+        d.bits.m.RshAssign((uint64)(n));
+        return ((uint8)(v >> 8), default);
     }
 
 slowPath:
     for ((nint i, var code) = (0, (int32)0); i < maxCodeLength; i++) {
         if (d.bits.n == 0) {
-            {
-                var err = d.ensureNBits(1); if (err != nil) {
-                    return (0, err);
-                }
+            var err = d.ensureNBits(1); if (err != nil) {
+                return (0, err);
             }
         }
         if ((d.bits.a & d.bits.m) != 0) {
@@ -256,10 +248,8 @@ break_slowPath:;
 
 internal static (bool, error) decodeBit(this ref decoder d) {
     if (d.bits.n == 0) {
-        {
-            var err = d.ensureNBits(1); if (err != nil) {
-                return (false, err);
-            }
+        var err = d.ensureNBits(1); if (err != nil) {
+            return (false, err);
         }
     }
     var ret = (d.bits.a & d.bits.m) != 0;
@@ -270,10 +260,8 @@ internal static (bool, error) decodeBit(this ref decoder d) {
 
 internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     if (d.bits.n < n) {
-        {
-            var err = d.ensureNBits(n); if (err != nil) {
-                return (0, err);
-            }
+        var err = d.ensureNBits(n); if (err != nil) {
+            return (0, err);
         }
     }
     var ret = d.bits.a.Rsh((uint64)((uint32)(d.bits.n - n)));

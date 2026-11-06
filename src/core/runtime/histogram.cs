@@ -115,14 +115,12 @@ internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
     // bucket for samples lower than the minimum.
     nuint bucketBit = default;
     nuint bucket = default;
-    {
-        nint l = sys.Len64((uint64)duration); if (l < timeHistMinBucketBits) {
-            bucketBit = timeHistMinBucketBits;
-            bucket = 0; // bucketBit - timeHistMinBucketBits
-        } else {
-            bucketBit = (nuint)l;
-            bucket = bucketBit - (nuint)timeHistMinBucketBits + 1;
-        }
+    nint l = sys.Len64((uint64)duration); if (l < timeHistMinBucketBits) {
+        bucketBit = timeHistMinBucketBits;
+        bucket = 0; // bucketBit - timeHistMinBucketBits
+    } else {
+        bucketBit = (nuint)l;
+        bucket = bucketBit - (nuint)timeHistMinBucketBits + 1;
     }
     // If the bucket we computed is greater than the number of buckets,
     // count that in overflow.

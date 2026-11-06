@@ -544,11 +544,9 @@ internal static bool hasPtrRecv(this ref Func obj) {
     // Caution: Checker.funcDecl (decl.go) marks a function by setting its type to an empty
     // signature. We may reach here before the signature is fully set up: we must explicitly
     // check if the receiver is set (we cannot just look for non-nil obj.typ).
-    {
-        var (sig, _) = obj.typ._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.recv != nil) {
-            var (_, isPtr) = deref(sig.recv.typ);
-            return isPtr;
-        }
+    var (sig, _) = obj.typ._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.recv != nil) {
+        var (_, isPtr) = deref(sig.recv.typ);
+        return isPtr;
     }
 
     // If a method's type is not set it may be a method/function that is:
@@ -615,10 +613,8 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
     switch (obj.type()) {
     case ж<PkgName> objΔ1: {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "package %s"u8, objΔ1.of(PkgName.Ꮡobject).Name());
-        {
-            @string path = objΔ1.imported.path; if (path != ""u8 && path != objΔ1.name) {
-                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " (%q)"u8, path);
-            }
+        @string path = objΔ1.imported.path; if (path != ""u8 && path != objΔ1.name) {
+            fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " (%q)"u8, path);
         }
         return;
     }
@@ -697,19 +693,15 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
         }}
         if (tname.IsAlias()) {
             buf.WriteString(" =");
-            {
-                var (alias, ok) = typ._<ж<Alias>>(ᐧ); if (ok) { // materialized? (gotypesalias=1)
-                    typ = alias.fromRHS;
-                }
+            var (alias, ok) = typ._<ж<Alias>>(ᐧ); if (ok) { // materialized? (gotypesalias=1)
+                typ = alias.fromRHS;
             }
+        } else if (typ._<ж<TypeParam>>(ᐧ) is var (t, _) && t != nil) {
+            typ = t.bound;
         } else {
-            var (t, _) = typ._<ж<TypeParam>>(ᐧ); if (t != nil) {
-                typ = t.bound;
-            } else {
-                // TODO(gri) should this be fromRHS for *Named?
-                // (See discussion in #66559.)
-                typ = typ.Underlying();
-            }
+            // TODO(gri) should this be fromRHS for *Named?
+            // (See discussion in #66559.)
+            typ = typ.Underlying();
         }
     }
 
@@ -793,25 +785,21 @@ internal static void writeFuncName(ж<bytes.Buffer> Ꮡbuf, ref Func f, Func<ж<
 
     if (f.typ != nil) {
         var sig = f.typ._<ж<ΔSignature>>();
-        {
-            var recv = sig.Recv(); if (recv != nil) {
-                buf.WriteByte((byte)'(');
-                {
-                    var (_, ok) = recv.of(Var.Ꮡobject).Type()._<ж<Interface>>(ᐧ); if (ok) {
-                        // gcimporter creates abstract methods of
-                        // named interfaces using the interface type
-                        // (not the named type) as the receiver.
-                        // Don't print it in full.
-                        buf.WriteString(interfaceˢ2);
-                    } else {
-                        WriteType(Ꮡbuf, recv.of(Var.Ꮡobject).Type(), qf);
-                    }
-                }
-                buf.WriteByte((byte)')');
-                buf.WriteByte((byte)'.');
-            } else if (f.pkg != nil) {
-                buf.WriteString(packagePrefix(f.pkg, qf));
+        var recv = sig.Recv(); if (recv != nil) {
+            buf.WriteByte((byte)'(');
+            var (_, ok) = recv.of(Var.Ꮡobject).Type()._<ж<Interface>>(ᐧ); if (ok) {
+                // gcimporter creates abstract methods of
+                // named interfaces using the interface type
+                // (not the named type) as the receiver.
+                // Don't print it in full.
+                buf.WriteString(interfaceˢ2);
+            } else {
+                WriteType(Ꮡbuf, recv.of(Var.Ꮡobject).Type(), qf);
             }
+            buf.WriteByte((byte)')');
+            buf.WriteByte((byte)'.');
+        } else if (f.pkg != nil) {
+            buf.WriteString(packagePrefix(f.pkg, qf));
         }
     }
     buf.WriteString(f.name);
@@ -857,12 +845,10 @@ internal static @string objectKind(Object obj) {
     case ж<TypeName> objΔ1: {
         if (objΔ1.IsAlias()) {
             return typeAliasˢ;
+        } else if (objΔ1.of(TypeName.Ꮡobject).Type()._<ж<TypeParam>>(out _)) {
+            return typeParameterˢ;
         } else {
-            var (_, ok) = objΔ1.of(TypeName.Ꮡobject).Type()._<ж<TypeParam>>(ᐧ); if (ok) {
-                return typeParameterˢ;
-            } else {
-                return definedTypeˢ;
-            }
+            return definedTypeˢ;
         }
         break;
     }

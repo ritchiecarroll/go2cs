@@ -299,10 +299,8 @@ Skip:
             if (len(b.cap) > 1) {
                 b.cap[1] = posΔ1;
             }
-            {
-                nint old = b.matchcap[1]; if (old == -1 || (longest && posΔ1 > 0 && posΔ1 > old)) {
-                    copy(b.matchcap, b.cap);
-                }
+            nint old = b.matchcap[1]; if (old == -1 || (longest && posΔ1 > 0 && posΔ1 > old)) {
+                copy(b.matchcap, b.cap);
             }
 
             // If going for first match, we're done.

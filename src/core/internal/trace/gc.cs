@@ -205,10 +205,8 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 ps[(nint)(ev.Proc())].gc++;
             } else if (handleMarkAssist(r)) {
                 ps[(nint)(ev.Proc())].gc++;
-                {
-                    var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
-                        inGC[g] = true;
-                    }
+                var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
+                    inGC[g] = true;
                 }
             }
         }
@@ -220,10 +218,8 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 ps[(nint)(ev.Proc())].gc--;
             } else if (handleMarkAssist(r)) {
                 ps[(nint)(ev.Proc())].gc--;
-                {
-                    var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
-                        delete(inGC, g);
-                    }
+                var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
+                    delete(inGC, g);
                 }
             }
         }
@@ -602,15 +598,13 @@ keep:;
             acc.mud.add(acc.lastMU, mu, (float64)(timeΔ1 - acc.lastTime));
         }
         (acc.lastTime, acc.lastMU) = (timeΔ1, mu);
-        {
-            var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok) {
-                acc.bound = math.Max(acc.bound, mudBound);
-            } else {
-                // We haven't accumulated enough total precise
-                // mass yet to even reach our goal, so keep
-                // accumulating.
-                acc.bound = 1D;
-            }
+        var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok) {
+            acc.bound = math.Max(acc.bound, mudBound);
+        } else {
+            // We haven't accumulated enough total precise
+            // mass yet to even reach our goal, so keep
+            // accumulating.
+            acc.bound = 1D;
         }
         // It's not worth checking percentiles every time, so
         // just keep accumulating this band.
@@ -736,10 +730,8 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         var s = vᴛ1;
 
         windows[i] = window;
-        {
-            var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
-                windows[i] = max;
-            }
+        var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
+            windows[i] = max;
         }
 
         var bandU1 = (bandUtilHeap)s.mkBandUtil(i, windows[i]);
@@ -855,10 +847,8 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
     var left = c.bands[bandIdx].integrator;
     var right = left;
     var (timeΔ1, endTime) = c.bandTime(bandIdx);
-    {
-        var utilEnd = util[len(util) - 1].Time - (int64)window; if (utilEnd < endTime) {
-            endTime = utilEnd;
-        }
+    var utilEnd = util[len(util) - 1].Time - (int64)window; if (utilEnd < endTime) {
+        endTime = utilEnd;
     }
     acc.resetTime();
     for (;;) {
@@ -880,12 +870,10 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
         // Advance the window to the next time where either
         // the left or right edge of the window encounters a
         // change in the utilization curve.
-        {
-            var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2) {
-                timeΔ1 = t1;
-            } else {
-                timeΔ1 = t2;
-            }
+        var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2) {
+            timeΔ1 = t1;
+        } else {
+            timeΔ1 = t2;
         }
         if (timeΔ1 < minTime) {
             timeΔ1 = minTime;

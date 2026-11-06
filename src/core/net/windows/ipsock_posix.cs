@@ -81,10 +81,8 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
             if (errΔ1 != nil) {
                 continue;
             }
-            {
-                var errΔ2 = syscall.Bind(sΔ1, sa); if (errΔ2 != nil) {
-                    continue;
-                }
+            var errΔ2 = syscall.Bind(sΔ1, sa); if (errΔ2 != nil) {
+                continue;
             }
             if (i == 0) {
                 p.ipv6Enabled = true;

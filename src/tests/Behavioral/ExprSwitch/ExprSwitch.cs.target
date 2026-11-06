@@ -101,34 +101,32 @@ internal static void Main() {
     nint hour = 1;
     nint hour1 = time.Now().Hour();
 
-    {
-        nint hourΔ1 = time.Now().Hour();
-        switch (ᐧ) {
-        case {} when hourΔ1 is 1 or < 12 or 2: {
-            fmt.Println("Good morning!");
-            break;
-        }
-        case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4): {
-            fmt.Println("Good morning (opt 2)!");
-            break;
-        }
-        case {} when hourΔ1 is < 17: {
-            fmt.Println("Good afternoon!");
-            break;
-        }
-        case {} when hourΔ1 is 0: {
-            fmt.Println("Midnight!");
-            break;
-        }
-        case {} when hourΔ1 == 0 && hour1 == 1: {
-            fmt.Println("Midnight (opt 2)!");
-            break;
-        }
-        default: {
-            fmt.Println("Good evening!");
-            break;
-        }}
+    nint hourΔ1 = time.Now().Hour();
+    switch (ᐧ) {
+    case {} when hourΔ1 is 1 or < 12 or 2: {
+        fmt.Println("Good morning!");
+        break;
     }
+    case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4): {
+        fmt.Println("Good morning (opt 2)!");
+        break;
+    }
+    case {} when hourΔ1 is < 17: {
+        fmt.Println("Good afternoon!");
+        break;
+    }
+    case {} when hourΔ1 is 0: {
+        fmt.Println("Midnight!");
+        break;
+    }
+    case {} when hourΔ1 == 0 && hour1 == 1: {
+        fmt.Println("Midnight (opt 2)!");
+        break;
+    }
+    default: {
+        fmt.Println("Good evening!");
+        break;
+    }}
 
     fmt.Println(hour);
 
@@ -142,97 +140,91 @@ internal static void Main() {
 
     fmt.Printf("i before = %d\n"u8, i);
 
-    {
-        nint iΔ1 = 1;
-        var exprᴛ2 = getNext();
-        var matchᴛ1 = false;
-        if (exprᴛ2 == -1) { matchᴛ1 = true;
-            fmt.Println("negative");
-        }
-        else if (exprᴛ2 is 0) { matchᴛ1 = true;
-            fmt.Println("zero");
-        }
-        else if (exprᴛ2 is 1 or 2) { matchᴛ1 = true;
-            fmt.Println("one or two");
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1 && exprᴛ2 is 3) { matchᴛ1 = true;
-            fmt.Printf("three, but x=%d "u8, x);
-            fmt.Printf("and i now = %d\n"u8, iΔ1);
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1) { /* default: */
-            fmt.Println("plus, always a default here because of fallthrough");
-        }
+    nint iΔ1 = 1;
+    var exprᴛ2 = getNext();
+    var matchᴛ1 = false;
+    if (exprᴛ2 == -1) { matchᴛ1 = true;
+        fmt.Println("negative");
+    }
+    else if (exprᴛ2 is 0) { matchᴛ1 = true;
+        fmt.Println("zero");
+    }
+    else if (exprᴛ2 is 1 or 2) { matchᴛ1 = true;
+        fmt.Println("one or two");
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && exprᴛ2 is 3) { matchᴛ1 = true;
+        fmt.Printf("three, but x=%d "u8, x);
+        fmt.Printf("and i now = %d\n"u8, iΔ1);
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1) { /* default: */
+        fmt.Println("plus, always a default here because of fallthrough");
     }
 
     fmt.Printf("i after = %d\n"u8, i);
 
-    {
-        var next = getNext();
-        var matchᴛ2 = false;
-        if (next <= -1) { matchᴛ2 = true;
-            fmt.Println("negative");
+    var next = getNext();
+    var matchᴛ2 = false;
+    if (next <= -1) { matchᴛ2 = true;
+        fmt.Println("negative");
 
-            var exprᴛ4 = getNext();
-            var matchᴛ3 = false;
-            if (exprᴛ4 is 1 or 2) { matchᴛ3 = true;
-                fmt.Println("sub0 one or two");
-            }
-            else if (exprᴛ4 is 3) { matchᴛ3 = true;
-                fmt.Println("sub0 three");
-                fallthrough = true;
-            }
-            if (fallthrough || !matchᴛ3) { /* default: */
-                fmt.Println("sub0 default");
-            }
-
+        var exprᴛ4 = getNext();
+        var matchᴛ3 = false;
+        if (exprᴛ4 is 1 or 2) { matchᴛ3 = true;
+            fmt.Println("sub0 one or two");
         }
-        else if (next is 0) { matchᴛ2 = true;
-            fmt.Println("zero");
-
-            {
-                var nextΔ2 = getNext();
-                var matchᴛ4 = false;
-                if (nextΔ2 is 1 or <= 2) { matchᴛ4 = true;
-                    fmt.Println("sub1 one or two");
-                }
-                else if (nextΔ2 is 3) { matchᴛ4 = true;
-                    fmt.Println("sub1 three");
-                    fallthrough = true;
-                }
-                if (fallthrough || !matchᴛ4) { /* default: */
-                    fmt.Println("sub1 default");
-                }
-            }
-
-        }
-        else if (next is 1 or 2) { matchᴛ2 = true;
-            fmt.Println("one or two");
-
-            switch (next) {
-            case 1 or 2: {
-                fmt.Println("sub2 one or two");
-                break;
-            }
-            case 3: {
-                fmt.Println("sub2 three");
-                break;
-            }
-            default: {
-                fmt.Println("sub2 default");
-                break;
-            }}
-
+        else if (exprᴛ4 is 3) { matchᴛ3 = true;
+            fmt.Println("sub0 three");
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2 && (next >= 3 && next < 100)) { matchᴛ2 = true;
-            fmt.Printf("three or greater < 100: %d\n"u8, x);
+        if (fallthrough || !matchᴛ3) { /* default: */
+            fmt.Println("sub0 default");
+        }
+
+    }
+    else if (next is 0) { matchᴛ2 = true;
+        fmt.Println("zero");
+
+        var nextΔ2 = getNext();
+        var matchᴛ4 = false;
+        if (nextΔ2 is 1 or <= 2) { matchᴛ4 = true;
+            fmt.Println("sub1 one or two");
+        }
+        else if (nextΔ2 is 3) { matchᴛ4 = true;
+            fmt.Println("sub1 three");
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2) { /* default: */
-            fmt.Println("plus, always a default here because of fallthrough");
+        if (fallthrough || !matchᴛ4) { /* default: */
+            fmt.Println("sub1 default");
         }
+
+    }
+    else if (next is 1 or 2) { matchᴛ2 = true;
+        fmt.Println("one or two");
+
+        switch (next) {
+        case 1 or 2: {
+            fmt.Println("sub2 one or two");
+            break;
+        }
+        case 3: {
+            fmt.Println("sub2 three");
+            break;
+        }
+        default: {
+            fmt.Println("sub2 default");
+            break;
+        }}
+
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ2 && (next >= 3 && next < 100)) { matchᴛ2 = true;
+        fmt.Printf("three or greater < 100: %d\n"u8, x);
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ2) { /* default: */
+        fmt.Println("plus, always a default here because of fallthrough");
     }
 
     var exprᴛ6 = Foo(2);

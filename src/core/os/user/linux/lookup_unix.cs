@@ -114,33 +114,27 @@ internal static Func<slice<byte>, (any, error)> matchGroupIndexValue(@string val
             parts[0][0] == '+' || parts[0][0] == '-') {
             return (v, err);
         }
-        {
-            var (_, errΔ1) = strconv.Atoi(parts[2]); if (errΔ1 != nil) {
-                return (default, default);
-            }
+        var (_, errΔ1) = strconv.Atoi(parts[2]); if (errΔ1 != nil) {
+            return (default, default);
         }
         return (Ꮡ(new Group(Name: parts[0], Gid: parts[2])), default);
     };
 }
 
 internal static (ж<Group>, error) findGroupId(@string id, io.Reader r) {
-    {
-        var (v, err) = readColonFile(r, matchGroupIndexValue(id, 2), 3); if (err != nil) {
-            return (default, err);
-        } else if (v != nil) {
-            return (v._<ж<Group>>(), default);
-        }
+    var (v, err) = readColonFile(r, matchGroupIndexValue(id, 2), 3); if (err != nil) {
+        return (default, err);
+    } else if (v != nil) {
+        return (v._<ж<Group>>(), default);
     }
     return (default, ((UnknownGroupIdError)id));
 }
 
 internal static (ж<Group>, error) findGroupName(@string name, io.Reader r) {
-    {
-        var (v, err) = readColonFile(r, matchGroupIndexValue(name, 0), 3); if (err != nil) {
-            return (default, err);
-        } else if (v != nil) {
-            return (v._<ж<Group>>(), default);
-        }
+    var (v, err) = readColonFile(r, matchGroupIndexValue(name, 0), 3); if (err != nil) {
+        return (default, err);
+    } else if (v != nil) {
+        return (v._<ж<Group>>(), default);
     }
     return (default, ((UnknownGroupError)name));
 }
@@ -165,15 +159,11 @@ internal static Func<slice<byte>, (any, error)> matchUserIndexValue(@string valu
         if (len(parts) < 6 || parts[idx] != value || parts[0] == "" || parts[0][0] == '+' || parts[0][0] == '-') {
             return (v, err);
         }
-        {
-            var (_, errΔ1) = strconv.Atoi(parts[2]); if (errΔ1 != nil) {
-                return (default, default);
-            }
+        var (_, errΔ1) = strconv.Atoi(parts[2]); if (errΔ1 != nil) {
+            return (default, default);
         }
-        {
-            var (_, errΔ2) = strconv.Atoi(parts[3]); if (errΔ2 != nil) {
-                return (default, default);
-            }
+        var (_, errΔ2) = strconv.Atoi(parts[3]); if (errΔ2 != nil) {
+            return (default, default);
         }
         var u = Ꮡ(new User(
             Username: parts[0],
@@ -196,23 +186,19 @@ internal static (ж<User>, error) findUserId(@string uid, io.Reader r) {
     if (e != nil) {
         return (default, errors.New("user: invalid userid "u8 + uid));
     }
-    {
-        var (v, err) = readColonFile(r, matchUserIndexValue(uid, 2), 6); if (err != nil) {
-            return (default, err);
-        } else if (v != nil) {
-            return (v._<ж<User>>(), default);
-        }
+    var (v, err) = readColonFile(r, matchUserIndexValue(uid, 2), 6); if (err != nil) {
+        return (default, err);
+    } else if (v != nil) {
+        return (v._<ж<User>>(), default);
     }
     return (default, ((UnknownUserIdError)i));
 }
 
 internal static (ж<User>, error) findUsername(@string name, io.Reader r) {
-    {
-        var (v, err) = readColonFile(r, matchUserIndexValue(name, 0), 6); if (err != nil) {
-            return (default, err);
-        } else if (v != nil) {
-            return (v._<ж<User>>(), default);
-        }
+    var (v, err) = readColonFile(r, matchUserIndexValue(name, 0), 6); if (err != nil) {
+        return (default, err);
+    } else if (v != nil) {
+        return (v._<ж<User>>(), default);
     }
     return (default, ((UnknownUserError)name));
 }

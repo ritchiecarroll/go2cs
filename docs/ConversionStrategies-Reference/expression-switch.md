@@ -39,7 +39,7 @@ A variable tag stays switchable. Guarded by `CrossPkgUser` / `CrossPkgLib`.
 
 ## A leading constant-true case stays opaque to the compiler
 Go's `switch { case true: ... case cond: ... }` (time parseStrictRFC3339 deliberately disabling its strict checks) compiles the LATER cases as dead code; a foldable `when true` makes C# reject them outright (CS8120). A constant-true case condition on a NON-LAST clause therefore emits the golib `ᐧᐧ` marker -- a `static readonly bool` the compiler cannot fold:
-<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:253 -->
+<!-- source: src/tests/Behavioral/ExprSwitch/ExprSwitch.cs:245 -->
 ```csharp
 case {} when ᐧᐧ: {
 ```
@@ -267,7 +267,7 @@ reached the end of the body" *is* "the fallthrough statement was reached" — wh
 be raised at the end rather than at the statement. In a break-wrapped case that equivalence holds only
 **inside** the wrapper, so the assignment goes there and a `break` skips it:
 
-<!-- source: src/core/time/format.cs:1375-1382 -->
+<!-- source: src/core/time/format.cs:1367-1374 -->
 ```csharp
             do {
                 if (len(value) >= 1 && value[0] == 'Z') {

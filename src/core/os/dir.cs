@@ -190,11 +190,9 @@ public static error CopyFS(@string dir, fs.FS fsys) {
                     return errΔ4;
                 }
 
-                {
-                    var (_, errΔ5) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ5 != nil) {
-                        w.Close();
-                        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "Copy", Path: newPath, Err: errΔ5)));
-                    }
+                var (_, errΔ5) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ5 != nil) {
+                    w.Close();
+                    return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "Copy", Path: newPath, Err: errΔ5)));
                 }
                 return w.Close();
             }

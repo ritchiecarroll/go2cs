@@ -11,19 +11,15 @@ partial interface Getter {
 }
 
 public static (@string, bool) TrySpeak(any v) {
-    {
-        var (s, ok) = v._<Speaker>(ᐧ); if (ok) {
-            return (s.Speak(), true);
-        }
+    var (s, ok) = v._<Speaker>(ᐧ); if (ok) {
+        return (s.Speak(), true);
     }
     return ("", false);
 }
 
 public static (@string, bool) TryGet(any v) {
-    {
-        var (g, ok) = v._<Getter>(ᐧ); if (ok) {
-            return (g.Get(), true);
-        }
+    var (g, ok) = v._<Getter>(ᐧ); if (ok) {
+        return (g.Get(), true);
     }
     return ("", false);
 }

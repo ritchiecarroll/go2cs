@@ -29,10 +29,8 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
         r.compressedBuf = appendꓸꓸꓸ(r.compressedBuf, makeꓸꓸꓸ<byte>(need));
     }
 
-    {
-        var (_, errΔ1) = io.ReadFull(r.r, r.compressedBuf); if (errΔ1 != nil) {
-            return r.wrapNonEOFError(0, errΔ1);
-        }
+    var (_, errΔ1) = io.ReadFull(r.r, r.compressedBuf); if (errΔ1 != nil) {
+        return r.wrapNonEOFError(0, errΔ1);
     }
 
     var data = (block)r.compressedBuf;
@@ -247,10 +245,8 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
         }
         r.seqTableBuffers[kind] = r.seqTableBuffers[kind].slice(0, ((nint)1).Lsh((int64)(tableBits)));
 
-        {
-            var errΔ1 = info.toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = info.toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
 
         r.seqTables[kind] = r.seqTableBuffers[kind];
@@ -407,10 +403,8 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
         }
 
         if (match > 0) {
-            {
-                var errΔ2 = r.copyFromWindow(Ꮡrbr, offset, match); if (errΔ2 != nil) {
-                    return errΔ2;
-                }
+            var errΔ2 = r.copyFromWindow(Ꮡrbr, offset, match); if (errΔ2 != nil) {
+                return errΔ2;
             }
         }
     }

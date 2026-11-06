@@ -22,17 +22,13 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     if (err != nil) {
         return (default, err);
     }
-    {
-        err = setDefaultSockopts(s, family, sotype, ipv6only); if (err != nil) {
-            poll.CloseFunc(s);
-            return (default, err);
-        }
+    err = setDefaultSockopts(s, family, sotype, ipv6only); if (err != nil) {
+        poll.CloseFunc(s);
+        return (default, err);
     }
-    {
-        (fd, err) = newFD(s, family, sotype, net); if (err != nil) {
-            poll.CloseFunc(s);
-            return (default, err);
-        }
+    (fd, err) = newFD(s, family, sotype, net); if (err != nil) {
+        poll.CloseFunc(s);
+        return (default, err);
     }
 
     // This function makes a network file descriptor for the
@@ -60,29 +56,23 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     if (laddr != nil && raddr == nil) {
         switch (sotype) {
         case var ᴛ when ᴛ == syscall.SOCK_STREAM || ᴛ == syscall.SOCK_SEQPACKET: {
-            {
-                var errΔ3 = fd.listenStream(ctx, laddr, listenerBacklog(), ctrlCtxFn); if (errΔ3 != nil) {
-                    fd.Close();
-                    return (default, errΔ3);
-                }
+            var errΔ3 = fd.listenStream(ctx, laddr, listenerBacklog(), ctrlCtxFn); if (errΔ3 != nil) {
+                fd.Close();
+                return (default, errΔ3);
             }
             return (fd, default);
         }
         case var ᴛ when ᴛ == syscall.SOCK_DGRAM: {
-            {
-                var errΔ4 = fd.listenDatagram(ctx, laddr, ctrlCtxFn); if (errΔ4 != nil) {
-                    fd.Close();
-                    return (default, errΔ4);
-                }
+            var errΔ4 = fd.listenDatagram(ctx, laddr, ctrlCtxFn); if (errΔ4 != nil) {
+                fd.Close();
+                return (default, errΔ4);
             }
             return (fd, default);
         }}
     }
-    {
-        var errΔ5 = fd.dial(ctx, laddr, raddr, ctrlCtxFn); if (errΔ5 != nil) {
-            fd.Close();
-            return (default, errΔ5);
-        }
+    var errΔ5 = fd.dial(ctx, laddr, raddr, ctrlCtxFn); if (errΔ5 != nil) {
+        fd.Close();
+        return (default, errΔ5);
     }
     return (fd, default);
 }
@@ -119,47 +109,35 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr
         } else if (laddr != nil) {
             ctrlAddr = laddr.String();
         }
-        {
-            var errΔ1 = ctrlCtxFn(ctx, fd.ctrlNetwork(), ctrlAddr, new rawConnжRawConn(c)); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = ctrlCtxFn(ctx, fd.ctrlNetwork(), ctrlAddr, new rawConnжRawConn(c)); if (errΔ1 != nil) {
+            return errΔ1;
         }
     }
 
     syscall.Sockaddr lsa = default;
     error err = default;
     if (laddr != nil) {
-        {
-            (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
-                return err;
-            } else if (lsa != nil) {
-                {
-                    err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-                        return os.NewSyscallError(bindˢ, err);
-                    }
-                }
+        (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
+            return err;
+        } else if (lsa != nil) {
+            err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
+                return os.NewSyscallError(bindˢ, err);
             }
         }
     }
     syscall.Sockaddr rsa = default;  // remote address from the user
     syscall.Sockaddr crsa = default; // remote address we actually connected to
     if (raddr != nil) {
-        {
-            (rsa, err) = raddr.sockaddr(fd.family); if (err != nil) {
-                return err;
-            }
+        (rsa, err) = raddr.sockaddr(fd.family); if (err != nil) {
+            return err;
         }
-        {
-            (crsa, err) = Ꮡfd.connect(ctx, lsa, rsa); if (err != nil) {
-                return err;
-            }
+        (crsa, err) = Ꮡfd.connect(ctx, lsa, rsa); if (err != nil) {
+            return err;
         }
         fd.isConnected = true;
     } else {
-        {
-            var errΔ2 = Ꮡfd.init(); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = Ꮡfd.init(); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
     // Record the local and remote addresses from the actual socket.
@@ -185,41 +163,29 @@ internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, Δ
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     error err = default;
-    {
-        err = setDefaultListenerSockopts(fd.pfd.Sysfd); if (err != nil) {
-            return err;
-        }
+    err = setDefaultListenerSockopts(fd.pfd.Sysfd); if (err != nil) {
+        return err;
     }
     syscall.Sockaddr lsa = default;
-    {
-        (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
-            return err;
-        }
+    (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
+        return err;
     }
 
     if (ctrlCtxFn != nil) {
         var c = newRawConn(Ꮡfd);
-        {
-            var errΔ1 = ctrlCtxFn(ctx, fd.ctrlNetwork(), laddr.String(), new rawConnжRawConn(c)); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = ctrlCtxFn(ctx, fd.ctrlNetwork(), laddr.String(), new rawConnжRawConn(c)); if (errΔ1 != nil) {
+            return errΔ1;
         }
     }
 
-    {
-        err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-            return os.NewSyscallError(bindˢ, err);
-        }
+    err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
+        return os.NewSyscallError(bindˢ, err);
     }
-    {
-        err = listenFunc(fd.pfd.Sysfd, backlog); if (err != nil) {
-            return os.NewSyscallError(listenˢ, err);
-        }
+    err = listenFunc(fd.pfd.Sysfd, backlog); if (err != nil) {
+        return os.NewSyscallError(listenˢ, err);
     }
-    {
-        err = Ꮡfd.init(); if (err != nil) {
-            return err;
-        }
+    err = Ꮡfd.init(); if (err != nil) {
+        return err;
     }
     (lsa, _) = syscall.Getsockname(fd.pfd.Sysfd);
     Ꮡfd.setAddr(fd.addrFunc()(lsa), default);
@@ -239,10 +205,8 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
         // multiple UDP listeners that listen on the same UDP
         // port to join the same group address.
         if (addr.IP != nil && addr.IP.IsMulticast()) {
-            {
-                var errΔ1 = setDefaultMulticastSockopts(fd.pfd.Sysfd); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = setDefaultMulticastSockopts(fd.pfd.Sysfd); if (errΔ1 != nil) {
+                return errΔ1;
             }
             ref var addrΔ1 = ref heap<UDPAddr>(addr.Value, out var ᏑaddrΔ1);
             switch (fd.family) {
@@ -260,29 +224,21 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
     }}
     error err = default;
     syscall.Sockaddr lsa = default;
-    {
-        (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
-            return err;
-        }
+    (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
+        return err;
     }
 
     if (ctrlCtxFn != nil) {
         var c = newRawConn(Ꮡfd);
-        {
-            var errΔ2 = ctrlCtxFn(ctx, fd.ctrlNetwork(), laddr.String(), new rawConnжRawConn(c)); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = ctrlCtxFn(ctx, fd.ctrlNetwork(), laddr.String(), new rawConnжRawConn(c)); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
-    {
-        err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-            return os.NewSyscallError(bindˢ, err);
-        }
+    err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
+        return os.NewSyscallError(bindˢ, err);
     }
-    {
-        err = Ꮡfd.init(); if (err != nil) {
-            return err;
-        }
+    err = Ꮡfd.init(); if (err != nil) {
+        return err;
     }
     (lsa, _) = syscall.Getsockname(fd.pfd.Sysfd);
     Ꮡfd.setAddr(fd.addrFunc()(lsa), default);

@@ -77,10 +77,8 @@ public static void Run(nint code) {
         defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    Throw(exitHookInvokedPanicˢ);
-                }
+            var e = recover(); if (e != nil) {
+                Throw(exitHookInvokedPanicˢ);
             }
         }, ref ᒐ);
 

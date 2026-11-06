@@ -107,14 +107,12 @@ internal static void readHosts() {
 
                     @is[addr] = append(@is[addr], name);
 
-                    {
-                        var (v, okΔ1) = hs[key, ꟷ]; if (okΔ1) {
-                            hs[key] = new byName(
-                                addrs: append(v.addrs, addr),
-                                canonicalName: v.canonicalName
-                            );
-                            continue;
-                        }
+                    var (v, okΔ1) = hs[key, ꟷ]; if (okΔ1) {
+                        hs[key] = new byName(
+                            addrs: append(v.addrs, addr),
+                            canonicalName: v.canonicalName
+                        );
+                        continue;
                     }
 
                     hs[key] = new byName(
@@ -149,12 +147,10 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) {
                 lowerASCIIBytes(lowerHost);
                 host = (@string)lowerHost;
             }
-            {
-                var (byName, ok) = hosts.byName[absDomainName(host), ꟷ]; if (ok) {
-                    var ipsCp = new slice<@string>(len(byName.addrs));
-                    copy(ipsCp, byName.addrs);
-                    return (ipsCp, byName.canonicalName);
-                }
+            var (byName, ok) = hosts.byName[absDomainName(host), ꟷ]; if (ok) {
+                var ipsCp = new slice<@string>(len(byName.addrs));
+                copy(ipsCp, byName.addrs);
+                return (ipsCp, byName.canonicalName);
             }
         }
         return (default, "");
@@ -175,12 +171,10 @@ internal static slice<@string> lookupStaticAddr(@string addr) {
             return default;
         }
         if (len(hosts.byAddr) != 0) {
-            {
-                var (hostsΔ1, ok) = hosts.byAddr[addr, ꟷ]; if (ok) {
-                    var hostsCp = new slice<@string>(len(hostsΔ1));
-                    copy(hostsCp, hostsΔ1);
-                    return hostsCp;
-                }
+            var (hostsΔ1, ok) = hosts.byAddr[addr, ꟷ]; if (ok) {
+                var hostsCp = new slice<@string>(len(hostsΔ1));
+                copy(hostsCp, hostsΔ1);
+                return hostsCp;
             }
         }
         return default;

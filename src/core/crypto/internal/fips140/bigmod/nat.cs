@@ -120,10 +120,8 @@ internal static ж<ΔNat> resetToBytes(this ж<ΔNat> Ꮡx, slice<byte> b) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     Ꮡx.reset((len(b) + (nint)_S - 1) / (nint)_S);
-    {
-        var err = x.setBytes(b); if (err != nil) {
-            throw panic("bigmod: internal error: bad arithmetic");
-        }
+    var err = x.setBytes(b); if (err != nil) {
+        throw panic("bigmod: internal error: bad arithmetic");
     }
     return Ꮡx.trim();
 }
@@ -202,10 +200,8 @@ public static (ж<ΔNat>, error) SetBytes(this ж<ΔNat> Ꮡx, slice<byte> b, ж
     ref var m = ref Ꮡm.DerefOrNull();
 
     Ꮡx.resetFor(Ꮡm);
-    {
-        var err = x.setBytes(b); if (err != nil) {
-            return (default, err);
-        }
+    var err = x.setBytes(b); if (err != nil) {
+        return (default, err);
     }
     if (x.cmpGeq(m.nat) == yes) {
         return (default, errors.New(inputOverflowsTheModulusˢ));
@@ -227,10 +223,8 @@ public static (ж<ΔNat>, error) SetOverflowingBytes(this ж<ΔNat> Ꮡx, slice<
     ref var m = ref Ꮡm.DerefOrNull();
 
     Ꮡx.resetFor(Ꮡm);
-    {
-        var err = x.setBytes(b); if (err != nil) {
-            return (default, err);
-        }
+    var err = x.setBytes(b); if (err != nil) {
+        return (default, err);
     }
     // setBytes would have returned an error if the input overflowed the limb
     // size of the modulus, so now we only need to check if the most significant
@@ -1156,10 +1150,8 @@ public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> x, nuin
     Ꮡout.set(xR);
     for (nint i = (nint)bits.UintSize - bits.Len(e) + 1; i < bits.UintSize; i++) {
         Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
-        {
-            nuint k = (e.Rsh((int64)((nint)bits.UintSize - i - 1))) & 1; if (k != 0) {
-                Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
-            }
+        nuint k = (e.Rsh((int64)((nint)bits.UintSize - i - 1))) & 1; if (k != 0) {
+            Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
         }
     }
     return Ꮡout.montgomeryReduction(Ꮡm);

@@ -38,17 +38,15 @@ internal static error sysctl(slice<_C_int> mib, ж<byte> old, ж<uintptr> oldlen
     } else {
         _p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
     }
-    {
-        var (_, _, err) = syscall_syscall6(
-            libc_sysctl_trampoline_addr,
-            (uintptr)_p0,
-            (uintptr)len(mib),
-            (uintptr)old,
-            (uintptr)oldlen,
-            (uintptr)@new,
-            (uintptr)newlen); if (err != 0) {
-            return err;
-        }
+    var (_, _, err) = syscall_syscall6(
+        libc_sysctl_trampoline_addr,
+        (uintptr)_p0,
+        (uintptr)len(mib),
+        (uintptr)old,
+        (uintptr)oldlen,
+        (uintptr)@new,
+        (uintptr)newlen); if (err != 0) {
+        return err;
     }
 
     return default;
@@ -60,10 +58,8 @@ internal static uintptr libc_sysctl_trampoline_addr = (uintptr)global::go.GoCgoD
 internal static bool darwinSysctlEnabled(slice<byte> name) {
     ref var @out = ref heap<int32>((int32)0, out var Ꮡout);
     ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
-    {
-        var ret = sysctlbyname(Ꮡ(name, 0), Ꮡout.Reinterpret<int32, byte>(), Ꮡnout, nil, 0); if (ret != nil) {
-            return false;
-        }
+    var ret = sysctlbyname(Ꮡ(name, 0), Ꮡout.Reinterpret<int32, byte>(), Ꮡnout, nil, 0); if (ret != nil) {
+        return false;
     }
     return @out > 0;
 }
@@ -73,17 +69,15 @@ internal static uintptr libc_sysctlbyname_trampoline_addr = (uintptr)global::go.
 
 // adapted from runtime/sys_darwin.go in the pattern of sysctl() above, as defined in x/sys/unix
 internal static error sysctlbyname(ж<byte> name, ж<byte> old, ж<uintptr> oldlen, ж<byte> @new, uintptr newlen) {
-    {
-        var (_, _, err) = syscall_syscall6(
-            libc_sysctlbyname_trampoline_addr,
-            (uintptr)name,
-            (uintptr)old,
-            (uintptr)oldlen,
-            (uintptr)@new,
-            (uintptr)newlen,
-            0); if (err != 0) {
-            return err;
-        }
+    var (_, _, err) = syscall_syscall6(
+        libc_sysctlbyname_trampoline_addr,
+        (uintptr)name,
+        (uintptr)old,
+        (uintptr)oldlen,
+        (uintptr)@new,
+        (uintptr)newlen,
+        0); if (err != 0) {
+        return err;
     }
 
     return default;

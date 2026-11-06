@@ -125,10 +125,8 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     c.elemsize = (uint16)elem.Size_;
     c.elemtype = elem;
     c.dataqsiz = (nuint)size;
-    {
-        var b = getg().Value.bubble; if (b != nil) {
-            c.bubble = b;
-        }
+    var b = getg().Value.bubble; if (b != nil) {
+        c.bubble = b;
     }
     lockInit(ref (c.Ꮡlock).DerefOrNull(), lockRankHchan);
 

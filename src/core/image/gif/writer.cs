@@ -95,10 +95,8 @@ internal static error WriteByte(this blockWriter b, byte c) {
 // actually called.
 internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
     foreach (var (i, c) in data) {
-        {
-            var err = b.WriteByte(c); if (err != nil) {
-                return (i, err);
-            }
+        var err = b.WriteByte(c); if (err != nil) {
+            return (i, err);
         }
     }
     return (len(data), default);
@@ -158,28 +156,26 @@ internal static void writeHeader(this ref encoder e) {
     byteorder.LEPutUint16(e.buf[2..4], (uint16)e.g.Config.Height);
     e.write(e.buf[..4]);
 
-    {
-        var (p, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(p) > 0) {
-            nint paddedSize = log2(len(p)); // Size of Global Color Table: 2^(1+n).
-            e.buf[0] = (byte)((uint8)((uint8)fColorTable | (uint8)paddedSize));
-            e.buf[1] = e.g.BackgroundIndex;
-            e.buf[2] = 0x00; // Pixel Aspect Ratio.
-            e.write(e.buf[..3]);
-            error err = default;
-            (e.globalCT, err) = encodeColorTable(e.globalColorTable[..], p, paddedSize);
-            if (err != nil && e.err == nil) {
-                e.err = err;
-                return;
-            }
-            e.write(e.globalColorTable.slice(0, e.globalCT));
-        } else {
-            // All frames have a local color table, so a global color table
-            // is not needed.
-            e.buf[0] = 0x00;
-            e.buf[1] = 0x00; // Background Color Index.
-            e.buf[2] = 0x00; // Pixel Aspect Ratio.
-            e.write(e.buf[..3]);
+    var (p, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(p) > 0) {
+        nint paddedSize = log2(len(p)); // Size of Global Color Table: 2^(1+n).
+        e.buf[0] = (byte)((uint8)((uint8)fColorTable | (uint8)paddedSize));
+        e.buf[1] = e.g.BackgroundIndex;
+        e.buf[2] = 0x00; // Pixel Aspect Ratio.
+        e.write(e.buf[..3]);
+        error err = default;
+        (e.globalCT, err) = encodeColorTable(e.globalColorTable[..], p, paddedSize);
+        if (err != nil && e.err == nil) {
+            e.err = err;
+            return;
         }
+        e.write(e.globalColorTable.slice(0, e.globalCT));
+    } else {
+        // All frames have a local color table, so a global color table
+        // is not needed.
+        e.buf[0] = 0x00;
+        e.buf[1] = 0x00; // Background Color Index.
+        e.buf[2] = 0x00; // Pixel Aspect Ratio.
+        e.write(e.buf[..3]);
     }
 
     // Add animation info if necessary.
@@ -220,13 +216,11 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
         uint8 b = default;
         // It is most likely that the palette is full of color.RGBAs, so they
         // get a fast path.
-        {
-            var (rgba, ok) = c._<colorꓸRGBA>(ᐧ); if (ok) {
-                (r, g, b) = (rgba.R, rgba.G, rgba.B);
-            } else {
-                var (rr, gg, bb, _) = c.RGBA();
-                (r, g, b) = ((uint8)(rr >> 8), (uint8)(gg >> 8), (uint8)(bb >> 8));
-            }
+        var (rgba, ok) = c._<colorꓸRGBA>(ᐧ); if (ok) {
+            (r, g, b) = (rgba.R, rgba.G, rgba.B);
+        } else {
+            var (rr, gg, bb, _) = c.RGBA();
+            (r, g, b) = ((uint8)(rr >> 8), (uint8)(gg >> 8), (uint8)(bb >> 8));
         }
         dst[3 * i + 0] = r;
         dst[3 * i + 1] = g;
@@ -286,11 +280,9 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             e.err = errors.New(gifCannotEncodeColorˢ2);
             return;
         }
-        {
-            var (_, _, _, a) = c.RGBA(); if (a == 0) {
-                transparentIndex = i;
-                break;
-            }
+        var (_, _, _, a) = c.RGBA(); if (a == 0) {
+            transparentIndex = i;
+            break;
         }
     }
 
@@ -326,27 +318,25 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     // point to the same []color.Color? If so, they are equal so long as the
     // frame's palette is not longer than the global palette...
     nint paddedSize = log2(len(pm.Palette)); // Size of Local Color Table: 2^(1+n).
-    {
-        var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡelem<Δcolor.Color>(gp, 0) == Ꮡelem<Δcolor.Color>(pm.Palette, 0)) {
+    var (gp, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(pm.Palette) <= len(gp) && Ꮡelem<Δcolor.Color>(gp, 0) == Ꮡelem<Δcolor.Color>(pm.Palette, 0)) {
+        e.writeByte(0); // Use the global color table.
+    } else {
+        var (ct, err) = encodeColorTable(e.localColorTable[..], pm.Palette, paddedSize);
+        if (err != nil) {
+            if (e.err == nil) {
+                e.err = err;
+            }
+            return;
+        }
+        // This frame's palette is not the very same slice as the global
+        // palette, but it might be a copy, possibly with one value turned into
+        // transparency by DecodeAll.
+        if (ct <= e.globalCT && e.colorTablesMatch(len(pm.Palette), transparentIndex)) {
             e.writeByte(0); // Use the global color table.
         } else {
-            var (ct, err) = encodeColorTable(e.localColorTable[..], pm.Palette, paddedSize);
-            if (err != nil) {
-                if (e.err == nil) {
-                    e.err = err;
-                }
-                return;
-            }
-            // This frame's palette is not the very same slice as the global
-            // palette, but it might be a copy, possibly with one value turned into
-            // transparency by DecodeAll.
-            if (ct <= e.globalCT && e.colorTablesMatch(len(pm.Palette), transparentIndex)) {
-                e.writeByte(0); // Use the global color table.
-            } else {
-                // Use a local color table.
-                e.writeByte((byte)((uint8)((uint8)fColorTable | (uint8)paddedSize)));
-                e.write(e.localColorTable.slice(0, ct));
-            }
+            // Use a local color table.
+            e.writeByte((byte)((uint8)((uint8)fColorTable | (uint8)paddedSize)));
+            e.write(e.localColorTable.slice(0, ct));
         }
     }
 
@@ -359,20 +349,18 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     var bw = new blockWriter(e: Ꮡe);
     bw.setup();
     var lzww = lzw.NewWriter(bw, lzw.LSB, litWidth);
-    {
-        nint dx = b.Dx(); if (dx == pm.Stride) {
-            (_, e.err) = lzww.Write(pm.Pix.slice(0, dx * b.Dy()));
+    nint dx = b.Dx(); if (dx == pm.Stride) {
+        (_, e.err) = lzww.Write(pm.Pix.slice(0, dx * b.Dy()));
+        if (e.err != nil) {
+            lzww.Close();
+            return;
+        }
+    } else {
+        for ((nint i, nint y) = (0, b.Min.Y); y < b.Max.Y; (i, y) = (i + pm.Stride, y + 1)) {
+            (_, e.err) = lzww.Write(pm.Pix.slice(i, i + dx));
             if (e.err != nil) {
                 lzww.Close();
                 return;
-            }
-        } else {
-            for ((nint i, nint y) = (0, b.Min.Y); y < b.Max.Y; (i, y) = (i + pm.Stride, y + 1)) {
-                (_, e.err) = lzww.Write(pm.Pix.slice(i, i + dx));
-                if (e.err != nil) {
-                    lzww.Close();
-                    return;
-                }
             }
         }
     }
@@ -428,19 +416,15 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
         e.g.Config.Width = p.X;
         e.g.Config.Height = p.Y;
     } else if (e.g.Config.ColorModel != nil) {
-        {
-            var (_, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (!ok) {
-                return errors.New(gifGifColorModelMustBeAˢ);
-            }
+        var (_, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (!ok) {
+            return errors.New(gifGifColorModelMustBeAˢ);
         }
     }
 
-    {
-        var (ww, ok) = w._<writer>(ᐧ); if (ok) {
-            e.w = ww;
-        } else {
-            e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
-        }
+    if (w._<writer>(out var ww)) {
+        e.w = ww;
+    } else {
+        e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
     }
 
     e.writeHeader();
@@ -483,13 +467,11 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
 
     var (pm, _) = m._<ж<image.Paletted>>(ᐧ);
     if (pm == nil) {
-        {
-            var (cp, ok) = m.ColorModel()._<Δcolor.Palette>(ᐧ); if (ok) {
-                pm = image.NewPaletted(b, cp);
-                for (nint y = b.Min.Y; y < b.Max.Y; y++) {
-                    for (nint x = b.Min.X; x < b.Max.X; x++) {
-                        pm.Set(x, y, cp.Convert(m.At(x, y)));
-                    }
+        var (cp, ok) = m.ColorModel()._<Δcolor.Palette>(ᐧ); if (ok) {
+            pm = image.NewPaletted(b, cp);
+            for (nint y = b.Min.Y; y < b.Max.Y; y++) {
+                for (nint x = b.Min.X; x < b.Max.X; x++) {
+                    pm.Set(x, y, cp.Convert(m.At(x, y)));
                 }
             }
         }

@@ -76,10 +76,8 @@ internal static @unsafe.Pointer pinnerGetPtr(ж<any> i) {
     if (etyp == nil) {
         throw panic(((errorString)(@string)runtimePinnerArgumentIsˢ));
     }
-    {
-        var kind = etyp.Kind(); if (kind != abi.Pointer && kind != abi.UnsafePointer) {
-            throw panic(((errorString)("runtime.Pinner: argument is not a pointer: "u8 + toRType(etyp).@string())));
-        }
+    var kind = etyp.Kind(); if (kind != abi.Pointer && kind != abi.UnsafePointer) {
+        throw panic(((errorString)("runtime.Pinner: argument is not a pointer: "u8 + toRType(etyp).@string())));
     }
     if (inUserArenaChunk((uintptr)(~e).data)) {
         // Arena-allocated objects are not eligible for pinning.

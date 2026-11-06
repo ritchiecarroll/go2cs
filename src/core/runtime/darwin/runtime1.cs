@@ -628,21 +628,17 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         // is int, not int32, and should only be updated
         // if specified in GODEBUG.
         if (seen == nil && key == "memprofilerate"u8) {
-            {
-                var (n, err) = strconv.Atoi(value); if (err == nil) {
-                    MemProfileRate = n;
-                }
+            var (n, err) = strconv.Atoi(value); if (err == nil) {
+                MemProfileRate = n;
             }
         } else {
             foreach (var (_, v) in dbgvars) {
                 if (v.name == key) {
-                    {
-                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == nil) {
-                            if (seen == nil && v.value != nil) {
-                                v.value.Value = (int32)n;
-                            } else if (v.atomic != nil) {
-                                v.atomic.Store((int32)n);
-                            }
+                    var (n, err) = strconv.ParseInt(value, 10, 32); if (err == nil) {
+                        if (seen == nil && v.value != nil) {
+                            v.value.Value = (int32)n;
+                        } else if (v.atomic != nil) {
+                            v.atomic.Store((int32)n);
                         }
                     }
                 }
@@ -687,10 +683,8 @@ internal static void setTraceback(@string level) {
     }
     if (fallthrough || !matchᴛ1) { /* default: */
         t = tracebackAll;
-        {
-            var (n, err) = strconv.Atoi(level); if (err == nil && n == (nint)(uint32)n) {
-                t |= (uint32)(((uint32)n << (int)(tracebackShift)));
-            }
+        var (n, err) = strconv.Atoi(level); if (err == nil && n == (nint)(uint32)n) {
+            t |= (uint32)(((uint32)n << (int)(tracebackShift)));
         }
     }
     // when C owns the process, simply exit'ing the process on fatal errors

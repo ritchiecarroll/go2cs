@@ -56,10 +56,8 @@ internal static (@string s, bool ok) readLine(this ref Δfile f) {
     @string s = default;
     bool ok = default;
 
-    {
-        (s, ok) = f.getLineFromData(); if (ok) {
-            return (s, ok);
-        }
+    (s, ok) = f.getLineFromData(); if (ok) {
+        return (s, ok);
     }
     if (len(f.data) < cap(f.data)) {
         nint ln = len(f.data);
@@ -249,10 +247,8 @@ internal static bool isSpace(byte b) {
 // removeComment returns line, removing any '#' byte and any following
 // bytes.
 internal static @string removeComment(@string line) {
-    {
-        nint i = bytealg.IndexByteString(line, (byte)'#'); if (i != -1) {
-            return line.slice(0, i);
-        }
+    nint i = bytealg.IndexByteString(line, (byte)'#'); if (i != -1) {
+        return line.slice(0, i);
     }
     return line;
 }
@@ -266,13 +262,9 @@ internal static error foreachField(@string x, Func<@string, error> fn) {
         if (sp == -1) {
             return fn(x);
         }
-        {
-            @string field = trimSpace(x.slice(0, sp)); if (len(field) > 0) {
-                {
-                    var err = fn(field); if (err != nil) {
-                        return err;
-                    }
-                }
+        @string field = trimSpace(x.slice(0, sp)); if (len(field) > 0) {
+            var err = fn(field); if (err != nil) {
+                return err;
             }
         }
         x = trimSpace(x.slice(sp + 1));

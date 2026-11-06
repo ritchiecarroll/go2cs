@@ -113,10 +113,8 @@ private static readonly @string smtpHelloCalledAfterˢᵇ = "smtp: Hello called 
 public static error Hello(this ж<Client> Ꮡc, @string localName) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var err = validateLine(localName); if (err != nil) {
-            return err;
-        }
+    var err = validateLine(localName); if (err != nil) {
+        return err;
     }
     if (c.didHello) {
         return errors.New(smtpHelloCalledAfterˢ);
@@ -183,10 +181,8 @@ internal static error ehlo(this ж<Client> Ꮡc) {
             ext[k] = v;
         }
     }
-    {
-        var (mechs, ok) = ext[authˢ, ꟷ]; if (ok) {
-            c.auth = strings.Split(mechs, " ");
-        }
+    var (mechs, ok) = ext[authˢ, ꟷ]; if (ok) {
+        c.auth = strings.Split(mechs, " ");
     }
     c.ext = ext;
     return err;
@@ -201,10 +197,8 @@ private static readonly @string starttlsˢᵇ = "STARTTLS"u8;
 public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (_, _, err) = Ꮡc.cmd(220, starttlsˢ);
     if (err != nil) {
@@ -239,15 +233,11 @@ private static readonly @string vrfySˢᵇ = "VRFY %s"u8;
 // does not necessarily indicate an invalid address. Many servers
 // will not verify addresses for security reasons.
 public static error Verify(this ж<Client> Ꮡc, @string addr) {
-    {
-        var errΔ1 = validateLine(addr); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = validateLine(addr); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
+        return errΔ2;
     }
     var (_, _, err) = Ꮡc.cmd(250, vrfySˢ, addr);
     return err;
@@ -259,10 +249,8 @@ public static error Verify(this ж<Client> Ꮡc, @string addr) {
 public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var encoding = base64.StdEncoding;
     var (mech, resp, err) = a.Start(Ꮡ(new ServerInfo(c.serverName, c.tls, c.auth)));
@@ -324,27 +312,19 @@ private static readonly @string smtputf8ˢᵇ = "SMTPUTF8"u8;
 public static error Mail(this ж<Client> Ꮡc, @string from) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var errΔ1 = validateLine(from); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = validateLine(from); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
+        return errΔ2;
     }
     @string cmdStr = mailFromSˢ;
     if (c.ext != nil) {
-        {
-            var (_, ok) = c.ext["8BITMIME", ꟷ]; if (ok) {
-                cmdStr += " BODY=8BITMIME"u8;
-            }
+        if (c.ext["8BITMIME", ꟷ] is (_, true)) {
+            cmdStr += " BODY=8BITMIME"u8;
         }
-        {
-            var (_, ok) = c.ext[smtputf8ˢ, ꟷ]; if (ok) {
-                cmdStr += " SMTPUTF8"u8;
-            }
+        if (c.ext[smtputf8ˢ, ꟷ] is (_, true)) {
+            cmdStr += " SMTPUTF8"u8;
         }
     }
     var (_, _, err) = Ꮡc.cmd(250, cmdStr, from);
@@ -359,10 +339,8 @@ private static readonly @string rcptToSˢᵇ = "RCPT TO:<%s>"u8;
 // A call to Rcpt must be preceded by a call to [Client.Mail] and may be followed by
 // a [Client.Data] call or another Rcpt call.
 public static error Rcpt(this ж<Client> Ꮡc, @string to) {
-    {
-        var errΔ1 = validateLine(to); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = validateLine(to); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (_, _, err) = Ꮡc.cmd(25, rcptToSˢ, to);
     return err;
@@ -430,16 +408,12 @@ private static readonly @string smtpServerDoesnTSupportˢᵇ = "smtp: server doe
 public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string> to, slice<byte> msg) {
     GoFrame ᒐ = default;
     try {
-        {
-            var errΔ1 = validateLine(from); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = validateLine(from); if (errΔ1 != nil) {
+            return errΔ1;
         }
         foreach (var (_, recp) in to) {
-            {
-                var errΔ2 = validateLine(recp); if (errΔ2 != nil) {
-                    return errΔ2;
-                }
+            var errΔ2 = validateLine(recp); if (errΔ2 != nil) {
+                return errΔ2;
             }
         }
         var (c, err) = Dial(addr);
@@ -448,10 +422,8 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
-        {
-            err = c.hello(); if (err != nil) {
-                return err;
-            }
+        err = c.hello(); if (err != nil) {
+            return err;
         }
         {
             var (ok, _) = c.Extension(starttlsˢ); if (ok) {
@@ -459,35 +431,25 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
                 if (testHookStartTLS != nil) {
                     testHookStartTLS(config);
                 }
-                {
-                    err = c.StartTLS(config); if (err != nil) {
-                        return err;
-                    }
+                err = c.StartTLS(config); if (err != nil) {
+                    return err;
                 }
             }
         }
         if (a != nil && c.ext != nil) {
-            {
-                var (_, ok) = c.ext[authˢ, ꟷ]; if (!ok) {
-                    return errors.New(smtpServerDoesnTSupportˢ);
-                }
+            var (_, ok) = c.ext[authˢ, ꟷ]; if (!ok) {
+                return errors.New(smtpServerDoesnTSupportˢ);
             }
-            {
-                err = c.Auth(a); if (err != nil) {
-                    return err;
-                }
-            }
-        }
-        {
-            err = c.Mail(from); if (err != nil) {
+            err = c.Auth(a); if (err != nil) {
                 return err;
             }
         }
+        err = c.Mail(from); if (err != nil) {
+            return err;
+        }
         foreach (var (_, addrΔ1) in to) {
-            {
-                err = c.Rcpt(addrΔ1); if (err != nil) {
-                    return err;
-                }
+            err = c.Rcpt(addrΔ1); if (err != nil) {
+                return err;
             }
         }
         (var w, err) = c.Data();
@@ -515,10 +477,8 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
 public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var err = Ꮡc.hello(); if (err != nil) {
-            return (false, "");
-        }
+    var err = Ꮡc.hello(); if (err != nil) {
+        return (false, "");
     }
     if (c.ext == nil) {
         return (false, "");
@@ -535,10 +495,8 @@ private static readonly @string rsetˢᵇ = "RSET"u8;
 // Reset sends the RSET command to the server, aborting the current mail
 // transaction.
 public static error Reset(this ж<Client> Ꮡc) {
-    {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (_, _, err) = Ꮡc.cmd(250, rsetˢ);
     return err;
@@ -551,10 +509,8 @@ private static readonly @string noopˢᵇ = "NOOP"u8;
 // Noop sends the NOOP command to the server. It does nothing but check
 // that the connection to the server is okay.
 public static error Noop(this ж<Client> Ꮡc) {
-    {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (_, _, err) = Ꮡc.cmd(250, noopˢ);
     return err;

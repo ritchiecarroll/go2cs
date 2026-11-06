@@ -107,10 +107,8 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
 
     // A cheap version of hedged signatures, for the deprecated path.
     array<byte> seed = new(32);
-    {
-        var (_, errΔ1) = io.ReadFull(csprng, seed[..]); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = io.ReadFull(csprng, seed[..]); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     foreach (var (i, b) in priv.D.Bytes()) {
         seed[i % 32] ^= (byte)(b);
@@ -230,15 +228,11 @@ internal static (ж<bigꓸInt> k, error err) randFieldElement(elliptic.Curve c, 
     for (;;) {
         var N = c.Params().N;
         var b = new slice<byte>((N.BitLen() + 7) / 8);
-        {
-            (_, err) = io.ReadFull(rand, b); if (err != nil) {
-                return (k, err);
-            }
+        (_, err) = io.ReadFull(rand, b); if (err != nil) {
+            return (k, err);
         }
-        {
-            nint excess = len(b) * 8 - N.BitLen(); if (excess > 0) {
-                b[0].RshAssign((int64)(excess));
-            }
+        nint excess = len(b) * 8 - N.BitLen(); if (excess > 0) {
+            b[0].RshAssign((int64)(excess));
         }
         k = @new<bigꓸInt>().SetBytes(b);
         if (k.Sign() != 0 && k.Cmp(N) < 0) {

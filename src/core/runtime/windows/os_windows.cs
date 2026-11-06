@@ -1285,13 +1285,11 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // Does it want a preemption and is it safe to preempt?
     var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.SP());
     if (gp != nil && wantAsyncPreempt(gp)) {
-        {
-            var (ok, resumePC) = isAsyncSafePoint(gp, c.PC(), c.SP(), c.LR()); if (ok) {
-                // Inject call to asyncPreempt
-                var targetPC = abi.FuncPCABI0(asyncPreempt);
-                c.PushCall(targetPC, resumePC);
-                stdcall(_SetThreadContext, thread, (uintptr)c);
-            }
+        var (ok, resumePC) = isAsyncSafePoint(gp, c.PC(), c.SP(), c.LR()); if (ok) {
+            // Inject call to asyncPreempt
+            var targetPC = abi.FuncPCABI0(asyncPreempt);
+            c.PushCall(targetPC, resumePC);
+            stdcall(_SetThreadContext, thread, (uintptr)c);
         }
     }
 

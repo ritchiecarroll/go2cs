@@ -264,6 +264,8 @@
     <None Include="$(MSBuildThisFileDirectory)incrementalWrites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)initScopeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)initScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />

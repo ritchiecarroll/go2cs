@@ -19,17 +19,15 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp
     foreach (var (_, loc) in p.Location) {
         nint i = default;
         for (i = len(loc.Line) - 1; i >= 0; i--) {
-            {
-                var fn = loc.Line[i].Function; if (fn != nil && fn.Name != ""u8) {
-                    @string funcName = fn.Name;
-                    // Account for leading '.' on the PPC ELF v1 ABI.
-                    if (funcName[0] == '.') {
-                        funcName = funcName[1..];
-                    }
-                    if (dropRx.MatchString(funcName)) {
-                        if (keepRx == nil || !keepRx.MatchString(funcName)) {
-                            break;
-                        }
+            var fn = loc.Line[i].Function; if (fn != nil && fn.Name != ""u8) {
+                @string funcName = fn.Name;
+                // Account for leading '.' on the PPC ELF v1 ABI.
+                if (funcName[0] == '.') {
+                    funcName = funcName[1..];
+                }
+                if (dropRx.MatchString(funcName)) {
+                    if (keepRx == nil || !keepRx.MatchString(funcName)) {
+                        break;
                     }
                 }
             }
@@ -84,16 +82,12 @@ public static error RemoveUninteresting(this ref Profile p) {
     error err = default;
 
     if (p.DropFrames != ""u8) {
-        {
-            (drop, err) = regexp.Compile("^("u8 + p.DropFrames + ")$"u8); if (err != nil) {
-                return fmt.Errorf("failed to compile regexp %s: %v"u8, p.DropFrames, err);
-            }
+        (drop, err) = regexp.Compile("^("u8 + p.DropFrames + ")$"u8); if (err != nil) {
+            return fmt.Errorf("failed to compile regexp %s: %v"u8, p.DropFrames, err);
         }
         if (p.KeepFrames != ""u8) {
-            {
-                (keep, err) = regexp.Compile("^("u8 + p.KeepFrames + ")$"u8); if (err != nil) {
-                    return fmt.Errorf("failed to compile regexp %s: %v"u8, p.KeepFrames, err);
-                }
+            (keep, err) = regexp.Compile("^("u8 + p.KeepFrames + ")$"u8); if (err != nil) {
+                return fmt.Errorf("failed to compile regexp %s: %v"u8, p.KeepFrames, err);
             }
         }
         p.Prune(drop, keep);

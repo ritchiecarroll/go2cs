@@ -181,10 +181,8 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         }
 
         // The line must end with only whitespace.
-        {
-            var (s, _, _) = getLine(restOfEndLine); if (len(s) != 0) {
-                continue;
-            }
+        var (s, _, _) = getLine(restOfEndLine); if (len(s) != 0) {
+            continue;
         }
 
         p.Bytes = slice<byte>([]);
@@ -287,15 +285,11 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     // All errors below are relayed from underlying io.Writer,
     // so it is now safe to write data.
 
-    {
-        var (_, errΔ1) = @out.Write(pemStart[1..]); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = @out.Write(pemStart[1..]); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n")); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n")); if (errΔ2 != nil) {
+        return errΔ2;
     }
 
     if (len(b.Headers) > 0) {
@@ -312,25 +306,19 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
         // The Proc-Type header must be written first.
         // See RFC 1421, section 4.6.1.1
         if (hasProcType) {
-            {
-                var errΔ3 = writeHeader(@out, procType, b.Headers[procType]); if (errΔ3 != nil) {
-                    return errΔ3;
-                }
+            var errΔ3 = writeHeader(@out, procType, b.Headers[procType]); if (errΔ3 != nil) {
+                return errΔ3;
             }
         }
         // For consistency of output, write other headers sorted by key.
         slices.Sort<slice<@string>, @string>(h);
         foreach (var (_, k) in h) {
-            {
-                var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != nil) {
-                    return errΔ4;
-                }
+            var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != nil) {
+                return errΔ4;
             }
         }
-        {
-            var (_, errΔ5) = @out.Write(nl); if (errΔ5 != nil) {
-                return errΔ5;
-            }
+        var (_, errΔ5) = @out.Write(nl); if (errΔ5 != nil) {
+            return errΔ5;
         }
     }
 
@@ -338,18 +326,14 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     breaker.@out = @out;
 
     var b64 = base64.NewEncoder(base64.StdEncoding, new lineBreakerжWriter(Ꮡbreaker));
-    {
-        var (_, errΔ6) = b64.Write(b.Bytes); if (errΔ6 != nil) {
-            return errΔ6;
-        }
+    var (_, errΔ6) = b64.Write(b.Bytes); if (errΔ6 != nil) {
+        return errΔ6;
     }
     b64.Close();
     breaker.Close();
 
-    {
-        var (_, errΔ7) = @out.Write(pemEnd[1..]); if (errΔ7 != nil) {
-            return errΔ7;
-        }
+    var (_, errΔ7) = @out.Write(pemEnd[1..]); if (errΔ7 != nil) {
+        return errΔ7;
     }
     var (_, err) = @out.Write(slice<byte>(b.Type + "-----\n"));
     return err;
@@ -362,10 +346,8 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 // report details about this error case, use [Encode] instead.
 public static slice<byte> EncodeToMemory(ж<Block> b) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = Encode(new bytes_BufferжWriter(Ꮡbuf), b); if (err != nil) {
-            return default;
-        }
+    var err = Encode(new bytes_BufferжWriter(Ꮡbuf), b); if (err != nil) {
+        return default;
     }
     return buf.Bytes();
 }

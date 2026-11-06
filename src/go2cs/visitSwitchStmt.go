@@ -334,12 +334,17 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		}
 	}
 
-	if switchStmt.Init != nil {
-		// Any declared variable will be scoped to switch statement, so create a sub-block for it
+	// Any declared variable is scoped to the switch statement, so it gets a sub-block, unless
+	// analyzeInitScopes cleared the init to be a statement of the enclosing block, as Go writes it.
+	initBraced := switchStmt.Init != nil && v.initScopeShapes[switchStmt] != initScopeDropped
+
+	if initBraced {
 		v.outputBuilder.WriteString(v.newline)
 		v.writeOutput("{")
 		v.indentLevel++
+	}
 
+	if switchStmt.Init != nil {
 		v.visitStmt(switchStmt.Init, []StmtContext{})
 	}
 
@@ -556,7 +561,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 			v.writePatternSwitch(tag, caseClauses, caseConds, caseUsesPattern, exprVarName, stringTag)
 
-			if switchStmt.Init != nil {
+			if initBraced {
 				v.indentLevel--
 				v.writeOutputLn("}")
 			}
@@ -985,7 +990,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 	}
 
 	// Close any locally scoped declared variable sub-block
-	if switchStmt.Init != nil {
+	if initBraced {
 		v.indentLevel--
 		v.writeOutputLn("}")
 	}
