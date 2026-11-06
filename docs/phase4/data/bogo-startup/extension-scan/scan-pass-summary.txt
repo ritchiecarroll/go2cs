@@ -1,0 +1,2 @@
+master: n=12; pass 0 over the 172 assemblies loaded before the first question: first-to-last row 192.9 ms; scan rows per launch 604; hook EXIT 920 ms; wall 939 ms
+c: n=12; pass 0 over the 172 assemblies loaded before the first question: first-to-last row 121.3 ms; scan rows per launch 242; hook EXIT 824 ms; wall 839 ms
