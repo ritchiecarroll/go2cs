@@ -235,6 +235,16 @@ The gates also held:
   `TestHandOwnSourcePinScannerFires`, reports a changed body and a missing function, and ignores a doc-only change.
 - The `-tests` rows and the gate battery are in §11.
 
+**Amended 2026-11-06 (G's review, non-blocking note, taken before landing).** The three tests above read values
+through `Bytes()`, so a result that is congruent but not fully reduced would pass them.
+`RawLimbsAreFullyReduced` reads the raw Montgomery limbs (field `x`, by reflection) and requires exactly
+`(a * b * R^-1) mod p`. Its inputs reach a pre-reduction t in [p, 2p), which happens exactly when y * R < a * b:
+- limbs p - 1 times p - 2^55, since R is congruent to 2^55 mod p, so y = 1;
+- limbs p - 2^288 squared, since (2^288)^2 = R, so y = 1.
+It counts the cases it reaches and fails as VACUOUS below 4 Mul pairs or 1 square. Planting a skipped final select
+(`keepD = 0`) failed it with raw limbs p + 1 where 1 was expected. The other three tests stayed green under that
+plant, which is G's point. The file was restored md5-identical.
+
 ## 11. Gates
 
 The battery ran serially at `fe61651694`, alone on the box, with the tree clean:

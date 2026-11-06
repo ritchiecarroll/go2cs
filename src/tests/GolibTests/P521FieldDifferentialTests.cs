@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.crypto.@internal.fips140.nistec.fiat_package;
@@ -164,5 +165,64 @@ public class P521FieldDifferentialTests
             v.Square(v);
             Assert.AreEqual(y * y % P, decode(v.Bytes()), $"aliased Square {n}");
         }
+    }
+
+    // The tests above read VALUES through Bytes(), so a result that is congruent but NOT fully reduced
+    // would still pass them. This one reads the RAW Montgomery limbs and requires exactly
+    // (a * b * R^-1) mod p, which is below p.
+    //
+    // It needs inputs whose pre-reduction t lands in [p, 2p), where only the final select brings the
+    // result below p. With y = (a * b * R^-1) mod p, the CIOS loop ends at t = (a * b + m * p) / R for
+    // the unique m in [0, R). t = y + p exactly when y * R < a * b, so the result must be tiny against
+    // the product. Since R = 2^576 is congruent to 2^55 mod p, limbs p - 1 and p - 2^55 multiply to y = 1.
+    // And (2^288)^2 = R, so limbs p - 2^288 square to y = 1 as well. The test counts the cases it reaches
+    // and refuses to pass vacuously.
+    private static readonly FieldInfo limbsField =
+        typeof(fiat.P521Element).GetField("x", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+    private static BigInteger rawLimbs(ж<fiat.P521Element> e)
+    {
+        var limbs = (IArray<ulong>)limbsField.GetValue(e.Value)!;
+        BigInteger v = BigInteger.Zero;
+
+        for (int i = 8; i >= 0; i--)
+            v = (v << 64) | limbs.Source[i];
+
+        return v;
+    }
+
+    [TestMethod]
+    public void RawLimbsAreFullyReduced()
+    {
+        BigInteger[] limbEdges =
+        [
+            0, 1, 2, P - 1, P - 2, R % P, R * R % P, P - (R % P), P - 2 * (R % P), P - (BigInteger.One << 288),
+            (BigInteger.One << 288), (BigInteger.One << 520), (BigInteger.One << 512) - 1,
+        ];
+
+        int upperHalf = 0, squaresInUpperHalf = 0;
+
+        foreach (BigInteger a in limbEdges)
+        {
+            var square = builtin.@new<fiat.P521Element>().Square(element(withLimbs(a)));
+            BigInteger ySquare = a * a * RInv % P;
+            Assert.AreEqual(ySquare, rawLimbs(square), $"Square raw limbs, limbs {a:X}");
+
+            if (ySquare * R < a * a)
+                squaresInUpperHalf++;
+
+            foreach (BigInteger b in limbEdges)
+            {
+                var product = builtin.@new<fiat.P521Element>().Mul(element(withLimbs(a)), element(withLimbs(b)));
+                BigInteger y = a * b * RInv % P;
+                Assert.AreEqual(y, rawLimbs(product), $"Mul raw limbs, limbs {a:X} * {b:X}");
+
+                if (y * R < a * b)
+                    upperHalf++;
+            }
+        }
+
+        Assert.IsTrue(upperHalf >= 4, $"VACUOUS: only {upperHalf} Mul pairs reach t in [p, 2p)");
+        Assert.IsTrue(squaresInUpperHalf >= 1, $"VACUOUS: only {squaresInUpperHalf} squares reach t in [p, 2p)");
     }
 }
