@@ -1,0 +1,18 @@
+  0000000140830160: 53                 push        rbx
+  0000000140830161: 48 83 EC 30        sub         rsp,30h
+  0000000140830165: 33 C0              xor         eax,eax
+  0000000140830167: 48 89 44 24 28     mov         qword ptr [rsp+28h],rax
+  000000014083016C: 48 8B D9           mov         rbx,rcx
+  000000014083016F: 49 8B C0           mov         rax,r8
+  0000000140830172: 4C 8D 44 24 28     lea         r8,[rsp+28h]
+  0000000140830177: 48 8B CA           mov         rcx,rdx
+  000000014083017A: 48 8B D0           mov         rdx,rax
+  000000014083017D: E8 0E 2A 84 FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  0000000140830182: 48 8B 4C 24 28     mov         rcx,qword ptr [rsp+28h]
+  0000000140830187: 48 89 03           mov         qword ptr [rbx],rax
+  000000014083018A: 48 89 4B 08        mov         qword ptr [rbx+8],rcx
+  000000014083018E: 48 8B C3           mov         rax,rbx
+  0000000140830191: 48 83 C4 30        add         rsp,30h
+  0000000140830195: 5B                 pop         rbx
+  0000000140830196: C3                 ret
+  0000000140830197: 90                 nop

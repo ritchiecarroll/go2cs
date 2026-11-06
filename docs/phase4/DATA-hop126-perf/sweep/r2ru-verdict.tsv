@@ -1,0 +1,17 @@
+PerfChannel	R2Ru/R2R	117.1	79.9	1.466	+46.6%	floor 37.0%	n=11	MOVED
+PerfFib	R2Ru/R2R	108.7	110.8	0.981	-1.9%	floor 38.8%	n=5	within
+PerfFieldView	R2Ru/R2R	1909.0	1933.6	0.987	-1.3%	floor 2.8%	n=5	within
+PerfIface	R2Ru/R2R	660.4	376.1	1.756	+75.6%	floor 4.2%	n=11	MOVED
+PerfIfaceCall	R2Ru/R2R	1458.1	339.6	4.294	+329.4%	floor 2.8%	n=11	MOVED
+PerfIfaceShell	R2Ru/R2R	728.4	574.6	1.268	+26.8%	floor 3.0%	n=5	MOVED
+PerfIfaceShellChurn	R2Ru/R2R	1188.1	1071.7	1.109	+10.9%	floor 2.8%	n=5	MOVED
+PerfMap	R2Ru/R2R	268.9	248.9	1.080	+8.0%	floor 2.8%	n=5	MOVED
+PerfMatMul	R2Ru/R2R	589.4	213.8	2.757	+175.7%	floor 4.6%	n=5	MOVED
+PerfRefLower	R2Ru/R2R	524.7	535.0	0.981	-1.9%	floor 2.8%	n=11	within
+PerfSieve	R2Ru/R2R	265.2	139.5	1.901	+90.1%	floor 3.1%	n=5	MOVED
+PerfSort	R2Ru/R2R	255.0	254.4	1.003	+0.3%	floor 3.1%	n=11	within
+PerfStartup	R2Ru/R2R	374.1	374.2	1.000	-0.0%	floor 2.8%	n=11	within
+PerfString	R2Ru/R2R	1995.5	653.5	3.054	+205.4%	floor 3.1%	n=5	MOVED
+PerfStringMatch	R2Ru/R2R	1215.2	804.7	1.510	+51.0%	floor 6.3%	n=5	MOVED
+PerfStringView	R2Ru/R2R	605.2	21.8	27.792	+2679.2%	floor 12.4%	n=5	MOVED
+PerfTlsHandshake	R2Ru/R2R	1079.6	1073.7	1.006	+0.6%	floor 2.8%	n=5	within
