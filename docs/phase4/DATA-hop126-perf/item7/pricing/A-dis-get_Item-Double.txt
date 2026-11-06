@@ -1,0 +1,31 @@
+  00000001410F53A0: 53                 push        rbx
+  00000001410F53A1: 48 83 EC 20        sub         rsp,20h
+  00000001410F53A5: 48 8B DA           mov         rbx,rdx
+  00000001410F53A8: 48 85 DB           test        rbx,rbx
+  00000001410F53AB: 7C 34              jl          00000001410F53E1
+  00000001410F53AD: 48 3B 59 10        cmp         rbx,qword ptr [rcx+10h]
+  00000001410F53B1: 7D 2E              jge         00000001410F53E1
+  00000001410F53B3: 48 83 79 20 00     cmp         qword ptr [rcx+20h],0
+  00000001410F53B8: 74 0D              je          00000001410F53C7
+  00000001410F53BA: 48 8B D3           mov         rdx,rbx
+  00000001410F53BD: 48 83 C4 20        add         rsp,20h
+  00000001410F53C1: 5B                 pop         rbx
+  00000001410F53C2: E9 59 FF FF FF     jmp         golib_go_slice_1<Double>__NativeElementRef
+  00000001410F53C7: 48 8B 01           mov         rax,qword ptr [rcx]
+  00000001410F53CA: 48 03 59 08        add         rbx,qword ptr [rcx+8]
+  00000001410F53CE: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  00000001410F53D1: 48 3B D9           cmp         rbx,rcx
+  00000001410F53D4: 73 20              jae         00000001410F53F6
+  00000001410F53D6: 48 8D 44 D8 10     lea         rax,[rax+rbx*8+10h]
+  00000001410F53DB: 48 83 C4 20        add         rsp,20h
+  00000001410F53DF: 5B                 pop         rbx
+  00000001410F53E0: C3                 ret
+  00000001410F53E1: 48 8B 51 10        mov         rdx,qword ptr [rcx+10h]
+  00000001410F53E5: 48 8B CB           mov         rcx,rbx
+  00000001410F53E8: E8 63 E1 51 FF     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  00000001410F53ED: 48 8B C8           mov         rcx,rax
+  00000001410F53F0: E8 2B 3E 28 05     call        RhpThrowEx
+  00000001410F53F5: CC                 int         3
+  00000001410F53F6: E8 95 55 02 FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  00000001410F53FB: CC                 int         3
+  00000001410F53FC: 90                 nop

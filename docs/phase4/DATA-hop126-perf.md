@@ -1022,3 +1022,79 @@ paid for by short inputs.
 - The disassembly gates come before any timing.
 - The predictions stated 2026-11-05 carry over to the new base: A against base 0.80-0.90 for TlsHandshake; at least 2 of
   Sieve, MatMul and Sort moved faster; AI/A 0.88-0.96.
+
+### 11.7 Amended 2026-11-06: the two portable fixes, priced at the default instruction set
+
+Raw files are in [`item7/pricing/`](DATA-hop126-perf/item7/pricing/). The design was approved before any image was built,
+and its arms were amended on 2026-11-06 (§11.6, *Open from this section*): source-reference builds by the i9 at the
+default instruction set, each with its native PDB.
+
+| arm | tree | change | programs |
+|:--|:--|:--|:--|
+| B0 | `f0ed6c71f6` | base | TlsHandshake, Sieve, MatMul, Sort |
+| A | `2393238b8a` | R's zero-size pre-gate (golib `GoZeroSize.cs` only) | the same four |
+| AI | `32a0372d23` | A plus the `bits.Mul` inline (`math/bits` `bits_impl.cs` only) | TlsHandshake |
+
+The i9 confirmed the following for every image:
+- the converted program sources are byte-identical across arms (paths masked);
+- each image's golib and `math/bits` tree hashes are named in its manifest;
+- no response file names an instruction set;
+- every `go.*` project resolves from that arm's own `src/core` (0 packages);
+- SDK 10.0.403, ILC 10.0.14.
+
+Every file was sha256-checked against the i9's post and its folder manifest before use. All timing is `win-x64` on G.
+
+**The disassembly gates, read before any timing** (`pgates.sh`, by symbol extent on TlsHandshake): GATES PASS.
+- B0's `slice<UIntPtr>.get_Item` carries the `GoZeroSizeFacts` class-constructor check, as the control. A's and AI's do
+  not: 31 instructions against 51, the shape the §11.5 probe predicted.
+- B0's and A's `bigmod.addMulVVW` call `math/bits.Mul`. AI's does not. It calls `Math.BigMul`'s software fallback directly
+  and holds no `mulx`, as a default-instruction-set image should.
+- **A gate hazard, recorded for any future ILC symbol gate: identical-body folding.** In A, `slice<UIntPtr>.get_Item`
+  became a one-instruction `jmp` to `slice<Double>.get_Item`: with the gate gone, the two 8-byte-element indexers are the
+  same machine code, and ILC keeps one. A gate that reads only the named symbol's extent passes VACUOUSLY on such a stub,
+  as the first read here did. `pgates.sh` now follows a one-instruction `jmp` to its target and says so, so the gate
+  reads the body the caller actually runs.
+- Visible but not gated: in A, `get_Item` is smaller but still a CALL from `addMulVVW`, four per iteration. It is not
+  inlined.
+
+**The window (04:11-04:18): INVALID as worded.** Exactly one arm broke "every arm's A/A under 3%": Sieve's B0, at 3.86%.
+Every other arm's A/A was 0.05-0.55%. The Fib control held (+2.18%, [-2.29%, +3.85%]), and the census found 0 build
+processes and 0 pwsh hosts at both ends. Per the §11.6 precedent, the other rows stand on per-row validity. The Sieve row
+was re-measured alone (below), and the window's 0.834 for Sieve is not read.
+
+**The Sieve-only rerun (04:19-04:20, valid)**, as COORD approved it before it ran:
+- B0 and A at 21 rounds, under the original rule with no amendment.
+- A/A: B0 0.59%, A 0.18%. Fib control -0.30%, [-4.33%, +3.98%].
+- The Go Sieve control, which is reported only in every window, stepped +22.57% from start to end (interval excluding 0),
+  while Fib did not. All 11 end samples (60-68 ms) sit above all 11 start samples (44-56 ms), so it is a step, not a drift.
+  It is **not explained**: the census shows nothing.
+  - The stated hypothesis, unverified: a memory-subsystem state change. Go's Sieve is memory-bound and Fib is compute-bound.
+  - Interleaving the arms in alternating order cancels a slow drift, but not a step inside one arm's half. The per-round
+    table of the four arms shows no level change from round 0 to round 20 (`psieve-arms.tsv`), so no step reached the arms.
+
+**The result.** ms medians:
+
+| reading | program | new | base | ratio | change | floor | |
+|:--|:--|--:|--:|--:|--:|--:|:--|
+| A/B0 | MatMul | 605.0 | 735.0 | 0.823 | -17.7% | 1.5% | **moved faster** |
+| A/B0 | Sieve (rerun) | 277.5 | 320.9 | 0.865 | -13.5% | 6.7% | **moved faster** |
+| A/B0 | Sort | 481.9 | 556.1 | 0.867 | -13.3% | 1.4% | **moved faster** |
+| A/B0 | TlsHandshake | 2347.3 | 2543.3 | 0.923 | -7.7% | 0.7% | **moved faster** |
+| AI/A | TlsHandshake | 2175.8 | 2347.3 | 0.927 | -7.3% | 0.9% | **moved faster** |
+| AI/B0, both fixes | TlsHandshake | 2175.8 | 2543.3 | 0.856 | -14.4% | 0.9% | **moved faster** |
+
+**The predictions, stated 2026-11-05 and scored as worded: 2 of 3 HIT.**
+- A/B0 TlsHandshake 0.80-0.90: **FAILED** (0.923). The prediction priced all of `get_Item`'s 448 ms. A recovers 196 ms,
+  because the indexer lost its class-constructor check but is still a call, four per iteration.
+- At least 2 of Sieve, MatMul and Sort move faster: **HIT**, all three.
+- AI/A TlsHandshake 0.88-0.96: **HIT** (0.927, -172 ms).
+
+**Beside §11.6, for the instruction-set decision.**
+- **The two portable fixes:** at the DEFAULT instruction set, they take TlsHandshake to 0.856 (-368 ms). Option A alone
+  speeds the slice-heavy programs by 13-18%, and it costs no CPU support.
+- **x86-64-v3 alone:** TlsHandshake 0.899 (-256 ms), the slice-heavy programs within noise, StringMatch +4.7% and
+  IfaceShellChurn +3.0%, a suite geomean of 1.000, and an image that refuses to start on CPUs without AVX2, BMI1, BMI2,
+  F16C, FMA or LZCNT.
+- **Not measured:** v3 on top of both fixes (AIv3 was skipped). What v3 could still add on TlsHandshake is at most the
+  software fallback's share (169 ms exclusive in §11.3).
+- **Open:** the remaining `get_Item` call is the next lever, and R holds that scout (an AOT indexer inline).
