@@ -132,6 +132,11 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// The selector of the deferred or spawned call whose own text visitDeferStmt/visitGoStmt are rendering, or nil.
+	// That text is split at its last dot into the receiver Go evaluates at the statement and the method, so a value
+	// method's receiver there must be the copied value, never the box a twin would copy from later (convSelectorExpr).
+	deferGoCallSelector *ast.SelectorExpr
+
 	fset               *token.FileSet
 	pkg                *types.Package
 	info               *types.Info
