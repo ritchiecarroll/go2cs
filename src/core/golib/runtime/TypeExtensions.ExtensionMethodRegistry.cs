@@ -65,6 +65,12 @@ namespace go.golib;
 //   type an assembly declares, 16,185 of them for the crypto/tls test host, about 85% of the scan's
 //   cold cost — is the fallback for an assembly without raw metadata (Native AOT). The two must find
 //   the same methods in the same order; GolibTests' ExtensionScanMetadataTests holds them to it.
+//   Between the two sits the BUILD-TIME LIST (ListedExtensionHosts): go2cs-gen writes one
+//   [assembly: GoExtensionHost(typeof(X))] per host class and a GoExtensionHostList marker that says the
+//   list is complete, and an assembly without raw metadata that carries the marker is read from its
+//   list instead of GetTypes(). It is read ONLY there: wherever the metadata walk exists it is exact by
+//   construction, and the list would be a second source that can go stale. GolibTests'
+//   ExtensionHostListTests holds the list to the walk's methods (docs/phase4/DESIGN-extension-host-list.md).
 //   golib is skipped by IDENTITY, not by name: its extension methods
 //   are C# helpers (GoShift's Rsh/Lsh on the builtin integers, slice and Must helpers), never Go
 //   methods, and Go's predeclared types have empty method sets. The name prefix `go.golib.` alone
@@ -267,7 +273,7 @@ public static partial class TypeExtensions
 
         Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");
 
-        foreach (Type type in ExtensionHostTypes(assembly) ?? assembly.GetTypes())
+        foreach (Type type in ExtensionHostTypes(assembly) ?? ListedExtensionHosts(assembly) ?? assembly.GetTypes())
         foreach (MethodInfo extensionMethod in DeclaredExtensionMethods(type))
             extensionMethods.Add((extensionMethod, extensionMethod.GetExtensionTargetType()));
     }
@@ -357,6 +363,31 @@ public static partial class TypeExtensions
 
             return false;
         }
+    }
+
+    /// <summary>
+    /// The classes of <paramref name="assembly"/> that go2cs-gen listed at build time as declaring extension methods,
+    /// each once, in the order first listed.
+    /// </summary>
+    /// <returns>
+    /// The classes, or <c>null</c> when the assembly does not carry <see cref="GoExtensionHostListAttribute"/> and so
+    /// has no complete list; the caller then falls back to <see cref="Assembly.GetTypes"/>.
+    /// </returns>
+    internal static IReadOnlyList<Type>? ListedExtensionHosts(Assembly assembly)
+    {
+        if (!assembly.IsDefined(typeof(GoExtensionHostListAttribute), false))
+            return null;
+
+        List<Type> hosts = [];
+        HashSet<Type> listed = [];
+
+        foreach (GoExtensionHostAttribute attribute in assembly.GetCustomAttributes<GoExtensionHostAttribute>())
+        {
+            if (listed.Add(attribute.Host))
+                hosts.Add(attribute.Host);
+        }
+
+        return hosts;
     }
 
     private sealed class TypePrecedenceComparer : Comparer<Type>
