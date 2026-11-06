@@ -338,9 +338,17 @@ public static partial class TypeExtensions
     /// <param name="method">Receiver-first static method from a Go method set.</param>
     /// <param name="receiver">The method's first parameter type, byref included.</param>
     /// <returns><c>true</c> when the method belongs to the pointer method set only.</returns>
-    internal static bool IsPointerSetByRefReceiver(MethodInfo method, Type receiver) =>
-        method.GetCustomAttribute<GoRecvAttribute>() is not null ||
-        receiver.IsByRef && method.GetCustomAttribute<GoCopyBoundAttribute>() is null && !IsHandOwnedPackage(method);
+    internal static bool IsPointerSetByRefReceiver(MethodInfo method, Type receiver)
+    {
+        PointerSetTestProbeForTest?.Invoke(method);
+
+        return method.GetCustomAttribute<GoRecvAttribute>() is not null ||
+            receiver.IsByRef && method.GetCustomAttribute<GoCopyBoundAttribute>() is null && !IsHandOwnedPackage(method);
+    }
+
+    // TEST SEAM, GolibTests only: called with each method IsPointerSetByRefReceiver tests, so a test can count the
+    // custom-attribute reads a method-set question costs. Null in every program. Never wire product code to it.
+    internal static Action<MethodInfo>? PointerSetTestProbeForTest;
 
     // Whether the method's assembly opts out with [assembly: GoHandOwnedPackage]: there a method is a
     // pointer receiver only by [GoRecv], as it was before converted code stopped writing it.
