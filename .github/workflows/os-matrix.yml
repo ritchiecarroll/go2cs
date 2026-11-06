@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite)'
         type: choice
         required: true
         default: census
@@ -59,6 +59,7 @@ on:
           - release-smoke
           - aot-smoke
           - nugetgo-behavior
+          - golib-tests
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
         type: string
@@ -342,6 +343,9 @@ jobs:
                                          # thing here that has never been run end to end.
                                          # 150 is chosen to clear a pessimistic reading of it with
                                          # the headroom the table's own doctrine asks for.
+              'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
+                                         # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
+                                         # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
@@ -866,6 +870,65 @@ jobs:
 
           if ($failed.Count -gt 0) { exit 1 }
           exit 0
+
+      # -------------------------------------------------------------------------------------
+      # golib-tests — GolibTests on this leg's own host. Added for guards whose subject only exists on one
+      # architecture: RuntimeAesHashTests checks the runtime's AES hash bit for bit against a table taken from
+      # Go, and on osx-arm64 that body runs on Arm's AESE and AESMC (runtime/hash_impl.cs) rather than on
+      # x86's AESENC, a composition no x64 host can execute. Nothing else in CI runs GolibTests.
+      # -------------------------------------------------------------------------------------
+      - name: GolibTests — build and run for this GOOS
+        if: needs.plan.outputs.stage == 'golib-tests'
+        shell: pwsh
+        env:
+          GOLIB_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "golib-tests-$goos-$rid.log"
+          $trx = Join-Path $art "golib-tests-$goos-$rid.trx"
+
+          Push-Location 'src/tests/GolibTests'
+          try {
+              & dotnet build -c Release "-p:GoTargetOS=$goos" -nologo -v q *>&1 | Tee-Object -FilePath $log
+              $runExit = $LASTEXITCODE
+
+              if ($runExit -eq 0) {
+                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos", '--blame-hang-timeout', '10m',
+                      '--logger', "trx;LogFileName=$trx", '--logger', 'console;verbosity=normal')
+
+                  if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_FILTER)) { $testArgs += @('--filter', $env:GOLIB_FILTER) }
+
+                  & dotnet @testArgs *>&1 | Tee-Object -FilePath $log -Append
+                  $runExit = $LASTEXITCODE
+              }
+          }
+          finally { Pop-Location }
+
+          # Every test's outcome by name (Passed, Failed, NotExecuted for an Inconclusive), read from the trx, so a
+          # guard that went Inconclusive on this host is visible rather than counted as a pass.
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $outcomes = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object { "  $($_.outcome) $($_.testName)" })
+          }
+
+          $summary = @(
+              "## GolibTests -- GOOS=$goos ($rid)"
+              ''
+              "Filter ``$($env:GOLIB_FILTER)`` -- exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
 
       # -------------------------------------------------------------------------------------
       # behavioral-smoke — prove the harness itself runs on this runner.
