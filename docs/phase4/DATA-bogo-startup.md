@@ -278,6 +278,12 @@ package-init phase and cannot be split per package with these instruments. The t
    ReadyToRun instantiation coverage.
 5. **The test host's `Run`.** About 0.08 s: the preload (15 ms) and the second scan, which lever 1 would remove.
 
+**Amended 2026-11-06 (H, claude/h-p521-table).** Lever 2's P-521 half is implemented and measured in
+[DATA-p521-table.md](DATA-p521-table.md): the field multiply is displaced onto a straight-line hand-own, and the
+generator-table build fell from 520 ms to 42.6 ms under ReadyToRun on H. That seat also found that composite
+ReadyToRun discards a precompiled body that uses `Math.BigMul`; whether the four `fiat` P-256 methods' 27 ms of
+JIT share that cause is not established. The ReadyToRun-rejection row on the BOARD carries it.
+
 ### 8.5 What this changes
 
 The 0.95 s is three roughly equal parts plus a small rest:

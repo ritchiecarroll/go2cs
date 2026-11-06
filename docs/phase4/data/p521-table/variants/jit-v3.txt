@@ -1,0 +1,2 @@
+  89: JIT compiled go.math.bits_package:Mul64(ulong,ulong) [FullOpts, IL size=16, code size=38]
+  92: JIT compiled go.crypto.internal.fips140.nistec.fiat_package:p521Mul(byref,byref,byref) [FullOpts, IL size=8523, code size=13881]

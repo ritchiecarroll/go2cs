@@ -1,0 +1,180 @@
+// Scratch prototype, never committed: a call-free 9-limb Montgomery multiply for p = 2^521 - 1 (R = 2^576),
+// sized against the converted fiat p521Mul. m' = -p^-1 mod 2^64 = 1, since p = -1 mod 2^64.
+using System;
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
+
+static class Proto
+{
+    const ulong P8 = 0x1FF;
+
+    // 64x64 -> 128 without leaving the assembly: four 32x32 products.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static ulong MulSplit(ulong a, ulong b, out ulong lo)
+    {
+        ulong a0 = (uint)a, a1 = a >> 32, b0 = (uint)b, b1 = b >> 32;
+        ulong p00 = a0 * b0, p01 = a0 * b1, p10 = a1 * b0, p11 = a1 * b1;
+        ulong mid = (p00 >> 32) + (uint)p01 + (uint)p10;
+        lo = (mid << 32) | (uint)p00;
+        return p11 + (p01 >> 32) + (p10 >> 32) + (mid >> 32);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static ulong Adc(ulong x, ulong y, ref ulong carry)
+    {
+        ulong s = x + y + carry;
+        carry = ((x & y) | ((x | y) & ~s)) >> 63;
+        return s;
+    }
+
+    // variant 0: Math.BigMul; 2: MulSplit.
+    public static void MontMul(int variant, Span<ulong> z, ReadOnlySpan<ulong> x, ReadOnlySpan<ulong> y)
+    {
+        Span<ulong> t = stackalloc ulong[11];
+        t.Clear();
+        for (int i = 0; i < 9; i++)
+        {
+            ulong yi = y[i], c = 0;
+            for (int j = 0; j < 9; j++)
+            {
+                ulong hi = variant == 0 ? Math.BigMul(x[j], yi, out ulong lo) : MulSplit(x[j], yi, out lo);
+                ulong k = 0;
+                lo = Adc(lo, t[j], ref k);
+                hi += k; k = 0;
+                lo = Adc(lo, c, ref k);
+                t[j] = lo;
+                c = hi + k;
+            }
+            ulong cc = 0;
+            t[9] = Adc(t[9], c, ref cc);
+            t[10] += cc;
+
+            ulong m = t[0];
+            c = 0;
+            {
+                ulong hi = variant == 0 ? Math.BigMul(m, ulong.MaxValue, out ulong lo) : MulSplit(m, ulong.MaxValue, out lo);
+                ulong k = 0;
+                Adc(lo, t[0], ref k);
+                c = hi + k;
+            }
+            for (int j = 1; j < 9; j++)
+            {
+                ulong pj = j == 8 ? P8 : ulong.MaxValue;
+                ulong hi = variant == 0 ? Math.BigMul(m, pj, out ulong lo) : MulSplit(m, pj, out lo);
+                ulong k = 0;
+                lo = Adc(lo, t[j], ref k);
+                hi += k; k = 0;
+                lo = Adc(lo, c, ref k);
+                t[j - 1] = lo;
+                c = hi + k;
+            }
+            ulong k2 = 0;
+            t[8] = Adc(t[9], c, ref k2);
+            t[9] = t[10] + k2;
+            t[10] = 0;
+        }
+        // t < 2p: subtract p once, branch-free.
+        Span<ulong> d = stackalloc ulong[9];
+        ulong borrow = 0;
+        for (int j = 0; j < 9; j++)
+        {
+            ulong pj = j == 8 ? P8 : ulong.MaxValue;
+            ulong diff = t[j] - pj - borrow;
+            borrow = ((~t[j] & pj) | (~(t[j] ^ pj) & diff)) >> 63;
+            d[j] = diff;
+        }
+        // keep t only when the subtraction borrowed and t[9] is clear
+        ulong keepT = 0UL - (borrow & ~t[9] & 1);
+        for (int j = 0; j < 9; j++) z[j] = (t[j] & keepT) | (d[j] & ~keepT);
+    }
+
+    // variant 3: the reduction uses p = 2^521 - 1 directly. With m = t[0], (t + m*p) / 2^64 = (t - t[0]) / 2^64 +
+    // m * 2^457, and 457 = 7*64 + 9, so the step is a one-limb shift plus m << 9 at limb 7 and m >> 55 at limb 8.
+    public static void MontMulMersenne(Span<ulong> z, ReadOnlySpan<ulong> x, ReadOnlySpan<ulong> y)
+    {
+        Span<ulong> t = stackalloc ulong[11];
+        t.Clear();
+        for (int i = 0; i < 9; i++)
+        {
+            ulong yi = y[i], c = 0;
+            for (int j = 0; j < 9; j++)
+            {
+                ulong hi = Math.BigMul(x[j], yi, out ulong lo);
+                ulong k = 0;
+                lo = Adc(lo, t[j], ref k);
+                hi += k; k = 0;
+                lo = Adc(lo, c, ref k);
+                t[j] = lo;
+                c = hi + k;
+            }
+            ulong cc = 0;
+            t[9] = Adc(t[9], c, ref cc);
+            t[10] += cc;
+
+            ulong m = t[0];
+            for (int j = 1; j < 11; j++) t[j - 1] = t[j];
+            t[10] = 0;
+            ulong k2 = 0;
+            t[7] = Adc(t[7], m << 9, ref k2);
+            t[8] = Adc(t[8], m >> 55, ref k2);
+            t[9] = Adc(t[9], 0, ref k2);
+        }
+        Span<ulong> d = stackalloc ulong[9];
+        ulong borrow = 0;
+        for (int j = 0; j < 9; j++)
+        {
+            ulong pj = j == 8 ? P8 : ulong.MaxValue;
+            ulong diff = t[j] - pj - borrow;
+            borrow = ((~t[j] & pj) | (~(t[j] ^ pj) & diff)) >> 63;
+            d[j] = diff;
+        }
+        ulong keepT = 0UL - (borrow & ~t[9] & 1);
+        for (int j = 0; j < 9; j++) z[j] = (t[j] & keepT) | (d[j] & ~keepT);
+    }
+
+    static void Call(int variant, Span<ulong> z, ReadOnlySpan<ulong> x, ReadOnlySpan<ulong> y)
+    {
+        if (variant == 3) MontMulMersenne(z, x, y); else MontMul(variant, z, x, y);
+    }
+
+    static BigInteger ToBig(ReadOnlySpan<ulong> l) { BigInteger v = 0; for (int j = 8; j >= 0; j--) v = (v << 64) + l[j]; return v; }
+    static void FromBig(BigInteger v, Span<ulong> l) { for (int j = 0; j < 9; j++) { l[j] = (ulong)(v & ulong.MaxValue); v >>= 64; } }
+
+    public static void Run()
+    {
+        BigInteger p = (BigInteger.One << 521) - 1, R = BigInteger.One << 576, Rinv = BigInteger.ModPow(R, p - 2, p);
+        var rng = new Random(521);
+        Span<ulong> a = stackalloc ulong[9], b = stackalloc ulong[9], z = stackalloc ulong[9];
+        var buf = new byte[72];
+        foreach (int variant in new[] { 0, 2, 3 })
+        {
+            int bad = 0;
+            for (int n = 0; n < 20000; n++)
+            {
+                rng.NextBytes(buf); var av = BigInteger.Remainder(new BigInteger(buf, isUnsigned: true), p);
+                rng.NextBytes(buf); var bv = BigInteger.Remainder(new BigInteger(buf, isUnsigned: true), p);
+                if (n == 0) av = p - 1; if (n == 1) bv = p - 1; if (n == 2) av = 0;
+                FromBig(av, a); FromBig(bv, b);
+                Call(variant, z, a, b);
+                if (ToBig(z) != av * bv * Rinv % p) bad++;
+            }
+            Console.WriteLine($"proto variant {variant} mismatches {bad} of 20000");
+        }
+        FromBig(R % p, a);
+        foreach (int variant in new[] { 0, 2, 3 })
+        {
+            var r = new double[7];
+            for (int k = 0; k < 9; k++)
+            {
+                var sw = Stopwatch.StartNew();
+                for (int i = 0; i < 200_000; i++) Call(variant, a, a, a);
+                if (k >= 2) r[k - 2] = sw.Elapsed.TotalNanoseconds / 200_000;
+            }
+            Array.Sort(r);
+            Console.WriteLine($"proto variant {variant} MontMul      min {r[0],10:F1} ns  median {r[3],10:F1} ns");
+        }
+        Console.WriteLine($"Bmi2.X64.IsSupported {Bmi2.X64.IsSupported}");
+    }
+}

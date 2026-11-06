@@ -224,6 +224,26 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// Montgomery domain and would double-convert these already-Montgomery limbs, silently).
 		"init": goosAny,
 	},
+	"crypto/internal/fips140/nistec/fiat": {
+		// p521Mul and p521Square are fiat-crypto's generated word-by-word Montgomery bodies, and each
+		// declares 1,006 locals: past the JIT's 512-local cut-off for inlining INTO a method, so every
+		// bits.Mul64, bits.Add64, p521Uint1 conversion and limb read stays a call (1,250 per field
+		// multiply), under the JIT and ReadyToRun alike. Measured on H at 642621b43f's tree (win-x64,
+		// runtime 10.0.13): a field multiply 2.37 us JIT / 13.7 us ReadyToRun against Go's 190 ns, and
+		// the P-521 generator-table build crypto/tls's test package pays at every launch 523 ms under
+		// ReadyToRun against Go's 6 ms (docs/phase4/DATA-p521-table.md; COORD ruling 2026-11-06). No
+		// visible-code change avoids a caller-side local count, and bits.* calls stay visible at call
+		// sites by the intrinsic-granularity ruling (2026-10-22), so the seam is a NON-visible hand-own.
+		// UNLIKE the init above, this displaces formally verified output with hand-written arithmetic:
+		// crypto/internal/fips140/nistec/fiat/p521_impl.cs holds a straight-line, constant-time CIOS body
+		// with fiat's exact contract, checked against BigInteger (GolibTests
+		// P521FieldDifferentialTests) and against Go (the P521CurveBytes behavioral test), and the two
+		// Go bodies are pinned by source hash (repoguard TestHandOwnedReimplementationsMatchPinnedGoSource)
+		// so a hop that changes either fails there. P-384's fiat Mul has the same shape off the start-up
+		// path (BOARD); it is not displaced.
+		"p521Mul":    goosAny,
+		"p521Square": goosAny,
+	},
 	"crypto/internal/fips140/sha3": {
 		// keccakF1600Generic views the sponge state both ways — the [200]byte it absorbs into and the
 		// [25]uint64 it permutes over — and on a little-endian host Go takes the view for free with
