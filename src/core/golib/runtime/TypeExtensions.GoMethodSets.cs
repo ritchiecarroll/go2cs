@@ -338,9 +338,17 @@ public static partial class TypeExtensions
     /// <param name="method">Receiver-first static method from a Go method set.</param>
     /// <param name="receiver">The method's first parameter type, byref included.</param>
     /// <returns><c>true</c> when the method belongs to the pointer method set only.</returns>
-    internal static bool IsPointerSetByRefReceiver(MethodInfo method, Type receiver) =>
-        method.GetCustomAttribute<GoRecvAttribute>() is not null ||
-        receiver.IsByRef && method.GetCustomAttribute<GoCopyBoundAttribute>() is null && !IsHandOwnedPackage(method);
+    internal static bool IsPointerSetByRefReceiver(MethodInfo method, Type receiver)
+    {
+        PointerSetTestProbeForTest?.Invoke(method);
+
+        return method.GetCustomAttribute<GoRecvAttribute>() is not null ||
+            receiver.IsByRef && method.GetCustomAttribute<GoCopyBoundAttribute>() is null && !IsHandOwnedPackage(method);
+    }
+
+    // TEST SEAM, GolibTests only: called with each method IsPointerSetByRefReceiver tests, so a test can count the
+    // custom-attribute reads a method-set question costs. Null in every program. Never wire product code to it.
+    internal static Action<MethodInfo>? PointerSetTestProbeForTest;
 
     // Whether the method's assembly opts out with [assembly: GoHandOwnedPackage]: there a method is a
     // pointer receiver only by [GoRecv], as it was before converted code stopped writing it.
@@ -490,6 +498,13 @@ public static partial class TypeExtensions
                 Type receiverType = receiver.IsByRef ? receiver.GetElementType()! : receiver;
                 ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
 
+                // The receiver match first: it is a type comparison, and the pointer-receiver rule below reads custom
+                // attributes, which cost far more (under Native AOT each read decodes reflection metadata). Both are
+                // pure filters, so their order changes only how many methods pay the attribute reads: those of the
+                // asked type, not every method of every scanned package.
+                if (!ReceiverElementMatches(receiverElement, valueElement))
+                    continue;
+
                 // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
                 // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
                 // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
@@ -500,9 +515,6 @@ public static partial class TypeExtensions
                 // It stays in the set here and is bound through a COPY of the receiver (see
                 // IsCopyBoundReceiver).
                 if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
-                    continue;
-
-                if (!ReceiverElementMatches(receiverElement, valueElement))
                     continue;
 
                 // A VALUE method's ж<X> twin (go2cs-gen's `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`) is
