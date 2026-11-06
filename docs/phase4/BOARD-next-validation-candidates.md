@@ -33632,6 +33632,26 @@ branches like this one; shape 2 removes them).
 
 — C1 (2026-11-06)
 
+**Amended 2026-11-06 (C1, COORD ruling: the AES trio seat, option 3) — NARROWED, still OPEN.** On
+`claude/c1-aes-arm64`, an arm64 process now takes alginit's arm64 branch and has `cpu.ARM64` filled, in the hand-owns
+that stand in for schedinit, keyed on the PROCESS architecture:
+
+- `src/core/internal/cpu/cpu_arm64_impl.cs`: cpu_arm64.go's doinit option table, registered only on an arm64 process,
+  then GODEBUG's cpu.* options off Windows (so `cpu.aes=off` clears `ARM64.HasAES`, as in Go);
+- `src/core/internal/cpu/darwin/cpu_arm64_darwin_impl.cs`: darwin's osInit (AES, PMULL, SHA1, SHA2 unconditional;
+  ATOMICS, CRC32, SHA512, SHA3 from the same `hw.optional.*` sysctls). `HasDIT` is held FALSE by ruling (Q2): the row
+  below;
+- `src/core/runtime/hash_impl.cs`: `initHashAlgorithm` gains alginit's arm64 branch, with amd64's schedule run on Arm's
+  AESE and AESMC (`AESENC(s, k) = AESMC(AESE(s, 0)) ^ k`, ruling Q3, schedule 3-i).
+
+The AES trio above closes with it on osx-arm64. A second, user-visible consumer moves with it: crypto/tls's
+`hasGCMAsmARM64` reads the filled flags, so osx-arm64 now prefers AES-GCM as Go does there (named on crypto/tls's
+proof page through its manifest note). What stays OPEN on this row: `runtime.GOARCH` itself reads `amd64` on Apple
+silicon, and every compile-time-folded `GOARCH ==` branch that the shape-1 census would find; the design scout is
+`docs/DESIGN-aeshash-arm64.md`.
+
+— C1 (2026-11-06)
+
 ### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
 
 This is the owed row for a gap that until now was recorded only as prose, at
@@ -33926,5 +33946,34 @@ Read while gating batches 202-203 (re-merged as 205-206) and 207 on the i7 and t
 - One earlier i7 Release failure at 386e95397a stays UNNAMED: it ran at -v q with no trx, so it is not attributed to either test.
 Both tests read clean in every other run: 13 Release and 3 Debug across the two boxes. **Open; owner to be assigned.** The fix shape is the owner's: a deterministic precondition (no GC inside the window, a private pool, or a bounded retry) without hiding a real regression.
 
+
+## 2026-11-06 — C1 (COORD ruling, the AES trio seat's Q2): `cpu.ARM64.HasDIT` is held false because .NET cannot set PSTATE.DIT; crypto/subtle's three DIT tests skip on osx-arm64 where Go runs them — OPEN, retires on a .NET API
+
+**What happens.** Go's darwin osInit fills `ARM64.HasDIT` from `hw.optional.arm.FEAT_DIT`, and Apple silicon reports
+it, so Go on osx-arm64 runs crypto/subtle's TestWithDataIndependentTiming, TestDITPanic and
+TestDITGoroutineInheritance. Each checks that `WithDataIndependentTiming` sets the processor's PSTATE.DIT bit inside
+the call and restores it after. The converted runtime cannot set that bit: the .NET runtime exposes no control for
+PSTATE.DIT, and `src/core/internal/runtime/sys/no_dit.cs` reports `DITSupported` false.
+
+**Ruled (COORD, 2026-11-06).** The darwin osInit hand-own (`src/core/internal/cpu/darwin/cpu_arm64_darwin_impl.cs`)
+fills every other flag Go's does and holds `HasDIT` FALSE. A capability flag describes what the CONVERTED runtime can
+do, not the silicon; `HasDIT` true would let `WithDataIndependentTiming`, and any program that reads the flag, believe
+DIT had been enabled when it had not, a silent false security claim, worse than three honest reds. So the three tests
+take their own skip branch (`CPU does not support DIT`), and `src/core/crypto/subtle/go2cs_test_disclosures.json`
+discloses them as `platform-skip` on darwin, naming the cause. On osx-x64 both sides skip and the entries are unused.
+
+**How it became visible.** Before batch 208 the osx-arm64 oracle ran amd64 under Rosetta, where Go's
+`cpu.ARM64.HasDIT` is false and Go skipped too. With the oracle at native arm64 (`-test-oracle-goarch`), Go runs the
+three tests, and crypto/subtle on osx-arm64 read three undisclosed Go pass / C# skip divergences until these entries.
+
+**Retires when** .NET gains an API for PSTATE.DIT and the converted runtime's `EnableDIT`/`DITEnabled` use it: then
+`DITSupported` can be true on arm64, `HasDIT` follows the sysctl as in Go, and the three tests run.
+
+**Note for the roster.** The roster's `darwin:` key banks a row only when osx-arm64 and osx-x64 agree verdict for
+verdict. With the oracle at each RID's own arch, crypto/subtle reads three DISCLOSED rows on osx-arm64 and three
+matched skips on osx-x64: the first row where the two mac RIDs legitimately differ. How the key carries that is
+COORD's call.
+
+— C1 (2026-11-06)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
