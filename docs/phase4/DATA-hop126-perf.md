@@ -1098,3 +1098,86 @@ was re-measured alone (below), and the window's 0.834 for Sieve is not read.
 - **Not measured:** v3 on top of both fixes (AIv3 was skipped). What v3 could still add on TlsHandshake is at most the
   software fallback's share (169 ms exclusive in §11.3).
 - **Open:** the remaining `get_Item` call is the next lever, and R holds that scout (an AOT indexer inline).
+
+### 11.8 Amended 2026-11-06: the ReadyToRun composite lever in single-file publishes, and what the 3 s really is
+
+Raw files are in [`item7/r2r-lever/`](DATA-hop126-perf/item7/r2r-lever/). The question, from the i9's discriminator: does
+crossgen2's `--composite`, the SDK default for a self-contained single-file ReadyToRun publish, cost converted programs?
+And should single-file converted templates set `PublishReadyToRunComposite=false`?
+
+The i9 built every image at master `52d69e8968` by the drop recipe:
+- `-recurse=nuget` against the published 1.26.10.2 `go.*` packages; the masked source identities equal the drop's.
+- `dotnet publish -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true -p:PublishSingleFile=true`, at the
+  default instruction set. SDK 10.0.403, crossgen2 and runtime pack 10.0.14.
+- Each publish folder was pulled whole and every file checked against its own manifest.
+
+The converted csproj (and `csproj-template.xml`) sets `EnableCompressionInSingleFile=true`. It keeps the program's own
+assembly out of ReadyToRun, the same in every arm.
+
+| arm | packaging | crossgen2 | exe | publish |
+|:--|:--|:--|--:|--:|
+| C | composite, compressed (what a plain single-file publish gets today) | one `--composite` invocation, a 1,649,922,048-byte image | 571 MB | ~765 s |
+| N | per-assembly, compressed (`PublishReadyToRunComposite=false`, what the shipped single-file profiles set) | one invocation per assembly (82-83) | 33 MB | 30 s |
+| CU | composite, UNcompressed (C plus `EnableCompressionInSingleFile=false`), PerfStartup only | as C | 1,696 MB | 699 s |
+
+**Window 1, C against N (05:02-05:07, valid).** A/A 0.08-2.27%; the Fib control held (-0.55%, [-3.74%, +1.70%]).
+
+| program | N | C | N/C | floor | |
+|:--|--:|--:|--:|--:|:--|
+| Startup, process wall | 473.2 | 3492.3 | 0.136 | 4.5% | **N faster by 3.0 s** |
+| StringMatch, in-program | 779.8 | 1074.4 | 0.726 | 10.2% | **N faster** |
+
+StringMatch's process wall, which is not the reading, was 1272.7 against 4643.0 ms.
+
+The predictions, scored as worded:
+- Startup N/C below 1: **HIT**, far beyond its stated size.
+- StringMatch within its floor: **FAILED**.
+
+**The mechanism, step by step.**
+- *Not JIT time.* `DOTNET_JitDisasmSummary`, one run per image outside the timing (`jit-*-summary.txt`): C JITs about 5x
+  FEWER methods than N (Startup 510 against 2626; StringMatch 911 against 2684). The composite precompiles far more of the
+  framework and its generic instantiations.
+- *`bits.Mul` cannot be tested here.* Neither program calls `math/bits.Mul`, `Mul64` or `Math.BigMul`, so neither arm's
+  list names them. TlsHandshake would be the program for the i9's discriminator.
+- *Compression, by size.* C's 571,067,714-byte exe bundles a 1,649,922,048-byte composite image, so it is compressed, at
+  about 2.9:1. CU's uncompressed exe is 1,695,755,227 bytes.
+- *Compression is the whole 3 s.* The discriminating window (05:23-05:26, valid: A/A 0.05-0.69%, Fib control +0.88%,
+  [-2.11%, +5.61%]), PerfStartup process wall:
+
+| arm | wall (ms) | against C | against N |
+|:--|--:|--:|--:|
+| C, composite compressed | 3480.3 | | 7.40x |
+| N, per-assembly compressed | 470.4 | 0.135 (replicates 0.136) | |
+| CU, composite uncompressed | 319.7 | **0.092** (-3.16 s) | **0.680** (-150.7 ms) |
+
+Single-file compression of the one 1.65 GB composite image is the entire ~3 s: every start decompresses it. With
+compression off, the composite starts 32% faster than the per-assembly profile. "Composite wins start-up" holds once it is
+not decompressed. The prediction stated before this window scored 1 of 2:
+- CU/C below 0.5: **HIT**.
+- CU/N in 0.9-1.3: **FAILED**, because CU landed below the range.
+
+The fit with P1's BoGo host (composite, uncompressed, about 1.2 s) is consistent.
+
+**StringMatch's loop under composite, a hypothesis, unverified.** With fewer methods JIT'd, more of C's hot framework code
+stays as precompiled ReadyToRun code instead of being re-JIT'd at Tier1 with dynamic PGO (N's StringMatch lists 61
+"Tier1 with Dynamic PGO" methods). CU's in-program time was not measured, so whether the loop penalty survives without
+compression is open.
+
+**The 2x2 as far as measured, and the trade for the template ruling** (Startup wall):
+
+| | compressed | uncompressed |
+|:--|:--|:--|
+| composite | 3480 ms, 571 MB | 320 ms, 1,696 MB |
+| per-assembly | 470 ms, 33 MB | NOT MEASURED (ruled below) |
+
+- The one combination that is never right is composite WITH compression. Today it is what a plain
+  `dotnet publish -p:PublishSingleFile=true` produces under `csproj-template.xml`, which sets compression and leaves the
+  SDK's composite default.
+- The shipped single-file profiles already avoid it with `PublishReadyToRunComposite=false` (seat #14, pinned by
+  `TestSingleFileProfilesCompileReadyToRunPerAssembly`).
+- CU buys about 150 ms of start-up at a 1.7 GB executable and a ~700 s publish. Its in-program cost is unmeasured.
+- **RULED (COORD, 2026-11-06): no further arms.** Per-assembly uncompressed and CU's in-program time would not change the
+  template decision. CU's 1.7 GB executable and ~700 s publish rule it out as a default whatever its loop does, and N is
+  already the shipped profiles' shape.
+- **The fix is seated with C2:** `csproj-template.xml` sets `PublishReadyToRunComposite=false` for an Exe unless the
+  project sets it, so a plain single-file publish gets N, not C.

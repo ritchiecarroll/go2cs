@@ -1,0 +1,4 @@
+665213f437fad9d55c903b5ae09fa75c548020b87d6b0709447d4f16bcfa4c33 N PerfStartup go2cs-perf/r2r-lever/N/PerfStartup/PerfStartup.exe
+f89fe5a079ae0ec7588c3fc1a043e3bf62d7d057b87411555d62dbcfc109a2e8 N PerfStringMatch go2cs-perf/r2r-lever/N/PerfStringMatch/PerfStringMatch.exe
+331034a0d1634bea971756ee8617854976a8afbfd8b136a5baa67d37de63a2b0 C PerfStartup go2cs-perf/r2r-lever/C/PerfStartup/PerfStartup.exe
+20289778071edee565b96fda97cb08d29ac523820cec8d419486bc2f62fd6444 C PerfStringMatch go2cs-perf/r2r-lever/C/PerfStringMatch/PerfStringMatch.exe
