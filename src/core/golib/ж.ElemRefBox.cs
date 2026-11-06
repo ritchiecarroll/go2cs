@@ -55,9 +55,8 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     // expression, so the weak-table fallback paid an insert under its lock on every such box.
     internal ViewEntry? m_views;
 
-    // The native marshals' run source (NativeStructMarshal.CallDeep, and the shared marshal behind the darwin
-    // libc funnel and the linux keystone): the fast arm's backing and absolute index. The foreign arm has no
-    // contiguous backing to copy a run from, so it answers none.
+    // The native marshals' run source (NativeStructMarshal.CallDeep and the shared darwin/linux marshal): the
+    // fast arm's backing and absolute index. The foreign arm has no contiguous backing, so it answers none.
     Array? IElementRun.RunBacking => m_backing;
 
     nint IElementRun.RunIndex => m_index;
