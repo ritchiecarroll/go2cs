@@ -476,3 +476,182 @@ also falls short of the 0.97 box line. So both are true: the images carry the ga
 - The rest of master's golib drift (C0/P) is within the floor on both boxes.
 - The residual price of "programs plain" on a literal-heavy row is about 5-9% under Native AOT, and larger under the
   JIT on G (H/P 0.752, §8.4.4). The i9 timed AOT only.
+
+---
+
+## 10. Appendix, 2026-11-05: the tuning sweep (-hoist-literals, call-counting delay, TieredPGO)
+
+Appended after §9. The owner asked for the tuning page to carry before-and-after tables, one per setting, showing every row a
+setting moves beyond its floor in EITHER direction. This section holds the new measurement. The other settings' tables
+come from data already recorded:
+- TC0: §3 and `w1-runner-report.txt`;
+- AOT folding off: window 2's D26 against N26, `verdict.tsv`;
+- `GoReadyToRunUserCode` (R2Ru): §5, `w1-r2ru-*.tsv`.
+
+The shell-cache switch (`Go2csNoShellCache`) is not user-facing. It compiles into golib, and the published go.lib is built
+with the cache, so it gets no table (§8.4.4 keeps its tradeoff).
+
+The raw files are in [`DATA-hop126-perf/sweep/`](DATA-hop126-perf/sweep/):
+- `sb.sh` (the builds) and `sweep-build-log.txt`;
+- `sww.sh` (the window), `sww-log.txt` and the raw samples `sww-arms-1.tsv` and `sww-arms-2.tsv`;
+- the controls;
+- `sweep-verdict.tsv`;
+- the reader `sweepread.sh` and its two proof inputs, `rd-ctl.tsv` and `rd-ctl2.tsv`.
+
+**The builds** (not timed). All 17 programs, with Go sources equal to the shipping commit `33589333b2` (checked), each
+converted twice by the `.2` converter (`7871e564`), `-recurse=nuget`, against go.\* 1.26.10.2 as a consumer gets it:
+- **P:** plain, the default;
+- **H:** `-hoist-literals`.
+
+Each conversion got the template JIT build and the template ReadyToRun publish. That is 34 conversions and 68 builds, all
+rc 0. Hoisting creates fields in three programs only: StringMatch (7), TlsHandshake (3) and StringView (1). The **D** arms
+are copies of P's JIT and R2R folders with ONLY `runtimeconfig.json`'s `CallCountingDelayMs` changed from 0 to 100, .NET's
+own default.
+
+**The window** (13:33-14:31):
+- per program, 11 rounds, interleaved, every arm twice (A/A);
+- the arms: JP and JH (JIT, plain and hoist), RP and RH (R2R, plain and hoist), JD and RD (plain with delay 100) and JG
+  (JIT plain under `DOTNET_TieredPGO=0`);
+- valid: rc 0, 0 build processes at both ends, and Fib −0.08% [−3.23%, +2.20%] holds 0.
+
+**The reading** is the §8 rule, with the reader proven both ways on §9's data. It reads StringMatch's known AOT pair as
+0.894 moved, and one image under two labels as 0.998 within.
+- An arm's value is the mean of its A and AA medians: in-program time, except Startup's process wall.
+- A ratio's floor is the largest of its two arms' A/A gaps and IQRs. A cell moves only beyond its floor.
+- Thirteen arms have A/A gaps of 3% or more, and each widens its cells' floors:
+  - Channel: JD 4.48%, JG 6.49%, JH 3.93%, JP 5.10%, RH 5.37%, RP 4.46%;
+  - Iface RP 5.24%; IfaceCall JP 10.97%;
+  - String: JG 4.95%, JH 3.76%;
+  - StringMatch JD 3.20%;
+  - StringView: JG 7.95%, JP 11.77%.
+
+**The predictions, written before the window and scored as worded:**
+- Hoist moves StringMatch strongly (JIT ≤ 0.80, R2R ≤ 0.85), IfaceShellChurn little, the rest within: **HELD** (JIT 0.752,
+  R2R 0.676; every other row within).
+- Delay 100 moves Startup and slows Sort, the rest mostly within: **FAILED**. It moves 14 of 17 rows under JIT and 12 of 17
+  under R2R.
+- TieredPGO=0 slows Sort and the interface-dispatch rows, the rest within: **FAILED**. It slows 13 of 17.
+
+**The headline: most of the `.1` → `.2` JIT gain is the template's `CallCountingDelayMs=0`.** The delay-100 JIT medians
+sit on window 1's `.1` JIT values: Fib 213.4 against 213.0, String 734.3 against 735.1, Map 470.9 against 473.3, and Sort
+434.8 against 450.0.
+
+**The framing the tuning page must carry:** these programs run for about 0.1 to 2.5 s, so the delay decides how much of
+each run executes before tier-1 code. In a long-running service the delay is only a start-up transient. Startup itself is
+the one row that is faster with the delay: −3.7% JIT, −7.0% R2R.
+
+**No Native AOT step is needed.** Hoisting moved only StringMatch, whose AOT pair is §9 (0.909 G, 0.945 i9). The delay and
+TieredPGO are tiering settings, which Native AOT does not have.
+
+Every table below, in ms (variant against baseline):
+
+### Hoist under JIT (JH/JP)
+
+| program | variant | baseline | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 80.0 | 80.7 | 0.992 | -0.8% | 19.9% | within |
+| Fib | 97.2 | 97.6 | 0.996 | -0.4% | 3.0% | within |
+| FieldView | 1732.7 | 1723.7 | 1.005 | +0.5% | 1.7% | within |
+| Iface | 377.1 | 374.7 | 1.006 | +0.6% | 6.9% | within |
+| IfaceCall | 340.7 | 358.3 | 0.951 | -4.9% | 11.3% | within |
+| IfaceShell | 598.0 | 600.4 | 0.996 | -0.4% | 4.1% | within |
+| IfaceShellChurn | 1086.6 | 1076.8 | 1.009 | +0.9% | 2.9% | within |
+| Map | 253.7 | 253.6 | 1.000 | +0.0% | 4.4% | within |
+| MatMul | 219.2 | 213.2 | 1.028 | +2.8% | 4.9% | within |
+| RefLower | 510.4 | 511.3 | 0.998 | -0.2% | 2.2% | within |
+| Sieve | 136.3 | 139.3 | 0.978 | -2.2% | 5.9% | within |
+| Sort | 255.4 | 255.1 | 1.001 | +0.1% | 1.8% | within |
+| Startup | 507.4 | 502.0 | 1.011 | +1.1% | 2.9% | within |
+| String | 339.0 | 339.0 | 1.000 | +0.0% | 16.7% | within |
+| StringMatch | 594.7 | 791.2 | 0.752 | -24.8% | 10.5% | **moved** |
+| StringView | 22.4 | 20.9 | 1.070 | +7.0% | 18.0% | within |
+| TlsHandshake | 1069.0 | 1071.6 | 0.998 | -0.2% | 2.0% | within |
+
+### Hoist under ReadyToRun (RH/RP)
+
+| program | variant | baseline | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 81.1 | 82.5 | 0.983 | -1.7% | 31.9% | within |
+| Fib | 100.4 | 101.4 | 0.990 | -1.0% | 5.3% | within |
+| FieldView | 1914.5 | 1936.5 | 0.989 | -1.1% | 1.5% | within |
+| Iface | 371.0 | 380.9 | 0.974 | -2.6% | 10.9% | within |
+| IfaceCall | 353.9 | 349.0 | 1.014 | +1.4% | 20.6% | within |
+| IfaceShell | 574.5 | 575.0 | 0.999 | -0.1% | 4.9% | within |
+| IfaceShellChurn | 1093.9 | 1090.9 | 1.003 | +0.3% | 4.0% | within |
+| Map | 255.0 | 248.7 | 1.026 | +2.6% | 5.2% | within |
+| MatMul | 216.8 | 215.4 | 1.007 | +0.7% | 2.2% | within |
+| RefLower | 537.4 | 536.8 | 1.001 | +0.1% | 2.3% | within |
+| Sieve | 134.1 | 134.7 | 0.995 | -0.5% | 2.7% | within |
+| Sort | 254.4 | 255.0 | 0.998 | -0.2% | 2.0% | within |
+| Startup | 373.5 | 371.5 | 1.005 | +0.5% | 2.8% | within |
+| String | 659.5 | 656.5 | 1.005 | +0.5% | 45.5% | within |
+| StringMatch | 566.8 | 838.8 | 0.676 | -32.4% | 9.5% | **moved** |
+| StringView | 21.8 | 21.7 | 1.006 | +0.6% | 16.9% | within |
+| TlsHandshake | 1081.4 | 1078.2 | 1.003 | +0.3% | 2.0% | within |
+
+### Delay 100 under JIT (JD/JP)
+
+| program | variant | baseline | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 126.1 | 80.7 | 1.563 | +56.3% | 19.9% | **moved** |
+| Fib | 213.4 | 97.6 | 2.186 | +118.6% | 3.0% | **moved** |
+| FieldView | 1959.8 | 1723.7 | 1.137 | +13.7% | 1.7% | **moved** |
+| Iface | 558.8 | 374.7 | 1.491 | +49.1% | 4.5% | **moved** |
+| IfaceCall | 435.8 | 358.3 | 1.216 | +21.6% | 11.3% | **moved** |
+| IfaceShell | 723.0 | 600.4 | 1.204 | +20.4% | 4.1% | **moved** |
+| IfaceShellChurn | 1574.1 | 1076.8 | 1.462 | +46.2% | 2.0% | **moved** |
+| Map | 470.9 | 253.6 | 1.857 | +85.7% | 4.3% | **moved** |
+| MatMul | 212.9 | 213.2 | 0.999 | -0.1% | 4.9% | within |
+| RefLower | 752.4 | 511.3 | 1.472 | +47.2% | 2.1% | **moved** |
+| Sieve | 134.8 | 139.3 | 0.967 | -3.3% | 5.5% | within |
+| Sort | 434.8 | 255.1 | 1.704 | +70.4% | 2.3% | **moved** |
+| Startup | 483.5 | 502.0 | 0.963 | -3.7% | 2.9% | **moved** |
+| String | 734.3 | 339.0 | 2.166 | +116.6% | 16.7% | **moved** |
+| StringMatch | 1125.8 | 791.2 | 1.423 | +42.3% | 8.4% | **moved** |
+| StringView | 18.8 | 20.9 | 0.897 | -10.3% | 18.0% | within |
+| TlsHandshake | 2053.3 | 1071.6 | 1.916 | +91.6% | 7.6% | **moved** |
+
+### Delay 100 under ReadyToRun (RD/RP)
+
+| program | variant | baseline | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 105.2 | 82.5 | 1.275 | +27.5% | 31.9% | within |
+| Fib | 213.2 | 101.4 | 2.102 | +110.2% | 5.0% | **moved** |
+| FieldView | 2089.3 | 1936.5 | 1.079 | +7.9% | 1.3% | **moved** |
+| Iface | 616.7 | 380.9 | 1.619 | +61.9% | 10.9% | **moved** |
+| IfaceCall | 506.5 | 349.0 | 1.451 | +45.1% | 14.5% | **moved** |
+| IfaceShell | 770.4 | 575.0 | 1.340 | +34.0% | 4.9% | **moved** |
+| IfaceShellChurn | 1269.0 | 1090.9 | 1.163 | +16.3% | 4.0% | **moved** |
+| Map | 466.1 | 248.7 | 1.874 | +87.4% | 5.2% | **moved** |
+| MatMul | 215.5 | 215.4 | 1.001 | +0.1% | 2.9% | within |
+| RefLower | 761.2 | 536.8 | 1.418 | +41.8% | 2.3% | **moved** |
+| Sieve | 132.7 | 134.7 | 0.986 | -1.4% | 1.7% | within |
+| Sort | 437.6 | 255.0 | 1.716 | +71.6% | 3.1% | **moved** |
+| Startup | 345.5 | 371.5 | 0.930 | -7.0% | 2.6% | **moved** |
+| String | 810.1 | 656.5 | 1.234 | +23.4% | 44.7% | within |
+| StringMatch | 1096.0 | 838.8 | 1.307 | +30.7% | 9.5% | **moved** |
+| StringView | 18.4 | 21.7 | 0.848 | -15.2% | 16.9% | within |
+| TlsHandshake | 1688.7 | 1078.2 | 1.566 | +56.6% | 6.6% | **moved** |
+
+### TieredPGO=0 under JIT (JG/JP)
+
+| program | variant | baseline | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 95.8 | 80.7 | 1.187 | +18.7% | 19.9% | within |
+| Fib | 98.8 | 97.6 | 1.012 | +1.2% | 3.0% | within |
+| FieldView | 2917.6 | 1723.7 | 1.693 | +69.3% | 1.7% | **moved** |
+| Iface | 528.0 | 374.7 | 1.409 | +40.9% | 5.6% | **moved** |
+| IfaceCall | 807.0 | 358.3 | 2.252 | +125.2% | 11.3% | **moved** |
+| IfaceShell | 738.2 | 600.4 | 1.230 | +23.0% | 4.1% | **moved** |
+| IfaceShellChurn | 1432.7 | 1076.8 | 1.331 | +33.1% | 2.3% | **moved** |
+| Map | 264.6 | 253.6 | 1.044 | +4.4% | 4.3% | **moved** |
+| MatMul | 393.7 | 213.2 | 1.847 | +84.7% | 4.9% | **moved** |
+| RefLower | 645.7 | 511.3 | 1.263 | +26.3% | 1.7% | **moved** |
+| Sieve | 140.8 | 139.3 | 1.010 | +1.0% | 7.0% | within |
+| Sort | 305.5 | 255.1 | 1.197 | +19.7% | 2.2% | **moved** |
+| Startup | 491.6 | 502.0 | 0.979 | -2.1% | 2.9% | within |
+| String | 1465.3 | 339.0 | 4.322 | +332.2% | 16.7% | **moved** |
+| StringMatch | 1057.9 | 791.2 | 1.337 | +33.7% | 4.0% | **moved** |
+| StringView | 29.4 | 20.9 | 1.405 | +40.5% | 18.6% | **moved** |
+| TlsHandshake | 1513.4 | 1071.6 | 1.412 | +41.2% | 2.8% | **moved** |
+

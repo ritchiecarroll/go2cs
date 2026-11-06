@@ -1,0 +1,238 @@
+PerfChannel	JP	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit	
+PerfChannel	JH	C:\go2cs\scratch\p1262\sw\H\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\H\PerfChannel\jit	
+PerfChannel	RP	C:\go2cs\scratch\p1262\sw\P\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\r2r	
+PerfChannel	RH	C:\go2cs\scratch\p1262\sw\H\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\H\PerfChannel\r2r	
+PerfChannel	JD	C:\go2cs\scratch\p1262\sw\D\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\D\PerfChannel\jit	
+PerfChannel	RD	C:\go2cs\scratch\p1262\sw\D\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\D\PerfChannel\r2r	
+PerfChannel	JG	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit	DOTNET_TieredPGO=0
+PerfChannel	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit	
+PerfChannel	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\H\PerfChannel\jit	
+PerfChannel	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\r2r	
+PerfChannel	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\H\PerfChannel\r2r	
+PerfChannel	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\D\PerfChannel\jit	
+PerfChannel	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfChannel\r2r\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\D\PerfChannel\r2r	
+PerfChannel	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit\PerfChannel.exe	C:\go2cs\scratch\p1262\sw\P\PerfChannel\jit	DOTNET_TieredPGO=0
+PerfFib	JP	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit	
+PerfFib	JH	C:\go2cs\scratch\p1262\sw\H\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\H\PerfFib\jit	
+PerfFib	RP	C:\go2cs\scratch\p1262\sw\P\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\r2r	
+PerfFib	RH	C:\go2cs\scratch\p1262\sw\H\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\H\PerfFib\r2r	
+PerfFib	JD	C:\go2cs\scratch\p1262\sw\D\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\D\PerfFib\jit	
+PerfFib	RD	C:\go2cs\scratch\p1262\sw\D\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\D\PerfFib\r2r	
+PerfFib	JG	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit	DOTNET_TieredPGO=0
+PerfFib	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit	
+PerfFib	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\H\PerfFib\jit	
+PerfFib	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\r2r	
+PerfFib	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\H\PerfFib\r2r	
+PerfFib	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\D\PerfFib\jit	
+PerfFib	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfFib\r2r\PerfFib.exe	C:\go2cs\scratch\p1262\sw\D\PerfFib\r2r	
+PerfFib	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit\PerfFib.exe	C:\go2cs\scratch\p1262\sw\P\PerfFib\jit	DOTNET_TieredPGO=0
+PerfFieldView	JP	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit	
+PerfFieldView	JH	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\jit	
+PerfFieldView	RP	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\r2r	
+PerfFieldView	RH	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\r2r	
+PerfFieldView	JD	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\jit	
+PerfFieldView	RD	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\r2r	
+PerfFieldView	JG	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit	DOTNET_TieredPGO=0
+PerfFieldView	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit	
+PerfFieldView	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\jit	
+PerfFieldView	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\r2r	
+PerfFieldView	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\H\PerfFieldView\r2r	
+PerfFieldView	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\jit	
+PerfFieldView	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\r2r\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\D\PerfFieldView\r2r	
+PerfFieldView	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit\PerfFieldView.exe	C:\go2cs\scratch\p1262\sw\P\PerfFieldView\jit	DOTNET_TieredPGO=0
+PerfIface	JP	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit	
+PerfIface	JH	C:\go2cs\scratch\p1262\sw\H\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\H\PerfIface\jit	
+PerfIface	RP	C:\go2cs\scratch\p1262\sw\P\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\r2r	
+PerfIface	RH	C:\go2cs\scratch\p1262\sw\H\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\H\PerfIface\r2r	
+PerfIface	JD	C:\go2cs\scratch\p1262\sw\D\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\D\PerfIface\jit	
+PerfIface	RD	C:\go2cs\scratch\p1262\sw\D\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\D\PerfIface\r2r	
+PerfIface	JG	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit	DOTNET_TieredPGO=0
+PerfIface	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit	
+PerfIface	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\H\PerfIface\jit	
+PerfIface	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\r2r	
+PerfIface	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\H\PerfIface\r2r	
+PerfIface	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\D\PerfIface\jit	
+PerfIface	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIface\r2r\PerfIface.exe	C:\go2cs\scratch\p1262\sw\D\PerfIface\r2r	
+PerfIface	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit\PerfIface.exe	C:\go2cs\scratch\p1262\sw\P\PerfIface\jit	DOTNET_TieredPGO=0
+PerfIfaceCall	JP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit	
+PerfIfaceCall	JH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\jit	
+PerfIfaceCall	RP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\r2r	
+PerfIfaceCall	RH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\r2r	
+PerfIfaceCall	JD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\jit	
+PerfIfaceCall	RD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\r2r	
+PerfIfaceCall	JG	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit	DOTNET_TieredPGO=0
+PerfIfaceCall	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit	
+PerfIfaceCall	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\jit	
+PerfIfaceCall	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\r2r	
+PerfIfaceCall	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceCall\r2r	
+PerfIfaceCall	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\jit	
+PerfIfaceCall	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\r2r\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceCall\r2r	
+PerfIfaceCall	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit\PerfIfaceCall.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceCall\jit	DOTNET_TieredPGO=0
+PerfIfaceShell	JP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit	
+PerfIfaceShell	JH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\jit	
+PerfIfaceShell	RP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\r2r	
+PerfIfaceShell	RH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\r2r	
+PerfIfaceShell	JD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\jit	
+PerfIfaceShell	RD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\r2r	
+PerfIfaceShell	JG	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit	DOTNET_TieredPGO=0
+PerfIfaceShell	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit	
+PerfIfaceShell	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\jit	
+PerfIfaceShell	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\r2r	
+PerfIfaceShell	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShell\r2r	
+PerfIfaceShell	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\jit	
+PerfIfaceShell	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\r2r\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShell\r2r	
+PerfIfaceShell	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit\PerfIfaceShell.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShell\jit	DOTNET_TieredPGO=0
+PerfIfaceShellChurn	JP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	JH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	RP	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	RH	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	JD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	RD	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	JG	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit	DOTNET_TieredPGO=0
+PerfIfaceShellChurn	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\H\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\jit	
+PerfIfaceShellChurn	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\r2r\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\D\PerfIfaceShellChurn\r2r	
+PerfIfaceShellChurn	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit\PerfIfaceShellChurn.exe	C:\go2cs\scratch\p1262\sw\P\PerfIfaceShellChurn\jit	DOTNET_TieredPGO=0
+PerfMap	JP	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit	
+PerfMap	JH	C:\go2cs\scratch\p1262\sw\H\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\H\PerfMap\jit	
+PerfMap	RP	C:\go2cs\scratch\p1262\sw\P\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\r2r	
+PerfMap	RH	C:\go2cs\scratch\p1262\sw\H\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\H\PerfMap\r2r	
+PerfMap	JD	C:\go2cs\scratch\p1262\sw\D\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\D\PerfMap\jit	
+PerfMap	RD	C:\go2cs\scratch\p1262\sw\D\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\D\PerfMap\r2r	
+PerfMap	JG	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit	DOTNET_TieredPGO=0
+PerfMap	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit	
+PerfMap	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\H\PerfMap\jit	
+PerfMap	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\r2r	
+PerfMap	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\H\PerfMap\r2r	
+PerfMap	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\D\PerfMap\jit	
+PerfMap	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfMap\r2r\PerfMap.exe	C:\go2cs\scratch\p1262\sw\D\PerfMap\r2r	
+PerfMap	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit\PerfMap.exe	C:\go2cs\scratch\p1262\sw\P\PerfMap\jit	DOTNET_TieredPGO=0
+PerfMatMul	JP	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit	
+PerfMatMul	JH	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\jit	
+PerfMatMul	RP	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\r2r	
+PerfMatMul	RH	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\r2r	
+PerfMatMul	JD	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\jit	
+PerfMatMul	RD	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\r2r	
+PerfMatMul	JG	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit	DOTNET_TieredPGO=0
+PerfMatMul	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit	
+PerfMatMul	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\jit	
+PerfMatMul	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\r2r	
+PerfMatMul	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\H\PerfMatMul\r2r	
+PerfMatMul	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\jit	
+PerfMatMul	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\r2r\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\D\PerfMatMul\r2r	
+PerfMatMul	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit\PerfMatMul.exe	C:\go2cs\scratch\p1262\sw\P\PerfMatMul\jit	DOTNET_TieredPGO=0
+PerfRefLower	JP	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit	
+PerfRefLower	JH	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\jit	
+PerfRefLower	RP	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\r2r	
+PerfRefLower	RH	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\r2r	
+PerfRefLower	JD	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\jit	
+PerfRefLower	RD	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\r2r	
+PerfRefLower	JG	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit	DOTNET_TieredPGO=0
+PerfRefLower	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit	
+PerfRefLower	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\jit	
+PerfRefLower	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\r2r	
+PerfRefLower	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\H\PerfRefLower\r2r	
+PerfRefLower	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\jit	
+PerfRefLower	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\r2r\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\D\PerfRefLower\r2r	
+PerfRefLower	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit\PerfRefLower.exe	C:\go2cs\scratch\p1262\sw\P\PerfRefLower\jit	DOTNET_TieredPGO=0
+PerfSieve	JP	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit	
+PerfSieve	JH	C:\go2cs\scratch\p1262\sw\H\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\H\PerfSieve\jit	
+PerfSieve	RP	C:\go2cs\scratch\p1262\sw\P\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\r2r	
+PerfSieve	RH	C:\go2cs\scratch\p1262\sw\H\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\H\PerfSieve\r2r	
+PerfSieve	JD	C:\go2cs\scratch\p1262\sw\D\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\D\PerfSieve\jit	
+PerfSieve	RD	C:\go2cs\scratch\p1262\sw\D\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\D\PerfSieve\r2r	
+PerfSieve	JG	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit	DOTNET_TieredPGO=0
+PerfSieve	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit	
+PerfSieve	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\H\PerfSieve\jit	
+PerfSieve	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\r2r	
+PerfSieve	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\H\PerfSieve\r2r	
+PerfSieve	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\D\PerfSieve\jit	
+PerfSieve	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfSieve\r2r\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\D\PerfSieve\r2r	
+PerfSieve	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit\PerfSieve.exe	C:\go2cs\scratch\p1262\sw\P\PerfSieve\jit	DOTNET_TieredPGO=0
+PerfSort	JP	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit	
+PerfSort	JH	C:\go2cs\scratch\p1262\sw\H\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\H\PerfSort\jit	
+PerfSort	RP	C:\go2cs\scratch\p1262\sw\P\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\r2r	
+PerfSort	RH	C:\go2cs\scratch\p1262\sw\H\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\H\PerfSort\r2r	
+PerfSort	JD	C:\go2cs\scratch\p1262\sw\D\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\D\PerfSort\jit	
+PerfSort	RD	C:\go2cs\scratch\p1262\sw\D\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\D\PerfSort\r2r	
+PerfSort	JG	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit	DOTNET_TieredPGO=0
+PerfSort	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit	
+PerfSort	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\H\PerfSort\jit	
+PerfSort	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\r2r	
+PerfSort	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\H\PerfSort\r2r	
+PerfSort	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\D\PerfSort\jit	
+PerfSort	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfSort\r2r\PerfSort.exe	C:\go2cs\scratch\p1262\sw\D\PerfSort\r2r	
+PerfSort	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit\PerfSort.exe	C:\go2cs\scratch\p1262\sw\P\PerfSort\jit	DOTNET_TieredPGO=0
+PerfStartup	JP	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit	
+PerfStartup	JH	C:\go2cs\scratch\p1262\sw\H\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\H\PerfStartup\jit	
+PerfStartup	RP	C:\go2cs\scratch\p1262\sw\P\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\r2r	
+PerfStartup	RH	C:\go2cs\scratch\p1262\sw\H\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\H\PerfStartup\r2r	
+PerfStartup	JD	C:\go2cs\scratch\p1262\sw\D\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\D\PerfStartup\jit	
+PerfStartup	RD	C:\go2cs\scratch\p1262\sw\D\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\D\PerfStartup\r2r	
+PerfStartup	JG	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit	DOTNET_TieredPGO=0
+PerfStartup	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit	
+PerfStartup	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\H\PerfStartup\jit	
+PerfStartup	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\r2r	
+PerfStartup	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\H\PerfStartup\r2r	
+PerfStartup	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\D\PerfStartup\jit	
+PerfStartup	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStartup\r2r\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\D\PerfStartup\r2r	
+PerfStartup	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit\PerfStartup.exe	C:\go2cs\scratch\p1262\sw\P\PerfStartup\jit	DOTNET_TieredPGO=0
+PerfString	JP	C:\go2cs\scratch\p1262\sw\P\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\jit	
+PerfString	JH	C:\go2cs\scratch\p1262\sw\H\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\H\PerfString\jit	
+PerfString	RP	C:\go2cs\scratch\p1262\sw\P\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\r2r	
+PerfString	RH	C:\go2cs\scratch\p1262\sw\H\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\H\PerfString\r2r	
+PerfString	JD	C:\go2cs\scratch\p1262\sw\D\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\D\PerfString\jit	
+PerfString	RD	C:\go2cs\scratch\p1262\sw\D\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\D\PerfString\r2r	
+PerfString	JG	C:\go2cs\scratch\p1262\sw\P\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\jit	DOTNET_TieredPGO=0
+PerfString	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\jit	
+PerfString	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\H\PerfString\jit	
+PerfString	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\r2r	
+PerfString	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\H\PerfString\r2r	
+PerfString	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\D\PerfString\jit	
+PerfString	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfString\r2r\PerfString.exe	C:\go2cs\scratch\p1262\sw\D\PerfString\r2r	
+PerfString	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfString\jit\PerfString.exe	C:\go2cs\scratch\p1262\sw\P\PerfString\jit	DOTNET_TieredPGO=0
+PerfStringMatch	JP	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit	
+PerfStringMatch	JH	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\jit	
+PerfStringMatch	RP	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\r2r	
+PerfStringMatch	RH	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\r2r	
+PerfStringMatch	JD	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\jit	
+PerfStringMatch	RD	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\r2r	
+PerfStringMatch	JG	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit	DOTNET_TieredPGO=0
+PerfStringMatch	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit	
+PerfStringMatch	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\jit	
+PerfStringMatch	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\r2r	
+PerfStringMatch	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringMatch\r2r	
+PerfStringMatch	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\jit	
+PerfStringMatch	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\r2r\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringMatch\r2r	
+PerfStringMatch	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit\PerfStringMatch.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringMatch\jit	DOTNET_TieredPGO=0
+PerfStringView	JP	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit	
+PerfStringView	JH	C:\go2cs\scratch\p1262\sw\H\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringView\jit	
+PerfStringView	RP	C:\go2cs\scratch\p1262\sw\P\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\r2r	
+PerfStringView	RH	C:\go2cs\scratch\p1262\sw\H\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringView\r2r	
+PerfStringView	JD	C:\go2cs\scratch\p1262\sw\D\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringView\jit	
+PerfStringView	RD	C:\go2cs\scratch\p1262\sw\D\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringView\r2r	
+PerfStringView	JG	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit	DOTNET_TieredPGO=0
+PerfStringView	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit	
+PerfStringView	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringView\jit	
+PerfStringView	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\r2r	
+PerfStringView	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\H\PerfStringView\r2r	
+PerfStringView	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringView\jit	
+PerfStringView	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfStringView\r2r\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\D\PerfStringView\r2r	
+PerfStringView	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit\PerfStringView.exe	C:\go2cs\scratch\p1262\sw\P\PerfStringView\jit	DOTNET_TieredPGO=0
+PerfTlsHandshake	JP	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit	
+PerfTlsHandshake	JH	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\jit	
+PerfTlsHandshake	RP	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\r2r	
+PerfTlsHandshake	RH	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\r2r	
+PerfTlsHandshake	JD	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\jit	
+PerfTlsHandshake	RD	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\r2r	
+PerfTlsHandshake	JG	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit	DOTNET_TieredPGO=0
+PerfTlsHandshake	JP-AA	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit	
+PerfTlsHandshake	JH-AA	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\jit	
+PerfTlsHandshake	RP-AA	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\r2r	
+PerfTlsHandshake	RH-AA	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\H\PerfTlsHandshake\r2r	
+PerfTlsHandshake	JD-AA	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\jit	
+PerfTlsHandshake	RD-AA	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\r2r\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\D\PerfTlsHandshake\r2r	
+PerfTlsHandshake	JG-AA	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\sw\P\PerfTlsHandshake\jit	DOTNET_TieredPGO=0
