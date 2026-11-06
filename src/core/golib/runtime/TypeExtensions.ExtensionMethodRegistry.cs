@@ -100,6 +100,10 @@ public static partial class TypeExtensions
     // unset. Never wire product code to it.
     internal static Action<Assembly>? ScanProbeForTest;
 
+    // TEST SEAM, GolibTests only: the assemblies the scan sees in place of AppDomain.GetAssemblies(), so a test
+    // can stage an assembly "loading" mid-scan. Null in every program. Never wire product code to it.
+    internal static Func<Assembly[]>? AssemblySourceForTest;
+
     // Bumped by every assembly load (ClearTypeCaches). A scan keeps only a result whose generation did not
     // move while it ran.
     private static int s_extensionMethodsGeneration;
@@ -143,7 +147,7 @@ public static partial class TypeExtensions
             int generation = Volatile.Read(ref s_extensionMethodsGeneration);
             List<(MethodInfo, Type)> extensionMethods = [];
 
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AssemblySourceForTest?.Invoke() ?? AppDomain.CurrentDomain.GetAssemblies())
             {
                 ScanProbeForTest?.Invoke(assembly);
                 LoadAssemblyExtensionMethods(assembly, extensionMethods);
@@ -164,6 +168,9 @@ public static partial class TypeExtensions
 
         return scanned;
     }
+
+    // TEST SEAM, GolibTests only: forget the published scan, so the next question scans from nothing.
+    internal static void ResetExtensionScanForTest() => ClearTypeCaches(null, EventArgs.Empty);
 
     internal static void ClearTypeCaches(object? sender, EventArgs e)
     {
