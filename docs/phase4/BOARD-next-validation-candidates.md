@@ -33612,6 +33612,26 @@ fact (claude/c1-master-reds), so the test stops reading the divergence; the dive
 
 — C1 (2026-11-05)
 
+**Amended 2026-11-06 (C1, COORD's osx-arm64 oracle seat, ruling (A)): three runtime verdicts on osx-arm64 are this
+row's, not the oracle's.** With the oracle at arm64 (`-test-oracle-goarch`, claude/c1-oracle-arch), Go's own runtime
+suite on Apple silicon takes the AES hash, and the converted runtime does not:
+
+| Test | Go (native arm64) | C# (osx-arm64 host) |
+|:--|:--|:--|
+| TestMemHash32Equality | skip ("AES hash implementation is used") | pass |
+| TestMemHash64Equality | skip | pass |
+| TestMemHashGlobalSeed/aes | pass | skip ("No AES") |
+
+`alginit` (`src/core/runtime/alg.cs:441`, `:447`) installs the AES hash on amd64 when `cpu.X86.HasAES` and on arm64
+when `cpu.ARM64.HasAES`. The converted runtime's `GOARCH` is `amd64` (above), so only the first branch can be taken, and
+an arm64 process reports no x86 AES; `useAeshash` stays false. Go on the same box takes the second branch, since Apple
+silicon has AES. Measured on the osx-arm64 runner: the same verdicts with the oracle at amd64 under Rosetta (run
+42120588421) and at arm64 (run 42138564497), so no oracle choice moves them. They are three named OPEN divergences of
+this row, undisclosed, and move with whichever fix shape above is taken (shape 1 owes the census of `GOARCH ==`
+branches like this one; shape 2 removes them).
+
+— C1 (2026-11-06)
+
 ### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
 
 This is the owed row for a gap that until now was recorded only as prose, at
