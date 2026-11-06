@@ -1,0 +1,98 @@
+14008B560  cmp         r8,8
+14008B564  jb          000000014008B65B
+14008B56A  cmp         rcx,rdx
+14008B56D  je          000000014008B652
+14008B573  cmp         r8,20h
+14008B577  jae         000000014008B600
+14008B57D  cmp         r8,10h
+14008B581  jae         000000014008B5A3
+14008B583  add         r8,0FFFFFFFFFFFFFFF8h
+14008B587  mov         rax,qword ptr [rcx]
+14008B58A  sub         rax,qword ptr [rdx]
+14008B58D  mov         rcx,qword ptr [rcx+r8]
+14008B591  sub         rcx,qword ptr [rdx+r8]
+14008B595  or          rax,rcx
+14008B598  sete        al
+14008B59B  movzx       eax,al
+14008B59E  jmp         000000014008B6AC
+14008B5A3  xor         eax,eax
+14008B5A5  add         r8,0FFFFFFFFFFFFFFF0h
+14008B5A9  je          000000014008B5E6
+14008B5AB  vmovups     xmm0,xmmword ptr [rcx]
+14008B5AF  vpcmpeqb    xmm0,xmm0,xmmword ptr [rdx]
+14008B5B3  vpmovmskb   r10d,xmm0
+14008B5B7  cmp         r10d,0FFFFh
+14008B5BE  jne         000000014008B5E0
+14008B5C0  add         rax,10h
+14008B5C4  cmp         r8,rax
+14008B5C7  jbe         000000014008B5E6
+14008B5C9  vmovups     xmm0,xmmword ptr [rcx+rax]
+14008B5CE  vpcmpeqb    xmm0,xmm0,xmmword ptr [rdx+rax]
+14008B5D3  vpmovmskb   r10d,xmm0
+14008B5D7  cmp         r10d,0FFFFh
+14008B5DE  je          000000014008B5C0
+14008B5E0  xor         eax,eax
+14008B5E2  vzeroupper
+14008B5E5  ret
+14008B5E6  vmovups     xmm0,xmmword ptr [rcx+r8]
+14008B5EC  vpcmpeqb    xmm0,xmm0,xmmword ptr [rdx+r8]
+14008B5F2  vpmovmskb   ecx,xmm0
+14008B5F6  cmp         ecx,0FFFFh
+14008B5FC  jne         000000014008B5E0
+14008B5FE  jmp         000000014008B652
+14008B600  xor         eax,eax
+14008B602  add         r8,0FFFFFFFFFFFFFFE0h
+14008B606  je          000000014008B63D
+14008B608  vmovups     ymm0,ymmword ptr [rcx]
+14008B60C  vpcmpeqb    ymm0,ymm0,ymmword ptr [rdx]
+14008B610  vpmovmskb   r10d,ymm0
+14008B614  cmp         r10d,0FFFFFFFFh
+14008B618  je          000000014008B634
+14008B61A  jmp         000000014008B5E0
+14008B61C  nop         dword ptr [rax]
+14008B620  vmovups     ymm0,ymmword ptr [rcx+rax]
+14008B625  vpcmpeqb    ymm0,ymm0,ymmword ptr [rdx+rax]
+14008B62A  vpmovmskb   r10d,ymm0
+14008B62E  cmp         r10d,0FFFFFFFFh
+14008B632  jne         000000014008B5E0
+14008B634  add         rax,20h
+14008B638  cmp         r8,rax
+14008B63B  ja          000000014008B620
+14008B63D  vmovups     ymm0,ymmword ptr [rcx+r8]
+14008B643  vpcmpeqb    ymm0,ymm0,ymmword ptr [rdx+r8]
+14008B649  vpmovmskb   eax,ymm0
+14008B64D  cmp         eax,0FFFFFFFFh
+14008B650  jne         000000014008B5E0
+14008B652  mov         eax,1
+14008B657  vzeroupper
+14008B65A  ret
+14008B65B  cmp         r8,4
+14008B65F  jb          000000014008B67B
+14008B661  add         r8,0FFFFFFFFFFFFFFFCh
+14008B665  mov         eax,dword ptr [rcx]
+14008B667  sub         eax,dword ptr [rdx]
+14008B669  mov         ecx,dword ptr [rcx+r8]
+14008B66D  sub         ecx,dword ptr [rdx+r8]
+14008B671  or          eax,ecx
+14008B673  sete        al
+14008B676  movzx       eax,al
+14008B679  jmp         000000014008B6AC
+14008B67B  xor         eax,eax
+14008B67D  mov         r10,r8
+14008B680  and         r10,2
+14008B684  je          000000014008B690
+14008B686  movzx       eax,word ptr [rcx]
+14008B689  movzx       r9d,word ptr [rdx]
+14008B68D  sub         eax,r9d
+14008B690  test        r8b,1
+14008B694  je          000000014008B6A4
+14008B696  movzx       ecx,byte ptr [rcx+r10]
+14008B69B  movzx       edx,byte ptr [rdx+r10]
+14008B6A0  sub         ecx,edx
+14008B6A2  or          eax,ecx
+14008B6A4  test        eax,eax
+14008B6A6  sete        al
+14008B6A9  movzx       eax,al
+14008B6AC  vzeroupper
+14008B6AF  ret
+14008B6B0  nop
