@@ -227,6 +227,39 @@ func (v *Visitor) valueMethodHasBoxTwin(fn *types.Func, sig *types.Signature) bo
 	return true
 }
 
+// identBoxExpr renders the box `Ꮡ<name>` of an identifier whose box is declared in scope. The box is `Ꮡ` plus the
+// DECLARING-scope box-base name, which differs between a deref-aliased pointer param and an escaping value LOCAL. A
+// deref-aliased pointer is declared `ref var <shadow-name> = ref Ꮡ<raw>.Value` (its box keeps the RAW name;
+// visitFuncDecl / heap decls never shadow-rename the `Ꮡ` companion), so for a collision-renamed param `p`→`Δp` the box
+// is `Ꮡp`. A heap-boxed value LOCAL is the OPPOSITE — it is declared `ref var <shadow-name> = ref heap(new T(), out var
+// Ꮡ<shadow-name>)`, so a shadow-renamed `b`→`bΔ1` keeps its box under the RENDERED name `ᏑbΔ1` (crypto/x509
+// marshalCertificate's inner `var b cryptobyte.Builder`, renamed to dodge the outer method's own `b`). Using the raw
+// name for the local emitted `Ꮡb`, colliding with the outer `b`'s box declared later (CS0841/CS0103). boxBaseName
+// resolves the correct box base for each — but it must read the var's DECLARING name, not the current lambda's capture
+// remap: a heap-boxed local captured by a closure keeps its box under the declaring name (`Ꮡonce`, the box is captured
+// directly), NOT the value-snapshot capture name `onceʗ1` (there is no `Ꮡonceʗ1` box — CS0103, sync OnceFunc).
+// Disable conversionInLambda across the boxBaseName call so getIdentName falls to the shadowing name (`bΔ1`) or raw
+// name (`once`), never the capture form. The box base is substituted only when the identifier renders as something
+// other than its raw name (shadow-renamed local, collision-renamed param, or a capture form); boxBaseName returns the
+// raw name for an unrenamed var.
+func (v *Visitor) identBoxExpr(ident *ast.Ident) string {
+	recvExpr := v.convExpr(ident, nil)
+
+	if recvExpr != ident.Name {
+		savedInLambda := false
+		if v.lambdaCapture != nil {
+			savedInLambda = v.lambdaCapture.conversionInLambda
+			v.lambdaCapture.conversionInLambda = false
+		}
+		recvExpr = v.boxBaseName(ident)
+		if v.lambdaCapture != nil {
+			v.lambdaCapture.conversionInLambda = savedInLambda
+		}
+	}
+
+	return AddressPrefix + recvExpr
+}
+
 // selectorTargetIsDirectBoxMethod reports whether the method a selector names is emitted with the
 // BOX as its receiver (`this ж<T>`) rather than as a `[GoRecv] ref` extension. Such a target binds
 // only a real `ж<T>`, so a caller that would otherwise prefer a plain addressable member chain must
@@ -2142,6 +2175,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 								return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
+
+							// A deref-aliased pointer PARAM, or the receiver of a direct-ж method, renders as its value
+							// alias (`ref var p = ref Ꮡp.DerefOrNull()`), and a nil one is a null ref. `p.M()` on the alias
+							// copies *p into M's `this T` while the arguments are still being built, before they run, and a
+							// method that never reads its receiver lets the JIT drop that copy at full optimization, and the
+							// nil-pointer fault with it. Through the box the twin copies *p after the arguments, as Go does,
+							// and fails on nil through ж<T>'s own check: `Ꮡp.M()`. A `[GoRecv] this ref T` receiver has no
+							// box in scope (exprHasReceiverBoxInScope) and keeps the alias. Not for the selector of a
+							// deferred or spawned call, whose receiver Go copies at the statement (deferGoCallSelector).
+							if !needsDeref && v.exprHasReceiverBoxInScope(selectorExpr.X) && v.valueMethodHasBoxTwin(funcObj, sig) && selectorExpr != v.deferGoCallSelector {
+								return fmt.Sprintf("%s.%s", v.identBoxExpr(selectorExpr.X.(*ast.Ident)), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+							}
 						}
 					}
 				}
@@ -2540,24 +2585,15 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		// snapshot capture name `onceʗ1` (there is no `Ꮡonceʗ1` box — CS0103, sync OnceFunc). Disable
 		// conversionInLambda across the boxBaseName call so getIdentName falls to the shadowing name
 		// (`bΔ1`) or raw name (`once`), never the capture form.
-		recvExpr := v.convExpr(selectorExpr.X, nil)
+		var recvBox string
 
-		// Substitute the box base only when the receiver renders as something other than its raw name
-		// (shadow-renamed local, collision-renamed param, or a capture form). boxBaseName returns the
-		// raw name for an unrenamed var, so an already-correct accessor is unchanged — no golden churn.
-		if ident, ok := selectorExpr.X.(*ast.Ident); ok && recvExpr != ident.Name {
-			savedInLambda := false
-			if v.lambdaCapture != nil {
-				savedInLambda = v.lambdaCapture.conversionInLambda
-				v.lambdaCapture.conversionInLambda = false
-			}
-			recvExpr = v.boxBaseName(ident)
-			if v.lambdaCapture != nil {
-				v.lambdaCapture.conversionInLambda = savedInLambda
-			}
+		if ident, ok := selectorExpr.X.(*ast.Ident); ok {
+			recvBox = v.identBoxExpr(ident)
+		} else {
+			recvBox = AddressPrefix + v.convExpr(selectorExpr.X, nil)
 		}
 
-		return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s%s.%s", AddressPrefix, recvExpr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+		return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", recvBox, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
 	// A (non-capture) pointer-receiver method called on a FIELD of a pointer LOCAL — `c.gp.set(v)`

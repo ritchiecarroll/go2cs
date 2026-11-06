@@ -335,9 +335,8 @@ internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq
 // It also recursively adds an entry for all instructions reachable from pc by following
 // empty-width conditions satisfied by cond.  pos gives the current position
 // in the input.
-internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> Ꮡcond, ж<thread> Ꮡt) {
+internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) {
     ref var q = ref Ꮡq.DerefOrNull();
-    ref var cond = ref Ꮡcond.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
 Again:
@@ -366,7 +365,7 @@ Again:
         break;
     }
     case var ᴛ when ᴛ == syntax.InstAlt || ᴛ == syntax.InstAltMatch: {
-        Ꮡt = m.add(Ꮡq, i.Out, pos, cap, Ꮡcond, Ꮡt); t = ref Ꮡt.DerefOrNull();
+        Ꮡt = m.add(Ꮡq, i.Out, pos, cap, cond, Ꮡt); t = ref Ꮡt.DerefOrNull();
         pc = i.Arg;
         goto Again;
         break;
@@ -387,7 +386,7 @@ Again:
         if ((nint)i.Arg < len(cap)) {
             nint opos = cap[i.Arg];
             cap[i.Arg] = pos;
-            m.add(Ꮡq, i.Out, pos, cap, Ꮡcond, nil);
+            m.add(Ꮡq, i.Out, pos, cap, cond, nil);
             cap[i.Arg] = opos;
         } else {
             pc = i.Out;

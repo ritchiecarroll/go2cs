@@ -18,11 +18,7 @@ partial interface Helloer {
     @string Hello();
 }
 
-internal static @string direct(ж<T> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
-    return p.Hello();
-}
+internal static @string direct(ж<T> p) { return p.Hello(); }
 
 internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;

@@ -452,6 +452,7 @@
     <None Include="$(MSBuildThisFileDirectory)nestedMapPointerValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareCollections_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareOperands_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nilParamBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />

@@ -863,6 +863,7 @@
     <Project Path="tests/Behavioral/NilPointerParamMethods/NilPointerParamMethods.csproj" />
     <Project Path="tests/Behavioral/NilReceiverMethods/NilReceiverMethods.csproj" />
     <Project Path="tests/Behavioral/NilPointerParamUnsafePointer/NilPointerParamUnsafePointer.csproj" />
+    <Project Path="tests/Behavioral/NilPointerParamValueCallTC0/NilPointerParamValueCallTC0.csproj" />
     <Project Path="tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
     <Project Path="tests/Behavioral/NilPointerValueReceiverCall/NilPointerValueReceiverCall.csproj" />
     <Project Path="tests/Behavioral/NilReceiverNormalization/NilReceiverNormalization.csproj" />
