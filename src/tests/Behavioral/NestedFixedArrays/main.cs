@@ -15,9 +15,7 @@ partial struct holder {
 }
 
 internal static array<array<byte>> gNested = new(2, () => new(4));
-
 internal static array<array<array<byte>>> gDeep = new(2, () => new(3, () => new(4)));
-
 internal static array<inner> gStructElem = new(2, () => new());
 
 internal static void Main() {

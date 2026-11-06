@@ -66,9 +66,9 @@ using static go.go.token_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACJEkAACFAAIAoKCgpSCgqaClAAgRJIAFC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQADx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqipoKGppSsAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACJIks7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqirAALFJKClIKUpg==", "334-336:1;559-563:1")]
+[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACJEgAABFAAIAoKCgpSCgqaClAAgRJIAFC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQADx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqipoKGppSsAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACJIks7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqirAALFJKClIKUpg==", "334-336:1;559-563:1")]
 [assembly: GoPositionMap("go/token/serialize.go", "serialize.cs", "ABkwsoKCpoKCggAHEIKUqLKUgoKCgoLulIKU", "", "", "63=Clone/1/2/4,Clone/2/2/5")]
-[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIQBjAIAZdYB0oKClIKUAAsispSkpKSklMqCgoK6koKUrsCooqqgppKCqKSCrLKClIKCpg==")]
+[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIQBjAIAZdYB0oKClIKUAAsispSkpKSklMqCgoK6koKUrrCYoqqQlpKCqKSCrLKClIKCpg==")]
 [assembly: GoPositionMap("go/token/tree.go", "tree.cs", "ADRqggACGAAJApSklKrSgoKClIKUgoK4goKCgpSClIKCAAMQAAgCkoKCgoKClKauwoKClIKCgqaClKYABhDClKSkpLiigoKUlIKClKaigoK4soKCuLKCgriigpSmgoKCpqKUgpS0tLQABBQACAKCgoKUgpS2gpSkuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSCAAUQ0riClIKUgoKospSCyoKUpoKUtoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "362=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
 // </GoSourcePositionMaps>
 

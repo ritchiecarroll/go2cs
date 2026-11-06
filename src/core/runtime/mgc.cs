@@ -1687,7 +1687,6 @@ partial struct gcBgMarkWorkerNode {
     // gcBgMarkWorker().
     internal muintptr m;
 }
-
 partial struct gcBgMarkWorkerNodePadded {
     /*embed*/ internal gcBgMarkWorkerNode gcBgMarkWorkerNode;
     internal array<byte> pad = new((uintptr)((uintptr)tagAlign - /* unsafe.Sizeof(gcBgMarkWorkerNode{}) */ (uintptr)32) - gcBgMarkWorkerNodeRedZoneSize);
@@ -2121,7 +2120,6 @@ internal static void gcResetMarkState() {
 
 // Hooks for other packages
 internal static Action poolcleanup;
-
 internal static slice<@unsafe.Pointer> boringCaches; // for crypto/internal/boring
 
 // sync_runtime_registerPoolCleanup should be an internal detail,

@@ -90,7 +90,6 @@ internal static bool decref(this ж<fdMutex> Ꮡmu) {
 
 // Implemented in runtime package.
 internal static partial void runtime_Semacquire(ж<uint32> sema);
-
 internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // incref adds a reference to fd.

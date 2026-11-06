@@ -8,9 +8,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static nint start(this ref counter c) {
-    return c.n;
-}
+internal static nint start(this ref counter c) { return c.n; }
 
 internal static nint shadowedForInit() {
     var b = Ꮡ(new counter(n: 100));

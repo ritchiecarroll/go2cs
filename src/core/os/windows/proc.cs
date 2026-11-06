@@ -32,30 +32,22 @@ public static ref slice<@string> Args => ref ((StaticBox<slice<@string>>)ᏑArgs
 // Getuid returns the numeric user id of the caller.
 //
 // On Windows, it returns -1.
-public static nint Getuid() {
-    return syscall.Getuid();
-}
+public static nint Getuid() { return syscall.Getuid(); }
 
 // Geteuid returns the numeric effective user id of the caller.
 //
 // On Windows, it returns -1.
-public static nint Geteuid() {
-    return syscall.Geteuid();
-}
+public static nint Geteuid() { return syscall.Geteuid(); }
 
 // Getgid returns the numeric group id of the caller.
 //
 // On Windows, it returns -1.
-public static nint Getgid() {
-    return syscall.Getgid();
-}
+public static nint Getgid() { return syscall.Getgid(); }
 
 // Getegid returns the numeric effective group id of the caller.
 //
 // On Windows, it returns -1.
-public static nint Getegid() {
-    return syscall.Getegid();
-}
+public static nint Getegid() { return syscall.Getegid(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getgroupsˢ => ref getgroupsˢᵇ;

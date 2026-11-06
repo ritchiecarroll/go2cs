@@ -90,10 +90,10 @@ internal static void clip(Image dst, ж<image.Rectangle> Ꮡr, image.Image src, 
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     var orig = r.Min;
-    r = r.Intersect(dst.Bounds());
-    r = r.Intersect(src.Bounds().Add(orig.Sub(sp)));
+    r = Ꮡr.Intersect(dst.Bounds());
+    r = Ꮡr.Intersect(src.Bounds().Add(orig.Sub(sp)));
     if (mask != nil) {
-        r = r.Intersect(mask.Bounds().Add(orig.Sub(mp)));
+        r = Ꮡr.Intersect(mask.Bounds().Add(orig.Sub(mp)));
     }
     nint dx = r.Min.X - orig.X;
     nint dy = r.Min.Y - orig.Y;

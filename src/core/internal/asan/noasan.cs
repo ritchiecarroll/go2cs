@@ -10,10 +10,8 @@ partial class asan_package {
 
 public const bool Enabled = false;
 
-public static void Read(@unsafe.Pointer addr, uintptr len) {
-}
+public static void Read(@unsafe.Pointer addr, uintptr len) { }
 
-public static void Write(@unsafe.Pointer addr, uintptr len) {
-}
+public static void Write(@unsafe.Pointer addr, uintptr len) { }
 
 } // end asan_package

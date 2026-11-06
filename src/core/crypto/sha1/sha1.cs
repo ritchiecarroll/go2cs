@@ -126,13 +126,9 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return ΔBlockSize;
-}
+internal static nint BlockSize(this ref digest d) { return ΔBlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢ => ref cryptoSha1UseOfSha1IsNotˢᵇ;

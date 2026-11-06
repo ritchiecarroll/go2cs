@@ -682,14 +682,10 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> r) {
 }
 
 // Checks whether chunked is part of the encodings stack.
-internal static bool chunked(slice<@string> te) {
-    return builtin.len(te) > 0 && te[0] == "chunked";
-}
+internal static bool chunked(slice<@string> te) { return builtin.len(te) > 0 && te[0] == "chunked"; }
 
 // Checks whether the encoding is explicitly "identity".
-internal static bool isIdentity(slice<@string> te) {
-    return builtin.len(te) == 1 && te[0] == "identity";
-}
+internal static bool isIdentity(slice<@string> te) { return builtin.len(te) == 1 && te[0] == "identity"; }
 
 // unsupportedTEError reports unsupported transfer-encodings.
 partial struct unsupportedTEError {
@@ -1248,7 +1244,6 @@ internal static (nint n, error err) Read(this finishAsyncByteRead fr, slice<byte
 }
 
 internal static reflectꓸType nopCloserType = reflect.TypeOf(io.NopCloser(default));
-
     partial struct rᴛ1 /*dyn*/ {
         /*embed*/ public io_package.Reader Reader;
         /*embed*/ public io_package.WriterTo WriterTo;

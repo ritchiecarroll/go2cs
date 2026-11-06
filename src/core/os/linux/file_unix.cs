@@ -462,17 +462,9 @@ partial struct unixDirent {
     internal FileInfo info;
 }
 
-internal static @string Name(this ref unixDirent d) {
-    return d.name;
-}
-
-internal static bool IsDir(this ref unixDirent d) {
-    return d.typ.IsDir();
-}
-
-internal static FileMode Type(this ref unixDirent d) {
-    return d.typ;
-}
+internal static @string Name(this ref unixDirent d) { return d.name; }
+internal static bool IsDir(this ref unixDirent d) { return d.typ.IsDir(); }
+internal static FileMode Type(this ref unixDirent d) { return d.typ; }
 
 internal static (FileInfo, error) Info(this ref unixDirent d) {
     if (d.info != nil) {

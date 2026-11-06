@@ -409,9 +409,7 @@ partial struct replace {
     internal any v;
 }
 
-internal static slog.Value LogValue(this ref replace r) {
-    return slog.AnyValue(r.v);
-}
+internal static slog.Value LogValue(this ref replace r) { return slog.AnyValue(r.v); }
 
 internal static @string String(this ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);

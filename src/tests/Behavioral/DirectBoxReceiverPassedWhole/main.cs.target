@@ -8,13 +8,9 @@ partial struct mc {
     internal nint n;
 }
 
-internal static void clearViaPtr(ref mc c) {
-    c.n = 0;
-}
+internal static void clearViaPtr(ref mc c) { c.n = 0; }
 
-internal static void bump(ref nint p) {
-    p++;
-}
+internal static void bump(ref nint p) { p++; }
 
 internal static void reset(this ж<mc> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();

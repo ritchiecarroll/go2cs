@@ -39,11 +39,9 @@ internal static void @try(@string name, Action register) {
     finally { ᒐ.Run(); }
 }
 
-internal static void nothing(nint _) {
-}
+internal static void nothing(nint _) { }
 
-internal static void release(this ref T t, nint _) {
-}
+internal static void release(this ref T t, nint _) { }
 
 internal static void Main() {
     @try("captures ptr", () => {

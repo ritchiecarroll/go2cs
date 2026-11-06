@@ -37,8 +37,7 @@ partial struct Heading {
     public slice<ΔText> Text; // the heading text
 }
 
-internal static void block(this ref Heading _) {
-}
+internal static void block(this ref Heading _) { }
 
 // A List is a numbered or bullet list.
 // Lists are always non-empty: len(Items) > 0.
@@ -65,8 +64,7 @@ partial struct List {
     public bool ForceBlankBetween;
 }
 
-internal static void block(this ref List _) {
-}
+internal static void block(this ref List _) { }
 
 // BlankBefore reports whether a reformatting of the comment
 // should include a blank line before the list.
@@ -117,8 +115,7 @@ partial struct Paragraph {
     public slice<ΔText> Text;
 }
 
-internal static void block(this ref Paragraph _) {
-}
+internal static void block(this ref Paragraph _) { }
 
 // A Code is a preformatted code block.
 partial struct Code {
@@ -128,8 +125,7 @@ partial struct Code {
     public @string Text;
 }
 
-internal static void block(this ref Code _) {
-}
+internal static void block(this ref Code _) { }
 
 // A Text is text-level content in a doc comment,
 // one of [Plain], [Italic], [*Link], or [*DocLink].
@@ -140,14 +136,12 @@ partial interface ΔText {
 // A Plain is a string rendered as plain text (not italicized).
 partial struct Plain /*@string*/;
 
-internal static void text(this Plain _) {
-}
+internal static void text(this Plain _) { }
 
 // An Italic is a string rendered as italicized text.
 partial struct Italic /*@string*/;
 
-internal static void text(this Italic _) {
-}
+internal static void text(this Italic _) { }
 
 // A Link is a link to a specific URL.
 partial struct Link {
@@ -156,8 +150,7 @@ partial struct Link {
     public @string URL;       // target URL of link
 }
 
-internal static void text(this ref Link _) {
-}
+internal static void text(this ref Link _) { }
 
 // A DocLink is a link to documentation for a Go package or symbol.
 partial struct DocLink {
@@ -175,8 +168,7 @@ partial struct DocLink {
     public @string Name;       // const, func, type, var, or method name
 }
 
-internal static void text(this ref DocLink _) {
-}
+internal static void text(this ref DocLink _) { }
 
 // A Parser is a doc comment parser.
 // The fields in the struct can be filled in before calling [Parser.Parse]

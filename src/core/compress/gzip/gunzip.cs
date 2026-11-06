@@ -293,8 +293,6 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
 // Close closes the [Reader]. It does not close the underlying reader.
 // In order for the GZIP checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-public static error Close(this ref Reader z) {
-    return z.decompressor.Close();
-}
+public static error Close(this ref Reader z) { return z.decompressor.Close(); }
 
 } // end gzip_package

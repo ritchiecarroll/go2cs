@@ -16,24 +16,15 @@ partial struct widget {
     internal nint n;
 }
 
-internal static @string Str(this ref widget w) {
-    return fmt.Sprintf("widget(%d)"u8, w.n);
-}
-
-internal static @string Marshal(this ref widget w) {
-    return fmt.Sprintf("<%d>"u8, w.n);
-}
+internal static @string Str(this ref widget w) { return fmt.Sprintf("widget(%d)"u8, w.n); }
+internal static @string Marshal(this ref widget w) { return fmt.Sprintf("<%d>"u8, w.n); }
 
 partial struct other {
 }
 
-internal static @string Str(this ref other o) {
-    return "other";
-}
+internal static @string Str(this ref other o) { return "other"; }
 
-internal static Stringish newStringish(nint n) {
-    return new widgetжStringish(Ꮡ(new widget(n)));
-}
+internal static Stringish newStringish(nint n) { return new widgetжStringish(Ꮡ(new widget(n))); }
 
 internal static void Main() {
     var s = newStringish(7);

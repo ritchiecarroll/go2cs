@@ -73,9 +73,7 @@ partial struct MAC {
 }
 
 // Size returns the number of bytes Sum will return.
-public static nint Size(this ref MAC h) {
-    return TagSize;
-}
+public static nint Size(this ref MAC h) { return TagSize; }
 
 // Write adds more data to the running message authentication code.
 // It never returns an error.

@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool RegabiArgs = true;
-
 public static UntypedInt RegabiArgsInt => 1;
 
 } // end goexperiment_package

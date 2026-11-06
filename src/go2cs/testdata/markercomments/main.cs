@@ -80,10 +80,7 @@ internal static nint hash(/*[32]*/ array<byte> b) {
     return len(b);
 }
 
-internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) {
-    grid = grid.Clone();
-
-}
+internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) { grid = grid.Clone(); }
 
 internal static T first<T>(/*[2]*/ array<T> a) {
     a = a.Clone();
@@ -99,10 +96,7 @@ internal static nint noted(/*[4]*/ array<byte> a, nint b) {
     return len(a) + b;
 }
 
-internal static void put(this ref holder h, /*[3]*/ array<nint> v) {
-    v = v.Clone();
-
-}
+internal static void put(this ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
 
 internal static void Main() {
     var lambda = ([GoArrayDims(32)] array<byte> x) => {

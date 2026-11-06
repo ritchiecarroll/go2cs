@@ -65,13 +65,13 @@ using static go.@internal.abi_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAISAAkEgg==")]
-[assembly: GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlKTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
-[assembly: GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce8KaQqKCmkKaQ")]
-[assembly: GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQAAiAAEBwADgKC")]
+[assembly: GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlJTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
+[assembly: GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce4JaAmJCWgJaA")]
+[assembly: GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgt6SgpQAAiAADhwADgKC")]
 [assembly: GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
-[assembly: GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkqSSpJKkkg==")]
+[assembly: GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkpSSlJKUkg==")]
 [assembly: GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
-[assembly: GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFcgKSCqJCmkqaCgpQAGi6igpTmooKUAAIU8gASMoIAP0SygpSUpKysrKysrKwAEZQBkKSAAAgQgoKClKaigoKUqJAAGj6CpoKmgqaCAAYyggANHIIAJVKi6qKokqiSqJLqooKCgoKCzJKClIKssoKCgoKClPqSgpSCqJKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFclIKogJaSpoKClAAaLqKClOaigpQAAhTyABIyggA/RLKClJSkrKysrKysrAARlAGAlAAHEIKCgpSmooKClKiAABk+gqaCpoKmggAFMoIADRyCACVSouqiqJKokqiS6qKCgoKCgsySgpSCrLKCgoKCgpT6koKUgqiSgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

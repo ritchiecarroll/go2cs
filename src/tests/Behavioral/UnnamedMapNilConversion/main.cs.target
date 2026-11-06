@@ -6,7 +6,6 @@ using reflect = reflect_package;
 partial class main_package {
 
 partial struct myMap /*map[@string, nint]*/;
-
 partial struct mySlice /*[]byte*/;
 
 internal static void Main() {

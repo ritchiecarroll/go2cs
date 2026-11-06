@@ -76,11 +76,8 @@ partial struct Table /*[256]uint32*/;
 // Castagnoli table so we can compare against it to find when the caller is
 // using this polynomial.
 internal static ж<Table> castagnoliTable;
-
 internal static ж<slicing8Table> castagnoliTable8;
-
 internal static Func<uint32, slice<byte>, uint32> updateCastagnoli;
-
 internal static readonly ж<atomic.Bool> ᏑhaveCastagnoli = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool haveCastagnoli => ref ((StaticBox<atomic.Bool>)ᏑhaveCastagnoli).ValueSlot;
 
@@ -105,7 +102,6 @@ public static ж<Table> IEEETable = simpleMakeTable(IEEE);
 
 // ieeeTable8 is the slicing8Table for IEEE
 internal static ж<slicing8Table> ieeeTable8;
-
 internal static Func<uint32, slice<byte>, uint32> updateIEEE;
 
 internal static Action ieeeInitOnce;
@@ -160,21 +156,13 @@ public static hash.Hash32 New(ж<Table> tab) {
 // big-endian byte order. The returned Hash32 also implements
 // [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to marshal
 // and unmarshal the internal state of the hash.
-public static hash.Hash32 NewIEEE() {
-    return New(IEEETable);
-}
+public static hash.Hash32 NewIEEE() { return New(IEEETable); }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return 1;
-}
+internal static nint BlockSize(this ref digest d) { return 1; }
 
-internal static void Reset(this ref digest d) {
-    d.crc = 0;
-}
+internal static void Reset(this ref digest d) { d.crc = 0; }
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "crc\x01"u8;
@@ -248,9 +236,7 @@ internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     return (len(p), default);
 }
 
-internal static uint32 Sum32(this ref digest d) {
-    return d.crc;
-}
+internal static uint32 Sum32(this ref digest d) { return d.crc; }
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum32();
@@ -259,9 +245,7 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 
 // Checksum returns the CRC-32 checksum of data
 // using the polynomial represented by the [Table].
-public static uint32 Checksum(slice<byte> data, ж<Table> tab) {
-    return Update(0, tab, data);
-}
+public static uint32 Checksum(slice<byte> data, ж<Table> tab) { return Update(0, tab, data); }
 
 // ChecksumIEEE returns the CRC-32 checksum of data
 // using the [IEEE] polynomial.

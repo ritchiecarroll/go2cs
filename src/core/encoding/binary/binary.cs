@@ -148,17 +148,13 @@ public static slice<byte> AppendUint64(this littleEndian _, slice<byte> b, uint6
 internal static ref readonly @string littleEndianˢ => ref littleEndianˢᵇ;
 private static readonly @string littleEndianˢᵇ = "LittleEndian"u8;
 
-public static @string String(this littleEndian _) {
-    return littleEndianˢ;
-}
+public static @string String(this littleEndian _) { return littleEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryLittleEndianˢ => ref binaryLittleEndianˢᵇ;
 private static readonly @string binaryLittleEndianˢᵇ = "binary.LittleEndian"u8;
 
-public static @string GoString(this littleEndian _) {
-    return binaryLittleEndianˢ;
-}
+public static @string GoString(this littleEndian _) { return binaryLittleEndianˢ; }
 
 public partial struct bigEndian {
 }
@@ -243,33 +239,25 @@ public static slice<byte> AppendUint64(this bigEndian _, slice<byte> b, uint64 v
 internal static ref readonly @string bigEndianˢ => ref bigEndianˢᵇ;
 private static readonly @string bigEndianˢᵇ = "BigEndian"u8;
 
-public static @string String(this bigEndian _) {
-    return bigEndianˢ;
-}
+public static @string String(this bigEndian _) { return bigEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryBigEndianˢ => ref binaryBigEndianˢᵇ;
 private static readonly @string binaryBigEndianˢᵇ = "binary.BigEndian"u8;
 
-public static @string GoString(this bigEndian _) {
-    return binaryBigEndianˢ;
-}
+public static @string GoString(this bigEndian _) { return binaryBigEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nativeEndianˢ => ref nativeEndianˢᵇ;
 private static readonly @string nativeEndianˢᵇ = "NativeEndian"u8;
 
-public static @string String(this nativeEndian _) {
-    return nativeEndianˢ;
-}
+public static @string String(this nativeEndian _) { return nativeEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryNativeEndianˢ => ref binaryNativeEndianˢᵇ;
 private static readonly @string binaryNativeEndianˢᵇ = "binary.NativeEndian"u8;
 
-public static @string GoString(this nativeEndian _) {
-    return binaryNativeEndianˢ;
-}
+public static @string GoString(this nativeEndian _) { return binaryNativeEndianˢ; }
 
 // Read reads structured binary data from r into data.
 // Data must be a pointer to a fixed-size value or a slice
@@ -958,7 +946,6 @@ partial struct coder {
 }
 
 partial struct decoder /*coder*/;
-
 partial struct encoder /*coder*/;
 
 internal static bool @bool(this ref decoder d) {
@@ -1020,37 +1007,21 @@ internal static void uint64(this ref encoder e, uint64 x) {
     e.offset += 8;
 }
 
-internal static int8 int8(this ref decoder d) {
-    return (int8)d.uint8();
-}
+internal static int8 int8(this ref decoder d) { return (int8)d.uint8(); }
 
-internal static void int8(this ref encoder e, int8 x) {
-    e.uint8((uint8)x);
-}
+internal static void int8(this ref encoder e, int8 x) { e.uint8((uint8)x); }
 
-internal static int16 int16(this ref decoder d) {
-    return (int16)d.uint16();
-}
+internal static int16 int16(this ref decoder d) { return (int16)d.uint16(); }
 
-internal static void int16(this ref encoder e, int16 x) {
-    e.uint16((uint16)x);
-}
+internal static void int16(this ref encoder e, int16 x) { e.uint16((uint16)x); }
 
-internal static int32 int32(this ref decoder d) {
-    return (int32)d.uint32();
-}
+internal static int32 int32(this ref decoder d) { return (int32)d.uint32(); }
 
-internal static void int32(this ref encoder e, int32 x) {
-    e.uint32((uint32)x);
-}
+internal static void int32(this ref encoder e, int32 x) { e.uint32((uint32)x); }
 
-internal static int64 int64(this ref decoder d) {
-    return (int64)d.uint64();
-}
+internal static int64 int64(this ref decoder d) { return (int64)d.uint64(); }
 
-internal static void int64(this ref encoder e, int64 x) {
-    e.uint64((uint64)x);
-}
+internal static void int64(this ref encoder e, int64 x) { e.uint64((uint64)x); }
 
 internal static void value(this ref decoder d, reflectꓸValue v) {
     switch (v.Kind()) {

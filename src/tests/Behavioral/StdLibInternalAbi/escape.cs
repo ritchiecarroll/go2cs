@@ -14,7 +14,6 @@ public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
 }
 
 internal static bool alwaysFalse;
-
 internal static any escapeSink;
 
 public static T Escape<T>(T x) {

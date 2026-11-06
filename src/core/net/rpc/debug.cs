@@ -62,29 +62,13 @@ partial struct debugService {
 
 partial struct serviceArray /*[]debugService*/;
 
-internal static nint Len(this serviceArray s) {
-    return len(s);
-}
+internal static nint Len(this serviceArray s) { return len(s); }
+internal static bool Less(this serviceArray s, nint i, nint j) { return s[i].Name < s[j].Name; }
+internal static void Swap(this serviceArray s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
-internal static bool Less(this serviceArray s, nint i, nint j) {
-    return s[i].Name < s[j].Name;
-}
-
-internal static void Swap(this serviceArray s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
-
-internal static nint Len(this methodArray m) {
-    return len(m);
-}
-
-internal static bool Less(this methodArray m, nint i, nint j) {
-    return m[i].Name < m[j].Name;
-}
-
-internal static void Swap(this methodArray m, nint i, nint j) {
-    (m[i], m[j]) = (m[j], m[i]);
-}
+internal static nint Len(this methodArray m) { return len(m); }
+internal static bool Less(this methodArray m, nint i, nint j) { return m[i].Name < m[j].Name; }
+internal static void Swap(this methodArray m, nint i, nint j) { (m[i], m[j]) = (m[j], m[i]); }
 
 partial struct debugHTTP {
     /*embed*/ public ж<Server> Server;

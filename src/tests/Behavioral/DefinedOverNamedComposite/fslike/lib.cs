@@ -4,13 +4,9 @@ partial class fslike_package {
 
 partial struct MapFS /*map[@string, nint]*/;
 
-public static nint Get(this MapFS m, @string k) {
-    return m[k];
-}
+public static nint Get(this MapFS m, @string k) { return m[k]; }
 
-public static nint Size(this MapFS m) {
-    return len(m);
-}
+public static nint Size(this MapFS m) { return len(m); }
 
 partial struct List /*[]nint*/;
 

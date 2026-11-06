@@ -6,7 +6,6 @@ using reflect = reflect_package;
 partial class main_package {
 
 partial struct S /*@string*/;
-
 partial struct B /*[]byte*/;
 
 internal static void @try(@string label, Action set) {

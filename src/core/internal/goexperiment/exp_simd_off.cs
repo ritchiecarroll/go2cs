@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool SIMD = false;
-
 public static UntypedInt SIMDInt => 0;
 
 } // end goexperiment_package

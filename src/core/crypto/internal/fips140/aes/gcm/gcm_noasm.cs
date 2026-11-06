@@ -6,14 +6,12 @@ namespace go.crypto.@internal.fips140.aes;
 
 partial class gcm_package {
 
-internal static void checkGenericIsExpected() {
-}
+internal static void checkGenericIsExpected() { }
 
 partial struct gcmPlatformData {
 }
 
-internal static void initGCM(ref GCM g) {
-}
+internal static void initGCM(ref GCM g) { }
 
 internal static void seal(slice<byte> @out, ж<GCM> g, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     sealGeneric(@out, g, nonce, plaintext, data);

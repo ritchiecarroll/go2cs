@@ -23,7 +23,6 @@ internal static float32 f32Return() {
 }
 
 internal static float64 directBig = 123456789123456789123456789D;
-
 internal static float64 directSmall = 42D;
 
 internal static float64 decimalControl = 339.7784D;

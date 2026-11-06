@@ -43,18 +43,14 @@ partial struct StructuralError {
     public @string Msg;
 }
 
-public static @string Error(this StructuralError e) {
-    return "asn1: structure error: "u8 + e.Msg;
-}
+public static @string Error(this StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
 
 // A SyntaxError suggests that the ASN.1 data is invalid.
 partial struct SyntaxError {
     public @string Msg;
 }
 
-public static @string Error(this SyntaxError e) {
-    return "asn1: syntax error: "u8 + e.Msg;
-}
+public static @string Error(this SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
 
 // We start by dealing with each of the primitive types in turn.
 // BOOLEAN
@@ -447,7 +443,6 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
 }
 
 partial struct asteriskFlag /*bool*/;
-
 partial struct ampersandFlag /*bool*/;
 
 internal static asteriskFlag allowAsterisk => true;

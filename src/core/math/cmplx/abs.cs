@@ -12,8 +12,6 @@ using math = math_package;
 partial class cmplx_package {
 
 // Abs returns the absolute value (also called the modulus) of x.
-public static float64 Abs(complex128 x) {
-    return math.Hypot(real(x), imag(x));
-}
+public static float64 Abs(complex128 x) { return math.Hypot(real(x), imag(x)); }
 
 } // end cmplx_package

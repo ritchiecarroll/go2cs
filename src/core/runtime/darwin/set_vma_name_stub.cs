@@ -9,11 +9,8 @@ using @unsafe = unsafe_package;
 partial class runtime_package {
 
 // setVMAName isn’t implemented
-internal static void setVMAName(@unsafe.Pointer start, uintptr len, @string name) {
-}
+internal static void setVMAName(@unsafe.Pointer start, uintptr len, @string name) { }
 
-internal static bool setVMANameSupported() {
-    return false;
-}
+internal static bool setVMANameSupported() { return false; }
 
 } // end runtime_package

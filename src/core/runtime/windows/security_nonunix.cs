@@ -10,7 +10,6 @@ internal static bool isSecureMode() {
     return false;
 }
 
-internal static void secure() {
-}
+internal static void secure() { }
 
 } // end runtime_package

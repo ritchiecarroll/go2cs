@@ -8,9 +8,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void inc(this ref counter c) {
-    c.n++;
-}
+internal static void inc(this ref counter c) { c.n++; }
 
 partial struct holder {
     /*embed*/ internal counter counter;

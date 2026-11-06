@@ -246,13 +246,13 @@ internal static (time.Time, error) parseTime(ж<cryptobyte.String> Ꮡder) {
 
     ref var t = ref heap(new time.Time(), out var Ꮡt);
     switch (ᐧ) {
-    case {} when der.PeekASN1Tag(cryptobyte_asn1.UTCTime): {
+    case {} when Ꮡder.PeekASN1Tag(cryptobyte_asn1.UTCTime): {
         if (!der.ReadASN1UTCTime(Ꮡt)) {
             return (t, errors.New(x509MalformedUTCTimeˢ));
         }
         break;
     }
-    case {} when der.PeekASN1Tag(cryptobyte_asn1.GeneralizedTime): {
+    case {} when Ꮡder.PeekASN1Tag(cryptobyte_asn1.GeneralizedTime): {
         if (!der.ReadASN1GeneralizedTime(Ꮡt)) {
             return (t, errors.New(x509Malformedˢ));
         }

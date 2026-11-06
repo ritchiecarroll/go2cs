@@ -9,9 +9,7 @@ partial class main_package {
 
 partial struct Direct /*map[nint, Direct]*/;
 
-public static @string String(this Direct d) {
-    return fmt.Sprintf("Direct(%d)"u8, len(d));
-}
+public static @string String(this Direct d) { return fmt.Sprintf("Direct(%d)"u8, len(d)); }
 
 partial struct DirectStr /*map[@string, DirectStr]*/;
 

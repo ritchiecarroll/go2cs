@@ -32,7 +32,6 @@ public static UntypedInt ΔBlockSize => 64;
 // The maximum number of bytes that can be passed to block(). The limit exists
 // because implementations that rely on assembly routines are not preemptible.
 internal static UntypedInt maxAsmIters => 1024;
-
 internal static UntypedInt maxAsmSize => /* BlockSize * maxAsmIters */ 65536; // 64KiB
 
 internal static UntypedInt init0 => 0x67452301;
@@ -124,13 +123,9 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return ΔBlockSize;
-}
+internal static nint BlockSize(this ref digest d) { return ΔBlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢ => ref cryptoMd5UseOfMd5IsNotˢᵇ;

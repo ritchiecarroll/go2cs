@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static nint run(Func<nint, nint> f) {
-    return f(10);
-}
+internal static nint run(Func<nint, nint> f) { return f(10); }
 
 internal static void Main() {
     nint n = 100;

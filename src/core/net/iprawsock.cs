@@ -42,9 +42,7 @@ partial struct IPAddr {
 }
 
 // Network returns the address's network name, "ip".
-public static @string Network(this ref IPAddr a) {
-    return "ip";
-}
+public static @string Network(this ref IPAddr a) { return "ip"; }
 
 public static @string String(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -238,9 +236,7 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
     return (n, oobn, err);
 }
 
-internal static ж<IPConn> newIPConn(ж<netFD> fd) {
-    return Ꮡ(new IPConn(new conn(fd)));
-}
+internal static ж<IPConn> newIPConn(ж<netFD> fd) { return Ꮡ(new IPConn(new conn(fd))); }
 
 // DialIP acts like [Dial] for IP networks.
 //

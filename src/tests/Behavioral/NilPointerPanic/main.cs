@@ -10,13 +10,9 @@ partial struct node {
     internal ж<node> next;
 }
 
-internal static @string label(this ref node n) {
-    return "node:"u8 + n.name;
-}
+internal static @string label(this ref node n) { return "node:"u8 + n.name; }
 
-internal static bool isNil(this ж<node> Ꮡn) {
-    return Ꮡn == nil;
-}
+internal static bool isNil(this ж<node> Ꮡn) { return Ꮡn == nil; }
 
 partial struct box {
     internal ж<node> p;

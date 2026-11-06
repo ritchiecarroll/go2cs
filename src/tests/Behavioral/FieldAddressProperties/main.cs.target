@@ -68,9 +68,7 @@ internal static ж<nint> keep(ж<nint> p) {
     return p;
 }
 
-internal static void bump(ref nint p) {
-    p++;
-}
+internal static void bump(ref nint p) { p++; }
 
 internal static void Main() {
     var l = @new<List>().Init();

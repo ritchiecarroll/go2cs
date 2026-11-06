@@ -446,7 +446,6 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
     ['<'] = @"\u003c",
     ['>'] = @"\u003e"
 }; }
-
 [GoLazy] partial class lazyᴛjsRegexpReplacementTable { internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
     [0] = @"\u0000",
     ['\t'] = @"\t",

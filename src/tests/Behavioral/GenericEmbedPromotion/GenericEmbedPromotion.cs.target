@@ -14,9 +14,7 @@ partial struct p224 {
     internal nint v;
 }
 
-internal static @string label(this ref p224 p) {
-    return "p224";
-}
+internal static @string label(this ref p224 p) { return "p224"; }
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -24,13 +22,9 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     return Ꮡ(new p224(v: p.v + o.v));
 }
 
-internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) {
-    return (Ꮡ(new p224(v: (nint)b[0])), default);
-}
+internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) { return (Ꮡ(new p224(v: (nint)b[0])), default); }
 
-internal static ж<p224> newP224() {
-    return Ꮡ(new p224(v: 1));
-}
+internal static ж<p224> newP224() { return Ꮡ(new p224(v: 1)); }
 
 partial struct curve<Point>
     where Point : point<Point>
@@ -42,21 +36,15 @@ partial struct curve<Point>
 
 internal static @string Tag<Point>(this ref curve<Point> c)
     where Point : point<Point>
-{
-    return c.name;
-}
+{ return c.name; }
 
 internal static @string SeedLabel<Point>(this ref curve<Point> c)
     where Point : point<Point>
-{
-    return c.seed.label();
-}
+{ return c.seed.label(); }
 
 internal static @string LabelOf<Point>(this ref curve<Point> c, Point p)
     where Point : point<Point>
-{
-    return p.label();
-}
+{ return p.label(); }
 
 internal static @string Fresh<Point>(this ref curve<Point> c)
     where Point : point<Point>

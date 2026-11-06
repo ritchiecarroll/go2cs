@@ -50,16 +50,12 @@ public static @string String(this ref Builder b) {
 }
 
 // Len returns the number of accumulated bytes; b.Len() == len(b.String()).
-public static nint Len(this ref Builder b) {
-    return len(b.buf);
-}
+public static nint Len(this ref Builder b) { return len(b.buf); }
 
 // Cap returns the capacity of the builder's underlying byte slice. It is the
 // total space allocated for the string being built and includes any bytes
 // already written.
-public static nint Cap(this ref Builder b) {
-    return cap(b.buf);
-}
+public static nint Cap(this ref Builder b) { return cap(b.buf); }
 
 // Reset resets the [Builder] to be empty.
 public static void Reset(this ref Builder b) {

@@ -5,13 +5,9 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static T pick<T>(slice<T> a) {
-    return a[0];
-}
+internal static T pick<T>(slice<T> a) { return a[0]; }
 
-internal static map<K, V> pair<K, V>(K k, V v) {
-    return new map<K, V>{[k] = v};
-}
+internal static map<K, V> pair<K, V>(K k, V v) { return new map<K, V>{[k] = v}; }
 
 internal static void show(any f) {
     fmt.Println("show:", reflect.TypeOf(f).String());

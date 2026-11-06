@@ -8623,7 +8623,6 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
 // non-self mappings.
 [GoLazy] partial class lazyᴛCaseRanges { public static readonly ж<slice<CaseRange>> ᏑCaseRanges = new StaticBox<slice<CaseRange>>(_CaseRanges); }
 public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange>>)ᏑCaseRanges).ValueSlot;
-
 [GoLazy] partial class lazyᴛ_CaseRanges { internal static slice<CaseRange> _CaseRanges = slice<CaseRange>([
     new(0x0041, 0x005A, new d(new rune[]{0, 32, 0}.array())),
     new(0x0061, 0x007A, new d(new rune[]{-32, 0, -32}.array())),
@@ -8954,7 +8953,6 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     new(0x1E900, 0x1E921, new d(new rune[]{0, 34, 0}.array())),
     new(0x1E922, 0x1E943, new d(new rune[]{-34, 0, -34}.array()))
 ]); }
-
 [GoLazy] partial class lazyᴛproperties { internal static array<uint8> properties = new array<uint8>(256){
     [0x00] = pC,                              // '\x00'
     [0x01] = pC,                              // '\x01'

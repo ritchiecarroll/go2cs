@@ -245,9 +245,7 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
 // canonical key for "accept-encoding" is "Accept-Encoding".
 // If s contains a space or invalid header field bytes, it is
 // returned without modifications.
-public static @string CanonicalHeaderKey(@string s) {
-    return textproto.CanonicalMIMEHeaderKey(s);
-}
+public static @string CanonicalHeaderKey(@string s) { return textproto.CanonicalMIMEHeaderKey(s); }
 
 // hasToken reports whether token appears with v, ASCII
 // case-insensitive, with space or comma boundaries.

@@ -5,13 +5,10 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt replacementChar => /* '�' */ 65533;
-
 internal static UntypedFloat scale => 2.5;
 
 internal static UntypedFloat cbrtC => 5.42857142857142815906e-01;
-
 internal static UntypedFloat cbrtD => -7.05306122448979611050e-01;
-
 internal static UntypedFloat folded => /* 19.0 / 35.0 */ 0.5428571428571428;
 
 internal static UntypedInt fsize => 5;

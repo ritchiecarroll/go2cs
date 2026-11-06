@@ -75,7 +75,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
-<!-- source: src/core/net/darwin/dial.cs:908-909 -->
+<!-- source: src/core/net/darwin/dial.cs:906-907 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
@@ -96,7 +96,7 @@ small, even := func(v int) bool { return v < n }, func(v int) bool { return v%2 
 d, t := double, triple
 ```
 
-<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:40-41, 44-45 -->
+<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:25-26, 29-30 -->
 ```csharp
 var small = (nint v) => v < n;
 var even = (nint v) => v % 2 == 0;
@@ -241,7 +241,7 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:167-170 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:165-168 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
@@ -726,7 +726,7 @@ case StartElement:
     d.translate(&t1.Name, true)    // write must land in t1
     t = t1                          // …because Go reads it back out
 ```
-<!-- source: src/core/encoding/xml/xml.cs:312-313, 333, 337 -->
+<!-- source: src/core/encoding/xml/xml.cs:306-307, 327, 331 -->
 ```csharp
 case StartElement t1ᴛ1: {
     ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);

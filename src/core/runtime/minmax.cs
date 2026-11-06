@@ -21,21 +21,10 @@ internal static @string strmax(@string x, @string y) {
     return x;
 }
 
-internal static float32 fmin32(float32 x, float32 y) {
-    return fmin(x, y);
-}
-
-internal static float64 fmin64(float64 x, float64 y) {
-    return fmin(x, y);
-}
-
-internal static float32 fmax32(float32 x, float32 y) {
-    return fmax(x, y);
-}
-
-internal static float64 fmax64(float64 x, float64 y) {
-    return fmax(x, y);
-}
+internal static float32 fmin32(float32 x, float32 y) { return fmin(x, y); }
+internal static float64 fmin64(float64 x, float64 y) { return fmin(x, y); }
+internal static float32 fmax32(float32 x, float32 y) { return fmax(x, y); }
+internal static float64 fmax64(float64 x, float64 y) { return fmax(x, y); }
 
 partial interface floaty<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered*/ {
     //  Type constraints: ~float32 | ~float64

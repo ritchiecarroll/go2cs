@@ -8,9 +8,7 @@ partial struct T {
     public nint N;
 }
 
-public static nint F() {
-    return 7;
-}
+public static nint F() { return 7; }
 
 public static partial @string Where() {
     var (pc, _, _, ok) = runtime.Caller(0);

@@ -50,8 +50,8 @@ using static go.main_package;
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
 [assembly: GoBoundedGoroutine("main.cs", 28, 5, 0)]
 [assembly: GoBoundedGoroutine("main.cs", 32, 5, 1)]
-[assembly: GoBoundedGoroutine("main.cs", 64, 5, 2)]
-[assembly: GoBoundedGoroutine("main.cs", 67, 5, 3)]
+[assembly: GoBoundedGoroutine("main.cs", 59, 5, 2)]
+[assembly: GoBoundedGoroutine("main.cs", 62, 5, 3)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +61,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAskgoKCpoKCAAYSgqiCAAYWgKKApIKUgoKUgoKUgoKUgpKCkg==", "", "", "", "28:21,32:15,64:15,67:15")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAskgoKCpoKCAAYSgqiCAAYWgpSClIKClIKClIKClIKSgpI=", "", "", "", "28:21,32:15,59:15,62:15")]
 // </GoSourcePositionMaps>
 
 namespace go;

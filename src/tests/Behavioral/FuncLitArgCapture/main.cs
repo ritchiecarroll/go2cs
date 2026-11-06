@@ -11,7 +11,6 @@ partial struct box {
 }
 
 internal static ж<box> gPtr;
-
 internal static box gVal = new box(x: 7);
 
 internal static void run(Action f) {

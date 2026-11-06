@@ -542,7 +542,6 @@ internal static slice<byte> token(this ref ss s, bool skipSpace, Func<rune, bool
 }
 
 internal static error errComplex = errors.New("syntax error scanning complex number");
-
 internal static error errBool = errors.New("syntax error scanning boolean");
 
 internal static nint indexRune(sstring s, rune r) {

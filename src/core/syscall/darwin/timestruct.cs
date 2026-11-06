@@ -7,9 +7,7 @@ namespace go;
 partial class syscall_package {
 
 // TimespecToNsec returns the time stored in ts as nanoseconds.
-public static int64 TimespecToNsec(Timespec ts) {
-    return ts.Nano();
-}
+public static int64 TimespecToNsec(Timespec ts) { return ts.Nano(); }
 
 // NsecToTimespec converts a number of nanoseconds into a [Timespec].
 public static Timespec NsecToTimespec(int64 nsec) {

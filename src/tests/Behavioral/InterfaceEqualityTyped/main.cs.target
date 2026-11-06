@@ -8,9 +8,7 @@ partial class main_package {
 
 partial struct errno /*num:uintptr*/;
 
-internal static @string Error(this errno e) {
-    return fmt.Sprintf("errno %d"u8, (uintptr)e);
-}
+internal static @string Error(this errno e) { return fmt.Sprintf("errno %d"u8, (uintptr)e); }
 
 internal static errno eagain => 11;
 internal static errno eintr => 4;
@@ -23,9 +21,7 @@ partial struct pathError {
     public error Err;
 }
 
-internal static @string Error(this pathError e) {
-    return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error();
-}
+internal static @string Error(this pathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
 partial struct pair<K, V> {
     public K Key;
@@ -49,9 +45,7 @@ partial interface lener {
     nint Len();
 }
 
-internal static bool eq(any a, any b) {
-    return AreEqual(a, b);
-}
+internal static bool eq(any a, any b) { return AreEqual(a, b); }
 
 internal static @string /*text*/ panicText(any a, any b) {
     @string text = default;

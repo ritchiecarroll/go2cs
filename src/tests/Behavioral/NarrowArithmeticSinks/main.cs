@@ -26,13 +26,9 @@ internal static int8 h = 101;
 internal static nuint n = 1;
 internal static uint8 w8 = 100;
 
-internal static @string show(any x) {
-    return fmt.Sprintf("%v %T"u8, x, x);
-}
+internal static @string show(any x) { return fmt.Sprintf("%v %T"u8, x, x); }
 
-internal static any ret(int8 a) {
-    return (int8)(a + a);
-}
+internal static any ret(int8 a) { return (int8)(a + a); }
 
 internal static @string variadic(params ꓸꓸꓸany xsʗp) {
     var xs = xsʗp.sslice();
@@ -40,9 +36,7 @@ internal static @string variadic(params ꓸꓸꓸany xsʗp) {
     return fmt.Sprint(xs.ꓸꓸꓸ);
 }
 
-internal static @string gen<T>(T x) {
-    return fmt.Sprintf("%v %T"u8, (x).OrTypedNilOf(), (x).OrTypedNilOf());
-}
+internal static @string gen<T>(T x) { return fmt.Sprintf("%v %T"u8, (x).OrTypedNilOf(), (x).OrTypedNilOf()); }
 
 internal static void arm(@string @class, Func<@string> f) {
     GoFrame ᒐ = default;

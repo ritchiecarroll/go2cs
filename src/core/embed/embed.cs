@@ -221,30 +221,17 @@ internal static @string Name(this ref @file f) {
     return elem;
 }
 
-internal static int64 Size(this ref @file f) {
-    return (int64)len(f.data);
-}
-
-internal static time.Time ModTime(this ref @file f) {
-    return new time.Time();
-}
+internal static int64 Size(this ref @file f) { return (int64)len(f.data); }
+internal static time.Time ModTime(this ref @file f) { return new time.Time(); }
 
 internal static bool IsDir(this ref @file f) {
     var (_, _, isDir) = split(f.name);
     return isDir;
 }
 
-internal static any Sys(this ref @file f) {
-    return default;
-}
-
-internal static fs.FileMode Type(this ref @file f) {
-    return f.Mode().Type();
-}
-
-internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) {
-    return (new fileжFileInfo(Ꮡf), default);
-}
+internal static any Sys(this ref @file f) { return default; }
+internal static fs.FileMode Type(this ref @file f) { return f.Mode().Type(); }
+internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) { return (new fileжFileInfo(Ꮡf), default); }
 
 internal static fs.FileMode Mode(this ref @file f) {
     if (f.IsDir()) {
@@ -373,13 +360,8 @@ partial struct openFile {
 internal static Δio.Seeker _ᴛ5ʗ = new openFileжSeeker(((ж<openFile>)nil));
 internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)nil));
 
-internal static error Close(this ref openFile f) {
-    return default;
-}
-
-internal static (fs.FileInfo, error) Stat(this ref openFile f) {
-    return (new fileжFileInfo(f.f), default);
-}
+internal static error Close(this ref openFile f) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openFile f) { return (new fileжFileInfo(f.f), default); }
 
 internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.data)) {
@@ -432,13 +414,8 @@ partial struct openDir {
     internal nint offset;        // the read offset, an index into the files slice
 }
 
-internal static error Close(this ref openDir d) {
-    return default;
-}
-
-internal static (fs.FileInfo, error) Stat(this ref openDir d) {
-    return (new fileжFileInfo(d.f), default);
-}
+internal static error Close(this ref openDir d) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openDir d) { return (new fileжFileInfo(d.f), default); }
 
 internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢ)))));

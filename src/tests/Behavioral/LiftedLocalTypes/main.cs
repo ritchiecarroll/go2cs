@@ -127,12 +127,7 @@ internal static void localInterfaceEmbed() {
 partial struct embedImpl {
 }
 
-internal static nint x(this embedImpl _) {
-    return 3;
-}
-
-internal static nint y(this embedImpl _) {
-    return 4;
-}
+internal static nint x(this embedImpl _) { return 3; }
+internal static nint y(this embedImpl _) { return 4; }
 
 } // end main_package

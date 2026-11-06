@@ -45,7 +45,6 @@ public static (CFRef, error) SecTrustCreateWithCertificates(CFRef certs, CFRef p
     }
     return (trustObj, default);
 }
-
 internal static partial void x509_SecTrustCreateWithCertificates_trampoline();
 
 //go:cgo_import_dynamic x509_SecCertificateCreateWithData SecCertificateCreateWithData "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -65,7 +64,6 @@ public static (CFRef, error) SecCertificateCreateWithData(slice<byte> b) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
-
 internal static partial void x509_SecCertificateCreateWithData_trampoline();
 
 //go:cgo_import_dynamic x509_SecPolicyCreateSSL SecPolicyCreateSSL "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -87,7 +85,6 @@ public static (CFRef, error) SecPolicyCreateSSL(@string name) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
-
 internal static partial void x509_SecPolicyCreateSSL_trampoline();
 
 //go:cgo_import_dynamic x509_SecTrustSetVerifyDate SecTrustSetVerifyDate "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -98,7 +95,6 @@ public static error SecTrustSetVerifyDate(CFRef trustObj, CFRef dateRef) {
     }
     return default;
 }
-
 internal static partial void x509_SecTrustSetVerifyDate_trampoline();
 
 //go:cgo_import_dynamic x509_SecTrustEvaluate SecTrustEvaluate "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -112,7 +108,6 @@ public static (CFRef, error) SecTrustEvaluate(CFRef trustObj) {
     }
     return (result, default);
 }
-
 internal static partial void x509_SecTrustEvaluate_trampoline();
 
 //go:cgo_import_dynamic x509_SecTrustEvaluateWithError SecTrustEvaluateWithError "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -131,7 +126,6 @@ public static (nint, error) SecTrustEvaluateWithError(CFRef trustObj) {
     }
     return (0, default);
 }
-
 internal static partial void x509_SecTrustEvaluateWithError_trampoline();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -148,7 +142,6 @@ public static (slice<byte>, error) SecCertificateCopyData(CFRef cert) {
     CFRelease((CFRef)ret);
     return (b, default);
 }
-
 internal static partial void x509_SecCertificateCopyData_trampoline();
 
 //go:cgo_import_dynamic x509_SecTrustCopyCertificateChain SecTrustCopyCertificateChain "/System/Library/Frameworks/Security.framework/Versions/A/Security"
@@ -159,7 +152,6 @@ public static (CFRef, error) SecTrustCopyCertificateChain(CFRef trustObj) {
     }
     return ((CFRef)ret, default);
 }
-
 internal static partial void x509_SecTrustCopyCertificateChain_trampoline();
 
 } // end macos_package

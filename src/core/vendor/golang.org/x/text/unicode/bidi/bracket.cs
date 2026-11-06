@@ -58,17 +58,9 @@ internal static @string String(this ref bracketPair b) {
 // bracketPairs is a slice of bracketPairs with a sort.Interface implementation.
 partial struct bracketPairs /*[]bracketPair*/;
 
-internal static nint Len(this bracketPairs b) {
-    return len(b);
-}
-
-internal static void Swap(this bracketPairs b, nint i, nint j) {
-    (b[i], b[j]) = (b[j], b[i]);
-}
-
-internal static bool Less(this bracketPairs b, nint i, nint j) {
-    return b[i].opener < b[j].opener;
-}
+internal static nint Len(this bracketPairs b) { return len(b); }
+internal static void Swap(this bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
+internal static bool Less(this bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
 
 // resolvePairedBrackets runs the paired bracket part of the UBA algorithm.
 //

@@ -25,9 +25,7 @@ internal static void bumpPair(this ref hasher h, nint i, nint j) {
     p.Value += 10;
 }
 
-internal static uint32 headAt(this ref hasher h, nint i) {
-    return h.head[i];
-}
+internal static uint32 headAt(this ref hasher h, nint i) { return h.head[i]; }
 
 internal static void Main() {
     var h = Ꮡ(new hasher(pairs: new array<nint>[]{new nint[]{0, 0, 0}.array(), new nint[]{0, 0, 0}.array()}.array()));

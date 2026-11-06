@@ -20,14 +20,10 @@ internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContextSpecific => 0x80;
 
 // Constructed returns t with the constructed class bit set.
-public static Tag Constructed(this Tag t) {
-    return (Tag)(t | (uint8)classConstructed);
-}
+public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
 
 // ContextSpecific returns t with the context-specific class bit set.
-public static Tag ContextSpecific(this Tag t) {
-    return (Tag)(t | (uint8)classContextSpecific);
-}
+public static Tag ContextSpecific(this Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
 
 // The following is a list of standard tag and class combinations.
 public static Tag BOOLEAN => /* Tag(1) */ 1;

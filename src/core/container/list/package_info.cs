@@ -60,7 +60,7 @@ using static go.container.list_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("container/list/list.go", "list.cs", "AB0+koKUqJKClAAJFrKCgoKokKigppKClKiSgpSosoK60oKCgoKCgqiSqLKCgoKCgqjCgpSClIKCgqzippSokoKosoKs0oKmrNKCpqzigqas4oKmrPKClKzygpSq0oKCvMKCgg==")]
+[assembly: GoPositionMap("container/list/list.go", "list.cs", "AB0+koKUqJKClAAJFrKCgoKogJiQlpKClKiSgpSosoK60oKCgoKCgqiSqLKCgoKCgqjCgpSClIKCgqzippSokoKosoKs0oKmrNKCpqzigqas4oKmrPKClKzygpSq0oKCvMKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

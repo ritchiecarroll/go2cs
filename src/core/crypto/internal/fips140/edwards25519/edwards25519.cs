@@ -247,7 +247,6 @@ internal static ж<field.Element> d = @new<field.Element>().SetBytes(slice<byte>
     0x98, 0xe8, 0x79, 0x77, 0x79, 0x40, 0xc7, 0x8c,
     0x73, 0xfe, 0x6f, 0x2b, 0xee, 0x6c, 0x03, 0x52])).Item1;
 internal static error _ᴛ3ʗ;
-
 internal static ж<field.Element> d2 = @new<field.Element>().Add(d, d);
 
 internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> p) {

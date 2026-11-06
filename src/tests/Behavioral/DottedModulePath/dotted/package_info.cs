@@ -49,7 +49,7 @@ using static go.example.com.dotted.dotted_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("dotted.go", "dotted.cs", "AAocgKaCgoKU")]
+[assembly: GoPositionMap("dotted.go", "dotted.cs", "AAocloKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.example.com.dotted;

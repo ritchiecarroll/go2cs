@@ -6,21 +6,13 @@ partial class main_package {
 
 partial struct calc /*num:nint*/;
 
-internal static @string Zero(this calc c) {
-    return fmt.Sprintf("z(%d)"u8, (nint)c);
-}
+internal static @string Zero(this calc c) { return fmt.Sprintf("z(%d)"u8, (nint)c); }
 
-internal static @string One(this calc c, nint a) {
-    return fmt.Sprintf("o(%d,%d)"u8, (nint)c, a);
-}
+internal static @string One(this calc c, nint a) { return fmt.Sprintf("o(%d,%d)"u8, (nint)c, a); }
 
-internal static @string Two(this calc c, nint a, nint b) {
-    return fmt.Sprintf("t(%d,%d,%d)"u8, (nint)c, a, b);
-}
+internal static @string Two(this calc c, nint a, nint b) { return fmt.Sprintf("t(%d,%d,%d)"u8, (nint)c, a, b); }
 
-internal static @string Three(this calc c, nint a, nint b, nint d) {
-    return fmt.Sprintf("h(%d,%d,%d,%d)"u8, (nint)c, a, b, d);
-}
+internal static @string Three(this calc c, nint a, nint b, nint d) { return fmt.Sprintf("h(%d,%d,%d,%d)"u8, (nint)c, a, b, d); }
 
 internal static @string Four(this calc c, nint a, nint b, nint d, nint e) {
     return fmt.Sprintf("f(%d,%d,%d,%d,%d)"u8, (nint)c, a, b, d, e);

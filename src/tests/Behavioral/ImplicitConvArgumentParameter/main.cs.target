@@ -9,22 +9,15 @@ partial class main_package {
 partial struct S {
     public nint A;
 }
-
 partial struct U {
     public @string B;
 }
-
 partial struct V {
     public nint A;
 }
 
-internal static nint two(ref S p, ref U q) {
-    return p.A + len(q.B);
-}
-
-internal static nint pair(S a, V b) {
-    return a.A * 10 + b.A;
-}
+internal static nint two(ref S p, ref U q) { return p.A + len(q.B); }
+internal static nint pair(S a, V b) { return a.A * 10 + b.A; }
 
 internal static nint tail(S a, params ꓸꓸꓸжU restʗp) {
     var rest = restʗp.sslice();

@@ -15,9 +15,7 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static @string String(this point p) {
-    return fmt.Sprintf("(%d,%d)"u8, p.x, p.y);
-}
+internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 
 internal static @string describe(Token t) {
     switch (t.type()) {

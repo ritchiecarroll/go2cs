@@ -27,7 +27,6 @@ internal static UntypedInt numCodes => 19; // number of codes in Huffman meta-co
 // Initialize the fixedHuffmanDecoder only once upon first use.
 internal static readonly ж<sync.Once> ᏑfixedOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once fixedOnce => ref ((StaticBox<sync.Once>)ᏑfixedOnce).ValueSlot;
-
 internal static readonly ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StaticBox<huffmanDecoder>(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ((StaticBox<huffmanDecoder>)ᏑfixedHuffmanDecoder).ValueSlot;
 
@@ -41,9 +40,7 @@ public static @string Error(this CorruptInputError e) {
 // An InternalError reports an error in the flate code itself.
 partial struct InternalError /*@string*/;
 
-public static @string Error(this InternalError e) {
-    return "flate: internal error: "u8 + ((@string)e);
-}
+public static @string Error(this InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
 
 // A ReadError reports an error encountered while reading input.
 //

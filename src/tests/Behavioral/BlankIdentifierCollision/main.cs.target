@@ -35,24 +35,15 @@ internal static void multiBlank() {
 
 internal delegate stateFn stateFn(nint _Δp0);
 
-internal static stateFn lexText(nint i) {
-    return lexNumber;
-}
+internal static stateFn lexText(nint i) { return lexNumber; }
 
-internal static stateFn lexNumber(nint i) {
-    return default;
-}
+internal static stateFn lexNumber(nint i) { return default; }
 
-internal static (@string, error) pair(@string a, nint b) {
-    return (a, default);
-}
+internal static (@string, error) pair(@string a, nint b) { return (a, default); }
 
-internal static void sink(nint a) {
-}
+internal static void sink(nint a) { }
 
-internal static nint count() {
-    return 7;
-}
+internal static nint count() { return 7; }
 
 internal static nint total(params ꓸꓸꓸnint aʗp) {
     var a = aʗp.sslice();

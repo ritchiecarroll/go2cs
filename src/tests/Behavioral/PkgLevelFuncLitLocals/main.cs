@@ -13,9 +13,7 @@ internal static void inc(this ж<counter> Ꮡc, nint by) {
     p.Value += by;
 }
 
-internal static nint get(this counter c) {
-    return c.n;
-}
+internal static nint get(this counter c) { return c.n; }
 
 partial struct entry {
     internal @string name;

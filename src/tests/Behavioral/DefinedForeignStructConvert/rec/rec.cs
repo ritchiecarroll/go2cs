@@ -12,12 +12,8 @@ partial struct Open {
     public @string S;
 }
 
-public static Hidden NewHidden(nint n, @string s) {
-    return new Hidden(N: n, s: s);
-}
+public static Hidden NewHidden(nint n, @string s) { return new Hidden(N: n, s: s); }
 
-public static @string S(this Hidden h) {
-    return h.s;
-}
+public static @string S(this Hidden h) { return h.s; }
 
 } // end rec_package

@@ -69,26 +69,15 @@ partial struct Basic {
 }
 
 // Kind returns the kind of basic type b.
-public static BasicKind Kind(this ref Basic b) {
-    return b.kind;
-}
+public static BasicKind Kind(this ref Basic b) { return b.kind; }
 
 // Info returns information about properties of basic type b.
-public static BasicInfo Info(this ref Basic b) {
-    return b.info;
-}
+public static BasicInfo Info(this ref Basic b) { return b.info; }
 
 // Name returns the name of basic type b.
-public static @string Name(this ref Basic b) {
-    return b.name;
-}
+public static @string Name(this ref Basic b) { return b.name; }
 
-public static ΔType Underlying(this ж<Basic> Ꮡb) {
-    return new BasicжΔType(Ꮡb);
-}
-
-public static @string String(this ж<Basic> Ꮡb) {
-    return TypeString(new BasicжΔType(Ꮡb), default);
-}
+public static ΔType Underlying(this ж<Basic> Ꮡb) { return new BasicжΔType(Ꮡb); }
+public static @string String(this ж<Basic> Ꮡb) { return TypeString(new BasicжΔType(Ꮡb), default); }
 
 } // end types_package

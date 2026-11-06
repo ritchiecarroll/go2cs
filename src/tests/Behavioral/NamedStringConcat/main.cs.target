@@ -6,13 +6,9 @@ partial class main_package {
 
 partial struct version /*@string*/;
 
-internal static @string tag(this version v) {
-    return ((@string)v) + "!"u8;
-}
+internal static @string tag(this version v) { return ((@string)v) + "!"u8; }
 
-internal static version bump(version v) {
-    return v + "-next"u8;
-}
+internal static version bump(version v) { return v + "-next"u8; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string go121ˢ = "go1.21"u8;

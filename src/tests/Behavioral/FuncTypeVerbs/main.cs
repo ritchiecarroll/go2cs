@@ -9,9 +9,7 @@ partial class main_package {
 
 internal static UntypedInt letter => /* 'c' */ 99;
 
-internal static (rune, bool) pair() {
-    return ('p', true);
-}
+internal static (rune, bool) pair() { return ('p', true); }
 
 internal static void Main() {
     var noArgs = () => {

@@ -41,17 +41,13 @@ partial struct ledger {
     internal ж<CrossPkgLibꓸStatus> cur;
 }
 
-internal static void note(nint n) {
-    fmt.Println("noted", n);
-}
+internal static void note(nint n) { fmt.Println("noted", n); }
 
 partial struct badge {
     internal @string name;
 }
 
-internal static @string Label(this badge b) {
-    return "badge:"u8 + b.name;
-}
+internal static @string Label(this badge b) { return "badge:"u8 + b.name; }
 
 partial interface namedLabel :
     CrossPkgLib.Labeled
@@ -64,13 +60,8 @@ partial struct emblem {
     internal nint rank;
 }
 
-internal static @string Label(this emblem e) {
-    return e.name;
-}
-
-internal static nint Rank(this emblem e) {
-    return e.rank;
-}
+internal static @string Label(this emblem e) { return e.name; }
+internal static nint Rank(this emblem e) { return e.rank; }
 
 partial interface stamped :
     CrossPkgLib.Labeled
@@ -86,21 +77,14 @@ partial struct seal {
     internal @string name;
 }
 
-internal static @string Label(this seal s) {
-    return s.name;
-}
-
-internal static @string Stamp(this seal s) {
-    return "ok:"u8 + s.name;
-}
+internal static @string Label(this seal s) { return s.name; }
+internal static @string Stamp(this seal s) { return "ok:"u8 + s.name; }
 
 partial struct dial {
     internal @string n;
 }
 
-internal static @string Label(this ref dial d) {
-    return "dial:"u8 + d.n;
-}
+internal static @string Label(this ref dial d) { return "dial:"u8 + d.n; }
 
 partial interface certificate :
     CrossPkgLib.Rated,
@@ -114,21 +98,10 @@ partial struct cert {
     internal nint id;
 }
 
-internal static @string Label(this cert c) {
-    return "cert";
-}
-
-internal static @string Seal(this cert c) {
-    return "wax";
-}
-
-internal static nint Rating(this cert c) {
-    return 9;
-}
-
-internal static nint Serial(this cert c) {
-    return c.id;
-}
+internal static @string Label(this cert c) { return "cert"; }
+internal static @string Seal(this cert c) { return "wax"; }
+internal static nint Rating(this cert c) { return 9; }
+internal static nint Serial(this cert c) { return c.id; }
 
 partial struct holder<T> {
     /*embed*/ public ж<CrossPkgLib_package.Cache<T>> Cache;
@@ -139,13 +112,9 @@ partial struct relay {
     internal @string tag;
 }
 
-internal static @string Report(this ref relay r) {
-    return "relay:"u8 + r.tag;
-}
+internal static @string Report(this ref relay r) { return "relay:"u8 + r.tag; }
 
-internal static (ж<relay>, error) makeRelay() {
-    return (Ꮡ(new relay(tag: "live")), default);
-}
+internal static (ж<relay>, error) makeRelay() { return (Ꮡ(new relay(tag: "live")), default); }
 
 internal static (CrossPkgLib.Reporter, error) getReporter() {
     var (ᴛ1, ᴛ2) = makeRelay();
@@ -167,9 +136,7 @@ internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string
     };
 }
 
-internal static (slice<byte>, error) readWith(@string @base, @string @file) {
-    return (slice<byte>(@base + @file), default);
-}
+internal static (slice<byte>, error) readWith(@string @base, @string @file) { return (slice<byte>(@base + @file), default); }
 
 internal static void Main() {
     GoFrame ᒐ = default;
@@ -404,9 +371,7 @@ partial interface ΔMeter {
     nint Bump();
 }
 
-internal static @string Meter(this tagged t) {
-    return "tagged-meter";
-}
+internal static @string Meter(this tagged t) { return "tagged-meter"; }
 
 partial struct counter {
     /*embed*/ public ж<CrossPkgLib_package.Meter> Meter;
@@ -421,8 +386,6 @@ partial struct tallies {
     internal nint pts;
 }
 
-internal static nint Score(this ref tallies t) {
-    return t.pts;
-}
+internal static nint Score(this ref tallies t) { return t.pts; }
 
 } // end main_package

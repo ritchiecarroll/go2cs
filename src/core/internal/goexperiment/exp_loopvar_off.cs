@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool LoopVar = false;
-
 public static UntypedInt LoopVarInt => 0;
 
 } // end goexperiment_package

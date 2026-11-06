@@ -22,11 +22,9 @@ partial struct nested {
 partial struct clashA {
     public nint Y;
 }
-
 partial struct clashB {
     public nint Y;
 }
-
 partial struct clash {
     /*embed*/ internal clashA clashA;
     /*embed*/ internal clashB clashB;
@@ -41,30 +39,14 @@ partial struct host {
 
 internal delegate error handler(nint _);
 
-internal static error call(this handler h, nint n) {
-    return h(n);
-}
+internal static error call(this handler h, nint n) { return h(n); }
 
-internal static void noArgs() {
-}
-
-internal static void oneIn(nint _) {
-}
-
-internal static error oneOut() {
-    return default;
-}
-
-internal static (nint, error) twoOut() {
-    return (0, default);
-}
-
-internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) {
-}
-
-internal static (bool, error) mixed(nint a, @string b) {
-    return (false, default);
-}
+internal static void noArgs() { }
+internal static void oneIn(nint _) { }
+internal static error oneOut() { return default; }
+internal static (nint, error) twoOut() { return (0, default); }
+internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) { }
+internal static (bool, error) mixed(nint a, @string b) { return (false, default); }
 
 partial struct definedByte /*num:byte*/;
 

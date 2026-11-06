@@ -177,17 +177,9 @@ partial struct deadlineExceededError {
 internal static ref readonly @string contextDeadlineExceededˢ => ref contextDeadlineExceededˢᵇ;
 private static readonly @string contextDeadlineExceededˢᵇ = "context deadline exceeded"u8;
 
-internal static @string Error(this deadlineExceededError _) {
-    return contextDeadlineExceededˢ;
-}
-
-internal static bool Timeout(this deadlineExceededError _) {
-    return true;
-}
-
-internal static bool Temporary(this deadlineExceededError _) {
-    return true;
-}
+internal static @string Error(this deadlineExceededError _) { return contextDeadlineExceededˢ; }
+internal static bool Timeout(this deadlineExceededError _) { return true; }
+internal static bool Temporary(this deadlineExceededError _) { return true; }
 
 // An emptyCtx is never canceled, has no values, and has no deadline.
 // It is the common base of backgroundCtx and todoCtx.

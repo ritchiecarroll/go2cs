@@ -23,7 +23,6 @@ public static ж<Writer> NewWriter(ж<bufio.Writer> w) {
 }
 
 internal static slice<byte> crnl = slice<byte>([(byte)'\r', (byte)'\n']);
-
 internal static slice<byte> dotcrnl = slice<byte>([(byte)'.', (byte)'\r', (byte)'\n']);
 
 // PrintfLine writes the formatted output followed by \r\n.

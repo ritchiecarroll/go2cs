@@ -11,7 +11,7 @@ body:go-blank-unmapped	2123
 eol:cs-ragged-run	77
 eol:missing	3
 eol:moved-to-own-line	4
-eol:split	29
+eol:split	20
 group:unmapped	12
 misplaced:after-case-label/anchor-differs	1
 misplaced:after-open-brace/anchor-differs	4
@@ -31,7 +31,7 @@ misplaced:trailing-field/anchor-differs	15
 misplaced:trailing-field/trailing-to-own-line	1
 misplaced:trailing-spec/anchor-differs	58
 misplaced:trailing-spec/trailing-to-own-line	1
-misplaced:trailing-stmt/anchor-differs	63
+misplaced:trailing-stmt/anchor-differs	61
 misplaced:trailing-stmt/trailing-to-own-line	47
 missed:after-case-label	2
 missed:after-open-brace	12
@@ -51,9 +51,9 @@ partial:decl-doc	56
 partial:directive	6
 partial:free-stmt	7
 top:go-blank-cs-none	79
-top:go-none-cs-blank	1208
+top:go-none-cs-blank	39
 top:unmapped:func	359
-top:unmapped:method	168
+top:unmapped:method	169
 top:unmapped:type-alias	62
 top:unmapped:type-other	72
 top:unmapped:type-struct	9

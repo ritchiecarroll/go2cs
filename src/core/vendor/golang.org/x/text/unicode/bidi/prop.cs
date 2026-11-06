@@ -36,15 +36,11 @@ public static ΔClass Class(this Properties p) {
 }
 
 // IsBracket reports whether the rune is a bracket.
-public static bool IsBracket(this Properties p) {
-    return (uint8)(p.entry & 0xF0) != 0;
-}
+public static bool IsBracket(this Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
 
 // IsOpeningBracket reports whether the rune is an opening bracket.
 // IsBracket must return true.
-public static bool IsOpeningBracket(this Properties p) {
-    return (uint8)(p.entry & (uint8)openMask) != 0;
-}
+public static bool IsOpeningBracket(this Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
 
 // TODO: find a better API and expose.
 internal static rune reverseBracket(this Properties p, rune r) {

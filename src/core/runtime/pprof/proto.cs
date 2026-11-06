@@ -21,9 +21,7 @@ partial class pprof_package {
 // lostProfileEvent is the function to which lost profiling
 // events are attributed.
 // (The name shows up in the pprof graphs.)
-internal static void lostProfileEvent() {
-    lostProfileEvent();
-}
+internal static void lostProfileEvent() { lostProfileEvent(); }
 
 // A profileBuilder writes a profile incrementally from a
 // stream of profile samples delivered by the runtime.
@@ -687,7 +685,6 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
 }
 
 internal static slice<byte> space = slice<byte>(" "u8);
-
 internal static slice<byte> newline = slice<byte>("\n"u8);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

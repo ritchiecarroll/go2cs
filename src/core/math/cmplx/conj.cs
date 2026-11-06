@@ -6,8 +6,6 @@ namespace go.math;
 partial class cmplx_package {
 
 // Conj returns the complex conjugate of x.
-public static complex128 Conj(complex128 x) {
-    return complex(real(x), -imag(x));
-}
+public static complex128 Conj(complex128 x) { return complex(real(x), -imag(x)); }
 
 } // end cmplx_package

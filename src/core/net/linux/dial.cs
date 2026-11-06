@@ -216,9 +216,7 @@ partial struct Dialer {
     internal mptcpStatusDial mptcpStatus;
 }
 
-internal static bool dualStack(this ref Dialer d) {
-    return d.FallbackDelay >= 0;
-}
+internal static bool dualStack(this ref Dialer d) { return d.FallbackDelay >= 0; }
 
 internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     if (a.IsZero()) {

@@ -11,9 +11,7 @@ partial interface badge {
 partial struct gold {
 }
 
-internal static @string label(this gold _) {
-    return "gold";
-}
+internal static @string label(this gold _) { return "gold"; }
 
 
 partial struct reservedᴛ1 /*dyn*/ {

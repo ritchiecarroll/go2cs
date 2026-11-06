@@ -12,15 +12,11 @@ partial interface I {
     @string M();
 }
 
-public static @string M<T>(this G<T> g) {
-    return fmt.Sprint((g.v).OrTypedNilOf());
-}
+public static @string M<T>(this G<T> g) { return fmt.Sprint((g.v).OrTypedNilOf()); }
 
 partial struct T /*num:nint*/;
 
-public static @string M(this T t) {
-    return fmt.Sprint((nint)t);
-}
+public static @string M(this T t) { return fmt.Sprint((nint)t); }
 
 internal static void Main() {
     I a = new G<nint>(7);

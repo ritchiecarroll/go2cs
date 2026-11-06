@@ -56,14 +56,10 @@ partial struct PkgDecoder {
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
-public static @string PkgPath(this ref PkgDecoder pr) {
-    return pr.pkgPath;
-}
+public static @string PkgPath(this ref PkgDecoder pr) { return pr.pkgPath; }
 
 // SyncMarkers reports whether pr uses sync markers.
-public static bool SyncMarkers(this ref PkgDecoder pr) {
-    return pr.sync;
-}
+public static bool SyncMarkers(this ref PkgDecoder pr) { return pr.sync; }
 
 // NewPkgDecoder returns a PkgDecoder initialized to read the Unified
 // IR export data from input. pkgPath is the package path for the
@@ -557,8 +553,6 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Rel
 }
 
 // Version reports the version of the bitstream.
-public static ΔVersion Version(this ref Decoder w) {
-    return w.common.version;
-}
+public static ΔVersion Version(this ref Decoder w) { return w.common.version; }
 
 } // end pkgbits_package

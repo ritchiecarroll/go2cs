@@ -11,8 +11,7 @@ using go.vendor.golang.org.x.text;
 partial class norm_package {
 
 // Reset implements the Reset method of the transform.Transformer interface.
-public static void Reset(this Form _) {
-}
+public static void Reset(this Form _) { }
 
 // Transform implements the Transform method of the transform.Transformer
 // interface. It may need to write segments of up to MaxSegmentSize at once.

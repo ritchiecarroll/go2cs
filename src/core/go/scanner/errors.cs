@@ -40,18 +40,11 @@ public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) 
 }
 
 // Reset resets an [ErrorList] to no errors.
-public static void Reset(this ref ErrorList p) {
-    p = (p)[0..0];
-}
+public static void Reset(this ref ErrorList p) { p = (p)[0..0]; }
 
 // [ErrorList] implements the sort Interface.
-public static nint Len(this ErrorList p) {
-    return len(p);
-}
-
-public static void Swap(this ErrorList p, nint i, nint j) {
-    (p[i], p[j]) = (p[j], p[i]);
-}
+public static nint Len(this ErrorList p) { return len(p); }
+public static void Swap(this ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
 
 public static bool Less(this ErrorList p, nint i, nint j) {
     var e = p[i].ᏑPos;

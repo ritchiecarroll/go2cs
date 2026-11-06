@@ -8,25 +8,19 @@ partial struct simpleErr {
     internal @string msg;
 }
 
-internal static @string Error(this simpleErr e) {
-    return e.msg;
-}
+internal static @string Error(this simpleErr e) { return e.msg; }
 
 partial struct multiWrap {
     internal slice<error> errs;
 }
 
-internal static slice<error> Unwrap(this multiWrap m) {
-    return m.errs;
-}
+internal static slice<error> Unwrap(this multiWrap m) { return m.errs; }
 
 partial struct singleWrap {
     internal error err;
 }
 
-internal static error Unwrap(this singleWrap s) {
-    return s.err;
-}
+internal static error Unwrap(this singleWrap s) { return s.err; }
 
 internal partial interface classify_type /*dyn*/ {
     error Unwrap();

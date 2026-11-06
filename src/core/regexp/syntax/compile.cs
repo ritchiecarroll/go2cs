@@ -89,7 +89,6 @@ internal static void init(this ref compiler c) {
 }
 
 internal static slice<rune> anyRuneNotNL = slice<rune>([0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune]);
-
 internal static slice<rune> anyRune = slice<rune>([0, unicode.MaxRune]);
 
 internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {

@@ -102,7 +102,7 @@ func dropped(n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:43-56 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:36-49 -->
 ```csharp
 internal static @string dropped(nint n) {
     nint m = next(n); if (m > 3) {
@@ -154,7 +154,7 @@ func classify(x any) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:70-94 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:63-87 -->
 ```csharp
 internal static @string classify(any x) {
     if (x._<Shape>(out var s)) {
@@ -211,7 +211,7 @@ func chain(x any, m map[string]int, n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:96-109 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:89-102 -->
 ```csharp
 internal static @string chain(any x, map<@string, nint> m, nint n) {
     if (x == nil) {
@@ -250,7 +250,7 @@ func rebinding() int {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:111-118 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:104-111 -->
 ```csharp
 internal static nint rebinding() {
     {
@@ -266,7 +266,7 @@ The closure case: each pass of the backward `goto` loop captures its own `x` bec
 scope each time it is entered. Siblings declaring the same name keep their blocks too, rather than
 renaming one of them.
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:120-154 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-147 -->
 ```csharp
 internal static slice<nint> captures() {
     var fnsᴷ = new stackAppend<Func<nint>>();
@@ -1088,7 +1088,7 @@ its Δ rename). A TYPE reference to the dot-imported package rendered through th
 use. When the name is bound to a different target, the type is therefore named through the dot-import's own
 class, rooted in `global::`:
 
-<!-- source: src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 21, 29 -->
+<!-- source: src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 19, 27 -->
 ```csharp
 using static DotImportNameCollision.a.keys_package;
 using keys = DotImportNameCollision.b.keys_package;
@@ -1123,11 +1123,9 @@ sort's own convenience methods are exactly this shape, and they called themselve
 ```go
 func (x StringSlice) Sort() { Sort(x) }
 ```
-<!-- source: src/core/sort/sort.cs:186-188 -->
+<!-- source: src/core/sort/sort.cs:159 -->
 ```csharp
-public static void Sort(this StringSlice x) {
-    Sort((Interface)(x));
-}
+public static void Sort(this StringSlice x) { Sort((Interface)(x)); }
 ```
 
 The converter casts the first argument to the function's interface parameter type wherever the argument's

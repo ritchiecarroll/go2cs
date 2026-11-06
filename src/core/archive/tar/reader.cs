@@ -878,7 +878,7 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
 
     bool writeLastByte = default;
     var pos0 = sr.pos;
-    while (sr.logicalRemaining() > 0 && !writeLastByte && err == nil) {
+    while (Ꮡsr.logicalRemaining() > 0 && !writeLastByte && err == nil) {
         int64 nf = default; // Size of fragment
         var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
         if (sr.pos < holeStart) { // In a data fragment
@@ -886,7 +886,7 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
             (nf, err) = io.CopyN(ws, sr.fr, nf);
         } else { // In a hole fragment
             nf = holeEnd - sr.pos;
-            if (sr.physicalRemaining() == 0) {
+            if (Ꮡsr.physicalRemaining() == 0) {
                 writeLastByte = true;
                 nf--;
             }
@@ -913,7 +913,7 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
     case {} when err != nil: {
         return (n, err);
     }
-    case {} when sr.logicalRemaining() == 0 && sr.physicalRemaining() > 0: {
+    case {} when Ꮡsr.logicalRemaining() == 0 && Ꮡsr.physicalRemaining() > 0: {
         return (n, errUnrefData); // More data in dense file than sparse file
     }
     default: {
@@ -924,7 +924,6 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
 internal static int64 logicalRemaining(this sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
 }
-
 internal static int64 physicalRemaining(this sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }

@@ -19,7 +19,6 @@ internal const nint uintSize = /* int(32 << (^uint(0) >> 63)) */ 64;
 // These are initialized in cpu_$GOARCH.go
 // and should not be changed after they are initialized.
 internal static nuint hwCap;
-
 internal static nuint hwCap2;
 
 internal static error readHWCAP() {

@@ -11,7 +11,6 @@ partial class unicode_package {
 
 [GoLazy] partial class lazyᴛTurkishCase { public static readonly ж<SpecialCase> ᏑTurkishCase = new StaticBox<SpecialCase>(_TurkishCase); }
 public static ref SpecialCase TurkishCase => ref ((StaticBox<SpecialCase>)ᏑTurkishCase).ValueSlot;
-
 [GoLazy] partial class lazyᴛ_TurkishCase { internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
     new CaseRange(0x0049, 0x0049, new d(new rune[]{0, 0x131 - 0x49, 0}.array())),
     new CaseRange(0x0069, 0x0069, new d(new rune[]{0x130 - 0x69, 0, 0x130 - 0x69}.array())),

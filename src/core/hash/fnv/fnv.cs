@@ -92,21 +92,10 @@ public static hash.Hash New128a() {
     return new sum128aжHash(Ꮡs);
 }
 
-internal static void Reset(this ref sum32 s) {
-    s = offset32;
-}
-
-internal static void Reset(this ref sum32a s) {
-    s = offset32;
-}
-
-internal static void Reset(this ref sum64 s) {
-    s = offset64;
-}
-
-internal static void Reset(this ref sum64a s) {
-    s = offset64;
-}
+internal static void Reset(this ref sum32 s) { s = offset32; }
+internal static void Reset(this ref sum32a s) { s = offset32; }
+internal static void Reset(this ref sum64 s) { s = offset64; }
+internal static void Reset(this ref sum64a s) { s = offset64; }
 
 internal static void Reset(this ref sum128 s) {
     s.Value[0] = offset128Higher;
@@ -118,21 +107,10 @@ internal static void Reset(this ref sum128a s) {
     s.Value[1] = offset128Lower;
 }
 
-internal static uint32 Sum32(this ref sum32 s) {
-    return (uint32)(s);
-}
-
-internal static uint32 Sum32(this ref sum32a s) {
-    return (uint32)(s);
-}
-
-internal static uint64 Sum64(this ref sum64 s) {
-    return (uint64)(s);
-}
-
-internal static uint64 Sum64(this ref sum64a s) {
-    return (uint64)(s);
-}
+internal static uint32 Sum32(this ref sum32 s) { return (uint32)(s); }
+internal static uint32 Sum32(this ref sum32a s) { return (uint32)(s); }
+internal static uint64 Sum64(this ref sum64 s) { return (uint64)(s); }
+internal static uint64 Sum64(this ref sum64a s) { return (uint64)(s); }
 
 internal static (nint, error) Write(this ref sum32 s, slice<byte> data) {
     var hash = s;
@@ -200,53 +178,19 @@ internal static (nint, error) Write(this ref sum128a s, slice<byte> data) {
     return (len(data), default);
 }
 
-internal static nint Size(this ref sum32 s) {
-    return 4;
-}
+internal static nint Size(this ref sum32 s) { return 4; }
+internal static nint Size(this ref sum32a s) { return 4; }
+internal static nint Size(this ref sum64 s) { return 8; }
+internal static nint Size(this ref sum64a s) { return 8; }
+internal static nint Size(this ref sum128 s) { return 16; }
+internal static nint Size(this ref sum128a s) { return 16; }
 
-internal static nint Size(this ref sum32a s) {
-    return 4;
-}
-
-internal static nint Size(this ref sum64 s) {
-    return 8;
-}
-
-internal static nint Size(this ref sum64a s) {
-    return 8;
-}
-
-internal static nint Size(this ref sum128 s) {
-    return 16;
-}
-
-internal static nint Size(this ref sum128a s) {
-    return 16;
-}
-
-internal static nint BlockSize(this ref sum32 s) {
-    return 1;
-}
-
-internal static nint BlockSize(this ref sum32a s) {
-    return 1;
-}
-
-internal static nint BlockSize(this ref sum64 s) {
-    return 1;
-}
-
-internal static nint BlockSize(this ref sum64a s) {
-    return 1;
-}
-
-internal static nint BlockSize(this ref sum128 s) {
-    return 1;
-}
-
-internal static nint BlockSize(this ref sum128a s) {
-    return 1;
-}
+internal static nint BlockSize(this ref sum32 s) { return 1; }
+internal static nint BlockSize(this ref sum32a s) { return 1; }
+internal static nint BlockSize(this ref sum64 s) { return 1; }
+internal static nint BlockSize(this ref sum64a s) { return 1; }
+internal static nint BlockSize(this ref sum128 s) { return 1; }
+internal static nint BlockSize(this ref sum128a s) { return 1; }
 
 internal static slice<byte> Sum(this ref sum32 s, slice<byte> @in) {
     var v = (uint32)(s);

@@ -2472,7 +2472,6 @@ internal static bool chansend(@unsafe.Pointer ch, @unsafe.Pointer val, bool nb) 
 }
 
 internal static partial @unsafe.Pointer /*ch*/ makechan(ж<abi.Type> typ, nint size);
-
 internal static partial @unsafe.Pointer /*m*/ makemap(ж<abi.Type> t, nint cap);
 
 //go:noescape

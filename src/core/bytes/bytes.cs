@@ -431,9 +431,7 @@ internal static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint
 //   - n < 0: all subslices.
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<slice<byte>> SplitN(slice<byte> s, slice<byte> sep, nint n) {
-    return genSplit(s, sep, 0, n);
-}
+public static slice<slice<byte>> SplitN(slice<byte> s, slice<byte> sep, nint n) { return genSplit(s, sep, 0, n); }
 
 // SplitAfterN slices s into subslices after each instance of sep and
 // returns a slice of those subslices.
@@ -452,9 +450,7 @@ public static slice<slice<byte>> SplitAfterN(slice<byte> s, slice<byte> sep, nin
 // It is equivalent to SplitN with a count of -1.
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<slice<byte>> Split(slice<byte> s, slice<byte> sep) {
-    return genSplit(s, sep, 0, -1);
-}
+public static slice<slice<byte>> Split(slice<byte> s, slice<byte> sep) { return genSplit(s, sep, 0, -1); }
 
 // SplitAfter slices s into all subslices after each instance of sep and
 // returns a slice of those subslices.
@@ -767,9 +763,7 @@ public static slice<byte> ToLower(slice<byte> s) {
 }
 
 // ToTitle treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their title case.
-public static slice<byte> ToTitle(slice<byte> s) {
-    return Map(Δunicode.ToTitle, s);
-}
+public static slice<byte> ToTitle(slice<byte> s) { return Map(Δunicode.ToTitle, s); }
 
 // ToUpperSpecial treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their
 // upper case, giving priority to the special casing rules.

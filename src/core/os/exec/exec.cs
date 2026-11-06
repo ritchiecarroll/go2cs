@@ -126,9 +126,7 @@ public static @string Error(this ref ΔError e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref ΔError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref ΔError e) { return e.Err; }
 
 // ErrWaitDelay is returned by [Cmd.Wait] if the process exits with a
 // successful status code but its output pipes are not closed before the
@@ -366,7 +364,6 @@ partial struct ctxResult {
 }
 
 internal static ж<godebug.Setting> execwait = godebug.New("#execwait");
-
 internal static ж<godebug.Setting> execerrdot = godebug.New("execerrdot");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

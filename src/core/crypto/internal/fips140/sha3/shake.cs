@@ -61,27 +61,18 @@ internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S
     return Ꮡc;
 }
 
-public static nint BlockSize(this ref SHAKE s) {
-    return s.d.BlockSize();
-}
-
-public static nint Size(this ref SHAKE s) {
-    return s.d.Size();
-}
+public static nint BlockSize(this ref SHAKE s) { return s.d.BlockSize(); }
+public static nint Size(this ref SHAKE s) { return s.d.Size(); }
 
 // Sum appends a portion of output to b and returns the resulting slice. The
 // output length is selected to provide full-strength generic security: 32 bytes
 // for SHAKE128 and 64 bytes for SHAKE256. It does not change the underlying
 // state. It panics if any output has already been read.
-public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) {
-    return s.d.Sum(@in);
-}
+public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) { return s.d.Sum(@in); }
 
 // Write absorbs more data into the hash's state.
 // It panics if any output has already been read.
-public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) {
-    return Ꮡs.Ꮡd.Write(p);
-}
+public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) { return Ꮡs.Ꮡd.Write(p); }
 
 public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> @out) {
     fips140.RecordApproved();

@@ -8,9 +8,7 @@ partial struct Node {
     internal nint val;
 }
 
-public static nint Value(this ref Node n) {
-    return n.val;
-}
+public static nint Value(this ref Node n) { return n.val; }
 
 internal static slice<slice<ж<Node>>> group(this ж<Node> Ꮡn) {
     return [[Ꮡn]];

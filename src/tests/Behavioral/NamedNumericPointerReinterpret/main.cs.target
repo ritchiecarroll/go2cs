@@ -17,26 +17,16 @@ internal static partial uint32 load32(ж<uint32> Ꮡp) {
 }
 
 partial struct lfstack /*num:uint64*/;
-
 partial struct sweepClass /*num:uint32*/;
 
-internal static uint64 peek(this ж<lfstack> Ꮡhead) {
-    return load64(Ꮡhead.Reinterpret<lfstack, uint64>());
-}
+internal static uint64 peek(this ж<lfstack> Ꮡhead) { return load64(Ꮡhead.Reinterpret<lfstack, uint64>()); }
+internal static uint32 peek(this ж<sweepClass> Ꮡsc) { return load32(Ꮡsc.Reinterpret<sweepClass, uint32>()); }
 
-internal static uint32 peek(this ж<sweepClass> Ꮡsc) {
-    return load32(Ꮡsc.Reinterpret<sweepClass, uint32>());
-}
-
-internal static uint64 peekVia(ж<lfstack> p) {
-    return load64(p.Reinterpret<lfstack, uint64>());
-}
+internal static uint64 peekVia(ж<lfstack> p) { return load64(p.Reinterpret<lfstack, uint64>()); }
 
 partial struct hexval /*num:uint64*/;
 
-internal static partial uint64 describe(hexval v) {
-    return (uint64)v;
-}
+internal static partial uint64 describe(hexval v) { return (uint64)v; }
 
 internal static partial void storeInt(ж<nint> Ꮡp, nint v) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -46,14 +36,11 @@ internal static partial void storeInt(ж<nint> Ꮡp, nint v) {
 
 partial struct gobber /*num:nint*/;
 
-internal static void set(this ж<gobber> Ꮡg, nint v) {
-    storeInt(Ꮡg.Reinterpret<gobber, nint>(), v);
-}
+internal static void set(this ж<gobber> Ꮡg, nint v) { storeInt(Ꮡg.Reinterpret<gobber, nint>(), v); }
 
 partial struct coord {
     public nint X, Y;
 }
-
 partial struct point /*coord*/;
 
 internal static partial void bump(ж<coord> c) {
@@ -63,9 +50,7 @@ internal static partial void bump(ж<coord> c) {
 
 partial struct namedString /*@string*/;
 
-internal static partial void setStr(ref namedString s, @string v) {
-    s = (namedString)v;
-}
+internal static partial void setStr(ref namedString s, @string v) { s = (namedString)v; }
 
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
@@ -100,8 +85,6 @@ internal static void Main() {
     fmt.Println(Ꮡd.peek(), d);
 }
 
-internal static partial void storeInt64(ref uint64 p, uint64 v) {
-    p = v;
-}
+internal static partial void storeInt64(ref uint64 p, uint64 v) { p = v; }
 
 } // end main_package

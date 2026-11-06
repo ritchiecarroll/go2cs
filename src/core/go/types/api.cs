@@ -77,13 +77,8 @@ partial struct ArgumentError {
     public error Err;
 }
 
-public static @string Error(this ref ArgumentError e) {
-    return e.Err.Error();
-}
-
-public static error Unwrap(this ref ArgumentError e) {
-    return e.Err;
-}
+public static @string Error(this ref ArgumentError e) { return e.Err.Error(); }
+public static error Unwrap(this ref ArgumentError e) { return e.Err; }
 
 // An Importer resolves import paths to Packages.
 //

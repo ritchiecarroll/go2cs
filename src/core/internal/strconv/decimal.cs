@@ -109,7 +109,6 @@ public static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
 // Maximum shift that we can do in one pass without overflow.
 // A uint has 32 or 64 bits, and we have to be able to accommodate 9<<k.
 internal static UntypedInt uintSize => /* 32 << (^uint(0) >> 63) */ 64;
-
 internal static UntypedInt maxShift => /* uintSize - 4 */ 60;
 
 // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.

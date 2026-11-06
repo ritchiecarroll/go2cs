@@ -12,29 +12,19 @@ partial class abi_package {
 // either unsafe.Sizeof and Alignof, nor runtime, reflect, or reflectlite.
 
 // CommonSize returns sizeof(Type) for a compilation target with a given ptrSize
-public static nint CommonSize(nint ptrSize) {
-    return 4 * ptrSize + 8 + 8;
-}
+public static nint CommonSize(nint ptrSize) { return 4 * ptrSize + 8 + 8; }
 
 // StructFieldSize returns sizeof(StructField) for a compilation target with a given ptrSize
-public static nint StructFieldSize(nint ptrSize) {
-    return 3 * ptrSize;
-}
+public static nint StructFieldSize(nint ptrSize) { return 3 * ptrSize; }
 
 // UncommonSize returns sizeof(UncommonType).  This currently does not depend on ptrSize.
 // This exported function is in an internal package, so it may change to depend on ptrSize in the future.
-public static uint64 UncommonSize() {
-    return 4 + 2 + 2 + 4 + 4;
-}
+public static uint64 UncommonSize() { return 4 + 2 + 2 + 4 + 4; }
 
 // TFlagOff returns the offset of Type.TFlag for a compilation target with a given ptrSize
-public static nint TFlagOff(nint ptrSize) {
-    return 2 * ptrSize + 4;
-}
+public static nint TFlagOff(nint ptrSize) { return 2 * ptrSize + 4; }
 
 // ITabTypeOff returns the offset of ITab.Type for a compilation target with a given ptrSize
-public static nint ITabTypeOff(nint ptrSize) {
-    return ptrSize;
-}
+public static nint ITabTypeOff(nint ptrSize) { return ptrSize; }
 
 } // end abi_package

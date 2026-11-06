@@ -118,9 +118,7 @@ internal static ref bool forceClone3 => ref ((StaticBox<bool>)ᏑforceClone3).Va
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeFork();
-
 internal static partial void runtime_AfterFork();
-
 internal static partial void runtime_AfterForkInChild();
 
 // Fork, dup fd onto 0..len(fd), and exec(argv0, argvv, envv) in child.
@@ -185,21 +183,16 @@ partial struct capData {
     internal uint32 permitted;
     internal uint32 inheritable;
 }
-
 partial struct caps {
     internal capHeader hdr;
     internal array<capData> data = new(2);
 }
 
 // See CAP_TO_INDEX in linux/capability.h:
-internal static uintptr capToIndex(uintptr cap) {
-    return cap >> 5;
-}
+internal static uintptr capToIndex(uintptr cap) { return cap >> 5; }
 
 // See CAP_TO_MASK in linux/capability.h:
-internal static uint32 capToMask(uintptr cap) {
-    return ((uint32)1).Lsh((nuint)((uintptr)(cap & 31)));
-}
+internal static uint32 capToMask(uintptr cap) { return ((uint32)1).Lsh((nuint)((uintptr)(cap & 31))); }
 
 // cloneArgs holds arguments for clone3 Linux syscall.
 partial struct cloneArgs {

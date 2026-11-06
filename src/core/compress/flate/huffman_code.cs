@@ -50,9 +50,7 @@ internal static void set(this ref hcode h, uint16 code, uint16 length) {
     h.code = code;
 }
 
-internal static literalNode maxNode() {
-    return new literalNode(math.MaxUint16, math.MaxInt32);
-}
+internal static literalNode maxNode() { return new literalNode(math.MaxUint16, math.MaxInt32); }
 
 internal static ж<huffmanEncoder> newHuffmanEncoder(nint size) {
     return Ꮡ(new huffmanEncoder(codes: new slice<hcode>(size)));
@@ -106,7 +104,6 @@ internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
 }
 
 internal static ж<huffmanEncoder> fixedLiteralEncoding = generateFixedLiteralEncoding();
-
 internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEncoding();
 
 internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
@@ -326,17 +323,13 @@ internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
-internal static nint Len(this byLiteral s) {
-    return len(s);
-}
+internal static nint Len(this byLiteral s) { return len(s); }
 
 internal static bool Less(this byLiteral s, nint i, nint j) {
     return s[i].literal < s[j].literal;
 }
 
-internal static void Swap(this byLiteral s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
+internal static void Swap(this byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 partial struct byFreq /*[]literalNode*/;
 
@@ -347,9 +340,7 @@ internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 
-internal static nint Len(this byFreq s) {
-    return len(s);
-}
+internal static nint Len(this byFreq s) { return len(s); }
 
 internal static bool Less(this byFreq s, nint i, nint j) {
     if (s[i].freq == s[j].freq) {
@@ -358,9 +349,7 @@ internal static bool Less(this byFreq s, nint i, nint j) {
     return s[i].freq < s[j].freq;
 }
 
-internal static void Swap(this byFreq s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
+internal static void Swap(this byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 internal static uint16 reverseBits(uint16 number, byte bitLength) {
     return bits.Reverse16((uint16)(number.Lsh((uint64)((byte)(16 - bitLength)))));

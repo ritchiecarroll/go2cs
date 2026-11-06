@@ -32,9 +32,7 @@ partial struct Sym {
 }
 
 // Static reports whether this symbol is static (not visible outside its file).
-public static bool Static(this ref Sym s) {
-    return s.Type >= 'a';
-}
+public static bool Static(this ref Sym s) { return s.Type >= 'a'; }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
 // instantiated type, function, or method). If s.Name contains brackets, then it
@@ -803,9 +801,7 @@ break_pathloop:;
 // the symbol table.
 partial struct UnknownFileError /*@string*/;
 
-public static @string Error(this UnknownFileError e) {
-    return "unknown file: "u8 + ((@string)e);
-}
+public static @string Error(this UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
 
 // UnknownLineError represents a failure to map a line to a program
 // counter, either because the line is beyond the bounds of the file

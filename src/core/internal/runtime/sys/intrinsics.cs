@@ -86,9 +86,7 @@ public static nint /*n*/ Len64(uint64 x) {
 
 // --- OnesCount ---
 internal static UntypedInt m0 => 0x5555555555555555; // 01010101 ...
-
 internal static UntypedInt m1 => 0x3333333333333333; // 00110011 ...
-
 internal static UntypedInt m2 => 0x0f0f0f0f0f0f0f0f; // 00001111 ...
 
 // OnesCount64 returns the number of one bits ("population count") in x.
@@ -123,14 +121,10 @@ public static nint OnesCount64(uint64 x) {
 }
 
 // LeadingZeros64 returns the number of leading zero bits in x; the result is 64 for x == 0.
-public static nint LeadingZeros64(uint64 x) {
-    return 64 - Len64(x);
-}
+public static nint LeadingZeros64(uint64 x) { return 64 - Len64(x); }
 
 // LeadingZeros8 returns the number of leading zero bits in x; the result is 8 for x == 0.
-public static nint LeadingZeros8(uint8 x) {
-    return 8 - Len8(x);
-}
+public static nint LeadingZeros8(uint8 x) { return 8 - Len8(x); }
 
 // Len8 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint Len8(uint8 x) {
@@ -174,8 +168,7 @@ public static uint32 Bswap32(uint32 x) {
 // AMD64: Produce PREFETCHT0 instruction
 //
 // ARM64: Produce PRFM instruction with PLDL1KEEP option
-public static void Prefetch(uintptr addr) {
-}
+public static void Prefetch(uintptr addr) { }
 
 // PrefetchStreamed prefetches data from memory addr, with a hint that this data is being streamed.
 // That is, it is likely to be accessed very soon, but only once. If possible, this will avoid polluting the cache.
@@ -183,8 +176,7 @@ public static void Prefetch(uintptr addr) {
 // AMD64: Produce PREFETCHNTA instruction
 //
 // ARM64: Produce PRFM instruction with PLDL1STRM option
-public static void PrefetchStreamed(uintptr addr) {
-}
+public static void PrefetchStreamed(uintptr addr) { }
 
 // GetCallerPC returns the program counter (PC) of its caller's caller.
 // GetCallerSP returns the stack pointer (SP) of its caller's caller.

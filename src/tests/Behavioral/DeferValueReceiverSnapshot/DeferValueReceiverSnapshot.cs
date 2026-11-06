@@ -8,17 +8,9 @@ partial struct path {
     internal @string name;
 }
 
-internal static void Pop(this path p, nint k) {
-    fmt.Println("pop", p.name, k);
-}
-
-internal static void Done(this path p) {
-    fmt.Println("done", p.name);
-}
-
-internal static void Pair(this path p, nint a, @string b) {
-    fmt.Println("pair", p.name, a, b);
-}
+internal static void Pop(this path p, nint k) { fmt.Println("pop", p.name, k); }
+internal static void Done(this path p) { fmt.Println("done", p.name); }
+internal static void Pair(this path p, nint a, @string b) { fmt.Println("pair", p.name, a, b); }
 
 partial struct state {
     internal path cur;

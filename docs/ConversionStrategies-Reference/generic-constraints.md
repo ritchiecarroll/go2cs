@@ -2,7 +2,7 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#generic-constraints)
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `[N]E` array-core to `IArray<E>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` emits no C# constraint at all (see [The `comparable` constraint](#the-comparable-constraint)).
-<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:70 `internal static bool eq<T>(T a, T b) {`
+<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:58 `internal static bool eq<T>(T a, T b) {`
 (Go: `func eq[T comparable](a, b T) bool`). history: comparable once mapped to golib's CRTP comparable<T>. -->
 
 ## An array-core constraint `~[N]E` lifts to `IArray<E>`
@@ -74,7 +74,7 @@ The breadcrumb is spelled as Go writes the constraint: a foreign term by its pac
 sees the type set at the declaration and the elided-constraint ratchet (repoguard) can tell it from a
 lost constraint:
 
-<!-- source: src/tests/Behavioral/Constraints/Constraints.cs:92-93 -->
+<!-- source: src/tests/Behavioral/Constraints/Constraints.cs:90-91 -->
 ```csharp
 internal static T firstOf<T>(slice<T> p)
     where T : /* RecordUnion = recordA | recordB | recordC */ new()
@@ -103,7 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
-<!-- source: src/core/go/types/predicates.cs:658-665 -->
+<!-- source: src/core/go/types/predicates.cs:610-617 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
@@ -217,7 +217,7 @@ would infer a different `T`:
 x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:103-104 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:96-97 -->
 ```csharp
 var x = max(u8, (uint8)1);
 x += 100;
@@ -1002,7 +1002,7 @@ The cast above repairs the invariant positions; it leaves the callee itself inst
 
 When every argument that reaches a type parameter is an untyped constant at a position whose type IS that parameter (a variadic element included), and at least one of those constants would infer a different C# type, the call emits the instantiation go/types resolved (`calleeTypeParamFixedByUntypedConst`). The argument text does not change:
 
-<!-- source: src/tests/Behavioral/UntypedConstTypeArg/main.cs.target:28-37 -->
+<!-- source: src/tests/Behavioral/UntypedConstTypeArg/main.cs.target:22-31 -->
 ```csharp
 fmt.Println(show<nint>(3));
 fmt.Println(show(2.5D));

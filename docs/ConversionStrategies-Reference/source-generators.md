@@ -201,7 +201,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:221 -->
+<!-- source: src/core/bufio/bufio.cs:218 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```
@@ -215,7 +215,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:938 -->
+<!-- source: src/core/time/time.cs:936 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -258,7 +258,7 @@ its definition does not spell. Nested arrays list each length in order.
 …
 internal static nint hash(/*[32]*/ array<byte> b) {
 …
-internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) {
+internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) { grid = grid.Clone(); }
 ```
 
 **A string twin is the function that takes an `sstring`.** A few registered functions exist twice, so that a
@@ -277,7 +277,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
 a wrapper over golib's `channel<bool>`, which has no direction in its type. The comment after the name spells
 the type as Go does, arrow included, and the generator records the direction from it.
 
-<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:25 -->
 ```csharp
 partial struct AssignD /*<-chan bool*/;
 ```

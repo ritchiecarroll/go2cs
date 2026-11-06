@@ -16,13 +16,9 @@ internal static partial void where(@string tag) {
     fmt.Printf("%s: %d\n"u8, tag, line);
 }
 
-internal static partial void whereV(this T t, @string tag) {
-    where2(tag);
-}
+internal static partial void whereV(this T t, @string tag) { where2(tag); }
 
-internal static partial void whereP(this ref T t, @string tag) {
-    where2(tag);
-}
+internal static partial void whereP(this ref T t, @string tag) { where2(tag); }
 
 internal static partial void where2(@string tag) {
     var (_, _, line, _) = runtime.Caller(2);

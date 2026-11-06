@@ -61,7 +61,7 @@ using static go.crypto.@internal.fips140.sha256_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/cast.go", "cast.cs", "AAwagoK43IKCgpQ=", "14-31:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AEGCAYKmgoKUlIKCgoKCgoKCgoKCAAgGgoKUgpSCgoKCgoKCgoKCgoKmgqaCpoKCpoKCgoKCgoKCgpSCgoKCgoKClIKokoKCqJKCgoKmgoKUpoCkwoKCgoKCgoKUlIKCgoKClIKUgpSmgpSCgoKUpqKEkoKCgpS4goKClIKmlIKCgoKCgoKCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AECCAYKmgoKUlIKCgoKCgoKCgoKCAAgGgoKUgpSCgoKCgoKCgoKCgoKmgqaCpoKCpoKCgoKCgoKCgpSCgoKCgoKClIKokoKCqJKCgoKmgoKUppTCgoKCgoKCgpSUgoKCgoKUgpSClKaClIKCgpSmooSSgoKClLiCgoKUgqaUgoKCgoKCgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgoKUgoKClIKCgoKmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block_noasm.go", "sha256block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>

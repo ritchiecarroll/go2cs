@@ -23,7 +23,6 @@ partial class types_package {
 
 // nopos, noposn indicate an unknown position
 internal static tokenꓸPos nopos;
-
 internal static atPos noposn = ((atPos)nopos);
 
 // debugging/development support

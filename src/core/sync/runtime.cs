@@ -26,7 +26,6 @@ internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s, bool sync
 // the reason for waiting in a backtrace, and is used to compute some metrics.
 // Otherwise they're functionally identical.
 internal static partial void runtime_SemacquireRWMutexR(ж<uint32> s, bool lifo, nint skipframes);
-
 internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes);
 
 // Semrelease atomically increments *s and notifies a waiting goroutine
@@ -52,14 +51,12 @@ internal static partial void runtime_notifyListNotifyOne(ж<notifyList> l);
 
 // Ensure that sync and runtime agree on size of notifyList.
 internal static partial void runtime_notifyListCheck(uintptr size);
-
 [GoInit] internal static void initΔ1() {
     notifyList n = default;
     runtime_notifyListCheck(/* unsafe.Sizeof(n) */ (uintptr)32);
 }
 
 internal static partial void @throw(@string _);
-
 internal static partial void fatal(@string _);
 
 } // end sync_package

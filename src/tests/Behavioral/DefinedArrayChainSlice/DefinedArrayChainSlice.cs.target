@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct @base /*[4]uint64*/;
-
 partial struct one /*@base*/;
-
 partial struct two /*one*/;
 
 internal static void Main() {

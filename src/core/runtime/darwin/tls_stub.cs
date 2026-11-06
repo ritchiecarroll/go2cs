@@ -7,7 +7,6 @@ namespace go;
 partial class runtime_package {
 
 //go:nosplit
-internal static void osSetupTLS(ref m mp) {
-}
+internal static void osSetupTLS(ref m mp) { }
 
 } // end runtime_package

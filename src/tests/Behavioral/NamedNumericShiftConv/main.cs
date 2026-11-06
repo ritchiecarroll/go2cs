@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct arenaIdx /*num:nuint*/;
-
 partial struct tag /*num:uint8*/;
-
 partial struct big /*num:uint64*/;
 
 internal static UntypedInt bits => 6;

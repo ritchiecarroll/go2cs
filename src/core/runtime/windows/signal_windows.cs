@@ -29,13 +29,9 @@ internal static void preventErrorDialogs() {
 
 // in sys_windows_386.s, sys_windows_amd64.s, and sys_windows_arm64.s
 internal static partial void exceptiontramp();
-
 internal static partial void firstcontinuetramp();
-
 internal static partial void lastcontinuetramp();
-
 internal static partial void sehtramp();
-
 internal static partial void sigresume();
 
 internal static void initExceptionHandler() {

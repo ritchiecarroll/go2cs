@@ -58,7 +58,7 @@ using static go.strconv_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
 [assembly: GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
-[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABMmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmgAACFPKmgqaCpoI=")]
+[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABMmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmAAEU8qaCpoKmgg==")]
 [assembly: GoPositionMap("strconv/quote.go", "quote.cs", "ABAmkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgpSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSkgqSCpLiCgpSClJS0tLS0tLS0gpS0tKSCgoKUgoKCgpSUgpSClIKClIK0goKClIKCgoKUlIKCgpS0tIKClLSClIKqooIAAhLigoKUrgAJBIKUgoKClJSUlLTYgoKCpv62goKUtIKkgoKClLqSgoKClKaCgpSmgoKUyoLKgpSUgpSkvNKCkoKCgpSmAAIYAAoEgpSUlJQACBKCgoKClIKmgoKClIKUgoKssoKUrMSClII=")]
 // </GoSourcePositionMaps>
 

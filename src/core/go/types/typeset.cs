@@ -33,19 +33,13 @@ partial struct _TypeSet {
 }
 
 // IsEmpty reports whether s is the empty set.
-internal static bool IsEmpty(this ref _TypeSet s) {
-    return s.terms.isEmpty();
-}
+internal static bool IsEmpty(this ref _TypeSet s) { return s.terms.isEmpty(); }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-internal static bool IsAll(this ref _TypeSet s) {
-    return s.IsMethodSet() && len(s.methods) == 0;
-}
+internal static bool IsAll(this ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-internal static bool IsMethodSet(this ref _TypeSet s) {
-    return !s.comparable && s.terms.isAll();
-}
+internal static bool IsMethodSet(this ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
 internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
@@ -57,15 +51,11 @@ internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
 }
 
 // NumMethods returns the number of methods available.
-internal static nint NumMethods(this ref _TypeSet s) {
-    return len(s.methods);
-}
+internal static nint NumMethods(this ref _TypeSet s) { return len(s.methods); }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-internal static ж<Func> Method(this ref _TypeSet s, nint i) {
-    return s.methods[i];
-}
+internal static ж<Func> Method(this ref _TypeSet s, nint i) { return s.methods[i]; }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
 internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
@@ -116,9 +106,7 @@ internal static @string String(this ref _TypeSet s) {
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-internal static bool hasTerms(this ref _TypeSet s) {
-    return !s.terms.isEmpty() && !s.terms.isAll();
-}
+internal static bool hasTerms(this ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
 
 // subsetOf reports whether s1 ⊆ s2.
 internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {

@@ -15,9 +15,7 @@ partial struct Holder {
     public map<@string, nint> M;
 }
 
-internal static @string take(any v) {
-    return fmt.Sprintf("%#v"u8, v);
-}
+internal static @string take(any v) { return fmt.Sprintf("%#v"u8, v); }
 
 internal static void Main() {
     var h = new Holder();

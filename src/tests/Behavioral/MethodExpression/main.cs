@@ -13,9 +13,7 @@ internal static nint add(this ref counter c, nint d) {
     return c.n;
 }
 
-internal static nint get(this counter c) {
-    return c.n;
-}
+internal static nint get(this counter c) { return c.n; }
 
 internal static void Main() {
     var f = ((Func<ж<counter>, nint, nint>)(add));
@@ -51,9 +49,7 @@ partial struct shifter {
     internal rune delta;
 }
 
-internal static rune shift(this shifter s, rune r) {
-    return r + s.delta;
-}
+internal static rune shift(this shifter s, rune r) { return r + s.delta; }
 
 internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
     var @out = new slice<rune>(len(rs));
@@ -65,16 +61,12 @@ internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
 
 internal delegate nint reader();
 
-internal static nint sum(this reader f, nint extra) {
-    return f() + extra;
-}
+internal static nint sum(this reader f, nint extra) { return f() + extra; }
 
 partial struct dispatcher {
     internal Func<nint, nint> compute;
 }
 
-internal static nint readTen() {
-    return 10;
-}
+internal static nint readTen() { return 10; }
 
 } // end main_package

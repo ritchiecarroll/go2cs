@@ -174,21 +174,10 @@ partial struct permanentError {
     internal netꓸError err;
 }
 
-internal static @string Error(this ref permanentError e) {
-    return e.err.Error();
-}
-
-internal static error Unwrap(this ref permanentError e) {
-    return new net_ΔErrorᴠerror(e.err);
-}
-
-internal static bool Timeout(this ref permanentError e) {
-    return e.err.Timeout();
-}
-
-internal static bool Temporary(this ref permanentError e) {
-    return false;
-}
+internal static @string Error(this ref permanentError e) { return e.err.Error(); }
+internal static error Unwrap(this ref permanentError e) { return new net_ΔErrorᴠerror(e.err); }
+internal static bool Timeout(this ref permanentError e) { return e.err.Timeout(); }
+internal static bool Temporary(this ref permanentError e) { return false; }
 
 internal static error setErrorLocked(this ref halfConn hc, error err) {
     var (e, ok) = err._<netꓸError>(ᐧ); if (ok) {

@@ -19,9 +19,7 @@ internal static nint Add(this ref inner i, nint d) {
     return i.n;
 }
 
-internal static nint Get(this inner i) {
-    return i.n;
-}
+internal static nint Get(this inner i) { return i.n; }
 
 partial struct outer {
     /*embed*/ internal inner inner;
@@ -31,9 +29,7 @@ partial struct own {
     internal @string s;
 }
 
-internal static @string Say(this own o, @string p) {
-    return p + o.s;
-}
+internal static @string Say(this own o, @string p) { return p + o.s; }
 
 internal static void Main() {
     var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));

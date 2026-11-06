@@ -196,9 +196,7 @@ internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
 partial struct Number /*@string*/;
 
 // String returns the literal text of the number.
-public static @string String(this Number n) {
-    return (@string)n;
-}
+public static @string String(this Number n) { return (@string)n; }
 
 // Float64 returns the number as a float64.
 public static (float64, error) Float64(this Number n) {
@@ -660,7 +658,6 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
 }
 
 internal static slice<byte> nullLiteral = slice<byte>("null"u8);
-
 internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
 // object consumes an object from d.data[d.off-1:], decoding into v.

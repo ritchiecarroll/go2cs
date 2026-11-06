@@ -13,7 +13,6 @@ partial class tls_package {
 // Defaults are collected in this file to allow distributions to more easily patch
 // them to apply local policies.
 internal static ж<godebug.Setting> tlsmlkem = godebug.New("tlsmlkem");
-
 internal static ж<godebug.Setting> tlssecpmlkem = godebug.New("tlssecpmlkem");
 
 // defaultCurvePreferences is the default set of supported key exchanges, as
@@ -58,7 +57,6 @@ internal static slice<SignatureScheme> defaultSupportedSignatureAlgorithms() {
 }
 
 internal static ж<godebug.Setting> tlsrsakex = godebug.New("tlsrsakex");
-
 internal static ж<godebug.Setting> tls3des = godebug.New("tls3des");
 
 internal static slice<uint16> supportedCipherSuites(bool aesGCMPreferred) {

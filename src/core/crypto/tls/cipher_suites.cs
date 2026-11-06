@@ -463,17 +463,9 @@ partial struct prefixNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize(this ref prefixNonceAEAD f) {
-    return aeadNonceLength - noncePrefixLength;
-}
-
-internal static nint Overhead(this ref prefixNonceAEAD f) {
-    return f.aead.Overhead();
-}
-
-internal static nint explicitNonceLen(this ref prefixNonceAEAD f) {
-    return f.NonceSize();
-}
+internal static nint NonceSize(this ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
+internal static nint Overhead(this ref prefixNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref prefixNonceAEAD f) { return f.NonceSize(); }
 
 internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
@@ -492,17 +484,9 @@ partial struct xorNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize(this ref xorNonceAEAD f) {
-    return 8; // 64-bit sequence number
-}
-
-internal static nint Overhead(this ref xorNonceAEAD f) {
-    return f.aead.Overhead();
-}
-
-internal static nint explicitNonceLen(this ref xorNonceAEAD f) {
-    return 0;
-}
+internal static nint NonceSize(this ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
+internal static nint Overhead(this ref xorNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref xorNonceAEAD f) { return 0; }
 
 internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     foreach (var (i, b) in nonce) {
@@ -614,25 +598,11 @@ partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
-internal static nint Size(this ref cthWrapper c) {
-    return c.h.Size();
-}
-
-internal static nint BlockSize(this ref cthWrapper c) {
-    return c.h.BlockSize();
-}
-
-internal static void Reset(this ref cthWrapper c) {
-    c.h.Reset();
-}
-
-internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) {
-    return c.h.Write(p);
-}
-
-internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) {
-    return c.h.ConstantTimeSum(b);
-}
+internal static nint Size(this ref cthWrapper c) { return c.h.Size(); }
+internal static nint BlockSize(this ref cthWrapper c) { return c.h.BlockSize(); }
+internal static void Reset(this ref cthWrapper c) { c.h.Reset(); }
+internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
+internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
 
 internal static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
     boring.Unreachable();

@@ -15,9 +15,7 @@ partial struct Arr /*[3]nint*/;
 partial struct M {
 }
 
-public static @string Do(this M _Δp0, nint _Δp1) {
-    return "";
-}
+public static @string Do(this M _Δp0, nint _Δp1) { return ""; }
 
 partial struct typeError {
     public reflectꓸType Type;

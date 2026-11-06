@@ -70,7 +70,6 @@ public static @string String(this KeyUsage i) {
         return "KeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
-
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.

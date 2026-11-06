@@ -65,7 +65,6 @@ internal static array<float64> _tanP = new float64[]{
     1.15351664838587416140e6D,  // 0x413199eca5fc9ddd
     -1.79565251976484877988e7D  // 0xc1711fead3299176
 }.array();
-
 internal static array<float64> _tanQ = new float64[]{
     1.00000000000000000000e0D,
     1.36812963470692954678e4D,  // 0x40cab8a5eeb36572

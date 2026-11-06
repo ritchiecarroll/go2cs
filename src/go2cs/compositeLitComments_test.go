@@ -151,9 +151,9 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 		}
 	}
 
-	// A one-line func declaration's label stays in its function, on the return it follows, and does not
-	// move to the declaration after it.
-	if line := strings.TrimSpace(lines[lineContaining(t, lines, "// a one-line declaration's label")]); line != "return 8; // a one-line declaration's label" {
+	// A one-line func declaration's label stays on its function's one line (class K), after the closing
+	// brace, and does not move to the declaration after it.
+	if line := strings.TrimSpace(lines[lineContaining(t, lines, "// a one-line declaration's label")]); line != "internal static nint eight() { return 8; } // a one-line declaration's label" {
 		t.Errorf("a one-line func declaration's label left its return: the line reads %q", line)
 	}
 

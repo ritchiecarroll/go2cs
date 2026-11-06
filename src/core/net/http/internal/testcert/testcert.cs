@@ -77,8 +77,6 @@ private static readonly @string testingKeyˢᵇ = "TESTING KEY"u8;
 private static ref readonly @string privateKeyˢ => ref privateKeyˢᵇ;
 private static readonly @string privateKeyˢᵇ = "PRIVATE KEY"u8;
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ);
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ); }
 
 } // end testcert_package

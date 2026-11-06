@@ -8,9 +8,7 @@ internal static int8 h = 101;
 
 internal static @string genericKey<M>(M m)
     where M : /* ~map[int8]string */ IMap<int8, @string>, ISupportMake<M>, new()
-{
-    return m[(int8)((h >> 1))];
-}
+{ return m[(int8)((h >> 1))]; }
 
 internal static void Main() {
     uint8 u = 200;

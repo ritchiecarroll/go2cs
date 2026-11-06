@@ -50,7 +50,7 @@ using static go.ShadowedImportConstLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwggA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAwg")]
 // </GoSourcePositionMaps>
 
 namespace go;

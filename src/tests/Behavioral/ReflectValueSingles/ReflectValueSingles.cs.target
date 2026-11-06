@@ -25,22 +25,15 @@ internal static void expectPanic(@string label, @string want, Action f) {
 
 partial struct gA {
 }
-
 partial struct gB<T> {
 }
 
 partial struct integer /*num:nint*/;
-
 partial struct MyBytes /*[]byte*/;
-
 partial struct MyBytesArray0 /*[0]byte*/;
-
 partial struct MyBytesArray /*[4]byte*/;
-
 /*[0]*/ partial class MyBytesArrayPtr0 /*ж<array<byte>>*/;
-
 /*[4]*/ partial class MyBytesArrayPtr /*ж<array<byte>>*/;
-
 partial struct MyBuffer /*global::go.bytes_package.Buffer*/;
 
 internal static void convRow(@string label, any x, any want) {
@@ -59,9 +52,7 @@ internal static void convRow(@string label, any x, any want) {
 }
 
 partial struct IntChan /*chan nint*/;
-
 partial struct IntChanRecv /*<-chan nint*/;
-
 partial struct IntChanSend /*chan<- nint*/;
 
 internal partial struct main_S /*[]byte*/;

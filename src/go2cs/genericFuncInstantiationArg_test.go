@@ -119,10 +119,10 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "instarg", "main.cs"))
 	accessor := TypedNilFuncAccessor
 
-	// Each function's emission, from its signature line through the first closing brace at the
-	// method's own indentation.
+	// Each function's emission: its one line, when it is written on one line (class K), or from its
+	// signature line through the first closing brace at the method's own indentation.
 	bodyOf := func(name string) string {
-		match := regexp.MustCompile(`(?m)^( *)[^\n]*\b` + name + `\([^\n]*\n(?s:.*?)^( *)\}\s*$`).FindString(mainCs)
+		match := regexp.MustCompile(`(?m)^( *)[^\n]*\b` + name + `\((?:[^\n]*\}[ \t\r]*$|[^\n]*\n(?s:.*?)^( *)\}\s*$)`).FindString(mainCs)
 
 		if match == "" {
 			t.Fatalf("%s: not found in the emission:\n%s", name, mainCs)

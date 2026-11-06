@@ -5,11 +5,9 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct A /*map[@string, nint]*/;
-
 partial struct B /*map[@string, nint]*/;
 
 partial struct S1 /*[]nint*/;
-
 partial struct S2 /*[]nint*/;
 
 internal static void Main() {

@@ -12,17 +12,13 @@ partial struct Circle {
     public nint R;
 }
 
-public static nint Area(this Circle c) {
-    return 3 * c.R * c.R;
-}
+public static nint Area(this Circle c) { return 3 * c.R * c.R; }
 
 partial struct Square {
     public nint S;
 }
 
-public static nint Area(this Square s) {
-    return s.S * s.S;
-}
+public static nint Area(this Square s) { return s.S * s.S; }
 
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;

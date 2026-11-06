@@ -42,8 +42,7 @@ partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
-internal static void isExpr(this ref TagExpr x) {
-}
+internal static void isExpr(this ref TagExpr x) { }
 
 public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
@@ -53,17 +52,14 @@ public static @string String(this ref TagExpr x) {
     return x.Tag;
 }
 
-internal static Expr tag(@string tag) {
-    return new TagExprжExpr(Ꮡ(new TagExpr(tag)));
-}
+internal static Expr tag(@string tag) { return new TagExprжExpr(Ꮡ(new TagExpr(tag))); }
 
 // A NotExpr represents the expression !X (the negation of X).
 partial struct NotExpr {
     public Expr X;
 }
 
-internal static void isExpr(this ref NotExpr x) {
-}
+internal static void isExpr(this ref NotExpr x) { }
 
 public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
@@ -80,17 +76,14 @@ public static @string String(this ref NotExpr x) {
     return "!"u8 + s;
 }
 
-internal static Expr not(Expr x) {
-    return new NotExprжExpr(Ꮡ(new NotExpr(x)));
-}
+internal static Expr not(Expr x) { return new NotExprжExpr(Ꮡ(new NotExpr(x))); }
 
 // An AndExpr represents the expression X && Y.
 partial struct AndExpr {
     public Expr X, Y;
 }
 
-internal static void isExpr(this ref AndExpr x) {
-}
+internal static void isExpr(this ref AndExpr x) { }
 
 public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
@@ -120,8 +113,7 @@ partial struct OrExpr {
     public Expr X, Y;
 }
 
-internal static void isExpr(this ref OrExpr x) {
-}
+internal static void isExpr(this ref OrExpr x) { }
 
 public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.

@@ -35,13 +35,9 @@ public static color.Color Convert(this ref Uniform c, color.Color _) {
     return c.C;
 }
 
-public static Rectangle Bounds(this ref Uniform c) {
-    return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000));
-}
+public static Rectangle Bounds(this ref Uniform c) { return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000)); }
 
-public static color.Color At(this ref Uniform c, nint x, nint y) {
-    return c.C;
-}
+public static color.Color At(this ref Uniform c, nint x, nint y) { return c.C; }
 
 public static color.RGBA64 RGBA64At(this ref Uniform c, nint x, nint y) {
     var (r, g, b, a) = c.C.RGBA();

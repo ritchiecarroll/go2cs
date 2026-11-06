@@ -104,7 +104,6 @@ internal static UntypedInt regSB => iota;
 internal static UntypedInt regFP => 1;
 
 internal static slice<@string> fixedRegs = new golib.SparseArray<@string>{[regSB] = "SB", [regFP] = "FP"}.slice();
-
 internal static slice<@string> gpRegs = slice<@string>(["AX", "BX", "CX", "DI", "SI", "R8", "R9", "R10", "R11"]); // ABI argument order
 
 partial struct regSet {

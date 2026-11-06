@@ -8,9 +8,7 @@ partial struct Δsliceᴛ {
     internal nint lo, hi;
 }
 
-internal static nint span(this Δsliceᴛ s) {
-    return s.hi - s.lo;
-}
+internal static nint span(this Δsliceᴛ s) { return s.hi - s.lo; }
 
 partial struct builder {
     internal nint @base;

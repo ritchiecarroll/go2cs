@@ -8,13 +8,9 @@ partial struct frame {
     public @string Name;
 }
 
-internal static @string label(this frame f) {
-    return f.Name;
-}
+internal static @string label(this frame f) { return f.Name; }
 
-internal static @string tag(this frame f, @string suffix) {
-    return f.Name + suffix;
-}
+internal static @string tag(this frame f, @string suffix) { return f.Name + suffix; }
 
 internal static @string touch(this frame f) {
     f.Name = "touched";

@@ -7,11 +7,9 @@ partial class main_package {
 partial struct A {
     internal nint v;
 }
-
 partial struct B {
     internal nint v;
 }
-
 partial struct C {
     internal nint v;
 }

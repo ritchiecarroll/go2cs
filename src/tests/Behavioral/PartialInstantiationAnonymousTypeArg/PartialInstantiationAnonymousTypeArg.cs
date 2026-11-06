@@ -8,12 +8,8 @@ partial struct withM {
     internal @string s;
 }
 
-internal static void M(this withM w) {
-}
-
-internal static @string String(this withM w) {
-    return w.s;
-}
+internal static void M(this withM w) { }
+internal static @string String(this withM w) { return w.s; }
 
 internal static (T, bool) assertAs<T, V>(V v) {
     var (t, ok) = ((any)(v).OrTypedNilOf())._<T>(ᐧ);

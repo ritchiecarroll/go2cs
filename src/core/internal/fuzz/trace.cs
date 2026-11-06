@@ -18,34 +18,17 @@ partial class fuzz_package {
 //go:linkname libfuzzerTraceConstCmp8 runtime.libfuzzerTraceConstCmp8
 //go:linkname libfuzzerHookStrCmp runtime.libfuzzerHookStrCmp
 //go:linkname libfuzzerHookEqualFold runtime.libfuzzerHookEqualFold
-internal static void libfuzzerTraceCmp1(uint8 arg0, uint8 arg1, nuint fakePC) {
-}
+internal static void libfuzzerTraceCmp1(uint8 arg0, uint8 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceCmp2(uint16 arg0, uint16 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceCmp4(uint32 arg0, uint32 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceCmp8(uint64 arg0, uint64 arg1, nuint fakePC) { }
 
-internal static void libfuzzerTraceCmp2(uint16 arg0, uint16 arg1, nuint fakePC) {
-}
+internal static void libfuzzerTraceConstCmp1(uint8 arg0, uint8 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceConstCmp2(uint16 arg0, uint16 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceConstCmp4(uint32 arg0, uint32 arg1, nuint fakePC) { }
+internal static void libfuzzerTraceConstCmp8(uint64 arg0, uint64 arg1, nuint fakePC) { }
 
-internal static void libfuzzerTraceCmp4(uint32 arg0, uint32 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerTraceCmp8(uint64 arg0, uint64 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerTraceConstCmp1(uint8 arg0, uint8 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerTraceConstCmp2(uint16 arg0, uint16 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerTraceConstCmp4(uint32 arg0, uint32 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerTraceConstCmp8(uint64 arg0, uint64 arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerHookStrCmp(@string arg0, @string arg1, nuint fakePC) {
-}
-
-internal static void libfuzzerHookEqualFold(@string arg0, @string arg1, nuint fakePC) {
-}
+internal static void libfuzzerHookStrCmp(@string arg0, @string arg1, nuint fakePC) { }
+internal static void libfuzzerHookEqualFold(@string arg0, @string arg1, nuint fakePC) { }
 
 } // end fuzz_package

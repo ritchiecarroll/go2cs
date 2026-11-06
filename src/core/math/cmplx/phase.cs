@@ -9,8 +9,6 @@ partial class cmplx_package {
 
 // Phase returns the phase (also called the argument) of x.
 // The returned value is in the range [-Pi, Pi].
-public static float64 Phase(complex128 x) {
-    return math.Atan2(imag(x), real(x));
-}
+public static float64 Phase(complex128 x) { return math.Atan2(imag(x), real(x)); }
 
 } // end cmplx_package

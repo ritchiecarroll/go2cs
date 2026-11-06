@@ -294,9 +294,7 @@ public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
 }
 
 // mask64Bits returns 0xffffffff if cond is 1, and 0 otherwise.
-internal static uint64 mask64Bits(nint cond) {
-    return ~((uint64)cond - 1);
-}
+internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {

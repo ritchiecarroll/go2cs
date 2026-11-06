@@ -13,48 +13,20 @@ using token = global::go.go.token_package;
 partial class types_package {
 
 // isValid reports whether t is a valid type.
-internal static bool isValid(ΔType t) {
-    return !AreEqual(Unalias(t), Typ[Invalid]);
-}
+internal static bool isValid(ΔType t) { return !AreEqual(Unalias(t), Typ[Invalid]); }
 
 // The isX predicates below report whether t is an X.
 // If t is a type parameter the result is false; i.e.,
 // these predicates don't look inside a type parameter.
-internal static bool isBoolean(ΔType t) {
-    return isBasic(t, IsBoolean);
-}
-
-internal static bool isInteger(ΔType t) {
-    return isBasic(t, IsInteger);
-}
-
-internal static bool isUnsigned(ΔType t) {
-    return isBasic(t, IsUnsigned);
-}
-
-internal static bool isFloat(ΔType t) {
-    return isBasic(t, IsFloat);
-}
-
-internal static bool isComplex(ΔType t) {
-    return isBasic(t, IsComplex);
-}
-
-internal static bool isNumeric(ΔType t) {
-    return isBasic(t, IsNumeric);
-}
-
-internal static bool isString(ΔType t) {
-    return isBasic(t, IsString);
-}
-
-internal static bool isIntegerOrFloat(ΔType t) {
-    return isBasic(t, (BasicInfo)(IsInteger | IsFloat));
-}
-
-internal static bool isConstType(ΔType t) {
-    return isBasic(t, IsConstType);
-}
+internal static bool isBoolean(ΔType t) { return isBasic(t, IsBoolean); }
+internal static bool isInteger(ΔType t) { return isBasic(t, IsInteger); }
+internal static bool isUnsigned(ΔType t) { return isBasic(t, IsUnsigned); }
+internal static bool isFloat(ΔType t) { return isBasic(t, IsFloat); }
+internal static bool isComplex(ΔType t) { return isBasic(t, IsComplex); }
+internal static bool isNumeric(ΔType t) { return isBasic(t, IsNumeric); }
+internal static bool isString(ΔType t) { return isBasic(t, IsString); }
+internal static bool isIntegerOrFloat(ΔType t) { return isBasic(t, (BasicInfo)(IsInteger | IsFloat)); }
+internal static bool isConstType(ΔType t) { return isBasic(t, IsConstType); }
 
 // isBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter the result is false; i.e.,
@@ -67,33 +39,13 @@ internal static bool isBasic(ΔType t, BasicInfo info) {
 // The allX predicates below report whether t is an X.
 // If t is a type parameter the result is true if isX is true
 // for all specified types of the type parameter's type set.
-internal static bool allBoolean(ΔType t) {
-    return allBasic(t, IsBoolean);
-}
-
-internal static bool allInteger(ΔType t) {
-    return allBasic(t, IsInteger);
-}
-
-internal static bool allUnsigned(ΔType t) {
-    return allBasic(t, IsUnsigned);
-}
-
-internal static bool allNumeric(ΔType t) {
-    return allBasic(t, IsNumeric);
-}
-
-internal static bool allString(ΔType t) {
-    return allBasic(t, IsString);
-}
-
-internal static bool allOrdered(ΔType t) {
-    return allBasic(t, IsOrdered);
-}
-
-internal static bool allNumericOrString(ΔType t) {
-    return allBasic(t, (BasicInfo)(IsNumeric | IsString));
-}
+internal static bool allBoolean(ΔType t) { return allBasic(t, IsBoolean); }
+internal static bool allInteger(ΔType t) { return allBasic(t, IsInteger); }
+internal static bool allUnsigned(ΔType t) { return allBasic(t, IsUnsigned); }
+internal static bool allNumeric(ΔType t) { return allBasic(t, IsNumeric); }
+internal static bool allString(ΔType t) { return allBasic(t, IsString); }
+internal static bool allOrdered(ΔType t) { return allBasic(t, IsOrdered); }
+internal static bool allNumericOrString(ΔType t) { return allBasic(t, (BasicInfo)(IsNumeric | IsString)); }
 
 // allBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter, the result is true if isBasic(t, info) is true

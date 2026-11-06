@@ -142,17 +142,11 @@ internal static error Set(this ref boolValue b, @string s) {
     return err;
 }
 
-internal static any Get(this ref boolValue b) {
-    return (bool)(b);
-}
+internal static any Get(this ref boolValue b) { return (bool)(b); }
 
-internal static @string String(this ref boolValue b) {
-    return strconv.FormatBool((bool)(b));
-}
+internal static @string String(this ref boolValue b) { return strconv.FormatBool((bool)(b)); }
 
-internal static bool IsBoolFlag(this ref boolValue b) {
-    return true;
-}
+internal static bool IsBoolFlag(this ref boolValue b) { return true; }
 
 // optional interface to indicate boolean flags that can be
 // supplied without "=value" text
@@ -181,13 +175,9 @@ internal static error Set(this ref intValue i, @string s) {
     return err;
 }
 
-internal static any Get(this ref intValue i) {
-    return (nint)(i);
-}
+internal static any Get(this ref intValue i) { return (nint)(i); }
 
-internal static @string String(this ref intValue i) {
-    return strconv.Itoa((nint)(i));
-}
+internal static @string String(this ref intValue i) { return strconv.Itoa((nint)(i)); }
 
 // -- int64 Value
 partial struct int64Value /*num:int64*/;
@@ -208,13 +198,9 @@ internal static error Set(this ref int64Value i, @string s) {
     return err;
 }
 
-internal static any Get(this ref int64Value i) {
-    return (int64)(i);
-}
+internal static any Get(this ref int64Value i) { return (int64)(i); }
 
-internal static @string String(this ref int64Value i) {
-    return strconv.FormatInt((int64)(i), 10);
-}
+internal static @string String(this ref int64Value i) { return strconv.FormatInt((int64)(i), 10); }
 
 // -- uint Value
 partial struct uintValue /*num:nuint*/;
@@ -235,13 +221,9 @@ internal static error Set(this ref uintValue i, @string s) {
     return err;
 }
 
-internal static any Get(this ref uintValue i) {
-    return (nuint)(i);
-}
+internal static any Get(this ref uintValue i) { return (nuint)(i); }
 
-internal static @string String(this ref uintValue i) {
-    return strconv.FormatUint((uint64)(i), 10);
-}
+internal static @string String(this ref uintValue i) { return strconv.FormatUint((uint64)(i), 10); }
 
 // -- uint64 Value
 partial struct uint64Value /*num:uint64*/;
@@ -262,13 +244,9 @@ internal static error Set(this ref uint64Value i, @string s) {
     return err;
 }
 
-internal static any Get(this ref uint64Value i) {
-    return (uint64)(i);
-}
+internal static any Get(this ref uint64Value i) { return (uint64)(i); }
 
-internal static @string String(this ref uint64Value i) {
-    return strconv.FormatUint((uint64)(i), 10);
-}
+internal static @string String(this ref uint64Value i) { return strconv.FormatUint((uint64)(i), 10); }
 
 // -- string Value
 partial struct stringValue /*@string*/;
@@ -285,13 +263,9 @@ internal static error Set(this ref stringValue s, @string val) {
     return default;
 }
 
-internal static any Get(this ref stringValue s) {
-    return (@string)(s);
-}
+internal static any Get(this ref stringValue s) { return (@string)(s); }
 
-internal static @string String(this ref stringValue s) {
-    return (@string)(s);
-}
+internal static @string String(this ref stringValue s) { return (@string)(s); }
 
 // -- float64 Value
 partial struct float64Value /*num:float64*/;
@@ -312,13 +286,9 @@ internal static error Set(this ref float64Value f, @string s) {
     return err;
 }
 
-internal static any Get(this ref float64Value f) {
-    return (float64)(f);
-}
+internal static any Get(this ref float64Value f) { return (float64)(f); }
 
-internal static @string String(this ref float64Value f) {
-    return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64);
-}
+internal static @string String(this ref float64Value f) { return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64); }
 
 // -- time.Duration Value
 partial struct durationValue /*global::go.time_package.Duration*/;
@@ -339,13 +309,9 @@ internal static error Set(this ref durationValue d, @string s) {
     return err;
 }
 
-internal static any Get(this ref durationValue d) {
-    return (time.Duration)d;
-}
+internal static any Get(this ref durationValue d) { return (time.Duration)d; }
 
-internal static @string String(this ж<durationValue> Ꮡd) {
-    return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String();
-}
+internal static @string String(this ж<durationValue> Ꮡd) { return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String(); }
 
 // -- encoding.TextUnmarshaler Value
 partial struct textValue {
@@ -388,28 +354,18 @@ internal static @string String(this textValue v) {
 // -- func Value
 internal delegate error funcValue(@string _);
 
-internal static partial error Set(this funcValue f, @string s) {
-    return f(s);
-}
+internal static partial error Set(this funcValue f, @string s) { return f(s); }
 
-internal static @string String(this funcValue f) {
-    return ""u8;
-}
+internal static @string String(this funcValue f) { return ""u8; }
 
 // -- boolFunc Value
 internal delegate error boolFuncValue(@string _);
 
-internal static partial error Set(this boolFuncValue f, @string s) {
-    return f(s);
-}
+internal static partial error Set(this boolFuncValue f, @string s) { return f(s); }
 
-internal static @string String(this boolFuncValue f) {
-    return ""u8;
-}
+internal static @string String(this boolFuncValue f) { return ""u8; }
 
-internal static bool IsBoolFlag(this boolFuncValue f) {
-    return true;
-}
+internal static bool IsBoolFlag(this boolFuncValue f) { return true; }
 
 // Value is the interface to the dynamic value stored in a flag.
 // (The default value is represented as a string.)
@@ -555,7 +511,6 @@ public static ж<Flag> Lookup(@string name) {
 public static partial error Set(this ref FlagSet f, @string name, @string value) {
     return f.set(name, value);
 }
-
 internal static partial error set(this ref FlagSet f, @string name, @string value) {
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
@@ -819,14 +774,10 @@ internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
 public static ref Action Usage => ref ((StaticBox<Action>)ᏑUsage).ValueSlot;
 
 // NFlag returns the number of flags that have been set.
-public static nint NFlag(this ref FlagSet f) {
-    return len(f.actual);
-}
+public static nint NFlag(this ref FlagSet f) { return len(f.actual); }
 
 // NFlag returns the number of command-line flags that have been set.
-public static nint NFlag() {
-    return len(CommandLine.actual);
-}
+public static nint NFlag() { return len(CommandLine.actual); }
 
 // Arg returns the i'th argument. Arg(0) is the first remaining argument
 // after flags have been processed. Arg returns an empty string if the
@@ -846,24 +797,16 @@ public static @string Arg(nint i) {
 }
 
 // NArg is the number of arguments remaining after flags have been processed.
-public static nint NArg(this ref FlagSet f) {
-    return len(f.args);
-}
+public static nint NArg(this ref FlagSet f) { return len(f.args); }
 
 // NArg is the number of arguments remaining after flags have been processed.
-public static nint NArg() {
-    return len(CommandLine.args);
-}
+public static nint NArg() { return len(CommandLine.args); }
 
 // Args returns the non-flag arguments.
-public static slice<@string> Args(this ref FlagSet f) {
-    return f.args;
-}
+public static slice<@string> Args(this ref FlagSet f) { return f.args; }
 
 // Args returns the non-flag command-line arguments.
-public static slice<@string> Args() {
-    return CommandLine.args;
-}
+public static slice<@string> Args() { return CommandLine.args; }
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.

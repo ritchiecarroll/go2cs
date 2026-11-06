@@ -454,6 +454,7 @@
     <None Include="$(MSBuildThisFileDirectory)nestedMapPointerValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareCollections_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareOperands_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nilParamBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
@@ -647,6 +648,8 @@
     <None Include="$(MSBuildThisFileDirectory)toolchainProvision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)topLevelSeparation.go" />
+    <None Include="$(MSBuildThisFileDirectory)topLevelSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingCommentAlignment.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingCommentAlignment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingComments_test.go" />

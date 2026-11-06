@@ -133,31 +133,15 @@ partial interface anyDirs {
 
 partial struct fileInfoDirs /*[]global::go.io.fs_package.FileInfo*/;
 
-internal static nint len(this fileInfoDirs d) {
-    return builtin.len(d);
-}
-
-internal static bool isDir(this fileInfoDirs d, nint i) {
-    return d[i].IsDir();
-}
-
-internal static @string name(this fileInfoDirs d, nint i) {
-    return d[i].Name();
-}
+internal static nint len(this fileInfoDirs d) { return builtin.len(d); }
+internal static bool isDir(this fileInfoDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name(this fileInfoDirs d, nint i) { return d[i].Name(); }
 
 partial struct dirEntryDirs /*[]global::go.io.fs_package.DirEntry*/;
 
-internal static nint len(this dirEntryDirs d) {
-    return builtin.len(d);
-}
-
-internal static bool isDir(this dirEntryDirs d, nint i) {
-    return d[i].IsDir();
-}
-
-internal static @string name(this dirEntryDirs d, nint i) {
-    return d[i].Name();
-}
+internal static nint len(this dirEntryDirs d) { return builtin.len(d); }
+internal static bool isDir(this dirEntryDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name(this dirEntryDirs d, nint i) { return d[i].Name(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errorReadingDirectoryˢ => ref errorReadingDirectoryˢᵇ;
@@ -1006,9 +990,7 @@ internal static bool containsDotDot(@string v) {
     return false;
 }
 
-internal static bool isSlashRune(rune r) {
-    return r == '/' || r == '\\';
-}
+internal static bool isSlashRune(rune r) { return r == '/' || r == '\\'; }
 
 partial struct fileHandler {
     internal FileSystem root;
@@ -1036,20 +1018,11 @@ internal static (File, error) Open(this ioFS f, @string name) {
     return (new ioFile(@file), default);
 }
 
-internal static error Close(this ioFile f) {
-    return f.@file.Close();
-}
-
-internal static (nint, error) Read(this ioFile f, slice<byte> b) {
-    return f.@file.Read(b);
-}
-
-internal static (fs.FileInfo, error) Stat(this ioFile f) {
-    return f.@file.Stat();
-}
+internal static error Close(this ioFile f) { return f.@file.Close(); }
+internal static (nint, error) Read(this ioFile f, slice<byte> b) { return f.@file.Read(b); }
+internal static (fs.FileInfo, error) Stat(this ioFile f) { return f.@file.Stat(); }
 
 internal static error errMissingSeek = errors.New("io.File missing Seek method");
-
 internal static error errMissingReadDir = errors.New("io.File directory missing ReadDir method");
 
 internal static (int64, error) Seek(this ioFile f, int64 offset, nint whence) {

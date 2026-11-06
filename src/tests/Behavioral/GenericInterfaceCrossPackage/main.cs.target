@@ -9,22 +9,16 @@ partial struct encKey {
     internal slice<byte> b;
 }
 
-internal static slice<byte> Bytes(this ref encKey e) {
-    return e.b;
-}
+internal static slice<byte> Bytes(this ref encKey e) { return e.b; }
 
 partial struct decKey {
     internal slice<byte> b;
     internal ж<encKey> ek;
 }
 
-internal static slice<byte> Bytes(this ref decKey d) {
-    return d.b;
-}
+internal static slice<byte> Bytes(this ref decKey d) { return d.b; }
 
-internal static ж<encKey> EncapsulationKey(this ref decKey d) {
-    return d.ek;
-}
+internal static ж<encKey> EncapsulationKey(this ref decKey d) { return d.ek; }
 
 internal static (ж<decKey>, error) generateKey() {
     return (Ꮡ(new decKey(b: [1, 2], ek: Ꮡ(new encKey(b: [3, 4])))), default);

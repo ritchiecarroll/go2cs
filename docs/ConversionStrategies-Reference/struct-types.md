@@ -169,7 +169,7 @@ type Composed struct {
 	ByKey map[string]struct{ Count int }
 }
 ```
-<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:29-31, 37-39, 45-46, 48, 50 -->
+<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:28-30, 36-38, 44-45, 47, 49 -->
 ```csharp
 partial struct Composed_Ptrs /*dyn*/ {
     public uint32 Size;

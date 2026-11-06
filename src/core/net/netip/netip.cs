@@ -70,30 +70,20 @@ internal static unique.Handle<addrDetail> z6noz = unique.Make<addrDetail>(new ad
 
 // IPv6LinkLocalAllNodes returns the IPv6 link-local all nodes multicast
 // address ff02::1.
-public static ΔAddr IPv6LinkLocalAllNodes() {
-    return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x01});
-}
+public static ΔAddr IPv6LinkLocalAllNodes() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x01}); }
 
 // IPv6LinkLocalAllRouters returns the IPv6 link-local all routers multicast
 // address ff02::2.
-public static ΔAddr IPv6LinkLocalAllRouters() {
-    return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x02});
-}
+public static ΔAddr IPv6LinkLocalAllRouters() { return AddrFrom16(new array<byte>(16){[0] = 0xff, [1] = 0x02, [15] = 0x02}); }
 
 // IPv6Loopback returns the IPv6 loopback address ::1.
-public static ΔAddr IPv6Loopback() {
-    return AddrFrom16(new array<byte>(16){[15] = 0x01});
-}
+public static ΔAddr IPv6Loopback() { return AddrFrom16(new array<byte>(16){[15] = 0x01}); }
 
 // IPv6Unspecified returns the IPv6 unspecified address "::".
-public static ΔAddr IPv6Unspecified() {
-    return new ΔAddr(z: z6noz);
-}
+public static ΔAddr IPv6Unspecified() { return new ΔAddr(z: z6noz); }
 
 // IPv4Unspecified returns the IPv4 unspecified address "0.0.0.0".
-public static ΔAddr IPv4Unspecified() {
-    return AddrFrom4(new byte[]{}.array(4));
-}
+public static ΔAddr IPv4Unspecified() { return AddrFrom4(new byte[]{}.array(4)); }
 
 // AddrFrom4 returns the address of the IPv4 address given by the bytes in addr.
 public static ΔAddr AddrFrom4(/*[4]*/ array<byte> addr) {
@@ -405,9 +395,7 @@ internal static bool isZero(this ΔAddr ip) {
 // IsValid reports whether the [Addr] is an initialized address (not the zero Addr).
 //
 // Note that "0.0.0.0" and "::" are both valid values.
-public static bool IsValid(this ΔAddr ip) {
-    return ip.z != z0;
-}
+public static bool IsValid(this ΔAddr ip) { return ip.z != z0; }
 
 // BitLen returns the number of bits in the IP address:
 // 128 for IPv6, 32 for IPv4, and 0 for the zero [Addr].
@@ -475,9 +463,7 @@ public static nint Compare(this ΔAddr ip, ΔAddr ip2) {
 // Less reports whether ip sorts before ip2.
 // IP addresses sort first by length, then their address.
 // IPv6 addresses with zones sort just after the same address without a zone.
-public static bool Less(this ΔAddr ip, ΔAddr ip2) {
-    return ip.Compare(ip2) == -1;
-}
+public static bool Less(this ΔAddr ip, ΔAddr ip2) { return ip.Compare(ip2) == -1; }
 
 // Is4 reports whether ip is an IPv4 address.
 //
@@ -1136,19 +1122,13 @@ partial struct AddrPort {
 
 // AddrPortFrom returns an [AddrPort] with the provided IP and port.
 // It does not allocate.
-public static AddrPort AddrPortFrom(ΔAddr ip, uint16 port) {
-    return new AddrPort(ip: ip, port: port);
-}
+public static AddrPort AddrPortFrom(ΔAddr ip, uint16 port) { return new AddrPort(ip: ip, port: port); }
 
 // Addr returns p's IP address.
-public static ΔAddr Addr(this AddrPort p) {
-    return p.ip;
-}
+public static ΔAddr Addr(this AddrPort p) { return p.ip; }
 
 // Port returns p's port.
-public static uint16 Port(this AddrPort p) {
-    return p.port;
-}
+public static uint16 Port(this AddrPort p) { return p.port; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notAnIpPortˢ => ref notAnIpPortˢᵇ;
@@ -1232,9 +1212,7 @@ public static AddrPort MustParseAddrPort(@string s) {
 
 // IsValid reports whether p.Addr() is valid.
 // All ports are valid, including zero.
-public static bool IsValid(this AddrPort p) {
-    return p.ip.IsValid();
-}
+public static bool IsValid(this AddrPort p) { return p.ip.IsValid(); }
 
 // Compare returns an integer comparing two AddrPorts.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
@@ -1416,32 +1394,22 @@ public static ΔPrefix PrefixFrom(ΔAddr ip, nint bits) {
 }
 
 // Addr returns p's IP address.
-public static ΔAddr Addr(this ΔPrefix p) {
-    return p.ip;
-}
+public static ΔAddr Addr(this ΔPrefix p) { return p.ip; }
 
 // Bits returns p's prefix length.
 //
 // It reports -1 if invalid.
-public static nint Bits(this ΔPrefix p) {
-    return (nint)p.bitsPlusOne - 1;
-}
+public static nint Bits(this ΔPrefix p) { return (nint)p.bitsPlusOne - 1; }
 
 // IsValid reports whether p.Bits() has a valid range for p.Addr().
 // If p.Addr() is the zero [Addr], IsValid returns false.
 // Note that if p is the zero [Prefix], then p.IsValid() == false.
-public static bool IsValid(this ΔPrefix p) {
-    return p.bitsPlusOne > 0;
-}
+public static bool IsValid(this ΔPrefix p) { return p.bitsPlusOne > 0; }
 
-internal static bool isZero(this ΔPrefix p) {
-    return p == new ΔPrefix();
-}
+internal static bool isZero(this ΔPrefix p) { return p == new ΔPrefix(); }
 
 // IsSingleIP reports whether p contains exactly one IP.
-public static bool IsSingleIP(this ΔPrefix p) {
-    return p.IsValid() && p.Bits() == p.ip.BitLen();
-}
+public static bool IsSingleIP(this ΔPrefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
 
 // Compare returns an integer comparing two prefixes.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.

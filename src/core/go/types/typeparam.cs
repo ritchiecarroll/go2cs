@@ -19,9 +19,7 @@ internal static ref atomic.Uint32 lastID => ref ((StaticBox<atomic.Uint32>)Ꮡla
 
 // nextID returns a value increasing monotonically by 1 with
 // each call, starting with 1. It may be called concurrently.
-internal static uint64 nextID() {
-    return (uint64)ᏑlastID.Add(1);
-}
+internal static uint64 nextID() { return (uint64)ᏑlastID.Add(1); }
 
 // A TypeParam represents the type of a type parameter in a generic declaration.
 //
@@ -71,9 +69,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
 }
 
 // Obj returns the type name for the type parameter t.
-public static ж<TypeName> Obj(this ref TypeParam t) {
-    return t.obj;
-}
+public static ж<TypeName> Obj(this ref TypeParam t) { return t.obj; }
 
 // Index returns the index of the type param within its param list, or -1 if
 // the type parameter has not yet been bound to a type.
@@ -110,9 +106,7 @@ public static ΔType Underlying(this ref TypeParam t) {
     return new InterfaceжΔType(t.iface());
 }
 
-public static @string String(this ж<TypeParam> Ꮡt) {
-    return TypeString(new TypeParamжΔType(Ꮡt), default);
-}
+public static @string String(this ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжΔType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation

@@ -8,12 +8,7 @@ using @unsafe = unsafe_package;
 
 partial class checktest_package {
 
-public static ж<uint32> PtrStaticData() {
-    return default;
-}
-
-public static @unsafe.Pointer PtrStaticText() {
-    return default;
-}
+public static ж<uint32> PtrStaticData() { return default; }
+public static @unsafe.Pointer PtrStaticText() { return default; }
 
 } // end checktest_package

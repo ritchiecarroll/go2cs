@@ -23,29 +23,19 @@ public static UntypedInt UintSize => /* uintSize */ 64;
 // --- LeadingZeros ---
 
 // LeadingZeros returns the number of leading zero bits in x; the result is [UintSize] for x == 0.
-public static nint LeadingZeros(nuint x) {
-    return (nint)UintSize - Len(x);
-}
+public static nint LeadingZeros(nuint x) { return (nint)UintSize - Len(x); }
 
 // LeadingZeros8 returns the number of leading zero bits in x; the result is 8 for x == 0.
-public static nint LeadingZeros8(uint8 x) {
-    return 8 - Len8(x);
-}
+public static nint LeadingZeros8(uint8 x) { return 8 - Len8(x); }
 
 // LeadingZeros16 returns the number of leading zero bits in x; the result is 16 for x == 0.
-public static nint LeadingZeros16(uint16 x) {
-    return 16 - Len16(x);
-}
+public static nint LeadingZeros16(uint16 x) { return 16 - Len16(x); }
 
 // LeadingZeros32 returns the number of leading zero bits in x; the result is 32 for x == 0.
-public static nint LeadingZeros32(uint32 x) {
-    return 32 - Len32(x);
-}
+public static nint LeadingZeros32(uint32 x) { return 32 - Len32(x); }
 
 // LeadingZeros64 returns the number of leading zero bits in x; the result is 64 for x == 0.
-public static nint LeadingZeros64(uint64 x) {
-    return 64 - Len64(x);
-}
+public static nint LeadingZeros64(uint64 x) { return 64 - Len64(x); }
 
 // --- TrailingZeros ---
 
@@ -118,13 +108,9 @@ public static nint TrailingZeros64(uint64 x) {
 
 // --- OnesCount ---
 internal static UntypedInt m0 => 0x5555555555555555; // 01010101 ...
-
 internal static UntypedInt m1 => 0x3333333333333333; // 00110011 ...
-
 internal static UntypedInt m2 => 0x0f0f0f0f0f0f0f0f; // 00001111 ...
-
 internal static UntypedInt m3 => 0x00ff00ff00ff00ff; // etc.
-
 internal static UntypedInt m4 => 0x0000ffff0000ffff;
 
 // OnesCount returns the number of one bits ("population count") in x.

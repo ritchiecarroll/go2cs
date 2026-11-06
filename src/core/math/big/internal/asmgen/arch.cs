@@ -159,24 +159,16 @@ partial struct ΔReg {
 }
 
 // IsImm reports whether r is an immediate value.
-public static bool IsImm(this ΔReg r) {
-    return strings.HasPrefix(r.name, "$");
-}
+public static bool IsImm(this ΔReg r) { return strings.HasPrefix(r.name, "$"); }
 
 // IsMem reports whether r is a memory value.
-public static bool IsMem(this ΔReg r) {
-    return strings.HasSuffix(r.name, ")");
-}
+public static bool IsMem(this ΔReg r) { return strings.HasSuffix(r.name, ")"); }
 
 // String returns the assembly syntax for r.
-public static @string String(this ΔReg r) {
-    return r.name;
-}
+public static @string String(this ΔReg r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of Reg (a register with no name).
-public static bool Valid(this ΔReg r) {
-    return r.name != ""u8;
-}
+public static bool Valid(this ΔReg r) { return r.name != ""u8; }
 
 // A RegPtr is like a Reg but expected to hold a pointer.
 // The separate Go type helps keeps pointers and scalars separate and avoid mistakes;
@@ -186,19 +178,13 @@ partial struct RegPtr {
 }
 
 // String returns the assembly syntax for r.
-public static @string String(this RegPtr r) {
-    return r.name;
-}
+public static @string String(this RegPtr r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of RegPtr (a register with no name).
-public static bool Valid(this RegPtr r) {
-    return r.name != ""u8;
-}
+public static bool Valid(this RegPtr r) { return r.name != ""u8; }
 
 // mem returns a memory reference to off bytes from the pointer r.
-internal static ΔReg mem(this ж<RegPtr> Ꮡr, nint off) {
-    return new ΔReg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil()));
-}
+internal static ΔReg mem(this ж<RegPtr> Ꮡr, nint off) { return new ΔReg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
 
 // A Carry is a flag field explaining how an instruction sets and uses the carry flags.
 // Different operations expect different sets of bits.

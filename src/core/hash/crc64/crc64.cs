@@ -96,21 +96,13 @@ partial struct digest {
 // value out in big-endian byte order. The returned Hash64 also
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
-public static hash.Hash64 New(ж<Table> tab) {
-    return new digestжHash64(Ꮡ(new digest(0, tab)));
-}
+public static hash.Hash64 New(ж<Table> tab) { return new digestжHash64(Ꮡ(new digest(0, tab))); }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return 1;
-}
+internal static nint BlockSize(this ref digest d) { return 1; }
 
-internal static void Reset(this ref digest d) {
-    d.crc = 0;
-}
+internal static void Reset(this ref digest d) { d.crc = 0; }
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "crc\x02"u8;
@@ -196,9 +188,7 @@ internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     return (len(p), default);
 }
 
-internal static uint64 Sum64(this ref digest d) {
-    return d.crc;
-}
+internal static uint64 Sum64(this ref digest d) { return d.crc; }
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum64();
@@ -207,9 +197,7 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 
 // Checksum returns the CRC-64 checksum of data
 // using the polynomial represented by the [Table].
-public static uint64 Checksum(slice<byte> data, ж<Table> tab) {
-    return update(0, ref (tab).DerefOrNull(), data);
-}
+public static uint64 Checksum(slice<byte> data, ж<Table> tab) { return update(0, ref (tab).DerefOrNull(), data); }
 
 // tableSum returns the ISO checksum of table t.
 internal static uint64 tableSum(ж<Table> Ꮡt) {

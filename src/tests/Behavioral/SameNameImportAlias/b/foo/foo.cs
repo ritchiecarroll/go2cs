@@ -13,8 +13,6 @@ partial struct ΔKind /*@string*/;
 partial struct S {
 }
 
-public static ΔKind Kind(this S _) {
-    return (@string)"b";
-}
+public static ΔKind Kind(this S _) { return (@string)"b"; }
 
 } // end foo_package

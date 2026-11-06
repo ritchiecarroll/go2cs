@@ -688,20 +688,9 @@ public static ΔHandler DiscardHandler = new discardHandler();
 partial struct discardHandler {
 }
 
-internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) {
-    return false;
-}
-
-internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) {
-    return default;
-}
-
-internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) {
-    return dh;
-}
-
-internal static ΔHandler WithGroup(this discardHandler dh, @string name) {
-    return dh;
-}
+internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) { return false; }
+internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
+internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
+internal static ΔHandler WithGroup(this discardHandler dh, @string name) { return dh; }
 
 } // end slog_package

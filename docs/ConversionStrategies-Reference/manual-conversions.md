@@ -2834,7 +2834,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:35-40 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
 ```csharp
 partial struct host {
     public nint Plain;
@@ -4600,7 +4600,7 @@ The case is fiat-crypto's P-521 field multiply. Its generated body declares more
 inline into, so every 64-bit multiply, carry add and limb read in it stays a call. The registry displaces
 `p521Mul` and `p521Square`, and the converter emits a placeholder for each:
 
-<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs:80-82 -->
+<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs:79-81 -->
 ```csharp
 // go2cs generated this placeholder — func p521Mul is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

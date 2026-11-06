@@ -10,17 +10,13 @@ partial struct mark {
     internal nint n;
 }
 
-internal static @string Greet(this mark m) {
-    return fmt.Sprintf("mark%d"u8, m.n);
-}
+internal static @string Greet(this mark m) { return fmt.Sprintf("mark%d"u8, m.n); }
 
 partial struct loud {
     internal nint n;
 }
 
-internal static @string Greet(this ref loud l) {
-    return fmt.Sprintf("loud%d"u8, l.n);
-}
+internal static @string Greet(this ref loud l) { return fmt.Sprintf("loud%d"u8, l.n); }
 
 internal static void Main() {
     var v = new mark(n: 1);

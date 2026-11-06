@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct Inner /*[]nint*/;
-
 partial struct Outer /*[]Inner*/;
 
 internal static Outer build() {

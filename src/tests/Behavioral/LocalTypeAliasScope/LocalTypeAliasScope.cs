@@ -15,9 +15,7 @@ partial struct Header {
     public int64 Size;
 }
 
-public static @string String(this Header h) {
-    return fmt.Sprint(h.Name, "/", h.Size);
-}
+public static @string String(this Header h) { return fmt.Sprint(h.Name, "/", h.Size); }
 
 internal partial struct writeOps_opWrite /*dyn*/ {
     internal @string str;

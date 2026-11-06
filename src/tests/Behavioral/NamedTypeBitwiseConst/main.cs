@@ -7,24 +7,16 @@ partial class main_package {
 partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
-
 internal static UntypedInt classContext => 0x80;
 
-public static Tag Constructed(this Tag t) {
-    return (Tag)(t | (uint8)classConstructed);
-}
-
-public static Tag Context(this Tag t) {
-    return (Tag)(t | (uint8)classContext);
-}
+public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
+public static Tag Context(this Tag t) { return (Tag)(t | (uint8)classContext); }
 
 partial struct word /*num:uint64*/;
 
 internal static UntypedInt tagBits => 19;
 
-internal static word low(this word w) {
-    return (word)(w & (uint64)((1 << (int)(tagBits)) - 1));
-}
+internal static word low(this word w) { return (word)(w & (uint64)((1 << (int)(tagBits)) - 1)); }
 
 internal static void Main() {
     Tag t = 0x10;
@@ -45,9 +37,7 @@ internal static void Main() {
     fmt.Println(c.R, c.G, c.B, c.A);
 }
 
-internal static Tag mask(Tag t) {
-    return (Tag)(t & 0xFF);
-}
+internal static Tag mask(Tag t) { return (Tag)(t & 0xFF); }
 
 internal static word maskFor(nuint s) {
     var m = (((word)1) << s) - 1;

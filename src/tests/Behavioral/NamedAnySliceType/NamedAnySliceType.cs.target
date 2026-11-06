@@ -13,9 +13,7 @@ partial struct row {
     internal SE val;
 }
 
-internal static @string describe(this SE s) {
-    return fmt.Sprint(len(s), ":", s);
-}
+internal static @string describe(this SE s) { return fmt.Sprint(len(s), ":", s); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;

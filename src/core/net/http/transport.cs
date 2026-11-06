@@ -1083,9 +1083,7 @@ partial struct transportReadFromServerError {
     internal error err;
 }
 
-internal static error Unwrap(this transportReadFromServerError e) {
-    return e.err;
-}
+internal static error Unwrap(this transportReadFromServerError e) { return e.err; }
 
 internal static @string Error(this transportReadFromServerError e) {
     return fmt.Sprintf("net/http: Transport failed to read from server: %v"u8, e.err);
@@ -3125,21 +3123,10 @@ partial struct timeoutError {
     internal @string err;
 }
 
-internal static @string Error(this ref timeoutError e) {
-    return e.err;
-}
-
-internal static bool Timeout(this ref timeoutError e) {
-    return true;
-}
-
-internal static bool Temporary(this ref timeoutError e) {
-    return true;
-}
-
-internal static bool Is(this ref timeoutError e, error err) {
-    return AreEqual(err, context_package.DeadlineExceeded);
-}
+internal static @string Error(this ref timeoutError e) { return e.err; }
+internal static bool Timeout(this ref timeoutError e) { return true; }
+internal static bool Temporary(this ref timeoutError e) { return true; }
+internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }
 
 internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError("net/http: timeout awaiting response headers")));
 
@@ -3147,15 +3134,13 @@ internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(
 // testing.
 internal static error errRequestCanceled;
 internal static void initᴛerrRequestCanceled() { errRequestCanceled = http2errRequestCanceled; }
-
 internal static error errRequestCanceledConn = errors.New("net/http: request canceled while waiting for connection"); // TODO: unify?
 
 // errRequestDone is used to cancel the round trip Context after a request is successfully done.
 // It should not be seen by the user.
 internal static error errRequestDone = errors.New("net/http: request completed");
 
-internal static void nop() {
-}
+internal static void nop() { }
 
 // testHooks. Always non-nil.
 internal static readonly ж<Action> ᏑtestHookEnterRoundTrip = new StaticBox<Action>(nop);
@@ -3486,7 +3471,6 @@ partial struct bodyEOFSignal {
 }
 
 internal static error errReadOnClosedResBody = errors.New("http: read on closed response body");
-
 internal static error errConcurrentReadOnResBody = errors.New("http: concurrent read on response body");
 
 internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byte> p) {
@@ -3568,13 +3552,8 @@ partial struct gzipReader {
 partial struct eofReader {
 }
 
-internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
-    return (0, io.EOF);
-}
-
-internal static (byte, error) ReadByte(this eofReader _) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+internal static (byte, error) ReadByte(this eofReader _) { return (0, io.EOF); }
 
 internal static readonly ж<sync.Pool> ᏑgzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
 internal static ref sync.Pool gzipPool => ref ((StaticBox<sync.Pool>)ᏑgzipPool).ValueSlot;
@@ -3696,21 +3675,13 @@ internal static error Close(this ж<gzipReader> Ꮡgz) {
 partial struct tlsHandshakeTimeoutError {
 }
 
-internal static bool Timeout(this tlsHandshakeTimeoutError _) {
-    return true;
-}
-
-internal static bool Temporary(this tlsHandshakeTimeoutError _) {
-    return true;
-}
-
+internal static bool Timeout(this tlsHandshakeTimeoutError _) { return true; }
+internal static bool Temporary(this tlsHandshakeTimeoutError _) { return true; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTlsHandshakeˢ => ref netHttpTlsHandshakeˢᵇ;
 private static readonly @string netHttpTlsHandshakeˢᵇ = "net/http: TLS handshake timeout"u8;
 
-internal static @string Error(this tlsHandshakeTimeoutError _) {
-    return netHttpTlsHandshakeˢ;
-}
+internal static @string Error(this tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢ; }
 
 // fakeLocker is a sync.Locker which does nothing. It's used to guard
 // test-only fields when not under test, to avoid runtime atomic
@@ -3718,11 +3689,8 @@ internal static @string Error(this tlsHandshakeTimeoutError _) {
 partial struct fakeLocker {
 }
 
-internal static void Lock(this fakeLocker _) {
-}
-
-internal static void Unlock(this fakeLocker _) {
-}
+internal static void Lock(this fakeLocker _) { }
+internal static void Unlock(this fakeLocker _) { }
 
 // cloneTLSConfig returns a shallow clone of cfg, or a new zero tls.Config if
 // cfg is nil. This is safe to call even if cfg is in active use by a TLS

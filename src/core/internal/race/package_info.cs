@@ -55,7 +55,7 @@ using static go.@internal.race_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/race/norace.go", "norace.cs", "AA4gpqampqampqampqampoA=")]
+[assembly: GoPositionMap("internal/race/norace.go", "norace.cs", "AA4gpqampqampqampqampg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

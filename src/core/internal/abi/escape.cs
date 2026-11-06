@@ -23,7 +23,6 @@ public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
 }
 
 internal static bool alwaysFalse;
-
 internal static any escapeSink;
 
 // Escape forces any pointers in x to escape to the heap.
@@ -47,9 +46,7 @@ public static T Escape<T>(T x) {
 //	if hasNonStringPointers(T) { Escape(v) }
 //
 // Implemented as a compiler intrinsic.
-public static void EscapeNonString<T>(T v) {
-    // Go COMPILER INTRINSIC: the gc compiler replaces every call, so the written `panic("intrinsic")` body is unreachable by construction and has no CLR counterpart.
-}
+public static void EscapeNonString<T>(T v) { } // Go COMPILER INTRINSIC: the gc compiler replaces every call, so the written `panic("intrinsic")` body is unreachable by construction and has no CLR counterpart.
 
 // EscapeToResultNonString models a data flow edge from v to the result,
 // if v contains a non-string pointer. If v contains only string pointers,

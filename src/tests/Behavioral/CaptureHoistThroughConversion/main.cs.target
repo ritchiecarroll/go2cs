@@ -6,9 +6,7 @@ partial class main_package {
 
 public delegate void Handler(nint _);
 
-public static void Do(this Handler h, nint i) {
-    h(i);
-}
+public static void Do(this Handler h, nint i) { h(i); }
 
 partial interface Iface {
     void Do(nint _);
@@ -16,17 +14,11 @@ partial interface Iface {
 
 internal static channel<@string> @out = new channel<@string>(16);
 
-internal static void serve(Iface i, nint n) {
-    i.Do(n);
-}
+internal static void serve(Iface i, nint n) { i.Do(n); }
 
-internal static void run(Handler h, nint n) {
-    h(n);
-}
+internal static void run(Handler h, nint n) { h(n); }
 
-internal static void runBare(Action<nint> f, nint n) {
-    f(n);
-}
+internal static void runBare(Action<nint> f, nint n) { f(n); }
 
 internal static Handler makeHandler(slice<@string> g) {
     var gʗ1 = g;

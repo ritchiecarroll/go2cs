@@ -117,7 +117,7 @@ A beyond-float64 value still routes to the `GoBigConst` (BigInteger) overflow pa
 
 **A literal-only float const folds only where C#'s steps would land off Go's value.**<!-- 2026-10-04 --> A float constant built only from literals (`1 - .999`, `0.1 + 0.2`) keeps its operator form (`1D - .999D`), which C# evaluates one operation at a time, rounding after each. That agrees with Go's exact-then-rounded value for most expressions (`1.5 * 2.0`), but not when a decimal with no exact binary form makes a step round differently: `1 - .999` is 0.001 in Go and 0.0010000000000000009 in C#, which is what `internal/trace/traceviewer`'s quantile list `[]float64{0, 1 - .999, 1 - .99, 1 - .95}` computed. `foldedInexactLiteralFloatConst` (`literalFloatConstFold.go`) works out the value the emitted operator form produces (a literal parsed to the nearest double, or float for a float32 target; a pair of integer operands kept as C# integer arithmetic, so `7/2 + .5` is 3.5 as in Go; each float operation rounded) and folds the expression to Go's value, in the same `/* <expr> */ <literal>` form as the named-constant fold, only when the two differ. The decision is made once, for the outermost literal expression, so `(1 - .999) * 1000` folds whole to `/* (1 - .999) * 1000 */ 1D`; an expression whose steps already give Go's value keeps its operator form and so do all the literal operations inside it. (Guarded by `literalFloatConstFold_test.go`, with `1.5 * 2.0`, `7/2 + .5` and float32 `0.1 + 0.2` as the controls that must not fold, and by the `LiteralFloatConstFold` behavioral test, output-compared vs Go.)
 
-**Function-local untyped constants TIGHTEN to their single concrete use type.** A per-function analysis pass (`performUntypedConstAnalysis`) resolves every use of each function-local untyped numeric constant through go/types: when ALL uses record the SAME concrete basic type — and none participates in constant folding — the declaration emits at that type (with C#'s `const` keyword where legal: the primitive aliases; native-int/`uintptr` values fall to the existing `static readonly`/`unchecked` demotions), and every cast the wrapper made necessary (the bitwise/arith operand casts, the `append`/deferred-call element casts, the 32-bit-and-wider shift retype) is skipped as redundant. One cast is **kept because it is value-changing, not wrapper-driven**: a tightened const of a *sub-int32* type (`int8`/`int16`/`uint8`/`uint16`) as the LEFT operand of a non-constant shift keeps its width cast — C# promotes a narrow shifted operand to `int`, so the shift is golib's guarded `Lsh` on the cast receiver, `((byte)cb).Lsh(k)`, whose `byte` overload wraps at the declared width (`const cb = 200; b + cb<<k` → Go wraps `200<<1` to 144, byte width, result 145; a promoted C# shift computes 400 → 401).<!-- src/tests/Behavioral/UntypedConstDefine/main.cs.target:75 (`fmt.Println((byte)(b + ((byte)cb).Lsh(sh1)));`). Before the GoShift guard the retype was (byte)(cb << (int)(k)). --> The emitted code otherwise reads like the Go source — math `cbrt`:
+**Function-local untyped constants TIGHTEN to their single concrete use type.** A per-function analysis pass (`performUntypedConstAnalysis`) resolves every use of each function-local untyped numeric constant through go/types: when ALL uses record the SAME concrete basic type — and none participates in constant folding — the declaration emits at that type (with C#'s `const` keyword where legal: the primitive aliases; native-int/`uintptr` values fall to the existing `static readonly`/`unchecked` demotions), and every cast the wrapper made necessary (the bitwise/arith operand casts, the `append`/deferred-call element casts, the 32-bit-and-wider shift retype) is skipped as redundant. One cast is **kept because it is value-changing, not wrapper-driven**: a tightened const of a *sub-int32* type (`int8`/`int16`/`uint8`/`uint16`) as the LEFT operand of a non-constant shift keeps its width cast — C# promotes a narrow shifted operand to `int`, so the shift is golib's guarded `Lsh` on the cast receiver, `((byte)cb).Lsh(k)`, whose `byte` overload wraps at the declared width (`const cb = 200; b + cb<<k` → Go wraps `200<<1` to 144, byte width, result 145; a promoted C# shift computes 400 → 401).<!-- src/tests/Behavioral/UntypedConstDefine/main.cs.target:72 (`fmt.Println((byte)(b + ((byte)cb).Lsh(sh1)));`). Before the GoShift guard the retype was (byte)(cb << (int)(k)). --> The emitted code otherwise reads like the Go source — math `cbrt`:
 
 ```go
 const (
@@ -186,7 +186,7 @@ const (
     stateDict
 )
 ```
-<!-- source: src/core/compress/flate/inflate.cs:498-499 -->
+<!-- source: src/core/compress/flate/inflate.cs:495-496 -->
 ```csharp
 const nint stateInit = iota; // Zero value must be stateInit
 const nint stateDict = 1;
@@ -251,7 +251,7 @@ A native-sized integer constant (`nint`/`nuint`, and golib's `uintptr` struct) w
 public static uintptr MaxUintptr => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 ```
 
-The same `unchecked` cast is emitted for a **named** constant declared over a *wide unsigned* underlying whose folded value overflows int32 — `const unknownClass = ^Class(0)` (x/text/unicode/bidi, `type Class uint`) and `const _m = ^Word(0)` (go/constant via math/big, `type Word uintptr`) both fold to the all-ones literal `18446744073709551615` (a C# `ulong`), which has no implicit conversion to the generated wrapper struct (CS0266). The native-int-const detection fires for a `uintptr`, `uint` or `uint64` underlying, so the const emits `unchecked((ΔClass)18446744073709551615)` (bidi's `Class` is `ΔClass` in C#).<!-- src/core/vendor/golang.org/x/text/unicode/bidi/trieval.cs:37 (`internal static ΔClass unknownClass => /* ^Class(0) */ unchecked((ΔClass)18446744073709551615);`); src/core/go/constant/value.cs:907 (`internal static big.Word _m => /* ^big.Word(0) */ unchecked((big.Word)18446744073709551615);`). --> A **small** named const stays uncast (`const c = Class(5)` → `Class(5)`, an ordinary in-range constant conversion) — the cast is added only when the value is out of int32 range, so no other named-const emission churns. (Guarded by the `NamedNumericConstCast` behavioral test — a beyond-int32 `^Named(0)` over `uint` and over `uint64` plus a small in-range control, values verified vs Go; shared root, cleared go/constant and bidi one error each.)
+The same `unchecked` cast is emitted for a **named** constant declared over a *wide unsigned* underlying whose folded value overflows int32 — `const unknownClass = ^Class(0)` (x/text/unicode/bidi, `type Class uint`) and `const _m = ^Word(0)` (go/constant via math/big, `type Word uintptr`) both fold to the all-ones literal `18446744073709551615` (a C# `ulong`), which has no implicit conversion to the generated wrapper struct (CS0266). The native-int-const detection fires for a `uintptr`, `uint` or `uint64` underlying, so the const emits `unchecked((ΔClass)18446744073709551615)` (bidi's `Class` is `ΔClass` in C#).<!-- src/core/vendor/golang.org/x/text/unicode/bidi/trieval.cs:37 (`internal static ΔClass unknownClass => /* ^Class(0) */ unchecked((ΔClass)18446744073709551615);`); src/core/go/constant/value.cs:804 (`internal static big.Word _m => /* ^big.Word(0) */ unchecked((big.Word)18446744073709551615);`). --> A **small** named const stays uncast (`const c = Class(5)` → `Class(5)`, an ordinary in-range constant conversion) — the cast is added only when the value is out of int32 range, so no other named-const emission churns. (Guarded by the `NamedNumericConstCast` behavioral test — a beyond-int32 `^Named(0)` over `uint` and over `uint64` plus a small in-range control, values verified vs Go; shared root, cleared go/constant and bidi one error each.)
 
 **`uintptr` is a DISTINCT golib struct** (`golib/uintptr.cs`), not an alias of `System.UIntPtr`: Go's `uint` and `uintptr` are distinct types (both may appear in one type switch; `%T` reports them differently; conversion between them is explicit), and the historical alias erased that identity — type switches collided (CS8120), `%T` lied, and overloads could not distinguish them. The struct holds a single public mutable `nuint Value` field (PascalCase — it is public so `Interlocked`/`Volatile` seams can target the inner storage; the intrinsics cannot take a ref to a user struct) and carries the full operator surface so `uintptr`-typed expressions KEEP the type. The conversion matrix is empirically tuned to C#'s user-defined-conversion candidate rules (encompassing counts only STANDARD conversions, so nothing ever chains two user-defined operators; a PARTIAL outbound operator set is unstable — undeclared targets see multiple viable std-hop candidates, CS0457): implicit both ways with `nuint` plus implicit from smaller unsigned/`char`/`UntypedInt`; explicit inbound from signed types and `uint64`; the FULL exact outbound matrix (all integer widths + `float32`/`float64` + unsafe `void*`). Knock-ons handled with it: `const uintptr` is illegal C# (user struct) so every package-level uintptr const emits a get-only property; a uintptr-typed switch tag/label can never be a constant/relational pattern (CS9135) so those switches use the if-else `==` form; wrappers over uintptr (`/*num:uintptr*/`) gain generated `nuint`/`UntypedInt` bridges; generic-math-constrained golib helpers (`unsafe.Add/Slice/String`) gain non-generic `uintptr` overloads; and the manual managed-referent types declare direct `uintptr` bridges (token out, panic-on-nonzero in).
 
@@ -296,7 +296,7 @@ See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-num
 
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package Untyped* wrapper property, from which `@string` has no conversion (CS0030).<!-- src/core/unicode/utf8/utf8.cs:17 (`public static UntypedInt RuneError =>`) --> The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:251 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:218 -->
 ```csharp
 fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```
@@ -360,7 +360,7 @@ Bare, in `rune` slots:
 	digit := byte('7')
 	fmt.Println(digit-'0', int(digit-'0'))
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:67-78 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:58-69 -->
 ```csharp
     fmt.Println(takesRune('y'), retRune());
     if (r == 'a' && r < 'z') {
@@ -393,7 +393,7 @@ Cast to the target, in `byte`, `int8` and `int16` slots:
 	var i8 int8 = 'A'
 	var i16 int16 = 'B'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:46-59 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:37-50 -->
 ```csharp
     byte b = (byte)'q';
     switch (b) {
@@ -423,7 +423,7 @@ Kept, where C# would box or infer a `char`:
 	// Inferred locals stay int32.
 	r := 'a'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:32-37 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:23-28 -->
 ```csharp
     fmt.Println((rune)'a');
     fmt.Printf("%T %v\n"u8, (rune)'a', (rune)'a');

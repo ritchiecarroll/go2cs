@@ -55,7 +55,7 @@ using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1/asn1.go", "asn1.cs", "ABUukKaQ")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1/asn1.go", "asn1.cs", "ABUugJaA")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.cryptobyte;

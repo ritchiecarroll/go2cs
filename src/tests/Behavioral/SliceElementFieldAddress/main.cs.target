@@ -22,13 +22,9 @@ partial struct cell {
     internal nint n, m;
 }
 
-internal static partial void setU32(ref uint32 p, uint32 v) {
-    p = v;
-}
+internal static partial void setU32(ref uint32 p, uint32 v) { p = v; }
 
-internal static partial void setInt(ref nint p, nint v) {
-    p = v;
-}
+internal static partial void setInt(ref nint p, nint v) { p = v; }
 
 internal static void Main() {
     var cells = new slice<cell>(3);

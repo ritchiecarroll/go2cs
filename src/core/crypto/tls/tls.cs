@@ -137,17 +137,9 @@ partial struct timeoutError {
 internal static ref readonly @string tlsDialWithDialerTimedˢ => ref tlsDialWithDialerTimedˢᵇ;
 private static readonly @string tlsDialWithDialerTimedˢᵇ = "tls: DialWithDialer timed out"u8;
 
-internal static @string Error(this timeoutError _) {
-    return tlsDialWithDialerTimedˢ;
-}
-
-internal static bool Timeout(this timeoutError _) {
-    return true;
-}
-
-internal static bool Temporary(this timeoutError _) {
-    return true;
-}
+internal static @string Error(this timeoutError _) { return tlsDialWithDialerTimedˢ; }
+internal static bool Timeout(this timeoutError _) { return true; }
+internal static bool Temporary(this timeoutError _) { return true; }
 
 // DialWithDialer connects to the given network address using dialer.Dial and
 // then initiates a TLS handshake, returning the resulting TLS connection. Any

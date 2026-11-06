@@ -37,7 +37,6 @@ internal static void sortSeq<S, E>(S x, Func<E, E, bool> less)
 }
 
 partial struct numbers /*[]nint*/;
-
 partial struct sortedMap /*[]nint*/;
 
 internal static void Main() {

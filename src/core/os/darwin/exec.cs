@@ -235,14 +235,10 @@ partial interface ΔSignal {
 }
 
 // Getpid returns the process id of the caller.
-public static nint Getpid() {
-    return syscall.Getpid();
-}
+public static nint Getpid() { return syscall.Getpid(); }
 
 // Getppid returns the process id of the caller's parent.
-public static nint Getppid() {
-    return syscall.Getppid();
-}
+public static nint Getppid() { return syscall.Getppid(); }
 
 // FindProcess looks for a running process by its pid.
 //

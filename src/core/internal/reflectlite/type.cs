@@ -245,9 +245,7 @@ internal static ж<uncommonType> uncommon(this rtype t) {
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<abi.Type> common(this rtype t) {
-    return t.Type;
-}
+internal static ж<abi.Type> common(this rtype t) { return t.Type; }
 
 internal static slice<abi.Method> exportedMethods(this rtype t) {
     var ut = t.uncommon();

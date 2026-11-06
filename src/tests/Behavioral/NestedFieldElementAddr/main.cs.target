@@ -23,17 +23,11 @@ partial struct store {
     internal slice<uintptr> data;
 }
 
-internal static slice<uintptr> stk(this ref store s) {
-    return s.data;
-}
+internal static slice<uintptr> stk(this ref store s) { return s.data; }
 
-internal static partial void bump(ref uintptr p) {
-    p = p + 7;
-}
+internal static partial void bump(ref uintptr p) { p = p + 7; }
 
-internal static partial void bumpInt(ref nint p) {
-    p = p + 3;
-}
+internal static partial void bumpInt(ref nint p) { p = p + 3; }
 
 internal static void Main() {
     var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: new uintptr[]{10, 20, 30, 40}.array())));

@@ -26,24 +26,15 @@ internal static slice<ftoaTest> ftoatests = [
 ];
 
 internal static slice<float64> floats = [(float64)below1e23, (float64)above1e23, small];
-
 internal static array<float64> floatArr = new float64[]{(float64)below1e23, (float64)above1e23}.array();
-
 internal static map<@string, float64> byName = new map<@string, float64>{["below"] = (float64)below1e23, ["above"] = (float64)above1e23, ["small"] = small};
-
 internal static ftoaTest keyed = new ftoaTest(f: (float64)below1e23, fmtc: (byte)'g', prec: -1, s: "keyed");
-
 internal static slice<slice<float64>> nested = [[(float64)below1e23], [(float64)above1e23]];
-
 internal static float32 asFloat32 = (float32)below1e23;
 
-internal static float64 take(float64 f) {
-    return f;
-}
+internal static float64 take(float64 f) { return f; }
 
-internal static float64 give() {
-    return (float64)above1e23;
-}
+internal static float64 give() { return (float64)above1e23; }
 
 internal static void Main() {
     float64 x = 1e40D;

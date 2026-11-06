@@ -115,25 +115,12 @@ public static bool BoundaryAfter(this ΔProperties p) {
 // influenced by normalization.
 partial struct qcInfo /*num:uint8*/;
 
-internal static bool isYesC(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x10) == 0;
-}
+internal static bool isYesC(this ΔProperties p) { return (qcInfo)(p.flags & 0x10) == 0; }
+internal static bool isYesD(this ΔProperties p) { return (qcInfo)(p.flags & 0x4) == 0; }
 
-internal static bool isYesD(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x4) == 0;
-}
-
-internal static bool combinesForward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x20) != 0;
-}
-
-internal static bool combinesBackward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x8) != 0; // == isMaybe
-}
-
-internal static bool hasDecomposition(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x4) != 0; // == isNoD
-}
+internal static bool combinesForward(this ΔProperties p) { return (qcInfo)(p.flags & 0x20) != 0; }
+internal static bool combinesBackward(this ΔProperties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
+internal static bool hasDecomposition(this ΔProperties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
 
 internal static bool isInert(this ΔProperties p) {
     return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;

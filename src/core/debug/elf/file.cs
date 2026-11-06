@@ -215,9 +215,7 @@ partial struct Prog {
 }
 
 // Open returns a new ReadSeeker reading the ELF program body.
-public static io.ReadSeeker Open(this ref Prog p) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
 
 // A Symbol represents an entry in an ELF symbol table section.
 partial struct Symbol {

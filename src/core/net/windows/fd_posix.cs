@@ -87,7 +87,6 @@ internal static (nint n, syscallꓸSockaddr sa, error err) readFrom(this ж<netF
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, sa, wrapSyscallError(readFromSyscallName, err));
 }
-
 internal static (nint n, error err) readFromInet4(this ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> from) {
     nint n = default;
     error err = default;

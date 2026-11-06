@@ -21,9 +21,7 @@ internal static bool Less(this ref mnode n, ж<mnode> Ꮡo) {
 
 partial struct age /*num:nint*/;
 
-internal static bool Less(this age a, age b) {
-    return a < b;
-}
+internal static bool Less(this age a, age b) { return a < b; }
 
 internal static void Main() {
     fmt.Println(new lib.Ord2<age>(V: 3).Below(5), new lib.Ord<age>(V: 3).Below(2));

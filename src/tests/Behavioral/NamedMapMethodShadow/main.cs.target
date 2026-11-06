@@ -7,15 +7,11 @@ partial class main_package {
 
 partial struct Env /*map[@string, @string]*/;
 
-public static void Set(this Env e, @string k, @string v) {
-    e[strings.ToLower(k)] = v;
-}
+public static void Set(this Env e, @string k, @string v) { e[strings.ToLower(k)] = v; }
 
 partial struct Bag /*map[@string, nint]*/;
 
-public static void Add(this Bag b, @string k, nint v) {
-    b[k] += v;
-}
+public static void Add(this Bag b, @string k, nint v) { b[k] += v; }
 
 partial struct Cache /*map[@string, nint]*/;
 
@@ -34,15 +30,11 @@ public static void Clear(this Cache c) {
     }
 }
 
-public static bool ContainsKey(this Cache c, @string k) {
-    return k == "always"u8;
-}
+public static bool ContainsKey(this Cache c, @string k) { return k == "always"u8; }
 
 partial struct PEnv /*map[@string, @string]*/;
 
-public static void Set(this ref PEnv p, @string k, @string v) {
-    (p)[strings.ToUpper(k)] = v;
-}
+public static void Set(this ref PEnv p, @string k, @string v) { (p)[strings.ToUpper(k)] = v; }
 
 partial struct Uniq<T> /*map[T, EmptyStruct]*/;
 
@@ -65,9 +57,7 @@ partial struct ΔSet /*map[@string, nint]*/;
 
 partial struct Hdr /*map[@string, slice<@string>]*/;
 
-public static void Set(this Hdr h, @string k, @string v) {
-    h[strings.ToUpper(k)] = [v];
-}
+public static void Set(this Hdr h, @string k, @string v) { h[strings.ToUpper(k)] = [v]; }
 
 internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;

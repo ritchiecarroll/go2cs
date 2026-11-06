@@ -29,9 +29,7 @@ internal static nint /*n*/ aliased(/*[6]*/ ж<array<nint>> p) {
     return n;
 }
 
-internal static void report(/*[6]*/ ж<array<nint>> p) {
-    fmt.Println("aliased nil:", p == nil);
-}
+internal static void report(/*[6]*/ ж<array<nint>> p) { fmt.Println("aliased nil:", p == nil); }
 
 partial struct words /*[5]uint64*/;
 

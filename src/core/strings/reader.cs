@@ -33,9 +33,7 @@ public static nint Len(this ref Reader r) {
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The returned value is always the same and is not affected by calls
 // to any other method.
-public static int64 Size(this ref Reader r) {
-    return (int64)len(r.s);
-}
+public static int64 Size(this ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
@@ -190,14 +188,10 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 }
 
 // Reset resets the [Reader] to be reading from s.
-public static void Reset(this ref Reader r, @string s) {
-    r = new Reader(s, 0, -1);
-}
+public static void Reset(this ref Reader r, @string s) { r = new Reader(s, 0, -1); }
 
 // NewReader returns a new [Reader] reading from s.
 // It is similar to [bytes.NewBufferString] but more efficient and non-writable.
-public static ж<Reader> NewReader(@string s) {
-    return Ꮡ(new Reader(s, 0, -1));
-}
+public static ж<Reader> NewReader(@string s) { return Ꮡ(new Reader(s, 0, -1)); }
 
 } // end strings_package
