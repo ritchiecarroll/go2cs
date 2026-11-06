@@ -8,7 +8,7 @@
 
 // Guards the goroutine stack-bound proof (goroutineStackAnalysis.go) and its mark (visitGoStmt.go). A go statement
 // whose goroutine provably cannot recurse is recorded in package_info.cs, `[assembly: GoBoundedGoroutine(file, line,
-// column)]` at its goǃ call, which go2cs-gen intercepts to start it on golib's small stack reservation; every goroutine
+// column, ordinal)]` at its goǃ call, which go2cs-gen intercepts to start it on golib's small stack reservation; every goroutine
 // the proof cannot follow keeps the Go-scale default, unrecorded, because an under-reserved goroutine that recurses
 // deeply ends the process where Go would have grown its stack.
 
@@ -235,7 +235,7 @@ func TestABoundedGoroutineIsRecordedInThePackageInfoNotInItsStatement(t *testing
 		}
 	}
 
-	records := regexp.MustCompile(`GoBoundedGoroutine\("main\.cs", (\d+), (\d+)\)\]`).FindAllStringSubmatch(packageInfo, -1)
+	records := regexp.MustCompile(`GoBoundedGoroutine\("main\.cs", (\d+), (\d+), (-?\d+)\)\]`).FindAllStringSubmatch(packageInfo, -1)
 
 	// The fourth sits inside a literal that a single-return literal returns, whose collapse to an expression body
 	// rewrites the captured text: its record must survive the rewrite.
@@ -259,6 +259,15 @@ func TestABoundedGoroutineIsRecordedInThePackageInfoNotInItsStatement(t *testing
 
 		if column < 1 || column > len(units) || !strings.HasPrefix(string(utf16.Decode(units[column-1:])), "goǃ(") {
 			t.Errorf("record %s does not land on a goǃ call: %q", record[0], lines[line-1])
+		}
+
+		// The ordinal is the call's index among every goǃ of the file, counted here independently of the converter's
+		// scan: the goǃ occurrences in the text before the call (this fixture's emission has none in a comment or string).
+		ordinal, _ := strconv.Atoi(record[3])
+		before := strings.Join(lines[:line-1], "\n") + "\n" + string(utf16.Decode(units[:column-1]))
+
+		if want := strings.Count(before, "goǃ"); ordinal != want {
+			t.Errorf("record %s carries ordinal %d; the call is goǃ #%d of the file", record[0], ordinal, want)
 		}
 
 		recorded[line] = true

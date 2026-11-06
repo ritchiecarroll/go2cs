@@ -37,9 +37,9 @@ using static global::go.sync.atomic_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("example_test.cs", 29, 5)]
-[assembly: GoBoundedGoroutine("example_test.cs", 40, 9)]
-[assembly: GoBoundedGoroutine("value_test.cs", 255, 9)]
+[assembly: GoBoundedGoroutine("example_test.cs", 29, 5, 0)]
+[assembly: GoBoundedGoroutine("example_test.cs", 40, 9, 1)]
+[assembly: GoBoundedGoroutine("value_test.cs", 255, 9, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

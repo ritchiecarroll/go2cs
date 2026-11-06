@@ -601,6 +601,7 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 	}
 
 	stripped, entries, thunks, bounded, closures := extractPositionAndThunkSentinels(text)
+	bounded = assignBoundedGoOrdinals(stripped, bounded)
 
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(stripped)

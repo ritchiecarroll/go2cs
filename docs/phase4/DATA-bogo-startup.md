@@ -306,3 +306,83 @@ inits", read loading as costly, and had no model of golib doing reflection durin
 package's P-521 key, were outside the prediction.
 
 — P1 (2026-11-06)
+
+## 9. golib's extension-method scan, fixed in three steps (appended 2026-11-06)
+
+> **State: MEASURED (2026-11-06), the same box as §8, branch `claude/p1-extscan` cut at `b0b48783dc`.** golib
+> only: no converter or go2cs-gen change. Each step is its own commit with its own measurement. The design of
+> step (c) is [`DESIGN-extension-scan-metadata.md`](DESIGN-extension-scan-metadata.md). Raw readings and the kit
+> are in [`data/bogo-startup/extension-scan/`](data/bogo-startup/extension-scan/). The prediction was posted
+> before the first change (mailbox `5f9f660fb`) and is scored in 9.5.
+
+### 9.1 A correction to §8: the scan is not on every program's start-up
+
+§8 measured one program, the crypto/tls test host. The scan runs only in a program that asks a dynamic
+method-set question. The host asks one during package init; `PerfStartup` (the Performance suite's Startup row)
+never does. A JIT copy of `PerfStartup` with §8's hook attached showed golib's scan probe installed and zero
+scans. So the scan is not the Startup row's creep, and nothing in this section moves that row (9.3). §8.3's
+shares are shares of the probe launch only.
+
+### 9.2 The three steps
+
+| step | commits | change |
+|:--|:--|:--|
+| (a) | red `86c2b1b1b9`, fix `567025cae1` | Skip golib by assembly identity. Its name is `golib`, which the `go.golib.` prefix never matched, so its 203 helper extension methods were in the index. That was also a Go-parity bug: `GetExtensionMethod(typeof(ulong), "Rsh")` returned `GoShift.Rsh`, a method the builtin `uint64` does not have in Go. |
+| (b) | red `74c63b72a3`, fix `3761a45377`, census `5b73a00b78` | Keep the scan across `AssemblyLoad`. The scan records the assemblies it visited, and the next question visits only the ones loaded since. Before, each load dropped the whole scan and the next question rescanned everything. The old lock-inversion test that asserted the full rescan is replaced by two that count visits per assembly. |
+| (c) | design `6f5bcc2042`, change `72c5159700` | Find the classes that declare extension methods in each assembly's metadata tables, and resolve only those, instead of `Assembly.GetTypes()`. `GetTypes()` stays the fallback where there is no raw metadata (Native AOT). A guard test holds both paths to the same methods in the same order; it was made to fail once by reversing the class order. |
+
+### 9.3 Measurements
+
+The probe is §8.1's launch: 1 warm-up and 24 timed launches per arm, the host rebuilt through the pipeline at each
+commit. The Startup columns are the in-tree runner (JIT) and this seat's own timing of the same binaries; the
+runner has no ReadyToRun column, so the R2R arm is `PerfStartup`'s own R2R publish, timed the same way. Medians,
+p25 to p75 in brackets, ms.
+
+| arm | probe | change | runner Go / JIT | Go | JIT | R2R |
+|:--|--:|--:|:--|--:|--:|--:|
+| base `b0b48783dc` | 930 (910 to 957) | | 1.9 / 445.9 | 3.7 | 486 | 288 (283 to 300) |
+| (a) `567025cae1` | 920 (903 to 964) | −10 | 2.0 / 442.3 | 3.6 | 477 | 293 (286 to 305) |
+| (b) `3761a45377` | 889 (871 to 914) | −32 | 1.9 / 438.3 | 4.0 | 482 | 289 (282 to 302) |
+| (c) `72c5159700` | 836 (816 to 863) | −53 | 2.1 / 441.3 | 3.5 | 487 | 287 (284 to 303) |
+
+- The probe is 94 ms faster in all, 10%. The base reads 930 ms here against §8's 950 ms on the same box two hours
+  earlier. Every arm of this section was measured between 02:00 and 03:06 UTC, and the scoring uses 930.
+- The Startup row does not move: the runner's JIT column spans 438 to 446 ms across the four arms, the R2R arm 287
+  to 293 ms, and Go stays under 4.1 ms.
+- (b) was measured at `3761a45377`. `5b73a00b78` only rewrites one append so the allocation census can read it.
+
+### 9.4 Why (c) saved 53 ms, not 130 to 160
+
+The scan's own time, from §8's hook with `P1HOOK_SCAN=1` (12 launches each), over the 172 assemblies loaded
+before the first question:
+
+| host | pass 0, first to last scan row | scan rows per launch | launch |
+|:--|--:|--:|--:|
+| master's host, before (a) | 192.9 ms | 604 | 939 ms |
+| (c) | 121.3 ms | 242 | 839 ms |
+
+- At master, pass 0 includes golib (10.5 ms), which (a) removes. So (c) shortens pass 0 by about 61 ms, from
+  about 182 ms to 121 ms. The probe dropped 53 ms at (c), within 8 ms of that.
+- The prediction took the metadata prototype's cost for the pass: a 7 to 12 ms table walk plus about 50 ms of
+  resolve and filter. The prototype ran inside the start-up hook, before package init. Inside the launch, the
+  same pass costs 121 ms. The largest items still cost most: `runtime` 32.1 to 21.4 ms, `net` 10.8 to 7.4 ms,
+  `crypto.x509` 8.4 to 6.7 ms (per assembly in `scan-pass0-per-assembly.tsv`). Why resolving and filtering the
+  same 204 classes costs about twice as much mid-init is not attributed: there are no stacks. Interleaved
+  assembly loads during the pass are one candidate, inferred and not measured.
+- The scan rows per launch fell from 604 to 242: (a) removed golib, and (b) removed the two full rescans. Each
+  assembly is now visited once.
+
+### 9.5 The prediction, scored
+
+| predicted | measured | score |
+|:--|:--|:--|
+| (a) −5 to −15 ms | −10 ms | MET |
+| (b) a further −15 to −30 ms | −32 ms | MISSED by 2 ms, over the band |
+| (c) a further −130 to −160 ms | −53 ms | MISSED; the falsifier "(c) under −100 ms" FIRED |
+| all three: 760 to 800 ms | 836 ms | MISSED |
+| the Startup row flat within 3% at every step | JIT within 2%, R2R within 2% | MET |
+
+The (c) miss is one error: I took a pass cost measured outside the launch as the pass cost inside it. The probe's
+remaining cost is §8.2's package init and the host's own variables (P-521 key 179 ms), plus the 121 ms pass.
+
+— P1 (2026-11-06)

@@ -1,0 +1,20 @@
+DISTURBED PerfChannel A/A V3 0.99% D26 11.77%
+DISTURBED PerfMap A/A V3 0.23% D26 8.94%
+DISTURBED PerfStringView A/A V3 0.07% D26 7.94%
+PerfChannel	V3/D26	113.5	110.0	1.032	+3.2%	floor 21.7%	within
+PerfFib	V3/D26	179.9	179.9	1.000	+0.0%	floor 2.3%	within
+PerfFieldView	V3/D26	2361.6	2372.1	0.996	-0.4%	floor 1.5%	within
+PerfIface	V3/D26	577.8	577.4	1.001	+0.1%	floor 1.9%	within
+PerfIfaceCall	V3/D26	543.5	555.7	0.978	-2.2%	floor 7.7%	within
+PerfIfaceShell	V3/D26	1221.4	1276.2	0.957	-4.3%	floor 6.1%	within
+PerfIfaceShellChurn	V3/D26	1808.6	1747.6	1.035	+3.5%	floor 1.7%	MOVED
+PerfMap	V3/D26	328.4	323.4	1.016	+1.6%	floor 20.9%	within
+PerfMatMul	V3/D26	743.7	739.1	1.006	+0.6%	floor 1.6%	within
+PerfRefLower	V3/D26	647.7	656.2	0.987	-1.3%	floor 1.7%	within
+PerfSieve	V3/D26	321.2	305.4	1.052	+5.2%	floor 18.2%	within
+PerfSort	V3/D26	548.1	551.4	0.994	-0.6%	floor 1.4%	within
+PerfStartup	V3/D26	171.0	169.6	1.008	+0.8%	floor 5.4%	within
+PerfString	V3/D26	1443.7	1402.3	1.029	+2.9%	floor 6.1%	within
+PerfStringMatch	V3/D26	1358.0	1289.5	1.053	+5.3%	floor 1.3%	MOVED
+PerfStringView	V3/D26	18.8	19.6	0.961	-3.9%	floor 14.5%	within
+PerfTlsHandshake	V3/D26	2295.0	2543.2	0.902	-9.8%	floor 1.1%	MOVED

@@ -533,7 +533,8 @@ public static unsafe partial class NativeStructMarshal
 
 /// <summary>
 /// An element pointer's backing array and absolute index, when it has one (the fast arm of
-/// <see cref="ElemRefBox{T}"/>): what the deep marshal copies a contiguous run from.
+/// <see cref="ElemRefBox{T}"/>): what the deep marshal, and the shared one behind the darwin libc funnel and
+/// the linux keystone, copy a contiguous run from.
 /// </summary>
 internal interface IElementRun
 {

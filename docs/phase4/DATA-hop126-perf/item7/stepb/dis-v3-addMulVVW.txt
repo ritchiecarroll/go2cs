@@ -1,0 +1,71 @@
+  00000001402257C0: 41 57              push        r15
+  00000001402257C2: 41 56              push        r14
+  00000001402257C4: 41 55              push        r13
+  00000001402257C6: 41 54              push        r12
+  00000001402257C8: 57                 push        rdi
+  00000001402257C9: 56                 push        rsi
+  00000001402257CA: 55                 push        rbp
+  00000001402257CB: 53                 push        rbx
+  00000001402257CC: 48 83 EC 38        sub         rsp,38h
+  00000001402257D0: 48 8B D9           mov         rbx,rcx
+  00000001402257D3: 48 8B F2           mov         rsi,rdx
+  00000001402257D6: 49 8B F8           mov         rdi,r8
+  00000001402257D9: 33 ED              xor         ebp,ebp
+  00000001402257DB: 48 8B 53 10        mov         rdx,qword ptr [rbx+10h]
+  00000001402257DF: 48 FF CA           dec         rdx
+  00000001402257E2: 48 8B CE           mov         rcx,rsi
+  00000001402257E5: E8 06 D5 00 01     call        golib_go_slice_1<UIntPtr>__get_Item_0
+  00000001402257EA: 4C 8B 73 10        mov         r14,qword ptr [rbx+10h]
+  00000001402257EE: 45 33 FF           xor         r15d,r15d
+  00000001402257F1: 45 33 ED           xor         r13d,r13d
+  00000001402257F4: EB 6F              jmp         0000000140225865
+  00000001402257F6: 48 8B CE           mov         rcx,rsi
+  00000001402257F9: 49 8B D7           mov         rdx,r15
+  00000001402257FC: E8 EF D4 00 01     call        golib_go_slice_1<UIntPtr>__get_Item_0
+  0000000140225801: 48 8B 10           mov         rdx,qword ptr [rax]
+  0000000140225804: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  0000000140225809: 4C 8B C7           mov         r8,rdi
+  000000014022580C: E8 1F 62 5F 00     call        math_bits_go_math_bits_package__Mul
+  0000000140225811: 4C 8B 64 24 20     mov         r12,qword ptr [rsp+20h]
+  0000000140225816: 48 8B 44 24 28     mov         rax,qword ptr [rsp+28h]
+  000000014022581B: 48 89 44 24 30     mov         qword ptr [rsp+30h],rax
+  0000000140225820: 48 8B CB           mov         rcx,rbx
+  0000000140225823: 49 8B D7           mov         rdx,r15
+  0000000140225826: E8 C5 D4 00 01     call        golib_go_slice_1<UIntPtr>__get_Item_0
+  000000014022582B: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014022582E: 48 8B 54 24 30     mov         rdx,qword ptr [rsp+30h]
+  0000000140225833: 48 03 CA           add         rcx,rdx
+  0000000140225836: 48 3B CA           cmp         rcx,rdx
+  0000000140225839: 0F 92 C2           setb        dl
+  000000014022583C: 0F B6 D2           movzx       edx,dl
+  000000014022583F: 49 03 D4           add         rdx,r12
+  0000000140225842: 48 03 E9           add         rbp,rcx
+  0000000140225845: 48 3B E9           cmp         rbp,rcx
+  0000000140225848: 0F 92 C1           setb        cl
+  000000014022584B: 0F B6 C9           movzx       ecx,cl
+  000000014022584E: 48 03 CA           add         rcx,rdx
+  0000000140225851: 4C 8B E1           mov         r12,rcx
+  0000000140225854: 48 8B CB           mov         rcx,rbx
+  0000000140225857: 49 8B D7           mov         rdx,r15
+  000000014022585A: E8 91 D4 00 01     call        golib_go_slice_1<UIntPtr>__get_Item_0
+  000000014022585F: 48 89 28           mov         qword ptr [rax],rbp
+  0000000140225862: 49 8B EC           mov         rbp,r12
+  0000000140225865: 45 84 ED           test        r13b,r13b
+  0000000140225868: 75 08              jne         0000000140225872
+  000000014022586A: 41 BD 01 00 00 00  mov         r13d,1
+  0000000140225870: EB 03              jmp         0000000140225875
+  0000000140225872: 49 FF C7           inc         r15
+  0000000140225875: 4D 3B FE           cmp         r15,r14
+  0000000140225878: 0F 8C 78 FF FF FF  jl          00000001402257F6
+  000000014022587E: 48 8B C5           mov         rax,rbp
+  0000000140225881: 48 83 C4 38        add         rsp,38h
+  0000000140225885: 5B                 pop         rbx
+  0000000140225886: 5D                 pop         rbp
+  0000000140225887: 5E                 pop         rsi
+  0000000140225888: 5F                 pop         rdi
+  0000000140225889: 41 5C              pop         r12
+  000000014022588B: 41 5D              pop         r13
+  000000014022588D: 41 5E              pop         r14
+  000000014022588F: 41 5F              pop         r15
+  0000000140225891: C3                 ret
+  0000000140225892: 90                 nop
