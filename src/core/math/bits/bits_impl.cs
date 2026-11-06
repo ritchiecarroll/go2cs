@@ -66,11 +66,11 @@ namespace go.math;
 
 partial class bits_package
 {
-    // Mul returns the full-width product of x and y: (hi, lo) = x * y.
-    //
-    // No attribute: at one level this body is small enough that the JIT inlines it on its own --
-    // `DOTNET_JitDisasmSummary` shows `bits_package:Mul` ABSENT from the compile list entirely once
-    // it is written this way, where the two-level form appeared at IL 83 / code 141.
+    // Mul returns the full-width product of x and y: (hi, lo) = x * y. The JIT inlines this one-level body unaided
+    // (`DOTNET_JitDisasmSummary`: Mul absent from the compile list). Native AOT does not: G's item-7 disassembly found
+    // bigmod's addMulVVW calling it at both ISAs, its (hi, lo) tuple through a stack buffer. So it carries its
+    // siblings' attribute, for Native AOT; under the JIT the attribute changes nothing.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static (nuint hi, nuint lo) Mul(nuint x, nuint y)
     {
         uint64 hi = Math.BigMul((uint64)x, (uint64)y, out uint64 lo);
