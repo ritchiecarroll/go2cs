@@ -498,6 +498,13 @@ public static partial class TypeExtensions
                 Type receiverType = receiver.IsByRef ? receiver.GetElementType()! : receiver;
                 ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
 
+                // The receiver match first: it is a type comparison, and the pointer-receiver rule below reads custom
+                // attributes, which cost far more (under Native AOT each read decodes reflection metadata). Both are
+                // pure filters, so their order changes only how many methods pay the attribute reads: those of the
+                // asked type, not every method of every scanned package.
+                if (!ReceiverElementMatches(receiverElement, valueElement))
+                    continue;
+
                 // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
                 // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
                 // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
@@ -508,9 +515,6 @@ public static partial class TypeExtensions
                 // It stays in the set here and is bound through a COPY of the receiver (see
                 // IsCopyBoundReceiver).
                 if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
-                    continue;
-
-                if (!ReceiverElementMatches(receiverElement, valueElement))
                     continue;
 
                 // A VALUE method's ж<X> twin (go2cs-gen's `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`) is
