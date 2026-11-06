@@ -184,16 +184,14 @@ public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
         return default;
     }
 
-    {
-        var (o, err) = url.Parse(origin); if (err == nil && o.Host == req.Host) {
-            // The Origin header matches the Host header. Note that the Host header
-            // doesn't include the scheme, so we don't know if this might be an
-            // HTTP→HTTPS cross-origin request. We fail open, since all modern
-            // browsers support Sec-Fetch-Site since 2023, and running an older
-            // browser makes a clear security trade-off already. Sites can mitigate
-            // this with HTTP Strict Transport Security (HSTS).
-            return default;
-        }
+    var (o, err) = url.Parse(origin); if (err == nil && o.Host == req.Host) {
+        // The Origin header matches the Host header. Note that the Host header
+        // doesn't include the scheme, so we don't know if this might be an
+        // HTTP→HTTPS cross-origin request. We fail open, since all modern
+        // browsers support Sec-Fetch-Site since 2023, and running an older
+        // browser makes a clear security trade-off already. Sites can mitigate
+        // this with HTTP Strict Transport Security (HSTS).
+        return default;
     }
 
     if (Ꮡc.isRequestExempt(Ꮡreq)) {
@@ -214,14 +212,10 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
         ref var c = ref Ꮡc.DerefOrNull();
         ref var req = ref Ꮡreq.DerefOrNull();
 
-        {
-            var bypass = Ꮡc.Ꮡbypass.Load(); if (bypass != nil) {
-                {
-                    var (h, _) = bypass.Handler(Ꮡreq); if (AreEqual(h, sentinelHandler)) {
-                        // The request matches a bypass pattern.
-                        return true;
-                    }
-                }
+        var bypass = Ꮡc.Ꮡbypass.Load(); if (bypass != nil) {
+            var (h, _) = bypass.Handler(Ꮡreq); if (AreEqual(h, sentinelHandler)) {
+                // The request matches a bypass pattern.
+                return true;
             }
         }
 
@@ -243,17 +237,13 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
 // to [CrossOriginProtection.SetDenyHandler].
 public static ΔHandler Handler(this ж<CrossOriginProtection> Ꮡc, ΔHandler h) {
     return new HandlerFuncᴠΔHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
-        {
-            var err = Ꮡc.Check(r); if (err != nil) {
-                {
-                    var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
-                        (deny.ValueSlot).ServeHTTP(w, r);
-                        return;
-                    }
-                }
-                Error(w, err.Error(), StatusForbidden);
+        var err = Ꮡc.Check(r); if (err != nil) {
+            var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
+                (deny.ValueSlot).ServeHTTP(w, r);
                 return;
             }
+            Error(w, err.Error(), StatusForbidden);
+            return;
         }
         h.ServeHTTP(w, r);
     }));

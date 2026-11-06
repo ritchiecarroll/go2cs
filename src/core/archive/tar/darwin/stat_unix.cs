@@ -40,25 +40,17 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
         // Best effort at populating Uname and Gname.
         // The os/user functions may fail for any number of reasons
         // (not implemented on that platform, cgo not enabled, etc).
-        {
-            var (u, okΔ1) = ᏑuserMap.Load(h.Uid); if (okΔ1) {
-                h.Uname = u._<@string>();
-            } else {
-                var (uΔ1, err) = user.LookupId(strconv.Itoa(h.Uid)); if (err == nil) {
-                    h.Uname = uΔ1.Username;
-                    ᏑuserMap.Store(h.Uid, h.Uname);
-                }
-            }
+        var (u, okΔ1) = ᏑuserMap.Load(h.Uid); if (okΔ1) {
+            h.Uname = u._<@string>();
+        } else if (user.LookupId(strconv.Itoa(h.Uid)) is var (uΔ1, err) && err == nil) {
+            h.Uname = uΔ1.Username;
+            ᏑuserMap.Store(h.Uid, h.Uname);
         }
-        {
-            var (g, okΔ2) = ᏑgroupMap.Load(h.Gid); if (okΔ2) {
-                h.Gname = g._<@string>();
-            } else {
-                var (gΔ1, err) = user.LookupGroupId(strconv.Itoa(h.Gid)); if (err == nil) {
-                    h.Gname = gΔ1.Name;
-                    ᏑgroupMap.Store(h.Gid, h.Gname);
-                }
-            }
+        var (g, okΔ2) = ᏑgroupMap.Load(h.Gid); if (okΔ2) {
+            h.Gname = g._<@string>();
+        } else if (user.LookupGroupId(strconv.Itoa(h.Gid)) is var (gΔ1, err) && err == nil) {
+            h.Gname = gΔ1.Name;
+            ᏑgroupMap.Store(h.Gid, h.Gname);
         }
     }
     h.AccessTime = statAtime(sys);

@@ -87,7 +87,7 @@ internal class InterfaceTypeTemplate : TemplateBase
         $$"""
 
 
-        public static partial class {{PackageName}}_package_asserts
+        public static partial class {{DeclareExtensionHost($"{PackageName}_package_asserts")}}
         {
             [{{GeneratedCodeAttribute}}]
             {{Scope}} static {{TypeT}} _<[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(

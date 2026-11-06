@@ -1,0 +1,320 @@
+14001D1C0  push        r15
+14001D1C2  push        r14
+14001D1C4  push        r13
+14001D1C6  push        r12
+14001D1C8  push        rdi
+14001D1C9  push        rsi
+14001D1CA  push        rbp
+14001D1CB  push        rbx
+14001D1CC  sub         rsp,0F8h
+14001D1D3  vxorps      xmm4,xmm4,xmm4
+14001D1D7  vmovdqu     ymmword ptr [rsp+50h],ymm4
+14001D1DD  vmovdqu     ymmword ptr [rsp+70h],ymm4
+14001D1E3  vmovdqu     ymmword ptr [rsp+90h],ymm4
+14001D1EC  vmovdqu     ymmword ptr [rsp+0B0h],ymm4
+14001D1F5  vmovdqu     ymmword ptr [rsp+0D0h],ymm4
+14001D1FE  xor         eax,eax
+14001D200  mov         qword ptr [rsp+0F0h],rax
+14001D208  mov         rbx,rcx
+14001D20B  xor         esi,esi
+14001D20D  lea         rcx,[??_7golib_go_map_2_NilKeyDictionary<golib_go_string__IntPtr>@@6B@]
+14001D214  call        RhpNewFast
+14001D219  mov         rdi,rax
+14001D21C  lea         rax,[?__NONGCSTATICS@golib_go_map_2<golib_go_string__IntPtr>@@]
+14001D223  cmp         qword ptr [rax-8],0
+14001D228  jne         000000014001D782
+14001D22E  mov         r8,qword ptr [?__GCSTATICS@golib_go_map_2<golib_go_string__IntPtr>@@]
+14001D235  mov         r8,qword ptr [r8+8]
+14001D239  mov         rcx,rdi
+14001D23C  xor         edx,edx
+14001D23E  call        S_P_CoreLib_System_Collections_Generic_Dictionary_2<golib_go_string__IntPtr>___ctor_2
+14001D243  cmp         byte ptr [?__NONGCSTATICS@cmp__Module_@@],0
+14001D24A  je          000000014001D27A
+14001D24C  mov         rcx,qword ptr gs:[58h]
+14001D255  mov         eax,dword ptr [_tls_index]
+14001D25B  mov         edx,10h
+14001D260  add         rdx,qword ptr [rcx+rax*8]
+14001D264  mov         rbp,qword ptr [rdx]
+14001D267  test        rbp,rbp
+14001D26A  je          000000014001D78C
+14001D270  mov         rax,rbp
+14001D273  inc         qword ptr [rax+0D8h]
+14001D27A  mov         qword ptr [rsp+0F0h],rdi
+14001D282  xor         edi,edi
+14001D284  cmp         rdi,rbx
+14001D287  jge         000000014001D621
+14001D28D  lea         rax,[?__NONGCSTATICS@PerfStringMatch_go_main_package@@]
+14001D294  cmp         qword ptr [rax-8],0
+14001D299  jne         000000014001D7A0
+14001D29F  mov         rbp,qword ptr [?__GCSTATICS@PerfStringMatch_go_main_package@@]
+14001D2A6  lea         rcx,[rbp+8]
+14001D2AA  mov         rax,rdi
+14001D2AD  cqo
+14001D2AF  idiv        rax,qword ptr [rbp+18h]
+14001D2B3  call        golib_go_slice_1<golib_go_string>__get_Item_0
+14001D2B8  mov         r14,qword ptr [rax]
+14001D2BB  mov         r15d,dword ptr [rax+8]
+14001D2BF  mov         r13d,dword ptr [rax+0Ch]
+14001D2C3  lea         rax,[?__NONGCSTATICS@golib_go_StringLiteralCache@@]
+14001D2CA  cmp         qword ptr [rax-8],0
+14001D2CF  jne         000000014001D7AA
+14001D2D5  mov         r12,qword ptr [?__GCSTATICS@golib_go_StringLiteralCache@@]
+14001D2DC  mov         rcx,qword ptr [r12+8]
+14001D2E1  mov         rdx,qword ptr [rcx+8]
+14001D2E5  cmp         byte ptr [rdx],dl
+14001D2E7  add         rdx,10h
+14001D2EB  lea         rax,[__Str___go_build_EE16208502F5574ADC697CB0228169169C7272404FD593118F813561E7C0FA42]
+14001D2F2  mov         qword ptr [rsp+48h],rax
+14001D2F7  mov         rax,9E3779B97F4A7C15h
+14001D301  imul        rax,qword ptr [rsp+48h]
+14001D307  mov         ecx,dword ptr [rcx+10h]
+14001D30A  shrx        rcx,rax,rcx
+14001D30F  movsxd      rcx,ecx
+14001D312  lea         rcx,[rcx+rcx*2]
+14001D316  lea         rax,[rdx+rcx*8]
+14001D31A  lea         rcx,[__Str___go_build_EE16208502F5574ADC697CB0228169169C7272404FD593118F813561E7C0FA42]
+14001D321  cmp         qword ptr [rax],rcx
+14001D324  je          000000014001D33C
+14001D326  lea         rcx,[rsp+0D0h]
+14001D32E  lea         rdx,[__Str___go_build_EE16208502F5574ADC697CB0228169169C7272404FD593118F813561E7C0FA42]
+14001D335  call        golib_go_StringLiteralCache__Slow
+14001D33A  jmp         000000014001D34A
+14001D33C  vmovdqu     xmm0,xmmword ptr [rax+8]
+14001D341  vmovdqu     xmmword ptr [rsp+0D0h],xmm0
+14001D34A  mov         qword ptr [rsp+50h],r14
+14001D34F  mov         dword ptr [rsp+58h],r15d
+14001D354  mov         dword ptr [rsp+5Ch],r13d
+14001D359  lea         rcx,[rsp+50h]
+14001D35E  lea         rdx,[rsp+0D0h]
+14001D366  call        internal_stringslite_go_internal_stringslite_package__HasPrefix
+14001D36B  test        eax,eax
+14001D36D  jne         000000014001D4ED
+14001D373  mov         rcx,qword ptr [r12+8]
+14001D378  mov         rdx,qword ptr [rcx+8]
+14001D37C  cmp         byte ptr [rdx],dl
+14001D37E  add         rdx,10h
+14001D382  lea         rax,[__Str_____B2159916263E92EDCB652E1F251D715273D95CBC4C9BDA49A54D896E607316A7]
+14001D389  mov         qword ptr [rsp+38h],rax
+14001D38E  mov         rax,9E3779B97F4A7C15h
+14001D398  imul        rax,qword ptr [rsp+38h]
+14001D39E  mov         ecx,dword ptr [rcx+10h]
+14001D3A1  shrx        rcx,rax,rcx
+14001D3A6  movsxd      rcx,ecx
+14001D3A9  lea         rcx,[rcx+rcx*2]
+14001D3AD  lea         rax,[rdx+rcx*8]
+14001D3B1  lea         rcx,[__Str_____B2159916263E92EDCB652E1F251D715273D95CBC4C9BDA49A54D896E607316A7]
+14001D3B8  cmp         qword ptr [rax],rcx
+14001D3BB  je          000000014001D3D3
+14001D3BD  lea         rcx,[rsp+0A8h]
+14001D3C5  lea         rdx,[__Str_____B2159916263E92EDCB652E1F251D715273D95CBC4C9BDA49A54D896E607316A7]
+14001D3CC  call        golib_go_StringLiteralCache__Slow
+14001D3D1  jmp         000000014001D3E1
+14001D3D3  vmovdqu     xmm0,xmmword ptr [rax+8]
+14001D3D8  vmovdqu     xmmword ptr [rsp+0A8h],xmm0
+14001D3E1  mov         qword ptr [rsp+50h],r14
+14001D3E6  mov         dword ptr [rsp+58h],r15d
+14001D3EB  mov         dword ptr [rsp+5Ch],r13d
+14001D3F0  lea         rcx,[rsp+50h]
+14001D3F5  lea         rdx,[rsp+0A8h]
+14001D3FD  call        internal_stringslite_go_internal_stringslite_package__HasPrefix
+14001D402  test        eax,eax
+14001D404  je          000000014001D5D1
+14001D40A  mov         rcx,qword ptr [r12+8]
+14001D40F  mov         rdx,qword ptr [rcx+8]
+14001D413  cmp         byte ptr [rdx],dl
+14001D415  add         rdx,10h
+14001D419  lea         rax,[__Str_comment]
+14001D420  mov         qword ptr [rsp+30h],rax
+14001D425  mov         rax,9E3779B97F4A7C15h
+14001D42F  imul        rax,qword ptr [rsp+30h]
+14001D435  mov         ecx,dword ptr [rcx+10h]
+14001D438  shrx        rcx,rax,rcx
+14001D43D  movsxd      rcx,ecx
+14001D440  lea         rcx,[rcx+rcx*2]
+14001D444  lea         r12,[rdx+rcx*8]
+14001D448  lea         rcx,[__Str_comment]
+14001D44F  cmp         qword ptr [r12],rcx
+14001D453  je          000000014001D46B
+14001D455  lea         rcx,[rsp+98h]
+14001D45D  lea         rdx,[__Str_comment]
+14001D464  call        golib_go_StringLiteralCache__Slow
+14001D469  jmp         000000014001D47B
+14001D46B  vmovdqu     xmm0,xmmword ptr [r12+8]
+14001D472  vmovdqu     xmmword ptr [rsp+98h],xmm0
+14001D47B  xor         edx,edx
+14001D47D  mov         qword ptr [rsp+90h],rdx
+14001D485  vmovdqu     xmm0,xmmword ptr [rsp+98h]
+14001D48E  vmovdqu     xmmword ptr [rsp+50h],xmm0
+14001D494  lea         rdx,[rsp+50h]
+14001D499  lea         rcx,[rsp+0F0h]
+14001D4A1  lea         r8,[rsp+90h]
+14001D4A9  call        golib_go_map_2<golib_go_string__IntPtr>__TryGetValue
+14001D4AE  test        eax,eax
+14001D4B0  je          000000014001D4BC
+14001D4B2  mov         r8,qword ptr [rsp+90h]
+14001D4BA  jmp         000000014001D4C4
+14001D4BC  call        golib_go_builtin__GoZero_0<IntPtr>
+14001D4C1  mov         r8,rax
+14001D4C4  vmovdqu     xmm0,xmmword ptr [rsp+98h]
+14001D4CD  vmovdqu     xmmword ptr [rsp+50h],xmm0
+14001D4D3  lea         rdx,[rsp+50h]
+14001D4D8  inc         r8
+14001D4DB  lea         rcx,[rsp+0F0h]
+14001D4E3  call        golib_go_map_2<golib_go_string__IntPtr>__set_Item
+14001D4E8  jmp         000000014001D5D1
+14001D4ED  mov         rcx,qword ptr [r12+8]
+14001D4F2  mov         rdx,qword ptr [rcx+8]
+14001D4F6  cmp         byte ptr [rdx],dl
+14001D4F8  add         rdx,10h
+14001D4FC  lea         rax,[__Str_build]
+14001D503  mov         qword ptr [rsp+40h],rax
+14001D508  mov         rax,9E3779B97F4A7C15h
+14001D512  imul        rax,qword ptr [rsp+40h]
+14001D518  mov         ecx,dword ptr [rcx+10h]
+14001D51B  shrx        rcx,rax,rcx
+14001D520  movsxd      rcx,ecx
+14001D523  lea         rcx,[rcx+rcx*2]
+14001D527  lea         r12,[rdx+rcx*8]
+14001D52B  lea         rcx,[__Str_build]
+14001D532  cmp         qword ptr [r12],rcx
+14001D536  je          000000014001D54E
+14001D538  lea         rcx,[rsp+0C0h]
+14001D540  lea         rdx,[__Str_build]
+14001D547  call        golib_go_StringLiteralCache__Slow
+14001D54C  jmp         000000014001D55E
+14001D54E  vmovdqu     xmm0,xmmword ptr [r12+8]
+14001D555  vmovdqu     xmmword ptr [rsp+0C0h],xmm0
+14001D55E  xor         edx,edx
+14001D560  mov         qword ptr [rsp+0B8h],rdx
+14001D568  vmovdqu     xmm0,xmmword ptr [rsp+0C0h]
+14001D571  vmovdqu     xmmword ptr [rsp+50h],xmm0
+14001D577  lea         rdx,[rsp+50h]
+14001D57C  lea         rcx,[rsp+0F0h]
+14001D584  lea         r8,[rsp+0B8h]
+14001D58C  call        golib_go_map_2<golib_go_string__IntPtr>__TryGetValue
+14001D591  test        eax,eax
+14001D593  je          000000014001D59F
+14001D595  mov         r8,qword ptr [rsp+0B8h]
+14001D59D  jmp         000000014001D5A7
+14001D59F  call        golib_go_builtin__GoZero_0<IntPtr>
+14001D5A4  mov         r8,rax
+14001D5A7  vmovdqu     xmm0,xmmword ptr [rsp+0C0h]
+14001D5B0  vmovdqu     xmmword ptr [rsp+50h],xmm0
+14001D5B6  lea         rdx,[rsp+50h]
+14001D5BB  inc         r8
+14001D5BE  lea         rcx,[rsp+0F0h]
+14001D5C6  call        golib_go_map_2<golib_go_string__IntPtr>__set_Item
+14001D5CB  movsxd      rax,r13d
+14001D5CE  add         rsi,rax
+14001D5D1  lea         rcx,[rbp+30h]
+14001D5D5  mov         rax,rdi
+14001D5D8  cqo
+14001D5DA  idiv        rax,qword ptr [rbp+40h]
+14001D5DE  call        golib_go_slice_1<golib_go_string>__get_Item_0
+14001D5E3  vmovdqu     xmm0,xmmword ptr [rax]
+14001D5E7  vmovdqu     xmmword ptr [rsp+50h],xmm0
+14001D5ED  lea         rcx,[rsp+50h]
+14001D5F2  call        PerfStringMatch_go_main_package__classify
+14001D5F7  add         rsi,rax
+14001D5FA  lea         rcx,[rsp+0E0h]
+14001D602  mov         rdx,rax
+14001D605  call        PerfStringMatch_go_main_package__kindName
+14001D60A  movsxd      rax,dword ptr [rsp+0ECh]
+14001D612  add         rsi,rax
+14001D615  inc         rdi
+14001D618  cmp         rdi,rbx
+14001D61B  jl          000000014001D28D
+14001D621  lea         rax,[?__NONGCSTATICS@golib_go_StringLiteralCache@@]
+14001D628  cmp         qword ptr [rax-8],0
+14001D62D  jne         000000014001D7B4
+14001D633  mov         r12,qword ptr [?__GCSTATICS@golib_go_StringLiteralCache@@]
+14001D63A  mov         rcx,qword ptr [r12+8]
+14001D63F  mov         rdx,qword ptr [rcx+8]
+14001D643  cmp         byte ptr [rdx],dl
+14001D645  add         rdx,10h
+14001D649  lea         rax,[__Str_build]
+14001D650  mov         qword ptr [rsp+28h],rax
+14001D655  mov         rax,9E3779B97F4A7C15h
+14001D65F  imul        rax,qword ptr [rsp+28h]
+14001D665  mov         ecx,dword ptr [rcx+10h]
+14001D668  shrx        rcx,rax,rcx
+14001D66D  movsxd      rcx,ecx
+14001D670  lea         rcx,[rcx+rcx*2]
+14001D674  lea         rbx,[rdx+rcx*8]
+14001D678  lea         rcx,[__Str_build]
+14001D67F  cmp         qword ptr [rbx],rcx
+14001D682  je          000000014001D69A
+14001D684  lea         rcx,[rsp+80h]
+14001D68C  lea         rdx,[__Str_build]
+14001D693  call        golib_go_StringLiteralCache__Slow
+14001D698  jmp         000000014001D6A8
+14001D69A  vmovdqu     xmm0,xmmword ptr [rbx+8]
+14001D69F  vmovdqu     xmmword ptr [rsp+80h],xmm0
+14001D6A8  lea         rcx,[rsp+0F0h]
+14001D6B0  lea         rdx,[rsp+80h]
+14001D6B8  lea         r8,[rsp+78h]
+14001D6BD  call        golib_go_map_2<golib_go_string__IntPtr>__TryGetValue
+14001D6C2  test        eax,eax
+14001D6C4  je          000000014001D6CD
+14001D6C6  mov         rbx,qword ptr [rsp+78h]
+14001D6CB  jmp         000000014001D6D5
+14001D6CD  call        golib_go_builtin__GoZero_0<IntPtr>
+14001D6D2  mov         rbx,rax
+14001D6D5  lea         rbx,[rbx+rbx*2]
+14001D6D9  mov         rcx,qword ptr [r12+8]
+14001D6DE  mov         rdx,qword ptr [rcx+8]
+14001D6E2  cmp         byte ptr [rdx],dl
+14001D6E4  add         rdx,10h
+14001D6E8  lea         rax,[__Str_comment]
+14001D6EF  mov         qword ptr [rsp+20h],rax
+14001D6F4  mov         rax,9E3779B97F4A7C15h
+14001D6FE  imul        rax,qword ptr [rsp+20h]
+14001D704  mov         ecx,dword ptr [rcx+10h]
+14001D707  shrx        rcx,rax,rcx
+14001D70C  movsxd      rcx,ecx
+14001D70F  lea         rcx,[rcx+rcx*2]
+14001D713  lea         rdi,[rdx+rcx*8]
+14001D717  lea         rcx,[__Str_comment]
+14001D71E  cmp         qword ptr [rdi],rcx
+14001D721  je          000000014001D736
+14001D723  lea         rcx,[rsp+68h]
+14001D728  lea         rdx,[__Str_comment]
+14001D72F  call        golib_go_StringLiteralCache__Slow
+14001D734  jmp         000000014001D741
+14001D736  vmovdqu     xmm0,xmmword ptr [rdi+8]
+14001D73B  vmovdqu     xmmword ptr [rsp+68h],xmm0
+14001D741  lea         rcx,[rsp+0F0h]
+14001D749  lea         rdx,[rsp+68h]
+14001D74E  lea         r8,[rsp+60h]
+14001D753  call        golib_go_map_2<golib_go_string__IntPtr>__TryGetValue
+14001D758  test        eax,eax
+14001D75A  je          000000014001D763
+14001D75C  mov         rax,qword ptr [rsp+60h]
+14001D761  jmp         000000014001D768
+14001D763  call        golib_go_builtin__GoZero_0<IntPtr>
+14001D768  add         rbx,rsi
+14001D76B  add         rax,rbx
+14001D76E  add         rsp,0F8h
+14001D775  pop         rbx
+14001D776  pop         rbp
+14001D777  pop         rsi
+14001D778  pop         rdi
+14001D779  pop         r12
+14001D77B  pop         r13
+14001D77D  pop         r14
+14001D77F  pop         r15
+14001D781  ret
+14001D782  call        __GetGCStaticBase_golib_go_map_2<golib_go_string__IntPtr>
+14001D787  jmp         000000014001D22E
+14001D78C  mov         rcx,rdx
+14001D78F  lea         rax,[S_P_CoreLib_Internal_Runtime_ThreadStatics__GetInlinedThreadStaticBaseSlow]
+14001D796  call        rax
+14001D798  mov         rbp,rax
+14001D79B  jmp         000000014001D270
+14001D7A0  call        __GetGCStaticBase_PerfStringMatch_go_main_package
+14001D7A5  jmp         000000014001D29F
+14001D7AA  call        __GetGCStaticBase_golib_go_StringLiteralCache
+14001D7AF  jmp         000000014001D2D5
+14001D7B4  call        __GetGCStaticBase_golib_go_StringLiteralCache
+14001D7B9  jmp         000000014001D633
+14001D7BE  nop

@@ -78,10 +78,8 @@ internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
         var elem = vᴛ1;
 
         elem = resolve(name, elem);
-        {
-            var (v, _) = elem._<ж<Var>>(ᐧ); if (v != nil && needUse(v.kind) && !check.usedVars[v]) {
-                unused = append(unusedᴷ, unused, v);
-            }
+        var (v, _) = elem._<ж<Var>>(ᐧ); if (v != nil && needUse(v.kind) && !check.usedVars[v]) {
+            unused = append(unusedᴷ, unused, v);
         }
     }
     slices.SortFunc(unused, (ж<Var> a, ж<Var> b) => cmpPos(a.pos, b.pos));
@@ -121,10 +119,8 @@ internal static void simpleStmt(this ж<Checker> Ꮡcheck, ast.Stmt s) {
 
 internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     for (nint i = len(list); i > 0; i--) {
-        {
-            var (_, ok) = list[i - 1]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
-                return list.slice(0, i);
-            }
+        var (_, ok) = list[i - 1]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
+            return list.slice(0, i);
         }
     }
     return default;
@@ -308,21 +304,19 @@ L:
             goto continue_L; // we're done
         }
         // look for duplicate values
-        {
-            var val = goVal(v.val); if (val != nil) {
-                // look for duplicate types for a given value
-                // (quadratic algorithm, but these lists tend to be very short)
-                foreach (var (_, vt) in seen[val]) {
-                    if (Identical(v.typ, vt.typ)) {
-                        var err = Ꮡcheck.newError(DuplicateCase);
-                        err.addf(new operandжpositioner(Ꮡv), "duplicate case %s in expression switch", Ꮡv);
-                        err.addf((atPos)vt.pos, "previous case");
-                        err.report();
-                        goto continue_L;
-                    }
+        var val = goVal(v.val); if (val != nil) {
+            // look for duplicate types for a given value
+            // (quadratic algorithm, but these lists tend to be very short)
+            foreach (var (_, vt) in seen[val]) {
+                if (Identical(v.typ, vt.typ)) {
+                    var err = Ꮡcheck.newError(DuplicateCase);
+                    err.addf(new operandжpositioner(Ꮡv), "duplicate case %s in expression switch", Ꮡv);
+                    err.addf((atPos)vt.pos, "previous case");
+                    err.report();
+                    goto continue_L;
                 }
-                seen[val] = append(seen[val], new valueType(v.Pos(), v.typ));
             }
+            seen[val] = append(seen[val], new valueType(v.Pos(), v.typ));
         }
 continue_L:;
     }
@@ -332,11 +326,9 @@ break_L:;
 // isNil reports whether the expression e denotes the predeclared value nil.
 internal static bool isNil(this ref Checker check, ast.Expr e) {
     // The only way to express the nil value is by literally writing nil (possibly in parentheses).
-    {
-        var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {
-            var (_, ok) = check.environment.lookup(name.Name)._<ж<Nil>>(ᐧ);
-            return ok;
-        }
+    var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {
+        var (_, ok) = check.environment.lookup(name.Name)._<ж<Nil>>(ᐧ);
+        return ok;
     }
     return false;
 }
@@ -540,10 +532,8 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         if (debug) {
             defer((ж<ΔScope> scope) => {
                 // don't check if code is panicking
-                {
-                    var p = recover(); if (p != nil) {
-                        throw panic(p);
-                    }
+                var p = recover(); if (p != nil) {
+                    throw panic(p);
                 }
                 assert(scope == Ꮡcheck.Value.scope);
             }, Ꮡcheck.Value.scope, ref ᒐ);
@@ -609,10 +599,8 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             if (ch.mode == invalid || val.mode == invalid) {
                 return;
             }
-            {
-                var elem = Ꮡcheck.chanElem(inNode(new ast.SendStmtжNode(sΔ1), sΔ1.Arrow), Ꮡch, false); if (elem != nil) {
-                    Ꮡcheck.assignment(Ꮡval, elem, sendˢ);
-                }
+            var elem = Ꮡcheck.chanElem(inNode(new ast.SendStmtжNode(sΔ1), sΔ1.Arrow), Ꮡch, false); if (elem != nil) {
+                Ꮡcheck.assignment(Ꮡval, elem, sendˢ);
             }
             break;
         }
@@ -703,14 +691,12 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 // list in a "return" statement if a different entity (constant, type, or variable)
                 // with the same name as a result parameter is in scope at the place of the return."
                 foreach (var (_, obj) in res.vars) {
-                    {
-                        var alt = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(obj.name); if (alt != nil && !AreEqual(alt, obj)) {
-                            var err = Ꮡcheck.newError(OutOfScopeResult);
-                            err.addf(new ast_ReturnStmtжpositioner(sΔ1), "result parameter %s not in scope at return", obj.name);
-                            err.addf(new Objectᴠpositioner(alt), "inner declaration of %s", obj.OrTypedNil());
-                            err.report();
-                            // ok to continue
-                        }
+                    var alt = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(obj.name); if (alt != nil && !AreEqual(alt, obj)) {
+                        var err = Ꮡcheck.newError(OutOfScopeResult);
+                        err.addf(new ast_ReturnStmtжpositioner(sΔ1), "result parameter %s not in scope at return", obj.name);
+                        err.addf(new Objectᴠpositioner(alt), "inner declaration of %s", obj.OrTypedNil());
+                        err.report();
+                        // ok to continue
                     }
                 }
             } else {
@@ -1003,10 +989,8 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
 
                 // if present, rhs must be a receive operation
                 if (rhs != nil) {
-                    {
-                        var (x, _) = ast.Unparen(rhs)._<ж<ast.UnaryExpr>>(ᐧ); if (x != nil && x.Op == token.ARROW) {
-                            valid = true;
-                        }
+                    var (x, _) = ast.Unparen(rhs)._<ж<ast.UnaryExpr>>(ᐧ); if (x != nil && x.Op == token.ARROW) {
+                        valid = true;
                     }
                 }
 
@@ -1040,14 +1024,12 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             Ꮡcheck.simpleStmt(sΔ1.Post);
             // spec: "The init statement may be a short variable
             // declaration, but the post statement must not."
-            {
-                var (sΔ5, _) = sΔ1.Post._<ж<ast.AssignStmt>>(ᐧ); if (sΔ5 != nil && sΔ5.Tok == token.DEFINE) {
-                    Ꮡcheck.softErrorf(new ast_AssignStmtжpositioner(sΔ5), InvalidPostDecl, "cannot declare in post statement");
-                    // Don't call useLHS here because we want to use the lhs in
-                    // this erroneous statement so that we don't get errors about
-                    // these lhs variables being declared and not used.
-                    Ꮡcheck.use(sΔ5.Lhs.ꓸꓸꓸ); // avoid follow-up errors
-                }
+            var (sΔ5, _) = sΔ1.Post._<ж<ast.AssignStmt>>(ᐧ); if (sΔ5 != nil && sΔ5.Tok == token.DEFINE) {
+                Ꮡcheck.softErrorf(new ast_AssignStmtжpositioner(sΔ5), InvalidPostDecl, "cannot declare in post statement");
+                // Don't call useLHS here because we want to use the lhs in
+                // this erroneous statement so that we don't get errors about
+                // these lhs variables being declared and not used.
+                Ꮡcheck.use(sΔ5.Lhs.ꓸꓸꓸ); // avoid follow-up errors
             }
             Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt(sΔ1.Body));
             break;

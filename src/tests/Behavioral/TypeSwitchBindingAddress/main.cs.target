@@ -25,10 +25,8 @@ partial struct resolver {
 internal static void fix(this ref resolver r, ж<name> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
-    {
-        var (v, ok) = r.ns[n.space, ꟷ]; if (ok) {
-            n.space = v;
-        }
+    var (v, ok) = r.ns[n.space, ꟷ]; if (ok) {
+        n.space = v;
     }
 }
 

@@ -1909,7 +1909,7 @@ internal class StructTypeTemplate : TemplateBase
             return footer + $$"""
 
                 [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
-                public static class {{XpkgClassName($"{PackageName}_package", NonGenericStructName)}}
+                public static class {{DeclareExtensionHost(XpkgClassName($"{PackageName}_package", NonGenericStructName))}}
                 {{{m_xpkg}}
                 }
 

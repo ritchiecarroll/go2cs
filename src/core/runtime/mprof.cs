@@ -451,10 +451,8 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
                 var sf = u.srcFunc(uf);
                 if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)) {
                     // ignore wrappers
-                } else {
-                    var more = skipOrAdd(uf.pc + 1); if (!more) {
-                        return n;
-                    }
+                } else if (skipOrAdd(uf.pc + 1) is var more && !more) {
+                    return n;
                 }
                 lastFuncID = sf.funcID;
             }
@@ -545,22 +543,20 @@ internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) {
         return;
     }
 
-    {
-        var prev = prof.cycles; if (prev > 0) {
-            // We can only store one call stack for runtime-internal lock contention
-            // on this M, and we've already got one. Decide which should stay, and
-            // add the other to the report for runtime._LostContendedRuntimeLock.
-            if (cycles == 0) {
-                return;
-            }
-            var prevScore = (uint64)cheaprand64() % (uint64)prev;
-            var thisScore = (uint64)cheaprand64() % (uint64)cycles;
-            if (prevScore > thisScore) {
-                prof.cyclesLost += cycles;
-                return;
-            } else {
-                prof.cyclesLost += prev;
-            }
+    var prev = prof.cycles; if (prev > 0) {
+        // We can only store one call stack for runtime-internal lock contention
+        // on this M, and we've already got one. Decide which should stay, and
+        // add the other to the report for runtime._LostContendedRuntimeLock.
+        if (cycles == 0) {
+            return;
+        }
+        var prevScore = (uint64)cheaprand64() % (uint64)prev;
+        var thisScore = (uint64)cheaprand64() % (uint64)cycles;
+        if (prevScore > thisScore) {
+            prof.cyclesLost += cycles;
+            return;
+        } else {
+            prof.cyclesLost += prev;
         }
     }
     Ꮡprof.captureStack();
@@ -614,10 +610,8 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
 //
 //go:nowritebarrierrec
 internal static void store(this ref mLockProfile prof) {
-    {
-        var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
-            prof.storeSlow();
-        }
+    var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
+        prof.storeSlow();
     }
 }
 
@@ -631,11 +625,9 @@ internal static void storeSlow(this ref mLockProfile prof) {
 
     nint nstk = (nint)debug.profstackdepth;
     for (nint i = 0; i < nstk; i++) {
-        {
-            var pc = prof.stack[i]; if (pc == 0) {
-                nstk = i;
-                break;
-            }
+        var pc = prof.stack[i]; if (pc == 0) {
+            nstk = i;
+            break;
         }
     }
 
@@ -1379,14 +1371,12 @@ internal static void tryRecordGoroutineProfileWB(ж<g> gp1) {
 // in the current goroutine profile: either that it should not be profiled, or
 // that a snapshot of its call stack and labels are now in the profile.
 internal static void tryRecordGoroutineProfile(ж<g> gp1, slice<uintptr> pcbuf, Action yield) {
-    {
-        var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
-            // Dead goroutines should not appear in the profile. Goroutines that
-            // start while profile collection is active will get goroutineProfiled
-            // set to goroutineProfileSatisfied before transitioning out of _Gdead,
-            // so here we check _Gdead first.
-            return;
-        }
+    var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
+        // Dead goroutines should not appear in the profile. Goroutines that
+        // start while profile collection is active will get goroutineProfiled
+        // set to goroutineProfileSatisfied before transitioning out of _Gdead,
+        // so here we check _Gdead first.
+        return;
     }
 
     for (;;) {
@@ -1498,10 +1488,8 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
         if (gp1 == gpʗ1) {
             return false;
         }
-        {
-            var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
-                return false;
-            }
+        var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
+            return false;
         }
         if (isSystemGoroutine(gp1, false)) {
             return false;

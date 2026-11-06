@@ -151,10 +151,8 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
         return true;
     }
 
-    {
-        var (_, ok) = distInfo[new OSArch(goos, goarch), ꟷ]; if (!ok) {
-            return false; // platform unrecognized
-        }
+    var (_, ok) = distInfo[new OSArch(goos, goarch), ꟷ]; if (!ok) {
+        return false; // platform unrecognized
     }
 
     @string platform = goos + "/"u8 + goarch;

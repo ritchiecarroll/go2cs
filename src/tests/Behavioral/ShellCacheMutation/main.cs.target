@@ -71,10 +71,8 @@ internal static void Main() {
             src = after;
         }
 
-        {
-            var (v, okΔ2) = src._<main_type>(ᐧ); if (okΔ2) {
-                alternating = alternating * 10 + v.Len();
-            }
+        var (v, okΔ2) = src._<main_type>(ᐧ); if (okΔ2) {
+            alternating = alternating * 10 + v.Len();
         }
     }
 
@@ -88,10 +86,8 @@ internal static void Main() {
         }
 
         foreach (var (_, aΔ1) in range(values)) {
-            {
-                var (v, okΔ3) = aΔ1._<main_type>(ᐧ); if (okΔ3) {
-                    sum += v.Len();
-                }
+            var (v, okΔ3) = aΔ1._<main_type>(ᐧ); if (okΔ3) {
+                sum += v.Len();
             }
         }
     }

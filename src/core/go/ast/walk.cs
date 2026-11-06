@@ -32,10 +32,8 @@ internal static void walkList<N>(Visitor v, slice<N> list)
 // w for each of the non-nil children of node, followed by a call of
 // w.Visit(nil).
 public static void Walk(Visitor v, Node node) {
-    {
-        v = v.Visit(node); if (v == nil) {
-            return;
-        }
+    v = v.Visit(node); if (v == nil) {
+        return;
     }
 
     // walk children

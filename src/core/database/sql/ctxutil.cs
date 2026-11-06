@@ -11,10 +11,8 @@ using go.database.sql;
 partial class sql_package {
 
 internal static (driver.Stmt, error) ctxDriverPrepare(context.Context ctx, driver.Conn ci, @string query) {
-    {
-        var (ciCtx, @is) = ci._<driver.ConnPrepareContext>(ᐧ); if (@is) {
-            return ciCtx.PrepareContext(ctx, query);
-        }
+    var (ciCtx, @is) = ci._<driver.ConnPrepareContext>(ᐧ); if (@is) {
+        return ciCtx.PrepareContext(ctx, query);
     }
     var (si, err) = ci.Prepare(query);
     if (err == nil) {
@@ -72,10 +70,8 @@ internal static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.
 }
 
 internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, driver.Stmt si, slice<driver.NamedValue> nvdargs) {
-    {
-        var (siCtx, @is) = si._<driver.StmtExecContext>(ᐧ); if (@is) {
-            return siCtx.ExecContext(ctx, nvdargs);
-        }
+    var (siCtx, @is) = si._<driver.StmtExecContext>(ᐧ); if (@is) {
+        return siCtx.ExecContext(ctx, nvdargs);
     }
     var (dargs, err) = namedValueToValue(nvdargs);
     if (err != nil) {
@@ -94,10 +90,8 @@ internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dr
 }
 
 internal static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, driver.Stmt si, slice<driver.NamedValue> nvdargs) {
-    {
-        var (siCtx, @is) = si._<driver.StmtQueryContext>(ᐧ); if (@is) {
-            return siCtx.QueryContext(ctx, nvdargs);
-        }
+    var (siCtx, @is) = si._<driver.StmtQueryContext>(ᐧ); if (@is) {
+        return siCtx.QueryContext(ctx, nvdargs);
     }
     var (dargs, err) = namedValueToValue(nvdargs);
     if (err != nil) {
@@ -124,15 +118,13 @@ private static readonly @string sqlDriverDoesNotSupportˢ2ᵇ = "sql: driver doe
 internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOptions> Ꮡopts, driver.Conn ci) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
-    {
-        var (ciCtx, @is) = ci._<driver.ConnBeginTx>(ᐧ); if (@is) {
-            var dopts = new driver.TxOptions();
-            if (Ꮡopts != nil) {
-                dopts.Isolation = (driver.IsolationLevel)(nint)opts.Isolation;
-                dopts.ReadOnly = opts.ReadOnly;
-            }
-            return ciCtx.BeginTx(ctx, dopts);
+    var (ciCtx, @is) = ci._<driver.ConnBeginTx>(ᐧ); if (@is) {
+        var dopts = new driver.TxOptions();
+        if (Ꮡopts != nil) {
+            dopts.Isolation = (driver.IsolationLevel)(nint)opts.Isolation;
+            dopts.ReadOnly = opts.ReadOnly;
         }
+        return ciCtx.BeginTx(ctx, dopts);
     }
 
     if (Ꮡopts != nil) {

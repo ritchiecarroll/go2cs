@@ -39,12 +39,10 @@ internal static void Main() {
     var items = slice<any>([new widget(name: "beta"), new plain()]);
 
     foreach (var (_, it) in range(items)) {
-        {
-            var (t, ok) = it._<Tagger>(ᐧ); if (ok) {
-                fmt.Println(t.Describe(), t.Tag());
-            } else {
-                fmt.Println("not a Tagger");
-            }
+        var (t, ok) = it._<Tagger>(ᐧ); if (ok) {
+            fmt.Println(t.Describe(), t.Tag());
+        } else {
+            fmt.Println("not a Tagger");
         }
     }
 }

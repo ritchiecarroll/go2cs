@@ -661,12 +661,10 @@ internal static ж<_defer> newdefer() {
         }
         unlock(Ꮡsched.of(schedt.Ꮡdeferlock));
     }
-    {
-        nint n = len((~pp).deferpool); if (n > 0) {
-            d = (~pp).deferpool[n - 1];
-            pp.Value.deferpool[n - 1] = default;
-            pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
-        }
+    nint n = len((~pp).deferpool); if (n > 0) {
+        d = (~pp).deferpool[n - 1];
+        pp.Value.deferpool[n - 1] = default;
+        pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
     }
     releasem(ref (mp).DerefOrNull());
     (mp, pp) = (default, default);
@@ -986,17 +984,15 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
     if (Δp.deferreturn) {
         Δp.sp = sp;
 
-        {
-            var s = (ж<savedOpenDeferState>)(uintptr)((~gp).param); if (s != nil) {
-                // recovery saved some state for us, so that we can resume
-                // calling open-coded defers without unwinding the stack.
+        var s = (ж<savedOpenDeferState>)(uintptr)((~gp).param); if (s != nil) {
+            // recovery saved some state for us, so that we can resume
+            // calling open-coded defers without unwinding the stack.
 
-                gp.Value.param = default;
+            gp.Value.param = default;
 
-                Δp.retpc = s.Value.retpc;
-                Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
-                Δp.slotsPtr = (uintptr)add(sp, (~s).slotsOffset);
-            }
+            Δp.retpc = s.Value.retpc;
+            Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
+            Δp.slotsPtr = (uintptr)add(sp, (~s).slotsOffset);
         }
 
         return;
@@ -1070,23 +1066,21 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
         }
 
 Recheck:
-        {
-            var d = gp.Value._defer; if (d != nil && (~d).sp == (uintptr)Δp.sp) {
-                if ((~d).rangefunc) {
-                    deferconvert(d);
-                    popDefer(ref (gp).DerefOrNull());
-                    goto Recheck;
-                }
-
-                var fn = d.Value.fn;
-
-                Δp.retpc = d.Value.pc;
-
-                // Unlink and free.
+        var d = gp.Value._defer; if (d != nil && (~d).sp == (uintptr)Δp.sp) {
+            if ((~d).rangefunc) {
+                deferconvert(d);
                 popDefer(ref (gp).DerefOrNull());
-
-                return (fn, true);
+                goto Recheck;
             }
+
+            var fn = d.Value.fn;
+
+            Δp.retpc = d.Value.pc;
+
+            // Unlink and free.
+            popDefer(ref (gp).DerefOrNull());
+
+            return (fn, true);
         }
 
         if (!Ꮡp.nextFrame()) {
@@ -1108,10 +1102,8 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
     var gpʗ1 = gp;
     systemstack(() => {
         uintptr limit = default;
-        {
-            var d = gpʗ1.Value._defer; if (d != nil) {
-                limit = d.Value.sp;
-            }
+        var d = gpʗ1.Value._defer; if (d != nil) {
+            limit = d.Value.sp;
         }
 
         ref var u = ref heap(new unwinder(), out var Ꮡu);
@@ -1561,10 +1553,8 @@ internal static void fatalpanic(ж<_panic> msgs) {
         // If this panic is the result of a synctest bubble deadlock,
         // print stacks for the goroutines in the bubble.
         ж<synctestBubble> bubble = default;
-        {
-            var (de, ok) = msgs.Value.arg._<synctestDeadlockError>(ᐧ); if (ok) {
-                bubble = de.bubble;
-            }
+        var (de, ok) = msgs.Value.arg._<synctestDeadlockError>(ᐧ); if (ok) {
+            bubble = de.bubble;
         }
 
         docrash = dopanic_m(gpʗ1, pc, sp, bubble);

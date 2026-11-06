@@ -1,0 +1,14 @@
+proto variant 0 mismatches 0 of 20000
+proto variant 2 mismatches 0 of 20000
+proto variant 3 mismatches 0 of 20000
+proto variant 0 MontMul      min      409.6 ns  median      416.9 ns
+proto variant 2 MontMul      min      599.9 ns  median      612.4 ns
+proto variant 3 MontMul      min      297.1 ns  median      299.9 ns
+Bmi2.X64.IsSupported True
+proto variant 0 mismatches 0 of 20000
+proto variant 2 mismatches 0 of 20000
+proto variant 3 mismatches 0 of 20000
+proto variant 0 MontMul      min      409.0 ns  median      411.8 ns
+proto variant 2 MontMul      min      595.5 ns  median      600.6 ns
+proto variant 3 MontMul      min      304.9 ns  median      316.3 ns
+Bmi2.X64.IsSupported True

@@ -41,29 +41,23 @@ internal static void Main() {
     var v = valueSourced()._<valErr>();
     fmt.Println("val-assert", v.tag, v.Error());
 
-    {
-        var (_, ok) = valueSourced()._<ж<myErr>>(ᐧ); if (ok) {
-            fmt.Println("ptr-miss-WRONG");
-        } else {
-            fmt.Println("ptr-miss-ok");
-        }
+    if (valueSourced()._<ж<myErr>>(out _)) {
+        fmt.Println("ptr-miss-WRONG");
+    } else {
+        fmt.Println("ptr-miss-ok");
     }
-    {
-        var (_, ok) = pointerSourced()._<valErr>(ᐧ); if (ok) {
-            fmt.Println("val-miss-WRONG");
-        } else {
-            fmt.Println("val-miss-ok");
-        }
+    if (pointerSourced()._<valErr>(out _)) {
+        fmt.Println("val-miss-WRONG");
+    } else {
+        fmt.Println("val-miss-ok");
     }
 
     func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("recovered");
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("recovered");
                 }
             }, ref ᒐ);
             _ = pointerSourced()._<valErr>();
@@ -73,12 +67,10 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     })();
 
-    {
-        var (s, ok) = pointerSourced()._<main_type>(ᐧ); if (ok) {
-            fmt.Println("iface-assert", s.Error());
-        } else {
-            fmt.Println("iface-assert-missed");
-        }
+    if (pointerSourced()._<main_type>(out var s)) {
+        fmt.Println("iface-assert", s.Error());
+    } else {
+        fmt.Println("iface-assert-missed");
     }
 }
 

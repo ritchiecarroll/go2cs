@@ -238,10 +238,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     // Read and decode Mach magic to determine byte order, size.
     // Magic32 and Magic64 differ only in the bottom bit.
     array<byte> ident = new(4);
-    {
-        var (_, errΔ1) = r.ReadAt(ident[0..], 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = r.ReadAt(ident[0..], 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     var be = binary.BigEndian.Uint32(ident[0..]);
     var le = binary.LittleEndian.Uint32(ident[0..]);
@@ -261,10 +259,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }}
 
     // Read entire file header.
-    {
-        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), f.ByteOrder, f.ᏑFileHeader); if (errΔ2 != nil) {
-            return (default, errΔ2);
-        }
+    var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), f.ByteOrder, f.ᏑFileHeader); if (errΔ2 != nil) {
+        return (default, errΔ2);
     }
 
     // Then load commands.
@@ -303,10 +299,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdRpath: {
             ref var hdr = ref heap(new RpathCmd(), out var Ꮡhdr);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ15 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ15 != nil) {
-                    return (default, errΔ15);
-                }
+            var errΔ15 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ15 != nil) {
+                return (default, errΔ15);
             }
             var l = @new<Rpath>();
             if (hdr.Path >= (uint32)len(cmddat)) {
@@ -320,10 +314,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdDylib: {
             ref var hdr = ref heap(new DylibCmd(), out var Ꮡhdr);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ16 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ16 != nil) {
-                    return (default, errΔ16);
-                }
+            var errΔ16 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ16 != nil) {
+                return (default, errΔ16);
             }
             var l = @new<Dylib>();
             if (hdr.Name >= (uint32)len(cmddat)) {
@@ -340,10 +332,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdSymtab: {
             ref var hdr = ref heap(new SymtabCmd(), out var Ꮡhdr);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ17 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ17 != nil) {
-                    return (default, errΔ17);
-                }
+            var errΔ17 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ17 != nil) {
+                return (default, errΔ17);
             }
             var (strtab, errΔ18) = saferio.ReadDataAt(r, (uint64)hdr.Strsize, (int64)hdr.Stroff);
             if (errΔ18 != nil) {
@@ -370,10 +360,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdDysymtab: {
             ref var hdr = ref heap(new DysymtabCmd(), out var Ꮡhdr);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ19 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ19 != nil) {
-                    return (default, errΔ19);
-                }
+            var errΔ19 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡhdr); if (errΔ19 != nil) {
+                return (default, errΔ19);
             }
             if (f.Symtab == nil) {
                 return (default, new FormatErrorжerror(Ꮡ(new FormatError(offset, "dynamic symbol table seen before any ordinary symbol table", default))));
@@ -391,10 +379,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 return (default, errΔ20);
             }
             var x = new slice<uint32>((nint)(hdr.Nindirectsyms));
-            {
-                var errΔ21 = binary.Read(new bytes_ReaderжReader(bytes.NewReader(datΔ2)), bo, x); if (errΔ21 != nil) {
-                    return (default, errΔ21);
-                }
+            var errΔ21 = binary.Read(new bytes_ReaderжReader(bytes.NewReader(datΔ2)), bo, x); if (errΔ21 != nil) {
+                return (default, errΔ21);
             }
             var st = @new<Dysymtab>();
             st.LoadBytes = (LoadBytes)cmddat;
@@ -407,10 +393,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdSegment: {
             ref var seg32 = ref heap(new Segment32(), out var Ꮡseg32);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ22 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡseg32); if (errΔ22 != nil) {
-                    return (default, errΔ22);
-                }
+            var errΔ22 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡseg32); if (errΔ22 != nil) {
+                return (default, errΔ22);
             }
             s = @new<ΔSegment>();
             s.LoadBytes = cmddat;
@@ -428,10 +412,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             f.Loads = append(f.Loads, (Load)(new ΔSegmentжLoad(s)));
             for (nint iΔ3 = 0; iΔ3 < (nint)s.Nsect; iΔ3++) {
                 ref var sh32 = ref heap(new Section32(), out var Ꮡsh32);
-                {
-                    var errΔ23 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡsh32); if (errΔ23 != nil) {
-                        return (default, errΔ23);
-                    }
+                var errΔ23 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡsh32); if (errΔ23 != nil) {
+                    return (default, errΔ23);
                 }
                 var sh = @new<ΔSection>();
                 sh.Name = cstring(sh32.Name[0..]);
@@ -443,10 +425,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 sh.Reloff = sh32.Reloff;
                 sh.Nreloc = sh32.Nreloc;
                 sh.Flags = sh32.Flags;
-                {
-                    var errΔ24 = f.pushSection(sh, r); if (errΔ24 != nil) {
-                        return (default, errΔ24);
-                    }
+                var errΔ24 = f.pushSection(sh, r); if (errΔ24 != nil) {
+                    return (default, errΔ24);
                 }
             }
             break;
@@ -454,10 +434,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         case var ᴛ when ᴛ == LoadCmdSegment64: {
             ref var seg64 = ref heap(new Segment64(), out var Ꮡseg64);
             var b = bytes.NewReader(cmddat);
-            {
-                var errΔ25 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡseg64); if (errΔ25 != nil) {
-                    return (default, errΔ25);
-                }
+            var errΔ25 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡseg64); if (errΔ25 != nil) {
+                return (default, errΔ25);
             }
             s = @new<ΔSegment>();
             s.LoadBytes = cmddat;
@@ -475,10 +453,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             f.Loads = append(f.Loads, (Load)(new ΔSegmentжLoad(s)));
             for (nint iΔ4 = 0; iΔ4 < (nint)s.Nsect; iΔ4++) {
                 ref var sh64 = ref heap(new Section64(), out var Ꮡsh64);
-                {
-                    var errΔ26 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡsh64); if (errΔ26 != nil) {
-                        return (default, errΔ26);
-                    }
+                var errΔ26 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡsh64); if (errΔ26 != nil) {
+                    return (default, errΔ26);
                 }
                 var sh = @new<ΔSection>();
                 sh.Name = cstring(sh64.Name[0..]);
@@ -490,10 +466,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 sh.Reloff = sh64.Reloff;
                 sh.Nreloc = sh64.Nreloc;
                 sh.Flags = sh64.Flags;
-                {
-                    var errΔ27 = f.pushSection(sh, r); if (errΔ27 != nil) {
-                        return (default, errΔ27);
-                    }
+                var errΔ27 = f.pushSection(sh, r); if (errΔ27 != nil) {
+                    return (default, errΔ27);
                 }
             }
             break;
@@ -525,17 +499,13 @@ internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> sym
     for (nint i = 0; i < (nint)hdr.Nsyms; i++) {
         ref var n = ref heap(new Nlist64(), out var Ꮡn);
         if (f.Magic == Magic64) {
-            {
-                var err = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡn); if (err != nil) {
-                    return (default, err);
-                }
+            var err = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡn); if (err != nil) {
+                return (default, err);
             }
         } else {
             ref var n32 = ref heap(new Nlist32(), out var Ꮡn32);
-            {
-                var err = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡn32); if (err != nil) {
-                    return (default, err);
-                }
+            var err = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡn32); if (err != nil) {
+                return (default, err);
             }
             n.Name = n32.Name;
             n.Type = n32.Type;
@@ -591,10 +561,8 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
             var rel = Ꮡ(sh.Relocs, i);
 
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);
-            {
-                var errΔ1 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡri); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡri); if (errΔ1 != nil) {
+                return errΔ1;
             }
 
             if ((uint32)(ri.Addr & ((uint32)1 << 31)) != 0) { // scattered
@@ -646,10 +614,8 @@ internal static @string cstring(slice<byte> b) {
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
 public static ж<ΔSegment> Segment(this ref File f, @string name) {
     foreach (var (_, l) in f.Loads) {
-        {
-            var (s, ok) = l._<ж<ΔSegment>>(ᐧ); if (ok && s.Name == name) {
-                return s;
-            }
+        var (s, ok) = l._<ж<ΔSegment>>(ᐧ); if (ok && s.Name == name) {
+            return s;
         }
     }
     return default;
@@ -730,15 +696,11 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             if (errΔ2 != nil) {
                 return (default, errΔ2);
             }
-            {
-                var (_, errΔ3) = io.ReadFull(r, dbuf); if (errΔ3 != nil) {
-                    return (default, errΔ3);
-                }
+            var (_, errΔ3) = io.ReadFull(r, dbuf); if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
-            {
-                var errΔ4 = r.Close(); if (errΔ4 != nil) {
-                    return (default, errΔ4);
-                }
+            var errΔ4 = r.Close(); if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
             b = dbuf;
         }
@@ -754,10 +716,8 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
+            continue;
         }
         var (b, errΔ5) = sectionData(s);
         if (errΔ5 != nil) {
@@ -777,11 +737,9 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (ok) {
-                // Already handled.
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (ok) {
+            // Already handled.
+            continue;
         }
 
         var (b, errΔ6) = sectionData(s);
@@ -839,10 +797,8 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
 
     slice<@string> all = default;
     foreach (var (_, l) in f.Loads) {
-        {
-            var (lib, ok) = l._<ж<Dylib>>(ᐧ); if (ok) {
-                all = append(allᴷ, all, lib.Name);
-            }
+        var (lib, ok) = l._<ж<Dylib>>(ᐧ); if (ok) {
+            all = append(allᴷ, all, lib.Name);
         }
     }
     all = move2heap(allᴷ, all);

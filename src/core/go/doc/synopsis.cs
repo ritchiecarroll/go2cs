@@ -77,10 +77,8 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
     if (len(d.Content) == 0) {
         return ""u8;
     }
-    {
-        var (_, ok) = d.Content[0]._<ж<comment.Paragraph>>(ᐧ); if (!ok) {
-            return ""u8;
-        }
+    var (_, ok) = d.Content[0]._<ж<comment.Paragraph>>(ᐧ); if (!ok) {
+        return ""u8;
     }
     d.Content = d.Content[..1]; // might be blank lines, code blocks, etc in “first sentence”
     return strings.TrimSpace((@string)pr.Text(d));

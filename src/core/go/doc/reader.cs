@@ -71,10 +71,8 @@ internal static ref readonly @string badparamˢ => ref badparamˢᵇ;
 private static readonly @string badparamˢᵇ = "BADPARAM"u8;
 
 internal static @string recvParam(ast.Expr p) {
-    {
-        var (id, ok) = p._<ж<ast.Ident>>(ᐧ); if (ok) {
-            return id.Name;
-        }
+    var (id, ok) = p._<ж<ast.Ident>>(ᐧ); if (ok) {
+        return id.Name;
     }
     return badparamˢ;
 }
@@ -87,25 +85,21 @@ internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preser
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var name = ref heap<@string>(f.Name.Name, out var Ꮡname);
-    {
-        var g = mset[name]; if (g != nil && g.Doc != ""u8) {
-            // A function with the same name has already been registered;
-            // since it has documentation, assume f is simply another
-            // implementation and ignore it. This does not happen if the
-            // caller is using go/build.ScanDir to determine the list of
-            // files implementing a package.
-            return;
-        }
+    var g = mset[name]; if (g != nil && g.Doc != ""u8) {
+        // A function with the same name has already been registered;
+        // since it has documentation, assume f is simply another
+        // implementation and ignore it. This does not happen if the
+        // caller is using go/build.ScanDir to determine the list of
+        // files implementing a package.
+        return;
     }
     // function doesn't exist or has no documentation; use f
     ref var recv = ref heap<@string>(""u8, out var Ꮡrecv);
     if (f.Recv != nil) {
         ast.Expr typ = default;
         // be careful in case of incorrect ASTs
-        {
-            var list = f.Recv.List; if (len(list) == 1) {
-                typ = list[0].Type;
-            }
+        var list = f.Recv.List; if (len(list) == 1) {
+            typ = list[0].Type;
         }
         recv = recvString(typ);
     }
@@ -158,12 +152,10 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
         return baseTypeName(t.X);
     }
     case ж<ast.SelectorExpr> t: {
-        {
-            var (_, ok) = t.X._<ж<ast.Ident>>(ᐧ); if (ok) {
-                // only possible for qualified type names;
-                // assume type is imported
-                return (t.Sel.Name, true);
-            }
+        var (_, ok) = t.X._<ж<ast.Ident>>(ᐧ); if (ok) {
+            // only possible for qualified type names;
+            // assume type is imported
+            return (t.Sel.Name, true);
         }
         break;
     }
@@ -236,10 +228,8 @@ internal static ж<namedType> lookupType(this ref reader r, @string name) {
     if (name == ""u8 || name == "_"u8) {
         return default; // no type docs for anonymous types
     }
-    {
-        var (typΔ1, found) = r.types[name, ꟷ]; if (found) {
-            return typΔ1;
-        }
+    var (typΔ1, found) = r.types[name, ꟷ]; if (found) {
+        return typΔ1;
     }
     // type not found - add one without declaration
     var typ = Ꮡ(new namedType(
@@ -264,12 +254,10 @@ internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<nam
     if (Ꮡparent == nil || imp) {
         return fname;
     }
-    {
-        var ftype = r.lookupType(fname); if (ftype != nil) {
-            ftype.isEmbedded = true;
-            var (_, ptr) = fieldType._<ж<ast.StarExpr>>(ᐧ);
-            parent.embedded[ftype] = ptr;
-        }
+    var ftype = r.lookupType(fname); if (ftype != nil) {
+        ftype.isEmbedded = true;
+        var (_, ptr) = fieldType._<ж<ast.StarExpr>>(ᐧ);
+        parent.embedded[ftype] = ptr;
     }
     return fname;
 }
@@ -325,10 +313,8 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
         switch (ᐧ) {
         case {} when s.Type != nil: {
             // a type is present; determine its name
-            {
-                var (nΔ2, imp) = baseTypeName(s.Type); if (!imp) {
-                    name = nΔ2;
-                }
+            var (nΔ2, imp) = baseTypeName(s.Type); if (!imp) {
+                name = nΔ2;
             }
             break;
         }
@@ -363,10 +349,8 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     const float64 threshold = 0.75;
     if (domName != ""u8 && r.isVisible(domName) && domFreq >= (nint)((float64)len(decl.Specs) * threshold)) {
         // typed entries are sufficiently frequent
-        {
-            var typ = r.lookupType(domName); if (typ != nil) {
-                values = typ.Ꮡvalues; // associate with that type
-            }
+        var typ = r.lookupType(domName); if (typ != nil) {
+            values = typ.Ꮡvalues; // associate with that type
         }
     }
 
@@ -474,10 +458,8 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
             // don't show this method
             return;
         }
-        {
-            var typ = r.lookupType(recvTypeName); if (typ != nil) {
-                typ.methods.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
-            }
+        var typ = r.lookupType(recvTypeName); if (typ != nil) {
+            typ.methods.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
         }
         // otherwise ignore the method
         // TODO(gri): There may be exported methods of non-exported types
@@ -501,21 +483,17 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
                     factoryType = t.Elt;
                 }
             }
-            {
-                var (n, imp) = baseTypeName(factoryType); if (!imp && r.isVisible(n) && !r.isPredeclared(n)) {
-                    if (lookupTypeParam(n, fun.Type.TypeParams) != nil) {
-                        // Issue #49477: don't associate fun with its type parameter result.
-                        // A type parameter is not a defined type.
-                        continue;
-                    }
-                    {
-                        var t = r.lookupType(n); if (t != nil) {
-                            typ = t;
-                            numResultTypes++;
-                            if (numResultTypes > 1) {
-                                break;
-                            }
-                        }
+            var (n, imp) = baseTypeName(factoryType); if (!imp && r.isVisible(n) && !r.isPredeclared(n)) {
+                if (lookupTypeParam(n, fun.Type.TypeParams) != nil) {
+                    // Issue #49477: don't associate fun with its type parameter result.
+                    // A type parameter is not a defined type.
+                    continue;
+                }
+                var t = r.lookupType(n); if (t != nil) {
+                    typ = t;
+                    numResultTypes++;
+                    if (numResultTypes > 1) {
+                        break;
                     }
                 }
             }
@@ -572,10 +550,8 @@ internal static @string clean(@string s) {
         }
     }
     // remove trailing blank, if any
-    {
-        nint n = len(b); if (n > 0 && p == ' ') {
-            b = b.slice(0, n - 1);
-        }
+    nint n = len(b); if (n > 0 && p == ' ') {
+        b = b.slice(0, n - 1);
     }
     return (@string)b;
 }
@@ -583,22 +559,20 @@ internal static @string clean(@string s) {
 // readNote collects a single note from a sequence of comments.
 internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
     @string text = (Ꮡ(new ast.CommentGroup(List: list))).Text();
-    {
-        var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != nil) {
-            // The note body starts after the marker.
-            // We remove any formatting so that we don't
-            // get spurious line breaks/indentation when
-            // showing the TODO body.
-            ref var body = ref heap<@string>(clean(text.slice(m[1])), out var Ꮡbody);
-            if (body != ""u8) {
-                @string marker = text.slice(m[2], m[3]);
-                r.notes[marker] = append(r.notes[marker], Ꮡ(new Note(
-                    Pos: list[0].Pos(),
-                    End: list[len(list) - 1].End(),
-                    UID: text.slice(m[4], m[5]),
-                    Body: body
-                )));
-            }
+    var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != nil) {
+        // The note body starts after the marker.
+        // We remove any formatting so that we don't
+        // get spurious line breaks/indentation when
+        // showing the TODO body.
+        ref var body = ref heap<@string>(clean(text.slice(m[1])), out var Ꮡbody);
+        if (body != ""u8) {
+            @string marker = text.slice(m[2], m[3]);
+            r.notes[marker] = append(r.notes[marker], Ꮡ(new Note(
+                Pos: list[0].Pos(),
+                End: list[len(list) - 1].End(),
+                UID: text.slice(m[4], m[5]),
+                Body: body
+            )));
         }
     }
 }
@@ -647,29 +621,25 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
             case var ᴛ when ᴛ == token.IMPORT: {
                 // imports are handled individually
                 foreach (var (_, spec) in d.Specs) {
-                    {
-                        var (s, ok) = spec._<ж<ast.ImportSpec>>(ᐧ); if (ok) {
-                            {
-                                var (import_, err) = strconv.Unquote((~s.Path).Value); if (err == nil) {
-                                    r.imports[import_] = 1;
-                                    @string name = default;
-                                    if (s.Name != nil) {
-                                        name = s.Name.Name;
-                                        if (name == "."u8) {
-                                            r.hasDotImp = true;
-                                        }
-                                    }
-                                    if (name != "."u8) {
-                                        if (name == ""u8) {
-                                            name = assumedPackageName(import_);
-                                        }
-                                        var (old, okΔ1) = r.importByName[name, ꟷ];
-                                        if (!okΔ1) {
-                                            r.importByName[name] = import_;
-                                        } else if (old != import_ && old != ""u8) {
-                                            r.importByName[name] = ""u8; // ambiguous
-                                        }
-                                    }
+                    var (s, ok) = spec._<ж<ast.ImportSpec>>(ᐧ); if (ok) {
+                        var (import_, err) = strconv.Unquote((~s.Path).Value); if (err == nil) {
+                            r.imports[import_] = 1;
+                            @string name = default;
+                            if (s.Name != nil) {
+                                name = s.Name.Name;
+                                if (name == "."u8) {
+                                    r.hasDotImp = true;
+                                }
+                            }
+                            if (name != "."u8) {
+                                if (name == ""u8) {
+                                    name = assumedPackageName(import_);
+                                }
+                                var (old, okΔ1) = r.importByName[name, ꟷ];
+                                if (!okΔ1) {
+                                    r.importByName[name] = import_;
+                                } else if (old != import_ && old != ""u8) {
+                                    r.importByName[name] = ""u8; // ambiguous
                                 }
                             }
                         }
@@ -690,33 +660,29 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
                     // create a new fake declaration below, so that
                     // go/doc type declarations always appear w/o
                     // parentheses)
-                    {
-                        var (s, ok) = d.Specs[0]._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
-                            r.readType(d, s);
-                        }
+                    var (s, ok) = d.Specs[0]._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
+                        r.readType(d, s);
                     }
                     break;
                 }
                 foreach (var (_, spec) in d.Specs) {
-                    {
-                        var (s, ok) = spec._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
-                            // use an individual (possibly fake) declaration
-                            // for each type; this also ensures that each type
-                            // gets to (re-)use the declaration documentation
-                            // if there's none associated with the spec itself
-                            var fake = Ꮡ(new ast.GenDecl(
-                                Doc: d.Doc,
-                                // don't use the existing TokPos because it
-                                // will lead to the wrong selection range for
-                                // the fake declaration if there are more
-                                // than one type in the group (this affects
-                                // src/cmd/godoc/godoc.go's posLink_urlFunc)
-                                TokPos: s.Pos(),
-                                Tok: token.TYPE,
-                                Specs: slice<ast.Spec>([new ast.TypeSpecжSpec(s)])
-                            ));
-                            r.readType(fake, s);
-                        }
+                    var (s, ok) = spec._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
+                        // use an individual (possibly fake) declaration
+                        // for each type; this also ensures that each type
+                        // gets to (re-)use the declaration documentation
+                        // if there's none associated with the spec itself
+                        var fake = Ꮡ(new ast.GenDecl(
+                            Doc: d.Doc,
+                            // don't use the existing TokPos because it
+                            // will lead to the wrong selection range for
+                            // the fake declaration if there are more
+                            // than one type in the group (this affects
+                            // src/cmd/godoc/godoc.go's posLink_urlFunc)
+                            TokPos: s.Pos(),
+                            Tok: token.TYPE,
+                            Specs: slice<ast.Spec>([new ast.TypeSpecжSpec(s)])
+                        ));
+                        r.readType(fake, s);
                     }
                 }
                 break;
@@ -772,10 +738,8 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
     // process functions now that we have better type information
     foreach (var (_, f) in pkg.Files) {
         foreach (var (_, decl) in f.Decls) {
-            {
-                var (d, ok) = decl._<ж<ast.FuncDecl>>(ᐧ); if (ok) {
-                    r.readFunc(d);
-                }
+            var (d, ok) = decl._<ж<ast.FuncDecl>>(ᐧ); if (ok) {
+                r.readFunc(d);
             }
         }
     }
@@ -894,10 +858,8 @@ internal static void cleanupTypes(this ref reader r) {
             if (!predeclared) {
                 foreach (var (name, m) in t.methods) {
                     // don't overwrite functions with the same name - drop them
-                    {
-                        var (_, found) = r.funcs[name, ꟷ]; if (!found) {
-                            r.funcs[name] = m;
-                        }
+                    var (_, found) = r.funcs[name, ꟷ]; if (!found) {
+                        r.funcs[name] = m;
                     }
                 }
             }
@@ -925,10 +887,8 @@ internal static slice<@string> sortedKeys(map<@string, nint> m) {
 // sortingName returns the name to use when sorting d into place.
 internal static @string sortingName(ref ast.GenDecl d) {
     if (len(d.Specs) == 1) {
-        {
-            var (s, ok) = d.Specs[0]._<ж<ast.ValueSpec>>(ᐧ); if (ok) {
-                return s.Names[0].Name;
-            }
+        var (s, ok) = d.Specs[0]._<ж<ast.ValueSpec>>(ᐧ); if (ok) {
+            return s.Names[0].Name;
         }
     }
     return ""u8;
@@ -1086,20 +1046,16 @@ internal static @string assumedPackageName(@string importPath) {
 
     @string @base = path.Base(importPath);
     if (strings.HasPrefix(@base, "v")) {
-        {
-            var (_, err) = strconv.Atoi(@base[1..]); if (err == nil) {
-                @string dir = path.Dir(importPath);
-                if (dir != "."u8) {
-                    @base = path.Base(dir);
-                }
+        var (_, err) = strconv.Atoi(@base[1..]); if (err == nil) {
+            @string dir = path.Dir(importPath);
+            if (dir != "."u8) {
+                @base = path.Base(dir);
             }
         }
     }
     @base = strings.TrimPrefix(@base, "go-");
-    {
-        nint i = strings.IndexFunc(@base, notIdentifier); if (i >= 0) {
-            @base = @base.slice(0, i);
-        }
+    nint i = strings.IndexFunc(@base, notIdentifier); if (i >= 0) {
+        @base = @base.slice(0, i);
     }
     return @base;
 }

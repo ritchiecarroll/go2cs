@@ -86,11 +86,9 @@ public static (ж<ReadCloser>, error) OpenReader(@string name) {
         return (default, err);
     }
     var r = @new<ReadCloser>();
-    {
-        err = r.of(ReadCloser.ᏑReader).init(new os_FileжReaderAt(f), fi.Size()); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
-            f.Close();
-            return (default, err);
-        }
+    err = r.of(ReadCloser.ᏑReader).init(new os_FileжReaderAt(f), fi.Size()); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
+        f.Close();
+        return (default, err);
     }
     r.f = f;
     return (r, err);
@@ -116,10 +114,8 @@ public static (ж<Reader>, error) NewReader(io.ReaderAt r, int64 size) {
     }
     var zr = @new<Reader>();
     error err = default;
-    {
-        err = zr.init(r, size); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
-            return (default, err);
-        }
+    err = zr.init(r, size); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
+        return (default, err);
     }
     return (zr, err);
 }
@@ -144,10 +140,8 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     }
     r.Comment = end.comment;
     var rs = io.NewSectionReader(rdr, 0, size);
-    {
-        (_, err) = rs.Seek(r.baseOffset + (int64)end.directoryOffset, io.SeekStart); if (err != nil) {
-            return err;
-        }
+    (_, err) = rs.Seek(r.baseOffset + (int64)end.directoryOffset, io.SeekStart); if (err != nil) {
+        return err;
     }
     var buf = bufio.NewReader(new io.SectionReaderжReader(rs));
 
@@ -330,16 +324,14 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
             return (0, io.ErrUnexpectedEOF);
         }
         if (r.desr != nil) {
-            {
-                var err1 = readDataDescriptor(r.desr, ref (r.f).DerefOrNull()); if (err1 != nil) {
-                    if (AreEqual(err1, io.EOF)) {
-                        err = io.ErrUnexpectedEOF;
-                    } else {
-                        err = err1;
-                    }
-                } else if (r.hash.Sum32() != r.f.CRC32) {
-                    err = ErrChecksum;
+            var err1 = readDataDescriptor(r.desr, ref (r.f).DerefOrNull()); if (err1 != nil) {
+                if (AreEqual(err1, io.EOF)) {
+                    err = io.ErrUnexpectedEOF;
+                } else {
+                    err = err1;
                 }
+            } else if (r.hash.Sum32() != r.f.CRC32) {
+                err = ErrChecksum;
             }
         } else {
             // If there's not a data descriptor, we still compare
@@ -362,16 +354,12 @@ internal static error Close(this ref checksumReader r) {
 // and returns the file body offset.
 internal static (int64, error) findBodyOffset(this ref File f) {
     array<byte> buf = new(30); /* fileHeaderLen */
-    {
-        var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset); if (err != nil) {
-            return (0, err);
-        }
+    var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset); if (err != nil) {
+        return (0, err);
     }
     var b = (readBuf)(buf[..]);
-    {
-        var sig = b.uint32(); if (sig != fileHeaderSignature) {
-            return (0, ErrFormat);
-        }
+    var sig = b.uint32(); if (sig != fileHeaderSignature) {
+        return (0, ErrFormat);
     }
     b = b[22..]; // skip over most of the header
     nint filenameLen = (nint)b.uint16();
@@ -390,10 +378,8 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
         }
     }
     var b = (readBuf)(buf[..]);
-    {
-        var sig = b.uint32(); if (sig != directoryHeaderSignature) {
-            return ErrFormat;
-        }
+    var sig = b.uint32(); if (sig != directoryHeaderSignature) {
+        return ErrFormat;
     }
     f.CreatorVersion = b.uint16();
     f.ReaderVersion = b.uint16();
@@ -634,17 +620,13 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
             bLen = size;
         }
         buf = new slice<byte>((nint)bLen);
-        {
-            var (_, errΔ1) = r.ReadAt(buf, size - bLen); if (errΔ1 != nil && !AreEqual(errΔ1, io.EOF)) {
-                return (default, 0, errΔ1);
-            }
+        var (_, errΔ1) = r.ReadAt(buf, size - bLen); if (errΔ1 != nil && !AreEqual(errΔ1, io.EOF)) {
+            return (default, 0, errΔ1);
         }
-        {
-            nint p = findSignatureInBlock(buf); if (p >= 0) {
-                buf = buf.slice(p);
-                directoryEndOffset = size - bLen + (int64)p;
-                break;
-            }
+        nint p = findSignatureInBlock(buf); if (p >= 0) {
+            buf = buf.slice(p);
+            directoryEndOffset = size - bLen + (int64)p;
+            break;
         }
         if (i == 1 || bLen == size) {
             return (default, 0, ErrFormat);
@@ -688,10 +670,8 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     baseOffset = directoryEndOffset - (int64)d.directorySize - (int64)d.directoryOffset;
 
     // Make sure directoryOffset points to somewhere in our file.
-    {
-        var o = baseOffset + (int64)d.directoryOffset; if (o < 0 || o >= size) {
-            return (default, 0, ErrFormat);
-        }
+    var o = baseOffset + (int64)d.directoryOffset; if (o < 0 || o >= size) {
+        return (default, 0, ErrFormat);
     }
 
     // If the directory end data tells us to use a non-zero baseOffset,
@@ -720,16 +700,12 @@ internal static (int64, error) findDirectory64End(io.ReaderAt r, int64 directory
         return (-1, default); // no need to look for a header outside the file
     }
     var buf = new slice<byte>(directory64LocLen);
-    {
-        var (_, err) = r.ReadAt(buf, locOffset); if (err != nil) {
-            return (-1, err);
-        }
+    var (_, err) = r.ReadAt(buf, locOffset); if (err != nil) {
+        return (-1, err);
     }
     var b = (readBuf)buf;
-    {
-        var sig = b.uint32(); if (sig != directory64LocSignature) {
-            return (-1, default);
-        }
+    var sig = b.uint32(); if (sig != directory64LocSignature) {
+        return (-1, default);
     }
     if (b.uint32() != 0) { // number of the disk with the start of the zip64 end of central directory
         return (-1, default); // the file is not a valid zip64-file
@@ -745,17 +721,13 @@ internal static (int64, error) findDirectory64End(io.ReaderAt r, int64 directory
 // directory end with the zip64 directory end values.
 internal static error /*err*/ readDirectory64End(io.ReaderAt r, int64 offset, ref directoryEnd d) {
     var buf = new slice<byte>(directory64EndLen);
-    {
-        var (_, errΔ1) = r.ReadAt(buf, offset); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = r.ReadAt(buf, offset); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     var b = (readBuf)buf;
-    {
-        var sig = b.uint32(); if (sig != directory64EndSignature) {
-            return ErrFormat;
-        }
+    var sig = b.uint32(); if (sig != directory64EndSignature) {
+        return ErrFormat;
     }
 
     b = b[12..];                       // skip dir size, version and version needed (uint64 + 2x uint16)
@@ -923,27 +895,21 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                 continue;
             }
 
-            {
-                var (idxΔ1, ok) = files[name, ꟷ]; if (ok) {
-                    Ꮡr.Value.fileList[idxΔ1].isDup = true;
-                    continue;
-                }
+            if (files[name, ꟷ] is (var idxΔ1, true)) {
+                Ꮡr.Value.fileList[idxΔ1].isDup = true;
+                continue;
             }
-            {
-                var (idxΔ2, ok) = knownDirs[name, ꟷ]; if (ok) {
-                    Ꮡr.Value.fileList[idxΔ2].isDup = true;
-                    continue;
-                }
+            if (knownDirs[name, ꟷ] is (var idxΔ2, true)) {
+                Ꮡr.Value.fileList[idxΔ2].isDup = true;
+                continue;
             }
 
             @string dir = name;
             for (;;) {
-                {
-                    nint idxΔ3 = strings.LastIndex(dir, "/"); if (idxΔ3 < 0) {
-                        break;
-                    } else {
-                        dir = dir.slice(0, idxΔ3);
-                    }
+                nint idxΔ3 = strings.LastIndex(dir, "/"); if (idxΔ3 < 0) {
+                    break;
+                } else {
+                    dir = dir.slice(0, idxΔ3);
                 }
                 if (dirs[dir]) {
                     break;
@@ -965,20 +931,16 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
             }
         }
         foreach (var (dir, _) in dirs) {
-            {
-                var (_, ok) = knownDirs[dir, ꟷ]; if (!ok) {
-                    {
-                        var (idx, okΔ1) = files[dir, ꟷ]; if (okΔ1) {
-                            Ꮡr.Value.fileList[idx].isDup = true;
-                        } else {
-                            var entry = new fileListEntry(
-                                name: dir,
-                                @file: nil,
-                                isDir: true
-                            );
-                            Ꮡr.Value.fileList = append(Ꮡr.Value.fileList, entry);
-                        }
-                    }
+            var (_, ok) = knownDirs[dir, ꟷ]; if (!ok) {
+                var (idx, okΔ1) = files[dir, ꟷ]; if (okΔ1) {
+                    Ꮡr.Value.fileList[idx].isDup = true;
+                } else {
+                    var entry = new fileListEntry(
+                        name: dir,
+                        @file: nil,
+                        isDir: true
+                    );
+                    Ꮡr.Value.fileList = append(Ꮡr.Value.fileList, entry);
                 }
             }
         }

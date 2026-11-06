@@ -1,0 +1,26 @@
+start 2026-11-05 08:53:18
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== p7b-warm-ctl.tsv 08:53:21
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== p7b-ctl-start.tsv 08:53:24
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== p7b-tls.tsv 08:53:28
+TLS: verified 4 arms, output equal
+TLS: 11 rounds done
+== p7b-ctl-end.tsv 08:56:27
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-05 08:56:33 rc=0

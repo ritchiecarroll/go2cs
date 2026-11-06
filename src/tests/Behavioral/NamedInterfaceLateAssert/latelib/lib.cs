@@ -23,37 +23,29 @@ partial interface quiet {
 }
 
 public static (@string, bool) TryTop(any v) {
-    {
-        var (t, ok) = v._<Top>(ᐧ); if (ok) {
-            return (t.Name() + "/" + t.Kind() + "/" + t.Detail("d"), true);
-        }
+    var (t, ok) = v._<Top>(ᐧ); if (ok) {
+        return (t.Name() + "/" + t.Kind() + "/" + t.Detail("d"), true);
     }
     return ("", false);
 }
 
 public static (@string, bool) TryMid(any v) {
-    {
-        var (m, ok) = v._<Mid>(ᐧ); if (ok) {
-            return (m.Name() + "/" + m.Kind(), true);
-        }
+    var (m, ok) = v._<Mid>(ᐧ); if (ok) {
+        return (m.Name() + "/" + m.Kind(), true);
     }
     return ("", false);
 }
 
 public static (@string, bool) TryBase(any v) {
-    {
-        var (b, ok) = v._<Base>(ᐧ); if (ok) {
-            return (b.Name(), true);
-        }
+    var (b, ok) = v._<Base>(ᐧ); if (ok) {
+        return (b.Name(), true);
     }
     return ("", false);
 }
 
 public static (@string, bool) TryQuiet(any v) {
-    {
-        var (q, ok) = v._<quiet>(ᐧ); if (ok) {
-            return (q.Whisper(), true);
-        }
+    var (q, ok) = v._<quiet>(ᐧ); if (ok) {
+        return (q.Whisper(), true);
     }
     return ("", false);
 }

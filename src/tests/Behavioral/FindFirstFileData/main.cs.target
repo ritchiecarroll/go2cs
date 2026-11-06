@@ -85,10 +85,8 @@ internal static void Main() {
 
 internal static void build(@string root) {
     foreach (var (_, d) in range(dirs)) {
-        {
-            var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != nil) {
-                fatal("MkdirAll", err);
-            }
+        var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != nil) {
+            fatal("MkdirAll", err);
         }
     }
 
@@ -97,25 +95,19 @@ internal static void build(@string root) {
         foreach (var i in range(len(body))) {
             body[i] = (byte)('a' + i % 26);
         }
-        {
-            var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != nil) {
-                fatal("WriteFile", err);
-            }
+        var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != nil) {
+            fatal("WriteFile", err);
         }
     }
 
     foreach (var (_, f) in range(files)) {
-        {
-            var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != nil) {
-                fatal("Chtimes", err);
-            }
+        var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != nil) {
+            fatal("Chtimes", err);
         }
     }
     for (nint i = len(dirs) - 1; i >= 0; i--) {
-        {
-            var err = os.Chtimes(filepath.Join(root, dirs[i].rel), dirs[i].stamp, dirs[i].stamp); if (err != nil) {
-                fatal("Chtimes", err);
-            }
+        var err = os.Chtimes(filepath.Join(root, dirs[i].rel), dirs[i].stamp, dirs[i].stamp); if (err != nil) {
+            fatal("Chtimes", err);
         }
     }
 }
@@ -138,18 +130,14 @@ internal static slice<entry> enumerate(@string dir) {
 
         slice<entry> @out = default;
         for (;;) {
-            {
-                var (e, ok) = toEntry(Ꮡdata); if (ok) {
-                    @out = append(@out, e);
-                }
+            var (e, ok) = toEntry(Ꮡdata); if (ok) {
+                @out = append(@out, e);
             }
-            {
-                var errΔ1 = syscall.FindNextFile(h, Ꮡdata); if (errΔ1 != nil) {
-                    if (AreEqual(errΔ1, syscall.ERROR_NO_MORE_FILES)) {
-                        break;
-                    }
-                    fatal("FindNextFile", errΔ1);
+            var errΔ1 = syscall.FindNextFile(h, Ꮡdata); if (errΔ1 != nil) {
+                if (AreEqual(errΔ1, syscall.ERROR_NO_MORE_FILES)) {
+                    break;
                 }
+                fatal("FindNextFile", errΔ1);
             }
         }
 

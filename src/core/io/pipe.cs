@@ -151,10 +151,8 @@ internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
 // readCloseError is considered internal to the pipe type.
 internal static error readCloseError(this ж<pipe> Ꮡp) {
     var rerr = Ꮡp.Ꮡrerr.Load();
-    {
-        var werr = Ꮡp.Ꮡwerr.Load(); if (rerr == nil && werr != nil) {
-            return werr;
-        }
+    var werr = Ꮡp.Ꮡwerr.Load(); if (rerr == nil && werr != nil) {
+        return werr;
     }
     return ErrClosedPipe;
 }
@@ -162,10 +160,8 @@ internal static error readCloseError(this ж<pipe> Ꮡp) {
 // writeCloseError is considered internal to the pipe type.
 internal static error writeCloseError(this ж<pipe> Ꮡp) {
     var werr = Ꮡp.Ꮡwerr.Load();
-    {
-        var rerr = Ꮡp.Ꮡrerr.Load(); if (werr == nil && rerr != nil) {
-            return rerr;
-        }
+    var rerr = Ꮡp.Ꮡrerr.Load(); if (werr == nil && rerr != nil) {
+        return rerr;
     }
     return ErrClosedPipe;
 }

@@ -119,16 +119,14 @@ internal static @string probe(any x) {
     }
     default: {
         var v = x;
-        {
-            nint vΔ1 = len(fmt.Sprint(v));
-            switch (vΔ1) {
-            case 1: {
-                return "one";
-            }
-            default: {
-                return "many";
-            }}
+        nint vΔ1 = len(fmt.Sprint(v));
+        switch (vΔ1) {
+        case 1: {
+            return "one";
         }
+        default: {
+            return "many";
+        }}
 
         break;
     }}

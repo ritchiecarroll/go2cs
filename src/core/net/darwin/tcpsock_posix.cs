@@ -67,10 +67,8 @@ internal static (int64, error) readFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) {
 internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var (n, err, handled) = spliceTo(w, c.fd); if (handled) {
-            return (n, err);
-        }
+    var (n, err, handled) = spliceTo(w, c.fd); if (handled) {
+        return (n, err);
     }
     return genericWriteTo(Ꮡc, w);
 }
@@ -165,15 +163,11 @@ internal static bool selfConnect(ref netFD fd, error err) {
 }
 
 internal static bool spuriousENOTAVAIL(error err) {
-    {
-        var (op, ok) = err._<ж<OpError>>(ᐧ); if (ok) {
-            err = op.Err;
-        }
+    if (err._<ж<OpError>>(out var op)) {
+        err = op.Err;
     }
-    {
-        var (sys, ok) = err._<ж<os.SyscallError>>(ᐧ); if (ok) {
-            err = sys.Err;
-        }
+    if (err._<ж<os.SyscallError>>(out var sys)) {
+        err = sys.Err;
     }
     return AreEqual(err, syscall.EADDRNOTAVAIL);
 }

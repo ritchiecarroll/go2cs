@@ -92,10 +92,8 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
                     // We found an existing entry, which is as far as we can go.
                     // If it stays this way, we'll have to replace it with an
                     // indirect node.
-                    {
-                        var (v, _) = n.entry().lookup(key); if (v != nil) {
-                            return v;
-                        }
+                    var (v, _) = n.entry().lookup(key); if (v != nil) {
+                        return v;
                     }
                     haveInsertPoint = true;
                     break;
@@ -127,11 +125,9 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         ж<Δentry<T>> oldEntry = default;
         if (n != nil) {
             oldEntry = n.entry();
-            {
-                var (v, _) = oldEntry.lookup(key); if (v != nil) {
-                    // Easy case: by loading again, it turns out exactly what we wanted is here!
-                    return v;
-                }
+            var (v, _) = oldEntry.lookup(key); if (v != nil) {
+                // Easy case: by loading again, it turns out exactly what we wanted is here!
+                return v;
             }
         }
         ref var wp = ref heap<weak.Pointer<T>>(out var Ꮡwp);

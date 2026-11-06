@@ -448,10 +448,8 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
     if (src == 0) {
         for (;;) {
             uintptr addr = default;
-            {
-                (tp, addr) = tp.next(dst + size); if (addr == 0) {
-                    break;
-                }
+            (tp, addr) = tp.next(dst + size); if (addr == 0) {
+                break;
             }
             var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
             var Δp = buf.get1();
@@ -460,10 +458,8 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
     } else {
         for (;;) {
             uintptr addr = default;
-            {
-                (tp, addr) = tp.next(dst + size); if (addr == 0) {
-                    break;
-                }
+            (tp, addr) = tp.next(dst + size); if (addr == 0) {
+                break;
             }
             var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
             var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(src + (addr - dst)));
@@ -512,10 +508,8 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
     }
     for (;;) {
         uintptr addr = default;
-        {
-            (tp, addr) = tp.next(dst + size); if (addr == 0) {
-                break;
-            }
+        (tp, addr) = tp.next(dst + size); if (addr == 0) {
+            break;
         }
         var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(addr - dst + src));
         var Δp = buf.get1();
@@ -925,12 +919,10 @@ internal static void doubleCheckHeapPointers(uintptr x, uintptr dataSize, ж<_ty
     dumpTypePointers(tp);
     for (;;) {
         uintptr addr = default;
-        {
-            (tp, addr) = tp.next(x + span.elemsize); if (addr == 0) {
-                println((@string)"runtime: would've stopped here");
-                dumpTypePointers(tp);
-                break;
-            }
+        (tp, addr) = tp.next(x + span.elemsize); if (addr == 0) {
+            println((@string)"runtime: would've stopped here");
+            dumpTypePointers(tp);
+            break;
         }
         print((@string)"runtime: addr=", (Δhex)(uint64)addr, (@string)"\n");
         dumpTypePointers(tp);
@@ -991,12 +983,10 @@ internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior
     dumpTypePointers(tp);
     for (;;) {
         uintptr addr = default;
-        {
-            (tp, addr) = tp.next(interior + size); if (addr == 0) {
-                println((@string)"runtime: would've stopped here");
-                dumpTypePointers(tp);
-                break;
-            }
+        (tp, addr) = tp.next(interior + size); if (addr == 0) {
+            println((@string)"runtime: would've stopped here");
+            dumpTypePointers(tp);
+            break;
         }
         print((@string)"runtime: addr=", (Δhex)(uint64)addr, (@string)"\n");
         dumpTypePointers(tp);
@@ -1472,19 +1462,17 @@ internal static (uintptr @base, ж<mspan> s, uintptr objIndex) findObject(uintpt
     //
     // Check s.state to synchronize with span initialization
     // before checking other fields. See also spanOfHeap.
-    {
-        var state = s.Ꮡstate.get(); if (state != mSpanInUse || Δp < s.@base() || Δp >= s.limit) {
-            // Pointers into stacks are also ok, the runtime manages these explicitly.
-            if (state == mSpanManual) {
-                return (@base, s, objIndex);
-            }
-            // The following ensures that we are rigorous about what data
-            // structures hold valid pointers.
-            if (debug.invalidptr != 0) {
-                badPointer(s, Δp, refBase, refOff);
-            }
+    var state = s.Ꮡstate.get(); if (state != mSpanInUse || Δp < s.@base() || Δp >= s.limit) {
+        // Pointers into stacks are also ok, the runtime manages these explicitly.
+        if (state == mSpanManual) {
             return (@base, s, objIndex);
         }
+        // The following ensures that we are rigorous about what data
+        // structures hold valid pointers.
+        if (debug.invalidptr != 0) {
+            badPointer(s, Δp, refBase, refOff);
+        }
+        return (@base, s, objIndex);
     }
 
     objIndex = s.objIndex(Δp);
@@ -1712,12 +1700,10 @@ Run:
                 Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.DerefOrNull();
                 bits >>= 8;
             }
-            {
-                n %= 8; if (n > 0) {
-                    bits |= (uintptr)(((uintptr)(Δp.Value)).Lsh((uint64)(nbits)));
-                    Δp = add1(Δp);
-                    nbits += n;
-                }
+            n %= 8; if (n > 0) {
+                bits |= (uintptr)(((uintptr)(Δp.Value)).Lsh((uint64)(nbits)));
+                Δp = add1(Δp);
+                nbits += n;
             }
             goto continue_Run;
         }
@@ -1839,13 +1825,11 @@ Run:
         var off = n - nbits; // n > nbits because n > maxBits and nbits <= 7
         // Leading src fragment.
         src = subtractb(src, (off + 7) / 8);
-        {
-            var frag = (uintptr)(off & 7); if (frag != 0) {
-                bits |= (uintptr)((((uintptr)(src.Value)).Rsh((uint64)(8 - frag))).Lsh((uint64)(nbits)));
-                src = add1(src);
-                nbits += frag;
-                c -= frag;
-            }
+        var frag = (uintptr)(off & 7); if (frag != 0) {
+            bits |= (uintptr)((((uintptr)(src.Value)).Rsh((uint64)(8 - frag))).Lsh((uint64)(nbits)));
+            src = add1(src);
+            nbits += frag;
+            c -= frag;
         }
         // Main loop: load one byte, write another.
         // The bits are rotating through the bit buffer.
@@ -1857,11 +1841,9 @@ Run:
             bits >>= 8;
         }
         // Final src fragment.
-        {
-            c %= 8; if (c > 0) {
-                bits |= (uintptr)(((uintptr)((uintptr)(src.Value) & (((uintptr)1).Lsh((uint64)(c)) - 1))).Lsh((uint64)(nbits)));
-                nbits += c;
-            }
+        c %= 8; if (c > 0) {
+            bits |= (uintptr)(((uintptr)((uintptr)(src.Value) & (((uintptr)1).Lsh((uint64)(c)) - 1))).Lsh((uint64)(nbits)));
+            nbits += c;
         }
 continue_Run:;
     }

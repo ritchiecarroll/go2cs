@@ -44,10 +44,8 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
     var p = @new<bigꓸInt>();
 
     for (;;) {
-        {
-            var (_, err) = io.ReadFull(r, bytes); if (err != nil) {
-                return (default, err);
-            }
+        var (_, err) = io.ReadFull(r, bytes); if (err != nil) {
+            return (default, err);
         }
 
         // Clear bits in the first byte to make sure the candidate has a size <= bits.

@@ -73,10 +73,8 @@ public static error Start(this ж<FlightRecorder> Ꮡfr) {
 
     // Start tracing, data is sent to a recorder which forwards it to our own
     // storage.
-    {
-        var err = Ꮡtracing.subscribeFlightRecorder(Ꮡ(new recorder(r: Ꮡfr))); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡtracing.subscribeFlightRecorder(Ꮡ(new recorder(r: Ꮡfr))); if (err != nil) {
+        return err;
     }
 
     fr.enabled = true;

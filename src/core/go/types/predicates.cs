@@ -179,11 +179,9 @@ internal static bool isTypeParam(ΔType t) {
 // use anywhere, but it may report a false negative if the type set has not been
 // computed yet.
 internal static bool hasEmptyTypeset(ΔType t) {
-    {
-        var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil && tpar.bound != nil) {
-            var (iface, _) = safeUnderlying(tpar.bound)._<ж<Interface>>(ᐧ);
-            return iface != nil && iface.tset != nil && iface.tset.IsEmpty();
-        }
+    var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil && tpar.bound != nil) {
+        var (iface, _) = safeUnderlying(tpar.bound)._<ж<Interface>>(ᐧ);
+        return iface != nil && iface.tset != nil && iface.tset.IsEmpty();
     }
     return false;
 }
@@ -193,10 +191,8 @@ internal static bool hasEmptyTypeset(ΔType t) {
 // TODO(gri) should we include signatures or assert that they are not present?
 internal static bool isGeneric(ΔType t) {
     // A parameterized type is only generic if it doesn't have an instantiation already.
-    {
-        var (alias, _) = t._<ж<Alias>>(ᐧ); if (alias != nil && alias.tparams != nil && alias.targs == nil) {
-            return true;
-        }
+    var (alias, _) = t._<ж<Alias>>(ᐧ); if (alias != nil && alias.tparams != nil && alias.targs == nil) {
+        return true;
     }
     var named = asNamed(t);
     return named != nil && named.obj != nil && named.inst == nil && named.TypeParams().Len() > 0;
@@ -347,31 +343,25 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // Basic types are singletons except for the rune and byte
         // aliases, thus we cannot solely rely on the x == y check
         // above. See also comment in TypeName.IsAlias.
-        {
-            var (yΔ1, ok) = y._<ж<Basic>>(ᐧ); if (ok) {
-                return xΔ1.kind == yΔ1.kind;
-            }
+        if (y._<ж<Basic>>(out var yΔ1)) {
+            return xΔ1.kind == yΔ1.kind;
         }
         break;
     }
     case ж<Array> xΔ1: {
         // Two array types are identical if they have identical element types
         // and the same array length.
-        {
-            var (yΔ2, ok) = y._<ж<Array>>(ᐧ); if (ok) {
-                // If one or both array lengths are unknown (< 0) due to some error,
-                // assume they are the same to avoid spurious follow-on errors.
-                return (xΔ1.len < 0 || yΔ2.len < 0 || xΔ1.len == yΔ2.len) && c.identical(xΔ1.elem, yΔ2.elem, Ꮡp);
-            }
+        if (y._<ж<Array>>(out var yΔ2)) {
+            // If one or both array lengths are unknown (< 0) due to some error,
+            // assume they are the same to avoid spurious follow-on errors.
+            return (xΔ1.len < 0 || yΔ2.len < 0 || xΔ1.len == yΔ2.len) && c.identical(xΔ1.elem, yΔ2.elem, Ꮡp);
         }
         break;
     }
     case ж<Slice> xΔ1: {
         // Two slice types are identical if they have identical element types.
-        {
-            var (yΔ3, ok) = y._<ж<Slice>>(ᐧ); if (ok) {
-                return c.identical(xΔ1.elem, yΔ3.elem, Ꮡp);
-            }
+        if (y._<ж<Slice>>(out var yΔ3)) {
+            return c.identical(xΔ1.elem, yΔ3.elem, Ꮡp);
         }
         break;
     }
@@ -380,46 +370,40 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // and if corresponding fields have the same names, and identical types,
         // and identical tags. Two embedded fields are considered to have the same
         // name. Lower-case field names from different packages are always different.
-        {
-            var (yΔ4, ok) = y._<ж<Struct>>(ᐧ); if (ok) {
-                if (xΔ1.NumFields() == yΔ4.NumFields()) {
-                    foreach (var (i, f) in xΔ1.fields) {
-                        var g = yΔ4.fields[i];
-                        if (f.embedded != g.embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId(g.pkg, g.name, false) || !c.identical(f.typ, g.typ, Ꮡp)) {
-                            return false;
-                        }
+        if (y._<ж<Struct>>(out var yΔ4)) {
+            if (xΔ1.NumFields() == yΔ4.NumFields()) {
+                foreach (var (i, f) in xΔ1.fields) {
+                    var g = yΔ4.fields[i];
+                    if (f.embedded != g.embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId(g.pkg, g.name, false) || !c.identical(f.typ, g.typ, Ꮡp)) {
+                        return false;
                     }
-                    return true;
                 }
+                return true;
             }
         }
         break;
     }
     case ж<Pointer> xΔ1: {
         // Two pointer types are identical if they have identical base types.
-        {
-            var (yΔ5, ok) = y._<ж<Pointer>>(ᐧ); if (ok) {
-                return c.identical(xΔ1.@base, yΔ5.@base, Ꮡp);
-            }
+        if (y._<ж<Pointer>>(out var yΔ5)) {
+            return c.identical(xΔ1.@base, yΔ5.@base, Ꮡp);
         }
         break;
     }
     case ж<Tuple> xΔ1: {
         // Two tuples types are identical if they have the same number of elements
         // and corresponding elements have identical types.
-        {
-            var (yΔ6, ok) = y._<ж<Tuple>>(ᐧ); if (ok) {
-                if (xΔ1.Len() == yΔ6.Len()) {
-                    if (xΔ1 != nil) {
-                        foreach (var (i, v) in xΔ1.vars) {
-                            var w = yΔ6.vars[i];
-                            if (!c.identical(v.typ, w.typ, Ꮡp)) {
-                                return false;
-                            }
+        if (y._<ж<Tuple>>(out var yΔ6)) {
+            if (xΔ1.Len() == yΔ6.Len()) {
+                if (xΔ1 != nil) {
+                    foreach (var (i, v) in xΔ1.vars) {
+                        var w = yΔ6.vars[i];
+                        if (!c.identical(v.typ, w.typ, Ꮡp)) {
+                            return false;
                         }
                     }
-                    return true;
                 }
+                return true;
             }
         }
         break;
@@ -475,15 +459,13 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         return xΔ1.variadic == yΔ7.variadic && c.identical(new TupleжΔType(xΔ1.@params), new TupleжΔType(yparams), Ꮡp) && c.identical(new TupleжΔType(xΔ1.results), new TupleжΔType(yresults), Ꮡp);
     }
     case ж<Union> xΔ1: {
-        {
-            var (yΔ8, _) = y._<ж<Union>>(ᐧ); if (yΔ8 != nil) {
-                // TODO(rfindley): can this be reached during type checking? If so,
-                // consider passing a type set map.
-                var unionSets = new map<ж<Union>, ж<_TypeSet>>();
-                var xset = computeUnionTypeSet(nil, unionSets, nopos, xΔ1);
-                var yset = computeUnionTypeSet(nil, unionSets, nopos, yΔ8);
-                return xset.terms.equal(yset.terms);
-            }
+        var (yΔ8, _) = y._<ж<Union>>(ᐧ); if (yΔ8 != nil) {
+            // TODO(rfindley): can this be reached during type checking? If so,
+            // consider passing a type set map.
+            var unionSets = new map<ж<Union>, ж<_TypeSet>>();
+            var xset = computeUnionTypeSet(nil, unionSets, nopos, xΔ1);
+            var yset = computeUnionTypeSet(nil, unionSets, nopos, yΔ8);
+            return xset.terms.equal(yset.terms);
         }
         break;
     }
@@ -495,80 +477,74 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // the same names and identical function types, and if any type restrictions
         // are the same. Lower-case method names from different packages are always
         // different. The order of the methods is irrelevant.
-        {
-            var (yΔ9, ok) = y._<ж<Interface>>(ᐧ); if (ok) {
-                var xset = xΔ1.typeSet();
-                var yset = yΔ9.typeSet();
-                if (xset.comparable != yset.comparable) {
-                    return false;
-                }
-                if (!xset.terms.equal(yset.terms)) {
-                    return false;
-                }
-                var a = xset.methods;
-                var b = yset.methods;
-                if (len(a) == len(b)) {
-                    // Interface types are the only types where cycles can occur
-                    // that are not "terminated" via named types; and such cycles
-                    // can only be created via method parameter types that are
-                    // anonymous interfaces (directly or indirectly) embedding
-                    // the current interface. Example:
-                    //
-                    //    type T interface {
-                    //        m() interface{T}
-                    //    }
-                    //
-                    // If two such (differently named) interfaces are compared,
-                    // endless recursion occurs if the cycle is not detected.
-                    //
-                    // If x and y were compared before, they must be equal
-                    // (if they were not, the recursion would have stopped);
-                    // search the ifacePair stack for the same pair.
-                    //
-                    // This is a quadratic algorithm, but in practice these stacks
-                    // are extremely short (bounded by the nesting depth of interface
-                    // type declarations that recur via parameter types, an extremely
-                    // rare occurrence). An alternative implementation might use a
-                    // "visited" map, but that is probably less efficient overall.
-                    var q = Ꮡ(new ifacePair(xΔ1, yΔ9, Ꮡp));
-                    while (Ꮡp != nil) {
-                        if (p.identical(q)) {
-                            return true; // same pair was compared before
-                        }
-                        Ꮡp = p.prev; p = ref Ꮡp.DerefOrNull();
+        if (y._<ж<Interface>>(out var yΔ9)) {
+            var xset = xΔ1.typeSet();
+            var yset = yΔ9.typeSet();
+            if (xset.comparable != yset.comparable) {
+                return false;
+            }
+            if (!xset.terms.equal(yset.terms)) {
+                return false;
+            }
+            var a = xset.methods;
+            var b = yset.methods;
+            if (len(a) == len(b)) {
+                // Interface types are the only types where cycles can occur
+                // that are not "terminated" via named types; and such cycles
+                // can only be created via method parameter types that are
+                // anonymous interfaces (directly or indirectly) embedding
+                // the current interface. Example:
+                //
+                //    type T interface {
+                //        m() interface{T}
+                //    }
+                //
+                // If two such (differently named) interfaces are compared,
+                // endless recursion occurs if the cycle is not detected.
+                //
+                // If x and y were compared before, they must be equal
+                // (if they were not, the recursion would have stopped);
+                // search the ifacePair stack for the same pair.
+                //
+                // This is a quadratic algorithm, but in practice these stacks
+                // are extremely short (bounded by the nesting depth of interface
+                // type declarations that recur via parameter types, an extremely
+                // rare occurrence). An alternative implementation might use a
+                // "visited" map, but that is probably less efficient overall.
+                var q = Ꮡ(new ifacePair(xΔ1, yΔ9, Ꮡp));
+                while (Ꮡp != nil) {
+                    if (p.identical(q)) {
+                        return true; // same pair was compared before
                     }
-                    if (debug) {
-                        assertSortedMethods(a);
-                        assertSortedMethods(b);
-                    }
-                    foreach (var (i, f) in a) {
-                        var g = b[i];
-                        if (f.of(Func.Ꮡobject).Id() != g.of(Func.Ꮡobject).Id() || !c.identical(f.typ, g.typ, q)) {
-                            return false;
-                        }
-                    }
-                    return true;
+                    Ꮡp = p.prev; p = ref Ꮡp.DerefOrNull();
                 }
+                if (debug) {
+                    assertSortedMethods(a);
+                    assertSortedMethods(b);
+                }
+                foreach (var (i, f) in a) {
+                    var g = b[i];
+                    if (f.of(Func.Ꮡobject).Id() != g.of(Func.Ꮡobject).Id() || !c.identical(f.typ, g.typ, q)) {
+                        return false;
+                    }
+                }
+                return true;
             }
         }
         break;
     }
     case ж<Map> xΔ1: {
         // Two map types are identical if they have identical key and value types.
-        {
-            var (yΔ10, ok) = y._<ж<Map>>(ᐧ); if (ok) {
-                return c.identical(xΔ1.key, yΔ10.key, Ꮡp) && c.identical(xΔ1.elem, yΔ10.elem, Ꮡp);
-            }
+        if (y._<ж<Map>>(out var yΔ10)) {
+            return c.identical(xΔ1.key, yΔ10.key, Ꮡp) && c.identical(xΔ1.elem, yΔ10.elem, Ꮡp);
         }
         break;
     }
     case ж<Chan> xΔ1: {
         // Two channel types are identical if they have identical value types
         // and the same direction.
-        {
-            var (yΔ11, ok) = y._<ж<Chan>>(ᐧ); if (ok) {
-                return xΔ1.dir == yΔ11.dir && c.identical(xΔ1.elem, yΔ11.elem, Ꮡp);
-            }
+        if (y._<ж<Chan>>(out var yΔ11)) {
+            return xΔ1.dir == yΔ11.dir && c.identical(xΔ1.elem, yΔ11.elem, Ꮡp);
         }
         break;
     }
@@ -576,23 +552,21 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // Two named types are identical if their type names originate
         // in the same type declaration; if they are instantiated they
         // must have identical type argument lists.
-        {
-            var yΔ12 = asNamed(y); if (yΔ12 != nil) {
-                // check type arguments before origins to match unifier
-                // (for correct source code we need to do all checks so
-                // order doesn't matter)
-                var xargs = xΔ1.TypeArgs().list();
-                var yargs = yΔ12.TypeArgs().list();
-                if (len(xargs) != len(yargs)) {
+        var yΔ12 = asNamed(y); if (yΔ12 != nil) {
+            // check type arguments before origins to match unifier
+            // (for correct source code we need to do all checks so
+            // order doesn't matter)
+            var xargs = xΔ1.TypeArgs().list();
+            var yargs = yΔ12.TypeArgs().list();
+            if (len(xargs) != len(yargs)) {
+                return false;
+            }
+            foreach (var (i, xarg) in xargs) {
+                if (!Identical(xarg, yargs[i])) {
                     return false;
                 }
-                foreach (var (i, xarg) in xargs) {
-                    if (!Identical(xarg, yargs[i])) {
-                        return false;
-                    }
-                }
-                return identicalOrigin(xΔ1, yΔ12);
             }
+            return identicalOrigin(xΔ1, yΔ12);
         }
         break;
     }
@@ -636,28 +610,26 @@ internal static bool identicalInstance(ΔType xorig, slice<ΔType> xargs, ΔType
 public static ΔType Default(ΔType t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
-    {
-        var (tΔ1, _) = t._<ж<Basic>>(ᐧ); if (tΔ1 != nil) {
-            switch (tΔ1.kind) {
-            case var ᴛ when ᴛ == UntypedBool: {
-                return new BasicжΔType(Typ[Bool]);
-            }
-            case var ᴛ when ᴛ == ΔUntypedInt: {
-                return new BasicжΔType(Typ[Int]);
-            }
-            case var ᴛ when ᴛ == UntypedRune: {
-                return universeRune; // use 'rune' name
-            }
-            case var ᴛ when ᴛ == ΔUntypedFloat: {
-                return new BasicжΔType(Typ[Float64]);
-            }
-            case var ᴛ when ᴛ == ΔUntypedComplex: {
-                return new BasicжΔType(Typ[Complex128]);
-            }
-            case var ᴛ when ᴛ == UntypedString: {
-                return new BasicжΔType(Typ[ΔString]);
-            }}
+    var (tΔ1, _) = t._<ж<Basic>>(ᐧ); if (tΔ1 != nil) {
+        switch (tΔ1.kind) {
+        case var ᴛ when ᴛ == UntypedBool: {
+            return new BasicжΔType(Typ[Bool]);
         }
+        case var ᴛ when ᴛ == ΔUntypedInt: {
+            return new BasicжΔType(Typ[Int]);
+        }
+        case var ᴛ when ᴛ == UntypedRune: {
+            return universeRune; // use 'rune' name
+        }
+        case var ᴛ when ᴛ == ΔUntypedFloat: {
+            return new BasicжΔType(Typ[Float64]);
+        }
+        case var ᴛ when ᴛ == ΔUntypedComplex: {
+            return new BasicжΔType(Typ[Complex128]);
+        }
+        case var ᴛ when ᴛ == UntypedString: {
+            return new BasicжΔType(Typ[ΔString]);
+        }}
     }
     return t;
 }

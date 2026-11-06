@@ -328,10 +328,8 @@ internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked
     rwc.SetDeadline(new time.Time());
 
     if (c.r.hasByte) {
-        {
-            var (_, errΔ1) = c.bufr.Peek(c.bufr.Buffered() + 1); if (errΔ1 != nil) {
-                return (default, default, fmt.Errorf("unexpected Peek failure reading buffered byte: %v"u8, errΔ1));
-            }
+        var (_, errΔ1) = c.bufr.Peek(c.bufr.Buffered() + 1); if (errΔ1 != nil) {
+            return (default, default, fmt.Errorf("unexpected Peek failure reading buffered byte: %v"u8, errΔ1));
         }
     }
     c.bufw.Reset(new net_ConnᴠWriter(rwc));
@@ -416,10 +414,8 @@ internal static void close(this ref chunkWriter cw) {
         var bw = cw.res.conn.bufw; // conn's bufio writer
         // zero chunk to mark EOF
         bw.WriteString("0\r\n");
-        {
-            var trailers = cw.res.finalTrailers(); if (trailers != nil) {
-                trailers.Write(new bufio_WriterжWriter(bw)); // the writer handles noting errors
-            }
+        var trailers = cw.res.finalTrailers(); if (trailers != nil) {
+            trailers.Write(new bufio_WriterжWriter(bw)); // the writer handles noting errors
         }
         // final blank line after the trailers (whether
         // present or not)
@@ -524,13 +520,11 @@ private static readonly @string TrailerPrefixᵇ = "Trailer:"u8;
 internal static ΔHeader finalTrailers(this ref response w) {
     ΔHeader t = default;
     foreach (var (k, vv) in w.handlerHeader) {
-        {
-            var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
-                if (t == nil) {
-                    t = new ΔHeader(0);
-                }
-                t[kk] = vv;
+        var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
+            if (t == nil) {
+                t = new ΔHeader(0);
             }
+            t[kk] = vv;
         }
     }
     foreach (var (_, k) in w.trailers) {
@@ -761,13 +755,11 @@ internal static void backgroundRead(this ж<connReader> Ꮡcr) {
         // context, but that's kinda why HTTP/1.x pipelining died
         // anyway.
     }
-    {
-        var (ne, ok) = err._<netꓸError>(ᐧ); if (ok && cr.aborted && ne.Timeout()) {
-            // Ignore this error. It's the expected error from
-            // another goroutine calling abortPendingRead.
-        } else if (err != nil) {
-            cr.handleReadErrorLocked(err);
-        }
+    var (ne, ok) = err._<netꓸError>(ᐧ); if (ok && cr.aborted && ne.Timeout()) {
+        // Ignore this error. It's the expected error from
+        // another goroutine calling abortPendingRead.
+    } else if (err != nil) {
+        cr.handleReadErrorLocked(err);
     }
     cr.aborted = false;
     cr.inRead = false;
@@ -824,10 +816,8 @@ internal static void handleReadErrorLocked(this ref connReader cr, error _) {
         return;
     }
     cr.conn.cancelCtx();
-    {
-        var res = cr.conn.ᏑcurReq.Load(); if (res != nil) {
-            res.closeNotify();
-        }
+    var res = cr.conn.ᏑcurReq.Load(); if (res != nil) {
+        res.closeNotify();
     }
 }
 
@@ -917,12 +907,10 @@ internal static ж<sync.Pool> bufioWriterPool(nint size) {
 }
 
 internal static ж<bufio.Reader> newBufioReader(io.Reader r) {
-    {
-        var v = ᏑbufioReaderPool.Get(); if (v != nil) {
-            var br = v._<ж<bufio.Reader>>();
-            br.Reset(r);
-            return br;
-        }
+    var v = ᏑbufioReaderPool.Get(); if (v != nil) {
+        var br = v._<ж<bufio.Reader>>();
+        br.Reset(r);
+        return br;
     }
     // Note: if this reader size is ever changed, update
     // TestHandlerBodyClose's assumptions.
@@ -937,12 +925,10 @@ internal static void putBufioReader(ж<bufio.Reader> br) {
 internal static ж<bufio.Writer> newBufioWriterSize(io.Writer w, nint size) {
     var pool = bufioWriterPool(size);
     if (pool != nil) {
-        {
-            var v = pool.Get(); if (v != nil) {
-                var bw = v._<ж<bufio.Writer>>();
-                bw.Reset(w);
-                return bw;
-            }
+        var v = pool.Get(); if (v != nil) {
+            var bw = v._<ж<bufio.Writer>>();
+            bw.Reset(w);
+            return bw;
         }
     }
     return bufio.NewWriterSize(w, size);
@@ -952,10 +938,8 @@ internal static void putBufioWriter(ж<bufio.Writer> Ꮡbw) {
     ref var bw = ref Ꮡbw.DerefOrNull();
 
     Ꮡbw.Reset(default);
-    {
-        var pool = bufioWriterPool(bw.Available()); if (pool != nil) {
-            pool.Put(Ꮡbw.OrTypedNil());
-        }
+    var pool = bufioWriterPool(bw.Available()); if (pool != nil) {
+        pool.Put(Ꮡbw.OrTypedNil());
     }
 }
 
@@ -1135,10 +1119,8 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
         req.ctx = ctx;
         req.RemoteAddr = c.remoteAddr;
         req.TLS = c.tlsState;
-        {
-            var (body, ok) = req.Body._<ж<body>>(ᐧ); if (ok) {
-                body.doEarlyClose = true;
-            }
+        var (body, ok) = req.Body._<ж<body>>(ᐧ); if (ok) {
+            body.doEarlyClose = true;
         }
 
         c.rwc.SetReadDeadline(wholeReqDeadline);
@@ -1289,15 +1271,13 @@ internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
         w.cw.header = w.handlerHeader.Clone();
     }
 
-    {
-        @string cl = w.handlerHeader.get(contentLengthˢ); if (cl != ""u8) {
-            var (v, err) = strconv.ParseInt(cl, 10, 64);
-            if (err == nil && v >= 0) {
-                w.contentLength = v;
-            } else {
-                w.conn.server.logf("http: invalid Content-Length of %q", cl);
-                w.handlerHeader.Del(contentLengthˢ);
-            }
+    @string cl = w.handlerHeader.get(contentLengthˢ); if (cl != ""u8) {
+        var (v, err) = strconv.ParseInt(cl, 10, 64);
+        if (err == nil && v >= 0) {
+            w.contentLength = v;
+        } else {
+            w.conn.server.logf("http: invalid Content-Length of %q", cl);
+            w.handlerHeader.Del(contentLengthˢ);
         }
     }
 }
@@ -1394,10 +1374,8 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
             headerʗ1.Del(key);
             return;
         }
-        {
-            var (_, ok) = headerʗ1[key, ꟷ]; if (!ok) {
-                return;
-            }
+        var (_, ok) = headerʗ1[key, ꟷ]; if (!ok) {
+            return;
         }
         if (ᏑexcludeHeader.ValueSlot == nil) {
             ᏑexcludeHeader.ValueSlot = new map<@string, bool>();
@@ -1698,10 +1676,8 @@ internal static void foreachHeaderElement(@string v, Action<@string> fn) {
     }
     foreach (var iᴛ1 in range<@string>(strings.SplitSeq(v, ",").Invoke)) {
         var f = iᴛ1;
-        {
-            f = textproto.TrimString(f); if (f != ""u8) {
-                fn(f);
-            }
+        f = textproto.TrimString(f); if (f != ""u8) {
+            fn(f);
         }
     }
 }
@@ -1722,16 +1698,14 @@ internal static void writeStatusLine(ж<bufio.Writer> Ꮡbw, bool is11, nint cod
     } else {
         bw.WriteString(http10ˢ);
     }
-    {
-        @string text = StatusText(code); if (text != ""u8) {
-            bw.Write(strconv.AppendInt(scratch[..0], (int64)code, 10));
-            bw.WriteByte((byte)' ');
-            bw.WriteString(text);
-            bw.WriteString("\r\n");
-        } else {
-            // don't worry about performance
-            fmt.Fprintf(new bufio_WriterжWriter(Ꮡbw), "%03d status code %d\r\n"u8, code, code);
-        }
+    @string text = StatusText(code); if (text != ""u8) {
+        bw.Write(strconv.AppendInt(scratch[..0], (int64)code, 10));
+        bw.WriteByte((byte)' ');
+        bw.WriteString(text);
+        bw.WriteString("\r\n");
+    } else {
+        // don't worry about performance
+        fmt.Fprintf(new bufio_WriterжWriter(Ꮡbw), "%03d status code %d\r\n"u8, code, code);
     }
 }
 
@@ -1950,10 +1924,8 @@ internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPC
 // See https://golang.org/issue/3595
 internal static void closeWriteAndWait(this ref conn c) {
     c.finalFlush();
-    {
-        var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
-            tcp.CloseWrite();
-        }
+    var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
+        tcp.CloseWrite();
     }
 
     // When we return from closeWriteAndWait, the caller will fully close the
@@ -2015,10 +1987,8 @@ internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, 
     if (!runHook) {
         return;
     }
-    {
-        var hook = srv.ConnState; if (hook != nil) {
-            hook(nc, state);
-        }
+    var hook = srv.ConnState; if (hook != nil) {
+        hook(nc, state);
     }
 }
 
@@ -2100,21 +2070,17 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
     try {
         ref var c = ref Ꮡc.DerefOrNull();
 
-        {
-            var ra = c.rwc.RemoteAddr(); if (ra != nil) {
-                c.remoteAddr = ra.String();
-            }
+        var ra = c.rwc.RemoteAddr(); if (ra != nil) {
+            c.remoteAddr = ra.String();
         }
         ctx = context_package.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.rwc.LocalAddr());
         ref var inFlightResponse = ref heap<ж<response>>(out var ᏑinFlightResponse);
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var err = recover(); if (err != nil && !AreEqual(err, ErrAbortHandler)) {
-                    const nint size = /* 64 << 10 */ 65536;
-                    var buf = new slice<byte>(size);
-                    buf = buf.slice(0, runtime.Stack(buf, false));
-                    Ꮡc.Value.server.logf("http: panic serving %v: %v\n%s", Ꮡc.Value.remoteAddr, err, buf);
-                }
+            var err = recover(); if (err != nil && !AreEqual(err, ErrAbortHandler)) {
+                const nint size = /* 64 << 10 */ 65536;
+                var buf = new slice<byte>(size);
+                buf = buf.slice(0, runtime.Stack(buf, false));
+                Ꮡc.Value.server.logf("http: panic serving %v: %v\n%s", Ꮡc.Value.remoteAddr, err, buf);
             }
             if (ᏑinFlightResponse.ValueSlot != nil) {
                 ᏑinFlightResponse.ValueSlot.cancelCtx();
@@ -2130,55 +2096,45 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
             }
         }, ref ᒐ);
 
-        {
-            var (tlsConn, ok) = c.rwc._<ж<tls.Conn>>(ᐧ); if (ok) {
-                var tlsTO = c.server.tlsHandshakeTimeout();
-                if (tlsTO > 0) {
-                    var dl = time.Now().Add(tlsTO);
-                    c.rwc.SetReadDeadline(dl);
-                    c.rwc.SetWriteDeadline(dl);
+        if (c.rwc._<ж<tls.Conn>>(out var tlsConn)) {
+            var tlsTO = c.server.tlsHandshakeTimeout();
+            if (tlsTO > 0) {
+                var dl = time.Now().Add(tlsTO);
+                c.rwc.SetReadDeadline(dl);
+                c.rwc.SetWriteDeadline(dl);
+            }
+            var err = tlsConn.HandshakeContext(ctx); if (err != nil) {
+                // If the handshake failed due to the client not speaking
+                // TLS, assume they're speaking plaintext HTTP and write a
+                // 400 response on the TLS conn's underlying net.Conn.
+                @string reason = default;
+                var (re, okΔ1) = err._<tls.RecordHeaderError>(ᐧ); if (okΔ1 && re.Conn != nil && tlsRecordHeaderLooksLikeHTTP(re.RecordHeader)) {
+                    io.WriteString(new net_ConnᴠWriter(re.Conn), http10400BadRequestˢ);
+                    re.Conn.Close();
+                    reason = clientSentAnHttpRequestˢ;
+                } else {
+                    reason = err.Error();
                 }
-                {
-                    var err = tlsConn.HandshakeContext(ctx); if (err != nil) {
-                        // If the handshake failed due to the client not speaking
-                        // TLS, assume they're speaking plaintext HTTP and write a
-                        // 400 response on the TLS conn's underlying net.Conn.
-                        @string reason = default;
-                        {
-                            var (re, okΔ1) = err._<tls.RecordHeaderError>(ᐧ); if (okΔ1 && re.Conn != nil && tlsRecordHeaderLooksLikeHTTP(re.RecordHeader)) {
-                                io.WriteString(new net_ConnᴠWriter(re.Conn), http10400BadRequestˢ);
-                                re.Conn.Close();
-                                reason = clientSentAnHttpRequestˢ;
-                            } else {
-                                reason = err.Error();
-                            }
-                        }
-                        c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), reason);
-                        return;
-                    }
+                c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), reason);
+                return;
+            }
+            // Restore Conn-level deadlines.
+            if (tlsTO > 0) {
+                c.rwc.SetReadDeadline(new time.Time());
+                c.rwc.SetWriteDeadline(new time.Time());
+            }
+            c.tlsState = @new<tlsꓸConnectionState>();
+            c.tlsState.Value = tlsConn.ConnectionState();
+            @string proto = c.tlsState.NegotiatedProtocol; if (validNextProto(proto)) {
+                var fn = c.server.TLSNextProto[proto]; if (fn != nil) {
+                    var h = new initALPNRequest(ctx, tlsConn, new serverHandler(c.server));
+                    // Mark freshly created HTTP/2 as active and prevent any server state hooks
+                    // from being run on these connections. This prevents closeIdleConns from
+                    // closing such connections. See issue https://golang.org/issue/39776.
+                    Ꮡc.setState(c.rwc, StateActive, skipHooks);
+                    fn(c.server, tlsConn, h);
                 }
-                // Restore Conn-level deadlines.
-                if (tlsTO > 0) {
-                    c.rwc.SetReadDeadline(new time.Time());
-                    c.rwc.SetWriteDeadline(new time.Time());
-                }
-                c.tlsState = @new<tlsꓸConnectionState>();
-                c.tlsState.Value = tlsConn.ConnectionState();
-                {
-                    @string proto = c.tlsState.NegotiatedProtocol; if (validNextProto(proto)) {
-                        {
-                            var fn = c.server.TLSNextProto[proto]; if (fn != nil) {
-                                var h = new initALPNRequest(ctx, tlsConn, new serverHandler(c.server));
-                                // Mark freshly created HTTP/2 as active and prevent any server state hooks
-                                // from being run on these connections. This prevents closeIdleConns from
-                                // closing such connections. See issue https://golang.org/issue/39776.
-                                Ꮡc.setState(c.rwc, StateActive, skipHooks);
-                                fn(c.server, tlsConn, h);
-                            }
-                        }
-                        return;
-                    }
-                }
+                return;
             }
         }
 
@@ -2186,11 +2142,9 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
 
         // Set Request.TLS if the conn is not a *tls.Conn, but implements ConnectionState.
         if (c.tlsState == nil) {
-            {
-                var (tc, ok) = c.rwc._<connectionStater>(ᐧ); if (ok) {
-                    c.tlsState = @new<tlsꓸConnectionState>();
-                    c.tlsState.Value = tc.ConnectionState();
-                }
+            var (tc, ok) = c.rwc._<connectionStater>(ᐧ); if (ok) {
+                c.tlsState = @new<tlsꓸConnectionState>();
+                c.tlsState.Value = tc.ConnectionState();
             }
         }
 
@@ -2259,11 +2213,9 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
                     return; // don't reply
                 }
                 default: {
-                    {
-                        var (v, ok) = err._<statusError>(ᐧ); if (ok) {
-                            fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s: %s%s%d %s: %s"u8, v.code, StatusText(v.code), v.text, errorHeaders, v.code, StatusText(v.code), v.text);
-                            return;
-                        }
+                    var (v, ok) = err._<statusError>(ᐧ); if (ok) {
+                        fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 %d %s: %s%s%d %s: %s"u8, v.code, StatusText(v.code), v.text, errorHeaders, v.code, StatusText(v.code), v.text);
+                        return;
                     }
                     @string publicErr = publicErrᶜ1;
                     fmt.Fprintf(new net_ConnᴠWriter(c.rwc), "HTTP/1.1 " + publicErr + errorHeaders + publicErr);
@@ -2338,10 +2290,8 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
             // read the next request. This prevents a ReadHeaderTimeout or
             // ReadTimeout from starting until the first bytes of the next request
             // have been received.
-            {
-                var (_, errΔ1) = c.bufr.Peek(4); if (errΔ1 != nil) {
-                    return;
-                }
+            var (_, errΔ1) = c.bufr.Peek(4); if (errΔ1 != nil) {
+                return;
             }
 
             {
@@ -2670,41 +2620,37 @@ public static ΔHandler StripPrefix(@string prefix, ΔHandler h) {
 public static void Redirect(ResponseWriter w, ж<Request> Ꮡr, @string url, nint code) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        var (u, err) = urlpkg.Parse(url); if (err == nil) {
-            // If url was relative, make its path absolute by
-            // combining with request path.
-            // The client would probably do this for us,
-            // but doing it ourselves is more reliable.
-            // See RFC 7231, section 7.1.2
-            if (u.Scheme == ""u8 && u.Host == ""u8) {
-                @string oldpath = r.URL.EscapedPath();
-                if (oldpath == ""u8) { // should not happen, but avoid a crash if it does
-                    oldpath = "/";
-                }
-
-                // no leading http://server
-                if (url == ""u8 || url[0] != '/') {
-                    // make relative path absolute
-                    var (olddir, _) = path.Split(oldpath);
-                    url = olddir + url;
-                }
-
-                @string query = default;
-                {
-                    nint i = strings.Index(url, "?"); if (i != -1) {
-                        (url, query) = (url.slice(0, i), url.slice(i));
-                    }
-                }
-
-                // clean up but preserve trailing slash
-                var trailing = strings.HasSuffix(url, "/");
-                url = path.Clean(url);
-                if (trailing && !strings.HasSuffix(url, "/")) {
-                    url += "/"u8;
-                }
-                url += query;
+    var (u, err) = urlpkg.Parse(url); if (err == nil) {
+        // If url was relative, make its path absolute by
+        // combining with request path.
+        // The client would probably do this for us,
+        // but doing it ourselves is more reliable.
+        // See RFC 7231, section 7.1.2
+        if (u.Scheme == ""u8 && u.Host == ""u8) {
+            @string oldpath = r.URL.EscapedPath();
+            if (oldpath == ""u8) { // should not happen, but avoid a crash if it does
+                oldpath = "/";
             }
+
+            // no leading http://server
+            if (url == ""u8 || url[0] != '/') {
+                // make relative path absolute
+                var (olddir, _) = path.Split(oldpath);
+                url = olddir + url;
+            }
+
+            @string query = default;
+            nint i = strings.Index(url, "?"); if (i != -1) {
+                (url, query) = (url.slice(0, i), url.slice(i));
+            }
+
+            // clean up but preserve trailing slash
+            var trailing = strings.HasSuffix(url, "/");
+            url = path.Clean(url);
+            if (trailing && !strings.HasSuffix(url, "/")) {
+                url += "/"u8;
+            }
+            url += query;
         }
     }
 
@@ -3219,10 +3165,8 @@ public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж
 }
 
 internal static partial void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
-    {
-        var err = Ꮡmux.registerErr(pattern, handler); if (err != nil) {
-            throw panic(err);
-        }
+    var err = Ꮡmux.registerErr(pattern, handler); if (err != nil) {
+        throw panic(err);
     }
 }
 
@@ -3246,10 +3190,8 @@ internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string pats
         if (handler == nil) {
             return errors.New(httpNilHandlerˢ);
         }
-        {
-            var (f, okΔ1) = handler._<HandlerFunc>(ᐧ); if (okΔ1 && f == nil) {
-                return errors.New(httpNilHandlerˢ);
-            }
+        var (f, okΔ1) = handler._<HandlerFunc>(ᐧ); if (okΔ1 && f == nil) {
+            return errors.New(httpNilHandlerˢ);
         }
 
         var (pat, err) = parsePattern(patstr);
@@ -3601,10 +3543,8 @@ internal static bool closeIdleConns(this ж<Server> Ꮡs) {
 internal static error closeListenersLocked(this ref Server s) {
     error err = default;
     foreach (var (ln, _) in s.listeners) {
-        {
-            var cerr = (ln.ValueSlot).Close(); if (cerr != nil && err == nil) {
-                err = cerr;
-            }
+        var cerr = (ln.ValueSlot).Close(); if (cerr != nil && err == nil) {
+            err = cerr;
         }
     }
     return err;
@@ -3791,10 +3731,8 @@ public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
         ref var s = ref Ꮡs.DerefOrNull();
         ref var l = ref heap(lʗp, out var Ꮡl);
 
-        {
-            var fn = testHookServerServe; if (fn != nil) {
-                fn(Ꮡs, l); // call hook with unwrapped listener
-            }
+        var fn = testHookServerServe; if (fn != nil) {
+            fn(Ꮡs, l); // call hook with unwrapped listener
         }
 
         var origListener = l;
@@ -3829,32 +3767,26 @@ public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
                 if (Ꮡs.shuttingDown()) {
                     return ErrServerClosed;
                 }
-                {
-                    var (ne, ok) = err._<netꓸError>(ᐧ); if (ok && ne.Temporary()) {
-                        if (tempDelay == 0) {
-                            tempDelay = 5 * time.Millisecond;
-                        } else {
-                            tempDelay *= 2;
-                        }
-                        {
-                            var max = 1 * time.ΔSecond; if (tempDelay > max) {
-                                tempDelay = max;
-                            }
-                        }
-                        s.logf("http: Accept error: %v; retrying in %v", err, tempDelay);
-                        time.Sleep(tempDelay);
-                        continue;
+                var (ne, ok) = err._<netꓸError>(ᐧ); if (ok && ne.Temporary()) {
+                    if (tempDelay == 0) {
+                        tempDelay = 5 * time.Millisecond;
+                    } else {
+                        tempDelay *= 2;
                     }
+                    var max = 1 * time.ΔSecond; if (tempDelay > max) {
+                        tempDelay = max;
+                    }
+                    s.logf("http: Accept error: %v; retrying in %v", err, tempDelay);
+                    time.Sleep(tempDelay);
+                    continue;
                 }
                 return err;
             }
             var connCtx = ctx;
-            {
-                var cc = s.ConnContext; if (cc != nil) {
-                    connCtx = cc(connCtx, rw);
-                    if (connCtx == nil) {
-                        throw panic("ConnContext returned nil");
-                    }
+            var cc = s.ConnContext; if (cc != nil) {
+                connCtx = cc(connCtx, rw);
+                if (connCtx == nil) {
+                    throw panic("ConnContext returned nil");
                 }
             }
             tempDelay = 0;
@@ -4216,13 +4148,11 @@ internal static void onceSetNextProtoDefaults(this ж<Server> Ꮡs) {
         http2server.IncNonDefault();
         return;
     }
-    {
-        var (_, ok) = s.TLSNextProto["h2", ꟷ]; if (ok) {
-            // TLSNextProto already contains an HTTP/2 implementation.
-            // The user probably called golang.org/x/net/http2.ConfigureServer
-            // to add it.
-            return;
-        }
+    var (_, ok) = s.TLSNextProto["h2", ꟷ]; if (ok) {
+        // TLSNextProto already contains an HTTP/2 implementation.
+        // The user probably called golang.org/x/net/http2.ConfigureServer
+        // to add it.
+        return;
     }
     var conf = Ꮡ(new http2Server());
     s.nextProtoErr = http2ConfigureServer(Ꮡs, conf);
@@ -4300,10 +4230,8 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
             try {
                 var panicChanʗ2 = panicChanʗ1;
                 defer(() => {
-                    {
-                        var p = recover(); if (p != nil) {
-                            panicChanʗ2.ᐸꟷ(p);
-                        }
+                    var p = recover(); if (p != nil) {
+                        panicChanʗ2.ᐸꟷ(p);
                     }
                 }, ref ᒐ);
                 Ꮡh.Value.handler.ServeHTTP(new timeoutWriterжResponseWriter(twʗ1), Ꮡr);
@@ -4337,21 +4265,19 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
             tw.Ꮡmu.Lock();
             var twʗ3 = tw;
             defer(twʗ3.Ꮡmu.Unlock, ref ᒐ);
-            {
-                var err = ctx.Err();
-                switch (err) {
-                case var ᴛ when AreEqual(ᴛ, context_package.DeadlineExceeded): {
-                    w.WriteHeader(StatusServiceUnavailable);
-                    io.WriteString(w, h.errorBody());
-                    tw.err = ErrHandlerTimeout;
-                    break;
-                }
-                default: {
-                    w.WriteHeader(StatusServiceUnavailable);
-                    tw.err = err;
-                    break;
-                }}
+            var err = ctx.Err();
+            switch (err) {
+            case var ᴛ when AreEqual(ᴛ, context_package.DeadlineExceeded): {
+                w.WriteHeader(StatusServiceUnavailable);
+                io.WriteString(w, h.errorBody());
+                tw.err = ErrHandlerTimeout;
+                break;
             }
+            default: {
+                w.WriteHeader(StatusServiceUnavailable);
+                tw.err = err;
+                break;
+            }}
             break;
         }}
     }
@@ -4374,10 +4300,8 @@ internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)
 
 // Push implements the [Pusher] interface.
 internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
-    {
-        var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
-            return pusher.Push(target, opts);
-        }
+    var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
+        return pusher.Push(target, opts);
     }
     return new ProtocolErrorжerror(ErrNotSupported);
 }

@@ -1,6 +1,8 @@
 #nullable enable
 
 using System;
+using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.builtin;
@@ -163,4 +165,81 @@ public static class vdotx_package
     public struct D { public nint n; }
 
     public static nint M(this D d) => d.n;
+}
+
+// go2cs-gen gives each Go VALUE method a ж<X> twin, `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`, so a
+// converted call `p.M()` binds it. It is the same Go method in a second shape, and golib's method-set candidate source
+// holds only the original: the *X table counts it once, the binder answers it by value, and reflect's call through a
+// nil *X raises Go's panicwrap. The fixture declares each twin AHEAD of its original, so a scan meets the twin first.
+[TestClass]
+public class ValueMethodTwinTests
+{
+    [TestMethod]
+    public void TheCandidateSourceHoldsTheOriginalAlone()
+    {
+        Type[] receivers = [.. go.golib.TypeExtensions.GetGoMethodSetCandidates(typeof(valuetwin_package.Vec), true)
+            .Where(static method => method.Name == "Len").Select(static method => method.GetParameters()[0].ParameterType)];
+
+        CollectionAssert.AreEqual(new[] { typeof(valuetwin_package.Vec) }, receivers, "the *Vec set holds Len once, by value");
+        CollectionAssert.AreEqual(new[] { "Grow", "Len" }, go.golib.TypeExtensions.GetGoMethodSetEntries(typeof(valuetwin_package.Vec), true)
+            .Select(static entry => entry.GoName).ToArray(), "the *Vec table names Len once");
+        Assert.AreEqual(typeof(valuetwin_package.Vec), go.golib.TypeExtensions.GetGoMethodSetEntries(typeof(valuetwin_package.Vec), true)
+            .Single(static entry => entry.GoName == "Len").Method.GetParameters()[0].ParameterType, "the table keeps the original");
+
+        Type[] generic = [.. go.golib.TypeExtensions.GetGoMethodSetCandidates(typeof(valuetwin_package.Pair<nint>), true)
+            .Where(static method => method.Name == "First").Select(static method => method.GetParameters()[0].ParameterType)];
+
+        CollectionAssert.AreEqual(new[] { typeof(valuetwin_package.Pair<nint>) }, generic, "a generic value method's twin is left out too");
+    }
+
+    [TestMethod]
+    public void TheBinderAnswersAValueMethodByValue()
+    {
+        AdapterBinder.ResolveReceiverMethods(typeof(valuetwin_package.Vec), "Len", out MethodInfo? byPtr, out MethodInfo? byVal);
+
+        Assert.IsNull(byPtr, "a value method has no pointer shape in the binder");
+        Assert.AreEqual(typeof(valuetwin_package.Vec), byVal?.GetParameters()[0].ParameterType);
+    }
+
+    [TestMethod]
+    public void ANilPointerStillPanicsWithPanicwrap()
+    {
+        Type vec = typeof(ж<valuetwin_package.Vec>);
+        Delegate func = GoReflect.GoMethodFunc(vec, GoReflect.GoMethodIndex(vec, "Len"))!;
+        string message;
+
+        try { message = "no panic: " + ((Func<ж<valuetwin_package.Vec>, nint>)func)(null!); }
+        catch (PanicException ex) { message = ex.Message; }
+        catch (Exception ex) { message = "call threw " + ex.GetType().Name + ": " + ex.Message; }
+
+        Assert.AreEqual("value method valuetwin.Vec.Len called using nil *Vec pointer", message);
+    }
+
+    [TestMethod]
+    public void APointerMethodsTwinStaysACandidate()
+    {
+        MethodInfo[] grow = [.. go.golib.TypeExtensions.GetGoMethodSetCandidates(typeof(valuetwin_package.Vec), true).Where(static method => method.Name == "Grow")];
+
+        Assert.IsTrue(grow.Any(static method => method.GetParameters()[0].ParameterType == typeof(ж<valuetwin_package.Vec>)),
+            "a pointer method's ж<Vec> twin pairs with a `this ref Vec` original and is not a value twin");
+    }
+}
+
+public static class valuetwin_package
+{
+    public struct Vec { public nint n; }
+
+    public struct Pair<T> { public T first; }
+
+    public static nint Len(this ж<Vec> Ꮡv) { var v = ~Ꮡv; return v.Len(); }
+
+    public static nint Len(this Vec v) => v.n;
+
+    public static T First<T>(this ж<Pair<T>> Ꮡp) { var p = ~Ꮡp; return p.First(); }
+
+    public static T First<T>(this Pair<T> p) => p.first;
+
+    public static nint Grow(this ж<Vec> Ꮡv) => Ꮡv.Value.Grow();
+
+    public static nint Grow(this ref Vec v) => ++v.n;
 }

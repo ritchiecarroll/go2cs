@@ -172,11 +172,9 @@ internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) {
         // A timer is scheduled to fire. Wake the root goroutine to handle it.
         return bubble.root;
     }
-    {
-        var gp = bubble.waiter; if (gp != nil) {
-            // A goroutine is blocked in Wait. Wake it.
-            return gp;
-        }
+    var gp = bubble.waiter; if (gp != nil) {
+        // A goroutine is blocked in Wait. Wake it.
+        return gp;
     }
     // All goroutines in the bubble are durably blocked, and nothing has called Wait.
     // Wake the root goroutine.
@@ -390,11 +388,9 @@ internal static bool synctest_isInBubble() {
 
 //go:linkname synctest_acquire internal/synctest.acquire
 internal static any synctest_acquire() {
-    {
-        var bubble = getg().Value.bubble; if (bubble != nil) {
-            bubble.incActive();
-            return bubble.OrTypedNil();
-        }
+    var bubble = getg().Value.bubble; if (bubble != nil) {
+        bubble.incActive();
+        return bubble.OrTypedNil();
     }
     return default;
 }

@@ -71,7 +71,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:537-540, 560 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:531-534, 554 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ public global::go.go.types_package.ΔType Type;
@@ -1100,7 +1100,7 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:251 -->
+<!-- source: src/core/testing/quick/quick.cs:247 -->
 ```csharp
 public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 ```

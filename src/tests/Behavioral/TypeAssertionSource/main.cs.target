@@ -47,12 +47,10 @@ internal static void @catch(@string what, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: %T: %v\n"u8, what, r, r);
-                } else {
-                    fmt.Printf("%s: NO PANIC\n"u8, what);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: %T: %v\n"u8, what, r, r);
+            } else {
+                fmt.Printf("%s: NO PANIC\n"u8, what);
             }
         }, ref ᒐ);
         f();

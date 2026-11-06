@@ -456,12 +456,10 @@ public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
-    {
-        @string cΔ1 = r.Header.Get(cookieˢ); if (cΔ1 != ""u8) {
-            r.Header.Set(cookieˢ, cΔ1 + "; "u8 + s);
-        } else {
-            r.Header.Set(cookieˢ, s);
-        }
+    @string cΔ1 = r.Header.Get(cookieˢ); if (cΔ1 != ""u8) {
+        r.Header.Set(cookieˢ, cΔ1 + "; "u8 + s);
+    } else {
+        r.Header.Set(cookieˢ, s);
     }
 }
 
@@ -614,10 +612,8 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
             if (closed) {
                 return;
             }
-            {
-                var closeErr = Ꮡr.Value.closeBody(); if (closeErr != nil && Ꮡerr.ValueSlot == nil) {
-                    Ꮡerr.ValueSlot = closeErr;
-                }
+            var closeErr = Ꮡr.Value.closeBody(); if (closeErr != nil && Ꮡerr.ValueSlot == nil) {
+                Ꮡerr.ValueSlot = closeErr;
             }
         }, ref ᒐ);
 
@@ -688,11 +684,9 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
         // and other small bufio Writers to have a minimum 4k buffer
         // size.
         ж<bufio.Writer> bw = default;
-        {
-            var (_, ok) = w._<io.ByteWriter>(ᐧ); if (!ok) {
-                bw = bufio.NewWriter(w);
-                w = new bufio_WriterжWriter(bw);
-            }
+        if (!w._<io.ByteWriter>(out _)) {
+            bw = bufio.NewWriter(w);
+            w = new bufio_WriterжWriter(bw);
         }
 
         (_, err) = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n"u8, valueOrDefault(r.Method, getˢ), ruri);
@@ -760,12 +754,10 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
 
         // Flush and wait for 100-continue if expected.
         if (waitForContinue != nil) {
-            {
-                var (bwΔ1, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok) {
-                    err = bwΔ1.Flush();
-                    if (err != nil) {
-                        goto ᒐdone;
-                    }
+            var (bwΔ1, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok) {
+                err = bwΔ1.Flush();
+                if (err != nil) {
+                    goto ᒐdone;
                 }
             }
             if (trace != nil && trace.Wait100Continue != nil) {
@@ -780,10 +772,8 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
 
         {
             var (bwΔ2, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok && tw.FlushHeaders) {
-                {
-                    var errΔ1 = bwΔ2.Flush(); if (errΔ1 != nil) {
-                        err = errΔ1; goto ᒐdone;
-                    }
+                var errΔ1 = bwΔ2.Flush(); if (errΔ1 != nil) {
+                    err = errΔ1; goto ᒐdone;
                 }
             }
         }
@@ -1107,12 +1097,10 @@ internal static readonly ж<sync.Pool> ᏑtextprotoReaderPool = new StaticBox<sy
 internal static ref sync.Pool textprotoReaderPool => ref ((StaticBox<sync.Pool>)ᏑtextprotoReaderPool).ValueSlot;
 
 internal static ж<textproto.Reader> newTextprotoReader(ж<bufio.Reader> br) {
-    {
-        var v = ᏑtextprotoReaderPool.Get(); if (v != nil) {
-            var tr = v._<ж<textproto.Reader>>();
-            tr.R = br;
-            return tr;
-        }
+    var v = ᏑtextprotoReaderPool.Get(); if (v != nil) {
+        var tr = v._<ж<textproto.Reader>>();
+        tr.R = br;
+        return tr;
     }
     return textproto.NewReader(br);
 }
@@ -1173,10 +1161,8 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> b) {
 
         // First line: GET /index.html HTTP/1.0
         @string s = default;
-        {
-            (s, err) = tp.ReadLine(); if (err != nil) {
-                (req, err) = (default, err); goto ᒐdone;
-            }
+        (s, err) = tp.ReadLine(); if (err != nil) {
+            (req, err) = (default, err); goto ᒐdone;
         }
         defer(() => {
             if (AreEqual(Ꮡerr.ValueSlot, io.EOF)) {
@@ -1193,10 +1179,8 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> b) {
             (req, err) = (default, badStringError(invalidMethodˢ, req.Method)); goto ᒐdone;
         }
         @string rawurl = req.RequestURI;
-        {
-            (req.ProtoMajor, req.ProtoMinor, ok) = ParseHTTPVersion(req.Proto); if (!ok) {
-                (req, err) = (default, badStringError(malformedHttpVersionˢ, req.Proto)); goto ᒐdone;
-            }
+        (req.ProtoMajor, req.ProtoMinor, ok) = ParseHTTPVersion(req.Proto); if (!ok) {
+            (req, err) = (default, badStringError(malformedHttpVersionˢ, req.Proto)); goto ᒐdone;
         }
 
         // CONNECT requests are used two different ways, and neither uses a full URL:
@@ -1213,10 +1197,8 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> b) {
             rawurl = "http://"u8 + rawurl;
         }
 
-        {
-            (req.URL, err) = url.ParseRequestURI(rawurl); if (err != nil) {
-                (req, err) = (default, err); goto ᒐdone;
-            }
+        (req.URL, err) = url.ParseRequestURI(rawurl); if (err != nil) {
+            (req, err) = (default, err); goto ᒐdone;
         }
 
         if (justAuthority) {
@@ -1349,10 +1331,8 @@ internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> 
 
     n = (nint)l.n;
     l.n = 0;
-    {
-        var (res, ok) = l.w._<Read_requestTooLarger>(ᐧ); if (ok) {
-            res.requestTooLarge();
-        }
+    var (res, ok) = l.w._<Read_requestTooLarger>(ᐧ); if (ok) {
+        res.requestTooLarge();
     }
     l.err = new MaxBytesErrorжerror(Ꮡ(new MaxBytesError(l.i)));
     return (n, l.err);
@@ -1393,11 +1373,9 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
     case {} when ct == "application/x-www-form-urlencoded"u8: {
         io.Reader reader = r.Body;
         var maxFormSize = (int64)(9223372036854775807L);
-        {
-            var (_, ok) = r.Body._<ж<maxBytesReader>>(ᐧ); if (!ok) {
-                maxFormSize = (int64)((int64)10 << 20); // 10 MB is a lot of text.
-                reader = io.LimitReader(r.Body, maxFormSize + 1);
-            }
+        var (_, ok) = r.Body._<ж<maxBytesReader>>(ᐧ); if (!ok) {
+            maxFormSize = (int64)((int64)10 << 20); // 10 MB is a lot of text.
+            reader = io.LimitReader(r.Body, maxFormSize + 1);
         }
         var (b, e) = io.ReadAll(reader);
         if (e != nil) {
@@ -1552,10 +1530,8 @@ public static @string FormValue(this ж<Request> Ꮡr, @string key) {
     if (r.Form == nil) {
         Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
-    {
-        var vs = r.Form[key]; if (builtin.len(vs) > 0) {
-            return vs[0];
-        }
+    var vs = r.Form[key]; if (builtin.len(vs) > 0) {
+        return vs[0];
     }
     return ""u8;
 }
@@ -1571,10 +1547,8 @@ public static @string PostFormValue(this ж<Request> Ꮡr, @string key) {
     if (r.PostForm == nil) {
         Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
-    {
-        var vs = r.PostForm[key]; if (builtin.len(vs) > 0) {
-            return vs[0];
-        }
+    var vs = r.PostForm[key]; if (builtin.len(vs) > 0) {
+        return vs[0];
     }
     return ""u8;
 }
@@ -1594,11 +1568,9 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
         }
     }
     if (r.MultipartForm != nil && r.MultipartForm.File != nil) {
-        {
-            var fhs = r.MultipartForm.File[key]; if (builtin.len(fhs) > 0) {
-                var (f, err) = fhs[0].Open();
-                return (f, fhs[0], err);
-            }
+        var fhs = r.MultipartForm.File[key]; if (builtin.len(fhs) > 0) {
+            var (f, err) = fhs[0].Open();
+            return (f, fhs[0], err);
         }
     }
     return (default, default, ErrMissingFile);
@@ -1609,10 +1581,8 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
 // It returns the empty string if the request was not matched against a pattern
 // or there is no such wildcard in the pattern.
 public static @string PathValue(this ref Request r, @string name) {
-    {
-        nint i = r.patIndex(name); if (i >= 0) {
-            return r.matches[i];
-        }
+    nint i = r.patIndex(name); if (i >= 0) {
+        return r.matches[i];
     }
     return r.otherValues[name];
 }
@@ -1620,15 +1590,13 @@ public static @string PathValue(this ref Request r, @string name) {
 // SetPathValue sets name to value, so that subsequent calls to r.PathValue(name)
 // return value.
 public static void SetPathValue(this ref Request r, @string name, @string value) {
-    {
-        nint i = r.patIndex(name); if (i >= 0) {
-            r.matches[i] = value;
-        } else {
-            if (r.otherValues == nil) {
-                r.otherValues = new map<@string, @string>{};
-            }
-            r.otherValues[name] = value;
+    nint i = r.patIndex(name); if (i >= 0) {
+        r.matches[i] = value;
+    } else {
+        if (r.otherValues == nil) {
+            r.otherValues = new map<@string, @string>{};
         }
+        r.otherValues[name] = value;
     }
 }
 

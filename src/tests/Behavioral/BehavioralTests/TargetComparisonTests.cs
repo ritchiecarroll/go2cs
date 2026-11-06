@@ -472,6 +472,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferVariadicCallee() => CheckTarget("DeferVariadicCallee");
 
     [TestMethod]
+    public void CheckDeferredClosurePanicChain() => CheckTarget("DeferredClosurePanicChain");
+
+    [TestMethod]
     public void CheckDefinedArrayChainSlice() => CheckTarget("DefinedArrayChainSlice");
 
     [TestMethod]
@@ -922,6 +925,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]
@@ -1004,6 +1010,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
+
+    [TestMethod]
+    public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
 
     [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
@@ -1637,6 +1646,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
+
+    [TestMethod]
+    public void CheckP521CurveBytes() => CheckTarget("P521CurveBytes");
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
@@ -2633,6 +2645,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckValuePunBits() => CheckTarget("ValuePunBits");
+
+    [TestMethod]
+    public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
+
+    [TestMethod]
+    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
 
     [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");

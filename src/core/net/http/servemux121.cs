@@ -63,10 +63,8 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
         if (handler == nil) {
             throw panic("http: nil handler");
         }
-        {
-            var (_, exist) = mux.m[pattern, ꟷ]; if (exist) {
-                throw panic("http: multiple registrations for " + pattern);
-            }
+        var (_, exist) = mux.m[pattern, ꟷ]; if (exist) {
+            throw panic("http: multiple registrations for " + pattern);
         }
 
         if (mux.m == nil) {
@@ -118,10 +116,8 @@ internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> 
         // If r.URL.Path is /tree and its handler is not registered,
         // the /tree -> /tree/ redirect applies to CONNECT requests
         // but the path canonicalization does not.
-        {
-            var (u, ok) = Ꮡmux.redirectToPathSlash(r.URL.Host, r.URL.Path, r.URL); if (ok) {
-                return (RedirectHandler(u.String(), StatusMovedPermanently), u.Path);
-            }
+        var (u, ok) = Ꮡmux.redirectToPathSlash(r.URL.Host, r.URL.Path, r.URL); if (ok) {
+            return (RedirectHandler(u.String(), StatusMovedPermanently), u.Path);
         }
 
         return Ꮡmux.handler(r.Host, r.URL.Path);
@@ -222,10 +218,8 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
     var p = slice<@string>([path, host + path]);
 
     foreach (var (_, c) in p) {
-        {
-            var (_, exist) = mux.m[c, ꟷ]; if (exist) {
-                return false;
-            }
+        var (_, exist) = mux.m[c, ꟷ]; if (exist) {
+            return false;
         }
     }
 
@@ -234,10 +228,8 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
         return false;
     }
     foreach (var (_, c) in p) {
-        {
-            var (_, exist) = mux.m[c + "/"u8, ꟷ]; if (exist) {
-                return path[n - 1] != '/';
-            }
+        var (_, exist) = mux.m[c + "/"u8, ꟷ]; if (exist) {
+            return path[n - 1] != '/';
         }
     }
 

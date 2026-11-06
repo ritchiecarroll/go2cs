@@ -66,7 +66,7 @@ using static go.@internal.cpu_package;
 [assembly: GoPositionMap("internal/cpu/cpu.go", "cpu.cs", "AMQB6ALCgoKCABEw4oKCgoKClJSClIKCgpSkgqS0tIK2goKClKaCgoKCuMaCgqaCgqYAAxDCgoKm")]
 [assembly: GoPositionMap("internal/cpu/cpu_x86.go", "cpu_x86.cs", "AAwYpgA1cIIACRSCpu6m7qYABxKUgoKmlJSCgoKCgoLKlIKUgpTcpgAHEJSCgqaCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCppSClIKCpoKUAAcQpoKCgrimgqyygqaUsoKCgoKCpoK4goKCuKaygtw=", "211-220:1")]
 [assembly: GoPositionMap("internal/cpu/cpu_x86_other.go", "cpu_x86_other.cs", "AAgS")]
-[assembly: GoPositionMap("internal/cpu/datacache_x86.go", "datacache_x86.cs", "AAge4oKCpqa2lKaCgpSmpMyCqJKClIKCuIK4lIKCgoKU7oKmtoKCgqaUgqaCpoCCpIKmgILIgpQ=")]
+[assembly: GoPositionMap("internal/cpu/datacache_x86.go", "datacache_x86.cs", "AAge4oKCpqa2lKaCgpSmpMyCqJKClIKCuIK4lIKCgoKU7oKmtoKCgqaUgqaCpoKUgqaCuIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

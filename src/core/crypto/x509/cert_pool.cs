@@ -116,10 +116,8 @@ public static ж<CertPool> Clone(this ref CertPool s) {
 //
 // New changes in the system cert pool might not be reflected in subsequent calls.
 public static (ж<CertPool>, error) SystemCertPool() {
-    {
-        var sysRoots = systemRootsPool(); if (sysRoots != nil) {
-            return (sysRoots.Clone(), default);
-        }
+    var sysRoots = systemRootsPool(); if (sysRoots != nil) {
+        return (sysRoots.Clone(), default);
     }
 
     return loadSystemRoots();

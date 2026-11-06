@@ -197,20 +197,18 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         errorf(par.typ, arg.typ, arg);
                         inferred = default; goto ᒐdone;
                     }
-                } else {
-                    var (_, ok) = par.typ._<ж<TypeParam>>(ᐧ); if (ok && !arg.isNil()) {
-                        // Since default types are all basic (i.e., non-composite) types, an
-                        // untyped argument will never match a composite parameter type; the
-                        // only parameter type it can possibly match against is a *TypeParam.
-                        // Thus, for untyped arguments we only need to look at parameter types
-                        // that are single type parameters.
-                        // Also, untyped nils don't have a default type and can be ignored.
-                        // Finally, it's not possible to have an alias type denoting a type
-                        // parameter declared by the current function and use it in the same
-                        // function signature; hence we don't need to Unalias before the
-                        // .(*TypeParam) type assertion above.
-                        untyped = append(untypedᴷ, untyped, i);
-                    }
+                } else if (par.typ._<ж<TypeParam>>(ᐧ) is var (_, ok) && ok && !arg.isNil()) {
+                    // Since default types are all basic (i.e., non-composite) types, an
+                    // untyped argument will never match a composite parameter type; the
+                    // only parameter type it can possibly match against is a *TypeParam.
+                    // Thus, for untyped arguments we only need to look at parameter types
+                    // that are single type parameters.
+                    // Also, untyped nils don't have a default type and can be ignored.
+                    // Finally, it's not possible to have an alias type denoting a type
+                    // parameter declared by the current function and use it in the same
+                    // function signature; hence we don't need to Unalias before the
+                    // .(*TypeParam) type assertion above.
+                    untyped = append(untypedᴷ, untyped, i);
                 }
             }
         }
@@ -445,29 +443,25 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             nint nΔ1 = 0;
             foreach (var (_, index) in dirty) {
                 var t0 = inferred[index];
-                {
-                    var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
-                        // t0 was simplified to t1.
-                        // If t0 was a generic function, but the simplified signature t1 does
-                        // not contain any type parameters anymore, the function is not generic
-                        // anymore. Remove its type parameters. (go.dev/issue/59953)
-                        // Note that if t0 was a signature, t1 must be a signature, and t1
-                        // can only be a generic signature if it originated from a generic
-                        // function argument. Those signatures are never defined types and
-                        // thus there is no need to call Underlying below.
-                        // TODO(gri) Consider doing this in Checker.subst.
-                        //           Then this would fall out automatically here and also
-                        //           in instantiation (where we also explicitly nil out
-                        //           type parameters). See the *Signature TODO in subst.
-                        {
-                            var (sig, _) = t1._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0 && !isParameterized(tparams, new ΔSignatureжΔType(sig))) {
-                                sig.tparams = default;
-                            }
-                        }
-                        inferred[index] = t1;
-                        dirty[nΔ1] = index;
-                        nΔ1++;
+                var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
+                    // t0 was simplified to t1.
+                    // If t0 was a generic function, but the simplified signature t1 does
+                    // not contain any type parameters anymore, the function is not generic
+                    // anymore. Remove its type parameters. (go.dev/issue/59953)
+                    // Note that if t0 was a signature, t1 must be a signature, and t1
+                    // can only be a generic signature if it originated from a generic
+                    // function argument. Those signatures are never defined types and
+                    // thus there is no need to call Underlying below.
+                    // TODO(gri) Consider doing this in Checker.subst.
+                    //           Then this would fall out automatically here and also
+                    //           in instantiation (where we also explicitly nil out
+                    //           type parameters). See the *Signature TODO in subst.
+                    var (sig, _) = t1._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0 && !isParameterized(tparams, new ΔSignatureжΔType(sig))) {
+                        sig.tparams = default;
                     }
+                    inferred[index] = t1;
+                    dirty[nΔ1] = index;
+                    nΔ1++;
                 }
             }
             dirty = dirty.slice(0, nΔ1);
@@ -602,10 +596,8 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
         ref var w = ref Ꮡw.DerefOrNull();
 
         // detect cycles
-        {
-            var (x, ok) = w.seen[typ, ꟷ]; if (ok) {
-                res = x; goto ᒐdone;
-            }
+        var (x, ok) = w.seen[typ, ꟷ]; if (ok) {
+            res = x; goto ᒐdone;
         }
         w.seen[typ] = false;
         defer(() => {
@@ -727,14 +719,12 @@ internal static (ж<Δterm>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
         }
         return (single, true);
     }
-    {
-        var (typ, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default); if (typ != nil) {
-            // A core type is always an underlying type.
-            // If any term of tpar has a tilde, we don't
-            // have a precise core type and we must return
-            // a tilde as well.
-            return (Ꮡ(new Δterm(tilde, typ)), false);
-        }
+    var (typ, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default); if (typ != nil) {
+        // A core type is always an underlying type.
+        // If any term of tpar has a tilde, we don't
+        // have a precise core type and we must return
+        // a tilde as well.
+        return (Ꮡ(new Δterm(tilde, typ)), false);
     }
     return (default, false);
 }
@@ -769,14 +759,10 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
             // We have seen typ before. If it is one of the type parameters
             // in w.tparams, iterative substitution will lead to infinite expansion.
             // Nil out the corresponding type which effectively kills the cycle.
-            {
-                var (tpar, _) = typ._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
-                    {
-                        nint i = slices.Index(w.tparams, tpar); if (i >= 0) {
-                            // cycle through tpar
-                            w.inferred[i] = default;
-                        }
-                    }
+            var (tpar, _) = typ._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
+                nint i = slices.Index(w.tparams, tpar); if (i >= 0) {
+                    // cycle through tpar
+                    w.inferred[i] = default;
                 }
             }
             // If we don't have one of our type parameters, the cycle is due
@@ -853,10 +839,8 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
             break;
         }
         case ж<TypeParam> t: {
-            {
-                nint i = slices.Index(w.tparams, t); if (i >= 0 && w.inferred[i] != nil) {
-                    Ꮡw.typ(w.inferred[i]);
-                }
+            nint i = slices.Index(w.tparams, t); if (i >= 0 && w.inferred[i] != nil) {
+                Ꮡw.typ(w.inferred[i]);
             }
             break;
         }

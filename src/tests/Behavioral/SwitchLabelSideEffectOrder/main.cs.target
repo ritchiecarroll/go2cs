@@ -64,28 +64,26 @@ internal static void middle(nint t) {
 }
 
 internal static void nested(@string a, nint b) {
-    {
-        @string x = a + "!"u8;
-        var exprᴛ1 = x;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == s("p", "p!"): {
-            switch (b) {
-            case var ᴛ when ᴛ == f("q", 1): {
-                flush("nested "u8 + x, fmt.Sprint("p/q ", b));
-                break;
-            }
-            default: {
-                flush("nested "u8 + x, fmt.Sprint("p/default ", b));
-                break;
-            }}
-
+    @string x = a + "!"u8;
+    var exprᴛ1 = x;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == s("p", "p!"): {
+        switch (b) {
+        case var ᴛ when ᴛ == f("q", 1): {
+            flush("nested "u8 + x, fmt.Sprint("p/q ", b));
             break;
         }
-        case {} when exprᴛ1 == s("r", "r!") || exprᴛ1 == s("t", "t!"): {
-            flush("nested "u8 + x, "rt");
+        default: {
+            flush("nested "u8 + x, fmt.Sprint("p/default ", b));
             break;
         }}
+
+        break;
     }
+    case {} when exprᴛ1 == s("r", "r!") || exprᴛ1 == s("t", "t!"): {
+        flush("nested "u8 + x, "rt");
+        break;
+    }}
 
 }
 

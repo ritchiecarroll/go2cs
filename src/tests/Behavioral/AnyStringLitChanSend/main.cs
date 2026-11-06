@@ -77,12 +77,10 @@ internal static void Main() {
     var rt = new channel<any>(1);
     rt.ᐸꟷ(assertˢ);
     var got = ᐸꟷ(rt);
-    {
-        var (s, ok) = got._<@string>(ᐧ); if (ok) {
-            fmt.Println("assert string:", s);
-        } else {
-            fmt.Println("assert missed");
-        }
+    var (s, ok) = got._<@string>(ᐧ); if (ok) {
+        fmt.Println("assert string:", s);
+    } else {
+        fmt.Println("assert missed");
     }
 }
 

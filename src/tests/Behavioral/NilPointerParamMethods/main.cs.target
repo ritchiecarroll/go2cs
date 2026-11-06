@@ -27,10 +27,8 @@ internal static ж<node> store(ж<node> p) {
 internal static @string guarded(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    {
-        var err = checkArg(Ꮡp, "guarded"); if (err != nil) {
-            return "guarded: "u8 + err.Error();
-        }
+    var err = checkArg(Ꮡp, "guarded"); if (err != nil) {
+        return "guarded: "u8 + err.Error();
     }
     return "guarded: "u8 + p.name;
 }
@@ -91,11 +89,9 @@ internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s -> panic: %v\n"u8, label, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s -> panic: %v\n"u8, label, r);
+                return;
             }
         }, ref ᒐ);
         fn();

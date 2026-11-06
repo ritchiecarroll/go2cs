@@ -181,10 +181,8 @@ internal static nint /*numVarints*/ peekNumVarints(slice<byte> data) {
 
     for (; len(data) > 0; numVarints++) {
         error err = default;
-        {
-            (_, data, err) = decodeVarint(data); if (err != nil) {
-                break;
-            }
+        (_, data, err) = decodeVarint(data); if (err != nil) {
+            break;
         }
     }
     return numVarints;
@@ -298,10 +296,8 @@ internal static error decodeMessage(ж<buffer> Ꮡb, message m) {
         if (b.field >= len(dec) || dec[b.field] == nil) {
             continue;
         }
-        {
-            var errΔ1 = dec[b.field](Ꮡb, m); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = dec[b.field](Ꮡb, m); if (errΔ1 != nil) {
+            return errΔ1;
         }
     }
     return default;
@@ -310,10 +306,8 @@ internal static error decodeMessage(ж<buffer> Ꮡb, message m) {
 internal static error decodeInt64(ref buffer b, ж<int64> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    {
-        var err = checkType(ref b, 0); if (err != nil) {
-            return err;
-        }
+    var err = checkType(ref b, 0); if (err != nil) {
+        return err;
     }
     x = (int64)b.u64;
     return default;
@@ -332,10 +326,8 @@ internal static error decodeInt64s(ref buffer b, ж<slice<int64>> Ꮡx) {
             uint64 u = default;
             error err = default;
 
-            {
-                (u, data, err) = decodeVarint(data); if (err != nil) {
-                    return err;
-                }
+            (u, data, err) = decodeVarint(data); if (err != nil) {
+                return err;
             }
             x = append(x, (int64)u);
         }
@@ -354,10 +346,8 @@ internal static error decodeInt64s(ref buffer b, ж<slice<int64>> Ꮡx) {
 internal static error decodeUint64(ref buffer b, ж<uint64> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    {
-        var err = checkType(ref b, 0); if (err != nil) {
-            return err;
-        }
+    var err = checkType(ref b, 0); if (err != nil) {
+        return err;
     }
     x = b.u64;
     return default;
@@ -376,10 +366,8 @@ internal static error decodeUint64s(ref buffer b, ж<slice<uint64>> Ꮡx) {
             uint64 uΔ1 = default;
             error err = default;
 
-            {
-                (uΔ1, data, err) = decodeVarint(data); if (err != nil) {
-                    return err;
-                }
+            (uΔ1, data, err) = decodeVarint(data); if (err != nil) {
+                return err;
             }
             x = append(x, uΔ1);
         }
@@ -396,10 +384,8 @@ internal static error decodeUint64s(ref buffer b, ж<slice<uint64>> Ꮡx) {
 }
 
 internal static error decodeString(ref buffer b, ref @string x) {
-    {
-        var err = checkType(ref b, 2); if (err != nil) {
-            return err;
-        }
+    var err = checkType(ref b, 2); if (err != nil) {
+        return err;
     }
     x = (@string)b.data;
     return default;
@@ -409,10 +395,8 @@ internal static error decodeStrings(ref buffer b, ж<slice<@string>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     @string s = default;
-    {
-        var err = decodeString(ref b, ref s); if (err != nil) {
-            return err;
-        }
+    var err = decodeString(ref b, ref s); if (err != nil) {
+        return err;
     }
     x = append(x, s);
     return default;
@@ -421,10 +405,8 @@ internal static error decodeStrings(ref buffer b, ж<slice<@string>> Ꮡx) {
 internal static error decodeBool(ref buffer b, ж<bool> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    {
-        var err = checkType(ref b, 0); if (err != nil) {
-            return err;
-        }
+    var err = checkType(ref b, 0); if (err != nil) {
+        return err;
     }
     if ((int64)b.u64 == 0) {
         x = false;

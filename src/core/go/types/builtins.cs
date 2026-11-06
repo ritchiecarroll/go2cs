@@ -148,16 +148,14 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                         var y = args[1];
                         var hasString = false;
                         foreach (var (_, u) in range<ΔType, ΔType>(typeset(y.typ).Invoke)) {
-                            {
-                                var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical(s.elem, universeByte)) {
-                                    // typeset ⊇ {[]byte}
-                                } else if (u != nil && isString(u)) {
-                                    // typeset ⊇ {string}
-                                    hasString = true;
-                                } else {
-                                    y = default;
-                                    break;
-                                }
+                            var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical(s.elem, universeByte)) {
+                                // typeset ⊇ {[]byte}
+                            } else if (u != nil && isString(u)) {
+                                // typeset ⊇ {string}
+                                hasString = true;
+                            } else {
+                                y = default;
+                                break;
                             }
                         }
                         if (y != nil && hasString) {
@@ -395,19 +393,17 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // (applyTypeFunc never calls f with a type parameter)
             var f = ΔType (ΔType typ) => {
                 assert(!isTypeParam(typ));
-                {
-                    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
-                        switch (t.kind) {
-                        case var ᴛ2 when ᴛ2 == Float32: {
-                            return new BasicжΔType(Typ[Complex64]);
-                        }
-                        case var ᴛ2 when ᴛ2 == Float64: {
-                            return new BasicжΔType(Typ[Complex128]);
-                        }
-                        case var ᴛ2 when ᴛ2 == ΔUntypedFloat: {
-                            return new BasicжΔType(Typ[ΔUntypedComplex]);
-                        }}
+                var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
+                    switch (t.kind) {
+                    case var ᴛ2 when ᴛ2 == Float32: {
+                        return new BasicжΔType(Typ[Complex64]);
                     }
+                    case var ᴛ2 when ᴛ2 == Float64: {
+                        return new BasicжΔType(Typ[Complex128]);
+                    }
+                    case var ᴛ2 when ᴛ2 == ΔUntypedFloat: {
+                        return new BasicжΔType(Typ[ΔUntypedComplex]);
+                    }}
                 }
                 return default;
             };
@@ -448,15 +444,13 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, new SliceжΔType(NewSlice(universeByte)), nil); if (ok) {
                     special = true;
                     foreach (var (_, u) in range<ΔType, ΔType>(typeset(y.typ).Invoke)) {
-                        {
-                            var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical(s.elem, universeByte)) {
-                                // typeset ⊇ {[]byte}
-                            } else if (u != nil && isString(u)) {
-                                // typeset ⊇ {string}
-                            } else {
-                                special = false;
-                                break;
-                            }
+                        var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical(s.elem, universeByte)) {
+                            // typeset ⊇ {[]byte}
+                        } else if (u != nil && isString(u)) {
+                            // typeset ⊇ {string}
+                        } else {
+                            special = false;
+                            break;
                         }
                     }
                 }
@@ -556,19 +550,17 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // (applyTypeFunc never calls f with a type parameter)
             var f = ΔType (ΔType typ) => {
                 assert(!isTypeParam(typ));
-                {
-                    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
-                        switch (t.kind) {
-                        case var ᴛ2 when ᴛ2 == Complex64: {
-                            return new BasicжΔType(Typ[Float32]);
-                        }
-                        case var ᴛ2 when ᴛ2 == Complex128: {
-                            return new BasicжΔType(Typ[Float64]);
-                        }
-                        case var ᴛ2 when ᴛ2 == ΔUntypedComplex: {
-                            return new BasicжΔType(Typ[ΔUntypedFloat]);
-                        }}
+                var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
+                    switch (t.kind) {
+                    case var ᴛ2 when ᴛ2 == Complex64: {
+                        return new BasicжΔType(Typ[Float32]);
                     }
+                    case var ᴛ2 when ᴛ2 == Complex128: {
+                        return new BasicжΔType(Typ[Float64]);
+                    }
+                    case var ᴛ2 when ᴛ2 == ΔUntypedComplex: {
+                        return new BasicжΔType(Typ[ΔUntypedFloat]);
+                    }}
                 }
                 return default;
             };
@@ -1138,10 +1130,8 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
         // the results of previously seen types.
         {
             var named = asNamed(t); if (named != nil) {
-                {
-                    var (v, ok) = seen[named, ꟷ]; if (ok) {
-                        varSized = v; goto ᒐdone;
-                    }
+                var (v, ok) = seen[named, ꟷ]; if (ok) {
+                    varSized = v; goto ᒐdone;
                 }
                 if (seen == nil) {
                     seen = new map<ж<Named>, bool>();
@@ -1204,11 +1194,9 @@ internal static ΔType applyTypeFunc(this ж<Checker> Ꮡcheck, Func<ΔType, ΔT
                 if (t == nil) {
                     return false;
                 }
-                {
-                    var r = f(t.typ); if (r != nil) {
-                        Ꮡterms.ValueSlot = append(Ꮡterms.ValueSlot, NewTerm(t.tilde, r));
-                        return true;
-                    }
+                var r = f(t.typ); if (r != nil) {
+                    Ꮡterms.ValueSlot = append(Ꮡterms.ValueSlot, NewTerm(t.tilde, r));
+                    return true;
                 }
                 return false;
             })) {
@@ -1274,13 +1262,9 @@ internal static ж<ΔSignature> makeSig(ΔType res, params ꓸꓸꓸType argsʗp
 // arrayPtrDeref returns A if typ is of the form *A and A is an array;
 // otherwise it returns typ.
 internal static ΔType arrayPtrDeref(ΔType typ) {
-    {
-        var (p, ok) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (ok) {
-            {
-                var (a, _) = p.@base.Underlying()._<ж<Array>>(ᐧ); if (a != nil) {
-                    return new ArrayжΔType(a);
-                }
-            }
+    var (p, ok) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (ok) {
+        var (a, _) = p.@base.Underlying()._<ж<Array>>(ᐧ); if (a != nil) {
+            return new ArrayжΔType(a);
         }
     }
     return typ;

@@ -55,8 +55,8 @@ using static go.mime.quotedprintable_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABYwksqClKS2lKaigpSSgIKkgIKkpoKUlKiCgqoADRSCgoKUpoKCgoKCgoKElIKClKaUlJSCgpSClJS02LSUgoKClA==", "", "", "25=NewReader/1/1/1")]
-[assembly: GoPositionMap("mime/quotedprintable/writer.go", "writer.cs", "ABYwkqzSgqa0toKAgqSmgIKkpoKmgIK2qqKAgraokoKUgoKmgqaAgqSAgqSmgoCCyIKCpqaCgoCCyIKCgpTckoKmgoKCgILIpoKClKaCgoKUpoKAgraCpoI=")]
+[assembly: GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABYwksqClKS2lKaigpSSgpSClKaClJSogoKqAA0UgoKClKaCgoKCgoKChJSCgpSmlJSUgoKUgpSUtNi0lIKCgpQ=", "", "", "25=NewReader/1/1/1")]
+[assembly: GoPositionMap("mime/quotedprintable/writer.go", "writer.cs", "ABYwkqzSgqa0toKClKaClKaCpoKmqqKCpqiSgpSCgqaCpoCCpICCpKaCgriCgqamgoKCuIKCgpTckoKmgoKCgrimgoKUpoKCgpSmgoKmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;

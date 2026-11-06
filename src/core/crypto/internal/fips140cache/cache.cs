@@ -31,12 +31,10 @@ partial struct Cache<K, V> {
 // The cache is evicted some time after k becomes unreachable.
 public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
     var p = weak.Make<K>(k);
-    {
-        var (cached, ok) = Ꮡc.Ꮡm.Load(p); if (ok) {
-            var vΔ1 = cached._<ж<V>>();
-            if (check(vΔ1)) {
-                return (vΔ1, default);
-            }
+    var (cached, ok) = Ꮡc.Ꮡm.Load(p); if (ok) {
+        var vΔ1 = cached._<ж<V>>();
+        if (check(vΔ1)) {
+            return (vΔ1, default);
         }
     }
     var (v, err) = @new();

@@ -155,7 +155,7 @@ public class CrossPackagePromotedForwarderTests
         }
         """;
 
-    private const string Consumer =
+    internal const string Consumer =
         """
         using go;
 
@@ -292,7 +292,7 @@ public class CrossPackagePromotedForwarderTests
         }
         """;
 
-    private sealed record Run(Dictionary<string, string> Sources, IReadOnlyList<Diagnostic> Diagnostics);
+    internal sealed record Run(Dictionary<string, string> Sources, IReadOnlyList<Diagnostic> Diagnostics);
 
     private static IEnumerable<MetadataReference> CoreReferences()
     {
@@ -305,7 +305,7 @@ public class CrossPackagePromotedForwarderTests
     // Compiles golib, xa and xb in turn, then runs the TypeGenerator over the consumer. With
     // compilationReferences the consumer sees xa and xb as COMPILATIONS (an IDE's project-to-project
     // view) rather than as emitted images (an MSBuild build's).
-    private static Run Generate(string consumerSource, bool compilationReferences = false)
+    internal static Run Generate(string consumerSource, bool compilationReferences = false)
     {
         CSharpParseOptions parseOptions = new(LanguageVersion.Latest);
         CSharpCompilationOptions libraryOptions = new(OutputKind.DynamicallyLinkedLibrary);
@@ -335,7 +335,7 @@ public class CrossPackagePromotedForwarderTests
             [.. result.Diagnostics]);
     }
 
-    private static Run GenerateClean(string consumerSource, bool compilationReferences = false)
+    internal static Run GenerateClean(string consumerSource, bool compilationReferences = false)
     {
         Run run = Generate(consumerSource, compilationReferences);
         Assert.AreEqual(0, run.Diagnostics.Count, $"the generator must report no diagnostics: {string.Join("; ", run.Diagnostics)}");

@@ -116,40 +116,32 @@ partial struct Context {
 internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
-    {
-        var f = ctxt.JoinPath; if (f != nil) {
-            return f(elem.ꓸꓸꓸ);
-        }
+    var f = ctxt.JoinPath; if (f != nil) {
+        return f(elem.ꓸꓸꓸ);
     }
     return filepath.Join(elem.ꓸꓸꓸ);
 }
 
 // splitPathList calls ctxt.SplitPathList (if not nil) or else filepath.SplitList.
 internal static slice<@string> splitPathList(this ref Context ctxt, @string s) {
-    {
-        var f = ctxt.SplitPathList; if (f != nil) {
-            return f(s);
-        }
+    var f = ctxt.SplitPathList; if (f != nil) {
+        return f(s);
     }
     return filepath.SplitList(s);
 }
 
 // isAbsPath calls ctxt.IsAbsPath (if not nil) or else filepath.IsAbs.
 internal static bool isAbsPath(this ref Context ctxt, @string path) {
-    {
-        var f = ctxt.IsAbsPath; if (f != nil) {
-            return f(path);
-        }
+    var f = ctxt.IsAbsPath; if (f != nil) {
+        return f(path);
     }
     return filepath.IsAbs(path);
 }
 
 // isDir calls ctxt.IsDir (if not nil) or else uses os.Stat.
 internal static bool isDir(this ref Context ctxt, @string path) {
-    {
-        var f = ctxt.IsDir; if (f != nil) {
-            return f(path);
-        }
+    var f = ctxt.IsDir; if (f != nil) {
+        return f(path);
     }
     var (fi, err) = os.Stat(path);
     return err == nil && fi.IsDir();
@@ -161,17 +153,13 @@ internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string 
     @string rel = default;
     bool ok = default;
 
-    {
-        var f = ctxt.HasSubdir; if (f != nil) {
-            return f(root, dir);
-        }
+    var f = ctxt.HasSubdir; if (f != nil) {
+        return f(root, dir);
     }
 
     // Try using paths we received.
-    {
-        (rel, ok) = hasSubdir(root, dir); if (ok) {
-            return (rel, ok);
-        }
+    (rel, ok) = hasSubdir(root, dir); if (ok) {
+        return (rel, ok);
     }
 
     // Try expanding symlinks and comparing
@@ -180,15 +168,11 @@ internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string 
     var (rootSym, _) = filepath.EvalSymlinks(root);
     var (dirSym, _) = filepath.EvalSymlinks(dir);
 
-    {
-        (rel, ok) = hasSubdir(rootSym, dir); if (ok) {
-            return (rel, ok);
-        }
+    (rel, ok) = hasSubdir(rootSym, dir); if (ok) {
+        return (rel, ok);
     }
-    {
-        (rel, ok) = hasSubdir(root, dirSym); if (ok) {
-            return (rel, ok);
-        }
+    (rel, ok) = hasSubdir(root, dirSym); if (ok) {
+        return (rel, ok);
     }
     return hasSubdir(rootSym, dirSym);
 }
@@ -215,28 +199,24 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 // readDir calls ctxt.ReadDir (if not nil) or else os.ReadDir.
 internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) {
     // TODO: add a fs.DirEntry version of Context.ReadDir
-    {
-        var f = ctxt.ReadDir; if (f != nil) {
-            var (fis, err) = f(path);
-            if (err != nil) {
-                return (default, err);
-            }
-            var des = new slice<fs.DirEntry>(len(fis));
-            foreach (var (i, fi) in fis) {
-                des[i] = fs.FileInfoToDirEntry(fi);
-            }
-            return (des, default);
+    var f = ctxt.ReadDir; if (f != nil) {
+        var (fis, err) = f(path);
+        if (err != nil) {
+            return (default, err);
         }
+        var des = new slice<fs.DirEntry>(len(fis));
+        foreach (var (i, fi) in fis) {
+            des[i] = fs.FileInfoToDirEntry(fi);
+        }
+        return (des, default);
     }
     return os.ReadDir(path);
 }
 
 // openFile calls ctxt.OpenFile (if not nil) or else os.Open.
 internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) {
-    {
-        var fn = ctxt.OpenFile; if (fn != nil) {
-            return fn(path);
-        }
+    var fn = ctxt.OpenFile; if (fn != nil) {
+        return fn(path);
     }
 
     var (f, err) = os.Open(path);
@@ -339,16 +319,14 @@ internal static @string defaultGOPATH() {
     } else if (runtime.GOOS == "plan9"u8) {
         env = homeˢ2;
     }
-    {
-        @string home = os.Getenv(env); if (home != ""u8) {
-            @string def = filepath.Join(home, "go");
-            if (filepath.Clean(def) == filepath.Clean(runtime.GOROOT())) {
-                // Don't set the default GOPATH to GOROOT,
-                // as that will trigger warnings from the go tool.
-                return ""u8;
-            }
-            return def;
+    @string home = os.Getenv(env); if (home != ""u8) {
+        @string def = filepath.Join(home, "go");
+        if (filepath.Clean(def) == filepath.Clean(runtime.GOROOT())) {
+            // Don't set the default GOPATH to GOROOT,
+            // as that will trigger warnings from the go tool.
+            return ""u8;
         }
+        return def;
     }
     return ""u8;
 }
@@ -386,10 +364,8 @@ internal static Context defaultContext() {
 
     c.GOARCH = buildcfg.GOARCH;
     c.GOOS = buildcfg.GOOS;
-    {
-        @string goroot = runtime.GOROOT(); if (goroot != ""u8) {
-            c.GOROOT = filepath.Clean(goroot);
-        }
+    @string goroot = runtime.GOROOT(); if (goroot != ""u8) {
+        c.GOROOT = filepath.Clean(goroot);
     }
     c.GOPATH = envOr(gopathˢ, defaultGOPATH());
     c.Compiler = runtime.Compiler;
@@ -723,48 +699,40 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
         bool inTestdata(@string sub) => strings.Contains(sub, testdataˢ) || strings.HasSuffix(sub, testdataˢ2) || strings.HasPrefix(sub, testdataˢ3) || sub == "testdata"u8;
         if (ctxt.GOROOT != ""u8) {
             @string root = ctxt.joinPath(ctxt.GOROOT, srcˢ);
-            {
-                var (sub, ok) = ctxt.hasSubdir(root, p.Dir); if (ok && !inTestdata(sub)) {
-                    p.Goroot = true;
-                    p.ImportPath = sub;
-                    p.Root = ctxt.GOROOT;
-                    setPkga(); // p.ImportPath changed
-                    goto Found;
-                }
+            var (sub, ok) = ctxt.hasSubdir(root, p.Dir); if (ok && !inTestdata(sub)) {
+                p.Goroot = true;
+                p.ImportPath = sub;
+                p.Root = ctxt.GOROOT;
+                setPkga(); // p.ImportPath changed
+                goto Found;
             }
         }
         var all = ctxt.gopath();
         foreach (var (i, root) in all) {
             @string rootsrc = ctxt.joinPath(root, srcˢ);
-            {
-                var (sub, ok) = ctxt.hasSubdir(rootsrc, p.Dir); if (ok && !inTestdata(sub)) {
-                    // We found a potential import path for dir,
-                    // but check that using it wouldn't find something
-                    // else first.
-                    if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
-                        {
-                            @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, sub); if (ctxt.isDir(dir)) {
-                                p.ConflictDir = dir;
-                                goto Found;
-                            }
-                        }
+            var (sub, ok) = ctxt.hasSubdir(rootsrc, p.Dir); if (ok && !inTestdata(sub)) {
+                // We found a potential import path for dir,
+                // but check that using it wouldn't find something
+                // else first.
+                if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
+                    @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, sub); if (ctxt.isDir(dir)) {
+                        p.ConflictDir = dir;
+                        goto Found;
                     }
-                    foreach (var (_, earlyRoot) in all.slice(0, i)) {
-                        {
-                            @string dir = ctxt.joinPath(earlyRoot, srcˢ, sub); if (ctxt.isDir(dir)) {
-                                p.ConflictDir = dir;
-                                goto Found;
-                            }
-                        }
-                    }
-
-                    // sub would not name some other directory instead of this one.
-                    // Record it.
-                    p.ImportPath = sub;
-                    p.Root = root;
-                    setPkga(); // p.ImportPath changed
-                    goto Found;
                 }
+                foreach (var (_, earlyRoot) in all.slice(0, i)) {
+                    @string dir = ctxt.joinPath(earlyRoot, srcˢ, sub); if (ctxt.isDir(dir)) {
+                        p.ConflictDir = dir;
+                        goto Found;
+                    }
+                }
+
+                // sub would not name some other directory instead of this one.
+                // Record it.
+                p.ImportPath = sub;
+                p.Root = root;
+                setPkga(); // p.ImportPath changed
+                goto Found;
             }
         }
         // It's okay that we didn't find a root containing dir.
@@ -774,12 +742,10 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
             return (p, fmt.Errorf("import %q: cannot import absolute path"u8, path));
         }
 
-        {
-            var errΔ1 = ctxt.importGo(p, path, srcDir, mode); if (errΔ1 == nil) {
-                goto Found;
-            } else if (!AreEqual(errΔ1, errNoModules)) {
-                return (p, errΔ1);
-            }
+        var errΔ1 = ctxt.importGo(p, path, srcDir, mode); if (errΔ1 == nil) {
+            goto Found;
+        } else if (!AreEqual(errΔ1, errNoModules)) {
+            return (p, errΔ1);
         }
 
         var gopath = ctxt.gopath(); // needed twice below; avoid computing many times
@@ -1036,10 +1002,8 @@ Found:
             break;
         }
         default: {
-            {
-                var list = fileListForExt(p, ext); if (list != nil) {
-                    list.ValueSlot = append(list.ValueSlot, name);
-                }
+            var list = fileListForExt(p, ext); if (list != nil) {
+                list.ValueSlot = append(list.ValueSlot, name);
             }
             continue;
             break;
@@ -1113,10 +1077,8 @@ Found:
                 }
                 isCgo = true;
                 if (imp.doc != nil) {
-                    {
-                        var errΔ5 = Ꮡctxt.saveCgo(filename, p, imp.doc); if (errΔ5 != nil) {
-                            badGoFile(name, errΔ5);
-                        }
+                    var errΔ5 = Ꮡctxt.saveCgo(filename, p, imp.doc); if (errΔ5 != nil) {
+                        badGoFile(name, errΔ5);
                     }
                 }
             }
@@ -1332,18 +1294,14 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
         // If the source directory is in GOROOT, then the in-process code works fine
         // and we should keep using it. Moreover, the 'go list' approach below doesn't
         // take standard-library vendoring into account and will fail.
-        {
-            var (_, ok) = ctxt.hasSubdir(filepath.Join(ctxt.GOROOT, srcˢ), absSrcDir); if (ok) {
-                return errNoModules;
-            }
+        var (_, ok) = ctxt.hasSubdir(filepath.Join(ctxt.GOROOT, srcˢ), absSrcDir); if (ok) {
+            return errNoModules;
         }
     }
 
     // For efficiency, if path is a standard library package, let the usual lookup code handle it.
-    {
-        @string dirΔ1 = ctxt.joinPath(ctxt.GOROOT, srcˢ, path); if (ctxt.isDir(dirΔ1)) {
-            return errNoModules;
-        }
+    @string dirΔ1 = ctxt.joinPath(ctxt.GOROOT, srcˢ, path); if (ctxt.isDir(dirΔ1)) {
+        return errNoModules;
     }
 
     // If GO111MODULE=auto, look to see if there is a go.mod.
@@ -1366,15 +1324,13 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
             }
         }
         for (;;) {
-            {
-                var (fΔ1, errΔ1) = ctxt.openFile(ctxt.joinPath(parent, goModˢ)); if (errΔ1 == nil) {
-                    var buf = new slice<byte>(100);
-                    var (_, errΔ2) = fΔ1.Read(buf);
-                    fΔ1.Close();
-                    if (errΔ2 == nil || AreEqual(errΔ2, io.EOF)) {
-                        // go.mod exists and is readable (is a file, not a directory).
-                        break;
-                    }
+            var (fΔ1, errΔ1) = ctxt.openFile(ctxt.joinPath(parent, goModˢ)); if (errΔ1 == nil) {
+                var buf = new slice<byte>(100);
+                var (_, errΔ2) = fΔ1.Read(buf);
+                fΔ1.Close();
+                if (errΔ2 == nil || AreEqual(errΔ2, io.EOF)) {
+                    // go.mod exists and is readable (is a file, not a directory).
+                    break;
                 }
             }
             @string d = filepath.Dir(parent);
@@ -1766,12 +1722,10 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
         var p = content;
         while (len(p) > 0) {
             var line = p;
-            {
-                nint i = bytes.IndexByte(line, (byte)'\n'); if (i >= 0) {
-                    (line, p) = (line.slice(0, i), p.slice(i + 1));
-                } else {
-                    p = p.slice(len(p));
-                }
+            nint i = bytes.IndexByte(line, (byte)'\n'); if (i >= 0) {
+                (line, p) = (line.slice(0, i), p.slice(i + 1));
+            } else {
+                p = p.slice(len(p));
             }
             line = bytes.TrimSpace(line);
             if (!bytes.HasPrefix(line, slashSlash) || !bytes.Contains(line, plusBuild)) {
@@ -1781,11 +1735,9 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
             if (!constraint.IsPlusBuild(text)) {
                 continue;
             }
-            {
-                var (x, errΔ4) = constraint.Parse(text); if (errΔ4 == nil) {
-                    if (!Ꮡctxt.eval(x, allTags)) {
-                        shouldBuild = false;
-                    }
+            var (x, errΔ4) = constraint.Parse(text); if (errΔ4 == nil) {
+                if (!Ꮡctxt.eval(x, allTags)) {
+                    shouldBuild = false;
                 }
             }
         }
@@ -1853,12 +1805,10 @@ Lines:
 Comments:
         while (len(line) > 0) {
             if (inSlashStar) {
-                {
-                    nint i = bytes.Index(line, starSlash); if (i >= 0) {
-                        inSlashStar = false;
-                        line = bytes.TrimSpace(line.slice(i + len(starSlash)));
-                        goto continue_Comments;
-                    }
+                nint i = bytes.Index(line, starSlash); if (i >= 0) {
+                    inSlashStar = false;
+                    line = bytes.TrimSpace(line.slice(i + len(starSlash)));
+                    goto continue_Comments;
                 }
                 goto continue_Lines;
             }
@@ -1903,10 +1853,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         }
 
         // #cgo (nocallback|noescape) <function name>
-        {
-            var fields = strings.Fields(line); if (len(fields) == 3 && (fields[1] == "nocallback" || fields[1] == "noescape")) {
-                continue;
-            }
+        var fields = strings.Fields(line); if (len(fields) == 3 && (fields[1] == "nocallback" || fields[1] == "noescape")) {
+            continue;
         }
 
         // Split at colon.
@@ -1943,10 +1891,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         foreach (var (i, vᴛ1) in args) {
             var arg = vᴛ1;
 
-            {
-                (arg, ok) = expandSrcDir(arg, di.Dir); if (!ok) {
-                    return fmt.Errorf("%s: malformed #cgo argument: %s"u8, filename, arg);
-                }
+            (arg, ok) = expandSrcDir(arg, di.Dir); if (!ok) {
+                return fmt.Errorf("%s: malformed #cgo argument: %s"u8, filename, arg);
             }
             args[i] = arg;
         }
@@ -2063,10 +2009,8 @@ internal static bool safeCgoName(@string s) {
         return false;
     }
     for (nint i = 0; i < len(s); i++) {
-        {
-            var c = s[i]; if (c < utf8.RuneSelf && strings.IndexByte(safeString, c) < 0) {
-                return false;
-            }
+        var c = s[i]; if (c < utf8.RuneSelf && strings.IndexByte(safeString, c) < 0) {
+            return false;
         }
     }
     return true;
@@ -2254,10 +2198,8 @@ internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@st
     name = name.slice(i); // ignore everything before first _
 
     var l = strings.Split(name, "_");
-    {
-        nint nΔ1 = len(l); if (nΔ1 > 0 && l[nΔ1 - 1] == "test") {
-            l = l.slice(0, nΔ1 - 1);
-        }
+    nint nΔ1 = len(l); if (nΔ1 > 0 && l[nΔ1 - 1] == "test") {
+        l = l.slice(0, nΔ1 - 1);
     }
     nint n = len(l);
     if (n >= 2 && syslist.KnownOS[l[n - 2]] && syslist.KnownArch[l[n - 1]]) {

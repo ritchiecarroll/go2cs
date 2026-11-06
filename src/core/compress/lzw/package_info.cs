@@ -60,7 +60,7 @@ using static go.compress.lzw_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("compress/lzw/reader.go", "reader.cs", "AFC0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClP7kgoKCgoKUgpSmgoKUgsaCgoKCtIK0kriCgpSCgqaCgoKUgoKUgsaCpIKCgpSCuJSCpoLYgqaYooKqooIAAh4ADAKmgoKC5oKUtLSClIKCpoKClIKCgoKCgg==")]
-[assembly: GoPositionMap("compress/lzw/writer.go", "writer.cs", "AD2CAZKCgoKAgqSClKiSgoKCgIKkgpTKmtKCgoKUgoKAgqSCgoKClJTowoKUgpSAgoKCgsiCggAHEIKAgsiUgoKCpoKCgoKUgriAgqSmgIKClIK2goKClMaCqsKCgpSmlIKAgqSAgsiCgILIgoCCtoKClICCtqqiggACGAAJAqaCgoKmgpS0tIKUgoKUgoKUgoKCgoKCgg==")]
+[assembly: GoPositionMap("compress/lzw/writer.go", "writer.cs", "AD2CAZKCgoKClIKUqJKCgoKClIKUyprSgoKClIKCgpSCgoKClJTowoKUgpSCgoKCuIKCAAcQgoK4lIKCgqaCgoKClIK4gpSmgoKUgqaCgoKUxoKqwoKClKaUgoCCpICCyIKCuIKAgraCgpSCpqqiggACGAAJAqaCgoKmgpS0tIKUgoKUgoKUgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

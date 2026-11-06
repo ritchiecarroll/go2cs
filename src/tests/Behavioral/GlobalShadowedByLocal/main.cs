@@ -57,10 +57,8 @@ internal static partial nint nestedBlockShadow(nint kind) {
 internal static map<@string, slice<@string>> hosts = new map<@string, slice<@string>>{["a"] = ["x", "y"]};
 
 internal static partial nint tupleInitShadow(@string key) {
-    {
-        var (hostsΔ1, ok) = hosts[key, ꟷ]; if (ok) {
-            return len(hostsΔ1);
-        }
+    var (hostsΔ1, ok) = hosts[key, ꟷ]; if (ok) {
+        return len(hostsΔ1);
     }
     return -1;
 }
@@ -73,10 +71,8 @@ internal static partial nint constSelfInitShadow() {
 }
 
 internal static partial nint constNestedInitShadow() {
-    {
-        nint mlkemQ = main_package.mlkemQ / 1000; if (mlkemQ > 2) {
-            return mlkemQ;
-        }
+    nint mlkemQ = main_package.mlkemQ / 1000; if (mlkemQ > 2) {
+        return mlkemQ;
     }
     return -1;
 }

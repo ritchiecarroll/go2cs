@@ -130,23 +130,19 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
 
             // If we have a named type, we may have associated methods.
             // Look for those first.
-            {
-                var named = asNamed(typΔ1); if (named != nil) {
-                    {
-                        var alt = seen.lookup(named); if (alt != nil) {
-                            // We have seen this type before, at a more shallow depth
-                            // (note that multiples of this type at the current depth
-                            // were consolidated before). The type at that depth shadows
-                            // this same type at the current depth, so we can ignore
-                            // this one.
-                            continue;
-                        }
-                    }
-                    seen.add(named);
+            var named = asNamed(typΔ1); if (named != nil) {
+                var alt = seen.lookup(named); if (alt != nil) {
+                    // We have seen this type before, at a more shallow depth
+                    // (note that multiples of this type at the current depth
+                    // were consolidated before). The type at that depth shadows
+                    // this same type at the current depth, so we can ignore
+                    // this one.
+                    continue;
+                }
+                seen.add(named);
 
-                    for (nint i = 0; i < named.NumMethods(); i++) {
-                        mset = mset.addOne(named.Method(i), concat(e.index, i), e.indirect, e.multiples);
-                    }
+                for (nint i = 0; i < named.NumMethods(); i++) {
+                    mset = mset.addOne(named.Method(i), concat(e.index, i), e.indirect, e.multiples);
                 }
             }
 
@@ -183,30 +179,26 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
         foreach (var (k, vᴛ1) in mset) {
             var m = vᴛ1;
 
-            {
-                var (_, found) = @base[k, ꟷ]; if (!found) {
-                    // Fields collide with methods of the same name at this depth.
-                    if (fset[k]) {
-                        m = default; // collision
-                    }
-                    if (@base == nil) {
-                        @base = new methodSet(0);
-                    }
-                    @base[k] = m;
+            var (_, found) = @base[k, ꟷ]; if (!found) {
+                // Fields collide with methods of the same name at this depth.
+                if (fset[k]) {
+                    m = default; // collision
                 }
+                if (@base == nil) {
+                    @base = new methodSet(0);
+                }
+                @base[k] = m;
             }
         }
 
         // Add all (remaining) fields at this depth as collisions (since they will
         // hide any method further down) if no entries with matching names exist already.
         foreach (var (k, _) in fset) {
-            {
-                var (_, found) = @base[k, ꟷ]; if (!found) {
-                    if (@base == nil) {
-                        @base = new methodSet(0);
-                    }
-                    @base[k] = default; // collision
+            var (_, found) = @base[k, ꟷ]; if (!found) {
+                if (@base == nil) {
+                    @base = new methodSet(0);
                 }
+                @base[k] = default; // collision
             }
         }
 
@@ -262,11 +254,9 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
         // (!indirect && f.hasPtrRecv()). A 2nd method on the same level may be in the method
         // set and may not collide with the first one, thus leading to a false positive.
         // Is that possible? Investigate.
-        {
-            var (_, found) = s[key, ꟷ]; if (!found && (indirect || !f.hasPtrRecv())) {
-                s[key] = Ꮡ(new Selection(MethodVal, default, new FuncжObject(Ꮡf), index, indirect));
-                return s;
-            }
+        var (_, found) = s[key, ꟷ]; if (!found && (indirect || !f.hasPtrRecv())) {
+            s[key] = Ꮡ(new Selection(MethodVal, default, new FuncжObject(Ꮡf), index, indirect));
+            return s;
         }
     }
     s[key] = default; // collision

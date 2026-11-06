@@ -182,10 +182,8 @@ internal static void Main() {
 
 internal static void calculate(nint x) {
     nint y = x * 2;
-    {
-        nint xΔ1 = y - 1; if (xΔ1 > 0) {
-            fmt.Println(xΔ1);
-        }
+    nint xΔ1 = y - 1; if (xΔ1 > 0) {
+        fmt.Println(xΔ1);
     }
 }
 

@@ -14,10 +14,8 @@ partial struct Buffers /*[]slice<byte>*/;
 public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     ref var v = ref Ꮡv.DerefOrNull();
 
-    {
-        var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
-            return wv.writeBuffers(Ꮡv);
-        }
+    var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
+        return wv.writeBuffers(Ꮡv);
     }
     int64 n = default;
     foreach (var (_, b) in range<slice<byte>>(v)) {
@@ -155,14 +153,12 @@ internal static void Main() {
     (n, err) = Ꮡbufs.WriteTo(new PlainConnжWriter(p));
     report("PlainConn", ref (plainSink).DerefOrNull(), n, err);
 
-    {
-        var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
-            ref var more = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice()), out var Ꮡmore);
-            (n, _) = wv.writeBuffers(Ꮡmore);
-            fmt.Println("direct", n, (@string)tcpSink.bytes);
-        } else {
-            fmt.Println("direct", "miss");
-        }
+    var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
+        ref var more = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice()), out var Ꮡmore);
+        (n, _) = wv.writeBuffers(Ꮡmore);
+        fmt.Println("direct", n, (@string)tcpSink.bytes);
+    } else {
+        fmt.Println("direct", "miss");
     }
 }
 

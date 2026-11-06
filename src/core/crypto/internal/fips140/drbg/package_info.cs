@@ -61,8 +61,8 @@ using static go.crypto.@internal.fips140.drbg_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCptaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
-[assembly: GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oCCpJQ=")]
-[assembly: GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AB0wAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgoDKgoKktAAEEtIADBqigIKCtoKC", "60-64:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oKUlA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AB0wAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgsqCgpS0AAQS0gAMGqKCgqaCgg==", "60-64:1", "", "", "", "67:21,68:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

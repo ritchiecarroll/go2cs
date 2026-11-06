@@ -1,0 +1,546 @@
+start 2026-11-05 13:01:59 conv=7871e564020be20e dotnet=10.0.400 go=go1.26.10
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfChannel\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfChannel
+
+Recursive conversion complete in 9.71s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfChannel\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfChannel\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:16.08
+P/PerfChannel hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll ca45894e7c19 r2r-dll 2f9d6b274af3
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfChannel\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfChannel
+
+Recursive conversion complete in 1.59s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfChannel\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfChannel\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.67
+H/PerfChannel hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll b7313d2b6fb7 r2r-dll 61d7d2d2d53d
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfFib\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfFib
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfFib\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfFib\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.28
+P/PerfFib hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 51d4c23cdacb r2r-dll 14d41d8f2a5f
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfFib\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfFib
+
+Recursive conversion complete in 1.58s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfFib\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfFib\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.61
+H/PerfFib hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 7b8f17de9be6 r2r-dll 7ca2ee4d1c8b
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfFieldView\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfFieldView
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfFieldView\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfFieldView\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.84
+P/PerfFieldView hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll d228d0b49d85 r2r-dll 7ee69e0f5cc9
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfFieldView\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfFieldView
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfFieldView\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfFieldView\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.83
+H/PerfFieldView hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll c490d732ce21 r2r-dll 05e5d4da2daa
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfIface\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIface
+
+Recursive conversion complete in 1.56s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIface\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIface\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.09
+P/PerfIface hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 1bc12d94ebec r2r-dll 6ce0b92564c8
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfIface\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIface
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIface\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIface\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.94
+H/PerfIface hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 31edd6ce18f6 r2r-dll bc37db401320
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceCall\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceCall
+
+Recursive conversion complete in 1.54s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceCall\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceCall\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.95
+P/PerfIfaceCall hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 360334052fe1 r2r-dll af7e88d1daea
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceCall\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceCall
+
+Recursive conversion complete in 1.56s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceCall\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceCall\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.98
+H/PerfIfaceCall hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 15f24aab10eb r2r-dll 16d85ba2ad45
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShell\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceShell
+
+Recursive conversion complete in 1.54s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShell\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShell\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.87
+P/PerfIfaceShell hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 6a412f2f6431 r2r-dll 1e1509386f8a
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShell\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceShell
+
+Recursive conversion complete in 1.59s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShell\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShell\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.95
+H/PerfIfaceShell hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 0e83763fe985 r2r-dll ab6764f27968
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShellChurn\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceShellChurn
+
+Recursive conversion complete in 1.58s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShellChurn\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfIfaceShellChurn\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.26
+P/PerfIfaceShellChurn hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll d117c7522a13 r2r-dll 384e8895ea21
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShellChurn\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfIfaceShellChurn
+
+Recursive conversion complete in 1.55s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShellChurn\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfIfaceShellChurn\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.93
+H/PerfIfaceShellChurn hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll a5864df87583 r2r-dll 1877e2c8294a
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfMap\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMap
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfMap\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfMap\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.62
+P/PerfMap hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 5567c1872db3 r2r-dll cde73142dd42
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfMap\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMap
+
+Recursive conversion complete in 1.55s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfMap\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfMap\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.64
+H/PerfMap hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll f20a9537ae22 r2r-dll ee4f6f92bd01
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfMatMul\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMatMul
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfMatMul\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfMatMul\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.61
+P/PerfMatMul hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll ce055384f81b r2r-dll 6e4ec2b0e8c3
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfMatMul\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMatMul
+
+Recursive conversion complete in 1.65s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfMatMul\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfMatMul\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.67
+H/PerfMatMul hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 08d299901239 r2r-dll d8e88252a3b1
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfRefLower\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfRefLower
+
+Recursive conversion complete in 1.58s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfRefLower\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfRefLower\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.74
+P/PerfRefLower hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 61b045efb0ab r2r-dll 77e84f5266a1
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfRefLower\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfRefLower
+
+Recursive conversion complete in 1.58s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfRefLower\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfRefLower\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.77
+H/PerfRefLower hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll e97b46958de8 r2r-dll 56837f565069
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfSieve\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSieve
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfSieve\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfSieve\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.74
+P/PerfSieve hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 01b99bee4e46 r2r-dll 5f92ceb689a5
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfSieve\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSieve
+
+Recursive conversion complete in 1.58s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfSieve\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfSieve\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.61
+H/PerfSieve hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll a9b6879bc57f r2r-dll 32bb440a6aee
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfSort\src
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSort
+
+Recursive conversion complete in 1.76s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfSort\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfSort\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.90
+P/PerfSort hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 1bdc0e5817f4 r2r-dll d7ce80ebb853
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfSort\src
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSort
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfSort\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfSort\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.63
+H/PerfSort hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll b474ab04c7c0 r2r-dll afb81a435d9d
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.53s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStartup\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.51
+P/PerfStartup hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 404120c221cd r2r-dll 236c91782723
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStartup\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.51
+H/PerfStartup hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 07b9480a975f r2r-dll a54eda9292dc
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfString\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfString
+
+Recursive conversion complete in 5.21s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfString\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfString\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.69
+P/PerfString hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 333d877cddba r2r-dll b36a4e5e3f53
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfString\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfString
+
+Recursive conversion complete in 2.83s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfString\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfString\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.62
+H/PerfString hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 2c4d1aae2102 r2r-dll 114e78989ada
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringMatch\src
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringMatch
+
+Recursive conversion complete in 1.79s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringMatch\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringMatch\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.04
+P/PerfStringMatch hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll bac64b30e6c1 r2r-dll 39bf5603553d
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringMatch\src
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringMatch
+
+Recursive conversion complete in 1.59s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringMatch\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringMatch\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.77
+H/PerfStringMatch hoisted-fields=7 jit rc=0 r2r rc=0 jit-dll 2cd02eef4136 r2r-dll a94d6ca53f03
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringView\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringView
+
+Recursive conversion complete in 1.6s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringView\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfStringView\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.62
+P/PerfStringView hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 666f3e89049f r2r-dll dcd7f4e4efe6
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringView\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringView
+
+Recursive conversion complete in 1.56s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringView\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfStringView\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.58
+H/PerfStringView hoisted-fields=1 jit rc=0 r2r rc=0 jit-dll f0e31436c111 r2r-dll cbb3a6d33bf4
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\P\PerfTlsHandshake\src
+Closure: 163 packages discovered — converting 1 app + 0 third-party, referencing 161 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfTlsHandshake
+
+Recursive conversion complete in 5.88s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfTlsHandshake\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\P\PerfTlsHandshake\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:14.32
+P/PerfTlsHandshake hoisted-fields=0 jit rc=0 r2r rc=0 jit-dll 8ff62851b7dd r2r-dll 236a0c3655f3
+Recursively converting module at C:\go2cs\scratch\p1262\sw\tmp\H\PerfTlsHandshake\src
+Closure: 163 packages discovered — converting 1 app + 0 third-party, referencing 161 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfTlsHandshake
+
+Recursive conversion complete in 2.15s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfTlsHandshake\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\sw\tmp\H\PerfTlsHandshake\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.44
+H/PerfTlsHandshake hoisted-fields=3 jit rc=0 r2r rc=0 jit-dll 547fb45965fa r2r-dll 58bce1df8cbd
+end 2026-11-05 13:32:24 fail=0

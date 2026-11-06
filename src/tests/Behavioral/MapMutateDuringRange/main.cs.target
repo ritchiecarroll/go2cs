@@ -7,10 +7,8 @@ partial class main_package {
 internal static @string dump(map<@string, nint> m, slice<@string> keys) {
     @string s = "";
     foreach (var (_, k) in range(keys)) {
-        {
-            var (v, ok) = m[k, ꟷ]; if (ok) {
-                s += fmt.Sprintf("%s=%d "u8, k, v);
-            }
+        var (v, ok) = m[k, ꟷ]; if (ok) {
+            s += fmt.Sprintf("%s=%d "u8, k, v);
         }
     }
     return fmt.Sprintf("[%s] len=%d"u8, s, len(m));

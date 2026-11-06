@@ -88,10 +88,8 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
                 return (default, errΔ1);
             }
         }
-        {
-            var (_, errΔ2) = tryReadFull(tr.r, tr.blk.slice(0, (nint)(tr.pad))); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var (_, errΔ2) = tryReadFull(tr.r, tr.blk.slice(0, (nint)(tr.pad))); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         tr.pad = 0;
 
@@ -151,10 +149,8 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             // The old GNU sparse format is handled here since it is technically
             // just a regular file with additional attributes.
 
-            {
-                var errΔ7 = mergePAX(ref (hdr).DerefOrNull(), paxHdrs); if (errΔ7 != nil) {
-                    return (default, errΔ7);
-                }
+            var errΔ7 = mergePAX(ref (hdr).DerefOrNull(), paxHdrs); if (errΔ7 != nil) {
+                return (default, errΔ7);
             }
             if (gnuLongName != ""u8) {
                 hdr.Name = gnuLongName;
@@ -172,18 +168,14 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
 
             // The extended headers may have updated the size.
             // Thus, setup the regFileReader again after merging PAX headers.
-            {
-                var errΔ8 = tr.handleRegularFile(hdr); if (errΔ8 != nil) {
-                    return (default, errΔ8);
-                }
+            var errΔ8 = tr.handleRegularFile(hdr); if (errΔ8 != nil) {
+                return (default, errΔ8);
             }
 
             // Sparse formats rely on being able to read from the logical data
             // section; there must be a preceding call to handleRegularFile.
-            {
-                var errΔ9 = tr.handleSparseFile(hdr, rawHdr); if (errΔ9 != nil) {
-                    return (default, errΔ9);
-                }
+            var errΔ9 = tr.handleSparseFile(hdr, rawHdr); if (errΔ9 != nil) {
+                return (default, errΔ9);
             }
 
             // Set the final guess at the format.
@@ -273,10 +265,8 @@ internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr,
     hdr.Format.mayOnlyBe(FormatPAX);
 
     // Update hdr from GNU sparse PAX headers.
-    {
-        @string name = hdr.PAXRecords[paxGNUSparseName]; if (name != ""u8) {
-            hdr.Name = name;
-        }
+    @string name = hdr.PAXRecords[paxGNUSparseName]; if (name != ""u8) {
+        hdr.Name = name;
     }
     @string size = hdr.PAXRecords[paxGNUSparseSize];
     if (size == ""u8) {
@@ -430,10 +420,8 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
         }
     }
     if (bytes.Equal(tr.blk[..], zeroBlock[..])) {
-        {
-            var (_, err) = io.ReadFull(tr.r, tr.blk[..]); if (err != nil) {
-                return (default, ж<block>.NilBoxOfDims(512L), err); // EOF is okay here; exactly 1 block of zeros read
-            }
+        var (_, err) = io.ReadFull(tr.r, tr.blk[..]); if (err != nil) {
+            return (default, ж<block>.NilBoxOfDims(512L), err); // EOF is okay here; exactly 1 block of zeros read
         }
         if (bytes.Equal(tr.blk[..], zeroBlock[..])) {
             return (default, ж<block>.NilBoxOfDims(512L), io.EOF); // normal EOF; exactly 2 block of zeros read
@@ -534,10 +522,8 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
             if (p2.err != nil) {
                 (hdr.AccessTime, hdr.ChangeTime) = (new time.Time(), new time.Time());
                 var ustarΔ4 = Ꮡtr.Ꮡblk.toUSTAR();
-                {
-                    @string s = p.parseString(ustarΔ4.prefix()); if (isASCII(s)) {
-                        prefix = s;
-                    }
+                @string s = p.parseString(ustarΔ4.prefix()); if (isASCII(s)) {
+                    prefix = s;
                 }
                 hdr.Format = FormatUnknown; // Buggy file is not GNU
             }
@@ -598,10 +584,8 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
 
         if (s.isExtended()[0] > 0) {
             // There are more entries. Read an extension header and parse its entries.
-            {
-                var (_, err) = mustReadFull(tr.r, blk.Value[..]); if (err != nil) {
-                    return (default, err);
-                }
+            var (_, err) = mustReadFull(tr.r, blk.Value[..]); if (err != nil) {
+                return (default, err);
             }
             s = blk.toSparse();
             totalSize += len(s);
@@ -637,10 +621,8 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
             if (totalSize > maxSpecialFileSize) {
                 return errSparseTooLong;
             }
-            {
-                var (_, errΔ1) = mustReadFull(r, blkʗ1[..]); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var (_, errΔ1) = mustReadFull(r, blkʗ1[..]); if (errΔ1 != nil) {
+                return errΔ1;
             }
             buf.Write(blkʗ1[..]);
             foreach (var (_, c) in blkʗ1.ΔRangeSnapshot()) {
@@ -662,10 +644,8 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
 
     // Parse for the number of entries.
     // Use integer overflow resistant math to check this.
-    {
-        var errΔ2 = feedTokens(1); if (errΔ2 != nil) {
-            return (default, errΔ2);
-        }
+    var errΔ2 = feedTokens(1); if (errΔ2 != nil) {
+        return (default, errΔ2);
     }
     var (numEntries, err) = strconv.ParseInt(nextToken(), 10, 0); // Intentionally parse as native int
     if (err != nil || numEntries < 0 || (nint)(2 * numEntries) < (nint)numEntries) {
@@ -675,10 +655,8 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
     // Parse for all member entries.
     // numEntries is trusted after this since feedTokens limits the number of
     // tokens based on maxSpecialFileSize.
-    {
-        var errΔ3 = feedTokens(2 * numEntries); if (errΔ3 != nil) {
-            return (default, errΔ3);
-        }
+    var errΔ3 = feedTokens(2 * numEntries); if (errΔ3 != nil) {
+        return (default, errΔ3);
     }
     var spd = new sparseDatas(0, (nint)(numEntries));
     for (var i = (int64)0; i < numEntries; i++) {
@@ -890,10 +868,8 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
 
     var (ws, ok) = w._<io.WriteSeeker>(ᐧ);
     if (ok) {
-        {
-            var (_, errΔ1) = ws.Seek(0, io.SeekCurrent); if (errΔ1 != nil) {
-                ok = false; // Not all io.Seeker can really seek
-            }
+        var (_, errΔ1) = ws.Seek(0, io.SeekCurrent); if (errΔ1 != nil) {
+            ok = false; // Not all io.Seeker can really seek
         }
     }
     if (!ok) {
@@ -1005,21 +981,19 @@ internal static error discard(io.Reader r, int64 n) {
     // the fact that the stream may be truncated. We can rely on the
     // io.CopyN done shortly afterwards to trigger any IO errors.
     int64 seekSkipped = default; // Number of bytes skipped via Seek
-    {
-        var (sr, ok) = r._<io.Seeker>(ᐧ); if (ok && n > 1) {
-            // Not all io.Seeker can actually Seek. For example, os.Stdin implements
-            // io.Seeker, but calling Seek always returns an error and performs
-            // no action. Thus, we try an innocent seek to the current position
-            // to see if Seek is really supported.
-            var (pos1, errΔ1) = sr.Seek(0, io.SeekCurrent);
-            if (pos1 >= 0 && errΔ1 == nil) {
-                // Seek seems supported, so perform the real Seek.
-                var (pos2, errΔ2) = sr.Seek(n - 1, io.SeekCurrent);
-                if (pos2 < 0 || errΔ2 != nil) {
-                    return errΔ2;
-                }
-                seekSkipped = pos2 - pos1;
+    var (sr, ok) = r._<io.Seeker>(ᐧ); if (ok && n > 1) {
+        // Not all io.Seeker can actually Seek. For example, os.Stdin implements
+        // io.Seeker, but calling Seek always returns an error and performs
+        // no action. Thus, we try an innocent seek to the current position
+        // to see if Seek is really supported.
+        var (pos1, errΔ1) = sr.Seek(0, io.SeekCurrent);
+        if (pos1 >= 0 && errΔ1 == nil) {
+            // Seek seems supported, so perform the real Seek.
+            var (pos2, errΔ2) = sr.Seek(n - 1, io.SeekCurrent);
+            if (pos2 < 0 || errΔ2 != nil) {
+                return errΔ2;
             }
+            seekSkipped = pos2 - pos1;
         }
     }
 

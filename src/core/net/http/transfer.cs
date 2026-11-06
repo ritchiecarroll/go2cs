@@ -305,10 +305,8 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     if (t.Close && !hasToken(t.Header.get(connectionˢ), closeˢ)) {
-        {
-            var (_, err) = io.WriteString(w, connectionCloseˢ); if (err != nil) {
-                return err;
-            }
+        var (_, err) = io.WriteString(w, connectionCloseˢ); if (err != nil) {
+            return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
             trace.WroteHeaderField(connectionˢ, slice<@string>(["close"]));
@@ -333,10 +331,8 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             trace.WroteHeaderField(contentLengthˢ, slice<@string>([strconv.FormatInt(t.ContentLength, 10)]));
         }
     } else if (chunked(t.TransferEncoding)) {
-        {
-            var (_, err) = io.WriteString(w, transferEncodingChunkedˢ); if (err != nil) {
-                return err;
-            }
+        var (_, err) = io.WriteString(w, transferEncodingChunkedˢ); if (err != nil) {
+            return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
             trace.WroteHeaderField(transferEncodingˢ, slice<@string>(["chunked"]));
@@ -361,10 +357,8 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             slices.Sort<slice<@string>, @string>(keys);
             // TODO: could do better allocation-wise here, but trailers are rare,
             // so being lazy for now.
-            {
-                var (_, err) = io.WriteString(w, "Trailer: "u8 + strings.Join(keys, ",") + "\r\n"u8); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = io.WriteString(w, "Trailer: "u8 + strings.Join(keys, ",") + "\r\n"u8); if (err != nil) {
+                return err;
             }
             if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
                 trace.WroteHeaderField(trailerˢ, keys);
@@ -388,10 +382,8 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
             if (closed || Ꮡt.Value.BodyCloser == nil) {
                 return;
             }
-            {
-                var closeErr = Ꮡt.Value.BodyCloser.Close(); if (closeErr != nil && err == nil) {
-                    err = closeErr;
-                }
+            var closeErr = Ꮡt.Value.BodyCloser.Close(); if (closeErr != nil && err == nil) {
+                err = closeErr;
             }
         }, ref ᒐ);
 
@@ -402,10 +394,8 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
         if (!t.ResponseToHEAD && t.Body != nil) {
             io.Reader body = t.unwrapBody();
             if (chunked(t.TransferEncoding)) {
-                {
-                    var (bw, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok && !t.IsResponse) {
-                        w = new internal_FlushAfterChunkWriterжWriter(Ꮡ(new @internal.FlushAfterChunkWriter(Writer: bw)));
-                    }
+                var (bw, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok && !t.IsResponse) {
+                    w = new internal_FlushAfterChunkWriterжWriter(Ꮡ(new @internal.FlushAfterChunkWriter(Writer: bw)));
                 }
                 var cw = @internal.NewChunkedWriter(w);
                 (_, err) = Ꮡt.doBodyCopy(cw, body);
@@ -433,10 +423,8 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
         }
         if (t.BodyCloser != nil) {
             closed = true;
-            {
-                var errΔ1 = t.BodyCloser.Close(); if (errΔ1 != nil) {
-                    err = errΔ1; goto ᒐdone;
-                }
+            var errΔ1 = t.BodyCloser.Close(); if (errΔ1 != nil) {
+                err = errΔ1; goto ᒐdone;
             }
         }
 
@@ -448,10 +436,8 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
         if (!t.ResponseToHEAD && chunked(t.TransferEncoding)) {
             // Write Trailer header
             if (t.Trailer != nil) {
-                {
-                    var errΔ2 = t.Trailer.Write(w); if (errΔ2 != nil) {
-                        err = errΔ2; goto ᒐdone;
-                    }
+                var errΔ2 = t.Trailer.Write(w); if (errΔ2 != nil) {
+                    err = errΔ2; goto ᒐdone;
                 }
             }
             // Last chunk, empty trailer
@@ -602,10 +588,8 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> r) {
     }
 
     // Transfer-Encoding: chunked, and overriding Content-Length.
-    {
-        var errΔ1 = t.parseTransferEncoding(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = t.parseTransferEncoding(); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     (var realLength, err) = fixLength(isResponse, t.StatusCode, t.RequestMethod, t.Header, t.Chunked);
@@ -613,12 +597,10 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> r) {
         return err;
     }
     if (isResponse && t.RequestMethod == "HEAD"u8) {
-        {
-            var (n, errΔ2) = parseContentLength(t.Header[contentLengthˢ]); if (errΔ2 != nil) {
-                return errΔ2;
-            } else {
-                t.ContentLength = n;
-            }
+        var (n, errΔ2) = parseContentLength(t.Header[contentLengthˢ]); if (errΔ2 != nil) {
+            return errΔ2;
+        } else {
+            t.ContentLength = n;
         }
     } else {
         t.ContentLength = realLength;
@@ -968,25 +950,21 @@ internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
         b.sawEOF = true;
         // Chunked case. Read the trailer.
         if (b.hdr != nil) {
-            {
-                var e = b.readTrailer(); if (e != nil) {
-                    err = e;
-                    // Something went wrong in the trailer, we must not allow any
-                    // further reads of any kind to succeed from body, nor any
-                    // subsequent requests on the server connection. See
-                    // golang.org/issue/12027
-                    b.sawEOF = false;
-                    b.closed = true;
-                }
+            var e = b.readTrailer(); if (e != nil) {
+                err = e;
+                // Something went wrong in the trailer, we must not allow any
+                // further reads of any kind to succeed from body, nor any
+                // subsequent requests on the server connection. See
+                // golang.org/issue/12027
+                b.sawEOF = false;
+                b.closed = true;
             }
             b.hdr = default;
         } else {
             // If the server declared the Content-Length, our body is a LimitedReader
             // and we need to check whether this EOF arrived early.
-            {
-                var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N > 0) {
-                    err = io.ErrUnexpectedEOF;
-                }
+            var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N > 0) {
+                err = io.ErrUnexpectedEOF;
             }
         }
     }
@@ -997,11 +975,9 @@ internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
     // earlier (since it will see this EOF itself), even if the
     // client doesn't do future reads or Close.
     if (err == nil && n > 0) {
-        {
-            var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N == 0) {
-                err = io.EOF;
-                b.sawEOF = true;
-            }
+        var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N == 0) {
+            err = io.EOF;
+            b.sawEOF = true;
         }
     }
 
@@ -1095,10 +1071,8 @@ internal static void mergeSetHeader(ref ΔHeader dst, ΔHeader src) {
 // It returns -1 if unknown.
 // b.mu must be held.
 internal static int64 unreadDataSizeLocked(this ref body b) {
-    {
-        var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok) {
-            return lr.N;
-        }
+    var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok) {
+        return lr.N;
     }
     return -1;
 }
@@ -1128,22 +1102,20 @@ internal static error Close(this ж<body> Ꮡb) {
         case {} when b.doEarlyClose: {
             // Read up to maxPostHandlerReadBytes bytes of the body, looking
             // for EOF (and trailers), so we can re-use this connection.
-            {
-                var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N > maxPostHandlerReadBytes) {
-                    // There was a declared Content-Length, and we have more bytes remaining
-                    // than our maxPostHandlerReadBytes tolerance. So, give up.
+            var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && lr.N > maxPostHandlerReadBytes) {
+                // There was a declared Content-Length, and we have more bytes remaining
+                // than our maxPostHandlerReadBytes tolerance. So, give up.
+                b.earlyClose = true;
+            } else {
+                int64 n = default;
+                // Consume the body, or, which will also lead to us reading
+                // the trailer headers after the body, if present.
+                (n, err) = io.CopyN(io.Discard, new bodyLocked(Ꮡb), maxPostHandlerReadBytes);
+                if (AreEqual(err, io.EOF)) {
+                    err = default;
+                }
+                if (n == maxPostHandlerReadBytes) {
                     b.earlyClose = true;
-                } else {
-                    int64 n = default;
-                    // Consume the body, or, which will also lead to us reading
-                    // the trailer headers after the body, if present.
-                    (n, err) = io.CopyN(io.Discard, new bodyLocked(Ꮡb), maxPostHandlerReadBytes);
-                    if (AreEqual(err, io.EOF)) {
-                        err = default;
-                    }
-                    if (n == maxPostHandlerReadBytes) {
-                        b.earlyClose = true;
-                    }
                 }
             }
             break;
@@ -1305,15 +1277,11 @@ internal static bool isKnownInMemoryReader(io.Reader r) {
     case ж<strings.Reader> _: {
         return true;
     }}
-    {
-        var (rΔ1, ok) = unwrapNopCloser(r); if (ok) {
-            return isKnownInMemoryReader(rΔ1);
-        }
+    var (rΔ1, ok) = unwrapNopCloser(r); if (ok) {
+        return isKnownInMemoryReader(rΔ1);
     }
-    {
-        var (rΔ2, ok) = r._<ж<readTrackingBody>>(ᐧ); if (ok) {
-            return isKnownInMemoryReader(rΔ2.ReadCloser);
-        }
+    if (r._<ж<readTrackingBody>>(out var rΔ2)) {
+        return isKnownInMemoryReader(rΔ2.ReadCloser);
     }
     return false;
 }
@@ -1329,12 +1297,10 @@ internal static (nint n, error err) Write(this bufioFlushWriter fw, slice<byte> 
     error err = default;
 
     (n, err) = fw.w.Write(p);
-    {
-        var (bw, ok) = fw.w._<ж<bufio.Writer>>(ᐧ); if (n > 0 && ok) {
-            var ferr = bw.Flush();
-            if (ferr != nil && err == nil) {
-                err = ferr;
-            }
+    var (bw, ok) = fw.w._<ж<bufio.Writer>>(ᐧ); if (n > 0 && ok) {
+        var ferr = bw.Flush();
+        if (ferr != nil && err == nil) {
+            err = ferr;
         }
     }
     return (n, err);

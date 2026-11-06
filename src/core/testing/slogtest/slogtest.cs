@@ -284,19 +284,15 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     // Collect and check the results.
     slice<error> errs = default;
     var res = results();
-    {
-        nint g = len(res);
-        nint w = len(cases); if (g != w) {
-            return fmt.Errorf("got %d results, want %d"u8, g, w);
-        }
+    nint g = len(res);
+    nint w = len(cases); if (g != w) {
+        return fmt.Errorf("got %d results, want %d"u8, g, w);
     }
     foreach (var (i, got) in range(res)) {
         var c = cases[i];
         foreach (var (_, check) in range(c.checks)) {
-            {
-                @string problem = check(got); if (problem != ""u8) {
-                    errs = append(errsᴷ, errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
-                }
+            @string problem = check(got); if (problem != ""u8) {
+                errs = append(errsᴷ, errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
             }
         }
     }
@@ -322,10 +318,8 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newH
             cʗ1.f(l);
             var got = result(tΔ1);
             foreach (var (_, check) in range(cʗ1.checks)) {
-                {
-                    @string p = check(got); if (p != ""u8) {
-                        tΔ1.Errorf("%s: %s", p, cʗ1.explanation);
-                    }
+                @string p = check(got); if (p != ""u8) {
+                    tΔ1.Errorf("%s: %s", p, cʗ1.explanation);
                 }
             }
         });
@@ -336,10 +330,8 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newH
 
 internal static Func<map<@string, any>, @string> hasKey(@string key) {
     return (map<@string, any> m) => {
-        {
-            var (_, ok) = m[key, ꟷ]; if (!ok) {
-                return fmt.Sprintf("missing key %q"u8, key);
-            }
+        var (_, ok) = m[key, ꟷ]; if (!ok) {
+            return fmt.Sprintf("missing key %q"u8, key);
         }
         return ""u8;
     };
@@ -347,10 +339,8 @@ internal static Func<map<@string, any>, @string> hasKey(@string key) {
 
 internal static Func<map<@string, any>, @string> missingKey(@string key) {
     return (map<@string, any> m) => {
-        {
-            var (_, ok) = m[key, ꟷ]; if (ok) {
-                return fmt.Sprintf("unexpected key %q"u8, key);
-            }
+        var (_, ok) = m[key, ꟷ]; if (ok) {
+            return fmt.Sprintf("unexpected key %q"u8, key);
         }
         return ""u8;
     };
@@ -358,10 +348,8 @@ internal static Func<map<@string, any>, @string> missingKey(@string key) {
 
 internal static Func<map<@string, any>, @string> hasAttr(@string key, any wantVal) {
     return (map<@string, any> m) => {
-        {
-            @string s = hasKey(key)(m); if (s != ""u8) {
-                return s;
-            }
+        @string s = hasKey(key)(m); if (s != ""u8) {
+            return s;
         }
         var gotVal = m[key];
         if (!reflect.DeepEqual(gotVal, wantVal)) {

@@ -27,12 +27,10 @@ internal partial interface testTypeAssertion_type /*dyn*/ {
 }
 
 internal static void testTypeAssertion(error err) {
-    {
-        var (x, ok) = err._<testTypeAssertion_type>(ᐧ); if (ok) {
-            fmt.Println("TypeAssertion: Is(nil) =", x.Is(default));
-        } else {
-            fmt.Println("TypeAssertion: No match");
-        }
+    var (x, ok) = err._<testTypeAssertion_type>(ᐧ); if (ok) {
+        fmt.Println("TypeAssertion: Is(nil) =", x.Is(default));
+    } else {
+        fmt.Println("TypeAssertion: No match");
     }
 }
 

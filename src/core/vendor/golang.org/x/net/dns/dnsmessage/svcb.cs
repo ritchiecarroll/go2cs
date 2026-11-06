@@ -135,20 +135,16 @@ public static SVCParamKey SVCParamTLSSupportedGroups => 9;
 
 // String implements fmt.Stringer.String.
 public static @string String(this SVCParamKey k) {
-    {
-        var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
-            return n;
-        }
+    var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
+        return n;
     }
     return printUint16((uint16)k);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this SVCParamKey k) {
-    {
-        var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
-            return "dnsmessage.SVCParam"u8 + n;
-        }
+    var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
+        return "dnsmessage.SVCParam"u8 + n;
     }
     return printUint16((uint16)k);
 }
@@ -186,16 +182,12 @@ internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint
     nint bodyEnd = off + (nint)length;
 
     error err = default;
-    {
-        (r.Priority, paramsOff, err) = unpackUint16(msg, paramsOff); if (err != nil) {
-            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Priority", err))));
-        }
+    (r.Priority, paramsOff, err) = unpackUint16(msg, paramsOff); if (err != nil) {
+        return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Priority", err))));
     }
 
-    {
-        (paramsOff, err) = r.Target.unpack(msg, paramsOff); if (err != nil) {
-            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", err))));
-        }
+    (paramsOff, err) = r.Target.unpack(msg, paramsOff); if (err != nil) {
+        return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", err))));
     }
 
     // Two-pass parsing to avoid allocations.
@@ -207,20 +199,16 @@ internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint
     while (off < bodyEnd) {
         uint16 key = default;
         uint16 size = default;
-        {
-            (key, off, err) = unpackUint16(msg, off); if (err != nil) {
-                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params key", err))));
-            }
+        (key, off, err) = unpackUint16(msg, off); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params key", err))));
         }
         if (n > 0 && key <= previousKey) {
             // As per https://www.rfc-editor.org/rfc/rfc9460.html#section-2.2, clients MUST
             // consider the RR malformed if the SvcParamKeys are not in strictly increasing numeric order
             return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params", errParamOutOfOrder))));
         }
-        {
-            (size, off, err) = unpackUint16(msg, off); if (err != nil) {
-                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params value length", err))));
-            }
+        (size, off, err) = unpackUint16(msg, off); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("Params value length", err))));
         }
         if (off + (nint)size > bodyEnd) {
             return (new ΔSVCBResource(), errResourceLen);
@@ -243,16 +231,12 @@ internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint
         var p = Ꮡ(r.Params, i);
         uint16 key = default;
         uint16 size = default;
-        {
-            (key, off, err) = unpackUint16(msg, off); if (err != nil) {
-                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param key", err))));
-            }
+        (key, off, err) = unpackUint16(msg, off); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param key", err))));
         }
         p.Key = (SVCParamKey)key;
-        {
-            (size, off, err) = unpackUint16(msg, off); if (err != nil) {
-                return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param length", err))));
-            }
+        (size, off, err) = unpackUint16(msg, off); if (err != nil) {
+            return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param length", err))));
         }
         if (len(msg.slice(off)) < (nint)size) {
             return (new ΔSVCBResource(), new nestedErrorжerror(Ꮡ(new nestedError("param value", errCalcLen))));
@@ -309,30 +293,22 @@ internal static error genericSVCBResource(this ж<Builder> Ꮡb, ResourceHeader 
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != nil) {
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("ResourceBody", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceBody", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;

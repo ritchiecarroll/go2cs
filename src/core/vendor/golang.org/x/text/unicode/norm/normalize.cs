@@ -81,10 +81,8 @@ public static bool IsNormal(this Form f, slice<byte> b) {
     rb.setFlusher(default, cmpNormalBytes);
     while (bp < len(b)) {
         rb.@out = b.slice(bp);
-        {
-            bp = decomposeSegment(Ꮡrb, bp, true); if (bp < 0) {
-                return false;
-            }
+        bp = decomposeSegment(Ꮡrb, bp, true); if (bp < 0) {
+            return false;
         }
         (bp, _) = rb.f.quickSpan(rb.src, bp, len(b), true);
     }
@@ -139,10 +137,8 @@ public static bool IsNormalString(this Form f, @string s) {
         return true;
     });
     while (bp < len(s)) {
-        {
-            bp = decomposeSegment(Ꮡrb, bp, true); if (bp < 0) {
-                return false;
-            }
+        bp = decomposeSegment(Ꮡrb, bp, true); if (bp < 0) {
+            return false;
         }
         (bp, _) = rb.f.quickSpan(rb.src, bp, len(s), true);
     }
@@ -175,15 +171,13 @@ internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
     var buf = rb.@out.slice(p);
     rb.@out = rb.@out.slice(0, p);
     decomposeToLastBoundary(Ꮡrb);
-    {
-        ssState s = rb.ss.next(info); if (s == ssStarter) {
-            Ꮡrb.doFlush();
-            rb.ss.first(info);
-        } else if (s == ssOverflow) {
-            Ꮡrb.doFlush();
-            rb.insertCGJ();
-            rb.ss = 0;
-        }
+    ssState s = rb.ss.next(info); if (s == ssStarter) {
+        Ꮡrb.doFlush();
+        rb.ss.first(info);
+    } else if (s == ssOverflow) {
+        Ꮡrb.doFlush();
+        rb.insertCGJ();
+        rb.ss = 0;
     }
     Ꮡrb.insertUnsafe(inputBytes(buf), 0, info);
     return true;
@@ -234,13 +228,11 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
     var src = rb.src;
     nint n = rb.nsrc;
     var doMerge = len(@out) > 0;
-    {
-        nint q = src.skipContinuationBytes(p); if (q > p) {
-            // Move leading non-starters to destination.
-            rb.@out = src.appendSlice(rb.@out, p, q);
-            p = q;
-            doMerge = patchTail(Ꮡrb);
-        }
+    nint q = src.skipContinuationBytes(p); if (q > p) {
+        // Move leading non-starters to destination.
+        rb.@out = src.appendSlice(rb.@out, p, q);
+        p = q;
+        doMerge = patchTail(Ꮡrb);
     }
     var fd = Ꮡrb.Ꮡf;
     if (doMerge) {
@@ -335,14 +327,12 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
     var ss = (streamSafe)0;
     nint lastSegStart = i;
     for (n = end; i < n; ) {
-        {
-            nint j = src.skipASCII(i, n); if (i != j) {
-                i = j;
-                lastSegStart = i - 1;
-                lastCC = 0;
-                ss = 0;
-                continue;
-            }
+        nint j = src.skipASCII(i, n); if (i != j) {
+            i = j;
+            lastSegStart = i - 1;
+            lastCC = 0;
+            ss = 0;
+            continue;
         }
         var info = f.info(src, i);
         if (info.size == 0) {
@@ -417,10 +407,8 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
         if (info.size == 0) {
             return -1;
         }
-        {
-            ssState s = ss.next(info); if (s != ssSuccess) {
-                return i;
-            }
+        ssState s = ss.next(info); if (s != ssSuccess) {
+            return i;
         }
         i += (nint)info.size;
         if (i >= nsrc) {
@@ -480,10 +468,8 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
         }
         // TODO: Using streamSafe to determine the boundary isn't the same as
         // using BoundaryBefore. Determine which should be used.
-        {
-            ssState s = ss.next(info); if (s != ssSuccess) {
-                return i;
-            }
+        ssState s = ss.next(info); if (s != ssSuccess) {
+            return i;
         }
     }
     if (!atEOF && !info.BoundaryAfter() && !ss.isMax()) {
@@ -524,10 +510,8 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     ssState v = ss.backwards(info);
     for (i = p; i >= 0 && v != ssStarter; i = p) {
         (info, p) = lastRuneStart(ref fd, b.slice(0, i));
-        {
-            v = ss.backwards(info); if (v == ssOverflow) {
-                break;
-            }
+        v = ss.backwards(info); if (v == ssOverflow) {
+            break;
         }
         if (p + (nint)info.size != i) {
             if (p == -1) { // no boundary found
@@ -581,18 +565,14 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
             }
             break;
         }
-        {
-            ssState s = rb.ss.next(info); if (s == ssStarter) {
-                break;
-            } else if (s == ssOverflow) {
-                rb.insertCGJ();
-                break;
-            }
+        ssState s = rb.ss.next(info); if (s == ssStarter) {
+            break;
+        } else if (s == ssOverflow) {
+            rb.insertCGJ();
+            break;
         }
-        {
-            insertErr err = Ꮡrb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
-                return (nint)err;
-            }
+        insertErr err = Ꮡrb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
+            return (nint)err;
         }
     }
 end:

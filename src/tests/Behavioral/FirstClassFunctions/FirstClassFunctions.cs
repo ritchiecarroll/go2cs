@@ -124,10 +124,8 @@ internal static void Main() {
     fmt.Println(tg.tag(), r.h(1));
 
     var wk = Ꮡ(new worker(n: 3));
-    {
-        var err = wk.initWorker(0); if (err == nil) {
-            fmt.Println(wk.run([1, 2]), lastN.Value);
-        }
+    var err = wk.initWorker(0); if (err == nil) {
+        fmt.Println(wk.run([1, 2]), lastN.Value);
     }
 
     var res = new resolver(

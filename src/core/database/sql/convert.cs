@@ -64,17 +64,15 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     // First, see if the value itself knows how to convert
     // itself to a driver type. For example, a NullString
     // struct changing into a string or nil.
-    {
-        var (vr, ok) = nv.Value._<driver.Valuer>(ᐧ); if (ok) {
-            var (sv, errΔ1) = callValuerValue(vr);
-            if (errΔ1 != nil) {
-                return errΔ1;
-            }
-            if (!driver.IsValue(sv)) {
-                return fmt.Errorf("non-subset type %T returned from Value"u8, sv);
-            }
-            nv.Value = sv;
+    var (vr, ok) = nv.Value._<driver.Valuer>(ᐧ); if (ok) {
+        var (sv, errΔ1) = callValuerValue(vr);
+        if (errΔ1 != nil) {
+            return errΔ1;
         }
+        if (!driver.IsValue(sv)) {
+            return fmt.Errorf("non-subset type %T returned from Value"u8, sv);
+        }
+        nv.Value = sv;
     }
 
     // Second, ask the column to sanity check itself. For
@@ -155,16 +153,12 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         var arg = vᴛ1;
 
         var nv = Ꮡ(nvargs, n);
-        {
-            var (np, okΔ1) = arg._<NamedArg>(ᐧ); if (okΔ1) {
-                {
-                    err = validateNamedValueName(np.Name); if (err != nil) {
-                        return (default, err);
-                    }
-                }
-                arg = np.Value;
-                nv.Name = np.Name;
+        var (np, okΔ1) = arg._<NamedArg>(ᐧ); if (okΔ1) {
+            err = validateNamedValueName(np.Name); if (err != nil) {
+                return (default, err);
             }
+            arg = np.Value;
+            nv.Name = np.Name;
         }
         nv.Ordinal = n + 1;
         nv.Value.Value = arg;
@@ -457,10 +451,8 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         return default;
     }}
 
-    {
-        var (scanner, ok) = dest._<Scanner>(ᐧ); if (ok) {
-            return scanner.Scan(src);
-        }
+    if (dest._<Scanner>(out var scanner)) {
+        return scanner.Scan(src);
     }
 
     var dpv = reflect.ValueOf(dest);
@@ -568,10 +560,8 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
 }
 
 internal static error strconvErr(error err) {
-    {
-        var (ne, ok) = err._<ж<strconv.NumError>>(ᐧ); if (ok) {
-            return ne.Err;
-        }
+    var (ne, ok) = err._<ж<strconv.NumError>>(ᐧ); if (ok) {
+        return ne.Err;
     }
     return err;
 }
@@ -645,10 +635,8 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor<driver.Valuer
 //
 // This function is mirrored in the database/sql/driver package.
 internal static (driverꓸValue v, error err) callValuerValue(driver.Valuer vr) {
-    {
-        var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
-            return (default, default);
-        }
+    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
+        return (default, default);
     }
     return vr.Value();
 }

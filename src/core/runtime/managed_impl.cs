@@ -1501,18 +1501,21 @@ partial class runtime_package
     // recover calls in those deferred functions will return nil.
     public static void Goexit()
     {
-        // Calling Goexit from the MAIN goroutine terminates main without returning while the
-        // program keeps running its other goroutines — and crashes with "no goroutines" once they
-        // all exit. That needs a live-goroutine registry and a main-thread parking protocol the
-        // managed model does not have yet (DESIGN-goexit.md option A), so the main-goroutine case
-        // stays GATED rather than silently doing something else: ending the process here would
-        // kill goroutines Go would keep running. The gate is honest and loud, never a no-op.
+        // Calling Goexit from the MAIN goroutine terminates main without returning while the program keeps
+        // running its other goroutines, and dies with "no goroutines (main called runtime.Goexit) - deadlock!"
+        // once none can run. The exception carries the mark: every deferring frame on main's stack catches it
+        // and runs its deferred calls (GoFrame), and past the outermost one golib parks the main thread until
+        // the other goroutines are done (golib.MainGoexit). docs/DESIGN-goexit-main.md.
+        if (Goroutine.Current is { IsMain: true })
+            throw new GoexitException(fromMain: true);
+
+        // A thread with no goroutine identity at all (a host thread that never ran Go code) is no goroutine for
+        // Goexit to end; Go has no such state.
         if (!Goroutine.OnGoroutine)
         {
             throw new NotSupportedException(
-                "runtime.Goexit from the main goroutine is not supported: main-goroutine Goexit " +
-                "must leave the other goroutines running (see docs/phase4/DESIGN-goexit.md). " +
-                "Goexit from a goroutine is fully supported.");
+                "runtime.Goexit on a thread that runs no goroutine is not supported: Goexit ends the calling " +
+                "goroutine, and this thread has none.");
         }
 
         // The goroutine case: unwind. GoFunc's finally-based defer machinery runs this goroutine's
@@ -2948,7 +2951,7 @@ partial class runtime_package
             foreach (object attribute in assembly.GetCustomAttributes(typeof(GoPositionMapAttribute), false))
             {
                 if (attribute is GoPositionMapAttribute map && map.CsFile.Length > 0)
-                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls, map.Thunks);
+                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls, map.Thunks, map.Closures);
             }
         }
         catch (Exception)
@@ -3090,42 +3093,52 @@ partial class runtime_package
         remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
 
     // One converted file's recorded position map.
-    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "", string thunks = "")
+    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "", string thunks = "",
+        string closures = "")
     {
         private Dictionary<int, string[]>? m_methodValues;
 
         private HashSet<(int line, int column)>? m_thunks;
 
+        private HashSet<(int line, int column)>? m_closures;
+
         // HasThunks is false for a record without a thunk list, so a lambda of such a file is never read for one.
         public bool HasThunks => thunks.Length > 0;
+
+        // HasClosures is false for a record without a deferred-closure list, so a lambda of such a file is never read for one.
+        public bool HasClosures => closures.Length > 0;
 
         // IsThunkSite answers whether a lambda whose first sequence point is (line, column) is a go/defer thunk
         // (GoPositionMapAttribute.Thunks). A malformed entry drops the whole list: every lambda of the file then
         // stays a frame, today's answer, rather than one being elided that Go shows.
-        public bool IsThunkSite(int line, int column)
+        public bool IsThunkSite(int line, int column) => (m_thunks ??= decodeSites(thunks)).Contains((line, column));
+
+        // IsDeferredClosureSite answers whether a lambda whose first sequence point is (line, column) is a Go func literal
+        // handed straight to defer (GoPositionMapAttribute.Closures). A malformed entry drops the whole list: every
+        // panic such a closure raises then keeps the refusal, today's answer, rather than one splicing a frame Go does
+        // not show.
+        public bool IsDeferredClosureSite(int line, int column) => (m_closures ??= decodeSites(closures)).Contains((line, column));
+
+        // A `<csLine>:<column>` list, comma-joined; empty when any entry is malformed.
+        private static HashSet<(int line, int column)> decodeSites(string encoded)
         {
-            if (m_thunks is null)
+            HashSet<(int, int)> decoded = [];
+
+            foreach (string entry in encoded.Split(',', StringSplitOptions.RemoveEmptyEntries))
             {
-                HashSet<(int, int)> decoded = [];
+                int colon = entry.IndexOf(':');
 
-                foreach (string entry in thunks.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                if (colon <= 0 || !int.TryParse(entry.AsSpan(0, colon), out int site) || site <= 0 ||
+                    !int.TryParse(entry.AsSpan(colon + 1), out int at) || at <= 0)
                 {
-                    int colon = entry.IndexOf(':');
-
-                    if (colon <= 0 || !int.TryParse(entry.AsSpan(0, colon), out int site) || site <= 0 ||
-                        !int.TryParse(entry.AsSpan(colon + 1), out int at) || at <= 0)
-                    {
-                        decoded.Clear();
-                        break;
-                    }
-
-                    decoded.Add((site, at));
+                    decoded.Clear();
+                    break;
                 }
 
-                m_thunks = decoded;
+                decoded.Add((site, at));
             }
 
-            return m_thunks.Contains((line, column));
+            return decoded;
         }
 
         // One later-line call of a statement (GoPositionMapAttribute.Calls).
@@ -4091,16 +4104,18 @@ partial class runtime_package
     //   - one that ends at the DEFERRING FUNCTION (its own catch caught the panic first): the site's
     //     last Go frame is that function, checked again against the next live Go frame by method, and
     //     dropped, since the live walk reports it;
-    //   - one that ends at the RUN, in exactly two cases, and the chain then continues with the panic
+    //   - one that ends at the RUN, in exactly three cases, and the chain then continues with the panic
     //     Beneath, whose gopanic called the deferred call: the zero-argument nil-deferred-func thunk
-    //     (no Go frame of its own; its fault frames alone), or the deferred delegate that is itself the
-    //     panic's first catcher (SiteIsTheDeferredCall; all its Go frames stay). Every OTHER panic a
-    //     deferred call raises is refused: the converter's defer wrappers (`() => c()` for a named func
-    //     type, `defer panic(v)`'s thunk, the lambdas for a call whose results are dropped) are
-    //     indistinguishable at run time from Go's closures, and Go ELIDES its deferwrap except over the
-    //     panic machinery, so any of them would splice a frame Go does not show, or misname one Go does
-    //     (COORD's verification of the re-cut, B2 and C3). A stated missing splice until the converter
-    //     marks its defer wrappers.
+    //     (no Go frame of its own; its fault frames alone), the deferred delegate that is itself the
+    //     panic's first catcher (SiteIsTheDeferredCall; all its Go frames stay), or a Go func literal
+    //     handed straight to defer, whose frame is the site's last Go frame (all its Go frames stay).
+    //     Every OTHER panic a deferred call raises is refused: the converter's defer wrappers (`() => c()`
+    //     for a named func type, `defer panic(v)`'s thunk, the lambdas for a call whose results are
+    //     dropped) look like Go's closures at run time, and Go ELIDES its deferwrap except over the panic
+    //     machinery, so any of them would splice a frame Go does not show, or misname one Go does (COORD's
+    //     verification of the re-cut, B2 and C3). The converter's DEFERRED-CLOSURE record is what tells a
+    //     closure from a wrapper (isRecordedDeferredClosure); without it, or without a symbol file to read
+    //     the lambda's position from, the closure is refused as before.
     // Only the fault kinds golib tags where the panic is RAISED are spliced: an explicit panic(v), a nil
     // dereference and an integer divide. Every other runtime error (goPanicIndex, the goPanicSlice family,
     // panicdottypeE/I, mapassign, closechan, ...: a runtime frame that is not modelled) is refused, and an
@@ -4241,9 +4256,13 @@ partial class runtime_package
         if (link.FaultKind == PanicFaultKind.Memory && adapterBeforeFirstGoFrame(raw))
             return null;
 
-        // An ends-at-Run site: only the nil-func thunk, or the deferred delegate that caught first.
+        // An ends-at-Run site: only the nil-func thunk, the deferred delegate that caught first, or a Go func literal
+        // handed straight to defer that raised the panic itself or through its callees, Go's `main.main.func1` and
+        // `panic(...)` above the deferring function. Its frame is the site's last Go frame, the one the Run called; the
+        // converter's closure record is what tells it from a converter thunk there, which Go elides (isRecordedDeferredClosure).
         if (link.SiteEndsAtRun && !link.SiteIsTheDeferredCall &&
-            !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod))
+            !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod) &&
+            !(site.Count > 0 && isRecordedDeferredClosure(site[^1].GetMethod())))
             return null;
 
         return (site, raw);
@@ -4495,6 +4514,56 @@ partial class runtime_package
             return false;
 
         return goPositionMapRecord(method, goSourcePath(file)) is { HasThunks: true } record && record.IsThunkSite(line, column);
+    }
+
+    // Whether a converted lambda is a Go func literal handed straight to defer (`defer func() { r := recover(); panic(r)
+    // }()`, emitted `defer(() => { ... }, ref ᒐ)`). Such a closure has no deferring frame of its own, so a panic it raises
+    // is first caught by the deferring function's GoFrame.Run, exactly like a panic a converter thunk raises; Go prints
+    // the closure's frame and elides the thunk, and only the converter knows which lambda is which. Its file's
+    // GoPositionMap record lists each such closure by its lambda's first sequence point (GoPositionMapAttribute.Closures).
+    // Read only when a panic chain is spliced, never at capture: an assembly with no closure record, or with no symbol
+    // file to read the lambda's position from, answers false, and the chain keeps its refusal.
+    private static bool isRecordedDeferredClosure(System.Reflection.MethodBase? method)
+    {
+        if (method is null || !method.Name.Contains(">b__", StringComparison.Ordinal))
+            return false;
+
+        System.Reflection.Assembly? assembly = method.DeclaringType?.Assembly ?? method.Module.Assembly;
+
+        if (assembly is null)
+            return false;
+
+        Dictionary<string, GoPositionMapRecord>? records;
+
+        lock (s_positionMapLock)
+        {
+            if (!s_positionMaps.TryGetValue(assembly, out records))
+            {
+                records = readGoPositionMaps(assembly);
+                s_positionMaps[assembly] = records;
+            }
+        }
+
+        bool anyClosure = false;
+
+        foreach (GoPositionMapRecord candidate in records.Values)
+        {
+            if (candidate.HasClosures)
+            {
+                anyClosure = true;
+                break;
+            }
+        }
+
+        if (!anyClosure)
+            return false;
+
+        (string? file, int line, int column) = methodSourceStart(method);
+
+        if (file is null || line <= 0)
+            return false;
+
+        return goPositionMapRecord(method, goSourcePath(file)) is { HasClosures: true } record && record.IsDeferredClosureSite(line, column);
     }
 
     // Interns one observed call site to its process-lifetime token -- the managed spelling of "a PC":
@@ -4803,7 +4872,94 @@ partial class runtime_package
             found = call;
         }
 
-        return found;
+        return found >= 0 ? found : droppedBoundarySettledCallSite(method, ilOffset, end, callee, calls, boundaries);
+    }
+
+    // THE DROPPED BOUNDARY. The optimized JIT can keep no IL boundary at all for a statement that reads a closure-captured
+    // variable and then calls a hoisted-literal accessor (`genericHelper<float64>(t, genericFloat64ˢ)` where `t` is a
+    // display-class field): a frame suspended in that statement's call reports the PREVIOUS statement's offset, so the
+    // region above, which ends at the modelled boundary the JIT dropped, holds no call of the callee and today's line
+    // names a statement that does not hold the suspended call. Measured 2026-11-05 on linux, Release, tiering off:
+    // testing's testHelper reported IL 0xE9 (the recoverHelper statement) for both calls at helperfuncs_test.go:86 and
+    // :87, TestArtifactDirSpecified's runTest frame read testing_test.go:1073 for the call on :1074, and runtime/pprof's
+    // printCountProfile key closure read pprof.go:500 (an `if` with no call) for the WriteString on :501. In a plain C#
+    // probe the drift held with the accessor inlined or not; the same call with the field read directly, an ldstr
+    // literal, or an uncaptured parameter reported its own statement.
+    //
+    // The region is widened across every following boundary the JIT may drop, defined narrowly: a stack-empty boundary
+    // whose statement's first call is a hoisted-literal accessor (droppedBoundary). The call settled must then be the ONLY
+    // call of the callee in the widened region, and no virtual, interface, calli or delegate call may sit in it (COORD
+    // ruling (a), 2026-11-05). A GENERIC callee is refused outright: the frame reports a generic method as its open
+    // definition (StackFrame.GetMethod takes the typical definition), so two instantiations' calls in one region are one
+    // observation with one IL offset -- TestTBHelper's GenericFloat64 and GenericInt frames, which differ only in their
+    // native offsets, and no in-process map ties a native offset to a call. That test keeps its disclosure.
+    // It fires only where today's reading is already wrong: the region settle found no call of the callee, so today's
+    // line names a statement that does not hold the suspended call.
+    private static int droppedBoundarySettledCallSite(System.Reflection.MethodBase method, int ilOffset, int end, System.Reflection.MethodBase callee, int[] calls, int[] boundaries)
+    {
+        if (callee.ContainsGenericParameters)
+            return -1;
+
+        int widened = end;
+
+        while (widened != int.MaxValue && droppedBoundary(method, widened, calls, boundaries))
+        {
+            int next = Array.BinarySearch(boundaries, widened + 1);
+
+            if (next < 0)
+                next = ~next;
+
+            widened = next < boundaries.Length ? boundaries[next] : int.MaxValue;
+        }
+
+        if (widened == end)
+            return -1;
+
+        int settled = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < ilOffset || call >= widened)
+                continue;
+
+            if (callTarget(method, call) is not { } target || isIndirectCall(method, call, target))
+                return -1;
+
+            if (!targetsCallee(target, callee))
+                continue;
+
+            if (settled >= 0)
+                return -1;
+
+            settled = call;
+        }
+
+        return settled;
+    }
+
+    // Whether the optimized JIT may drop the boundary at `boundary`: it is a stack-empty boundary (a PDB statement
+    // start) whose statement's first call, before the next boundary, is a hoisted-literal accessor -- the static
+    // `ref readonly` getter the converter emits for a hoisted literal (`genericFloat64ˢ`).
+    private static bool droppedBoundary(System.Reflection.MethodBase method, int boundary, int[] calls, int[] boundaries)
+    {
+        if (sequencePointOffsets(method) is not { } statements || Array.BinarySearch(statements, boundary) < 0)
+            return false;
+
+        int next = Array.BinarySearch(boundaries, boundary + 1);
+
+        if (next < 0)
+            next = ~next;
+
+        int end = next < boundaries.Length ? boundaries[next] : int.MaxValue;
+        int index = Array.BinarySearch(calls, boundary);
+
+        if (index < 0)
+            index = ~index;
+
+        return index < calls.Length && calls[index] < end && callTarget(method, calls[index]) is System.Reflection.MethodInfo
+        {
+            IsStatic: true, IsSpecialName: true, ReturnType.IsByRef: true
+        } accessor && accessor.Name.StartsWith("get_", StringComparison.Ordinal) && accessor.Name.EndsWith("ˢ", StringComparison.Ordinal);
     }
 
     private static bool isDirectCall(System.Reflection.MethodBase method, int ilOffset) =>

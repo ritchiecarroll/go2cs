@@ -430,6 +430,10 @@ func (v *Visitor) objectOnlyCalled(obj types.Object, root ast.Node) bool {
 }
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
+	// The literal a defer statement hands straight to defer (visitDeferStmt's deferredClosureLit), decided here, before
+	// the body converts: a defer inside the body re-enters visitDeferStmt for a literal of its own.
+	deferredClosure := funcLit == v.deferredClosureLit && !context.isIIFE && context.localFuncName == ""
+
 	if v.currentFuncSignature == nil {
 		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
 		v.funcSignatureIsLiteralSeed = true
@@ -1446,6 +1450,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			if hasReturn && (!hasFullyTypedArm || mixedIntConflict || hasConvertedForward || hasUnconvertibleLiteral) {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
+		}
+
+		// A deferred closure's lambda is marked where its first sequence point lands, so its file's record lists it.
+		if deferredClosure {
+			inner = v.markDeferredClosureBody(inner)
 		}
 
 		result.WriteString(v.litNoInliningPrefix(funcLit) + returnTypePrefix + "(" + parameterSignature + ") => " + inner)

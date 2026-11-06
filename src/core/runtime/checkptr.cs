@@ -104,25 +104,21 @@ internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Point
 //go:linkname checkptrBase
 internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
     // stack
-    {
-        var gp = getg(); if ((~gp).stack.lo <= (uintptr)Δp && (uintptr)Δp < (~gp).stack.hi) {
-            // TODO(mdempsky): Walk the stack to identify the
-            // specific stack frame or even stack object that p
-            // points into.
-            //
-            // In the mean time, use "1" as a pseudo-address to
-            // represent the stack. This is an invalid address on
-            // all platforms, so it's guaranteed to be distinct
-            // from any of the addresses we might return below.
-            return 1;
-        }
+    var gp = getg(); if ((~gp).stack.lo <= (uintptr)Δp && (uintptr)Δp < (~gp).stack.hi) {
+        // TODO(mdempsky): Walk the stack to identify the
+        // specific stack frame or even stack object that p
+        // points into.
+        //
+        // In the mean time, use "1" as a pseudo-address to
+        // represent the stack. This is an invalid address on
+        // all platforms, so it's guaranteed to be distinct
+        // from any of the addresses we might return below.
+        return 1;
     }
 
     // heap (must check after stack because of #35068)
-    {
-        var (@base, _, _) = findObject((uintptr)Δp, 0, 0); if (@base != 0) {
-            return @base;
-        }
+    var (@base, _, _) = findObject((uintptr)Δp, 0, 0); if (@base != 0) {
+        return @base;
     }
 
     // data or bss

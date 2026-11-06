@@ -1,0 +1,6 @@
+DISTURBED PerfChannel A/A V3 8.08% D26 6.68%
+PerfChannel	V3/D26	113.3	112.0	1.011	+1.1%	floor 15.5%	within
+PerfIfaceShellChurn	V3/D26	1752.1	1700.3	1.030	+3.0%	floor 1.5%	MOVED
+PerfMap	V3/D26	294.5	293.7	1.003	+0.3%	floor 4.8%	within
+PerfStringMatch	V3/D26	1352.6	1292.1	1.047	+4.7%	floor 1.0%	MOVED
+PerfStringView	V3/D26	19.2	19.0	1.008	+0.8%	floor 10.5%	within

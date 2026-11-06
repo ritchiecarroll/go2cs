@@ -169,10 +169,8 @@ public static bool Is(ж<RangeTable> ᏑrangeTab, rune r) {
 internal static bool isExcludingLatin(ref RangeTable rangeTab, rune r) {
     var r16 = rangeTab.R16;
     // Compare as uint32 to correctly handle negative runes.
-    {
-        nint off = rangeTab.LatinOffset; if (len(r16) > off && (uint32)r <= (uint32)r16[len(r16) - 1].Hi) {
-            return is16(r16.slice(off), (uint16)r);
-        }
+    nint off = rangeTab.LatinOffset; if (len(r16) > off && (uint32)r <= (uint32)r16[len(r16) - 1].Hi) {
+        return is16(r16.slice(off), (uint16)r);
     }
     var r32 = rangeTab.R32;
     if (len(r32) > 0 && r >= (rune)r32[0].Lo) {
@@ -253,10 +251,8 @@ internal static (rune mappedRune, bool foundMapping) to(nint _case, rune r, slic
     if (_case < 0 || MaxCase <= _case) {
         return (ReplacementChar, false); // as reasonable an error as any
     }
-    {
-        var cr = lookupCaseRange(r, caseRange); if (cr != nil) {
-            return (convertCase(_case, r, ref (cr).DerefOrNull()), true);
-        }
+    var cr = lookupCaseRange(r, caseRange); if (cr != nil) {
+        return (convertCase(_case, r, ref (cr).DerefOrNull()), true);
     }
     return (r, false);
 }
@@ -381,15 +377,11 @@ public static rune SimpleFold(rune r) {
     // No folding specified. This is a one- or two-element
     // equivalence class containing rune and ToLower(rune)
     // and ToUpper(rune) if they are different from rune.
-    {
-        var cr = lookupCaseRange(r, CaseRanges); if (cr != nil) {
-            {
-                var l = convertCase(LowerCase, r, ref (cr).DerefOrNull()); if (l != r) {
-                    return l;
-                }
-            }
-            return convertCase(UpperCase, r, ref (cr).DerefOrNull());
+    var cr = lookupCaseRange(r, CaseRanges); if (cr != nil) {
+        var l = convertCase(LowerCase, r, ref (cr).DerefOrNull()); if (l != r) {
+            return l;
         }
+        return convertCase(UpperCase, r, ref (cr).DerefOrNull());
     }
     return r;
 }

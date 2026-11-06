@@ -18,10 +18,8 @@ internal static nint readArchiveHeader(ж<bufio.Reader> b, @string name) {
     UntypedInt HeaderSize = 60;
 
     array<byte> buf = new(60); /* HeaderSize */
-    {
-        var (_, err) = io.ReadFull(new bufio_ReaderжReader(b), buf[..]); if (err != nil) {
-            return -1;
-        }
+    var (_, err) = io.ReadFull(new bufio_ReaderжReader(b), buf[..]); if (err != nil) {
+        return -1;
     }
     @string aname = strings.Trim((@string)(buf[0..16]), " ");
     if (!strings.HasPrefix(aname, name)) {

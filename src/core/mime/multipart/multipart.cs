@@ -172,10 +172,8 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
         Header: new map<@string, slice<@string>>(),
         mr: mr
     ));
-    {
-        var err = bp.populateHeaders(maxMIMEHeaderSize, maxMIMEHeaders); if (err != nil) {
-            return (default, err);
-        }
+    var err = bp.populateHeaders(maxMIMEHeaderSize, maxMIMEHeaders); if (err != nil) {
+        return (default, err);
     }
     bp.r = new partReader(bp);
 
@@ -281,19 +279,17 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     }
 
     // Search for "\n--boundary".
-    {
-        nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
-            switch (matchAfterPrefix(buf.slice(iΔ1), nlDashBoundary, readErr)) {
-            case var ᴛ when ᴛ == -1: {
-                return (iΔ1 + len(nlDashBoundary), default);
-            }
-            case 0: {
-                return (iΔ1, default);
-            }
-            case var ᴛ when ᴛ == +1: {
-                return (iΔ1, io.EOF);
-            }}
+    nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
+        switch (matchAfterPrefix(buf.slice(iΔ1), nlDashBoundary, readErr)) {
+        case var ᴛ when ᴛ == -1: {
+            return (iΔ1 + len(nlDashBoundary), default);
         }
+        case 0: {
+            return (iΔ1, default);
+        }
+        case var ᴛ when ᴛ == +1: {
+            return (iΔ1, io.EOF);
+        }}
     }
     if (bytes.HasPrefix(nlDashBoundary, buf)) {
         return (0, readErr);
@@ -381,14 +377,10 @@ internal static UntypedInt maxMIMEHeaderSize => /* 10 << 20 */ 10485760;
 internal static ж<godebug.Setting> multipartmaxheaders = godebug.New("multipartmaxheaders");
 
 internal static int64 maxMIMEHeaders() {
-    {
-        @string s = multipartmaxheaders.Value(); if (s != ""u8) {
-            {
-                var (v, err) = strconv.ParseInt(s, 10, 64); if (err == nil && v >= 0) {
-                    multipartmaxheaders.IncNonDefault();
-                    return v;
-                }
-            }
+    @string s = multipartmaxheaders.Value(); if (s != ""u8) {
+        var (v, err) = strconv.ParseInt(s, 10, 64); if (err == nil && v >= 0) {
+            multipartmaxheaders.IncNonDefault();
+            return v;
         }
     }
     return 10000;

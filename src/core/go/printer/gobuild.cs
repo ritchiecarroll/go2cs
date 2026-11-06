@@ -127,10 +127,8 @@ internal static void fixGoBuildLines(this ref printer p) {
         start = end + len(p.lineAt(end));
     }
     after = appendLines(after, p.output.slice(start));
-    {
-        nint n = len(after); if (n >= 2 && isNL(after[n - 1]) && isNL(after[n - 2])) {
-            after = after.slice(0, n - 1);
-        }
+    nint n = len(after); if (n >= 2 && isNL(after[n - 1]) && isNL(after[n - 2])) {
+        after = after.slice(0, n - 1);
     }
 
     p.output = p.output.slice(0, insert);

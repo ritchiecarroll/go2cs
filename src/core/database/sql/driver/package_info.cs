@@ -72,7 +72,7 @@ using static go.database.sql.driver_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCVAaACgqaCAAsU1ILmgg==")]
-[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+1ICkgpSkgoKUpIKClKaClIKClKSCgpSmAAoSlIKClIKClKSCgpSkgoKUlAAMFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAWKpQAARoACwKAhqSmgoKmlIKClIKUuKaCpoKUxqSkgoKUpKSkgoKUpJQ=")]
+[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+1ICkgpSkgoKUpIKClKaClIKClKSCgpSmAAoSlIKClIKClKSCgpSkgoKUlAAMFoKklAAIEoKClAAIEoKClKiSgpTkpJSqogAWKpQAARoACwKGlKaCgqaUgoKUgpS4poKmgpTGpKSCgpSkpKSCgpSklA==")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;

@@ -40,15 +40,11 @@ partial struct traceEventWriter {
 //
 // In this case, the default status should be tracev2.GoBad or tracev2.ProcBad to help identify bugs sooner.
 internal static traceEventWriter eventWriter(this traceLocker tl, tracev2.GoStatus goStatus, tracev2.ProcStatus procStatus) {
-    {
-        var pp = (~tl.mp).p.ptr(); if (pp != nil && !pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
-            tl.writer().writeProcStatus((uint64)(~pp).id, procStatus, (~pp).trace.inSweep).end();
-        }
+    var pp = (~tl.mp).p.ptr(); if (pp != nil && !pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
+        tl.writer().writeProcStatus((uint64)(~pp).id, procStatus, (~pp).trace.inSweep).end();
     }
-    {
-        var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
-            tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, goStatus, (~gp).inMarkAssist, 0 /* no stack */).end();
-        }
+    var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
+        tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, goStatus, (~gp).inMarkAssist, 0 /* no stack */).end();
     }
     return tl.rawEventWriter();
 }

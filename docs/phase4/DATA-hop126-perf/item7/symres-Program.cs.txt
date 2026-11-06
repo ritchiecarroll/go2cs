@@ -1,0 +1,46 @@
+// symres <image.exe> <pdb-dir> <base-hex> <pcs.txt> -- item 7: resolve sampled program counters (one hex address per line,
+// as the trace recorded them for the image loaded at <base>) to function names through dbghelp and the image's PDB, and
+// print exclusive sample counts per function, highest first. Only the sampled addresses are looked up.
+using System.Runtime.InteropServices;
+using System.Text;
+
+static class P
+{
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern bool SymInitializeW(IntPtr h, string? path, bool invade);
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern ulong SymLoadModuleExW(IntPtr h, IntPtr file, string image, string? module, ulong baseAddr, uint size, IntPtr data, uint flags);
+    [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)] static extern bool SymFromAddrW(IntPtr h, ulong addr, out ulong disp, IntPtr symbol);
+    [DllImport("dbghelp.dll")] static extern uint SymSetOptions(uint o);
+
+    static int Main(string[] a)
+    {
+        IntPtr h = new(0x7171);
+        SymSetOptions(0x2 | 0x10);
+        if (!SymInitializeW(h, a[1], false)) { Console.Error.WriteLine($"SymInitialize failed {Marshal.GetLastWin32Error()}"); return 2; }
+        ulong b = Convert.ToUInt64(a[2], 16);
+        ulong m = SymLoadModuleExW(h, IntPtr.Zero, a[0], null, b, 0, IntPtr.Zero, 0);
+        if (m == 0) { Console.Error.WriteLine($"SymLoadModuleEx failed {Marshal.GetLastWin32Error()}"); return 3; }
+        const int maxName = 2000;
+        IntPtr buf = Marshal.AllocHGlobal(88 + maxName * 2);
+        var counts = new Dictionary<string, int>(); int total = 0, unresolved = 0;
+        var cache = new Dictionary<ulong, string>();
+        foreach (string line in File.ReadLines(a[3]))
+        {
+            string t = line.Trim(); if (t.Length == 0) continue;
+            ulong pc = Convert.ToUInt64(t, 16); total++;
+            if (!cache.TryGetValue(pc, out string? name))
+            {
+                for (int i = 0; i < 88 + maxName * 2; i++) Marshal.WriteByte(buf, i, 0);
+                Marshal.WriteInt32(buf, 0, 88); Marshal.WriteInt32(buf, 80, maxName); // SizeOfStruct, MaxNameLen
+                if (SymFromAddrW(h, pc, out ulong disp, buf)) { int len = Marshal.ReadInt32(buf, 76); uint size = (uint)Marshal.ReadInt32(buf, 28); name = Marshal.PtrToStringUni(buf + 84, len) ?? "?"; if (size == 0 || disp >= size) name = "<outside " + name + " +0x" + disp.ToString("x") + " size 0x" + size.ToString("x") + ">"; }
+                else { name = "<unresolved>"; if (unresolved == 0) Console.Error.WriteLine($"first SymFromAddr failure at 0x{pc:x}: win32 {Marshal.GetLastWin32Error()}"); }
+                cache[pc] = name;
+            }
+            if (name == "<unresolved>") unresolved++;
+            counts[name] = counts.GetValueOrDefault(name) + 1;
+        }
+        if (a.Length > 4 && a[4] == "--map") { foreach (var kv in cache) Console.WriteLine($"0x{kv.Key:x16}	{kv.Value}"); return 0; }
+        Console.WriteLine($"# samples {total}, unresolved {unresolved}, distinct functions {counts.Count}");
+        foreach (var kv in counts.OrderByDescending(k => k.Value)) Console.WriteLine($"{kv.Value}\t{100.0 * kv.Value / total:F1}%\t{kv.Key}");
+        return 0;
+    }
+}

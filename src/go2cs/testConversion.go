@@ -7778,6 +7778,32 @@ type testEnvironmentRecord struct {
 	// the pipeline calls setsid), so the driver's answer is theirs. Omitted on Windows, where the
 	// probe can only ever fail and would say nothing about the row.
 	Terminal string `json:"terminal,omitempty"`
+
+	// OracleGOARCH is the GOARCH the oracle `go test` child ran at, recorded only when -test-oracle-goarch moved it off
+	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
+	OracleGOARCH string `json:"oracleGoarch,omitempty"`
+}
+
+// oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
+// by -test-oracle-goarch when one is given. Only the child environment reads it (runCommandWithTimeoutEnv appends
+// GOOS/GOARCH from targetPlatform last), so the oracle's `go test` builds and runs at that arch while the conversion,
+// the converted host and the manifest keep the target.
+//
+// The case is osx-arm64: the darwin corpus is converted once, for darwin/amd64, and the converted host there is a native
+// arm64 .NET process, so an oracle at the target's GOARCH ran under Rosetta and the comparison read Rosetta's own
+// behaviour as the package's (runtime's TestMmapErrorSign: EINVAL under translation, ENOMEM natively). Measured on the
+// osx-arm64 runner, Go's whole runtime suite moves three verdicts between the two arches, and the darwin std has no
+// arm64-only test file, so the native oracle only drops the amd64-only tests the converted host already withdraws
+// on an arm64 process.
+func oracleOptions(options Options) Options {
+	goos, goarch, ok := strings.Cut(options.targetPlatform, "/")
+
+	if !ok || options.testOracleGOARCH == "" || options.testOracleGOARCH == goarch {
+		return options
+	}
+
+	options.targetPlatform = goos + "/" + options.testOracleGOARCH
+	return options
 }
 
 // testEnvironmentFromOptions derives the record from the same two options testHostRunEnv reads, so
@@ -7785,10 +7811,16 @@ type testEnvironmentRecord struct {
 // side-effect-free by design (see TestTestEnvironmentRecordRoundTrips) — OracleGoVersion is filled
 // in separately by the caller, since answering it means actually running a child process.
 func testEnvironmentFromOptions(options Options) testEnvironmentRecord {
-	return testEnvironmentRecord{
+	record := testEnvironmentRecord{
 		Configuration: options.testConfig,
 		Tiered:        !(options.testConfig == "Release" && !options.testTiered),
 	}
+
+	if oracle := oracleOptions(options); oracle.targetPlatform != options.targetPlatform {
+		_, record.OracleGOARCH, _ = strings.Cut(oracle.targetPlatform, "/")
+	}
+
+	return record
 }
 
 // oracleGoVersion runs `go version` through the EXACT SAME child-invocation mechanism the oracle
@@ -10442,11 +10474,11 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	hostFatalSkip := withdrawnSkipExpression(disclosures, targetArchExcludedNames(archExcluded))
 
 	goArgs := oracleTestArgs(options, hostFatalSkip)
-	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, options, "go", goArgs...)
+	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
 	// oracleGoVersion's own doc comment for why this is not `go env GOROOT`.
-	oracleVersion := oracleGoVersion(inputPath, options)
+	oracleVersion := oracleGoVersion(inputPath, oracleOptions(options))
 
 	// The driver's terminal context, observed beside the oracle run it applies to — see
 	// testEnvironmentRecord.Terminal for why a count without it cannot be reproduced.

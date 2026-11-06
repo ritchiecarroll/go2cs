@@ -69,6 +69,7 @@ type Options struct {
 	testTimeout            time.Duration // per-child-command timeout for test build/run/compare actions
 	testDeadline           time.Duration // the converted host's per-test deadline (GO2CS_TEST_DEADLINE); 0 is none
 	testFilter             string        // -run regex handed VERBATIM to BOTH compare sides, and to the host under -test-action run (block-gated census)
+	testOracleGOARCH       string        // -test-oracle-goarch: the GOARCH the oracle `go test` child runs at; "" is the target's (oracleOptions)
 	testPackagePath        string        // import path of the package under test (self-import binding, IP-3)
 	testPackageName        string        // package name of the package under test (self-import binding, IP-3)
 	testWhiteboxReference  bool          // internal _test.go files emit into a bridge while production is referenced

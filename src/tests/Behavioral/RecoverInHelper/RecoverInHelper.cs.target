@@ -79,10 +79,8 @@ internal static void catchError(ж<error> Ꮡerr) {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var err = ref Ꮡerr.DerefOrNull();
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                err = fmt.Errorf("caught: %v"u8, e);
-            }
+        var e = recover(calledByDefer); if (e != nil) {
+            err = fmt.Errorf("caught: %v"u8, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -112,14 +110,12 @@ internal static void catchGobError(ref error err) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                var (ge, ok) = e._<gobError>(ᐧ);
-                if (!ok) {
-                    throw panic(e);
-                }
-                err = ge.err;
+        var e = recover(calledByDefer); if (e != nil) {
+            var (ge, ok) = e._<gobError>(ᐧ);
+            if (!ok) {
+                throw panic(e);
             }
+            err = ge.err;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

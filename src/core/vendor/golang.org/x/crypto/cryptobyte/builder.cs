@@ -177,13 +177,11 @@ internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>>
                     return;
                 }
 
-                {
-                    ref var buildError = ref heap<BuildError>(out var ᏑbuildError);
-                    (buildError, var ok) = r._<BuildError>(ᐧ); if (ok) {
-                        Ꮡb.Value.err = buildError.Err;
-                    } else {
-                        throw panic(r);
-                    }
+                ref var buildError = ref heap<BuildError>(out var ᏑbuildError);
+                (buildError, var ok) = r._<BuildError>(ᐧ); if (ok) {
+                    Ꮡb.Value.err = buildError.Err;
+                } else {
+                    throw panic(r);
                 }
             }, ref ᒐ);
         }

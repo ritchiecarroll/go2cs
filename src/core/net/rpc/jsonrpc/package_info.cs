@@ -66,8 +66,8 @@ using static go.net.rpc.jsonrpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgANHLKCgoKCgoIACBKCgoLmsoKAgraCgoKUgoKCgoKUgpSUpoKClKaCqqKokoKClA==", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
-[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgANHIKCggAIErKCgIKkyoKCgoKClKaCgpSCnMKCpuSygoKCgpSClJSUgoKUlKaCrLI=", "", "", "37=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgANHLKCgoKCgoIACBKCgoLmsoKCpoKCgpSCgoKCgpSClJSmgoKUpoKqoqiSgoKU", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgANHIKCggAIErKCgpTKgoKCgoKUpoKClIKcwoKm5LKCgoKClIKUlJSCgpSUpoKssg==", "", "", "37=NewDecoder/1/1/1,NewEncoder/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;

@@ -803,10 +803,8 @@ internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint s
             // Relock the heap, because now we need to make these pages
             // available allocation. Free them back to the page allocator.
             @lock(Δp.mheapLock);
-            {
-                var b = (new offAddr(addr)); if (b.lessThan(Δp.searchAddr)) {
-                    Δp.searchAddr = b;
-                }
+            var b = (new offAddr(addr)); if (b.lessThan(Δp.searchAddr)) {
+                Δp.searchAddr = b;
             }
             Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free(@base, npages);
             Δp.update(addr, (uintptr)npages, true, false);
@@ -1103,10 +1101,8 @@ internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
     var minHeapIdx = Ꮡs.ᏑminHeapIdx.Load();
-    {
-        var baseIdx = (uintptr)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
-            Ꮡs.ᏑminHeapIdx.Store(baseIdx);
-        }
+    var baseIdx = (uintptr)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
+        Ꮡs.ᏑminHeapIdx.Store(baseIdx);
     }
     return Ꮡs.sysGrow(@base, limit, sysStat);
 }

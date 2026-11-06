@@ -198,13 +198,11 @@ public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @str
     buf.WriteByte((byte)'(');
     WriteType(Ꮡbuf, s.Recv(), qf);
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), ") %s"u8, s.obj.Name());
-    {
-        var T = s.Type(); if (s.kind == FieldVal) {
-            buf.WriteByte((byte)' ');
-            WriteType(Ꮡbuf, T, qf);
-        } else {
-            WriteSignature(Ꮡbuf, T._<ж<ΔSignature>>(), qf);
-        }
+    var T = s.Type(); if (s.kind == FieldVal) {
+        buf.WriteByte((byte)' ');
+        WriteType(Ꮡbuf, T, qf);
+    } else {
+        WriteSignature(Ꮡbuf, T._<ж<ΔSignature>>(), qf);
     }
     return Ꮡbuf.String();
 }

@@ -9,9 +9,10 @@
 // Guards seat #42: Go compiles a go or defer statement's call into a deferwrap/gowrap closure marked as a
 // wrapper, which its tracebacks elide; the converter's thunk lambda (`defer(() => where("x"), ref ᒐ)`) is that
 // closure, and the runtime elides it only if it can recognise it. The file's GoPositionMap record carries the
-// (C# line, column) of each thunk's BODY -- the lambda method's first sequence point -- and nothing else: a
-// user func literal, even a Go one-liner sharing a line with a thunk, is a block lambda whose first sequence
-// point is the line below its `=> {`, so it is never recorded.
+// (C# line, column) of each thunk's BODY -- the lambda method's first sequence point -- in its seventh argument,
+// and no func literal there: a user func literal, even a Go one-liner sharing a line with a thunk, is a block
+// lambda whose first sequence point is its `{` (Debug) or its first statement (Release), never a thunk body's
+// position. A literal handed straight to defer is listed in the EIGHTH argument instead (deferredClosureSites_test.go).
 
 package main
 

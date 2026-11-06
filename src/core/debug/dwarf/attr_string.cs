@@ -260,10 +260,8 @@ private static readonly @string _Attr_nameᵇ = "SiblingLocationNameOrderingByte
 }; }
 
 public static @string String(this Attr i) {
-    {
-        var (str, ok) = _Attr_map[i, ꟷ]; if (ok) {
-            return str;
-        }
+    var (str, ok) = _Attr_map[i, ꟷ]; if (ok) {
+        return str;
     }
     return "Attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
 }

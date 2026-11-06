@@ -31,10 +31,8 @@ public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
 }
 
 public static bool Add<T>(this Set<T> s, T item) {
-    {
-        var (_, ok) = s[item, ꟷ]; if (ok) {
-            return false;
-        }
+    var (_, ok) = s[item, ꟷ]; if (ok) {
+        return false;
     }
 
     s[item] = new @void();

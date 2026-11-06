@@ -14,10 +14,8 @@ internal static void f() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println("Recovered in f", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println("Recovered in f", r);
             }
         }, ref ᒐ);
         fmt.Println("Calling g.");

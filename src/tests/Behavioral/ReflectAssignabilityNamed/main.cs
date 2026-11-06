@@ -13,11 +13,9 @@ internal static void @try(@string label, Action set) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: PANIC %v\n"u8, label, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: PANIC %v\n"u8, label, r);
+                return;
             }
             fmt.Printf("%s: ok\n"u8, label);
         }, ref ᒐ);

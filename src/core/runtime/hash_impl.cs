@@ -79,11 +79,32 @@
 // aeshashbody, memhash32 and memhash64 ported instruction for instruction onto
 // System.Runtime.Intrinsics.X86.Aes: Go's `AESENC src, dst` is `dst = Aes.Encrypt(dst, src)`. They are
 // bit-reproducible against Go for the same key schedule (GolibTests' AesHashMatchesGo compares a fixed
-// schedule against a table taken from Go itself). The corpus is converted for GOARCH=amd64, so on an
-// arm64 host cpu.X86's flags are false and Go's own condition selects the fallback: the arm64
-// aeshashbody (asm_arm64.s, a different schedule) is not reachable from this corpus and not ported.
-// Consequence, matching Go on an AES host: TestMemHash32/64Equality SKIP (memhash32 is not memhash
-// over four bytes under AES) and TestMemHashGlobalSeed/aes runs.
+// schedule against a table taken from Go itself). Consequence, matching Go on an AES host:
+// TestMemHash32/64Equality SKIP (memhash32 is not memhash over four bytes under AES) and
+// TestMemHashGlobalSeed/aes runs.
+//
+// AN ARM64 PROCESS (COORD's AES trio seat, ruled 2026-11-06, option 3 with schedule 3-i). The corpus is
+// converted for GOARCH=amd64, and both mac RIDs run that one build, so on Apple silicon this file runs in
+// a native arm64 process, where cpu.X86 is all false (as it is in Go on arm64). Go's alginit has a second
+// branch for that machine, `GOARCH == "arm64" && cpu.ARM64.HasAES`, and Apple silicon always takes it.
+// initHashAlgorithm takes it too, keyed on the PROCESS architecture (the converted GOARCH constant still
+// reads "amd64": the BOARD's 2026-11-05 GOARCH row, OPEN), over cpu.ARM64 as internal/cpu's
+// cpu_arm64_impl.cs fills it (darwin's osInit, then GODEBUG, so cpu.aes=off selects the fallback here as
+// in Go). Without it the trio diverged from Go on osx-arm64 (run 42138564497): MemHash32/64Equality
+// passed where Go skips, and GlobalSeed/aes skipped where Go passes.
+//
+// WHICH SCHEDULE, and why amd64's. Go on arm64 runs asm_arm64.s's aeshashbody, a different schedule from
+// asm_amd64.s's. Which one runs is NOT OBSERVABLE from Go code: the 128-byte aeskeysched is random per
+// process (and the hash seed with it), so no hash value is stable across processes or comparable with
+// another implementation's. What Go code can observe is which hash family is selected (the skip/pass
+// pattern above) and the hash's statistical quality (the Smhasher suite), and both schedules answer those
+// alike. So the arm64 branch keeps amd64's schedule, run on Arm's AES instructions: x86's
+// `AESENC s, k` is MixColumns(ShiftRows(SubBytes(s))) ^ k; Arm's AESE(s, k) is ShiftRows(SubBytes(s ^ k))
+// and AESMC is MixColumns, so `AESENC s, k` = AESMC(AESE(s, 0)) ^ k (aesenc below). The one body family
+// then stays bit-reproducible against the same Go table on both architectures: RuntimeAesHashTests runs
+// it on an osx-arm64 host, and a wrong composition fails it by name rather than as a weaker hash.
+// asm_arm64.s's own schedule is not ported (it would need a second table and a second body family, and
+// change no verdict).
 //
 // 64-bit only: this is hash64.go. hash32.go's schedule is not ported; a 32-bit host throws at first
 // use rather than hashing with the wrong constants.
@@ -103,7 +124,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
-using Aes = System.Runtime.Intrinsics.X86.Aes;
+using X86Aes = System.Runtime.Intrinsics.X86.Aes;
+using ArmAes = System.Runtime.Intrinsics.Arm.Aes;
 using System.Security.Cryptography;
 using System.Threading;
 using go.golib;
@@ -149,21 +171,32 @@ private static void ensureHashKey() {
     }
 }
 
-// Go's alginit, performed once at load: the AES branch when the CPU flags (after GODEBUG's cpu.*
+// Go's alginit, performed once at load: an AES branch when the CPU flags (after GODEBUG's cpu.*
 // options, which internal/cpu applies off Windows) allow it, the fallback's hashkey otherwise. The fallback key is seeded either way, because
-// the public fallback bodies below (GoMemhash and friends) are callable directly by guards.
+// the public fallback bodies below (GoMemhash and friends) are callable directly by guards. The arm64
+// branch is keyed on the process architecture (header, AN ARM64 PROCESS); x86's keeps precedence, so an
+// x64 process is unchanged.
 [ModuleInitializer]
 internal static void initHashAlgorithm() {
     if ((GOARCH == "386"u8 || GOARCH == "amd64"u8) && cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41 &&
-        System.Runtime.Intrinsics.X86.Aes.IsSupported && System.Runtime.Intrinsics.X86.Sse41.IsSupported) {
-        Span<byte> random = stackalloc byte[128];
-        RandomNumberGenerator.Fill(random);
-        for (int i = 0; i < 128; i++)
-            aeskeysched[i] = random[i];
-        useAeshash = true;
+        X86Aes.IsSupported && System.Runtime.Intrinsics.X86.Sse41.IsSupported) {
+        selectAesHash();
+    }
+    else if (cpu.GoIsArm64Process && cpu.ARM64.HasAES && ArmAes.IsSupported) {
+        selectAesHash();
     }
 
     ensureHashKey();
+}
+
+// The AES hash, keyed by 128 random bytes: what alg.go's initAlgAES does (the converted initAlgAES in alg.cs is
+// not called, since it seeds through bootstrapRand and an unsafe.Pointer cast over aeskeysched).
+private static void selectAesHash() {
+    Span<byte> random = stackalloc byte[128];
+    RandomNumberGenerator.Fill(random);
+    for (int i = 0; i < 128; i++)
+        aeskeysched[i] = random[i];
+    useAeshash = true;
 }
 
 // ---- aeshash: asm_amd64.s's aeshashbody, memhash32 and memhash64 over System.Runtime.Intrinsics ----
@@ -174,8 +207,18 @@ private static Vector128<byte> aesKey(ReadOnlySpan<byte> schedule, int block) =>
 private static Vector128<byte> aesLoad(ReadOnlySpan<byte> data, int offset) =>
     Vector128.Create(data.Slice(offset, 16));
 
+// x86's `AESENC roundKey, state`: one AES round of state, then XOR roundKey. On Arm, AESE with a zero key is
+// SubBytes and ShiftRows alone and AESMC is MixColumns, so the round is AESMC(AESE(state, 0)) ^ roundKey
+// (header, WHICH SCHEDULE). The IsSupported tests are JIT-time constants: each process compiles one arm.
+private static Vector128<byte> aesenc(Vector128<byte> state, Vector128<byte> roundKey) {
+    if (X86Aes.IsSupported)
+        return X86Aes.Encrypt(state, roundKey);
+
+    return ArmAes.MixColumns(ArmAes.Encrypt(state, Vector128<byte>.Zero)) ^ roundKey;
+}
+
 // AESENC X, X: one round keyed by the state itself
-private static Vector128<byte> aesSelf(Vector128<byte> x) => Aes.Encrypt(x, x);
+private static Vector128<byte> aesSelf(Vector128<byte> x) => aesenc(x, x);
 
 private static ulong aesLow(Vector128<byte> x) => x.AsUInt64().ToScalar();
 
@@ -258,7 +301,7 @@ public static ulong GoAeshash(ReadOnlySpan<byte> data, ulong seed, ReadOnlySpan<
 
         for (int offset = 0; blocks != 0; blocks--, offset += 128) {
             for (int i = 0; i < 8; i++)
-                state[i] = Aes.Encrypt(aesSelf(state[i]), aesLoad(data, offset + 16 * i));
+                state[i] = aesenc(aesSelf(state[i]), aesLoad(data, offset + 16 * i));
         }
     }
 
@@ -273,18 +316,18 @@ public static ulong GoAeshash(ReadOnlySpan<byte> data, ulong seed, ReadOnlySpan<
 /// by the schedule's first three blocks.</summary>
 public static ulong GoAeshash32(uint data, ulong seed, ReadOnlySpan<byte> schedule) {
     Vector128<byte> x = Vector128.Create(seed, (ulong)data).AsByte();
-    x = Aes.Encrypt(x, aesKey(schedule, 0));
-    x = Aes.Encrypt(x, aesKey(schedule, 1));
-    return aesLow(Aes.Encrypt(x, aesKey(schedule, 2)));
+    x = aesenc(x, aesKey(schedule, 0));
+    x = aesenc(x, aesKey(schedule, 1));
+    return aesLow(aesenc(x, aesKey(schedule, 2)));
 }
 
 /// <summary>Go's AES <c>memhash64</c>: the eight data bytes in the seed's high quadword, three rounds
 /// keyed by the schedule's first three blocks.</summary>
 public static ulong GoAeshash64(ulong data, ulong seed, ReadOnlySpan<byte> schedule) {
     Vector128<byte> x = Vector128.Create(seed, data).AsByte();
-    x = Aes.Encrypt(x, aesKey(schedule, 0));
-    x = Aes.Encrypt(x, aesKey(schedule, 1));
-    return aesLow(Aes.Encrypt(x, aesKey(schedule, 2)));
+    x = aesenc(x, aesKey(schedule, 0));
+    x = aesenc(x, aesKey(schedule, 1));
+    return aesLow(aesenc(x, aesKey(schedule, 2)));
 }
 
 /// <summary>Whether this process selected the AES hash (Go's <c>useAeshash</c>).</summary>

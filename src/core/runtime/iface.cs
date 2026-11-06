@@ -72,19 +72,15 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     // Use atomic to ensure we see any previous writes done by the thread
     // that updates the itabTable field (with atomic.Storep in itabAdd).
     var t = (ж<itabTableType>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑitabTable)));
-    {
-        m = t.find(Ꮡinter, Ꮡtyp); if (m != nil) {
-            goto finish;
-        }
+    m = t.find(Ꮡinter, Ꮡtyp); if (m != nil) {
+        goto finish;
     }
 
     // Not found.  Grab the lock and try again.
     @lock(ᏑitabLock);
-    {
-        m = itabTable.find(Ꮡinter, Ꮡtyp); if (m != nil) {
-            unlock(ᏑitabLock);
-            goto finish;
-        }
+    m = itabTable.find(Ꮡinter, Ꮡtyp); if (m != nil) {
+        unlock(ᏑitabLock);
+        goto finish;
     }
 
     // Entry doesn't exist yet. Make a new entry & add it.

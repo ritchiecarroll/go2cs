@@ -136,10 +136,8 @@ internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
         ref var a = ref Ꮡa.DerefOrNull();
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    err = fmt.Errorf("boom"u8);
-                }
+            var e = recover(); if (e != nil) {
+                err = fmt.Errorf("boom"u8);
             }
         }, ref ᒐ);
         a.total += n;

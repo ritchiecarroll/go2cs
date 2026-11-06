@@ -36,12 +36,10 @@ internal static error escapeTemplate(ж<Template> Ꮡtmpl, parse.Node node, @str
     }
     if (err != nil) {
         // Prevent execution of unsafe templates.
-        {
-            var t = tmpl.set[name]; if (t != nil) {
-                t.escapeErr = err;
-                t.text.Tree = default;
-                t.Tree = default;
-            }
+        var t = tmpl.set[name]; if (t != nil) {
+            t.escapeErr = err;
+            t.text.Tree = default;
+            t.Tree = default;
         }
         return err;
     }
@@ -62,10 +60,8 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 
     // Optimization for simple common case of a single string argument.
     if (len(args) == 1) {
-        {
-            var (s, ok) = args[0]._<@string>(ᐧ); if (ok) {
-                return s;
-            }
+        var (s, ok) = args[0]._<@string>(ᐧ); if (ok) {
+            return s;
         }
     }
     foreach (var (i, arg) in args) {
@@ -220,14 +216,12 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
             continue;
         }
         @string ident = node.Ident;
-        {
-            var (_, okΔ1) = predefinedEscapers[ident, ꟷ]; if (okΔ1) {
-                if (pos < len(n.Pipe.Cmds) - 1 || c.state == stateAttr && c.delim == delimSpaceOrTagEnd && ident == "html"u8) {
-                    return new context(
-                        state: stateError,
-                        err: errorf(ErrPredefinedEscaper, new parse.ActionNodeжNode(Ꮡn), n.Line, "predefined escaper %q disallowed in template", ident)
-                    );
-                }
+        var (_, okΔ1) = predefinedEscapers[ident, ꟷ]; if (okΔ1) {
+            if (pos < len(n.Pipe.Cmds) - 1 || c.state == stateAttr && c.delim == delimSpaceOrTagEnd && ident == "html"u8) {
+                return new context(
+                    state: stateError,
+                    err: errorf(ErrPredefinedEscaper, new parse.ActionNodeжNode(Ꮡn), n.Line, "predefined escaper %q disallowed in template", ident)
+                );
             }
         }
     }
@@ -372,36 +366,32 @@ internal static void ensurePipelineContains(ж<parse.PipeNode> Ꮡp, slice<@stri
     nint pipelineLen = len(p.Cmds);
     if (pipelineLen > 0) {
         var lastCmd = p.Cmds[pipelineLen - 1];
-        {
-            var (idNode, ok) = lastCmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ); if (ok) {
-                {
-                    @string esc = idNode.Ident; if (predefinedEscapers[esc]) {
-                        // Pipeline ends with a predefined escaper.
-                        if (len(p.Cmds) == 1 && len(lastCmd.Args) > 1) {
-                            // Special case: pipeline is of the form {{ esc arg1 arg2 ... argN }},
-                            // where esc is the predefined escaper, and arg1...argN are its arguments.
-                            // Convert this into the equivalent form
-                            // {{ _eval_args_ arg1 arg2 ... argN | esc }}, so that esc can be easily
-                            // merged with the escapers in s.
-                            lastCmd.Args[0] = new parse.IdentifierNodeжNode(parse.NewIdentifier(evalArgsˢ).SetTree(nil).SetPos(lastCmd.Args[0].Position()));
-                            p.Cmds = appendCmd(p.Cmds, newIdentCmd(esc, p.Position()));
-                            pipelineLen++;
-                        }
-                        // If any of the commands in s that we are about to insert is equivalent
-                        // to the predefined escaper, use the predefined escaper instead.
-                        var dup = false;
-                        foreach (var (i, escaper) in s) {
-                            if (escFnsEq(esc, escaper)) {
-                                s[i] = idNode.Ident;
-                                dup = true;
-                            }
-                        }
-                        if (dup) {
-                            // The predefined escaper will already be inserted along with the
-                            // escapers in s, so do not copy it to the rewritten pipeline.
-                            pipelineLen--;
-                        }
+        var (idNode, ok) = lastCmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ); if (ok) {
+            @string esc = idNode.Ident; if (predefinedEscapers[esc]) {
+                // Pipeline ends with a predefined escaper.
+                if (len(p.Cmds) == 1 && len(lastCmd.Args) > 1) {
+                    // Special case: pipeline is of the form {{ esc arg1 arg2 ... argN }},
+                    // where esc is the predefined escaper, and arg1...argN are its arguments.
+                    // Convert this into the equivalent form
+                    // {{ _eval_args_ arg1 arg2 ... argN | esc }}, so that esc can be easily
+                    // merged with the escapers in s.
+                    lastCmd.Args[0] = new parse.IdentifierNodeжNode(parse.NewIdentifier(evalArgsˢ).SetTree(nil).SetPos(lastCmd.Args[0].Position()));
+                    p.Cmds = appendCmd(p.Cmds, newIdentCmd(esc, p.Position()));
+                    pipelineLen++;
+                }
+                // If any of the commands in s that we are about to insert is equivalent
+                // to the predefined escaper, use the predefined escaper instead.
+                var dup = false;
+                foreach (var (i, escaper) in s) {
+                    if (escFnsEq(esc, escaper)) {
+                        s[i] = idNode.Ident;
+                        dup = true;
                     }
+                }
+                if (dup) {
+                    // The predefined escaper will already be inserted along with the
+                    // escapers in s, so do not copy it to the rewritten pipeline.
+                    pipelineLen--;
                 }
             }
         }
@@ -412,10 +402,8 @@ internal static void ensurePipelineContains(ж<parse.PipeNode> Ꮡp, slice<@stri
     for (nint i = 0; i < pipelineLen; i++) {
         var cmd = p.Cmds[i];
         newCmds[i] = cmd;
-        {
-            var (idNode, ok) = cmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ); if (ok) {
-                insertedIdents[normalizeEscFn(idNode.Ident)] = true;
-            }
+        var (idNode, ok) = cmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ); if (ok) {
+            insertedIdents[normalizeEscFn(idNode.Ident)] = true;
         }
     }
     foreach (var (_, name) in s) {
@@ -466,10 +454,8 @@ internal static bool escFnsEq(@string a, @string b) {
 // normalizeEscFn(a) is equal to normalizeEscFn(b) for any pair of names of
 // escaper functions a and b that are equivalent.
 internal static @string normalizeEscFn(@string e) {
-    {
-        @string norm = equivEscapers[e]; if (norm != ""u8) {
-            return norm;
-        }
+    @string norm = equivEscapers[e]; if (norm != ""u8) {
+        return norm;
     }
     return e;
 }
@@ -497,13 +483,11 @@ internal static @string normalizeEscFn(@string e) {
 internal static slice<ж<parse.CommandNode>> appendCmd(slice<ж<parse.CommandNode>> cmds, ж<parse.CommandNode> Ꮡcmd) {
     ref var cmd = ref Ꮡcmd.DerefOrNull();
 
-    {
-        nint n = len(cmds); if (n != 0) {
-            var (last, okLast) = cmds[n - 1].Args[0]._<ж<parse.IdentifierNode>>(ᐧ);
-            var (next, okNext) = cmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ);
-            if (okLast && okNext && redundantFuncs[last.Ident][next.Ident]) {
-                return cmds;
-            }
+    nint n = len(cmds); if (n != 0) {
+        var (last, okLast) = cmds[n - 1].Args[0]._<ж<parse.IdentifierNode>>(ᐧ);
+        var (next, okNext) = cmd.Args[0]._<ж<parse.IdentifierNode>>(ᐧ);
+        if (okLast && okNext && redundantFuncs[last.Ident][next.Ident]) {
+            return cmds;
         }
     }
     return append(cmds, Ꮡcmd);
@@ -596,13 +580,9 @@ internal static context join(context a, context b, parse.Node node, @string node
     //   <p title={{if .C}}{{.}}{{end}}
     // ends in an unquoted value state even though the else branch
     // ends in stateBeforeValue.
-    {
-        var (cΔ1, d) = (nudge(a), nudge(b)); if (!(cΔ1.eq(a) && d.eq(b))) {
-            {
-                var e = join(cΔ1, d, node, nodeName); if (e.state != stateError) {
-                    return e;
-                }
-            }
+    var (cΔ1, d) = (nudge(a), nudge(b)); if (!(cΔ1.eq(a) && d.eq(b))) {
+        var e = join(cΔ1, d, node, nodeName); if (e.state != stateError) {
+            return e;
         }
     }
 
@@ -740,11 +720,9 @@ internal static (context, @string) escapeTree(this ref escaper e, context c, par
     // identifier.
     ref var dname = ref heap<@string>(c.mangle(name), out var Ꮡdname);
     e.called[dname] = true;
-    {
-        var (@out, ok) = e.output[dname, ꟷ]; if (ok) {
-            // Already escaped.
-            return (@out, dname);
-        }
+    var (@out, ok) = e.output[dname, ꟷ]; if (ok) {
+        // Already escaped.
+        return (@out, dname);
     }
     var t = e.template(name);
     if (t == nil) {
@@ -784,10 +762,8 @@ internal static context computeOutCtx(this ref escaper e, context c, ж<template
     var (c1, ok) = e.escapeTemplateBody(c, Ꮡt);
     if (!ok) {
         // Look for a fixed point by assuming c1 as the output context.
-        {
-            var (c2, ok2) = e.escapeTemplateBody(c1, Ꮡt); if (ok2) {
-                (c1, ok) = (c2, true);
-            }
+        var (c2, ok2) = e.escapeTemplateBody(c1, Ꮡt); if (ok2) {
+            (c1, ok) = (c2, true);
         }
         // Use c1 as the error context if neither assumption worked.
     }
@@ -974,13 +950,11 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // "<a class=`foo "        ends inside a value,
         // "<a style=font:'Arial'" needs open-quote fixup.
         // IE treats '`' as a quotation character.
-        {
-            nint j = bytes.IndexAny(s.slice(0, i), "\"'<=`"); if (j >= 0) {
-                return (new context(
-                    state: stateError,
-                    err: errorf(ErrBadHTML, default, 0, "%q in unquoted attr: %q", s.slice(j, j + 1), s.slice(0, i))
-                ), len(s));
-            }
+        nint j = bytes.IndexAny(s.slice(0, i), "\"'<=`"); if (j >= 0) {
+            return (new context(
+                state: stateError,
+                err: errorf(ErrBadHTML, default, 0, "%q in unquoted attr: %q", s.slice(j, j + 1), s.slice(0, i))
+            ), len(s));
         }
     }
     if (i == len(s)) {
@@ -1013,30 +987,24 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // editActionNode records a change to an action pipeline for later commit.
 internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
-    {
-        var (_, ok) = e.actionNodeEdits[n, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
-        }
+    var (_, ok) = e.actionNodeEdits[n, ꟷ]; if (ok) {
+        throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
     e.actionNodeEdits[n] = cmds;
 }
 
 // editTemplateNode records a change to a {{template}} callee for later commit.
 internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> n, @string callee) {
-    {
-        var (_, ok) = e.templateNodeEdits[n, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
-        }
+    var (_, ok) = e.templateNodeEdits[n, ꟷ]; if (ok) {
+        throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
     e.templateNodeEdits[n] = callee;
 }
 
 // editTextNode records a change to a text node for later commit.
 internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slice<byte> text) {
-    {
-        var (_, ok) = e.textNodeEdits[n, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
-        }
+    var (_, ok) = e.textNodeEdits[n, ꟷ]; if (ok) {
+        throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
     e.textNodeEdits[n] = text;
 }
@@ -1051,10 +1019,8 @@ internal static void commit(this ref escaper e) {
     // to add derived templates to the underlying text/template name space.
     var tmpl = e.arbitraryTemplate();
     foreach (var (_, t) in e.derived) {
-        {
-            var (_, err) = tmpl.text.AddParseTree(t.Name(), t.Tree); if (err != nil) {
-                throw panic("error adding derived template");
-            }
+        var (_, err) = tmpl.text.AddParseTree(t.Name(), t.Tree); if (err != nil) {
+            throw panic("error adding derived template");
         }
     }
     foreach (var (n, s) in e.actionNodeEdits) {

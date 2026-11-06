@@ -62,10 +62,8 @@ public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compile
     }
     case {} when exprᴛ1 == "gccgo"u8: {
         gccgoimporter.GccgoInstallation inst = default;
-        {
-            var err = inst.InitFromDriver(gccgoˢ); if (err != nil) {
-                return default;
-            }
+        var err = inst.InitFromDriver(gccgoˢ); if (err != nil) {
+            return default;
         }
         return new gccgoimportsжImporter(Ꮡ(new gccgoimports(
             packages: new map<@string, ж<types.Package>>(),

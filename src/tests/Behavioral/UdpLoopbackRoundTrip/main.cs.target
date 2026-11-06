@@ -34,11 +34,9 @@ internal static void unconnectedRoundTrip() {
         defer(() => clientʗ1.Close(), ref ᒐ);
 
         var payload = slice<byte>("datagram-payload"u8);
-        {
-            (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != nil) {
-                fmt.Println("ipv4: WriteTo failed");
-                return;
-            }
+        (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != nil) {
+            fmt.Println("ipv4: WriteTo failed");
+            return;
         }
 
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
@@ -52,11 +50,9 @@ internal static void unconnectedRoundTrip() {
         fmt.Printf("ipv4: bytesMatch=%v\n"u8, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
         fmt.Printf("ipv4: senderAddrMatchesClient=%v\n"u8, from.String() == client.LocalAddr().String());
 
-        {
-            (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != nil) {
-                fmt.Println("ipv4: reply WriteTo failed");
-                return;
-            }
+        (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != nil) {
+            fmt.Println("ipv4: reply WriteTo failed");
+            return;
         }
         client.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rfrom, rerr) = client.ReadFrom(buf);
@@ -90,11 +86,9 @@ internal static void zeroLengthDatagram() {
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
 
-        {
-            (_, err) = client.WriteTo([], server.LocalAddr()); if (err != nil) {
-                fmt.Println("zerolen: WriteTo failed");
-                return;
-            }
+        (_, err) = client.WriteTo([], server.LocalAddr()); if (err != nil) {
+            fmt.Println("zerolen: WriteTo failed");
+            return;
         }
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(8);
@@ -125,11 +119,9 @@ internal static void connectedRoundTrip() {
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
 
-        {
-            (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != nil) {
-                fmt.Println("connected: write failed");
-                return;
-            }
+        (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != nil) {
+            fmt.Println("connected: write failed");
+            return;
         }
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);
@@ -141,11 +133,9 @@ internal static void connectedRoundTrip() {
         fmt.Printf("connected: bytesMatch=%v senderMatchesLocal=%v\n"u8,
             ((sstring)(buf.slice(0, n))) == "connected-payload"u8, from.String() == conn.LocalAddr().String());
 
-        {
-            (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != nil) {
-                fmt.Println("connected: reply failed");
-                return;
-            }
+        (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != nil) {
+            fmt.Println("connected: reply failed");
+            return;
         }
         conn.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rerr) = conn.Read(buf);
@@ -176,11 +166,9 @@ internal static void ipv6RoundTrip() {
 
         fmt.Println("ipv6: available=true");
 
-        {
-            (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != nil) {
-                fmt.Println("ipv6: WriteTo failed");
-                return;
-            }
+        (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != nil) {
+            fmt.Println("ipv6: WriteTo failed");
+            return;
         }
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);

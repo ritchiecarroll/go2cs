@@ -601,10 +601,8 @@ internal static objptr steal(this ref spanQueue q, ж<spanQueue> q2) {
         var r2 = (ж<spanSPMC>)(uintptr)(r.Ꮡprev.Load());
 
         // Try to refill from one of the rings
-        {
-            var s = q.refill(r); if (s != 0) {
-                return s;
-            }
+        var s = q.refill(r); if (s != 0) {
+            return s;
         }
 
         if (r2 == nil) {
@@ -871,10 +869,8 @@ internal static objptr tryStealSpan(this ref gcWork w) {
         if (pp == p2) {
             continue;
         }
-        {
-            var s = w.spanq.steal(p2.of(runtime_package.Δp.Ꮡgcw).Ꮡspanq); if (s != 0) {
-                return s;
-            }
+        var s = w.spanq.steal(p2.of(runtime_package.Δp.Ꮡgcw).Ꮡspanq); if (s != 0) {
+            return s;
         }
         // N.B. This is intentionally racy. We may stomp on a mask set by
         // a P that just put a bunch of work into its local queue.
@@ -998,10 +994,8 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
     // Process all the pointers we just got.
     foreach (var (_, pΔ1) in gcw.ptrBuf.slice(0, nptrs)) {
         if (!tryDeferToSpanScan(pΔ1, Ꮡgcw)) {
-            {
-                var (obj, span, objIndex) = findObject(pΔ1, 0, 0); if (obj != 0) {
-                    greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
-                }
+            var (obj, span, objIndex) = findObject(pΔ1, 0, 0); if (obj != 0) {
+                greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
             }
         }
     }
@@ -1090,10 +1084,8 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
             continue;
         }
         if (!tryDeferToSpanScan(Δp, Ꮡgcw)) {
-            {
-                var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
-                    greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
-                }
+            var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
+                greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
             }
         }
     }
@@ -1146,10 +1138,8 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
             continue;
         }
         if (!tryDeferToSpanScan(Δp, Ꮡgcw)) {
-            {
-                var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
-                    greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
-                }
+            var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
+                greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
             }
         }
     }
@@ -1341,13 +1331,9 @@ internal static void scanObject(uintptr b, ж<gcWork> Ꮡgcw) {
     uintptr scanSize = default;
     for (;;) {
         uintptr addr = default;
-        {
-            (tp, addr) = tp.nextFast(); if (addr == 0) {
-                {
-                    (tp, addr) = tp.next(b + n); if (addr == 0) {
-                        break;
-                    }
-                }
+        (tp, addr) = tp.nextFast(); if (addr == 0) {
+            (tp, addr) = tp.next(b + n); if (addr == 0) {
+                break;
             }
         }
 
@@ -1373,10 +1359,8 @@ internal static void scanObject(uintptr b, ж<gcWork> Ꮡgcw) {
             // just allocated and hence will be marked by
             // allocation itself.
             if (!tryDeferToSpanScan(obj, Ꮡgcw)) {
-                {
-                    var (objΔ1, span, objIndex) = findObject(obj, b, addr - b); if (objΔ1 != 0) {
-                        greyobject(objΔ1, b, addr - b, span, Ꮡgcw, objIndex);
-                    }
+                var (objΔ1, span, objIndex) = findObject(obj, b, addr - b); if (objΔ1 != 0) {
+                    greyobject(objΔ1, b, addr - b, span, Ꮡgcw, objIndex);
                 }
             }
         }

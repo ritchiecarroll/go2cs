@@ -67,8 +67,8 @@ using static go.@internal.syscall.windows_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "AB5EgoKmpIKClIKUgpSCgqaCgoKCgoKCgpSmtIK0gtikgpSUlIKmgqaCgpSClIKmlIKClIKUgpSAggADENKUgrS0toKCpoKCgpQADByClIKmgoK4gIK2goK4AAcUAA8ShJSCgrqCyoKCgoKUgoKmgpTcgoKCuoKU2JKClJSUAAoUgsaklKaCgoCCpIIACxqClIKmoqaUgoCCpIIABhCCgILsAAYQgqaUgqYACxgACx6UyKQACxaygoCmuoKUAAYQgoLIAAgUooKAgqSCAAYQgpSUuoKClIKUgpSY3oIABxC4gpTegIKk1qKCgIKkggAGEIKUlKaCgpSClIKUht6AgqQAFCjcAA8KooKClJSCgpSmgoCCpIIACxqClIYAABy8lIKCgoKCgoKCpoKUAAgShJIABxKm3NKClIKClJSCgpSCgoKUlIKClIKCgqaCgoKCpg==", "51-55:1;585-587:1", "", "223=IndexByte/1/3/1,IndexByte/2/3/1,IndexByte/3/3/1", "738:21")]
-[assembly: GoPositionMap("internal/syscall/windows/nonblocking_windows.go", "nonblocking_windows.cs", "AAoesoKAgqQ=")]
+[assembly: GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "AB5EgoKmpIKClIKUgpSCgqaCgoKCgoKCgpSmtIK0gtikgpSUlIKmgqaCgpSClIKmlIKClIKUgpSCAAIQ0pSCtLS2goKmgoKClAAMHIKUgqaCgriCpoKCuAAHFAAPEoSUgoK6gsqCgoKClIKCpoKU3IKCgrqClNiSgpSUlAAKFILGpJSmgoKClIIACxqClIKmoqaUgoKUggAGEIKC3AAGEIKmlIKmAAsYAAselMikAAsWsoKmuoKUAAYQgoK4AAgUooKClIIABhCClJS6goKUgpSClJjeggAHELiClN6ClNaigoKUggAGEIKUlKaCgpSClIKUht6ClAAUKNwADwqigoKUlIKClKaCgpSCAAsagpSGAAAcvJSCgoKCgoKCgqaClAAIEoSSAAcSptzSgpSCgpSUgoKUgoKClJSCgpSCgoKmgoKCgqY=", "51-55:1;585-587:1", "", "219=IndexByte/1/3/1,IndexByte/2/3/1,IndexByte/3/3/1", "716:21")]
+[assembly: GoPositionMap("internal/syscall/windows/nonblocking_windows.go", "nonblocking_windows.cs", "AAoesoKClA==")]
 [assembly: GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
 [assembly: GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCgoKCgoKUgpSCABxuABIysoLYsoI=")]
 [assembly: GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClJQ=")]

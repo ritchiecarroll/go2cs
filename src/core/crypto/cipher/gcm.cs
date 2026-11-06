@@ -233,10 +233,8 @@ internal static (AEAD, error) newGCMFallback(Block cipher, nint nonceSize, nint 
     if (nonceSize <= 0) {
         return (default, errors.New(cipherTheNonceCanTHaveˢ));
     }
-    {
-        var (cipherΔ1, ok) = cipher._<gcmAble>(ᐧ); if (ok) {
-            return cipherΔ1.NewGCM(nonceSize, tagSize);
-        }
+    var (cipherΔ1, ok) = cipher._<gcmAble>(ᐧ); if (ok) {
+        return cipherΔ1.NewGCM(nonceSize, tagSize);
     }
     if (cipher.BlockSize() != gcmBlockSize) {
         return (default, errors.New(cipherNewGCMRequires128ˢ));
@@ -405,13 +403,11 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     slice<byte> head = default;
     slice<byte> tail = default;
 
-    {
-        nint total = len(@in) + n; if (cap(@in) >= total) {
-            head = @in.slice(0, total);
-        } else {
-            head = new slice<byte>(total);
-            copy(head, @in);
-        }
+    nint total = len(@in) + n; if (cap(@in) >= total) {
+        head = @in.slice(0, total);
+    } else {
+        head = new slice<byte>(total);
+        copy(head, @in);
     }
     tail = head.slice(len(@in));
     return (head, tail);

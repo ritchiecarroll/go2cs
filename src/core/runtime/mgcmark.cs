@@ -84,14 +84,12 @@ internal static (slice<ж<g>>, nint) allGsSnapshotSortedForGC() {
     foreach (var (_, gp) in allgs) {
         // not sure if we need atomic load because we are stopping the world,
         // but do it just to be safe for now
-        {
-            var status = readgstatus(gp); if (status != _Gwaiting || gp.internalBlocked()) {
-                allgsSorted[currIndex] = gp;
-                currIndex++;
-            } else {
-                allgsSorted[blockedIndex] = gp;
-                blockedIndex--;
-            }
+        var status = readgstatus(gp); if (status != _Gwaiting || gp.internalBlocked()) {
+            allgsSorted[currIndex] = gp;
+            currIndex++;
+        } else {
+            allgsSorted[blockedIndex] = gp;
+            blockedIndex--;
         }
     }
 
@@ -182,11 +180,9 @@ private static readonly @string scanMissedAGˢᵇ = "scan missed a g"u8;
 // gcMarkRootCheck checks that all roots have been scanned. It is
 // purely for debugging.
 internal static void gcMarkRootCheck() {
-    {
-        var (next, jobs) = (Ꮡwork.ᏑmarkrootNext.Load(), Ꮡwork.ᏑmarkrootJobs.Load()); if (next < jobs) {
-            print(next, (@string)" of ", jobs, (@string)" markroot jobs done\n");
-            @throw(leftOverMarkrootJobsˢ);
-        }
+    var (next, jobs) = (Ꮡwork.ᏑmarkrootNext.Load(), Ꮡwork.ᏑmarkrootJobs.Load()); if (next < jobs) {
+        print(next, (@string)" of ", jobs, (@string)" markroot jobs done\n");
+        @throw(leftOverMarkrootJobsˢ);
     }
 
     // Check that stacks have been scanned.
@@ -469,11 +465,9 @@ internal static void markrootSpans(ж<gcWork> gcw, nint shard) {
 
             // The state must be mSpanInUse if the specials bit is set, so
             // sanity check that.
-            {
-                var state = s.Ꮡstate.get(); if (state != mSpanInUse) {
-                    print((@string)"s.state = ", state, (@string)"\n");
-                    @throw(nonInUseSpanFoundWithˢ);
-                }
+            var state = s.Ꮡstate.get(); if (state != mSpanInUse) {
+                print((@string)"s.state = ", state, (@string)"\n");
+                @throw(nonInUseSpanFoundWithˢ);
             }
             // Check that this span was swept (it may be cached or uncached).
             if (!useCheckmark && !(s.sweepgen == sg || s.sweepgen == sg + 3)) {
@@ -548,10 +542,8 @@ internal static void gcAssistAlloc(ж<g> Ꮡgp) {
         if (getg() == (~gp.m).g0) {
             return;
         }
-        {
-            var mp = getg().Value.m; if ((~mp).locks > 0 || (~mp).preemptoff != ""u8) {
-                return;
-            }
+        var mp = getg().Value.m; if ((~mp).locks > 0 || (~mp).preemptoff != ""u8) {
+            return;
         }
 
         {
@@ -1186,12 +1178,10 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
         }
 
         // Scan arguments to this frame.
-        {
-            var n = frame.argBytes(); if (n != 0) {
-                // TODO: We could pass the entry argument map
-                // to narrow this down further.
-                scanConservative(frame.argp, n, nil, gcw, Ꮡstate);
-            }
+        var n = frame.argBytes(); if (n != 0) {
+            // TODO: We could pass the entry argument map
+            // to narrow this down further.
+            scanConservative(frame.argp, n, nil, gcw, Ꮡstate);
         }
 
         if (isAsyncPreempt || isDebugCall) {
@@ -1408,29 +1398,17 @@ internal static void gcDrain(ж<gcWork> Ꮡgcw, gcDrainFlags flags) {
         // See mgcwork.go for the rationale behind the order in which we check these queues.
         uintptr b = default;
         objptr s = default;
-        {
-            b = gcw.tryGetObjFast(); if (b == 0) {
-                {
-                    s = gcw.tryGetSpanFast(); if (s == 0) {
-                        {
-                            b = gcw.tryGetObj(); if (b == 0) {
-                                {
-                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
-                                        // Flush the write barrier
-                                        // buffer; this may create
-                                        // more work.
-                                        wbBufFlush();
-                                        {
-                                            b = gcw.tryGetObj(); if (b == 0) {
-                                                {
-                                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
-                                                        s = gcw.tryStealSpan();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+        b = gcw.tryGetObjFast(); if (b == 0) {
+            s = gcw.tryGetSpanFast(); if (s == 0) {
+                b = gcw.tryGetObj(); if (b == 0) {
+                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                        // Flush the write barrier
+                        // buffer; this may create
+                        // more work.
+                        wbBufFlush();
+                        b = gcw.tryGetObj(); if (b == 0) {
+                            s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                s = gcw.tryStealSpan();
                             }
                         }
                     }
@@ -1526,37 +1504,25 @@ internal static int64 gcDrainN(ж<gcWork> Ꮡgcw, int64 scanWork) {
         // See mgcwork.go for the rationale behind the order in which we check these queues.
         uintptr b = default;
         objptr s = default;
-        {
-            b = gcw.tryGetObjFast(); if (b == 0) {
-                {
-                    s = gcw.tryGetSpanFast(); if (s == 0) {
-                        {
-                            b = gcw.tryGetObj(); if (b == 0) {
-                                {
-                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
-                                        // Flush the write barrier
-                                        // buffer; this may create
-                                        // more work.
-                                        wbBufFlush();
-                                        {
-                                            b = gcw.tryGetObj(); if (b == 0) {
-                                                {
-                                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
-                                                        // Try to do a root job.
-                                                        if (Ꮡwork.ᏑmarkrootNext.Load() < Ꮡwork.ᏑmarkrootJobs.Load()) {
-                                                            var (job, ok) = gcNextMarkRoot();
-                                                            if (ok) {
-                                                                workFlushed += markroot(Ꮡgcw, job, false);
-                                                                continue;
-                                                            }
-                                                        }
-                                                        s = gcw.tryStealSpan();
-                                                    }
-                                                }
-                                            }
-                                        }
+        b = gcw.tryGetObjFast(); if (b == 0) {
+            s = gcw.tryGetSpanFast(); if (s == 0) {
+                b = gcw.tryGetObj(); if (b == 0) {
+                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                        // Flush the write barrier
+                        // buffer; this may create
+                        // more work.
+                        wbBufFlush();
+                        b = gcw.tryGetObj(); if (b == 0) {
+                            s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                // Try to do a root job.
+                                if (Ꮡwork.ᏑmarkrootNext.Load() < Ꮡwork.ᏑmarkrootJobs.Load()) {
+                                    var (job, ok) = gcNextMarkRoot();
+                                    if (ok) {
+                                        workFlushed += markroot(Ꮡgcw, job, false);
+                                        continue;
                                     }
                                 }
+                                s = gcw.tryStealSpan();
                             }
                         }
                     }
@@ -1629,10 +1595,8 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> ptrmask, ж<gcW
                         Ꮡstk.putPtr(Δp, false);
                     } else {
                         if (!tryDeferToSpanScan(Δp, gcw)) {
-                            {
-                                var (obj, span, objIndex) = findObject(Δp, b, i); if (obj != 0) {
-                                    greyobject(obj, b, i, span, gcw, objIndex);
-                                }
+                            var (obj, span, objIndex) = findObject(Δp, b, i); if (obj != 0) {
+                                greyobject(obj, b, i, span, gcw, objIndex);
                             }
                         }
                     }
@@ -1761,10 +1725,8 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
 internal static void shade(uintptr b) {
     var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
     if (!tryDeferToSpanScan(b, gcw)) {
-        {
-            var (obj, span, objIndex) = findObject(b, 0, 0); if (obj != 0) {
-                greyobject(obj, 0, 0, span, gcw, objIndex);
-            }
+        var (obj, span, objIndex) = findObject(b, 0, 0); if (obj != 0) {
+            greyobject(obj, 0, 0, span, gcw, objIndex);
         }
     }
 }
@@ -1850,12 +1812,10 @@ internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
         return;
     }
     print((@string)" s.base()=", (Δhex)(uint64)s.@base(), (@string)" s.limit=", (Δhex)(uint64)s.limit, (@string)" s.spanclass=", s.spanclass, (@string)" s.elemsize=", s.elemsize, (@string)" s.state=");
-    {
-        var state = s.Ꮡstate.get(); if (0 <= state && (nint)state < len(mSpanStateNames)) {
-            print(mSpanStateNames[state], (@string)"\n");
-        } else {
-            print((@string)"unknown(", state, (@string)")\n");
-        }
+    var state = s.Ꮡstate.get(); if (0 <= state && (nint)state < len(mSpanStateNames)) {
+        print(mSpanStateNames[state], (@string)"\n");
+    } else {
+        print((@string)"unknown(", state, (@string)")\n");
     }
 
     var skipped = false;

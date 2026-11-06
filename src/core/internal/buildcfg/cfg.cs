@@ -83,10 +83,8 @@ public static void Check() {
 }
 
 internal static @string envOr(@string key, @string value) {
-    {
-        @string x = os.Getenv(key); if (x != ""u8) {
-            return x;
-        }
+    @string x = os.Getenv(key); if (x != ""u8) {
+        return x;
     }
     return value;
 }
@@ -96,23 +94,21 @@ internal static ref readonly @string goamd64ˢ => ref goamd64ˢᵇ;
 private static readonly @string goamd64ˢᵇ = "GOAMD64"u8;
 
 internal static nint goamd64() {
-    {
-        @string v = envOr(goamd64ˢ, DefaultGOAMD64);
-        var exprᴛ1 = v;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "v1"u8: {
-            return 1;
-        }
-        case {} when exprᴛ1 == "v2"u8: {
-            return 2;
-        }
-        case {} when exprᴛ1 == "v3"u8: {
-            return 3;
-        }
-        case {} when exprᴛ1 == "v4"u8: {
-            return 4;
-        }}
+    @string v = envOr(goamd64ˢ, DefaultGOAMD64);
+    var exprᴛ1 = v;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "v1"u8: {
+        return 1;
     }
+    case {} when exprᴛ1 == "v2"u8: {
+        return 2;
+    }
+    case {} when exprᴛ1 == "v3"u8: {
+        return 3;
+    }
+    case {} when exprᴛ1 == "v4"u8: {
+        return 4;
+    }}
     Error = fmt.Errorf("invalid GOAMD64: must be v1, v2, v3, v4"u8);
     return (nint)((byte)(DefaultGOAMD64[len("v")] - '0'));
 }
@@ -142,34 +138,24 @@ internal static bool isFIPSVersion(@string v) {
     if (!ok) {
         return false;
     }
-    {
-        (v, ok) = cutNum(v); if (!ok) {
-            return false;
-        }
+    (v, ok) = cutNum(v); if (!ok) {
+        return false;
     }
-    {
-        (v, ok) = strings.CutPrefix(v, "."); if (!ok) {
-            return false;
-        }
+    (v, ok) = strings.CutPrefix(v, "."); if (!ok) {
+        return false;
     }
-    {
-        (v, ok) = cutNum(v); if (!ok) {
-            return false;
-        }
+    (v, ok) = cutNum(v); if (!ok) {
+        return false;
     }
     if (v == ""u8) {
         return true;
     }
-    {
-        (v, ok) = strings.CutPrefix(v, "-rc"); if (ok) {
-            (v, ok) = cutNum(v);
-            return ok && v == ""u8;
-        }
+    (v, ok) = strings.CutPrefix(v, "-rc"); if (ok) {
+        (v, ok) = cutNum(v);
+        return ok && v == ""u8;
     }
-    {
-        (v, ok) = strings.CutPrefix(v, "-"); if (ok) {
-            return len(v) == 8;
-        }
+    (v, ok) = strings.CutPrefix(v, "-"); if (ok) {
+        return len(v) == 8;
     }
     return false;
 }
@@ -385,14 +371,12 @@ internal static ref readonly @string gomipsˢ => ref gomipsˢᵇ;
 private static readonly @string gomipsˢᵇ = "GOMIPS"u8;
 
 internal static @string gomips() {
-    {
-        @string v = envOr(gomipsˢ, DefaultGOMIPS);
-        var exprᴛ1 = v;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
-            return v;
-        }}
-    }
+    @string v = envOr(gomipsˢ, DefaultGOMIPS);
+    var exprᴛ1 = v;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
+        return v;
+    }}
     Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS;
 }
@@ -402,14 +386,12 @@ internal static ref readonly @string gomips64ˢ => ref gomips64ˢᵇ;
 private static readonly @string gomips64ˢᵇ = "GOMIPS64"u8;
 
 internal static @string gomips64() {
-    {
-        @string v = envOr(gomips64ˢ, DefaultGOMIPS64);
-        var exprᴛ1 = v;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
-            return v;
-        }}
-    }
+    @string v = envOr(gomips64ˢ, DefaultGOMIPS64);
+    var exprᴛ1 = v;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
+        return v;
+    }}
     Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS64;
 }
@@ -419,20 +401,18 @@ internal static ref readonly @string goppc64ˢ => ref goppc64ˢᵇ;
 private static readonly @string goppc64ˢᵇ = "GOPPC64"u8;
 
 internal static nint goppc64() {
-    {
-        @string v = envOr(goppc64ˢ, DefaultGOPPC64);
-        var exprᴛ1 = v;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "power8"u8: {
-            return 8;
-        }
-        case {} when exprᴛ1 == "power9"u8: {
-            return 9;
-        }
-        case {} when exprᴛ1 == "power10"u8: {
-            return 10;
-        }}
+    @string v = envOr(goppc64ˢ, DefaultGOPPC64);
+    var exprᴛ1 = v;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "power8"u8: {
+        return 8;
     }
+    case {} when exprᴛ1 == "power9"u8: {
+        return 9;
+    }
+    case {} when exprᴛ1 == "power10"u8: {
+        return 10;
+    }}
     Error = fmt.Errorf("invalid GOPPC64: must be power8, power9, power10"u8);
     return (nint)((byte)(DefaultGOPPC64[len("power")] - '0'));
 }
@@ -442,20 +422,18 @@ internal static ref readonly @string goriscv64ˢ => ref goriscv64ˢᵇ;
 private static readonly @string goriscv64ˢᵇ = "GORISCV64"u8;
 
 internal static nint goriscv64() {
-    {
-        @string vΔ1 = envOr(goriscv64ˢ, DefaultGORISCV64);
-        var exprᴛ1 = vΔ1;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "rva20u64"u8: {
-            return 20;
-        }
-        case {} when exprᴛ1 == "rva22u64"u8: {
-            return 22;
-        }
-        case {} when exprᴛ1 == "rva23u64"u8: {
-            return 23;
-        }}
+    @string vΔ1 = envOr(goriscv64ˢ, DefaultGORISCV64);
+    var exprᴛ1 = vΔ1;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "rva20u64"u8: {
+        return 20;
     }
+    case {} when exprᴛ1 == "rva22u64"u8: {
+        return 22;
+    }
+    case {} when exprᴛ1 == "rva23u64"u8: {
+        return 23;
+    }}
     Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
     nint i = strings.IndexFunc(v, (rune r) => r < '0' || r > '9');

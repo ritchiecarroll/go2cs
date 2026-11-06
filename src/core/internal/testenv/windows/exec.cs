@@ -36,15 +36,13 @@ private static readonly object skippingTestˢ = (@string)"skipping test:"u8;
 // If exec is not supported, testenv.SyscallIsNotSupported will return true
 // for the resulting error.
 public static void MustHaveExec(testing.TB t) {
-    {
-        var err = tryExec(); if (err != nil) {
-            @string msg = fmt.Sprintf("cannot exec subprocess on %s/%s: %v"u8, Δruntime.GOOS, Δruntime.GOARCH, err);
-            if (t == nil) {
-                throw panic(msg);
-            }
-            t.Helper();
-            t.Skip(skippingTestˢ, msg);
+    var err = tryExec(); if (err != nil) {
+        @string msg = fmt.Sprintf("cannot exec subprocess on %s/%s: %v"u8, Δruntime.GOOS, Δruntime.GOARCH, err);
+        if (t == nil) {
+            throw panic(msg);
         }
+        t.Helper();
+        t.Skip(skippingTestˢ, msg);
     }
 }
 
@@ -187,52 +185,42 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
     Action cancelCtx = default;
     time.Duration gracePeriod = default; // unlimited unless the test has a deadline (to allow for interactive debugging)
 
-    {
-        var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {
-            {
-                var (td, okΔ1) = tΔ1.Deadline(); if (okΔ1) {
-                    // Start with a minimum grace period, just long enough to consume the
-                    // output of a reasonable program after it terminates.
-                    gracePeriod = 100 * time.Millisecond;
-                    {
-                        @string s = os.Getenv(goTestTimeoutScaleˢ); if (s != ""u8) {
-                            var (scale, err) = strconv.Atoi(s);
-                            if (err != nil) {
-                                tΔ1.Fatalf("invalid GO_TEST_TIMEOUT_SCALE: %v", err);
-                            }
-                            gracePeriod *= ((time.Duration)(int64)scale);
-                        }
-                    }
-
-                    // If time allows, increase the termination grace period to 5% of the
-                    // test's remaining time.
-                    var testTimeout = time.Until(td);
-                    {
-                        var gp = testTimeout / 20; if (gp > gracePeriod) {
-                            gracePeriod = gp;
-                        }
-                    }
-
-                    // When we run commands that execute subprocesses, we want to reserve two
-                    // grace periods to clean up: one for the delay between the first
-                    // termination signal being sent (via the Cancel callback when the Context
-                    // expires) and the process being forcibly terminated (via the WaitDelay
-                    // field), and a second one for the delay between the process being
-                    // terminated and the test logging its output for debugging.
-                    //
-                    // (We want to ensure that the test process itself has enough time to
-                    // log the output before it is also terminated.)
-                    var cmdTimeout = testTimeout - 2 * gracePeriod;
-
-                    {
-                        var (cd, okΔ2) = ctx.Deadline(); if (!okΔ2 || time.Until(cd) > cmdTimeout) {
-                            // Either ctx doesn't have a deadline, or its deadline would expire
-                            // after (or too close before) the test has already timed out.
-                            // Add a shorter timeout so that the test will produce useful output.
-                            (ctx, cancelCtx) = context.WithTimeout(ctx, cmdTimeout);
-                        }
-                    }
+    var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {
+        var (td, okΔ1) = tΔ1.Deadline(); if (okΔ1) {
+            // Start with a minimum grace period, just long enough to consume the
+            // output of a reasonable program after it terminates.
+            gracePeriod = 100 * time.Millisecond;
+            @string s = os.Getenv(goTestTimeoutScaleˢ); if (s != ""u8) {
+                var (scale, err) = strconv.Atoi(s);
+                if (err != nil) {
+                    tΔ1.Fatalf("invalid GO_TEST_TIMEOUT_SCALE: %v", err);
                 }
+                gracePeriod *= ((time.Duration)(int64)scale);
+            }
+
+            // If time allows, increase the termination grace period to 5% of the
+            // test's remaining time.
+            var testTimeout = time.Until(td);
+            var gp = testTimeout / 20; if (gp > gracePeriod) {
+                gracePeriod = gp;
+            }
+
+            // When we run commands that execute subprocesses, we want to reserve two
+            // grace periods to clean up: one for the delay between the first
+            // termination signal being sent (via the Cancel callback when the Context
+            // expires) and the process being forcibly terminated (via the WaitDelay
+            // field), and a second one for the delay between the process being
+            // terminated and the test logging its output for debugging.
+            //
+            // (We want to ensure that the test process itself has enough time to
+            // log the output before it is also terminated.)
+            var cmdTimeout = testTimeout - 2 * gracePeriod;
+
+            var (cd, okΔ2) = ctx.Deadline(); if (!okΔ2 || time.Until(cd) > cmdTimeout) {
+                // Either ctx doesn't have a deadline, or its deadline would expire
+                // after (or too close before) the test has already timed out.
+                // Add a shorter timeout so that the test will produce useful output.
+                (ctx, cancelCtx) = context.WithTimeout(ctx, cmdTimeout);
             }
         }
     }

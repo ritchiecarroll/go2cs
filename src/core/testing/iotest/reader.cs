@@ -170,134 +170,130 @@ public static error TestReader(io.Reader r, slice<byte> content) {
         return fmt.Errorf("Read(10) at EOF = %v, %v, want 0, EOF"u8, n, err);
     }
 
-    {
-        var (rΔ1, ok) = r._<io.ReadSeeker>(ᐧ); if (ok) {
-            // Seek(0, 1) should report the current file position (EOF).
+    if (r._<io.ReadSeeker>(out var rΔ1)) {
+        // Seek(0, 1) should report the current file position (EOF).
+        {
+            var (off, errΔ2) = rΔ1.Seek(0, 1); if (off != (int64)len(content) || errΔ2 != nil) {
+                return fmt.Errorf("Seek(0, 1) from EOF = %d, %v, want %d, nil"u8, off, errΔ2, len(content));
+            }
+        }
+
+        // Seek backward partway through file, in two steps.
+        // If middle == 0, len(content) == 0, can't use the -1 and +1 seeks.
+        nint middle = len(content) - len(content) / 3;
+        if (middle > 0) {
             {
-                var (off, errΔ2) = rΔ1.Seek(0, 1); if (off != (int64)len(content) || errΔ2 != nil) {
-                    return fmt.Errorf("Seek(0, 1) from EOF = %d, %v, want %d, nil"u8, off, errΔ2, len(content));
-                }
-            }
-
-            // Seek backward partway through file, in two steps.
-            // If middle == 0, len(content) == 0, can't use the -1 and +1 seeks.
-            nint middle = len(content) - len(content) / 3;
-            if (middle > 0) {
-                {
-                    var (off, errΔ3) = rΔ1.Seek(-1, 1); if (off != (int64)(len(content) - 1) || errΔ3 != nil) {
-                        return fmt.Errorf("Seek(-1, 1) from EOF = %d, %v, want %d, nil"u8, -off, errΔ3, len(content) - 1);
-                    }
-                }
-                {
-                    var (off, errΔ4) = rΔ1.Seek((int64)(-len(content) / 3), 1); if (off != (int64)(middle - 1) || errΔ4 != nil) {
-                        return fmt.Errorf("Seek(%d, 1) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, len(content) - 1, off, errΔ4, middle - 1);
-                    }
-                }
-                {
-                    var (off, errΔ5) = rΔ1.Seek(+1, 1); if (off != (int64)middle || errΔ5 != nil) {
-                        return fmt.Errorf("Seek(+1, 1) from %d = %d, %v, want %d, nil"u8, middle - 1, off, errΔ5, middle);
-                    }
-                }
-            }
-
-            // Seek(0, 1) should report the current file position (middle).
-            {
-                var (off, errΔ6) = rΔ1.Seek(0, 1); if (off != (int64)middle || errΔ6 != nil) {
-                    return fmt.Errorf("Seek(0, 1) from %d = %d, %v, want %d, nil"u8, middle, off, errΔ6, middle);
-                }
-            }
-
-            // Reading forward should return the last part of the file.
-            var (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
-            if (errΔ7 != nil) {
-                return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
-            }
-            if (!bytes.Equal(dataΔ1, content.slice(middle))) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
-            }
-
-            // Seek relative to end of file, but start elsewhere.
-            {
-                var (off, errΔ8) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ8 != nil) {
-                    return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ8, middle / 2);
+                var (off, errΔ3) = rΔ1.Seek(-1, 1); if (off != (int64)(len(content) - 1) || errΔ3 != nil) {
+                    return fmt.Errorf("Seek(-1, 1) from EOF = %d, %v, want %d, nil"u8, -off, errΔ3, len(content) - 1);
                 }
             }
             {
-                var (off, errΔ9) = rΔ1.Seek((int64)(-len(content) / 3), 2); if (off != (int64)middle || errΔ9 != nil) {
-                    return fmt.Errorf("Seek(%d, 2) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, middle / 2, off, errΔ9, middle);
+                var (off, errΔ4) = rΔ1.Seek((int64)(-len(content) / 3), 1); if (off != (int64)(middle - 1) || errΔ4 != nil) {
+                    return fmt.Errorf("Seek(%d, 1) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, len(content) - 1, off, errΔ4, middle - 1);
                 }
             }
-
-            // Reading forward should return the last part of the file (again).
-            (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
-            if (errΔ7 != nil) {
-                return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
-            }
-            if (!bytes.Equal(dataΔ1, content.slice(middle))) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
-            }
-
-            // Absolute seek & read forward.
             {
-                var (off, errΔ10) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ10 != nil) {
-                    return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ10, middle / 2);
+                var (off, errΔ5) = rΔ1.Seek(+1, 1); if (off != (int64)middle || errΔ5 != nil) {
+                    return fmt.Errorf("Seek(+1, 1) from %d = %d, %v, want %d, nil"u8, middle - 1, off, errΔ5, middle);
                 }
             }
-            (dataΔ1, errΔ7) = io.ReadAll(rΔ1);
-            if (errΔ7 != nil) {
-                return fmt.Errorf("ReadAll from offset %d: %v"u8, middle / 2, errΔ7);
+        }
+
+        // Seek(0, 1) should report the current file position (middle).
+        {
+            var (off, errΔ6) = rΔ1.Seek(0, 1); if (off != (int64)middle || errΔ6 != nil) {
+                return fmt.Errorf("Seek(0, 1) from %d = %d, %v, want %d, nil"u8, middle, off, errΔ6, middle);
             }
-            if (!bytes.Equal(dataΔ1, content.slice(middle / 2))) {
-                return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle / 2, dataΔ1, content.slice(middle / 2));
+        }
+
+        // Reading forward should return the last part of the file.
+        var (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
+        if (errΔ7 != nil) {
+            return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
+        }
+        if (!bytes.Equal(dataΔ1, content.slice(middle))) {
+            return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
+        }
+
+        // Seek relative to end of file, but start elsewhere.
+        {
+            var (off, errΔ8) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ8 != nil) {
+                return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ8, middle / 2);
             }
+        }
+        {
+            var (off, errΔ9) = rΔ1.Seek((int64)(-len(content) / 3), 2); if (off != (int64)middle || errΔ9 != nil) {
+                return fmt.Errorf("Seek(%d, 2) from %d = %d, %v, want %d, nil"u8, -len(content) / 3, middle / 2, off, errΔ9, middle);
+            }
+        }
+
+        // Reading forward should return the last part of the file (again).
+        (dataΔ1, errΔ7) = io.ReadAll(new smallByteReaderжReader(Ꮡ(new smallByteReader(r: rΔ1))));
+        if (errΔ7 != nil) {
+            return fmt.Errorf("ReadAll from offset %d: %v"u8, middle, errΔ7);
+        }
+        if (!bytes.Equal(dataΔ1, content.slice(middle))) {
+            return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle, dataΔ1, content.slice(middle));
+        }
+
+        // Absolute seek & read forward.
+        {
+            var (off, errΔ10) = rΔ1.Seek((int64)(middle / 2), 0); if (off != (int64)(middle / 2) || errΔ10 != nil) {
+                return fmt.Errorf("Seek(%d, 0) from EOF = %d, %v, want %d, nil"u8, middle / 2, off, errΔ10, middle / 2);
+            }
+        }
+        (dataΔ1, errΔ7) = io.ReadAll(rΔ1);
+        if (errΔ7 != nil) {
+            return fmt.Errorf("ReadAll from offset %d: %v"u8, middle / 2, errΔ7);
+        }
+        if (!bytes.Equal(dataΔ1, content.slice(middle / 2))) {
+            return fmt.Errorf("ReadAll from offset %d = %q\n\twant %q"u8, middle / 2, dataΔ1, content.slice(middle / 2));
         }
     }
 
-    {
-        var (rΔ2, ok) = r._<io.ReaderAt>(ᐧ); if (ok) {
-            var dataΔ2 = new slice<byte>(len(content), len(content) + 1);
-            foreach (var i in range(len(dataΔ2))) {
-                dataΔ2[i] = 0xfe;
-            }
-            var (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2, 0);
-            if (nΔ2 != len(dataΔ2) || errΔ11 != nil && !AreEqual(errΔ11, io.EOF)) {
-                return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, nil or EOF"u8, len(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
-            }
-            if (!bytes.Equal(dataΔ2, content)) {
-                return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
-            }
+    if (r._<io.ReaderAt>(out var rΔ2)) {
+        var dataΔ2 = new slice<byte>(len(content), len(content) + 1);
+        foreach (var i in range(len(dataΔ2))) {
+            dataΔ2[i] = 0xfe;
+        }
+        var (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2, 0);
+        if (nΔ2 != len(dataΔ2) || errΔ11 != nil && !AreEqual(errΔ11, io.EOF)) {
+            return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, nil or EOF"u8, len(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
+        }
+        if (!bytes.Equal(dataΔ2, content)) {
+            return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
+        }
 
-            (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2[..1], (int64)len(dataΔ2));
-            if (nΔ2 != 0 || !AreEqual(errΔ11, io.EOF)) {
-                return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 0, EOF"u8, len(dataΔ2), nΔ2, errΔ11);
-            }
+        (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2[..1], (int64)len(dataΔ2));
+        if (nΔ2 != 0 || !AreEqual(errΔ11, io.EOF)) {
+            return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 0, EOF"u8, len(dataΔ2), nΔ2, errΔ11);
+        }
 
-            foreach (var i in range(len(dataΔ2))) {
-                dataΔ2[i] = 0xfe;
-            }
-            (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(0, cap(dataΔ2)), 0);
-            if (nΔ2 != len(dataΔ2) || !AreEqual(errΔ11, io.EOF)) {
-                return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, EOF"u8, cap(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
-            }
-            if (!bytes.Equal(dataΔ2, content)) {
-                return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
-            }
+        foreach (var i in range(len(dataΔ2))) {
+            dataΔ2[i] = 0xfe;
+        }
+        (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(0, cap(dataΔ2)), 0);
+        if (nΔ2 != len(dataΔ2) || !AreEqual(errΔ11, io.EOF)) {
+            return fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, EOF"u8, cap(dataΔ2), nΔ2, errΔ11, len(dataΔ2));
+        }
+        if (!bytes.Equal(dataΔ2, content)) {
+            return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
+        }
 
-            foreach (var i in range(len(dataΔ2))) {
-                dataΔ2[i] = 0xfe;
-            }
-            foreach (var i in range(len(dataΔ2))) {
-                (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
-                if (nΔ2 != 1 || errΔ11 != nil && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
-                    @string want = nilˢ;
-                    if (i == len(dataΔ2) - 1) {
-                        want = nilOrEofˢ;
-                    }
-                    return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 1, %s"u8, i, nΔ2, errΔ11, want);
+        foreach (var i in range(len(dataΔ2))) {
+            dataΔ2[i] = 0xfe;
+        }
+        foreach (var i in range(len(dataΔ2))) {
+            (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
+            if (nΔ2 != 1 || errΔ11 != nil && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
+                @string want = nilˢ;
+                if (i == len(dataΔ2) - 1) {
+                    want = nilOrEofˢ;
                 }
-                if (dataΔ2[i] != content[i]) {
-                    return fmt.Errorf("ReadAt(1, %d) = %q want %q"u8, i, dataΔ2.slice(i, i + 1), content.slice(i, i + 1));
-                }
+                return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 1, %s"u8, i, nΔ2, errΔ11, want);
+            }
+            if (dataΔ2[i] != content[i]) {
+                return fmt.Errorf("ReadAt(1, %d) = %q want %q"u8, i, dataΔ2.slice(i, i + 1), content.slice(i, i + 1));
             }
         }
     }

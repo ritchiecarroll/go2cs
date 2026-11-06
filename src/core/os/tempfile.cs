@@ -49,10 +49,8 @@ public static (ж<File>, error) CreateTemp(@string dir, @string pattern) {
         @string name = prefix + nextRandom() + suffix;
         var (f, errΔ1) = OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_EXCL), 384);
         if (IsExist(errΔ1)) {
-            {
-                @try++; if (@try < 10000) {
-                    continue;
-                }
+            @try++; if (@try < 10000) {
+                continue;
             }
             return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp", Path: prefix + "*"u8 + suffix, Err: ErrExist))));
         }
@@ -73,12 +71,10 @@ internal static (@string prefix, @string suffix, error err) prefixAndSuffix(@str
             return ("", "", errPatternHasSeparator);
         }
     }
-    {
-        nint pos = bytealg.LastIndexByteString(pattern, (byte)'*'); if (pos != -1) {
-            (prefix, suffix) = (pattern.slice(0, pos), pattern.slice(pos + 1));
-        } else {
-            prefix = pattern;
-        }
+    nint pos = bytealg.LastIndexByteString(pattern, (byte)'*'); if (pos != -1) {
+        (prefix, suffix) = (pattern.slice(0, pos), pattern.slice(pos + 1));
+    } else {
+        prefix = pattern;
     }
     return (prefix, suffix, default);
 }
@@ -110,18 +106,14 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
             return (name, default);
         }
         if (IsExist(errΔ1)) {
-            {
-                @try++; if (@try < 10000) {
-                    continue;
-                }
+            @try++; if (@try < 10000) {
+                continue;
             }
             return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp", Path: prefix + "*"u8 + suffix, Err: ErrExist))));
         }
         if (IsNotExist(errΔ1)) {
-            {
-                var (_, errΔ2) = Stat(dir); if (IsNotExist(errΔ2)) {
-                    return ("", errΔ2);
-                }
+            var (_, errΔ2) = Stat(dir); if (IsNotExist(errΔ2)) {
+                return ("", errΔ2);
             }
         }
         return ("", errΔ1);

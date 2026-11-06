@@ -358,12 +358,10 @@ internal static void add(this ж<tree> Ꮡt, ж<ΔFile> Ꮡfile) {
         t.set(Ꮡfile, pos, parent); // missing; insert
         return;
     }
-    {
-        var prev = (pos.ValueSlot).@file; if (prev != Ꮡfile) {
-            throw panic(fmt.Sprintf("file %s (%d-%d) overlaps with file %s (%d-%d)"u8,
-                prev.Name(), prev.Base(), prev.End(),
-                @file.Name(), @file.Base(), @file.End()));
-        }
+    var prev = (pos.ValueSlot).@file; if (prev != Ꮡfile) {
+        throw panic(fmt.Sprintf("file %s (%d-%d) overlaps with file %s (%d-%d)"u8,
+            prev.Name(), prev.Base(), prev.End(),
+            @file.Name(), @file.Base(), @file.End()));
     }
 }
 
@@ -373,17 +371,15 @@ internal static void set(this ref tree t, ж<ΔFile> Ꮡfile, ж<ж<node>> Ꮡpo
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
-    {
-        var xΔ1 = pos; if (xΔ1 != nil) {
-            // This code path isn't currently needed
-            // because FileSet never updates an existing entry.
-            // Remove this assertion if things change.
-            if (true) { // defeat vet's unreachable pass
-                throw panic("unreachable according to current FileSet requirements");
-            }
-            xΔ1.@file = Ꮡfile;
-            return;
+    var xΔ1 = pos; if (xΔ1 != nil) {
+        // This code path isn't currently needed
+        // because FileSet never updates an existing entry.
+        // Remove this assertion if things change.
+        if (true) { // defeat vet's unreachable pass
+            throw panic("unreachable according to current FileSet requirements");
         }
+        xΔ1.@file = Ꮡfile;
+        return;
     }
     var x = Ꮡ(new node(@file: Ꮡfile, key: @file.key(), parent: parent, height: -1));
     pos = x;
@@ -408,10 +404,8 @@ internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) {
         return;
     }
     case {} when x.left == nil: {
-        {
-            pos = x.right; if (pos != nil) {
-                (pos).parent = x.parent;
-            }
+        pos = x.right; if (pos != nil) {
+            (pos).parent = x.parent;
         }
         t.rebalanceUp(x.parent);
         break;

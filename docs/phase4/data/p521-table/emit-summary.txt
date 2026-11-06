@@ -1,0 +1,13 @@
+arm A ref 642621b43f268087240c3da0ec9b57931b504308 binary 86d3d5a2c9f12b9d seeded 4560 .cs
+arm B ref HEAD binary fad5a0a500112937 seeded 4560 .cs
+seed HEAD 5c94886d29e6c2f29ce0fac1f3ab241304039e80
+arm A emission rc=0 wall=1180s written-into-root 1 staged-cs 5994
+arm B emission rc=0 wall=1167s written-into-root 3 staged-cs 5994
+arm A DYNTYPE-marker files 0
+arm B DYNTYPE-marker files 0
+arm A marked hand-owns written over: 0 of 335 marked
+arm B marked hand-owns written over: 0 of 335 marked
+diff A vs B: 2 entries
+Files /c/go2cs-h/scratch/p521/emit/rootA/src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs and /c/go2cs-h/scratch/p521/emit/rootB/src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs differ
+Files /c/go2cs-h/scratch/p521/emit/rootA/src/core/crypto/internal/fips140/nistec/fiat/package_info.cs and /c/go2cs-h/scratch/p521/emit/rootB/src/core/crypto/internal/fips140/nistec/fiat/package_info.cs differ
+done

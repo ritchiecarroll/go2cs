@@ -30,10 +30,8 @@ internal const bool netbsd32Bit = /* runtime.GOOS == "netbsd" && sizeofPtr == 4 
 
 // clen returns the index of the first NULL byte in n or len(n) if n contains no NULL byte.
 internal static nint clen(slice<byte> n) {
-    {
-        nint i = bytealg.IndexByte(n, 0); if (i != -1) {
-            return i;
-        }
+    nint i = bytealg.IndexByte(n, 0); if (i != -1) {
+        return i;
     }
     return len(n);
 }
@@ -98,10 +96,8 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
         }
 
         // Unmap the memory and update m.
-        {
-            var errno = m.munmap((uintptr)Ꮡ(b, 0), (uintptr)len(b)); if (errno != nil) {
-                err = errno; goto ᒐdone;
-            }
+        var errno = m.munmap((uintptr)Ꮡ(b, 0), (uintptr)len(b)); if (errno != nil) {
+            err = errno; goto ᒐdone;
         }
         delete(m.active, p);
         err = default;
@@ -346,10 +342,8 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     ref var socklen = ref heap(new _Socklen(), out var Ꮡsocklen);
     socklen = SizeofSockaddrAny;
-    {
-        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
-            return (n, err);
-        }
+    (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
+        return (n, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
@@ -365,10 +359,8 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
     ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
     ref var socklen = ref heap(new _Socklen(), out var Ꮡsocklen);
     socklen = SizeofSockaddrAny;
-    {
-        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
-            return (n, err);
-        }
+    (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡsocklen); if (err != nil) {
+        return (n, err);
     }
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);

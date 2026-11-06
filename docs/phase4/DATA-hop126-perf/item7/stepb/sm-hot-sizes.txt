@@ -1,0 +1,26 @@
+PerfStringMatch_go_main_package__Main                            346 ->   324 (-22)
+PerfStringMatch_go_main_package___cctor                         2558 ->  2636 (+78)
+PerfStringMatch_go_main_package__classify                        680 ->   680 
+PerfStringMatch_go_main_package__init__import_fmt                 12 ->    12 
+PerfStringMatch_go_main_package__init__import_strings             12 ->    12 
+PerfStringMatch_go_main_package__init__import_time                12 ->    12 
+PerfStringMatch_go_main_package__kindName                        687 ->   709 (+22)
+PerfStringMatch_go_main_package__run                            1503 ->  1534 (+31)
+strings_go_strings_package__HasPrefix                              5 ->     5 
+internal_stringslite_go_internal_stringslite_package__HasPrefi   178 ->   178 
+golib_go_string__op_Equality                                     141 ->   141 
+golib_go_string__op_Equality_0                                   141 ->   141 
+golib_go_string__op_Equality_1                                   140 ->   140 
+golib_go_string__op_Equality_2                                    95 ->    95 
+golib_go_string__op_Equality_3                                    95 ->    95 
+golib_go_StringLiteralCache__Contains                             71 ->    71 
+golib_go_StringLiteralCache__Find                                130 ->   131 (+1)
+golib_go_StringLiteralCache__Get                                 139 ->   143 (+4)
+golib_go_StringLiteralCache__Index                                20 ->    20 
+golib_go_StringLiteralCache__Insert                              605 ->   603 (-2)
+golib_go_StringLiteralCache__Miss                                277 ->   277 
+golib_go_StringLiteralCache__Slow                                208 ->   214 (+6)
+golib_go_StringLiteralCache___cctor                              112 ->   112 
+golib_go_StringLiteralCache__get_Count                            44 ->    44 
+S_P_CoreLib_System_SpanHelpers__SequenceEqual                    240 ->   336 (+96)
+S_P_CoreLib_System_SpanHelpers__SequenceEqual_0<UInt8>           287 ->   287 

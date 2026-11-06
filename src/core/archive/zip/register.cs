@@ -163,20 +163,16 @@ internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecom
 // RegisterDecompressor allows custom decompressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
 public static void RegisterDecompressor(uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
-    {
-        var (_, dup) = Ꮡdecompressors.LoadOrStore(method, (dcomp).OrTypedNilFunc()); if (dup) {
-            throw panic("decompressor already registered");
-        }
+    var (_, dup) = Ꮡdecompressors.LoadOrStore(method, (dcomp).OrTypedNilFunc()); if (dup) {
+        throw panic("decompressor already registered");
     }
 }
 
 // RegisterCompressor registers custom compressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
 public static void RegisterCompressor(uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
-    {
-        var (_, dup) = Ꮡcompressors.LoadOrStore(method, (comp).OrTypedNilFunc()); if (dup) {
-            throw panic("compressor already registered");
-        }
+    var (_, dup) = Ꮡcompressors.LoadOrStore(method, (comp).OrTypedNilFunc()); if (dup) {
+        throw panic("compressor already registered");
     }
 }
 

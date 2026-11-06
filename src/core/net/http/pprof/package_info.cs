@@ -69,7 +69,7 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKAlJSkguyygoKCpriCgoCUlKSCrNKCmOqUgoKUpoKCgpSCgoKC3IKClLiqogAKCoKCgoKClICCgqSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKipIKCgIKkgoKClIKmAAkUAAwagoIAEB7igIKCgsiClIKCAAgSgu6YgIIALQiCggABKIKCpo6ClJqC", "424-426:1", "", "197=Sprintf/1/1/1;229=Sprintf/1/1/1;497=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "373:21")]
+[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKUlJSC7LKCgoKmuIKClJSUgqzSgpjqlIKClKaCgoKUgoKCgtyCgpS4qqIACgqCgoKCgpSCgpSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKipIKCgpSCgoKUgqYACRQADBqCggAQHuKCgoK4gpSCggAIEoLumIIALAiCggABKIKCpo6ClJqC", "424-426:1", "", "196=Sprintf/1/1/1;226=Sprintf/1/1/1;487=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "367:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

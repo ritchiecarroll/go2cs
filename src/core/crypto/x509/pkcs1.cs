@@ -71,15 +71,11 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
         return (default, new asn1.SyntaxError(Msg: "trailing data"));
     }
     if (err != nil) {
-        {
-            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey())); if (errΔ1 == nil) {
-                return (default, errors.New(x509FailedToParsePrivateˢ));
-            }
+        var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey())); if (errΔ1 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ));
         }
-        {
-            var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
-                return (default, errors.New(x509FailedToParsePrivateˢ2));
-            }
+        var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ2));
         }
         return (default, err);
     }
@@ -115,25 +111,21 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
     }
 
     key.Precompute();
-    {
-        var errΔ3 = key.Validate(); if (errΔ3 != nil) {
-            // If x509rsacrt=0 is set, try dropping the CRT values and
-            // rerunning precomputation and key validation.
-            if (x509rsacrt.Value() == "0"u8) {
-                key.Precomputed.Dp = default;
-                key.Precomputed.Dq = default;
-                key.Precomputed.Qinv = default;
-                key.Precompute();
-                {
-                    var errΔ4 = key.Validate(); if (errΔ4 == nil) {
-                        x509rsacrt.IncNonDefault();
-                        return (key, default);
-                    }
-                }
+    var errΔ3 = key.Validate(); if (errΔ3 != nil) {
+        // If x509rsacrt=0 is set, try dropping the CRT values and
+        // rerunning precomputation and key validation.
+        if (x509rsacrt.Value() == "0"u8) {
+            key.Precomputed.Dp = default;
+            key.Precomputed.Dq = default;
+            key.Precomputed.Qinv = default;
+            key.Precompute();
+            var errΔ4 = key.Validate(); if (errΔ4 == nil) {
+                x509rsacrt.IncNonDefault();
+                return (key, default);
             }
-
-            return (default, errΔ3);
         }
+
+        return (default, errΔ3);
     }
 
     return (key, default);
@@ -196,10 +188,8 @@ public static (ж<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
     ref var pub = ref heap(new pkcs1PublicKey(), out var Ꮡpub);
     var (rest, err) = asn1.Unmarshal(der, Ꮡpub);
     if (err != nil) {
-        {
-            var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new publicKeyInfo())); if (errΔ1 == nil) {
-                return (default, errors.New(x509FailedToParsePublicˢ));
-            }
+        var (_, errΔ1) = asn1.Unmarshal(der, Ꮡ(new publicKeyInfo())); if (errΔ1 == nil) {
+            return (default, errors.New(x509FailedToParsePublicˢ));
         }
         return (default, err);
     }

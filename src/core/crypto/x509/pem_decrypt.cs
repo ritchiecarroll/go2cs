@@ -168,7 +168,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
 
     // Based on the OpenSSL implementation. The salt is the first 8 bytes
     // of the initialization vector.
-    var key = (~ciph).deriveKey(password, iv[..8]);
+    var key = ciph.deriveKey(password, iv[..8]);
     (var block, err) = ciph.cipherFunc(key);
     if (err != nil) {
         return (default, err);
@@ -220,14 +220,12 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
         return (default, errors.New(x509UnknownEncryptionˢ));
     }
     var iv = new slice<byte>(ciph.blockSize);
-    {
-        var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != nil) {
-            return (default, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
-        }
+    var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != nil) {
+        return (default, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
     }
     // The salt is the first 8 bytes of the initialization vector,
     // matching the key derivation in DecryptPEMBlock.
-    var key = (~ciph).deriveKey(password, iv[..8]);
+    var key = ciph.deriveKey(password, iv[..8]);
     var (block, err) = ciph.cipherFunc(key);
     if (err != nil) {
         return (default, err);

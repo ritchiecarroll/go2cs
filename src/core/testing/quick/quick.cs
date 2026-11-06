@@ -73,160 +73,156 @@ public static (reflectꓸValue value, bool ok) Value(reflectꓸType t, ж<rand.R
 internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
-    {
-        var (m, okΔ1) = reflect.TypeAssert<Generator>(reflect.Zero(t)); if (okΔ1) {
-            return (m.Generate(Ꮡrand, size), true);
-        }
+    var (m, okΔ1) = reflect.TypeAssert<Generator>(reflect.Zero(t)); if (okΔ1) {
+        return (m.Generate(Ꮡrand, size), true);
     }
 
     var v = reflect.New(t).Elem();
-    {
-        var concrete = t;
-        switch (concrete.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔBool: {
-            v.SetBool((randΔ1.Int() & 1) == 0);
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Float32: {
-            v.SetFloat((float64)randFloat32(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Float64: {
-            v.SetFloat(randFloat64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Complex64: {
-            v.SetComplex(complex((float64)randFloat32(Ꮡrand), (float64)randFloat32(Ꮡrand)));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Complex128: {
-            v.SetComplex(complex(randFloat64(Ꮡrand), randFloat64(Ꮡrand)));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Int16: {
-            v.SetInt(randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Int32: {
-            v.SetInt(randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Int64: {
-            v.SetInt(randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Int8: {
-            v.SetInt(randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.ΔInt: {
-            v.SetInt(randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Uint16: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Uint32: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Uint64: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Uint8: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.ΔUint: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Uintptr: {
-            v.SetUint((uint64)randInt64(Ꮡrand));
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Map: {
-            nint numElems = randΔ1.Intn(size);
-            v.Set(reflect.MakeMap(concrete));
-            for (nint i = 0; i < numElems; i++) {
-                var (key, ok1) = sizedValue(concrete.Key(), Ꮡrand, size);
-                var (valueΔ2, ok2) = sizedValue(concrete.Elem(), Ꮡrand, size);
-                if (!ok1 || !ok2) {
-                    return (new reflectꓸValue(), false);
-                }
-                v.SetMapIndex(key, valueΔ2);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.ΔPointer: {
-            if (randΔ1.Intn(size) == 0) {
-                v.SetZero(); // Generate nil pointer.
-            } else {
-                var (elem, okΔ6) = sizedValue(concrete.Elem(), Ꮡrand, size);
-                if (!okΔ6) {
-                    return (new reflectꓸValue(), false);
-                }
-                v.Set(reflect.New(concrete.Elem()));
-                v.Elem().Set(elem);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
-            nint numElems = randΔ1.Intn(size);
-            nint sizeLeft = size - numElems;
-            v.Set(reflect.MakeSlice(concrete, numElems, numElems));
-            for (nint i = 0; i < numElems; i++) {
-                var (elem, okΔ7) = sizedValue(concrete.Elem(), Ꮡrand, sizeLeft);
-                if (!okΔ7) {
-                    return (new reflectꓸValue(), false);
-                }
-                v.Index(i).Set(elem);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Array: {
-            for (nint i = 0; i < v.Len(); i++) {
-                var (elem, okΔ8) = sizedValue(concrete.Elem(), Ꮡrand, size);
-                if (!okΔ8) {
-                    return (new reflectꓸValue(), false);
-                }
-                v.Index(i).Set(elem);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.ΔString: {
-            nint numChars = randΔ1.Intn(complexSize);
-            var codePoints = new slice<rune>(numChars);
-            for (nint i = 0; i < numChars; i++) {
-                codePoints[i] = (rune)randΔ1.Intn(0x10ffff);
-            }
-            v.SetString((@string)codePoints);
-            break;
-        }
-        case var ᴛ when ᴛ == reflect.Struct: {
-            nint n = v.NumField();
-            // Divide sizeLeft evenly among the struct fields.
-            nint sizeLeft = size;
-            if (n > sizeLeft) {
-                sizeLeft = 1;
-            } else if (n > 0) {
-                sizeLeft = quo(sizeLeft, n);
-            }
-            for (nint i = 0; i < n; i++) {
-                var (elem, okΔ9) = sizedValue(concrete.Field(i).Type, Ꮡrand, sizeLeft);
-                if (!okΔ9) {
-                    return (new reflectꓸValue(), false);
-                }
-                v.Field(i).Set(elem);
-            }
-            break;
-        }
-        default: {
-            return (new reflectꓸValue(), false);
-        }}
+    var concrete = t;
+    switch (concrete.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
+        v.SetBool((randΔ1.Int() & 1) == 0);
+        break;
     }
+    case var ᴛ when ᴛ == reflect.Float32: {
+        v.SetFloat((float64)randFloat32(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Float64: {
+        v.SetFloat(randFloat64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Complex64: {
+        v.SetComplex(complex((float64)randFloat32(Ꮡrand), (float64)randFloat32(Ꮡrand)));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Complex128: {
+        v.SetComplex(complex(randFloat64(Ꮡrand), randFloat64(Ꮡrand)));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Int16: {
+        v.SetInt(randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Int32: {
+        v.SetInt(randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Int64: {
+        v.SetInt(randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Int8: {
+        v.SetInt(randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.ΔInt: {
+        v.SetInt(randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Uint16: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Uint32: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Uint64: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Uint8: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.ΔUint: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Uintptr: {
+        v.SetUint((uint64)randInt64(Ꮡrand));
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Map: {
+        nint numElems = randΔ1.Intn(size);
+        v.Set(reflect.MakeMap(concrete));
+        for (nint i = 0; i < numElems; i++) {
+            var (key, ok1) = sizedValue(concrete.Key(), Ꮡrand, size);
+            var (valueΔ2, ok2) = sizedValue(concrete.Elem(), Ꮡrand, size);
+            if (!ok1 || !ok2) {
+                return (new reflectꓸValue(), false);
+            }
+            v.SetMapIndex(key, valueΔ2);
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
+        if (randΔ1.Intn(size) == 0) {
+            v.SetZero(); // Generate nil pointer.
+        } else {
+            var (elem, okΔ6) = sizedValue(concrete.Elem(), Ꮡrand, size);
+            if (!okΔ6) {
+                return (new reflectꓸValue(), false);
+            }
+            v.Set(reflect.New(concrete.Elem()));
+            v.Elem().Set(elem);
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        nint numElems = randΔ1.Intn(size);
+        nint sizeLeft = size - numElems;
+        v.Set(reflect.MakeSlice(concrete, numElems, numElems));
+        for (nint i = 0; i < numElems; i++) {
+            var (elem, okΔ7) = sizedValue(concrete.Elem(), Ꮡrand, sizeLeft);
+            if (!okΔ7) {
+                return (new reflectꓸValue(), false);
+            }
+            v.Index(i).Set(elem);
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Array: {
+        for (nint i = 0; i < v.Len(); i++) {
+            var (elem, okΔ8) = sizedValue(concrete.Elem(), Ꮡrand, size);
+            if (!okΔ8) {
+                return (new reflectꓸValue(), false);
+            }
+            v.Index(i).Set(elem);
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.ΔString: {
+        nint numChars = randΔ1.Intn(complexSize);
+        var codePoints = new slice<rune>(numChars);
+        for (nint i = 0; i < numChars; i++) {
+            codePoints[i] = (rune)randΔ1.Intn(0x10ffff);
+        }
+        v.SetString((@string)codePoints);
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Struct: {
+        nint n = v.NumField();
+        // Divide sizeLeft evenly among the struct fields.
+        nint sizeLeft = size;
+        if (n > sizeLeft) {
+            sizeLeft = 1;
+        } else if (n > 0) {
+            sizeLeft = quo(sizeLeft, n);
+        }
+        for (nint i = 0; i < n; i++) {
+            var (elem, okΔ9) = sizedValue(concrete.Field(i).Type, Ꮡrand, sizeLeft);
+            if (!okΔ9) {
+                return (new reflectꓸValue(), false);
+            }
+            v.Field(i).Set(elem);
+        }
+        break;
+    }
+    default: {
+        return (new reflectꓸValue(), false);
+    }}
 
     return (v, true);
 }

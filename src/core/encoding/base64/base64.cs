@@ -117,12 +117,12 @@ public static ж<Encoding> URLEncoding = NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZ
 // RawStdEncoding is the standard raw, unpadded base64 encoding,
 // as defined in RFC 4648 section 3.2.
 // This is the same as [StdEncoding] but omits padding characters.
-public static ж<Encoding> RawStdEncoding = (~StdEncoding).WithPadding(NoPadding);
+public static ж<Encoding> RawStdEncoding = StdEncoding.WithPadding(NoPadding);
 
 // RawURLEncoding is the unpadded alternate base64 encoding defined in RFC 4648.
 // It is typically used in URLs and file names.
 // This is the same as [URLEncoding] but omits padding characters.
-public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding);
+public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
 
 /*
  * Encoder
@@ -235,10 +235,8 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
             return (n, err);
         }
         e.enc.Encode(e.@out[..], e.buf[..]);
-        {
-            (_, e.err) = e.w.Write(e.@out[..4]); if (e.err != nil) {
-                return (n, e.err);
-            }
+        (_, e.err) = e.w.Write(e.@out[..4]); if (e.err != nil) {
+            return (n, e.err);
         }
         e.nbuf = 0;
     }
@@ -251,10 +249,8 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
             nn -= nn % 3;
         }
         e.enc.Encode(e.@out[..], p.slice(0, nn));
-        {
-            (_, e.err) = e.w.Write(e.@out.slice(0, nn / 3 * 4)); if (e.err != nil) {
-                return (n, e.err);
-            }
+        (_, e.err) = e.w.Write(e.@out.slice(0, nn / 3 * 4)); if (e.err != nil) {
+            return (n, e.err);
         }
         n += nn;
         p = p.slice(nn);
@@ -543,48 +539,44 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
     nint si = 0;
     while (strconv.IntSize >= 64 && len(src) - si >= 8 && len(dst) - n >= 8) {
         var src2 = src.slice(si, si + 8);
-        {
-            var (dn, ok) = assemble64(
-                enc.decodeMap[src2[0]],
-                enc.decodeMap[src2[1]],
-                enc.decodeMap[src2[2]],
-                enc.decodeMap[src2[3]],
-                enc.decodeMap[src2[4]],
-                enc.decodeMap[src2[5]],
-                enc.decodeMap[src2[6]],
-                enc.decodeMap[src2[7]]); if (ok) {
-                byteorder.BEPutUint64(dst.slice(n), dn);
-                n += 6;
-                si += 8;
-            } else {
-                nint ninc = default;
-                (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
-                n += ninc;
-                if (err != nil) {
-                    return (n, err);
-                }
+        var (dn, ok) = assemble64(
+            enc.decodeMap[src2[0]],
+            enc.decodeMap[src2[1]],
+            enc.decodeMap[src2[2]],
+            enc.decodeMap[src2[3]],
+            enc.decodeMap[src2[4]],
+            enc.decodeMap[src2[5]],
+            enc.decodeMap[src2[6]],
+            enc.decodeMap[src2[7]]); if (ok) {
+            byteorder.BEPutUint64(dst.slice(n), dn);
+            n += 6;
+            si += 8;
+        } else {
+            nint ninc = default;
+            (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
+            n += ninc;
+            if (err != nil) {
+                return (n, err);
             }
         }
     }
 
     while (len(src) - si >= 4 && len(dst) - n >= 4) {
         var src2 = src.slice(si, si + 4);
-        {
-            var (dn, ok) = assemble32(
-                enc.decodeMap[src2[0]],
-                enc.decodeMap[src2[1]],
-                enc.decodeMap[src2[2]],
-                enc.decodeMap[src2[3]]); if (ok) {
-                byteorder.BEPutUint32(dst.slice(n), dn);
-                n += 3;
-                si += 4;
-            } else {
-                nint ninc = default;
-                (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
-                n += ninc;
-                if (err != nil) {
-                    return (n, err);
-                }
+        var (dn, ok) = assemble32(
+            enc.decodeMap[src2[0]],
+            enc.decodeMap[src2[1]],
+            enc.decodeMap[src2[2]],
+            enc.decodeMap[src2[3]]); if (ok) {
+            byteorder.BEPutUint32(dst.slice(n), dn);
+            n += 3;
+            si += 4;
+        } else {
+            nint ninc = default;
+            (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);
+            n += ninc;
+            if (err != nil) {
+                return (n, err);
             }
         }
     }

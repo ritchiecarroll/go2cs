@@ -73,10 +73,8 @@ private static readonly @string lfstackNodeAllocatedFromˢᵇ = "lfstack node al
 // lfnodeValidate panics if node is not a valid address for use with
 // lfstack.push. This only needs to be called when node is allocated.
 internal static void lfnodeValidate(ж<lfnode> node) {
-    {
-        var (@base, _, _) = findObject((uintptr)node, 0, 0); if (@base != 0) {
-            @throw(lfstackNodeAllocatedFromˢ);
-        }
+    var (@base, _, _) = findObject((uintptr)node, 0, 0); if (@base != 0) {
+        @throw(lfstackNodeAllocatedFromˢ);
     }
     lfstackPack(node, ~(uintptr)0);
 }

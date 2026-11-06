@@ -1059,10 +1059,8 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
     if (!p.Name.IsExported()) {
         f.PkgPath = t.PkgPath.Name();
     }
-    {
-        @string tag = p.Name.Tag(); if (tag != ""u8) {
-            f.Tag = (StructTag)tag;
-        }
+    @string tag = p.Name.Tag(); if (tag != ""u8) {
+        f.Tag = (StructTag)tag;
     }
     f.Offset = p.Offset;
 
@@ -1299,10 +1297,8 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     }
 
     // Check the cache.
-    {
-        var (piΔ1, ok) = ᏑptrMap.Load(Ꮡt.OrTypedNil()); if (ok) {
-            return piΔ1._<ж<ptrType>>().of(ptrType.ᏑType);
-        }
+    var (piΔ1, ok) = ᏑptrMap.Load(Ꮡt.OrTypedNil()); if (ok) {
+        return piΔ1._<ж<ptrType>>().of(ptrType.ᏑType);
     }
 
     // Look in known types.
@@ -1918,11 +1914,9 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
         throw panic("reflect: funcLayout with interface receiver " + stringFor(Ꮡrcvr));
     }
     var k = new layoutKey(Ꮡt, Ꮡrcvr);
-    {
-        var (ltiΔ1, ok) = ᏑlayoutCache.Load(k); if (ok) {
-            var ltΔ1 = ltiΔ1._<layoutType>();
-            return (ltΔ1.t, ltΔ1.framePool, ltΔ1.abid.ΔClone());
-        }
+    var (ltiΔ1, ok) = ᏑlayoutCache.Load(k); if (ok) {
+        var ltΔ1 = ltiΔ1._<layoutType>();
+        return (ltΔ1.t, ltΔ1.framePool, ltΔ1.abid.ΔClone());
     }
 
     // Compute the ABI layout.

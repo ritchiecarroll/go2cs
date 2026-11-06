@@ -128,10 +128,8 @@ public static bool IsUnspecified(this IP ip) {
 
 // IsLoopback reports whether ip is a loopback address.
 public static bool IsLoopback(this IP ip) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            return ip4[0] == 127;
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        return ip4[0] == 127;
     }
     return ip.Equal(IPv6loopback);
 }
@@ -139,16 +137,14 @@ public static bool IsLoopback(this IP ip) {
 // IsPrivate reports whether ip is a private address, according to
 // RFC 1918 (IPv4 addresses) and RFC 4193 (IPv6 addresses).
 public static bool IsPrivate(this IP ip) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            // Following RFC 1918, Section 3. Private Address Space which says:
-            //   The Internet Assigned Numbers Authority (IANA) has reserved the
-            //   following three blocks of the IP address space for private internets:
-            //     10.0.0.0        -   10.255.255.255  (10/8 prefix)
-            //     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
-            //     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
-            return ip4[0] == 10 || (ip4[0] == 172 && (byte)(ip4[1] & 0xf0) == 16) || (ip4[0] == 192 && ip4[1] == 168);
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        // Following RFC 1918, Section 3. Private Address Space which says:
+        //   The Internet Assigned Numbers Authority (IANA) has reserved the
+        //   following three blocks of the IP address space for private internets:
+        //     10.0.0.0        -   10.255.255.255  (10/8 prefix)
+        //     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+        //     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+        return ip4[0] == 10 || (ip4[0] == 172 && (byte)(ip4[1] & 0xf0) == 16) || (ip4[0] == 192 && ip4[1] == 168);
     }
     // Following RFC 4193, Section 8. IANA Considerations which says:
     //   The IANA has assigned the FC00::/7 prefix to "Unique Local Unicast".
@@ -157,10 +153,8 @@ public static bool IsPrivate(this IP ip) {
 
 // IsMulticast reports whether ip is a multicast address.
 public static bool IsMulticast(this IP ip) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            return (byte)(ip4[0] & 0xf0) == 0xe0;
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        return (byte)(ip4[0] & 0xf0) == 0xe0;
     }
     return len(ip) == IPv6len && ip[0] == 0xff;
 }
@@ -174,10 +168,8 @@ public static bool IsInterfaceLocalMulticast(this IP ip) {
 // IsLinkLocalMulticast reports whether ip is a link-local
 // multicast address.
 public static bool IsLinkLocalMulticast(this IP ip) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
     }
     return len(ip) == IPv6len && ip[0] == 0xff && (byte)(ip[1] & 0x0f) == 0x02;
 }
@@ -185,10 +177,8 @@ public static bool IsLinkLocalMulticast(this IP ip) {
 // IsLinkLocalUnicast reports whether ip is a link-local
 // unicast address.
 public static bool IsLinkLocalUnicast(this IP ip) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            return ip4[0] == 169 && ip4[1] == 254;
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        return ip4[0] == 169 && ip4[1] == 254;
     }
     return len(ip) == IPv6len && ip[0] == 0xfe && (byte)(ip[1] & 0xc0) == 0x80;
 }
@@ -248,10 +238,8 @@ internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 // Only IPv4 addresses have default masks; DefaultMask returns
 // nil if ip is not a valid IPv4 address.
 public static IPMask DefaultMask(this IP ip) {
-    {
-        ip = ip.To4(); if (ip == nil) {
-            return default;
-        }
+    ip = ip.To4(); if (ip == nil) {
+        return default;
     }
     switch (ᐧ) {
     case {} when ip[0] is < 0x80: {
@@ -349,10 +337,8 @@ internal static @string ipEmptyString(IP ip) {
 // If len(ip) != IPv4len or IPv6len, it appends nothing.
 internal static slice<byte> appendTo(this IP ip, slice<byte> b) {
     // If IPv4, use dotted notation.
-    {
-        var p4 = ip.To4(); if (len(p4) == IPv4len) {
-            ip = p4;
-        }
+    var p4 = ip.To4(); if (len(p4) == IPv4len) {
+        ip = p4;
     }
     var (addr, _) = netip.AddrFromSlice(ip);
     return addr.AppendTo(b);
@@ -478,12 +464,10 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     IP ip = default;
     IPMask m = default;
 
-    {
-        ip = n.IP.To4(); if (ip == nil) {
-            ip = n.IP;
-            if (len(ip) != IPv6len) {
-                return (default, default);
-            }
+    ip = n.IP.To4(); if (ip == nil) {
+        ip = n.IP;
+        if (len(ip) != IPv6len) {
+            return (default, default);
         }
     }
     m = n.Mask;
@@ -509,10 +493,8 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
 // Contains reports whether the network includes ip.
 public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
-    {
-        var x = ip.To4(); if (x != nil) {
-            ip = x;
-        }
+    var x = ip.To4(); if (x != nil) {
+        ip = x;
     }
     nint l = len(ip);
     if (l != len(nn)) {
@@ -563,10 +545,8 @@ public static @string String(this ж<IPNet> Ꮡn) {
 // ParseIP returns nil. The returned address is always 16 bytes,
 // IPv4 addresses are returned in IPv4-mapped IPv6 form.
 public static IP ParseIP(@string s) {
-    {
-        var (addr, valid) = parseIP(s); if (valid) {
-            return (IP)(addr[..]);
-        }
+    var (addr, valid) = parseIP(s); if (valid) {
+        return (IP)(addr[..]);
     }
     return default;
 }

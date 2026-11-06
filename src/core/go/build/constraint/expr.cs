@@ -105,10 +105,8 @@ public static @string String(this ref AndExpr x) {
 
 internal static @string andArg(Expr x) {
     @string s = x.String();
-    {
-        var (_, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
-            s = "("u8 + s + ")"u8;
-        }
+    var (_, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
+        s = "("u8 + s + ")"u8;
     }
     return s;
 }
@@ -138,10 +136,8 @@ public static @string String(this ref OrExpr x) {
 
 internal static @string orArg(Expr x) {
     @string s = x.String();
-    {
-        var (_, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
-            s = "("u8 + s + ")"u8;
-        }
+    var (_, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
+        s = "("u8 + s + ")"u8;
     }
     return s;
 }
@@ -236,16 +232,12 @@ internal static (Expr x, error err) parseExpr(@string text) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    {
-                        var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok) {
-                            err = new SyntaxErrorжerror(eΔ1);
-                            return;
-                        }
-                    }
-                    throw panic(e); // unreachable unless parser has a bug
+            var e = recover(); if (e != nil) {
+                var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok) {
+                    err = new SyntaxErrorжerror(eΔ1);
+                    return;
                 }
+                throw panic(e); // unreachable unless parser has a bug
             }
         }, ref ᒐ);
 
@@ -324,15 +316,11 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
         if (p.tok == "("u8) {
             ref var pos = ref heap<nint>(p.pos, out var Ꮡpos);
             defer(() => {
-                {
-                    var e = recover(); if (e != nil) {
-                        {
-                            var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
-                                eΔ1.Err = missingCloseParenˢ;
-                            }
-                        }
-                        throw panic(e);
+                var e = recover(); if (e != nil) {
+                    var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
+                        eΔ1.Err = missingCloseParenˢ;
                     }
+                    throw panic(e);
                 }
             }, ref ᒐ);
             var x = Ꮡp.or();
@@ -492,10 +480,8 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
             if (y == nil) {
                 y = z;
             } else {
-                {
-                    size++; if (size > maxOldSize) {
-                        return (default, errComplex);
-                    }
+                size++; if (size > maxOldSize) {
+                    return (default, errComplex);
                 }
                 y = and(y, z);
             }
@@ -503,10 +489,8 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
         if (x == nil) {
             x = y;
         } else {
-            {
-                size++; if (size > maxOldSize) {
-                    return (default, errComplex);
-                }
+            size++; if (size > maxOldSize) {
+                return (default, errComplex);
             }
             x = or(x, y);
         }
@@ -620,10 +604,8 @@ internal static Expr pushNot(Expr x, bool not) {
         return xΔ1;
     }
     case ж<NotExpr> xΔ1: {
-        {
-            var (_, ok) = xΔ1.X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
-                return new NotExprжExpr(xΔ1);
-            }
+        var (_, ok) = xΔ1.X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
+            return new NotExprжExpr(xΔ1);
         }
         return pushNot(xΔ1.X, !not);
     }
@@ -660,12 +642,10 @@ internal static Expr pushNot(Expr x, bool not) {
 // appendSplitAnd appends x to list while splitting apart any top-level && expressions.
 // For example, appendSplitAnd({W}, X && Y && Z) = {W, X, Y, Z}.
 internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
-    {
-        var (xΔ1, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
-            list = appendSplitAnd(list, xΔ1.X);
-            list = appendSplitAnd(list, xΔ1.Y);
-            return list;
-        }
+    var (xΔ1, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
+        list = appendSplitAnd(list, xΔ1.X);
+        list = appendSplitAnd(list, xΔ1.Y);
+        return list;
     }
     return append(list, x);
 }
@@ -673,12 +653,10 @@ internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
 // appendSplitOr appends x to list while splitting apart any top-level || expressions.
 // For example, appendSplitOr({W}, X || Y || Z) = {W, X, Y, Z}.
 internal static slice<Expr> appendSplitOr(slice<Expr> list, Expr x) {
-    {
-        var (xΔ1, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
-            list = appendSplitOr(list, xΔ1.X);
-            list = appendSplitOr(list, xΔ1.Y);
-            return list;
-        }
+    var (xΔ1, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
+        list = appendSplitOr(list, xΔ1.X);
+        list = appendSplitOr(list, xΔ1.Y);
+        return list;
     }
     return append(list, x);
 }

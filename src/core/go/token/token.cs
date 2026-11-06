@@ -291,10 +291,8 @@ internal static map<@string, Token> keywords;
 
 // Lookup maps an identifier to its keyword token or [IDENT] (if not a keyword).
 public static Token Lookup(@string ident) {
-    {
-        var (tok, is_keyword) = keywords[ident, ꟷ]; if (is_keyword) {
-            return tok;
-        }
+    var (tok, is_keyword) = keywords[ident, ꟷ]; if (is_keyword) {
+        return tok;
     }
     return IDENT;
 }

@@ -1309,7 +1309,7 @@ Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
 call is deconstructed into markers and passed expanded (`rangeˢ` is the hoisted `"range"` literal):
 
-<!-- source: src/core/text/template/parse/parse.cs:768-769 -->
+<!-- source: src/core/text/template/parse/parse.cs:754-755 -->
 ```csharp
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
@@ -1501,7 +1501,7 @@ internal partial interface readBatch_r /*dyn*/ :
 
 The cast site in another file, `generation.cs`:
 
-<!-- source: src/core/internal/trace/generation.cs:171 -->
+<!-- source: src/core/internal/trace/generation.cs:167 -->
 ```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(r));
 ```

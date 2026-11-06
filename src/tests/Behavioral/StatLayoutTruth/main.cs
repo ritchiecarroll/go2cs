@@ -21,25 +21,19 @@ internal static void Main() {
         defer(os.RemoveAll, dir, ref ᒐ);
 
         @string sub = filepath.Join(dir, "sub");
-        {
-            var errΔ1 = os.Mkdir(sub, 493); if (errΔ1 != nil) {
-                fmt.Println("Mkdir error:", errΔ1);
-                return;
-            }
+        var errΔ1 = os.Mkdir(sub, 493); if (errΔ1 != nil) {
+            fmt.Println("Mkdir error:", errΔ1);
+            return;
         }
         var payload = slice<byte>("0123456789abcdef"u8);
         @string @file = filepath.Join(dir, "a.txt");
-        {
-            var errΔ2 = os.WriteFile(@file, payload, 420); if (errΔ2 != nil) {
-                fmt.Println("WriteFile error:", errΔ2);
-                return;
-            }
+        var errΔ2 = os.WriteFile(@file, payload, 420); if (errΔ2 != nil) {
+            fmt.Println("WriteFile error:", errΔ2);
+            return;
         }
-        {
-            var errΔ3 = os.WriteFile(filepath.Join(sub, "b.txt"), payload[..5], 420); if (errΔ3 != nil) {
-                fmt.Println("WriteFile error:", errΔ3);
-                return;
-            }
+        var errΔ3 = os.WriteFile(filepath.Join(sub, "b.txt"), payload[..5], 420); if (errΔ3 != nil) {
+            fmt.Println("WriteFile error:", errΔ3);
+            return;
         }
 
         (var fi, err) = os.Stat(dir);

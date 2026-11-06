@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestWithDataIndependentTiming",
+      "class": "platform-skip",
+      "platforms": [
+        "darwin"
+      ],
+      "signature": "CPU does not support DIT",
+      "reason": "The three Data Independent Timing (DIT) tests each begin by skipping when internal/cpu reports that the processor has no DIT feature. Go on Apple silicon reports DIT and runs them: crypto/subtle.WithDataIndependentTiming sets the processor's PSTATE.DIT bit for the duration of the call, and the tests check that the bit is set inside it and restored after. The converted runtime cannot set that bit, because the .NET runtime exposes no control for PSTATE.DIT, so internal/runtime/sys reports DIT as unsupported and WithDataIndependentTiming leaves it unset. internal/cpu therefore reports HasDIT as false on an arm64 process: the flag describes what the converted runtime can do, not what the silicon can do. Reporting it true would let WithDataIndependentTiming, and any caller that reads the flag, believe that DIT had been enabled when it had not. The converted side takes the skip branch the test's own source writes for a processor without DIT. On an Intel Mac both runtimes skip. This entry retires when .NET gains a way to set PSTATE.DIT and the converted runtime uses it.",
+      "history": "Minted 2026-11-06 by C1 in the AES trio seat (claude/c1-aes-arm64), on COORD's ruling Q2 of the same day: HasDIT is held FALSE although Go's darwin osInit fills it from hw.optional.arm.FEAT_DIT, because a capability flag must describe what the converted runtime can do; .NET gives no way to set PSTATE.DIT (internal/runtime/sys/no_dit.cs: DITSupported false), and HasDIT=true would be a silent false security claim, worse than three honest reds. The divergence became visible when batch 208 moved the osx-arm64 oracle to native arm64 (-test-oracle-goarch), where Go's cpu.ARM64.HasDIT is true; under the earlier amd64 oracle (Rosetta) Go skipped too. Platform darwin: on osx-x64 both sides skip and the entry is unused there. The BOARD row (2026-11-06, C1) carries the retirement condition: a .NET API for PSTATE.DIT."
+    },
+    {
+      "name": "TestDITPanic",
+      "class": "platform-skip",
+      "platforms": [
+        "darwin"
+      ],
+      "signature": "CPU does not support DIT",
+      "reason": "The three Data Independent Timing (DIT) tests each begin by skipping when internal/cpu reports that the processor has no DIT feature. Go on Apple silicon reports DIT and runs them: crypto/subtle.WithDataIndependentTiming sets the processor's PSTATE.DIT bit for the duration of the call, and the tests check that the bit is set inside it and restored after. The converted runtime cannot set that bit, because the .NET runtime exposes no control for PSTATE.DIT, so internal/runtime/sys reports DIT as unsupported and WithDataIndependentTiming leaves it unset. internal/cpu therefore reports HasDIT as false on an arm64 process: the flag describes what the converted runtime can do, not what the silicon can do. Reporting it true would let WithDataIndependentTiming, and any caller that reads the flag, believe that DIT had been enabled when it had not. The converted side takes the skip branch the test's own source writes for a processor without DIT. On an Intel Mac both runtimes skip. This entry retires when .NET gains a way to set PSTATE.DIT and the converted runtime uses it.",
+      "history": "Minted 2026-11-06 by C1 in the AES trio seat (claude/c1-aes-arm64), on COORD's ruling Q2 of the same day: HasDIT is held FALSE although Go's darwin osInit fills it from hw.optional.arm.FEAT_DIT, because a capability flag must describe what the converted runtime can do; .NET gives no way to set PSTATE.DIT (internal/runtime/sys/no_dit.cs: DITSupported false), and HasDIT=true would be a silent false security claim, worse than three honest reds. The divergence became visible when batch 208 moved the osx-arm64 oracle to native arm64 (-test-oracle-goarch), where Go's cpu.ARM64.HasDIT is true; under the earlier amd64 oracle (Rosetta) Go skipped too. Platform darwin: on osx-x64 both sides skip and the entry is unused there. The BOARD row (2026-11-06, C1) carries the retirement condition: a .NET API for PSTATE.DIT."
+    },
+    {
+      "name": "TestDITGoroutineInheritance",
+      "class": "platform-skip",
+      "platforms": [
+        "darwin"
+      ],
+      "signature": "CPU does not support DIT",
+      "reason": "The three Data Independent Timing (DIT) tests each begin by skipping when internal/cpu reports that the processor has no DIT feature. Go on Apple silicon reports DIT and runs them: crypto/subtle.WithDataIndependentTiming sets the processor's PSTATE.DIT bit for the duration of the call, and the tests check that the bit is set inside it and restored after. The converted runtime cannot set that bit, because the .NET runtime exposes no control for PSTATE.DIT, so internal/runtime/sys reports DIT as unsupported and WithDataIndependentTiming leaves it unset. internal/cpu therefore reports HasDIT as false on an arm64 process: the flag describes what the converted runtime can do, not what the silicon can do. Reporting it true would let WithDataIndependentTiming, and any caller that reads the flag, believe that DIT had been enabled when it had not. The converted side takes the skip branch the test's own source writes for a processor without DIT. On an Intel Mac both runtimes skip. This entry retires when .NET gains a way to set PSTATE.DIT and the converted runtime uses it.",
+      "history": "Minted 2026-11-06 by C1 in the AES trio seat (claude/c1-aes-arm64), on COORD's ruling Q2 of the same day: HasDIT is held FALSE although Go's darwin osInit fills it from hw.optional.arm.FEAT_DIT, because a capability flag must describe what the converted runtime can do; .NET gives no way to set PSTATE.DIT (internal/runtime/sys/no_dit.cs: DITSupported false), and HasDIT=true would be a silent false security claim, worse than three honest reds. The divergence became visible when batch 208 moved the osx-arm64 oracle to native arm64 (-test-oracle-goarch), where Go's cpu.ARM64.HasDIT is true; under the earlier amd64 oracle (Rosetta) Go skipped too. Platform darwin: on osx-x64 both sides skip and the entry is unused there. The BOARD row (2026-11-06, C1) carries the retirement condition: a .NET API for PSTATE.DIT."
+    }
+  ]
+}

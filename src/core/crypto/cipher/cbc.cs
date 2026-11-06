@@ -50,18 +50,14 @@ public static BlockMode NewCBCEncrypter(Block b, slice<byte> iv) {
     if (len(iv) != b.BlockSize()) {
         throw panic("cipher.NewCBCEncrypter: IV length must equal block size");
     }
-    {
-        var (bΔ1, ok) = b._<ж<aes.Block>>(ᐧ); if (ok) {
-            return new aes_CBCEncrypterжBlockMode(aes.NewCBCEncrypter(bΔ1, new array<byte>(iv, 16)));
-        }
+    if (b._<ж<aes.Block>>(out var bΔ1)) {
+        return new aes_CBCEncrypterжBlockMode(aes.NewCBCEncrypter(bΔ1, new array<byte>(iv, 16)));
     }
     if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
-    {
-        var (cbc, ok) = b._<cbcEncAble>(ᐧ); if (ok) {
-            return cbc.NewCBCEncrypter(iv);
-        }
+    if (b._<cbcEncAble>(out var cbc)) {
+        return cbc.NewCBCEncrypter(iv);
     }
     return new cbcEncrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcEncrypter>());
 }
@@ -91,10 +87,8 @@ internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice
     if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
-    {
-        var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
-            throw panic("crypto/cipher: internal error: generic CBC used with AES");
-        }
+    var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
+        throw panic("crypto/cipher: internal error: generic CBC used with AES");
     }
 
     var iv = x.iv;
@@ -137,18 +131,14 @@ public static BlockMode NewCBCDecrypter(Block b, slice<byte> iv) {
     if (len(iv) != b.BlockSize()) {
         throw panic("cipher.NewCBCDecrypter: IV length must equal block size");
     }
-    {
-        var (bΔ1, ok) = b._<ж<aes.Block>>(ᐧ); if (ok) {
-            return new aes_CBCDecrypterжBlockMode(aes.NewCBCDecrypter(bΔ1, new array<byte>(iv, 16)));
-        }
+    if (b._<ж<aes.Block>>(out var bΔ1)) {
+        return new aes_CBCDecrypterжBlockMode(aes.NewCBCDecrypter(bΔ1, new array<byte>(iv, 16)));
     }
     if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
-    {
-        var (cbc, ok) = b._<cbcDecAble>(ᐧ); if (ok) {
-            return cbc.NewCBCDecrypter(iv);
-        }
+    if (b._<cbcDecAble>(out var cbc)) {
+        return cbc.NewCBCDecrypter(iv);
     }
     return new cbcDecrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcDecrypter>());
 }
@@ -178,10 +168,8 @@ internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice
     if (alias.InexactOverlap(dst.slice(0, len(src)), src)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
-    {
-        var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
-            throw panic("crypto/cipher: internal error: generic CBC used with AES");
-        }
+    var (_, ok) = x.b._<ж<aes.Block>>(ᐧ); if (ok) {
+        throw panic("crypto/cipher: internal error: generic CBC used with AES");
     }
     if (len(src) == 0) {
         return;

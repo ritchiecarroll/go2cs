@@ -198,10 +198,8 @@ fallback:
         if (haveFastIndex) {
             // Switch to bytealg.Index, if available, or a brute force search when
             // IndexByte returns too many false positives.
-            {
-                nint j = bytealg.Index(s.slice(i - last), b.slice(0, n)); if (j >= 0) {
-                    return i + j - last;
-                }
+            nint j = bytealg.Index(s.slice(i - last), b.slice(0, n)); if (j >= 0) {
+                return i + j - last;
             }
         } else {
             // If bytealg.Index is not available a brute force search is
@@ -261,15 +259,13 @@ public static nint IndexAny(slice<byte> s, @string chars) {
         return IndexRune(s, r);
     }
     if (len(s) > 8) {
-        {
-            var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
-                foreach (var (i, c) in s) {
-                    if (@as.contains(c)) {
-                        return i;
-                    }
+        var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
+            foreach (var (i, c) in s) {
+                if (@as.contains(c)) {
+                    return i;
                 }
-                return -1;
             }
+            return -1;
         }
     }
     nint width = default;
@@ -318,15 +314,13 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
         return -1;
     }
     if (len(s) > 8) {
-        {
-            var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
-                for (nint i = len(s) - 1; i >= 0; i--) {
-                    if (@as.contains(s[i])) {
-                        return i;
-                    }
+        var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
+            for (nint i = len(s) - 1; i >= 0; i--) {
+                if (@as.contains(s[i])) {
+                    return i;
                 }
-                return -1;
             }
+            return -1;
         }
     }
     if (len(s) == 1) {
@@ -1026,11 +1020,9 @@ public static slice<byte> Trim(slice<byte> s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimLeftByte(trimRightByte(s, cutset[0]), cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimLeftASCII(trimRightASCII(s, Ꮡas), Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimLeftASCII(trimRightASCII(s, Ꮡas), Ꮡas);
     }
     return trimLeftUnicode(trimRightUnicode(s, cutset), cutset);
 }
@@ -1048,11 +1040,9 @@ public static slice<byte> TrimLeft(slice<byte> s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimLeftByte(s, cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimLeftASCII(s, Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimLeftASCII(s, Ꮡas);
     }
     return trimLeftUnicode(s, cutset);
 }
@@ -1108,11 +1098,9 @@ public static slice<byte> TrimRight(slice<byte> s, @string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
         return trimRightByte(s, cutset[0]);
     }
-    {
-        ref var @as = ref heap<asciiSet>(out var Ꮡas);
-        (@as, var ok) = makeASCIISet(cutset); if (ok) {
-            return trimRightASCII(s, Ꮡas);
-        }
+    ref var @as = ref heap<asciiSet>(out var Ꮡas);
+    (@as, var ok) = makeASCIISet(cutset); if (ok) {
+        return trimRightASCII(s, Ꮡas);
     }
     return trimRightUnicode(s, cutset);
 }
@@ -1428,10 +1416,8 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
 //
 // Cut returns slices of the original slice s, not copies.
 public static (slice<byte> before, slice<byte> after, bool found) Cut(slice<byte> s, slice<byte> sep) {
-    {
-        nint i = Index(s, sep); if (i >= 0) {
-            return (s.slice(0, i), s.slice(i + len(sep)), true);
-        }
+    nint i = Index(s, sep); if (i >= 0) {
+        return (s.slice(0, i), s.slice(i + len(sep)), true);
     }
     return (s, default, false);
 }

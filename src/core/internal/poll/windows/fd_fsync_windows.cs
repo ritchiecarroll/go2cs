@@ -14,10 +14,8 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.Fsync(fd.Sysfd);

@@ -1,0 +1,8 @@
+fiat P384 Mul          min       1012.4 ns  median       1171.2 ns
+fiat P384 Square       min        963.2 ns  median        996.2 ns
+P384 first_SBM_us 57274 jit_us 15350
+P384 ScalarBaseMult    min    2219396.0 ns  median    2240690.0 ns
+fiat P384 Mul          min       1006.7 ns  median       1034.1 ns
+fiat P384 Square       min        982.0 ns  median       1007.6 ns
+P384 first_SBM_us 59204 jit_us 15670
+P384 ScalarBaseMult    min    2211730.5 ns  median    2231593.5 ns

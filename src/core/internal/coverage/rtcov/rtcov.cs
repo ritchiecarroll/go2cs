@@ -78,10 +78,8 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte
         if (Meta.PkgMap == nil) {
             Meta.PkgMap = new map<nint, nint>();
         }
-        {
-            var (_, ok) = Meta.PkgMap[pkgid, ꟷ]; if (ok) {
-                return 0;
-            }
+        var (_, ok) = Meta.PkgMap[pkgid, ꟷ]; if (ok) {
+            return 0;
         }
         // Record the real slot (position on meta-list) for this
         // package; we'll use the map to fix things up later on.

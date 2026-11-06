@@ -1,0 +1,27 @@
+start 2026-11-06 05:23:38
+verified: CU folder (70 entries) + C, N exes; CU exe 1695755227 bytes
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== cu-warm-ctl.tsv 05:23:53
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== cu-ctl-start.tsv 05:23:56
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== cu-arms.tsv 05:23:59
+PerfStartup: verified 6 arms, output equal
+PerfStartup: 11 rounds done
+== cu-ctl-end.tsv 05:26:13
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 05:26:18 rc=0

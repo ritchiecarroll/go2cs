@@ -85,10 +85,8 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> typ, bool nee
 
     // Pre-malloc debug hooks.
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, typ); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -119,10 +117,8 @@ internal static @unsafe.Pointer mallocStub(uintptr size, ж<_type> typ, bool nee
 
     // Adjust our GC assist debt to account for internal fragmentation.
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)(elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)(elemsize - size);
         }
     }
 
@@ -237,10 +233,8 @@ internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, �
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -350,10 +344,8 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     return (x, elemsize);
@@ -501,10 +493,8 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> typ,
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 

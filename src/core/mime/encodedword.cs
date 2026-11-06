@@ -141,24 +141,22 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @strin
 // writeQString encodes s using Q encoding and writes it to buf.
 internal static void writeQString(ж<strings.Builder> buf, @string s) {
     for (nint i = 0; i < len(s); i++) {
-        {
-            var b = s[i];
-            switch (ᐧ) {
-            case {} when b is (byte)' ': {
-                buf.WriteByte((byte)'_');
-                break;
-            }
-            case {} when b >= (byte)'!' && b <= (byte)'~' && b != (byte)'=' && b != (byte)'?' && b != (byte)'_': {
-                buf.WriteByte(b);
-                break;
-            }
-            default: {
-                buf.WriteByte((byte)'=');
-                buf.WriteByte(upperhex[(b >> 4)]);
-                buf.WriteByte(upperhex[(byte)(b & 0x0f)]);
-                break;
-            }}
+        var b = s[i];
+        switch (ᐧ) {
+        case {} when b is (byte)' ': {
+            buf.WriteByte((byte)'_');
+            break;
         }
+        case {} when b >= (byte)'!' && b <= (byte)'~' && b != (byte)'=' && b != (byte)'?' && b != (byte)'_': {
+            buf.WriteByte(b);
+            break;
+        }
+        default: {
+            buf.WriteByte((byte)'=');
+            buf.WriteByte(upperhex[(b >> 4)]);
+            buf.WriteByte(upperhex[(byte)(b & 0x0f)]);
+            break;
+        }}
     }
 }
 
@@ -230,10 +228,8 @@ public static (@string, error) Decode(this ref WordDecoder d, @string word) {
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    {
-        var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
-            return ("", errΔ1);
-        }
+    var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
+        return ("", errΔ1);
     }
     return (buf.String(), default);
 }
@@ -299,10 +295,8 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
             Ꮡbuf.WriteString(header.slice(0, start));
         }
 
-        {
-            var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
-                return ("", errΔ1);
-            }
+        var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != nil) {
+            return ("", errΔ1);
         }
 
         header = header.slice(end);
@@ -367,10 +361,8 @@ internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @
         if (errΔ1 != nil) {
             return errΔ1;
         }
-        {
-            (_, errΔ1) = Δio.Copy(new strings_BuilderжWriter(buf), r); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        (_, errΔ1) = Δio.Copy(new strings_BuilderжWriter(buf), r); if (errΔ1 != nil) {
+            return errΔ1;
         }
         break;
     }}
@@ -399,33 +391,31 @@ internal static (slice<byte>, error) qDecode(@string s) {
     var dec = new slice<byte>(len(s));
     nint n = 0;
     for (nint i = 0; i < len(s); i++) {
-        {
-            var c = s[i];
-            switch (ᐧ) {
-            case {} when c is (byte)'_': {
-                dec[n] = (byte)' ';
-                break;
-            }
-            case {} when c is (byte)'=': {
-                if (i + 2 >= len(s)) {
-                    return (default, errInvalidWord);
-                }
-                var (b, err) = readHexByte(s[i + 1], s[i + 2]);
-                if (err != nil) {
-                    return (default, err);
-                }
-                dec[n] = b;
-                i += 2;
-                break;
-            }
-            case {} when (c <= (byte)'~' && c >= (byte)' ') || c == (byte)'\n' || c == (byte)'\r' || c == (byte)'\t': {
-                dec[n] = c;
-                break;
-            }
-            default: {
-                return (default, errInvalidWord);
-            }}
+        var c = s[i];
+        switch (ᐧ) {
+        case {} when c is (byte)'_': {
+            dec[n] = (byte)' ';
+            break;
         }
+        case {} when c is (byte)'=': {
+            if (i + 2 >= len(s)) {
+                return (default, errInvalidWord);
+            }
+            var (b, err) = readHexByte(s[i + 1], s[i + 2]);
+            if (err != nil) {
+                return (default, err);
+            }
+            dec[n] = b;
+            i += 2;
+            break;
+        }
+        case {} when (c <= (byte)'~' && c >= (byte)' ') || c == (byte)'\n' || c == (byte)'\r' || c == (byte)'\t': {
+            dec[n] = c;
+            break;
+        }
+        default: {
+            return (default, errInvalidWord);
+        }}
         n++;
     }
 
@@ -437,15 +427,11 @@ internal static (byte, error) readHexByte(byte a, byte b) {
     byte hb = default;
     byte lb = default;
     error err = default;
-    {
-        (hb, err) = fromHex(a); if (err != nil) {
-            return (0, err);
-        }
+    (hb, err) = fromHex(a); if (err != nil) {
+        return (0, err);
     }
-    {
-        (lb, err) = fromHex(b); if (err != nil) {
-            return (0, err);
-        }
+    (lb, err) = fromHex(b); if (err != nil) {
+        return (0, err);
     }
     return ((byte)((byte)(hb << 4) | lb), default);
 }

@@ -1,0 +1,8 @@
+# the probe trap. zsprobe-v1 (zsprobe-v1-fulltrim-Program.cs.txt) built with the AOT default, FULL trim: its Classify's bare
+# GetFields saw no fields on Pair, classified the 16-byte struct zero-size, so every G0/G1 element aliased one slot
+# (8 reads of the last write, 7 -> 56) while the marker gate G2 read the never-written array (0).
+# v1 prints U0 U1 U2 Q0 Q1 Q2 E0 E1 E2. v1+d prints Q0 Q1 Q2, then 'direct' and Main's own sum over the array, then v1's line.
+jit (v1):              28 28 28 28 28 28 8 8 8 
+aot full trim (v1):    28 28 28 56 56 0 8 8 8 
+aot full trim (v1+d):  56 56 0 direct 56 28 28 28 56 56 0 8 8 8 
+aot TrimMode=partial (v1+d): 28 28 28 direct 28 28 28 28 28 28 28 8 8 8 

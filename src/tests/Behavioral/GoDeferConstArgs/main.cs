@@ -85,10 +85,8 @@ internal static void @catch(@string tag) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var r = recover(calledByDefer); if (r != nil) {
-                fmt.Println(tag, "recovered:", r);
-            }
+        var r = recover(calledByDefer); if (r != nil) {
+            fmt.Println(tag, "recovered:", r);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

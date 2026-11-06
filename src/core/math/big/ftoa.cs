@@ -349,18 +349,16 @@ internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
 
     // adjust mantissa to use exactly x.prec bits
     var m = x.mant;
-    {
-        var w = (uint32)len(x.mant) * (uint32)_W;
-        switch (ᐧ) {
-        case {} when w < x.prec: {
-            m = ((Δnat)default).lsh(m, (nuint)(x.prec - w));
-            break;
-        }
-        case {} when w > x.prec: {
-            m = ((Δnat)default).rsh(m, (nuint)(w - x.prec));
-            break;
-        }}
+    var w = (uint32)len(x.mant) * (uint32)_W;
+    switch (ᐧ) {
+    case {} when w < x.prec: {
+        m = ((Δnat)default).lsh(m, (nuint)(x.prec - w));
+        break;
     }
+    case {} when w > x.prec: {
+        m = ((Δnat)default).rsh(m, (nuint)(w - x.prec));
+        break;
+    }}
 
     buf = appendꓸꓸꓸ(buf, m.utoa(10));
     buf = append(buf, (byte)'p');
@@ -408,18 +406,16 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
 
     // adjust mantissa to use exactly n bits
     var m = x.mant;
-    {
-        nuint w = (nuint)len(x.mant) * (nuint)_W;
-        switch (ᐧ) {
-        case {} when w < n: {
-            m = ((Δnat)default).lsh(m, n - w);
-            break;
-        }
-        case {} when w > n: {
-            m = ((Δnat)default).rsh(m, w - n);
-            break;
-        }}
+    nuint w = (nuint)len(x.mant) * (nuint)_W;
+    switch (ᐧ) {
+    case {} when w < n: {
+        m = ((Δnat)default).lsh(m, n - w);
+        break;
     }
+    case {} when w > n: {
+        m = ((Δnat)default).rsh(m, w - n);
+        break;
+    }}
     var exp64 = (int64)x.exp - 1; // avoid wrap-around
 
     var hm = m.utoa(16);
@@ -555,10 +551,8 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     }}
 
     nint padding = default;
-    {
-        var (width, hasWidth) = s.Width(); if (hasWidth && width > len(sign) + len(buf)) {
-            padding = width - len(sign) - len(buf);
-        }
+    var (width, hasWidth) = s.Width(); if (hasWidth && width > len(sign) + len(buf)) {
+        padding = width - len(sign) - len(buf);
     }
 
     switch (ᐧ) {

@@ -1,0 +1,24 @@
+# BoGo probe round (measure.sh), golib + gen at the cut's base e6a7ef0329 vs the tip 254a04ebec, same box, back to back
+ D src/core/golib/GoExtensionHostAttribute.cs
+ D src/gen/go2cs-gen/ExtensionHostListGenerator.cs
+== l2base at 254a04ebec 09:06:10
+probe l2base n=24 median 871 ms p25 844 p75 894 rc {'0'}
+startup l2base rc 0
+| Startup | 2.4 | 463.2 (189.36×) | n/a |
+| Startup | 1.0 | 79.6 | n/a |
+go-l2base n=24 median 3.9 ms p25 3.8 p75 4.0 rc {'0'}
+jit-l2base n=24 median 510.1 ms p25 497.0 p75 547.6 rc {'0'}
+publish rc 0
+r2r l2base n=24 median 305.1 ms p25 294.0 p75 316.5 rc {'0'}
+== l2base done 09:19:29
+
+== l2 at 254a04ebec 08:53:17
+probe l2 n=24 median 872 ms p25 836 p75 913 rc {'0'}
+startup l2 rc 0
+| Startup | 2.0 | 464.8 (232.54×) | n/a |
+| Startup | 0.8 | 79.6 | n/a |
+go-l2 n=24 median 4.1 ms p25 3.8 p75 4.3 rc {'0'}
+jit-l2 n=24 median 495.9 ms p25 488.6 p75 508.4 rc {'0'}
+publish rc 0
+r2r l2 n=24 median 298.4 ms p25 293.4 p75 304.0 rc {'0'}
+== l2 done 09:05:25

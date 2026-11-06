@@ -54,28 +54,26 @@ internal static void setOption(this ref Template t, @string opt) {
         throw panic("empty option string");
     }
     // key=value
-    {
-        var (key, value, ok) = strings.Cut(opt, "="); if (ok) {
-            var exprᴛ1 = key;
+    var (key, value, ok) = strings.Cut(opt, "="); if (ok) {
+        var exprᴛ1 = key;
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "missingkey"u8: {
+            var exprᴛ2 = value;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "missingkey"u8: {
-                var exprᴛ2 = value;
-                switch (ᐧ) {
-                case {} when exprᴛ2 == "invalid"u8 || exprᴛ2 == "default"u8: {
-                    t.option.missingKey = mapInvalid;
-                    return;
-                }
-                case {} when exprᴛ2 == "zero"u8: {
-                    t.option.missingKey = mapZeroValue;
-                    return;
-                }
-                case {} when exprᴛ2 == "error"u8: {
-                    t.option.missingKey = mapError;
-                    return;
-                }}
-                break;
+            case {} when exprᴛ2 == "invalid"u8 || exprᴛ2 == "default"u8: {
+                t.option.missingKey = mapInvalid;
+                return;
+            }
+            case {} when exprᴛ2 == "zero"u8: {
+                t.option.missingKey = mapZeroValue;
+                return;
+            }
+            case {} when exprᴛ2 == "error"u8: {
+                t.option.missingKey = mapError;
+                return;
             }}
-        }
+            break;
+        }}
     }
     throw panic("unrecognized option: " + opt);
 }

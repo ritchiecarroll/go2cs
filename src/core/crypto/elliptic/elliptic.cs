@@ -161,10 +161,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
     ж<bigꓸInt> x = default;
     ж<bigꓸInt> y = default;
 
-    {
-        var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
-            return c.Unmarshal(data);
-        }
+    var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
+        return c.Unmarshal(data);
     }
 
     nint byteLen = (curve.Params().BitSize + 7) / 8;
@@ -193,10 +191,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
     ж<bigꓸInt> x = default;
     ж<bigꓸInt> y = default;
 
-    {
-        var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
-            return c.UnmarshalCompressed(data);
-        }
+    var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
+        return c.UnmarshalCompressed(data);
     }
 
     nint byteLen = (curve.Params().BitSize + 7) / 8;

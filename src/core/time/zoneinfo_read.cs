@@ -100,10 +100,8 @@ internal static slice<byte> rest(this ref dataIO d) {
 
 // Make a string by stopping at the first NUL
 internal static @string byteString(slice<byte> p) {
-    {
-        nint i = bytealg.IndexByte(p, 0); if (i != -1) {
-            p = p.slice(0, i);
-        }
+    nint i = bytealg.IndexByte(p, 0); if (i != -1) {
+        p = p.slice(0, i);
     }
     return (@string)p;
 }
@@ -118,36 +116,32 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     var d = new dataIO(data, false);
 
     // 4-byte magic "TZif"
-    {
-        var magic = d.read(4); if (((sstring)magic) != "TZif"u8) {
-            return (default, errBadData);
-        }
+    var magic = d.read(4); if (((sstring)magic) != "TZif"u8) {
+        return (default, errBadData);
     }
 
     // 1-byte version, then 15 bytes of padding
     nint version = default;
     slice<byte> p = default;
-    {
-        p = d.read(16); if (len(p) != 16) {
-            return (default, errBadData);
-        } else {
-            switch (p[0]) {
-            case 0: {
-                version = 1;
-                break;
-            }
-            case (byte)'2': {
-                version = 2;
-                break;
-            }
-            case (byte)'3': {
-                version = 3;
-                break;
-            }
-            default: {
-                return (default, errBadData);
-            }}
+    p = d.read(16); if (len(p) != 16) {
+        return (default, errBadData);
+    } else {
+        switch (p[0]) {
+        case 0: {
+            version = 1;
+            break;
         }
+        case (byte)'2': {
+            version = 2;
+            break;
+        }
+        case (byte)'3': {
+            version = 3;
+            break;
+        }
+        default: {
+            return (default, errBadData);
+        }}
     }
 
     // six big-endian 32-bit integers:
@@ -254,26 +248,20 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     foreach (var i in range(zones)) {
         bool ok = default;
         uint32 nΔ1 = default;
-        {
-            (nΔ1, ok) = zonedata.big4(); if (!ok) {
-                return (default, errBadData);
-            }
+        (nΔ1, ok) = zonedata.big4(); if (!ok) {
+            return (default, errBadData);
         }
         if ((uint32)(nint)nΔ1 != nΔ1) {
             return (default, errBadData);
         }
         zones[i].offset = (nint)(int32)nΔ1;
         byte b = default;
-        {
-            (b, ok) = zonedata.@byte(); if (!ok) {
-                return (default, errBadData);
-            }
+        (b, ok) = zonedata.@byte(); if (!ok) {
+            return (default, errBadData);
         }
         zones[i].isDST = b != 0;
-        {
-            (b, ok) = zonedata.@byte(); if (!ok || (nint)b >= len(abbrev)) {
-                return (default, errBadData);
-            }
+        (b, ok) = zonedata.@byte(); if (!ok || (nint)b >= len(abbrev)) {
+            return (default, errBadData);
         }
         zones[i].name = byteString(abbrev.slice(b));
         if (runtime.GOOS == "aix"u8 && len(name) > 8 && (name[..8] == "Etc/GMT+" || name[..8] == "Etc/GMT-")) {
@@ -291,20 +279,16 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     foreach (var i in range(tx)) {
         int64 nΔ2 = default;
         if (!is64) {
-            {
-                var (n4, ok) = txtimes.big4(); if (!ok) {
-                    return (default, errBadData);
-                } else {
-                    nΔ2 = (int64)(int32)n4;
-                }
+            var (n4, ok) = txtimes.big4(); if (!ok) {
+                return (default, errBadData);
+            } else {
+                nΔ2 = (int64)(int32)n4;
             }
         } else {
-            {
-                var (n8, ok) = txtimes.big8(); if (!ok) {
-                    return (default, errBadData);
-                } else {
-                    nΔ2 = (int64)n8;
-                }
+            var (n8, ok) = txtimes.big8(); if (!ok) {
+                return (default, errBadData);
+            } else {
+                nΔ2 = (int64)n8;
             }
         }
         tx[i].when = nΔ2;
@@ -342,25 +326,21 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             } else if (l.extend != ""u8) {
                 // If we're at the end of the known zone transitions,
                 // try the extend string.
-                {
-                    ref var nameΔ1 = ref heap<@string>(out var ᏑnameΔ1);
-                    ref var offset = ref heap<nint>(out var Ꮡoffset);
-                    ref var isDST = ref heap<bool>(out var ᏑisDST);
-                    (nameΔ1, offset, var estart, var eend, isDST, var ok) = tzset(l.extend, l.cacheStart, sec); if (ok) {
-                        l.cacheStart = estart;
-                        l.cacheEnd = eend;
-                        // Find the zone that is returned by tzset to avoid allocation if possible.
-                        {
-                            nint zoneIdx = findZone(l.zone, nameΔ1, offset, isDST); if (zoneIdx != -1) {
-                                l.cacheZone = Ꮡ(l.zone, zoneIdx);
-                            } else {
-                                l.cacheZone = Ꮡ(new zone(
-                                    name: nameΔ1,
-                                    offset: offset,
-                                    isDST: isDST
-                                ));
-                            }
-                        }
+                ref var nameΔ1 = ref heap<@string>(out var ᏑnameΔ1);
+                ref var offset = ref heap<nint>(out var Ꮡoffset);
+                ref var isDST = ref heap<bool>(out var ᏑisDST);
+                (nameΔ1, offset, var estart, var eend, isDST, var ok) = tzset(l.extend, l.cacheStart, sec); if (ok) {
+                    l.cacheStart = estart;
+                    l.cacheEnd = eend;
+                    // Find the zone that is returned by tzset to avoid allocation if possible.
+                    nint zoneIdx = findZone(l.zone, nameΔ1, offset, isDST); if (zoneIdx != -1) {
+                        l.cacheZone = Ꮡ(l.zone, zoneIdx);
+                    } else {
+                        l.cacheZone = Ꮡ(new zone(
+                            name: nameΔ1,
+                            offset: offset,
+                            isDST: isDST
+                        ));
                     }
                 }
             }
@@ -435,20 +415,16 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         const nint zheader = 0x04034b50;
 
         var buf = new slice<byte>(ztailsize);
-        {
-            var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != nil || get4(buf) != zecheader) {
-                return (default, errors.New("corrupt zip file "u8 + zipfile));
-            }
+        var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != nil || get4(buf) != zecheader) {
+            return (default, errors.New("corrupt zip file "u8 + zipfile));
         }
         nint n = get2(buf[10..]);
         nint size = get4(buf[12..]);
         nint off = get4(buf[16..]);
 
         buf = new slice<byte>(size);
-        {
-            var errΔ2 = preadn(fd, buf, off); if (errΔ2 != nil) {
-                return (default, errors.New("corrupt zip file "u8 + zipfile));
-            }
+        var errΔ2 = preadn(fd, buf, off); if (errΔ2 != nil) {
+            return (default, errors.New("corrupt zip file "u8 + zipfile));
         }
 
         for (nint i = 0; i < n; i++) {
@@ -510,18 +486,14 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             //	30+namelen+xlen - file data
             //
             buf = new slice<byte>(zheadersize + namelen);
-            {
-                var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != nil || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf.slice(30, 30 + namelen))) != name) {
-                    return (default, errors.New("corrupt zip file "u8 + zipfile));
-                }
+            var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != nil || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf.slice(30, 30 + namelen))) != name) {
+                return (default, errors.New("corrupt zip file "u8 + zipfile));
             }
             xlen = get2(buf[28..]);
 
             buf = new slice<byte>(sizeΔ1);
-            {
-                var errΔ4 = preadn(fd, buf, offΔ1 + 30 + namelen + xlen); if (errΔ4 != nil) {
-                    return (default, errors.New("corrupt zip file "u8 + zipfile));
-                }
+            var errΔ4 = preadn(fd, buf, offΔ1 + 30 + namelen + xlen); if (errΔ4 != nil) {
+                return (default, errors.New("corrupt zip file "u8 + zipfile));
             }
 
             return (buf, default);
@@ -560,10 +532,8 @@ internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, sl
     foreach (var (_, source) in sources) {
         var (zoneData, err) = loadTzinfo(name, source);
         if (err == nil) {
-            {
-                (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
-                    return (z, default);
-                }
+            (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
+                return (z, default);
             }
         }
         if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {
@@ -573,10 +543,8 @@ internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, sl
     if (loadFromEmbeddedTZData != nil) {
         var (zoneData, err) = loadFromEmbeddedTZData(name);
         if (err == nil) {
-            {
-                (z, err) = LoadLocationFromTZData(name, slice<byte>(zoneData)); if (err == nil) {
-                    return (z, default);
-                }
+            (z, err) = LoadLocationFromTZData(name, slice<byte>(zoneData)); if (err == nil) {
+                return (z, default);
             }
         }
         if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {
@@ -587,10 +555,8 @@ internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, sl
         var (source, ok) = gorootZoneSource(runtime.GOROOT()); if (ok) {
             var (zoneData, err) = loadTzinfo(name, source);
             if (err == nil) {
-                {
-                    (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
-                        return (z, default);
-                    }
+                (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {
+                    return (z, default);
                 }
             }
             if (firstErr == nil && !AreEqual(err, syscall.ENOENT)) {

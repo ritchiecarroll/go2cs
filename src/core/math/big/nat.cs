@@ -76,10 +76,8 @@ internal static Δnat setWord(this Δnat z, Word x) {
 
 internal static Δnat setUint64(this Δnat z, uint64 x) {
     // single-word value
-    {
-        Word w = (Word)(nuint)x; if ((uint64)w == x) {
-            return z.setWord(w);
-        }
+    Word w = (Word)(nuint)x; if ((uint64)w == x) {
+        return z.setWord(w);
     }
     // 2-word value
     z = z.make(2);
@@ -244,14 +242,10 @@ internal static bool alias(Δnat x, Δnat y) {
 // (we don't use nat.add because we need z to stay the same
 // slice, and we don't need to normalize z after each addition)
 internal static void addTo(Δnat z, Δnat x) {
-    {
-        nint n = len(x); if (n > 0) {
-            {
-                Word c = addVV(z.slice(0, n), z.slice(0, n), x.slice(0, n)); if (c != 0) {
-                    if (n < len(z)) {
-                        addVW(z.slice(n), z.slice(n), c);
-                    }
-                }
+    nint n = len(x); if (n > 0) {
+        Word c = addVV(z.slice(0, n), z.slice(0, n), x.slice(0, n)); if (c != 0) {
+            if (n < len(z)) {
+                addVW(z.slice(n), z.slice(n), c);
             }
         }
     }
@@ -363,20 +357,18 @@ internal static nint bitLen(this Δnat x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
-    {
-        nint i = len(x) - 1; if (i >= 0) {
-            // bits.Len uses a lookup table for the low-order bits on some
-            // architectures. Neutralize any input-dependent behavior by setting all
-            // bits after the first one bit.
-            nuint top = (nuint)x[i];
-            top |= (nuint)((top >> 1));
-            top |= (nuint)((top >> 2));
-            top |= (nuint)((top >> 4));
-            top |= (nuint)((top >> 8));
-            top |= (nuint)((top >> 16));
-            top |= (nuint)(((top >> 16) >> 16)); // ">> 32" doesn't compile on 32-bit architectures
-            return i * (nint)_W + bits.Len(top);
-        }
+    nint i = len(x) - 1; if (i >= 0) {
+        // bits.Len uses a lookup table for the low-order bits on some
+        // architectures. Neutralize any input-dependent behavior by setting all
+        // bits after the first one bit.
+        nuint top = (nuint)x[i];
+        top |= (nuint)((top >> 1));
+        top |= (nuint)((top >> 2));
+        top |= (nuint)((top >> 4));
+        top |= (nuint)((top >> 8));
+        top |= (nuint)((top >> 16));
+        top |= (nuint)(((top >> 16) >> 16)); // ">> 32" doesn't compile on 32-bit architectures
+        return i * (nint)_W + bits.Len(top);
     }
     return 0;
 }
@@ -430,13 +422,11 @@ internal static Δnat lsh(this Δnat z, Δnat x, nuint s) {
 
     nint n = m + (nint)(s / (nuint)_W);
     z = z.make(n + 1);
-    {
-        s %= _W; if (s == 0) {
-            copy(z.slice(n - m, n), x);
-            z[n] = 0;
-        } else {
-            z[n] = lshVU(z.slice(n - m, n), x, s);
-        }
+    s %= _W; if (s == 0) {
+        copy(z.slice(n - m, n), x);
+        z[n] = 0;
+    } else {
+        z[n] = lshVU(z.slice(n - m, n), x, s);
     }
     clear(z.slice(0, n - m));
 
@@ -462,12 +452,10 @@ internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
     // n > 0
 
     z = z.make(n);
-    {
-        s %= _W; if (s == 0) {
-            copy(z, x.slice(m - n));
-        } else {
-            rshVU(z, x.slice(m - n), s);
-        }
+    s %= _W; if (s == 0) {
+        copy(z, x.slice(m - n));
+    } else {
+        rshVU(z, x.slice(m - n), s);
     }
 
     return z.norm();
@@ -727,10 +715,8 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
                 if ((Word)(m[0] & 1) == 1) {
                     return z.expNNMontgomery(Ꮡstk, x, y, m);
                 }
-                {
-                    var (logM, ok) = m.isPow2(); if (ok) {
-                        return z.expNNWindowed(Ꮡstk, x, y, logM);
-                    }
+                var (logM, ok) = m.isPow2(); if (ok) {
+                    return z.expNNWindowed(Ꮡstk, x, y, logM);
                 }
                 return z.expNNMontgomeryEven(Ꮡstk, x, y, m);
             }
@@ -881,10 +867,10 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         powers[1] = powers[1].trunc(x, logM);
         for (nint iΔ2 = 2; iΔ2 < (nint)(1 << (int)(n)); iΔ2 += 2) {
             var (p2, p, p1) = (Ꮡpowers.at<Δnat>(iΔ2 / 2), Ꮡpowers.at<Δnat>(iΔ2), Ꮡpowers.at<Δnat>(iΔ2 + 1));
-            p.ValueSlot = (~p).sqr(Ꮡstk, p2.ValueSlot);
-            p.ValueSlot = (~p).trunc(p.ValueSlot, logM);
-            p1.ValueSlot = (~p1).mul(Ꮡstk, p.ValueSlot, x);
-            p1.ValueSlot = (~p1).trunc(p1.ValueSlot, logM);
+            p.ValueSlot = p.sqr(Ꮡstk, p2.ValueSlot);
+            p.ValueSlot = p.trunc(p.ValueSlot, logM);
+            p1.ValueSlot = p1.mul(Ꮡstk, p.ValueSlot, x);
+            p1.ValueSlot = p1.trunc(p1.ValueSlot, logM);
         }
 
         // Because phi(2**logM) = 2**(logM-1), x**(2**(logM-1)) = 1,
@@ -895,10 +881,8 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         nint i = len(y) - 1;
         nint mtop = (nint)((logM - 2) / (nuint)_W); // -2 because the top word of N bits is the (N-1)/W'th word.
         Word mmask = ~((Word)((Word)0));
-        {
-            nuint mbits = (logM - 1) & (nuint)(_W - 1); if (mbits != 0) {
-                mmask = ((Word)((nuint)1 << (int)(mbits))) - 1;
-            }
+        nuint mbits = (logM - 1) & (nuint)(_W - 1); if (mbits != 0) {
+            mmask = ((Word)((nuint)1 << (int)(mbits))) - 1;
         }
         if (i > mtop) {
             i = mtop;

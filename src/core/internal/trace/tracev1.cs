@@ -179,10 +179,8 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     ref var addErr = ref heap<error>(out var ᏑaddErr);
     var evtʗ1 = evt;
     void add(stringID id, @string s) {
-        {
-            var err = evtʗ1.Ꮡstrings.insert(id, s); if (err != nil && ᏑaddErr.ValueSlot == nil) {
-                ᏑaddErr.ValueSlot = err;
-            }
+        var err = evtʗ1.Ꮡstrings.insert(id, s); if (err != nil && ᏑaddErr.ValueSlot == nil) {
+            ᏑaddErr.ValueSlot = err;
         }
     }
     foreach (var (id, s) in pr.InlineStrings) {
@@ -355,28 +353,24 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     }
     case var ᴛ when ᴛ == tracev1.EvProcStart: {
         it.procMs[((ProcID)(int64)ev.P)] = (ThreadID)(int64)ev.Args[0];
-        {
-            var (_, ok) = it.seenProcs[((ProcID)(int64)ev.P), ꟷ]; if (ok) {
-                mappedType = tracev2.EvProcStart;
-                mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
-            } else {
-                it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
-                mappedType = tracev2.EvProcStatus;
-                mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcRunning}.array(4));
-            }
+        if (it.seenProcs[((ProcID)(int64)ev.P), ꟷ] is (_, true)) {
+            mappedType = tracev2.EvProcStart;
+            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
+        } else {
+            it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
+            mappedType = tracev2.EvProcStatus;
+            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcRunning}.array(4));
         }
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvProcStop: {
-        {
-            var (_, ok) = it.seenProcs[((ProcID)(int64)ev.P), ꟷ]; if (ok) {
-                mappedType = tracev2.EvProcStop;
-                mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
-            } else {
-                it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
-                mappedType = tracev2.EvProcStatus;
-                mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcIdle}.array(4));
-            }
+        if (it.seenProcs[((ProcID)(int64)ev.P), ꟷ] is (_, true)) {
+            mappedType = tracev2.EvProcStop;
+            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P}.array(4));
+        } else {
+            it.seenProcs[((ProcID)(int64)ev.P)] = new EmptyStruct();
+            mappedType = tracev2.EvProcStatus;
+            mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.P, (uint64)tracev2.ProcIdle}.array(4));
         }
         break;
     }
@@ -675,19 +669,15 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     }}
 
     if (tracev1.EventDescriptions[ev.Type].Stack) {
-        {
-            var stackIDs = tracev2.Specs()[mappedType].StackIDs; if (len(stackIDs) > 0) {
-                mappedArgs[stackIDs[0] - 1] = (uint64)ev.StkID;
-            }
+        var stackIDs = tracev2.Specs()[mappedType].StackIDs; if (len(stackIDs) > 0) {
+            mappedArgs[stackIDs[0] - 1] = (uint64)ev.StkID;
         }
     }
 
     var m = NoThread;
     if (ev.P != -1 && ev.Type != tracev1.EvCPUSample) {
-        {
-            var (t, ok) = it.procMs[((ProcID)(int64)ev.P), ꟷ]; if (ok) {
-                m = t;
-            }
+        var (t, ok) = it.procMs[((ProcID)(int64)ev.P), ꟷ]; if (ok) {
+            m = t;
         }
     }
     if (ev.Type == tracev1.EvProcStop) {

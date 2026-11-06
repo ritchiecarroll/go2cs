@@ -1,0 +1,683 @@
+# zsprobe, TrimMode=partial (the template's), ILC 10.0.11: the gate bodies the table in section 11.5 counts
+# program output: 28 28 28 direct 28 G3: 28 28 28 28 8 28 28 28 28 28 28 8 8 8 
+== S<UIntPtr>__G0
+  0000000140068050: 57                 push        rdi
+  0000000140068051: 56                 push        rsi
+  0000000140068052: 53                 push        rbx
+  0000000140068053: 48 83 EC 20        sub         rsp,20h
+  0000000140068057: 48 8B D9           mov         rbx,rcx
+  000000014006805A: 48 8B F2           mov         rsi,rdx
+  000000014006805D: 48 85 F6           test        rsi,rsi
+  0000000140068060: 7C 5A              jl          00000001400680BC
+  0000000140068062: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  0000000140068066: 7D 54              jge         00000001400680BC
+  0000000140068068: 48 8D 3D C9 A9 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<UIntPtr>@@]
+                    00
+  000000014006806F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  0000000140068074: 75 66              jne         00000001400680DC
+  0000000140068076: 80 3F 00           cmp         byte ptr [rdi],0
+  0000000140068079: 75 35              jne         00000001400680B0
+  000000014006807B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  0000000140068080: 74 12              je          0000000140068094
+  0000000140068082: 48 8B CB           mov         rcx,rbx
+  0000000140068085: 48 8B D6           mov         rdx,rsi
+  0000000140068088: 48 83 C4 20        add         rsp,20h
+  000000014006808C: 5B                 pop         rbx
+  000000014006808D: 5E                 pop         rsi
+  000000014006808E: 5F                 pop         rdi
+  000000014006808F: E9 EC 01 00 00     jmp         zsprobe_S_1<UIntPtr>__Native
+  0000000140068094: 48 8B 03           mov         rax,qword ptr [rbx]
+  0000000140068097: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006809B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006809E: 48 3B F1           cmp         rsi,rcx
+  00000001400680A1: 73 40              jae         00000001400680E3
+  00000001400680A3: 48 8D 44 F0 10     lea         rax,[rax+rsi*8+10h]
+  00000001400680A8: 48 83 C4 20        add         rsp,20h
+  00000001400680AC: 5B                 pop         rbx
+  00000001400680AD: 5E                 pop         rsi
+  00000001400680AE: 5F                 pop         rdi
+  00000001400680AF: C3                 ret
+  00000001400680B0: 48 83 C4 20        add         rsp,20h
+  00000001400680B4: 5B                 pop         rbx
+  00000001400680B5: 5E                 pop         rsi
+  00000001400680B6: 5F                 pop         rdi
+  00000001400680B7: E9 84 01 00 00     jmp         zsprobe_S_1<UIntPtr>__Zero
+  00000001400680BC: 48 8D 0D C5 54 09  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  00000001400680C3: E8 88 ED 01 00     call        RhpNewFast
+  00000001400680C8: 48 8B D8           mov         rbx,rax
+  00000001400680CB: 48 8B CB           mov         rcx,rbx
+  00000001400680CE: E8 3D 6C FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  00000001400680D3: 48 8B CB           mov         rcx,rbx
+  00000001400680D6: E8 35 F3 01 00     call        RhpThrowEx
+  00000001400680DB: CC                 int         3
+  00000001400680DC: E8 27 BC 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<UIntPtr>
+  00000001400680E1: EB 93              jmp         0000000140068076
+  00000001400680E3: E8 48 68 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  00000001400680E8: CC                 int         3
+== S<UIntPtr>__G1
+  00000001400680F0: 53                 push        rbx
+  00000001400680F1: 48 83 EC 20        sub         rsp,20h
+  00000001400680F5: 48 85 D2           test        rdx,rdx
+  00000001400680F8: 7C 31              jl          000000014006812B
+  00000001400680FA: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  00000001400680FE: 7D 2B              jge         000000014006812B
+  0000000140068100: 48 83 79 18 00     cmp         qword ptr [rcx+18h],0
+  0000000140068105: 74 0A              je          0000000140068111
+  0000000140068107: 48 83 C4 20        add         rsp,20h
+  000000014006810B: 5B                 pop         rbx
+  000000014006810C: E9 6F 01 00 00     jmp         zsprobe_S_1<UIntPtr>__Native
+  0000000140068111: 48 8B 01           mov         rax,qword ptr [rcx]
+  0000000140068114: 48 03 51 08        add         rdx,qword ptr [rcx+8]
+  0000000140068118: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006811B: 48 3B D1           cmp         rdx,rcx
+  000000014006811E: 73 2B              jae         000000014006814B
+  0000000140068120: 48 8D 44 D0 10     lea         rax,[rax+rdx*8+10h]
+  0000000140068125: 48 83 C4 20        add         rsp,20h
+  0000000140068129: 5B                 pop         rbx
+  000000014006812A: C3                 ret
+  000000014006812B: 48 8D 0D 56 54 09  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  0000000140068132: E8 19 ED 01 00     call        RhpNewFast
+  0000000140068137: 48 8B D8           mov         rbx,rax
+  000000014006813A: 48 8B CB           mov         rcx,rbx
+  000000014006813D: E8 CE 6B FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  0000000140068142: 48 8B CB           mov         rcx,rbx
+  0000000140068145: E8 C6 F2 01 00     call        RhpThrowEx
+  000000014006814A: CC                 int         3
+  000000014006814B: E8 E0 67 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  0000000140068150: CC                 int         3
+== S<UIntPtr>__G2
+  0000000140068160: 53                 push        rbx
+  0000000140068161: 48 83 EC 20        sub         rsp,20h
+  0000000140068165: 48 85 D2           test        rdx,rdx
+  0000000140068168: 7C 31              jl          000000014006819B
+  000000014006816A: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  000000014006816E: 7D 2B              jge         000000014006819B
+  0000000140068170: 48 83 79 18 00     cmp         qword ptr [rcx+18h],0
+  0000000140068175: 74 0A              je          0000000140068181
+  0000000140068177: 48 83 C4 20        add         rsp,20h
+  000000014006817B: 5B                 pop         rbx
+  000000014006817C: E9 FF 00 00 00     jmp         zsprobe_S_1<UIntPtr>__Native
+  0000000140068181: 48 8B 01           mov         rax,qword ptr [rcx]
+  0000000140068184: 48 03 51 08        add         rdx,qword ptr [rcx+8]
+  0000000140068188: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006818B: 48 3B D1           cmp         rdx,rcx
+  000000014006818E: 73 2B              jae         00000001400681BB
+  0000000140068190: 48 8D 44 D0 10     lea         rax,[rax+rdx*8+10h]
+  0000000140068195: 48 83 C4 20        add         rsp,20h
+  0000000140068199: 5B                 pop         rbx
+  000000014006819A: C3                 ret
+  000000014006819B: 48 8D 0D E6 53 09  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  00000001400681A2: E8 A9 EC 01 00     call        RhpNewFast
+  00000001400681A7: 48 8B D8           mov         rbx,rax
+  00000001400681AA: 48 8B CB           mov         rcx,rbx
+  00000001400681AD: E8 5E 6B FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  00000001400681B2: 48 8B CB           mov         rcx,rbx
+  00000001400681B5: E8 56 F2 01 00     call        RhpThrowEx
+  00000001400681BA: CC                 int         3
+  00000001400681BB: E8 70 67 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  00000001400681C0: CC                 int         3
+== S<UIntPtr>__G3
+  00000001400681D0: 53                 push        rbx
+  00000001400681D1: 48 83 EC 20        sub         rsp,20h
+  00000001400681D5: 48 85 D2           test        rdx,rdx
+  00000001400681D8: 7C 31              jl          000000014006820B
+  00000001400681DA: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  00000001400681DE: 7D 2B              jge         000000014006820B
+  00000001400681E0: 48 83 79 18 00     cmp         qword ptr [rcx+18h],0
+  00000001400681E5: 74 0A              je          00000001400681F1
+  00000001400681E7: 48 83 C4 20        add         rsp,20h
+  00000001400681EB: 5B                 pop         rbx
+  00000001400681EC: E9 8F 00 00 00     jmp         zsprobe_S_1<UIntPtr>__Native
+  00000001400681F1: 48 8B 01           mov         rax,qword ptr [rcx]
+  00000001400681F4: 48 03 51 08        add         rdx,qword ptr [rcx+8]
+  00000001400681F8: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  00000001400681FB: 48 3B D1           cmp         rdx,rcx
+  00000001400681FE: 73 2B              jae         000000014006822B
+  0000000140068200: 48 8D 44 D0 10     lea         rax,[rax+rdx*8+10h]
+  0000000140068205: 48 83 C4 20        add         rsp,20h
+  0000000140068209: 5B                 pop         rbx
+  000000014006820A: C3                 ret
+  000000014006820B: 48 8D 0D 76 53 09  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  0000000140068212: E8 39 EC 01 00     call        RhpNewFast
+  0000000140068217: 48 8B D8           mov         rbx,rax
+  000000014006821A: 48 8B CB           mov         rcx,rbx
+  000000014006821D: E8 EE 6A FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  0000000140068222: 48 8B CB           mov         rcx,rbx
+  0000000140068225: E8 E6 F1 01 00     call        RhpThrowEx
+  000000014006822A: CC                 int         3
+  000000014006822B: E8 00 67 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  0000000140068230: CC                 int         3
+== S<zsprobe_Pair>__G0
+  000000014006E6B0: 57                 push        rdi
+  000000014006E6B1: 56                 push        rsi
+  000000014006E6B2: 53                 push        rbx
+  000000014006E6B3: 48 83 EC 20        sub         rsp,20h
+  000000014006E6B7: 48 8B D9           mov         rbx,rcx
+  000000014006E6BA: 48 8B F2           mov         rsi,rdx
+  000000014006E6BD: 48 85 F6           test        rsi,rsi
+  000000014006E6C0: 7C 5E              jl          000000014006E720
+  000000014006E6C2: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E6C6: 7D 58              jge         000000014006E720
+  000000014006E6C8: 48 8D 3D 79 44 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Pair>@@]
+                    00
+  000000014006E6CF: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E6D4: 75 6A              jne         000000014006E740
+  000000014006E6D6: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E6D9: 75 39              jne         000000014006E714
+  000000014006E6DB: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E6E0: 74 12              je          000000014006E6F4
+  000000014006E6E2: 48 8B CB           mov         rcx,rbx
+  000000014006E6E5: 48 8B D6           mov         rdx,rsi
+  000000014006E6E8: 48 83 C4 20        add         rsp,20h
+  000000014006E6EC: 5B                 pop         rbx
+  000000014006E6ED: 5E                 pop         rsi
+  000000014006E6EE: 5F                 pop         rdi
+  000000014006E6EF: E9 8C 9B FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E6F4: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E6F7: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E6FB: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E6FE: 48 3B F1           cmp         rsi,rcx
+  000000014006E701: 73 44              jae         000000014006E747
+  000000014006E703: 48 C1 E6 04        shl         rsi,4
+  000000014006E707: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E70C: 48 83 C4 20        add         rsp,20h
+  000000014006E710: 5B                 pop         rbx
+  000000014006E711: 5E                 pop         rsi
+  000000014006E712: 5F                 pop         rdi
+  000000014006E713: C3                 ret
+  000000014006E714: 48 83 C4 20        add         rsp,20h
+  000000014006E718: 5B                 pop         rbx
+  000000014006E719: 5E                 pop         rsi
+  000000014006E71A: 5F                 pop         rdi
+  000000014006E71B: E9 E0 01 00 00     jmp         zsprobe_S_1<zsprobe_Pair>__Zero
+  000000014006E720: 48 8D 0D 61 EE 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E727: E8 24 87 01 00     call        RhpNewFast
+  000000014006E72C: 48 8B D8           mov         rbx,rax
+  000000014006E72F: 48 8B CB           mov         rcx,rbx
+  000000014006E732: E8 D9 05 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E737: 48 8B CB           mov         rcx,rbx
+  000000014006E73A: E8 D1 8C 01 00     call        RhpThrowEx
+  000000014006E73F: CC                 int         3
+  000000014006E740: E8 E3 55 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Pair>
+  000000014006E745: EB 8F              jmp         000000014006E6D6
+  000000014006E747: E8 E4 01 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E74C: CC                 int         3
+== S<zsprobe_Pair>__G1
+  000000014006E750: 57                 push        rdi
+  000000014006E751: 56                 push        rsi
+  000000014006E752: 53                 push        rbx
+  000000014006E753: 48 83 EC 20        sub         rsp,20h
+  000000014006E757: 48 8B D9           mov         rbx,rcx
+  000000014006E75A: 48 8B F2           mov         rsi,rdx
+  000000014006E75D: 48 85 F6           test        rsi,rsi
+  000000014006E760: 7C 5E              jl          000000014006E7C0
+  000000014006E762: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E766: 7D 58              jge         000000014006E7C0
+  000000014006E768: 48 8D 3D D9 43 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Pair>@@]
+                    00
+  000000014006E76F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E774: 75 6A              jne         000000014006E7E0
+  000000014006E776: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E779: 75 39              jne         000000014006E7B4
+  000000014006E77B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E780: 74 12              je          000000014006E794
+  000000014006E782: 48 8B CB           mov         rcx,rbx
+  000000014006E785: 48 8B D6           mov         rdx,rsi
+  000000014006E788: 48 83 C4 20        add         rsp,20h
+  000000014006E78C: 5B                 pop         rbx
+  000000014006E78D: 5E                 pop         rsi
+  000000014006E78E: 5F                 pop         rdi
+  000000014006E78F: E9 EC 9A FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E794: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E797: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E79B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E79E: 48 3B F1           cmp         rsi,rcx
+  000000014006E7A1: 73 44              jae         000000014006E7E7
+  000000014006E7A3: 48 C1 E6 04        shl         rsi,4
+  000000014006E7A7: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E7AC: 48 83 C4 20        add         rsp,20h
+  000000014006E7B0: 5B                 pop         rbx
+  000000014006E7B1: 5E                 pop         rsi
+  000000014006E7B2: 5F                 pop         rdi
+  000000014006E7B3: C3                 ret
+  000000014006E7B4: 48 83 C4 20        add         rsp,20h
+  000000014006E7B8: 5B                 pop         rbx
+  000000014006E7B9: 5E                 pop         rsi
+  000000014006E7BA: 5F                 pop         rdi
+  000000014006E7BB: E9 40 01 00 00     jmp         zsprobe_S_1<zsprobe_Pair>__Zero
+  000000014006E7C0: 48 8D 0D C1 ED 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E7C7: E8 84 86 01 00     call        RhpNewFast
+  000000014006E7CC: 48 8B D8           mov         rbx,rax
+  000000014006E7CF: 48 8B CB           mov         rcx,rbx
+  000000014006E7D2: E8 39 05 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E7D7: 48 8B CB           mov         rcx,rbx
+  000000014006E7DA: E8 31 8C 01 00     call        RhpThrowEx
+  000000014006E7DF: CC                 int         3
+  000000014006E7E0: E8 43 55 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Pair>
+  000000014006E7E5: EB 8F              jmp         000000014006E776
+  000000014006E7E7: E8 44 01 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E7EC: CC                 int         3
+== S<zsprobe_Pair>__G2
+  000000014006E7F0: 53                 push        rbx
+  000000014006E7F1: 48 83 EC 20        sub         rsp,20h
+  000000014006E7F5: 48 85 D2           test        rdx,rdx
+  000000014006E7F8: 7C 35              jl          000000014006E82F
+  000000014006E7FA: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  000000014006E7FE: 7D 2F              jge         000000014006E82F
+  000000014006E800: 48 83 79 18 00     cmp         qword ptr [rcx+18h],0
+  000000014006E805: 74 0A              je          000000014006E811
+  000000014006E807: 48 83 C4 20        add         rsp,20h
+  000000014006E80B: 5B                 pop         rbx
+  000000014006E80C: E9 6F 9A FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E811: 48 8B 01           mov         rax,qword ptr [rcx]
+  000000014006E814: 48 03 51 08        add         rdx,qword ptr [rcx+8]
+  000000014006E818: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E81B: 48 3B D1           cmp         rdx,rcx
+  000000014006E81E: 73 2F              jae         000000014006E84F
+  000000014006E820: 48 C1 E2 04        shl         rdx,4
+  000000014006E824: 48 8D 44 10 10     lea         rax,[rax+rdx+10h]
+  000000014006E829: 48 83 C4 20        add         rsp,20h
+  000000014006E82D: 5B                 pop         rbx
+  000000014006E82E: C3                 ret
+  000000014006E82F: 48 8D 0D 52 ED 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E836: E8 15 86 01 00     call        RhpNewFast
+  000000014006E83B: 48 8B D8           mov         rbx,rax
+  000000014006E83E: 48 8B CB           mov         rcx,rbx
+  000000014006E841: E8 CA 04 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E846: 48 8B CB           mov         rcx,rbx
+  000000014006E849: E8 C2 8B 01 00     call        RhpThrowEx
+  000000014006E84E: CC                 int         3
+  000000014006E84F: E8 DC 00 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E854: CC                 int         3
+== S<zsprobe_Pair>__G3
+  000000014006E860: 57                 push        rdi
+  000000014006E861: 56                 push        rsi
+  000000014006E862: 53                 push        rbx
+  000000014006E863: 48 83 EC 20        sub         rsp,20h
+  000000014006E867: 48 8B D9           mov         rbx,rcx
+  000000014006E86A: 48 8B F2           mov         rsi,rdx
+  000000014006E86D: 48 85 F6           test        rsi,rsi
+  000000014006E870: 7C 5E              jl          000000014006E8D0
+  000000014006E872: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E876: 7D 58              jge         000000014006E8D0
+  000000014006E878: 48 8D 3D C9 42 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Pair>@@]
+                    00
+  000000014006E87F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E884: 75 6A              jne         000000014006E8F0
+  000000014006E886: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E889: 75 39              jne         000000014006E8C4
+  000000014006E88B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E890: 74 12              je          000000014006E8A4
+  000000014006E892: 48 8B CB           mov         rcx,rbx
+  000000014006E895: 48 8B D6           mov         rdx,rsi
+  000000014006E898: 48 83 C4 20        add         rsp,20h
+  000000014006E89C: 5B                 pop         rbx
+  000000014006E89D: 5E                 pop         rsi
+  000000014006E89E: 5F                 pop         rdi
+  000000014006E89F: E9 DC 99 FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E8A4: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E8A7: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E8AB: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E8AE: 48 3B F1           cmp         rsi,rcx
+  000000014006E8B1: 73 44              jae         000000014006E8F7
+  000000014006E8B3: 48 C1 E6 04        shl         rsi,4
+  000000014006E8B7: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E8BC: 48 83 C4 20        add         rsp,20h
+  000000014006E8C0: 5B                 pop         rbx
+  000000014006E8C1: 5E                 pop         rsi
+  000000014006E8C2: 5F                 pop         rdi
+  000000014006E8C3: C3                 ret
+  000000014006E8C4: 48 83 C4 20        add         rsp,20h
+  000000014006E8C8: 5B                 pop         rbx
+  000000014006E8C9: 5E                 pop         rsi
+  000000014006E8CA: 5F                 pop         rdi
+  000000014006E8CB: E9 30 00 00 00     jmp         zsprobe_S_1<zsprobe_Pair>__Zero
+  000000014006E8D0: 48 8D 0D B1 EC 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E8D7: E8 74 85 01 00     call        RhpNewFast
+  000000014006E8DC: 48 8B D8           mov         rbx,rax
+  000000014006E8DF: 48 8B CB           mov         rcx,rbx
+  000000014006E8E2: E8 29 04 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E8E7: 48 8B CB           mov         rcx,rbx
+  000000014006E8EA: E8 21 8B 01 00     call        RhpThrowEx
+  000000014006E8EF: CC                 int         3
+  000000014006E8F0: E8 33 54 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Pair>
+  000000014006E8F5: EB 8F              jmp         000000014006E886
+  000000014006E8F7: E8 34 00 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E8FC: CC                 int         3
+== S<zsprobe_Str>__G0
+  000000014006EA30: 57                 push        rdi
+  000000014006EA31: 56                 push        rsi
+  000000014006EA32: 53                 push        rbx
+  000000014006EA33: 48 83 EC 20        sub         rsp,20h
+  000000014006EA37: 48 8B D9           mov         rbx,rcx
+  000000014006EA3A: 48 8B F2           mov         rsi,rdx
+  000000014006EA3D: 48 85 F6           test        rsi,rsi
+  000000014006EA40: 7C 5E              jl          000000014006EAA0
+  000000014006EA42: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006EA46: 7D 58              jge         000000014006EAA0
+  000000014006EA48: 48 8D 3D 09 41 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Str>@@]
+                    00
+  000000014006EA4F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006EA54: 75 6A              jne         000000014006EAC0
+  000000014006EA56: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006EA59: 75 39              jne         000000014006EA94
+  000000014006EA5B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006EA60: 74 12              je          000000014006EA74
+  000000014006EA62: 48 8B CB           mov         rcx,rbx
+  000000014006EA65: 48 8B D6           mov         rdx,rsi
+  000000014006EA68: 48 83 C4 20        add         rsp,20h
+  000000014006EA6C: 5B                 pop         rbx
+  000000014006EA6D: 5E                 pop         rsi
+  000000014006EA6E: 5F                 pop         rdi
+  000000014006EA6F: E9 0C 98 FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006EA74: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006EA77: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006EA7B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006EA7E: 48 3B F1           cmp         rsi,rcx
+  000000014006EA81: 73 44              jae         000000014006EAC7
+  000000014006EA83: 48 C1 E6 04        shl         rsi,4
+  000000014006EA87: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006EA8C: 48 83 C4 20        add         rsp,20h
+  000000014006EA90: 5B                 pop         rbx
+  000000014006EA91: 5E                 pop         rsi
+  000000014006EA92: 5F                 pop         rdi
+  000000014006EA93: C3                 ret
+  000000014006EA94: 48 83 C4 20        add         rsp,20h
+  000000014006EA98: 5B                 pop         rbx
+  000000014006EA99: 5E                 pop         rsi
+  000000014006EA9A: 5F                 pop         rdi
+  000000014006EA9B: E9 B0 01 00 00     jmp         zsprobe_S_1<zsprobe_Str>__Zero
+  000000014006EAA0: 48 8D 0D E1 EA 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006EAA7: E8 A4 83 01 00     call        RhpNewFast
+  000000014006EAAC: 48 8B D8           mov         rbx,rax
+  000000014006EAAF: 48 8B CB           mov         rcx,rbx
+  000000014006EAB2: E8 59 02 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006EAB7: 48 8B CB           mov         rcx,rbx
+  000000014006EABA: E8 51 89 01 00     call        RhpThrowEx
+  000000014006EABF: CC                 int         3
+  000000014006EAC0: E8 73 52 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Str>
+  000000014006EAC5: EB 8F              jmp         000000014006EA56
+  000000014006EAC7: E8 64 FE FC FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006EACC: CC                 int         3
+== S<zsprobe_Str>__G1
+  000000014006EAD0: 57                 push        rdi
+  000000014006EAD1: 56                 push        rsi
+  000000014006EAD2: 53                 push        rbx
+  000000014006EAD3: 48 83 EC 20        sub         rsp,20h
+  000000014006EAD7: 48 8B D9           mov         rbx,rcx
+  000000014006EADA: 48 8B F2           mov         rsi,rdx
+  000000014006EADD: 48 85 F6           test        rsi,rsi
+  000000014006EAE0: 7C 5E              jl          000000014006EB40
+  000000014006EAE2: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006EAE6: 7D 58              jge         000000014006EB40
+  000000014006EAE8: 48 8D 3D 69 40 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Str>@@]
+                    00
+  000000014006EAEF: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006EAF4: 75 6A              jne         000000014006EB60
+  000000014006EAF6: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006EAF9: 75 39              jne         000000014006EB34
+  000000014006EAFB: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006EB00: 74 12              je          000000014006EB14
+  000000014006EB02: 48 8B CB           mov         rcx,rbx
+  000000014006EB05: 48 8B D6           mov         rdx,rsi
+  000000014006EB08: 48 83 C4 20        add         rsp,20h
+  000000014006EB0C: 5B                 pop         rbx
+  000000014006EB0D: 5E                 pop         rsi
+  000000014006EB0E: 5F                 pop         rdi
+  000000014006EB0F: E9 6C 97 FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006EB14: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006EB17: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006EB1B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006EB1E: 48 3B F1           cmp         rsi,rcx
+  000000014006EB21: 73 44              jae         000000014006EB67
+  000000014006EB23: 48 C1 E6 04        shl         rsi,4
+  000000014006EB27: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006EB2C: 48 83 C4 20        add         rsp,20h
+  000000014006EB30: 5B                 pop         rbx
+  000000014006EB31: 5E                 pop         rsi
+  000000014006EB32: 5F                 pop         rdi
+  000000014006EB33: C3                 ret
+  000000014006EB34: 48 83 C4 20        add         rsp,20h
+  000000014006EB38: 5B                 pop         rbx
+  000000014006EB39: 5E                 pop         rsi
+  000000014006EB3A: 5F                 pop         rdi
+  000000014006EB3B: E9 10 01 00 00     jmp         zsprobe_S_1<zsprobe_Str>__Zero
+  000000014006EB40: 48 8D 0D 41 EA 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006EB47: E8 04 83 01 00     call        RhpNewFast
+  000000014006EB4C: 48 8B D8           mov         rbx,rax
+  000000014006EB4F: 48 8B CB           mov         rcx,rbx
+  000000014006EB52: E8 B9 01 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006EB57: 48 8B CB           mov         rcx,rbx
+  000000014006EB5A: E8 B1 88 01 00     call        RhpThrowEx
+  000000014006EB5F: CC                 int         3
+  000000014006EB60: E8 D3 51 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Str>
+  000000014006EB65: EB 8F              jmp         000000014006EAF6
+  000000014006EB67: E8 C4 FD FC FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006EB6C: CC                 int         3
+== S<zsprobe_Str>__G3
+  000000014006EBE0: 53                 push        rbx
+  000000014006EBE1: 48 83 EC 20        sub         rsp,20h
+  000000014006EBE5: 48 85 D2           test        rdx,rdx
+  000000014006EBE8: 7C 35              jl          000000014006EC1F
+  000000014006EBEA: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  000000014006EBEE: 7D 2F              jge         000000014006EC1F
+  000000014006EBF0: 48 83 79 18 00     cmp         qword ptr [rcx+18h],0
+  000000014006EBF5: 74 0A              je          000000014006EC01
+  000000014006EBF7: 48 83 C4 20        add         rsp,20h
+  000000014006EBFB: 5B                 pop         rbx
+  000000014006EBFC: E9 7F 96 FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006EC01: 48 8B 01           mov         rax,qword ptr [rcx]
+  000000014006EC04: 48 03 51 08        add         rdx,qword ptr [rcx+8]
+  000000014006EC08: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006EC0B: 48 3B D1           cmp         rdx,rcx
+  000000014006EC0E: 73 2F              jae         000000014006EC3F
+  000000014006EC10: 48 C1 E2 04        shl         rdx,4
+  000000014006EC14: 48 8D 44 10 10     lea         rax,[rax+rdx+10h]
+  000000014006EC19: 48 83 C4 20        add         rsp,20h
+  000000014006EC1D: 5B                 pop         rbx
+  000000014006EC1E: C3                 ret
+  000000014006EC1F: 48 8D 0D 62 E9 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006EC26: E8 25 82 01 00     call        RhpNewFast
+  000000014006EC2B: 48 8B D8           mov         rbx,rax
+  000000014006EC2E: 48 8B CB           mov         rcx,rbx
+  000000014006EC31: E8 DA 00 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006EC36: 48 8B CB           mov         rcx,rbx
+  000000014006EC39: E8 D2 87 01 00     call        RhpThrowEx
+  000000014006EC3E: CC                 int         3
+  000000014006EC3F: E8 EC FC FC FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006EC44: CC                 int         3
+== S<zsprobe_Empty>__G0
+  000000014006E360: 57                 push        rdi
+  000000014006E361: 56                 push        rsi
+  000000014006E362: 53                 push        rbx
+  000000014006E363: 48 83 EC 20        sub         rsp,20h
+  000000014006E367: 48 8B D9           mov         rbx,rcx
+  000000014006E36A: 48 8B F2           mov         rsi,rdx
+  000000014006E36D: 48 85 F6           test        rsi,rsi
+  000000014006E370: 7C 5A              jl          000000014006E3CC
+  000000014006E372: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E376: 7D 54              jge         000000014006E3CC
+  000000014006E378: 48 8D 3D B9 47 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Empty>@@]
+                    00
+  000000014006E37F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E384: 75 66              jne         000000014006E3EC
+  000000014006E386: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E389: 75 35              jne         000000014006E3C0
+  000000014006E38B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E390: 74 12              je          000000014006E3A4
+  000000014006E392: 48 8B CB           mov         rcx,rbx
+  000000014006E395: 48 8B D6           mov         rdx,rsi
+  000000014006E398: 48 83 C4 20        add         rsp,20h
+  000000014006E39C: 5B                 pop         rbx
+  000000014006E39D: 5E                 pop         rsi
+  000000014006E39E: 5F                 pop         rdi
+  000000014006E39F: E9 DC 9E FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E3A4: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E3A7: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E3AB: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E3AE: 48 3B F1           cmp         rsi,rcx
+  000000014006E3B1: 73 40              jae         000000014006E3F3
+  000000014006E3B3: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E3B8: 48 83 C4 20        add         rsp,20h
+  000000014006E3BC: 5B                 pop         rbx
+  000000014006E3BD: 5E                 pop         rsi
+  000000014006E3BE: 5F                 pop         rdi
+  000000014006E3BF: C3                 ret
+  000000014006E3C0: 48 83 C4 20        add         rsp,20h
+  000000014006E3C4: 5B                 pop         rbx
+  000000014006E3C5: 5E                 pop         rsi
+  000000014006E3C6: 5F                 pop         rdi
+  000000014006E3C7: E9 B4 01 00 00     jmp         zsprobe_S_1<zsprobe_Empty>__Zero
+  000000014006E3CC: 48 8D 0D B5 F1 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E3D3: E8 78 8A 01 00     call        RhpNewFast
+  000000014006E3D8: 48 8B D8           mov         rbx,rax
+  000000014006E3DB: 48 8B CB           mov         rcx,rbx
+  000000014006E3DE: E8 2D 09 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E3E3: 48 8B CB           mov         rcx,rbx
+  000000014006E3E6: E8 25 90 01 00     call        RhpThrowEx
+  000000014006E3EB: CC                 int         3
+  000000014006E3EC: E8 27 59 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Empty>
+  000000014006E3F1: EB 93              jmp         000000014006E386
+  000000014006E3F3: E8 38 05 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E3F8: CC                 int         3
+== S<zsprobe_Empty>__G1
+  000000014006E400: 57                 push        rdi
+  000000014006E401: 56                 push        rsi
+  000000014006E402: 53                 push        rbx
+  000000014006E403: 48 83 EC 20        sub         rsp,20h
+  000000014006E407: 48 8B D9           mov         rbx,rcx
+  000000014006E40A: 48 8B F2           mov         rsi,rdx
+  000000014006E40D: 48 85 F6           test        rsi,rsi
+  000000014006E410: 7C 5A              jl          000000014006E46C
+  000000014006E412: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E416: 7D 54              jge         000000014006E46C
+  000000014006E418: 48 8D 3D 19 47 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Empty>@@]
+                    00
+  000000014006E41F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E424: 75 66              jne         000000014006E48C
+  000000014006E426: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E429: 75 35              jne         000000014006E460
+  000000014006E42B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E430: 74 12              je          000000014006E444
+  000000014006E432: 48 8B CB           mov         rcx,rbx
+  000000014006E435: 48 8B D6           mov         rdx,rsi
+  000000014006E438: 48 83 C4 20        add         rsp,20h
+  000000014006E43C: 5B                 pop         rbx
+  000000014006E43D: 5E                 pop         rsi
+  000000014006E43E: 5F                 pop         rdi
+  000000014006E43F: E9 3C 9E FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E444: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E447: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E44B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E44E: 48 3B F1           cmp         rsi,rcx
+  000000014006E451: 73 40              jae         000000014006E493
+  000000014006E453: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E458: 48 83 C4 20        add         rsp,20h
+  000000014006E45C: 5B                 pop         rbx
+  000000014006E45D: 5E                 pop         rsi
+  000000014006E45E: 5F                 pop         rdi
+  000000014006E45F: C3                 ret
+  000000014006E460: 48 83 C4 20        add         rsp,20h
+  000000014006E464: 5B                 pop         rbx
+  000000014006E465: 5E                 pop         rsi
+  000000014006E466: 5F                 pop         rdi
+  000000014006E467: E9 14 01 00 00     jmp         zsprobe_S_1<zsprobe_Empty>__Zero
+  000000014006E46C: 48 8D 0D 15 F1 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E473: E8 D8 89 01 00     call        RhpNewFast
+  000000014006E478: 48 8B D8           mov         rbx,rax
+  000000014006E47B: 48 8B CB           mov         rcx,rbx
+  000000014006E47E: E8 8D 08 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E483: 48 8B CB           mov         rcx,rbx
+  000000014006E486: E8 85 8F 01 00     call        RhpThrowEx
+  000000014006E48B: CC                 int         3
+  000000014006E48C: E8 87 58 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Empty>
+  000000014006E491: EB 93              jmp         000000014006E426
+  000000014006E493: E8 98 04 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E498: CC                 int         3
+== S<zsprobe_Empty>__G2
+  000000014006E4A0: 53                 push        rbx
+  000000014006E4A1: 48 83 EC 20        sub         rsp,20h
+  000000014006E4A5: 48 85 D2           test        rdx,rdx
+  000000014006E4A8: 7C 10              jl          000000014006E4BA
+  000000014006E4AA: 48 3B 51 10        cmp         rdx,qword ptr [rcx+10h]
+  000000014006E4AE: 7D 0A              jge         000000014006E4BA
+  000000014006E4B0: 48 83 C4 20        add         rsp,20h
+  000000014006E4B4: 5B                 pop         rbx
+  000000014006E4B5: E9 C6 00 00 00     jmp         zsprobe_S_1<zsprobe_Empty>__Zero
+  000000014006E4BA: 48 8D 0D C7 F0 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E4C1: E8 8A 89 01 00     call        RhpNewFast
+  000000014006E4C6: 48 8B D8           mov         rbx,rax
+  000000014006E4C9: 48 8B CB           mov         rcx,rbx
+  000000014006E4CC: E8 3F 08 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E4D1: 48 8B CB           mov         rcx,rbx
+  000000014006E4D4: E8 37 8F 01 00     call        RhpThrowEx
+  000000014006E4D9: CC                 int         3
+== S<zsprobe_Empty>__G3
+  000000014006E4E0: 57                 push        rdi
+  000000014006E4E1: 56                 push        rsi
+  000000014006E4E2: 53                 push        rbx
+  000000014006E4E3: 48 83 EC 20        sub         rsp,20h
+  000000014006E4E7: 48 8B D9           mov         rbx,rcx
+  000000014006E4EA: 48 8B F2           mov         rsi,rdx
+  000000014006E4ED: 48 85 F6           test        rsi,rsi
+  000000014006E4F0: 7C 5A              jl          000000014006E54C
+  000000014006E4F2: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014006E4F6: 7D 54              jge         000000014006E54C
+  000000014006E4F8: 48 8D 3D 39 46 0E  lea         rdi,[?__NONGCSTATICS@zsprobe_Facts_1<zsprobe_Empty>@@]
+                    00
+  000000014006E4FF: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014006E504: 75 66              jne         000000014006E56C
+  000000014006E506: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014006E509: 75 35              jne         000000014006E540
+  000000014006E50B: 48 83 7B 18 00     cmp         qword ptr [rbx+18h],0
+  000000014006E510: 74 12              je          000000014006E524
+  000000014006E512: 48 8B CB           mov         rcx,rbx
+  000000014006E515: 48 8B D6           mov         rdx,rsi
+  000000014006E518: 48 83 C4 20        add         rsp,20h
+  000000014006E51C: 5B                 pop         rbx
+  000000014006E51D: 5E                 pop         rsi
+  000000014006E51E: 5F                 pop         rdi
+  000000014006E51F: E9 5C 9D FF FF     jmp         zsprobe_S_1<UIntPtr>__Native
+  000000014006E524: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014006E527: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014006E52B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014006E52E: 48 3B F1           cmp         rsi,rcx
+  000000014006E531: 73 40              jae         000000014006E573
+  000000014006E533: 48 8D 44 30 10     lea         rax,[rax+rsi+10h]
+  000000014006E538: 48 83 C4 20        add         rsp,20h
+  000000014006E53C: 5B                 pop         rbx
+  000000014006E53D: 5E                 pop         rsi
+  000000014006E53E: 5F                 pop         rdi
+  000000014006E53F: C3                 ret
+  000000014006E540: 48 83 C4 20        add         rsp,20h
+  000000014006E544: 5B                 pop         rbx
+  000000014006E545: 5E                 pop         rsi
+  000000014006E546: 5F                 pop         rdi
+  000000014006E547: E9 34 00 00 00     jmp         zsprobe_S_1<zsprobe_Empty>__Zero
+  000000014006E54C: 48 8D 0D 35 F0 08  lea         rcx,[??_7S_P_CoreLib_System_IndexOutOfRangeException@@6B@]
+                    00
+  000000014006E553: E8 F8 88 01 00     call        RhpNewFast
+  000000014006E558: 48 8B D8           mov         rbx,rax
+  000000014006E55B: 48 8B CB           mov         rcx,rbx
+  000000014006E55E: E8 AD 07 FA FF     call        S_P_CoreLib_System_IndexOutOfRangeException___ctor
+  000000014006E563: 48 8B CB           mov         rcx,rbx
+  000000014006E566: E8 A5 8E 01 00     call        RhpThrowEx
+  000000014006E56B: CC                 int         3
+  000000014006E56C: E8 A7 57 01 00     call        __GetNonGCStaticBase_zsprobe_Facts_1<zsprobe_Empty>
+  000000014006E571: EB 93              jmp         000000014006E506
+  000000014006E573: E8 B8 03 FD FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014006E578: CC                 int         3

@@ -18,10 +18,8 @@ partial struct Reg /*map[@string, ж<Item>]*/;
 public static @string Describe(this Reg r) {
     @string @out = "";
     foreach (var (_, k) in range(slice<@string>(["a", "b"]))) {
-        {
-            var (it, ok) = r[k, ꟷ]; if (ok) {
-                @out += fmt.Sprintf("%s=%s/%d "u8, k, it.Name, it.N);
-            }
+        var (it, ok) = r[k, ꟷ]; if (ok) {
+            @out += fmt.Sprintf("%s=%s/%d "u8, k, it.Name, it.N);
         }
     }
     return @out;
@@ -32,10 +30,8 @@ partial struct Bag /*map[@string, Describer]*/;
 public static @string Describe(this Bag b) {
     @string @out = "";
     foreach (var (_, k) in range(slice<@string>(["r", "s"]))) {
-        {
-            var (d, ok) = b[k, ꟷ]; if (ok) {
-                @out += k + "{"u8 + d.Describe() + "} "u8;
-            }
+        var (d, ok) = b[k, ꟷ]; if (ok) {
+            @out += k + "{"u8 + d.Describe() + "} "u8;
         }
     }
     return @out;

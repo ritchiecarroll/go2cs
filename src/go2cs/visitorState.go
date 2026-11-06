@@ -132,6 +132,11 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// The selector of the deferred or spawned call whose own text visitDeferStmt/visitGoStmt are rendering, or nil.
+	// That text is split at its last dot into the receiver Go evaluates at the statement and the method, so a value
+	// method's receiver there must be the copied value, never the box a twin would copy from later (convSelectorExpr).
+	deferGoCallSelector *ast.SelectorExpr
+
 	fset               *token.FileSet
 	pkg                *types.Package
 	info               *types.Info
@@ -436,6 +441,11 @@ type Visitor struct {
 	// (see finalizePositionMap). Pure AST facts, recorded at declaration-visit time so no emission
 	// reordering, collapse, or double conversion of an expression can perturb the counter.
 	funcLitEntries []funcLitEntry
+	// deferredClosureLit is the Go func literal a defer statement hands straight to defer (`defer func() { … }()`),
+	// set by visitDeferStmt for the conversion of its call only; convFuncLit marks that literal's lambda with the
+	// deferred-closure sentinels (markDeferredClosureBody) and clears it, so no other literal (a nested one, an
+	// argument of the deferred call) is ever marked.
+	deferredClosureLit *ast.FuncLit
 	// methodValueEntries collects this FILE's value-receiver method values -- the Go line and the
 	// `pkg.Recv.Method` Go names the `-fm` wrapper by -- appended per function declaration beside the
 	// literal names (collectMethodValueNames) and emitted as the record's methodValues argument.
@@ -586,6 +596,7 @@ type Visitor struct {
 	deadUnsafePointerBoxes  map[*ast.CallExpr]bool        // `unsafe.Pointer(x)` conversions whose wrapper object an enclosing `uintptr(…)` reads straight back — emitted without it (see markDeadUnsafePointerBox)
 	identNames              map[*ast.Ident]string         // Local identifiers to adjusted names map
 	isReassigned            map[*ast.Ident]bool           // Local identifiers to reassignment status map
+	initScopeShapes         map[ast.Stmt]initScopeShape   // Per-func: how a head if/switch/type switch emits its init (analyzeInitScopes)
 
 	// The per-file warning entry facts (warningEntries.go): the locals the emission referenced by
 	// name, the locals it declared with a constant initializer, and the package variables it

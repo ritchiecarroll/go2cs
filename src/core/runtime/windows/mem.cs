@@ -225,10 +225,8 @@ retry:
         if (Δp != (uintptr)p2) {
             // Must have raced. Try again.
             sysUnreserve(p2, size);
-            {
-                retries++; if (retries == 100) {
-                    @throw(failedToAllocateAlignedˢ);
-                }
+            retries++; if (retries == 100) {
+                @throw(failedToAllocateAlignedˢ);
             }
             goto retry;
         }

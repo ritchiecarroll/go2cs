@@ -128,6 +128,9 @@ public static class MainExit
     /// <summary>The number of goroutines counted as running a panic's deferred calls (GolibTests reads it).</summary>
     internal static int RunningPanicDefers => Volatile.Read(ref s_runningPanicDefers);
 
+    /// <summary>Go's <c>panicking</c>: a fatal report has begun somewhere, and its owner will end the process.</summary>
+    internal static bool Panicking => Volatile.Read(ref s_panicking) != 0;
+
     private static int s_installed;
 
     /// <summary>Installs the main-return tail, once: golib's module initializer registers the main goroutine.</summary>
@@ -145,6 +148,11 @@ public static class MainExit
     internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
         {
+            // Main's runtime.Goexit, past its outermost deferring frame: not a crash, so it claims no report. Claiming
+            // one here would make a goroutine that panics later wait behind a report main never writes.
+            if (MainGoexit.Is(e.ExceptionObject as Exception))
+                MainGoexit.Park();
+
             AwaitReportOwner();
             backstop(sender, e);
         };

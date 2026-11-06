@@ -1,0 +1,13 @@
+  000000014081BA30: 50                 push        rax
+  000000014081BA31: 33 C0              xor         eax,eax
+  000000014081BA33: 48 89 04 24        mov         qword ptr [rsp],rax
+  000000014081BA37: 48 8D 04 24        lea         rax,[rsp]
+  000000014081BA3B: C4 C2 AB F6 D0     mulx        rdx,r10,r8
+  000000014081BA40: 4C 89 10           mov         qword ptr [rax],r10
+  000000014081BA43: 48 8B 04 24        mov         rax,qword ptr [rsp]
+  000000014081BA47: 48 89 11           mov         qword ptr [rcx],rdx
+  000000014081BA4A: 48 89 41 08        mov         qword ptr [rcx+8],rax
+  000000014081BA4E: 48 8B C1           mov         rax,rcx
+  000000014081BA51: 48 83 C4 08        add         rsp,8
+  000000014081BA55: C3                 ret
+  000000014081BA56: 90                 nop

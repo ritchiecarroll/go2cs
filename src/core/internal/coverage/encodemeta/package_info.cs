@@ -61,8 +61,8 @@ using static go.@internal.coverage.encodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKAgoKCpKaCgriCgoKCgIKCgszGooIACBKClICCpKamgriAgqSmgoKCgsqCgIKkgoKUqqKCgoKCgqiSgoKCgoKCgpSCgpQ=", "", "", "42=New128a/1/1/2;144=Nentries/1/1/5")]
-[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKClIKCuIKCuAAKFoKAgraCuIKCgoKCgIKkgpSClIKCgoCCpIKUuICCyIKCgoKUgIKkgqa4gIKk", "", "", "35=NewWriter/1/1/2")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKCgoKUpoKCuIKCgoKCgoK8xqKCAAgSgpSAgqSmpoK4gIKkpoKCgoLKgoCCpIKClKqigoKCgoKokoKCgoKCgoKUgoKU", "", "", "42=New128a/1/1/2;140=Nentries/1/1/5")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKClIKCuIKCuAAKFoKCpoK4goKCgoKClIKUgpSCgoKClIKUuIK4goKCgpSClIKmuIKU", "", "", "35=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

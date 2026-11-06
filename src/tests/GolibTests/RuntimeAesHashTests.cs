@@ -13,6 +13,8 @@ using go.golib;
 using @unsafe = go.unsafe_package;
 using static go.runtime_package;
 using X86 = System.Runtime.Intrinsics.X86;
+using Arm = System.Runtime.Intrinsics.Arm;
+using cpu = go.@internal.cpu_package;
 
 namespace GolibTests;
 
@@ -21,6 +23,8 @@ namespace GolibTests;
 /// memhash64 ported onto System.Runtime.Intrinsics, and alginit's selection of it. The port must be
 /// BIT-REPRODUCIBLE: for the same key schedule it answers exactly what Go's assembly answers, which
 /// the table below (taken from Go itself) checks across every size class of aeshashbody. The
+/// table runs on an arm64 host too, where the same schedule executes on Arm's AESE and AESMC (hash_impl.cs,
+/// WHICH SCHEDULE), so it checks that composition bit for bit. The
 /// selection must follow Go's condition (AES, SSSE3 and SSE4.1), so an AES host takes Go's AES
 /// skip/pass pattern in hash_test.go.
 /// </summary>
@@ -332,11 +336,18 @@ public class RuntimeAesHashTests
         Encoding.Latin1.GetString(Data(), 0, 200)
     ];
 
+    // An AES backend the hash bodies can run on: x86's AESENC, or Arm's AESE and AESMC.
     private static void RequireAes()
     {
-        if (!(X86.Aes.IsSupported && X86.Ssse3.IsSupported && X86.Sse41.IsSupported))
-            Assert.Inconclusive("the host has no AES/SSSE3/SSE4.1: Go selects the fallback here too");
+        if (!(X86.Aes.IsSupported && X86.Ssse3.IsSupported && X86.Sse41.IsSupported) && !Arm.Aes.IsSupported)
+            Assert.Inconclusive("the host has neither x86 AES/SSSE3/SSE4.1 nor Arm AES: Go selects the fallback here too");
     }
+
+    // Go's alginit condition for this process: the amd64 branch, or (on an arm64 process) the arm64 branch
+    // over cpu.ARM64 as internal/cpu fills it. No GODEBUG cpu.* option is set in the test host.
+    private static bool GoSelectsAes =>
+        (X86.Aes.IsSupported && X86.Ssse3.IsSupported && X86.Sse41.IsSupported) ||
+        (cpu.GoIsArm64Process && cpu.ARM64.HasAES && Arm.Aes.IsSupported);
 
     [TestMethod]
     public void AesHashMatchesGoAcrossEverySizeClass()
@@ -378,8 +389,19 @@ public class RuntimeAesHashTests
     public void AlginitSelectsAesOnGosCondition()
     {
         // No GODEBUG cpu.* option is set in the test host, so the flags are the hardware's
-        bool expected = X86.Aes.IsSupported && X86.Ssse3.IsSupported && X86.Sse41.IsSupported;
-        Assert.AreEqual(expected, GoUsesAeshash, "useAeshash follows (GOARCH amd64) && HasAES && HasSSSE3 && HasSSE41");
+        Assert.AreEqual(GoSelectsAes, GoUsesAeshash, "useAeshash follows alginit: amd64's HasAES && HasSSSE3 && HasSSE41, or arm64's HasAES");
+    }
+
+    [TestMethod]
+    public void AppleSiliconTakesAlginitsArm64Branch()
+    {
+        // darwin's osInit sets ARM64.HasAES unconditionally, so Go on Apple silicon always runs the AES hash;
+        // so must the converted runtime, though its GOARCH constant reads amd64.
+        if (!(cpu.GoIsArm64Process && OperatingSystem.IsMacOS()))
+            Assert.Inconclusive("not an arm64 process on macOS");
+
+        Assert.IsTrue(cpu.ARM64.HasAES, "darwin's osInit sets HasAES");
+        Assert.IsTrue(GoUsesAeshash, "alginit's arm64 branch: the AES hash");
     }
 
     [TestMethod]
@@ -388,6 +410,9 @@ public class RuntimeAesHashTests
         // The shipped path: memhash/memhash32/memhash64/strhash as the emitted code calls them, each
         // equal to its aeshash body under this process's own aeskeysched.
         RequireAes();
+        if (!GoSelectsAes)
+            Assert.Inconclusive("Go's alginit selects the fallback in this process");
+
         Assert.IsTrue(GoUsesAeshash, "no GODEBUG cpu.* option is set in the test host");
         byte[] schedule = GoAesKeySchedule();
         Random random = new(4242);

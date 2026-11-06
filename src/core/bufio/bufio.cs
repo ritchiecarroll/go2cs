@@ -160,14 +160,12 @@ public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
 
     // 0 <= n <= len(b.buf)
     error err = default;
-    {
-        nint avail = b.w - b.r; if (avail < n) {
-            // not enough data in buffer
-            n = avail;
-            err = b.readErr();
-            if (err == nil) {
-                err = ErrBufferFull;
-            }
+    nint avail = b.w - b.r; if (avail < n) {
+        // not enough data in buffer
+        n = avail;
+        err = b.readErr();
+        if (err == nil) {
+            err = ErrBufferFull;
         }
     }
     return (b.buf.slice(b.r, b.r + n), err);
@@ -366,13 +364,11 @@ public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte de
     nint s = 0; // search start index
     for (;;) {
         // Search buffer.
-        {
-            nint i = bytes.IndexByte(b.buf.slice(b.r + s, b.w), delim); if (i >= 0) {
-                i += s;
-                line = b.buf.slice(b.r, b.r + i + 1);
-                b.r += i + 1;
-                break;
-            }
+        nint i = bytes.IndexByte(b.buf.slice(b.r + s, b.w), delim); if (i >= 0) {
+            i += s;
+            line = b.buf.slice(b.r, b.r + i + 1);
+            b.r += i + 1;
+            break;
         }
 
         // Pending error?
@@ -557,20 +553,16 @@ public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
         }
     }
 
-    {
-        var (r, ok) = b.rd._<io.WriterTo>(ᐧ); if (ok) {
-            var (m, errΔ1) = r.WriteTo(w);
-            n += m;
-            return (n, errΔ1);
-        }
+    if (b.rd._<io.WriterTo>(out var r)) {
+        var (m, errΔ1) = r.WriteTo(w);
+        n += m;
+        return (n, errΔ1);
     }
 
-    {
-        var (wΔ1, ok) = w._<io.ReaderFrom>(ᐧ); if (ok) {
-            var (m, errΔ2) = wΔ1.ReadFrom(b.rd);
-            n += m;
-            return (n, errΔ2);
-        }
+    if (w._<io.ReaderFrom>(out var wΔ1)) {
+        var (m, errΔ2) = wΔ1.ReadFrom(b.rd);
+        n += m;
+        return (n, errΔ2);
     }
 
     if (b.w - b.r < len(b.buf)) {
@@ -777,10 +769,8 @@ public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
     }
     nint n = b.Available();
     if (n < utf8.UTFMax) {
-        {
-            b.Flush(); if (b.err != nil) {
-                return (0, b.err);
-            }
+        b.Flush(); if (b.err != nil) {
+            return (0, b.err);
         }
         n = b.Available();
         if (n < utf8.UTFMax) {
@@ -845,10 +835,8 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
     nint m = default;
     for (;;) {
         if (b.Available() == 0) {
-            {
-                var err1 = b.Flush(); if (err1 != nil) {
-                    return (n, err1);
-                }
+            var err1 = b.Flush(); if (err1 != nil) {
+                return (n, err1);
             }
         }
         if (readerFromOK && b.Buffered() == 0) {

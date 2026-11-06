@@ -105,10 +105,8 @@ internal static error verifyLegacyHandshakeSignature(uint8 sigType, cryptoꓸPub
         if (!ok) {
             return fmt.Errorf("expected an RSA public key, got %T"u8, pubkey);
         }
-        {
-            var err = rsa.VerifyPKCS1v15(pubKey, hashFunc, hashed, sig); if (err != nil) {
-                return err;
-            }
+        var err = rsa.VerifyPKCS1v15(pubKey, hashFunc, hashed, sig); if (err != nil) {
+            return err;
         }
         break;
     }

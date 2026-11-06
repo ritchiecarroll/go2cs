@@ -310,10 +310,8 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         }
     }
     for (nint i = 0; i < n; i++) {
-        {
-            var (xt, targ) = (@in[i].Type(), t.In(i)); if (!xt.AssignableTo(new rtypeжΔType(toRType(targ)))) {
-                throw panic("reflect: " + op + " using " + xt.String() + " as type " + stringFor(targ));
-            }
+        var (xt, targ) = (@in[i].Type(), t.In(i)); if (!xt.AssignableTo(new rtypeжΔType(toRType(targ)))) {
+            throw panic("reflect: " + op + " using " + xt.String() + " as type " + stringFor(targ));
         }
     }
     if (!isSlice && isVariadic) {
@@ -323,10 +321,8 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         var elem = toRType(t.In(n)).Elem(); // FIXME cast to slice type and Elem()
         for (nint i = 0; i < m; i++) {
             var x = @in[n + i];
-            {
-                var xt = x.Type(); if (!xt.AssignableTo(elem)) {
-                    throw panic("reflect: cannot use " + xt.String() + " as type " + elem.String() + " in " + op);
-                }
+            var xt = x.Type(); if (!xt.AssignableTo(elem)) {
+                throw panic("reflect: cannot use " + xt.String() + " as type " + elem.String() + " in " + op);
             }
             Δslice.Index(i).Set(x);
         }
@@ -374,26 +370,24 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         // Guaranteed to only be one word in size,
         // so it will only take up exactly 1 abiStep (either
         // in a register or on the stack).
-        {
-            var st = abid.call.steps[0];
-            var exprᴛ1 = st.kind;
-            var matchᴛ1 = false;
-            if (exprᴛ1 == abiStepStack) { matchᴛ1 = true;
-                storeRcvr(rcvr, stackArgs);
-            }
-            else if (exprᴛ1 == abiStepPointer) { matchᴛ1 = true;
-                storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑregArgs.at(abi.RegArgs.ᏑPtrs, st.ireg)));
-                fallthrough = true;
-            }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
-                storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑregArgs.at(abi.RegArgs.ᏑInts, st.ireg)));
-            }
-            else if (exprᴛ1 == abiStepFloatReg) {
-                storeRcvr(rcvr, @unsafe.Pointer.FromPinnedBox(ᏑregArgs.at(abi.RegArgs.ᏑFloats, st.freg)));
-            }
-            else if (!matchᴛ1) { /* default: */
-                throw panic("unknown ABI parameter kind");
-            }
+        var st = abid.call.steps[0];
+        var exprᴛ1 = st.kind;
+        var matchᴛ1 = false;
+        if (exprᴛ1 == abiStepStack) { matchᴛ1 = true;
+            storeRcvr(rcvr, stackArgs);
+        }
+        else if (exprᴛ1 == abiStepPointer) { matchᴛ1 = true;
+            storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑregArgs.at(abi.RegArgs.ᏑPtrs, st.ireg)));
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
+            storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑregArgs.at(abi.RegArgs.ᏑInts, st.ireg)));
+        }
+        else if (exprᴛ1 == abiStepFloatReg) {
+            storeRcvr(rcvr, @unsafe.Pointer.FromPinnedBox(ᏑregArgs.at(abi.RegArgs.ᏑFloats, st.freg)));
+        }
+        else if (!matchᴛ1) { /* default: */
+            throw panic("unknown ABI parameter kind");
         }
         inStart = 1;
     }
@@ -635,62 +629,60 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
         }
         var v = new ΔValue(typ, nil, (flag)(uintptr)typ.Kind());
         var steps = abid.call.stepsForValue(i);
-        {
-            var st = steps[0]; if (st.kind == abiStepStack) {
-                if (!typ.IsDirectIface()) {
-                    // value cannot be inlined in interface data.
-                    // Must make a copy, because f might keep a reference to it,
-                    // and we cannot let f keep a reference to the stack frame
-                    // after this function returns, not even a read-only reference.
-                    v.ptr = (uintptr)unsafe_New(typ);
-                    if (typ.Size() > 0) {
-                        typedmemmove(typ, v.ptr, (uintptr)add(ptr, st.stkOff, typSize0ˢ));
+        var st = steps[0]; if (st.kind == abiStepStack) {
+            if (!typ.IsDirectIface()) {
+                // value cannot be inlined in interface data.
+                // Must make a copy, because f might keep a reference to it,
+                // and we cannot let f keep a reference to the stack frame
+                // after this function returns, not even a read-only reference.
+                v.ptr = (uintptr)unsafe_New(typ);
+                if (typ.Size() > 0) {
+                    typedmemmove(typ, v.ptr, (uintptr)add(ptr, st.stkOff, typSize0ˢ));
+                }
+                v.flag |= (flag)(flagIndir);
+            } else {
+                v.ptr = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(ptr, st.stkOff, ptrˢ));
+            }
+        } else {
+            if (!typ.IsDirectIface()) {
+                // All that's left is values passed in registers that we need to
+                // create space for the values.
+                v.flag |= (flag)(flagIndir);
+                v.ptr = (uintptr)unsafe_New(typ);
+                foreach (var (_, stΔ1) in steps) {
+                    switch (stΔ1.kind) {
+                    case var ᴛ when ᴛ == abiStepIntReg: {
+                        @unsafe.Pointer offset = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
+                        intFromReg(Ꮡregs, stΔ1.ireg, stΔ1.size, offset);
+                        break;
                     }
-                    v.flag |= (flag)(flagIndir);
-                } else {
-                    v.ptr = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(ptr, st.stkOff, ptrˢ));
+                    case var ᴛ when ᴛ == abiStepPointer: {
+                        @unsafe.Pointer s = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
+                        ((ж<@unsafe.Pointer>)(uintptr)(s)).Value = regs.Ptrs[stΔ1.ireg];
+                        break;
+                    }
+                    case var ᴛ when ᴛ == abiStepFloatReg: {
+                        @unsafe.Pointer offset = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
+                        floatFromReg(Ꮡregs, stΔ1.freg, stΔ1.size, offset);
+                        break;
+                    }
+                    case var ᴛ when ᴛ == abiStepStack: {
+                        throw panic("register-based return value has stack component");
+                        break;
+                    }
+                    default: {
+                        throw panic("unknown ABI part kind");
+                        break;
+                    }}
                 }
             } else {
-                if (!typ.IsDirectIface()) {
-                    // All that's left is values passed in registers that we need to
-                    // create space for the values.
-                    v.flag |= (flag)(flagIndir);
-                    v.ptr = (uintptr)unsafe_New(typ);
-                    foreach (var (_, stΔ1) in steps) {
-                        switch (stΔ1.kind) {
-                        case var ᴛ when ᴛ == abiStepIntReg: {
-                            @unsafe.Pointer offset = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                            intFromReg(Ꮡregs, stΔ1.ireg, stΔ1.size, offset);
-                            break;
-                        }
-                        case var ᴛ when ᴛ == abiStepPointer: {
-                            @unsafe.Pointer s = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                            ((ж<@unsafe.Pointer>)(uintptr)(s)).Value = regs.Ptrs[stΔ1.ireg];
-                            break;
-                        }
-                        case var ᴛ when ᴛ == abiStepFloatReg: {
-                            @unsafe.Pointer offset = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                            floatFromReg(Ꮡregs, stΔ1.freg, stΔ1.size, offset);
-                            break;
-                        }
-                        case var ᴛ when ᴛ == abiStepStack: {
-                            throw panic("register-based return value has stack component");
-                            break;
-                        }
-                        default: {
-                            throw panic("unknown ABI part kind");
-                            break;
-                        }}
-                    }
-                } else {
-                    // Pointer-valued data gets put directly
-                    // into v.ptr.
-                    if (steps[0].kind != abiStepPointer) {
-                        print((@string)"kind=", steps[0].kind, (@string)", type=", stringFor(typ), (@string)"\n");
-                        throw panic("mismatch between ABI description and types");
-                    }
-                    v.ptr = regs.Ptrs[steps[0].ireg];
+                // Pointer-valued data gets put directly
+                // into v.ptr.
+                if (steps[0].kind != abiStepPointer) {
+                    print((@string)"kind=", steps[0].kind, (@string)", type=", stringFor(typ), (@string)"\n");
+                    throw panic("mismatch between ABI description and types");
                 }
+                v.ptr = regs.Ptrs[steps[0].ireg];
             }
         }
         @in = builtin.append(@in, v);
@@ -925,29 +917,27 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     ref var methodRegs = ref heap(new abi.RegArgs(), out var ᏑmethodRegs);
 
     // Deal with the receiver. It's guaranteed to only be one word in size.
-    {
-        var st = methodABI.call.steps[0];
-        var exprᴛ1 = st.kind;
-        var matchᴛ1 = false;
-        if (exprᴛ1 == abiStepStack) { matchᴛ1 = true;
-            // Only copy the receiver to the stack if the ABI says so.
-            // Otherwise, it'll be in a register already.
-            storeRcvr(rcvr, methodFrame);
-        }
-        else if (exprᴛ1 == abiStepPointer) { matchᴛ1 = true;
-            // Put the receiver in a register.
-            storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑmethodRegs.at(abi.RegArgs.ᏑPtrs, st.ireg)));
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
-            storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑmethodRegs.at(abi.RegArgs.ᏑInts, st.ireg)));
-        }
-        else if (exprᴛ1 == abiStepFloatReg) {
-            storeRcvr(rcvr, @unsafe.Pointer.FromPinnedBox(ᏑmethodRegs.at(abi.RegArgs.ᏑFloats, st.freg)));
-        }
-        else if (!matchᴛ1) { /* default: */
-            throw panic("unknown ABI parameter kind");
-        }
+    var st = methodABI.call.steps[0];
+    var exprᴛ1 = st.kind;
+    var matchᴛ1 = false;
+    if (exprᴛ1 == abiStepStack) { matchᴛ1 = true;
+        // Only copy the receiver to the stack if the ABI says so.
+        // Otherwise, it'll be in a register already.
+        storeRcvr(rcvr, methodFrame);
+    }
+    else if (exprᴛ1 == abiStepPointer) { matchᴛ1 = true;
+        // Put the receiver in a register.
+        storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑmethodRegs.at(abi.RegArgs.ᏑPtrs, st.ireg)));
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
+        storeRcvr(rcvr, @unsafe.Pointer.FromBox(ᏑmethodRegs.at(abi.RegArgs.ᏑInts, st.ireg)));
+    }
+    else if (exprᴛ1 == abiStepFloatReg) {
+        storeRcvr(rcvr, @unsafe.Pointer.FromPinnedBox(ᏑmethodRegs.at(abi.RegArgs.ᏑFloats, st.freg)));
+    }
+    else if (!matchᴛ1) { /* default: */
+        throw panic("unknown ABI parameter kind");
     }
 
     // Translate the rest of the arguments.
@@ -1093,13 +1083,11 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     if (valueRegs != nil) {
         valueRegs.Value = methodRegs.ΔClone();
     }
-    {
-        var retSize = methodFrameType.Size() - methodABI.retOffset; if (retSize > 0) {
-            @unsafe.Pointer valueRet = (uintptr)add(valueFrame, valueABI.retOffset, valueFrameSSizeRetOffsetˢ);
-            @unsafe.Pointer methodRet = (uintptr)add(methodFrame, methodABI.retOffset, methodFrameSSizeˢ);
-            // This copies to the stack. Write barriers are not needed.
-            memmove(valueRet, methodRet, retSize);
-        }
+    var retSize = methodFrameType.Size() - methodABI.retOffset; if (retSize > 0) {
+        @unsafe.Pointer valueRet = (uintptr)add(valueFrame, valueABI.retOffset, valueFrameSSizeRetOffsetˢ);
+        @unsafe.Pointer methodRet = (uintptr)add(methodFrame, methodABI.retOffset, methodFrameSSizeˢ);
+        // This copies to the stack. Write barriers are not needed.
+        memmove(valueRet, methodRet, retSize);
     }
 
     // Tell the runtime it can now depend on the return values
@@ -1227,10 +1215,8 @@ public static (ΔValue, error) FieldByIndexErr(this ΔValue v, slice<nint> index
 // It panics if v's Kind is not [Struct].
 public static ΔValue FieldByName(this ΔValue v, @string name) {
     v.mustBe(Struct);
-    {
-        var (f, ok) = toRType(v.typ()).FieldByName(name); if (ok) {
-            return v.FieldByIndex(f.Index);
-        }
+    var (f, ok) = toRType(v.typ()).FieldByName(name); if (ok) {
+        return v.FieldByIndex(f.Index);
     }
     return new ΔValue();
 }
@@ -1240,10 +1226,8 @@ public static ΔValue FieldByName(this ΔValue v, @string name) {
 // It panics if v's Kind is not [Struct].
 // It returns the zero Value if no field was found.
 public static ΔValue FieldByNameFunc(this ΔValue v, Func<@string, bool> match) {
-    {
-        var (f, ok) = toRType(v.typ()).FieldByNameFunc(match); if (ok) {
-            return v.FieldByIndex(f.Index);
-        }
+    var (f, ok) = toRType(v.typ()).FieldByNameFunc(match); if (ok) {
+        return v.FieldByIndex(f.Index);
     }
     return new ΔValue();
 }
@@ -1376,31 +1360,29 @@ public static ΔKind Kind(this ΔValue v) {
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static nint lenNonSlice(this ΔValue v) {
-    {
-        ΔKind k = v.kind();
-        switch (k) {
-        case var ᴛ when ᴛ == Array: {
-            var tt = v.typ().Reinterpret<abi.Type, arrayType>();
-            return (nint)tt.of(arrayType.ᏑLen).Value;
-        }
-        case var ᴛ when ᴛ == Chan: {
-            return chanlen((uintptr)v.pointer());
-        }
-        case var ᴛ when ᴛ == Map: {
-            return maplen((uintptr)v.pointer());
-        }
-        case var ᴛ when ᴛ == ΔString: {
-            // String is bigger than a word; assume flagIndir.
-            return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Len;
-        }
-        case var ᴛ when ᴛ == Ptr: {
-            if (v.typ().Elem().Kind() == abi.Array) {
-                return v.typ().Elem().Len();
-            }
-            throw panic("reflect: call of reflect.Value.Len on ptr to non-array Value");
-            break;
-        }}
+    ΔKind k = v.kind();
+    switch (k) {
+    case var ᴛ when ᴛ == Array: {
+        var tt = v.typ().Reinterpret<abi.Type, arrayType>();
+        return (nint)tt.of(arrayType.ᏑLen).Value;
     }
+    case var ᴛ when ᴛ == Chan: {
+        return chanlen((uintptr)v.pointer());
+    }
+    case var ᴛ when ᴛ == Map: {
+        return maplen((uintptr)v.pointer());
+    }
+    case var ᴛ when ᴛ == ΔString: {
+        // String is bigger than a word; assume flagIndir.
+        return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Len;
+    }
+    case var ᴛ when ᴛ == Ptr: {
+        if (v.typ().Elem().Kind() == abi.Array) {
+            return v.typ().Elem().Len();
+        }
+        throw panic("reflect: call of reflect.Value.Len on ptr to non-array Value");
+        break;
+    }}
     throw panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
 }
 
@@ -2362,10 +2344,8 @@ internal static ΔValue cvtComplex(ΔValue v, ΔType t) {
 // convertOp: intXX -> string
 internal static ΔValue cvtIntString(ΔValue v, ΔType t) {
     @string s = "\uFFFD";
-    {
-        var x = v.Int(); if ((int64)(rune)x == x) {
-            s = (@string)(rune)x;
-        }
+    var x = v.Int(); if ((int64)(rune)x == x) {
+        s = (@string)(rune)x;
     }
     return makeString(v.flag.ro(), s, t);
 }
@@ -2373,10 +2353,8 @@ internal static ΔValue cvtIntString(ΔValue v, ΔType t) {
 // convertOp: uintXX -> string
 internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
     @string s = "\uFFFD";
-    {
-        var x = v.Uint(); if ((uint64)(rune)x == x) {
-            s = (@string)(rune)x;
-        }
+    var x = v.Uint(); if ((uint64)(rune)x == x) {
+        s = (@string)(rune)x;
     }
     return makeString(v.flag.ro(), s, t);
 }

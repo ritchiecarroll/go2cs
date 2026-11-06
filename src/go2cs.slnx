@@ -453,6 +453,7 @@
     <Project Path="tests/Behavioral/DeferValueFieldPtrReceiver/DeferValueFieldPtrReceiver.csproj" />
     <Project Path="tests/Behavioral/DeferValueReceiverSnapshot/DeferValueReceiverSnapshot.csproj" />
     <Project Path="tests/Behavioral/DeferVariadicCallee/DeferVariadicCallee.csproj" />
+    <Project Path="tests/Behavioral/DeferredClosurePanicChain/DeferredClosurePanicChain.csproj" />
     <Project Path="tests/Behavioral/DefinedArrayChainSlice/DefinedArrayChainSlice.csproj" />
     <Project Path="tests/Behavioral/DefinedComplexConst/DefinedComplexConst.csproj" />
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />
@@ -613,6 +614,7 @@
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
     <Project Path="tests/Behavioral/GoexitDefers/GoexitDefers.csproj" />
+    <Project Path="tests/Behavioral/GoexitFromMain/GoexitFromMain.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/consumer/GoHostModuleShadow.consumer.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/hostlib/go.shadowlib.in.lib.csproj" />
@@ -651,6 +653,7 @@
     <Project Path="tests/Behavioral/InferredForeignTypeNoImport/InferredForeignTypeNoImport.csproj" />
     <Project Path="tests/Behavioral/InitFrameNames/InitFrameNames.csproj" />
     <Project Path="tests/Behavioral/InitOrderTupleSpecs/InitOrderTupleSpecs.csproj" />
+    <Project Path="tests/Behavioral/InitStatementScope/InitStatementScope.csproj" />
     <Project Path="tests/Behavioral/InterfaceAssertionMapKey/InterfaceAssertionMapKey.csproj" />
     <Project Path="tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="tests/Behavioral/InterfaceEqualityTyped/InterfaceEqualityTyped.csproj" />
@@ -871,6 +874,7 @@
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/OsGetpagesize/OsGetpagesize.csproj" />
+    <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
@@ -1210,6 +1214,8 @@
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/ValueAdapterDynamicType.csproj" />
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />
+    <Project Path="tests/Behavioral/ValueReceiverArgumentOrder/ValueReceiverArgumentOrder.csproj" />
+    <Project Path="tests/Behavioral/DeferGoPointerValueReceiver/DeferGoPointerValueReceiver.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />

@@ -79,10 +79,8 @@ internal static void p6() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var e = recover(); if (e != nil) {
-                        r = -1;
-                    }
+                var e = recover(); if (e != nil) {
+                    r = -1;
                 }
             }, ref ᒐ);
             if (n < 0) {

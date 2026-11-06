@@ -295,25 +295,23 @@ internal static uintptr tryGetObjFast(this ref gcWork w) {
 internal static void dispose(this ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    {
-        var wbuf = w.wbuf1; if (wbuf != nil) {
-            if (wbuf.nobj == 0) {
-                putempty(wbuf);
-            } else {
-                putfull(wbuf);
-                w.flushedWork = true;
-            }
-            w.wbuf1 = default;
-
-            wbuf = w.wbuf2;
-            if (wbuf.nobj == 0) {
-                putempty(wbuf);
-            } else {
-                putfull(wbuf);
-                w.flushedWork = true;
-            }
-            w.wbuf2 = default;
+    var wbuf = w.wbuf1; if (wbuf != nil) {
+        if (wbuf.nobj == 0) {
+            putempty(wbuf);
+        } else {
+            putfull(wbuf);
+            w.flushedWork = true;
         }
+        w.wbuf1 = default;
+
+        wbuf = w.wbuf2;
+        if (wbuf.nobj == 0) {
+            putempty(wbuf);
+        } else {
+            putfull(wbuf);
+            w.flushedWork = true;
+        }
+        w.wbuf2 = default;
     }
     if (!Ꮡw.Ꮡspanq.empty()) {
         Ꮡw.Ꮡspanq.flush(); // Flush any local work.
@@ -351,19 +349,15 @@ internal static void balance(this ref gcWork w) {
     if (w.wbuf1 == nil) {
         return;
     }
-    {
-        var wbuf = w.wbuf2; if (wbuf.nobj != 0) {
-            putfull(wbuf);
-            w.flushedWork = true;
-            w.wbuf2 = getempty();
-        } else {
-            var wbufΔ1 = w.wbuf1; if (wbufΔ1.nobj > 4) {
-                w.wbuf1 = handoff(wbufΔ1);
-                w.flushedWork = true; // handoff did putfull
-            } else {
-                return;
-            }
-        }
+    var wbuf = w.wbuf2; if (wbuf.nobj != 0) {
+        putfull(wbuf);
+        w.flushedWork = true;
+        w.wbuf2 = getempty();
+    } else if (w.wbuf1 is var wbufΔ1 && wbufΔ1.nobj > 4) {
+        w.wbuf1 = handoff(wbufΔ1);
+        w.flushedWork = true; // handoff did putfull
+    } else {
+        return;
     }
     // We flushed a buffer to the full list, so wake a worker.
     if (gcphase == _GCmark) {

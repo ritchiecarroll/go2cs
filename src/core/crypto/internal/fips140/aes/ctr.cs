@@ -59,13 +59,11 @@ public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> 
 public static void RoundToBlock(ж<CTR> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    {
-        var remainder = c.offset % (uint64)ΔBlockSize; if (remainder != 0) {
-            uint64 carry = default;
-            (c.offset, carry) = bits.Add64(c.offset, (uint64)ΔBlockSize - remainder, 0);
-            if (carry != 0) {
-                throw panic("crypto/aes: counter overflow");
-            }
+    var remainder = c.offset % (uint64)ΔBlockSize; if (remainder != 0) {
+        uint64 carry = default;
+        (c.offset, carry) = bits.Add64(c.offset, (uint64)ΔBlockSize - remainder, 0);
+        if (carry != 0) {
+            throw panic("crypto/aes: counter overflow");
         }
     }
 }
@@ -88,18 +86,16 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
 
     var (ivlo, ivhi) = add128(c.ivlo, c.ivhi, offset / (uint64)ΔBlockSize);
 
-    {
-        var blockOffset = offset % (uint64)ΔBlockSize; if (blockOffset != 0) {
-            // We have a partial block at the beginning.
-            ref var @in = ref heap(new array<byte>(16), out var Ꮡin);
-            ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
-            copy(@in.slice((nint)(blockOffset)), src);
-            ctrBlocks1(ref nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
-            nint n = copy(dst, @out.slice((nint)(blockOffset)));
-            src = src.slice(n);
-            dst = dst.slice(n);
-            (ivlo, ivhi) = add128(ivlo, ivhi, 1);
-        }
+    var blockOffset = offset % (uint64)ΔBlockSize; if (blockOffset != 0) {
+        // We have a partial block at the beginning.
+        ref var @in = ref heap(new array<byte>(16), out var Ꮡin);
+        ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
+        copy(@in.slice((nint)(blockOffset)), src);
+        ctrBlocks1(ref nonnil(ref c).b, Ꮡout, Ꮡin, ivlo, ivhi);
+        nint n = copy(dst, @out.slice((nint)(blockOffset)));
+        src = src.slice(n);
+        dst = dst.slice(n);
+        (ivlo, ivhi) = add128(ivlo, ivhi, 1);
     }
 
     while (len(src) >= (nint)(8 * ΔBlockSize)) {

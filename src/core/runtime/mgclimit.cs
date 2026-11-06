@@ -135,10 +135,8 @@ internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 n
     // between startGCTransition and finishGCTransition. Even though the GC
     // isn't running on all CPUs, it is preventing user code from doing so,
     // so it might as well be.
-    {
-        var lastUpdate = Ꮡl.ᏑlastUpdate.Load(); if (now >= lastUpdate) {
-            Ꮡl.accumulate(0, (now - lastUpdate) * (int64)l.nprocs);
-        }
+    var lastUpdate = Ꮡl.ᏑlastUpdate.Load(); if (now >= lastUpdate) {
+        Ꮡl.accumulate(0, (now - lastUpdate) * (int64)l.nprocs);
     }
     Ꮡl.ᏑlastUpdate.Store(now);
     l.transitioning = false;

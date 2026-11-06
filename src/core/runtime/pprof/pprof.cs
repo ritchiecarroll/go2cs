@@ -1048,10 +1048,8 @@ internal static void profileWriter(io.Writer w) {
             time.Sleep(100 * time.Millisecond);
         }
         var (data, tags, eof) = readProfile();
-        {
-            var e = b.addCPUData(data, tags); if (e != nil && err == nil) {
-                err = e;
-            }
+        var e = b.addCPUData(data, tags); if (e != nil && err == nil) {
+            err = e;
         }
         if (eof) {
             break;

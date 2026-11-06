@@ -107,26 +107,24 @@ public static float64 Jn(nint n, float64 x) {
             //                 3     s+c             c-s
 
             float64 temp = default;
-            {
-                var (s, c) = Sincos(x);
-                switch ((n & 3)) {
-                case 0: {
-                    temp = c + s;
-                    break;
-                }
-                case 1: {
-                    temp = -c + s;
-                    break;
-                }
-                case 2: {
-                    temp = -c - s;
-                    break;
-                }
-                case 3: {
-                    temp = c - s;
-                    break;
-                }}
+            var (s, c) = Sincos(x);
+            switch ((n & 3)) {
+            case 0: {
+                temp = c + s;
+                break;
             }
+            case 1: {
+                temp = -c + s;
+                break;
+            }
+            case 2: {
+                temp = -c - s;
+                break;
+            }
+            case 3: {
+                temp = c - s;
+                break;
+            }}
             b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
         } else {
             b = J1(x);
@@ -299,26 +297,24 @@ public static float64 Yn(nint n, float64 x) {
         //		   3	 s+c		 c-s
 
         float64 temp = default;
-        {
-            var (s, c) = Sincos(x);
-            switch ((n & 3)) {
-            case 0: {
-                temp = s - c;
-                break;
-            }
-            case 1: {
-                temp = -s - c;
-                break;
-            }
-            case 2: {
-                temp = -s + c;
-                break;
-            }
-            case 3: {
-                temp = s + c;
-                break;
-            }}
+        var (s, c) = Sincos(x);
+        switch ((n & 3)) {
+        case 0: {
+            temp = s - c;
+            break;
         }
+        case 1: {
+            temp = -s - c;
+            break;
+        }
+        case 2: {
+            temp = -s + c;
+            break;
+        }
+        case 3: {
+            temp = s + c;
+            break;
+        }}
         b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
     } else {
         var a = Y0(x);

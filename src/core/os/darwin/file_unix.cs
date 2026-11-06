@@ -36,17 +36,13 @@ internal static error rename(@string oldname, @string newname) {
         // However, if the old name and new name are not the same, yet
         // they refer to the same file, it implies a case-only
         // rename on a case-insensitive filesystem, which is ok.
-        {
-            var (ofi, errΔ1) = Lstat(oldname); if (errΔ1 != nil) {
-                {
-                    var (pe, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
-                        errΔ1 = pe.Err;
-                    }
-                }
-                return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, errΔ1)));
-            } else if (newname == oldname || !SameFile(fi, ofi)) {
-                return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, syscall.EEXIST)));
+        var (ofi, errΔ1) = Lstat(oldname); if (errΔ1 != nil) {
+            var (pe, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
+                errΔ1 = pe.Err;
             }
+            return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, errΔ1)));
+        } else if (newname == oldname || !SameFile(fi, ofi)) {
+            return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, syscall.EEXIST)));
         }
     }
     err = ignoringEINTR(() => syscall.Rename(oldname, newname));
@@ -210,13 +206,11 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             if (kind == kindSock) {
                 f.nonblock = true; // tell Fd to return blocking descriptor
             }
+        } else if (syscall.SetNonblock(fd, true) is var err && err == nil) {
+            f.nonblock = true;
+            clearNonBlock = true;
         } else {
-            var err = syscall.SetNonblock(fd, true); if (err == nil) {
-                f.nonblock = true;
-                clearNonBlock = true;
-            } else {
-                pollable = false;
-            }
+            pollable = false;
         }
     }
 
@@ -227,13 +221,9 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
     // Linux systems. We assume that any real error
     // will show up in later I/O.
     // We do restore the blocking behavior if it was set by us.
-    {
-        var pollErr = f.of(File.Ꮡpfd).Init(fileˢ, pollable); if (pollErr != nil && clearNonBlock) {
-            {
-                var err = syscall.SetNonblock(fd, false); if (err == nil) {
-                    f.nonblock = false;
-                }
-            }
+    var pollErr = f.of(File.Ꮡpfd).Init(fileˢ, pollable); if (pollErr != nil && clearNonBlock) {
+        var err = syscall.SetNonblock(fd, false); if (err == nil) {
+            f.nonblock = false;
         }
     }
 
@@ -266,10 +256,8 @@ private static readonly @string DevNullᵇ = "/dev/null"u8;
 internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMode perm) {
     var setSticky = false;
     if (!supportsCreateWithStickyBit && (flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
-        {
-            var (_, err) = Stat(name); if (IsNotExist(err)) {
-                setSticky = true;
-            }
+        var (_, err) = Stat(name); if (IsNotExist(err)) {
+            setSticky = true;
         }
     }
 
@@ -328,19 +316,15 @@ internal static error close(this ж<@file> Ꮡfile) {
     if (Ꮡfile == nil) {
         return syscall.EINVAL;
     }
-    {
-        var info = Ꮡfile.Ꮡdirinfo.Swap(nil); if (info != nil) {
-            info.close();
-        }
+    var info = Ꮡfile.Ꮡdirinfo.Swap(nil); if (info != nil) {
+        info.close();
     }
     error err = default;
-    {
-        var e = Ꮡfile.Ꮡpfd.Close(); if (e != nil) {
-            if (AreEqual(e, poll.ErrFileClosing)) {
-                e = ErrClosed;
-            }
-            err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close", Path: @file.name, Err: e)));
+    var e = Ꮡfile.Ꮡpfd.Close(); if (e != nil) {
+        if (AreEqual(e, poll.ErrFileClosing)) {
+            e = ErrClosed;
         }
+        err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close", Path: @file.name, Err: e)));
     }
 
     // no need for a finalizer anymore
@@ -356,12 +340,10 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     int64 ret = default;
     error err = default;
 
-    {
-        var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
-            // Free cached dirinfo, so we allocate a new one if we
-            // access this file as a directory again. See #35767 and #37161.
-            info.close();
-        }
+    var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
+        // Free cached dirinfo, so we allocate a new one if we
+        // access this file as a directory again. See #35767 and #37161.
+        info.close();
     }
     (ret, err) = Ꮡf.of(File.Ꮡpfd).Seek(offset, whence);
     runtime.KeepAlive(Ꮡf.OrTypedNil());

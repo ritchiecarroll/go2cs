@@ -318,13 +318,11 @@ internal static void writeTo(this ref CommandNode c, ж<strings.Builder> sb) {
         if (i > 0) {
             sb.WriteByte((byte)' ');
         }
-        {
-            var (argΔ1, ok) = arg._<ж<PipeNode>>(ᐧ); if (ok) {
-                sb.WriteByte((byte)'(');
-                argΔ1.writeTo(sb);
-                sb.WriteByte((byte)')');
-                continue;
-            }
+        var (argΔ1, ok) = arg._<ж<PipeNode>>(ᐧ); if (ok) {
+            sb.WriteByte((byte)'(');
+            argΔ1.writeTo(sb);
+            sb.WriteByte((byte)')');
+            continue;
         }
         arg.writeTo(sb);
     }
@@ -573,14 +571,12 @@ public static @string String(this ref ChainNode c) {
 }
 
 internal static void writeTo(this ref ChainNode c, ж<strings.Builder> sb) {
-    {
-        var (_, ok) = c.Node._<ж<PipeNode>>(ᐧ); if (ok) {
-            sb.WriteByte((byte)'(');
-            c.Node.writeTo(sb);
-            sb.WriteByte((byte)')');
-        } else {
-            c.Node.writeTo(sb);
-        }
+    var (_, ok) = c.Node._<ж<PipeNode>>(ᐧ); if (ok) {
+        sb.WriteByte((byte)'(');
+        c.Node.writeTo(sb);
+        sb.WriteByte((byte)')');
+    } else {
+        c.Node.writeTo(sb);
     }
     foreach (var (_, field) in c.Field) {
         sb.WriteByte((byte)'.');
@@ -676,10 +672,8 @@ internal static (ж<NumberNode>, error) newNumber(this ж<Tree> Ꮡt, Pos pos, @
     }
     case var ᴛ when ᴛ == itemComplex: {
         // fmt.Sscan can parse the pair, so let it do the work.
-        {
-            var (_, errΔ4) = fmt.Sscan(text, n.ᏑComplex128); if (errΔ4 != nil) {
-                return (default, errΔ4);
-            }
+        var (_, errΔ4) = fmt.Sscan(text, n.ᏑComplex128); if (errΔ4 != nil) {
+            return (default, errΔ4);
         }
         n.IsComplex = true;
         n.simplifyComplex();

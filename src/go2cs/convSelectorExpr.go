@@ -180,6 +180,53 @@ func (v *Visitor) fieldTypeIsRenamed(x ast.Expr) bool {
 	return packageHasMethodNamed(obj.Pkg(), obj.Name())
 }
 
+// valueMethodHasBoxTwin reports whether go2cs-gen's RecvGenerator gives the VALUE-receiver method fn a
+// `fn(this ж<T> Ꮡv, …)` twin, so that a call through a pointer can be written `p.M()` as Go writes it.
+// The twin dereferences the box inside its body, after the call's arguments are evaluated, and calls
+// fn on that copy: Go's order (`p.M(f())` copies *p after f runs), and a nil box fails exactly as
+// `(~p)` fails. The twin is guaranteed, and the call binds it, unless:
+//   - fn's package is one the converter never emits (nonConvertedStdLibPackages): a hand-owned
+//     package (`[assembly: GoHandOwnedPackage]`) gets no twins, so testing's BenchmarkResult methods
+//     keep `(~p)`;
+//   - fn's C# name is a member of ж<T> or of a golib extension over it (fieldAccessCollisions.txt):
+//     C# binds the box's instance member before any extension, so `p.Value()` would not reach fn;
+//   - fn is hand-owned by registry (manualConversionTypes, manualConversionFuncs), or its receiver is
+//     a type a hand-owned file of this package declares (isHandOwnedType): such a body's receiver
+//     form is the hand author's, so the call keeps the spelling that does not depend on it.
+//
+// Hand-owned value methods outside those registries are declared `this T` in their package class and
+// get their twin like any converted method.
+func (v *Visitor) valueMethodHasBoxTwin(fn *types.Func, sig *types.Signature) bool {
+	if fn.Pkg() == nil || isNonConvertedStdLibPackage(fn.Pkg().Path()) {
+		return false
+	}
+
+	if fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(fn.Name()))] {
+		return false
+	}
+
+	named, ok := types.Unalias(sig.Recv().Type()).(*types.Named)
+
+	if !ok || isHandOwnedType(named) {
+		return false
+	}
+
+	pkgPath := resolveGorootVendoredPath(fn.Pkg().Path())
+	recvName := named.Origin().Obj().Name()
+
+	if typeNames, ok := manualConversionTypes[pkgPath]; ok && typeNames[recvName] {
+		return false
+	}
+
+	if funcScopes, ok := manualConversionFuncs[pkgPath]; ok {
+		if scope, listed := funcScopes[recvName+"."+fn.Name()]; listed && scope.includes(goosOfTarget(v.options.targetPlatform)) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // selectorTargetIsDirectBoxMethod reports whether the method a selector names is emitted with the
 // BOX as its receiver (`this ж<T>`) rather than as a `[GoRecv] ref` extension. Such a target binds
 // only a real `ж<T>`, so a caller that would otherwise prefer a plain addressable member chain must
@@ -2057,8 +2104,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// (`z := new(nat); z.make(n)` calls make on *z). A deref-aliased pointer PARAM or RECEIVER
 	// already renders as its value alias, but a pointer LOCAL (or other pointer-valued expr)
 	// renders as the box, which the value-receiver extension cannot bind (math/big's nat
-	// CS1929 ×9). Emit the value deref: `(~z).make(n)`. Direct (Index len 1) methods only —
-	// promoted chains keep their own `.of()` hop machinery below.
+	// CS1929 ×9). go2cs-gen gives each such method a `make(this ж<nat> Ꮡz, …)` twin that copies *z
+	// after the arguments are evaluated, as Go does, so the call is written as Go writes it, `z.make(n)`
+	// (valueMethodHasBoxTwin); a method the twin is not guaranteed for keeps the value deref,
+	// `(~z).make(n)`. Direct (Index len 1) methods only — promoted chains keep their own `.of()` hop
+	// machinery below. A method VALUE (`f := z.make`) is not a call and never reaches this branch.
 	if context.isCallExpr {
 		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 1 {
 			if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
@@ -2083,6 +2133,13 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							}
 
 							if needsDeref {
+								// Not for the selector of a deferred or spawned call: Go copies *p at the defer or go
+								// statement, and the lowering snapshots the receiver text there, so it must be the copy
+								// (`(~p)`), not the box the twin would copy from when the call runs.
+								if v.valueMethodHasBoxTwin(funcObj, sig) && selectorExpr != v.deferGoCallSelector {
+									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+								}
+
 								return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
 						}

@@ -50,10 +50,8 @@ partial interface reader :
 
 // asReader converts an io.Reader to a reader.
 internal static reader asReader(io.Reader r) {
-    {
-        var (rr, ok) = r._<reader>(ᐧ); if (ok) {
-            return rr;
-        }
+    var (rr, ok) = r._<reader>(ᐧ); if (ok) {
+        return rr;
     }
     return new bufio_Readerжreader(bufio.NewReader(r));
 }

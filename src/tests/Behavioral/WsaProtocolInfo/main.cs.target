@@ -10,11 +10,9 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
-        {
-            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (errΔ1 != nil) {
-                fmt.Println("FATAL WSAStartup", errΔ1);
-                return;
-            }
+        var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (errΔ1 != nil) {
+            fmt.Println("FATAL WSAStartup", errΔ1);
+            return;
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
 

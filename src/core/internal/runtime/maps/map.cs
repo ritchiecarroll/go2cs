@@ -462,7 +462,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     while (match != 0) {
         var i = match.first();
@@ -567,7 +567,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     // Look for an existing slot containing this key.
     while (match != 0) {
@@ -595,7 +595,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     // There can't be deleted slots, small maps can't have them
     // (see deleteSmall). Use matchEmptyOrDeleted as it is a bit
     // more efficient than matchEmpty.
-    match = (~g.ctrls()).matchEmptyOrDeleted();
+    match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
         fatal(smallMapWithNoEmptySlotˢ);
         return default;
@@ -680,10 +680,8 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> Ꮡtyp, @unsafe
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (Ꮡm == nil || m.Used() == 0) {
-        {
-            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
-                throw panic(err); // see issue 23734
-            }
+        var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
+            throw panic(err); // see issue 23734
         }
         return;
     }
@@ -727,7 +725,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     while (match != 0) {
         var i = match.first();
@@ -919,10 +917,8 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
         for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
-            {
-                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * a.of(abiꓸArrayType.ᏑElem).Value.Size_)); if (err != nil) {
-                    return err;
-                }
+            var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * a.of(abiꓸArrayType.ᏑElem).Value.Size_)); if (err != nil) {
+                return err;
             }
         }
         return default;
@@ -933,10 +929,8 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
             if (f.Name.IsBlank()) {
                 continue;
             }
-            {
-                var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != nil) {
-                    return err;
-                }
+            var err = mapKeyError2(f.Typ, (@unsafe.Pointer)((uintptr)p + f.Offset)); if (err != nil) {
+                return err;
             }
         }
         return default;

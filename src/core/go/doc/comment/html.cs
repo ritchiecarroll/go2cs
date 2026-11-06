@@ -59,12 +59,10 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
         @out.WriteString("<h");
         @string h = strconv.Itoa(p.headingLevel());
         @out.WriteString(h);
-        {
-            @string id = p.headingID(xΔ1); if (id != ""u8) {
-                @out.WriteString(@" id=""");
-                p.escape(Ꮡout, id);
-                @out.WriteString(@"""");
-            }
+        @string id = p.headingID(xΔ1); if (id != ""u8) {
+            @out.WriteString(@" id=""");
+            p.escape(Ꮡout, id);
+            @out.WriteString(@"""");
         }
         @out.WriteString(">");
         p.text(Ꮡout, xΔ1.Text);
@@ -89,16 +87,14 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
         @string next = "1";
         foreach (var (_, item) in xΔ1.Items) {
             @out.WriteString("<li");
-            {
-                @string n = item.Number; if (n != ""u8) {
-                    if (n != next) {
-                        @out.WriteString(valueˢ);
-                        @out.WriteString(n);
-                        @out.WriteString(@"""");
-                        next = n;
-                    }
-                    next = inc(next);
+            @string n = item.Number; if (n != ""u8) {
+                if (n != next) {
+                    @out.WriteString(valueˢ);
+                    @out.WriteString(n);
+                    @out.WriteString(@"""");
+                    next = n;
                 }
+                next = inc(next);
             }
             @out.WriteString(">");
             p.tight = !xΔ1.BlankBetween();

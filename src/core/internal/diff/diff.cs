@@ -198,17 +198,13 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     // Using negative numbers now lets us distinguish positive line numbers later.
     var m = new map<@string, nint>();
     foreach (var (_, s) in x) {
-        {
-            nint c = m[s]; if (c > -2) {
-                m[s] = c - 1;
-            }
+        nint c = m[s]; if (c > -2) {
+            m[s] = c - 1;
         }
     }
     foreach (var (_, s) in y) {
-        {
-            nint c = m[s]; if (c > -8) {
-                m[s] = c - 4;
-            }
+        nint c = m[s]; if (c > -8) {
+            m[s] = c - 4;
         }
     }
 
@@ -228,11 +224,9 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
         }
     }
     foreach (var (i, s) in x) {
-        {
-            var (j, ok) = m[s, ꟷ]; if (ok && j >= 0) {
-                xi = append(xiᴷ, xi, i);
-                inv = append(invᴷ, inv, j);
-            }
+        var (j, ok) = m[s, ꟷ]; if (ok && j >= 0) {
+            xi = append(xiᴷ, xi, i);
+            inv = append(invᴷ, inv, j);
         }
     }
 

@@ -320,10 +320,8 @@ partial interface StringWriter {
 // If w implements [StringWriter], [StringWriter.WriteString] is invoked directly.
 // Otherwise, [Writer.Write] is called exactly once.
 public static (nint n, error err) WriteString(Writer w, @string s) {
-    {
-        var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
-            return sw.WriteString(s);
-        }
+    var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
+        return sw.WriteString(s);
     }
     return w.Write(slice<byte>(s));
 }
@@ -426,26 +424,20 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
 
     // If the reader has a WriteTo method, use it to do the copy.
     // Avoids an allocation and a copy.
-    {
-        var (wt, ok) = src._<WriterTo>(ᐧ); if (ok) {
-            return wt.WriteTo(dst);
-        }
+    if (src._<WriterTo>(out var wt)) {
+        return wt.WriteTo(dst);
     }
     // Similarly, if the writer has a ReadFrom method, use it to do the copy.
-    {
-        var (rf, ok) = dst._<ReaderFrom>(ᐧ); if (ok) {
-            return rf.ReadFrom(src);
-        }
+    if (dst._<ReaderFrom>(out var rf)) {
+        return rf.ReadFrom(src);
     }
     if (buf == nil) {
         nint size = 32 * 1024;
-        {
-            var (l, ok) = src._<ж<LimitedReader>>(ᐧ); if (ok && (int64)size > l.N) {
-                if (l.N < 1) {
-                    size = 1;
-                } else {
-                    size = (nint)l.N;
-                }
+        var (l, ok) = src._<ж<LimitedReader>>(ᐧ); if (ok && (int64)size > l.N) {
+            if (l.N < 1) {
+                size = 1;
+            } else {
+                size = (nint)l.N;
             }
         }
         buf = new slice<byte>(size);
@@ -543,10 +535,8 @@ public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) 
     if (s.off >= s.limit) {
         return (0, EOF);
     }
-    {
-        var max = s.limit - s.off; if ((int64)len(p) > max) {
-            p = p.slice(0, (nint)(max));
-        }
+    var max = s.limit - s.off; if ((int64)len(p) > max) {
+        p = p.slice(0, (nint)(max));
     }
     (n, err) = s.r.ReadAt(p, s.off);
     s.off += (int64)n;
@@ -589,15 +579,13 @@ public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p
         return (0, EOF);
     }
     off += s.@base;
-    {
-        var max = s.limit - off; if ((int64)len(p) > max) {
-            p = p.slice(0, (nint)(max));
-            (n, err) = s.r.ReadAt(p, off);
-            if (err == nil) {
-                err = EOF;
-            }
-            return (n, err);
+    var max = s.limit - off; if ((int64)len(p) > max) {
+        p = p.slice(0, (nint)(max));
+        (n, err) = s.r.ReadAt(p, off);
+        if (err == nil) {
+            err = EOF;
         }
+        return (n, err);
     }
     return s.r.ReadAt(p, off);
 }
@@ -686,10 +674,8 @@ internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) {
 
     (n, err) = t.r.Read(p);
     if (n > 0) {
-        {
-            var (nΔ1, errΔ1) = t.w.Write(p.slice(0, n)); if (errΔ1 != nil) {
-                return (nΔ1, errΔ1);
-            }
+        var (nΔ1, errΔ1) = t.w.Write(p.slice(0, n)); if (errΔ1 != nil) {
+            return (nΔ1, errΔ1);
         }
     }
     return (n, err);
@@ -746,10 +732,8 @@ internal static (int64 n, error err) ReadFrom(this discard _, Reader r) {
 // If r implements [WriterTo], the returned [ReadCloser] will implement [WriterTo]
 // by forwarding calls to r.
 public static ReadCloser NopCloser(Reader r) {
-    {
-        var (_, ok) = r._<WriterTo>(ᐧ); if (ok) {
-            return new nopCloserWriterTo(r);
-        }
+    var (_, ok) = r._<WriterTo>(ᐧ); if (ok) {
+        return new nopCloserWriterTo(r);
     }
     return new nopCloser(r);
 }

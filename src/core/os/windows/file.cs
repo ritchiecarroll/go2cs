@@ -147,10 +147,8 @@ public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     (n, var e) = Ꮡf.read(b);
     return (n, f.wrapErr(readˢ, e));
@@ -169,10 +167,8 @@ public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int6
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
 
     if (off < 0) {
@@ -201,10 +197,8 @@ public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     (n, var handled, var e) = f.readFrom(r);
     if (!handled) {
@@ -244,10 +238,8 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     (n, var e) = Ꮡf.write(b);
     if (n < 0) {
@@ -278,10 +270,8 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     if (f.appendMode) {
         return (0, errWriteAtInAppendMode);
@@ -309,10 +299,8 @@ public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     (n, var handled, var e) = f.writeTo(w);
     if (handled) {
@@ -356,10 +344,8 @@ private static readonly @string seekˢᵇ = "seek"u8;
 public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint whence) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     var (r, e) = Ꮡf.seek(offset, whence);
     if (e == nil && Ꮡf.of(File.Ꮡdirinfo).Load() != nil && r != 0) {
@@ -414,11 +400,9 @@ internal static error setStickyBit(@string name) {
 // Chdir changes the current working directory to the named directory.
 // If there is an error, it will be of type [*PathError].
 public static error Chdir(@string dir) {
-    {
-        var e = syscall.Chdir(dir); if (e != nil) {
-            testlog.Open(dir); // observe likely non-existent directory
-            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chdir", Path: dir, Err: e)));
-        }
+    var e = syscall.Chdir(dir); if (e != nil) {
+        testlog.Open(dir); // observe likely non-existent directory
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chdir", Path: dir, Err: e)));
     }
     if (runtime.GOOS == "windows"u8) {
         var abs = filepathlite.IsAbs(dir);
@@ -430,12 +414,10 @@ public static error Chdir(@string dir) {
         }
         ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     }
-    {
-        var log = testlog.Logger(); if (log != nil) {
-            var (wd, err) = Getwd();
-            if (err == nil) {
-                log.Chdir(wd);
-            }
+    var log = testlog.Logger(); if (log != nil) {
+        var (wd, err) = Getwd();
+        if (err == nil) {
+            log.Chdir(wd);
         }
     }
     return default;
@@ -728,10 +710,8 @@ public static (@string, error) UserHomeDir() {
         (env, enverr) = (homeˢ2, homeˢ4);
         break;
     }}
-    {
-        @string v = Getenv(env); if (v != ""u8) {
-            return (v, default);
-        }
+    @string v = Getenv(env); if (v != ""u8) {
+        return (v, default);
     }
     // On some operating systems the home directory is not always defined.
     var exprᴛ2 = runtime.GOOS;
@@ -826,10 +806,8 @@ private static readonly @string syscallConnˢᵇ = "SyscallConn"u8;
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
 public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
-    {
-        var err = Ꮡf.checkValid(syscallConnˢ); if (err != nil) {
-            return (default, err);
-        }
+    var err = Ꮡf.checkValid(syscallConnˢ); if (err != nil) {
+        return (default, err);
     }
     var (ᴛ1, ᴛ2) = newRawConn(Ꮡf);
     return (new rawConnжRawConn(ᴛ1), ᴛ2);
@@ -915,11 +893,9 @@ internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
     }
     (var b, err) = ReadFile(fullname);
     if (err != nil) {
-        {
-            var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
-                // See comment in dirFS.Open.
-                e.Path = name;
-            }
+        var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
+            // See comment in dirFS.Open.
+            e.Path = name;
         }
         return (default, err);
     }
@@ -935,11 +911,9 @@ internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
     }
     (var entries, err) = ReadDir(fullname);
     if (err != nil) {
-        {
-            var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
-                // See comment in dirFS.Open.
-                e.Path = name;
-            }
+        var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
+            // See comment in dirFS.Open.
+            e.Path = name;
         }
         return (default, err);
     }
@@ -1022,10 +996,8 @@ public static (slice<byte>, error) ReadFile(@string name) {
 }
 
 internal static int64 statOrZero(ж<File> f) {
-    {
-        var (fi, err) = f.Stat(); if (err == nil) {
-            return fi.Size();
-        }
+    var (fi, err) = f.Stat(); if (err == nil) {
+        return fi.Size();
     }
     return 0;
 }
@@ -1087,10 +1059,8 @@ public static error WriteFile(@string name, slice<byte> data, FileMode perm) {
         return err;
     }
     (_, err) = f.Write(data);
-    {
-        var err1 = f.Close(); if (err1 != nil && err == nil) {
-            err = err1;
-        }
+    var err1 = f.Close(); if (err1 != nil && err == nil) {
+        err = err1;
     }
     return err;
 }

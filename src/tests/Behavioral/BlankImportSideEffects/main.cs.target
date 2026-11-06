@@ -18,12 +18,10 @@ internal static void Main() {
     fmt.Println("count at init:", countAtInit);
 
     foreach (var (_, name) in range(slice<@string>(["jpeglike", "pnglike", "giflike"]))) {
-        {
-            var (describe, ok) = registry.Lookup(name); if (ok) {
-                fmt.Println("found:", name, "=>", describe);
-            } else {
-                fmt.Println("missing:", name);
-            }
+        var (describe, ok) = registry.Lookup(name); if (ok) {
+            fmt.Println("found:", name, "=>", describe);
+        } else {
+            fmt.Println("missing:", name);
         }
     }
 

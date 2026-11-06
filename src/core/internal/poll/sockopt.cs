@@ -15,10 +15,8 @@ public static error SetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name, nint
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptInt(fd.Sysfd, level, name, arg);
@@ -35,10 +33,8 @@ public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name
         arg = arg.Clone();
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptInet4Addr(fd.Sysfd, level, name, arg);
@@ -54,10 +50,8 @@ public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, �
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptLinger(fd.Sysfd, level, name, l);
@@ -73,10 +67,8 @@ public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint na
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return (-1, err);
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return (-1, err);
         }
         ᒐd1 = true;
         return Δsyscall.GetsockoptInt(fd.Sysfd, level, name);

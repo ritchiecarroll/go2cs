@@ -580,12 +580,10 @@ internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
             dnsMode = s;
         }
     }
-    {
-        nint i = bytealg.IndexByteString(goDebug, (byte)'+'); if (i != -1) {
-            parsePart(goDebug.slice(0, i));
-            parsePart(goDebug.slice(i + 1));
-            return (dnsMode, debugLevel);
-        }
+    nint i = bytealg.IndexByteString(goDebug, (byte)'+'); if (i != -1) {
+        parsePart(goDebug.slice(0, i));
+        parsePart(goDebug.slice(i + 1));
+        return (dnsMode, debugLevel);
     }
     parsePart(goDebug);
     return (dnsMode, debugLevel);

@@ -112,7 +112,11 @@ public static unsafe partial class NativeStructMarshal
     /// libc reads for a nil pointer; a NON-nil one, or any string, slice, map, channel, func or interface
     /// field, leaves the token in place so libc answers EFAULT, exactly as before -- never the linux
     /// panic, which would turn kevent's and sendmsg's errno into a crash. Pointer words are not decoded
-    /// back: a nil stays nil. Two follow-ups are named here, each its own later sizing:
+    /// back: a nil stays nil. A pointer to an ELEMENT of a slice or array of such records carries the run from
+    /// that element to the end of its backing, every element under the same policy, as the windows deep form
+    /// does: getfsstat writes bufsize/sizeof(Statfs_t) records through &amp;buf[0], and kevent reads nchanges and
+    /// writes nevents Kevent_t through its two lists; one record's copy let libc write past it (darwin's
+    /// TestGetfsstat host kill, BOARD 2026-10-26). Two follow-ups are named here, each its own later sizing:
     /// Msghdr/Iovec as hand-own mirrors (their pointers are never nil in use), and Kevent_t.Udata, which
     /// the kernel never dereferences and returns verbatim, so a token there may round-trip the way Go's
     /// opaque pointer does.
@@ -178,6 +182,11 @@ public static unsafe partial class NativeStructMarshal
         ArgumentBoxes boxes = default;
         ArgumentTypes types = default;
 
+        // An ELEMENT pointer's run (see marshalRun): the backing array in `runs`, the run's first index and length.
+        ArgumentBoxes runs = default;
+        Span<int> runStarts = stackalloc int[args.Length];
+        Span<int> runCounts = stackalloc int[args.Length];
+
         buffers.Clear();
 
         try
@@ -222,6 +231,44 @@ public static unsafe partial class NativeStructMarshal
                 if (!shape.Marshallable)
                     continue;
 
+                // A pointer to an ELEMENT of a slice or array of such records gives the callee the run from that
+                // element to the end of the backing, as in Go: getfsstat writes bufsize/sizeof records through
+                // &buf[0], kevent reads and writes nevents. One record's copy there let libc write past it.
+                if (box is IElementRun { RunBacking: { } backing } run && backing.GetType().GetElementType() == type)
+                {
+                    if (aliasIntoEarlierRun(runs, runStarts, runCounts, buffers, i, backing, (int)run.RunIndex, shape.Size) is { } inRun)
+                    {
+                        args[i] = inRun;
+                        continue;
+                    }
+
+                    // Another element of a backing an earlier argument already carries, outside its run: the token
+                    // stays (EFAULT), never a second independent copy of the same storage.
+                    if (runOf(runs, i, backing) >= 0)
+                        continue;
+
+                    int start = (int)run.RunIndex;
+                    int count = backing.Length - start;
+
+                    if (count <= 0 || shape.HasPointerWords && !runPointerWordsAreNil(backing, start, count, type))
+                        continue;
+
+                    nuint runSize = shape.Size * (nuint)count;
+                    nint runBuffer = (nint)NativeMemory.AlignedAlloc(runSize, 16);
+                    buffers[i] = runBuffer;
+                    NativeMemory.Clear((void*)runBuffer, runSize);
+
+                    for (int k = 0; k < count; k++)
+                        encode(backing.GetValue(start + k)!, type, (byte*)runBuffer + (nuint)k * shape.Size);
+
+                    runs[i] = backing;
+                    runStarts[i] = start;
+                    runCounts[i] = count;
+                    types[i] = type;
+                    args[i] = (nuint)runBuffer;
+                    continue;
+                }
+
                 object value = ReadPointerSlot(box)!;
 
                 // A pointer word crosses only as nil (0); a non-nil one keeps the token, and EFAULT.
@@ -243,6 +290,21 @@ public static unsafe partial class NativeStructMarshal
 
             for (int i = 0; i < args.Length; i++)
             {
+                // A run comes back element by element, success or failure, as one record's copy does.
+                if (runs[i] is Array backing)
+                {
+                    nuint stride = shapeOf(types[i]!, nilPointersAsZero).Size;
+
+                    for (int k = 0; k < runCounts[i]; k++)
+                    {
+                        object element = backing.GetValue(runStarts[i] + k)!;
+                        decode(element, types[i]!, (byte*)buffers[i] + (nuint)k * stride);
+                        backing.SetValue(element, runStarts[i] + k);
+                    }
+
+                    continue;
+                }
+
                 if (boxes[i] is not { } box)
                     continue;
 
@@ -261,6 +323,42 @@ public static unsafe partial class NativeStructMarshal
                     NativeMemory.AlignedFree((void*)buffers[i]);
             }
         }
+    }
+
+    // The earlier argument whose run is over this backing, or -1.
+    private static int runOf(ArgumentBoxes runs, int before, Array backing)
+    {
+        for (int j = 0; j < before; j++)
+        {
+            if (ReferenceEquals(runs[j], backing))
+                return j;
+        }
+
+        return -1;
+    }
+
+    // An element inside an earlier argument's run is that run's native element: one copy, so the decode cannot
+    // overwrite one argument's result with another's stale copy.
+    private static nuint? aliasIntoEarlierRun(ArgumentBoxes runs, ReadOnlySpan<int> starts, ReadOnlySpan<int> counts, ReadOnlySpan<nint> buffers, int before, Array backing, int index, nuint stride)
+    {
+        int j = runOf(runs, before, backing);
+
+        if (j < 0 || index < starts[j] || index >= starts[j] + counts[j])
+            return null;
+
+        return (nuint)buffers[j] + (nuint)(index - starts[j]) * stride;
+    }
+
+    // The nil-pointer policy over a run: every element's pointer words must be nil, or none of it crosses.
+    private static bool runPointerWordsAreNil(Array backing, int start, int count, Type type)
+    {
+        for (int k = 0; k < count; k++)
+        {
+            if (!pointerWordsAreNil(backing.GetValue(start + k)!, type))
+                return false;
+        }
+
+        return true;
     }
 
     private static int sameTokenBefore(ReadOnlySpan<nuint> original, int index)

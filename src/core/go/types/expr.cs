@@ -72,16 +72,14 @@ internal static opPredicates unaryOpPredicates;
 internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    {
-        var pred = m[op]; if (pred != nil) {
-            if (!pred(x.typ)) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UndefinedOp, invalidOp + "operator %s not defined on %s", op, Ꮡx.OrTypedNil());
-                return false;
-            }
-        } else {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidSyntaxTree, "unknown operator %s", op);
+    var pred = m[op]; if (pred != nil) {
+        if (!pred(x.typ)) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UndefinedOp, invalidOp + "operator %s not defined on %s", op, Ꮡx.OrTypedNil());
             return false;
         }
+    } else {
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidSyntaxTree, "unknown operator %s", op);
+        return false;
     }
     return true;
 }
@@ -156,25 +154,21 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
     case var ᴛ when ᴛ == token.AND: {
         // spec: "As an exception to the addressability
         // requirement x may also be a composite literal."
-        {
-            var (_, ok) = ast.Unparen(e.X)._<ж<ast.CompositeLit>>(ᐧ); if (!ok && x.mode != variable) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableOperand, invalidOp + "cannot take address of %s", Ꮡx.OrTypedNil());
-                x.mode = invalid;
-                return;
-            }
+        var (_, ok) = ast.Unparen(e.X)._<ж<ast.CompositeLit>>(ᐧ); if (!ok && x.mode != variable) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableOperand, invalidOp + "cannot take address of %s", Ꮡx.OrTypedNil());
+            x.mode = invalid;
+            return;
         }
         x.mode = value;
         x.typ = new PointerжΔType(Ꮡ(new Pointer(@base: x.typ)));
         return;
     }
     case var ᴛ when ᴛ == token.ARROW: {
-        {
-            var elem = Ꮡcheck.chanElem(new operandжpositioner(Ꮡx), Ꮡx, true); if (elem != nil) {
-                x.mode = commaok;
-                x.typ = elem;
-                check.hasCallOrRecv = true;
-                return;
-            }
+        var elem = Ꮡcheck.chanElem(new operandжpositioner(Ꮡx), Ꮡx, true); if (elem != nil) {
+            x.mode = commaok;
+            x.typ = elem;
+            check.hasCallOrRecv = true;
+            return;
         }
         x.mode = invalid;
         return;
@@ -415,11 +409,9 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
 
 // updateExprVal updates the value of x to val.
 internal static void updateExprVal(this ref Checker check, ast.Expr x, constant.Value val) {
-    {
-        var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
-            info.val = val;
-            check.untyped[x] = info;
-        }
+    var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
+        info.val = val;
+        check.untyped[x] = info;
     }
 }
 
@@ -439,10 +431,8 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
 
     if (isUntyped(target)) {
         // both x and target are untyped
-        {
-            var m = maxType(x.typ, target); if (m != nil) {
-                return (m, default, 0);
-            }
+        var m = maxType(x.typ, target); if (m != nil) {
+            return (m, default, 0);
         }
         return (default, default, InvalidUntypedConversion);
     }
@@ -822,11 +812,9 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
             // that node, and it can only be deleted once).
             // Be cautious and check for presence of entry.
             // Example: var e, f = int(1<<""[f]) // go.dev/issue/11347
-            {
-                var (info, found) = check.untyped[x.expr, ꟷ]; if (found) {
-                    info.isLhs = true;
-                    check.untyped[x.expr] = info;
-                }
+            var (info, found) = check.untyped[x.expr, ꟷ]; if (found) {
+                info.isLhs = true;
+                check.untyped[x.expr] = info;
             }
             // keep x's type
             x.mode = value;
@@ -1049,10 +1037,8 @@ partial struct target {
 // The result is nil if typ is not a signature.
 internal static ж<target> newTarget(ΔType typ, @string desc) {
     if (typ != nil) {
-        {
-            var (sig, _) = typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil) {
-                return Ꮡ(new target(sig, desc));
-            }
+        var (sig, _) = typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil) {
+            return Ꮡ(new target(sig, desc));
         }
     }
     return default;
@@ -1266,11 +1252,9 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "cannot use type assertion on type parameter value %s", Ꮡx.OrTypedNil());
             goto ΔError;
         }
-        {
-            var (_, ok) = x.typ.Underlying()._<ж<Interface>>(ᐧ); if (!ok) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "%s is not an interface", Ꮡx.OrTypedNil());
-                goto ΔError;
-            }
+        var (_, ok) = x.typ.Underlying()._<ж<Interface>>(ᐧ); if (!ok) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "%s is not an interface", Ꮡx.OrTypedNil());
+            goto ΔError;
         }
         var TΔ1 = Ꮡcheck.varType(eΔ1.Type);
         if (!isValid(TΔ1)) {
@@ -1474,15 +1458,13 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default, false);
     Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
 
-    {
-        var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
-            // multiple values
-            list = new slice<ж<operand>>(t.Len());
-            foreach (var (i, v) in t.vars) {
-                list[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
-            }
-            return (list, commaOk);
+    var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
+        // multiple values
+        list = new slice<ж<operand>>(t.Len());
+        foreach (var (i, v) in t.vars) {
+            list[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
         }
+        return (list, commaOk);
     }
 
     // exactly one (possibly invalid or comma-ok) value
@@ -1572,12 +1554,10 @@ internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
 
     if (x.mode == value) {
         // tuple types are never named - no need for underlying type below
-        {
-            var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok) {
-                assert(t.Len() != 1);
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TooManyValues, "multiple-value %s in single-value context", Ꮡx.OrTypedNil());
-                x.mode = invalid;
-            }
+        var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok) {
+            assert(t.Len() != 1);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TooManyValues, "multiple-value %s in single-value context", Ꮡx.OrTypedNil());
+            x.mode = invalid;
         }
     }
 }
