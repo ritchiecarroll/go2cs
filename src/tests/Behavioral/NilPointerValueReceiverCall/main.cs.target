@@ -24,9 +24,7 @@ partial interface Helloer {
     @string Hello();
 }
 
-internal static @string direct(ж<T> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
+internal static @string direct(ж<T> p) {
     return p.Hello();
 }
 
