@@ -10,7 +10,6 @@ using reflect = reflect_package;
 partial class main_package {
 
 partial struct ordinary /*@string*/;
-
 partial interface inlineIface {
     void Do();
 }

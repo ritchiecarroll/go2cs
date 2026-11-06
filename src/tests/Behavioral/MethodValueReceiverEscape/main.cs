@@ -15,9 +15,7 @@ internal static nint dec(this ref counter c, nint step) {
     return c.n;
 }
 
-internal static nint peek(this counter c) {
-    return c.n;
-}
+internal static nint peek(this counter c) { return c.n; }
 
 partial struct holder {
     internal counter c;
@@ -25,13 +23,9 @@ partial struct holder {
 
 partial struct intList /*[]nint*/;
 
-internal static void push(this ref intList l, nint v) {
-    l = append(l, v);
-}
+internal static void push(this ref intList l, nint v) { l = append(l, v); }
 
-internal static nint applyInt(Func<nint, nint> f, nint a, nint b) {
-    return f(a) + f(b);
-}
+internal static nint applyInt(Func<nint, nint> f, nint a, nint b) { return f(a) + f(b); }
 
 internal static void applyPush(Action<nint> f) {
     f(1);

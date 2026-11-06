@@ -8,17 +8,13 @@ partial struct box<T> {
     internal T v;
 }
 
-internal static T Get<T>(this box<T> b) {
-    return b.v;
-}
+internal static T Get<T>(this box<T> b) { return b.v; }
 
 partial struct keeper<T> {
     internal T v;
 }
 
-internal static T Get<T>(this ref keeper<T> k) {
-    return k.v;
-}
+internal static T Get<T>(this ref keeper<T> k) { return k.v; }
 
 internal partial interface describe_type /*dyn*/ {
     @string Get();

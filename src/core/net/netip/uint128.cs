@@ -28,9 +28,7 @@ internal static uint128 mask6(nint n) {
 // It's faster than u == (uint128{}) because the compiler (as of Go
 // 1.15/1.16b1) doesn't do this trick and instead inserts a branch in
 // its eq alg's generated code.
-internal static bool isZero(this uint128 u) {
-    return (u.hi | u.lo) == 0;
-}
+internal static bool isZero(this uint128 u) { return (u.hi | u.lo) == 0; }
 
 // and returns the bitwise AND of u and m (u&m).
 internal static uint128 and(this uint128 u, uint128 m) {

@@ -38,14 +38,10 @@ public static @string String(this ref MethodSet s) {
 }
 
 // Len returns the number of methods in s.
-public static nint Len(this ref MethodSet s) {
-    return len(s.list);
-}
+public static nint Len(this ref MethodSet s) { return len(s.list); }
 
 // At returns the i'th method in s for 0 <= i < s.Len().
-public static ж<Selection> At(this ref MethodSet s, nint i) {
-    return s.list[i];
-}
+public static ж<Selection> At(this ref MethodSet s, nint i) { return s.list[i]; }
 
 // Lookup returns the method with matching package and name, or nil if not found.
 public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {

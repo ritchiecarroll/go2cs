@@ -8,15 +8,11 @@ partial struct box {
     internal nint n;
 }
 
-internal static nint Len(this ref box b) {
-    return b.n;
-}
+internal static nint Len(this ref box b) { return b.n; }
 
 partial struct counter /*num:nint*/;
 
-internal static nint Len(this counter c) {
-    return (nint)c;
-}
+internal static nint Len(this counter c) { return (nint)c; }
 
 internal partial interface lener_R0 /*dyn*/ {
     nint Len();

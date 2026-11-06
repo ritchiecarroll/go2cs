@@ -789,17 +789,9 @@ internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void setReadLimit(this ref connReader cr, int64 remain) {
-    cr.remain = remain;
-}
-
-internal static void setInfiniteReadLimit(this ref connReader cr) {
-    cr.remain = maxInt64;
-}
-
-internal static bool hitReadLimit(this ref connReader cr) {
-    return cr.remain <= 0;
-}
+internal static void setReadLimit(this ref connReader cr, int64 remain) { cr.remain = remain; }
+internal static void setInfiniteReadLimit(this ref connReader cr) { cr.remain = maxInt64; }
+internal static bool hitReadLimit(this ref connReader cr) { return cr.remain <= 0; }
 
 // handleReadErrorLocked is called whenever a Read from the client returns a
 // non-nil error.
@@ -2000,9 +1992,7 @@ internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) {
 // badRequestError is a literal string (used by in the server in HTML,
 // unescaped) to tell the user why their request was bad. It should
 // be plain text without user info or other embedded errors.
-internal static error badRequestError(@string e) {
-    return new statusError(StatusBadRequest, e);
-}
+internal static error badRequestError(@string e) { return new statusError(StatusBadRequest, e); }
 
 // statusError is an error used to respond to a request with an HTTP status.
 // The text should be plain text without user info or other embedded errors.
@@ -2011,9 +2001,7 @@ partial struct statusError {
     internal @string text;
 }
 
-internal static @string Error(this statusError e) {
-    return StatusText(e.code) + ": "u8 + e.text;
-}
+internal static @string Error(this statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
 
 // ErrAbortHandler is a sentinel panic value to abort a handler.
 // While any panic from ServeHTTP aborts the response to the client,
@@ -2317,9 +2305,7 @@ partial struct unencryptedHTTP2Request {
     internal serverHandler h;
 }
 
-internal static context.Context BaseContext(this unencryptedHTTP2Request h) {
-    return h.ctx;
-}
+internal static context.Context BaseContext(this unencryptedHTTP2Request h) { return h.ctx; }
 
 internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
@@ -2568,15 +2554,11 @@ public static void Error(ResponseWriter w, @string error, nint code) {
 }
 
 // NotFound replies to the request with an HTTP 404 not found error.
-public static void NotFound(ResponseWriter w, ж<Request> r) {
-    Error(w, pageNotFoundˢ, StatusNotFound);
-}
+public static void NotFound(ResponseWriter w, ж<Request> r) { Error(w, pageNotFoundˢ, StatusNotFound); }
 
 // NotFoundHandler returns a simple request handler
 // that replies to each request with a “404 page not found” reply.
-public static ΔHandler NotFoundHandler() {
-    return new HandlerFuncᴠΔHandler(new HandlerFunc(NotFound));
-}
+public static ΔHandler NotFoundHandler() { return new HandlerFuncᴠΔHandler(new HandlerFunc(NotFound)); }
 
 // StripPrefix returns a handler that serves HTTP requests by removing the
 // given prefix from the request URL's Path (and RawPath if set) and invoking
@@ -4306,9 +4288,7 @@ internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOpt
     return new ProtocolErrorжerror(ErrNotSupported);
 }
 
-internal static ΔHeader Header(this ref timeoutWriter tw) {
-    return tw.h;
-}
+internal static ΔHeader Header(this ref timeoutWriter tw) { return tw.h; }
 
 internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p) {
     GoFrame ᒐ = default;
@@ -4388,9 +4368,7 @@ internal static error Close(this ж<onceCloseListener> Ꮡoc) {
     return oc.closeErr;
 }
 
-internal static void close(this ref onceCloseListener oc) {
-    oc.closeErr = oc.Listener.Close();
-}
+internal static void close(this ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
 
 // globalOptionsHandler responds to "OPTIONS *" requests.
 partial struct globalOptionsHandler {
@@ -4424,9 +4402,7 @@ partial struct initALPNRequest {
 // recognized by x/net/http2 to pass down a context; the TLSNextProto
 // API predates context support so we shoehorn through the only
 // interface we have available.
-internal static context.Context BaseContext(this initALPNRequest h) {
-    return h.ctx;
-}
+internal static context.Context BaseContext(this initALPNRequest h) { return h.ctx; }
 
 internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();

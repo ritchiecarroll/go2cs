@@ -165,9 +165,7 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
 // An UnmarshalError represents an error in the unmarshaling process.
 partial struct UnmarshalError /*@string*/;
 
-public static @string Error(this UnmarshalError e) {
-    return (@string)e;
-}
+public static @string Error(this UnmarshalError e) { return (@string)e; }
 
 // Unmarshaler is the interface implemented by objects that can unmarshal
 // an XML element description of themselves.

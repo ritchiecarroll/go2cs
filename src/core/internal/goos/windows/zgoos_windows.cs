@@ -8,39 +8,22 @@ public static ref readonly @string GOOS => ref GOOSᵇ;
 private static readonly @string GOOSᵇ = @"windows"u8;
 
 public static UntypedInt IsAix => 0;
-
 public static UntypedInt IsAndroid => 0;
-
 public static UntypedInt IsDarwin => 0;
-
 public static UntypedInt IsDragonfly => 0;
-
 public static UntypedInt IsFreebsd => 0;
-
 public static UntypedInt IsHurd => 0;
-
 public static UntypedInt IsIllumos => 0;
-
 public static UntypedInt IsIos => 0;
-
 public static UntypedInt IsJs => 0;
-
 public static UntypedInt IsLinux => 0;
-
 public static UntypedInt IsNacl => 0;
-
 public static UntypedInt IsNetbsd => 0;
-
 public static UntypedInt IsOpenbsd => 0;
-
 public static UntypedInt IsPlan9 => 0;
-
 public static UntypedInt IsSolaris => 0;
-
 public static UntypedInt IsWasip1 => 0;
-
 public static UntypedInt IsWindows => 1;
-
 public static UntypedInt IsZos => 0;
 
 } // end goos_package

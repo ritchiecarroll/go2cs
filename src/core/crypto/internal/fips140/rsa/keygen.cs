@@ -432,7 +432,6 @@ internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
 }
 
 internal const bool millerRabinCOMPOSITE = false;
-
 internal const bool millerRabinPOSSIBLYPRIME = true;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -10,9 +10,7 @@ partial struct Img {
     internal hueꓸShade px;
 }
 
-public static hue.Tint At(this ref Img p) {
-    return p.px;
-}
+public static hue.Tint At(this ref Img p) { return p.px; }
 
 internal static void Main() {
     var p = Ꮡ(new Img(new hueꓸShade(L: 0x99, A: 0xff)));

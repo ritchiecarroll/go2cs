@@ -353,27 +353,22 @@ partial struct keventt {
 }
 
 partial struct pthread /*num:uintptr*/;
-
 partial struct pthreadattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(56);
 }
-
 partial struct pthreadmutex {
     public int64 X__sig;
     public array<int8> X__opaque = new(56);
 }
-
 partial struct pthreadmutexattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(8);
 }
-
 partial struct pthreadcond {
     public int64 X__sig;
     public array<int8> X__opaque = new(40);
 }
-
 partial struct pthreadcondattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(8);
@@ -385,17 +380,11 @@ partial struct machTimebaseInfo {
 }
 
 partial struct machPort /*num:uint32*/;
-
 partial struct machVMMapRead /*num:uint32*/;
-
 partial struct machVMAddress /*num:uint64*/;
-
 partial struct machVMSize /*num:uint64*/;
-
 partial struct machVMRegionFlavour /*num:int32*/;
-
 partial class machVMRegionInfo /*ж<int32>*/;
-
 partial struct machMsgTypeNumber /*num:uint32*/;
 
 } // end runtime_package

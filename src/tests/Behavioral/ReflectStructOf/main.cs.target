@@ -9,9 +9,7 @@ partial struct stringer {
     internal nint n;
 }
 
-internal static @string String(this stringer s) {
-    return fmt.Sprint(s.n);
-}
+internal static @string String(this stringer s) { return fmt.Sprint(s.n); }
 
 internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;

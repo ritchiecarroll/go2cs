@@ -224,9 +224,7 @@ public static @string Error(this SystemRootsError se) {
     return msg;
 }
 
-public static error Unwrap(this SystemRootsError se) {
-    return se.Err;
-}
+public static error Unwrap(this SystemRootsError se) { return se.Err; }
 
 // errNotParsed is returned when a certificate without ASN.1 contents is
 // verified. Platform-specific verification needs the ASN.1 contents.
@@ -862,13 +860,8 @@ break_candidateLoop:;
     return (chains, err);
 }
 
-internal static bool validHostnamePattern(@string host) {
-    return validHostname(host, true);
-}
-
-internal static bool validHostnameInput(@string host) {
-    return validHostname(host, false);
-}
+internal static bool validHostnamePattern(@string host) { return validHostname(host, true); }
+internal static bool validHostnameInput(@string host) { return validHostname(host, false); }
 
 // validHostname reports whether host is a valid hostname that can be matched or
 // matched against according to RFC 6125 2.2, with some leniency to accommodate

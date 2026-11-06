@@ -20,11 +20,9 @@ partial struct nb /*[4]byte*/;
 partial struct ns /*[2]withArray*/;
 
 partial struct ni /*[3]nint*/;
-
 partial struct no /*[2]ni*/;
 
 partial struct nsl /*[]nint*/;
-
 partial struct nmp /*map[@string, nint]*/;
 
 internal partial struct main_sa /*dyn*/ {

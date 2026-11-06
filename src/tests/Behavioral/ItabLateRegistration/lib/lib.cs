@@ -16,33 +16,23 @@ partial struct Circle {
     public nint R;
 }
 
-public static @string Name(this Circle c) {
-    return fmt.Sprintf("circle(%d)"u8, c.R);
-}
+public static @string Name(this Circle c) { return fmt.Sprintf("circle(%d)"u8, c.R); }
 
-public static nint Size(this Circle c) {
-    return c.R * 2;
-}
+public static nint Size(this Circle c) { return c.R * 2; }
 
 partial struct Square {
     public nint S;
 }
 
-public static @string Name(this Square s) {
-    return fmt.Sprintf("square(%d)"u8, s.S);
-}
+public static @string Name(this Square s) { return fmt.Sprintf("square(%d)"u8, s.S); }
 
-public static nint Size(this Square s) {
-    return s.S * 4;
-}
+public static nint Size(this Square s) { return s.S * 4; }
 
 partial struct Blank {
     public nint N;
 }
 
-public static @string Tag(this Blank b) {
-    return "blank";
-}
+public static @string Tag(this Blank b) { return "blank"; }
 
 public static (@string, bool) TryName(any v) {
     var (n, ok) = v._<Named>(ᐧ);

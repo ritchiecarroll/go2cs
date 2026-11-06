@@ -148,18 +148,12 @@ public static nint SearchStrings(slice<@string> a, @string x) {
 }
 
 // Search returns the result of applying [SearchInts] to the receiver and x.
-public static nint Search(this IntSlice p, nint x) {
-    return SearchInts(p, x);
-}
+public static nint Search(this IntSlice p, nint x) { return SearchInts(p, x); }
 
 // Search returns the result of applying [SearchFloat64s] to the receiver and x.
-public static nint Search(this Float64Slice p, float64 x) {
-    return SearchFloat64s(p, x);
-}
+public static nint Search(this Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
 
 // Search returns the result of applying [SearchStrings] to the receiver and x.
-public static nint Search(this StringSlice p, @string x) {
-    return SearchStrings(p, x);
-}
+public static nint Search(this StringSlice p, @string x) { return SearchStrings(p, x); }
 
 } // end sort_package

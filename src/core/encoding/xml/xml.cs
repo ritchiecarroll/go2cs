@@ -82,18 +82,14 @@ partial struct EndElement {
 partial struct CharData /*[]byte*/;
 
 // Copy creates a new copy of CharData.
-public static CharData Copy(this CharData c) {
-    return (CharData)bytes.Clone(c);
-}
+public static CharData Copy(this CharData c) { return (CharData)bytes.Clone(c); }
 
 // A Comment represents an XML comment of the form <!--comment-->.
 // The bytes do not include the <!-- and --> comment markers.
 partial struct Comment /*[]byte*/;
 
 // Copy creates a new copy of Comment.
-public static Comment Copy(this Comment c) {
-    return (Comment)bytes.Clone(c);
-}
+public static Comment Copy(this Comment c) { return (Comment)bytes.Clone(c); }
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
 partial struct ProcInst {
@@ -112,9 +108,7 @@ public static ProcInst Copy(this ProcInst p) {
 partial struct Directive /*[]byte*/;
 
 // Copy creates a new copy of Directive.
-public static Directive Copy(this Directive d) {
-    return (Directive)bytes.Clone(d);
-}
+public static Directive Copy(this Directive d) { return (Directive)bytes.Clone(d); }
 
 // CopyToken returns a copy of a Token.
 public static ΔToken CopyToken(ΔToken t) {

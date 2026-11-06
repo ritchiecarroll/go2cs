@@ -30,9 +30,7 @@ internal static int64 readBack(ж<box> Ꮡb) {
     return (~c).a + (~c).b;
 }
 
-internal static partial void bump(ref int64 p) {
-    p = p + 7;
-}
+internal static partial void bump(ref int64 p) { p = p + 7; }
 
 partial struct @base {
     internal int64 id;

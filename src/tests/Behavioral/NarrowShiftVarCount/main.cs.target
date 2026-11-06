@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal const byte tcb = 200;
-
 internal static UntypedInt ucb => 200;
-
 internal const uint16 tcw = 40000;
 
 partial struct nb /*num:byte*/;

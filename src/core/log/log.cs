@@ -96,9 +96,7 @@ public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) {
 internal static ж<Logger> std = New(new os.FileжWriter(os.Stderr), "", LstdFlags);
 
 // Default returns the standard logger used by the package-level output functions.
-public static ж<Logger> Default() {
-    return std;
-}
+public static ж<Logger> Default() { return std; }
 
 // Cheap integer to fixed-width decimal ASCII. Give a negative width to avoid zero-padding.
 internal static void itoa(ref slice<byte> buf, nint i, nint wid) {

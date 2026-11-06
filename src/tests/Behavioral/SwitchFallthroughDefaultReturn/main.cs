@@ -126,7 +126,6 @@ internal static partial nint leadingDefault(nint n) {
 }
 
 internal static nint waitObject0 = 0;
-
 internal static nint waitFailed = -1;
 
 internal static partial @string waitShape(nint s) {

@@ -4,8 +4,6 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoInit] internal static void initΔ3() {
-    fmt.Println("z.go init:", here());
-}
+[GoInit] internal static void initΔ3() { fmt.Println("z.go init:", here()); }
 
 } // end main_package

@@ -12,9 +12,7 @@ internal static @string Error(this myErr e) {
 
 partial struct tag /*@string*/;
 
-internal static @string Name(this tag t) {
-    return "tag:"u8 + ((@string)t);
-}
+internal static @string Name(this tag t) { return "tag:"u8 + ((@string)t); }
 
 partial interface named {
     @string Name();

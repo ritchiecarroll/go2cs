@@ -6,9 +6,7 @@ partial class main_package {
 
 partial struct errorString /*@string*/;
 
-internal static @string Error(this errorString e) {
-    return "err: "u8 + ((@string)e);
-}
+internal static @string Error(this errorString e) { return "err: "u8 + ((@string)e); }
 
 partial struct label /*@string*/;
 

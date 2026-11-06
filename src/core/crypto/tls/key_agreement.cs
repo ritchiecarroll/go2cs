@@ -38,7 +38,6 @@ partial interface keyAgreement {
 }
 
 internal static error errClientKeyExchange = errors.New("tls: invalid ClientKeyExchange message");
-
 internal static error errServerKeyExchange = errors.New("tls: invalid ServerKeyExchange message");
 
 // rsaKeyAgreement implements the standard TLS key agreement where the client

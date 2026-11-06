@@ -122,17 +122,13 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-public static ΔKind Kind(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindMask);
-}
+public static ΔKind Kind(this ref Type t) { return (ΔKind)(t.Kind_ & KindMask); }
 
 public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-public static bool Pointers(this ref Type t) {
-    return t.PtrBytes != 0;
-}
+public static bool Pointers(this ref Type t) { return t.PtrBytes != 0; }
 
 public static bool IfaceIndir(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
@@ -386,17 +382,11 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, ΔInterfaceType>();
 }
 
-public static uintptr Size(this ref Type t) {
-    return t.Size_;
-}
+public static uintptr Size(this ref Type t) { return t.Size_; }
 
-public static nint Align(this ref Type t) {
-    return (nint)t.Align_;
-}
+public static nint Align(this ref Type t) { return (nint)t.Align_; }
 
-public static nint FieldAlign(this ref Type t) {
-    return (nint)t.FieldAlign_;
-}
+public static nint FieldAlign(this ref Type t) { return (nint)t.FieldAlign_; }
 
 partial struct ΔInterfaceType {
     /*embed*/ public Type Type;
@@ -422,9 +412,7 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     return len(Ꮡt.ExportedMethods());
 }
 
-public static nint NumMethod(this ref ΔInterfaceType t) {
-    return len(t.Methods);
-}
+public static nint NumMethod(this ref ΔInterfaceType t) { return len(t.Methods); }
 
 partial struct ΔMapType {
     /*embed*/ public Type Type;
@@ -441,19 +429,15 @@ partial struct ΔMapType {
 public static bool IndirectKey(this ref ΔMapType mt) {
     return (mt.Flags & 1) != 0;
 }
-
 public static bool IndirectElem(this ref ΔMapType mt) {
     return (mt.Flags & 2) != 0;
 }
-
 public static bool ReflexiveKey(this ref ΔMapType mt) {
     return (mt.Flags & 4) != 0;
 }
-
 public static bool NeedKeyUpdate(this ref ΔMapType mt) {
     return (mt.Flags & 8) != 0;
 }
-
 public static bool HashMightPanic(this ref ΔMapType mt) {
     return (mt.Flags & 16) != 0;
 }
@@ -506,7 +490,6 @@ public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
     }
     return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:551)"));
 }
-
 public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 

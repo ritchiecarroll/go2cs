@@ -18,7 +18,6 @@ internal static bool ratTok(rune ch) {
 
 internal static readonly ж<ΔRat> ᏑratZero = new StaticBox<ΔRat>(default(ΔRat));
 internal static ref ΔRat ratZero => ref ((StaticBox<ΔRat>)ᏑratZero).ValueSlot;
-
 internal static fmt.Scanner _ᴛ6ʗ = new ΔRatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

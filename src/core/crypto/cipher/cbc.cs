@@ -73,9 +73,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     return new cbcEncrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcEncrypter>());
 }
 
-internal static nint BlockSize(this ref cbcEncrypter x) {
-    return x.blockSize;
-}
+internal static nint BlockSize(this ref cbcEncrypter x) { return x.blockSize; }
 
 internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
@@ -154,9 +152,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     return new cbcDecrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcDecrypter>());
 }
 
-internal static nint BlockSize(this ref cbcDecrypter x) {
-    return x.blockSize;
-}
+internal static nint BlockSize(this ref cbcDecrypter x) { return x.blockSize; }
 
 internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {

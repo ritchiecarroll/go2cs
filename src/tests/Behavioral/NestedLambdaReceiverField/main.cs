@@ -12,17 +12,13 @@ partial struct connGrab {
     internal @string name;
 }
 
-internal static @string tag(this ref connGrab c) {
-    return c.name;
-}
+internal static @string tag(this ref connGrab c) { return c.name; }
 
 partial struct dep {
     internal @string label;
 }
 
-internal static void note(this ref dep d, any x) {
-    fmt.Println("note:", d.label, x != nil);
-}
+internal static void note(this ref dep d, any x) { fmt.Println("note:", d.label, x != nil); }
 
 partial struct stmt {
     internal ж<dep> d;
@@ -30,9 +26,7 @@ partial struct stmt {
     internal nint id;
 }
 
-internal static void runWith(this ref stmt s, Action fn) {
-    fn();
-}
+internal static void runWith(this ref stmt s, Action fn) { fn(); }
 
 internal static void exec(this ж<stmt> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();

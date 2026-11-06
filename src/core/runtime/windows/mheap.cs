@@ -2959,7 +2959,6 @@ internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr
 }
 
 internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;
-
 internal static uintptr gcBitsHeaderBytes => /* unsafe.Sizeof(gcBitsHeader{}) */ 16;
 
 partial struct gcBitsHeader {

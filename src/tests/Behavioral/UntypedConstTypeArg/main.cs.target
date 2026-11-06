@@ -6,13 +6,9 @@ partial class main_package {
 
 internal static UntypedInt named => 7;
 
-internal static @string show<E>(E e) {
-    return fmt.Sprintf("%T %v"u8, (e).OrTypedNilOf(), (e).OrTypedNilOf());
-}
+internal static @string show<E>(E e) { return fmt.Sprintf("%T %v"u8, (e).OrTypedNilOf(), (e).OrTypedNilOf()); }
 
-internal static @string pair<E>(E a, E b) {
-    return fmt.Sprintf("%T"u8, (b).OrTypedNilOf());
-}
+internal static @string pair<E>(E a, E b) { return fmt.Sprintf("%T"u8, (b).OrTypedNilOf()); }
 
 internal static @string many<E>(params Span<E> esʗp) {
     var es = esʗp.slice();
@@ -20,9 +16,7 @@ internal static @string many<E>(params Span<E> esʗp) {
     return fmt.Sprintf("%T %d"u8, es, len(es));
 }
 
-internal static @string keyed<K, V>(K k, V v) {
-    return fmt.Sprintf("%T %T"u8, (k).OrTypedNilOf(), (v).OrTypedNilOf());
-}
+internal static @string keyed<K, V>(K k, V v) { return fmt.Sprintf("%T %T"u8, (k).OrTypedNilOf(), (v).OrTypedNilOf()); }
 
 internal static void Main() {
     fmt.Println(show<nint>(3));

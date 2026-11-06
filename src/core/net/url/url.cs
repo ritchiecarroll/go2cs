@@ -37,13 +37,8 @@ partial struct ΔError {
     public error Err;
 }
 
-public static error Unwrap(this ref ΔError e) {
-    return e.Err;
-}
-
-public static @string Error(this ref ΔError e) {
-    return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err);
-}
+public static error Unwrap(this ref ΔError e) { return e.Err; }
+public static @string Error(this ref ΔError e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();

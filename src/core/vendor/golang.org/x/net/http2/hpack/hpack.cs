@@ -136,15 +136,11 @@ public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc)
 // while still decoding and keeping in-sync with decoder state, but
 // without doing unnecessary decompression or generating unnecessary
 // garbage for header fields past the limit.
-public static void SetEmitEnabled(this ref Decoder d, bool v) {
-    d.emitEnabled = v;
-}
+public static void SetEmitEnabled(this ref Decoder d, bool v) { d.emitEnabled = v; }
 
 // EmitEnabled reports whether calls to the emitFunc provided to NewDecoder
 // are currently enabled. The default is true.
-public static bool EmitEnabled(this ref Decoder d) {
-    return d.emitEnabled;
-}
+public static bool EmitEnabled(this ref Decoder d) { return d.emitEnabled; }
 
 // TODO: add method *Decoder.Reset(maxSize, emitFunc) to let callers re-use Decoders and their
 // underlying buffers for garbage reasons.
@@ -320,13 +316,8 @@ internal static indexType indexedTrue => /* iota */ 0;
 internal static indexType indexedFalse => 1;
 internal static indexType indexedNever => 2;
 
-internal static bool indexed(this indexType v) {
-    return v == indexedTrue;
-}
-
-internal static bool sensitive(this indexType v) {
-    return v == indexedNever;
-}
+internal static bool indexed(this indexType v) { return v == indexedTrue; }
+internal static bool sensitive(this indexType v) { return v == indexedNever; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string invalidEncodingˢ => ref invalidEncodingˢᵇ;

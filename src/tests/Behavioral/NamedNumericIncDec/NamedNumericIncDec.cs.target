@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct idx /*num:nuint*/;
-
 partial struct sidx /*num:nint*/;
 
 partial struct cx /*num:complex128*/;

@@ -971,25 +971,14 @@ internal static ж<BreakNode> newBreak(this ж<Tree> Ꮡt, Pos pos, nint line) {
     return Ꮡ(new BreakNode(tr: Ꮡt, NodeType: NodeBreak, Pos: pos, Line: line));
 }
 
-public static Node Copy(this ref BreakNode b) {
-    return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line));
-}
-
+public static Node Copy(this ref BreakNode b) { return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string breakˢ => ref breakˢᵇ;
 private static readonly @string breakˢᵇ = "{{break}}"u8;
 
-public static @string String(this ref BreakNode b) {
-    return breakˢ;
-}
-
-internal static ж<Tree> tree(this ref BreakNode b) {
-    return b.tr;
-}
-
-internal static void writeTo(this ref BreakNode b, ж<strings.Builder> sb) {
-    sb.WriteString(breakˢ);
-}
+public static @string String(this ref BreakNode b) { return breakˢ; }
+internal static ж<Tree> tree(this ref BreakNode b) { return b.tr; }
+internal static void writeTo(this ref BreakNode b, ж<strings.Builder> sb) { sb.WriteString(breakˢ); }
 
 // ContinueNode represents a {{continue}} action.
 partial struct ContinueNode {
@@ -1003,25 +992,14 @@ internal static ж<ContinueNode> newContinue(this ж<Tree> Ꮡt, Pos pos, nint l
     return Ꮡ(new ContinueNode(tr: Ꮡt, NodeType: NodeContinue, Pos: pos, Line: line));
 }
 
-public static Node Copy(this ref ContinueNode c) {
-    return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line));
-}
-
+public static Node Copy(this ref ContinueNode c) { return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string continueˢ => ref continueˢᵇ;
 private static readonly @string continueˢᵇ = "{{continue}}"u8;
 
-public static @string String(this ref ContinueNode c) {
-    return continueˢ;
-}
-
-internal static ж<Tree> tree(this ref ContinueNode c) {
-    return c.tr;
-}
-
-internal static void writeTo(this ref ContinueNode c, ж<strings.Builder> sb) {
-    sb.WriteString(continueˢ);
-}
+public static @string String(this ref ContinueNode c) { return continueˢ; }
+internal static ж<Tree> tree(this ref ContinueNode c) { return c.tr; }
+internal static void writeTo(this ref ContinueNode c, ж<strings.Builder> sb) { sb.WriteString(continueˢ); }
 
 // RangeNode represents a {{range}} action and its commands.
 partial struct RangeNode {

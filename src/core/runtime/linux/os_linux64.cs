@@ -8,8 +8,7 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static void configure64bitsTimeOn32BitsArchitectures() {
-}
+internal static void configure64bitsTimeOn32BitsArchitectures() { }
 
 //go:noescape
 internal static partial int32 futex(@unsafe.Pointer addr, int32 op, uint32 val, ж<timespec> ts, @unsafe.Pointer addr2, uint32 val3);

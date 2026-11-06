@@ -11,25 +11,15 @@ partial interface shape {
 partial struct circle {
     internal nint r;
 }
-
 partial struct square {
     internal nint s;
 }
-
 partial struct dot {
 }
 
-internal static @string name(this circle c) {
-    return "circle";
-}
-
-internal static @string name(this square s) {
-    return "square";
-}
-
-internal static @string name(this dot d) {
-    return "dot";
-}
+internal static @string name(this circle c) { return "circle"; }
+internal static @string name(this square s) { return "square"; }
+internal static @string name(this dot d) { return "dot"; }
 
 internal static @string describe(shape v) {
     switch (v.type()) {

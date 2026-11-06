@@ -41,9 +41,7 @@ public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
 }
 
 // Network returns the address's network name, "udp".
-public static @string Network(this ref UDPAddr a) {
-    return udpˢ;
-}
+public static @string Network(this ref UDPAddr a) { return udpˢ; }
 
 public static @string String(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -125,9 +123,7 @@ partial struct addrPortUDPAddr {
     /*embed*/ public net.netip_package.AddrPort AddrPort;
 }
 
-internal static @string Network(this addrPortUDPAddr _) {
-    return udpˢ;
-}
+internal static @string Network(this addrPortUDPAddr _) { return udpˢ; }
 
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
@@ -329,9 +325,7 @@ public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn
     return (n, oobn, err);
 }
 
-internal static ж<UDPConn> newUDPConn(ж<netFD> fd) {
-    return Ꮡ(new UDPConn(new conn(fd)));
-}
+internal static ж<UDPConn> newUDPConn(ж<netFD> fd) { return Ꮡ(new UDPConn(new conn(fd))); }
 
 // DialUDP acts like [Dial] for UDP networks.
 //

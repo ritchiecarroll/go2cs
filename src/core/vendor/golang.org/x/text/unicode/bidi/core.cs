@@ -125,9 +125,7 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
     return (p, default);
 }
 
-internal static nint Len(this ref paragraph p) {
-    return len(p.initialTypes);
-}
+internal static nint Len(this ref paragraph p) { return len(p.initialTypes); }
 
 // The algorithm. Does not include line-based processing (Rules L1, L2).
 // These are applied later in the line-based phase of the algorithm.
@@ -281,17 +279,9 @@ partial struct directionalStatusStack {
     internal array<bool> isolateStatusStack = new(maxDepth + 1);
 }
 
-internal static void empty(this ref directionalStatusStack s) {
-    s.stackCounter = 0;
-}
-
-internal static void pop(this ref directionalStatusStack s) {
-    s.stackCounter--;
-}
-
-internal static nint depth(this ref directionalStatusStack s) {
-    return s.stackCounter;
-}
+internal static void empty(this ref directionalStatusStack s) { s.stackCounter = 0; }
+internal static void pop(this ref directionalStatusStack s) { s.stackCounter--; }
+internal static nint depth(this ref directionalStatusStack s) { return s.stackCounter; }
 
 internal static void push(this ref directionalStatusStack s, level level, ΔClass overrideStatus, bool isolateStatus) {
     s.embeddingLevelStack[s.stackCounter] = level;
@@ -449,9 +439,7 @@ partial struct ΔisolatingRunSequence {
     internal ΔClass sos, eos;
 }
 
-internal static nint Len(this ref ΔisolatingRunSequence i) {
-    return len(i.indexes);
-}
+internal static nint Len(this ref ΔisolatingRunSequence i) { return len(i.indexes); }
 
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
 // either L or R, for each isolating run sequence.

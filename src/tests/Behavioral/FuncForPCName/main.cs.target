@@ -6,19 +6,14 @@ using runtime = runtime_package;
 
 partial class main_package {
 
-internal static nint passInt(nint x) {
-    return x;
-}
+internal static nint passInt(nint x) { return x; }
 
-internal static @string passString(@string s) {
-    return s;
-}
+internal static @string passString(@string s) { return s; }
 
 partial struct receiver {
 }
 
-internal static void method(this receiver _) {
-}
+internal static void method(this receiver _) { }
 
 internal static @string nameOf(any fn) {
     var p = reflect.ValueOf(fn).Pointer();

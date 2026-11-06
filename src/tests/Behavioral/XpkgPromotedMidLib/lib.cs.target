@@ -12,9 +12,7 @@ partial struct Mid {
 partial struct loc2 {
 }
 
-internal static XpkgPromotedInnerLib.Token Tok(this loc2 _) {
-    return new XpkgPromotedInnerLib.Token(N: 9);
-}
+internal static XpkgPromotedInnerLib.Token Tok(this loc2 _) { return new XpkgPromotedInnerLib.Token(N: 9); }
 
 [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Mid2 {
     [FieldOffset(0)] /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
@@ -33,14 +31,11 @@ internal static nint Ping(this ref r1 r) {
 partial struct SameP {
     /*embed*/ internal ж<r1> r1;
 }
-
 partial struct SameV {
     /*embed*/ internal r1 r1;
 }
 
-public static SameP NewSameP() {
-    return new SameP(Ꮡ(new r1()));
-}
+public static SameP NewSameP() { return new SameP(Ꮡ(new r1())); }
 
 partial struct wrap {
     /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
@@ -62,9 +57,7 @@ partial struct MidF {
 partial struct inner3 {
 }
 
-internal static XpkgPromotedInnerLib.Token Tok(this inner3 _) {
-    return new XpkgPromotedInnerLib.Token(N: 3);
-}
+internal static XpkgPromotedInnerLib.Token Tok(this inner3 _) { return new XpkgPromotedInnerLib.Token(N: 3); }
 
 [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct PS {
     [FieldOffset(0)] /*embed*/ internal readonly inner3 inner3;

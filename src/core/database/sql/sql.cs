@@ -3620,7 +3620,6 @@ internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
 }
 
 internal static error errRowsClosed = errors.New("sql: Rows are closed");
-
 internal static error errNoRows = errors.New("sql: no Rows available");
 
 // Columns returns the column names.
@@ -4126,9 +4125,7 @@ internal static void CloseAndRemoveAll(this ref connRequestSet s) {
 }
 
 // Len returns the length of the set.
-internal static nint Len(this ref connRequestSet s) {
-    return len(s.s);
-}
+internal static nint Len(this ref connRequestSet s) { return len(s.s); }
 
 // connRequestDelHandle is an opaque handle to delete an
 // item from calling Add.

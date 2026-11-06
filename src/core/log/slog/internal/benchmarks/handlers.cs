@@ -31,9 +31,7 @@ internal static slogꓸHandler newFastTextHandler(io.Writer w) {
     return new fastTextHandlerжΔHandler(Ꮡ(new fastTextHandler(w: w)));
 }
 
-internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slogꓸLevel _Δp2) {
-    return true;
-}
+internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slogꓸLevel _Δp2) { return true; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeˢ => ref timeˢᵇ;
@@ -162,9 +160,7 @@ internal static ж<asyncHandler> newAsyncHandler() {
     return Ꮡ(new asyncHandler());
 }
 
-internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {
-    return true;
-}
+internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) { return true; }
 
 internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
@@ -186,13 +182,8 @@ internal static slogꓸHandler WithGroup(this ref asyncHandler _Δp0, @string _�
 partial struct disabledHandler {
 }
 
-internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {
-    return false;
-}
-
-internal static error Handle(this disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) {
-    throw panic("should not be called");
-}
+internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) { return false; }
+internal static error Handle(this disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) { throw panic("should not be called"); }
 
 internal static slogꓸHandler WithAttrs(this disabledHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("disabledHandler: With unimplemented");

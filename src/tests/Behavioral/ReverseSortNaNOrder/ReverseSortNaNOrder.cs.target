@@ -13,21 +13,13 @@ partial interface Interface {
 
 partial struct Float64Slice /*[]float64*/;
 
-public static nint Len(this Float64Slice x) {
-    return len(x);
-}
-
+public static nint Len(this Float64Slice x) { return len(x); }
 public static bool Less(this Float64Slice x, nint i, nint j) {
     return x[i] < x[j] || (fisNaN(x[i]) && !fisNaN(x[j]));
 }
+public static void Swap(this Float64Slice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
-public static void Swap(this Float64Slice x, nint i, nint j) {
-    (x[i], x[j]) = (x[j], x[i]);
-}
-
-internal static bool fisNaN(float64 f) {
-    return f != f;
-}
+internal static bool fisNaN(float64 f) { return f != f; }
 
 partial struct reverse {
     /*embed*/ public Interface Interface;
@@ -57,19 +49,13 @@ partial interface ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
 
 internal static bool isNaN<T>(T x)
     where T : /* ordered */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return !AreEqual(x, x);
-}
+{ return !AreEqual(x, x); }
 
 internal static bool less<T>(T x, T y)
     where T : /* ordered */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return (isNaN(x) && !isNaN(y)) || x < y;
-}
+{ return (isNaN(x) && !isNaN(y)) || x < y; }
 
-internal static bool eq<T>(T a, T b) {
-    return AreEqual(a, b);
-}
+internal static bool eq<T>(T a, T b) { return AreEqual(a, b); }
 
 internal static void Main() {
     var nan = Δmath.NaN();

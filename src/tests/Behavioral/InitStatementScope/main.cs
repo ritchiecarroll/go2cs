@@ -8,7 +8,6 @@ partial class main_package {
 partial interface Shape {
     nint Area();
 }
-
 partial interface Named {
     @string Name();
 }
@@ -17,15 +16,11 @@ partial struct Square {
     internal nint side;
 }
 
-public static nint Area(this Square s) {
-    return s.side * s.side;
-}
+public static nint Area(this Square s) { return s.side * s.side; }
 
 partial struct Label /*@string*/;
 
-public static @string Name(this Label l) {
-    return (@string)l;
-}
+public static @string Name(this Label l) { return (@string)l; }
 
 internal static UntypedInt limit => 5;
 
@@ -36,9 +31,7 @@ internal static (nint, error) pair(nint n) {
     return (n * 2, default);
 }
 
-internal static nint next(nint n) {
-    return n + 1;
-}
+internal static nint next(nint n) { return n + 1; }
 
 internal static @string dropped(nint n) {
     nint m = next(n); if (m > 3) {

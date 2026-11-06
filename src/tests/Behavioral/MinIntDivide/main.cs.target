@@ -32,9 +32,7 @@ partial struct holder {
     /*embed*/ internal ж<cell> cell;
 }
 
-internal static @string String(this holder h) {
-    return fmt.Sprint(h.x);
-}
+internal static @string String(this holder h) { return fmt.Sprint(h.x); }
 
 internal static nint counted(nint i) {
     calls++;
@@ -58,21 +56,15 @@ internal static slice<nint> ints() {
 
 internal static T div<T>(T a, T b)
     where T : /* ~int64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return quo(a, b);
-}
+{ return quo(a, b); }
 
 internal static T mod<T>(T a, T b)
     where T : /* ~int8 | ~int16 | ~int32 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return rem(a, b);
-}
+{ return rem(a, b); }
 
 internal static T quoAny<T>(T a, T b)
     where T : /* ~int | ~int64 | ~uint8 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return quo(a, b);
-}
+{ return quo(a, b); }
 
 internal static @string localRem() {
     var rem = builtin.rem(i64, (int64)m1); if (rem == 0) {

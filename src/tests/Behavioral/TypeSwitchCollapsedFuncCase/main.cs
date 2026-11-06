@@ -7,9 +7,7 @@ using reflect = reflect_package;
 partial class main_package {
 
 // type HookType is a methodless func type — rendered inline as its base delegate
-
 // type HookKind is a methodless func type — rendered inline as its base delegate
-
 // type HookValue is a methodless func type — rendered inline as its base delegate
 
 internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue to) {

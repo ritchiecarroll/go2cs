@@ -33,9 +33,7 @@ partial struct pattern {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
-internal static @string String(this ref pattern p) {
-    return p.str;
-}
+internal static @string String(this ref pattern p) { return p.str; }
 
 internal static segment lastSegment(this ref pattern p) {
     return p.segments[builtin.len(p.segments) - 1];

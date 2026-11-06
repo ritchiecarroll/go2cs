@@ -6,23 +6,14 @@ using reflect = reflect_package;
 partial class main_package {
 
 partial struct myBytes /*[]byte*/;
-
 partial struct myInts /*[]nint*/;
-
 partial struct myMap /*map[@string, nint]*/;
-
 partial struct myWideMap /*map[@string, int64]*/;
-
 partial struct myKeyMap /*map[nint, nint]*/;
-
 partial class myPtr /*ж<nint>*/;
-
 partial class myWidePtr /*ж<int64>*/;
-
 partial struct myChan /*chan nint*/;
-
 partial struct myArray /*[3]byte*/;
-
 partial struct myWideArray /*[4]byte*/;
 
 partial struct myOtherBytes /*[]byte*/;
@@ -31,26 +22,21 @@ partial struct fieldsA {
     public slice<byte> B;
     public map<@string, nint> M;
 }
-
 partial struct namedFieldsA {
     public slice<byte> B;
     public map<@string, nint> M;
 }
-
 partial struct fieldsWideElem {
     public slice<byte> B;
     public map<@string, int64> M;
 }
-
 partial struct fieldsRenamed {
     public slice<byte> B;
     public map<@string, nint> N;
 }
-
 partial struct fieldsShort {
     public slice<byte> B;
 }
-
 partial struct fieldsTagged {
     public slice<byte> B; /*`json:"b"`*/
     public map<@string, nint> M; /*`json:"m"`*/
@@ -59,9 +45,7 @@ partial struct fieldsTagged {
 partial struct speaker {
 }
 
-internal static @string String(this speaker _) {
-    return "speaker";
-}
+internal static @string String(this speaker _) { return "speaker"; }
 
 partial struct mute {
 }

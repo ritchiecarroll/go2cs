@@ -13,7 +13,6 @@ internal static readonly @string asciiOctal = "\u0041\u0042\u0009\u0043"u8;
 internal static readonly @string escapedOctal = "\\101|\u0041|\\\u0041|\\377"u8;
 
 internal static UntypedInt backslashRune => /* '\\' */ 92;
-
 internal static UntypedInt octalRune => /* '\101' */ 65;
 
 internal static nint get4(@string s, nint i) {

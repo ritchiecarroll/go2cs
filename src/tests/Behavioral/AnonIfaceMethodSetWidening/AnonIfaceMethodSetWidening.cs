@@ -8,13 +8,8 @@ partial struct gadget {
     internal nint n;
 }
 
-internal static @string Foo(this gadget g) {
-    return fmt.Sprintf("foo %d"u8, g.n);
-}
-
-internal static @string Bar(this ref gadget g) {
-    return "bar";
-}
+internal static @string Foo(this gadget g) { return fmt.Sprintf("foo %d"u8, g.n); }
+internal static @string Bar(this ref gadget g) { return "bar"; }
 
 partial interface fooer {
     @string Foo();

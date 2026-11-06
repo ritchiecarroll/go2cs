@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool GoroutineLeakProfile = false;
-
 public static UntypedInt GoroutineLeakProfileInt => 0;
 
 } // end goexperiment_package

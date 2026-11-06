@@ -88,18 +88,14 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
 }
 
 // MaxEncodedLen returns the maximum length of an encoding of n source bytes.
-public static nint MaxEncodedLen(nint n) {
-    return (n + 3) / 4 * 5;
-}
+public static nint MaxEncodedLen(nint n) { return (n + 3) / 4 * 5; }
 
 // NewEncoder returns a new ascii85 stream encoder. Data written to
 // the returned writer will be encoded and then written to w.
 // Ascii85 encodings operate in 32-bit blocks; when finished
 // writing, the caller must Close the returned encoder to flush any
 // trailing partial block.
-public static io.WriteCloser NewEncoder(io.Writer w) {
-    return new encoderжWriteCloser(Ꮡ(new encoder(w: w)));
-}
+public static io.WriteCloser NewEncoder(io.Writer w) { return new encoderжWriteCloser(Ꮡ(new encoder(w: w))); }
 
 partial struct encoder {
     internal error err;
@@ -261,9 +257,7 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
 }
 
 // NewDecoder constructs a new ascii85 stream decoder.
-public static io.Reader NewDecoder(io.Reader r) {
-    return new decoderжReader(Ꮡ(new decoder(r: r)));
-}
+public static io.Reader NewDecoder(io.Reader r) { return new decoderжReader(Ꮡ(new decoder(r: r))); }
 
 partial struct decoder {
     internal error err;

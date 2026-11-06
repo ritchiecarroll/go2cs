@@ -67,9 +67,7 @@ internal static ValueConverter _ᴛ3ʗ = new boolType();
 internal static ref readonly @string boolˢ => ref boolˢᵇ;
 private static readonly @string boolˢᵇ = "Bool"u8;
 
-public static @string String(this boolType _) {
-    return boolˢ;
-}
+public static @string String(this boolType _) { return boolˢ; }
 
 public static (Value, error) ConvertValue(this boolType _, any src) {
     switch (src.type()) {

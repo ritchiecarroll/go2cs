@@ -989,7 +989,7 @@ A pull whose direct reference would close a project cycle is instead reached **l
 golib's `LinknameVar<T>` — the same storage, with no `ProjectReference`. math/bits is that case at Go 1.26,
 because `runtime` imports `math/bits`:
 
-<!-- source: src/core/runtime/panic.cs:348 -->
+<!-- source: src/core/runtime/panic.cs:342 -->
 ```csharp
 public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 ```
@@ -1071,7 +1071,7 @@ import (
 )
 type fsOnly struct{ fs.FS }
 ```
-<!-- source: src/core/testing/fstest/mapfs.cs:7, 219 -->
+<!-- source: src/core/testing/fstest/mapfs.cs:7, 217 -->
 ```csharp
 using fs = go.io.fs_package;
 …

@@ -134,43 +134,26 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> recv, slice<ж<TypeParam>
 // For an abstract method, Recv returns the enclosing interface either
 // as a *[Named] or an *[Interface]. Due to embedding, an interface may
 // contain methods whose receiver type is a different interface.
-public static ж<Var> Recv(this ref ΔSignature s) {
-    return s.recv;
-}
+public static ж<Var> Recv(this ref ΔSignature s) { return s.recv; }
 
 // TypeParams returns the type parameters of signature s, or nil.
-public static ж<TypeParamList> TypeParams(this ref ΔSignature s) {
-    return s.tparams;
-}
+public static ж<TypeParamList> TypeParams(this ref ΔSignature s) { return s.tparams; }
 
 // RecvTypeParams returns the receiver type parameters of signature s, or nil.
-public static ж<TypeParamList> RecvTypeParams(this ref ΔSignature s) {
-    return s.rparams;
-}
+public static ж<TypeParamList> RecvTypeParams(this ref ΔSignature s) { return s.rparams; }
 
 // Params returns the parameters of signature s, or nil.
 // See [NewSignatureType] for details of variadic functions.
-public static ж<Tuple> Params(this ref ΔSignature s) {
-    return s.@params;
-}
+public static ж<Tuple> Params(this ref ΔSignature s) { return s.@params; }
 
 // Results returns the results of signature s, or nil.
-public static ж<Tuple> Results(this ref ΔSignature s) {
-    return s.results;
-}
+public static ж<Tuple> Results(this ref ΔSignature s) { return s.results; }
 
 // Variadic reports whether the signature s is variadic.
-public static bool Variadic(this ref ΔSignature s) {
-    return s.variadic;
-}
+public static bool Variadic(this ref ΔSignature s) { return s.variadic; }
 
-public static ΔType Underlying(this ж<ΔSignature> Ꮡs) {
-    return new ΔSignatureжΔType(Ꮡs);
-}
-
-public static @string String(this ж<ΔSignature> Ꮡs) {
-    return TypeString(new ΔSignatureжΔType(Ꮡs), default);
-}
+public static ΔType Underlying(this ж<ΔSignature> Ꮡs) { return new ΔSignatureжΔType(Ꮡs); }
+public static @string String(this ж<ΔSignature> Ꮡs) { return TypeString(new ΔSignatureжΔType(Ꮡs), default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodHasMultipleˢ => ref methodHasMultipleˢᵇ;

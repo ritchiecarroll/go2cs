@@ -6,9 +6,7 @@ partial class main_package {
 
 internal static slice<@string> trace;
 
-internal static void note(@string s) {
-    trace = append(trace, s);
-}
+internal static void note(@string s) { trace = append(trace, s); }
 
 internal static void show(@string label, bool open) {
     fmt.Println(label, "open =", open, trace);

@@ -9,13 +9,9 @@ partial struct frame {
     public bool Inlined;
 }
 
-internal static @string label(this frame f) {
-    return f.Name;
-}
+internal static @string label(this frame f) { return f.Name; }
 
-internal static void bump(this ref frame f) {
-    f.Name += "!"u8;
-}
+internal static void bump(this ref frame f) { f.Name += "!"u8; }
 
 partial interface namer {
     @string label();

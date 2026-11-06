@@ -15,17 +15,10 @@ internal static @string onlyNilCheck(ж<node> p) {
     return "set";
 }
 
-internal static bool inner(ж<node> p) {
-    return p == nil;
-}
+internal static bool inner(ж<node> p) { return p == nil; }
+internal static bool passThrough(ж<node> p) { return inner(p); }
 
-internal static bool passThrough(ж<node> p) {
-    return inner(p);
-}
-
-internal static nint usesValue(ref node p) {
-    return p.val;
-}
+internal static nint usesValue(ref node p) { return p.val; }
 
 internal static void Main() {
     fmt.Println(onlyNilCheck(nil));

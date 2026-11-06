@@ -403,9 +403,7 @@ public static ж<Named> Origin(this ж<Named> Ꮡt) {
 
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
-public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) {
-    return Ꮡt.unpack().tparams;
-}
+public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
 
 // SetTypeParams sets the type parameters of the named type t.
 // t must not have type arguments.
@@ -651,9 +649,7 @@ public static ΔType Underlying(this ж<Named> Ꮡn) {
     return n.underlying;
 }
 
-public static @string String(this ж<Named> Ꮡt) {
-    return TypeString(new NamedжΔType(Ꮡt), default);
-}
+public static @string String(this ж<Named> Ꮡt) { return TypeString(new NamedжΔType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation

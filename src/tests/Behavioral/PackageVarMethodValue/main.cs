@@ -8,18 +8,14 @@ partial struct T {
     internal nint n;
 }
 
-internal static void inc(this ref T p) {
-    p.n++;
-}
+internal static void inc(this ref T p) { p.n++; }
 
 internal static nint add(this ref T p, nint d) {
     p.n += d;
     return p.n;
 }
 
-internal static nint peek(this T t) {
-    return t.n;
-}
+internal static nint peek(this T t) { return t.n; }
 
 partial struct H {
     internal T t;
@@ -38,17 +34,11 @@ partial struct Tab {
     internal array<nint> vals = new(8);
 }
 
-internal static void inc(this ref Tab p) {
-    p.n++;
-}
+internal static void inc(this ref Tab p) { p.n++; }
 
-internal static T mk() {
-    return new T(n: 10);
-}
+internal static T mk() { return new T(n: 10); }
 
-internal static void apply(Action f) {
-    f();
-}
+internal static void apply(Action f) { f(); }
 
 internal static readonly ж<T> Ꮡg = new StaticBox<T>(default(T));
 internal static ref T g => ref ((StaticBox<T>)Ꮡg).ValueSlot;

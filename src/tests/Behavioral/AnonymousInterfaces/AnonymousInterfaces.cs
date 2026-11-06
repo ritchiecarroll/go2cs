@@ -78,13 +78,8 @@ partial interface InlineEmbed :
 partial struct embeddedImpl {
 }
 
-internal static error Close(this embeddedImpl _) {
-    return default;
-}
-
-internal static error Flush(this embeddedImpl _) {
-    return default;
-}
+internal static error Close(this embeddedImpl _) { return default; }
+internal static error Flush(this embeddedImpl _) { return default; }
 
 internal static void testInterfaceEmbedding(InlineEmbed x) {
     _ = x.Close();
@@ -103,17 +98,9 @@ internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
 partial struct fakeError {
 }
 
-internal static @string Error(this fakeError _) {
-    return "fake error";
-}
-
-internal static error Unwrap(this fakeError _) {
-    return Δio.EOF;
-}
-
-internal static bool Is(this fakeError _, error err) {
-    return AreEqual(err, Δio.EOF);
-}
+internal static @string Error(this fakeError _) { return "fake error"; }
+internal static error Unwrap(this fakeError _) { return Δio.EOF; }
+internal static bool Is(this fakeError _, error err) { return AreEqual(err, Δio.EOF); }
 
 partial struct tally {
     internal nint total;

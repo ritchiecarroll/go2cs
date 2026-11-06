@@ -478,17 +478,9 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
 
 partial struct stackProfile /*[]slice<uintptr>*/;
 
-internal static nint Len(this stackProfile x) {
-    return len(x);
-}
-
-internal static slice<uintptr> Stack(this stackProfile x, nint i) {
-    return x[i];
-}
-
-internal static ж<labelMap> Label(this stackProfile x, nint i) {
-    return default;
-}
+internal static nint Len(this stackProfile x) { return len(x); }
+internal static slice<uintptr> Stack(this stackProfile x, nint i) { return x[i]; }
+internal static ж<labelMap> Label(this stackProfile x, nint i) { return default; }
 
 // A countProfile is a set of stack traces to be printed as counts
 // grouped by stack trace. There are multiple implementations:
@@ -635,14 +627,8 @@ partial struct keysByCount {
     internal map<@string, nint> count;
 }
 
-internal static nint Len(this ref keysByCount x) {
-    return len(x.keys);
-}
-
-internal static void Swap(this ref keysByCount x, nint i, nint j) {
-    (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]);
-}
-
+internal static nint Len(this ref keysByCount x) { return len(x.keys); }
+internal static void Swap(this ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
 internal static bool Less(this ref keysByCount x, nint i, nint j) {
     @string ki = x.keys[i];
     @string kj = x.keys[j];
@@ -966,17 +952,9 @@ partial struct runtimeProfile {
     internal slice<@unsafe.Pointer> labels;
 }
 
-internal static nint Len(this ref runtimeProfile p) {
-    return len(p.stk);
-}
-
-internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) {
-    return p.stk[i].Stack;
-}
-
-internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
-    return (ж<labelMap>)(uintptr)(p.labels[i]);
-}
+internal static nint Len(this ref runtimeProfile p) { return len(p.stk); }
+internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
+internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return (ж<labelMap>)(uintptr)(p.labels[i]); }
 
 partial struct cpuᴛ1 /*dyn*/ {
     /*embed*/ public go.sync_package.Mutex Mutex;

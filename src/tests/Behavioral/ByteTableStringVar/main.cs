@@ -9,7 +9,6 @@ internal static readonly @string constTable = ((@string)(new byte[]{0xff, 0x00, 
 internal static @string varTable = ""u8 + ((@string)(new byte[]{0xff, 0x00, 0x80, 0x01})) + ((@string)(new byte[]{0xfe, 0x7f, 0x0a, 0xff}));
 
 internal static @string varSingle = ((@string)(new byte[]{0xff, 0x80, 0x01}));
-
 internal static @string varTyped = ""u8 + ((@string)(new byte[]{0xff, 0x80})) + "\x7f"u8;
 
 internal static readonly @string constText = "hello world";

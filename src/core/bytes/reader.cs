@@ -33,9 +33,7 @@ public static nint Len(this ref Reader r) {
 // Size returns the original length of the underlying byte slice.
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The result is unaffected by any method calls except [Reader.Reset].
-public static int64 Size(this ref Reader r) {
-    return (int64)len(r.s);
-}
+public static int64 Size(this ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
@@ -194,13 +192,9 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 }
 
 // Reset resets the [Reader] to be reading from b.
-public static void Reset(this ref Reader r, slice<byte> b) {
-    r = new Reader(b, 0, -1);
-}
+public static void Reset(this ref Reader r, slice<byte> b) { r = new Reader(b, 0, -1); }
 
 // NewReader returns a new [Reader] reading from b.
-public static ж<Reader> NewReader(slice<byte> b) {
-    return Ꮡ(new Reader(b, 0, -1));
-}
+public static ж<Reader> NewReader(slice<byte> b) { return Ꮡ(new Reader(b, 0, -1)); }
 
 } // end bytes_package

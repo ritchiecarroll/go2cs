@@ -432,13 +432,10 @@ internal static (slice<byte>, error) encrypt(ref ΔPublicKey pub, slice<byte> pl
 }
 
 public static error ErrMessageTooLong = errors.New("crypto/rsa: message too long for RSA key size");
-
 public static error ErrDecryption = errors.New("crypto/rsa: decryption error");
-
 public static error ErrVerification = errors.New("crypto/rsa: verification error");
 
 internal const bool withCheck = true;
-
 internal const bool noCheck = false;
 
 // DecryptWithoutCheck performs the RSA private key operation.

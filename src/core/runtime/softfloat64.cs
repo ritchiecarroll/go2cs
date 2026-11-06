@@ -436,7 +436,6 @@ internal static uint64 /*f*/ fintto64(int64 val) {
     }
     return fpack64(fs, mant, (nint)mantbits64, 0);
 }
-
 internal static uint32 /*f*/ fintto32(int64 val) {
     var fs = (uint64)((uint64)val & ((uint64)1 << 63));
     var mant = (uint64)val;

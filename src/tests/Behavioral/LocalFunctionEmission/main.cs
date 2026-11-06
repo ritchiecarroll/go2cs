@@ -106,9 +106,7 @@ internal static void p7() {
     fmt.Println("P7:", fact(5));
 }
 
-internal static nint apply(Func<nint, nint> f, nint v) {
-    return f(v);
-}
+internal static nint apply(Func<nint, nint> f, nint v) { return f(v); }
 
 internal static void p8() {
     nint m = 3;

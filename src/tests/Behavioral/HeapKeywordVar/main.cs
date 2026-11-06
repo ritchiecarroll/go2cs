@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void set(ref nint p) {
-    p = 42;
-}
+internal static void set(ref nint p) { p = 42; }
 
 internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;

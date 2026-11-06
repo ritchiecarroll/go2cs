@@ -69,7 +69,7 @@ using static go.embed_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("embed/embed.go", "embed.cs", "ALwB/ALSgoKClKiCAAscgpaAgKKAooCigICigKKAooCkgoKUpoLKlpK4lIKUgsqCgpKClIKUqJKCuIKSgpSSgpSssoKClIKU6JKCgpSCgpSCgpTokoKClIKClAAIFIKWgKKApIKClIKUgoKmgti0pIKUgqaCgpSCgpQACRSAooCkgqaCgoKClJSClIKClIKotpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
+[assembly: GoPositionMap("embed/embed.go", "embed.cs", "ALwB/ALSgoKClKiCAAscgpaAgKKCkoCAooKClIKClKaCypaSuJSClILKgoKSgpSClKiSgriCkoKUkoKUrLKCgpSClOiSgoKUgoKUgoKU6JKCgpSCgpQACBSCloKUgoKUgpSCgqaC2LSkgpSCpoKClIKClAAJFIKUgqaCgoKClJSClIKClIKotpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -699,9 +699,7 @@ public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
 }
 
 // Register publishes the receiver's methods in the [DefaultServer].
-public static error Register(any rcvr) {
-    return DefaultServer.Register(rcvr);
-}
+public static error Register(any rcvr) { return DefaultServer.Register(rcvr); }
 
 // RegisterName is like [Register] but uses the provided name for the type
 // instead of the receiver's concrete type.
@@ -752,9 +750,7 @@ public static error ServeRequest(ServerCodec codec) {
 // Accept accepts connections on the listener and serves requests
 // to [DefaultServer] for each incoming connection.
 // Accept blocks; the caller typically invokes it in a go statement.
-public static void Accept(net.Listener lis) {
-    DefaultServer.Accept(lis);
-}
+public static void Accept(net.Listener lis) { DefaultServer.Accept(lis); }
 
 // Can connect to RPC service using HTTP CONNECT to rpcPath.
 internal static @string connected = "200 Connected to Go RPC";

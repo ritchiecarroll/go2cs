@@ -25,9 +25,7 @@ partial struct LinkAddr {
 }
 
 // Family implements the Family method of Addr interface.
-public static nint Family(this ref LinkAddr a) {
-    return syscall.AF_LINK;
-}
+public static nint Family(this ref LinkAddr a) { return syscall.AF_LINK; }
 
 internal static (Addr, error) parseLinkAddr(slice<byte> b) {
     if (len(b) < 8) {

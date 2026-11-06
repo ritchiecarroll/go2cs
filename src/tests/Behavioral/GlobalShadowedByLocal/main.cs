@@ -14,9 +14,7 @@ partial struct acquirer {
     internal nint n;
 }
 
-internal static nint trace(this acquirer _) {
-    return 1;
-}
+internal static nint trace(this acquirer _) { return 1; }
 
 internal static partial nint collisionGlobalShadow() {
     nint a = main_package.Δtrace.addr;
@@ -32,9 +30,7 @@ internal static partial nint plainGlobalShadow() {
     return x + plainCounterΔ1;
 }
 
-internal static partial nint acquire(nint n) {
-    return n * 10;
-}
+internal static partial nint acquire(nint n) { return n * 10; }
 
 internal static partial nint nestedBlockShadow(nint kind) {
     nint total = 0;
@@ -81,18 +77,14 @@ partial struct qbox {
     internal nint v;
 }
 
-internal static partial ж<qbox> newQbox(nint n) {
-    return Ꮡ(new qbox(v: n));
-}
+internal static partial ж<qbox> newQbox(nint n) { return Ꮡ(new qbox(v: n)); }
 
 internal static partial nint constVarInitShadow() {
     var mlkemQ = newQbox(main_package.mlkemQ);
     return mlkemQ.v;
 }
 
-internal static partial nint constUnshadowedElsewhere() {
-    return mlkemQ;
-}
+internal static partial nint constUnshadowedElsewhere() { return mlkemQ; }
 
 internal static void Main() {
     fmt.Println(constSelfInitShadow(), constNestedInitShadow(), constVarInitShadow(), constUnshadowedElsewhere());
@@ -111,8 +103,6 @@ partial struct buildRec {
     public @string Path;
 }
 
-internal static @string mainField(buildRec b) {
-    return b.Main;
-}
+internal static @string mainField(buildRec b) { return b.Main; }
 
 } // end main_package

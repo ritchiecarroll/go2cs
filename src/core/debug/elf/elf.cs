@@ -75,13 +75,8 @@ internal static slice<intName> versionStrings = slice<intName>([
     new(1, "EV_CURRENT")
 ]);
 
-public static @string String(this Version i) {
-    return stringName((uint32)i, versionStrings, false);
-}
-
-public static @string GoString(this Version i) {
-    return stringName((uint32)i, versionStrings, true);
-}
+public static @string String(this Version i) { return stringName((uint32)i, versionStrings, false); }
+public static @string GoString(this Version i) { return stringName((uint32)i, versionStrings, true); }
 
 // Class is found in Header.Ident[EI_CLASS] and Header.Class.
 partial struct Class /*num:byte*/;
@@ -96,13 +91,8 @@ internal static slice<intName> classStrings = slice<intName>([
     new(2, "ELFCLASS64")
 ]);
 
-public static @string String(this Class i) {
-    return stringName((uint32)i, classStrings, false);
-}
-
-public static @string GoString(this Class i) {
-    return stringName((uint32)i, classStrings, true);
-}
+public static @string String(this Class i) { return stringName((uint32)i, classStrings, false); }
+public static @string GoString(this Class i) { return stringName((uint32)i, classStrings, true); }
 
 // Data is found in Header.Ident[EI_DATA] and Header.Data.
 partial struct ΔData /*num:byte*/;
@@ -117,13 +107,8 @@ internal static slice<intName> dataStrings = slice<intName>([
     new(2, "ELFDATA2MSB")
 ]);
 
-public static @string String(this ΔData i) {
-    return stringName((uint32)i, dataStrings, false);
-}
-
-public static @string GoString(this ΔData i) {
-    return stringName((uint32)i, dataStrings, true);
-}
+public static @string String(this ΔData i) { return stringName((uint32)i, dataStrings, false); }
+public static @string GoString(this ΔData i) { return stringName((uint32)i, dataStrings, true); }
 
 // OSABI is found in Header.Ident[EI_OSABI] and Header.OSABI.
 partial struct OSABI /*num:byte*/;
@@ -172,13 +157,8 @@ public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) applica
     new(255, "ELFOSABI_STANDALONE")
 ]); }
 
-public static @string String(this OSABI i) {
-    return stringName((uint32)i, osabiStrings, false);
-}
-
-public static @string GoString(this OSABI i) {
-    return stringName((uint32)i, osabiStrings, true);
-}
+public static @string String(this OSABI i) { return stringName((uint32)i, osabiStrings, false); }
+public static @string GoString(this OSABI i) { return stringName((uint32)i, osabiStrings, true); }
 
 // Type is found in Header.Type.
 partial struct Type /*num:uint16*/;
@@ -205,13 +185,8 @@ public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
     new(0xffff, "ET_HIPROC")
 ]); }
 
-public static @string String(this Type i) {
-    return stringName((uint32)i, typeStrings, false);
-}
-
-public static @string GoString(this Type i) {
-    return stringName((uint32)i, typeStrings, true);
-}
+public static @string String(this Type i) { return stringName((uint32)i, typeStrings, false); }
+public static @string GoString(this Type i) { return stringName((uint32)i, typeStrings, true); }
 
 // Machine is found in Header.Machine.
 partial struct Machine /*num:uint16*/;
@@ -598,13 +573,8 @@ public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the abse
     new(0x9026, "EM_ALPHA")
 ]); }
 
-public static @string String(this Machine i) {
-    return stringName((uint32)i, machineStrings, false);
-}
-
-public static @string GoString(this Machine i) {
-    return stringName((uint32)i, machineStrings, true);
-}
+public static @string String(this Machine i) { return stringName((uint32)i, machineStrings, false); }
+public static @string GoString(this Machine i) { return stringName((uint32)i, machineStrings, true); }
 
 // Special section indices.
 partial struct SectionIndex /*num:nint*/;
@@ -629,13 +599,8 @@ public static SectionIndex SHN_HIRESERVE => 0xffff;    /* Last of reserved range
     new(0xffff, "SHN_XINDEX")
 ]); }
 
-public static @string String(this SectionIndex i) {
-    return stringName((uint32)i, shnStrings, false);
-}
-
-public static @string GoString(this SectionIndex i) {
-    return stringName((uint32)i, shnStrings, true);
-}
+public static @string String(this SectionIndex i) { return stringName((uint32)i, shnStrings, false); }
+public static @string GoString(this SectionIndex i) { return stringName((uint32)i, shnStrings, true); }
 
 // Section type.
 partial struct SectionType /*num:uint32*/;
@@ -706,13 +671,8 @@ public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific
     new(0xffffffffU, "SHT_HIUSER")
 ]); }
 
-public static @string String(this SectionType i) {
-    return stringName((uint32)i, shtStrings, false);
-}
-
-public static @string GoString(this SectionType i) {
-    return stringName((uint32)i, shtStrings, true);
-}
+public static @string String(this SectionType i) { return stringName((uint32)i, shtStrings, false); }
+public static @string GoString(this SectionType i) { return stringName((uint32)i, shtStrings, true); }
 
 // Section flags.
 partial struct SectionFlag /*num:uint32*/;
@@ -745,13 +705,8 @@ public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processo
     new(0x800, "SHF_COMPRESSED")
 ]); }
 
-public static @string String(this SectionFlag i) {
-    return flagName((uint32)i, shfStrings, false);
-}
-
-public static @string GoString(this SectionFlag i) {
-    return flagName((uint32)i, shfStrings, true);
-}
+public static @string String(this SectionFlag i) { return flagName((uint32)i, shfStrings, false); }
+public static @string GoString(this SectionFlag i) { return flagName((uint32)i, shfStrings, true); }
 
 // Section compression type.
 partial struct CompressionType /*num:nint*/;
@@ -772,13 +727,8 @@ public static CompressionType COMPRESS_HIPROC => 0x7fffffff;        /* Last proc
     new(0x7fffffff, "COMPRESS_HIPROC")
 ]); }
 
-public static @string String(this CompressionType i) {
-    return stringName((uint32)i, compressionStrings, false);
-}
-
-public static @string GoString(this CompressionType i) {
-    return stringName((uint32)i, compressionStrings, true);
-}
+public static @string String(this CompressionType i) { return stringName((uint32)i, compressionStrings, false); }
+public static @string GoString(this CompressionType i) { return stringName((uint32)i, compressionStrings, true); }
 
 // Prog.Type
 partial struct ProgType /*num:nint*/;
@@ -858,13 +808,8 @@ public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specifi
     new(0x7fffffff, "PT_HIPROC")
 ]); }
 
-public static @string String(this ProgType i) {
-    return stringName((uint32)i, ptStrings, false);
-}
-
-public static @string GoString(this ProgType i) {
-    return stringName((uint32)i, ptStrings, true);
-}
+public static @string String(this ProgType i) { return stringName((uint32)i, ptStrings, false); }
+public static @string GoString(this ProgType i) { return stringName((uint32)i, ptStrings, true); }
 
 // Prog.Flag
 partial struct ProgFlag /*num:uint32*/;
@@ -881,13 +826,8 @@ internal static slice<intName> pfStrings = slice<intName>([
     new(0x4, "PF_R")
 ]);
 
-public static @string String(this ProgFlag i) {
-    return flagName((uint32)i, pfStrings, false);
-}
-
-public static @string GoString(this ProgFlag i) {
-    return flagName((uint32)i, pfStrings, true);
-}
+public static @string String(this ProgFlag i) { return flagName((uint32)i, pfStrings, false); }
+public static @string GoString(this ProgFlag i) { return flagName((uint32)i, pfStrings, true); }
 
 // Dyn.Tag
 partial struct DynTag /*num:nint*/;
@@ -1117,13 +1057,8 @@ public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific 
     new(0x7fffffff, "DT_FILTER")
 ]); }
 
-public static @string String(this DynTag i) {
-    return stringName((uint32)i, dtStrings, false);
-}
-
-public static @string GoString(this DynTag i) {
-    return stringName((uint32)i, dtStrings, true);
-}
+public static @string String(this DynTag i) { return stringName((uint32)i, dtStrings, false); }
+public static @string GoString(this DynTag i) { return stringName((uint32)i, dtStrings, true); }
 
 // DT_FLAGS values.
 partial struct DynFlag /*num:nint*/;
@@ -1149,13 +1084,8 @@ internal static slice<intName> dflagStrings = slice<intName>([
     new(0x0010, "DF_STATIC_TLS")
 ]);
 
-public static @string String(this DynFlag i) {
-    return flagName((uint32)i, dflagStrings, false);
-}
-
-public static @string GoString(this DynFlag i) {
-    return flagName((uint32)i, dflagStrings, true);
-}
+public static @string String(this DynFlag i) { return flagName((uint32)i, dflagStrings, false); }
+public static @string GoString(this DynFlag i) { return flagName((uint32)i, dflagStrings, true); }
 
 // DT_FLAGS_1 values.
 partial struct DynFlag1 /*num:uint32*/;
@@ -1270,13 +1200,8 @@ public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
     new(0x40000000, "DF_1_NOCOMMON")
 ]); }
 
-public static @string String(this DynFlag1 i) {
-    return flagName((uint32)i, dflag1Strings, false);
-}
-
-public static @string GoString(this DynFlag1 i) {
-    return flagName((uint32)i, dflag1Strings, true);
-}
+public static @string String(this DynFlag1 i) { return flagName((uint32)i, dflag1Strings, false); }
+public static @string GoString(this DynFlag1 i) { return flagName((uint32)i, dflag1Strings, true); }
 
 // NType values; used in core files.
 partial struct NType /*num:nint*/;
@@ -1291,13 +1216,8 @@ internal static slice<intName> ntypeStrings = slice<intName>([
     new(3, "NT_PRPSINFO")
 ]);
 
-public static @string String(this NType i) {
-    return stringName((uint32)i, ntypeStrings, false);
-}
-
-public static @string GoString(this NType i) {
-    return stringName((uint32)i, ntypeStrings, true);
-}
+public static @string String(this NType i) { return stringName((uint32)i, ntypeStrings, false); }
+public static @string GoString(this NType i) { return stringName((uint32)i, ntypeStrings, true); }
 
 /* Symbol Binding - ELFNN_ST_BIND - st_info */
 partial struct SymBind /*num:nint*/;
@@ -1320,13 +1240,8 @@ public static SymBind STB_HIPROC => 15; /*   specific semantics. */
     new(15, "STB_HIPROC")
 ]); }
 
-public static @string String(this SymBind i) {
-    return stringName((uint32)i, stbStrings, false);
-}
-
-public static @string GoString(this SymBind i) {
-    return stringName((uint32)i, stbStrings, true);
-}
+public static @string String(this SymBind i) { return stringName((uint32)i, stbStrings, false); }
+public static @string GoString(this SymBind i) { return stringName((uint32)i, stbStrings, true); }
 
 /* Symbol type - ELFNN_ST_TYPE - st_info */
 partial struct SymType /*num:nint*/;
@@ -1364,13 +1279,8 @@ public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
     new(15, "STT_HIPROC")
 ]); }
 
-public static @string String(this SymType i) {
-    return stringName((uint32)i, sttStrings, false);
-}
-
-public static @string GoString(this SymType i) {
-    return stringName((uint32)i, sttStrings, true);
-}
+public static @string String(this SymType i) { return stringName((uint32)i, sttStrings, false); }
+public static @string GoString(this SymType i) { return stringName((uint32)i, sttStrings, true); }
 
 /* Symbol visibility - ELFNN_ST_VISIBILITY - st_other */
 partial struct SymVis /*num:nint*/;
@@ -1387,13 +1297,8 @@ internal static slice<intName> stvStrings = slice<intName>([
     new(0x3, "STV_PROTECTED")
 ]);
 
-public static @string String(this SymVis i) {
-    return stringName((uint32)i, stvStrings, false);
-}
-
-public static @string GoString(this SymVis i) {
-    return stringName((uint32)i, stvStrings, true);
-}
+public static @string String(this SymVis i) { return stringName((uint32)i, stvStrings, false); }
+public static @string GoString(this SymVis i) { return stringName((uint32)i, stvStrings, true); }
 
 /*
  * Relocation types.
@@ -1492,13 +1397,8 @@ public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
     new(42, "R_X86_64_REX_GOTPCRELX")
 ]); }
 
-public static @string String(this R_X86_64 i) {
-    return stringName((uint32)i, rx86_64Strings, false);
-}
-
-public static @string GoString(this R_X86_64 i) {
-    return stringName((uint32)i, rx86_64Strings, true);
-}
+public static @string String(this R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, false); }
+public static @string GoString(this R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, true); }
 
 // Relocation types for AArch64 (aka arm64)
 partial struct R_AARCH64 /*num:nint*/;
@@ -1767,13 +1667,8 @@ public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
     new(1032, "R_AARCH64_IRELATIVE")
 ]); }
 
-public static @string String(this R_AARCH64 i) {
-    return stringName((uint32)i, raarch64Strings, false);
-}
-
-public static @string GoString(this R_AARCH64 i) {
-    return stringName((uint32)i, raarch64Strings, true);
-}
+public static @string String(this R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, false); }
+public static @string GoString(this R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, true); }
 
 // Relocation types for Alpha.
 partial struct R_ALPHA /*num:nint*/;
@@ -1838,13 +1733,8 @@ public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
     new(27, "R_ALPHA_RELATIVE")
 ]); }
 
-public static @string String(this R_ALPHA i) {
-    return stringName((uint32)i, ralphaStrings, false);
-}
-
-public static @string GoString(this R_ALPHA i) {
-    return stringName((uint32)i, ralphaStrings, true);
-}
+public static @string String(this R_ALPHA i) { return stringName((uint32)i, ralphaStrings, false); }
+public static @string GoString(this R_ALPHA i) { return stringName((uint32)i, ralphaStrings, true); }
 
 // Relocation types for ARM.
 partial struct R_ARM /*num:nint*/;
@@ -2141,13 +2031,8 @@ public static R_ARM R_ARM_RBASE => 255;
     new(255, "R_ARM_RBASE")
 ]); }
 
-public static @string String(this R_ARM i) {
-    return stringName((uint32)i, rarmStrings, false);
-}
-
-public static @string GoString(this R_ARM i) {
-    return stringName((uint32)i, rarmStrings, true);
-}
+public static @string String(this R_ARM i) { return stringName((uint32)i, rarmStrings, false); }
+public static @string GoString(this R_ARM i) { return stringName((uint32)i, rarmStrings, true); }
 
 // Relocation types for 386.
 partial struct R_386 /*num:nint*/;
@@ -2240,13 +2125,8 @@ public static R_386 R_386_GOT32X => 43;
     new(43, "R_386_GOT32X")
 ]); }
 
-public static @string String(this R_386 i) {
-    return stringName((uint32)i, r386Strings, false);
-}
-
-public static @string GoString(this R_386 i) {
-    return stringName((uint32)i, r386Strings, true);
-}
+public static @string String(this R_386 i) { return stringName((uint32)i, r386Strings, false); }
+public static @string GoString(this R_386 i) { return stringName((uint32)i, r386Strings, true); }
 
 // Relocation types for MIPS.
 partial struct R_MIPS /*num:nint*/;
@@ -2355,13 +2235,8 @@ public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
     new(248, "R_MIPS_PC32")
 ]); }
 
-public static @string String(this R_MIPS i) {
-    return stringName((uint32)i, rmipsStrings, false);
-}
-
-public static @string GoString(this R_MIPS i) {
-    return stringName((uint32)i, rmipsStrings, true);
-}
+public static @string String(this R_MIPS i) { return stringName((uint32)i, rmipsStrings, false); }
+public static @string GoString(this R_MIPS i) { return stringName((uint32)i, rmipsStrings, true); }
 
 // Relocation types for LoongArch.
 partial struct R_LARCH /*num:nint*/;
@@ -2604,13 +2479,8 @@ public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
     new(126, "R_LARCH_TLS_DESC_PCREL20_S2")
 ]); }
 
-public static @string String(this R_LARCH i) {
-    return stringName((uint32)i, rlarchStrings, false);
-}
-
-public static @string GoString(this R_LARCH i) {
-    return stringName((uint32)i, rlarchStrings, true);
-}
+public static @string String(this R_LARCH i) { return stringName((uint32)i, rlarchStrings, false); }
+public static @string GoString(this R_LARCH i) { return stringName((uint32)i, rlarchStrings, true); }
 
 // Relocation types for PowerPC.
 //
@@ -2778,13 +2648,8 @@ public static R_PPC R_PPC_EMB_RELSDA => 116;
     new(116, "R_PPC_EMB_RELSDA")
 ]); }
 
-public static @string String(this R_PPC i) {
-    return stringName((uint32)i, rppcStrings, false);
-}
-
-public static @string GoString(this R_PPC i) {
-    return stringName((uint32)i, rppcStrings, true);
-}
+public static @string String(this R_PPC i) { return stringName((uint32)i, rppcStrings, false); }
+public static @string GoString(this R_PPC i) { return stringName((uint32)i, rppcStrings, true); }
 
 // Relocation types for 64-bit PowerPC or Power Architecture processors.
 //
@@ -3120,13 +2985,8 @@ public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
     new(254, "R_PPC64_GNU_VTENTRY")
 ]); }
 
-public static @string String(this R_PPC64 i) {
-    return stringName((uint32)i, rppc64Strings, false);
-}
-
-public static @string GoString(this R_PPC64 i) {
-    return stringName((uint32)i, rppc64Strings, true);
-}
+public static @string String(this R_PPC64 i) { return stringName((uint32)i, rppc64Strings, false); }
+public static @string GoString(this R_PPC64 i) { return stringName((uint32)i, rppc64Strings, true); }
 
 // Relocation types for RISC-V processors.
 partial struct R_RISCV /*num:nint*/;
@@ -3243,13 +3103,8 @@ public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
     new(57, "R_RISCV_32_PCREL")
 ]); }
 
-public static @string String(this R_RISCV i) {
-    return stringName((uint32)i, rriscvStrings, false);
-}
-
-public static @string GoString(this R_RISCV i) {
-    return stringName((uint32)i, rriscvStrings, true);
-}
+public static @string String(this R_RISCV i) { return stringName((uint32)i, rriscvStrings, false); }
+public static @string GoString(this R_RISCV i) { return stringName((uint32)i, rriscvStrings, true); }
 
 // Relocation types for s390x processors.
 partial struct R_390 /*num:nint*/;
@@ -3380,13 +3235,8 @@ public static R_390 R_390_TLS_GOTIE20 => 60;
     new(60, "R_390_TLS_GOTIE20")
 ]); }
 
-public static @string String(this R_390 i) {
-    return stringName((uint32)i, r390Strings, false);
-}
-
-public static @string GoString(this R_390 i) {
-    return stringName((uint32)i, r390Strings, true);
-}
+public static @string String(this R_390 i) { return stringName((uint32)i, r390Strings, false); }
+public static @string GoString(this R_390 i) { return stringName((uint32)i, r390Strings, true); }
 
 // Relocation types for SPARC.
 partial struct R_SPARC /*num:nint*/;
@@ -3507,13 +3357,8 @@ public static R_SPARC R_SPARC_UA16 => 55;
     new(55, "R_SPARC_UA16")
 ]); }
 
-public static @string String(this R_SPARC i) {
-    return stringName((uint32)i, rsparcStrings, false);
-}
-
-public static @string GoString(this R_SPARC i) {
-    return stringName((uint32)i, rsparcStrings, true);
-}
+public static @string String(this R_SPARC i) { return stringName((uint32)i, rsparcStrings, false); }
+public static @string GoString(this R_SPARC i) { return stringName((uint32)i, rsparcStrings, true); }
 
 // Magic number for the elf trampoline, chosen wisely to be an immediate value.
 public static UntypedInt ARM_MAGIC_TRAMP_NUMBER => 0x5c000003;
@@ -3592,17 +3437,9 @@ partial struct Rela32 {
     public int32 Addend;  /* Addend. */
 }
 
-public static uint32 R_SYM32(uint32 info) {
-    return info >> 8;
-}
-
-public static uint32 R_TYPE32(uint32 info) {
-    return info & 0xff;
-}
-
-public static uint32 R_INFO32(uint32 sym, uint32 typ) {
-    return sym << 8 | typ;
-}
+public static uint32 R_SYM32(uint32 info) { return info >> 8; }
+public static uint32 R_TYPE32(uint32 info) { return info & 0xff; }
+public static uint32 R_INFO32(uint32 sym, uint32 typ) { return sym << 8 | typ; }
 
 // ELF32 Symbol.
 partial struct Sym32 {
@@ -3616,21 +3453,12 @@ partial struct Sym32 {
 
 public static UntypedInt Sym32Size => 16;
 
-public static SymBind ST_BIND(uint8 info) {
-    return (SymBind)(nint)((info >> 4));
-}
-
-public static SymType ST_TYPE(uint8 info) {
-    return (SymType)(nint)((uint8)(info & 0xF));
-}
-
+public static SymBind ST_BIND(uint8 info) { return (SymBind)(nint)((info >> 4)); }
+public static SymType ST_TYPE(uint8 info) { return (SymType)(nint)((uint8)(info & 0xF)); }
 public static uint8 ST_INFO(SymBind bind, SymType typ) {
     return (uint8)((uint8)((uint8)bind << 4) | (uint8)((uint8)typ & 0xf));
 }
-
-public static SymVis ST_VISIBILITY(uint8 other) {
-    return (SymVis)(nint)((uint8)(other & 3));
-}
+public static SymVis ST_VISIBILITY(uint8 other) { return (SymVis)(nint)((uint8)(other & 3)); }
 
 /*
  * ELF64
@@ -3711,17 +3539,9 @@ partial struct Rela64 {
     public int64 Addend;  /* Addend. */
 }
 
-public static uint32 R_SYM64(uint64 info) {
-    return (uint32)(info >> 32);
-}
-
-public static uint32 R_TYPE64(uint64 info) {
-    return (uint32)info;
-}
-
-public static uint64 R_INFO(uint32 sym, uint32 typ) {
-    return (uint64)sym << 32 | (uint64)typ;
-}
+public static uint32 R_SYM64(uint64 info) { return (uint32)(info >> 32); }
+public static uint32 R_TYPE64(uint64 info) { return (uint32)info; }
+public static uint64 R_INFO(uint32 sym, uint32 typ) { return (uint64)sym << 32 | (uint64)typ; }
 
 // ELF64 symbol table entries.
 partial struct Sym64 {

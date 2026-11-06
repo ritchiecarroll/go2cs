@@ -25,9 +25,7 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCEncrypter(b: b, iv: iv.Clone()));
 }
 
-public static nint BlockSize(this ref CBCEncrypter c) {
-    return ΔBlockSize;
-}
+public static nint BlockSize(this ref CBCEncrypter c) { return ΔBlockSize; }
 
 public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -88,9 +86,7 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCDecrypter(b: b, iv: iv.Clone()));
 }
 
-public static nint BlockSize(this ref CBCDecrypter c) {
-    return ΔBlockSize;
-}
+public static nint BlockSize(this ref CBCDecrypter c) { return ΔBlockSize; }
 
 public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();

@@ -237,9 +237,7 @@ partial struct sparseEntry {
     public int64 Offset, Length;
 }
 
-internal static int64 endOffset(this sparseEntry s) {
-    return s.Offset + s.Length;
-}
+internal static int64 endOffset(this sparseEntry s) { return s.Offset + s.Length; }
 
 // A sparse file can be represented as either a sparseDatas or a sparseHoles.
 // As long as the total size is known, they are equivalent and one can be
@@ -640,21 +638,10 @@ partial struct headerFileInfo {
     internal ж<Header> h;
 }
 
-internal static int64 Size(this headerFileInfo fi) {
-    return fi.h.Size;
-}
-
-internal static bool IsDir(this headerFileInfo fi) {
-    return fi.Mode().IsDir();
-}
-
-internal static time.Time ModTime(this headerFileInfo fi) {
-    return fi.h.ModTime;
-}
-
-internal static any Sys(this headerFileInfo fi) {
-    return fi.h.OrTypedNil();
-}
+internal static int64 Size(this headerFileInfo fi) { return fi.h.Size; }
+internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime(this headerFileInfo fi) { return fi.h.ModTime; }
+internal static any Sys(this headerFileInfo fi) { return fi.h.OrTypedNil(); }
 
 // Name returns the base name of the file.
 internal static @string Name(this headerFileInfo fi) {

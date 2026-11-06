@@ -702,17 +702,9 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
     return types.NewFunc(pos, pkg, name, sig);
 }
 
-internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncSym);
-}
-
-internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncLocalIdent);
-}
-
-internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncSelector);
-}
+internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSym); }
+internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncLocalIdent); }
+internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSelector); }
 
 internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) {
     Ꮡr.of(reader.ᏑDecoder).Sync(marker);

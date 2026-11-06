@@ -5,20 +5,15 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct A /*@string*/;
-
 partial struct B /*@string*/;
 
 partial struct otherString /*@string*/;
-
 partial struct pkgString /*@string*/;
 
 partial struct T /*bool*/;
-
 partial struct U /*bool*/;
 
-public static nint Len(this A a) {
-    return len(a);
-}
+public static nint Len(this A a) { return len(a); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcˢ = "abc"u8;

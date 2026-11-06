@@ -61,15 +61,11 @@ public static ж<List> Init(this ж<List> Ꮡl) {
 }
 
 // New returns an initialized list.
-public static ж<List> New() {
-    return @new<List>().Init();
-}
+public static ж<List> New() { return @new<List>().Init(); }
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).
-public static nint Len(this ref List l) {
-    return l.len;
-}
+public static nint Len(this ref List l) { return l.len; }
 
 // Front returns the first element of list l or nil if the list is empty.
 public static ж<Element> Front(this ref List l) {

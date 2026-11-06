@@ -6,9 +6,7 @@ partial class main_package {
 
 internal static UntypedInt two32 => /* 1 << 32 */ 4294967296;
 
-internal static int64 sum(int64 n) {
-    return n;
-}
+internal static int64 sum(int64 n) { return n; }
 
 internal static void Main() {
     uint64 a = 100;

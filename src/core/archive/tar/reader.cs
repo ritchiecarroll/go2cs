@@ -924,7 +924,6 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
 internal static int64 logicalRemaining(this sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
 }
-
 internal static int64 physicalRemaining(this sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }

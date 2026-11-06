@@ -12,7 +12,6 @@ partial class ecdsa_package {
 internal static (ж<boring.PublicKeyECDSA>, error) boringPublicKey(ж<PublicKey> _) {
     throw panic("boringcrypto: not available");
 }
-
 internal static (ж<boring.PrivateKeyECDSA>, error) boringPrivateKey(ж<PrivateKey> _) {
     throw panic("boringcrypto: not available");
 }

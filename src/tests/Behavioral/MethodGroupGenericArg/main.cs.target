@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static nint addInt(nint a, nint b) {
-    return a + b;
-}
+internal static nint addInt(nint a, nint b) { return a + b; }
 
 internal static E foldSlice<S, E>(S s, Func<E, E, E> combine)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
@@ -18,9 +16,7 @@ internal static E foldSlice<S, E>(S s, Func<E, E, E> combine)
     return acc;
 }
 
-internal static bool equalPair<T>(T a, T b) {
-    return AreEqual(a, b);
-}
+internal static bool equalPair<T>(T a, T b) { return AreEqual(a, b); }
 
 internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> eq)
     where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, ISliceWrap<S1, E1>, new()
@@ -60,9 +56,7 @@ internal static void reverse<S, E>(S s)
     }
 }
 
-internal static void applyTo<S>(S v, Action<S> f) {
-    f(v);
-}
+internal static void applyTo<S>(S v, Action<S> f) { f(v); }
 
 partial struct namedInts /*[]nint*/;
 

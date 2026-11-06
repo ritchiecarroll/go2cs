@@ -25,9 +25,7 @@ partial struct @base {
     internal nint n;
 }
 
-internal static nint Len(this ref @base b) {
-    return b.n;
-}
+internal static nint Len(this ref @base b) { return b.n; }
 
 partial struct sized {
     /*embed*/ internal @base @base;
@@ -65,9 +63,7 @@ partial struct holder {
     internal ж<wire> w;
 }
 
-internal static ж<point> mk(nint x) {
-    return Ꮡ(new point(x, x + 1));
-}
+internal static ж<point> mk(nint x) { return Ꮡ(new point(x, x + 1)); }
 
 internal static partial @string goFrames() {
     var namesᴷ = new stackAppend<@string>();

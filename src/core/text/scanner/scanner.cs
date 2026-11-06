@@ -35,9 +35,7 @@ partial struct Position {
 }
 
 // IsValid reports whether the position is valid.
-public static bool IsValid(this ref Position pos) {
-    return pos.Line > 0;
-}
+public static bool IsValid(this ref Position pos) { return pos.Line > 0; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string inputˢ => ref inputˢᵇ;
@@ -377,17 +375,9 @@ internal static rune scanIdentifier(this ж<Scanner> Ꮡs) {
     return ch;
 }
 
-internal static rune lower(rune ch) {
-    return (rune)(((rune)'a' - (rune)'A') | ch); // returns lower-case ch iff ch is ASCII letter
-}
-
-internal static bool isDecimal(rune ch) {
-    return '0' <= ch && ch <= '9';
-}
-
-internal static bool isHex(rune ch) {
-    return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f';
-}
+internal static rune lower(rune ch) { return (rune)(((rune)'a' - (rune)'A') | ch); } // returns lower-case ch iff ch is ASCII letter
+internal static bool isDecimal(rune ch) { return '0' <= ch && ch <= '9'; }
+internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f'; }
 
 // digits accepts the sequence { digit | '_' } starting with ch0.
 // If base <= 10, digits accepts any decimal digit but records

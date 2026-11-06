@@ -104,13 +104,9 @@ internal static Timeval setTimeval(int64 sec, int64 usec) {
     return new Timeval(Sec: sec, Usec: usec);
 }
 
-public static uint64 PC(this ref PtraceRegs r) {
-    return r.Rip;
-}
+public static uint64 PC(this ref PtraceRegs r) { return r.Rip; }
 
-public static void SetPC(this ref PtraceRegs r, uint64 pc) {
-    r.Rip = pc;
-}
+public static void SetPC(this ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
 
 public static void SetLen(this ref Iovec iov, nint length) {
     iov.Len = (uint64)length;

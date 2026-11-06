@@ -23,9 +23,7 @@ partial struct tagErr {
     internal @string tag;
 }
 
-internal static @string Error(this ref tagErr e) {
-    return "tag:"u8 + e.tag;
-}
+internal static @string Error(this ref tagErr e) { return "tag:"u8 + e.tag; }
 
 internal static (nint, error) check(@string s) {
     if (s == ""u8) {

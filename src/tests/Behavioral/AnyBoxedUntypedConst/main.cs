@@ -6,15 +6,11 @@ using ꓸꓸꓸany = Span<any>;
 partial class main_package {
 
 internal static UntypedInt namedInt => 7;
-
 internal static UntypedInt namedRune => /* 'A' */ 65;
-
 internal static UntypedFloat namedFloat => 2.5;
-
 internal static UntypedInt namedWide => /* 1 << 40 */ 1099511627776;
 
 internal static readonly @string namedStr = "seed"u8;
-
 internal static readonly @string typedStr = "seed"u8;
 
 partial struct holder {
@@ -31,21 +27,10 @@ internal static bool paramEq(any a, any b) {
     return AreEqual(a, b);
 }
 
-internal static any retLit() {
-    return (nint)0;
-}
-
-internal static any retNamed() {
-    return (nint)(namedInt);
-}
-
-internal static any retRuneL() {
-    return (rune)'A';
-}
-
-internal static any retFloatL() {
-    return 2.5D;
-}
+internal static any retLit() { return (nint)0; }
+internal static any retNamed() { return (nint)(namedInt); }
+internal static any retRuneL() { return (rune)'A'; }
+internal static any retFloatL() { return 2.5D; }
 
 internal static @string kindOf(any v) {
     switch (v.type()) {
@@ -68,13 +53,9 @@ internal static @string kindOf(any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object seedˢ = (@string)"seed"u8;
 
-internal static any retStrL() {
-    return seedˢ;
-}
+internal static any retStrL() { return seedˢ; }
 
-internal static (nint, error) readN() {
-    return (0, default);
-}
+internal static (nint, error) readN() { return (0, default); }
 
 internal static void Main() {
     var (n, _) = readN();

@@ -15,9 +15,7 @@ partial struct box {
     internal slice<nint> data;
 }
 
-internal static void clear(this ref box b) {
-    b.data = default;
-}
+internal static void clear(this ref box b) { b.data = default; }
 
 partial struct guard {
     internal error err;

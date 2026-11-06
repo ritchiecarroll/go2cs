@@ -80,9 +80,7 @@ internal static partial void nestedSiblings() {
     run(o);
 }
 
-internal static partial void run(Action f) {
-    f();
-}
+internal static partial void run(Action f) { f(); }
 
 internal static partial void viaArg() {
     run(() => {

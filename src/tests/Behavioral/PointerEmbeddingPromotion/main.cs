@@ -8,13 +8,8 @@ partial struct leaf {
     internal nint n;
 }
 
-internal static void bump(this ref leaf l) {
-    l.n++;
-}
-
-internal static nint get(this ref leaf l) {
-    return l.n;
-}
+internal static void bump(this ref leaf l) { l.n++; }
+internal static nint get(this ref leaf l) { return l.n; }
 
 partial struct holder {
     /*embed*/ internal ж<leaf> leaf;

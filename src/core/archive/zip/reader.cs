@@ -346,9 +346,7 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
     return (n, err);
 }
 
-internal static error Close(this ref checksumReader r) {
-    return r.rc.Close();
-}
+internal static error Close(this ref checksumReader r) { return r.rc.Close(); }
 
 // findBodyOffset does the minimum work to verify the file has a header
 // and returns the file body offset.
@@ -824,25 +822,11 @@ internal static @string Name(this ref fileListEntry f) {
     return elem;
 }
 
-internal static int64 Size(this ref fileListEntry f) {
-    return 0;
-}
-
-internal static fs.FileMode Mode(this ref fileListEntry f) {
-    return (fs.FileMode)(fs.ModeDir | 365);
-}
-
-internal static fs.FileMode Type(this ref fileListEntry f) {
-    return fs.ModeDir;
-}
-
-internal static bool IsDir(this ref fileListEntry f) {
-    return true;
-}
-
-internal static any Sys(this ref fileListEntry f) {
-    return default;
-}
+internal static int64 Size(this ref fileListEntry f) { return 0; }
+internal static fs.FileMode Mode(this ref fileListEntry f) { return (fs.FileMode)(fs.ModeDir | 365); }
+internal static fs.FileMode Type(this ref fileListEntry f) { return fs.ModeDir; }
+internal static bool IsDir(this ref fileListEntry f) { return true; }
+internal static any Sys(this ref fileListEntry f) { return default; }
 
 internal static time.Time ModTime(this ref fileListEntry f) {
     if (f.@file == nil) {
@@ -851,9 +835,7 @@ internal static time.Time ModTime(this ref fileListEntry f) {
     return f.@file.FileHeader.Modified.UTC();
 }
 
-internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) {
-    return (new fileListEntryжFileInfo(Ꮡf), default);
-}
+internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) { return (new fileListEntryжFileInfo(Ꮡf), default); }
 
 internal static @string String(this ж<fileListEntry> Ꮡf) {
     return fs.FormatDirEntry(new fileListEntryжDirEntry(Ꮡf));
@@ -1047,13 +1029,8 @@ partial struct openDir {
     internal nint offset;
 }
 
-internal static error Close(this ref openDir d) {
-    return default;
-}
-
-internal static (fs.FileInfo, error) Stat(this ref openDir d) {
-    return d.e.stat();
-}
+internal static error Close(this ref openDir d) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openDir d) { return d.e.stat(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;

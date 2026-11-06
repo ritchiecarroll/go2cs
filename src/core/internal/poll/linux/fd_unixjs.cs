@@ -14,8 +14,7 @@ partial struct SysFile {
     internal ж<slice<Δsyscall.Iovec>> iovecs;
 }
 
-internal static void init(this ref SysFile s) {
-}
+internal static void init(this ref SysFile s) { }
 
 internal static error destroy(this ref SysFile s, nint fd) {
     // We don't use ignoringEINTR here because POSIX does not define

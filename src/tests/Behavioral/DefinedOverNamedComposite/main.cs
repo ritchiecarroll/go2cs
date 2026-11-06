@@ -8,9 +8,7 @@ partial class main_package {
 
 partial struct shuffledFS /*global::go.DefinedOverNamedComposite.fslike_package.MapFS*/;
 
-internal static nint get(this shuffledFS f, @string k) {
-    return ((fslike.MapFS)f).Get(k);
-}
+internal static nint get(this shuffledFS f, @string k) { return ((fslike.MapFS)f).Get(k); }
 
 partial struct shuffledList /*global::go.DefinedOverNamedComposite.fslike_package.List*/;
 

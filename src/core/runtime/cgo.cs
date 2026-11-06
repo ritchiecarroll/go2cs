@@ -75,9 +75,7 @@ private static readonly @string cgoUseShouldNotBeCalledˢᵇ = "cgoUse should no
 // 2) they keep the argument alive until the call site; the call is emitted after
 // the end of the (presumed) use of the argument by C.
 // cgoUse should not actually be called (see cgoAlwaysFalse).
-internal static void cgoUse(any _) {
-    @throw(cgoUseShouldNotBeCalledˢ);
-}
+internal static void cgoUse(any _) { @throw(cgoUseShouldNotBeCalledˢ); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cgoKeepAliveShouldNotBeˢ => ref cgoKeepAliveShouldNotBeˢᵇ;
@@ -89,9 +87,7 @@ private static readonly @string cgoKeepAliveShouldNotBeˢᵇ = "cgoKeepAlive sho
 // cgoKeepAlive is marked in the cgo-generated code as //go:noescape, so
 // unlike cgoUse it does not force the argument to escape to the heap.
 // This is used to implement the #cgo noescape directive.
-internal static void cgoKeepAlive(any _) {
-    @throw(cgoKeepAliveShouldNotBeˢ);
-}
+internal static void cgoKeepAlive(any _) { @throw(cgoKeepAliveShouldNotBeˢ); }
 
 // cgoAlwaysFalse is a boolean value that is always false.
 // The cgo-generated code says if cgoAlwaysFalse { cgoUse(p) },

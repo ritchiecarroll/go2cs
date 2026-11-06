@@ -11,16 +11,9 @@ partial struct E {
     internal nint n;
 }
 
-public static void Bare(this ref E e) {
-}
-
-public static nint Value(this ref E e, nint a) {
-    return a;
-}
-
-public static nint Pair(this ref E e, nint a, nint b) {
-    return a + b;
-}
+public static void Bare(this ref E e) { }
+public static nint Value(this ref E e, nint a) { return a; }
+public static nint Pair(this ref E e, nint a, nint b) { return a + b; }
 
 internal static partial nint line() {
     var (_, _, l, _) = runtime.Caller(1);
@@ -29,9 +22,7 @@ internal static partial nint line() {
 
 internal static array<nint> got = new(6);
 
-internal static void record(nint i, nint l) {
-    got[i] = l;
-}
+internal static void record(nint i, nint l) { got[i] = l; }
 
 internal static void shapes() {
     var e = Ꮡ(new E());

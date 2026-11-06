@@ -1131,14 +1131,10 @@ internal static partial slice<uintptr> makeProfStackFP() {
 
 // makeProfStack returns a buffer large enough to hold a maximum-sized stack
 // trace.
-internal static partial slice<uintptr> makeProfStack() {
-    return new slice<uintptr>(debug.profstackdepth);
-}
+internal static partial slice<uintptr> makeProfStack() { return new slice<uintptr>(debug.profstackdepth); }
 
 //go:linkname pprof_makeProfStack
-public static partial slice<uintptr> pprof_makeProfStack() {
-    return makeProfStack();
-}
+public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStack(); }
 
 internal static void becomeSpinning(this ref m mp) {
     mp.spinning = true;
@@ -5420,33 +5416,13 @@ partial struct profᴛ1 /*dyn*/ {
 internal static readonly ж<profᴛ1> Ꮡprof = new StaticBox<profᴛ1>(default(profᴛ1));
 internal static ref profᴛ1 prof => ref ((StaticBox<profᴛ1>)Ꮡprof).ValueSlot;
 
-internal static void _System() {
-    _System();
-}
-
-internal static void _ExternalCode() {
-    _ExternalCode();
-}
-
-internal static void _LostExternalCode() {
-    _LostExternalCode();
-}
-
-internal static void _GC() {
-    _GC();
-}
-
-internal static void _LostSIGPROFDuringAtomic64() {
-    _LostSIGPROFDuringAtomic64();
-}
-
-internal static void _LostContendedRuntimeLock() {
-    _LostContendedRuntimeLock();
-}
-
-internal static void _VDSO() {
-    _VDSO();
-}
+internal static void _System() { _System(); }
+internal static void _ExternalCode() { _ExternalCode(); }
+internal static void _LostExternalCode() { _LostExternalCode(); }
+internal static void _GC() { _GC(); }
+internal static void _LostSIGPROFDuringAtomic64() { _LostSIGPROFDuringAtomic64(); }
+internal static void _LostContendedRuntimeLock() { _LostContendedRuntimeLock(); }
+internal static void _VDSO() { _VDSO(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string internalRuntimeAtomicˢ => ref internalRuntimeAtomicˢᵇ;

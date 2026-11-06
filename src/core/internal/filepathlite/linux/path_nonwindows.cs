@@ -6,7 +6,6 @@ namespace go.@internal;
 
 partial class filepathlite_package {
 
-internal static void postClean(ref lazybuf @out) {
-}
+internal static void postClean(ref lazybuf @out) { }
 
 } // end filepathlite_package

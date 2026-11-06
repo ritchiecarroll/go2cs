@@ -43,34 +43,22 @@ public static ж<Rand> New(Source src) {
 }
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
-public static int64 Int64(this ref Rand r) {
-    return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63)));
-}
+public static int64 Int64(this ref Rand r) { return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63))); }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
-public static uint32 Uint32(this ref Rand r) {
-    return (uint32)(r.src.Uint64() >> 32);
-}
+public static uint32 Uint32(this ref Rand r) { return (uint32)(r.src.Uint64() >> 32); }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
-public static uint64 Uint64(this ref Rand r) {
-    return r.src.Uint64();
-}
+public static uint64 Uint64(this ref Rand r) { return r.src.Uint64(); }
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32.
-public static int32 Int32(this ref Rand r) {
-    return (int32)(r.src.Uint64() >> 33);
-}
+public static int32 Int32(this ref Rand r) { return (int32)(r.src.Uint64() >> 33); }
 
 // Int returns a non-negative pseudo-random int.
-public static nint Int(this ref Rand r) {
-    return (nint)(((nuint)r.src.Uint64() << 1) >> 1);
-}
+public static nint Int(this ref Rand r) { return (nint)(((nuint)r.src.Uint64() << 1) >> 1); }
 
 // Uint returns a pseudo-random uint.
-public static nuint Uint(this ref Rand r) {
-    return (nuint)r.src.Uint64();
-}
+public static nuint Uint(this ref Rand r) { return (nuint)r.src.Uint64(); }
 
 // Int64N returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
@@ -284,79 +272,55 @@ internal static uint64 Uint64(this runtimeSource _) {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64
 // from the default Source.
-public static int64 Int64() {
-    return globalRand.Int64();
-}
+public static int64 Int64() { return globalRand.Int64(); }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32
 // from the default Source.
-public static uint32 Uint32() {
-    return globalRand.Uint32();
-}
+public static uint32 Uint32() { return globalRand.Uint32(); }
 
 // Uint64N returns, as a uint64, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n == 0.
-public static uint64 Uint64N(uint64 n) {
-    return globalRand.Uint64N(n);
-}
+public static uint64 Uint64N(uint64 n) { return globalRand.Uint64N(n); }
 
 // Uint32N returns, as a uint32, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n == 0.
-public static uint32 Uint32N(uint32 n) {
-    return globalRand.Uint32N(n);
-}
+public static uint32 Uint32N(uint32 n) { return globalRand.Uint32N(n); }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64
 // from the default Source.
-public static uint64 Uint64() {
-    return globalRand.Uint64();
-}
+public static uint64 Uint64() { return globalRand.Uint64(); }
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32
 // from the default Source.
-public static int32 Int32() {
-    return globalRand.Int32();
-}
+public static int32 Int32() { return globalRand.Int32(); }
 
 // Int returns a non-negative pseudo-random int from the default Source.
-public static nint Int() {
-    return globalRand.Int();
-}
+public static nint Int() { return globalRand.Int(); }
 
 // Uint returns a pseudo-random uint from the default Source.
-public static nuint Uint() {
-    return globalRand.Uint();
-}
+public static nuint Uint() { return globalRand.Uint(); }
 
 // Int64N returns, as an int64, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n <= 0.
-public static int64 Int64N(int64 n) {
-    return globalRand.Int64N(n);
-}
+public static int64 Int64N(int64 n) { return globalRand.Int64N(n); }
 
 // Int32N returns, as an int32, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n <= 0.
-public static int32 Int32N(int32 n) {
-    return globalRand.Int32N(n);
-}
+public static int32 Int32N(int32 n) { return globalRand.Int32N(n); }
 
 // IntN returns, as an int, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n <= 0.
-public static nint IntN(nint n) {
-    return globalRand.IntN(n);
-}
+public static nint IntN(nint n) { return globalRand.IntN(n); }
 
 // UintN returns, as a uint, a pseudo-random number in the half-open interval [0,n)
 // from the default Source.
 // It panics if n == 0.
-public static nuint UintN(nuint n) {
-    return globalRand.UintN(n);
-}
+public static nuint UintN(nuint n) { return globalRand.UintN(n); }
 
 // N returns a pseudo-random number in the half-open interval [0,n) from the default Source.
 // The type parameter Int can be any integer type.
@@ -377,28 +341,20 @@ partial interface intType<ΔT> /*operators = Sum, Arithmetic, Integer, Comparabl
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0)
 // from the default Source.
-public static float64 Float64() {
-    return globalRand.Float64();
-}
+public static float64 Float64() { return globalRand.Float64(); }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0)
 // from the default Source.
-public static float32 Float32() {
-    return globalRand.Float32();
-}
+public static float32 Float32() { return globalRand.Float32(); }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
 // in the half-open interval [0,n) from the default Source.
-public static slice<nint> Perm(nint n) {
-    return globalRand.Perm(n);
-}
+public static slice<nint> Perm(nint n) { return globalRand.Perm(n); }
 
 // Shuffle pseudo-randomizes the order of elements using the default Source.
 // n is the number of elements. Shuffle panics if n < 0.
 // swap swaps the elements with indexes i and j.
-public static void Shuffle(nint n, Action<nint, nint> swap) {
-    globalRand.Shuffle(n, swap);
-}
+public static void Shuffle(nint n, Action<nint, nint> swap) { globalRand.Shuffle(n, swap); }
 
 // NormFloat64 returns a normally distributed float64 in the range
 // [-math.MaxFloat64, +math.MaxFloat64] with
@@ -408,9 +364,7 @@ public static void Shuffle(nint n, Action<nint, nint> swap) {
 // adjust the output using:
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
-public static float64 NormFloat64() {
-    return globalRand.NormFloat64();
-}
+public static float64 NormFloat64() { return globalRand.NormFloat64(); }
 
 // ExpFloat64 returns an exponentially distributed float64 in the range
 // (0, +math.MaxFloat64] with an exponential distribution whose rate parameter
@@ -419,8 +373,6 @@ public static float64 NormFloat64() {
 // callers can adjust the output using:
 //
 //	sample = ExpFloat64() / desiredRateParameter
-public static float64 ExpFloat64() {
-    return globalRand.ExpFloat64();
-}
+public static float64 ExpFloat64() { return globalRand.ExpFloat64(); }
 
 } // end rand_package

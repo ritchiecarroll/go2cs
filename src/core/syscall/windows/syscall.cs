@@ -62,9 +62,7 @@ public static (slice<byte>, error) ByteSliceFromString(@string s) {
 // an error.
 //
 // Deprecated: Use [BytePtrFromString] instead.
-public static ж<byte> StringBytePtr(@string s) {
-    return Ꮡ(StringByteSlice(s), 0);
-}
+public static ж<byte> StringBytePtr(@string s) { return Ꮡ(StringByteSlice(s), 0); }
 
 // BytePtrFromString returns a pointer to a NUL-terminated array of
 // bytes containing the text of s. If s contains a NUL byte at any
@@ -103,12 +101,10 @@ public static int64 Nano(this ref Timeval tv) {
 
 // Getpagesize and Exit are provided by the runtime.
 public static partial nint Getpagesize();
-
 public static partial void Exit(nint code);
 
 // runtimeSetenv and runtimeUnsetenv are provided by the runtime.
 internal static partial void runtimeSetenv(@string k, @string v);
-
 internal static partial void runtimeUnsetenv(@string k);
 
 // runtimeClearenv is provided by the runtime (on platforms without

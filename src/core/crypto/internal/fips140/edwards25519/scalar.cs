@@ -161,7 +161,6 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
 internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{0x5b8ab432eac74798UL, 0x38afddd6de59d5d7UL,
     0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL}.array()
 ));
-
 internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
     0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL}.array()
 ));

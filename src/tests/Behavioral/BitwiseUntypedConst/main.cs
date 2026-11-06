@@ -9,13 +9,9 @@ internal static uint64 copysign(uint64 f, uint64 sign) {
     return (uint64)(f & ~signBit) | (uint64)(sign & signBit);
 }
 
-internal static uint64 clearLow(uint64 x) {
-    return x & ~(uint64)1;
-}
+internal static uint64 clearLow(uint64 x) { return x & ~(uint64)1; }
 
-internal static uint32 clearLow32(uint32 u) {
-    return (uint32)(u & ~1);
-}
+internal static uint32 clearLow32(uint32 u) { return (uint32)(u & ~1); }
 
 internal static void Main() {
     fmt.Println(copysign(0xFF, 0x8000000000000000UL));

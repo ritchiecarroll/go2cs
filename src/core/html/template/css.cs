@@ -221,7 +221,6 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
 }; }
 
 internal static slice<byte> expressionBytes = slice<byte>("expression"u8);
-
 internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 
 // cssValueFilter allows innocuous CSS values in the output including CSS

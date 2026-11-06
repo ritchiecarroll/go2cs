@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ReverseSortNaNOrder.go", "ReverseSortNaNOrder.cs", "AA8kgKKCpICmgAAGEIKmgqiCgoKCAAkYoKagpoCkgpaCgpaCgpaCloKCgpaCgg==")]
+[assembly: GoPositionMap("ReverseSortNaNOrder.go", "ReverseSortNaNOrder.cs", "AA8kgoKUlgAFEIKmgqiCgoKCAAkYkJaQlpSCloKCloKCloKWgoKCloKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

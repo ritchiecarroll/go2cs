@@ -8,13 +8,9 @@ partial struct T {
     internal nint n;
 }
 
-public static @string Hello(this T _) {
-    return "hello";
-}
+public static @string Hello(this T _) { return "hello"; }
 
-public static @string PtrHello(this ref T _) {
-    return "ptr hello";
-}
+public static @string PtrHello(this ref T _) { return "ptr hello"; }
 
 internal static ж<T> kept;
 
@@ -25,9 +21,7 @@ public static @string Via(this ж<T> Ꮡt) {
 
 internal static ж<T> sink;
 
-internal static @string onlyCall(ж<T> p) {
-    return p.Hello();
-}
+internal static @string onlyCall(ж<T> p) { return p.Hello(); }
 
 internal static @string alsoField(ж<T> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -51,13 +45,9 @@ internal static @string mark(@string s) {
     return s;
 }
 
-internal static @string join(@string a, @string b, @string c) {
-    return a + " "u8 + b + " "u8 + c;
-}
+internal static @string join(@string a, @string b, @string c) { return a + " "u8 + b + " "u8 + c; }
 
-internal static @string argOrder(ж<T> p) {
-    return join(mark("first"), p.Hello(), mark("third"));
-}
+internal static @string argOrder(ж<T> p) { return join(mark("first"), p.Hello(), mark("third")); }
 
 internal static @string ptrParam(ж<T> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

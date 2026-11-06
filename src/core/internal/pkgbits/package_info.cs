@@ -78,9 +78,9 @@ using static go.@internal.pkgbits_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsgKKAAA4igKKAABQugKKA")]
-[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqJA=")]
-[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCAppCmkAACEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiQ", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsggANIoIAEy6C")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+oJaAmrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqIA=")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMgAABEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
 [assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
 [assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]

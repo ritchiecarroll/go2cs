@@ -6,9 +6,7 @@ partial class main_package {
 
 public delegate nint Fn();
 
-public static @string String(this Fn fn) {
-    return "String(fn)";
-}
+public static @string String(this Fn fn) { return "String(fn)"; }
 
 partial interface Getter {
     nint Get();
@@ -16,9 +14,7 @@ partial interface Getter {
 
 public delegate nint G();
 
-public static nint Get(this G g) {
-    return 7;
-}
+public static nint Get(this G g) { return 7; }
 
 partial interface Both :
     fmt.Stringer

@@ -65,33 +65,16 @@ partial struct Context {
     public uint64 LastExceptionFromRip;
 }
 
-public static uintptr PC(this ref Context c) {
-    return (uintptr)c.Rip;
-}
-
-public static uintptr SP(this ref Context c) {
-    return (uintptr)c.Rsp;
-}
+public static uintptr PC(this ref Context c) { return (uintptr)c.Rip; }
+public static uintptr SP(this ref Context c) { return (uintptr)c.Rsp; }
 
 // AMD64 does not have link register, so this returns 0.
-public static uintptr LR(this ref Context c) {
-    return 0;
-}
+public static uintptr LR(this ref Context c) { return 0; }
+public static void SetLR(this ref Context c, uintptr x) { }
 
-public static void SetLR(this ref Context c, uintptr x) {
-}
-
-public static void SetPC(this ref Context c, uintptr x) {
-    c.Rip = (uint64)x;
-}
-
-public static void SetSP(this ref Context c, uintptr x) {
-    c.Rsp = (uint64)x;
-}
-
-public static void SetFP(this ref Context c, uintptr x) {
-    c.Rbp = (uint64)x;
-}
+public static void SetPC(this ref Context c, uintptr x) { c.Rip = (uint64)x; }
+public static void SetSP(this ref Context c, uintptr x) { c.Rsp = (uint64)x; }
+public static void SetFP(this ref Context c, uintptr x) { c.Rbp = (uint64)x; }
 
 public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) {
     var sp = c.SP() - (uintptr)goarch.StackAlign;

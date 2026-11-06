@@ -1674,9 +1674,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
 }
 
 internal static @unsafe.Pointer cgoTraceback;
-
 internal static @unsafe.Pointer cgoContext;
-
 internal static @unsafe.Pointer cgoSymbolizer;
 
 internal static bool cgoTracebackAvailable() {

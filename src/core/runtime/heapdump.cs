@@ -43,7 +43,6 @@ internal static UntypedInt tagMemProf => 16;
 internal static UntypedInt tagAllocSample => 17;
 
 internal static uintptr dumpfd; // fd to write the dump to.
-
 internal static readonly ж<slice<byte>> Ꮡtmpbuf = new StaticBox<slice<byte>>(default(slice<byte>));
 internal static ref slice<byte> tmpbuf => ref ((StaticBox<slice<byte>>)Ꮡtmpbuf).ValueSlot;
 
@@ -52,7 +51,6 @@ internal static UntypedInt bufSize => 4096;
 
 internal static readonly ж<array<byte>> Ꮡbuf = new StaticBox<array<byte>>(new array<byte>(4096));
 internal static ref array<byte> buf => ref ((StaticBox<array<byte>>)Ꮡbuf).ValueSlot;
-
 internal static uintptr nbuf;
 
 internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {

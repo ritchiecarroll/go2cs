@@ -430,25 +430,11 @@ partial struct ΔfuncDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
-internal static ast.Node node(this importDecl d) {
-    return new ast.ImportSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔconstDecl d) {
-    return new ast.ValueSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔvarDecl d) {
-    return new ast.ValueSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔtypeDecl d) {
-    return new ast.TypeSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔfuncDecl d) {
-    return new ast.FuncDeclжNode(d.decl);
-}
+internal static ast.Node node(this importDecl d) { return new ast.ImportSpecжNode(d.spec); }
+internal static ast.Node node(this ΔconstDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node(this ΔvarDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node(this ΔtypeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+internal static ast.Node node(this ΔfuncDecl d) { return new ast.FuncDeclжNode(d.decl); }
 
 internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
     foreach (var (_, d) in decls) {

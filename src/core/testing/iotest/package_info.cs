@@ -65,7 +65,7 @@ using static go.testing.iotest_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("testing/iotest/logger.go", "logger.cs", "AA8isoKClJSssgAHELKCgpSUrLI=")]
-[assembly: GoPositionMap("testing/iotest/reader.go", "reader.cs", "AA4ioOyCgpSqoOyCAAIQ0AAIENaCgoKClIKUgpS4mKD+goKClKiS7oIACBKCgpSCgoKUgoKUggAIFPKCgoK4goKUgpSCgqaUgILagoKAgqSAgqSAgtqAgsiCgpSCuICCpICCyIKClIK4gIKkgoKUgriCgoKUgoKUgqaCgqaClIKClIKmgpSCgoKCgpSUgrg=")]
+[assembly: GoPositionMap("testing/iotest/reader.go", "reader.cs", "AA4ikNyCgpSqkNyCAAIQwAAHENaCgoKClIKUgpS4mJDugoKClKiS7oIACBKCgpSCgoKUgoKUggAIFPKCgoK4goKUgpSCgqaUgILagoKAgqSAgqSAgtqAgsiCgpSCuICCpICCyIKClIK4gIKkgoKUgriCgoKUgoKUgqaCgqaClIKClIKmgpSCgoKCgpSUgrg=")]
 [assembly: GoPositionMap("testing/iotest/writer.go", "writer.cs", "AAkWogAHELKCpoKClIKCgpQ=")]
 // </GoSourcePositionMaps>
 

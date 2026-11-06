@@ -6,7 +6,6 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 partial struct Celsius /*num:float64*/;
-
 partial struct Counter /*num:nint*/;
 
 internal partial struct main_table /*dyn*/ {

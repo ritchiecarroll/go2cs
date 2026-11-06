@@ -8,25 +8,17 @@ partial struct T {
     internal nint n;
 }
 
-public static @string Hello(this T _) {
-    return "hello";
-}
+public static @string Hello(this T _) { return "hello"; }
 
-public static nint N(this T t) {
-    return t.n;
-}
+public static nint N(this T t) { return t.n; }
 
-public static @string PtrHello(this ref T _) {
-    return "ptr hello";
-}
+public static @string PtrHello(this ref T _) { return "ptr hello"; }
 
 partial interface Helloer {
     @string Hello();
 }
 
-internal static @string direct(ж<T> p) {
-    return p.Hello();
-}
+internal static @string direct(ж<T> p) { return p.Hello(); }
 
 internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;

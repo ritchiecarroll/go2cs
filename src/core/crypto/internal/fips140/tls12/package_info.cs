@@ -57,7 +57,7 @@ using static go.crypto.@internal.fips140.tls12_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/tls12/cast.go", "cast.cs", "ABAegoK4uAAHEIKU", "16-37:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/tls12/tls12.go", "tls12.cs", "AA8iwoKClIKCqLKCgpSCgoKCgoKUgoIACBLmgpSCxoLGtg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls12/tls12.go", "tls12.cs", "AA8iwoKClIKCqLKCgpSCgoKCgoKUgoIABxLmgpSCxoLGtg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

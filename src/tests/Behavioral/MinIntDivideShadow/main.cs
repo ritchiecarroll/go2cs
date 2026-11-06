@@ -5,9 +5,7 @@ using Δmath = math_package;
 
 partial class main_package {
 
-internal static @string quo(@string a, @string b) {
-    return a + "/"u8 + b;
-}
+internal static @string quo(@string a, @string b) { return a + "/"u8 + b; }
 
 internal static @string rem = "remainder";
 

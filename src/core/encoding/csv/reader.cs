@@ -82,9 +82,7 @@ public static @string Error(this ref ParseError e) {
     return fmt.Sprintf("parse error on line %d, column %d: %v"u8, e.Line, e.Column, e.Err);
 }
 
-public static error Unwrap(this ref ParseError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref ParseError e) { return e.Err; }
 
 // These are the errors that can be returned in [ParseError.Err].
 public static error ErrBareQuote = errors.New("bare \" in non-quoted-field");

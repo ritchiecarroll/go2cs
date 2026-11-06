@@ -311,7 +311,6 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
 }
 
 internal static slice<rune> anyRuneNotNL = slice<rune>([0, (rune)'\n' - 1, (rune)'\n' + 1, Δunicode.MaxRune]);
-
 internal static slice<rune> anyRune = slice<rune>([0, Δunicode.MaxRune]);
 
 // makeOnePass creates a onepass Prog, if possible. It is possible if at any alt,

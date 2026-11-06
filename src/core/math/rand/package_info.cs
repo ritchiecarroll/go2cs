@@ -66,9 +66,9 @@ using static go.math.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUgsoANmwAQoQB")]
-[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlILKABw4ACJE")]
-[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgoKmgqiQppCmkoKUqJCmkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUprKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAkSgqaCpoKmwoKCggACLAATAoKUlKaCgoIAChaClJS8oKigqKCooKaQqrCqsKqwqKCooKigqrAAAhDgAAIUAAgAAAIS8P6ygoKCprKCgoKmooKCqMKCgoKqooKUutKCgoI=")]
+[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUgsoANWwAQYQB")]
+[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlILKABs4ACFE")]
+[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgoKmgqiAloCWkoKUqICWkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUprKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAkSgqaCpoKmwoKCggACLAATAoKUlKaCgoIAChaClJS8kJiQmJCYkJaAmqCaoJqgmJCYkJiQmqAAARDQAAEU8AABEuDusoKCgqaygoKCpqKCgqjCgoKCqqKClLrSgoKC")]
 [assembly: GoPositionMap("math/rand/rng.go", "rng.cs", "ABQwAKABxgKSvIKCgoKUqJKClIKClIKmgoKCgoKCgoKCgoLMkqiSgoKmgoKmgoI=")]
 [assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
 // </GoSourcePositionMaps>

@@ -32,7 +32,6 @@ internal static void Store(this ж<onceError> Ꮡa, error err) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
-
 internal static error Load(this ж<onceError> Ꮡa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;

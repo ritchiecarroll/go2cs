@@ -258,7 +258,6 @@ internal static void printquoted(@string s) {
 internal static void printpointer(@unsafe.Pointer Δp) {
     printhex((uint64)(uintptr)Δp);
 }
-
 internal static void printuintptr(uintptr Δp) {
     printhex((uint64)Δp);
 }

@@ -9,14 +9,8 @@ partial struct path {
     internal @string name;
 }
 
-internal static void Done(this path p) {
-    fmt.Println("done", p.name);
-}
-
-internal static void Pop(this path p, nint k) {
-    fmt.Println("pop", k, p.name);
-}
-
+internal static void Done(this path p) { fmt.Println("done", p.name); }
+internal static void Pop(this path p, nint k) { fmt.Println("pop", k, p.name); }
 internal static void Run(this path p, ж<Δsync.WaitGroup> wg) {
     fmt.Println("run", p.name);
     wg.Done();

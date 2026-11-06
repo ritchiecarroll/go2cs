@@ -15,13 +15,9 @@ partial struct Leaf {
     internal slice<Leaf> kids;
 }
 
-public static slice<Leaf> Children(this Leaf l) {
-    return l.kids;
-}
+public static slice<Leaf> Children(this Leaf l) { return l.kids; }
 
-public static @string Label(this Leaf l) {
-    return l.name;
-}
+public static @string Label(this Leaf l) { return l.name; }
 
 public static nint Count<N>(N n)
     where N : Tree<N>
@@ -79,9 +75,7 @@ public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
     return () => Ꮡn.Value.next;
 }
 
-public static array<ж<Node>> Triple(this ж<Node> Ꮡn) {
-    return new ж<Node>[]{Ꮡn, Ꮡn, Ꮡn}.array();
-}
+public static array<ж<Node>> Triple(this ж<Node> Ꮡn) { return new ж<Node>[]{Ꮡn, Ꮡn, Ꮡn}.array(); }
 
 public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     return (Func<ж<Node>, bool> yield) => {
@@ -93,9 +87,7 @@ public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     };
 }
 
-public static @string Label(this ref Node n) {
-    return n.name;
-}
+public static @string Label(this ref Node n) { return n.name; }
 
 public static slice<@string> Walk<N>(N n)
     where N : Stepper<N>

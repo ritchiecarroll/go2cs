@@ -23,7 +23,6 @@ internal static void decryptBlock(ref Block c, slice<byte> dst, slice<byte> src)
     decryptBlockGeneric(ref nonnil(ref c).blockExpanded, dst, src);
 }
 
-internal static void checkGenericIsExpected() {
-}
+internal static void checkGenericIsExpected() { }
 
 } // end aes_package

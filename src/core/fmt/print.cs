@@ -202,13 +202,9 @@ internal static void free(this ж<pp> Ꮡp) {
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
 
-internal static (nint wid, bool ok) Width(this ref pp p) {
-    return (p.fmt.wid, p.fmt.widPresent);
-}
+internal static (nint wid, bool ok) Width(this ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
 
-internal static (nint prec, bool ok) Precision(this ref pp p) {
-    return (p.fmt.prec, p.fmt.precPresent);
-}
+internal static (nint prec, bool ok) Precision(this ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
 
 internal static bool Flag(this ref pp p, nint b) {
     switch (b) {

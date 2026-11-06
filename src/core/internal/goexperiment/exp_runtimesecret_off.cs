@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool RuntimeSecret = false;
-
 public static UntypedInt RuntimeSecretInt => 0;
 
 } // end goexperiment_package

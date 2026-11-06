@@ -45,13 +45,9 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 }
 
 internal static FS _ᴛ1ʗ = new subFSжFS(((ж<subFS>)nil));
-
 internal static ReadDirFS _ᴛ2ʗ = new subFSжReadDirFS(((ж<subFS>)nil));
-
 internal static ReadFileFS _ᴛ3ʗ = new subFSжReadFileFS(((ж<subFS>)nil));
-
 internal static ReadLinkFS _ᴛ4ʗ = new subFSжReadLinkFS(((ж<subFS>)nil));
-
 internal static GlobFS _ᴛ5ʗ = new subFSжGlobFS(((ж<subFS>)nil));
 
 partial struct subFS {

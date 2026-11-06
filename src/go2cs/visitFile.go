@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"log"
 	"sort"
 	"strings"
@@ -164,8 +165,23 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	v.collectMethodNamespaceUsings(file)
 
+	// Each declaration's emission opens with a blank line; the separator removes it where Go writes the
+	// declaration directly under the previous one (class K1, topLevelSeparation.go).
+	var prevDecl ast.Decl
+	prevShape := declShapeOther
+
 	for _, decl := range file.Decls {
+		mark := v.outputBuilder.Len()
+		v.lastDeclShape = declShapeOther
 		v.visitDecl(decl)
+
+		if genDecl, isGen := decl.(*ast.GenDecl); (isGen && genDecl.Tok == token.IMPORT) || !v.emittedSince(mark) {
+			prevDecl = nil
+			continue
+		}
+
+		v.separateTopLevelDecl(prevDecl, prevShape, decl, v.lastDeclShape, mark)
+		prevDecl, prevShape = decl, v.lastDeclShape
 	}
 
 	if v.options.includeComments {

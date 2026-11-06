@@ -43,7 +43,6 @@ using math;
 partial class fiat_package {
 
 partial struct p224Uint1 /*num:uint64*/; // We use uint64 instead of a more narrow type for performance reasons; see https://github.com/mit-plv/fiat-crypto/pull/1006#issuecomment-892625927
-
 partial struct p224Int1 /*num:int64*/;   // We use uint64 instead of a more narrow type for performance reasons; see https://github.com/mit-plv/fiat-crypto/pull/1006#issuecomment-892625927
 
 // The type p224MontgomeryDomainFieldElement is a field element in the Montgomery domain.

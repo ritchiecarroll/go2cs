@@ -19,16 +19,12 @@ partial class jpeg_package {
 // A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
-public static @string Error(this FormatError e) {
-    return "invalid JPEG format: "u8 + ((@string)e);
-}
+public static @string Error(this FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
 
 // An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
-public static @string Error(this UnsupportedError e) {
-    return "unsupported JPEG feature: "u8 + ((@string)e);
-}
+public static @string Error(this UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
 
 internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio");
 

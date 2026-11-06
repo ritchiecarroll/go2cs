@@ -15,8 +15,6 @@ partial struct Base {
     public @string Tag;
 }
 
-public static @string Read(this Base b) {
-    return "read:"u8 + b.Tag;
-}
+public static @string Read(this Base b) { return "read:"u8 + b.Tag; }
 
 } // end iolike_package

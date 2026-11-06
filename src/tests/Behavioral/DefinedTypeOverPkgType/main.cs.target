@@ -10,22 +10,13 @@ partial class main_package {
 partial struct stdFunction /*global::go.unsafe_package.Pointer*/;
 
 internal static stdFunction handler;
-
 internal static stdFunction other;
 
 partial struct counter /*global::go.sync.atomic_package.Uint32*/;
 
-internal static uint32 Load(this ж<counter> Ꮡc) {
-    return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Load();
-}
-
-internal static void Store(this ж<counter> Ꮡc, uint32 v) {
-    (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Store(v);
-}
-
-internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) {
-    return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Add(d);
-}
+internal static uint32 Load(this ж<counter> Ꮡc) { return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Load(); }
+internal static void Store(this ж<counter> Ꮡc, uint32 v) { (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Store(v); }
+internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) { return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Add(d); }
 
 internal static void Main() {
     handler = other;
@@ -45,11 +36,8 @@ internal static void Main() {
 }
 
 partial struct handleT /*num:uintptr*/;
-
 partial struct keyT /*num:uintptr*/;
 
-internal static keyT openKey(handleT h) {
-    return (keyT)(uintptr)h;
-}
+internal static keyT openKey(handleT h) { return (keyT)(uintptr)h; }
 
 } // end main_package

@@ -50,7 +50,6 @@ internal static void pHash<H>(Func<H> hashΔ1, slice<byte> result, slice<byte> s
 }
 
 internal static UntypedInt masterSecretLength => 48;
-
 internal static ref readonly @string extendedMasterSecretLabel => ref extendedMasterSecretLabelᵇ;
 private static readonly @string extendedMasterSecretLabelᵇ = "extended master secret"u8;
 

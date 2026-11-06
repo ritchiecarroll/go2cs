@@ -57,7 +57,6 @@ public static CFRef TimeToCFDateRef(time.Time t) {
 partial struct CFString /*num:uintptr*/;
 
 internal static UntypedInt kCFAllocatorDefault => 0;
-
 internal static UntypedInt kCFStringEncodingUTF8 => 0x08000100;
 
 //go:cgo_import_dynamic x509_CFDataCreate CFDataCreate "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -69,7 +68,6 @@ public static CFRef BytesToCFData(slice<byte> b) {
     runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p));
     return (CFRef)ret;
 }
-
 internal static partial void x509_CFDataCreate_trampoline();
 
 //go:cgo_import_dynamic x509_CFStringCreateWithBytes CFStringCreateWithBytes "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -84,7 +82,6 @@ public static CFString StringToCFString(@string s) {
     runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p));
     return (CFString)ret;
 }
-
 internal static partial void x509_CFStringCreateWithBytes_trampoline();
 
 //go:cgo_import_dynamic x509_CFDictionaryGetValueIfPresent CFDictionaryGetValueIfPresent "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -99,7 +96,6 @@ public static (CFRef value, bool ok) CFDictionaryGetValueIfPresent(CFRef dict, C
     }
     return (value, true);
 }
-
 internal static partial void x509_CFDictionaryGetValueIfPresent_trampoline();
 
 internal static UntypedInt kCFNumberSInt32Type => 3;
@@ -119,7 +115,6 @@ public static (int32, error) CFNumberGetValue(CFRef num) {
     }
     return (value, default);
 }
-
 internal static partial void x509_CFNumberGetValue_trampoline();
 
 //go:cgo_import_dynamic x509_CFDataGetLength CFDataGetLength "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -127,7 +122,6 @@ public static nint CFDataGetLength(CFRef data) {
     var ret = syscall(abi.FuncPCABI0(x509_CFDataGetLength_trampoline), (uintptr)data, 0, 0, 0, 0, 0D);
     return (nint)ret;
 }
-
 internal static partial void x509_CFDataGetLength_trampoline();
 
 //go:cgo_import_dynamic x509_CFDataGetBytePtr CFDataGetBytePtr "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -135,7 +129,6 @@ public static uintptr CFDataGetBytePtr(CFRef data) {
     var ret = syscall(abi.FuncPCABI0(x509_CFDataGetBytePtr_trampoline), (uintptr)data, 0, 0, 0, 0, 0D);
     return ret;
 }
-
 internal static partial void x509_CFDataGetBytePtr_trampoline();
 
 //go:cgo_import_dynamic x509_CFArrayGetCount CFArrayGetCount "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -143,7 +136,6 @@ public static nint CFArrayGetCount(CFRef Δarray) {
     var ret = syscall(abi.FuncPCABI0(x509_CFArrayGetCount_trampoline), (uintptr)Δarray, 0, 0, 0, 0, 0D);
     return (nint)ret;
 }
-
 internal static partial void x509_CFArrayGetCount_trampoline();
 
 //go:cgo_import_dynamic x509_CFArrayGetValueAtIndex CFArrayGetValueAtIndex "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -151,7 +143,6 @@ public static CFRef CFArrayGetValueAtIndex(CFRef Δarray, nint index) {
     var ret = syscall(abi.FuncPCABI0(x509_CFArrayGetValueAtIndex_trampoline), (uintptr)Δarray, (uintptr)index, 0, 0, 0, 0D);
     return (CFRef)ret;
 }
-
 internal static partial void x509_CFArrayGetValueAtIndex_trampoline();
 
 //go:cgo_import_dynamic x509_CFEqual CFEqual "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -159,14 +150,12 @@ public static bool CFEqual(CFRef a, CFRef b) {
     var ret = syscall(abi.FuncPCABI0(x509_CFEqual_trampoline), (uintptr)a, (uintptr)b, 0, 0, 0, 0D);
     return ret == 1;
 }
-
 internal static partial void x509_CFEqual_trampoline();
 
 //go:cgo_import_dynamic x509_CFRelease CFRelease "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static void CFRelease(CFRef @ref) {
     syscall(abi.FuncPCABI0(x509_CFRelease_trampoline), (uintptr)@ref, 0, 0, 0, 0, 0D);
 }
-
 internal static partial void x509_CFRelease_trampoline();
 
 //go:cgo_import_dynamic x509_CFArrayCreateMutable CFArrayCreateMutable "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -175,14 +164,12 @@ public static CFRef CFArrayCreateMutable() {
     /* kCFTypeArrayCallBacks */
     return (CFRef)ret;
 }
-
 internal static partial void x509_CFArrayCreateMutable_trampoline();
 
 //go:cgo_import_dynamic x509_CFArrayAppendValue CFArrayAppendValue "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static void CFArrayAppendValue(CFRef Δarray, CFRef val) {
     syscall(abi.FuncPCABI0(x509_CFArrayAppendValue_trampoline), (uintptr)Δarray, (uintptr)val, 0, 0, 0, 0D);
 }
-
 internal static partial void x509_CFArrayAppendValue_trampoline();
 
 //go:cgo_import_dynamic x509_CFDateCreate CFDateCreate "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -190,7 +177,6 @@ public static CFRef CFDateCreate(float64 seconds) {
     var ret = syscall(abi.FuncPCABI0(x509_CFDateCreate_trampoline), kCFAllocatorDefault, 0, 0, 0, 0, seconds);
     return (CFRef)ret;
 }
-
 internal static partial void x509_CFDateCreate_trampoline();
 
 //go:cgo_import_dynamic x509_CFErrorCopyDescription CFErrorCopyDescription "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
@@ -198,14 +184,12 @@ public static CFRef CFErrorCopyDescription(CFRef errRef) {
     var ret = syscall(abi.FuncPCABI0(x509_CFErrorCopyDescription_trampoline), (uintptr)errRef, 0, 0, 0, 0, 0D);
     return (CFRef)ret;
 }
-
 internal static partial void x509_CFErrorCopyDescription_trampoline();
 
 //go:cgo_import_dynamic x509_CFErrorGetCode CFErrorGetCode "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static nint CFErrorGetCode(CFRef errRef) {
     return (nint)syscall(abi.FuncPCABI0(x509_CFErrorGetCode_trampoline), (uintptr)errRef, 0, 0, 0, 0, 0D);
 }
-
 internal static partial void x509_CFErrorGetCode_trampoline();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -220,7 +204,6 @@ public static (CFRef, error) CFStringCreateExternalRepresentation(CFRef strRef) 
     }
     return ((CFRef)ret, default);
 }
-
 internal static partial void x509_CFStringCreateExternalRepresentation_trampoline();
 
 // syscall is implemented in the runtime package (runtime/sys_darwin.go)

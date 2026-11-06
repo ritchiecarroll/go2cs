@@ -44,7 +44,6 @@ partial struct edge {
 }
 
 internal static nint left = 10;
-
 internal static nint right = 20;
 
 } // end main_package

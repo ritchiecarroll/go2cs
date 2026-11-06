@@ -7,11 +7,9 @@ namespace go;
 partial class runtime_package {
 
 //go:nosplit
-internal static void osPreemptExtEnter(ref m mp) {
-}
+internal static void osPreemptExtEnter(ref m mp) { }
 
 //go:nosplit
-internal static void osPreemptExtExit(ref m mp) {
-}
+internal static void osPreemptExtExit(ref m mp) { }
 
 } // end runtime_package

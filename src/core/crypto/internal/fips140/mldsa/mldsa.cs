@@ -54,7 +54,6 @@ internal static UntypedInt maxK => 8;
 internal static UntypedInt maxL => 7;
 internal static UntypedInt maxλ => 256;
 internal static UntypedInt maxγ1 => 19;
-
 internal static UntypedInt maxPubKeySize => /* PublicKeySize87 */ 2592;
 
 partial struct PrivateKey {

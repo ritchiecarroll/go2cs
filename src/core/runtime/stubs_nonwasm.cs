@@ -7,8 +7,6 @@ namespace go;
 partial class runtime_package {
 
 // pause is only used on wasm.
-internal static void pause(uintptr newsp) {
-    throw panic("unreachable");
-}
+internal static void pause(uintptr newsp) { throw panic("unreachable"); }
 
 } // end runtime_package

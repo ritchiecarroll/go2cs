@@ -387,7 +387,6 @@ internal static @unsafe.Pointer convT(ж<_type> Ꮡt, @unsafe.Pointer v) {
     typedmemmove(Ꮡt, x, v);
     return x;
 }
-
 internal static @unsafe.Pointer convTnoptr(ж<_type> Ꮡt, @unsafe.Pointer v) {
     ref var t = ref Ꮡt.DerefOrNull();
 

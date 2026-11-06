@@ -59,7 +59,6 @@ internal static array<float64> tanhP = new float64[]{
     -9.92877231001918586564e1D,
     -1.61468768441708447952e3D
 }.array();
-
 internal static array<float64> tanhQ = new float64[]{
     1.12811678491632931402e2D,
     2.23548839060100448583e3D,

@@ -324,9 +324,7 @@ internal static ж<poolLocal> indexLocal(@unsafe.Pointer l, nint i) {
 
 // Implemented in runtime.
 internal static partial void runtime_registerPoolCleanup(Action cleanup);
-
 internal static partial nint runtime_procPin();
-
 internal static partial void runtime_procUnpin();
 
 // The below are implemented in internal/runtime/atomic and the

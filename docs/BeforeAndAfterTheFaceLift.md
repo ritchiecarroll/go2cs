@@ -38,7 +38,7 @@ After, the same file:
 
 <!-- source: src/core/strings/builder.cs:53 -->
 ```csharp
-public static nint Len(this ref Builder b) {
+public static nint Len(this ref Builder b) { return len(b.buf); }
 ```
 
 From the `this ref` receiver a source generator writes the overload that takes a pointer, as it did from the attribute.
@@ -101,7 +101,7 @@ Before, `src/core/time/time.cs`:
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:938 -->
+<!-- source: src/core/time/time.cs:936 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -240,7 +240,7 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:976 -->
+<!-- source: src/core/time/time.cs:974 -->
 ```csharp
 internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 ```

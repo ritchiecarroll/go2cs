@@ -6,13 +6,9 @@ using sort = sort_package;
 partial class main_package {
 
 partial struct Names /*map[nint, @string]*/;
-
 partial struct Scores /*[]float64*/;
-
 partial struct Feed /*chan nint*/;
-
 // type Pred is a methodless func type — rendered inline as its base delegate
-
 partial struct Grid /*[2]nint*/;
 
 internal static T first<T>(/*[2]*/ array<T> a) {

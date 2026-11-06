@@ -24,9 +24,7 @@ public static @string Name(this ж<T> Ꮡt) {
 partial struct U {
 }
 
-public static @string Name(this ref U _) {
-    return "U";
-}
+public static @string Name(this ref U _) { return "U"; }
 
 internal static @string classify(Namer i) {
     switch (i.type()) {

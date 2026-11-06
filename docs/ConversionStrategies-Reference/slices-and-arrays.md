@@ -704,7 +704,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 213, 216-217 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-214 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -1403,7 +1403,7 @@ nsLit := ns{}                 // type ns [2]withArray — withArray has a [2][3]
 nbLit := nb{}                 // type nb [4]byte — element needs nothing
 ```
 
-<!-- source: src/tests/Behavioral/CompositeLiteralElements/main.cs:128, 131, 138, 147 -->
+<!-- source: src/tests/Behavioral/CompositeLiteralElements/main.cs:126, 129, 136, 145 -->
 ```csharp
 var nnLit = new nn(new array<array<nint>>(2, () => new(3)));
 …
@@ -1490,7 +1490,7 @@ var x [2][4]byte           // len(x), len(x[1]) => 2 4
 var deep [2][3][4]byte
 var se [2]inner            // type inner struct { b [3]byte }
 ```
-<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs:24, 31, 41 -->
+<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs:22, 29, 39 -->
 ```csharp
 array<array<byte>> x = new(2, () => new(4));
 …
@@ -1666,7 +1666,7 @@ rule, one predicate, both containers:
 grid := make([][4]int32, 3)
 capped := make([][2]int, 1, 3)
 ```
-<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs.target:99, 105 -->
+<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs.target:97, 103 -->
 ```csharp
 var grid = GoReflect.WithElemDims(new slice<array<int32>>(3, () => new(4)), 4);
 …
@@ -1848,7 +1848,7 @@ lifted anonymous elements and cross-package generic elements:
 ```go
 ptrs := vals.([]*atomic.Int32)
 ```
-<!-- source: src/tests/Behavioral/ArrayOfCrossPackageType/main.cs.target:18 -->
+<!-- source: src/tests/Behavioral/ArrayOfCrossPackageType/main.cs.target:17 -->
 ```csharp
 var ptrs = vals._<slice<ж<atomic.Int32>>>();
 ```
@@ -1875,7 +1875,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:161-162 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

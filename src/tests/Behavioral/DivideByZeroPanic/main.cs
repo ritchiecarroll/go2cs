@@ -41,9 +41,7 @@ internal static (nint result, bool recovered) safeMod(nint a, nint b) {
     return (result, recovered);
 }
 
-internal static nint divide(nint a, nint b) {
-    return quo(a, b);
-}
+internal static nint divide(nint a, nint b) { return quo(a, b); }
 
 internal static bool /*ok*/ outerGuard(nint a, nint b) {
     bool ok = default;

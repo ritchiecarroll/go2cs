@@ -78,7 +78,7 @@ value the `return` has already evaluated, so the results are declared **before**
 back **after** the `finally`, and every exit inside the `try` leaves through a `goto` — which runs the
 `finally` exactly as a `return` would, without freezing a result the deferred calls may still change:
 
-<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs:73-90 -->
+<!-- source: src/tests/Behavioral/NamedReturnDefer/main.cs:71-88 -->
 ```csharp
 internal static (nint @out, @string label) compute(nint x) {
     nint @out = default;
@@ -178,7 +178,7 @@ or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
 	f := report
 	go f("via func value")
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:124-136 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:110-122 -->
 ```csharp
     nint n = 3;
     goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
@@ -220,7 +220,7 @@ effects included:
 	x = 2
 	seq = 100
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:143-150 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:129-136 -->
 ```csharp
         nint x = 1;
         defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
@@ -959,7 +959,7 @@ not only for the func-literal-callee case, so `convFuncLit` (reached via convCal
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:70-73 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:69-72 -->
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
@@ -1089,7 +1089,7 @@ a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buf
 `visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
 `DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
 
-<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:19-22 -->
+<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:15-18 -->
 ```csharp
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
@@ -1231,7 +1231,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:75 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:68 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
@@ -1245,7 +1245,7 @@ defer(Ꮡs.release, ref ᒐ);                 // DeferCallOrder's acquireAndWork
 ```
 (net's own `defer conf.releaseSema()` sites take the receiver-call lowering into the `finally`, described above, when its gates pass.) The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
 
-The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ)` for `defer b.c.reset()`, the `ж<T>` overload captured at defer time and mutating the real field. (pprof's own `defer b.deck.reset()` passes the gates of the [receiver-call lowering](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally) and is emitted into the frame's `finally` instead.) <!-- src/tests/Behavioral/DeferValueFieldPtrReceiver/main.cs.target:28 `defer(Ꮡb.Ꮡc.reset, ref ᒐ);`; src/core/runtime/pprof/proto.cs:686 `finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }` --> Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
+The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ)` for `defer b.c.reset()`, the `ж<T>` overload captured at defer time and mutating the real field. (pprof's own `defer b.deck.reset()` passes the gates of the [receiver-call lowering](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally) and is emitted into the frame's `finally` instead.) <!-- src/tests/Behavioral/DeferValueFieldPtrReceiver/main.cs.target:23 `defer(Ꮡb.Ꮡc.reset, ref ᒐ);`; src/core/runtime/pprof/proto.cs:684 `finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }` --> Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
 
 ## A deferred VALUE-receiver method passes its receiver as the thunk's first eager argument
 

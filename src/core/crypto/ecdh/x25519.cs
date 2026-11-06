@@ -23,9 +23,7 @@ internal static nint x25519SharedSecretSize = 32;
 //
 // Multiple invocations of this function will return the same value, so it can
 // be used for equality checks and switch statements.
-public static ΔCurve X25519() {
-    return new x25519CurveжΔCurve(x25519);
-}
+public static ΔCurve X25519() { return new x25519CurveжΔCurve(x25519); }
 
 internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve());
 

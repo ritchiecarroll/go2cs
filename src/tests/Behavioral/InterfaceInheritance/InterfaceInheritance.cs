@@ -8,37 +8,19 @@ partial struct T1 {
     internal @string name;
 }
 
-public static void M(this T1 t) {
-}
-
-public static void N(this T1 t) {
-}
-
-public static @string String(this T1 t) {
-    return "";
-}
-
-public static @string Error(this T1 t) {
-    return "";
-}
+public static void M(this T1 t) { }
+public static void N(this T1 t) { }
+public static @string String(this T1 t) { return ""; }
+public static @string Error(this T1 t) { return ""; }
 
 partial struct T2 {
     internal @string name;
 }
 
-public static void M(this T2 t) {
-}
-
-public static void N(this T2 t) {
-}
-
-public static @string String(this T2 t) {
-    return "";
-}
-
-public static @string Error(this T2 t) {
-    return "";
-}
+public static void M(this T2 t) { }
+public static void N(this T2 t) { }
+public static @string String(this T2 t) { return ""; }
+public static @string Error(this T2 t) { return ""; }
 
 partial interface I {
     void M();

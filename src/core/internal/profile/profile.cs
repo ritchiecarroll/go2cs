@@ -143,7 +143,6 @@ public static (ж<Profile>, error) Parse(io.Reader r) {
 }
 
 internal static error errMalformed = fmt.Errorf("malformed profile format"u8);
-
 public static error ErrNoData = fmt.Errorf("empty input file"u8);
 
 internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {

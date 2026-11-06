@@ -9,26 +9,18 @@ partial class main_package {
 partial struct T {
 }
 
-public static @string Run(this T _) {
-    return "method";
-}
+public static @string Run(this T _) { return "method"; }
 
-public static @string Run() {
-    return "func";
-}
+public static @string Run() { return "func"; }
 
-internal static @string use(Func<@string> f) {
-    return f();
-}
+internal static @string use(Func<@string> f) { return f(); }
 
 internal static @string show(any v) {
     var t = reflect.TypeOf(v);
     return fmt.Sprintf("%s in=%d out=%d"u8, t.Kind(), t.NumIn(), t.NumOut());
 }
 
-internal static any retAny() {
-    return (Func<@string>)(Run);
-}
+internal static any retAny() { return (Func<@string>)(Run); }
 
 internal static void Main() {
     Func<@string> a = Run;

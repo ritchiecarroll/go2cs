@@ -72,7 +72,7 @@ using static go.crypto.ecdsa_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEJ+AAgCgoKUgoKUAAIQ0oKClAANLAAOAoKUlKSkpKS4ooKClAAGHAANApSkpKSkuKKCgpQAECrSgoKUgoKUpoKUpKSkupKssoKClKrSAAYiAA4ClKSkpKS4ooKClIKClAAGHgAOApSkpKSkuKKCgpQAAiQADwKClIIAAhDSgoKClJSUlJSkpKSk+KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpQACgaigpSCgpSUpKSkpPiigoKUkoKUgoKUpoKCooKU6sKClIKClJKClAADEvKCgoKUlJSUpKSkpLiigoKUgoKUgpTmsoKCipSmooKClKaigoKUpqKCgpQADQrCgoK4gpSCpoKCgpSUAA0SwpSClIKmgoKCgoLowpSUgoKC", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "666=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABosooKmgoKmgoKCgqyygoKCpoKCgpSmAAUYAA4CgoKmgoKCipSmooKmlpKClIKUgpSmgoKUsoKCgoKmlIKCgriCgoKCgoK4AAISAAkCgpSCgpSmgoKmgoKUlIKUgpSCuIKUgoKClIKClIKUgqaY0oKCgoKUgpSCgg==", "", "", "93=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
-[assembly: GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
+[assembly: GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

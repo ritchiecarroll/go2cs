@@ -412,14 +412,8 @@ internal static ж<op> makeLoad(ж<op> Ꮡderef) {
 
 partial struct opHeap /*[]ж<op>*/;
 
-internal static nint Len(this opHeap h) {
-    return len(h);
-}
-
-internal static void Swap(this opHeap h, nint i, nint j) {
-    (h[i], h[j]) = (h[j], h[i]);
-}
-
+internal static nint Len(this opHeap h) { return len(h); }
+internal static void Swap(this opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
 internal static bool Less(this opHeap h, nint i, nint j) {
     nint priority(ж<op> o) {
         if (o.Δop == "deref"u8 || o.Δop == "const"u8) {

@@ -33,16 +33,14 @@ internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 // plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
-internal static void isPersonalizationString(this plainPersonalizationString _) {
-}
+internal static void isPersonalizationString(this plainPersonalizationString _) { }
 
 // Each entry in blockAlignedPersonalizationString is written to the HMAC at a
 // block boundary, as specified in draft-irtf-cfrg-det-sigs-with-noise-04,
 // Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
-internal static void isPersonalizationString(this blockAlignedPersonalizationString _) {
-}
+internal static void isPersonalizationString(this blockAlignedPersonalizationString _) { }
 
 partial interface personalizationString {
     void isPersonalizationString();

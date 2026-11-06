@@ -27,9 +27,7 @@ public static float64 Inf(nint sign) {
 }
 
 // NaN returns an IEEE 754 “not-a-number” value.
-public static float64 NaN() {
-    return Float64frombits(uvnan);
-}
+public static float64 NaN() { return Float64frombits(uvnan); }
 
 // IsNaN reports whether f is an IEEE 754 “not-a-number” value.
 public static bool /*is*/ IsNaN(float64 f) {

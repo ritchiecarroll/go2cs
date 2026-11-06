@@ -300,9 +300,7 @@ public static @string Error(this ref MarshalerError e) {
 }
 
 // Unwrap returns the underlying error.
-public static error Unwrap(this ref MarshalerError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref MarshalerError e) { return e.Err; }
 
 internal static ref readonly @string hex => ref hexᵇ;
 private static readonly @string hexᵇ = "0123456789abcdef"u8;

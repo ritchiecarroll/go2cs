@@ -55,7 +55,7 @@ using static go.@internal.asan_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/asan/noasan.go", "noasan.cs", "AAwepA==")]
+[assembly: GoPositionMap("internal/asan/noasan.go", "noasan.cs", "AAwelA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

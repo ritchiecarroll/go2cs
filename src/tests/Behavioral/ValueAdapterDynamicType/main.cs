@@ -10,13 +10,9 @@ partial struct Img {
     internal colorlike.NRGBA px;
 }
 
-public static colorlike.Color At(this ref Img p) {
-    return p.px;
-}
+public static colorlike.Color At(this ref Img p) { return p.px; }
 
-public static colorlike.Color Alt(this ref Img p) {
-    return new colorlike.Gray(Y: 7);
-}
+public static colorlike.Color Alt(this ref Img p) { return new colorlike.Gray(Y: 7); }
 
 internal static void Main() {
     var p = Ꮡ(new Img(new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff)));

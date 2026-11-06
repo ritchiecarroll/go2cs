@@ -97,9 +97,7 @@ private static readonly @string vmaNamePageAllocIndexᵇ = "page alloc index"u8;
 // It's a function (rather than a variable) because it needs to be
 // usable before package runtime's dynamic initialization is complete.
 // See #51913 for details.
-internal static offAddr maxSearchAddr() {
-    return maxOffAddr;
-}
+internal static offAddr maxSearchAddr() { return maxOffAddr; }
 
 // Global chunk index.
 //

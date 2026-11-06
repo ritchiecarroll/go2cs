@@ -66,7 +66,7 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABUogoKmgoKogoKmgoKsogACFAACEJQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABQogoKmgoKogoKmgoKsogACFAACEJQ=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AIsC8gOCgoIAFSSCgoKCgoKClJSClIKCgpSkgqS0tIK2goKClKaCgoKCuMaCgqaCgqaCgqY=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_darwin_x86.go", "cpu_darwin_x86.cs", "AAg2ABICqJKCgoKmgoKCgpS0goLGtMaClA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]

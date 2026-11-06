@@ -71,7 +71,6 @@ internal static partial void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
 }
 
 // type hashFunc is a methodless func type — rendered inline as its base delegate
-
 // type equalFunc is a methodless func type — rendered inline as its base delegate
 
 // Load returns the value stored in the map for a key, or nil if no

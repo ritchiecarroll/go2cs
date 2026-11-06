@@ -114,7 +114,6 @@ public static (uintptr r1, uintptr r2, Errno err) Syscall6(uintptr trap, uintptr
 }
 
 internal static partial (uintptr r1, uintptr r2) rawSyscallNoError(uintptr trap, uintptr a1, uintptr a2, uintptr a3);
-
 internal static partial (uintptr r1, Errno err) rawVforkSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3);
 
 /*
@@ -447,25 +446,15 @@ internal static UntypedInt exited => 0x00;
 internal static UntypedInt stopped => 0x7F;
 internal static UntypedInt shift => 8;
 
-public static bool Exited(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == exited;
-}
+public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
-public static bool Signaled(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited;
-}
+public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
 
-public static bool Stopped(this WaitStatus w) {
-    return (WaitStatus)(w & 0xFF) == stopped;
-}
+public static bool Stopped(this WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
 
-public static bool Continued(this WaitStatus w) {
-    return w == 0xFFFF;
-}
+public static bool Continued(this WaitStatus w) { return w == 0xFFFF; }
 
-public static bool CoreDump(this WaitStatus w) {
-    return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0;
-}
+public static bool CoreDump(this WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
 public static nint ExitStatus(this WaitStatus w) {
     if (!w.Exited()) {
@@ -838,17 +827,11 @@ public static error /*err*/ PtraceSyscall(nint pid, nint signal) {
     return ptrace(PTRACE_SYSCALL, pid, 0, (uintptr)signal);
 }
 
-public static error /*err*/ PtraceSingleStep(nint pid) {
-    return ptrace(PTRACE_SINGLESTEP, pid, 0, 0);
-}
+public static error /*err*/ PtraceSingleStep(nint pid) { return ptrace(PTRACE_SINGLESTEP, pid, 0, 0); }
 
-public static error /*err*/ PtraceAttach(nint pid) {
-    return ptrace(PTRACE_ATTACH, pid, 0, 0);
-}
+public static error /*err*/ PtraceAttach(nint pid) { return ptrace(PTRACE_ATTACH, pid, 0, 0); }
 
-public static error /*err*/ PtraceDetach(nint pid) {
-    return ptrace(PTRACE_DETACH, pid, 0, 0);
-}
+public static error /*err*/ PtraceDetach(nint pid) { return ptrace(PTRACE_DETACH, pid, 0, 0); }
 
 //sys	reboot(magic1 uint, magic2 uint, cmd int, arg string) (err error)
 public static error /*err*/ Reboot(nint cmd) {

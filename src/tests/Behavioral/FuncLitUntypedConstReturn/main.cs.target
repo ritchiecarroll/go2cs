@@ -5,34 +5,20 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt maxRune => /* '\U0010FFFF' */ 1114111;
-
 internal static UntypedInt runeSelf => 0x80;
-
 internal static UntypedInt bigConst => /* 1 << 40 */ 1099511627776;
 
-internal static rune apply(Func<rune, rune> f, rune r) {
-    return f(r);
-}
+internal static rune apply(Func<rune, rune> f, rune r) { return f(r); }
 
-internal static nint compareWith(uint16 a, uint16 b, Func<uint16, uint16, nint> cmp) {
-    return cmp(a, b);
-}
+internal static nint compareWith(uint16 a, uint16 b, Func<uint16, uint16, nint> cmp) { return cmp(a, b); }
 
-internal static int64 applyInt64(Func<bool, int64> f, bool v) {
-    return f(v);
-}
+internal static int64 applyInt64(Func<bool, int64> f, bool v) { return f(v); }
 
-internal static int32 applyInt32(Func<bool, int32> f, bool v) {
-    return f(v);
-}
+internal static int32 applyInt32(Func<bool, int32> f, bool v) { return f(v); }
 
-internal static float32 applyFloat32(Func<float32> f) {
-    return f();
-}
+internal static float32 applyFloat32(Func<float32> f) { return f(); }
 
-internal static float64 applyFloat64(Func<float64> f) {
-    return f();
-}
+internal static float64 applyFloat64(Func<float64> f) { return f(); }
 
 internal static void Main() {
     var maxFn = rune (rune _) => maxRune;

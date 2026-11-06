@@ -105,13 +105,8 @@ partial struct pipeAddr {
 internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
 private static readonly @string pipeˢᵇ = "pipe"u8;
 
-internal static @string Network(this pipeAddr _) {
-    return pipeˢ;
-}
-
-internal static @string String(this pipeAddr _) {
-    return pipeˢ;
-}
+internal static @string Network(this pipeAddr _) { return pipeˢ; }
+internal static @string String(this pipeAddr _) { return pipeˢ; }
 
 partial struct pipe {
     internal Δsync.Mutex wrMu; // Serialize Write operations
@@ -160,13 +155,8 @@ public static (Conn, Conn) Pipe() {
     return (new pipeжConn(p1), new pipeжConn(p2));
 }
 
-internal static ΔAddr LocalAddr(this ref pipe _) {
-    return new pipeAddr();
-}
-
-internal static ΔAddr RemoteAddr(this ref pipe _) {
-    return new pipeAddr();
-}
+internal static ΔAddr LocalAddr(this ref pipe _) { return new pipeAddr(); }
+internal static ΔAddr RemoteAddr(this ref pipe _) { return new pipeAddr(); }
 
 internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.read(b);

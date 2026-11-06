@@ -545,7 +545,6 @@ public static @string Error(this ref ECHRejectionError e) {
 }
 
 internal static error errMalformedECHExt = errors.New("tls: malformed encrypted_client_hello extension");
-
 internal static error errInvalidECHExt = errors.New("tls: client sent invalid encrypted_client_hello extension");
 
 partial struct echExtType /*num:uint8*/;

@@ -7,8 +7,6 @@ partial struct Outer {
     internal nint unexported;
 }
 
-public static nint Sum(this Outer o) {
-    return o.Exported + o.unexported;
-}
+public static nint Sum(this Outer o) { return o.Exported + o.unexported; }
 
 } // end fieldlib_package

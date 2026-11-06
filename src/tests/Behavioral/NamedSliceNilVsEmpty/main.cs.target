@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct IntSlice /*[]nint*/;
-
 partial struct StrIntMap /*map[@string, nint]*/;
-
 partial struct IntChan /*chan nint*/;
 
 internal static void probe(@string name, bool isNil) {

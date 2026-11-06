@@ -11,7 +11,6 @@ partial class nistec_package {
 
 internal static readonly ж<ж<array<fiat.P224Element>>> Ꮡp224GG = new StaticBox<ж<array<fiat.P224Element>>>(default(ж<array<fiat.P224Element>>));
 internal static ref ж<array<fiat.P224Element>> p224GG => ref ((StaticBox<ж<array<fiat.P224Element>>>)Ꮡp224GG).ValueSlot;
-
 internal static readonly ж<sync.Once> Ꮡp224GGOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p224GGOnce => ref ((StaticBox<sync.Once>)Ꮡp224GGOnce).ValueSlot;
 

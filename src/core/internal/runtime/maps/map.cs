@@ -945,12 +945,9 @@ partial struct unhashableTypeError {
     internal ж<abi.Type> typ;
 }
 
-internal static void RuntimeError(this unhashableTypeError _) {
-}
+internal static void RuntimeError(this unhashableTypeError _) { }
 
-internal static @string Error(this unhashableTypeError e) {
-    return "hash of unhashable type: "u8 + typeString(e.typ);
-}
+internal static @string Error(this unhashableTypeError e) { return "hash of unhashable type: "u8 + typeString(e.typ); }
 
 // Pushed from runtime
 //

@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool JSONv2 = false;
-
 public static UntypedInt JSONv2Int => 0;
 
 } // end goexperiment_package

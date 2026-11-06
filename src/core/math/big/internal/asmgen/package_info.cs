@@ -74,7 +74,7 @@ using static go.math.big.@internal.asmgen_package;
 [assembly: GoPositionMap("math/big/internal/asmgen/386.go", "386.cs", "AAkSAC5eog==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/add.go", "add.cs", "AA0U0pSCgoKCpoKCgoKCpoKCgoCAkoCAyJSigoKUlKaClIKUgoI=", "31-31:1;32-32:2;38-44:3")]
 [assembly: GoPositionMap("math/big/internal/asmgen/amd64.go", "amd64.cs", "/gAvYIIACAai3IKClJSUlIKUgqaqtqailKSClKSClJSmlIKUpqKUgoKUlIKmgoKUlIKUgpQ=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIcBvAKiABUukKaQppCmkAAJEJCmkKaQ")]
+[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIcBvAKiABUugJaAloCWgAAIEICWgJaA")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "/gAqVoKmooK4ooK4ooK4ooI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "/gAtXKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSCuKKCgpSCgoKUgg==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB08woKCgpSCABgu4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQABxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]

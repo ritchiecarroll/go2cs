@@ -5,11 +5,8 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct MyArray /*[4]byte*/;
-
 partial struct MyEmptyArray /*[0]byte*/;
-
 partial struct MyInts /*[3]nint*/;
-
 partial struct MyBytes /*[]byte*/;
 
 internal static void Main() {

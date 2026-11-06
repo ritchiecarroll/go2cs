@@ -36,9 +36,7 @@ partial struct Header {
     public int64 Size;
 }
 
-public static @string String(this Header h) {
-    return fmt.Sprint(h.Name, "/", h.Size);
-}
+public static @string String(this Header h) { return fmt.Sprint(h.Name, "/", h.Size); }
 
 partial interface Stringish {
     @string String();
@@ -56,9 +54,7 @@ partial struct zed {
     internal nint v;
 }
 
-internal static nint Zed(this zed z) {
-    return z.v;
-}
+internal static nint Zed(this zed z) { return z.v; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;

@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool RegabiWrappers = true;
-
 public static UntypedInt RegabiWrappersInt => 1;
 
 } // end goexperiment_package

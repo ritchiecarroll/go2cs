@@ -63,9 +63,7 @@ partial class os_package {
 // Name returns the name of the file as presented to Open.
 //
 // It is safe to call Name after [Close].
-public static @string Name(this ref File f) {
-    return f.name;
-}
+public static @string Name(this ref File f) { return f.name; }
 
 // Stdin, Stdout, and Stderr are open Files pointing to the standard input,
 // standard output, and standard error file descriptors.
@@ -743,15 +741,11 @@ public static (@string, error) UserHomeDir() {
 //
 // On Plan 9, the mode's permission bits, [ModeAppend], [ModeExclusive],
 // and [ModeTemporary] are used.
-public static error Chmod(@string name, FileMode mode) {
-    return chmod(name, mode);
-}
+public static error Chmod(@string name, FileMode mode) { return chmod(name, mode); }
 
 // Chmod changes the mode of the file to mode.
 // If there is an error, it will be of type [*PathError].
-public static error Chmod(this ж<File> Ꮡf, FileMode mode) {
-    return Ꮡf.chmod(mode);
-}
+public static error Chmod(this ж<File> Ꮡf, FileMode mode) { return Ꮡf.chmod(mode); }
 
 // SetDeadline sets the read and write deadlines for a File.
 // It is equivalent to calling both SetReadDeadline and SetWriteDeadline.
@@ -856,11 +850,8 @@ public static fs.FS DirFS(@string dir) {
 }
 
 internal static fs.StatFS _ᴛ1ʗ = ((dirFS)(@string)""u8);
-
 internal static fs.ReadFileFS _ᴛ2ʗ = ((dirFS)(@string)""u8);
-
 internal static fs.ReadDirFS _ᴛ3ʗ = ((dirFS)(@string)""u8);
-
 internal static fs.ReadLinkFS _ᴛ4ʗ = ((dirFS)(@string)""u8);
 
 partial struct dirFS /*@string*/;

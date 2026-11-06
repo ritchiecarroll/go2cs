@@ -1173,7 +1173,6 @@ internal static slice<uint16> ΔsupportedVersions = slice<uint16>([
 // roleClient and roleServer are meant to call supportedVersions and parents
 // with more readability at the callsite.
 internal const bool roleClient = true;
-
 internal const bool roleServer = false;
 
 internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");

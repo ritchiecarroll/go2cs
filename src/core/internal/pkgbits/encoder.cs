@@ -36,9 +36,7 @@ partial struct PkgEncoder {
 }
 
 // SyncMarkers reports whether pw uses sync markers.
-public static bool SyncMarkers(this ref PkgEncoder pw) {
-    return pw.syncFrames >= 0;
-}
+public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >= 0; }
 
 // NewPkgEncoder returns an initialized PkgEncoder.
 //
@@ -305,14 +303,10 @@ public static void Len(this ref Encoder w, nint x) {
 }
 
 // Int encodes and writes an int value into the element bitstream.
-public static void Int(this ref Encoder w, nint x) {
-    w.Int64((int64)x);
-}
+public static void Int(this ref Encoder w, nint x) { w.Int64((int64)x); }
 
 // Uint encodes and writes a uint value into the element bitstream.
-public static void Uint(this ref Encoder w, nuint x) {
-    w.Uint64((uint64)x);
-}
+public static void Uint(this ref Encoder w, nuint x) { w.Uint64((uint64)x); }
 
 // Reloc encodes and writes a relocation for the given (section,
 // index) pair into the element bitstream.
@@ -424,8 +418,6 @@ internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
 }
 
 // Version reports the version of the bitstream.
-public static ΔVersion Version(this ref Encoder w) {
-    return w.p.version;
-}
+public static ΔVersion Version(this ref Encoder w) { return w.p.version; }
 
 } // end pkgbits_package

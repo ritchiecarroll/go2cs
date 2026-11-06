@@ -16,9 +16,7 @@ internal static readonly relationship opDelete = "opDelete"u8;
 
 internal static readonly @string prefix = "op"u8;
 
-internal static @string tag(this relationship r) {
-    return "rel:"u8 + ((@string)r);
-}
+internal static @string tag(this relationship r) { return "rel:"u8 + ((@string)r); }
 
 internal static @string describe(relationship r) {
     if (r == equivalent) {

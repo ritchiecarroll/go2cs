@@ -71,9 +71,7 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSection s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
 partial struct Sym {

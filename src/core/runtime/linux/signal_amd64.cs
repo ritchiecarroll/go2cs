@@ -39,25 +39,12 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static uintptr sigpc(this ref sigctxt c) {
-    return (uintptr)c.rip();
-}
+internal static uintptr sigpc(this ref sigctxt c) { return (uintptr)c.rip(); }
 
-internal static void setsigpc(this ref sigctxt c, uint64 x) {
-    c.set_rip(x);
-}
-
-internal static uintptr sigsp(this ref sigctxt c) {
-    return (uintptr)c.rsp();
-}
-
-internal static uintptr siglr(this ref sigctxt c) {
-    return 0;
-}
-
-internal static uintptr fault(this ref sigctxt c) {
-    return (uintptr)c.sigaddr();
-}
+internal static void setsigpc(this ref sigctxt c, uint64 x) { c.set_rip(x); }
+internal static uintptr sigsp(this ref sigctxt c) { return (uintptr)c.rsp(); }
+internal static uintptr siglr(this ref sigctxt c) { return 0; }
+internal static uintptr fault(this ref sigctxt c) { return (uintptr)c.sigaddr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
 internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {

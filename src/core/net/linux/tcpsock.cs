@@ -42,9 +42,7 @@ public static netip.AddrPort AddrPort(this ж<TCPAddr> Ꮡa) {
 }
 
 // Network returns the address's network name, "tcp".
-public static @string Network(this ref TCPAddr a) {
-    return tcpˢ;
-}
+public static @string Network(this ref TCPAddr a) { return tcpˢ; }
 
 public static @string String(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -448,9 +446,7 @@ public static error Close(this ж<TCPListener> Ꮡl) {
 // Addr returns the listener's network address, a [*TCPAddr].
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
-public static ΔAddr Addr(this ref TCPListener l) {
-    return l.fd.laddr;
-}
+public static ΔAddr Addr(this ref TCPListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.

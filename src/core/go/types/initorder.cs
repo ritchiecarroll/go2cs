@@ -321,9 +321,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
 // a nodeQueue may be used as a priority queue.
 partial struct nodeQueue /*[]ж<graphNode>*/;
 
-internal static nint Len(this nodeQueue a) {
-    return len(a);
-}
+internal static nint Len(this nodeQueue a) { return len(a); }
 
 internal static void Swap(this nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);

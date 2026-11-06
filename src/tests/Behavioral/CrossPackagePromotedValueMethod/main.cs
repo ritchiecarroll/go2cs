@@ -25,9 +25,7 @@ partial struct localBase {
     internal nint n;
 }
 
-internal static nint Twice(this localBase b) {
-    return b.n * 2;
-}
+internal static nint Twice(this localBase b) { return b.n * 2; }
 
 partial struct Wrap {
     /*embed*/ internal localBase localBase;

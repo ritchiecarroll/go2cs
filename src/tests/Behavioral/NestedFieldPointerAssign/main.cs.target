@@ -13,9 +13,7 @@ partial struct outer {
     internal uintptr guard;
 }
 
-internal static partial ж<outer> get(ж<outer> o) {
-    return o;
-}
+internal static partial ж<outer> get(ж<outer> o) { return o; }
 
 internal static void Main() {
     ref var @base = ref heap(new outer(), out var Ꮡbase);

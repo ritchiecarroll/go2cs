@@ -11,17 +11,11 @@ partial struct T {
     internal nint n;
 }
 
-internal static nint valueMethod(this T t) {
-    return t.n;
-}
+internal static nint valueMethod(this T t) { return t.n; }
 
-public static nint ValueMethod(this T t) {
-    return t.n + 1;
-}
+public static nint ValueMethod(this T t) { return t.n + 1; }
 
-internal static nint pointerMethod(this ref T t) {
-    return t.n;
-}
+internal static nint pointerMethod(this ref T t) { return t.n; }
 
 partial struct W {
     /*embed*/ public bytes_package.Buffer Buffer;

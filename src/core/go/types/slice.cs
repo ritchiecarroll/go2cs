@@ -13,21 +13,12 @@ partial struct Slice {
 }
 
 // NewSlice returns a new slice type for the given element type.
-public static ж<Slice> NewSlice(ΔType elem) {
-    return Ꮡ(new Slice(elem: elem));
-}
+public static ж<Slice> NewSlice(ΔType elem) { return Ꮡ(new Slice(elem: elem)); }
 
 // Elem returns the element type of slice s.
-public static ΔType Elem(this ref Slice s) {
-    return s.elem;
-}
+public static ΔType Elem(this ref Slice s) { return s.elem; }
 
-public static ΔType Underlying(this ж<Slice> Ꮡs) {
-    return new SliceжΔType(Ꮡs);
-}
-
-public static @string String(this ж<Slice> Ꮡs) {
-    return TypeString(new SliceжΔType(Ꮡs), default);
-}
+public static ΔType Underlying(this ж<Slice> Ꮡs) { return new SliceжΔType(Ꮡs); }
+public static @string String(this ж<Slice> Ꮡs) { return TypeString(new SliceжΔType(Ꮡs), default); }
 
 } // end types_package
