@@ -392,7 +392,7 @@ ranges a nil `*[3]int` and a nil `*grid` and prints Go's counts, and whose `fill
 :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`; :267 `expect("overPointerParam", "foreach (var i in range(2))")`;
 :269 `expect("setAll", "foreach (var i in range(4))")`;
 :281 `expect("overString", "foreach (var (i, _) in str)")`; :282 `expect("overMap", "foreach (var (k, _) in m)")`.
-src/go2cs/collectionExpressionTargets_test.go:214 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
+src/go2cs/collectionExpressionTargets_test.go:218 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
 src/go2cs/rangeNilPointerArray_test.go `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`.
 src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`, :90 `func (b *grid) fill() {`.
 src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:105 `foreach (var i in range(len(a))) {`;
