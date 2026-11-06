@@ -1,0 +1,66 @@
+start 2026-11-06 00:25:17
+pulled+verified 17 v3 images
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+arms 68; halves 9 + 8
+== v3s-warm-ctl.tsv 00:25:35
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3s-ctl-start.tsv 00:25:38
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3s-arms-1.tsv 00:25:42
+PerfChannel: verified 4 arms, output equal
+PerfChannel: 11 rounds done
+PerfFib: verified 4 arms, output equal
+PerfFib: 11 rounds done
+PerfFieldView: verified 4 arms, output equal
+PerfFieldView: 11 rounds done
+PerfIface: verified 4 arms, output equal
+PerfIface: 11 rounds done
+PerfIfaceCall: verified 4 arms, output equal
+PerfIfaceCall: 11 rounds done
+PerfIfaceShell: verified 4 arms, output equal
+PerfIfaceShell: 11 rounds done
+PerfIfaceShellChurn: verified 4 arms, output equal
+PerfIfaceShellChurn: 11 rounds done
+PerfMap: verified 4 arms, output equal
+PerfMap: 11 rounds done
+PerfMatMul: verified 4 arms, output equal
+PerfMatMul: 11 rounds done
+== v3s-ctl-mid.tsv 00:34:08
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3s-arms-2.tsv 00:34:11
+PerfRefLower: verified 4 arms, output equal
+PerfRefLower: 11 rounds done
+PerfSieve: verified 4 arms, output equal
+PerfSieve: 11 rounds done
+PerfSort: verified 4 arms, output equal
+PerfSort: 11 rounds done
+PerfStartup: verified 4 arms, output equal
+PerfStartup: 11 rounds done
+PerfString: verified 4 arms, output equal
+PerfString: 11 rounds done
+PerfStringMatch: verified 4 arms, output equal
+PerfStringMatch: 11 rounds done
+PerfStringView: verified 4 arms, output equal
+PerfStringView: 11 rounds done
+PerfTlsHandshake: verified 4 arms, output equal
+PerfTlsHandshake: 11 rounds done
+== v3s-ctl-end.tsv 00:41:58
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 00:42:04 rc=0
