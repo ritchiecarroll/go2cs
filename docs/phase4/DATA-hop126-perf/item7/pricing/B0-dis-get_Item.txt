@@ -1,0 +1,51 @@
+  000000014125C150: 57                 push        rdi
+  000000014125C151: 56                 push        rsi
+  000000014125C152: 53                 push        rbx
+  000000014125C153: 48 83 EC 20        sub         rsp,20h
+  000000014125C157: 48 8B D9           mov         rbx,rcx
+  000000014125C15A: 48 8B F2           mov         rsi,rdx
+  000000014125C15D: 48 85 F6           test        rsi,rsi
+  000000014125C160: 7C 5A              jl          000000014125C1BC
+  000000014125C162: 48 3B 73 10        cmp         rsi,qword ptr [rbx+10h]
+  000000014125C166: 7D 54              jge         000000014125C1BC
+  000000014125C168: 48 8D 3D 09 DA 67  lea         rdi,[?__NONGCSTATICS@golib_go_GoZeroSizeFacts_1<UIntPtr>@@]
+  000000014125C16F: 48 83 7F F8 00     cmp         qword ptr [rdi-8],0
+  000000014125C174: 75 5B              jne         000000014125C1D1
+  000000014125C176: 80 3F 00           cmp         byte ptr [rdi],0
+  000000014125C179: 75 35              jne         000000014125C1B0
+  000000014125C17B: 48 83 7B 20 00     cmp         qword ptr [rbx+20h],0
+  000000014125C180: 74 12              je          000000014125C194
+  000000014125C182: 48 8B CB           mov         rcx,rbx
+  000000014125C185: 48 8B D6           mov         rdx,rsi
+  000000014125C188: 48 83 C4 20        add         rsp,20h
+  000000014125C18C: 5B                 pop         rbx
+  000000014125C18D: 5E                 pop         rsi
+  000000014125C18E: 5F                 pop         rdi
+  000000014125C18F: E9 1C B1 E9 FF     jmp         golib_go_slice_1<Double>__NativeElementRef
+  000000014125C194: 48 8B 03           mov         rax,qword ptr [rbx]
+  000000014125C197: 48 03 73 08        add         rsi,qword ptr [rbx+8]
+  000000014125C19B: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  000000014125C19E: 48 3B F1           cmp         rsi,rcx
+  000000014125C1A1: 73 35              jae         000000014125C1D8
+  000000014125C1A3: 48 8D 44 F0 10     lea         rax,[rax+rsi*8+10h]
+  000000014125C1A8: 48 83 C4 20        add         rsp,20h
+  000000014125C1AC: 5B                 pop         rbx
+  000000014125C1AD: 5E                 pop         rsi
+  000000014125C1AE: 5F                 pop         rdi
+  000000014125C1AF: C3                 ret
+  000000014125C1B0: 48 83 C4 20        add         rsp,20h
+  000000014125C1B4: 5B                 pop         rbx
+  000000014125C1B5: 5E                 pop         rsi
+  000000014125C1B6: 5F                 pop         rdi
+  000000014125C1B7: E9 54 FF FF FF     jmp         golib_go_slice_1<UIntPtr>__ZeroSizeElementRef
+  000000014125C1BC: 48 8B 53 10        mov         rdx,qword ptr [rbx+10h]
+  000000014125C1C0: 48 8B CE           mov         rcx,rsi
+  000000014125C1C3: E8 48 70 3B FF     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014125C1C8: 48 8B C8           mov         rcx,rax
+  000000014125C1CB: E8 C0 54 20 05     call        RhpThrowEx
+  000000014125C1D0: CC                 int         3
+  000000014125C1D1: E8 F2 91 D5 04     call        __GetNonGCStaticBase_golib_go_GoZeroSizeFacts_1<UIntPtr>
+  000000014125C1D6: EB 9E              jmp         000000014125C176
+  000000014125C1D8: E8 B3 E7 EB FE     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014125C1DD: CC                 int         3
+  000000014125C1DE: 90                 nop

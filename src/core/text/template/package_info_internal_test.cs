@@ -27,7 +27,7 @@ using static go.text.template_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("exec_test.cs", 861, 5)]
+[assembly: GoBoundedGoroutine("exec_test.cs", 861, 5, 0)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

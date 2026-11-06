@@ -1,0 +1,51 @@
+start 2026-11-06 04:11:19 
+verified: 12 lines
+ok    B0 get_Item references GoZeroSizeFacts (expected yes, found 2)
+ok    B0 addMulVVW calls bits.Mul (expected yes, found 1)
+info  A golib_go_slice_1<UIntPtr>__get_Item_0 is a folded stub -> golib_go_slice_1<Double>__get_Item_0
+ok    A get_Item references GoZeroSizeFacts (expected no, found 0)
+ok    A addMulVVW calls bits.Mul (expected yes, found 1)
+info  AI golib_go_slice_1<UIntPtr>__get_Item_0 is a folded stub -> golib_go_slice_1<Double>__get_Item_0
+ok    AI get_Item references GoZeroSizeFacts (expected no, found 0)
+ok    AI addMulVVW calls bits.Mul (expected no, found 0)
+ok    AI addMulVVW has no mulx (default ISA) (expected no, found 0)
+info  AI addMulVVW calls to BigMul software fallback: 1 (0 can mean the fallback was inlined too)
+GATES PASS
+arms 6 TLS + 12 others
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== price-warm-ctl.tsv 04:11:51
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== price-ctl-start.tsv 04:11:54
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== price-arms-1.tsv 04:11:57
+PerfTlsHandshake: verified 6 arms, output equal
+PerfTlsHandshake: 11 rounds done
+== price-ctl-mid.tsv 04:16:15
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== price-arms-2.tsv 04:16:19
+PerfSieve: verified 4 arms, output equal
+PerfSieve: 11 rounds done
+PerfMatMul: verified 4 arms, output equal
+PerfMatMul: 11 rounds done
+PerfSort: verified 4 arms, output equal
+PerfSort: 11 rounds done
+== price-ctl-end.tsv 04:18:05
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 04:18:10 rc=0

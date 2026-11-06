@@ -47,6 +47,7 @@
     <None Include="$(MSBuildThisFileDirectory)blankImportTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)boundedGoOrdinal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildInfoStamp.go" />
     <None Include="$(MSBuildThisFileDirectory)buildInfoStamp_test.go" />
@@ -306,6 +307,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\classify.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\corpus.go" />

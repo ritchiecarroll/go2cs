@@ -19,12 +19,14 @@ import (
 	"strings"
 	"testing"
 	"unicode/utf16"
+
+	"go2cs/internal/golauncher"
 )
 
 // A LINE-KEYED RECORD LANDS ON ITS CODE (COORD ruling of 2026-11-05 on C2's stale-record scout).
 //
 // Some records in a package's info files name a position in a converted .cs file: a GoBoundedGoroutine
-// record names the line and column of a goǃ call, and a GoPositionMap record's table, calls and thunks
+// record names the line, column and ordinal of a goǃ call, and a GoPositionMap record's table, calls and thunks
 // fields name C# lines (and, for a thunk, a column). Two seats that edit one file can merge without a
 // conflict into a record that names a position the merged file no longer has there: a bounded record is
 // one line per go statement, apart from the file's position map, so it is the case a merge never marks.
@@ -33,7 +35,9 @@ import (
 // THE RULE, for every record in every tracked package info file (package_info.cs, package_test_info.cs,
 // package_info_internal_test.cs), checked against the .cs file it names:
 //
-//	(a) GoBoundedGoroutine(file, line, column): the file exists, and the text at (line, column) begins goǃ;
+//	(a) GoBoundedGoroutine(file, line, column, ordinal): the file exists, the text at (line, column) begins goǃ, and
+//	    that call is the file's ordinal-th goǃ call (internal/golauncher, the count go2cs-gen and the converter share),
+//	    so a record a merge left on a NEIGHBOUR's goǃ fails too; a record without the ordinal is one it cannot read;
 //	(b) GoPositionMap: the table decodes, its C# lines increase, no mapped line is past the end of the
 //	    file, every calls key is a table line, and every thunk's column follows "=>".
 //
@@ -46,10 +50,16 @@ import (
 // 1442 thunks fail. A table line that is blank is NOT a failure: 75 mapped lines are legitimately blank,
 // a statement whose emission starts with a separator line.
 //
+// WHAT (b) CANNOT SEE: a GoPositionMap record that is stale but still FITS its file. Rule (b) checks that a table
+// is well formed and inside the file, not that it is this file's table, so a shift that keeps every mapped line,
+// calls key and thunk inside the file passes. Two narrower rules close the shapes measured so far: (a)'s ordinal for
+// a bounded record, and testInfoPositionMapCopies_test.go for a test info's copy of a production record. A
+// production package_info.cs record shifted inside its own file has no witness short of re-emitting the package.
+//
 // POSITIVE CONTROL: TestLineKeyedRecordScannerFires plants one violation per rule and a clean control.
 
 var (
-	boundedGoroutineRecord = regexp.MustCompile(`^\s*\[assembly:\s*(?:global::)?(?:go\.)?GoBoundedGoroutine\(\s*"([^"]+)"\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\]`)
+	boundedGoroutineRecord = regexp.MustCompile(`^\s*\[assembly:\s*(?:global::)?(?:go\.)?GoBoundedGoroutine\(\s*"([^"]+)"\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?\d+)\s*\)\]`)
 	positionMapRecordLine  = regexp.MustCompile(`^\s*\[assembly:\s*(?:global::)?(?:go\.)?GoPositionMap\((.*)\)\]\s*$`)
 	quotedArgument         = regexp.MustCompile(`"((?:[^"\\]|\\.)*)"`)
 	packageInfoFileName    = regexp.MustCompile(`^package_(?:info|test_info|info_internal_test)\.cs$`)
@@ -111,7 +121,7 @@ func lineKeyedCandidates(infoPath, csFile string, exists func(string) bool) []st
 }
 
 // boundedRecordProblem is why a bounded record does not land on its goǃ call in lines, or "".
-func boundedRecordProblem(lines []string, line, column int) string {
+func boundedRecordProblem(lines []string, line, column, ordinal int) string {
 	if line < 1 || line > len(lines) {
 		return fmt.Sprintf("line %d is past the end of the file (%d lines)", line, len(lines))
 	}
@@ -126,7 +136,18 @@ func boundedRecordProblem(lines []string, line, column int) string {
 		return fmt.Sprintf("line %d column %d reads %q, not a goǃ call", line, column, truncateForReport(text))
 	}
 
-	return ""
+	for _, call := range golauncher.Positions(strings.Join(lines, "\n")) {
+		if call.Line == line && call.Column == column {
+			if call.Ordinal != ordinal {
+				return fmt.Sprintf("the record names goǃ call #%d, but line %d column %d holds goǃ call #%d (a record left on a neighbour's call)",
+					ordinal, line, column, call.Ordinal)
+			}
+
+			return ""
+		}
+	}
+
+	return fmt.Sprintf("line %d column %d begins goǃ, but not a goǃ call the ordinal count reads (a comment, a string, or not a call)", line, column)
 }
 
 // positionMapProblems are the reasons a GoPositionMap record's C#-line fields do not fit lines.
@@ -222,9 +243,10 @@ func scanLineKeyedRecords(infos map[string]string, readSource func(string) ([]st
 			if match := boundedGoroutineRecord.FindStringSubmatch(recordLine); match != nil {
 				line, _ := strconv.Atoi(match[2])
 				column, _ := strconv.Atoi(match[3])
+				ordinal, _ := strconv.Atoi(match[4])
 				findings = append(findings, checkAgainstCandidates(at, "GoBoundedGoroutine", match[1], infoPath, exists, readSource,
 					func(lines []string) []string {
-						if problem := boundedRecordProblem(lines, line, column); problem != "" {
+						if problem := boundedRecordProblem(lines, line, column, ordinal); problem != "" {
 							return []string{problem}
 						}
 
@@ -352,8 +374,10 @@ func TestLineKeyedRecordsLandOnTheirCode(t *testing.T) {
 
 // TestLineKeyedRecordScannerFires plants one violation per rule and a clean control.
 func TestLineKeyedRecordScannerFires(t *testing.T) {
-	// a.cs: line 1 a goǃ call at column 5, line 3 a thunk body at column 17 (after "() => ").
+	// a.cs: line 1 a goǃ call at column 5, line 3 a thunk body at column 17 (after "() => "); n.cs: two goǃ calls on
+	// consecutive lines, so a record one line off still begins a goǃ call (the neighbour's), and only its ordinal tells.
 	clean := []string{"    goǃ(f, x);", "", "    defer(() => where(), ref ᒐ);"}
+	neighbours := []string{"    goǃ(f, x);", "    goǃ(g, y);"}
 	// "gJA=" is two packed table records, bytes 0x80 0x90: C# line 1 and C# line 3, both Go line 0.
 	table := "gJA="
 
@@ -366,18 +390,20 @@ func TestLineKeyedRecordScannerFires(t *testing.T) {
 		return fmt.Sprintf("[assembly: GoPositionMap(\"a.go\", \"a.cs\", \"%s\", \"\", \"\", \"%s\", \"%s\")]", table, calls, thunks)
 	}
 
-	sources := map[string][]string{"p/a.cs": clean, "p/b.cs": append([]string{"// shifted"}, clean...)}
+	sources := map[string][]string{"p/a.cs": clean, "p/b.cs": append([]string{"// shifted"}, clean...), "p/n.cs": neighbours}
 	readSource := func(p string) ([]string, bool) { lines, ok := sources[p]; return lines, ok }
 
 	cases := []struct {
 		name, info, want string
 	}{
-		{"clean", "[assembly: GoBoundedGoroutine(\"a.cs\", 1, 5)]\n" + record("3=where/1/1/0", "3:17"), ""},
-		{"bounded shifted", "[assembly: GoBoundedGoroutine(\"b.cs\", 1, 5)]", "not a goǃ call"},
-		{"bounded shifted, qualified", "[assembly: global::go.GoBoundedGoroutine(\"b.cs\", 1, 5)]", "not a goǃ call"},
-		{"bounded missing file", "[assembly: GoBoundedGoroutine(\"c.cs\", 1, 5)]", "not beside the info file"},
-		{"bounded past the end", "[assembly: GoBoundedGoroutine(\"a.cs\", 9, 5)]", "past the end of the file"},
-		{"record the guard cannot read", "[assembly: GoBoundedGoroutine(\"a.cs\", line: 1, 5)]", "cannot read"},
+		{"clean", "[assembly: GoBoundedGoroutine(\"a.cs\", 1, 5, 0)]\n[assembly: GoBoundedGoroutine(\"n.cs\", 2, 5, 1)]\n" + record("3=where/1/1/0", "3:17"), ""},
+		{"bounded shifted", "[assembly: GoBoundedGoroutine(\"b.cs\", 1, 5, 0)]", "not a goǃ call"},
+		{"bounded on a neighbour's call", "[assembly: GoBoundedGoroutine(\"n.cs\", 2, 5, 0)]", "holds goǃ call #1"},
+		{"bounded without its ordinal", "[assembly: GoBoundedGoroutine(\"a.cs\", 1, 5)]", "cannot read"},
+		{"bounded shifted, qualified", "[assembly: global::go.GoBoundedGoroutine(\"b.cs\", 1, 5, 0)]", "not a goǃ call"},
+		{"bounded missing file", "[assembly: GoBoundedGoroutine(\"c.cs\", 1, 5, 0)]", "not beside the info file"},
+		{"bounded past the end", "[assembly: GoBoundedGoroutine(\"a.cs\", 9, 5, 0)]", "past the end of the file"},
+		{"record the guard cannot read", "[assembly: GoBoundedGoroutine(\"a.cs\", line: 1, 5, 0)]", "cannot read"},
 		{"thunk shifted", strings.Replace(record("", "3:17"), "\"a.cs\"", "\"b.cs\"", 1), "does not follow \"=>\""},
 		{"calls key not a table line", record("2=where/1/1/0", ""), "keyed by a line the table does not map"},
 		// "gPA=" maps C# lines 1 and 9 (bytes 0x80 0xF0) against the 3-line file.

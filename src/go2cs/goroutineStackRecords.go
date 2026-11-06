@@ -15,16 +15,19 @@ import (
 	"strconv"
 	"strings"
 
+	"go2cs/internal/golauncher"
+
 	"github.com/ritchiecarroll/hashset"
 )
 
 // A goroutine the converter proves cannot recurse (goroutineStackAnalysis.go) starts on golib's bounded stack
 // reservation. Its `go` statement is emitted exactly as any other, `goǃ(f, x)`, so it reads like the Go `go f(x)`; the
-// mark lives in the package's info file instead, one `[assembly: GoBoundedGoroutine("<file>.cs", <line>, <column>)]`
-// record per statement, naming where the `goǃ` invocation starts. go2cs-gen intercepts the invocation at that position
-// and forwards it to the GoStack.Bounded rung (BoundedGoroutineInterceptorGenerator). A record that no longer lands on
-// an unmarked `goǃ` invocation is a build error there, never a goroutine started on the wrong reservation, and a `go`
-// statement without a record keeps the Go-scale default.
+// mark lives in the package's info file instead, one `[assembly: GoBoundedGoroutine("<file>.cs", <line>, <column>,
+// <ordinal>)]` record per statement, naming where the `goǃ` invocation starts and which `goǃ` call of the file it is
+// (internal/golauncher). go2cs-gen intercepts the invocation at that position and forwards it to the GoStack.Bounded
+// rung (BoundedGoroutineInterceptorGenerator). A record that no longer lands on an unmarked `goǃ` invocation is a build
+// error there, never a goroutine started on the wrong reservation, and a `go` statement without a record keeps the
+// Go-scale default.
 //
 // The line and column are not knowable while the statement is being emitted (positionMapOperations.go says why), so
 // visitGoStmt writes a BOUNDED sentinel immediately before `goǃ`, and finalizePositionMap reads its position off the
@@ -40,10 +43,11 @@ const BoundedGoSentinelMark = "00"
 var boundedGoRecords = map[string][]string{}
 
 // boundedGoSite is one marked `goǃ` invocation: its 1-based emitted C# line and the 1-based UTF-16 column it starts at,
-// the units Roslyn's line positions count in.
+// the units Roslyn's line positions count in, and its 0-based ordinal among every `goǃ` of the file.
 type boundedGoSite struct {
-	csLine int
-	column int
+	csLine  int
+	column  int
+	ordinal int
 }
 
 // boundedGoRecordable reports whether this emission can record a bounded `go` statement in an info file; when it cannot,
@@ -81,8 +85,8 @@ func recordBoundedGoSites(target string, csFile string, sites []boundedGoSite) {
 	records := make([]string, 0, len(sites))
 
 	for _, site := range sites {
-		records = append(records, fmt.Sprintf("[assembly: %s(%s, %d, %d)]", globalQualifyRooted("go.GoBoundedGoroutine"),
-			csharpStringLiteral(csFile), site.csLine, site.column))
+		records = append(records, fmt.Sprintf("[assembly: %s(%s, %d, %d, %d)]", globalQualifyRooted("go.GoBoundedGoroutine"),
+			csharpStringLiteral(csFile), site.csLine, site.column, site.ordinal))
 	}
 
 	packageLock.Lock()
@@ -90,7 +94,8 @@ func recordBoundedGoSites(target string, csFile string, sites []boundedGoSite) {
 	packageLock.Unlock()
 }
 
-// boundedGoRecordsProseLines is the comment above the records.
+// boundedGoRecordsProseLines is the comment above the records. applyBoundedGoRecords removes only this exact text, so a
+// change to its wording leaves the old comment in every info file a later conversion merges into.
 func boundedGoRecordsProseLines() []string {
 	return []string{
 		"// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of",
@@ -202,11 +207,17 @@ func sortBoundedGoRecords(records []string) {
 	key := func(record string) (string, int, int) {
 		file := boundedGoRecordFile(record)
 		_, rest, _ := strings.Cut(record, "\", ")
-		rest = strings.TrimSuffix(strings.TrimSpace(rest), ")]")
-		lineText, columnText, _ := strings.Cut(rest, ", ")
-		line, _ := strconv.Atoi(strings.TrimSpace(lineText))
-		column, _ := strconv.Atoi(strings.TrimSpace(columnText))
-		return file, line, column
+		fields := strings.Split(strings.TrimSuffix(strings.TrimSpace(rest), ")]"), ",")
+		field := func(i int) int {
+			if i >= len(fields) {
+				return 0
+			}
+
+			n, _ := strconv.Atoi(strings.TrimSpace(fields[i]))
+			return n
+		}
+
+		return file, field(0), field(1)
 	}
 
 	sort.SliceStable(records, func(i, j int) bool {
@@ -223,4 +234,32 @@ func sortBoundedGoRecords(records []string) {
 
 		return ci < cj
 	})
+}
+
+// assignBoundedGoOrdinals gives each bounded site its ordinal among the file's `goǃ` calls. A site the scan does not
+// find is the converter disagreeing with itself; it keeps ordinal -1, which go2cs-gen and repoguard both refuse, so the
+// disagreement fails loudly instead of recording a wrong number.
+func assignBoundedGoOrdinals(text string, sites []boundedGoSite) []boundedGoSite {
+	if len(sites) == 0 {
+		return sites
+	}
+
+	ordinals := map[[2]int]int{}
+
+	for _, launcher := range golauncher.Positions(text) {
+		ordinals[[2]int{launcher.Line, launcher.Column}] = launcher.Ordinal
+	}
+
+	for i := range sites {
+		ordinal, found := ordinals[[2]int{sites[i].csLine, sites[i].column}]
+
+		if !found {
+			ordinal = -1
+			showWarning("A bounded goǃ call at line %d column %d is not a goǃ identifier the ordinal scan reads; its record carries ordinal -1", sites[i].csLine, sites[i].column)
+		}
+
+		sites[i].ordinal = ordinal
+	}
+
+	return sites
 }
