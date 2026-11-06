@@ -1,0 +1,7 @@
+ITEM 7 NOTES (for the section 11 write-up)
+- 2026-11-05 19:49: the owner's first run of trace-tls.cmd (sha 5aa034c2) on G failed at the first wpr -start:
+  rc -984068079 = 0xC5585011, "Failed to enable the policy to profile system performance". G reproduced the identical
+  rc unelevated, so the prompt was not elevated. All hash checks had passed; nothing was traced; the script failed closed.
+- SUGGESTED IMPROVEMENT for the next staged script (COORD declined it for this one, to avoid a re-review and a new hash
+  before the rerun): an elevation guard after the hash checks:
+    net session >nul 2>&1 || (echo NOT ELEVATED: run from an "Administrator:" prompt & exit /b 4)

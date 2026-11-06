@@ -1,0 +1,30 @@
+start 2026-11-05 08:12:24 J sha256 958820cee8102bc8 jit dll f3e34310f4a95590 D26 7ac2b53c0aa89c93
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 1
+proc 35488 C:\Users\Admin\dotnet10\sdk\10.0.400\Roslyn\bincore\VBCSCompiler.exe
+admitted pwsh hosts: 0
+== warm-control-DISCARDED 08:12:28
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== control-start 08:12:33
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== tls 08:12:37
+TLS: verified 6 arms, output equal
+TLS: 11 rounds done
+TLS-chacha: verified 2 arms, output equal
+TLS-chacha: 11 rounds done
+== control-end 08:17:54
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 1
+proc 35488 C:\Users\Admin\dotnet10\sdk\10.0.400\Roslyn\bincore\VBCSCompiler.exe
+admitted pwsh hosts: 0
+end 2026-11-05 08:18:01 rc=0
