@@ -2133,7 +2133,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							}
 
 							if needsDeref {
-								if v.valueMethodHasBoxTwin(funcObj, sig) {
+								// Not for the selector of a deferred or spawned call: Go copies *p at the defer or go
+								// statement, and the lowering snapshots the receiver text there, so it must be the copy
+								// (`(~p)`), not the box the twin would copy from when the call runs.
+								if v.valueMethodHasBoxTwin(funcObj, sig) && selectorExpr != v.deferGoCallSelector {
 									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								}
 

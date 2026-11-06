@@ -205,7 +205,10 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	result := strings.Builder{}
 	wroteDecls := false
 
+	savedCallSelector := v.deferGoCallSelector
+	v.deferGoCallSelector, _ = ast.Unparen(deferStmt.Call.Fun).(*ast.SelectorExpr)
 	callExpr := strings.TrimSpace(v.convCallExpr(deferStmt.Call, lambdaContext))
+	v.deferGoCallSelector = savedCallSelector
 
 	// The receiver snapshot (see recvSnapshot): under the temp-parameter form the call renders as
 	// `<receiver>.<method>(ᴛ1, …)`, so the receiver is exactly the text before the method name once that
