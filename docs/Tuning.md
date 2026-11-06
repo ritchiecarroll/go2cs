@@ -86,6 +86,34 @@ that the tiers collect, and the profile is worth more.
      DOTNET_TieredCompilation=0 3,546 / 3,525; DOTNET_TieredPGO=0 3,541 / 3,533. The default takes about 43% less time
      than either setting. -->
 
+Across the [performance suite](Performance.md), on `win-x64` (an AMD Ryzen 5 PRO 6650U), turning
+dynamic PGO off with `DOTNET_TieredPGO=0` makes 13 of the 17 programs slower under the JIT and none faster; Startup,
+Fib, Sieve and Channel stay within measurement noise. Turning it off is not recommended. Medians in ms, in-program
+time; the ratio is PGO off against the default:
+
+| Benchmark | default | `DOTNET_TieredPGO=0` | ratio |
+|:--|--:|--:|--:|
+| String | 339.0 | 1465.3 | 4.322 |
+| IfaceCall | 358.3 | 807.0 | 2.252 |
+| MatMul | 213.2 | 393.7 | 1.847 |
+| FieldView | 1723.7 | 2917.6 | 1.693 |
+| TlsHandshake | 1071.6 | 1513.4 | 1.412 |
+| Iface | 374.7 | 528.0 | 1.409 |
+| StringView | 20.9 | 29.4 | 1.405 |
+| StringMatch | 791.2 | 1057.9 | 1.337 |
+| IfaceShellChurn | 1076.8 | 1432.7 | 1.331 |
+| RefLower | 511.3 | 645.7 | 1.263 |
+| IfaceShell | 600.4 | 738.2 | 1.230 |
+| Sort | 255.1 | 305.5 | 1.197 |
+| Map | 253.6 | 264.6 | 1.044 |
+
+<!-- Source: docs/phase4/DATA-hop126-perf.md section 10, the tuning sweep (G-LAPTOP, win-x64, AMD Ryzen 5 PRO 6650U,
+     SDK 10.0.400 / runtime 10.0.11; 11 interleaved rounds per program, every arm twice as its own A/A; a cell moves
+     only beyond the larger of its two arms' A/A gaps and IQRs). The table "TieredPGO=0 under JIT (JG/JP)": the moved
+     rows only, numbers as the record gives them (variant = JIT plain under DOTNET_TieredPGO=0, baseline = JIT plain
+     with the defaults). Only the JIT was swept with PGO off. Raw: docs/phase4/DATA-hop126-perf/sweep/sweep-verdict.tsv
+     (rows JG/JP), samples sww-arms-1.tsv and sww-arms-2.tsv. -->
+
 The settings, if you need them, each in three equivalent forms: a property in the project file, a value in
 `runtimeconfig.json`, or an environment variable for one run.
 
@@ -133,6 +161,45 @@ itself.
      (-32.6%), PerfStartup +24.05 ms (+5.5%); the short hot phase Hash.String 36.97 -> 10.54 ns (0.286). ReadyToRun
      publish (default against GoCallCountingDelayMs=runtime): PerfTlsHandshake 3,287 -> 2,309 ms, PerfStartup
      312.6 -> 342.3 ms. Override order measured: the env var beats runtimeconfig.json in both directions. -->
+
+**Before and after, across the performance suite.** On `win-x64` (an AMD Ryzen 5 PRO 6650U), the
+[performance suite's](Performance.md) programs ran with the template's delay of 0 and with .NET's own 100 ms. These
+programs run for about 0.1 to 2.5 s, so the delay decides how much of each run executes before the optimized code
+arrives. In a long-running service the delay is only a start-up transient, so the table overstates what the setting
+costs once a service is warm. With the delay at 100, 14 of the 17 programs are slower under the JIT and 12 under
+ReadyToRun. Startup is the one program that is faster. Most of the JIT speed-up from go.\* 1.26.10.1 to 1.26.10.2
+is this setting: with the delay at 100, the 1.26.10.2 JIT times sit on 1.26.10.1's. Medians in ms, in-program time
+except Startup's process wall time; the ratio is delay 100 against delay 0:
+
+| Benchmark | JIT, delay 0 | JIT, delay 100 | ratio | ReadyToRun, delay 0 | ReadyToRun, delay 100 | ratio |
+|:--|--:|--:|--:|--:|--:|--:|
+| Startup | 502.0 | 483.5 | 0.963 | 371.5 | 345.5 | 0.930 |
+| Fib | 97.6 | 213.4 | 2.186 | 101.4 | 213.2 | 2.102 |
+| String | 339.0 | 734.3 | 2.166 | | | within noise |
+| TlsHandshake | 1071.6 | 2053.3 | 1.916 | 1078.2 | 1688.7 | 1.566 |
+| Map | 253.6 | 470.9 | 1.857 | 248.7 | 466.1 | 1.874 |
+| Sort | 255.1 | 434.8 | 1.704 | 255.0 | 437.6 | 1.716 |
+| Channel | 80.7 | 126.1 | 1.563 | | | within noise |
+| Iface | 374.7 | 558.8 | 1.491 | 380.9 | 616.7 | 1.619 |
+| RefLower | 511.3 | 752.4 | 1.472 | 536.8 | 761.2 | 1.418 |
+| IfaceShellChurn | 1076.8 | 1574.1 | 1.462 | 1090.9 | 1269.0 | 1.163 |
+| StringMatch | 791.2 | 1125.8 | 1.423 | 838.8 | 1096.0 | 1.307 |
+| IfaceCall | 358.3 | 435.8 | 1.216 | 349.0 | 506.5 | 1.451 |
+| IfaceShell | 600.4 | 723.0 | 1.204 | 575.0 | 770.4 | 1.340 |
+| FieldView | 1723.7 | 1959.8 | 1.137 | 1936.5 | 2089.3 | 1.079 |
+
+MatMul, Sieve and StringView stay within measurement noise on both. Native AOT has no tiers, so the delay does not
+apply to it.
+
+<!-- Source: docs/phase4/DATA-hop126-perf.md section 10, the tuning sweep (G-LAPTOP, win-x64, AMD Ryzen 5 PRO 6650U,
+     SDK 10.0.400 / runtime 10.0.11; 11 interleaved rounds per program, every arm twice as its own A/A; a cell moves
+     only beyond the larger of its two arms' A/A gaps and IQRs). The tables "Delay 100 under JIT (JD/JP)" and "Delay
+     100 under ReadyToRun (RD/RP)": the moved rows only, numbers as the record gives them (variant = delay 100,
+     baseline = the template's 0). The D arms are copies of the plain JIT and R2R folders with only runtimeconfig.json's
+     CallCountingDelayMs changed from 0 to 100. The headline and the start-up-transient framing: the same section
+     ("Fib 213.4 against 213.0, String 734.3 against 735.1, Map 470.9 against 473.3, Sort 434.8 against 450.0"). Raw:
+     docs/phase4/DATA-hop126-perf/sweep/sweep-verdict.tsv (rows JD/JP and RD/RP), samples sww-arms-1.tsv and
+     sww-arms-2.tsv. -->
 
 
 **One setting to change on one runtime.** Quick JIT for loops is what lets the JIT replace a running loop with an
@@ -223,6 +290,29 @@ Every use still reads `Version` and `Name`, so the Go function bodies are unchan
 
 Every comparison in this list after the first was measured against the direct field read, before the accessor
 existed; the accessor reads faster than that field.
+
+**Before and after, across the performance suite.** Of the [performance suite's](Performance.md) 17 programs, only
+StringMatch moves beyond measurement noise with `-hoist-literals`. The other 16 stay within noise under both the JIT
+and ReadyToRun, including TlsHandshake and StringView, which also get hoisted fields. Native AOT was timed for
+StringMatch only. Medians in ms, in-program time; the ratio is hoisted against plain:
+
+| Machine (`win-x64`) | Deployment | plain | `-hoist-literals` | ratio |
+|:--|:--|--:|--:|--:|
+| AMD Ryzen 5 PRO 6650U | JIT | 791.2 | 594.7 | 0.752 |
+| AMD Ryzen 5 PRO 6650U | ReadyToRun | 838.8 | 566.8 | 0.676 |
+| AMD Ryzen 5 PRO 6650U | Native AOT | 1288.5 | 1171.8 | 0.909 |
+| Intel i9-13900K | Native AOT | 582.1 | 550.0 | 0.945 |
+
+<!-- Source: the JIT and ReadyToRun rows: docs/phase4/DATA-hop126-perf.md section 10, the tuning sweep (G-LAPTOP,
+     win-x64, AMD Ryzen 5 PRO 6650U, SDK 10.0.400 / runtime 10.0.11; all 17 programs converted twice by the 1.26.10.2
+     converter 7871e564, plain and -hoist-literals, against go.* 1.26.10.2; 11 interleaved rounds, every arm twice as
+     its own A/A; a cell moves only beyond the larger of its two arms' A/A gaps and IQRs). The tables "Hoist under JIT
+     (JH/JP)" and "Hoist under ReadyToRun (RH/RP)": StringMatch moved (floors 10.5% and 9.5%), every other row within.
+     Hoisting creates fields in StringMatch (7), TlsHandshake (3) and StringView (1) only. Raw:
+     docs/phase4/DATA-hop126-perf/sweep/sweep-verdict.tsv (rows JH/JP and RH/RP), samples sww-arms-1.tsv and
+     sww-arms-2.tsv. The Native AOT rows: section 9.4, the cross-box pair (the same four PerfStringMatch images on both
+     boxes, PROTOCOL v3, arm = mean of its A and AA medians): P and H on G (v2 run) 1288.5 / 1171.8, H/P 0.909, floor
+     1.2%; on the i9 (run3) 582.1 / 550.0, H/P 0.945, floor 1.8%. Raw: docs/phase4/DATA-hop126-perf/xbox/. -->
 
 **When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
 `fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. Before the accessor, a small
