@@ -498,7 +498,7 @@ src/core/internal/goos/darwin/…
 
 Such a package's `.csproj` gains exactly two blocks — the selector, and the include that reads it:
 
-<!-- source: src/core/internal/goos/internal.goos.csproj:170-172 -->
+<!-- source: src/core/internal/goos/internal.goos.csproj:172-174 -->
 ```xml
 <PropertyGroup Condition="'$(GoTargetOS)'==''">
   <GoTargetOS>windows</GoTargetOS>

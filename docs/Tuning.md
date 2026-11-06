@@ -48,9 +48,28 @@ performance comparison's Go 1.23.1 table under History, measured on an earlier c
      329 ms ReadyToRun, -33%). The deployment table's commands: the converter's Exe template
      sets <PublishReadyToRun>true</PublishReadyToRun> (src/go2cs/csproj-template.xml), applied only by dotnet publish. -->
 
-If you publish ReadyToRun as a single file, also set
-`<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`
+**A single-file publish compiles ReadyToRun one assembly at a time.** For a self-contained single-file ReadyToRun
+publish, the .NET SDK's default is one composite image of the program and the framework. A converted program's project
+also compresses the bundle, so every start decompresses that image first. The project therefore sets
+`<PublishReadyToRunComposite>false</PublishReadyToRunComposite>` unless you set it yourself, as the publish profiles
+go2cs writes already do. Start-up wall time of a `dotnet publish -p:PublishSingleFile=true` on `win-x64`:
+
+| ReadyToRun | Bundle | Start-up | Also |
+|---|---|---|---|
+| composite | compressed | 3,480 ms | a 571 MB executable; a string-matching loop ran 27% slower |
+| one assembly at a time | compressed | 470 ms | |
+| composite | uncompressed | 320 ms | a 1.70 GB executable, and about 700 s to publish |
+
+To build the composite image anyway, pass `-p:PublishReadyToRunComposite=true`. On `linux-x64` the composite image can
+also run the ReadyToRun compiler out of memory
 ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)).
+
+<!-- Sources. G's measurement, win-x64, a converted program published with a profile-less `dotnet publish
+     -p:PublishSingleFile=true` (docs/phase4/DATA-hop126-perf §11.8). The SDK default: Microsoft.NET.CrossGen.targets
+     sets PublishReadyToRunComposite to true for a single-file ReadyToRun publish and forces it to false unless the
+     publish is self-contained, which `dotnet publish` makes a single-file publish. The template's line:
+     src/go2cs/csproj-template.xml, guarded by TestTemplateTurnsTheCompositeReadyToRunImageOffUnlessAsked and
+     TestPlainSingleFilePublishEvaluatesReadyToRunPerAssembly (src/go2cs/singleFileComposite_test.go). -->
 
 **Your own code is compiled as it runs.** A ReadyToRun publish of a converted program precompiles golib and the
 standard library, which is where start time is won. It leaves the program's own assemblies, every project built from
