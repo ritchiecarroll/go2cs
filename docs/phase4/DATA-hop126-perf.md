@@ -655,3 +655,122 @@ Every table below, in ms (variant against baseline):
 | StringView | 29.4 | 20.9 | 1.405 | +40.5% | 18.6% | **moved** |
 | TlsHandshake | 1513.4 | 1071.6 | 1.412 | +41.2% | 2.8% | **moved** |
 
+
+---
+
+## 11. Appendix, 2026-11-05: item 7, TlsHandshake under Native AOT at about 2.4x its JIT, root-caused
+
+Appended after §10. §6 queued item 7; COORD seated it as a scout: root cause only, and any fix is a separate ruling. The raw
+files are in [`DATA-hop126-perf/item7/`](DATA-hop126-perf/item7/). Three large inputs are not committed and are named by
+sha256 in `large-files-not-committed.sha256`: the two ETL traces, the symbol-carrying image with its 1.7 GB PDB, and the
+118 MB event dump. They are kept on G under `C:\go2cs\scratch\p1262\trace\`.
+
+### 11.1 Step A: the instruction set does NOT explain it under the JIT (window 08:12-08:18)
+
+The plan's hypothesis H1 was the instruction set. The test ran the same `.2` JIT binary under runtime ISA knobs, against
+the admitted D26 AOT image, 11 rounds, with A/A on J. Medians, in ms:
+
+| J | J-AA | J-noBMI2 | J-noAVX2 | J-v2a | D26 (AOT) |
+|--:|--:|--:|--:|--:|--:|
+| 1069.8 | 1075.5 | 1077.6 | 1141.3 | 1133.5 | 2555.4 |
+
+J-v2a is AVX, AVX2, BMI1, BMI2, LZCNT and MOVBE off, with AES and PCLMULQDQ kept.
+
+- **Scored:** J-v2a/J = 1.057, at or below the pre-registered 1.2, so **H1 FAILED** for the JIT and Step B was dropped. The
+  disassembly below brings Step B back, for the AOT side only.
+- **Changed before measuring, and stated in the OPEN post:** with AES off, the converted Go TLS stack negotiates
+  ChaCha20-Poly1305 (suite 4867) instead of AES-128-GCM (4865). Go's own hardware-AES test reads the .NET runtime's view
+  of the CPU. The D26 AOT image negotiates 4865, so the AES-off arms (J-noAES 1070.9, J-v2 1127.6) ran as their own
+  verify group.
+- **Disclosed:** an idle `VBCSCompiler` from the pre-window build was alive at both ends.
+- **Window 1's record already split the gap:** TC0 reads 1523.7 ms, so TC0/J = 1.44 is tiering plus PGO, and AOT/TC0 =
+  1.66 is AOT-specific.
+
+### 11.2 The profile step: instrument and controls
+
+- **The image.** The drop's own exe and pdb pair no longer existed, so the i9 republished PerfTlsHandshake `.2` the drop's
+  way: converter `7871e564`, masked source identity equal, SDK 10.0.403 / ILC 10.0.14, the PDB kept.
+  - Image: sha256 `7f2534b7…`, size-equal to D26.
+  - PDB: `6fa856d5…`, 1,704,284,160 bytes.
+  - A short window shows it represents the timed D26: 2540.7 against 2538.4 ms, ratio 1.001, floor 1.5%, within.
+  - The first attempt at that window is **VOID**: its Fib control (+8.72%) did not hold 0, right after the 1.7 GB
+    pull. It is kept as `void1-p7b-*` and not read.
+- **The trace.** wpr's CPU sampling needs elevation, which the G session does not have, so it was the owner's hand.
+  - The script, `trace-tls.cmd` (sha256 `5aa034c2…`), was reviewed twice by COORD.
+  - Before anything runs, it hash-checks every file either run loads: the AOT exe and pdb inline, and the JIT folder's
+    435 files through `jit-manifest.txt`, whose own hash is inline.
+  - Its checks were proven to refuse a planted mismatch, on a JIT file and on the AOT hash, and both were restored.
+- **The first owner run failed, closed (19:49).** wpr returned rc −984068079 = `0xC5585011`, the code G reproduced
+  unelevated ("Failed to enable the policy to profile system performance"). No trace was written. The rerun at
+  19:52-19:54 from an elevated prompt wrote both traces.
+  - **Suggested for the next staged script (declined for this one):** an elevation guard after the hash checks,
+    `net session >nul 2>&1 || (echo NOT ELEVATED … & exit /b 4)`.
+- **The traced runs match the timed runs:** AOT `elapsed_ns` 2,512.7 ms (timed 2,538) and TC0 1,583.7 ms (window 1
+  1,523.7).
+- **Reading, headless, local symbols only, no network.**
+  - `xperf -symbols` on the 1.7 GB PDB was still building its symbol cache after more than an hour, and was stopped.
+  - Instead, `xperf -a dumper` exported the raw samples and stacks in 3 s, and a 40-line dbghelp resolver
+    (`symres-Program.cs.txt`) named only the sampled addresses. Its first build loaded symbols deferred and resolved
+    nothing; non-deferred, all resolve.
+  - It reports any address outside its symbol's extent: 7 of 2,160 frame addresses (runtime stubs and thunks: write barriers, an interface-dispatch stub, an unboxing thunk and a generic-lookup helper) are
+    excluded.
+  - The TC0 trace's JIT frames are named by xperf from the .NET rundown.
+  - **Both are cut to the timed region,** the last `elapsed_ns` of each run: the AOT timed region holds 2,500 samples,
+    and the TC0 region weighs 1,558.8 ms.
+
+### 11.3 The result: two codegen shapes in the AOT image cover about 87% of AOT/TC0
+
+Timed region, exclusive ms, AOT against TC0. The gap is 941 ms (`aot-timed-excl.txt`, `tc0-timed-perftls.txt`):
+
+| function | AOT | TC0 | AOT − TC0 |
+|:--|--:|--:|--:|
+| golib `slice<UIntPtr>.get_Item` | 547 | 99 | **+448** |
+| `math/bits.Mul` + `Math.BigMul` software fallback | 204 + 169 | ≈ 0 (inlined) | **+373** |
+| bigmod `addMulVVW` | 380 | 352 | +28 |
+| golib `ElementWindow.TryGet` | 98 | 99 | −1 |
+| `unsafe.Slice` | 85 | 70 | +15 |
+
+**Cause 1, golib's slice indexer:**
+- **The shape** (`disasm-aot-slice-UIntPtr-get_Item.txt`): in the AOT image every element read is a CALL. The indexer is
+  not inlined, and on each call it does:
+  - two bounds compares;
+  - a LAZY CLASS-CONSTRUCTOR CHECK on `GoZeroSizeFacts<UIntPtr>` (`cmp qword ptr [statics-8],0; jne <init helper>`);
+  - a load of `IsZeroSize`;
+  - a native-backing check;
+  - then the bounds-checked array access.
+- **The cause:** `GoZeroSizeFacts<T>.IsZeroSize = GoZeroSizeFacts.Classify(typeof(T))` is a reflective field walk in a
+  static initializer.
+  - golib's own comment says the gate "folds at JIT time". It does under the JIT, because the class is initialized
+    before the hot method compiles.
+  - ILC cannot pre-initialize a reflective static constructor. So under Native AOT the gate stays a runtime check, and
+    the indexer stays too big to inline.
+- **Its age:** present since `cd74435da6` (2026-08-26), so it is an AOT-against-JIT cost, not a `.1` → `.2` regression.
+- **Its reach:** every `slice<T>` element read in every Native AOT program, not this program alone.
+
+**Cause 2, the 64-bit multiply:**
+- **The shape** (`disasm-aot-math-bits-Mul.txt`): in the AOT image `math/bits.Mul` is a non-inlined call that
+  UNCONDITIONALLY calls `Math.BigMul`'s software fallback: no `mulx` or `mul`, and no runtime CPU check.
+- **The JIT side:** under the JIT the multiply is inlined, and §11.1 shows it is free even with BMI2 disabled.
+- So ILC compiled the software path at its baseline instruction set. §11.1 ruled out the ISA for the JIT only; for AOT,
+  `Math.BigMul`'s compile-time path depends on it. Confirmation is Step B (§11.4).
+
+**The rest, about 120 ms (13%):** `unsafe.Slice`/`SpanLength` and the slice constructor/`Window` run a little higher in AOT,
+plus allocation and GC helpers (`RhpNewFast`, `memset`, `mark_through_cards`).
+
+**The named suspects, scored:**
+- seat #18's NativeStructMarshal path: **killed**. It is not in the timed profile, and all socket syscalls together are
+  3.3%.
+- Shared-generic and generic-virtual dispatch in the crypto interfaces: **killed for the timed time.** `crypto.Signer.Sign`
+  does go through `GoShellBinding.Invoke` into reflection `DynamicInvoke`, but only once per handshake.
+- Static-base helpers: **confirmed**, as cause 1's class-constructor check.
+
+**A named AOT start-up cost, outside the timed region:** 516 ms of the AOT warm-up is spent in `builtin.TryTypeAssert`
+→ `TypeExtensions.StructurallyImplements` → `GetGoMethodSetCandidates`, decoding reflection metadata (`NativeFormat`) on
+first use. All of those samples fall 0.29-0.89 s after process start, before the timer. COORD names it a candidate for
+P1's extension-scan family.
+
+### 11.4 Open from this section
+
+- Step B, approved, diagnostic only: one AOT image with BMI2 in `IlcInstructionSet`, to confirm cause 2. The shipping
+  default is untouched; any instruction-set or portability change is the owner's call.
+- A design note on making `IsZeroSize` fold under ILC (cause 1), with options, footprint, risk and the expected gain.
