@@ -188,6 +188,12 @@ func (v *Visitor) callArgumentIsTargeted(call *ast.CallExpr, arg ast.Node, ances
 		if _, isBuiltin := v.info.Uses[f].(*types.Builtin); isBuiltin {
 			return false
 		}
+	case *ast.SelectorExpr:
+		// unsafe.SliceData and its siblings: go/types records each builtin call's own signature, which would
+		// read as an ordinary parameter, and golib's counterparts are generic.
+		if _, isBuiltin := v.info.Uses[f.Sel].(*types.Builtin); isBuiltin {
+			return false
+		}
 	case *ast.IndexExpr, *ast.IndexListExpr:
 		// An explicitly instantiated generic function.
 		return false
