@@ -214,10 +214,8 @@ internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummar
 // finalize is called when processing a goroutine end event or at
 // the end of trace processing. This finalizes the execution stat
 // and any active regions in the goroutine, in which case trigger is nil.
-internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔEvent> Ꮡtrigger) {
-    ref var trigger = ref Ꮡtrigger.DerefOrNull();
-
-    if (Ꮡtrigger != nil) {
+internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔEvent> trigger) {
+    if (trigger != nil) {
         g.EndTime = trigger.Time();
     }
     var finalStat = g.snapshotStat(lastTs);
@@ -230,7 +228,7 @@ internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔE
     // starting the GC worker goroutines.
     if (!IsSystemGoroutine(g.Name)) {
         foreach (var (_, s) in g.activeRegions) {
-            s.End = Ꮡtrigger;
+            s.End = trigger;
             s.GoroutineExecStats = finalStat.sub(s.GoroutineExecStats);
             g.Regions = builtin.append(g.Regions, s);
         }
@@ -286,9 +284,7 @@ partial struct rangeP {
 }
 
 // Event feeds a single event into the stats summarizer.
-public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
-    ref var ev = ref Ꮡev.DerefOrNull();
-
+public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
     if (s.syncTs == 0) {
         s.syncTs = ev.Time();
     }
@@ -383,7 +379,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 var creatorG = s.gs[ev.Goroutine()]; if (creatorG != nil && len(creatorG.activeRegions) > 0) {
                     var regions = creatorG.activeRegions;
                     var sΔ8 = regions[len(regions) - 1];
-                    g.activeRegions = slice<ж<UserRegionSummary>>([Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: Ꮡev))]);
+                    g.activeRegions = slice<ж<UserRegionSummary>>([Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: ev))]);
                 }
                 s.gs[g.ID] = g;
                 break;
@@ -470,7 +466,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 } while (false);
             }
             if (fallthrough || !matchᴛ1 && exprᴛ5 == GoNotExist) {
-                g.finalize(ev.Time(), Ꮡev);
+                g.finalize(ev.Time(), ev);
             }
             else if (exprᴛ5 == GoSyscall) { matchᴛ1 = true;
                 s.syscallingP[ev.Proc()] = id;
@@ -570,7 +566,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         var region = Ꮡ(new UserRegionSummary(
             Name: r.Type,
             TaskID: r.Task,
-            Start: Ꮡev,
+            Start: ev,
             GoroutineExecStats: g.snapshotStat(ev.Time())
         ));
         g.activeRegions = builtin.append(g.activeRegions, region);
@@ -600,7 +596,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
             task.Regions = builtin.append(task.Regions, sd);
         }
         sd.GoroutineExecStats = g.snapshotStat(ev.Time()).sub(sd.GoroutineExecStats);
-        sd.End = Ꮡev;
+        sd.End = ev;
         g.Regions = builtin.append(g.Regions, sd);
         break;
     }
@@ -612,9 +608,9 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         task.Name = t.Type;
         task.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
         if (ev.Kind() == EventTaskBegin) {
-            task.Start = Ꮡev;
+            task.Start = ev;
         } else {
-            task.End = Ꮡev;
+            task.End = ev;
         }
         // Initialize the parent, if one exists and it hasn't been done yet.
         // We need to avoid doing it twice, otherwise we could appear twice
@@ -632,7 +628,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         // doesn't exist (it's just been mentioned now).
         var task = s.getOrAddTask(log.Task);
         task.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
-        task.Logs = builtin.append(task.Logs, Ꮡev);
+        task.Logs = builtin.append(task.Logs, ev);
         break;
     }}
 }

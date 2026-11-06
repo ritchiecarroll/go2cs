@@ -704,12 +704,12 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
 
     bool readLastByte = default;
     var pos0 = sw.pos;
-    while (sw.logicalRemaining() > 0 && !readLastByte && err == nil) {
+    while (Ꮡsw.logicalRemaining() > 0 && !readLastByte && err == nil) {
         int64 nf = default; // Size of fragment
         var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
         if (sw.pos < dataStart) { // In a hole fragment
             nf = dataStart - sw.pos;
-            if (sw.physicalRemaining() == 0) {
+            if (Ꮡsw.physicalRemaining() == 0) {
                 readLastByte = true;
                 nf--;
             }
@@ -742,7 +742,7 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
     case {} when err != nil: {
         return (n, err);
     }
-    case {} when sw.logicalRemaining() == 0 && sw.physicalRemaining() > 0: {
+    case {} when Ꮡsw.logicalRemaining() == 0 && Ꮡsw.physicalRemaining() > 0: {
         return (n, errUnrefData); // Not possible; implies bug in validation logic
     }
     default: {

@@ -404,6 +404,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferFrameScopes() => CheckTarget("DeferFrameScopes");
 
     [TestMethod]
+    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
+
+    [TestMethod]
     public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
 
     [TestMethod]
@@ -1562,6 +1565,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilPointerParamUnsafePointer() => CheckTarget("NilPointerParamUnsafePointer");
 
     [TestMethod]
+    public void CheckNilPointerParamValueCallTC0() => CheckTarget("NilPointerParamValueCallTC0");
+
+    [TestMethod]
     public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
 
     [TestMethod]
@@ -2568,9 +2574,6 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
-
-    [TestMethod]
-    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
 
     [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");

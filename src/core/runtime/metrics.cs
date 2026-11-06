@@ -813,9 +813,8 @@ partial struct statAggregate {
 
 // ensure populates statistics aggregates determined by deps if they
 // haven't yet been populated.
-internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> Ꮡdeps) {
+internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
     ref var a = ref Ꮡa.DerefOrNull();
-    ref var deps = ref Ꮡdeps.DerefOrNull();
 
     var missing = deps.difference(a.ensured);
     if (missing.empty()) {
