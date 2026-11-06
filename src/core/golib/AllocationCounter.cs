@@ -62,6 +62,10 @@ namespace go;
 ///   <item><description>
 ///     allocations in hand-owned <c>*_impl.cs</c> package code that does not route through golib.
 ///   </description></item>
+///   <item><description>
+///     the objects a memory-profile sample's recorder allocates as it records: Go's profiler records outside
+///     mallocgc, so Mallocs never counts them, and <see cref="RewindThread"/> takes them back off here.
+///   </description></item>
 /// </list>
 /// <para>
 /// That residual is the reason a count may never be reported as if it were total. The consumer —
@@ -105,6 +109,14 @@ public static class AllocationCounter
 
     /// <summary>Zeroes this thread's tally before a pooled thread runs its next goroutine.</summary>
     internal static void ResetThread() => t_count = 0;
+
+    /// <summary>
+    /// Sets the calling thread's tally back to <paramref name="count"/>, a value this thread read from
+    /// <see cref="CurrentThreadCount"/>: the objects allocated since were the runtime's own bookkeeping, which
+    /// Go makes outside mallocgc and never counts in MemStats.Mallocs (a memory-profile sample's records,
+    /// <see cref="GoMemProfile"/>).
+    /// </summary>
+    internal static void RewindThread(long count) => t_count = count;
 
     /// <summary>
     /// Gets whether allocation counting is currently enabled for this process.

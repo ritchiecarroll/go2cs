@@ -8055,14 +8055,14 @@ sees. Longer than the usual summary section by owner rule (2026-09-27 review): e
 example rather than one fragment full of ellipses, and each section stands on its own. In the reference: the
 receiver-field call lowered into the finally (golden DeferFinallyLowering/main.cs.target:52#ed2cb8; never in a
 function that calls recover() or has named results), runtime.Goexit, the crash report, and
-(manual-conversions.md, runtime.Stack sections) the Go-shaped tracebacks, the main-goroutine Goexit gate and
+(manual-conversions.md, runtime.Stack sections) the Go-shaped tracebacks, main-goroutine Goexit and
 the NoInlining pin on runtime.Caller callers. src/core/golib/GoFrame.cs: m_d0..m_d3 are the inline slots; a
 fifth registration allocates the List<Action> overflow. PanicException: src/core/golib/PanicException.cs:20#6fd451.
 Run() re-throws a panic no deferred call recovered: GoFrame.cs:120-149#1286a5. Capture parks it for recover():
-GoFrame.cs:690-713#b2f6a2; builtin.recover reads and clears that slot: builtin.cs:341#9159ef. defer/panic/recover live on
+GoFrame.cs:712-743#7c8067; builtin.recover reads and clears that slot: builtin.cs:341#9159ef. defer/panic/recover live on
 the partial class builtin (builtin.DeferRegistrations.cs:55#ffe49b, builtin.cs:291#09e845, :341#9159ef); the project-wide
 `using static go.builtin` is described at builtin.cs:35#bbc027. A non-panic exception fails IsPanic and propagates
-unchanged while the finally still runs the defers: GoFrame.cs:623-685#3ad245. -->
+unchanged while the finally still runs the defers: GoFrame.cs:636-707#093b3c. -->
 **A function that defers wraps its body in `try`/`catch`/`finally`.** This is the smallest `defer`:
 
 <!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.go:5-9 -->
@@ -8245,7 +8245,7 @@ Package `main` exports nothing, so a program's own functions follow Go. A `defer
 func-typed field or an interface method is marked when its signature matches a recovering function of the
 package. An unexported recovering function that another package receives as a func value and defers is not
 marked there, so its `recover` returns `nil`.
-<!-- the mark: src/core/golib/GoFrame.cs:507 `public static bool TakeDeferredCall()`; the read:
+<!-- the mark: src/core/golib/GoFrame.cs:520 `public static bool TakeDeferredCall()`; the read:
      src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`;
      a literal reached through a func value: :386 `public static object? recoverChecked()`; the converter's forms:
      src/go2cs/recoverForms.go. Guard: src/tests/Behavioral/RecoverInHelper, compared with Go's output (the
@@ -8656,7 +8656,7 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1234 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
+<!-- src/core/golib/runtime/Goroutine.cs:1256 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
      `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
@@ -8729,8 +8729,9 @@ run the same way after conversion.
 no platform is named there, so the figure is kept here rather than in the text. -->
 
 **`runtime` keeps Go's goroutine contracts on top of threads.** `runtime.Goexit` runs the goroutine's
-deferred calls and ends only that goroutine. Calling it from `main` itself is not supported and throws
-an exception. `runtime.LockOSThread` holds because each goroutine already owns its thread, and a goroutine
+deferred calls and ends only that goroutine. Called from `main`, it runs main's deferred calls and ends `main`
+without returning: the other goroutines keep running, and once none can run the program dies with Go's
+`fatal error: no goroutines (main called runtime.Goexit) - deadlock!`, exit status 2. `runtime.LockOSThread` holds because each goroutine already owns its thread, and a goroutine
 that ends while locked retires its thread instead of handing it to the next goroutine.
 These functions are hand-written C#
 ([Manually-Converted Declarations](#manually-converted-declarations)).
@@ -11776,8 +11777,8 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:4854 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
-     the printed form :1953 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+<!-- src/core/runtime/managed_impl.cs:4944 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+     the printed form :1956 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
 

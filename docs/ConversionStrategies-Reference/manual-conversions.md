@@ -3248,14 +3248,18 @@ package's `managed_impl.cs` (`manualConversionFuncs`), since the converted body 
 the `GoexitDefers` behavioral test (defers run across frames, `recover()` sees nil, other goroutines
 still run, main continues) and by sync's `TestOnceFuncGoexit`, which this unblocked.
 
-**Goexit from the MAIN goroutine stays gated — at runtime, not statically.** There, Go ends `main`
-without returning while the *program continues* running its other goroutines, crashing with
-"no goroutines" once they all exit; that needs a live-goroutine registry and a main-thread parking
-protocol the managed model does not have (`docs/phase4/DESIGN-goexit.md` option C). The distinction is
-not statically decidable — a function's call graph says nothing about which goroutine will run it — so
-`Goroutine.OnGoroutine` (a `[ThreadStatic]` the root sets and restores, because goroutines run on
-pooled threads) answers it at the call, and the main-goroutine case throws a loud
-`NotSupportedException` naming the design doc rather than silently doing something else. Consequently
+**Goexit from the MAIN goroutine is decided at the call, not statically.** There, Go ends `main` without
+returning while the *program continues* running its other goroutines, and dies with `fatal error: no
+goroutines (main called runtime.Goexit) - deadlock!` once none can run (or "all goroutines are asleep" when the
+ones left are blocked). Which goroutine runs a function is not statically decidable, so the hand-owned
+`runtime.Goexit` asks the registry (`Goroutine.Current is { IsMain: true }`) and throws a `GoexitException` marked
+`FromMain`. Main has no goroutine root, and an exception nothing catches runs no `finally`, so every deferring frame
+catches that exception: `GoFrame.IsPanic` answers it with an internal marker `recover()` cannot read, the frame's
+`Run` runs its deferred calls and throws a fresh from-main Goexit from its `finally`. Past the outermost deferring
+frame, golib's backstop parks the main thread (`MainGoexit.Park`) until no other goroutine is left, and a goroutine
+left in a forever wait reports the deadlock itself, since the dead-program check counts an exited main as blocked
+(`docs/DESIGN-goexit-main.md`). The test host catches it around `TestMain` and parks the same way. Guarded by the
+`GoexitFromMain` behavioral test (six arms against `go run`) and GolibTests `MainGoexitTests`. Consequently
 `unsupportedRuntimeCapabilities` (`testConversion.go`) is now **empty**: the mechanism remains — a test
 whose transitive closure reaches a listed symbol converts as `unsupported`, disclosed by name, the
 same gate an unsupported `testing.*` member uses — with `TestUnsupportedRuntimeCapabilityGate` as its
@@ -3632,7 +3636,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4837 (`INLINED PANIC SITES`), :4845 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:4927 (`INLINED PANIC SITES`), :4935 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
