@@ -881,6 +881,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]

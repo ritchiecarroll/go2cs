@@ -34,14 +34,34 @@ namespace go;
 [DebuggerNonUserCode]
 public class GoexitException : Exception
 {
-    public GoexitException() : base("runtime.Goexit")
+    public GoexitException() : this(fromMain: false)
     {
+    }
+
+    /// <summary>
+    /// Unwinds for <c>runtime.Goexit</c>; <paramref name="fromMain"/> when the MAIN goroutine called it.
+    /// </summary>
+    /// <remarks>
+    /// A goroutine's Goexit ends at its root (<c>golib.Goroutine.Run</c>). Main's has no root: a converted
+    /// <c>main</c> is the CLR entry point, and an exception nothing catches ends the process WITHOUT running a
+    /// single <c>finally</c>, so main's deferred calls would never run. So every deferring frame catches a
+    /// from-main Goexit (<see cref="GoFrame.IsPanic"/>, through a marker <c>recover()</c> cannot read), runs its
+    /// deferred calls, and raises it again at its end; past the outermost one, golib parks the main thread until
+    /// no goroutine can run (<see cref="golib.MainGoexit"/>). docs/DESIGN-goexit-main.md.
+    /// </remarks>
+    public GoexitException(bool fromMain) : base("runtime.Goexit")
+    {
+        FromMain = fromMain;
+
         // Nothing stops a Goexit, so once one is raised this goroutine ends on it. GoFrame.Run reads the
         // mark: Go shows runtime.Goexit beneath a deferred call that a Goexit is running, and that frame
         // is not modelled, so a panic such a call raises is left unowned (a missing splice, never a
         // wrong one). Cleared with the goroutine's other thread state (GoFuncRoot.ResetThread).
         MarkGoroutineExiting();
     }
+
+    /// <summary>Whether the MAIN goroutine called <c>runtime.Goexit</c>.</summary>
+    public bool FromMain { get; }
 
     [ThreadStatic] private static bool t_started;
 

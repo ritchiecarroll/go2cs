@@ -919,6 +919,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]
