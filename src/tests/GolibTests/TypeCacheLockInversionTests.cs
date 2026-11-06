@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +31,7 @@ public class TypeCacheLockInversionTests
     [TestMethod]
     public void TheAssemblyLoadHandlerNeverWaitsForAnInFlightScan()
     {
-        TypeExtensions.ClearTypeCaches(null, EventArgs.Empty);
+        TypeExtensions.ResetExtensionScanForTest();
 
         using var scanInFlight = new ManualResetEventSlim();
         using var handlerDone = new ManualResetEventSlim();
@@ -67,26 +70,26 @@ public class TypeCacheLockInversionTests
         }
     }
 
+    // A load landing mid-scan may leave the scan's pass without the new assembly: it must not be what the scan
+    // publishes. The scan keeps what it has already visited (an assembly's extension methods never change after it
+    // loads) and visits only the assembly that loaded meanwhile before it publishes.
     [TestMethod]
-    public void AScanThatALoadInterruptedRescansRatherThanPublishingAStaleResult()
+    public void AScanThatALoadInterruptedVisitsTheNewAssemblyBeforeItPublishes()
     {
-        TypeExtensions.ClearTypeCaches(null, EventArgs.Empty);
-
-        Assembly? first = null;
-        int passes = 0;
+        Assembly first = typeof(go.sync.atomic_package).Assembly;
+        Assembly late = typeof(go.sort_package).Assembly;
+        Assembly[] source = [first];
+        ConcurrentDictionary<Assembly, int> visits = [];
         using var scanInFlight = new ManualResetEventSlim();
         using var handlerDone = new ManualResetEventSlim();
 
+        TypeExtensions.ResetExtensionScanForTest();
+        TypeExtensions.AssemblySourceForTest = () => Volatile.Read(ref source);
         TypeExtensions.ScanProbeForTest = assembly =>
         {
-            first ??= assembly;
+            visits.AddOrUpdate(assembly, 1, static (_, count) => count + 1);
 
-            if (assembly != first)
-                return;
-
-            passes++;
-
-            if (!scanInFlight.IsSet)
+            if (assembly == first && !scanInFlight.IsSet)
             {
                 scanInFlight.Set();
                 handlerDone.Wait(ProbeLimit);
@@ -95,8 +98,11 @@ public class TypeCacheLockInversionTests
 
         try
         {
-            Task scan = Task.Run(() => TypeExtensions.GetExtensionMethods());
+            Task<(MethodInfo, Type)[]> scan = Task.Run(TypeExtensions.GetExtensionMethods);
             Assert.IsTrue(scanInFlight.Wait(ProbeLimit), "control: the scan must reach the probe");
+
+            // The runtime loads `late` while the scan is in flight, and raises AssemblyLoad.
+            Volatile.Write(ref source, [first, late]);
 
             Task.Run(() =>
             {
@@ -107,14 +113,50 @@ public class TypeCacheLockInversionTests
             handlerDone.Set();
             Assert.IsTrue(scan.Wait(ProbeLimit * 2), "the scan must finish");
 
-            // The load landed mid-scan, so the first pass's result may be missing an assembly: it must not
-            // be what the scan publishes. One more pass, started after the load, is the fresh answer.
-            Assert.AreEqual(2, passes, "a scan interrupted by a load must scan again before it publishes");
+            Assert.AreEqual(1, visits.GetValueOrDefault(late), "a scan interrupted by a load must visit the new assembly before it publishes");
+            Assert.AreEqual(1, visits.GetValueOrDefault(first), "the assembly already visited must not be visited again");
+            Assert.IsTrue(scan.Result.Any(entry => entry.Item1.DeclaringType?.Assembly == late),
+                "the published scan must hold the extension methods of the assembly that loaded mid-scan");
         }
         finally
         {
             TypeExtensions.ScanProbeForTest = null;
+            TypeExtensions.AssemblySourceForTest = null;
+            TypeExtensions.ResetExtensionScanForTest();
+        }
+    }
+
+    // A load that lands after a scan published visits only the new assembly; the scan published before it is kept.
+    [TestMethod]
+    public void ALoadAfterAScanVisitsOnlyTheNewAssembly()
+    {
+        Assembly first = typeof(go.sync.atomic_package).Assembly;
+        Assembly late = typeof(go.sort_package).Assembly;
+        Assembly[] source = [first];
+        ConcurrentDictionary<Assembly, int> visits = [];
+
+        TypeExtensions.ResetExtensionScanForTest();
+        TypeExtensions.AssemblySourceForTest = () => Volatile.Read(ref source);
+        TypeExtensions.ScanProbeForTest = assembly => visits.AddOrUpdate(assembly, 1, static (_, count) => count + 1);
+
+        try
+        {
+            (MethodInfo, Type)[] before = TypeExtensions.GetExtensionMethods();
+
+            Volatile.Write(ref source, [first, late]);
             TypeExtensions.ClearTypeCaches(null, EventArgs.Empty);
+            (MethodInfo, Type)[] after = TypeExtensions.GetExtensionMethods();
+
+            Assert.AreEqual(1, visits.GetValueOrDefault(first), "a load must not make the scan visit an assembly it has already visited");
+            Assert.AreEqual(1, visits.GetValueOrDefault(late), "the newly loaded assembly must be visited once");
+            CollectionAssert.AreEqual(before, after.Take(before.Length).ToArray(), "the methods found before the load must be kept, in order");
+            Assert.IsTrue(after.Skip(before.Length).Any(), "the newly loaded assembly's extension methods must be appended");
+        }
+        finally
+        {
+            TypeExtensions.ScanProbeForTest = null;
+            TypeExtensions.AssemblySourceForTest = null;
+            TypeExtensions.ResetExtensionScanForTest();
         }
     }
 }
