@@ -35,8 +35,8 @@ using static global::go.net.http.internal_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("chunked_test.cs", 245, 5)]
-[assembly: GoBoundedGoroutine("chunked_test.cs", 259, 5)]
+[assembly: GoBoundedGoroutine("chunked_test.cs", 245, 5, 0)]
+[assembly: GoBoundedGoroutine("chunked_test.cs", 259, 5, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

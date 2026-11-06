@@ -1022,3 +1022,162 @@ paid for by short inputs.
 - The disassembly gates come before any timing.
 - The predictions stated 2026-11-05 carry over to the new base: A against base 0.80-0.90 for TlsHandshake; at least 2 of
   Sieve, MatMul and Sort moved faster; AI/A 0.88-0.96.
+
+### 11.7 Amended 2026-11-06: the two portable fixes, priced at the default instruction set
+
+Raw files are in [`item7/pricing/`](DATA-hop126-perf/item7/pricing/). The design was approved before any image was built,
+and its arms were amended on 2026-11-06 (§11.6, *Open from this section*): source-reference builds by the i9 at the
+default instruction set, each with its native PDB.
+
+| arm | tree | change | programs |
+|:--|:--|:--|:--|
+| B0 | `f0ed6c71f6` | base | TlsHandshake, Sieve, MatMul, Sort |
+| A | `2393238b8a` | R's zero-size pre-gate (golib `GoZeroSize.cs` only) | the same four |
+| AI | `32a0372d23` | A plus the `bits.Mul` inline (`math/bits` `bits_impl.cs` only) | TlsHandshake |
+
+The i9 confirmed the following for every image:
+- the converted program sources are byte-identical across arms (paths masked);
+- each image's golib and `math/bits` tree hashes are named in its manifest;
+- no response file names an instruction set;
+- every `go.*` project resolves from that arm's own `src/core` (0 packages);
+- SDK 10.0.403, ILC 10.0.14.
+
+Every file was sha256-checked against the i9's post and its folder manifest before use. All timing is `win-x64` on G.
+
+**The disassembly gates, read before any timing** (`pgates.sh`, by symbol extent on TlsHandshake): GATES PASS.
+- B0's `slice<UIntPtr>.get_Item` carries the `GoZeroSizeFacts` class-constructor check, as the control. A's and AI's do
+  not: 31 instructions against 51, the shape the §11.5 probe predicted.
+- B0's and A's `bigmod.addMulVVW` call `math/bits.Mul`. AI's does not. It calls `Math.BigMul`'s software fallback directly
+  and holds no `mulx`, as a default-instruction-set image should.
+- **A gate hazard, recorded for any future ILC symbol gate: identical-body folding.** In A, `slice<UIntPtr>.get_Item`
+  became a one-instruction `jmp` to `slice<Double>.get_Item`: with the gate gone, the two 8-byte-element indexers are the
+  same machine code, and ILC keeps one. A gate that reads only the named symbol's extent passes VACUOUSLY on such a stub,
+  as the first read here did. `pgates.sh` now follows a one-instruction `jmp` to its target and says so, so the gate
+  reads the body the caller actually runs.
+- Visible but not gated: in A, `get_Item` is smaller but still a CALL from `addMulVVW`, four per iteration. It is not
+  inlined.
+
+**The window (04:11-04:18): INVALID as worded.** Exactly one arm broke "every arm's A/A under 3%": Sieve's B0, at 3.86%.
+Every other arm's A/A was 0.05-0.55%. The Fib control held (+2.18%, [-2.29%, +3.85%]), and the census found 0 build
+processes and 0 pwsh hosts at both ends. Per the §11.6 precedent, the other rows stand on per-row validity. The Sieve row
+was re-measured alone (below), and the window's 0.834 for Sieve is not read.
+
+**The Sieve-only rerun (04:19-04:20, valid)**, as COORD approved it before it ran:
+- B0 and A at 21 rounds, under the original rule with no amendment.
+- A/A: B0 0.59%, A 0.18%. Fib control -0.30%, [-4.33%, +3.98%].
+- The Go Sieve control, which is reported only in every window, stepped +22.57% from start to end (interval excluding 0),
+  while Fib did not. All 11 end samples (60-68 ms) sit above all 11 start samples (44-56 ms), so it is a step, not a drift.
+  It is **not explained**: the census shows nothing.
+  - The stated hypothesis, unverified: a memory-subsystem state change. Go's Sieve is memory-bound and Fib is compute-bound.
+  - Interleaving the arms in alternating order cancels a slow drift, but not a step inside one arm's half. The per-round
+    table of the four arms shows no level change from round 0 to round 20 (`psieve-arms.tsv`), so no step reached the arms.
+
+**The result.** ms medians:
+
+| reading | program | new | base | ratio | change | floor | |
+|:--|:--|--:|--:|--:|--:|--:|:--|
+| A/B0 | MatMul | 605.0 | 735.0 | 0.823 | -17.7% | 1.5% | **moved faster** |
+| A/B0 | Sieve (rerun) | 277.5 | 320.9 | 0.865 | -13.5% | 6.7% | **moved faster** |
+| A/B0 | Sort | 481.9 | 556.1 | 0.867 | -13.3% | 1.4% | **moved faster** |
+| A/B0 | TlsHandshake | 2347.3 | 2543.3 | 0.923 | -7.7% | 0.7% | **moved faster** |
+| AI/A | TlsHandshake | 2175.8 | 2347.3 | 0.927 | -7.3% | 0.9% | **moved faster** |
+| AI/B0, both fixes | TlsHandshake | 2175.8 | 2543.3 | 0.856 | -14.4% | 0.9% | **moved faster** |
+
+**The predictions, stated 2026-11-05 and scored as worded: 2 of 3 HIT.**
+- A/B0 TlsHandshake 0.80-0.90: **FAILED** (0.923). The prediction priced all of `get_Item`'s 448 ms. A recovers 196 ms,
+  because the indexer lost its class-constructor check but is still a call, four per iteration.
+- At least 2 of Sieve, MatMul and Sort move faster: **HIT**, all three.
+- AI/A TlsHandshake 0.88-0.96: **HIT** (0.927, -172 ms).
+
+**Beside §11.6, for the instruction-set decision.**
+- **The two portable fixes:** at the DEFAULT instruction set, they take TlsHandshake to 0.856 (-368 ms). Option A alone
+  speeds the slice-heavy programs by 13-18%, and it costs no CPU support.
+- **x86-64-v3 alone:** TlsHandshake 0.899 (-256 ms), the slice-heavy programs within noise, StringMatch +4.7% and
+  IfaceShellChurn +3.0%, a suite geomean of 1.000, and an image that refuses to start on CPUs without AVX2, BMI1, BMI2,
+  F16C, FMA or LZCNT.
+- **Not measured:** v3 on top of both fixes (AIv3 was skipped). What v3 could still add on TlsHandshake is at most the
+  software fallback's share (169 ms exclusive in §11.3).
+- **Open:** the remaining `get_Item` call is the next lever, and R holds that scout (an AOT indexer inline).
+
+### 11.8 Amended 2026-11-06: the ReadyToRun composite lever in single-file publishes, and what the 3 s really is
+
+Raw files are in [`item7/r2r-lever/`](DATA-hop126-perf/item7/r2r-lever/). The question, from the i9's discriminator: does
+crossgen2's `--composite`, the SDK default for a self-contained single-file ReadyToRun publish, cost converted programs?
+And should single-file converted templates set `PublishReadyToRunComposite=false`?
+
+The i9 built every image at master `52d69e8968` by the drop recipe:
+- `-recurse=nuget` against the published 1.26.10.2 `go.*` packages; the masked source identities equal the drop's.
+- `dotnet publish -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true -p:PublishSingleFile=true`, at the
+  default instruction set. SDK 10.0.403, crossgen2 and runtime pack 10.0.14.
+- Each publish folder was pulled whole and every file checked against its own manifest.
+
+The converted csproj (and `csproj-template.xml`) sets `EnableCompressionInSingleFile=true`. It keeps the program's own
+assembly out of ReadyToRun, the same in every arm.
+
+| arm | packaging | crossgen2 | exe | publish |
+|:--|:--|:--|--:|--:|
+| C | composite, compressed (what a plain single-file publish gets today) | one `--composite` invocation, a 1,649,922,048-byte image | 571 MB | ~765 s |
+| N | per-assembly, compressed (`PublishReadyToRunComposite=false`, what the shipped single-file profiles set) | one invocation per assembly (82-83) | 33 MB | 30 s |
+| CU | composite, UNcompressed (C plus `EnableCompressionInSingleFile=false`), PerfStartup only | as C | 1,696 MB | 699 s |
+
+**Window 1, C against N (05:02-05:07, valid).** A/A 0.08-2.27%; the Fib control held (-0.55%, [-3.74%, +1.70%]).
+
+| program | N | C | N/C | floor | |
+|:--|--:|--:|--:|--:|:--|
+| Startup, process wall | 473.2 | 3492.3 | 0.136 | 4.5% | **N faster by 3.0 s** |
+| StringMatch, in-program | 779.8 | 1074.4 | 0.726 | 10.2% | **N faster** |
+
+StringMatch's process wall, which is not the reading, was 1272.7 against 4643.0 ms.
+
+The predictions, scored as worded:
+- Startup N/C below 1: **HIT**, far beyond its stated size.
+- StringMatch within its floor: **FAILED**.
+
+**The mechanism, step by step.**
+- *Not JIT time.* `DOTNET_JitDisasmSummary`, one run per image outside the timing (`jit-*-summary.txt`): C JITs about 5x
+  FEWER methods than N (Startup 510 against 2626; StringMatch 911 against 2684). The composite precompiles far more of the
+  framework and its generic instantiations.
+- *`bits.Mul` cannot be tested here.* Neither program calls `math/bits.Mul`, `Mul64` or `Math.BigMul`, so neither arm's
+  list names them. TlsHandshake would be the program for the i9's discriminator.
+- *Compression, by size.* C's 571,067,714-byte exe bundles a 1,649,922,048-byte composite image, so it is compressed, at
+  about 2.9:1. CU's uncompressed exe is 1,695,755,227 bytes.
+- *Compression is the whole 3 s.* The discriminating window (05:23-05:26, valid: A/A 0.05-0.69%, Fib control +0.88%,
+  [-2.11%, +5.61%]), PerfStartup process wall:
+
+| arm | wall (ms) | against C | against N |
+|:--|--:|--:|--:|
+| C, composite compressed | 3480.3 | | 7.40x |
+| N, per-assembly compressed | 470.4 | 0.135 (replicates 0.136) | |
+| CU, composite uncompressed | 319.7 | **0.092** (-3.16 s) | **0.680** (-150.7 ms) |
+
+Single-file compression of the one 1.65 GB composite image is the entire ~3 s: every start decompresses it. With
+compression off, the composite starts 32% faster than the per-assembly profile. "Composite wins start-up" holds once it is
+not decompressed. The prediction stated before this window scored 1 of 2:
+- CU/C below 0.5: **HIT**.
+- CU/N in 0.9-1.3: **FAILED**, because CU landed below the range.
+
+The fit with P1's BoGo host (composite, uncompressed, about 1.2 s) is consistent.
+
+**StringMatch's loop under composite, a hypothesis, unverified.** With fewer methods JIT'd, more of C's hot framework code
+stays as precompiled ReadyToRun code instead of being re-JIT'd at Tier1 with dynamic PGO (N's StringMatch lists 61
+"Tier1 with Dynamic PGO" methods). CU's in-program time was not measured, so whether the loop penalty survives without
+compression is open.
+
+**The 2x2 as far as measured, and the trade for the template ruling** (Startup wall):
+
+| | compressed | uncompressed |
+|:--|:--|:--|
+| composite | 3480 ms, 571 MB | 320 ms, 1,696 MB |
+| per-assembly | 470 ms, 33 MB | NOT MEASURED (ruled below) |
+
+- The one combination that is never right is composite WITH compression. Today it is what a plain
+  `dotnet publish -p:PublishSingleFile=true` produces under `csproj-template.xml`, which sets compression and leaves the
+  SDK's composite default.
+- The shipped single-file profiles already avoid it with `PublishReadyToRunComposite=false` (seat #14, pinned by
+  `TestSingleFileProfilesCompileReadyToRunPerAssembly`).
+- CU buys about 150 ms of start-up at a 1.7 GB executable and a ~700 s publish. Its in-program cost is unmeasured.
+- **RULED (COORD, 2026-11-06): no further arms.** Per-assembly uncompressed and CU's in-program time would not change the
+  template decision. CU's 1.7 GB executable and ~700 s publish rule it out as a default whatever its loop does, and N is
+  already the shipped profiles' shape.
+- **The fix is seated with C2:** `csproj-template.xml` sets `PublishReadyToRunComposite=false` for an Exe unless the
+  project sets it, so a plain single-file publish gets N, not C.

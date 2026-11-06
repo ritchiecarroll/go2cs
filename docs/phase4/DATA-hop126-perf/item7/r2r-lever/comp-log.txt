@@ -1,0 +1,35 @@
+start 2026-11-06 05:02:16 
+verified: 4 files
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== comp-warm-ctl.tsv 05:02:23
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== comp-ctl-start.tsv 05:02:27
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== comp-arms-1.tsv 05:02:30
+PerfStartup: verified 4 arms, output equal
+PerfStartup: 11 rounds done
+== comp-ctl-mid.tsv 05:04:15
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== comp-arms-2.tsv 05:04:19
+PerfStringMatch: verified 4 arms, output equal
+PerfStringMatch: 11 rounds done
+== comp-ctl-end.tsv 05:06:54
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 05:06:59 rc=0
