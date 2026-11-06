@@ -1257,66 +1257,6 @@ jobs:
       # -------------------------------------------------------------------------------------
       # sweep-shard — a filtered validated sweep against `go test -json` on this platform.
       # -------------------------------------------------------------------------------------
-      # MEASUREMENT ONLY (C1, the osx-arm64 oracle seat, 2026-11-05): what Go the darwin runner offers, which arch the
-      # oracle's test binary runs as, and Go's own verdicts for the four tests that diverge on osx-arm64 under each
-      # GOARCH. Annotated, so it is readable without the blob-served artifacts. Removed once the seat is ruled.
-      - name: Oracle arch probe (measurement)
-        if: needs.plan.outputs.stage == 'sweep-shard' && matrix.goos == 'darwin'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Continue'
-          $tags = 'purego,math_big_pure_go'
-          $run = '^(TestMemHash32Equality|TestMemHash64Equality|TestMemHashGlobalSeed|TestMmapErrorSign)$'
-          $lines = @("## Oracle arch probe -- GOOS=darwin ($($env:RID))", '')
-          $lines += "host        : $(& uname -m) / $(& sysctl -n machdep.cpu.brand_string)"
-          $lines += "go          : $(& go version) / GOHOSTARCH=$(& go env GOHOSTARCH) / GOROOT=$(& go env GOROOT)"
-          $lines += "dotnet RID  : $(@(& dotnet --info | Select-String 'RID:') | Select-Object -First 1 | ForEach-Object { $_.Line.Trim() })"
-          $lines += "x86_64 proc_translated: $(& arch -x86_64 /usr/sbin/sysctl -n sysctl.proc_translated 2>&1)"
-          $files = @{}
-
-          foreach ($arch in 'amd64', 'arm64') {
-              $env:GOARCH = $arch
-              $files[$arch] = @(& go list -tags $tags -f '{{range .TestGoFiles}}{{println .}}{{end}}{{range .XTestGoFiles}}{{println .}}{{end}}' runtime | Where-Object { $_ })
-              $lines += "GOARCH=$arch : $($files[$arch].Count) runtime test files under -tags $tags"
-              $out = @(& go test -tags $tags -count=1 -v -run $run runtime 2>&1)
-              $lines += @($out | ForEach-Object { "$_" } | Where-Object { $_ -match '^(=== RUN|\s*--- (PASS|FAIL|SKIP)|\s+\S+_test\.go:\d+:|ok\s|FAIL|fork/exec|bad CPU)' } | ForEach-Object { "  [$arch] $_" })
-          }
-
-          # The WHOLE runtime suite under both arches on an arm64 host: which final verdicts move when the oracle
-          # stops being amd64 under Rosetta. CGO_ENABLED=0 as the sweep pins it; -json, final action per test.
-          if ((& uname -m) -eq 'arm64') {
-              $env:CGO_ENABLED = '0'
-              $verdicts = @{}
-
-              foreach ($arch in 'amd64', 'arm64') {
-                  $env:GOARCH = $arch
-                  $start = Get-Date
-                  $map = @{}
-                  & go test -json -count=1 -timeout 45m -tags $tags runtime 2>$null | ForEach-Object {
-                      try { $e = $_ | ConvertFrom-Json } catch { return }
-                      if ($e.Test -and $e.Action -in 'pass', 'fail', 'skip') { $map[$e.Test] = $e.Action }
-                  }
-                  $verdicts[$arch] = $map
-                  $lines += "full suite GOARCH=$arch : $($map.Count) verdicts, pass=$(@($map.Values | Where-Object { $_ -eq 'pass' }).Count) fail=$(@($map.Values | Where-Object { $_ -eq 'fail' }).Count) skip=$(@($map.Values | Where-Object { $_ -eq 'skip' }).Count), $([int]((Get-Date) - $start).TotalSeconds) s"
-              }
-
-              Remove-Item Env:CGO_ENABLED
-              $names = @($verdicts['amd64'].Keys + $verdicts['arm64'].Keys | Sort-Object -Unique)
-              $moved = @($names | Where-Object { $verdicts['amd64'][$_] -ne $verdicts['arm64'][$_] })
-              $lines += "verdicts that move amd64 (Rosetta) -> arm64 (native): $($moved.Count)"
-              $lines += @($moved | ForEach-Object { "  $_ : amd64=$($verdicts['amd64'][$_]) arm64=$($verdicts['arm64'][$_])" })
-          }
-
-          Remove-Item Env:GOARCH -ErrorAction SilentlyContinue
-          $lines += "amd64-only test files: $(@($files['amd64'] | Where-Object { $files['arm64'] -notcontains $_ }) -join ', ')"
-          $lines += "arm64-only test files: $(@($files['arm64'] | Where-Object { $files['amd64'] -notcontains $_ }) -join ', ')"
-          $lines | ForEach-Object { Write-Host $_ }
-          & ./.github/annotate-summary.ps1 -Title "oracle arch probe darwin/$($env:RID)" -Lines $lines
-
-          # A measurement never fails its leg: a cross-compiled arm64 binary cannot run on the Intel runner, and that
-          # exit code skipped osx-x64's sweep (run 42120588421).
-          exit 0
-
       - name: Sweep shard — filtered validated sweep
         if: needs.plan.outputs.stage == 'sweep-shard'
         shell: pwsh
@@ -1372,10 +1312,15 @@ jobs:
           $log = Join-Path $art "sweep-$goos-$rid.log"
           $sweepExit = 0
           $skipBuild = $false
+
+          # The osx-arm64 runner converts the darwin/amd64 corpus and runs its converted host as a NATIVE arm64 process,
+          # so its oracle runs at arm64 too, not as amd64 under Rosetta (COORD's osx-arm64 oracle seat, ruling (A); the
+          # converter's -test-oracle-goarch). Every other leg's host runs at the target's own arch: nothing is passed.
+          $oracleGoarch = if ($env:RID -eq 'osx-arm64') { 'arm64' } else { '' }
           $failedRows = [System.Collections.Generic.List[string]]::new()
 
           foreach ($name in $names) {
-              & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -IgnoreDiskPreflight *>&1 |
+              & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -IgnoreDiskPreflight *>&1 |
                   Tee-Object -FilePath $log -Append
 
               $rowExit = $LASTEXITCODE
