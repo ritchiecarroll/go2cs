@@ -1440,39 +1440,6 @@ jobs:
 
           exit $sweepExit
 
-      # MEASUREMENT ONLY, the other half of the probe above: the four tests' verdicts as the sweep compared them, and every
-      # divergence the record holds that no disclosure or exclusion absorbs.
-      - name: Oracle arch probe -- the sweep's verdicts (measurement)
-        if: always() && needs.plan.outputs.stage == 'sweep-shard' && matrix.goos == 'darwin'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Continue'
-          $lines = @("## Oracle arch probe -- runtime's compared verdicts, GOOS=darwin ($($env:RID))", '')
-          $path = 'src/core/runtime/go2cs_test_comparison.json'
-
-          if (-not (Test-Path -LiteralPath $path)) {
-              $lines += "no comparison record at $path"
-          }
-          else {
-              $rec = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
-              $go = @{}; $cs = @{}
-              $rec.go.PSObject.Properties | ForEach-Object { $go[$_.Name] = $_.Value }
-              $rec.csharp.PSObject.Properties | ForEach-Object { $cs[$_.Name] = $_.Value }
-              $absorbed = @(@($rec.disclosed) + @($rec.excluded) + @($rec.skipped))
-              $lines += "status=$($rec.status) matched=$($rec.matched) go=$($go.Count) csharp=$($cs.Count) disclosed=$(@($rec.disclosed).Count) excluded=$(@($rec.excluded).Count)"
-
-              foreach ($name in @($go.Keys + $cs.Keys | Sort-Object -Unique | Where-Object { $_ -match '^(TestMemHash32Equality|TestMemHash64Equality|TestMemHashGlobalSeed|TestMmapErrorSign)(/|$)' })) {
-                  $lines += "  $name : go=$($go[$name]) csharp=$($cs[$name]) absorbed=$($absorbed -contains $name)"
-              }
-
-              $diverging = @($go.Keys + $cs.Keys | Sort-Object -Unique | Where-Object { $go[$_] -ne $cs[$_] -and $absorbed -notcontains $_ })
-              $lines += "undisclosed divergences: $($diverging.Count)"
-              $lines += @($diverging | Select-Object -First 60 | ForEach-Object { "  $_ : go=$($go[$_]) csharp=$($cs[$_])" })
-          }
-
-          $lines | ForEach-Object { Write-Host $_ }
-          & ./.github/annotate-summary.ps1 -Title "oracle arch verdicts darwin/$($env:RID)" -Lines $lines
-
       # -------------------------------------------------------------------------------------
       # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
       # -------------------------------------------------------------------------------------
