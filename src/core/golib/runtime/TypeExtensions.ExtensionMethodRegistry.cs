@@ -67,7 +67,12 @@ namespace go.golib;
 //   first type question is asked, so any answer computed from the scan can be stale the moment
 //   another assembly arrives. `ClearTypeCaches` is hooked to AppDomain.AssemblyLoad for exactly
 //   that reason, and it clears caches DECLARED IN TypeExtensions.GoMethodSets.cs as well as the
-//   two declared here. Adding a cache derived from the scan means adding it to that clear list:
+//   two declared here. The scan itself is NOT dropped: it records every assembly it has visited,
+//   and the next question after a load visits only the assemblies loaded since, appending what they
+//   declare. An assembly's extension methods never change after it loads, so re-reading the ones
+//   already visited could only find the same methods again; the per-type caches are what a new
+//   assembly can make stale, and those are cleared. Adding a cache derived from the scan means
+//   adding it to that clear list:
 //   a cache that is never cleared silently keeps an answer computed before the assembly that would
 //   have changed it existed, and the failure is a method that "does not exist" only sometimes,
 //   depending on load order.
@@ -90,7 +95,16 @@ namespace go.golib;
 // ---------------------------------------------------------------------------------------------
 public static partial class TypeExtensions
 {
-    private static (MethodInfo, Type)[]? s_extensionMethods;
+    // The published scan: the extension methods found, every assembly visited to find them (skipped ones
+    // included, so none is visited twice), and the load generation the scan covers.
+    private sealed class ExtensionScan((MethodInfo, Type)[] methods, ImmutableHashSet<Assembly> visited, int generation)
+    {
+        public readonly (MethodInfo, Type)[] Methods = methods;
+        public readonly ImmutableHashSet<Assembly> Visited = visited;
+        public readonly int Generation = generation;
+    }
+
+    private static ExtensionScan? s_extensionScan;
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> s_typeExtensionMethods = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
     private static int s_registeredAssemblyLoadEvent;
@@ -104,8 +118,9 @@ public static partial class TypeExtensions
     // can stage an assembly "loading" mid-scan. Null in every program. Never wire product code to it.
     internal static Func<Assembly[]>? AssemblySourceForTest;
 
-    // Bumped by every assembly load (ClearTypeCaches). A scan keeps only a result whose generation did not
-    // move while it ran.
+    // Bumped by every assembly load (ClearTypeCaches). A published scan covers the generation it read before
+    // it looked at the loaded assemblies; when the generation has moved since, the next question visits the
+    // assemblies loaded meanwhile.
     private static int s_extensionMethodsGeneration;
 
     /// <summary>
@@ -117,7 +132,7 @@ public static partial class TypeExtensions
     internal static int TypeCacheGeneration => Volatile.Read(ref s_extensionMethodsGeneration);
 
     // A load storm must not spin the scan forever: after this many generations moved under it, the latest
-    // complete scan is returned UNCACHED, and the next caller scans again.
+    // published scan is returned, and the next caller visits what loaded meanwhile.
     private const int MaxScanAttempts = 4;
 
     // NO LOCK, on either side -- and that is the rule this file keeps. The runtime raises AssemblyLoad
@@ -125,60 +140,82 @@ public static partial class TypeExtensions
     // that same lock. When the scan held a golib lock across GetTypes() and ClearTypeCaches (the
     // AssemblyLoad handler) took it, the two threads deadlocked: rooted 2026-10-03 from six hung
     // published programs (a ReadyToRun publish pinned to one CPU hung in 20 of 23 runs). So the handler
-    // only bumps a generation and nulls the cache; the scan runs outside any lock, publishes with
-    // CompareExchange, and retracts its OWN result (never a newer scan's) if a load moved the generation
-    // meanwhile. Two concurrent scans may both run; that duplicates work and is harmless.
+    // only bumps a generation and clears the per-type caches; the scan runs outside any lock and
+    // publishes with CompareExchange, only over the scan it extended (a scan that lost that race extends
+    // the winner on its next attempt). Two concurrent scans may both run; that duplicates work and is
+    // harmless.
     //
     // THE RULE FOR EVERY HANDLER: a golib AssemblyLoad / TypeResolve / AssemblyResolve handler must NEVER
     // wait on a lock that any code can hold across a type load.
     internal static (MethodInfo, Type)[] GetExtensionMethods()
     {
-        if (Volatile.Read(ref s_extensionMethods) is { } cached)
-            return cached;
+        if (Volatile.Read(ref s_extensionScan) is { } cached &&
+            cached.Generation == Volatile.Read(ref s_extensionMethodsGeneration))
+            return cached.Methods;
 
-        // Register assembly load event only once, used to clear extension method caches
+        // Register assembly load event only once, used to clear the per-type caches and move the generation
         if (Interlocked.CompareExchange(ref s_registeredAssemblyLoadEvent, 1, 0) == 0)
             AppDomain.CurrentDomain.AssemblyLoad += ClearTypeCaches;
 
-        (MethodInfo, Type)[] scanned = [];
+        ExtensionScan? latest = null;
 
         for (int attempt = 0; attempt < MaxScanAttempts; attempt++)
         {
             int generation = Volatile.Read(ref s_extensionMethodsGeneration);
-            List<(MethodInfo, Type)> extensionMethods = [];
+            ExtensionScan? extended = Volatile.Read(ref s_extensionScan);
+
+            if (extended is not null && extended.Generation == generation)
+                return extended.Methods;
+
+            ImmutableHashSet<Assembly> visited = extended?.Visited ?? [];
+            ImmutableHashSet<Assembly>.Builder? nowVisited = null;
+            List<(MethodInfo, Type)> found = [];
 
             foreach (Assembly assembly in AssemblySourceForTest?.Invoke() ?? AppDomain.CurrentDomain.GetAssemblies())
             {
+                if (visited.Contains(assembly))
+                    continue;
+
                 ScanProbeForTest?.Invoke(assembly);
-                LoadAssemblyExtensionMethods(assembly, extensionMethods);
+                LoadAssemblyExtensionMethods(assembly, found);
+                (nowVisited ??= visited.ToBuilder()).Add(assembly);
             }
 
-            scanned = extensionMethods.ToArray();
+            (MethodInfo, Type)[] methods = extended?.Methods ?? [];
 
-            // Publish only into an empty slot: a concurrent scan that already published is as fresh as this one.
-            (MethodInfo, Type)[] published = Interlocked.CompareExchange(ref s_extensionMethods, scanned, null) ?? scanned;
+            if (found.Count > 0)
+                methods = [.. methods, .. found];
+
+            latest = new ExtensionScan(methods, nowVisited?.ToImmutable() ?? visited, generation);
+
+            // Publish only over the scan this one extended: one that another caller published meanwhile is
+            // extended on the next attempt instead.
+            if (Interlocked.CompareExchange(ref s_extensionScan, latest, extended) != extended)
+                continue;
 
             if (Volatile.Read(ref s_extensionMethodsGeneration) == generation)
-                return published;
+                return latest.Methods;
 
-            // An assembly loaded while this scan ran: retract this scan's result (only if it is still the
-            // one published) and scan again.
-            Interlocked.CompareExchange(ref s_extensionMethods, null, scanned);
+            // An assembly loaded while this scan ran: the next attempt visits only what loaded meanwhile.
         }
 
-        return scanned;
+        return latest?.Methods ?? [];
     }
 
     // TEST SEAM, GolibTests only: forget the published scan, so the next question scans from nothing.
-    internal static void ResetExtensionScanForTest() => ClearTypeCaches(null, EventArgs.Empty);
+    internal static void ResetExtensionScanForTest()
+    {
+        Volatile.Write(ref s_extensionScan, null);
+        ClearTypeCaches(null, EventArgs.Empty);
+    }
 
     internal static void ClearTypeCaches(object? sender, EventArgs e)
     {
         // Since not all assemblies may be loaded when initial type caches are created, a load clears the
-        // caches so they are recreated. Called by the runtime while it holds its type-load lock, so it
-        // takes NO lock of golib's (see GetExtensionMethods).
+        // caches so they are recreated, and moves the generation so the next question visits the new
+        // assembly. Called by the runtime while it holds its type-load lock, so it takes NO lock of golib's
+        // and does no scanning (see GetExtensionMethods).
         Interlocked.Increment(ref s_extensionMethodsGeneration);
-        Volatile.Write(ref s_extensionMethods, null);
 
         s_typeExtensionMethods.Clear();
         s_typeExtensionMethodNames.Clear();
