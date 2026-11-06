@@ -513,9 +513,7 @@ internal static ref readonly @string ipNetˢ => ref ipNetˢᵇ;
 private static readonly @string ipNetˢᵇ = "ip+net"u8;
 
 // Network returns the address's network name, "ip+net".
-public static @string Network(this ref IPNet n) {
-    return ipNetˢ;
-}
+public static @string Network(this ref IPNet n) { return ipNetˢ; }
 
 // String returns the CIDR notation of n like "192.0.2.0/24"
 // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.

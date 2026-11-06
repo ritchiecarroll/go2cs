@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool StaticLockRanking = false;
-
 public static UntypedInt StaticLockRankingInt => 0;
 
 } // end goexperiment_package

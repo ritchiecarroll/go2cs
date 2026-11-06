@@ -318,9 +318,7 @@ partial struct socksAddr {
 internal static ref readonly @string socksˢ => ref socksˢᵇ;
 private static readonly @string socksˢᵇ = "socks"u8;
 
-internal static @string Network(this ref socksAddr a) {
-    return socksˢ;
-}
+internal static @string Network(this ref socksAddr a) { return socksˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;

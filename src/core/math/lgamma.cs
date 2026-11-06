@@ -101,7 +101,6 @@ internal static array<float64> _lgamA = new float64[]{
     2.52144565451257326939e-05D, // 0x3EFA7074428CFA52
     4.48640949618915160150e-05D  // 0x3F07858E90A45837
 }.array();
-
 internal static array<float64> _lgamR = new float64[]{
     1.0D,                        // placeholder
     1.39200533467621045958e+00D, // 0x3FF645A762C4AB74
@@ -111,7 +110,6 @@ internal static array<float64> _lgamR = new float64[]{
     7.77942496381893596434e-04D, // 0x3F497DDACA41A95B
     7.32668430744625636189e-06D  // 0x3EDEBAF7A5B38140
 }.array();
-
 internal static array<float64> _lgamS = new float64[]{
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
     2.14982415960608852501e-01D,  // 0x3FCB848B36E20878
@@ -121,7 +119,6 @@ internal static array<float64> _lgamS = new float64[]{
     1.84028451407337715652e-03D,  // 0x3F5E26B67368F239
     3.19475326584100867617e-05D   // 0x3F00BFECDD17E945
 }.array();
-
 [GoLazy] partial class lazyᴛ_lgamT { internal static array<float64> _lgamT = new float64[]{
     4.83836122723810047042e-01D,  // 0x3FDEF72BC8EE38A2
     -1.47587722994593911752e-01D, // 0xBFC2E4278DC6C509
@@ -139,7 +136,6 @@ internal static array<float64> _lgamS = new float64[]{
     -3.12754168375120860518e-04D, // 0xBF347F24ECC38C38
     3.35529192635519073543e-04D   // 0x3F35FD3EE8C2D3F4
 }.array(); }
-
 internal static array<float64> _lgamU = new float64[]{
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
     6.32827064025093366517e-01D,  // 0x3FE4401E8B005DFF
@@ -148,7 +144,6 @@ internal static array<float64> _lgamU = new float64[]{
     2.28963728064692451092e-01D,  // 0x3FCD4EAEF6010924
     1.33810918536787660377e-02D   // 0x3F8B678BBF2BAB09
 }.array();
-
 internal static array<float64> _lgamV = new float64[]{
     1.0D,
     2.45597793713041134822e+00D, // 0x4003A5D7C2BD619C
@@ -157,7 +152,6 @@ internal static array<float64> _lgamV = new float64[]{
     1.04222645593369134254e-01D, // 0x3FBAAE55D6537C88
     3.21709242282423911810e-03D  // 0x3F6A5ABB57D0CF61
 }.array();
-
 internal static array<float64> _lgamW = new float64[]{
     4.18938533204672725052e-01D,  // 0x3FDACFE390C97D69
     8.33333333333329678849e-02D,  // 0x3FB555555555553B

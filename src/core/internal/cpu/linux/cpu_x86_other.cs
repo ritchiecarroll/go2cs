@@ -6,7 +6,6 @@ namespace go.@internal;
 
 partial class cpu_package {
 
-internal static void osInit() {
-}
+internal static void osInit() { }
 
 } // end cpu_package

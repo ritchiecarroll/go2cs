@@ -42,9 +42,7 @@ partial struct @void {
 
 internal static ж<Δkind> voidKind = Ꮡ(new Δkind(typ: "void", reg: regClassNone));
 
-internal static ж<Δkind> kind(this @void _) {
-    return voidKind;
-}
+internal static ж<Δkind> kind(this @void _) { return voidKind; }
 
 partial struct Ptr<T>
     where T : Value
@@ -137,8 +135,7 @@ partial struct valGP {
     /*embed*/ internal valAny valAny;
 }
 
-internal static void isWord(this valGP _) {
-}
+internal static void isWord(this valGP _) { }
 
 partial struct valAny {
     /*embed*/ internal ж<op> op;

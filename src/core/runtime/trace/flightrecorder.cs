@@ -97,9 +97,7 @@ public static void Stop(this ref FlightRecorder fr) {
 // Enabled returns true if the flight recorder is active.
 // Specifically, it will return true if Start did not return an error, and Stop has not yet been called.
 // It is safe to call from multiple goroutines simultaneously.
-public static bool Enabled(this ref FlightRecorder fr) {
-    return fr.enabled;
-}
+public static bool Enabled(this ref FlightRecorder fr) { return fr.enabled; }
 
 // WriteTo snapshots the moving window tracked by the flight recorder.
 // The snapshot is expected to contain data that is up-to-date as of when WriteTo is called,

@@ -15,27 +15,16 @@ partial struct Array {
 
 // NewArray returns a new array type for the given element type and length.
 // A negative length indicates an unknown length.
-public static ж<Array> NewArray(ΔType elem, int64 len) {
-    return Ꮡ(new Array(len: len, elem: elem));
-}
+public static ж<Array> NewArray(ΔType elem, int64 len) { return Ꮡ(new Array(len: len, elem: elem)); }
 
 // Len returns the length of array a.
 // A negative result indicates an unknown length.
-public static int64 Len(this ref Array a) {
-    return a.len;
-}
+public static int64 Len(this ref Array a) { return a.len; }
 
 // Elem returns element type of array a.
-public static ΔType Elem(this ref Array a) {
-    return a.elem;
-}
+public static ΔType Elem(this ref Array a) { return a.elem; }
 
-public static ΔType Underlying(this ж<Array> Ꮡa) {
-    return new ArrayжΔType(Ꮡa);
-}
-
-public static @string String(this ж<Array> Ꮡa) {
-    return TypeString(new ArrayжΔType(Ꮡa), default);
-}
+public static ΔType Underlying(this ж<Array> Ꮡa) { return new ArrayжΔType(Ꮡa); }
+public static @string String(this ж<Array> Ꮡa) { return TypeString(new ArrayжΔType(Ꮡa), default); }
 
 } // end types_package

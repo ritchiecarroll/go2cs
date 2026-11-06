@@ -17,7 +17,6 @@ internal static partial int32 read(int32 fd, @unsafe.Pointer Δp, int32 n);
 internal static partial int32 closefd(int32 fd);
 
 internal static partial void exit(int32 code);
-
 internal static partial void usleep(uint32 usec);
 
 //go:nosplit

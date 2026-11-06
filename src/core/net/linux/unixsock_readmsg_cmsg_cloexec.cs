@@ -10,7 +10,6 @@ partial class net_package {
 
 internal static UntypedInt readMsgFlags => /* syscall.MSG_CMSG_CLOEXEC */ 1073741824;
 
-internal static void setReadMsgCloseOnExec(slice<byte> oob) {
-}
+internal static void setReadMsgCloseOnExec(slice<byte> oob) { }
 
 } // end net_package

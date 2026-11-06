@@ -117,23 +117,16 @@ internal static int64 ticksPerSecond() {
 }
 
 internal static slice<@string> envs;
-
 internal static slice<@string> argslice;
 
 //go:linkname syscall_runtime_envs syscall.runtime_envs
-public static slice<@string> syscall_runtime_envs() {
-    return appendꓸꓸꓸ(slice<@string>([]), envs);
-}
+public static slice<@string> syscall_runtime_envs() { return appendꓸꓸꓸ(slice<@string>([]), envs); }
 
 //go:linkname syscall_Getpagesize syscall.Getpagesize
-internal static nint syscall_Getpagesize() {
-    return (nint)physPageSize;
-}
+internal static nint syscall_Getpagesize() { return (nint)physPageSize; }
 
 //go:linkname os_runtime_args os.runtime_args
-public static slice<@string> os_runtime_args() {
-    return appendꓸꓸꓸ(slice<@string>([]), argslice);
-}
+public static slice<@string> os_runtime_args() { return appendꓸꓸꓸ(slice<@string>([]), argslice); }
 
 //go:linkname syscall_Exit syscall.Exit
 //go:nosplit
@@ -142,13 +135,10 @@ internal static void syscall_Exit(nint code) {
 }
 
 internal static @string godebugDefault;
-
 internal static readonly ж<atomic.Pointer<Action<@string, @string>>> ᏑgodebugUpdate = new StaticBox<atomic.Pointer<Action<@string, @string>>>(default(atomic.Pointer<Action<@string, @string>>));
 internal static ref atomic.Pointer<Action<@string, @string>> godebugUpdate => ref ((StaticBox<atomic.Pointer<Action<@string, @string>>>)ᏑgodebugUpdate).ValueSlot;
-
 internal static readonly ж<atomic.Pointer<@string>> ᏑgodebugEnv = new StaticBox<atomic.Pointer<@string>>(default(atomic.Pointer<@string>));
 internal static ref atomic.Pointer<@string> godebugEnv => ref ((StaticBox<atomic.Pointer<@string>>)ᏑgodebugEnv).ValueSlot; // set by parsedebugvars
-
 internal static readonly ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new StaticBox<atomic.Pointer<Func<@string, Action>>>(default(atomic.Pointer<Func<@string, Action>>));
 internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault => ref ((StaticBox<atomic.Pointer<Func<@string, Action>>>)ᏑgodebugNewIncNonDefault).ValueSlot;
 
@@ -305,9 +295,7 @@ internal static slice<uintptr> auxv;
 // See go.dev/issue/57336 and go.dev/issue/67401.
 //
 //go:linkname getAuxv
-internal static slice<uintptr> getAuxv() {
-    return auxv;
-}
+internal static slice<uintptr> getAuxv() { return auxv; }
 
 // zeroVal is used by reflect via linkname.
 //

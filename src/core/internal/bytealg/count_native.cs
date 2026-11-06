@@ -22,7 +22,6 @@ internal static nint countGeneric(slice<byte> b, byte c) {
     }
     return n;
 }
-
 internal static nint countGenericString(@string s, byte c) {
     nint n = 0;
     for (nint i = 0; i < len(s); i++) {

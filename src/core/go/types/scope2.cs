@@ -38,13 +38,8 @@ public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string 
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-public static tokenꓸPos Pos(this ref ΔScope s) {
-    return s.pos;
-}
-
-public static tokenꓸPos End(this ref ΔScope s) {
-    return s.end;
-}
+public static tokenꓸPos Pos(this ref ΔScope s) { return s.pos; }
+public static tokenꓸPos End(this ref ΔScope s) { return s.end; }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked

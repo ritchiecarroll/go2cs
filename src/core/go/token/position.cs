@@ -33,9 +33,7 @@ partial struct ΔPosition {
 }
 
 // IsValid reports whether the position is valid.
-public static bool IsValid(this ref ΔPosition pos) {
-    return pos.Line > 0;
-}
+public static bool IsValid(this ref ΔPosition pos) { return pos.Line > 0; }
 
 // String returns a string in one of several forms:
 //

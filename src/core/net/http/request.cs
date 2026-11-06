@@ -51,9 +51,7 @@ partial struct ProtocolError {
     public @string ErrorString;
 }
 
-public static @string Error(this ref ProtocolError pe) {
-    return pe.ErrorString;
-}
+public static @string Error(this ref ProtocolError pe) { return pe.ErrorString; }
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
 public static bool Is(this ж<ProtocolError> Ꮡpe, error err) {
@@ -96,9 +94,7 @@ public static ж<ProtocolError> ErrShortBody = Ꮡ(new ProtocolError("entity bod
 // compare errors against this variable.
 public static ж<ProtocolError> ErrMissingContentLength = Ꮡ(new ProtocolError("missing ContentLength in HEAD response"));
 
-internal static error badStringError(@string what, @string val) {
-    return fmt.Errorf("%s %q"u8, what, val);
-}
+internal static error badStringError(@string what, @string val) { return fmt.Errorf("%s %q"u8, what, val); }
 
 // Headers that Request.Write handles itself and should be skipped.
 internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool>{

@@ -326,9 +326,7 @@ internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
 
 // Given a string of the form "host", "host:port", or "[ipv6::address]:port",
 // return true if the string includes a port.
-internal static bool hasPort(@string s) {
-    return strings.LastIndex(s, ":") > strings.LastIndex(s, "]");
-}
+internal static bool hasPort(@string s) { return strings.LastIndex(s, ":") > strings.LastIndex(s, "]"); }
 
 internal static (@string, error) idnaASCII(@string v) {
     // TODO: Consider removing this check after verifying performance is okay.

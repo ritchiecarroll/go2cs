@@ -147,9 +147,7 @@ partial struct Options {
 }
 
 // HashFunc returns o.Hash.
-public static crypto.Hash HashFunc(this ref Options o) {
-    return o.Hash;
-}
+public static crypto.Hash HashFunc(this ref Options o) { return o.Hash; }
 
 internal static ж<godebug.Setting> cryptocustomrand = godebug.New("cryptocustomrand");
 

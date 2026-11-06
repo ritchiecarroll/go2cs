@@ -28,7 +28,6 @@ partial struct FileHeader64 {
 
 public static UntypedInt FILHSZ_32 => 20;
 public static UntypedInt FILHSZ_64 => 24;
-
 public static UntypedInt U802TOCMAGIC => /* 0737 */ 479; // AIX 32-bit XCOFF
 public static UntypedInt U64_TOCMAGIC => /* 0767 */ 503; // AIX 64-bit XCOFF
 
@@ -85,7 +84,6 @@ public static UntypedInt STYP_LOADER => 0x1000;
 public static UntypedInt STYP_DEBUG => 0x2000;
 public static UntypedInt STYP_TYPCHK => 0x4000;
 public static UntypedInt STYP_OVRFLO => 0x8000;
-
 public static UntypedInt SSUBTYP_DWINFO => 0x10000;  // DWARF info section
 public static UntypedInt SSUBTYP_DWLINE => 0x20000;  // DWARF line-number section
 public static UntypedInt SSUBTYP_DWPBNMS => 0x30000; // DWARF public names section
@@ -175,7 +173,6 @@ partial struct AuxFcn32 {
     public uint32 Xendndx;  // Symbol table index of next entry
     public uint16 Xpad;     // Unused
 }
-
 partial struct AuxFcn64 {
     public uint64 Xlnnoptr; // File pointer to line number
     public uint32 Xfsize;   // Size of function in bytes

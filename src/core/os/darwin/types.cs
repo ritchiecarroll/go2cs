@@ -21,9 +21,7 @@ using go.io;
 partial class os_package {
 
 // Getpagesize returns the underlying system's memory page size.
-public static nint Getpagesize() {
-    return syscall.Getpagesize();
-}
+public static nint Getpagesize() { return syscall.Getpagesize(); }
 
 // File represents an open file descriptor.
 //
@@ -58,13 +56,8 @@ public static fs.FileMode ModeType => /* fs.ModeType */ 2401763328;
 
 public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission bits, 0o777
 
-internal static @string Name(this ref fileStat fs) {
-    return fs.name;
-}
-
-internal static bool IsDir(this ref fileStat fs) {
-    return fs.Mode().IsDir();
-}
+internal static @string Name(this ref fileStat fs) { return fs.name; }
+internal static bool IsDir(this ref fileStat fs) { return fs.Mode().IsDir(); }
 
 // SameFile reports whether fi1 and fi2 describe the same file.
 // For example, on Unix this means that the device and inode fields

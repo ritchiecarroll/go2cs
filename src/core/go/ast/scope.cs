@@ -185,8 +185,6 @@ public static ObjKind Lbl => 6;            // label
     [(int)Lbl] = "label"
 }.array(); }
 
-public static @string String(this ObjKind kind) {
-    return objKindStrings[kind];
-}
+public static @string String(this ObjKind kind) { return objKindStrings[kind]; }
 
 } // end ast_package

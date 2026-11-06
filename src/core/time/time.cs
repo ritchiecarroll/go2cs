@@ -184,9 +184,7 @@ internal static int64 sec(this ref Time t) {
 }
 
 // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
-internal static int64 unixSec(this ref Time t) {
-    return t.sec() + internalToUnix;
-}
+internal static int64 unixSec(this ref Time t) { return t.sec() + internalToUnix; }
 
 // addSec adds d seconds to the time.
 internal static void addSec(this ref Time t, int64 d) {
@@ -1096,19 +1094,13 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
 }
 
 // Nanoseconds returns the duration as an integer nanosecond count.
-public static int64 Nanoseconds(this Duration d) {
-    return (int64)d;
-}
+public static int64 Nanoseconds(this Duration d) { return (int64)d; }
 
 // Microseconds returns the duration as an integer microsecond count.
-public static int64 Microseconds(this Duration d) {
-    return (int64)d / 1000;
-}
+public static int64 Microseconds(this Duration d) { return (int64)d / 1000; }
 
 // Milliseconds returns the duration as an integer millisecond count.
-public static int64 Milliseconds(this Duration d) {
-    return (int64)d / 1000000;
-}
+public static int64 Milliseconds(this Duration d) { return (int64)d / 1000000; }
 
 // These methods return float64 because the dominant
 // use case is for printing a floating point number like 1.5s, and

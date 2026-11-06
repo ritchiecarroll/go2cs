@@ -203,7 +203,6 @@ internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS)
 }
 
 internal static slice<byte> mp4ftype = slice<byte>("ftyp"u8);
-
 internal static slice<byte> mp4 = slice<byte>("mp4"u8);
 
 partial struct mp4Sig {

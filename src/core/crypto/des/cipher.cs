@@ -49,9 +49,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     return (new desCipherжBlock(c), default);
 }
 
-internal static nint BlockSize(this ref desCipher c) {
-    return ΔBlockSize;
-}
+internal static nint BlockSize(this ref desCipher c) { return ΔBlockSize; }
 
 internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {
@@ -105,9 +103,7 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     return (new tripleDESCipherжBlock(c), default);
 }
 
-internal static nint BlockSize(this ref tripleDESCipher c) {
-    return ΔBlockSize;
-}
+internal static nint BlockSize(this ref tripleDESCipher c) { return ΔBlockSize; }
 
 internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {

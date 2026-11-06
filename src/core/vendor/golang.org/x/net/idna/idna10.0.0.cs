@@ -339,20 +339,14 @@ partial struct labelError {
     internal @string label, code_;
 }
 
-internal static @string code(this labelError e) {
-    return e.code_;
-}
-
+internal static @string code(this labelError e) { return e.code_; }
 internal static @string Error(this labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
 partial struct runeError /*num:rune*/;
 
-internal static @string code(this runeError e) {
-    return "P1";
-}
-
+internal static @string code(this runeError e) { return "P1"; }
 internal static @string Error(this runeError e) {
     return fmt.Sprintf("idna: disallowed rune %U"u8, e);
 }

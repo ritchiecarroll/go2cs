@@ -23,7 +23,6 @@ partial class syslog_package {
 partial struct Priority /*num:nint*/;
 
 internal static UntypedInt severityMask => 0x07;
-
 internal static UntypedInt facilityMask => 0xf8;
 
 // Severity.

@@ -475,13 +475,9 @@ partial struct canceledError {
 internal static ref readonly @string operationWasCanceledˢ => ref operationWasCanceledˢᵇ;
 private static readonly @string operationWasCanceledˢᵇ = "operation was canceled"u8;
 
-internal static @string Error(this canceledError _) {
-    return operationWasCanceledˢ;
-}
+internal static @string Error(this canceledError _) { return operationWasCanceledˢ; }
 
-internal static bool Is(this canceledError _, error err) {
-    return AreEqual(err, context.Canceled);
-}
+internal static bool Is(this canceledError _, error err) { return AreEqual(err, context.Canceled); }
 
 // mapErr maps from the context errors to the historical internal net
 // error values.
@@ -524,9 +520,7 @@ partial struct OpError {
     public error Err;
 }
 
-public static error Unwrap(this ref OpError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref OpError e) { return e.Err; }
 
 public static @string Error(this ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -603,17 +597,10 @@ partial struct ParseError {
     public @string Text;
 }
 
-public static @string Error(this ref ParseError e) {
-    return "invalid "u8 + e.Type + ": "u8 + e.Text;
-}
+public static @string Error(this ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
 
-public static bool Timeout(this ref ParseError e) {
-    return false;
-}
-
-public static bool Temporary(this ref ParseError e) {
-    return false;
-}
+public static bool Timeout(this ref ParseError e) { return false; }
+public static bool Temporary(this ref ParseError e) { return false; }
 
 partial struct AddrError {
     public @string Err;
@@ -633,41 +620,20 @@ public static @string Error(this ж<AddrError> Ꮡe) {
     return s;
 }
 
-public static bool Timeout(this ref AddrError e) {
-    return false;
-}
-
-public static bool Temporary(this ref AddrError e) {
-    return false;
-}
+public static bool Timeout(this ref AddrError e) { return false; }
+public static bool Temporary(this ref AddrError e) { return false; }
 
 partial struct UnknownNetworkError /*@string*/;
 
-public static @string Error(this UnknownNetworkError e) {
-    return "unknown network "u8 + ((@string)e);
-}
-
-public static bool Timeout(this UnknownNetworkError e) {
-    return false;
-}
-
-public static bool Temporary(this UnknownNetworkError e) {
-    return false;
-}
+public static @string Error(this UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
+public static bool Timeout(this UnknownNetworkError e) { return false; }
+public static bool Temporary(this UnknownNetworkError e) { return false; }
 
 partial struct InvalidAddrError /*@string*/;
 
-public static @string Error(this InvalidAddrError e) {
-    return (@string)e;
-}
-
-public static bool Timeout(this InvalidAddrError e) {
-    return false;
-}
-
-public static bool Temporary(this InvalidAddrError e) {
-    return false;
-}
+public static @string Error(this InvalidAddrError e) { return (@string)e; }
+public static bool Timeout(this InvalidAddrError e) { return false; }
+public static bool Temporary(this InvalidAddrError e) { return false; }
 
 // errTimeout exists to return the historical "i/o timeout" string
 // for context.DeadlineExceeded. See mapErr.
@@ -689,17 +655,9 @@ partial struct timeoutError {
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
 private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
 
-internal static @string Error(this ref timeoutError e) {
-    return iOTimeoutˢ;
-}
-
-internal static bool Timeout(this ref timeoutError e) {
-    return true;
-}
-
-internal static bool Temporary(this ref timeoutError e) {
-    return true;
-}
+internal static @string Error(this ref timeoutError e) { return iOTimeoutˢ; }
+internal static bool Timeout(this ref timeoutError e) { return true; }
+internal static bool Temporary(this ref timeoutError e) { return true; }
 
 internal static bool Is(this ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
@@ -711,21 +669,10 @@ partial struct DNSConfigError {
     public error Err;
 }
 
-public static error Unwrap(this ref DNSConfigError e) {
-    return e.Err;
-}
-
-public static @string Error(this ref DNSConfigError e) {
-    return "error reading DNS config: "u8 + e.Err.Error();
-}
-
-public static bool Timeout(this ref DNSConfigError e) {
-    return false;
-}
-
-public static bool Temporary(this ref DNSConfigError e) {
-    return false;
-}
+public static error Unwrap(this ref DNSConfigError e) { return e.Err; }
+public static @string Error(this ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
+public static bool Timeout(this ref DNSConfigError e) { return false; }
+public static bool Temporary(this ref DNSConfigError e) { return false; }
 
 // Various errors contained in DNSError.
 internal static ж<notFoundError> errNoSuchHost = Ꮡ(new notFoundError("no such host"));
@@ -737,9 +684,7 @@ partial struct notFoundError {
     internal @string s;
 }
 
-internal static @string Error(this ref notFoundError e) {
-    return e.s;
-}
+internal static @string Error(this ref notFoundError e) { return e.s; }
 
 // temporaryError is an error type that implements the [Error] interface.
 // It returns true from the Temporary method.
@@ -747,17 +692,9 @@ partial struct temporaryError {
     internal @string s;
 }
 
-internal static @string Error(this ref temporaryError e) {
-    return e.s;
-}
-
-internal static bool Temporary(this ref temporaryError e) {
-    return true;
-}
-
-internal static bool Timeout(this ref temporaryError e) {
-    return false;
-}
+internal static @string Error(this ref temporaryError e) { return e.s; }
+internal static bool Temporary(this ref temporaryError e) { return true; }
+internal static bool Timeout(this ref temporaryError e) { return false; }
 
 // DNSError represents a DNS lookup error.
 partial struct DNSError {
@@ -805,9 +742,7 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 }
 
 // Unwrap returns e.UnwrapErr.
-public static error Unwrap(this ref DNSError e) {
-    return e.UnwrapErr;
-}
+public static error Unwrap(this ref DNSError e) { return e.UnwrapErr; }
 
 public static @string Error(this ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -826,16 +761,12 @@ public static @string Error(this ж<DNSError> Ꮡe) {
 // Timeout reports whether the DNS lookup is known to have timed out.
 // This is not always known; a DNS lookup may fail due to a timeout
 // and return a [DNSError] for which Timeout returns false.
-public static bool Timeout(this ref DNSError e) {
-    return e.IsTimeout;
-}
+public static bool Timeout(this ref DNSError e) { return e.IsTimeout; }
 
 // Temporary reports whether the DNS error is known to be temporary.
 // This is not always known; a DNS lookup may fail due to a temporary
 // error and return a [DNSError] for which Temporary returns false.
-public static bool Temporary(this ref DNSError e) {
-    return e.IsTimeout || e.IsTemporary;
-}
+public static bool Temporary(this ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
 
 // errClosed exists just so that the docs for ErrClosed don't mention
 // the internal package poll.

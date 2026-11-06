@@ -61,34 +61,24 @@ public static ж<Alias> NewAlias(ж<TypeName> obj, ΔType rhs) {
 
 // Obj returns the type name for the declaration defining the alias type a.
 // For instantiated types, this is same as the type name of the origin type.
-public static ж<TypeName> Obj(this ref Alias a) {
-    return a.orig.obj;
-}
+public static ж<TypeName> Obj(this ref Alias a) { return a.orig.obj; }
 
-public static @string String(this ж<Alias> Ꮡa) {
-    return TypeString(new AliasжΔType(Ꮡa), default);
-}
+public static @string String(this ж<Alias> Ꮡa) { return TypeString(new AliasжΔType(Ꮡa), default); }
 
 // Underlying returns the [underlying type] of the alias type a, which is the
 // underlying type of the aliased type. Underlying types are never Named,
 // TypeParam, or Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-public static ΔType Underlying(this ж<Alias> Ꮡa) {
-    return unalias(Ꮡa).Underlying();
-}
+public static ΔType Underlying(this ж<Alias> Ꮡa) { return unalias(Ꮡa).Underlying(); }
 
 // Origin returns the generic Alias type of which a is an instance.
 // If a is not an instance of a generic alias, Origin returns a.
-public static ж<Alias> Origin(this ref Alias a) {
-    return a.orig;
-}
+public static ж<Alias> Origin(this ref Alias a) { return a.orig; }
 
 // TypeParams returns the type parameters of the alias type a, or nil.
 // A generic Alias and its instances have the same type parameters.
-public static ж<TypeParamList> TypeParams(this ref Alias a) {
-    return a.tparams;
-}
+public static ж<TypeParamList> TypeParams(this ref Alias a) { return a.tparams; }
 
 // SetTypeParams sets the type parameters of the alias type a.
 // The alias a must not have type arguments.
@@ -99,15 +89,11 @@ public static void SetTypeParams(this ref Alias a, slice<ж<TypeParam>> tparams)
 
 // TypeArgs returns the type arguments used to instantiate the Alias type.
 // If a is not an instance of a generic alias, the result is nil.
-public static ж<TypeList> TypeArgs(this ref Alias a) {
-    return a.targs;
-}
+public static ж<TypeList> TypeArgs(this ref Alias a) { return a.targs; }
 
 // Rhs returns the type R on the right-hand side of an alias
 // declaration "type A = R", which may be another alias.
-public static ΔType Rhs(this ref Alias a) {
-    return a.fromRHS;
-}
+public static ΔType Rhs(this ref Alias a) { return a.fromRHS; }
 
 // Unalias returns t if it is not an alias type;
 // otherwise it follows t's alias chain until it

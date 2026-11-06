@@ -25,7 +25,6 @@ internal static UntypedInt tracebackShift => /* iota */ 2;
 
 internal static readonly ж<uint32> Ꮡtraceback_cache = new StaticBox<uint32>(((uint32)2 << (int)(tracebackShift)));
 internal static ref uint32 traceback_cache => ref ((StaticBox<uint32>)Ꮡtraceback_cache).ValueSlot;
-
 internal static uint32 traceback_env;
 
 // gotraceback returns the current traceback settings.

@@ -6,7 +6,6 @@ namespace go.vendor.golang.org.x.sys;
 
 partial class cpu_package {
 
-internal static void doinit() {
-}
+internal static void doinit() { }
 
 } // end cpu_package

@@ -121,7 +121,6 @@ public static (ж<P384Point>, error) SetBytes(this ж<P384Point> Ꮡp, slice<byt
 }
 
 internal static ж<fiat.P384Element> _p384B;
-
 internal static readonly ж<sync.Once> Ꮡ_p384BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p384BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p384BOnce).ValueSlot;
 
@@ -424,7 +423,6 @@ public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384
 }
 
 internal static ж<array<p384Table>> p384GeneratorTable;
-
 internal static readonly ж<sync.Once> Ꮡp384GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp384GeneratorTableOnce).ValueSlot;
 

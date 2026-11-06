@@ -19,21 +19,13 @@ partial class poll_package {
 internal static partial int64 runtimeNano();
 
 internal static partial void runtime_pollServerInit();
-
 internal static partial (uintptr, nint) runtime_pollOpen(uintptr fd);
-
 internal static partial void runtime_pollClose(uintptr ctx);
-
 internal static partial nint runtime_pollWait(uintptr ctx, nint mode);
-
 internal static partial void runtime_pollWaitCanceled(uintptr ctx, nint mode);
-
 internal static partial nint runtime_pollReset(uintptr ctx, nint mode);
-
 internal static partial void runtime_pollSetDeadline(uintptr ctx, int64 d, nint mode);
-
 internal static partial void runtime_pollUnblock(uintptr ctx);
-
 internal static partial bool runtime_isPollServerDescriptor(uintptr fd);
 
 partial struct pollDesc {

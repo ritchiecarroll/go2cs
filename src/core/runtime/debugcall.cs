@@ -25,7 +25,6 @@ internal static ref readonly @string debugCallUnsafePoint => ref debugCallUnsafe
 private static readonly @string debugCallUnsafePointᵇ = "call not at safe point"u8;
 
 internal static partial void debugCallV2();
-
 internal static partial void debugCallPanicked(any val);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

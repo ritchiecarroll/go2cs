@@ -16,9 +16,7 @@ internal static partial uintptr sbrk0();
 //
 //go:noescape
 internal static partial int32 access(ж<byte> name, int32 mode);
-
 internal static partial int32 connect(int32 fd, @unsafe.Pointer addr, int32 len);
-
 internal static partial int32 socket(int32 domain, int32 typ, int32 prot);
 
 } // end runtime_package

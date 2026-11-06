@@ -577,9 +577,7 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static uintptr Size(this ref rtype t) {
-    return t.t.Size();
-}
+internal static uintptr Size(this ref rtype t) { return t.t.Size(); }
 
 internal static nint Bits(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -594,17 +592,11 @@ internal static nint Bits(this ж<rtype> Ꮡt) {
     return (nint)t.t.Size_ * 8;
 }
 
-internal static nint Align(this ref rtype t) {
-    return t.t.Align();
-}
+internal static nint Align(this ref rtype t) { return t.t.Align(); }
 
-internal static nint FieldAlign(this ref rtype t) {
-    return t.t.FieldAlign();
-}
+internal static nint FieldAlign(this ref rtype t) { return t.t.FieldAlign(); }
 
-internal static ΔKind Kind(this ref rtype t) {
-    return (ΔKind)(nuint)t.t.Kind();
-}
+internal static ΔKind Kind(this ref rtype t) { return (ΔKind)(nuint)t.t.Kind(); }
 
 internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
     var ut = Ꮡt.uncommon();
@@ -922,9 +914,7 @@ internal static ΔMethod /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-internal static nint NumMethod(this ref interfaceType t) {
-    return len(t.Methods);
-}
+internal static nint NumMethod(this ref interfaceType t) { return len(t.Methods); }
 
 // MethodByName method with the given name in the type's method set.
 internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) {
@@ -1282,9 +1272,7 @@ internal static ref Δsync.Map ptrMap => ref ((StaticBox<Δsync.Map>)ᏑptrMap).
 // Deprecated: Superseded by [PointerTo].
 //
 //go:fix inline
-public static ΔType PtrTo(ΔType t) {
-    return PointerTo(t);
-}
+public static ΔType PtrTo(ΔType t) { return PointerTo(t); }
 
 // go2cs generated this placeholder — func PointerTo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1532,7 +1520,6 @@ internal static ref funcLookupCacheᴛ1 funcLookupCache => ref ((StaticBox<funcL
 // go2cs generated this placeholder — func ChanOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static slice<ΔType> funcTypes;
-
 internal static readonly ж<Δsync.Mutex> ᏑfuncTypesMutex = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex funcTypesMutex => ref ((StaticBox<Δsync.Mutex>)ᏑfuncTypesMutex).ValueSlot;
 
@@ -1567,7 +1554,6 @@ internal static ΔType initFuncTypes(nint n) {
 }
 
 // go2cs generated this placeholder — func FuncOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static @string stringFor(ж<abi.Type> t) {
     return toRType(t).String();
 }

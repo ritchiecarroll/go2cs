@@ -45,29 +45,12 @@ partial struct dumpConn {
     /*embed*/ public io_package.Reader Reader;
 }
 
-internal static error Close(this ref dumpConn c) {
-    return default;
-}
-
-internal static netꓸAddr LocalAddr(this ref dumpConn c) {
-    return default;
-}
-
-internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
-    return default;
-}
-
-internal static error SetDeadline(this ref dumpConn c, time.Time t) {
-    return default;
-}
-
-internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
-    return default;
-}
-
-internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
-    return default;
-}
+internal static error Close(this ref dumpConn c) { return default; }
+internal static netꓸAddr LocalAddr(this ref dumpConn c) { return default; }
+internal static netꓸAddr RemoteAddr(this ref dumpConn c) { return default; }
+internal static error SetDeadline(this ref dumpConn c, time.Time t) { return default; }
+internal static error SetReadDeadline(this ref dumpConn c, time.Time t) { return default; }
+internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) { return default; }
 
 partial struct neverEnding /*num:byte*/;
 
@@ -348,13 +331,8 @@ internal static error errNoBody = errors.New("sentinel error value");
 partial struct failureToReadBody {
 }
 
-internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) {
-    return (0, errNoBody);
-}
-
-internal static error Close(this failureToReadBody _) {
-    return default;
-}
+internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) { return (0, errNoBody); }
+internal static error Close(this failureToReadBody _) { return default; }
 
 // emptyBody is an instance of empty reader.
 internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader("")));

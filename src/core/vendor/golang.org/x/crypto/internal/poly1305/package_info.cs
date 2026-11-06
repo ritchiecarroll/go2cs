@@ -59,8 +59,8 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4ikKzigpSqooKCgqqigoKC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSkAAHGNLugoKmggAHEIKUgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4igJzigpSqooKCgqqigoKC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSgAAGGNLugoKmggAHEIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.@internal;

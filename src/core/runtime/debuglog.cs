@@ -97,8 +97,7 @@ partial struct dloggerFake {
 }
 
 //go:nosplit
-internal static void end(this dloggerFake l) {
-}
+internal static void end(this dloggerFake l) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string recordTooLargeˢ => ref recordTooLargeˢᵇ;
@@ -142,9 +141,7 @@ internal static UntypedInt debugLogPC => 12;
 internal static UntypedInt debugLogTraceback => 13;
 
 //go:nosplit
-internal static dloggerFake b(this dloggerFake l, bool x) {
-    return l;
-}
+internal static dloggerFake b(this dloggerFake l, bool x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> b(this ж<dloggerImpl> Ꮡl, bool x) {
@@ -159,9 +156,7 @@ internal static ж<dloggerImpl> b(this ж<dloggerImpl> Ꮡl, bool x) {
 }
 
 //go:nosplit
-internal static dloggerFake i(this dloggerFake l, nint x) {
-    return l;
-}
+internal static dloggerFake i(this dloggerFake l, nint x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> i(this ж<dloggerImpl> Ꮡl, nint x) {
@@ -169,9 +164,7 @@ internal static ж<dloggerImpl> i(this ж<dloggerImpl> Ꮡl, nint x) {
 }
 
 //go:nosplit
-internal static dloggerFake i8(this dloggerFake l, int8 x) {
-    return l;
-}
+internal static dloggerFake i8(this dloggerFake l, int8 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> i8(this ж<dloggerImpl> Ꮡl, int8 x) {
@@ -179,9 +172,7 @@ internal static ж<dloggerImpl> i8(this ж<dloggerImpl> Ꮡl, int8 x) {
 }
 
 //go:nosplit
-internal static dloggerFake i16(this dloggerFake l, int16 x) {
-    return l;
-}
+internal static dloggerFake i16(this dloggerFake l, int16 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> i16(this ж<dloggerImpl> Ꮡl, int16 x) {
@@ -189,9 +180,7 @@ internal static ж<dloggerImpl> i16(this ж<dloggerImpl> Ꮡl, int16 x) {
 }
 
 //go:nosplit
-internal static dloggerFake i32(this dloggerFake l, int32 x) {
-    return l;
-}
+internal static dloggerFake i32(this dloggerFake l, int32 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> i32(this ж<dloggerImpl> Ꮡl, int32 x) {
@@ -199,9 +188,7 @@ internal static ж<dloggerImpl> i32(this ж<dloggerImpl> Ꮡl, int32 x) {
 }
 
 //go:nosplit
-internal static dloggerFake i64(this dloggerFake l, int64 x) {
-    return l;
-}
+internal static dloggerFake i64(this dloggerFake l, int64 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> i64(this ж<dloggerImpl> Ꮡl, int64 x) {
@@ -213,9 +200,7 @@ internal static ж<dloggerImpl> i64(this ж<dloggerImpl> Ꮡl, int64 x) {
 }
 
 //go:nosplit
-internal static dloggerFake u(this dloggerFake l, nuint x) {
-    return l;
-}
+internal static dloggerFake u(this dloggerFake l, nuint x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> u(this ж<dloggerImpl> Ꮡl, nuint x) {
@@ -223,9 +208,7 @@ internal static ж<dloggerImpl> u(this ж<dloggerImpl> Ꮡl, nuint x) {
 }
 
 //go:nosplit
-internal static dloggerFake uptr(this dloggerFake l, uintptr x) {
-    return l;
-}
+internal static dloggerFake uptr(this dloggerFake l, uintptr x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> uptr(this ж<dloggerImpl> Ꮡl, uintptr x) {
@@ -233,9 +216,7 @@ internal static ж<dloggerImpl> uptr(this ж<dloggerImpl> Ꮡl, uintptr x) {
 }
 
 //go:nosplit
-internal static dloggerFake u8(this dloggerFake l, uint8 x) {
-    return l;
-}
+internal static dloggerFake u8(this dloggerFake l, uint8 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> u8(this ж<dloggerImpl> Ꮡl, uint8 x) {
@@ -243,9 +224,7 @@ internal static ж<dloggerImpl> u8(this ж<dloggerImpl> Ꮡl, uint8 x) {
 }
 
 //go:nosplit
-internal static dloggerFake u16(this dloggerFake l, uint16 x) {
-    return l;
-}
+internal static dloggerFake u16(this dloggerFake l, uint16 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> u16(this ж<dloggerImpl> Ꮡl, uint16 x) {
@@ -253,9 +232,7 @@ internal static ж<dloggerImpl> u16(this ж<dloggerImpl> Ꮡl, uint16 x) {
 }
 
 //go:nosplit
-internal static dloggerFake u32(this dloggerFake l, uint32 x) {
-    return l;
-}
+internal static dloggerFake u32(this dloggerFake l, uint32 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> u32(this ж<dloggerImpl> Ꮡl, uint32 x) {
@@ -263,9 +240,7 @@ internal static ж<dloggerImpl> u32(this ж<dloggerImpl> Ꮡl, uint32 x) {
 }
 
 //go:nosplit
-internal static dloggerFake u64(this dloggerFake l, uint64 x) {
-    return l;
-}
+internal static dloggerFake u64(this dloggerFake l, uint64 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> u64(this ж<dloggerImpl> Ꮡl, uint64 x) {
@@ -277,9 +252,7 @@ internal static ж<dloggerImpl> u64(this ж<dloggerImpl> Ꮡl, uint64 x) {
 }
 
 //go:nosplit
-internal static dloggerFake hex(this dloggerFake l, uint64 x) {
-    return l;
-}
+internal static dloggerFake hex(this dloggerFake l, uint64 x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> hex(this ж<dloggerImpl> Ꮡl, uint64 x) {
@@ -291,9 +264,7 @@ internal static ж<dloggerImpl> hex(this ж<dloggerImpl> Ꮡl, uint64 x) {
 }
 
 //go:nosplit
-internal static dloggerFake p(this dloggerFake l, any x) {
-    return l;
-}
+internal static dloggerFake p(this dloggerFake l, any x) { return l; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notAPointerTypeˢ => ref notAPointerTypeˢᵇ;
@@ -323,16 +294,12 @@ internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
 }
 
 //go:nosplit
-internal static dloggerFake s(this dloggerFake l, @string x) {
-    return l;
-}
+internal static dloggerFake s(this dloggerFake l, @string x) { return l; }
 
 // go2cs generated this placeholder — func s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:nosplit
-internal static dloggerFake hexdump(this dloggerFake l, @unsafe.Pointer Δp, uintptr bytes) {
-    return l;
-}
+internal static dloggerFake hexdump(this dloggerFake l, @unsafe.Pointer Δp, uintptr bytes) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Pointer Δp, uintptr bytes) {
@@ -360,9 +327,7 @@ internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Point
 }
 
 //go:nosplit
-internal static dloggerFake pc(this dloggerFake l, uintptr x) {
-    return l;
-}
+internal static dloggerFake pc(this dloggerFake l, uintptr x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> pc(this ж<dloggerImpl> Ꮡl, uintptr x) {
@@ -374,9 +339,7 @@ internal static ж<dloggerImpl> pc(this ж<dloggerImpl> Ꮡl, uintptr x) {
 }
 
 //go:nosplit
-internal static dloggerFake traceback(this dloggerFake l, slice<uintptr> x) {
-    return l;
-}
+internal static dloggerFake traceback(this dloggerFake l, slice<uintptr> x) { return l; }
 
 //go:nosplit
 internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintptr> x) {

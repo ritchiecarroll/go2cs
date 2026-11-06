@@ -65,7 +65,7 @@ using static go.testing.@internal.testdeps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACxOsoKCgoKmpoKmgqaC7ILaggANFILmguaC5oKo4oKmgoKClIKCgqIACQiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABYiwoKUAAoGooKCgoKUlIKCgpQ=", "", "", "", "199:21,232:21")]
+[assembly: GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACtOsoKCgoKmpoKmgqaC7ILaggANFILmguaC5oKo4oKmgoKClIKCgqIACQiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABQiwoKUAAoGooKCgoKUlIKCgpQ=", "", "", "", "198:21,231:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing.@internal;

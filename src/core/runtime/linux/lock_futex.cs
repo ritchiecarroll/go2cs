@@ -49,12 +49,10 @@ internal static (ж<g>, bool) beforeIdle(int64 _Δp0, int64 _Δp1) {
     return (default, false);
 }
 
-internal static void checkTimeouts() {
-}
+internal static void checkTimeouts() { }
 
 //go:nosplit
-internal static void semacreate(ref m mp) {
-}
+internal static void semacreate(ref m mp) { }
 
 //go:nosplit
 internal static int32 semasleep(int64 ns) {

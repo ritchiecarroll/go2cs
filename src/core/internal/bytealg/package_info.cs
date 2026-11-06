@@ -57,7 +57,7 @@ using static go.@internal.bytealg_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/bytealg/bytealg.go", "bytealg.cs", "ACFKwoKClJKCgpSUqsKCgpSSgoKUlKrUgoKCgpSClIKCgoKCgqaq1IKCgoKClIKUgoKCgoKmrg==")]
 [assembly: GoPositionMap("internal/bytealg/compare_native.go", "compare_native.cs", "AAoYpIIAAhA=")]
-[assembly: GoPositionMap("internal/bytealg/count_native.go", "count_native.cs", "AAgUpqaSgoKCpqSCgoKCpg==")]
+[assembly: GoPositionMap("internal/bytealg/count_native.go", "count_native.cs", "AAgUpqaSgoKCppSCgoKCpg==")]
 [assembly: GoPositionMap("internal/bytealg/equal_generic.go", "equal_generic.cs", "AAccAAkG")]
 [assembly: GoPositionMap("internal/bytealg/equal_native.go", "equal_native.cs", "AAkkAAkG")]
 [assembly: GoPositionMap("internal/bytealg/index_amd64.go", "index_amd64.cs", "AAwWgoKUAAMQ1A==")]

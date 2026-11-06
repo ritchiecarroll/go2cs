@@ -19,13 +19,8 @@ partial interface ΔCode {
 // A CodeVal distinguishes among go/constant.Value encodings.
 partial struct CodeVal /*num:nint*/;
 
-public static SyncMarker Marker(this CodeVal c) {
-    return SyncVal;
-}
-
-public static nint Value(this CodeVal c) {
-    return (nint)c;
-}
+public static SyncMarker Marker(this CodeVal c) { return SyncVal; }
+public static nint Value(this CodeVal c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.
@@ -39,13 +34,8 @@ public static CodeVal ValBigFloat => 5;
 // A CodeType distinguishes among go/types.Type encodings.
 partial struct CodeType /*num:nint*/;
 
-public static SyncMarker Marker(this CodeType c) {
-    return SyncType;
-}
-
-public static nint Value(this CodeType c) {
-    return (nint)c;
-}
+public static SyncMarker Marker(this CodeType c) { return SyncType; }
+public static nint Value(this CodeType c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.
@@ -65,13 +55,8 @@ public static CodeType TypeTypeParam => 11;
 // A CodeObj distinguishes among go/types.Object encodings.
 partial struct CodeObj /*num:nint*/;
 
-public static SyncMarker Marker(this CodeObj c) {
-    return SyncCodeObj;
-}
-
-public static nint Value(this CodeObj c) {
-    return (nint)c;
-}
+public static SyncMarker Marker(this CodeObj c) { return SyncCodeObj; }
+public static nint Value(this CodeObj c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.

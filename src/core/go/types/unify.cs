@@ -187,17 +187,9 @@ internal static @string String(this ref unifier u) {
 
 partial struct typeParamsById /*[]ж<TypeParam>*/;
 
-internal static nint Len(this typeParamsById s) {
-    return len(s);
-}
-
-internal static bool Less(this typeParamsById s, nint i, nint j) {
-    return s[i].id < s[j].id;
-}
-
-internal static void Swap(this typeParamsById s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
+internal static nint Len(this typeParamsById s) { return len(s); }
+internal static bool Less(this typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
+internal static void Swap(this typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them

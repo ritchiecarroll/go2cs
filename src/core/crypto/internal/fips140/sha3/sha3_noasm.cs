@@ -13,11 +13,9 @@ internal static void keccakF1600(/*[200]*/ ж<array<byte>> a) {
 internal static (nint n, error err) write(this ж<Digest> Ꮡd, slice<byte> p) {
     return Ꮡd.writeGeneric(p);
 }
-
 internal static (nint n, error err) read(this ж<Digest> Ꮡd, slice<byte> @out) {
     return Ꮡd.readGeneric(@out);
 }
-
 internal static slice<byte> sum(this ref Digest d, slice<byte> b) {
     return d.sumGeneric(b);
 }

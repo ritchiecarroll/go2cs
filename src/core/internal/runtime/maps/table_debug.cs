@@ -88,7 +88,6 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
-
 public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 

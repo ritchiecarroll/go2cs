@@ -54,9 +54,7 @@ public static ж<P256Point> Set(this ж<P256Point> Ꮡp, ж<P256Point> q) {
 }
 
 internal static UntypedInt p256ElementLength => 32;
-
 internal static UntypedInt p256UncompressedLength => /* 1 + 2*p256ElementLength */ 65;
-
 internal static UntypedInt p256CompressedLength => /* 1 + p256ElementLength */ 33;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -124,7 +122,6 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
 }
 
 internal static ж<fiat.P256Element> _p256B;
-
 internal static readonly ж<sync.Once> Ꮡ_p256BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p256BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p256BOnce).ValueSlot;
 

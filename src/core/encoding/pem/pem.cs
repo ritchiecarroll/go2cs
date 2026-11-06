@@ -79,11 +79,8 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
 }
 
 internal static slice<byte> pemStart = slice<byte>("\n-----BEGIN "u8);
-
 internal static slice<byte> pemEnd = slice<byte>("\n-----END "u8);
-
 internal static slice<byte> pemEndOfLine = slice<byte>("-----"u8);
-
 internal static slice<byte> colon = slice<byte>(":"u8);
 
 // Decode will find the next PEM formatted block (certificate, private key

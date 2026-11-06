@@ -634,9 +634,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
 // noValidation is a no-op validation func for readContinuedLineSlice
 // that permits any lines.
-internal static error noValidation(slice<byte> _) {
-    return default;
-}
+internal static error noValidation(slice<byte> _) { return default; }
 
 // mustHaveFieldNameColon ensures that, per RFC 7230, the
 // field-name is on a single line, so the first line must

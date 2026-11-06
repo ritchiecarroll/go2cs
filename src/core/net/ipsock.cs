@@ -77,9 +77,7 @@ internal static bool isIPv4(ΔAddr addr) {
 }
 
 // isNotIPv4 reports whether addr does not contain an IPv4 address.
-internal static bool isNotIPv4(ΔAddr addr) {
-    return !isIPv4(addr);
-}
+internal static bool isNotIPv4(ΔAddr addr) { return !isIPv4(addr); }
 
 // forResolve returns the most appropriate address in address for
 // a call to ResolveTCPAddr, ResolveUDPAddr, or ResolveIPAddr.

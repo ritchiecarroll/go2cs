@@ -10,7 +10,6 @@ using @unsafe = unsafe_package;
 partial class runtime_package {
 
 internal const bool asanenabled = false;
-
 internal static UntypedInt asanenabledBit => 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -18,36 +17,13 @@ internal static ref readonly @string asanˢ => ref asanˢᵇ;
 private static readonly @string asanˢᵇ = "asan"u8;
 
 // Because asanenabled is false, none of these functions should be called.
-internal static void asanread(@unsafe.Pointer addr, uintptr sz) {
-    @throw(asanˢ);
-}
-
-internal static void asanwrite(@unsafe.Pointer addr, uintptr sz) {
-    @throw(asanˢ);
-}
-
-internal static void asanunpoison(@unsafe.Pointer addr, uintptr sz) {
-    @throw(asanˢ);
-}
-
-internal static void asanpoison(@unsafe.Pointer addr, uintptr sz) {
-    @throw(asanˢ);
-}
-
-internal static void asanregisterglobals(@unsafe.Pointer addr, uintptr sz) {
-    @throw(asanˢ);
-}
-
-internal static void lsanregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) {
-    @throw(asanˢ);
-}
-
-internal static void lsanunregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) {
-    @throw(asanˢ);
-}
-
-internal static void lsandoleakcheck() {
-    @throw(asanˢ);
-}
+internal static void asanread(@unsafe.Pointer addr, uintptr sz) { @throw(asanˢ); }
+internal static void asanwrite(@unsafe.Pointer addr, uintptr sz) { @throw(asanˢ); }
+internal static void asanunpoison(@unsafe.Pointer addr, uintptr sz) { @throw(asanˢ); }
+internal static void asanpoison(@unsafe.Pointer addr, uintptr sz) { @throw(asanˢ); }
+internal static void asanregisterglobals(@unsafe.Pointer addr, uintptr sz) { @throw(asanˢ); }
+internal static void lsanregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) { @throw(asanˢ); }
+internal static void lsanunregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) { @throw(asanˢ); }
+internal static void lsandoleakcheck() { @throw(asanˢ); }
 
 } // end runtime_package

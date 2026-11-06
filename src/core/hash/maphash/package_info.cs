@@ -58,7 +58,7 @@ using static go.hash.maphash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACNWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAJ1rSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCqJKCgqaCpqyyggAKGJCmkKaSgoKssoKossqClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACNWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAJ1rSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCqJKCgqaCpqyyggAKGICWgJaSgoKssoKossqClA==")]
 [assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABYsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKSpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClKaCgoKUgoKCgpSCpoKClA==")]
 // </GoSourcePositionMaps>
 

@@ -1205,9 +1205,7 @@ partial struct http2goAwayFlowError {
 internal static ref readonly @string connectionExceededFlowˢ => ref connectionExceededFlowˢᵇ;
 private static readonly @string connectionExceededFlowˢᵇ = "connection exceeded flow control window size"u8;
 
-internal static @string Error(this http2goAwayFlowError _) {
-    return connectionExceededFlowˢ;
-}
+internal static @string Error(this http2goAwayFlowError _) { return connectionExceededFlowˢ; }
 
 // connError represents an HTTP/2 ConnectionError error code, along
 // with a string (for debugging) explaining why.
@@ -1557,9 +1555,7 @@ partial struct http2FrameHeader {
 
 // Header returns h. It exists so FrameHeaders can be embedded in other
 // specific frame types and implement the Frame interface.
-internal static http2FrameHeader Header(this http2FrameHeader h) {
-    return h;
-}
+internal static http2FrameHeader Header(this http2FrameHeader h) { return h; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string frameHeaderˢ => ref frameHeaderˢᵇ;
@@ -1612,9 +1608,7 @@ internal static void checkValid(this ref http2FrameHeader h) {
     }
 }
 
-internal static void invalidate(this ref http2FrameHeader h) {
-    h.valid = false;
-}
+internal static void invalidate(this ref http2FrameHeader h) { h.valid = false; }
 
 // frame header bytes.
 // Used only by ReadFrameHeader.
@@ -1799,17 +1793,11 @@ internal static void logWrite(this ж<http2Framer> Ꮡf) {
     f.debugWriteLoggerf("http2: Framer %p: wrote %v", Ꮡf.OrTypedNil(), http2summarizeFrame(fr));
 }
 
-internal static void writeByte(this ref http2Framer f, byte v) {
-    f.wbuf = append(f.wbuf, v);
-}
+internal static void writeByte(this ref http2Framer f, byte v) { f.wbuf = append(f.wbuf, v); }
 
-internal static void writeBytes(this ref http2Framer f, slice<byte> v) {
-    f.wbuf = appendꓸꓸꓸ(f.wbuf, v);
-}
+internal static void writeBytes(this ref http2Framer f, slice<byte> v) { f.wbuf = appendꓸꓸꓸ(f.wbuf, v); }
 
-internal static void writeUint16(this ref http2Framer f, uint16 v) {
-    f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v);
-}
+internal static void writeUint16(this ref http2Framer f, uint16 v) { f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v); }
 
 internal static void writeUint32(this ref http2Framer f, uint32 v) {
     f.wbuf = append(f.wbuf, (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
@@ -2248,9 +2236,7 @@ internal static http2Setting Setting(this ref http2SettingsFrame f, nint i) {
     );
 }
 
-internal static nint NumSettings(this ref http2SettingsFrame f) {
-    return builtin.len(f.p) / 6;
-}
+internal static nint NumSettings(this ref http2SettingsFrame f) { return builtin.len(f.p) / 6; }
 
 // HasDuplicates reports whether f contains any duplicate setting IDs.
 internal static bool HasDuplicates(this ref http2SettingsFrame f) {
@@ -2332,9 +2318,7 @@ partial struct http2PingFrame {
     public array<byte> Data = new(8);
 }
 
-internal static bool IsAck(this ref http2PingFrame f) {
-    return f.Flags.Has(http2FlagPingAck);
-}
+internal static bool IsAck(this ref http2PingFrame f) { return f.Flags.Has(http2FlagPingAck); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string framePingLengthˢ => ref framePingLengthˢᵇ;
@@ -3851,17 +3835,11 @@ partial struct http2httpError {
     internal bool timeout;
 }
 
-internal static @string Error(this ref http2httpError e) {
-    return e.msg;
-}
+internal static @string Error(this ref http2httpError e) { return e.msg; }
 
-internal static bool Timeout(this ref http2httpError e) {
-    return e.timeout;
-}
+internal static bool Timeout(this ref http2httpError e) { return e.timeout; }
 
-internal static bool Temporary(this ref http2httpError e) {
-    return true;
-}
+internal static bool Temporary(this ref http2httpError e) { return true; }
 
 internal static error http2errTimeout = new http2httpErrorжerror(Ꮡ(new http2httpError(msg: "http2: timeout awaiting response headers", timeout: true)));
 
@@ -3876,17 +3854,11 @@ partial struct http2sorter {
     internal slice<@string> v; // owned by sorter
 }
 
-internal static nint Len(this ref http2sorter s) {
-    return builtin.len(s.v);
-}
+internal static nint Len(this ref http2sorter s) { return builtin.len(s.v); }
 
-internal static void Swap(this ref http2sorter s, nint i, nint j) {
-    (s.v[i], s.v[j]) = (s.v[j], s.v[i]);
-}
+internal static void Swap(this ref http2sorter s, nint i, nint j) { (s.v[i], s.v[j]) = (s.v[j], s.v[i]); }
 
-internal static bool Less(this ref http2sorter s, nint i, nint j) {
-    return s.v[i] < s.v[j];
-}
+internal static bool Less(this ref http2sorter s, nint i, nint j) { return s.v[i] < s.v[j]; }
 
 // Keys returns the sorted keys of h.
 //
@@ -4054,22 +4026,16 @@ internal static (nint n, error err) Write(this ж<http2pipe> Ꮡp, slice<byte> d
 // read.
 //
 // The error must be non-nil.
-internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) {
-    Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default);
-}
+internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default); }
 
 // BreakWithError causes the next Read (waking up a current blocked
 // Read if needed) to return the provided err immediately, without
 // waiting for unread data.
-internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) {
-    Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default);
-}
+internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default); }
 
 // closeWithErrorAndCode is like CloseWithError but also sets some code to run
 // in the caller's goroutine before returning the error.
-internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) {
-    Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn);
-}
+internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn); }
 
 internal static void closeWithError(this ж<http2pipe> Ꮡp, ж<error> Ꮡdst, error err, Action fn) {
     GoFrame ᒐ = default;
@@ -4825,17 +4791,11 @@ partial struct http2stream {
     internal ΔHeader reqTrailer; // handler's Request.Trailer
 }
 
-internal static ж<http2Framer> Framer(this ref http2serverConn sc) {
-    return sc.framer;
-}
+internal static ж<http2Framer> Framer(this ref http2serverConn sc) { return sc.framer; }
 
-internal static error CloseConn(this ref http2serverConn sc) {
-    return sc.conn.Close();
-}
+internal static error CloseConn(this ref http2serverConn sc) { return sc.conn.Close(); }
 
-internal static error Flush(this ref http2serverConn sc) {
-    return sc.bw.Flush();
-}
+internal static error Flush(this ref http2serverConn sc) { return sc.bw.Flush(); }
 
 internal static (ж<hpack.Encoder>, ж<bytes.Buffer>) HeaderEncoder(this ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5321,21 +5281,13 @@ internal static ж<http2serverMessage> http2shutdownTimerMsg = @new<http2serverM
 internal static ж<http2serverMessage> http2gracefulShutdownMsg = @new<http2serverMessage>();
 internal static ж<http2serverMessage> http2handlerDoneMsg = @new<http2serverMessage>();
 
-internal static void onSettingsTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil());
-}
+internal static void onSettingsTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil()); }
 
-internal static void onIdleTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2idleTimerMsg.OrTypedNil());
-}
+internal static void onIdleTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2idleTimerMsg.OrTypedNil()); }
 
-internal static void onReadIdleTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil());
-}
+internal static void onReadIdleTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil()); }
 
-internal static void onShutdownTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil());
-}
+internal static void onShutdownTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil()); }
 
 internal static void sendServeMsg(this ref http2serverConn sc, any msg) {
     sc.serveG.checkNotOn(); // NOT
@@ -7163,9 +7115,7 @@ internal static (nint n, error err) Write(this http2chunkWriter cw, slice<byte> 
     return (n, err);
 }
 
-internal static bool hasTrailers(this ref http2responseWriterState rws) {
-    return builtin.len(rws.trailers) > 0;
-}
+internal static bool hasTrailers(this ref http2responseWriterState rws) { return builtin.len(rws.trailers) > 0; }
 
 internal static bool hasNonemptyTrailers(this ref http2responseWriterState rws) {
     foreach (var (_, trailer) in rws.trailers) {
@@ -8450,16 +8400,13 @@ internal static (nint n, error err) Write(this http2stickyErrWriter sew, slice<b
 partial struct http2noCachedConnError {
 }
 
-internal static void IsHTTP2NoCachedConnError(this http2noCachedConnError _) {
-}
+internal static void IsHTTP2NoCachedConnError(this http2noCachedConnError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http2NoCachedConnectionˢ => ref http2NoCachedConnectionˢᵇ;
 private static readonly @string http2NoCachedConnectionˢᵇ = "http2: no cached connection was available"u8;
 
-internal static @string Error(this http2noCachedConnError _) {
-    return http2NoCachedConnectionˢ;
-}
+internal static @string Error(this http2noCachedConnError _) { return http2NoCachedConnectionˢ; }
 
 internal partial interface http2isNoCachedConnError_type /*dyn*/ {
     void IsHTTP2NoCachedConnError();
@@ -11605,24 +11552,16 @@ internal static io.ReadCloser http2noBody = new http2noBodyReader();
 partial struct http2noBodyReader {
 }
 
-internal static error Close(this http2noBodyReader _) {
-    return default;
-}
+internal static error Close(this http2noBodyReader _) { return default; }
 
-internal static (nint, error) Read(this http2noBodyReader _Δp0, slice<byte> _Δp1) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this http2noBodyReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
 partial struct http2missingBody {
 }
 
-internal static error Close(this http2missingBody _) {
-    return default;
-}
+internal static error Close(this http2missingBody _) { return default; }
 
-internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) {
-    return (0, io.ErrUnexpectedEOF);
-}
+internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) { return (0, io.ErrUnexpectedEOF); }
 
 internal static bool http2strSliceContains(slice<@string> ss, @string s) {
     foreach (var (_, v) in ss) {
@@ -11637,13 +11576,9 @@ partial struct http2erringRoundTripper {
     internal error err;
 }
 
-internal static error RoundTripErr(this http2erringRoundTripper rt) {
-    return rt.err;
-}
+internal static error RoundTripErr(this http2erringRoundTripper rt) { return rt.err; }
 
-internal static (ж<Response>, error) RoundTrip(this http2erringRoundTripper rt, ж<Request> _) {
-    return (default, rt.err);
-}
+internal static (ж<Response>, error) RoundTrip(this http2erringRoundTripper rt, ж<Request> _) { return (default, rt.err); }
 
 internal static error http2errConcurrentReadOnResBody = errors.New("http2: concurrent read on response body");
 
@@ -11662,13 +11597,9 @@ partial struct http2gzipReader {
 partial struct http2eofReader {
 }
 
-internal static (nint, error) Read(this http2eofReader _Δp0, slice<byte> _Δp1) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this http2eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
-internal static (byte, error) ReadByte(this http2eofReader _) {
-    return (0, io.EOF);
-}
+internal static (byte, error) ReadByte(this http2eofReader _) { return (0, io.EOF); }
 
 internal static readonly ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
 internal static ref sync.Pool http2gzipPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2gzipPool).ValueSlot;
@@ -11791,9 +11722,7 @@ partial struct http2errorReader {
     internal error err;
 }
 
-internal static (nint, error) Read(this http2errorReader r, slice<byte> p) {
-    return (0, r.err);
-}
+internal static (nint, error) Read(this http2errorReader r, slice<byte> p) { return (0, r.err); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string closeˢ => ref closeˢᵇ;
@@ -12153,9 +12082,7 @@ internal static error writeFrame(this http2flushFrameWriter _, http2writeContext
     return ctx.Flush();
 }
 
-internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) {
-    return false;
-}
+internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) { return false; }
 
 partial struct http2writeSettings /*[]http2Setting*/;
 
@@ -12179,9 +12106,7 @@ internal static error writeFrame(this ref http2writeGoAway p, http2writeContext 
     return err;
 }
 
-internal static bool staysWithinBuffer(this ref http2writeGoAway _, nint max) {
-    return false; // flushes
-}
+internal static bool staysWithinBuffer(this ref http2writeGoAway _, nint max) { return false; } // flushes
 
 partial struct http2writeData {
     internal uint32 streamID;
@@ -12211,17 +12136,13 @@ internal static error writeFrame(this http2handlerPanicRST hp, http2writeContext
     return ctx.Framer().WriteRSTStream(hp.StreamID, http2ErrCodeInternal);
 }
 
-internal static bool staysWithinBuffer(this http2handlerPanicRST hp, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2handlerPanicRST hp, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 internal static error writeFrame(this http2StreamError se, http2writeContext ctx) {
     return ctx.Framer().WriteRSTStream(se.StreamID, se.Code);
 }
 
-internal static bool staysWithinBuffer(this http2StreamError se, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2StreamError se, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 partial struct http2writePing {
     internal array<byte> data = new(8);
@@ -12258,9 +12179,7 @@ internal static error writeFrame(this http2writeSettingsAck _, http2writeContext
     return ctx.Framer().WriteSettingsAck();
 }
 
-internal static bool staysWithinBuffer(this http2writeSettingsAck _, nint max) {
-    return http2frameHeaderLen <= max;
-}
+internal static bool staysWithinBuffer(this http2writeSettingsAck _, nint max) { return http2frameHeaderLen <= max; }
 
 // splitHeaderBlock splits headerBlock into fragments so that each fragment fits
 // in a single frame, then calls fn for each fragment. firstFrag/lastFrag are true
@@ -12457,9 +12376,7 @@ partial struct http2writeWindowUpdate {
     internal uint32 n;
 }
 
-internal static bool staysWithinBuffer(this http2writeWindowUpdate wu, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2writeWindowUpdate wu, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 internal static error writeFrame(this http2writeWindowUpdate wu, http2writeContext ctx) {
     return ctx.Framer().WriteWindowUpdate(wu.streamID, wu.n);
@@ -13003,13 +12920,9 @@ internal static bool walkReadyInOrder(this ж<http2priorityNodeRFC7540> Ꮡn, bo
 
 partial struct http2sortPriorityNodeSiblingsRFC7540 /*[]ж<http2priorityNodeRFC7540>*/;
 
-internal static nint Len(this http2sortPriorityNodeSiblingsRFC7540 z) {
-    return builtin.len(z);
-}
+internal static nint Len(this http2sortPriorityNodeSiblingsRFC7540 z) { return builtin.len(z); }
 
-internal static void Swap(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
-    (z[i], z[k]) = (z[k], z[i]);
-}
+internal static void Swap(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) { (z[i], z[k]) = (z[k], z[i]); }
 
 internal static bool Less(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
     // Prefer the subtree that has sent fewer bytes relative to its weight.
@@ -13584,8 +13497,7 @@ internal static void CloseStream(this ref http2roundRobinWriteScheduler ws, uint
     ws.queuePool.put(q);
 }
 
-internal static void AdjustStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) {
-}
+internal static void AdjustStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) { }
 
 internal static void Push(this ref http2roundRobinWriteScheduler ws, http2FrameWriteRequest wr) {
     if (wr.isControl()) {

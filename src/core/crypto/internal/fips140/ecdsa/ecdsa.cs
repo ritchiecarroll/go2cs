@@ -87,9 +87,7 @@ internal static void precomputeParams<P>(ref Curve<P> c, slice<byte> order)
     c.nMinus2 = bigmod.NewNat().ExpandFor(c.N).Sub(two, c.N).Bytes(c.N);
 }
 
-public static ж<Curve<P224PointжPoint>> P224() {
-    return _P224();
-}
+public static ж<Curve<P224PointжPoint>> P224() { return _P224(); }
 
 internal static Func<ж<Curve<P224PointжPoint>>> _P224;
 internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224PointжPoint>> () => {
@@ -108,9 +106,7 @@ internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224Point�
     0x5c, 0x5c, 0x2a, 0x3d
 ]); }
 
-public static ж<Curve<P256PointжPoint>> P256() {
-    return _P256();
-}
+public static ж<Curve<P256PointжPoint>> P256() { return _P256(); }
 
 internal static Func<ж<Curve<P256PointжPoint>>> _P256;
 internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256PointжPoint>> () => {
@@ -129,9 +125,7 @@ internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256Point�
     0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
     0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51]); }
 
-public static ж<Curve<P384PointжPoint>> P384() {
-    return _P384();
-}
+public static ж<Curve<P384PointжPoint>> P384() { return _P384(); }
 
 internal static Func<ж<Curve<P384PointжPoint>>> _P384;
 internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384PointжPoint>> () => {
@@ -151,9 +145,7 @@ internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384Point�
     0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a,
     0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73]); }
 
-public static ж<Curve<P521PointжPoint>> P521() {
-    return _P521();
-}
+public static ж<Curve<P521PointжPoint>> P521() { return _P521(); }
 
 internal static Func<ж<Curve<P521PointжPoint>>> _P521;
 internal static void initᴛ_P521() { _P521 = sync.OnceValue(ж<Curve<P521PointжPoint>> () => {

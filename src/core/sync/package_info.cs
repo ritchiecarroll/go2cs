@@ -73,9 +73,9 @@ using static go.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROLI=")]
+[assembly: GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROJI=")]
 [assembly: GoPositionMap("sync/map.go", "map.cs", "ACtesqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
-[assembly: GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAJAgABEgAIBqampqaigoKmkg==")]
+[assembly: GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAIAgABEgAIBqampqaSgoKmgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

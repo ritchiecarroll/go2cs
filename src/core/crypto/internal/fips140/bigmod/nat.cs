@@ -31,18 +31,13 @@ internal static UntypedInt _S => /* _W / 8 */ 8;
 // constant time by turning it into a mask.
 public partial struct choice /*num:nuint*/;
 
-internal static choice not(choice c) {
-    return (choice)(1 ^ c);
-}
+internal static choice not(choice c) { return (choice)(1 ^ c); }
 
 internal static choice yes => /* choice(1) */ 1;
-
 internal static choice no => /* choice(0) */ 0;
 
 // ctMask is all 1s if on is yes, and all 0s otherwise.
-internal static nuint ctMask(choice on) {
-    return ((nuint)0 - (nuint)on);
-}
+internal static nuint ctMask(choice on) { return ((nuint)0 - (nuint)on); }
 
 // ctEq returns 1 if x == y, and 0 otherwise. The execution time of this
 // function does not depend on its inputs.
@@ -67,7 +62,6 @@ partial struct ΔNat {
 // common and most performant RSA key size. It's also enough to cover some of
 // the operations of key sizes up to 4096.
 internal static UntypedInt preallocTarget => 2048;
-
 internal static UntypedInt preallocLimbs => /* (preallocTarget + _W - 1) / _W */ 32;
 
 // NewNat returns a new nat with a size of zero, just like new(Nat), but with

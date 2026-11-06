@@ -37,16 +37,9 @@ public static nint Len(this ж<Tuple> Ꮡt) {
 }
 
 // At returns the i'th variable of tuple t.
-public static ж<Var> At(this ref Tuple t, nint i) {
-    return t.vars[i];
-}
+public static ж<Var> At(this ref Tuple t, nint i) { return t.vars[i]; }
 
-public static ΔType Underlying(this ж<Tuple> Ꮡt) {
-    return new TupleжΔType(Ꮡt);
-}
-
-public static @string String(this ж<Tuple> Ꮡt) {
-    return TypeString(new TupleжΔType(Ꮡt), default);
-}
+public static ΔType Underlying(this ж<Tuple> Ꮡt) { return new TupleжΔType(Ꮡt); }
+public static @string String(this ж<Tuple> Ꮡt) { return TypeString(new TupleжΔType(Ꮡt), default); }
 
 } // end types_package

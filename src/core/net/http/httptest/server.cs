@@ -480,9 +480,7 @@ internal static void wrap(this ж<Server> Ꮡs) {
 
 // closeConn closes c.
 // s.mu must be held.
-internal static void closeConn(this ref Server s, net.Conn c) {
-    s.closeConnChan(c, default);
-}
+internal static void closeConn(this ref Server s, net.Conn c) { s.closeConnChan(c, default); }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.

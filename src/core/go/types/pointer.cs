@@ -13,21 +13,12 @@ partial struct Pointer {
 }
 
 // NewPointer returns a new pointer type for the given element (base) type.
-public static ж<Pointer> NewPointer(ΔType elem) {
-    return Ꮡ(new Pointer(@base: elem));
-}
+public static ж<Pointer> NewPointer(ΔType elem) { return Ꮡ(new Pointer(@base: elem)); }
 
 // Elem returns the element type for the given pointer p.
-public static ΔType Elem(this ref Pointer p) {
-    return p.@base;
-}
+public static ΔType Elem(this ref Pointer p) { return p.@base; }
 
-public static ΔType Underlying(this ж<Pointer> Ꮡp) {
-    return new PointerжΔType(Ꮡp);
-}
-
-public static @string String(this ж<Pointer> Ꮡp) {
-    return TypeString(new PointerжΔType(Ꮡp), default);
-}
+public static ΔType Underlying(this ж<Pointer> Ꮡp) { return new PointerжΔType(Ꮡp); }
+public static @string String(this ж<Pointer> Ꮡp) { return TypeString(new PointerжΔType(Ꮡp), default); }
 
 } // end types_package

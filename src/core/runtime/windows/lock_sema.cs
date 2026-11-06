@@ -44,7 +44,6 @@ internal static (ж<g>, bool) beforeIdle(int64 _Δp0, int64 _Δp1) {
     return (default, false);
 }
 
-internal static void checkTimeouts() {
-}
+internal static void checkTimeouts() { }
 
 } // end runtime_package

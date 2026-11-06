@@ -277,14 +277,10 @@ public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
 }
 
 // Size returns h's hash value size, 8 bytes.
-public static nint Size(this ref Hash h) {
-    return 8;
-}
+public static nint Size(this ref Hash h) { return 8; }
 
 // BlockSize returns h's block size.
-public static nint BlockSize(this ref Hash h) {
-    return len(h.buf);
-}
+public static nint BlockSize(this ref Hash h) { return len(h.buf); }
 
 // Clone implements [hash.Cloner].
 public static (hash.Cloner, error) Clone(this ref Hash h) {

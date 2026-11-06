@@ -51,9 +51,7 @@ partial interface Load {
 // A LoadBytes is the uninterpreted bytes of a Mach-O load command.
 partial struct LoadBytes /*[]byte*/;
 
-public static slice<byte> Raw(this LoadBytes b) {
-    return b;
-}
+public static slice<byte> Raw(this LoadBytes b) { return b; }
 
 // A SegmentHeader is the header for a Mach-O 32-bit or 64-bit load segment command.
 partial struct SegmentHeader {
@@ -90,9 +88,7 @@ public static (slice<byte>, error) Data(this ref ΔSegment s) {
 }
 
 // Open returns a new ReadSeeker reading the segment.
-public static io.ReadSeeker Open(this ref ΔSegment s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSegment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 partial struct SectionHeader {
     public @string Name;
@@ -139,9 +135,7 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSection s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Dylib represents a Mach-O load dynamic library command.
 partial struct Dylib {

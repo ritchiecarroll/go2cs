@@ -20,13 +20,8 @@ partial struct MemProfileRecord {
     public slice<uintptr> Stack;
 }
 
-public static int64 InUseBytes(this ref MemProfileRecord r) {
-    return r.AllocBytes - r.FreeBytes;
-}
-
-public static int64 InUseObjects(this ref MemProfileRecord r) {
-    return r.AllocObjects - r.FreeObjects;
-}
+public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+public static int64 InUseObjects(this ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
 
 partial struct BlockProfileRecord {
     public int64 Count;

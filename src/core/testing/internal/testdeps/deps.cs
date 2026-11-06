@@ -39,7 +39,6 @@ partial struct TestDeps {
 }
 
 internal static @string matchPat;
-
 internal static ж<regexp.Regexp> matchRe;
 
 public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) {
@@ -258,10 +257,8 @@ public static void SnapshotCoverage(this TestDeps _) {
 
 public static readonly ж<@string> ᏑCoverMode = new StaticBox<@string>(default(@string));
 public static ref @string CoverMode => ref ((StaticBox<@string>)ᏑCoverMode).ValueSlot;
-
 public static readonly ж<@string> ᏑCovered = new StaticBox<@string>(default(@string));
 public static ref @string Covered => ref ((StaticBox<@string>)ᏑCovered).ValueSlot;
-
 public static readonly ж<slice<@string>> ᏑCoverSelectedPackages = new StaticBox<slice<@string>>(default(slice<@string>));
 public static ref slice<@string> CoverSelectedPackages => ref ((StaticBox<slice<@string>>)ᏑCoverSelectedPackages).ValueSlot;
 

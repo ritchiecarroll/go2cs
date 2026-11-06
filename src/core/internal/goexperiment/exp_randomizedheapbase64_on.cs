@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool RandomizedHeapBase64 = true;
-
 public static UntypedInt RandomizedHeapBase64Int => 1;
 
 } // end goexperiment_package

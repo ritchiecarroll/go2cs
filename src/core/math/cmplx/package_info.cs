@@ -55,14 +55,14 @@ using static go.math.cmplx_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/cmplx/abs.go", "abs.cs", "AA0akA==")]
+[assembly: GoPositionMap("math/cmplx/abs.go", "abs.cs", "AA0agA==")]
 [assembly: GoPositionMap("math/cmplx/asin.go", "asin.cs", "AAlmACkCpKSklKSkxpSkpMaUgoKCgoKokqSkpJSkpMaUpKTGlIKCAAIiAA4CgqiSgpSCgpQAAkoAIgKkpKSClKSUgoKClIKUgoKClIKCqJKCgg==")]
-[assembly: GoPositionMap("math/cmplx/conj.go", "conj.cs", "AAcQkA==")]
+[assembly: GoPositionMap("math/cmplx/conj.go", "conj.cs", "AAcQgA==")]
 [assembly: GoPositionMap("math/cmplx/exp.go", "exp.cs", "AAlmACkCpJSkgpTograCgg==")]
 [assembly: GoPositionMap("math/cmplx/isinf.go", "isinf.cs", "AAkUkoKUqJKC")]
 [assembly: GoPositionMap("math/cmplx/isnan.go", "isnan.cs", "AAkWopSklKiSgg==")]
 [assembly: GoPositionMap("math/cmplx/log.go", "log.cs", "AAlyAC8CqJKC")]
-[assembly: GoPositionMap("math/cmplx/phase.go", "phase.cs", "AAkWoA==")]
+[assembly: GoPositionMap("math/cmplx/phase.go", "phase.cs", "AAkWkA==")]
 [assembly: GoPositionMap("math/cmplx/polar.go", "polar.cs", "AAcUsg==")]
 [assembly: GoPositionMap("math/cmplx/pow.go", "pow.cs", "AAlkACgCgoKUgpSkgpSklJSCgpSCgoKCgpSC")]
 [assembly: GoPositionMap("math/cmplx/rect.go", "rect.cs", "AAkUkoI=")]

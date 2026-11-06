@@ -764,9 +764,7 @@ partial struct parseError {
     internal @string text;
 }
 
-internal static @string Error(this ref parseError e) {
-    return e.text;
-}
+internal static @string Error(this ref parseError e) { return e.text; }
 
 // FNV-1a implementation. See Go's hash/fnv/fnv.go.
 // Copied here for simplicity (can handle integers more directly)

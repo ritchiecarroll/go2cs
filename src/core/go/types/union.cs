@@ -29,41 +29,21 @@ public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
     return Ꮡ(new Union(terms));
 }
 
-public static nint Len(this ref Union u) {
-    return len(u.terms);
-}
+public static nint Len(this ref Union u) { return len(u.terms); }
+public static ж<ΔTerm> Term(this ref Union u, nint i) { return u.terms[i]; }
 
-public static ж<ΔTerm> Term(this ref Union u, nint i) {
-    return u.terms[i];
-}
-
-public static ΔType Underlying(this ж<Union> Ꮡu) {
-    return new UnionжΔType(Ꮡu);
-}
-
-public static @string String(this ж<Union> Ꮡu) {
-    return TypeString(new UnionжΔType(Ꮡu), default);
-}
+public static ΔType Underlying(this ж<Union> Ꮡu) { return new UnionжΔType(Ꮡu); }
+public static @string String(this ж<Union> Ꮡu) { return TypeString(new UnionжΔType(Ꮡu), default); }
 
 // A Term represents a term in a [Union].
 partial struct ΔTerm /*Δterm*/;
 
 // NewTerm returns a new union term.
-public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) {
-    return Ꮡ(new ΔTerm(new Δterm(tilde, typ)));
-}
+public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) { return Ꮡ(new ΔTerm(new Δterm(tilde, typ))); }
 
-public static bool Tilde(this ref ΔTerm t) {
-    return t.tilde;
-}
-
-public static ΔType Type(this ref ΔTerm t) {
-    return t.typ;
-}
-
-public static @string String(this ж<ΔTerm> Ꮡt) {
-    return (Ꮡt.Reinterpret<ΔTerm, Δterm>()).String();
-}
+public static bool Tilde(this ref ΔTerm t) { return t.tilde; }
+public static ΔType Type(this ref ΔTerm t) { return t.typ; }
+public static @string String(this ж<ΔTerm> Ꮡt) { return (Ꮡt.Reinterpret<ΔTerm, Δterm>()).String(); }
 
 // ----------------------------------------------------------------------------
 // Implementation

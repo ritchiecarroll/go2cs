@@ -487,7 +487,6 @@ internal static void rotateLeft<E>(slice<E> s, nint r) {
     Reverse<slice<E>, E>(s.slice(r));
     Reverse<slice<E>, E>(s);
 }
-
 internal static void rotateRight<E>(slice<E> s, nint r) {
     rotateLeft(s, len(s) - r);
 }

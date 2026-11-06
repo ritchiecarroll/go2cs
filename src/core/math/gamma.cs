@@ -72,7 +72,6 @@ internal static array<float64> _gamP = new float64[]{
     4.94214826801497100753e-01D,
     9.99999999999999996796e-01D
 }.array();
-
 internal static array<float64> _gamQ = new float64[]{
     -2.31581873324120129819e-05D,
     5.39605580493303397842e-04D,
@@ -83,7 +82,6 @@ internal static array<float64> _gamQ = new float64[]{
     7.14304917030273074085e-02D,
     1.00000000000000000320e+00D
 }.array();
-
 internal static array<float64> _gamS = new float64[]{
     7.87311395793093628397e-04D,
     -2.29549961613378126380e-04D,

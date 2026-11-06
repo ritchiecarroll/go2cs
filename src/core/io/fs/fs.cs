@@ -156,25 +156,11 @@ public static error ErrExist = errExist();           // "file already exists"
 public static error ErrNotExist = errNotExist();     // "file does not exist"
 public static error ErrClosed = errClosed();         // "file already closed"
 
-internal static error errInvalid() {
-    return oserror.ErrInvalid;
-}
-
-internal static error errPermission() {
-    return oserror.ErrPermission;
-}
-
-internal static error errExist() {
-    return oserror.ErrExist;
-}
-
-internal static error errNotExist() {
-    return oserror.ErrNotExist;
-}
-
-internal static error errClosed() {
-    return oserror.ErrClosed;
-}
+internal static error errInvalid() { return oserror.ErrInvalid; }
+internal static error errPermission() { return oserror.ErrPermission; }
+internal static error errExist() { return oserror.ErrExist; }
+internal static error errNotExist() { return oserror.ErrNotExist; }
+internal static error errClosed() { return oserror.ErrClosed; }
 
 // A FileInfo describes a file and is returned by [Stat].
 partial interface FileInfo {
@@ -282,13 +268,9 @@ partial struct PathError {
     public error Err;
 }
 
-public static @string Error(this ref PathError e) {
-    return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error();
-}
+public static @string Error(this ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
-public static error Unwrap(this ref PathError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref PathError e) { return e.Err; }
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();

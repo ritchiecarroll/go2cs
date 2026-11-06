@@ -13,10 +13,8 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
     return (-1, false);
 }
 
-internal static void vgetrandomDestroy(ref m mp) {
-}
+internal static void vgetrandomDestroy(ref m mp) { }
 
-internal static void vgetrandomInit() {
-}
+internal static void vgetrandomInit() { }
 
 } // end runtime_package

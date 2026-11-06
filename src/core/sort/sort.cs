@@ -118,30 +118,18 @@ public static bool IsSorted(Interface data) {
 // IntSlice attaches the methods of Interface to []int, sorting in increasing order.
 partial struct IntSlice /*[]nint*/;
 
-public static nint Len(this IntSlice x) {
-    return len(x);
-}
-
-public static bool Less(this IntSlice x, nint i, nint j) {
-    return x[i] < x[j];
-}
-
-public static void Swap(this IntSlice x, nint i, nint j) {
-    (x[i], x[j]) = (x[j], x[i]);
-}
+public static nint Len(this IntSlice x) { return len(x); }
+public static bool Less(this IntSlice x, nint i, nint j) { return x[i] < x[j]; }
+public static void Swap(this IntSlice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this IntSlice x) {
-    Sort((Interface)(x));
-}
+public static void Sort(this IntSlice x) { Sort((Interface)(x)); }
 
 // Float64Slice implements Interface for a []float64, sorting in increasing order,
 // with not-a-number (NaN) values ordered before other values.
 partial struct Float64Slice /*[]float64*/;
 
-public static nint Len(this Float64Slice x) {
-    return len(x);
-}
+public static nint Len(this Float64Slice x) { return len(x); }
 
 // Less reports whether x[i] should be ordered before x[j], as required by the sort Interface.
 // Note that floating-point comparison by itself is not a transitive relation: it does not
@@ -149,13 +137,8 @@ public static nint Len(this Float64Slice x) {
 // This implementation of Less places NaN values before any others, by using:
 //
 //	x[i] < x[j] || (math.IsNaN(x[i]) && !math.IsNaN(x[j]))
-public static bool Less(this Float64Slice x, nint i, nint j) {
-    return x[i] < x[j] || (isNaN(x[i]) && !isNaN(x[j]));
-}
-
-public static void Swap(this Float64Slice x, nint i, nint j) {
-    (x[i], x[j]) = (x[j], x[i]);
-}
+public static bool Less(this Float64Slice x, nint i, nint j) { return x[i] < x[j] || (isNaN(x[i]) && !isNaN(x[j])); }
+public static void Swap(this Float64Slice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
 // isNaN is a copy of math.IsNaN to avoid a dependency on the math package.
 internal static bool isNaN(float64 f) {
@@ -163,75 +146,51 @@ internal static bool isNaN(float64 f) {
 }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this Float64Slice x) {
-    Sort((Interface)(x));
-}
+public static void Sort(this Float64Slice x) { Sort((Interface)(x)); }
 
 // StringSlice attaches the methods of Interface to []string, sorting in increasing order.
 partial struct StringSlice /*[]@string*/;
 
-public static nint Len(this StringSlice x) {
-    return len(x);
-}
-
-public static bool Less(this StringSlice x, nint i, nint j) {
-    return x[i] < x[j];
-}
-
-public static void Swap(this StringSlice x, nint i, nint j) {
-    (x[i], x[j]) = (x[j], x[i]);
-}
+public static nint Len(this StringSlice x) { return len(x); }
+public static bool Less(this StringSlice x, nint i, nint j) { return x[i] < x[j]; }
+public static void Swap(this StringSlice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this StringSlice x) {
-    Sort((Interface)(x));
-}
+public static void Sort(this StringSlice x) { Sort((Interface)(x)); }
 
 // Convenience wrappers for common cases
 
 // Ints sorts a slice of ints in increasing order.
 //
 // Note: as of Go 1.22, this function simply calls [slices.Sort].
-public static void Ints(slice<nint> x) {
-    slices.Sort<slice<nint>, nint>(x);
-}
+public static void Ints(slice<nint> x) { slices.Sort<slice<nint>, nint>(x); }
 
 // Float64s sorts a slice of float64s in increasing order.
 // Not-a-number (NaN) values are ordered before other values.
 //
 // Note: as of Go 1.22, this function simply calls [slices.Sort].
-public static void Float64s(slice<float64> x) {
-    slices.Sort<slice<float64>, float64>(x);
-}
+public static void Float64s(slice<float64> x) { slices.Sort<slice<float64>, float64>(x); }
 
 // Strings sorts a slice of strings in increasing order.
 //
 // Note: as of Go 1.22, this function simply calls [slices.Sort].
-public static void Strings(slice<@string> x) {
-    slices.Sort<slice<@string>, @string>(x);
-}
+public static void Strings(slice<@string> x) { slices.Sort<slice<@string>, @string>(x); }
 
 // IntsAreSorted reports whether the slice x is sorted in increasing order.
 //
 // Note: as of Go 1.22, this function simply calls [slices.IsSorted].
-public static bool IntsAreSorted(slice<nint> x) {
-    return slices.IsSorted<slice<nint>, nint>(x);
-}
+public static bool IntsAreSorted(slice<nint> x) { return slices.IsSorted<slice<nint>, nint>(x); }
 
 // Float64sAreSorted reports whether the slice x is sorted in increasing order,
 // with not-a-number (NaN) values before any other values.
 //
 // Note: as of Go 1.22, this function simply calls [slices.IsSorted].
-public static bool Float64sAreSorted(slice<float64> x) {
-    return slices.IsSorted<slice<float64>, float64>(x);
-}
+public static bool Float64sAreSorted(slice<float64> x) { return slices.IsSorted<slice<float64>, float64>(x); }
 
 // StringsAreSorted reports whether the slice x is sorted in increasing order.
 //
 // Note: as of Go 1.22, this function simply calls [slices.IsSorted].
-public static bool StringsAreSorted(slice<@string> x) {
-    return slices.IsSorted<slice<@string>, @string>(x);
-}
+public static bool StringsAreSorted(slice<@string> x) { return slices.IsSorted<slice<@string>, @string>(x); }
 
 // Notes on stable sorting:
 // The used algorithms are simple and provably correct on all input and use

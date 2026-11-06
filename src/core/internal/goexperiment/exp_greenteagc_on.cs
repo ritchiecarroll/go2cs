@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool GreenTeaGC = true;
-
 public static UntypedInt GreenTeaGCInt => 1;
 
 } // end goexperiment_package

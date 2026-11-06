@@ -95,7 +95,6 @@ internal static bool longStringQuickEqualityTest(@string a, @string b) {
     }
     return true;
 }
-
 internal partial struct stringPtr_stringStruct /*dyn*/ {
     internal @unsafe.Pointer ptr;
     internal nint len;

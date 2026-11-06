@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool SizeSpecializedMalloc = false;
-
 public static UntypedInt SizeSpecializedMallocInt => 0;
 
 } // end goexperiment_package

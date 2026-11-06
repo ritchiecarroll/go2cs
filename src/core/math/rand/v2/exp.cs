@@ -95,7 +95,6 @@ public static float64 ExpFloat64(this ref Rand r) {
     0xf7b577d2U, 0xf69c650cU, 0xf51530f0U, 0xf2cb0e3cU, 0xeeefb15dU,
     0xe6da6ecfU
 }.array(); }
-
 [GoLazy] partial class lazyᴛwe { internal static array<float32> we = new float32[]{
     2.0249555e-09F, 1.486674e-11F, 2.4409617e-11F, 3.1968806e-11F,
     3.844677e-11F, 4.4228204e-11F, 4.9516443e-11F, 5.443359e-11F,
@@ -162,7 +161,6 @@ public static float64 ExpFloat64(this ref Rand r) {
     1.2393786e-09F, 1.276585e-09F, 1.3193139e-09F, 1.3695435e-09F,
     1.4305498e-09F, 1.508365e-09F, 1.6160854e-09F, 1.7921248e-09F
 }.array(); }
-
 [GoLazy] partial class lazyᴛfe { internal static array<float32> fe = new float32[]{
     1F, 0.9381437F, 0.90046996F, 0.87170434F, 0.8477855F, 0.8269933F,
     0.8084217F, 0.7915276F, 0.77595687F, 0.7614634F, 0.7478686F,

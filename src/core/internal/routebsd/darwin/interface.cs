@@ -40,13 +40,8 @@ partial struct InterfaceMulticastAddrMessage {
 }
 
 // Implement the Message interface.
-internal static void message(this InterfaceMessage _) {
-}
-
-internal static void message(this InterfaceAddrMessage _) {
-}
-
-internal static void message(this InterfaceMulticastAddrMessage _) {
-}
+internal static void message(this InterfaceMessage _) { }
+internal static void message(this InterfaceAddrMessage _) { }
+internal static void message(this InterfaceMulticastAddrMessage _) { }
 
 } // end routebsd_package

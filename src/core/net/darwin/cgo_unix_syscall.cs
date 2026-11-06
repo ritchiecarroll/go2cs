@@ -36,9 +36,7 @@ internal static UntypedInt _C_IPPROTO_UDP => /* syscall.IPPROTO_UDP */ 17;
 internal static UntypedInt _C_SOCK_DGRAM => /* syscall.SOCK_DGRAM */ 2;
 internal static UntypedInt _C_SOCK_STREAM => /* syscall.SOCK_STREAM */ 1;
 
-internal static void _C_free(@unsafe.Pointer p) {
-    runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p));
-}
+internal static void _C_free(@unsafe.Pointer p) { runtime.KeepAlive(@unsafe.Pointer.OrTypedNil(p)); }
 
 internal static @unsafe.Pointer _C_malloc(uintptr n) {
     if (n <= 0) {
@@ -47,29 +45,12 @@ internal static @unsafe.Pointer _C_malloc(uintptr n) {
     return @unsafe.Pointer.FromPinnedBox(Ꮡ(new slice<byte>((nint)(n)), 0));
 }
 
-internal static ж<ж<_C_struct_sockaddr>> _C_ai_addr(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑAddr;
-}
-
-internal static ж<_C_int> _C_ai_family(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑFamily;
-}
-
-internal static ж<_C_int> _C_ai_flags(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑFlags;
-}
-
-internal static ж<ж<_C_struct_addrinfo>> _C_ai_next(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑNext;
-}
-
-internal static ж<_C_int> _C_ai_protocol(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑProtocol;
-}
-
-internal static ж<_C_int> _C_ai_socktype(ж<_C_struct_addrinfo> ai) {
-    return ai.ᏑSocktype;
-}
+internal static ж<ж<_C_struct_sockaddr>> _C_ai_addr(ж<_C_struct_addrinfo> ai) { return ai.ᏑAddr; }
+internal static ж<_C_int> _C_ai_family(ж<_C_struct_addrinfo> ai) { return ai.ᏑFamily; }
+internal static ж<_C_int> _C_ai_flags(ж<_C_struct_addrinfo> ai) { return ai.ᏑFlags; }
+internal static ж<ж<_C_struct_addrinfo>> _C_ai_next(ж<_C_struct_addrinfo> ai) { return ai.ᏑNext; }
+internal static ж<_C_int> _C_ai_protocol(ж<_C_struct_addrinfo> ai) { return ai.ᏑProtocol; }
+internal static ж<_C_int> _C_ai_socktype(ж<_C_struct_addrinfo> ai) { return ai.ᏑSocktype; }
 
 internal static void _C_freeaddrinfo(ж<_C_struct_addrinfo> ai) {
     unix.Freeaddrinfo(ai);

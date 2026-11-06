@@ -279,9 +279,7 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
 // used, independent of the functions being tested.
 partial struct SetupError /*@string*/;
 
-public static @string Error(this SetupError s) {
-    return (@string)s;
-}
+public static @string Error(this SetupError s) { return (@string)s; }
 
 // A CheckError is the result of Check finding an error.
 partial struct CheckError {

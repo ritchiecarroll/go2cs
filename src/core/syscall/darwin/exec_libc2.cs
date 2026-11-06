@@ -38,9 +38,7 @@ partial struct SysProcAttr {
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeFork();
-
 internal static partial void runtime_AfterFork();
-
 internal static partial void runtime_AfterForkInChild();
 
 // Fork, dup fd onto 0..len(fd), and exec(argv0, argvv, envv) in child.

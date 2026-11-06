@@ -96,9 +96,7 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     expandKeyGeneric(Ꮡc, key);
 }
 
-public static nint BlockSize(this ref Block c) {
-    return ΔBlockSize;
-}
+public static nint BlockSize(this ref Block c) { return ΔBlockSize; }
 
 public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.

@@ -68,8 +68,8 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABo2kqiygpSCgpSClIKUgoI=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABYslAAKDvKClIKUgpSCgoKCAAcUgqaCpoKCpqKClIKUgqaCgpSCpoKmlKKCuIKmgpSCpoKClIKmgsqClK7ygpSClII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgpSUgoKmoqKCgpSClIKCgqaUrAALDoKClIKCvtKUgoKUgoKmgoKCvMKCqsKCgoKCgoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgS2KSCpoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYgKSArOKCpoKUgpSCpoKUgpSmgpSClKaCpoKCAAIaAAoCgoKUrsKCgpSuwoKClAACHAALAoKClIKClAAQKAAJAoKUgpSCgoKmgKSArOKCpoKCuIKClIKUpoKUgpSmgqaCgg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgSyJSCpoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYlJzigqaClIKUgqaClIKUpoKUgpSmgqaCggACGgAKAoKClK7CgoKUrsKCgpQAAhwACwKCgpSCgpQAECgACQKClIKUgoKCppSc4oKmgoK4goKUgpSmgpSClKaCpoKC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAYACA64lIKCpoKCpoKokoKCqKSosqaCggAIEoKmpsySlIKCgsqCgoKCgriUgoK4qqKCgoKCvKKClIKCgg==", "", "", "55=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 

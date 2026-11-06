@@ -752,9 +752,7 @@ partial struct MemProfileRecord {
 }
 
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
-public static int64 InUseBytes(this ref MemProfileRecord r) {
-    return r.AllocBytes - r.FreeBytes;
-}
+public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
 
 // InUseObjects returns the number of objects in use (AllocObjects - FreeObjects).
 public static int64 InUseObjects(this ref MemProfileRecord r) {

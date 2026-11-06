@@ -50,14 +50,10 @@ partial struct Digest {
 }
 
 // BlockSize returns the rate of sponge underlying this hash function.
-public static nint BlockSize(this ref Digest d) {
-    return d.rate;
-}
+public static nint BlockSize(this ref Digest d) { return d.rate; }
 
 // Size returns the output size of the hash function in bytes.
-public static nint Size(this ref Digest d) {
-    return d.outputLen;
-}
+public static nint Size(this ref Digest d) { return d.outputLen; }
 
 // Reset resets the Digest to its initial state.
 public static void Reset(this ref Digest d) {
@@ -100,10 +96,7 @@ internal static void padAndPermute(this ж<Digest> Ꮡd) {
 }
 
 // Write absorbs more data into the hash's state.
-public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
-    return Ꮡd.write(p);
-}
-
+public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) { return Ꮡd.write(p); }
 internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byte> p) {
     nint n = default;
     error err = default;

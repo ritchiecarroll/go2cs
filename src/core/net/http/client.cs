@@ -542,9 +542,7 @@ public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string u
     return Ꮡc.Do(req);
 }
 
-internal static bool alwaysFalse() {
-    return false;
-}
+internal static bool alwaysFalse() { return false; }
 
 // ErrUseLastResponse can be returned by Client.CheckRedirect hooks to
 // control how redirects are processed. If returned, the next request

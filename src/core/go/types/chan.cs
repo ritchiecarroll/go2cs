@@ -27,21 +27,12 @@ public static ж<Chan> NewChan(ChanDir dir, ΔType elem) {
 }
 
 // Dir returns the direction of channel c.
-public static ChanDir Dir(this ref Chan c) {
-    return c.dir;
-}
+public static ChanDir Dir(this ref Chan c) { return c.dir; }
 
 // Elem returns the element type of channel c.
-public static ΔType Elem(this ref Chan c) {
-    return c.elem;
-}
+public static ΔType Elem(this ref Chan c) { return c.elem; }
 
-public static ΔType Underlying(this ж<Chan> Ꮡc) {
-    return new ChanжΔType(Ꮡc);
-}
-
-public static @string String(this ж<Chan> Ꮡc) {
-    return TypeString(new ChanжΔType(Ꮡc), default);
-}
+public static ΔType Underlying(this ж<Chan> Ꮡc) { return new ChanжΔType(Ꮡc); }
+public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжΔType(Ꮡc), default); }
 
 } // end types_package

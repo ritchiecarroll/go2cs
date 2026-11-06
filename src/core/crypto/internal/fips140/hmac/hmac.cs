@@ -81,13 +81,8 @@ public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {
     return h.inner.Write(p);
 }
 
-public static nint Size(this ref HMAC h) {
-    return h.outer.Size();
-}
-
-public static nint BlockSize(this ref HMAC h) {
-    return h.inner.BlockSize();
-}
+public static nint Size(this ref HMAC h) { return h.outer.Size(); }
+public static nint BlockSize(this ref HMAC h) { return h.inner.BlockSize(); }
 
 public static void Reset(this ref HMAC h) {
     if (h.marshaled) {

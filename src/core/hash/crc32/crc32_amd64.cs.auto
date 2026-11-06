@@ -43,13 +43,11 @@ internal static partial (uint32 retA, uint32 retB, uint32 retC) castagnoliSSE42T
 internal static partial uint32 ieeeCLMUL(uint32 crc, slice<byte> p);
 
 internal static UntypedInt castagnoliK1 => 168;
-
 internal static UntypedInt castagnoliK2 => 1344;
 
 partial struct sse42Table /*[4]Table*/;
 
 internal static ж<sse42Table> castagnoliSSE42TableK1;
-
 internal static ж<sse42Table> castagnoliSSE42TableK2;
 
 internal static bool archAvailableCastagnoli() {

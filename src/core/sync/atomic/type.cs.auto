@@ -24,19 +24,13 @@ partial class atomic_package {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static bool Load(this ж<Bool> Ꮡx) {
-    return LoadUint32(Ꮡx.of(Bool.Ꮡv)) != 0;
-}
+public static bool Load(this ж<Bool> Ꮡx) { return LoadUint32(Ꮡx.of(Bool.Ꮡv)) != 0; }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Bool> Ꮡx, bool val) {
-    StoreUint32(Ꮡx.of(Bool.Ꮡv), b32(val));
-}
+public static void Store(this ж<Bool> Ꮡx, bool val) { StoreUint32(Ꮡx.of(Bool.Ꮡv), b32(val)); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static bool /*old*/ Swap(this ж<Bool> Ꮡx, bool @new) {
-    return SwapUint32(Ꮡx.of(Bool.Ꮡv), b32(@new)) != 0;
-}
+public static bool /*old*/ Swap(this ж<Bool> Ꮡx, bool @new) { return SwapUint32(Ꮡx.of(Bool.Ꮡv), b32(@new)) != 0; }
 
 // CompareAndSwap executes the compare-and-swap operation for the boolean value x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Bool> Ꮡx, bool old, bool @new) {
@@ -68,19 +62,13 @@ partial struct Pointer<T> {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) {
-    return (ж<T>)(uintptr)(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv)));
-}
+public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) { return (ж<T>)(uintptr)(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv))); }
 
 // Store atomically stores val into x.
-public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> val) {
-    StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(val));
-}
+public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> val) { StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(val)); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> @new) {
-    return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(@new)));
-}
+public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> @new) { return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(@new))); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> old, ж<T> @new) {
@@ -96,19 +84,13 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
 }
 
 // Load atomically loads and returns the value stored in x.
-public static int32 Load(this ж<Int32> Ꮡx) {
-    return LoadInt32(Ꮡx.of(Int32.Ꮡv));
-}
+public static int32 Load(this ж<Int32> Ꮡx) { return LoadInt32(Ꮡx.of(Int32.Ꮡv)); }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Int32> Ꮡx, int32 val) {
-    StoreInt32(Ꮡx.of(Int32.Ꮡv), val);
-}
+public static void Store(this ж<Int32> Ꮡx, int32 val) { StoreInt32(Ꮡx.of(Int32.Ꮡv), val); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static int32 /*old*/ Swap(this ж<Int32> Ꮡx, int32 @new) {
-    return SwapInt32(Ꮡx.of(Int32.Ꮡv), @new);
-}
+public static int32 /*old*/ Swap(this ж<Int32> Ꮡx, int32 @new) { return SwapInt32(Ꮡx.of(Int32.Ꮡv), @new); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Int32> Ꮡx, int32 old, int32 @new) {
@@ -116,21 +98,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Int32> Ꮡx, int32 old, in
 }
 
 // Add atomically adds delta to x and returns the new value.
-public static int32 /*new*/ Add(this ж<Int32> Ꮡx, int32 delta) {
-    return AddInt32(Ꮡx.of(Int32.Ꮡv), delta);
-}
+public static int32 /*new*/ Add(this ж<Int32> Ꮡx, int32 delta) { return AddInt32(Ꮡx.of(Int32.Ꮡv), delta); }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-public static int32 /*old*/ And(this ж<Int32> Ꮡx, int32 mask) {
-    return AndInt32(Ꮡx.of(Int32.Ꮡv), mask);
-}
+public static int32 /*old*/ And(this ж<Int32> Ꮡx, int32 mask) { return AndInt32(Ꮡx.of(Int32.Ꮡv), mask); }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) {
-    return OrInt32(Ꮡx.of(Int32.Ꮡv), mask);
-}
+public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) { return OrInt32(Ꮡx.of(Int32.Ꮡv), mask); }
 
 // An Int64 is an atomic int64. The zero value is zero.
 //
@@ -142,19 +118,13 @@ public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static int64 Load(this ж<Int64> Ꮡx) {
-    return LoadInt64(Ꮡx.of(Int64.Ꮡv));
-}
+public static int64 Load(this ж<Int64> Ꮡx) { return LoadInt64(Ꮡx.of(Int64.Ꮡv)); }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Int64> Ꮡx, int64 val) {
-    StoreInt64(Ꮡx.of(Int64.Ꮡv), val);
-}
+public static void Store(this ж<Int64> Ꮡx, int64 val) { StoreInt64(Ꮡx.of(Int64.Ꮡv), val); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static int64 /*old*/ Swap(this ж<Int64> Ꮡx, int64 @new) {
-    return SwapInt64(Ꮡx.of(Int64.Ꮡv), @new);
-}
+public static int64 /*old*/ Swap(this ж<Int64> Ꮡx, int64 @new) { return SwapInt64(Ꮡx.of(Int64.Ꮡv), @new); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Int64> Ꮡx, int64 old, int64 @new) {
@@ -162,21 +132,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Int64> Ꮡx, int64 old, in
 }
 
 // Add atomically adds delta to x and returns the new value.
-public static int64 /*new*/ Add(this ж<Int64> Ꮡx, int64 delta) {
-    return AddInt64(Ꮡx.of(Int64.Ꮡv), delta);
-}
+public static int64 /*new*/ Add(this ж<Int64> Ꮡx, int64 delta) { return AddInt64(Ꮡx.of(Int64.Ꮡv), delta); }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-public static int64 /*old*/ And(this ж<Int64> Ꮡx, int64 mask) {
-    return AndInt64(Ꮡx.of(Int64.Ꮡv), mask);
-}
+public static int64 /*old*/ And(this ж<Int64> Ꮡx, int64 mask) { return AndInt64(Ꮡx.of(Int64.Ꮡv), mask); }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) {
-    return OrInt64(Ꮡx.of(Int64.Ꮡv), mask);
-}
+public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) { return OrInt64(Ꮡx.of(Int64.Ꮡv), mask); }
 
 // A Uint32 is an atomic uint32. The zero value is zero.
 //
@@ -187,19 +151,13 @@ public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static uint32 Load(this ж<Uint32> Ꮡx) {
-    return LoadUint32(Ꮡx.of(Uint32.Ꮡv));
-}
+public static uint32 Load(this ж<Uint32> Ꮡx) { return LoadUint32(Ꮡx.of(Uint32.Ꮡv)); }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Uint32> Ꮡx, uint32 val) {
-    StoreUint32(Ꮡx.of(Uint32.Ꮡv), val);
-}
+public static void Store(this ж<Uint32> Ꮡx, uint32 val) { StoreUint32(Ꮡx.of(Uint32.Ꮡv), val); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static uint32 /*old*/ Swap(this ж<Uint32> Ꮡx, uint32 @new) {
-    return SwapUint32(Ꮡx.of(Uint32.Ꮡv), @new);
-}
+public static uint32 /*old*/ Swap(this ж<Uint32> Ꮡx, uint32 @new) { return SwapUint32(Ꮡx.of(Uint32.Ꮡv), @new); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Uint32> Ꮡx, uint32 old, uint32 @new) {
@@ -207,21 +165,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uint32> Ꮡx, uint32 old, 
 }
 
 // Add atomically adds delta to x and returns the new value.
-public static uint32 /*new*/ Add(this ж<Uint32> Ꮡx, uint32 delta) {
-    return AddUint32(Ꮡx.of(Uint32.Ꮡv), delta);
-}
+public static uint32 /*new*/ Add(this ж<Uint32> Ꮡx, uint32 delta) { return AddUint32(Ꮡx.of(Uint32.Ꮡv), delta); }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uint32 /*old*/ And(this ж<Uint32> Ꮡx, uint32 mask) {
-    return AndUint32(Ꮡx.of(Uint32.Ꮡv), mask);
-}
+public static uint32 /*old*/ And(this ж<Uint32> Ꮡx, uint32 mask) { return AndUint32(Ꮡx.of(Uint32.Ꮡv), mask); }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) {
-    return OrUint32(Ꮡx.of(Uint32.Ꮡv), mask);
-}
+public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) { return OrUint32(Ꮡx.of(Uint32.Ꮡv), mask); }
 
 // A Uint64 is an atomic uint64. The zero value is zero.
 //
@@ -233,19 +185,13 @@ public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static uint64 Load(this ж<Uint64> Ꮡx) {
-    return LoadUint64(Ꮡx.of(Uint64.Ꮡv));
-}
+public static uint64 Load(this ж<Uint64> Ꮡx) { return LoadUint64(Ꮡx.of(Uint64.Ꮡv)); }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Uint64> Ꮡx, uint64 val) {
-    StoreUint64(Ꮡx.of(Uint64.Ꮡv), val);
-}
+public static void Store(this ж<Uint64> Ꮡx, uint64 val) { StoreUint64(Ꮡx.of(Uint64.Ꮡv), val); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static uint64 /*old*/ Swap(this ж<Uint64> Ꮡx, uint64 @new) {
-    return SwapUint64(Ꮡx.of(Uint64.Ꮡv), @new);
-}
+public static uint64 /*old*/ Swap(this ж<Uint64> Ꮡx, uint64 @new) { return SwapUint64(Ꮡx.of(Uint64.Ꮡv), @new); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Uint64> Ꮡx, uint64 old, uint64 @new) {
@@ -253,21 +199,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uint64> Ꮡx, uint64 old, 
 }
 
 // Add atomically adds delta to x and returns the new value.
-public static uint64 /*new*/ Add(this ж<Uint64> Ꮡx, uint64 delta) {
-    return AddUint64(Ꮡx.of(Uint64.Ꮡv), delta);
-}
+public static uint64 /*new*/ Add(this ж<Uint64> Ꮡx, uint64 delta) { return AddUint64(Ꮡx.of(Uint64.Ꮡv), delta); }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uint64 /*old*/ And(this ж<Uint64> Ꮡx, uint64 mask) {
-    return AndUint64(Ꮡx.of(Uint64.Ꮡv), mask);
-}
+public static uint64 /*old*/ And(this ж<Uint64> Ꮡx, uint64 mask) { return AndUint64(Ꮡx.of(Uint64.Ꮡv), mask); }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) {
-    return OrUint64(Ꮡx.of(Uint64.Ꮡv), mask);
-}
+public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) { return OrUint64(Ꮡx.of(Uint64.Ꮡv), mask); }
 
 // A Uintptr is an atomic uintptr. The zero value is zero.
 //
@@ -278,19 +218,13 @@ public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) {
 }
 
 // Load atomically loads and returns the value stored in x.
-public static uintptr Load(this ж<Uintptr> Ꮡx) {
-    return LoadUintptr(Ꮡx.of(Uintptr.Ꮡv));
-}
+public static uintptr Load(this ж<Uintptr> Ꮡx) { return LoadUintptr(Ꮡx.of(Uintptr.Ꮡv)); }
 
 // Store atomically stores val into x.
-public static void Store(this ж<Uintptr> Ꮡx, uintptr val) {
-    StoreUintptr(Ꮡx.of(Uintptr.Ꮡv), val);
-}
+public static void Store(this ж<Uintptr> Ꮡx, uintptr val) { StoreUintptr(Ꮡx.of(Uintptr.Ꮡv), val); }
 
 // Swap atomically stores new into x and returns the previous value.
-public static uintptr /*old*/ Swap(this ж<Uintptr> Ꮡx, uintptr @new) {
-    return SwapUintptr(Ꮡx.of(Uintptr.Ꮡv), @new);
-}
+public static uintptr /*old*/ Swap(this ж<Uintptr> Ꮡx, uintptr @new) { return SwapUintptr(Ꮡx.of(Uintptr.Ꮡv), @new); }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap(this ж<Uintptr> Ꮡx, uintptr old, uintptr @new) {
@@ -298,21 +232,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uintptr> Ꮡx, uintptr old
 }
 
 // Add atomically adds delta to x and returns the new value.
-public static uintptr /*new*/ Add(this ж<Uintptr> Ꮡx, uintptr delta) {
-    return AddUintptr(Ꮡx.of(Uintptr.Ꮡv), delta);
-}
+public static uintptr /*new*/ Add(this ж<Uintptr> Ꮡx, uintptr delta) { return AddUintptr(Ꮡx.of(Uintptr.Ꮡv), delta); }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uintptr /*old*/ And(this ж<Uintptr> Ꮡx, uintptr mask) {
-    return AndUintptr(Ꮡx.of(Uintptr.Ꮡv), mask);
-}
+public static uintptr /*old*/ And(this ж<Uintptr> Ꮡx, uintptr mask) { return AndUintptr(Ꮡx.of(Uintptr.Ꮡv), mask); }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) {
-    return OrUintptr(Ꮡx.of(Uintptr.Ꮡv), mask);
-}
+public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) { return OrUintptr(Ꮡx.of(Uintptr.Ꮡv), mask); }
 
 // noCopy may be added to structs which must not be copied
 // after the first use.
@@ -325,11 +253,8 @@ partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lock(this ref noCopy _) {
-}
-
-internal static void Unlock(this ref noCopy _) {
-}
+internal static void Lock(this ref noCopy _) { }
+internal static void Unlock(this ref noCopy _) { }
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

@@ -70,9 +70,7 @@ public static void Read(slice<byte> b) {
 // The urandom fallback is only used on Linux kernels before 3.17 and on AIX.
 internal static readonly ж<sync.Once> ᏑurandomOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once urandomOnce => ref ((StaticBox<sync.Once>)ᏑurandomOnce).ValueSlot;
-
 internal static ж<os.File> urandomFile;
-
 internal static error urandomErr;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

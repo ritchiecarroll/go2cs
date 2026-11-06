@@ -47,7 +47,6 @@ partial class template_package {
 }.array(); }
 
 internal static slice<byte> commentStart = slice<byte>("<!--"u8);
-
 internal static slice<byte> commentEnd = slice<byte>("-->"u8);
 
 // tText is the context transition function for the text state.

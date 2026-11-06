@@ -47,12 +47,10 @@ partial struct TypeAssert {
     public ж<ΔInterfaceType> Inter;
     public bool CanFail;
 }
-
 partial struct TypeAssertCache {
     public uintptr Mask;
     public array<TypeAssertCacheEntry> Entries = new(1);
 }
-
 partial struct TypeAssertCacheEntry {
     // type of source value (a *runtime._type)
     public uintptr Typ;

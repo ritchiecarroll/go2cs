@@ -31,7 +31,6 @@ internal static slice<rune> code3 = slice<rune>([ /* \w */
     [@"\w"] = new(+1, code3),
     [@"\W"] = new(-1, code3)
 }; }
-
 internal static slice<rune> code4 = slice<rune>([ /* [:alnum:] */
     0x30, 0x39,
     0x41, 0x5a,

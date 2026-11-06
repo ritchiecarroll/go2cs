@@ -99,65 +99,43 @@ public static void MarkImplicit(this ref Interface t) {
 }
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-public static nint NumExplicitMethods(this ref Interface t) {
-    return len(t.methods);
-}
+public static nint NumExplicitMethods(this ref Interface t) { return len(t.methods); }
 
 // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
 // The methods are ordered by their unique [Id].
-public static ж<Func> ExplicitMethod(this ref Interface t, nint i) {
-    return t.methods[i];
-}
+public static ж<Func> ExplicitMethod(this ref Interface t, nint i) { return t.methods[i]; }
 
 // NumEmbeddeds returns the number of embedded types in interface t.
-public static nint NumEmbeddeds(this ref Interface t) {
-    return len(t.embeddeds);
-}
+public static nint NumEmbeddeds(this ref Interface t) { return len(t.embeddeds); }
 
 // Embedded returns the i'th embedded defined (*[Named]) type of interface t for 0 <= i < t.NumEmbeddeds().
 // The result is nil if the i'th embedded type is not a defined type.
 //
 // Deprecated: Use [Interface.EmbeddedType] which is not restricted to defined (*[Named]) types.
-public static ж<Named> Embedded(this ref Interface t, nint i) {
-    return asNamed(t.embeddeds[i]);
-}
+public static ж<Named> Embedded(this ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-public static ΔType EmbeddedType(this ref Interface t, nint i) {
-    return t.embeddeds[i];
-}
+public static ΔType EmbeddedType(this ref Interface t, nint i) { return t.embeddeds[i]; }
 
 // NumMethods returns the total number of methods of interface t.
-public static nint NumMethods(this ж<Interface> Ꮡt) {
-    return Ꮡt.typeSet().NumMethods();
-}
+public static nint NumMethods(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
-public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) {
-    return Ꮡt.typeSet().Method(i);
-}
+public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
 
 // Empty reports whether t is the empty interface.
-public static bool Empty(this ж<Interface> Ꮡt) {
-    return Ꮡt.typeSet().IsAll();
-}
+public static bool Empty(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
-public static bool IsComparable(this ж<Interface> Ꮡt) {
-    return Ꮡt.typeSet().IsComparable(default);
-}
+public static bool IsComparable(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
-public static bool IsMethodSet(this ж<Interface> Ꮡt) {
-    return Ꮡt.typeSet().IsMethodSet();
-}
+public static bool IsMethodSet(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
-public static bool IsImplicit(this ref Interface t) {
-    return t.@implicit;
-}
+public static bool IsImplicit(this ref Interface t) { return t.@implicit; }
 
 // Complete computes the interface's type set. It must be called by users of
 // [NewInterfaceType] and [NewInterface] after the interface's embedded types are
@@ -176,13 +154,8 @@ public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
     return Ꮡt;
 }
 
-public static ΔType Underlying(this ж<Interface> Ꮡt) {
-    return new InterfaceжΔType(Ꮡt);
-}
-
-public static @string String(this ж<Interface> Ꮡt) {
-    return TypeString(new InterfaceжΔType(Ꮡt), default);
-}
+public static ΔType Underlying(this ж<Interface> Ꮡt) { return new InterfaceжΔType(Ꮡt); }
+public static @string String(this ж<Interface> Ꮡt) { return TypeString(new InterfaceжΔType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation

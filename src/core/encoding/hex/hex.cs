@@ -20,9 +20,7 @@ private static readonly @string reverseHexTableᵇ = ((@string)(new byte[]{0xff,
 
 // EncodedLen returns the length of an encoding of n source bytes.
 // Specifically, it returns n * 2.
-public static nint EncodedLen(nint n) {
-    return n * 2;
-}
+public static nint EncodedLen(nint n) { return n * 2; }
 
 // Encode encodes src into [EncodedLen](len(src))
 // bytes of dst. As a convenience, it returns the number
@@ -61,9 +59,7 @@ public static @string Error(this InvalidByteError e) {
 
 // DecodedLen returns the length of a decoding of x source bytes.
 // Specifically, it returns x / 2.
-public static nint DecodedLen(nint x) {
-    return x / 2;
-}
+public static nint DecodedLen(nint x) { return x / 2; }
 
 // Decode decodes src into [DecodedLen](len(src)) bytes,
 // returning the actual number of bytes written to dst.

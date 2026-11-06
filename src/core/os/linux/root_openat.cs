@@ -544,8 +544,6 @@ internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
 // and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
-internal static @string Error(this errSymlink _) {
-    throw panic("errSymlink is not user-visible");
-}
+internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
 } // end os_package

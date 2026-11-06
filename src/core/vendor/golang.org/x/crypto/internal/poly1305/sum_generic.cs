@@ -270,9 +270,7 @@ internal const uint64 maskLow2Bits = 0x0000000000000003;
 internal const uint64 maskNotLow2Bits = /* ^maskLow2Bits */ 18446744073709551612;
 
 // select64 returns x if v == 1 and y if v == 0, in constant time.
-internal static uint64 select64(uint64 v, uint64 x, uint64 y) {
-    return ~(v - 1) & x | (v - 1) & y;
-}
+internal static uint64 select64(uint64 v, uint64 x, uint64 y) { return ~(v - 1) & x | (v - 1) & y; }
 
 // [p0, p1, p2] is 2¹³⁰ - 5 in little endian order.
 internal static UntypedInt p0 => 0xFFFFFFFFFFFFFFFB;

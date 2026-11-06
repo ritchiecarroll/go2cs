@@ -94,13 +94,8 @@ internal static bool isalnum(byte b) {
     return 'a' <= b && b <= 'z' || '0' <= b && b <= '9';
 }
 
-public static tokenꓸPos Pos(this ref Directive d) {
-    return d.Slash;
-}
-
-public static tokenꓸPos End(this ref Directive d) {
-    return (tokenꓸPos)((nint)d.ArgsPos + len(d.Args));
-}
+public static tokenꓸPos Pos(this ref Directive d) { return d.Slash; }
+public static tokenꓸPos End(this ref Directive d) { return (tokenꓸPos)((nint)d.ArgsPos + len(d.Args)); }
 
 // A DirectiveArg is an argument to a directive comment.
 partial struct DirectiveArg {

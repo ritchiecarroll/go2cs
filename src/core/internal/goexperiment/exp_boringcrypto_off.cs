@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool BoringCrypto = false;
-
 public static UntypedInt BoringCryptoInt => 0;
 
 } // end goexperiment_package

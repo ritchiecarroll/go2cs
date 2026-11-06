@@ -661,9 +661,7 @@ internal static nint levelToZlib(CompressionLevel l) {
 internal static ref readonly @string iendˢ => ref iendˢᵇ;
 private static readonly @string iendˢᵇ = "IEND"u8;
 
-internal static void writeIEND(this ref encoder e) {
-    e.writeChunk(default, iendˢ);
-}
+internal static void writeIEND(this ref encoder e) { e.writeChunk(default, iendˢ); }
 
 // Encode writes the Image m to w in PNG format. Any Image may be
 // encoded, but images that are not [image.NRGBA] might be encoded lossily.

@@ -105,8 +105,7 @@ partial struct NopResetter {
 }
 
 // Reset implements the Reset method of the Transformer interface.
-public static void Reset(this NopResetter _) {
-}
+public static void Reset(this NopResetter _) { }
 
 // Reader wraps another io.Reader by transforming the bytes read.
 partial struct Reader {
@@ -528,8 +527,7 @@ public static Transformer RemoveFunc(Func<rune, bool> f) {
 
 internal delegate bool removeF(rune r);
 
-internal static void Reset(this removeF _) {
-}
+internal static void Reset(this removeF _) { }
 
 // Transform implements the Transformer interface.
 internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {

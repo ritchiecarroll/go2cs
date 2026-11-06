@@ -36,8 +36,7 @@ public static ref nint NOPTRBSS => ref ((StaticBox<nint>)ᏑNOPTRBSS).ValueSlot;
 
 public static ж<nint> BSS;
 
-public static void TEXT() {
-}
+public static void TEXT() { }
 
 internal static array<byte> globl12 = new(12);
 internal static array<byte> globl8 = new(8);

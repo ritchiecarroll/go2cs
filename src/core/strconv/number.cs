@@ -288,9 +288,7 @@ public static @string Error(this ref NumError e) {
     return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref NumError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref NumError e) { return e.Err; }
 
 // All ParseXXX functions allow the input string to escape to the error value.
 // This hurts strconv.ParseXXX(string(b)) calls where b is []byte since

@@ -55,9 +55,7 @@ partial struct SyntaxError {
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
-public static @string Error(this ref SyntaxError e) {
-    return e.msg;
-}
+public static @string Error(this ref SyntaxError e) { return e.msg; }
 
 // A scanner is a JSON scanning state machine.
 // Callers call scan.reset and then pass bytes in one at a time

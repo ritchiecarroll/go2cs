@@ -55,7 +55,7 @@ using static go.@internal.profilerecord_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/profilerecord/profilerecord.go", "profilerecord.cs", "ABYqgKKA")]
+[assembly: GoPositionMap("internal/profilerecord/profilerecord.go", "profilerecord.cs", "ABYqgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

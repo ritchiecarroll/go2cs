@@ -51,9 +51,7 @@ public static io.Reader NewReader(io.Reader r) {
 }
 
 internal static UntypedInt bzip2FileMagic => 0x425a; // "BZ"
-
 internal static UntypedInt bzip2BlockMagic => 0x314159265359;
-
 internal static UntypedInt bzip2FinalMagic => 0x177245385090;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

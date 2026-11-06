@@ -98,9 +98,7 @@ internal static UntypedInt shift => 8;
 internal static UntypedInt exited => 0;
 internal static UntypedInt stopped => 0x7F;
 
-public static bool Exited(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == exited;
-}
+public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
 public static nint ExitStatus(this WaitStatus w) {
     if ((WaitStatus)(w & (uint32)mask) != exited) {
@@ -109,9 +107,7 @@ public static nint ExitStatus(this WaitStatus w) {
     return (nint)(w >> (int)(shift));
 }
 
-public static bool Signaled(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != 0;
-}
+public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != 0; }
 
 public static ΔSignal Signal(this WaitStatus w) {
     ΔSignal sig = (ΔSignal)(nint)((WaitStatus)(w & (uint32)mask));
@@ -121,17 +117,11 @@ public static ΔSignal Signal(this WaitStatus w) {
     return sig;
 }
 
-public static bool CoreDump(this WaitStatus w) {
-    return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0;
-}
+public static bool CoreDump(this WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
-public static bool Stopped(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) != SIGSTOP;
-}
+public static bool Stopped(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) != SIGSTOP; }
 
-public static bool Continued(this WaitStatus w) {
-    return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) == SIGSTOP;
-}
+public static bool Continued(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((ΔSignal)(nint)((w >> (int)(shift)))) == SIGSTOP; }
 
 public static ΔSignal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
@@ -140,9 +130,7 @@ public static ΔSignal StopSignal(this WaitStatus w) {
     return (ΔSignal)(((ΔSignal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
-public static nint TrapCause(this WaitStatus w) {
-    return -1;
-}
+public static nint TrapCause(this WaitStatus w) { return -1; }
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
 public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> rusage) {

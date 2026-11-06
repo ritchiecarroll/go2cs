@@ -205,7 +205,6 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
 
 // Disable/enable preemption, implemented in runtime.
 internal static partial nint runtime_procPin();
-
 internal static partial void runtime_procUnpin();
 
 } // end atomic_package

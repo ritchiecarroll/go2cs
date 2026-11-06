@@ -72,7 +72,7 @@ using static go.@internal.syscall.windows_package;
 [assembly: GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
 [assembly: GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCgoKCgoKUgpSCABxuABIysoLYsoI=")]
 [assembly: GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClJQ=")]
-[assembly: GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAHjSCpoCkgg==")]
+[assembly: GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAHjSCppSC")]
 [assembly: GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AG7mAZKClIKClIKClII=")]
 [assembly: GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABxE0oKCgqqiggAMFoKCAAcSooKUgoKCgpSCgoKUgoKiqKKCqqKCrLKC/IKC3IKmgpSCgoKUgoKm")]
 [assembly: GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggADIKLCgpSmoqKCpqKigqaiooKmooKClKaigoKUpqKigqaiAAgCgpSmouKClKaywoKClKayooKClKaigoKUooKUpqKigpSmooKClKai4oKUpqKCgoKUpqIACgKClKaiooKUpqKCgpSigpSmouKClKaywoKClKaygoKClKaywoKClKaigoKmosKClKaigoKmsoKCgpSmoqKClKaiooKUprKigoKUprKigoKUprKigoKUAAQesqKCgpSmogAKAoKUpqLCgpSmoqKClAAGJqLCgpSmssKCgpSmsoKCgpSmosKCpqIACgKCpqKigpSmoqKClKaiooKUAAQWosKClKai4oKUpqLCgpQACDaiwoKUpqLCgpQABBCiooKmooKCpqKigpSmooKClKKClKaiooKUpqLCgpSmoqKClAAEHrKigoKU")]

@@ -81,9 +81,7 @@ internal static slice<byte> bytes(this ref buf b, nint n) {
     return data;
 }
 
-internal static void skip(this ref buf b, nint n) {
-    b.bytes(n);
-}
+internal static void skip(this ref buf b, nint n) { b.bytes(n); }
 
 internal static @string @string(this ref buf b) {
     nint i = bytes_package.IndexByte(b.data, 0);

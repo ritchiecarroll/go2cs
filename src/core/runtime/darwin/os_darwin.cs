@@ -443,7 +443,6 @@ internal static void setsig(uint32 i, uintptr fn) {
 // sigtramp is the callback from libc when a signal is received.
 // It is called with the C calling convention.
 internal static partial void sigtramp();
-
 internal static partial void cgoSigtramp();
 
 //go:nosplit

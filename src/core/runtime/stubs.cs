@@ -218,9 +218,7 @@ internal static partial void cgocallback(uintptr fn, uintptr frame, uintptr ctxt
 internal static partial void gogo(ж<gobuf> buf);
 
 internal static partial void asminit();
-
 internal static partial void setg(ж<g> gg);
-
 internal static partial void breakpoint();
 
 // reflectcall calls fn with arguments described by stackArgs, stackArgsSize,
@@ -346,57 +344,31 @@ internal static partial void rt0_go();
 // not called directly; definitions here supply type information for traceback.
 // These must have the same signature (arg pointer map) as reflectcall.
 internal static partial void call16(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call32(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call64(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call128(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call256(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call512(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call1024(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call2048(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call4096(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call8192(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call16384(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call32768(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call65536(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call131072(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call262144(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call524288(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call1048576(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call2097152(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call4194304(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call8388608(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call16777216(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call33554432(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call67108864(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call134217728(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call268435456(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call536870912(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
-
 internal static partial void call1073741824(@unsafe.Pointer typ, @unsafe.Pointer fn, @unsafe.Pointer stackArgs, uint32 stackArgsSize, uint32 stackRetOffset, uint32 frameSize, ж<abi.RegArgs> regArgs);
 
 internal static partial void systemstack_switch();
@@ -460,19 +432,12 @@ internal static partial void gcWriteBarrier1();
 internal static partial void gcWriteBarrier2();
 
 internal static partial void gcWriteBarrier3();
-
 internal static partial void gcWriteBarrier4();
-
 internal static partial void gcWriteBarrier5();
-
 internal static partial void gcWriteBarrier6();
-
 internal static partial void gcWriteBarrier7();
-
 internal static partial void gcWriteBarrier8();
-
 internal static partial void duffzero();
-
 internal static partial void duffcopy();
 
 // Called from linker-generated .initarray; declared for go vet; do NOT call from Go.

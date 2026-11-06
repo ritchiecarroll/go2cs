@@ -198,9 +198,7 @@ internal static bool isRTL(this ref Transformer t) {
 }
 
 // Reset implements transform.Transformer.
-public static void Reset(this ref Transformer t) {
-    t = new Transformer();
-}
+public static void Reset(this ref Transformer t) { t = new Transformer(); }
 
 // Transform implements transform.Transformer. This Transformer has state and
 // needs to be reset between uses.
