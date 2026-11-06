@@ -33612,6 +33612,26 @@ fact (claude/c1-master-reds), so the test stops reading the divergence; the dive
 
 — C1 (2026-11-05)
 
+**Amended 2026-11-06 (C1, COORD's osx-arm64 oracle seat, ruling (A)): three runtime verdicts on osx-arm64 are this
+row's, not the oracle's.** With the oracle at arm64 (`-test-oracle-goarch`, claude/c1-oracle-arch), Go's own runtime
+suite on Apple silicon takes the AES hash, and the converted runtime does not:
+
+| Test | Go (native arm64) | C# (osx-arm64 host) |
+|:--|:--|:--|
+| TestMemHash32Equality | skip ("AES hash implementation is used") | pass |
+| TestMemHash64Equality | skip | pass |
+| TestMemHashGlobalSeed/aes | pass | skip ("No AES") |
+
+`alginit` (`src/core/runtime/alg.cs:441`, `:447`) installs the AES hash on amd64 when `cpu.X86.HasAES` and on arm64
+when `cpu.ARM64.HasAES`. The converted runtime's `GOARCH` is `amd64` (above), so only the first branch can be taken, and
+an arm64 process reports no x86 AES; `useAeshash` stays false. Go on the same box takes the second branch, since Apple
+silicon has AES. Measured on the osx-arm64 runner: the same verdicts with the oracle at amd64 under Rosetta (run
+42120588421) and at arm64 (run 42138564497), so no oracle choice moves them. They are three named OPEN divergences of
+this row, undisclosed, and move with whichever fix shape above is taken (shape 1 owes the census of `GOARCH ==`
+branches like this one; shape 2 removes them).
+
+— C1 (2026-11-06)
+
 ### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
 
 This is the owed row for a gap that until now was recorded only as prose, at
@@ -33896,5 +33916,15 @@ through a pointer keeps the twin.
   itself.
 
 — C2 (2026-11-05)
+
+
+## 2026-11-06 — COORD: two GolibTests timing flakes read while gating 202-207; open, owner to be assigned
+
+Read while gating batches 202-203 (re-merged as 205-206) and 207 on the i7 and the i9, at 386e95397a and its re-merge 52d69e8968. Neither test is touched by those batches.
+- **AHandoffReleaseLetsTheWaiterRunFirst_TestSemaHandoffsRatio** (RuntimeSemaphoreHandoffTests.cs:75, last changed ffa20e812b, 2026-09-26) read `direct handoff < 2/3: 383 of 1000` once, in Debug, 1 of 8 runs on the i9. The other 7 read 999-1000. This is the row C2 recorded on 2026-10-29 (2 of 3 at a base on linux), now seen on windows too.
+- **RangeSnapshotChargesNothingOnEitherMeter** (ArrayRangeAllocationTests.cs:274) read `the range snapshot allocated 4984 bytes across 1000 loops` once, in Release, 1 of 3 runs on the i7 at 52d69e8968. The counter is GC.GetAllocatedBytesForCurrentThread around a loop whose enumerator rents from ArrayPool<T>.Shared. The shared pool trims on gen-2 GCs, so a collection inside the window can make a later Rent allocate on this thread. That is a plausible mechanism, not a measured one.
+- One earlier i7 Release failure at 386e95397a stays UNNAMED: it ran at -v q with no trx, so it is not attributed to either test.
+Both tests read clean in every other run: 13 Release and 3 Debug across the two boxes. **Open; owner to be assigned.** The fix shape is the owner's: a deterministic precondition (no GC inside the window, a private pool, or a bounded retry) without hiding a real regression.
+
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
