@@ -17,6 +17,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -57,7 +59,13 @@ namespace go.golib;
 //   The scan skips the framework (`System.*`, `Microsoft.*`, `netstandard`, `WindowsBase`), golib
 //   itself and golib's satellite assemblies, and considers only sealed, non-nested, non-generic
 //   static classes — which is exactly the shape the converter emits and a large saving over
-//   walking every type in the BCL. golib is skipped by IDENTITY, not by name: its extension methods
+//   walking every type in the BCL. It finds those classes in the assembly's METADATA TABLES
+//   (ExtensionHostTypes): C# marks a class that declares an extension method with [Extension]
+//   itself, so only those classes are ever loaded as types. Assembly.GetTypes() — which loads every
+//   type an assembly declares, 16,185 of them for the crypto/tls test host, about 85% of the scan's
+//   cold cost — is the fallback for an assembly without raw metadata (Native AOT). The two must find
+//   the same methods in the same order; GolibTests' ExtensionScanMetadataTests holds them to it.
+//   golib is skipped by IDENTITY, not by name: its extension methods
 //   are C# helpers (GoShift's Rsh/Lsh on the builtin integers, slice and Must helpers), never Go
 //   methods, and Go's predeclared types have empty method sets. The name prefix `go.golib.` alone
 //   missed golib's own assembly name, `golib`, so a builtin uint64 "had" Rsh.
@@ -259,19 +267,95 @@ public static partial class TypeExtensions
 
         Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");
 
-        foreach (Type type in assembly.GetTypes())
-        foreach (MethodInfo extensionMethod in getExtensionMethods(type))
+        foreach (Type type in ExtensionHostTypes(assembly) ?? assembly.GetTypes())
+        foreach (MethodInfo extensionMethod in DeclaredExtensionMethods(type))
             extensionMethods.Add((extensionMethod, extensionMethod.GetExtensionTargetType()));
-        
-        return;
+    }
 
-        static IEnumerable<MethodInfo> getExtensionMethods(Type type)
+    // The extension methods a type declares, in the shape the converter emits them: a sealed, non-nested,
+    // non-generic (static) class.
+    internal static IEnumerable<MethodInfo> DeclaredExtensionMethods(Type type)
+    {
+        if (!type.IsSealed || type.IsNested || type.IsGenericType)
+            return [];
+
+        return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));
+    }
+
+    /// <summary>
+    /// The types of <paramref name="assembly"/> that can declare an extension method, read from its metadata
+    /// tables without loading any other type: the sealed, non-nested, non-generic classes that carry
+    /// <see cref="ExtensionAttribute"/>, which C# puts on every class that declares an extension method. In
+    /// metadata order, which is the order <see cref="Assembly.GetTypes"/> returns them in.
+    /// </summary>
+    /// <returns>
+    /// The types, or <c>null</c> when the assembly has no raw metadata (Native AOT); the caller then falls back
+    /// to <see cref="Assembly.GetTypes"/>.
+    /// </returns>
+    internal static unsafe IReadOnlyList<Type>? ExtensionHostTypes(Assembly assembly)
+    {
+        if (!assembly.TryGetRawMetadata(out byte* blob, out int length))
+            return null;
+
+        MetadataReader reader = new(blob, length);
+        Module module = assembly.ManifestModule;
+        List<Type> hosts = [];
+
+        foreach (TypeDefinitionHandle handle in reader.TypeDefinitions)
         {
-            if (!type.IsSealed || type.IsNested || type.IsGenericType)
-                return [];
+            TypeDefinition definition = reader.GetTypeDefinition(handle);
 
-            return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));
+            if ((definition.Attributes & TypeAttributes.Sealed) == 0 ||
+                !definition.GetDeclaringType().IsNil ||
+                definition.GetGenericParameters().Count != 0 ||
+                !carriesExtensionAttribute(definition.GetCustomAttributes()))
+                continue;
+
+            hosts.Add(module.ResolveType(MetadataTokens.GetToken(handle)));
+        }
+
+        return hosts;
+
+        bool carriesExtensionAttribute(CustomAttributeHandleCollection attributes)
+        {
+            foreach (CustomAttributeHandle attributeHandle in attributes)
+            {
+                EntityHandle constructor = reader.GetCustomAttribute(attributeHandle).Constructor;
+
+                // ExtensionAttribute lives in the core library, so another assembly reaches its constructor
+                // through a member reference on a type reference. Only the core library itself defines it.
+                EntityHandle parent = constructor.Kind switch
+                {
+                    HandleKind.MemberReference =>
+                        reader.GetMemberReference((MemberReferenceHandle)constructor).Parent,
+                    HandleKind.MethodDefinition =>
+                        reader.GetMethodDefinition((MethodDefinitionHandle)constructor).GetDeclaringType(),
+                    _ => default
+                };
+
+                StringHandle name, space;
+
+                switch (parent.Kind)
+                {
+                    case HandleKind.TypeReference:
+                        TypeReference reference = reader.GetTypeReference((TypeReferenceHandle)parent);
+                        (name, space) = (reference.Name, reference.Namespace);
+                        break;
+                    case HandleKind.TypeDefinition:
+                        TypeDefinition local = reader.GetTypeDefinition((TypeDefinitionHandle)parent);
+                        (name, space) = (local.Name, local.Namespace);
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (reader.StringComparer.Equals(name, nameof(ExtensionAttribute)) &&
+                    reader.StringComparer.Equals(space, typeof(ExtensionAttribute).Namespace!))
+                    return true;
+            }
+
+            return false;
         }
     }
 
