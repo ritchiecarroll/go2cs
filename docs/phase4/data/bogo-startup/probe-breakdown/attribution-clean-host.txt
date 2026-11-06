@@ -1,0 +1,7 @@
+runs=24 hook_us=46554 exit_us=1019688 asm(ASM events)=236.0 loads(290/291)=466.0 jitted=189.0
+jit threads (run 1): {'300': 3, '32762': 178, '304': 7, '32767': 1} main 32762
+  exclusive OUT   median    827.1 ms
+  exclusive LOAD  median     36.7 ms
+  exclusive JIT   median    104.4 ms
+  exclusive TYPE  median      0.0 ms
+  exclusive INIT  median      0.0 ms
