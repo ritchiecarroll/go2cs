@@ -2546,6 +2546,78 @@ function ConvertFrom-ComparisonRecord {
     }
 }
 
+<#
+.SYNOPSIS
+    A failing row's comparison record as summary lines: status, matched, disclosed, the undisclosed
+    divergence count, and the first $First undisclosed divergences with both verdicts.
+.DESCRIPTION
+    The sweep-shard leg's summary is read from the check-runs annotations, because a cloud lane's egress
+    reaches api.github.com but not the blob host the job summary and the artifact are served from. Until
+    this line existed, the annotation carried the sweep's tail and each failing row's C# FAIL events, so a
+    divergence of any other shape (Go pass / C# skip, Go skip / C# pass, a one-sided row) could not be
+    read from such a lane at all: the osx-arm64 runtime row's AES trio, three skip-shaped verdicts, was
+    left UNREAD by run 42214977499 for exactly that reason (COORD ruling (a), 2026-11-06).
+
+    The undisclosed set is the CONVERTER'S, not a recount: each entry of the record's `errors` that
+    matches the mismatch line matchTerminalStatuses writes ($OracleOnlyDivergencePattern), printed with
+    its own detail. A recount from the two verdict maps would have to re-derive every absorption the
+    comparison applies (disclosed roots, withdrawn rows, skip-shape classes, exclusions) and could
+    disagree with the verdict the row was actually given. The other `errors` entries (go test's exit,
+    a census gap, an unreadable manifest) are counted and the first few printed apart from them.
+
+    matched is the number of names whose two verdicts are equal, of the Go side's count; disclosed is
+    the length of the record's disclosure list. Pure: no I/O, so the selftest reads fabricated records
+    through ConvertFrom-ComparisonRecord exactly as the leg reads real ones.
+#>
+function Get-ComparisonDivergenceLines {
+    param(
+        [Parameter(Mandatory)][string] $Row,
+        $Comparison,        # ConvertFrom-ComparisonRecord's shape, or $null when the row wrote no record
+        [int] $First = 40,
+        [int] $DetailWidth = 220
+    )
+
+    if ($null -eq $Comparison) {
+        return , @("${Row}: no comparison record")
+    }
+
+    $goMap = $Comparison.go
+    $csMap = $Comparison.csharp
+    $goCount = if ($null -eq $goMap) { 0 } else { $goMap.Count }
+    $csCount = if ($null -eq $csMap) { 0 } else { $csMap.Count }
+    $matched = 0
+
+    if ($null -ne $goMap -and $null -ne $csMap) {
+        foreach ($name in $goMap.Keys) {
+            if ($csMap.ContainsKey($name) -and $csMap[$name] -ceq $goMap[$name]) { $matched++ }
+        }
+    }
+
+    $disclosed = if ($null -eq $Comparison.disclosed) { 0 } else { @($Comparison.disclosed).Count }
+    $divergences = [System.Collections.Generic.List[string]]::new()
+    $otherErrors = [System.Collections.Generic.List[string]]::new()
+
+    foreach ($entry in @($Comparison.errors)) {
+        if ($null -eq $entry) { continue }
+        $text = [string]$entry
+
+        if ($text -match $OracleOnlyDivergencePattern) { $divergences.Add($text) } else { $otherErrors.Add($text) }
+    }
+
+    $clip = { param([string] $s) if ($s.Length -le $DetailWidth) { $s } else { $s.Substring(0, $DetailWidth) + ' ...' } }
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add("${Row}: status $($Comparison.status); matched $matched of $goCount Go / $csCount C# verdicts; disclosed $disclosed; undisclosed divergences $($divergences.Count); other errors $($otherErrors.Count)")
+
+    foreach ($text in @($divergences | Select-Object -First $First)) { $lines.Add('    ' + (& $clip $text)) }
+    if ($divergences.Count -gt $First) { $lines.Add("    ... and $($divergences.Count - $First) more undisclosed divergence(s)") }
+
+    foreach ($text in @($otherErrors | Select-Object -First 5)) { $lines.Add('    error: ' + (& $clip $text)) }
+    if ($otherErrors.Count -gt 5) { $lines.Add("    ... and $($otherErrors.Count - 5) more error(s)") }
+
+    return , $lines.ToArray()
+}
+
 # The go2cs-gen output-missing class (C2, coordinator ruling 2026-09-30). A source generator that failed to
 # load or initialize leaves the build to fail LATER, as CS0246 on the first generated type the code names --
 # the i9's D5 reflect row: three CS0246 in go/ast walk.cs (a generated adapter type and the inspector Visitor), green on
