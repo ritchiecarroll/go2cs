@@ -62,7 +62,31 @@ another assembly, and a loop that runs only once never leaves its precompiled fo
 - a string-matching benchmark's hot phase took about two thirds of the time;
 - start time stayed within run-to-run variation, and the published folder came out a few tens of KB smaller.
 
-To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`.
+To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`. That is rarely
+worth it. Across the [performance suite](Performance.md), on the same machine, precompiling the program's own code
+makes 11 of the 17 programs slower than the default ReadyToRun publish and none faster. FieldView, Fib, RefLower,
+Sort, Startup and TlsHandshake stay within measurement noise. Medians in ms; the ratio is precompiled-user-code
+against the default:
+
+| Benchmark | default ReadyToRun | `GoReadyToRunUserCode` | ratio |
+|:--|--:|--:|--:|
+| StringView | 21.8 | 605.2 | 27.792 |
+| IfaceCall | 339.6 | 1458.1 | 4.294 |
+| String | 653.5 | 1995.5 | 3.054 |
+| MatMul | 213.8 | 589.4 | 2.757 |
+| Sieve | 139.5 | 265.2 | 1.901 |
+| Iface | 376.1 | 660.4 | 1.756 |
+| StringMatch | 804.7 | 1215.2 | 1.510 |
+| Channel | 79.9 | 117.1 | 1.466 |
+| IfaceShell | 574.6 | 728.4 | 1.268 |
+| IfaceShellChurn | 1071.7 | 1188.1 | 1.109 |
+| Map | 248.9 | 268.9 | 1.080 |
+
+<!-- Source: docs/phase4/DATA-hop126-perf.md section 10.x (G-LAPTOP, win-x64, SDK 10.0.400 / runtime 10.0.11,
+     window 1): R2Ru against the template's R2R over the 17 programs, moved rows only, numbers as the record gives
+     them. Floor per program = the larger of the two arms' IQRs and window 1's 2.8% JIT null (no per-arm A/A in
+     this window), stated as such in the record. Raw: docs/phase4/DATA-hop126-perf/w1-r2ru-rest.tsv and w1-r2ru-review.tsv, the
+     reader sweep/r2ruread.sh and its verdict sweep/r2ru-verdict.tsv (it reproduces the verdict byte for byte). -->
 
 <!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53, G-LAPTOP, .NET 10.0.11, 15
      interleaved rounds, A/A band per program): r2rmod main loop 10.205 -> 1.190 ns/call (0.119), its library
