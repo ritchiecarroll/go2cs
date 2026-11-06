@@ -107,6 +107,7 @@
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testTargetArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testTargetArch_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)thisRefBoxReceiver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)unionNonOperatorMember_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedTypeParamArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyPointerUnion_test.go" />

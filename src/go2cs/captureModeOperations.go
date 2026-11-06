@@ -511,7 +511,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 
 		recvObj := recvObjectOf(funcDecl, info)
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName, recvObj, info) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyReassignsReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasGoStmtBoxMethodGroupOnReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName, info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName, recvObj, info) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyReassignsReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasGoStmtBoxMethodGroupOnReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName, info) || bodyCallsValueMethodOnReceiver(funcDecl.Body, recvName, info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -1953,6 +1953,57 @@ func recvObjectByName(body *ast.BlockStmt, recvName string, info *types.Info) ty
 			if obj := info.Uses[ident]; obj != nil {
 				found = obj
 				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyCallsValueMethodOnReceiver reports whether the body calls a VALUE method (a non-pointer, non-interface receiver)
+// directly on the method's own receiver (`t.M()`, not inside a func literal). Such a method is emitted over the box
+// (`this ж<T> Ꮡt`) so the call can bind go2cs-gen's `M(this ж<T> Ꮡv)` twin through `Ꮡt.M()`: Go copies *t into M's
+// receiver after the call's arguments run, and a nil t panics there. On a `this ref T` receiver there is no box, so
+// the call copied the ref while the arguments were still being built, before they ran, and the optimizing JIT
+// dropped that copy, with the nil fault, for a method that never reads its receiver (tiered compilation off).
+func bodyCallsValueMethodOnReceiver(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if _, isLit := node.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		callExpr, ok := node.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		recvIdent, ok := selectorExpr.X.(*ast.Ident)
+
+		if !ok || recvIdent.Name != recvName {
+			return true
+		}
+
+		if sel := info.Selections[selectorExpr]; sel == nil || sel.Kind() != types.MethodVal || len(sel.Index()) != 1 {
+			return true
+		}
+
+		if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr && !types.IsInterface(sig.Recv().Type()) {
+					found = true
+					return false
+				}
 			}
 		}
 
