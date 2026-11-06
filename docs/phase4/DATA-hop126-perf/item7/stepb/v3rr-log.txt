@@ -1,0 +1,42 @@
+start 2026-11-06 00:44:22
+verified 5 v3 images
+arms 12 + 8
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== v3rr-warm-ctl.tsv 00:44:28
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3rr-ctl-start.tsv 00:44:32
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3rr-arms-1.tsv 00:44:35
+PerfChannel: verified 4 arms, output equal
+PerfChannel: 21 rounds done
+PerfMap: verified 4 arms, output equal
+PerfMap: 21 rounds done
+PerfStringView: verified 4 arms, output equal
+PerfStringView: 21 rounds done
+== v3rr-ctl-mid.tsv 00:46:02
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== v3rr-arms-2.tsv 00:46:06
+PerfIfaceShellChurn: verified 4 arms, output equal
+PerfIfaceShellChurn: 21 rounds done
+PerfStringMatch: verified 4 arms, output equal
+PerfStringMatch: 21 rounds done
+== v3rr-ctl-end.tsv 00:51:18
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 00:51:23 rc=0
