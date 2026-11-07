@@ -86,6 +86,7 @@ These pages carry text from before a landed record change. The re-bank re-render
 | `internal/cpu` | rendered before `b769aa3bc2` | 09:24 |
 | `internal/runtime/gc/scan` | rendered before `b769aa3bc2` | 09:24 |
 | `crypto/sha1` | its darwin withdrawn section | 12:26 |
+| `crypto/tls` | the host-limit class text calls `TestBogoSuite` throughput-bound (a 2026-08-28 reading); [`DATA-bogo-startup.md`](phase4/DATA-bogo-startup.md) shows it is start-up-bound, about 1.2 s per launch, most of it loading packages (§3, §7). The class text is re-worded at the bank; the verdict counts do not move | COORD ruling, 2026-11-07 |
 
 ## 6. Rows whose reading depends on the host (host truth)
 
