@@ -126,6 +126,9 @@ These pages carry text from before a landed record change. The re-bank re-render
     using the ApiCompat tool pinned in `.config/dotnet-tools.json`. `nugetgo-pack.ps1` compares each module with its
     previous revision.
   - 1.26.10.3 carries one announced break, B3. It is golib's 12 entries in `src/core/golib/CompatibilitySuppressions.xml`.
+    The whole-surface census (2026-11-07: 362 packages and 525 assets, plus the 7 published modules' 23 assets) found
+    one more: batch 235's 5 receiver changes in vendored cryptobyte. No consumer can reach them (std-vendored, and the
+    one caller pins the package exactly), so they are suppressed and have no release-notes line.
   - **The policy the guard enforces:** within one Go minor, every published revision of a go.* or nugetgo.* package
     is binary-compatible with the revision before it, except for the breaks listed in that release's suppression
     files. A release that lists any break:
@@ -137,3 +140,35 @@ These pages carry text from before a landed record change. The re-bank re-render
     passed with no suppression. For an announced break, the published packages' ranges cannot be narrowed, and step
     3's deprecation is what reaches their consumers.
   - Across a Go minor there is no baseline: the guard reports and does not gate.
+- **gojq publishes with 1.26.10.3, in the nugetgo wave** (owner, 2026-11-07, relayed by COORD: "Yes, let's shoot for
+  being able to publish gojq with .3").
+  - **Scope:** the library root, `github.com/itchyny/gojq`, and its one third-party dependency, timefmt-go. The
+    command-line package `cli` and its six-module closure wait. This is OQ-4e/f/g/i in
+    `DESIGN-multi-package-modules.md`'s 2026-11-07 amendment, for COORD's ruling.
+  - **Inputs:** P1's `SCOUT-gojq.md` and C2's `SCOUT-timefmt-go.md`, both measured on linux/amd64 at `c6cddb6903`.
+    The per-GOOS closure was read with `go list -deps`, and every ID was read as 404 on nuget.org, so all are free.
+  - **Sequence:**
+    1. The go.* push, then C2's rebuild wave for the 7 published modules. `T` is the 1.26.10.3 record commit, as
+       NugetgoPublish section 0 requires.
+    2. timefmt-go: validate, pack, rehearse, publish. Then its registry row, or a local `-nuget-map` source naming
+       it, so that gojq's `-recurse=nuget` conversion references the published package.
+    3. gojq: validate, pack against the published timefmt-go, rehearse, publish.
+
+  | order | module @ version | nugetgo ID | route | flavors | B4 edges | license | blocked today by |
+  |--:|:--|:--|:--|:--|:--|:--|:--|
+  | 1 | `github.com/itchyny/timefmt-go` @ v0.1.8 | `nugetgo.github.com.itchyny.timefmt-go` | validated: 417 matched, 0 disclosed (C2's scout; linux/amd64 only) | one package, no GOOS-specific file: expected neutral | go.* `[1.26.10.3, 1.27)` | MIT | nothing technical. The conversion repository (owner, section 0 item 6) and the rehearsal route (item 7). windows and darwin were not measured; the pack's flavor conversions are the first reading |
+  | 2 | `github.com/itchyny/gojq` @ v0.12.19, the root only (`-ExcludePackage github.com/itchyny/gojq/cli`; `cmd/gojq` is a main package) | `nugetgo.github.com.itchyny.gojq` | validated: the `-tests -recurse` run over the whole module, which has no package filter, so `cli` must validate too or be disclosed. The scout read the root 162 of 164 and `cli` 898 of 914 with its patches | the root's only build tag is `gojq_debug`: expected neutral | go.* `[1.26.10.3, 1.27)`; `nugetgo.github.com.itchyny.timefmt-go` 0.1.8, a bare minimum (cobra's route, `-ThirdPartyPackage`) | MIT | seats A, B, C (build), D (`-tests`), E (the root's 2 tests), F and H (`cli`'s 16); G needs `-test-timeout` of about 50 minutes; the conversion repository; timefmt-go live and mapped |
+
+  - **Deferred with `cli`.** Each is free on nuget.org, but none is in the 1.26.10.3 wave. `golang.org/x/sys` is the
+    awkward one, and it is a blocker under today's pack rules.
+
+  | module @ version | nugetgo ID | why it waits |
+  |:--|:--|:--|
+  | `github.com/itchyny/go-yaml` @ v0.0.0-20251001235044-fca9a0999f15 | `nugetgo.github.com.itchyny.go-yaml` | the first pseudo-version package (B3's `L.0.N`); Apache-2.0; its own test suite has never been converted |
+  | `github.com/mattn/go-isatty` @ v0.0.20 | `nugetgo.github.com.mattn.go-isatty` | RID-specific: its windows flavor imports no x/sys, its linux and darwin flavors import `x/sys/unix`. Its dependencies are the union per TFM, so it waits for x/sys |
+  | `golang.org/x/sys` @ v0.38.0 | `nugetgo.golang.org.x.sys` | **cannot be packed today.** `unix` has no windows build, and `nugetgo-pack.ps1` refuses "a package missing on one GOOS". It needs a pack rule for a package that exists only on some GOOS (runtimes/ assets, no lib/ compile asset), a design question. It is also large (12 packages on windows alone, 61 test files), and its tests exercise the kernel, so validation is host-bound. BSD-3-Clause |
+  | `github.com/mattn/go-runewidth` @ v0.0.19 | `nugetgo.github.com.mattn.go-runewidth` | waits for uax29 (seat A) |
+  | `github.com/clipperhouse/uax29/v2` @ v2.3.0 | `nugetgo.github.com.clipperhouse.uax29.v2` | seat A. The module has 7 packages, so the pack takes `-ExcludePackage` for those that `graphemes` does not reach |
+  | `github.com/clipperhouse/stringish` @ v0.1.1 | `nugetgo.github.com.clipperhouse.stringish` | 2 packages; nothing measured beyond the scout's build |
+
+  - `github.com/google/go-cmp` is test-only (`cli`'s tests) and is never packed.
