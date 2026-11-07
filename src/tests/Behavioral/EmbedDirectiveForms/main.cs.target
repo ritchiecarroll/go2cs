@@ -17,7 +17,7 @@ internal static @string testfpAgain = go.embed_package.ΔEmbedString(typeof(main
 
 internal static void Main() {
     fmt.Printf("testfp: %d bytes, %d lines\n"u8, len(testfp), strings.Count(testfp, "\n"));
-    foreach (var (i, line) in strings.Split(strings.TrimSuffix(testfp, "\n"), "\n")) {
+    foreach (var (i, line) in range(strings.Split(strings.TrimSuffix(testfp, "\n"), "\n"))) {
         fmt.Printf("  %d: %q\n"u8, i, line);
     }
     fmt.Println("testfp == testfpAgain:", testfp == testfpAgain);
@@ -30,7 +30,7 @@ internal static void Main() {
     fmt.Printf("after write: %c %c\n"u8, entropyCapabilitiesJson[0], capabilitiesJson[0]);
 
     nint sum = default;
-    foreach (var (_, b) in capabilitiesJson) {
+    foreach (var (_, b) in range(capabilitiesJson)) {
         sum += (nint)b;
     }
     fmt.Println("byte sum:", sum);

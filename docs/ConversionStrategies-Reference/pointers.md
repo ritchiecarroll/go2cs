@@ -472,7 +472,7 @@ When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and 
 
 <!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-47 -->
 ```csharp
-ref var p = ref heap<payload>(new payload(vals: slice<nint>([1, 2, 3, 4])), out var Ꮡp);
+ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;
@@ -2792,7 +2792,7 @@ call-argument pointer arm). The routing mirrors the struct-field pointer arm: th
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
 <!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
-list = slice<ж<CommentGroup>>([c]);
+list = [c];
 ```
 Gated to bare idents of pointer type — keyed elements (maps) and address-of/composite elements
 manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the

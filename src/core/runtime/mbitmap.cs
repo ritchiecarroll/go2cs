@@ -409,13 +409,13 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
     if (s == nil) {
         // If dst is a global, use the data or BSS bitmaps to
         // execute write barriers.
-        foreach (var (_, datap) in activeModules()) {
+        foreach (var (_, datap) in range(activeModules())) {
             if (datap.data <= dst && dst < datap.edata) {
                 bulkBarrierBitmap(dst, src, size, dst - datap.data, datap.gcdatamask.bytedata);
                 return;
             }
         }
-        foreach (var (_, datap) in activeModules()) {
+        foreach (var (_, datap) in range(activeModules())) {
             if (datap.bss <= dst && dst < datap.ebss) {
                 bulkBarrierBitmap(dst, src, size, dst - datap.bss, datap.gcbssmask.bytedata);
                 return;
@@ -521,7 +521,7 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
 internal static void initHeapBits(this ref mspan s) {
     if (goarch.PtrSize == 8 && !s.spanclass.noscan() && s.spanclass.sizeclass() == 1) {
         var b = s.heapBits();
-        foreach (var i in range(b)) {
+        foreach (var i in range(len(b))) {
             b[i] = ~(uintptr)0;
         }
     } else if ((!s.spanclass.noscan() && heapBitsInSpan(s.elemsize)) || s.isUserArenaChunk) {

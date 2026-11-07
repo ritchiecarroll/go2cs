@@ -83,11 +83,11 @@ partial struct abiSeq {
 }
 
 internal static void dump(this ref abiSeq a) {
-    foreach (var (i, p) in a.steps) {
+    foreach (var (i, p) in range(a.steps)) {
         println((@string)"part", i, p.kind, p.offset, p.size, p.stkOff, p.ireg, p.freg);
     }
     print((@string)"values ");
-    foreach (var (_, i) in a.valueStart) {
+    foreach (var (_, i) in range(a.valueStart)) {
         print(i, (@string)" ");
     }
     println();
@@ -352,14 +352,14 @@ internal static abiDesc newAbiDesc(ж<funcType> t, ж<abi.Type> rcvr) {
             spill += goarch.PtrSize;
         }
     }
-    foreach (var (i, arg) in t.InSlice()) {
+    foreach (var (i, arg) in range(t.InSlice())) {
         var stkStep = @in.addArg(arg);
         if (stkStep != nil) {
             addTypeBits(stackPtrs, stkStep.stkOff, arg);
         } else {
             spill = align(spill, (uintptr)arg.Align());
             spill += arg.Size();
-            foreach (var (_, st) in @in.stepsForValue(i)) {
+            foreach (var (_, st) in range(@in.stepsForValue(i))) {
                 if (st.kind == abiStepPointer) {
                     inRegPtrs.Set(st.ireg);
                 }
@@ -385,12 +385,12 @@ internal static abiDesc newAbiDesc(ж<funcType> t, ж<abi.Type> rcvr) {
     // Fake it by artificially extending stackBytes by
     // the return offset.
     @out.stackBytes = retOffset;
-    foreach (var (i, res) in t.OutSlice()) {
+    foreach (var (i, res) in range(t.OutSlice())) {
         var stkStep = @out.addArg(res);
         if (stkStep != nil) {
             addTypeBits(stackPtrs, stkStep.stkOff, res);
         } else {
-            foreach (var (_, st) in @out.stepsForValue(i)) {
+            foreach (var (_, st) in range(@out.stepsForValue(i))) {
                 if (st.kind == abiStepPointer) {
                     outRegPtrs.Set(st.ireg);
                 }

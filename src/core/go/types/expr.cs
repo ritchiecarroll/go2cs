@@ -1461,14 +1461,14 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
     var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
         // multiple values
         list = new slice<ж<operand>>(t.Len());
-        foreach (var (i, v) in t.vars) {
+        foreach (var (i, v) in range(t.vars)) {
             list[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
         }
         return (list, commaOk);
     }
 
     // exactly one (possibly invalid or comma-ok) value
-    list = slice<ж<operand>>([Ꮡx]);
+    list = [Ꮡx];
     if (allowCommaOk && (x.mode == mapindex || x.mode == commaok || x.mode == commaerr)) {
         var x2 = Ꮡ(new operand(mode: value, expr: e, typ: new BasicжΔType(Typ[UntypedBool])));
         if (x.mode == commaerr) {

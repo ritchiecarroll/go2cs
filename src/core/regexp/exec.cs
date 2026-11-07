@@ -98,7 +98,7 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
 }
 
 internal static void init(this ref machine m, nint ncap) {
-    foreach (var (_, t) in m.pool) {
+    foreach (var (_, t) in range(m.pool)) {
         t.cap = t.cap.slice(0, ncap);
     }
     m.matchcap = m.matchcap.slice(0, ncap);
@@ -185,7 +185,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
         return false;
     }
     m.matched = false;
-    foreach (var iΔ1 in range(m.matchcap)) {
+    foreach (var iΔ1 in range(len(m.matchcap))) {
         m.matchcap[iΔ1] = -1;
     }
     var (runq, nextq) = (Ꮡm.Ꮡq0, Ꮡm.Ꮡq1);
@@ -254,7 +254,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
 internal static void clear(this ref machine m, ж<queue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
-    foreach (var (_, d) in q.dense) {
+    foreach (var (_, d) in range(q.dense)) {
         if (d.t != nil) {
             m.pool = append(m.pool, d.t);
         }
@@ -295,7 +295,7 @@ internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq
             }
             if (!longest) {
                 // First-match mode: cut off all lower-priority threads.
-                foreach (var (_, dΔ2) in runq.dense.slice(j + 1)) {
+                foreach (var (_, dΔ2) in range(runq.dense.slice(j + 1))) {
                     if (dΔ2.t != nil) {
                         m.pool = append(m.pool, dΔ2.t);
                     }
@@ -450,7 +450,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     }
 
     var matched = false;
-    foreach (var iΔ1 in range(m.matchcap)) {
+    foreach (var iΔ1 in range(len(m.matchcap))) {
         m.matchcap[iΔ1] = -1;
     }
 

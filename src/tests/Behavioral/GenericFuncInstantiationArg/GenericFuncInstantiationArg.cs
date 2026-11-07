@@ -27,7 +27,7 @@ internal static any returned() {
 
 internal static void Main() {
     var pf = pick<@string>;
-    fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(slice<@string>(["a", "b", "c"])));
+    fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(["a", "b", "c"]));
 
     fmt.Println(reflect.TypeOf(pick<@string>).String());
     fmt.Println(reflect.TypeOf(pair<@string, nint>).String());

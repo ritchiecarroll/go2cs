@@ -19,7 +19,7 @@ internal static nint SumArray(this filler _, /*[4]*/ array<nint> @in) {
     @in = @in.Clone();
 
     nint total = 0;
-    foreach (var (_, v) in @in.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(@in.ΔRangeSnapshot())) {
         total += v;
     }
     return total;
@@ -132,10 +132,10 @@ internal static slice<any> generateAndCall(reflectꓸValue fn) {
         arg.Index(i).SetUint((uint64)(i % 251));
     }
 
-    var @out = fn.Call(slice<reflectꓸValue>([arg]));
+    var @out = fn.Call([arg]);
     var results = new slice<any>(len(@out));
 
-    foreach (var (i, r) in @out) {
+    foreach (var (i, r) in range(@out)) {
         results[i] = r.Interface();
     }
 

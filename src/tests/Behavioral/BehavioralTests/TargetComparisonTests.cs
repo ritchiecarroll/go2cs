@@ -2422,6 +2422,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]
+    public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
@@ -2678,6 +2681,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
+
+    [TestMethod]
+    public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
 
     [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");

@@ -106,7 +106,7 @@ internal static digest update(digest d, slice<byte> p) {
             s2 += s1;
             p = p[4..];
         }
-        foreach (var (_, x) in p) {
+        foreach (var (_, x) in range(p)) {
             s1 += (uint32)x;
             s2 += s1;
         }

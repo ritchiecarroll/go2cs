@@ -11,7 +11,7 @@ partial struct holder {
 
 internal static nint sumRange(ref holder h) {
     nint s = 0;
-    foreach (var (_, x) in h.xs.ValueSlot) {
+    foreach (var (_, x) in range(h.xs.ValueSlot)) {
         s += x;
     }
     return s;

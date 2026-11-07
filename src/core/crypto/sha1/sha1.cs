@@ -256,7 +256,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
 
     array<byte> digest = new(20); /* ΔSize */
-    foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
+    foreach (var (i, s) in range(d.h.ΔRangeSnapshot())) {
         digest[i * 4] = (byte)(mask1b & (byte)(s >> 24));
         digest[i * 4 + 1] = (byte)(mask1b & (byte)(s >> 16));
         digest[i * 4 + 2] = (byte)(mask1b & (byte)(s >> 8));
@@ -276,7 +276,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     // compress, and only keep the digest if we actually needed the second block
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
 
-    foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
+    foreach (var (i, s) in range(d.h.ΔRangeSnapshot())) {
         digest[i * 4] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 24)));
         digest[i * 4 + 1] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 16)));
         digest[i * 4 + 2] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 8)));

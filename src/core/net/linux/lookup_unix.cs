@@ -38,7 +38,7 @@ internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.Onc
                 var (_, okΔ2) = protocols[f[0], ꟷ]; if (!okΔ2) {
                     protocols[f[0]] = proto;
                 }
-                foreach (var (_, alias) in f[2..]) {
+                foreach (var (_, alias) in range(f[2..])) {
                     var (_, okΔ3) = protocols[alias, ꟷ]; if (!okΔ3) {
                         protocols[alias] = proto;
                     }

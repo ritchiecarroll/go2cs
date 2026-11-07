@@ -64,7 +64,7 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
             return s;
         }
     }
-    foreach (var (i, arg) in args) {
+    foreach (var (i, arg) in range(args)) {
         args[i] = indirectToStringerOrError(arg);
     }
     return fmt.Sprint(args.ꓸꓸꓸ);
@@ -203,7 +203,7 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
     }
     c = nudge(c);
     // Check for disallowed use of predefined escapers in the pipeline.
-    foreach (var (pos, idNode) in n.Pipe.Cmds) {
+    foreach (var (pos, idNode) in range(n.Pipe.Cmds)) {
         var (node, ok) = idNode.Args[0]._<ж<parse.IdentifierNode>>(ᐧ);
         if (!ok) {
             // A predefined escaper "esc" will never be found as an identifier in a
@@ -382,7 +382,7 @@ internal static void ensurePipelineContains(ж<parse.PipeNode> Ꮡp, slice<@stri
                 // If any of the commands in s that we are about to insert is equivalent
                 // to the predefined escaper, use the predefined escaper instead.
                 var dup = false;
-                foreach (var (i, escaper) in s) {
+                foreach (var (i, escaper) in range(s)) {
                     if (escFnsEq(esc, escaper)) {
                         s[i] = idNode.Ident;
                         dup = true;
@@ -406,7 +406,7 @@ internal static void ensurePipelineContains(ж<parse.PipeNode> Ꮡp, slice<@stri
             insertedIdents[normalizeEscFn(idNode.Ident)] = true;
         }
     }
-    foreach (var (_, name) in s) {
+    foreach (var (_, name) in range(s)) {
         if (!insertedIdents[normalizeEscFn(name)]) {
             // When two templates share an underlying parse tree via the use of
             // AddParseTree and one template is executed after the other, this check
@@ -638,7 +638,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
     // Merge contexts at break and continue statements into overall body context.
     // In theory we could treat breaks differently from continues, but for now it is
     // enough to treat them both as going back to the start of the loop (which may then stop).
-    foreach (var (_, c) in rc.breaks) {
+    foreach (var (_, c) in range(rc.breaks)) {
         c0 = join(c0, c, c.n, rangeˢ);
         if (c0.state == stateError) {
             c0.err.Line = c.n._<ж<parse.BreakNode>>().Line;
@@ -646,7 +646,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
             return c0;
         }
     }
-    foreach (var (_, c) in rc.continues) {
+    foreach (var (_, c) in range(rc.continues)) {
         c0 = join(c0, c, c.n, rangeˢ);
         if (c0.state == stateError) {
             c0.err.Line = c.n._<ж<parse.ContinueNode>>().Line;
@@ -664,7 +664,7 @@ internal static context escapeList(this ref escaper e, context c, ж<parse.ListN
     if (Ꮡn == nil) {
         return c;
     }
-    foreach (var (_, m) in n.Nodes) {
+    foreach (var (_, m) in range(n.Nodes)) {
         c = e.escape(c, m);
         if (c.state == stateDead) {
             break;

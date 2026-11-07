@@ -287,6 +287,14 @@ cheaper-to-read copy. GitHub caps annotations at ten per level per step, so the 
 text into a few chunks, stays clear of the length cap, and — when a summary is longer than the
 budget — **says how much it dropped** rather than truncating silently.
 
+A `sweep-shard` summary carries, above its tail, each FAILING row's comparison record as lines: its
+status, how many verdicts matched, how many are disclosed, the undisclosed divergence count, and the
+first 40 undisclosed divergences with both verdicts, each followed by the C# side's first 8 failing lines from the
+row's `go2cs_test_results.json` (`Get-ComparisonDivergenceLines`, `src/_roster.ps1`,
+guarded by `src/tests/sweep-row-divergence-selftest.ps1`). The C# FAIL listing in the log shows one
+shape only; a Go pass / C# skip divergence, a Go skip / C# pass one or a one-sided row is readable from
+these lines alone on a host that cannot fetch the artifact.
+
 **Whoever triggers a run reports its result.** Read the summary, download the artifact if the
 detail matters, and report the finding in the terms the repository uses — a census as a census
 (assemblies produced, buckets by code), a sweep row as its arithmetic. A result that stays in a

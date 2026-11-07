@@ -137,7 +137,7 @@ internal static void probeG3() {
     var fsᴷ = new stackAppend<Func<nint>>();
 
     slice<Func<nint>> fs = default;
-    foreach (var (_, x) in slice<nint>([10, 20, 30])) {
+    foreach (var (_, x) in range(slice<nint>([10, 20, 30]))) {
         fs = append(fsᴷ, fs, () => x);
     }
     fmt.Println("G3:", fs[0](), fs[1](), fs[2]());
@@ -225,7 +225,7 @@ internal static (V, nint) probeP1<V>(slice<V> seq) {
     void set(V x) {
         (Ꮡv.ValueSlot, n) = (x, n + 1);
     }
-    foreach (var (_, x) in seq) {
+    foreach (var (_, x) in range(seq)) {
         set(x);
     }
     return (p.ValueSlot, n);

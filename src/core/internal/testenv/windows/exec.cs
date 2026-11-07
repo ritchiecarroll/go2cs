@@ -143,7 +143,7 @@ public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
     if (cmd.Env != nil) {
         throw panic("environment already set");
     }
-    foreach (var (_, env) in cmd.Environ()) {
+    foreach (var (_, env) in range(cmd.Environ())) {
         // Exclude GODEBUG from the environment to prevent its output
         // from breaking tests that are trying to parse other command output.
         if (strings.HasPrefix(env, godebugˢ)) {

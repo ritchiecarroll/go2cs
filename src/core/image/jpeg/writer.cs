@@ -103,12 +103,12 @@ partial struct huffmanSpec {
     // Luminance DC.
     new(
         new byte[]{0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}.array(),
-        slice<byte>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     ),
     // Luminance AC.
     new(
         new byte[]{0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125}.array(),
-        slice<byte>([
+        [
             0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
             0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
             0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
@@ -130,17 +130,17 @@ partial struct huffmanSpec {
             0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
             0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
             0xf9, 0xfa
-        ])
+        ]
     ),
     // Chrominance DC.
     new(
         new byte[]{0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0}.array(),
-        slice<byte>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     ),
     // Chrominance AC.
     new(
         new byte[]{0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119}.array(),
-        slice<byte>([
+        [
             0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
             0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
             0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
@@ -162,7 +162,7 @@ partial struct huffmanSpec {
             0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9,
             0xea, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
             0xf9, 0xfa
-        ])
+        ]
     )
 }.array(); }
 
@@ -176,7 +176,7 @@ internal static void init(this ref huffmanLUT h, huffmanSpec s) {
     s = s.ΔClone();
 
     nint maxValue = 0;
-    foreach (var (_, v) in s.value) {
+    foreach (var (_, v) in range(s.value)) {
         if ((nint)v > maxValue) {
             maxValue = (nint)v;
         }
@@ -200,7 +200,7 @@ internal static readonly ж<array<huffmanLUT>> ᏑtheHuffmanLUT = new StaticBox<
 internal static ref array<huffmanLUT> theHuffmanLUT => ref ((StaticBox<array<huffmanLUT>>)ᏑtheHuffmanLUT).ValueSlot;
 
 [GoInit] internal static void initΔ1() {
-    foreach (var (i, vᴛ1) in theHuffmanSpec.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(theHuffmanSpec.ΔRangeSnapshot())) {
         var s = vᴛ1.ΔClone();
 
         theHuffmanLUT[i].init(s);
@@ -306,7 +306,7 @@ internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint ma
 internal static void writeDQT(this ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
-    foreach (var i in range(e.quant)) {
+    foreach (var i in range(len(e.quant))) {
         e.writeByte((uint8)i);
         e.write(e.quant[i][..]);
     }
@@ -346,13 +346,13 @@ internal static void writeDHT(this ref encoder e, nint nComponent) {
         // Drop the Chrominance tables.
         specs = specs[..2];
     }
-    foreach (var (_, vᴛ1) in specs) {
+    foreach (var (_, vᴛ1) in range(specs)) {
         var s = vᴛ1.ΔClone();
 
         markerlen += 1 + 16 + len(s.value);
     }
     e.writeMarkerHeader(dhtMarker, markerlen);
-    foreach (var (i, vᴛ2) in specs) {
+    foreach (var (i, vᴛ2) in range(specs)) {
         var s = vᴛ2.ΔClone();
 
         e.writeByte(LiteralByteAt("\x00\x10\x01\x11"u8, i));
@@ -501,9 +501,9 @@ internal static void scale(ref block dst, ref array<block> src) {
 //   - the bytes "\x00\x3f\x00". Section B.2.3 of the spec says that for
 //     sequential DCTs, those bytes (8-bit Ss, 8-bit Se, 4-bit Ah, 4-bit Al)
 //     should be 0x00, 0x3f, 0x00<<4 | 0x00.
-internal static slice<byte> sosHeaderY = slice<byte>([
+internal static slice<byte> sosHeaderY = [
     0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00
-]);
+];
 
 // sosHeaderYCbCr is the SOS marker "\xff\xda" followed by 12 bytes:
 //   - the marker length "\x00\x0c",
@@ -514,10 +514,10 @@ internal static slice<byte> sosHeaderY = slice<byte>([
 //   - the bytes "\x00\x3f\x00". Section B.2.3 of the spec says that for
 //     sequential DCTs, those bytes (8-bit Ss, 8-bit Se, 4-bit Ah, 4-bit Al)
 //     should be 0x00, 0x3f, 0x00<<4 | 0x00.
-internal static slice<byte> sosHeaderYCbCr = slice<byte>([
+internal static slice<byte> sosHeaderYCbCr = [
     0xff, 0xda, 0x00, 0x0c, 0x03, 0x01, 0x00, 0x02,
     0x11, 0x03, 0x11, 0x00, 0x3f, 0x00
-]);
+];
 
 // writeSOS writes the StartOfScan marker.
 internal static void writeSOS(this ref encoder e, image.Image m) {
@@ -629,8 +629,8 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         scale = 200 - quality * 2;
     }
     // Initialize the quantization tables.
-    foreach (var i in range(e.quant)) {
-        foreach (var j in range(e.quant[i])) {
+    foreach (var i in range(len(e.quant))) {
+        foreach (var j in range(len(e.quant[i]))) {
             nint x = (nint)unscaledQuant[i][j];
             x = (x * scale + 50) / 100;
             if (x < 1) {

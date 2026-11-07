@@ -192,7 +192,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
         // Write each record to a buffer.
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         // Sort keys for deterministic ordering.
-        foreach (var (_, k) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(paxHdrs))) {
+        foreach (var (_, k) in range(slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(paxHdrs)))) {
             var (rec, err) = formatPAXRecord(k, paxHdrs[k]);
             if (err != nil) {
                 return err;
@@ -640,13 +640,14 @@ partial struct sparseFileWriter {
     internal int64 pos;      // Current position in sparse file
 }
 
-internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<byte> b) {
+internal static (nint n, error err) Write(this ж<sparseFileWriter> Ꮡsw, slice<byte> b) {
     nint n = default;
     error err = default;
+    ref var sw = ref Ꮡsw.DerefOrNull();
 
-    var overwrite = (int64)len(b) > sw.logicalRemaining();
+    var overwrite = (int64)len(b) > Ꮡsw.logicalRemaining();
     if (overwrite) {
-        b = b.slice(0, (nint)(sw.logicalRemaining()));
+        b = b.slice(0, (nint)(Ꮡsw.logicalRemaining()));
     }
 
     var b0 = b;
@@ -676,7 +677,7 @@ internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<by
     case {} when err != nil: {
         return (n, err);
     }
-    case {} when sw.logicalRemaining() == 0 && sw.physicalRemaining() > 0: {
+    case {} when Ꮡsw.logicalRemaining() == 0 && Ꮡsw.physicalRemaining() > 0: {
         return (n, errUnrefData); // Not possible; implies bug in validation logic
     }
     case {} when overwrite: {
@@ -727,7 +728,7 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
     // If the last fragment is a hole, then seek to 1-byte before EOF, and
     // read a single byte to ensure the file is the right size.
     if (readLastByte && err == nil) {
-        (_, err) = mustReadFull(rs, slice<byte>([0]));
+        (_, err) = mustReadFull(rs, [0]);
         sw.pos++;
     }
 
@@ -763,7 +764,7 @@ partial struct zeroWriter {
 }
 
 internal static (nint, error) Write(this zeroWriter _, slice<byte> b) {
-    foreach (var (i, c) in b) {
+    foreach (var (i, c) in range(b)) {
         if (c != 0) {
             return (i, errWriteHole);
         }
@@ -773,7 +774,7 @@ internal static (nint, error) Write(this zeroWriter _, slice<byte> b) {
 
 // ensureEOF checks whether r is at EOF, reporting ErrWriteTooLong if not so.
 internal static error ensureEOF(io.Reader r) {
-    var (n, err) = tryReadFull(r, slice<byte>([0]));
+    var (n, err) = tryReadFull(r, [0]);
     switch (ᐧ) {
     case {} when n is > 0: {
         return ErrWriteTooLong;

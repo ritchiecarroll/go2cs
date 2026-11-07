@@ -101,7 +101,7 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
     key.Precomputed.Dp = priv.Dp;
     key.Precomputed.Dq = priv.Dq;
     key.Precomputed.Qinv = priv.Qinv;
-    foreach (var (i, a) in priv.AdditionalPrimes) {
+    foreach (var (i, a) in range(priv.AdditionalPrimes)) {
         if (a.Prime.Sign() <= 0) {
             return (default, errors.New(x509PrivateKeyContainsˢ2));
         }
@@ -163,7 +163,7 @@ public static slice<byte> MarshalPKCS1PrivateKey(ж<rsa.PrivateKey> Ꮡkey) {
     );
 
     priv.AdditionalPrimes = new slice<pkcs1AdditionalRSAPrime>(builtin.len(key.Precomputed.CRTValues));
-    foreach (var (i, values) in key.Precomputed.CRTValues) {
+    foreach (var (i, values) in range(key.Precomputed.CRTValues)) {
         priv.AdditionalPrimes[i].Prime = key.Primes[2 + i];
         priv.AdditionalPrimes[i].Exp = values.Exp;
         priv.AdditionalPrimes[i].Coeff = values.Coeff;

@@ -6,7 +6,6 @@ using Δio = io_package;
 using Δnet = net_package;
 using strings = strings_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using crypto;
 
 partial class main_package {
@@ -69,15 +68,13 @@ jel6uj2FOP9g54s+GzlSVg/T
 
 """u8.Raw()));
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY"); }
 
 internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) {
     GoFrame ᒐ = default;
     try {
         var serverConf = Ꮡ(new tls.Config(
-            Certificates: slice<tls.Certificate>([cert]),
+            Certificates: [cert],
             MinVersion: tls.VersionTLS13,
             MaxVersion: tls.VersionTLS13
         ));
@@ -108,10 +105,8 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
                         return;
                     }
                     var s = tls.Server(c, serverConfʗ1);
-                    {
-                        var errΔ2 = s.Handshake(); if (errΔ2 == nil) {
-                            Δio.CopyN(Δio.Discard, new tls_ConnжReader(s), 1);
-                        }
+                    var errΔ2 = s.Handshake(); if (errΔ2 == nil) {
+                        Δio.CopyN(Δio.Discard, new tls_ConnжReader(s), 1);
                     }
                     s.Close();
                 }
@@ -129,14 +124,12 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
                 throw panic(errΔ3);
             }
             var t = tls.Client(c, clientConf);
-            {
-                var errΔ4 = t.Handshake(); if (errΔ4 != nil) {
-                    throw panic(errΔ4);
-                }
+            var errΔ4 = t.Handshake(); if (errΔ4 != nil) {
+                throw panic(errΔ4);
             }
             var st = t.ConnectionState();
             (version, suite) = (st.Version, st.CipherSuite);
-            t.Write(slice<byte>([0]));
+            t.Write([0]);
             t.Close();
             count++;
         }

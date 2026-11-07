@@ -190,7 +190,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
         slice<embeddedType> next = default; // embedded types found at current depth
 
         // look for (pkg, name) in all types at current depth
-        foreach (var (_, e) in current) {
+        foreach (var (_, e) in range(current)) {
             var typΔ1 = e.typ;
 
             // If we have a named type, we may have associated methods.
@@ -223,7 +223,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
             switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
                 // look for a matching field and collect embedded types
-                foreach (var (i, f) in t.fields) {
+                foreach (var (i, f) in range(t.fields)) {
                     if (f.of(Var.Ꮡobject).sameId(pkg, name, foldCase)) {
                         assert(f.typ != nil);
                         index = concat(e.index, i);
@@ -309,7 +309,7 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
 
     nint n = 0;                        // number of entries w/ unique type
     var prev = new map<ΔType, nint>(); // index at which type was previously seen
-    foreach (var (_, e) in list) {
+    foreach (var (_, e) in range(list)) {
         var (i, found) = lookupType(prev, e.typ); if (found) {
             list[i].multiples = true;
             // ignore this entry
@@ -347,12 +347,12 @@ partial struct instanceLookup {
 }
 
 internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) {
-    foreach (var (_, t) in l.buf.ΔRangeSnapshot()) {
+    foreach (var (_, t) in range(l.buf.ΔRangeSnapshot())) {
         if (t != nil && Identical(new NamedжΔType(inst), new NamedжΔType(t))) {
             return t;
         }
     }
-    foreach (var (_, t) in l.m[inst.Origin()]) {
+    foreach (var (_, t) in range(l.m[inst.Origin()])) {
         if (Identical(new NamedжΔType(inst), new NamedжΔType(t))) {
             return t;
         }
@@ -361,7 +361,7 @@ internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) {
 }
 
 internal static void add(this ref instanceLookup l, ж<Named> inst) {
-    foreach (var (i, t) in l.buf.ΔRangeSnapshot()) {
+    foreach (var (i, t) in range(l.buf.ΔRangeSnapshot())) {
         if (t == nil) {
             l.buf[i] = inst;
             return;
@@ -419,7 +419,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
 
     var (u, _) = V.Underlying()._<ж<Interface>>(ᐧ); if (u != nil) {
         var tset = u.typeSet();
-        foreach (var (_, vᴛ1) in methods) {
+        foreach (var (_, vᴛ1) in range(methods)) {
             m = vᴛ1;
 
             (_, f) = tset.LookupMethod(m.pkg, m.name, false);
@@ -438,7 +438,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
             }
         }
     } else {
-        foreach (var (_, vᴛ2) in methods) {
+        foreach (var (_, vᴛ2) in range(methods)) {
             m = vᴛ2;
 
             var (obj, index, indirect) = lookupFieldOrMethodImpl(V, false, m.pkg, m.name, false);
@@ -594,7 +594,7 @@ internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> se
             seen = new map<ж<Struct>, bool>();
         }
         seen[S] = true;
-        foreach (var (_, f) in S.fields) {
+        foreach (var (_, f) in range(S.fields)) {
             if (f.embedded && (!isValid(f.typ) || hasInvalidEmbeddedFields(f.typ, seen))) {
                 return true;
             }
@@ -706,7 +706,7 @@ internal static slice<nint> concat(slice<nint> list, nint i) {
 // See Object.sameId for the meaning of foldCase.
 internal static nint fieldIndex(slice<ж<Var>> fields, ж<Package> pkg, @string name, bool foldCase) {
     if (name != "_"u8) {
-        foreach (var (i, f) in fields) {
+        foreach (var (i, f) in range(fields)) {
             if (f.of(Var.Ꮡobject).sameId(pkg, name, foldCase)) {
                 return i;
             }
@@ -719,7 +719,7 @@ internal static nint fieldIndex(slice<ж<Var>> fields, ж<Package> pkg, @string 
 // See Object.sameId for the meaning of foldCase.
 internal static (nint, ж<Func>) methodIndex(slice<ж<Func>> methods, ж<Package> pkg, @string name, bool foldCase) {
     if (name != "_"u8) {
-        foreach (var (i, m) in methods) {
+        foreach (var (i, m) in range(methods)) {
             if (m.of(Func.Ꮡobject).sameId(pkg, name, foldCase)) {
                 return (i, m);
             }

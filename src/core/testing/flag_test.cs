@@ -30,7 +30,7 @@ public static void TestFlag(ж<testing.T> t) {
 
     testenv.MustHaveExec(new testing_TжTB(t));
 
-    foreach (var (_, flag) in slice<@string>(["", "-test.v", "-test.v=test2json"])) {
+    foreach (var (_, flag) in range(slice<@string>(["", "-test.v", "-test.v=test2json"]))) {
         t.Run(flag, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var cmd = exec.Command(testenv.Executable(new testing_TжTB(tΔ1)), testRunTestFlagˢ, "-test_flag_arg=" + flag);

@@ -21,7 +21,7 @@ internal static void initMimeWindows() {
     if (err != nil) {
         return;
     }
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         if (len(name) < 2 || name[0] != '.') { // looking for extensions only
             continue;
         }

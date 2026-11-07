@@ -57,7 +57,7 @@ internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr
     int64 sum = default;
     error err = default;
 
-    foreach (var (i, r) in mr.readers) {
+    foreach (var (i, r) in range(mr.readers)) {
         int64 n = default;
         var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok) { // reuse buffer with nested multiReaders
             (n, err) = subMr.writeToWithBuffer(w, buf);
@@ -97,7 +97,7 @@ internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p)
     nint n = default;
     error err = default;
 
-    foreach (var (_, w) in t.writers) {
+    foreach (var (_, w) in range(t.writers)) {
         (n, err) = w.Write(p);
         if (err != nil) {
             return (n, err);
@@ -117,7 +117,7 @@ internal static (nint n, error err) WriteString(this ref multiWriter t, @string 
     error err = default;
 
     slice<byte> p = default; // lazily initialized if/when needed
-    foreach (var (_, w) in t.writers) {
+    foreach (var (_, w) in range(t.writers)) {
         var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
             (n, err) = sw.WriteString(s);
         } else {
@@ -147,7 +147,7 @@ public static Writer MultiWriter(params ꓸꓸꓸWriter writersʗp) {
     var writers = writersʗp.sslice();
 
     var allWriters = new slice<Writer>(0, len(writers));
-    foreach (var (_, w) in writers) {
+    foreach (var (_, w) in range(writers)) {
         var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok) {
             allWriters = appendꓸꓸꓸ(allWriters, mw.writers);
         } else {

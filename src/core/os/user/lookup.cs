@@ -12,7 +12,7 @@ private static readonly @string userFileᵇ = "/etc/passwd"u8;
 internal static ref readonly @string groupFile => ref groupFileᵇ;
 private static readonly @string groupFileᵇ = "/etc/group"u8;
 
-internal static slice<byte> colon = slice<byte>([(byte)':']);
+internal static slice<byte> colon = [(byte)':'];
 
 // Current returns the current user.
 //

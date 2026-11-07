@@ -58,7 +58,7 @@ public static (slice<uint16>, error) UTF16FromString(@string s) {
 // using WTF-8 instead of UTF-8 encoding.
 public static @string UTF16ToString(slice<uint16> s) {
     nint maxLen = 0;
-    foreach (var (i, v) in s) {
+    foreach (var (i, v) in range(s)) {
         if (v == 0) {
             s = s.slice(0, i);
             break;

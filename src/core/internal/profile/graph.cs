@@ -198,7 +198,7 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
 partial struct EdgeMap /*[]ж<Edge>*/;
 
 public static ж<Edge> FindTo(this EdgeMap em, ж<Node> n) {
-    foreach (var (_, e) in em) {
+    foreach (var (_, e) in range<ж<Edge>>(em)) {
         if (e.Dest == n) {
             return e;
         }
@@ -211,7 +211,7 @@ public static void Add(this ref EdgeMap em, ж<Edge> e) {
 }
 
 public static void Delete(this ref EdgeMap em, ж<Edge> e) {
-    foreach (var (i, edge) in em) {
+    foreach (var (i, edge) in range<ж<Edge>>(em)) {
         if (edge == e) {
             (em)[i] = (em)[len(em) - 1];
             em = (em).slice(0, len(em) - 1);
@@ -249,7 +249,7 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
     var (nodes, locationMap) = CreateNodes(Ꮡprof, Ꮡo);
     var seenNode = new map<ж<Node>, bool>();
     var seenEdge = new map<nodePair, bool>();
-    foreach (var (_, sample) in prof.Sample) {
+    foreach (var (_, sample) in range(prof.Sample)) {
         int64 w = default;
         int64 dw = default;
         w = o.SampleValue((~sample).Value);
@@ -313,7 +313,7 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
 internal static ж<Graph> selectNodesForGraph(Nodes nodes, bool dropNegative) {
     // Collect nodes into a graph.
     var gNodes = new Nodes(0, len(nodes));
-    foreach (var (_, n) in nodes) {
+    foreach (var (_, n) in range<ж<Node>>(nodes)) {
         if (n == nil) {
             continue;
         }
@@ -376,13 +376,13 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
 
     var locations = new locationMap(new slice<Nodes>(len(prof.Location) + 1), new map<uint64, Nodes>());
     var nm = new NodeMap(len(prof.Location));
-    foreach (var (_, l) in prof.Location) {
+    foreach (var (_, l) in range(prof.Location)) {
         var lines = l.Line;
         if (len(lines) == 0) {
-            lines = slice<Line>([new()]); // Create empty line to include location info.
+            lines = [new()]; // Create empty line to include location info.
         }
         var nodes = new Nodes(len(lines));
-        foreach (var ln in range(lines)) {
+        foreach (var ln in range(len(lines))) {
             nodes[ln] = nm.findOrInsertLine(l, lines[ln], o);
         }
         locations.add(l.ID, nodes);
@@ -431,7 +431,7 @@ public static (int64 flat, int64 cum) Sum(this Nodes ns) {
     int64 flat = default;
     int64 cum = default;
 
-    foreach (var (_, n) in ns) {
+    foreach (var (_, n) in range<ж<Node>>(ns)) {
         flat += n.Flat;
         cum += n.Cum;
     }
@@ -457,19 +457,19 @@ public static @string String(this ref Graph g) {
 
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
 
-    foreach (var (i, n) in g.Nodes) {
+    foreach (var (i, n) in range<ж<Node>>(g.Nodes)) {
         nodeIndex[n] = i + 1;
     }
 
-    foreach (var (i, n) in g.Nodes) {
+    foreach (var (i, n) in range<ж<Node>>(g.Nodes)) {
         @string name = n.ᏑInfo.PrintableName();
         slice<nint> @in = default;
         slice<nint> @out = default;
 
-        foreach (var (_, from) in n.In) {
+        foreach (var (_, from) in range<ж<Edge>>(n.In)) {
             @in = append(@in, nodeIndex[from.Src]);
         }
-        foreach (var (_, to) in n.Out) {
+        foreach (var (_, to) in range<ж<Edge>>(n.Out)) {
             @out = append(@out, nodeIndex[to.Dest]);
         }
         s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, n.Flat, n.Cum, @in, @out));
@@ -482,7 +482,7 @@ public static @string String(this ref Graph g) {
 // (higher-to-lower) and then by the node names to avoid flakiness.
 public static slice<ж<Edge>> Sort(this EdgeMap em) {
     var el = new edgeList(0, len(em));
-    foreach (var (_, w) in em) {
+    foreach (var (_, w) in range<ж<Edge>>(em)) {
         el = append(el, w);
     }
 
@@ -493,7 +493,7 @@ public static slice<ж<Edge>> Sort(this EdgeMap em) {
 // Sum returns the total weight for a set of nodes.
 public static int64 Sum(this EdgeMap em) {
     int64 ret = default;
-    foreach (var (_, edge) in em) {
+    foreach (var (_, edge) in range<ж<Edge>>(em)) {
         ret += edge.Weight;
     }
     return ret;

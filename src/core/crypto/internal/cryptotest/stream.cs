@@ -15,7 +15,7 @@ using io = io_package;
 partial class cryptotest_package {
 
 // Each test is executed with each of the buffer lengths in bufLens.
-internal static slice<nint> bufLens = slice<nint>([0, 1, 3, 4, 8, 10, 15, 16, 20, 32, 50, 4096, 5000]);
+internal static slice<nint> bufLens = [0, 1, 3, 4, 8, 10, 15, 16, 20, 32, 50, 4096, 5000];
 internal static nint bufCap = 10000;
 
 // MakeStream returns a cipher.Stream instance.
@@ -45,7 +45,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
 
         // Test that XORKeyStream inverts itself for encryption/decryption.
         tΔ1.Run(roundtripˢ, (ж<testing.T> tΔ2) => {
-            foreach (var (_, length) in bufLens) {
+            foreach (var (_, length) in range(bufLens)) {
                 tΔ2.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ3) => {
                     var rng = newRandReader(tΔ3);
 
@@ -67,7 +67,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
         // Test that XORKeyStream behaves the same as directly XORing
         // plaintext with the stream.
         tΔ1.Run(directXORˢ, (ж<testing.T> tΔ4) => {
-            foreach (var (_, length) in bufLens) {
+            foreach (var (_, length) in range(bufLens)) {
                 tΔ4.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ5) => {
                     var rng = newRandReader(tΔ5);
 
@@ -109,7 +109,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
         var (src, dst, before) = (new slice<byte>(bufCap), new slice<byte>(bufCap), new slice<byte>(bufCap));
         rng.Read(src);
 
-        foreach (var (_, length) in bufLens) {
+        foreach (var (_, length) in range(bufLens)) {
             var beforeʗ1 = before;
             var dstʗ1 = dst;
             var srcʗ1 = src;
@@ -129,7 +129,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
 
         var (buff, expectedOutput) = (new slice<byte>(bufCap), new slice<byte>(bufCap));
 
-        foreach (var (_, length) in bufLens) {
+        foreach (var (_, length) in range(bufLens)) {
             // Record what output is when src and dst are different
             rng.Read(buff);
             ms().XORKeyStream(expectedOutput.slice(0, length), buff.slice(0, length));
@@ -150,7 +150,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
         rng.Read(plaintext);
         var ciphertext = new slice<byte>(bufCap);
 
-        foreach (var (_, length) in bufLens) {
+        foreach (var (_, length) in range(bufLens)) {
             copy(ciphertext, plaintext); // Reset ciphertext buffer
 
             var ciphertextʗ1 = ciphertext;
@@ -175,7 +175,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
         var buff = new slice<byte>(bufCap);
         rng.Read(buff);
 
-        foreach (var (_, length) in bufLens) {
+        foreach (var (_, length) in range(bufLens)) {
             if (length == 0 || length == 1) {
                 continue;
             }
@@ -216,7 +216,7 @@ public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
         // Make one long call to XORKeyStream
         ms().XORKeyStream(ciphertext, plaintext);
 
-        foreach (var (_, step) in bufLens) {
+        foreach (var (_, step) in range(bufLens)) {
             if (step == 0) {
                 continue;
             }

@@ -278,7 +278,7 @@ public static iter.Seq<StackFrame> Frames(this ΔStack s) {
             return;
         }
         var stk = sʗ1.table.Ꮡstacks.mustGet(sʗ1.id);
-        foreach (var (_, pc) in stk.pcs) {
+        foreach (var (_, pc) in range(stk.pcs)) {
             var f = sʗ1.table.pcs[pc];
             var sf = new StackFrame(
                 PC: f.pc,
@@ -818,7 +818,7 @@ internal static (ΔEvent, error) makeSyncEvent(ΔEvent e, ΔSync s) {
     }
     foreach (var (name, batches) in s.ExperimentalBatches) {
         bool found = default;
-        foreach (var (id, exp) in tracev2.Experiments()) {
+        foreach (var (id, exp) in range(tracev2.Experiments())) {
             if (exp == name) {
                 found = true;
                 e.table.expBatches[((tracev2.Experiment)(nuint)id)] = batches;
@@ -915,7 +915,7 @@ internal static stackID addStack(ж<evTable> Ꮡtable, slice<StackFrame> frames)
     ref var table = ref Ꮡtable.DerefOrNull();
 
     slice<uint64> pcs = default;
-    foreach (var (_, f) in frames) {
+    foreach (var (_, f) in range(frames)) {
         table.pcs[f.PC] = new frame(
             pc: f.PC,
             funcID: table.strings.append(f.Func),
@@ -1528,7 +1528,7 @@ public static @string String(this ΔEvent e) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Scope=%s"u8, r.Name, r.Scope);
         if (kind == EventRangeEnd) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Attributes=["u8);
-            foreach (var (i, attr) in e.RangeAttributes()) {
+            foreach (var (i, attr) in range(e.RangeAttributes())) {
                 if (i != 0) {
                     fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " "u8);
                 }
@@ -1579,7 +1579,7 @@ public static @string String(this ΔEvent e) {
     case var ᴛ when ᴛ == EventExperimental: {
         var r = e.Experimental();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s Args=["u8, r.Name);
-        foreach (var (i, arg) in r.Args) {
+        foreach (var (i, arg) in range(r.Args)) {
             if (i != 0) {
                 fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), ", "u8);
             }
@@ -1618,7 +1618,7 @@ internal static error validateTableIDs(this ΔEvent e) {
     var spec = tracev2.Specs()[e.@base.typ];
 
     // Check stacks.
-    foreach (var (_, i) in spec.StackIDs) {
+    foreach (var (_, i) in range(spec.StackIDs)) {
         var id = (stackID)e.@base.args[i - 1];
         var (_, ok) = e.table.Ꮡstacks.get(id);
         if (!ok) {
@@ -1629,7 +1629,7 @@ internal static error validateTableIDs(this ΔEvent e) {
     // early on, when reading the stacks in to begin with.
 
     // Check strings.
-    foreach (var (_, i) in spec.StringIDs) {
+    foreach (var (_, i) in range(spec.StringIDs)) {
         var id = (stringID)e.@base.args[i - 1];
         var (_, ok) = e.table.Ꮡstrings.get(id);
         if (!ok) {

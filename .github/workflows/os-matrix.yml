@@ -1460,6 +1460,47 @@ jobs:
               }
           }
 
+          # Each FAILING row's comparison record as lines: status, matched, disclosed, the undisclosed divergence count,
+          # and the first 40 undisclosed divergences with both verdicts (Get-ComparisonDivergenceLines, src/_roster.ps1;
+          # guarded by src/tests/sweep-row-divergence-selftest.ps1). The C# FAIL listing above shows one shape only; a
+          # Go pass / C# skip divergence, a Go skip / C# pass one or a one-sided row was unreadable from a lane that can
+          # read annotations but not the blob-served artifact (COORD ruling (a), 2026-11-06: the osx-arm64 runtime
+          # row's AES trio, unread in run 42214977499). The lines go to the log and into the summary's annotations.
+          . ./src/_roster.ps1
+          $divergenceLines = [System.Collections.Generic.List[string]]::new()
+
+          foreach ($name in $failedRows) {
+              $comparisonPath = Join-Path $PWD "src/core/$name/go2cs_test_comparison.json"
+              $comparison = $null
+
+              if (Test-Path -LiteralPath $comparisonPath) {
+                  try { $comparison = ConvertFrom-ComparisonRecord -Path $comparisonPath }
+                  catch {
+                      $divergenceLines.Add("${name}: comparison record unreadable: $($_.Exception.Message)")
+                      continue
+                  }
+              }
+
+              # The C# side's own failure text for each divergence, from the row's results record (its `fail` events):
+              # the first 8 lines each, under the divergence they explain. Unreadable or absent, the lines print without.
+              $failureText = @{}
+              $resultsPath = Join-Path $PWD "src/core/$name/go2cs_test_results.json"
+
+              if (Test-Path -LiteralPath $resultsPath) {
+                  try {
+                      $results = Get-Content -LiteralPath $resultsPath -Raw | ConvertFrom-Json
+                      foreach ($event in @($results.events | Where-Object { $_.action -eq 'fail' -and $_.test })) {
+                          if (-not $failureText.ContainsKey($event.test)) { $failureText[$event.test] = "$($event.output)" }
+                      }
+                  }
+                  catch { $divergenceLines.Add("${name}: results record unreadable for failure text: $($_.Exception.Message)") }
+              }
+
+              foreach ($line in (Get-ComparisonDivergenceLines -Row $name -Comparison $comparison -First 40 -FailureText $failureText -TextLines 8)) { $divergenceLines.Add($line) }
+          }
+
+          foreach ($line in $divergenceLines) { Write-Host "==> divergences: $line" }
+
           # A sweep regenerates committed test artifacts in place, so the tree is dirty afterwards
           # and it is (almost always) nothing -- CRLF phantoms and the -tests-closure class. The
           # sweep itself classifies them; this records the raw state alongside for the reader.
@@ -1485,6 +1526,14 @@ jobs:
               '**comparison-validated-at-count** and exits non-zero by design: validated, but with'
               'nothing banked for this OS to bank against. That is a reading, not a regression.'
               ''
+          ) + @(if ($divergenceLines.Count -gt 0) {
+              'Each failing row''s comparison record (undisclosed divergences with both verdicts):'
+              ''
+              '```'
+              $divergenceLines
+              '```'
+              ''
+          }) + @(
               'Tail of the run:'
               ''
               '```'

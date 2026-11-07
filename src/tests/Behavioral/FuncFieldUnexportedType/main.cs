@@ -22,21 +22,21 @@ public partial struct cfg {
     [0x0002] = () => Ꮡ(new hkdfState("sha512", 64))
 }; }
 
-[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = slice<Action<ж<cfg>>>([
+[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = [
     (ж<cfg> c) => {
         c.verbose = true;
     }
-]); }
+]; }
 
 internal static void Main() {
-    foreach (var (_, id) in slice<uint16>([0x0001, 0x0002])) {
+    foreach (var (_, id) in range(slice<uint16>([0x0001, 0x0002]))) {
         var ctor = SupportedStates[id];
         var s = ctor();
         fmt.Println(s.describe());
     }
 
     var c = Ꮡ(new cfg());
-    foreach (var (_, apply) in Appliers) {
+    foreach (var (_, apply) in range(Appliers)) {
         apply(c);
     }
     fmt.Println(c.verbose);

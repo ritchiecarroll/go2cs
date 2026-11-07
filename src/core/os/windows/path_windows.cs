@@ -165,12 +165,12 @@ internal static @string addExtendedPrefix(@string path) {
     slice<uint16> prefix = default;
     if (isUNC) {
         // UNC path, prepend the \\?\UNC\ prefix.
-        prefix = slice<uint16>(['\\', '\\', '?', '\\', 'U', 'N', 'C', '\\']);
+        prefix = ['\\', '\\', '?', '\\', 'U', 'N', 'C', '\\'];
     } else if (isDevice) {
         // Don't add the extended prefix to device paths, as it would
         // change its meaning.
     } else {
-        prefix = slice<uint16>(['\\', '\\', '?', '\\']);
+        prefix = ['\\', '\\', '?', '\\'];
     }
 
     var (p, err) = syscall.UTF16FromString(path);

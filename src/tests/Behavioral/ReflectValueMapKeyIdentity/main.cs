@@ -18,14 +18,14 @@ internal static void Main() {
     var m = new map<@string, any>{["vstring"] = fooˢ, ["Vint"] = (nint)42, ["vbool"] = true};
     var dataVal = reflect.ValueOf(m);
     var keys = new map<reflectꓸValue, EmptyStruct>();
-    foreach (var (_, k) in dataVal.MapKeys()) {
+    foreach (var (_, k) in range(dataVal.MapKeys())) {
         keys[k] = new EmptyStruct();
     }
     fmt.Println("distinct keys:", len(keys));
 
     nint matched = 0;
     foreach (var (k, _) in keys) {
-        foreach (var (_, field) in slice<@string>(["Vstring", "Vint", "Vbool"])) {
+        foreach (var (_, field) in range(slice<@string>(["Vstring", "Vint", "Vbool"]))) {
             if (strings.EqualFold(k.Interface()._<@string>(), field)) {
                 matched++;
             }

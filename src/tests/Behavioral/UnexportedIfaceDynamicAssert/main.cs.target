@@ -18,7 +18,7 @@ public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
         return wv.writeBuffers(Ꮡv);
     }
     int64 n = default;
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range<slice<byte>>(v)) {
         var (nb, err) = w.Write(b);
         n += (int64)nb;
         if (err != nil) {
@@ -62,7 +62,7 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
         return (0, fmt.Errorf("invalid conn"u8));
     }
     int64 n = default;
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range<slice<byte>>(v)) {
         c.fd.bytes = appendꓸꓸꓸ(c.fd.bytes, b);
         n += (int64)len(b);
     }
@@ -113,7 +113,7 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
     ref var v = ref Ꮡv.DerefOrNull();
 
     int64 n = default;
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range<slice<byte>>(v)) {
         s.fd.bytes = appendꓸꓸꓸ(s.fd.bytes, b);
         n += (int64)len(b);
     }

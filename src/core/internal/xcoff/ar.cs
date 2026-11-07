@@ -220,7 +220,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
 // FIXME: This doesn't work if an archive has two members with the same
 // name which can occur if an archive has both 32-bits and 64-bits files.
 public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
-    foreach (var (_, mem) in arch.Members) {
+    foreach (var (_, mem) in range(arch.Members)) {
         if (mem.Name == name) {
             return NewFile(new io.SectionReaderжReaderAt(mem.sr));
         }

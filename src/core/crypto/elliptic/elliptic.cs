@@ -61,7 +61,7 @@ partial interface Curve {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) ScalarBaseMult(slice<byte> k);
 }
 
-internal static slice<byte> mask = slice<byte>([0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f]);
+internal static slice<byte> mask = [0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f];
 
 // GenerateKey returns a public/private key pair. The private key is
 // generated using the given reader, which must return random data.

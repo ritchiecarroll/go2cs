@@ -16,7 +16,7 @@ internal static @string gogetenv(@string key) {
     if (env == nil) {
         @throw(getenvBeforeEnvInitˢ);
     }
-    foreach (var (_, s) in env) {
+    foreach (var (_, s) in range(env)) {
         if (len(s) > len(key) && s[len(key)] == '=' && envKeyEqual(s.slice(0, len(key)), key)) {
             return s.slice(len(key) + 1);
         }

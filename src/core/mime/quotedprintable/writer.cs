@@ -31,7 +31,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
     nint n = default;
 
-    foreach (var (i, b) in p) {
+    foreach (var (i, b) in range(p)) {
         switch (ᐧ) {
         // Simple writes are done in batch.
         case {} when b >= (byte)'!' && b <= (byte)'~' && b != (byte)'=': {
@@ -79,7 +79,7 @@ public static error Close(this ref Writer w) {
 
 // write limits text encoded in quoted-printable to 76 characters per line.
 internal static error write(this ref Writer w, slice<byte> p) {
-    foreach (var (_, b) in p) {
+    foreach (var (_, b) in range(p)) {
         if (b == '\n' || b == '\r') {
             // If the previous byte was \r, the CRLF has already been inserted.
             if (w.cr && b == '\n') {

@@ -10,7 +10,7 @@ public static void Transpose(this ref Graph g) {
     var old = g.edges;
 
     g.edges = new map<@string, map<@string, bool>>();
-    foreach (var (_, n) in g.Nodes) {
+    foreach (var (_, n) in range(g.Nodes)) {
         g.edges[n] = new map<@string, bool>();
     }
 
@@ -34,13 +34,13 @@ public static slice<@string> Topo(this ж<Graph> Ꮡg) {
         if (marksʗ1[n]) {
             return;
         }
-        foreach (var (_, to) in Ꮡg.Edges(n)) {
+        foreach (var (_, to) in range(Ꮡg.Edges(n))) {
             Ꮡvisit.ValueSlot(to);
         }
         marksʗ1[n] = true;
         Ꮡtopo.ValueSlot = append(Ꮡtopo.ValueSlot, n);
     };
-    foreach (var (_, root) in g.Nodes) {
+    foreach (var (_, root) in range(g.Nodes)) {
         visit(root);
     }
     for ((nint i, nint j) = (0, len(topo) - 1); i < j; (i, j) = (i + 1, j - 1)) {
@@ -53,10 +53,10 @@ public static slice<@string> Topo(this ж<Graph> Ꮡg) {
 // reachable. g must be transitively closed.
 public static void TransitiveReduction(this ref Graph g) {
     // For i -> j -> k, if i -> k exists, delete it.
-    foreach (var (_, i) in g.Nodes) {
-        foreach (var (_, j) in g.Nodes) {
+    foreach (var (_, i) in range(g.Nodes)) {
+        foreach (var (_, j) in range(g.Nodes)) {
             if (g.HasEdge(i, j)) {
-                foreach (var (_, k) in g.Nodes) {
+                foreach (var (_, k) in range(g.Nodes)) {
                     if (g.HasEdge(j, k)) {
                         g.DelEdge(i, k);
                     }

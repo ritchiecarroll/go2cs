@@ -104,7 +104,7 @@ func main() {
 
 	body := funcBody(t, cs, "controls(")
 
-	for _, kept := range []string{"in range(lp, 7))", "in q.Value)", "in range(s))"} {
+	for _, kept := range []string{"in range(lp, 7))", "in range(q.Value))", "in range(len(s)))"} {
 		if !strings.Contains(body, kept) {
 			t.Errorf("a control left its emission (want %q):\n%s", kept, body)
 		}

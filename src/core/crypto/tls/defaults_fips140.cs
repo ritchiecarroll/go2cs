@@ -24,19 +24,19 @@ partial class tls_package {
 // configured lists. Missing items are treated as if they were not implemented.
 //
 // They are applied when the fips140 GODEBUG is "on" or "only".
-internal static slice<uint16> allowedSupportedVersionsFIPS = slice<uint16>([
+internal static slice<uint16> allowedSupportedVersionsFIPS = [
     VersionTLS12,
     VersionTLS13
-]);
-internal static slice<CurveID> allowedCurvePreferencesFIPS = slice<CurveID>([
+];
+internal static slice<CurveID> allowedCurvePreferencesFIPS = [
     X25519MLKEM768,
     SecP256r1MLKEM768,
     SecP384r1MLKEM1024,
     CurveP256,
     CurveP384,
     CurveP521
-]);
-internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = slice<SignatureScheme>([
+];
+internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = [
     PSSWithSHA256,
     ECDSAWithP256AndSHA256,
     Ed25519,
@@ -47,19 +47,19 @@ internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = slice<Si
     PKCS1WithSHA512,
     ECDSAWithP384AndSHA384,
     ECDSAWithP521AndSHA512
-]);
-internal static slice<uint16> allowedCipherSuitesFIPS = slice<uint16>([
+];
+internal static slice<uint16> allowedCipherSuitesFIPS = [
     TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
     TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
     TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-]);
-internal static slice<uint16> allowedCipherSuitesTLS13FIPS = slice<uint16>([
+];
+internal static slice<uint16> allowedCipherSuitesTLS13FIPS = [
     TLS_AES_128_GCM_SHA256,
     TLS_AES_256_GCM_SHA384
-]);
+];
 
 internal static bool isCertificateAllowedFIPS(ref Δx509.Certificate c) {
     switch (c.PublicKey.type()) {

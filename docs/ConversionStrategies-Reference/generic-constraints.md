@@ -341,7 +341,7 @@ below) projects the slice element-wise through the adapter, instantiating `N` as
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
 {
-    foreach (var (_, node) in list) {
+    foreach (var (_, node) in range(list)) {
         Walk(v, node);
     }
 }

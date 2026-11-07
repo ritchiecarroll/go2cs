@@ -59,7 +59,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         // expect to see a single pod here, but allow for multiple pods in
         // case the test harness is doing extra work to collect data files
         // from builds that it kicks off as part of the testing.
-        var (podlist, err) = pods.CollectPods(slice<@string>([dir]), false);
+        var (podlist, err) = pods.CollectPods([dir], false);
         if (err != nil) {
             return fmt.Errorf("reading from %s: %v"u8, dir, err);
         }
@@ -94,7 +94,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         // in play). See issue #57924 for more on this.
         @string hashstring = fmt.Sprintf("%x"u8, finalHash);
         var importpaths = new map<@string, EmptyStruct>();
-        foreach (var (_, p) in podlist) {
+        foreach (var (_, p) in range(podlist)) {
             if (!strings.Contains(p.MetaFile, hashstring)) {
                 continue;
             }
@@ -216,7 +216,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
         }
 
         // Read counter data files.
-        foreach (var (_, cdf) in p.CounterDataFiles) {
+        foreach (var (_, cdf) in range(p.CounterDataFiles)) {
             var errΔ5 = readcdf(cdf); if (errΔ5 != nil) {
                 return errΔ5;
             }
@@ -284,7 +284,7 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     // "regular" meta-data file, then we can skip the package,
     // otherwise construct a dummy pod with the single meta-data file
     // (no counters) and invoke processPod on it.
-    foreach (var i in range(mfc.ImportPaths)) {
+    foreach (var i in range(len(mfc.ImportPaths))) {
         @string p = mfc.ImportPaths[i];
         var (_, ok) = importpaths[p, ꟷ]; if (ok) {
             continue;
@@ -313,7 +313,7 @@ public static float64 Snapshot() {
 
     var tot = (uint64)0;
     var totExec = (uint64)0;
-    foreach (var (_, c) in cl) {
+    foreach (var (_, c) in range(cl)) {
         var sd = @unsafe.Slice(c.Counters.Reinterpret<uint32, atomic.Uint32>(), c.Len);
         tot += (uint64)len(sd);
         for (nint i = 0; i < len(sd); i++) {
@@ -329,7 +329,7 @@ public static float64 Snapshot() {
                 break;
             }
             var counters = sd.slice(cst, cst + (nint)nCtrs);
-            foreach (var iΔ1 in range(counters)) {
+            foreach (var iΔ1 in range(len(counters))) {
                 if (Ꮡ(counters, iΔ1).Load() != 0) {
                     totExec++;
                 }

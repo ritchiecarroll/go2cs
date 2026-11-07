@@ -143,7 +143,7 @@ internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) 
     // separately as underflow, so fill that in manually and then iterate
     // over the rest.
     hist.counts[0] = Ꮡh.Ꮡunderflow.Load();
-    foreach (var i in range(h.counts)) {
+    foreach (var i in range(len(h.counts))) {
         hist.counts[i + 1] = Ꮡ(h.counts, i).Load();
     }
     hist.counts[len(hist.counts) - 1] = Ꮡh.Ꮡoverflow.Load();

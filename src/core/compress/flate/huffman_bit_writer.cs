@@ -32,7 +32,7 @@ internal static UntypedInt bufferFlushSize => 240;
 internal static UntypedInt bufferSize => /* bufferFlushSize + 8 */ 248;
 
 // The number of extra bits needed by length code X - LENGTH_CODES_START.
-[GoLazy] partial class lazyᴛlengthExtraBits { internal static slice<int8> lengthExtraBits = slice<int8>([
+[GoLazy] partial class lazyᴛlengthExtraBits { internal static slice<int8> lengthExtraBits = [
     /* 257 */
     0, 0, 0,
     /* 260 */
@@ -41,33 +41,33 @@ internal static UntypedInt bufferSize => /* bufferFlushSize + 8 */ 248;
     2, 2, 2, 3, 3, 3, 3, 4, 4, 4,
     /* 280 */
     4, 5, 5, 5, 5, 0
-]); }
+]; }
 
 // The length indicated by length code X - LENGTH_CODES_START.
-[GoLazy] partial class lazyᴛlengthBase { internal static slice<uint32> lengthBase = slice<uint32>([
+[GoLazy] partial class lazyᴛlengthBase { internal static slice<uint32> lengthBase = [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
     12, 14, 16, 20, 24, 28, 32, 40, 48, 56,
     64, 80, 96, 112, 128, 160, 192, 224, 255
-]); }
+]; }
 
 // offset code word extra bits.
-[GoLazy] partial class lazyᴛoffsetExtraBits { internal static slice<int8> offsetExtraBits = slice<int8>([
+[GoLazy] partial class lazyᴛoffsetExtraBits { internal static slice<int8> offsetExtraBits = [
     0, 0, 0, 0, 1, 1, 2, 2, 3, 3,
     4, 4, 5, 5, 6, 6, 7, 7, 8, 8,
     9, 9, 10, 10, 11, 11, 12, 12, 13, 13
-]); }
+]; }
 
-[GoLazy] partial class lazyᴛoffsetBase { internal static slice<uint32> offsetBase = slice<uint32>([
+[GoLazy] partial class lazyᴛoffsetBase { internal static slice<uint32> offsetBase = [
     0x000000, 0x000001, 0x000002, 0x000003, 0x000004,
     0x000006, 0x000008, 0x00000c, 0x000010, 0x000018,
     0x000020, 0x000030, 0x000040, 0x000060, 0x000080,
     0x0000c0, 0x000100, 0x000180, 0x000200, 0x000300,
     0x000400, 0x000600, 0x000800, 0x000c00, 0x001000,
     0x001800, 0x002000, 0x003000, 0x004000, 0x006000
-]); }
+]; }
 
 // The odd order in which the codegen code sizes are written.
-[GoLazy] partial class lazyᴛcodegenOrder { internal static slice<uint32> codegenOrder = slice<uint32>([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]); }
+[GoLazy] partial class lazyᴛcodegenOrder { internal static slice<uint32> codegenOrder = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]; }
 
 partial struct huffmanBitWriter {
     // writer is the underlying writer.
@@ -213,12 +213,12 @@ internal static void generateCodegen(this ref huffmanBitWriter w, nint numLitera
     var codegen = w.codegen; // cache
     // Copy the concatenated code sizes to codegen. Put a marker at the end.
     var cgnl = codegen.slice(0, numLiterals);
-    foreach (var i in range(cgnl)) {
+    foreach (var i in range(len(cgnl))) {
         cgnl[i] = (uint8)litEnc.codes[i].len;
     }
 
     cgnl = codegen.slice(numLiterals, numLiterals + numOffsets);
-    foreach (var i in range(cgnl)) {
+    foreach (var i in range(len(cgnl))) {
         cgnl[i] = (uint8)offEnc.codes[i].len;
     }
     codegen[numLiterals + numOffsets] = badCode;
@@ -545,7 +545,7 @@ internal static (nint numLiterals, nint numOffsets) indexTokens(this ref huffman
     clear(w.literalFreq);
     clear(w.offsetFreq);
 
-    foreach (var (_, t) in tokens) {
+    foreach (var (_, t) in range(tokens)) {
         if (t < matchType) {
             w.literalFreq[t.literal()]++;
             continue;
@@ -583,7 +583,7 @@ internal static void writeTokens(this ref huffmanBitWriter w, slice<token> token
     if (w.err != nil) {
         return;
     }
-    foreach (var (_, t) in tokens) {
+    foreach (var (_, t) in range(tokens)) {
         if (t < matchType) {
             w.writeCode(leCodes[t.literal()]);
             continue;
@@ -663,7 +663,7 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
     w.writeDynamicHeader(numLiterals, numOffsets, numCodegens, eof);
     var encoding = w.literalEncoding.codes[..257];
     nint n = w.nbytes;
-    foreach (var (_, t) in input) {
+    foreach (var (_, t) in range(input)) {
         // Bitwriting inlined, ~30% speedup
         var c = encoding[t];
         w.bits |= (uint64)(((uint64)c.code).Lsh(w.nbits));
@@ -701,7 +701,7 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
 // len(h) must be >= 256, and h's elements must be all zeroes.
 internal static void histogram(slice<byte> b, slice<int32> h) {
     h = h[..256];
-    foreach (var (_, t) in b) {
+    foreach (var (_, t) in range(b)) {
         h[t]++;
     }
 }

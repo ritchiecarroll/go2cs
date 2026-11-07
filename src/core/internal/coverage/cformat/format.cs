@@ -200,7 +200,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         }
     }
     sort.Strings(pkgs);
-    foreach (var (_, importpath) in pkgs) {
+    foreach (var (_, importpath) in range(pkgs)) {
         var p = fm.pm[importpath];
         if (p == nil) {
             continue;
@@ -210,7 +210,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
             units = append(unitsᴷ, units, u);
         }
         p.sortUnits(units);
-        foreach (var (_, u) in units) {
+        foreach (var (_, u) in range(units)) {
             var count = p.unitTable[u];
             @string @file = p.funcs[u.fnfid].@file;
             var (_, err) = fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n"u8,
@@ -253,7 +253,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
     slices.Sort<slice<@string>, @string>(pkgs);
     uint64 totalStmts = default;
     uint64 coveredStmts = default;
-    foreach (var (_, importpath) in pkgs) {
+    foreach (var (_, importpath) in range(pkgs)) {
         var p = fm.pm[importpath];
         if (p == nil) {
             continue;
@@ -323,7 +323,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
         var covStmts = (uint64)0;
 
         // Emit functions for each package, sorted by import path.
-        foreach (var (_, importpath) in slices.Sorted(maps.Keys<map<@string, ж<pstate>>, @string, ж<pstate>>(fm.pm))) {
+        foreach (var (_, importpath) in range(slices.Sorted(maps.Keys<map<@string, ж<pstate>>, @string, ж<pstate>>(fm.pm)))) {
             var p = fm.pm[importpath];
             if (len(p.unitTable) == 0) {
                 continue;
@@ -370,7 +370,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
                 cstmts = 0;
                 return default;
             }
-            foreach (var (k, u) in units) {
+            foreach (var (k, u) in range(units)) {
                 if (k == 0) {
                     captureFuncStart(u);
                 } else {

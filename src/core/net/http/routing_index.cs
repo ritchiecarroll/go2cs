@@ -38,7 +38,7 @@ internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
         if (idx.segments == nil) {
             idx.segments = new map<routingIndexKey, slice<ж<pattern>>>{};
         }
-        foreach (var (pos, seg) in pat.segments) {
+        foreach (var (pos, seg) in range(pat.segments)) {
             var key = new routingIndexKey(pos: pos, s: "");
             if (!seg.wild) {
                 key.s = seg.s;
@@ -71,7 +71,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         if (err != nil) {
             return err;
         }
-        foreach (var (_, p) in pats) {
+        foreach (var (_, p) in range(pats)) {
             err = f(p);
             if (err != nil) {
                 return err;
@@ -101,7 +101,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
     slice<ж<pattern>> wmin = default;
     nint min = math.MaxInt;
     var hasLit = false;
-    foreach (var (i, seg) in pat.segments) {
+    foreach (var (i, seg) in range(pat.segments)) {
         if (seg.multi) {
             break;
         }

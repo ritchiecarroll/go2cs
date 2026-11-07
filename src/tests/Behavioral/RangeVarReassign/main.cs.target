@@ -20,7 +20,7 @@ internal static void Main() {
             @out = append(@out, (uint16)(0xDC00 + (r & 0x3FF)));
         }
     }
-    foreach (var (_, u) in @out) {
+    foreach (var (_, u) in range(@out)) {
         fmt.Printf("%d "u8, u);
     }
     fmt.Println();
@@ -28,7 +28,7 @@ internal static void Main() {
 
     var pts = slice<point>([new(1, 2), new(3, 4)]);
     nint total = 0;
-    foreach (var (_, vᴛ1) in pts) {
+    foreach (var (_, vᴛ1) in range(pts)) {
         var p = vᴛ1;
 
         total += p.bump();
@@ -38,7 +38,7 @@ internal static void Main() {
 
     var tags = slice<point>([new(10, 1), new(20, 2)]);
     nint sum = 0;
-    foreach (var (_, vᴛ2) in tags) {
+    foreach (var (_, vᴛ2) in range(tags)) {
         var t = vᴛ2;
 
         (t.x, t.y) = (t.x + 1, t.y + 1);
@@ -47,21 +47,21 @@ internal static void Main() {
     fmt.Println("fieldwrite", sum, tags[0].x, tags[1].y);
 
     var rows = slice<row>([new(new point(1, 2), Ꮡ(new point(10, 0))), new(new point(3, 4), Ꮡ(new point(20, 0)))]);
-    foreach (var (_, vᴛ3) in rows) {
+    foreach (var (_, vᴛ3) in range(rows)) {
         var r = vᴛ3;
 
         fmt.Println("field method", r.v.bump());
     }
     fmt.Println("field method orig", rows[0].v.x, rows[1].v.x);
 
-    foreach (var (_, vᴛ4) in rows) {
+    foreach (var (_, vᴛ4) in range(rows)) {
         var r = vᴛ4;
 
         r.v.x = 99;
     }
     fmt.Println("nested write orig", rows[0].v.x, rows[1].v.x);
 
-    foreach (var (_, vᴛ5) in rows) {
+    foreach (var (_, vᴛ5) in range(rows)) {
         ref var r = ref heap(new row(), out var Ꮡr);
         r = vᴛ5;
 
@@ -70,7 +70,7 @@ internal static void Main() {
         fmt.Println("addr", p.x);
     }
 
-    foreach (var (_, r) in rows) {
+    foreach (var (_, r) in range(rows)) {
         r.ptr.bump();
     }
     fmt.Println("through pointer", rows[0].ptr.x, rows[1].ptr.x);

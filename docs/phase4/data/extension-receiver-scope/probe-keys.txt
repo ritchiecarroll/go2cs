@@ -1,0 +1,6 @@
+mset	go.crypto.tls_internal_test_package+intSlice	crypto.tls.tests	val
+mset	go.flag_package+boolValue	flag	ptr
+mset	go.testing_runtime.TestFlagBridge+ChattyFlag	testing_package	ptr
+scan-present	exit
+scan-present	load
+loads	237

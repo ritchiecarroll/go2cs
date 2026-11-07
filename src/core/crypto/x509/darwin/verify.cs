@@ -157,7 +157,7 @@ public static @string Error(this HostnameError h) {
         if (builtin.len(c.IPAddresses) >= maxNamesIncluded) {
             return fmt.Sprintf("x509: certificate is valid for %d IP SANs, but none matched %s"u8, builtin.len(c.IPAddresses), h.Host);
         }
-        foreach (var (_, san) in c.IPAddresses) {
+        foreach (var (_, san) in range(c.IPAddresses)) {
             if (valid.Len() > 0) {
                 Ꮡvalid.WriteString(", ");
             }
@@ -446,7 +446,7 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
         return (default, false);
     }
 
-    foreach (var (_, label) in reverseLabels) {
+    foreach (var (_, label) in range(reverseLabels)) {
         if (builtin.len(label) == 0) {
             // Empty labels are otherwise invalid.
             return (default, false);
@@ -631,16 +631,16 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
 
     slice<slice<ж<Certificate>>> candidateChains = default;
     if (opts.Roots.contains(Ꮡc)) {
-        candidateChains = slice<slice<ж<Certificate>>>([slice<ж<Certificate>>([Ꮡc])]);
+        candidateChains = [[Ꮡc]];
     } else {
-        (candidateChains, err) = Ꮡc.buildChains(slice<ж<Certificate>>([Ꮡc]), nil, Ꮡopts);
+        (candidateChains, err) = Ꮡc.buildChains([Ꮡc], nil, Ꮡopts);
         if (err != nil) {
             return (default, err);
         }
     }
 
     var anyKeyUsage = false;
-    foreach (var (_, eku) in opts.KeyUsages) {
+    foreach (var (_, eku) in range(opts.KeyUsages)) {
         if (eku == ExtKeyUsageAny) {
             // The presence of anyExtendedKeyUsage overrides any other key usage.
             anyKeyUsage = true;
@@ -649,7 +649,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
     }
 
     if (builtin.len(opts.KeyUsages) == 0) {
-        opts.KeyUsages = slice<ExtKeyUsage>([ExtKeyUsageServerAuth]);
+        opts.KeyUsages = [ExtKeyUsageServerAuth];
     }
 
     nint invalidPoliciesChains = default;
@@ -717,7 +717,7 @@ internal partial interface alreadyInChain_pubKeyEqual /*dyn*/ {
 // oddities.
 internal static bool alreadyInChain(ref Certificate candidate, slice<ж<Certificate>> chain) {
     ж<pkix.Extension> candidateSAN = default;
-    foreach (var (_, vᴛ1) in candidate.Extensions) {
+    foreach (var (_, vᴛ1) in range(candidate.Extensions)) {
         ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
         ext = vᴛ1;
 
@@ -727,7 +727,7 @@ internal static bool alreadyInChain(ref Certificate candidate, slice<ж<Certific
         }
     }
 
-    foreach (var (_, cert) in chain) {
+    foreach (var (_, cert) in range(chain)) {
         if (!bytes.Equal(candidate.RawSubject, cert.RawSubject)) {
             continue;
         }
@@ -738,7 +738,7 @@ internal static bool alreadyInChain(ref Certificate candidate, slice<ж<Certific
             continue;
         }
         ж<pkix.Extension> certSAN = default;
-        foreach (var (_, vᴛ2) in cert.Extensions) {
+        foreach (var (_, vᴛ2) in range(cert.Extensions)) {
             ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
             ext = vᴛ2;
 
@@ -836,11 +836,11 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(th
     }
 
 candidateLoop:
-    foreach (var (_, parents) in slice<buildChains_type>([
+    foreach (var (_, parents) in range(slice<buildChains_type>([
         new(rootCertificate, opts.Roots.findPotentialParents(Ꮡc)),
         new(intermediateCertificate, opts.Intermediates.findPotentialParents(Ꮡc))
-    ])) {
-        foreach (var (_, parent) in parents.potentials) {
+    ]))) {
+        foreach (var (_, parent) in range(parents.potentials)) {
             considerCandidate(parents.certType, parent);
             if (AreEqual(err, errSignatureLimit)) {
                 goto break_candidateLoop;
@@ -879,7 +879,7 @@ internal static bool validHostname(@string host, bool isPattern) {
         return false;
     }
 
-    foreach (var (i, part) in strings.Split(host, ".")) {
+    foreach (var (i, part) in range(strings.Split(host, "."))) {
         if (part == ""u8) {
             // Empty label.
             return false;
@@ -935,7 +935,7 @@ internal static bool matchHostnames(@string pattern, slice<@string> hostParts) {
         return false;
     }
 
-    foreach (var (i, patternPart) in patternParts) {
+    foreach (var (i, patternPart) in range(patternParts)) {
         if (i == 0 && patternPart == "*"u8) {
             continue;
         }
@@ -971,7 +971,7 @@ internal static @string toLowerCaseASCII(@string @in) {
     }
 
     var @out = slice<byte>(@in);
-    foreach (var (i, c) in @out) {
+    foreach (var (i, c) in range(@out)) {
         if ('A' <= c && c <= 'Z') {
             @out[i] += (byte)((rune)'a' - (rune)'A');
         }
@@ -999,7 +999,7 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
     var ip = net.ParseIP(candidateIP); if (ip != nil) {
         // We only match IP addresses against IP SANs.
         // See RFC 6125, Appendix B.2.
-        foreach (var (_, candidate) in c.IPAddresses) {
+        foreach (var (_, candidate) in range(c.IPAddresses)) {
             if (ip.Equal(candidate)) {
                 return default;
             }
@@ -1011,7 +1011,7 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
     var validCandidateName = validHostnameInput(candidateName);
     var hostParts = splitHostname(candidateName);
 
-    foreach (var (_, match) in c.DNSNames) {
+    foreach (var (_, match) in range(c.DNSNames)) {
         // Ideally, we'd only match valid hostnames according to RFC 6125 like
         // browsers (more or less) do, but in practice Go is used in a wider
         // array of contexts and can't even assume DNS resolution. Instead,
@@ -1057,7 +1057,7 @@ NextCert:
             continue;
         }
 
-        foreach (var (_, usage) in cert.ExtKeyUsage) {
+        foreach (var (_, usage) in range(cert.ExtKeyUsage)) {
             if (usage == ExtKeyUsageAny) {
                 // The certificate is explicitly good for any usage.
                 goto continue_NextCert;
@@ -1067,12 +1067,12 @@ NextCert:
         UntypedInt invalidUsage = -1;
 
 NextRequestedUsage:
-        foreach (var (iΔ1, requestedUsage) in usages) {
+        foreach (var (iΔ1, requestedUsage) in range(usages)) {
             if (requestedUsage == invalidUsage) {
                 continue;
             }
 
-            foreach (var (_, usage) in cert.ExtKeyUsage) {
+            foreach (var (_, usage) in range(cert.ExtKeyUsage)) {
                 if (requestedUsage == usage) {
                     goto continue_NextRequestedUsage;
                 }
@@ -1112,11 +1112,11 @@ partial struct policyGraphNode {
 internal static ж<policyGraphNode> newPolicyGraphNode(ΔOID valid, slice<ж<policyGraphNode>> parents) {
     var n = Ꮡ(new policyGraphNode(
         validPolicy: valid,
-        expectedPolicySet: slice<ΔOID>([valid]),
+        expectedPolicySet: [valid],
         children: new map<ж<policyGraphNode>, bool>{},
         parents: new map<ж<policyGraphNode>, bool>{}
     ));
-    foreach (var (_, p) in parents) {
+    foreach (var (_, p) in range(parents)) {
         p.children[n] = true;
         n.parents[p] = true;
     }
@@ -1131,18 +1131,18 @@ partial struct policyGraph {
 }
 
 internal static ΔOID anyPolicyOID;
-internal static void initᴛanyPolicyOID() { anyPolicyOID = mustNewOIDFromInts(slice<uint64>([2, 5, 29, 32, 0])); }
+internal static void initᴛanyPolicyOID() { anyPolicyOID = mustNewOIDFromInts([2, 5, 29, 32, 0]); }
 
 internal static ж<policyGraph> newPolicyGraph() {
     ref var root = ref heap<policyGraphNode>(new policyGraphNode(
         validPolicy: anyPolicyOID,
-        expectedPolicySet: slice<ΔOID>([anyPolicyOID]),
+        expectedPolicySet: [anyPolicyOID],
         children: new map<ж<policyGraphNode>, bool>{},
         parents: new map<ж<policyGraphNode>, bool>{}
     ), out var Ꮡroot);
     return Ꮡ(new policyGraph(
         depth: 0,
-        strata: slice<map<@string, ж<policyGraphNode>>>([new map<@string, ж<policyGraphNode>>{[((@string)anyPolicyOID.der)] = Ꮡroot}])
+        strata: [new map<@string, ж<policyGraphNode>>{[((@string)anyPolicyOID.der)] = Ꮡroot}]
     ));
 }
 
@@ -1234,7 +1234,7 @@ internal static void prune(this ref policyGraph pg) {
 internal static void incrDepth(this ref policyGraph pg) {
     pg.parentIndex = new map<@string, slice<ж<policyGraphNode>>>{};
     foreach (var (_, n) in pg.strata[pg.depth]) {
-        foreach (var (_, e) in n.expectedPolicySet) {
+        foreach (var (_, e) in range(n.expectedPolicySet)) {
             pg.parentIndex[((@string)e.der)] = append(pg.parentIndex[tmpstring(e.der)], n);
         }
     }
@@ -1278,7 +1278,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     }
 
     var initialUserPolicySet = new map<@string, bool>{};
-    foreach (var (_, p) in opts.CertificatePolicies) {
+    foreach (var (_, p) in range(opts.CertificatePolicies)) {
         initialUserPolicySet[((@string)p.der)] = true;
     }
     // If the user does not pass any policies, we consider
@@ -1308,7 +1308,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
             var policies = new map<@string, bool>{};
 
             // 6.1.3 (d) (1) -- as updated by RFC 9618
-            foreach (var (_, policy) in cert.Policies) {
+            foreach (var (_, policy) in range(cert.Policies)) {
                 policies[((@string)policy.der)] = true;
 
                 if (policy.Equal(anyPolicyOID)) {
@@ -1320,7 +1320,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                 if (builtin.len(parents) == 0) {
                     // 6.1.3 (d) (1) (ii) -- as updated by RFC 9618
                     var anyParent = pg.parentWithAnyPolicy(); if (anyParent != nil) {
-                        parents = slice<ж<policyGraphNode>>([anyParent]);
+                        parents = [anyParent];
                     }
                 }
                 if (builtin.len(parents) > 0) {
@@ -1337,7 +1337,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                 var missing = new map<@string, slice<ж<policyGraphNode>>>{};
                 var leaves = pg.leaves();
                 foreach (var p in range<ж<policyGraphNode>>(pg.parents().Invoke)) {
-                    foreach (var (_, expected) in p.expectedPolicySet) {
+                    foreach (var (_, expected) in range(p.expectedPolicySet)) {
                         if (leaves[tmpstring(expected.der)] == nil) {
                             missing[((@string)expected.der)] = append(missing[tmpstring(expected.der)], p);
                         }
@@ -1358,7 +1358,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                     // collect map of issuer -> []subject
                     var mappings = new map<@string, slice<ΔOID>>{};
 
-                    foreach (var (_, mapping) in cert.PolicyMappings) {
+                    foreach (var (_, mapping) in range(cert.PolicyMappings)) {
                         if (policyMapping > 0) {
                             if (mapping.IssuerDomainPolicy.Equal(anyPolicyOID) || mapping.SubjectDomainPolicy.Equal(anyPolicyOID)) {
                                 // Invalid mapping
@@ -1380,7 +1380,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                             matching.expectedPolicySet = subjectPolicies;
                         } else if (pg.leafWithPolicy(anyPolicyOID) is var matchingΔ1 && matchingΔ1 != nil) {
                             // 6.1.4 (b) (2) -- as updated by RFC 9618
-                            var nΔ1 = newPolicyGraphNode(new ΔOID(der: slice<byte>(issuerStr)), slice<ж<policyGraphNode>>([matchingΔ1]));
+                            var nΔ1 = newPolicyGraphNode(new ΔOID(der: slice<byte>(issuerStr)), [matchingΔ1]);
                             nΔ1.expectedPolicySet = subjectPolicies;
                             pg.insert(nΔ1);
                         }
@@ -1440,7 +1440,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 
     // 6.1.5 (g) (4) -- as updated by RFC 9618
     var authorityConstrainedPolicySet = new map<@string, bool>{};
-    foreach (var (_, nΔ2) in validPolicyNodeSet) {
+    foreach (var (_, nΔ2) in range(validPolicyNodeSet)) {
         authorityConstrainedPolicySet[((@string)nΔ2.validPolicy.der)] = true;
     }
     // 6.1.5 (g) (5) -- as updated by RFC 9618
@@ -1485,7 +1485,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 // containsDistrustedSPKIHash checks if any of the certificates in the chain
 // have an SPKI whose hash is present in the distrustedSPKIHashes map.
 internal static bool containsDistrustedSPKIHash(slice<ж<Certificate>> chain) {
-    foreach (var (_, c) in chain) {
+    foreach (var (_, c) in range(chain)) {
         var h = sha256.Sum256(c.RawSubjectPublicKeyInfo);
         var (_, ok) = distrustedSPKIHashes[hex.EncodeToString(h[..]), ꟷ]; if (ok) {
             return true;

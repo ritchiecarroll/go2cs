@@ -225,7 +225,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //     position is "position 1") does not have hexadecimal value 0x01,
     //     output "inconsistent" and stop.
     nint psLen = emLen - hLen - sLen - 2;
-    foreach (var (_, e) in db.slice(0, psLen)) {
+    foreach (var (_, e) in range(db.slice(0, psLen))) {
         if (e != 0x00) {
             return ErrVerification;
         }

@@ -7,16 +7,17 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the INDEX-ONLY range arm: `for i := range x`, `for i, _ := range x` and `for range x` over a slice, an
-// array or a pointer to an array read no element in Go, so they emit `foreach (var i in range(x))`, golib's index
-// enumerator, and not the (index, value) tuple foreach, which reads every element into a stack temp even when the
-// value is discarded (crypto/internal/fips140cache's TestCache waited forever on an element that temp kept alive).
+// array or a pointer to an array read no element in Go, so they range the length, `foreach (var i in range(len(x)))`
+// (Go 1.22's `for i := range len(x)`), and not the (index, value) pairs of `range(x)`, which read every element into a
+// stack temp even when the value is discarded (crypto/internal/fips140cache's TestCache waited forever on an element
+// that temp kept alive).
 //
 // The scalar-position escapes the integer arm takes apply unchanged: a blank key iterates a marked temp (a scalar
 // foreach `_` declares a variable), an assigned key copies a temp into the existing variable, a written key iterates
 // a temp and declares the variable from it, and an address-taken key gets a fresh box per iteration.
 //
-// Controls: a range with a value variable, a range over a string (whose indices are rune starts) and a range over a
-// map keep the tuple foreach.
+// Controls: a range with a value variable ranges the pairs, `range(s)`; a range over a string (whose indices are rune
+// starts) and a range over a map keep the tuple foreach over the operand.
 package main
 
 import (
@@ -248,14 +249,14 @@ func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {
 		}
 	}
 
-	expect("keyOnly", "foreach (var i in range(s))")
+	expect("keyOnly", "foreach (var i in range(len(s)))")
 	refuse("keyOnly", "(i, _)")
-	expect("blankValue", "foreach (var i in range(s))")
+	expect("blankValue", "foreach (var i in range(len(s)))")
 	refuse("blankValue", "(i, _)")
-	expect("noVars", "foreach (var _"+marker+"1 in range(s))")
+	expect("noVars", "foreach (var _"+marker+"1 in range(len(s)))")
 	// A *[N]T ranges its type's length beside the pointer, so a nil one ranges N times, as Go's does; a pointer
 	// PARAMETER is the dereferenced value and ranges its count (overPointerParam, below).
-	expect("overArray", "foreach (var i in range(a))", "foreach (var i in range(p, 3))")
+	expect("overArray", "foreach (var i in range(len(a)))", "foreach (var i in range(p, 3))")
 	refuse("overArray", ".Value", "(i, _)")
 	expect("overNilPointer", "foreach (var i in range(nilp, 4))")
 	refuse("overNilPointer", ".Value", "(i, _)")
@@ -268,15 +269,15 @@ func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {
 	expect("setAll", "foreach (var i in range(4))")
 	refuse("setAll", "range(b)")
 	refuse("setAll", "range(b, 4)")
-	expect("assigned", "foreach (var i"+marker+"1 in range(s))", "i = i"+marker+"1;")
-	expect("written", "foreach (var i"+marker+"1 in range(s))", "var i = i"+marker+"1;")
-	expect("addressed", "in range(s))", "heap(")
+	expect("assigned", "foreach (var i"+marker+"1 in range(len(s)))", "i = i"+marker+"1;")
+	expect("written", "foreach (var i"+marker+"1 in range(len(s)))", "var i = i"+marker+"1;")
+	expect("addressed", "in range(len(s)))", "heap(")
 	refuse("addressed", "(i, _)")
-	expect("named", "foreach (var i in range(s))")
-	expect("generic", "foreach (var i in range(s))")
+	expect("named", "foreach (var i in range(len(s)))")
+	expect("generic", "foreach (var i in range(len(s)))")
 
-	expect("withValue", "foreach (var (i, v) in s)")
-	refuse("withValue", "range(s)")
+	expect("withValue", "foreach (var (i, v) in range(s))")
+	refuse("withValue", "range(len(s))")
 	expect("overString", "foreach (var (i, _) in str)")
 	expect("overMap", "foreach (var (k, _) in m)")
 }

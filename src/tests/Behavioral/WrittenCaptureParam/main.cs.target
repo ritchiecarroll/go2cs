@@ -75,7 +75,7 @@ internal static (nint, nint) declSliceRedeclare(slice<nint> vʗp) {
 
     nint sum() {
         nint t = 0;
-        foreach (var (_, e) in Ꮡv.ValueSlot) {
+        foreach (var (_, e) in range(Ꮡv.ValueSlot)) {
             t += e;
         }
         return t;
@@ -104,7 +104,7 @@ internal static void Main() {
     (before, after) = litRedeclare(a);
     fmt.Println("litRedeclare:", before, after);
 
-    var (x, y) = declSliceRedeclare(slice<nint>([1, 2, 3]));
+    var (x, y) = declSliceRedeclare([1, 2, 3]);
     fmt.Println("declSliceRedeclare:", x, y);
 }
 

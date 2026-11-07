@@ -31,7 +31,7 @@ public class RuntimeLockProfileTests
         int64 count = 0;
         for (int i = 0; i < (int)m; i++)
         {
-            foreach (var (_, pc) in records[i].StackRecord.Stack())
+            foreach (var (_, pc) in range(records[i].StackRecord.Stack()))
             {
                 string name = (string)FuncForPC(pc - 1).Name();
                 if (name.Length == 0)

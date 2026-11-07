@@ -1374,7 +1374,7 @@ internal static bool hasRange(this ref rangeState s, rangeType typ) {
 internal static (stringID, error) endRange(this ref rangeState s, tracev2.EventType typ) {
     var st = tracev2.Specs()[typ].StartEv;
     nint idx = -1;
-    foreach (var (i, r) in s.inFlight) {
+    foreach (var (i, r) in range(s.inFlight)) {
         if (r.typ == st) {
             idx = i;
             break;

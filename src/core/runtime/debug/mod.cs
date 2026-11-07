@@ -135,10 +135,10 @@ public static @string String(this ref BuildInfo bi) {
     if (bi.Main != (new Module())) {
         formatMod(modˢ, bi.Main);
     }
-    foreach (var (_, dep) in bi.Deps) {
+    foreach (var (_, dep) in range(bi.Deps)) {
         formatMod(depˢ, dep.Value);
     }
-    foreach (var (_, s) in bi.Settings) {
+    foreach (var (_, s) in range(bi.Settings)) {
         @string key = s.Key;
         if (quoteKey(key)) {
             key = strconv.Quote(key);

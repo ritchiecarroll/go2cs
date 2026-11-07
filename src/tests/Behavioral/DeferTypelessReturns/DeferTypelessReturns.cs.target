@@ -19,7 +19,7 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) {
     GoFrame ᒐ = default;
     try {
         defer(() => fmt.Println("find done"), ref ᒐ);
-        foreach (var i in range(xs)) {
+        foreach (var i in range(len(xs))) {
             if (xs[i].n == want) {
                 return (Ꮡ(xs, i), default);
             }

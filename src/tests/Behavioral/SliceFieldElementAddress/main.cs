@@ -27,7 +27,7 @@ internal static void Main() {
     g.push(10);
     g.push(20);
 
-    foreach (var (i, row) in g.rows) {
+    foreach (var (i, row) in range(g.rows)) {
         fmt.Printf("row %d len=%d %v\n"u8, i, len(row), row);
     }
 

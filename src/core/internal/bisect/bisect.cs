@@ -451,7 +451,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
 
     var @base = stk[0];
     // normalize PCs
-    foreach (var i in range(stk.slice(0, n))) {
+    foreach (var i in range(len(stk.slice(0, n)))) {
         stk[i] -= @base;
     }
 
@@ -476,7 +476,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
         } else {
             if (!d.seen(h)) {
                 // Restore PCs in stack for printing
-                foreach (var i in range(stk.slice(0, n))) {
+                foreach (var i in range(len(stk.slice(0, n)))) {
                     stk[i] += @base;
                 }
                 printStack(w, h, stk.slice(1, n));
@@ -650,7 +650,7 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
     var data = dataʗp.sslice();
 
     var h = offset64;
-    foreach (var (_, v) in data) {
+    foreach (var (_, v) in range(data)) {
         switch (v.type()) {
         default: {
             var vΔ1 = v;
@@ -699,55 +699,55 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
             break;
         }
         case slice<@string> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvString(h, x);
             }
             break;
         }
         case slice<byte> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnv(h, x);
             }
             break;
         }
         case slice<nint> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint64(h, (uint64)x);
             }
             break;
         }
         case slice<nuint> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint64(h, (uint64)x);
             }
             break;
         }
         case slice<int32> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint32(h, (uint32)x);
             }
             break;
         }
         case slice<uint32> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint32(h, x);
             }
             break;
         }
         case slice<int64> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint64(h, (uint64)x);
             }
             break;
         }
         case slice<uint64> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint64(h, x);
             }
             break;
         }
         case slice<uintptr> vΔ1: {
-            foreach (var (_, x) in vΔ1) {
+            foreach (var (_, x) in range(vΔ1)) {
                 h = fnvUint64(h, (uint64)x);
             }
             break;
@@ -848,7 +848,7 @@ internal static bool seenLossy(this ref dedup d, uint64 h) {
 
     // Compute index in set to evict as hash of current set.
     var ch = offset64;
-    foreach (var (_, x) in cache.Value) {
+    foreach (var (_, x) in range(cache.Value)) {
         ch = fnvUint64(ch, x);
     }
     atomic.StoreUint64(cache.at<uint64>((ulong)((nuint)ch % (nuint)4)), h);

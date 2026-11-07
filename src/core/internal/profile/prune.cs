@@ -16,7 +16,7 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
 
-    foreach (var (_, loc) in p.Location) {
+    foreach (var (_, loc) in range(p.Location)) {
         nint i = default;
         for (i = len(loc.Line) - 1; i >= 0; i--) {
             var fn = loc.Line[i].Function; if (fn != nil && fn.Name != ""u8) {
@@ -48,7 +48,7 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp
     }
 
     // Prune locs from each Sample
-    foreach (var (_, sample) in p.Sample) {
+    foreach (var (_, sample) in range(p.Sample)) {
         // Scan from the root to the leaves to find the prune location.
         // Do not prune frames before the first user frame, to avoid
         // pruning everything.

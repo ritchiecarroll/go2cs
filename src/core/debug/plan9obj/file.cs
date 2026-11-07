@@ -192,7 +192,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
     var off = (uint32)f.HdrSize;
 
-    foreach (var (i, sect) in sects) {
+    foreach (var (i, sect) in range(sects)) {
         var s = @new<ΔSection>();
         s.SectionHeader = new SectionHeader(
             Name: sect.name,
@@ -347,7 +347,7 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
 // Section returns a section with the given name, or nil if no such
 // section exists.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
         }

@@ -86,7 +86,7 @@ public static void Attrs(this Record r, Func<Attr, bool> f) {
             return;
         }
     }
-    foreach (var (_, a) in r.back) {
+    foreach (var (_, a) in range(r.back)) {
         if (!f(a)) {
             return;
         }
@@ -125,7 +125,7 @@ public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     }
     nint ne = countEmptyGroups(attrs.slice(i));
     r.back = slices.Grow<slice<Attr>, Attr>(r.back, len(attrs.slice(i)) - ne);
-    foreach (var (_, a) in attrs.slice(i)) {
+    foreach (var (_, a) in range(attrs.slice(i))) {
         if (!a.Value.isEmptyGroup()) {
             r.back = builtin.append(r.back, a);
         }
@@ -249,7 +249,7 @@ public static ж<ΔSource> Source(this Record r) {
         return default;
     }
 
-    var fs = runtime.CallersFrames(slice<uintptr>([r.PC]));
+    var fs = runtime.CallersFrames([r.PC]);
     var (f, _) = fs.Next();
     return Ꮡ(new ΔSource(
         Function: f.Function,

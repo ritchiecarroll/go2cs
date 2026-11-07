@@ -480,7 +480,7 @@ But neither is more specific than the other.
 
 // writeMatchingPath writes to b a path that matches the segments.
 internal static void writeMatchingPath(ж<strings.Builder> b, slice<segment> segs) {
-    foreach (var (_, s) in segs) {
+    foreach (var (_, s) in range(segs)) {
         writeSegment(b, s);
     }
 }

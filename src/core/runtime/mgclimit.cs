@@ -226,7 +226,7 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
         // risk of extra time being accounted for in this window than actually happened in this window,
         // leading to all sorts of weird transient behavior.
         var mp = acquirem();
-        foreach (var (_, pp) in allp) {
+        foreach (var (_, pp) in range(allp)) {
             var (typ, duration) = pp.of(runtime_package.Δp.ᏑlimiterEvent).consume(now);
             switch (typ) {
             case var ᴛ when ᴛ == limiterEventIdle: {

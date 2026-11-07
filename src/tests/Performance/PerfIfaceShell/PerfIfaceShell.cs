@@ -7,17 +7,13 @@ partial class main_package {
 
 partial struct counter /*num:nint*/;
 
-internal static nint Len(this counter c) {
-    return (nint)c;
-}
+internal static nint Len(this counter c) { return (nint)c; }
 
 partial struct box {
     internal nint n;
 }
 
-internal static nint Len(this ref box b) {
-    return b.n;
-}
+internal static nint Len(this ref box b) { return b.n; }
 
 internal partial interface run_type /*dyn*/ {
     nint Len();

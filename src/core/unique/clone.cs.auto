@@ -28,7 +28,7 @@ internal static T clone<T>(T valueʗp, ж<cloneSeq> Ꮡseq) {
     ref var seq = ref Ꮡseq.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
-    foreach (var (_, offset) in seq.stringOffsets) {
+    foreach (var (_, offset) in range(seq.stringOffsets)) {
         var ps = (ж<@string>)(uintptr)((@unsafe.Pointer)((uintptr)Ꮡvalue + offset));
         ps.Value = stringslite.Clone(ps.Value);
     }
@@ -36,7 +36,7 @@ internal static T clone<T>(T valueʗp, ж<cloneSeq> Ꮡseq) {
 }
 
 // singleStringClone describes how to clone a single string.
-internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: slice<uintptr>([0]));
+internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: [0]);
 
 // cloneSeq describes how to clone a value of a particular type.
 partial struct cloneSeq {
@@ -71,7 +71,7 @@ internal static void buildStructCloneSeq(ж<abi.Type> typ, ж<cloneSeq> Ꮡseq, 
     ref var seq = ref Ꮡseq.DerefOrNull();
 
     var styp = typ.StructType();
-    foreach (var i in range(styp.Fields)) {
+    foreach (var i in range(len(styp.Fields))) {
         var f = Ꮡ(styp.Fields, i);
         switch (f.Typ.Kind()) {
         case var ᴛ when ᴛ == abi.ΔString: {

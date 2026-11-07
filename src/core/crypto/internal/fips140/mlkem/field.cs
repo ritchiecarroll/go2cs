@@ -135,7 +135,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         s[i] = fieldAdd(a[i], b[i]);
     }
     return s;
@@ -147,7 +147,7 @@ internal static T /*s*/ polySub<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         s[i] = fieldSub(a[i], b[i]);
     }
     return s;
@@ -231,7 +231,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 
     (s, var b) = sliceForAppend(s, encodingSize1);
     clear(b);
-    foreach (var i in range(f)) {
+    foreach (var i in range(len(f))) {
         b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)(i % 8))));
     }
     return s;
@@ -244,7 +244,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 // followed by Decompress₁, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress1(ref array<byte> b) {
     ringElement f = default;
-    foreach (var i in range(f)) {
+    foreach (var i in range(len(f))) {
         var b_i = (byte)(b[i / 8].Rsh((int64)(i % 8)) & 1);
         UntypedInt halfQ = /* (q + 1) / 2 */ 1665;                          // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ); // 0 decompresses to 0, and 1 to ⌈q/2⌋
@@ -440,7 +440,7 @@ internal static ringElement ringDecodeAndDecompress11(/*[352]*/ ж<array<byte>> 
 internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     var prf = sha3.NewShake256();
     prf.Write(s);
-    prf.Write(slice<byte>([b]));
+    prf.Write([b]);
     var B = new slice<byte>(64 * 2); // η = 2
     prf.Read(B);
 
@@ -532,7 +532,7 @@ internal static ringElement inverseNTT(nttElement f) {
             }
         }
     }
-    foreach (var i in range(f)) {
+    foreach (var i in range(len(f))) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
     return (ringElement)(array<fieldElement>)f;
@@ -544,7 +544,7 @@ internal static ringElement inverseNTT(nttElement f) {
 internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
     var B = sha3.NewShake128();
     B.Write(rho);
-    B.Write(slice<byte>([ii, jj]));
+    B.Write([ii, jj]);
 
     // SampleNTT essentially draws 12 bits at a time from r, interprets them in
     // little-endian, and rejects values higher than q, until it drew 256

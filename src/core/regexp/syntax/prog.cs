@@ -37,7 +37,7 @@ public static InstOp InstRune1 => 8;
 public static InstOp InstRuneAny => 9;
 public static InstOp InstRuneAnyNotNL => 10;
 
-internal static slice<@string> instOpNames = slice<@string>([
+internal static slice<@string> instOpNames = [
     "InstAlt",
     "InstAltMatch",
     "InstCapture",
@@ -49,7 +49,7 @@ internal static slice<@string> instOpNames = slice<@string>([
     "InstRune1",
     "InstRuneAny",
     "InstRuneAnyNotNL"
-]);
+];
 
 public static @string String(this InstOp i) {
     if ((nuint)i >= (nuint)len(instOpNames)) {
@@ -311,7 +311,7 @@ public static @string String(this ж<Inst> Ꮡi) {
 internal static void bw(ж<strings.Builder> b, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
-    foreach (var (_, s) in args) {
+    foreach (var (_, s) in range(args)) {
         b.WriteString(s);
     }
 }
@@ -319,7 +319,7 @@ internal static void bw(ж<strings.Builder> b, params ꓸꓸꓸstring argsʗp) {
 internal static void dumpProg(ж<strings.Builder> b, ж<Prog> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    foreach (var j in range(p.Inst)) {
+    foreach (var j in range(len(p.Inst))) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {

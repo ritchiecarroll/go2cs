@@ -11,13 +11,13 @@ partial struct pair {
 
 internal static slice<pair> build(slice<nint> lengths) {
     var pairs = new slice<pair>(len(lengths));
-    foreach (var (i, lengthΔ1) in lengths) {
+    foreach (var (i, lengthΔ1) in range(lengths)) {
         pairs[i].value = i;
         pairs[i].length = lengthΔ1;
     }
 
     nint length = 0;
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         length += p.length;
     }
     fmt.Println("total length:", length);
@@ -25,8 +25,8 @@ internal static slice<pair> build(slice<nint> lengths) {
 }
 
 internal static void Main() {
-    var pairs = build(slice<nint>([5, 3, 8]));
-    foreach (var (_, p) in pairs) {
+    var pairs = build([5, 3, 8]);
+    foreach (var (_, p) in range(pairs)) {
         fmt.Println(p.value, p.length);
     }
 }

@@ -1305,13 +1305,13 @@ public static bool Opaque(this ref Paletted p) {
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
-        foreach (var (_, c) in p.Pix.slice(i0, i1)) {
+        foreach (var (_, c) in range(p.Pix.slice(i0, i1))) {
             present[c] = true;
         }
         i0 += p.Stride;
         i1 += p.Stride;
     }
-    foreach (var (i, c) in p.Palette) {
+    foreach (var (i, c) in range<color.Color>(p.Palette)) {
         if (!present[i]) {
             continue;
         }

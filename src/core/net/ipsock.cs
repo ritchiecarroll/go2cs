@@ -105,7 +105,7 @@ internal static ΔAddr forResolve(this addrList addrs, @string network, @string 
 // first returns the first address which satisfies strategy, or if
 // none do, then the first address of any kind.
 internal static ΔAddr first(this addrList addrs, Func<ΔAddr, bool> strategy) {
-    foreach (var (_, addr) in addrs) {
+    foreach (var (_, addr) in range<ΔAddr>(addrs)) {
         if (strategy(addr)) {
             return addr;
         }
@@ -124,7 +124,7 @@ internal static (addrList primaries, addrList fallbacks) partition(this addrList
     addrList fallbacks = default;
 
     bool primaryLabel = default;
-    foreach (var (i, addr) in addrs) {
+    foreach (var (i, addr) in range<ΔAddr>(addrs)) {
         var label = strategy(addr);
         if (i == 0 || label == primaryLabel) {
             primaryLabel = label;
@@ -144,7 +144,7 @@ internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slic
     var addrsᴷ = new stackAppend<ΔAddr>(moves: true);
 
     addrList addrs = default;
-    foreach (var (_, ip) in ips) {
+    foreach (var (_, ip) in range(ips)) {
         if (filter == nil || filter(ip)) {
             addrs = append(addrsᴷ, addrs, inetaddr(ip));
         }

@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+C1-NO1	crypto/subtle	osx-arm64	10	7	3	3	0	DISC	no	10	0	10/0/True	yes
+C1-NO1	crypto/subtle	osx-x64	10	10	0	0	0	validated	no	10	0	10/0/True	no

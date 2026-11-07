@@ -84,14 +84,14 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         // we just treat these strings as being encoded using Latin-1. This matches
         // what most of the world does, including BoringSSL.
         var buf = new slice<byte>(0, builtin.len(value));
-        foreach (var (_, v) in value) {
+        foreach (var (_, v) in range(value)) {
             // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
             buf = utf8.AppendRune(buf, (rune)v);
         }
         return ((@string)buf, default);
     }
     case var ᴛ when ᴛ == cryptobyte_asn1.PrintableString: {
-        foreach (var (_, b) in value) {
+        foreach (var (_, b) in range(value)) {
             if (!isPrintable(b)) {
                 return ("", errors.New(invalidPrintableStringˢ));
             }
@@ -145,7 +145,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         return (s, default);
     }
     case var ᴛ when ᴛ == ((cryptobyte_asn1.Tag)asn1.TagNumericString): {
-        foreach (var (_, b) in value) {
+        foreach (var (_, b) in range(value)) {
             if (!('0' <= b && b <= '9' || b == ' ')) {
                 return ("", errors.New(invalidNumericStringˢ));
             }
@@ -668,7 +668,7 @@ internal static (slice<ΔOID>, error) parseCertificatePoliciesExtension(cryptoby
 internal static bool isValidIPMask(slice<byte> mask) {
     var seenZero = false;
 
-    foreach (var (_, b) in mask) {
+    foreach (var (_, b) in range(mask)) {
         if (seenZero) {
             if (b != 0) {
                 return false;
@@ -724,7 +724,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
     ref var excluded = ref heap<cryptobyte.String>(out var Ꮡexcluded);
     ref var havePermitted = ref heap(new bool(), out var ᏑhavePermitted);
     ref var haveExcluded = ref heap(new bool(), out var ᏑhaveExcluded);
-    if (!outer.ReadASN1(Ꮡtoplevel, cryptobyte_asn1.SEQUENCE) || !outer.Empty() || !toplevel.ReadOptionalASN1(Ꮡpermitted, ᏑhavePermitted, ((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed()) || !toplevel.ReadOptionalASN1(Ꮡexcluded, ᏑhaveExcluded, ((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed()) || !toplevel.Empty()) {
+    if (!outer.ReadASN1(Ꮡtoplevel, cryptobyte_asn1.SEQUENCE) || !outer.Empty() || !Ꮡtoplevel.ReadOptionalASN1(Ꮡpermitted, ᏑhavePermitted, ((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed()) || !Ꮡtoplevel.ReadOptionalASN1(Ꮡexcluded, ᏑhaveExcluded, ((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed()) || !toplevel.Empty()) {
         return (false, errors.New(x509Invalidˢ));
     }
 
@@ -886,7 +886,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     error err = default;
-    foreach (var (_, e) in @out.Extensions) {
+    foreach (var (_, e) in range(@out.Extensions)) {
         var unhandled = false;
 
         if (builtin.len(e.Id) == 4 && e.Id[0] == 2 && e.Id[1] == 5 && e.Id[2] == 29) {
@@ -950,7 +950,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     }
                     ref var dpNameDER = ref heap<cryptobyte.String>(out var ᏑdpNameDER);
                     ref var dpNamePresent = ref heap(new bool(), out var ᏑdpNamePresent);
-                    if (!dpDER.ReadOptionalASN1(ᏑdpNameDER, ᏑdpNamePresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
+                    if (!ᏑdpDER.ReadOptionalASN1(ᏑdpNameDER, ᏑdpNamePresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
                         return errors.New(x509InvalidCrlˢ2);
                     }
                     if (!dpNamePresent) {
@@ -1036,7 +1036,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     return err;
                 }
                 @out.PolicyIdentifiers = new slice<asn1.ObjectIdentifier>(0, builtin.len(@out.Policies));
-                foreach (var (_, oid) in @out.Policies) {
+                foreach (var (_, oid) in range(@out.Policies)) {
                     var (oidΔ1, ok) = oid.toASN1OID(); if (ok) {
                         @out.PolicyIdentifiers = append(@out.PolicyIdentifiers, oidΔ1);
                     }
@@ -1188,7 +1188,7 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
         return (default, errors.New(x509MalformedTbsˢ));
     }
 
-    if (!tbs.ReadOptionalASN1Integer(cert.ᏑVersion, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific(), (nint)0)) {
+    if (!Ꮡtbs.ReadOptionalASN1Integer(cert.ᏑVersion, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific(), (nint)0)) {
         return (default, errors.New(x509MalformedVersionˢ));
     }
     if (cert.Version < 0) {
@@ -1299,16 +1299,16 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
     }
 
     if (cert.Version > 1) {
-        if (!tbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)1).ContextSpecific())) {
+        if (!Ꮡtbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)1).ContextSpecific())) {
             return (default, errors.New(x509Malformedˢ3));
         }
-        if (!tbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)2).ContextSpecific())) {
+        if (!Ꮡtbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)2).ContextSpecific())) {
             return (default, errors.New(x509Malformedˢ4));
         }
         if (cert.Version == 3) {
             ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
             ref var present = ref heap(new bool(), out var Ꮡpresent);
-            if (!tbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)3).Constructed().ContextSpecific())) {
+            if (!Ꮡtbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)3).Constructed().ContextSpecific())) {
                 return (default, errors.New(x509MalformedExtensionsˢ));
             }
             if (present) {
@@ -1515,7 +1515,7 @@ public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
             }
             ref var extensionsΔ1 = ref heap<cryptobyte.String>(out var ᏑextensionsΔ1);
             ref var presentΔ1 = ref heap(new bool(), out var ᏑpresentΔ1);
-            if (!certSeq.ReadOptionalASN1(ᏑextensionsΔ1, ᏑpresentΔ1, cryptobyte_asn1.SEQUENCE)) {
+            if (!ᏑcertSeq.ReadOptionalASN1(ᏑextensionsΔ1, ᏑpresentΔ1, cryptobyte_asn1.SEQUENCE)) {
                 return (default, errors.New(x509MalformedExtensionsˢ));
             }
             if (presentΔ1) {
@@ -1550,7 +1550,7 @@ public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
 
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     ref var present = ref heap(new bool(), out var Ꮡpresent);
-    if (!tbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
+    if (!Ꮡtbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
         return (default, errors.New(x509MalformedExtensionsˢ));
     }
     if (present) {

@@ -149,7 +149,7 @@ internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<
     H.Write(suiteID);
     H.Write(slice<byte>([(byte)(len(label) >> 8), (byte)len(label)]));
     H.Write(slice<byte>(label));
-    H.Write(slice<byte>([(byte)(length >> 8), (byte)length]));
+    H.Write([(byte)(length >> 8), (byte)length]);
     H.Write(context);
     var @out = new slice<byte>(length);
     H.Read(@out);

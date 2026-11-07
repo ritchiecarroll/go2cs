@@ -67,7 +67,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
     nuint cur = (nuint)0;
     var cbits = (uint8)0;
     var sbits = (uint8)0;
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range(v)) {
         cur = cur << 8 | (nuint)b;
         cbits += 8;
         sbits += 8;
@@ -154,7 +154,7 @@ internal static void buildRootHuffmanNode() {
     // allocate a leaf node for each of the 256 symbols
     var leaves = Ꮡ(new array<node>(256));
 
-    foreach (var (sym, code) in huffmanCodes.ΔRangeSnapshot()) {
+    foreach (var (sym, code) in range(huffmanCodes.ΔRangeSnapshot())) {
         var codeLen = huffmanCodeLen[sym];
 
         var cur = lazyRootHuffmanNode;

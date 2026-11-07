@@ -10,11 +10,11 @@ internal static void Main() {
         new("wide", ᏑFeatures.of(Featuresᴛ1.ᏑHasWide))
     ]);
 
-    foreach (var (_, o) in options) {
+    foreach (var (_, o) in range(options)) {
         o.flag.Value = true;
     }
 
-    foreach (var (_, o) in options) {
+    foreach (var (_, o) in range(options)) {
         fmt.Printf("%s=%t\n"u8, o.name, o.flag.Value);
     }
 

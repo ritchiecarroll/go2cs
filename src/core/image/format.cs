@@ -61,7 +61,7 @@ internal static bool match(@string magic, slice<byte> b) {
     if (len(magic) != len(b)) {
         return false;
     }
-    foreach (var (i, c) in b) {
+    foreach (var (i, c) in range(b)) {
         if (magic[i] != c && magic[i] != '?') {
             return false;
         }
@@ -72,7 +72,7 @@ internal static bool match(@string magic, slice<byte> b) {
 // sniff determines the format of r's data.
 internal static format sniff(reader r) {
     var (formats, _) = ᏑatomicFormats.Load()._<slice<format>>(ᐧ);
-    foreach (var (_, f) in formats) {
+    foreach (var (_, f) in range(formats)) {
         var (b, err) = r.Peek(len(f.magic));
         if (err == nil && match(f.magic, b)) {
             return f;

@@ -836,7 +836,7 @@ internal static ж<ast.Field> parseFieldDecl(this ж<parser> Ꮡp) {
                 }
             } else {
                 // name1, name2, ... T
-                names = slice<ж<ast.Ident>>([name]);
+                names = [name];
                 while (p.tok == token.COMMA) {
                     Ꮡp.next();
                     names = append(names, Ꮡp.parseIdent());
@@ -1192,7 +1192,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         // distribute parameter types (len(list) > 0)
         if (named == 0) {
             // all unnamed => found names are type names
-            foreach (var i in range(list)) {
+            foreach (var i in range(len(list))) {
                 var par = Ꮡ(list, i);
                 var typΔ1 = par.name; if (typΔ1 != nil) {
                     par.typ = new ast.IdentжExpr(typΔ1);
@@ -1221,7 +1221,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             // some named or we're in a type parameter list => all must be named
             ref var errPos = ref heap(new tokenꓸPos(), out var ᏑerrPos); // left-most error position (or invalid)
             ast.Expr typΔ2 = default;                                    // current type (from right to left)
-            foreach (var i in range(list)) {
+            foreach (var i in range(len(list))) {
                 var par = Ꮡ(list, len(list) - i - 1); if (par.typ != nil) {
                     typΔ2 = par.typ;
                     if (par.name == nil) {
@@ -1270,7 +1270,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
 
         // check use of ...
         var first = true; // only report first occurrence
-        foreach (var i in range(list)) {
+        foreach (var i in range(len(list))) {
             var f = Ꮡ(list, i);
             var (t, _) = f.typ._<ж<ast.Ellipsis>>(ᐧ); if (t != nil && (!dddok || i + 1 < len(list))) {
                 if (first) {
@@ -1292,7 +1292,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         // If list contains types only, each type gets its own ast.Field.
         if (named == 0) {
             // parameter list consists of types only
-            foreach (var (_, par) in list) {
+            foreach (var (_, par) in range(list)) {
                 assert(par.typ != nil, nilTypeInUnnamedˢ);
                 @params = append(@params, Ꮡ(new ast.Field(Type: par.typ)));
             }
@@ -1309,7 +1309,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             @params = append(@params, field);
             Ꮡnames.ValueSlot = default;
         }
-        foreach (var (_, par) in list) {
+        foreach (var (_, par) in range(list)) {
             if (!AreEqual(par.typ, typ)) {
                 if (len(names) > 0) {
                     addParams();
@@ -1469,7 +1469,7 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
                     // TODO(rfindley) refactor to share code with parseFuncType.
                     var @params = Ꮡp.parseParameters(false);
                     var results = Ꮡp.parseParameters(true);
-                    idents = slice<ж<ast.Ident>>([ident]);
+                    idents = [ident];
                     typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(
                         Func: token.NoPos,
                         Params: @params,
@@ -1501,7 +1501,7 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
                 // TODO(rfindley) refactor to share code with parseFuncType.
                 var @params = Ꮡp.parseParameters(false);
                 var results = Ꮡp.parseParameters(true);
-                idents = slice<ж<ast.Ident>>([ident]);
+                idents = [ident];
                 typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(Func: token.NoPos, Params: @params, Results: results)));
                 break;
             }
@@ -3109,7 +3109,7 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
                     ref var posΔ1 = ref heap<tokenꓸPos>(p.pos, out var ᏑposΔ1);
                     Ꮡp.next();
                     var rhs = Ꮡp.parseRhs();
-                    comm = new ast.AssignStmtжStmt(Ꮡ(new ast.AssignStmt(Lhs: lhs, TokPos: posΔ1, Tok: tok, Rhs: slice<ast.Expr>([rhs]))));
+                    comm = new ast.AssignStmtжStmt(Ꮡ(new ast.AssignStmt(Lhs: lhs, TokPos: posΔ1, Tok: tok, Rhs: [rhs])));
                 } else {
                     // lhs must be single receive operation
                     if (len(lhs) > 1) {

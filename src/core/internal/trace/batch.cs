@@ -61,7 +61,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     }
     {
         var typ = (tracev2.EventType)b; if (typ == tracev2.EvEndOfGeneration) {
-            return (new batch(m: NoThread, exp: tracev2.NoExperiment, data: slice<byte>([b])), 0, default);
+            return (new batch(m: NoThread, exp: tracev2.NoExperiment, data: [b]), 0, default);
         }
     }
     {

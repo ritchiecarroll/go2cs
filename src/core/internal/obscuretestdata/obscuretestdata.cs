@@ -18,7 +18,7 @@ partial class obscuretestdata_package {
 public static slice<byte> Rot13(slice<byte> data) {
     var @out = new slice<byte>(len(data));
     copy(@out, data);
-    foreach (var (i, c) in @out) {
+    foreach (var (i, c) in range(@out)) {
         switch (ᐧ) {
         case {} when (byte)'A' <= c && c <= (byte)'M' || (byte)'a' <= c && c <= (byte)'m': {
             @out[i] = (byte)(c + 13);

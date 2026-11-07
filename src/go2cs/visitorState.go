@@ -244,6 +244,10 @@ type Visitor struct {
 	// inside an element, so a call's arguments keep their bare spelling.
 	collectionExpressionElements bool
 
+	// targetedSliceLiterals marks the slice literals whose position gives C# their slice<T> target, which render as
+	// a bare collection expression, `[1, 2]` (see markTargetedSliceLiterals).
+	targetedSliceLiterals map[*ast.CompositeLit]bool
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

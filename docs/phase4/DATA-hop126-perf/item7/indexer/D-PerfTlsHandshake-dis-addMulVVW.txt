@@ -1,0 +1,146 @@
+  0000000140232520: 41 57              push        r15
+  0000000140232522: 41 56              push        r14
+  0000000140232524: 41 55              push        r13
+  0000000140232526: 41 54              push        r12
+  0000000140232528: 57                 push        rdi
+  0000000140232529: 56                 push        rsi
+  000000014023252A: 55                 push        rbp
+  000000014023252B: 53                 push        rbx
+  000000014023252C: 48 83 EC 38        sub         rsp,38h
+  0000000140232530: 33 C0              xor         eax,eax
+  0000000140232532: 48 89 44 24 30     mov         qword ptr [rsp+30h],rax
+  0000000140232537: 48 8B D9           mov         rbx,rcx
+  000000014023253A: 48 8B F2           mov         rsi,rdx
+  000000014023253D: 49 8B F8           mov         rdi,r8
+  0000000140232540: 33 ED              xor         ebp,ebp
+  0000000140232542: 48 8B 43 10        mov         rax,qword ptr [rbx+10h]
+  0000000140232546: 48 FF C8           dec         rax
+  0000000140232549: 0F 88 7C 01 00 00  js          00000001402326CB
+  000000014023254F: 48 3B 46 10        cmp         rax,qword ptr [rsi+10h]
+  0000000140232553: 0F 8D 72 01 00 00  jge         00000001402326CB
+  0000000140232559: 48 83 7E 20 00     cmp         qword ptr [rsi+20h],0
+  000000014023255E: 74 0D              je          000000014023256D
+  0000000140232560: 48 8B CE           mov         rcx,rsi
+  0000000140232563: 48 8B D0           mov         rdx,rax
+  0000000140232566: E8 F5 DE EF 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014023256B: EB 13              jmp         0000000140232580
+  000000014023256D: 48 8B 0E           mov         rcx,qword ptr [rsi]
+  0000000140232570: 48 03 46 08        add         rax,qword ptr [rsi+8]
+  0000000140232574: 8B 49 08           mov         ecx,dword ptr [rcx+8]
+  0000000140232577: 48 3B C1           cmp         rax,rcx
+  000000014023257A: 0F 83 8A 01 00 00  jae         000000014023270A
+  0000000140232580: 4C 8B 73 10        mov         r14,qword ptr [rbx+10h]
+  0000000140232584: 45 33 FF           xor         r15d,r15d
+  0000000140232587: 45 33 ED           xor         r13d,r13d
+  000000014023258A: E9 FB 00 00 00     jmp         000000014023268A
+  000000014023258F: 49 FF C7           inc         r15
+  0000000140232592: 4D 3B FE           cmp         r15,r14
+  0000000140232595: 0F 8D 1C 01 00 00  jge         00000001402326B7
+  000000014023259B: 4D 85 FF           test        r15,r15
+  000000014023259E: 0F 8C 3C 01 00 00  jl          00000001402326E0
+  00000001402325A4: 4C 3B 7E 10        cmp         r15,qword ptr [rsi+10h]
+  00000001402325A8: 0F 8D 32 01 00 00  jge         00000001402326E0
+  00000001402325AE: 48 83 7E 20 00     cmp         qword ptr [rsi+20h],0
+  00000001402325B3: 74 0D              je          00000001402325C2
+  00000001402325B5: 48 8B CE           mov         rcx,rsi
+  00000001402325B8: 49 8B D7           mov         rdx,r15
+  00000001402325BB: E8 A0 DE EF 00     call        golib_go_slice_1<Double>__NativeElementRef
+  00000001402325C0: EB 1B              jmp         00000001402325DD
+  00000001402325C2: 48 8B 06           mov         rax,qword ptr [rsi]
+  00000001402325C5: 4D 8B C7           mov         r8,r15
+  00000001402325C8: 4C 03 46 08        add         r8,qword ptr [rsi+8]
+  00000001402325CC: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  00000001402325CF: 4C 3B C1           cmp         r8,rcx
+  00000001402325D2: 0F 83 32 01 00 00  jae         000000014023270A
+  00000001402325D8: 4A 8D 44 C0 10     lea         rax,[rax+r8*8+10h]
+  00000001402325DD: 48 8B 08           mov         rcx,qword ptr [rax]
+  00000001402325E0: 45 33 C0           xor         r8d,r8d
+  00000001402325E3: 4C 89 44 24 30     mov         qword ptr [rsp+30h],r8
+  00000001402325E8: 4C 8D 44 24 30     lea         r8,[rsp+30h]
+  00000001402325ED: 48 8B D7           mov         rdx,rdi
+  00000001402325F0: E8 FB 08 E4 FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  00000001402325F5: 4C 8B E0           mov         r12,rax
+  00000001402325F8: 48 8B 44 24 30     mov         rax,qword ptr [rsp+30h]
+  00000001402325FD: 48 89 44 24 28     mov         qword ptr [rsp+28h],rax
+  0000000140232602: 4C 3B 7B 10        cmp         r15,qword ptr [rbx+10h]
+  0000000140232606: 0F 8D E9 00 00 00  jge         00000001402326F5
+  000000014023260C: 48 83 7B 20 00     cmp         qword ptr [rbx+20h],0
+  0000000140232611: 74 10              je          0000000140232623
+  0000000140232613: 48 8B CB           mov         rcx,rbx
+  0000000140232616: 49 8B D7           mov         rdx,r15
+  0000000140232619: E8 42 DE EF 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014023261E: 48 8B C8           mov         rcx,rax
+  0000000140232621: EB 1C              jmp         000000014023263F
+  0000000140232623: 48 8B 0B           mov         rcx,qword ptr [rbx]
+  0000000140232626: 49 8B D7           mov         rdx,r15
+  0000000140232629: 48 03 53 08        add         rdx,qword ptr [rbx+8]
+  000000014023262D: 44 8B 41 08        mov         r8d,dword ptr [rcx+8]
+  0000000140232631: 49 3B D0           cmp         rdx,r8
+  0000000140232634: 0F 83 D0 00 00 00  jae         000000014023270A
+  000000014023263A: 48 8D 4C D1 10     lea         rcx,[rcx+rdx*8+10h]
+  000000014023263F: 48 8B 09           mov         rcx,qword ptr [rcx]
+  0000000140232642: 48 8B 44 24 28     mov         rax,qword ptr [rsp+28h]
+  0000000140232647: 48 03 C8           add         rcx,rax
+  000000014023264A: 48 3B C8           cmp         rcx,rax
+  000000014023264D: 0F 92 C2           setb        dl
+  0000000140232650: 0F B6 D2           movzx       edx,dl
+  0000000140232653: 49 03 D4           add         rdx,r12
+  0000000140232656: 48 03 E9           add         rbp,rcx
+  0000000140232659: 48 3B E9           cmp         rbp,rcx
+  000000014023265C: 0F 92 C1           setb        cl
+  000000014023265F: 0F B6 C9           movzx       ecx,cl
+  0000000140232662: 48 03 CA           add         rcx,rdx
+  0000000140232665: 4C 8B E1           mov         r12,rcx
+  0000000140232668: 4C 3B 7B 10        cmp         r15,qword ptr [rbx+10h]
+  000000014023266C: 0F 8D 83 00 00 00  jge         00000001402326F5
+  0000000140232672: 48 83 7B 20 00     cmp         qword ptr [rbx+20h],0
+  0000000140232677: 74 25              je          000000014023269E
+  0000000140232679: 48 8B CB           mov         rcx,rbx
+  000000014023267C: 49 8B D7           mov         rdx,r15
+  000000014023267F: E8 DC DD EF 00     call        golib_go_slice_1<Double>__NativeElementRef
+  0000000140232684: 48 89 28           mov         qword ptr [rax],rbp
+  0000000140232687: 49 8B EC           mov         rbp,r12
+  000000014023268A: 45 84 ED           test        r13b,r13b
+  000000014023268D: 0F 85 FC FE FF FF  jne         000000014023258F
+  0000000140232693: 41 BD 01 00 00 00  mov         r13d,1
+  0000000140232699: E9 F4 FE FF FF     jmp         0000000140232592
+  000000014023269E: 48 8B 03           mov         rax,qword ptr [rbx]
+  00000001402326A1: 49 8B D7           mov         rdx,r15
+  00000001402326A4: 48 03 53 08        add         rdx,qword ptr [rbx+8]
+  00000001402326A8: 8B 48 08           mov         ecx,dword ptr [rax+8]
+  00000001402326AB: 48 3B D1           cmp         rdx,rcx
+  00000001402326AE: 73 5A              jae         000000014023270A
+  00000001402326B0: 48 8D 44 D0 10     lea         rax,[rax+rdx*8+10h]
+  00000001402326B5: EB CD              jmp         0000000140232684
+  00000001402326B7: 48 8B C5           mov         rax,rbp
+  00000001402326BA: 48 83 C4 38        add         rsp,38h
+  00000001402326BE: 5B                 pop         rbx
+  00000001402326BF: 5D                 pop         rbp
+  00000001402326C0: 5E                 pop         rsi
+  00000001402326C1: 5F                 pop         rdi
+  00000001402326C2: 41 5C              pop         r12
+  00000001402326C4: 41 5D              pop         r13
+  00000001402326C6: 41 5E              pop         r14
+  00000001402326C8: 41 5F              pop         r15
+  00000001402326CA: C3                 ret
+  00000001402326CB: 48 8B 56 10        mov         rdx,qword ptr [rsi+10h]
+  00000001402326CF: 48 8B C8           mov         rcx,rax
+  00000001402326D2: E8 79 B0 3F 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  00000001402326D7: 48 8B C8           mov         rcx,rax
+  00000001402326DA: E8 11 D6 1E 06     call        RhpThrowEx
+  00000001402326DF: CC                 int         3
+  00000001402326E0: 48 8B 56 10        mov         rdx,qword ptr [rsi+10h]
+  00000001402326E4: 49 8B CF           mov         rcx,r15
+  00000001402326E7: E8 64 B0 3F 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  00000001402326EC: 48 8B C8           mov         rcx,rax
+  00000001402326EF: E8 FC D5 1E 06     call        RhpThrowEx
+  00000001402326F4: CC                 int         3
+  00000001402326F5: 48 8B 53 10        mov         rdx,qword ptr [rbx+10h]
+  00000001402326F9: 49 8B CF           mov         rcx,r15
+  00000001402326FC: E8 4F B0 3F 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  0000000140232701: 48 8B C8           mov         rcx,rax
+  0000000140232704: E8 E7 D5 1E 06     call        RhpThrowEx
+  0000000140232709: CC                 int         3
+  000000014023270A: E8 61 84 EE FF     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014023270F: CC                 int         3
+  0000000140232710: 90                 nop

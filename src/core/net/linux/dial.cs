@@ -378,7 +378,7 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         break;
     }}
     var naddrs = addrs[..0];
-    foreach (var (_, addrΔ3) in addrs) {
+    foreach (var (_, addrΔ3) in range<ΔAddr>(addrs)) {
         if (addrΔ3.Network() != hint.Network()) {
             return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type", Addr: hint.String()))));
         }
@@ -825,7 +825,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
 
         error firstErr = default; // The error from the first address is most relevant.
 
-        foreach (var (i, ra) in ras) {
+        foreach (var (i, ra) in range<ΔAddr>(ras)) {
             var selᴛ7 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out _): {

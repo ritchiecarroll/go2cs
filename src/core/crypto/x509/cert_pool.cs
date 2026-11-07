@@ -150,7 +150,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
     slice<potentialParent> matchingKeyID = default;
     slice<potentialParent> oneKeyID = default;
     slice<potentialParent> mismatchKeyID = default;
-    foreach (var (_, c) in s.byName[tmpstring(cert.RawIssuer)]) {
+    foreach (var (_, c) in range(s.byName[tmpstring(cert.RawIssuer)])) {
         var (candidate, constraint, err) = s.cert(c);
         if (err != nil) {
             continue;
@@ -281,7 +281,7 @@ public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var res = new slice<slice<byte>>(Ꮡs.len());
-    foreach (var (i, lc) in s.lazyCerts) {
+    foreach (var (i, lc) in range(s.lazyCerts)) {
         res[i] = lc.rawSubject;
     }
     return res;

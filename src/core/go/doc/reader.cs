@@ -54,7 +54,7 @@ internal static @string recvString(ast.Expr recv) {
             Ꮡb.WriteString(recvString(t.X));
             Ꮡb.WriteByte((byte)'[');
             Ꮡb.WriteString(recvParam(t.Indices[0]));
-            foreach (var (_, e) in t.Indices[1..]) {
+            foreach (var (_, e) in range(t.Indices[1..])) {
                 Ꮡb.WriteString(", ");
                 Ꮡb.WriteString(recvParam(e));
             }
@@ -282,9 +282,9 @@ internal static void remember(this ref reader r, @string predecl, ж<ast.Interfa
 
 internal static slice<@string> specNames(slice<ast.Spec> specs) {
     var names = new slice<@string>(0, len(specs)); // reasonable estimate
-    foreach (var (_, s) in specs) {
+    foreach (var (_, s) in range(specs)) {
         // s guaranteed to be an *ast.ValueSpec by readValue
-        foreach (var (_, ident) in s._<ж<ast.ValueSpec>>().Names) {
+        foreach (var (_, ident) in range(s._<ж<ast.ValueSpec>>().Names)) {
             names = append(names, ident.Name);
         }
     }
@@ -304,7 +304,7 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     nint domFreq = 0;
     @string prev = ""u8;
     nint n = 0;
-    foreach (var (_, spec) in decl.Specs) {
+    foreach (var (_, spec) in range(decl.Specs)) {
         var (s, ok) = spec._<ж<ast.ValueSpec>>(ᐧ);
         if (!ok) {
             continue; // should not happen, but be conservative
@@ -423,7 +423,7 @@ internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast
     // exports, but that's ok)
     slice<ж<ast.Field>> list = default;
     (list, typ.isStruct) = fields(spec.Type);
-    foreach (var (_, field) in list) {
+    foreach (var (_, field) in range(list)) {
         if (len(field.Names) == 0) {
             r.recordAnonymousField(typ, field.Type);
         }
@@ -474,7 +474,7 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
     if (fun.Type.Results.NumFields() >= 1) {
         ж<namedType> typ = default; // type to associate the function with
         nint numResultTypes = 0;
-        foreach (var (_, res) in fun.Type.Results.List) {
+        foreach (var (_, res) in range(fun.Type.Results.List)) {
             var factoryType = res.Type;
             {
                 var (t, ok) = factoryType._<ж<ast.ArrayType>>(ᐧ); if (ok) {
@@ -518,8 +518,8 @@ internal static ж<ast.Ident> lookupTypeParam(@string name, ж<ast.FieldList> �
     if (Ꮡtparams == nil) {
         return default;
     }
-    foreach (var (_, field) in tparams.List) {
-        foreach (var (_, id) in field.Names) {
+    foreach (var (_, field) in range(tparams.List)) {
+        foreach (var (_, id) in range(field.Names)) {
             if (id.Name == name) {
                 return id;
             }
@@ -583,10 +583,10 @@ internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
 // The note ends at the end of the comment group or at the start of
 // another note in the same comment group, whichever comes first.
 internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) {
-    foreach (var (_, group) in comments) {
+    foreach (var (_, group) in range(comments)) {
         nint i = -1; // comment index of most recent note start, valid if >= 0
         var list = group.List;
-        foreach (var (j, c) in list) {
+        foreach (var (j, c) in range(list)) {
             if (noteCommentRx.MatchString(c.Text)) {
                 if (i >= 0) {
                     r.readNote(list.slice(i, j));
@@ -614,13 +614,13 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     }
 
     // add all declarations but for functions which are processed in a separate pass
-    foreach (var (_, decl) in src.Decls) {
+    foreach (var (_, decl) in range(src.Decls)) {
         switch (decl.type()) {
         case ж<ast.GenDecl> d: {
             switch (d.Tok) {
             case var ᴛ when ᴛ == token.IMPORT: {
                 // imports are handled individually
-                foreach (var (_, spec) in d.Specs) {
+                foreach (var (_, spec) in range(d.Specs)) {
                     var (s, ok) = spec._<ж<ast.ImportSpec>>(ᐧ); if (ok) {
                         var (import_, err) = strconv.Unquote((~s.Path).Value); if (err == nil) {
                             r.imports[import_] = 1;
@@ -665,7 +665,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
                     }
                     break;
                 }
-                foreach (var (_, spec) in d.Specs) {
+                foreach (var (_, spec) in range(d.Specs)) {
                     var (s, ok) = spec._<ж<ast.TypeSpec>>(ᐧ); if (ok) {
                         // use an individual (possibly fake) declaration
                         // for each type; this also ensures that each type
@@ -680,7 +680,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
                             // src/cmd/godoc/godoc.go's posLink_urlFunc)
                             TokPos: s.Pos(),
                             Tok: token.TYPE,
-                            Specs: slice<ast.Spec>([new ast.TypeSpecжSpec(s)])
+                            Specs: [new ast.TypeSpecжSpec(s)]
                         ));
                         r.readType(fake, s);
                     }
@@ -721,7 +721,7 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
     slices.Sort<slice<@string>, @string>(r.filenames);
 
     // process files in sorted order
-    foreach (var (_, filename) in r.filenames) {
+    foreach (var (_, filename) in range(r.filenames)) {
         var f = pkg.Files[filename];
         if ((Mode)(mode & AllDecls) == 0) {
             r.fileExports(f);
@@ -737,7 +737,7 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
 
     // process functions now that we have better type information
     foreach (var (_, f) in pkg.Files) {
-        foreach (var (_, decl) in f.Decls) {
+        foreach (var (_, decl) in range(f.Decls)) {
             var (d, ok) = decl._<ж<ast.FuncDecl>>(ᐧ); if (ok) {
                 r.readFunc(d);
             }
@@ -768,7 +768,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 
     // copy existing receiver field list and set new receiver field
     ref var newFieldList = ref heap<ast.FieldList>(f.Decl.Recv.Value, out var ᏑnewFieldList);
-    newFieldList.List = slice<ж<ast.Field>>([ᏑnewField]);
+    newFieldList.List = [ᏑnewField];
 
     // copy existing function declaration and set new receiver field list
     ref var newFuncDecl = ref heap<ast.FuncDecl>(f.Decl.Value, out var ᏑnewFuncDecl);
@@ -825,7 +825,7 @@ internal static void computeMethodSets(this ref reader r) {
     // For any predeclared names that are declared locally, don't treat them as
     // exported fields anymore.
     foreach (var (predecl, _) in r.shadowedPredecl) {
-        foreach (var (_, ityp) in r.fixmap[predecl]) {
+        foreach (var (_, ityp) in range(r.fixmap[predecl])) {
             removeAnonymousField(predecl, ref (ityp).DerefOrNull());
         }
     }
@@ -897,7 +897,7 @@ internal static @string sortingName(ref ast.GenDecl d) {
 internal static slice<ж<Value>> sortedValues(slice<ж<Value>> m, token.Token tok) {
     var list = new slice<ж<Value>>(len(m)); // big enough in any case
     nint i = 0;
-    foreach (var (_, val) in m) {
+    foreach (var (_, val) in range(m)) {
         if (val.Decl.Tok == tok) {
             list[i] = val;
             i++;
@@ -971,7 +971,7 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
 // This is only used to populate the deprecated Package.Bugs field.
 internal static slice<@string> noteBodies(slice<ж<Note>> notes) {
     slice<@string> list = default;
-    foreach (var (_, n) in notes) {
+    foreach (var (_, n) in range(notes)) {
         list = append(list, n.Body);
     }
     return list;

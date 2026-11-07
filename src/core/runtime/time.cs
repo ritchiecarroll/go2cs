@@ -937,7 +937,7 @@ internal static void take(this ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
         // The world is stopped, so we ignore the locking of ts and src here.
         // That would introduce a sched < timers lock ordering,
         // which we'd rather avoid in the static ranking.
-        foreach (var (_, tw) in src.heap) {
+        foreach (var (_, tw) in range(src.heap)) {
             var t = tw.timer;
             t.ts = default;
             if ((uint8)(t.state & timerZombie) != 0) {
@@ -1422,7 +1422,7 @@ internal static void verify(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertLockHeld(Ꮡts.Ꮡmu);
-    foreach (var (i, tw) in ts.heap) {
+    foreach (var (i, tw) in range(ts.heap)) {
         if (i == 0) {
             // First timer has no parent.
             continue;
@@ -1476,7 +1476,7 @@ internal static int64 timeSleepUntil() {
 
     // Prevent allp slice changes. This is like retake.
     @lock(ᏑallpLock);
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         if (pp == nil) {
             // This can happen if procresize has grown
             // allp but not yet created new Ps.
@@ -1548,7 +1548,7 @@ internal static void siftDown(this ref timers ts, nint i) {
         }
         var w = tw;
         nint c = -1;
-        foreach (var (j, twΔ1) in heap.slice(leftChild, min(leftChild + (nint)timerHeapN, n))) {
+        foreach (var (j, twΔ1) in range(heap.slice(leftChild, min(leftChild + (nint)timerHeapN, n)))) {
             if (twΔ1.less(w)) {
                 w = twΔ1;
                 c = leftChild + j;

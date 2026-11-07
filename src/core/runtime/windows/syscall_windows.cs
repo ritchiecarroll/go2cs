@@ -196,7 +196,7 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
     }
     case var ᴛ when ᴛ == abi.Struct: {
         var st = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var i in range(st.Fields)) {
+        foreach (var i in range(len(st.Fields))) {
             var f = Ꮡ(st.Fields, i);
             if (!Δp.tryRegAssignArg(f.Typ, offset + f.Offset)) {
                 return false;
@@ -292,7 +292,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
 
     // Check arguments and construct ABI translation.
     abiDesc abiMap = default;
-    foreach (var (_, t) in ft.InSlice()) {
+    foreach (var (_, t) in range(ft.InSlice())) {
         abiMap.assignArg(t);
     }
     // The Go ABI aligns the result to the word size. src is
@@ -386,7 +386,7 @@ internal static void callbackWrap(ref callbackArgs a) {
     ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
     ref var frame = ref heap(new array<byte>(512), out var Ꮡframe);
     @unsafe.Pointer goArgs = @unsafe.Pointer.FromPinnedBox(Ꮡframe);
-    foreach (var (_, part) in c.abiMap.parts) {
+    foreach (var (_, part) in range(c.abiMap.parts)) {
         switch (part.kind) {
         case var ᴛ when ᴛ == abiPartStack: {
             memmove((uintptr)add(goArgs, part.dstStackOffset), (uintptr)add(a.args, part.srcStackOffset), part.len);

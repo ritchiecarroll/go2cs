@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Println(sprint(arg));
 
     var args = slice<any>([(nint)1, default, keepˢ]);
-    foreach (var (i, vᴛ1) in args) {
+    foreach (var (i, vᴛ1) in range(args)) {
         var a = vᴛ1;
 
         if (a == nil) {

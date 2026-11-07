@@ -191,7 +191,7 @@ public class ZeroSizeSliceSemanticsTests
         nint count = 0;
         nint lastIndex = -1;
 
-        foreach ((nint index, Void value) in s)
+        foreach ((nint index, Void value) in range(s))
         {
             count++;
             lastIndex = index;

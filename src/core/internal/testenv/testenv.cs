@@ -192,7 +192,7 @@ public static @string GoToolPath(testing.TB t) {
     // Add all environment variables that affect the Go command to test metadata.
     // Cached test results will be invalidate when these variables change.
     // See golang.org/issue/32285.
-    foreach (var (_, envVar) in strings.Fields(cfg.KnownEnv)) {
+    foreach (var (_, envVar) in range(strings.Fields(cfg.KnownEnv))) {
         os.Getenv(envVar);
     }
     return path;

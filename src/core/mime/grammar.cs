@@ -85,7 +85,7 @@ internal static bool isToken(@string s) {
     if (s == ""u8) {
         return false;
     }
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         if (!isTokenChar(c)) {
             return false;
         }

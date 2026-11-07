@@ -206,7 +206,7 @@ internal static (slice<runtime.Frame>, symbolizeFlag) allFrames(uintptr addr) {
     // each expansion. In general, CallersFrames takes a whole
     // stack, but in this case we know there will be no skips in
     // the stack and we have return PCs anyway.
-    var frames = runtime.CallersFrames(slice<uintptr>([addr]));
+    var frames = runtime.CallersFrames([addr]);
     var (frame, more) = frames.Next();
     if (frame.Function == "runtime.goexit"u8) {
         // Short-circuit if we see runtime.goexit so the loop
@@ -255,7 +255,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         w: w,
         zw: zw,
         start: time.Now(),
-        strings: slice<@string>([""]),
+        strings: [""],
         stringMap: new map<@string, nint>{[""] = 0},
         locs: new map<uintptr, locInfo>{},
         funcs: new map<@string, nint>{}
@@ -370,7 +370,7 @@ internal static error build(this ж<profileBuilder> Ꮡb) {
         if (e.tag != nil) {
             var eʗ1 = e;
             labels = () => {
-                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)(eʗ1.tag)).Value.Set.List) {
+                foreach (var (_, lbl) in range(((ж<labelMap>)(uintptr)(eʗ1.tag)).Value.Set.List)) {
                     Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
@@ -381,7 +381,7 @@ internal static error build(this ж<profileBuilder> Ꮡb) {
         b.pbSample(values, locs, labels);
     }
 
-    foreach (var (i, m) in b.mem) {
+    foreach (var (i, m) in range(b.mem)) {
         var hasFunctions = m.funcs == lookupTried; // lookupTried but not lookupFailed
         b.pbMapping(tagProfile_Mapping, (uint64)(i + 1), (uint64)m.start, (uint64)m.end, m.offset, m.@file, m.buildID, hasFunctions);
     }
@@ -635,7 +635,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
         msgOffset start = b.pb.startMessage();
         b.pb.uint64Opt(tagLocation_ID, id);
         b.pb.uint64Opt(tagLocation_Address, (uint64)firstFrame.PC);
-        foreach (var (_, vᴛ1) in b.deck.frames) {
+        foreach (var (_, vᴛ1) in range(b.deck.frames)) {
             ref var frame = ref heap(new runtime.Frame(), out var Ꮡframe);
             frame = vᴛ1;
 
@@ -654,7 +654,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             }
             b.pbLine(tagLocation_Line, funcID, (int64)frame.Line);
         }
-        foreach (var i in range(b.mem)) {
+        foreach (var i in range(len(b.mem))) {
             if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
                 b.pb.uint64Opt(tagLocation_MappingID, (uint64)(i + 1));
 
@@ -667,7 +667,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
         b.pb.endMessage(tagProfile_Location, start);
 
         // Write out functions we found during frame expansion.
-        foreach (var (_, fn) in newFuncs) {
+        foreach (var (_, fn) in range(newFuncs)) {
             msgOffset startΔ1 = b.pb.startMessage();
             b.pb.uint64Opt(tagFunction_ID, fn.id);
             b.pb.int64Opt(tagFunction_Name, b.stringIndex(fn.name));

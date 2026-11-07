@@ -115,7 +115,7 @@ internal static void Main() {
         new(st.P.OrTypedNil(), true),
         new((nint)7, false)
     ]);
-    foreach (var (_, r) in rows) {
+    foreach (var (_, r) in range(rows)) {
         fmt.Printf("row %T %v %v\n"u8, r.value, r.value == nil, r.want);
     }
 

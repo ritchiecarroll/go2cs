@@ -11,7 +11,8 @@
 // which copies *p after the arguments run and fails on a nil p through ж<T>'s own check. On the alias, `p.Abs()`
 // copied *p before the arguments, and a nil p's fault was lost when the JIT dropped a copy the method never reads
 // (DOTNET_TieredCompilation=0). Inside a closure the box is captured as it is. The controls keep the alias: a method
-// named like a member of ж<T> (fieldAccessCollisions.txt), and a `[GoRecv] this ref T` receiver, which has no box.
+// named like a member of ж<T> (fieldAccessCollisions.txt). A pointer method that calls a value method on its own
+// receiver is emitted over the box (thisRefBoxReceiver_test.go), so refRecv's call goes through the box too.
 
 package main
 
@@ -88,7 +89,7 @@ func TestValueMethodOnADerefAliasedPointerCallsTheBoxTwin(t *testing.T) {
 		// A field read keeps the alias live; the call still goes through the box.
 		{"viaParamMixed(", "return p.X + Ꮡp.Abs();", ""},
 		{"viaParamControl(", "return p.Value();", ""}, // named like ж<T>'s Value: the box's member would bind
-		{"refRecv(", "return h.Size();", ""},          // a [GoRecv] ref receiver has no box in scope
+		{"refRecv(", "return Ꮡh.Size();", ""},         // emitted over the box for this call (bodyCallsValueMethodOnReceiver)
 		{"boxRecv(", "return Ꮡh.Size();", ""},
 	} {
 		body := funcBody(t, cs, row.fn)

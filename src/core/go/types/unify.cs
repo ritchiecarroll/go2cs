@@ -92,7 +92,7 @@ internal static ж<unifier> newUnifier(slice<ж<TypeParam>> tparams, slice<ΔTyp
     // must be resolved and thus eventually will get a handle.
     // Also, sharing of handles caused by unified type parameters is rare and
     // so it's ok to not optimize for that case (and delay handle allocation).
-    foreach (var (i, x) in tparams) {
+    foreach (var (i, x) in range(tparams)) {
         ref var t = ref heap<ΔType>(out var Ꮡt);
         if (i < len(targs)) {
             t = targs[i];
@@ -173,7 +173,7 @@ internal static @string String(this ref unifier u) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var w = newTypeWriter(Ꮡbuf, default);
     w.@byte((byte)'[');
-    foreach (var (iΔ1, x) in tparams) {
+    foreach (var (iΔ1, x) in range<ж<TypeParam>>(tparams)) {
         if (iΔ1 > 0) {
             w.@string(", ");
         }
@@ -280,7 +280,7 @@ internal static nint unknowns(this ref unifier u) {
 // have identical indices.
 internal static slice<ΔType> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
     var list = new slice<ΔType>(len(tparams));
-    foreach (var (i, x) in tparams) {
+    foreach (var (i, x) in range(tparams)) {
         list[i] = u.at(x);
     }
     return list;
@@ -547,11 +547,11 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 // len(xmethods) <= len(ymethods)
                 // Collect the ymethods in a map for quick lookup.
                 var ymap = new map<@string, ж<Func>>(len(ymethods));
-                foreach (var (_, ym) in ymethods) {
+                foreach (var (_, ym) in range(ymethods)) {
                     ymap[ym.of(Func.Ꮡobject).Id()] = ym;
                 }
                 // All xmethods must exist in ymethods and corresponding signatures must unify.
-                foreach (var (_, xm) in xmethods) {
+                foreach (var (_, xm) in range(xmethods)) {
                     var ym = ymap[xm.of(Func.Ꮡobject).Id()]; if (ym == nil || !Ꮡu.nify(xm.typ, ym.typ, exact, Ꮡp)) {
                         result = false; goto ᒐdone;
                     }
@@ -571,7 +571,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             if (xi != nil) {
                 // All xi methods must exist in y and corresponding signatures must unify.
                 var xmethods = xi.typeSet().methods;
-                foreach (var (_, xm) in xmethods) {
+                foreach (var (_, xm) in range(xmethods)) {
                     var (obj, _, _) = LookupFieldOrMethod(y, false, xm.pkg, xm.name);
                     var (ym, _) = obj._<ж<Func>>(ᐧ); if (ym == nil || !Ꮡu.nify(xm.typ, ym.typ, exact, Ꮡp)) {
                         result = false; goto ᒐdone;
@@ -646,7 +646,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             // name. Lower-case field names from different packages are always different.
             if (y._<ж<Struct>>(out var yΔ4)) {
                 if (xΔ3.NumFields() == yΔ4.NumFields()) {
-                    foreach (var (i, f) in xΔ3.fields) {
+                    foreach (var (i, f) in range(xΔ3.fields)) {
                         var g = yΔ4.fields[i];
                         if (f.embedded != g.embedded || xΔ3.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId(g.pkg, g.name, false) || !Ꮡu.nify(f.typ, g.typ, emode, Ꮡp)) {
                             result = false; goto ᒐdone;
@@ -670,7 +670,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
             if (y._<ж<Tuple>>(out var yΔ6)) {
                 if (xΔ3.Len() == yΔ6.Len()) {
                     if (xΔ3 != nil) {
-                        foreach (var (i, v) in xΔ3.vars) {
+                        foreach (var (i, v) in range(xΔ3.vars)) {
                             var w = yΔ6.vars[i];
                             if (!Ꮡu.nify(v.typ, w.typ, mode, Ꮡp)) {
                                 result = false; goto ᒐdone;
@@ -745,7 +745,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                         assertSortedMethods(a);
                         assertSortedMethods(b);
                     }
-                    foreach (var (i, f) in a) {
+                    foreach (var (i, f) in range(a)) {
                         var g = b[i];
                         if (f.of(Func.Ꮡobject).Id() != g.of(Func.Ꮡobject).Id() || !Ꮡu.nify(f.typ, g.typ, exact, q)) {
                             result = false; goto ᒐdone;
@@ -784,7 +784,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 if (len(xargs) != len(yargs)) {
                     result = false; goto ᒐdone;
                 }
-                foreach (var (i, xarg) in xargs) {
+                foreach (var (i, xarg) in range(xargs)) {
                     if (!Ꮡu.nify(xarg, yargs[i], mode, Ꮡp)) {
                         result = false; goto ᒐdone;
                     }

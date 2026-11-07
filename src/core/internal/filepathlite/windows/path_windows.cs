@@ -79,7 +79,7 @@ internal static (@string, error) localize(@string path) {
     if (containsSlash) {
         // We can't depend on strings, so substitute \ for / manually.
         var buf = slice<byte>(path);
-        foreach (var (i, b) in buf) {
+        foreach (var (i, b) in range(buf)) {
             if (b == '/') {
                 buf[i] = (byte)'\\';
             }
@@ -322,7 +322,7 @@ internal static void postClean(ж<lazybuf> Ꮡout) {
     // If a ':' appears in the path element at the start of a path,
     // insert a .\ at the beginning to avoid converting relative paths
     // like a/../c: into c:.
-    foreach (var (_, c) in @out.buf) {
+    foreach (var (_, c) in range(@out.buf)) {
         if (IsPathSeparator(c)) {
             break;
         }

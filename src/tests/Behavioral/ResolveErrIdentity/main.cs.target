@@ -23,7 +23,7 @@ internal static void Main() {
         new("l2tp:gre", "127.0.0.1", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpGreˢ))),
         new("tcp", "1.2.3.4:123", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)tcpˢ)))
     ]);
-    foreach (var (_, r) in rows) {
+    foreach (var (_, r) in range(rows)) {
         var (addr, err) = Δnet.ResolveIPAddr(r.network, r.addr);
         fmt.Printf("ResolveIPAddr(%q):\n"u8, r.network);
         fmt.Printf("   addr nil:                  %v\n"u8, addr == nil);

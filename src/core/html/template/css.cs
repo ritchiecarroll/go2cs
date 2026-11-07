@@ -103,7 +103,7 @@ internal static bool isHex(byte c) {
 // hexDecode decodes a short hex digit sequence: "10" -> 16.
 internal static rune hexDecode(slice<byte> s) {
     var n = (rune)'\x00';
-    foreach (var (_, c) in s) {
+    foreach (var (_, c) in range(s)) {
         n <<= 4;
         switch (ᐧ) {
         case {} when (byte)'0' <= c && c <= (byte)'9': {
@@ -249,7 +249,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     // So we need to make sure that values do not have mismatched bracket
     // or quote characters to prevent the browser from restarting parsing
     // inside a string that might embed JavaScript source.
-    foreach (var (i, c) in b) {
+    foreach (var (i, c) in range(b)) {
         switch (c) {
         case 0 or (byte)'"' or (byte)'\'' or (byte)'(' or (byte)')' or (byte)'/' or (byte)';' or (byte)'@' or (byte)'[' or (byte)'\\' or (byte)']' or (byte)'`' or (byte)'{' or (byte)'}' or (byte)'<' or (byte)'>': {
             return filterFailsafe;

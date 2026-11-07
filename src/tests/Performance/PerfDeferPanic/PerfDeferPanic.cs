@@ -10,9 +10,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void add(this ref counter c, nint d) {
-    c.n += d;
-}
+internal static void add(this ref counter c, nint d) { c.n += d; }
 
 internal static error errBoom = errors.New("boom");
 
@@ -49,10 +47,8 @@ internal static nint /*r*/ viaRecover(nint i) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var e = recover(); if (AreEqual(e, errBoom)) {
-                    r = i & 15;
-                }
+            var e = recover(); if (AreEqual(e, errBoom)) {
+                r = i & 15;
             }
         }, ref ᒐ);
         throw panic(errBoom);

@@ -410,7 +410,7 @@ Loop:
                 }
                 parts = slices.Delete<slice<@string>, @string>(parts, i - count, end);
                 if (len(parts) == 0) {
-                    parts = slice<@string>(["."]);
+                    parts = ["."];
                 }
                 i = 0;
                 if (dirfd != rootfd) {
@@ -512,7 +512,7 @@ Loop:
             case ж<PathError> e: {
                 // This is strings.Join(parts[:i+1], PathSeparator).
                 e.Path = parts[0];
-                foreach (var (_, part) in parts.slice(1, i + 1)) {
+                foreach (var (_, part) in range(parts.slice(1, i + 1))) {
                     e.Path += ((@string)(rune)PathSeparator) + part;
                 }
                 (ret, err) = (ret, new fs.PathErrorжerror(e)); goto ᒐdone;

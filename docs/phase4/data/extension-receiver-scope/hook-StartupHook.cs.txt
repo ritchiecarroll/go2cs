@@ -1,0 +1,173 @@
+// P1 L3 scout instrument (DOTNET_STARTUP_HOOKS), never shipped.
+// P1L3_LIST=<file of assembly names>  P1L3_OUT=<tsv>: before Main, loads each listed assembly and walks it as golib's
+// extension scan does (metadata host types, GetMethods, IsDefined(Extension)), then reads each method's receiver with
+// GetParameters, timing each part cold; classifies the receiver's HOME assembly against the declaring assembly.
+// P1L3_EXIT=<file>: at ProcessExit writes the names of the loaded assemblies.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+internal class StartupHook
+{
+    static bool Skip(string n) => n.StartsWith("System") || n.StartsWith("netstandard") || n.StartsWith("Microsoft") ||
+        n.StartsWith("WindowsBase") || n == "golib" || n.StartsWith("go.golib.") || n == "P1L3Hook";
+
+    static double Us(long a, long b) => (b - a) * 1e6 / Stopwatch.Frequency;
+
+    static unsafe List<Type> Hosts(Assembly asm)
+    {
+        var list = new List<Type>();
+        if (!System.Reflection.Metadata.AssemblyExtensions.TryGetRawMetadata(asm, out byte* blob, out int len)) return null;
+        var md = new MetadataReader(blob, len);
+        foreach (var h in md.TypeDefinitions)
+        {
+            var td = md.GetTypeDefinition(h);
+            if (td.GetDeclaringType() != default(TypeDefinitionHandle)) continue;
+            var attrs = td.Attributes;
+            if ((attrs & TypeAttributes.Sealed) == 0 || (attrs & TypeAttributes.Interface) != 0) continue;
+            if (td.GetGenericParameters().Count > 0) continue;
+            bool ext = false;
+            foreach (var ch in td.GetCustomAttributes())
+            {
+                var ca = md.GetCustomAttribute(ch);
+                string name = null;
+                if (ca.Constructor.Kind == HandleKind.MemberReference)
+                {
+                    var mr = md.GetMemberReference((MemberReferenceHandle)ca.Constructor);
+                    if (mr.Parent.Kind == HandleKind.TypeReference) name = md.GetString(md.GetTypeReference((TypeReferenceHandle)mr.Parent).Name);
+                }
+                else if (ca.Constructor.Kind == HandleKind.MethodDefinition)
+                {
+                    var mdef = md.GetMethodDefinition((MethodDefinitionHandle)ca.Constructor);
+                    name = md.GetString(md.GetTypeDefinition(mdef.GetDeclaringType()).Name);
+                }
+                if (name == "ExtensionAttribute") { ext = true; break; }
+            }
+            if (!ext) continue;
+            list.Add(asm.ManifestModule.ResolveType(System.Reflection.Metadata.Ecma335.MetadataTokens.GetToken(h)));
+        }
+        return list;
+    }
+
+    static Type Home(Type r, out string kind)
+    {
+        if (r.IsByRef) r = r.GetElementType();
+        if (r.IsGenericParameter) { kind = "generic-param"; return null; }
+        if (r.IsGenericType && r.GetGenericTypeDefinition().Name == "ж`1" && r.GetGenericTypeDefinition().Assembly.GetName().Name == "golib")
+        {
+            r = r.GetGenericArguments()[0];
+            if (r.IsGenericParameter) { kind = "box-of-generic-param"; return null; }
+        }
+        kind = "type";
+        return r.IsGenericType ? r.GetGenericTypeDefinition() : r;
+    }
+
+
+    static readonly HashSet<string> Keys = new();
+    static Type s_te;
+    static void Snapshot(string when)
+    {
+        if (s_te == null)
+        {
+            var g = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name == "golib");
+            s_te = g?.GetType("go.golib.TypeExtensions");
+            if (s_te == null) return;
+        }
+        foreach (var fname in new[] { "s_typeExtensionMethods", "s_goMethodSetCandidates" })
+        {
+            var f = s_te.GetField(fname, BindingFlags.Static | BindingFlags.NonPublic);
+            if (f?.GetValue(null) is not System.Collections.IDictionary d) continue;
+            foreach (var k in d.Keys)
+            {
+                string key = k is Type t ? $"ext\t{t}\t{t.Assembly.GetName().Name}" : DescribeTuple(k);
+                lock (Keys) Keys.Add(key);
+            }
+        }
+        var scan = s_te.GetField("s_extensionScan", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(null);
+        if (scan != null) lock (Keys) Keys.Add($"scan-present\t{when}");
+    }
+    static string DescribeTuple(object k)
+    {
+        var t = (Type)k.GetType().GetField("Item1").GetValue(k);
+        var p = (bool)k.GetType().GetField("Item2").GetValue(k);
+        return $"mset\t{t}\t{t.Assembly.GetName().Name}\t{(p ? "ptr" : "val")}";
+    }
+    public static void Initialize()
+    {
+        string scanFile = Environment.GetEnvironmentVariable("P1L3_SCAN");
+        if (scanFile != null)
+        {
+            var rows = new System.Collections.Concurrent.ConcurrentQueue<string>();
+            bool armed = false;
+            long t0 = Stopwatch.GetTimestamp();
+            AppDomain.CurrentDomain.AssemblyLoad += (_, e) =>
+            {
+                if (armed || e.LoadedAssembly.GetName().Name != "golib") return;
+                var f = e.LoadedAssembly.GetType("go.golib.TypeExtensions")?.GetField("ScanProbeForTest", BindingFlags.Static | BindingFlags.NonPublic);
+                if (f == null) return;
+                Action<Assembly> d = asm => rows.Enqueue($"{Us(t0, Stopwatch.GetTimestamp()):F0}\t{Environment.CurrentManagedThreadId}\t{asm.GetName().Name}");
+                f.SetValue(null, d); armed = true;
+            };
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => { rows.Enqueue($"{Us(t0, Stopwatch.GetTimestamp()):F0}\t-\tEXIT"); File.WriteAllLines(scanFile, rows); };
+        }
+        string keysFile = Environment.GetEnvironmentVariable("P1L3_KEYS");
+        if (keysFile != null)
+        {
+            int loads = 0;
+            AppDomain.CurrentDomain.AssemblyLoad += (_, e) => { loads++; Snapshot("load"); };
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => { Snapshot("exit"); lock (Keys) File.WriteAllLines(keysFile, Keys.OrderBy(x => x).Append($"loads\t{loads}")); };
+        }
+        string exitFile = Environment.GetEnvironmentVariable("P1L3_EXIT");
+        if (exitFile != null)
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => File.WriteAllLines(exitFile,
+                AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.GetName().Name).OrderBy(n => n));
+
+        string listFile = Environment.GetEnvironmentVariable("P1L3_LIST"), outFile = Environment.GetEnvironmentVariable("P1L3_OUT");
+        if (listFile == null || outFile == null) return;
+
+        var sum = new StringBuilder("assembly\thosts\text_methods\twalk_us\tmethods_us\tgetparams_us\tsame\tcross\tother\n");
+        var cross = new StringBuilder("decl_assembly\thost_type\tmethod\treceiver\tkind\thome_assembly\n");
+        double tw = 0, tm = 0, tp = 0; int tn = 0, tc = 0;
+        foreach (var name in File.ReadAllLines(listFile))
+        {
+            if (name.Length == 0 || Skip(name)) continue;
+            Assembly asm;
+            try { asm = Assembly.Load(name); } catch { continue; }
+            long a = Stopwatch.GetTimestamp();
+            var hosts = Hosts(asm);
+            long b = Stopwatch.GetTimestamp();
+            if (hosts == null) continue;
+            var methods = new List<MethodInfo>();
+            foreach (var t in hosts)
+            {
+                if (!t.IsSealed || t.IsNested || t.IsGenericType) continue;
+                foreach (var m in t.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                    if (m.IsDefined(typeof(ExtensionAttribute), false)) methods.Add(m);
+            }
+            long c = Stopwatch.GetTimestamp();
+            var receivers = new Type[methods.Count];
+            for (int i = 0; i < methods.Count; i++) receivers[i] = methods[i].GetParameters()[0].ParameterType;
+            long d = Stopwatch.GetTimestamp();
+            int same = 0, x = 0, other = 0;
+            for (int i = 0; i < methods.Count; i++)
+            {
+                Type home = Home(receivers[i], out string kind);
+                if (home == null) { other++; cross.Append($"{name}\t{methods[i].DeclaringType.FullName}\t{methods[i].Name}\t{receivers[i]}\t{kind}\t-\n"); continue; }
+                if (home.Assembly == asm) { same++; continue; }
+                x++;
+                cross.Append($"{name}\t{methods[i].DeclaringType.FullName}\t{methods[i].Name}\t{receivers[i]}\t{kind}\t{home.Assembly.GetName().Name}\n");
+            }
+            sum.Append($"{name}\t{hosts.Count}\t{methods.Count}\t{Us(a, b):F0}\t{Us(b, c):F0}\t{Us(c, d):F0}\t{same}\t{x}\t{other}\n");
+            tw += Us(a, b); tm += Us(b, c); tp += Us(c, d); tn += methods.Count; tc += x;
+        }
+        sum.Append($"TOTAL\t-\t{tn}\t{tw:F0}\t{tm:F0}\t{tp:F0}\t-\t{tc}\t-\n");
+        File.WriteAllText(outFile, sum.ToString());
+        File.WriteAllText(Path.ChangeExtension(outFile, ".cross.tsv"), cross.ToString());
+    }
+}

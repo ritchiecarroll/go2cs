@@ -91,7 +91,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, Func<hash.Hash> mh) {
         var prefixes = slice<slice<byte>>([default, emptyBuff, shortBuff, longBuff]);
 
         // Go to each string and check digest gets appended to and is correct size.
-        foreach (var (_, prefix) in prefixes) {
+        foreach (var (_, prefix) in range(prefixes)) {
             h.Reset();
 
             var sum = getSum(tΔ1, h, prefix); // Append new digest to prefix
@@ -127,7 +127,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, Func<hash.Hash> mh) {
         // Set of example strings to append digest to
         var slices = slice<slice<byte>>([emptySlice, shortSlice, longSlice]);
 
-        foreach (var (_, Δslice) in slices) {
+        foreach (var (_, Δslice) in range(slices)) {
             writeToHash(tΔ2, h, Δslice); // Writes and checks Write doesn't error
         }
     });

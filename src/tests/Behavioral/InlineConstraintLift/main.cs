@@ -59,7 +59,7 @@ public static @string Names<T>(this ref Box<T> b)
     where T : Box_T
 {
     @string @out = "";
-    foreach (var (_, it) in b.items) {
+    foreach (var (_, it) in range(b.items)) {
         @out += it.Name() + ";"u8;
     }
     return @out;

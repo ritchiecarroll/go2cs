@@ -35,7 +35,7 @@ internal static void uint64s(this ref protobuf b, nint tag, slice<uint64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
-        foreach (var (_, u) in x) {
+        foreach (var (_, u) in range(x)) {
             b.varint(u);
         }
         nint n2 = len(b.data);
@@ -46,7 +46,7 @@ internal static void uint64s(this ref protobuf b, nint tag, slice<uint64> x) {
         copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
-    foreach (var (_, u) in x) {
+    foreach (var (_, u) in range(x)) {
         b.uint64(tag, u);
     }
 }
@@ -74,7 +74,7 @@ internal static void int64s(this ref protobuf b, nint tag, slice<int64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
-        foreach (var (_, u) in x) {
+        foreach (var (_, u) in range(x)) {
             b.varint((uint64)u);
         }
         nint n2 = len(b.data);
@@ -85,7 +85,7 @@ internal static void int64s(this ref protobuf b, nint tag, slice<int64> x) {
         copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
-    foreach (var (_, u) in x) {
+    foreach (var (_, u) in range(x)) {
         b.int64(tag, u);
     }
 }
@@ -96,7 +96,7 @@ internal static void @string(this ref protobuf b, nint tag, @string x) {
 }
 
 internal static void strings(this ref protobuf b, nint tag, slice<@string> x) {
-    foreach (var (_, s) in x) {
+    foreach (var (_, s) in range(x)) {
         b.@string(tag, s);
     }
 }

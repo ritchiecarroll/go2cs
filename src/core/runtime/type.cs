@@ -258,7 +258,7 @@ top:
     case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.StructType();
         abi.StructField bigField = default;
-        foreach (var (_, f) in s.Fields) {
+        foreach (var (_, f) in range(s.Fields)) {
             var ft = f.Typ;
             if (!ft.Pointers()) {
                 continue;
@@ -471,10 +471,10 @@ internal static void typelinksinit() {
 
     var modules = activeModules();
     var prev = modules[0];
-    foreach (var (_, md) in modules[1..]) {
+    foreach (var (_, md) in range(modules[1..])) {
         // Collect types from the previous module into typehash.
 collect:
-        foreach (var (_, tl) in prev.typelinks) {
+        foreach (var (_, tl) in range(prev.typelinks)) {
             ж<_type> t = default;
             if (prev.typemap == nil) {
                 t = (ж<_type>)(uintptr)((@unsafe.Pointer)(prev.types + (uintptr)tl));
@@ -483,7 +483,7 @@ collect:
             }
             // Add to typehash if not seen before.
             var tlist = typehash[t.Hash];
-            foreach (var (_, tcur) in tlist) {
+            foreach (var (_, tcur) in range(tlist)) {
                 if (tcur == t) {
                     goto continue_collect;
                 }
@@ -500,9 +500,9 @@ break_collect:;
             var tm = new map<typeOff, ж<_type>>(len(md.typelinks));
             pinnedTypemaps = append(pinnedTypemaps, tm);
             md.typemap = tm;
-            foreach (var (_, tl) in md.typelinks) {
+            foreach (var (_, tl) in range(md.typelinks)) {
                 var t = (ж<_type>)(uintptr)((@unsafe.Pointer)(md.types + (uintptr)tl));
-                foreach (var (_, candidate) in typehash[t.Hash]) {
+                foreach (var (_, candidate) in range(typehash[t.Hash])) {
                     var seen = new map<_typePair, EmptyStruct>{};
                     if (typesEqual(t, candidate, seen)) {
                         t = candidate;
@@ -625,7 +625,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         if (len(it.Methods) != len(iv.Methods)) {
             return false;
         }
-        foreach (var i in range(it.Methods)) {
+        foreach (var i in range(len(it.Methods))) {
             var tm = Ꮡ(it.Methods, i);
             var vm = Ꮡ(iv.Methods, i);
             // Note the mhdr array can be relocated from
@@ -670,7 +670,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         if (st.PkgPath.Name() != sv.PkgPath.Name()) {
             return false;
         }
-        foreach (var i in range(st.Fields)) {
+        foreach (var i in range(len(st.Fields))) {
             var tf = Ꮡ(st.Fields, i);
             var vf = Ꮡ(sv.Fields, i);
             if (tf.Name.Name() != vf.Name.Name()) {

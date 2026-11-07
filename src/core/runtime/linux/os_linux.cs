@@ -109,7 +109,7 @@ internal static int32 getCPUCount() {
         return 1;
     }
     var n = (int32)0;
-    foreach (var (_, vᴛ1) in buf.slice(0, r)) {
+    foreach (var (_, vᴛ1) in range(buf.slice(0, r))) {
         var v = vᴛ1;
 
         while (v != 0) {

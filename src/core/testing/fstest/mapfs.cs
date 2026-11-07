@@ -97,7 +97,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
             return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
         }
     }
-    foreach (var (_, fi) in list) {
+    foreach (var (_, fi) in range(list)) {
         delete(need, fi.name);
     }
     foreach (var (nameΔ1, _) in need) {
@@ -341,7 +341,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
         n = count;
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var i in range(list)) {
+    foreach (var i in range(len(list))) {
         list[i] = new mapFileInfoжDirEntry(Ꮡ(d.entry, d.offset + i));
     }
     d.offset += n;

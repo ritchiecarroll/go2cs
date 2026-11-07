@@ -361,7 +361,7 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
         return;
     }
     var removed = (uintptr)0;
-    foreach (var (_, r) in a.ranges.slice(pivot)) {
+    foreach (var (_, r) in range(a.ranges.slice(pivot))) {
         removed += r.size();
     }
     {

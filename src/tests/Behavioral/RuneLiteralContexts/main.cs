@@ -124,7 +124,7 @@ internal static partial void Main() {
     }, (rune)'g');
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
 
-    foreach (var (_, c) in slice<byte>("a_7."u8)) {
+    foreach (var (_, c) in range(slice<byte>("a_7."u8))) {
         int8 i8Δ1 = (int8)c;
         switch (ᐧ) {
         case {} when c is (byte)'_': {

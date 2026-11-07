@@ -189,7 +189,7 @@ internal static error refill(this ref Decoder dec) {
 }
 
 internal static bool nonSpace(slice<byte> b) {
-    foreach (var (_, c) in b) {
+    foreach (var (_, c) in range(b)) {
         if (!isSpace(c)) {
             return true;
         }

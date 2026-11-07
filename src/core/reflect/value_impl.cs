@@ -2520,7 +2520,7 @@ public static ΔValue Append(ΔValue s, params ꓸꓸꓸValue xʗp) {
     s.mustBe(ΔSlice, "");
     nint n = s.Len();
     s = s.extendSlice(len(x));
-    foreach (var (i, v) in x) {
+    foreach (var (i, v) in range(x)) {
         s.Index(n + i).Set(v);
     }
     return s;
@@ -2946,7 +2946,7 @@ internal static StructField FieldByIndex(this ж<rtype> Ꮡt, slice<nint> index)
     }
     StructField f = default!;
     f.Type = toType(Ꮡt.common());
-    foreach (var (i, x) in index) {
+    foreach (var (i, x) in range(index)) {
         if (i > 0) {
             var ft = f.Type;
             if (ft.Kind() == ΔPointer && ft.Elem().Kind() == Struct) {

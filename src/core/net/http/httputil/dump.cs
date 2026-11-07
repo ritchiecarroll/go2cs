@@ -55,7 +55,7 @@ internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) { retur
 partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
     return (len(p), default);

@@ -18,18 +18,18 @@ partial struct armsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action run;
 }
-[GoLazy] partial class lazyᴛarms { internal static slice<armsᴛ1> arms = slice<armsᴛ1>([
+[GoLazy] partial class lazyᴛarms { internal static slice<armsᴛ1> arms = [
     new("a: main's defers run, recover reads nil, a goroutine finishes, then no goroutines", armA),
     new("b: a goroutine calls os.Exit(0) after main's Goexit", armB),
     new("c: a goroutine panics after main's Goexit", armC),
     new("d: the goroutine left blocks forever in select{}", armD),
     new("e: the Goexit is raised two deferring frames below main", armE),
     new("f: the Goexit reaches main through iter.Pull's next", armF)
-]); }
+]; }
 
 internal static void Main() {
     @string arm = Δos.Getenv("GOEXIT_MAIN_ARM"); if (arm != ""u8) {
-        foreach (var (_, a) in arms) {
+        foreach (var (_, a) in range(arms)) {
             if (a.name[..1] == arm) {
                 a.run();
             }
@@ -38,7 +38,7 @@ internal static void Main() {
         return;
     }
 
-    foreach (var (_, a) in arms) {
+    foreach (var (_, a) in range(arms)) {
         parent(a.name);
     }
 }
@@ -202,7 +202,7 @@ internal static void parent(@string name) {
     }
 
     fmt.Println("== arm", name);
-    foreach (var (_, line) in strings.Split(strings.TrimRight(Ꮡstdout.String(), "\n"), "\n")) {
+    foreach (var (_, line) in range(strings.Split(strings.TrimRight(Ꮡstdout.String(), "\n"), "\n"))) {
         if (line != ""u8) {
             fmt.Println("  stdout:", line);
         }

@@ -33669,6 +33669,21 @@ silicon, and every compile-time-folded `GOARCH ==` branch that the shape-1 censu
 
 — C1 (2026-11-06)
 
+**Amended 2026-11-06 (C1, COORD's seat (a): the sweep-shard divergence line) — the AES trio READ, closed on
+osx-arm64.** Run 42261290086 at `claude/c1-sweep-divergences` (8fba1e6e7, the AES seat landed beneath it) read the
+runtime row through the new summary line. osx-arm64: matched 11062 of 11120, disclosed 63, ONE undisclosed
+divergence (TestUnsafePoint, Go pass / C# fail, its failure not matching the disclosed `can't objdump` signature).
+None of TestMemHash32Equality, TestMemHash64Equality or TestMemHashGlobalSeed/aes is among them, so all three
+match Go. osx-x64: matched 11061, two undisclosed (TestUnsafePoint and TestPingPongHog, Go pass / C# fail).
+
+**Correction to the counts in this row's posts.** The "62 undisclosed" (oracle at amd64) and "61 -> 58" figures
+were a recount from the verdict maps that compared bare names against the record's `disclosed` list. Those entries
+read `Name (class): signature`, so no disclosed name ever matched. The figures were the count of UNEQUAL verdicts:
+58 = 11120 - 11062 now, 61 before the AES fix, and 62 with the oracle under Rosetta. The undisclosed count is the
+converter's own mismatch lines, which the line reads: 1 on osx-arm64.
+
+— C1 (2026-11-06)
+
 ### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
 
 This is the owed row for a gap that until now was recorded only as prose, at
@@ -33963,6 +33978,48 @@ Read while gating batches 202-203 (re-merged as 205-206) and 207 on the i7 and t
 - One earlier i7 Release failure at 386e95397a stays UNNAMED: it ran at -v q with no trx, so it is not attributed to either test.
 Both tests read clean in every other run: 13 Release and 3 Debug across the two boxes. **Open; owner to be assigned.** The fix shape is the owner's: a deterministic precondition (no GC inside the window, a private pool, or a bounded retry) without hiding a real regression.
 
+**Amended 2026-11-07 (H, COORD's flakes seat, claude/h-golib-flakes) — (2) CLOSED; (1) still OPEN, source unnamed.**
+
+**(2) TestSemaHandoffsRatio: CLOSED.** The mechanism was measured: the ratio reads the host OS scheduler, not
+the code. Instrumented, H's 12 idle full suites (12,000 trials) had 4 losses, all after the waiter had resumed.
+Under 8 busy loops on H's 8 logical CPUs the test read 868/902/875, and under 16 it read 14 of 1000, the class of
+the i9's 383 and linux's 25. Every loss was one of two kinds, and neither is reachable by code:
+- (A) the waiter's thread was not scheduled within the 10 ms bound (Go's forcePreemptNS), so the releaser went on;
+- (B) the waiter resumed and released the releaser, then lost the core before its CAS.
+In Go both goroutines share one P; here each is an OS thread. The ratio assert is replaced by what the yield
+guarantees, per trial, with zero tolerance: unless the bound fired, the waiter has left its park when Release
+returns (`RuntimeSemaphoreHandoffTests.cs:110`). The waiter's park scope writes its wait reason Zero before it sets
+the event the releaser waits on, so this holds on any scheduler. 27,000 trials (18,000 idle, 9,000 loaded) read 0
+violations, including two runs under 12 busy loops that read 303 and 412 of 1000, which fail the old ratio. A
+planted no-yield handoff (the wait elided in `RuntimeSemaphore.Release`) fails it in 1000 of 1000 trials, in Debug
+and in Release; restored byte-identical. yields == Trials stays, the ratio is still printed, and the bound is
+untouched. The disclosed limit is in the test's comment: a waiter that never sets the event rides the bound in
+every trial and passes both the old test and the new one.
+
+**(1) RangeSnapshotChargesNothingOnEitherMeter: still OPEN.** The 4,984 and 6,352 B source is unnamed: it did not
+reproduce on H. Every window read 0 B in 12 instrumented suites, 9 isolated Release windows and 5 under 8 busy
+loops. Each candidate was probed inside the window and falsified:
+- a GC (gen0, gen2, gen2 plus finalizers, 40 windows each): 0 B;
+- a high-pressure pool trim clearing the thread's slot: 40 B;
+- the measuring loop's own tier-up (OSR): 0 B;
+- the tiering worker idled out for 5 s and then re-created: 0 B;
+- a concurrent `GC.GetTotalAllocatedBytes(precise: true)`, 39k EE suspensions: 0 B.
+One non-steady activity was measured in the window: in Release it held the measuring method's own tier-up, on the
+test thread, at 13-17 ms. The same window reads 0.03 ms with tiering off, 0.07 ms under AggressiveOptimization,
+and 0.17 ms in Debug, which does not tier.
+
+COORD ruled the change on the seat branch:
+- AggressiveOptimization on the measuring method (`ArrayRangeAllocationTests.cs:72`), which removes that tier-up
+  from the window and is NOT named as the cause;
+- the per-loop byte trace in the failure message: each step's loop, GC counts per generation, window ms and
+  memory load;
+- the zero assert untouched.
+A planted heap copy (the enumerator's pool rent replaced by `new T[length]`) fails it in both configurations, at
+32,000 B with a step on every loop; restored byte-identical. Source unnamed; the in-window tier-up is removed; the
+next failure self-describes. The i7 reproduced it, and it is the box to read on if it recurs.
+
+— H (2026-11-07)
+
 ## 2026-11-06 — H (COORD ruling, claude/h-p521-table): P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built
 
 **The shape.** fiat's converted p384Mul declares 460 named locals before the converter's tuple temporaries, against
@@ -34167,6 +34224,22 @@ cause before any fix.
 
 — P1 (2026-11-06)
 
+**Amended 2026-11-06 (P1, COORD ruling: the AOT variadic shell seat) — the framing was too narrow; FIXED on
+`claude/p1-aot-variadic-shell`, closes when it lands.** The gap is not about `testing`, promotion or a second
+assembly. Any runtime assert of a struct value, or a pointer to one, to an interface with a variadic method read false
+under Native AOT when no compile-time `GoImplement` covered the pair: a local value method `V.Error(...any)` missed
+too. go2cs-gen gave such interfaces no object shell, since a `params Span<T>` tail cannot ride a boxed invoker. The
+binder then fell to the generic shell's `MakeGenericType` over the struct, which Native AOT has no code for.
+The fix binds each variadic member through the type's compiled `IGoMethodSet` arm, or, for the hand-owned
+`testing.T`/`B`/`F`, `Delegate.CreateDelegate` over the box overload. Native AOT at the fix, against Go:
+`Behavioral/VariadicInterfaceAssert` (new) reads 15/15 asserts, up from 5/15, and XpkgPromotedMethodSet 61/61, up from
+60/61. AOT image size is +0.025% on PerfStartup. No generic limit was read: `G[int]` to `Error(...any)` reads true
+under AOT at the fix and the call arrives, and a go/ast census of go1.26.10 `src` finds 0 of 294 variadic receiver
+methods on a generic type and no generic struct embedding a type with one. Record:
+[`DATA-aot-variadic-shell.md`](DATA-aot-variadic-shell.md).
+
+— P1 (2026-11-06)
+
 
 ### 2026-11-06: a nil pointer PARAMETER's value-method call goes through its box (CLOSED for parameters and box receivers; `this ref T` receivers OPEN)
 
@@ -34213,6 +34286,103 @@ unmeasured: an explicit nil check on the ref (it still copies first), or emittin
 
 **Guards:** converter test TestValueMethodOnADerefAliasedPointerCallsTheBoxTwin (red at the base on its 4 positive
 rows); behavioral NilPointerParamValueCallTC0 (above) and NilPointerValueReceiverCall.
+
+— C2 (2026-11-06)
+
+## 2026-11-06 — P2 (claude/p2-class-k regen): the comment census does not count a one-line C# declaration whose body names a `_package` class — OPEN, the i9 may take it
+
+`isCSDecl` (src/go2cs/internal/commentcensus/census.go) refuses any line containing `_package`, which was meant for the
+`partial class X_package` lines. Class K emits short functions on one line, so net/http's
+`internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }`
+is no declaration to the census and `top:unmapped:method` rose 168 -> 169 at K's regen (23327b4686). The likely fix is to refuse
+`_package` only in the declaration's head, before its body opens; the baseline then moves by that one method.
+
+— P2 (2026-11-06)
+
+## 2026-11-07 — C1 (COORD ruling): runtime's TestPingPongHog fails on the converted side on osx-x64 only — OPEN, candidate flake, unrooted
+
+**Read.** Run 42261290086 (darwin sweep-shard at `claude/c1-sweep-divergences` 8fba1e6e7, the first run whose summary
+prints each failing row's undisclosed divergences): osx-x64's runtime row carries TWO undisclosed divergences,
+TestUnsafePoint and TestPingPongHog (Go pass / C# fail); osx-arm64's carries only TestUnsafePoint. TestPingPongHog is
+a scheduling-fairness test (two goroutines handing a channel value back and forth must each get a comparable share of
+CPU), and the osx-x64 runner is the 3-core hosted image.
+
+**Not chased (COORD).** One reading, one RID, a timing-shaped test on the smallest runner. It reads as a candidate
+flake. It is unrooted: no re-run, no second reading, and no per-test text was read (the C# FAIL listing caps at 30
+tests a row and did not reach it).
+
+**What would root it:** the test's own failure text from a re-read of runtime on osx-x64 (the sweep log's C# FAIL
+block now prints it when the row fails), and whether it recurs across runs or follows the runner's core count.
+
+— C1 (2026-11-07)
+
+## 2026-11-07 — i9 (claude/i9-census-package): the comment census reads a member line that names a `_package` class as its declaration — CLOSES P2's 2026-11-06 entry
+
+**The fix.** `isCSDecl` (src/go2cs/internal/commentcensus/census.go) now refuses a `_package` name only on the line
+that declares a package class, `\bclass\s+@?[\pL\pN_]+_package\b`. That covers the four forms the corpus writes:
+`partial class X_package {`, `public static partial class X_package`, `public static unsafe partial class unsafe_package`
+and `unsafe partial class unsafe_package  {`. A member can name a package class anywhere else on its line, in a
+one-line body or in its signature or initializer, and that line is its declaration.
+
+**Red first:** TestPackageNameInAMemberLineIsTheDeclaration. It holds net/http's one-line `Is` (body names
+`context_package`) and a func whose signature names `global::go.context_package.Context`. Before the fix both read
+`top:unmapped`; the four package-class forms still read as no declaration.
+
+**The move is wider than the one method.** The census reads code with comments and string contents removed, and 7 of
+its lines change their answer. Five of them now pair, in four files:
+- `top:unmapped:method` 169 -> 168: net/http transport.cs `Is` (P2's case).
+- `top:unmapped:var` 9 -> 5: internal/trace/traceviewer http.cs `staticContent`, net/http transport.cs
+  `testHookProxyConnectTimeout`, os executable_darwin.cs `executablePath` (matched through the getter's
+  `.executablePath;`), and x/text's unicode/norm transform.cs `errs`.
+
+Two do not move. html/template escape.cs is a lazy holder, already a declaration. internal/syscall/windows
+`CanUseLongPaths { get => ... }` stays `top:unmapped:var`: the value matcher wants the name followed by `=`, `;` or
+`,`, and that is its own question if wanted. 17 more production lines name `_package` only in a comment, or sit in
+hand-owned or unpaired files. Files 1,826 and groups 54,010 are unchanged; the other 55 classes do not move.
+
+**Scored:** a per-file census before and after differs in exactly those four files. The per-line prediction was
+written before that dump and met 7 of 7; the ratchet's two class totals had been seen first.
+
+— i9 (2026-11-07)
+
+### 2026-11-06: a pointer method that calls a value method on its own receiver is emitted over the box (CLOSED: the 10 `this ref T` receiver calls)
+
+Closes the OPEN half of the 2026-11-06 nil-param row: "the 10 calls on `this ref T` receivers (archive/tar 8,
+cryptobyte 2)". Branch claude/c2-thisref-box. Remedy (b), ruled by COORD over remedy (a) on parity.
+
+**The fix.** A new direct-ж trigger, bodyCallsValueMethodOnReceiver: a pointer method whose body calls a value method
+directly on its own receiver is emitted over the box, `M(this ж<T> Ꮡt)`, and the call reads `Ꮡt.M()`. It binds
+go2cs-gen's twin, which copies `*t` after the arguments run, as Go does, and fails on a nil `t` through `ж<T>`'s own
+check. This is the corpus's existing direct-ж form (archive/tar's WriteTo in the same file; parameters since batch
+221). With a `this ref T` receiver the ref was copied while the arguments were still being built.
+
+**Measured** on linux/amd64, .NET SDK 10.0.112, go1.26.10, at master 7fbb8fabfa (before P2's class K):
+- ThisRefReceiverTC0 (4 methods, 6 cases, tiered compilation off):
+  - master: 0/3 runs match Go at TC0, 3 lines wrong. A nil receiver whose callee ignores it returns. A nil receiver
+    panics before a side-effecting argument runs. A write the argument makes to `*t` is not seen.
+  - master at TC1: 0/3, the 2 argument-order lines.
+  - over the box: 3/3 at both tierings.
+- Remedy (a), `nonnil(ref t).M()` at the call, measured and not taken: 0/3 at both tierings. It fixes only the nil
+  drop, and the order lines stay wrong because the ref is still copied first.
+- At the 10 corpus sites master showed no observable divergence: the callees read their receiver and the arguments
+  are pure. The gap was in the shape.
+
+**Footprint**, two-seeded, three targets (360/358/358), identical per target, marker gate 0:
+- 8 files, +38/-33, against a posted prediction of about 40 to 80 lines.
+- 7 methods move: sparseFileReader.Read, sparseFileWriter.Write, and String.ReadOptionalASN1, SkipOptionalASN1,
+  ReadOptionalASN1Integer, ReadOptionalASN1OctetString and ReadOptionalASN1Boolean.
+- crypto/x509 parser.cs moves 8 call lines.
+- 3 GoPositionMap records re-encode.
+- Two specifics MISSED: x509's String locals already had boxes (no declaration change), and 3 records moved, not 4.
+- CNR: ShadowLocalOverRecvName only, main.cs +2/-2.
+- Per call: no new allocation at these sites, and no measurable time cost (200M calls, best of 5).
+- In general, a VALUE local that calls such a method needs a heap box. That cost is zero in this corpus.
+- Re-derived at master 80aed2b086, after class K and B3, with the cut converter: the same 8 files at +38/-33, and the
+  57 non-map lines byte-identical to the measurement above. Only the 3 map records' bytes moved, under K. The guard's
+  golden was re-minted there, and K collapses its one-line methods.
+
+**Guards:** converter test TestPointerMethodCallingAValueMethodOnItsReceiverIsEmittedOverTheBox (red at the base);
+nilParamBoxTwin's refRecv row, which now reads the box; and behavioral ThisRefReceiverTC0.
 
 — C2 (2026-11-06)
 

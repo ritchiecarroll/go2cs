@@ -41,7 +41,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
         return ("", default, default, pluginAlreadyLoadedˢ);
     }
 
-    foreach (var (_, pmd) in activeModules()) {
+    foreach (var (_, pmd) in range(activeModules())) {
         if (pmd.pluginpath == md.pluginpath) {
             md.bad = true;
             return ("", default, default, pluginAlreadyLoadedˢ);
@@ -60,7 +60,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
             @throw(pluginNewModuleDataˢ);
         }
     }
-    foreach (var (_, pkghash) in md.pkghashes) {
+    foreach (var (_, pkghash) in range(md.pkghashes)) {
         if (pkghash.linktimehash != pkghash.runtimehash.Value) {
             md.bad = true;
             return ("", default, default, "plugin was built with a different version of package " + pkghash.modulename);
@@ -75,7 +75,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     moduledataverify1(md);
 
     @lock(ᏑitabLock);
-    foreach (var (_, i) in md.itablinks) {
+    foreach (var (_, i) in range(md.itablinks)) {
         itabAdd(i);
     }
     unlock(ᏑitabLock);
@@ -89,7 +89,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     // function symbol names are prefixed here with '.' to avoid
     // a dependency on the reflect package.
     syms = new map<@string, any>(len(md.ptab));
-    foreach (var (_, ptab) in md.ptab) {
+    foreach (var (_, ptab) in range(md.ptab)) {
         var symName = resolveNameOff((@unsafe.Pointer)md.types, ptab.name);
         var t = toRType((ж<_type>)(uintptr)((@unsafe.Pointer)md.types)).typeOff(ptab.typ); // TODO can this stack of conversions be simpler?
         ref var val = ref heap<any>(out var Ꮡval);

@@ -59,7 +59,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
     // Package scopes do not have extents since they may be
     // discontiguous, so iterate over the package's files.
     if (s.parent == Universe) {
-        foreach (var (_, sΔ1) in s.children) {
+        foreach (var (_, sΔ1) in range(s.children)) {
             var inner = sΔ1.Innermost(pos); if (inner != nil) {
                 return inner;
             }
@@ -67,7 +67,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
     }
 
     if (s.Contains(pos)) {
-        foreach (var (_, sΔ2) in s.children) {
+        foreach (var (_, sΔ2) in range(s.children)) {
             if (sΔ2.Contains(pos)) {
                 return sΔ2.Innermost(pos);
             }

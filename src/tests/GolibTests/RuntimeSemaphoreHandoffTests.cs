@@ -12,17 +12,43 @@ namespace GolibTests;
 /// trials; Go measures >90%). RuntimeSemaphore signalled the waiter and returned, so the releaser -- still on
 /// its own thread -- won the race in nanoseconds: 1-8 per 10,000 on P1's linux readings.
 /// </summary>
+/// <remarks>
+/// <para>
+/// <b>What is asserted, and why not Go's ratio.</b> In Go both goroutines share one P, so the yield fixes
+/// the order. Here each is its own OS thread, and once the waiter has resumed, which of the two reaches the
+/// CAS first is the HOST scheduler's choice. A loaded box can read 14 of 1000 with the yield working as
+/// designed. The losses split two ways, and neither is code. (A) The waiter's thread was not scheduled
+/// within the 10 ms bound, so the releaser went on, as Go's sysmon preemption would let it. (B) The waiter
+/// resumed and released the releaser, then lost the core before its next instruction. The ratio is printed
+/// and not asserted.
+/// </para>
+/// <para>
+/// What the yield GUARANTEES is asserted per trial, with no tolerance: unless the bound fired, the waiter
+/// has left its park before Release returns. The waiter clears its wait reason when its park scope
+/// disposes, and only then sets the event the releaser waits on, so this holds on any scheduler. A
+/// release that does not yield returns while the waiter is still parked (readied, not yet running) and
+/// fails it in nearly every trial. That is the regression the ratio existed to catch.
+/// </para>
+/// <para>
+/// <b>The limit, the same for the old ratio and this check.</b> A waiter that never sets the event passes
+/// both: every trial then rides the bound. The ratio passed it because the waiter wins the CAS in
+/// microseconds once the releaser has waited 10 ms. No deterministic predicate separates that from a
+/// loaded box, where the bound fires too, so it is named here and not asserted.
+/// </para>
+/// </remarks>
 [TestClass]
 public class RuntimeSemaphoreHandoffTests
 {
     private const int Trials = 1000;
     private const int TimeoutMs = 60000;
 
+    private readonly record struct HandoffReading(int Ok, long Yields, int BoundHits, int ParkedAtReturn);
+
     // The replica of runtime's testSemaHandoff over the primitive itself, run on a goroutine (the MSTest
     // thread holds a lent identity and must not be the one that parks or readies).
-    private static (int ok, long yields) runHandoffTrials(int trials)
+    private static HandoffReading runHandoffTrials(int trials)
     {
-        int ok = 0;
+        int ok = 0, boundHits = 0, parkedAtReturn = 0;
         long yieldsBefore = Interlocked.Read(ref RuntimeSemaphore.s_handoffYields);
         using ManualResetEventSlim finished = new(false);
 
@@ -32,10 +58,12 @@ public class RuntimeSemaphoreHandoffTests
             {
                 ж<uint32> sema = new StandardBox<uint32>(0u);
                 int res = 0;
+                Goroutine? waiter = null;
                 using ManualResetEventSlim waiterDone = new(false);
 
                 Goroutine.Start(() =>
                 {
+                    Volatile.Write(ref waiter, Goroutine.Current);
                     RuntimeSemaphore.Acquire(sema, WaitReason.Semacquire);
                     Interlocked.CompareExchange(ref res, 1, 0);
                     RuntimeSemaphore.Release(sema, true);
@@ -47,8 +75,15 @@ public class RuntimeSemaphoreHandoffTests
                     Thread.Yield();
 
                 // The crux: release with handoff, then race the waiter's CAS.
+                long timeoutsBefore = Interlocked.Read(ref RuntimeSemaphore.s_handoffYieldTimeouts);
                 RuntimeSemaphore.Release(sema, true);
+                bool parked = Volatile.Read(ref waiter)!.IsParked;
                 Interlocked.CompareExchange(ref res, 2, 0);
+
+                if (Interlocked.Read(ref RuntimeSemaphore.s_handoffYieldTimeouts) != timeoutsBefore)
+                    boundHits++;
+                else if (parked)
+                    parkedAtReturn++;
 
                 waiterDone.Wait(TimeoutMs);
 
@@ -60,20 +95,21 @@ public class RuntimeSemaphoreHandoffTests
         });
 
         Assert.IsTrue(finished.Wait(TimeoutMs * 2), "the handoff trials did not finish");
-        return (ok, Interlocked.Read(ref RuntimeSemaphore.s_handoffYields) - yieldsBefore);
+        return new(ok, Interlocked.Read(ref RuntimeSemaphore.s_handoffYields) - yieldsBefore, boundHits, parkedAtReturn);
     }
 
     [TestMethod]
     public void AHandoffReleaseLetsTheWaiterRunFirst_TestSemaHandoffsRatio()
     {
-        long timeoutsBefore = Interlocked.Read(ref RuntimeSemaphore.s_handoffYieldTimeouts);
-        (int ok, long yields) = runHandoffTrials(Trials);
+        HandoffReading r = runHandoffTrials(Trials);
 
         // The reading, printed so a run records the RATIO and not only the pass: Go measures >90%.
-        System.Console.WriteLine($"SEMAHANDOFF direct={ok}/{Trials} yields={yields} boundHits={Interlocked.Read(ref RuntimeSemaphore.s_handoffYieldTimeouts) - timeoutsBefore}");
+        System.Console.WriteLine($"SEMAHANDOFF direct={r.Ok}/{Trials} yields={r.Yields} boundHits={r.BoundHits} parkedAtReturn={r.ParkedAtReturn}");
 
-        Assert.IsTrue(ok >= Trials * 2 / 3, $"direct handoff < 2/3: {ok} of {Trials} (Go measures >90%)");
-        Assert.AreEqual((long)Trials, yields, "exactly one releaser yield per permit actually handed off");
+        Assert.AreEqual((long)Trials, r.Yields, "exactly one releaser yield per permit actually handed off");
+        Assert.AreEqual(0, r.ParkedAtReturn,
+            $"a handoff release returned while its waiter was still parked in {r.ParkedAtReturn} of {Trials} trials " +
+            $"(the bound fired in {r.BoundHits}): the releaser did not yield to the waiter (Go's goyield)");
     }
 
     [TestMethod]

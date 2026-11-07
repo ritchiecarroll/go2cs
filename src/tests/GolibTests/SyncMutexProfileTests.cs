@@ -190,7 +190,7 @@ public class SyncMutexProfileTests
     private static System.Collections.Generic.List<string> FrameNames(slice<uintptr> stack)
     {
         var names = new System.Collections.Generic.List<string>();
-        foreach (var (_, pc) in stack)
+        foreach (var (_, pc) in range(stack))
             names.Add((string)FuncForPC(pc - 1).Name());
         return names;
     }
@@ -215,7 +215,7 @@ public class SyncMutexProfileTests
     private static int64 TotalAt(bool mutex, string function)
     {
         int64 count = 0;
-        foreach (var (_, record) in Records(mutex))
+        foreach (var (_, record) in range(Records(mutex)))
         {
             var names = FrameNames(StackOf(record));
             if (names.Count > 0 && names[0] == function)
@@ -228,7 +228,7 @@ public class SyncMutexProfileTests
     private static string TopFrames(bool mutex)
     {
         var all = new System.Collections.Generic.List<string>();
-        foreach (var (_, record) in Records(mutex))
+        foreach (var (_, record) in range(Records(mutex)))
         {
             var names = FrameNames(StackOf(record));
             all.Add($"[{(names.Count > 0 ? names[0] : "")} < {(names.Count > 1 ? names[1] : "-")} x{record.Count}]");
@@ -256,7 +256,7 @@ public class SyncMutexProfileTests
     private static int64 TotalAt(bool mutex, string top, string caller)
     {
         int64 count = 0;
-        foreach (var (_, record) in Records(mutex))
+        foreach (var (_, record) in range(Records(mutex)))
         {
             var names = FrameNames(StackOf(record));
             if (names.Count > 1 && names[0] == top && names[1] == caller)

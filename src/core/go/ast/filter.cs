@@ -47,7 +47,7 @@ public static bool PackageExports(ж<Package> pkg) {
 // General filtering
 internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Func<@string, bool> f) {
     nint j = 0;
-    foreach (var (_, x) in list) {
+    foreach (var (_, x) in range(list)) {
         if (f(x.Name)) {
             list[j] = x;
             j++;
@@ -85,7 +85,7 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     }
     var list = fields.List;
     nint j = 0;
-    foreach (var (_, f) in list) {
+    foreach (var (_, f) in range(list)) {
         var keepField = false;
         if (len(f.Names) == 0) {
             // anonymous field
@@ -124,7 +124,7 @@ internal static void filterCompositeLit(ref CompositeLit lit, Func<@string, bool
 
 internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool> filter, bool export) {
     nint j = 0;
-    foreach (var (_, exp) in list) {
+    foreach (var (_, exp) in range(list)) {
         switch (exp.type()) {
         case ж<CompositeLit> x: {
             filterCompositeLit(ref (x).DerefOrNull(), filter, export);
@@ -152,7 +152,7 @@ internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool
         return false;
     }
     bool b = default;
-    foreach (var (_, f) in fields.List) {
+    foreach (var (_, f) in range(fields.List)) {
         if (filterType(f.Type, filter, export)) {
             b = true;
         }
@@ -234,7 +234,7 @@ internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
 
 internal static slice<Spec> filterSpecList(slice<Spec> list, Func<@string, bool> f, bool export) {
     nint j = 0;
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         if (filterSpec(s, f, export)) {
             list[j] = s;
             j++;
@@ -280,7 +280,7 @@ public static bool FilterFile(ж<File> src, Func<@string, bool> f) {
 
 internal static bool filterFile(ref File src, Func<@string, bool> f, bool export) {
     nint j = 0;
-    foreach (var (_, d) in src.Decls) {
+    foreach (var (_, d) in range(src.Decls)) {
         if (filterDecl(d, f, export)) {
             src.Decls[j] = d;
             j++;
@@ -408,7 +408,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     if (ndocs > 0) {
         var list = new slice<ж<Comment>>(ndocs - 1); // -1: no separator before first group
         nint iΔ1 = 0;
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             var f = pkg.Files[filename];
             if (f.Doc != nil) {
                 if (iΔ1 > 0) {
@@ -416,7 +416,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                     list[iΔ1] = separator;
                     iΔ1++;
                 }
-                foreach (var (_, c) in f.Doc.List) {
+                foreach (var (_, c) in range(f.Doc.List)) {
                     list[iΔ1] = c;
                     iΔ1++;
                 }
@@ -438,9 +438,9 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         var funcs = new map<@string, nint>(); // map of func name -> decls index
         nint iΔ2 = 0;                         // current index
         nint n = 0;                           // number of filtered entries
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             var f = pkg.Files[filename];
-            foreach (var (_, vᴛ1) in f.Decls) {
+            foreach (var (_, vᴛ1) in range(f.Decls)) {
                 var d = vᴛ1;
 
                 if ((MergeMode)(mode & FilterFuncDuplicates) != 0) {
@@ -483,7 +483,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         // info within a single file).
         if (n > 0) {
             iΔ2 = 0;
-            foreach (var (_, d) in decls) {
+            foreach (var (_, d) in range(decls)) {
                 if (d != nil) {
                     decls[iΔ2] = d;
                     iΔ2++;
@@ -497,9 +497,9 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     slice<ж<ImportSpec>> imports = default;
     if ((MergeMode)(mode & FilterImportDuplicates) != 0) {
         var seen = new map<@string, bool>();
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             var f = pkg.Files[filename];
-            foreach (var (_, imp) in f.Imports) {
+            foreach (var (_, imp) in range(f.Imports)) {
                 @string path = imp.Path.Value.Value; if (!seen[path]) {
                     // TODO: consider handling cases where:
                     // - 2 imports exist with the same import path but
@@ -515,7 +515,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         }
     } else {
         // Iterate over filenames for deterministic order.
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             var f = pkg.Files[filename];
             imports = appendꓸꓸꓸ(imports, f.Imports);
         }
@@ -526,7 +526,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     if ((MergeMode)(mode & FilterUnassociatedComments) == 0) {
         comments = new slice<ж<CommentGroup>>(ncomments);
         nint iΔ3 = 0;
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             var f = pkg.Files[filename];
             iΔ3 += copy(comments.slice(iΔ3), f.Comments);
         }

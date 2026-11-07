@@ -7,7 +7,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 
@@ -42,6 +44,10 @@ public class ArrayRangeAllocationTests
     // noise (the pre-fix cost was ~72 B per loop entry -> ~72 KB here) and low enough to stay fast.
     private const int LoopCount = 1000;
 
+    // The per-loop byte reading of the last MeasureSnapshotBytes window, allocated once here so that
+    // recording it inside the window allocates nothing.
+    private static readonly long[] s_snapshotTrace = new long[LoopCount + 1];
+
     /// <summary>
     /// Measures the bytes AND the golib object count charged by N ranged loops over the converter's
     /// range-expression snapshot — the exact shape a converted <c>for i, v := range a</c> emits.
@@ -52,33 +58,79 @@ public class ArrayRangeAllocationTests
     /// <c>GC.GetAllocatedBytesForCurrentThread</c> is the meter behind
     /// <c>runtime.ReadMemStats</c>'s <c>TotalAlloc</c>, which no counter could hide from. Go's array
     /// range copy is inline and costs zero on both.
+    /// <para>
+    /// <b>AggressiveOptimization</b> makes the window measure steady-state code in both configurations.
+    /// Without it, Release runs this method at tier 0 and it tiers up (OSR) INSIDE the window, on this
+    /// thread: the window read 13-17 ms on H, against 0.07 ms with the attribute, 0.03 ms with tiering
+    /// off, and 0.17 ms in Debug, which does not tier. That transition is the one in-window activity
+    /// measured, and it is removed here. It is NOT the named cause of the rare Release reds of 4,984 and
+    /// 6,352 B: on H it allocated nothing, and so did a GC, a pool trim, the tiering worker's
+    /// re-creation and a concurrent precise byte total, each probed inside the window. That source is
+    /// unnamed (BOARD, 2026-11-06), so <paramref name="trace"/> makes the next red describe itself.
+    /// </para>
     /// </remarks>
-    private static long MeasureSnapshotBytes(array<byte> a, out long count, out long sum)
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static long MeasureSnapshotBytes(array<byte> a, out long count, out long sum, out string trace)
     {
         long total = 0;
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a.ΔRangeSnapshot())
+            foreach (var (i, v) in range(a.ΔRangeSnapshot()))
                 total += i + v;
         }
 
         total = 0;
 
+        long[] steps = s_snapshotTrace;
+        int gen0 = GC.CollectionCount(0), gen1 = GC.CollectionCount(1), gen2 = GC.CollectionCount(2);
+        long start = Stopwatch.GetTimestamp();
         long beforeCount = AllocationCounter.CurrentThreadCount;
         long before = GC.GetAllocatedBytesForCurrentThread();
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a.ΔRangeSnapshot())
+            steps[run] = GC.GetAllocatedBytesForCurrentThread();
+
+            foreach (var (i, v) in range(a.ΔRangeSnapshot()))
                 total += i + v;
         }
 
         long after = GC.GetAllocatedBytesForCurrentThread();
+        long end = Stopwatch.GetTimestamp();
+        steps[LoopCount] = after;
 
         count = AllocationCounter.CurrentThreadCount - beforeCount;
         sum = total;
+        trace = describeWindow(steps, before, end - start, GC.CollectionCount(0) - gen0, GC.CollectionCount(1) - gen1, GC.CollectionCount(2) - gen2);
         return after - before;
+    }
+
+    // Names WHERE a window's bytes landed: each loop whose entry reading moved ("@loop:+bytes"; @1000 is
+    // the window's close), how many collections of each generation ran inside it, how long it took, and
+    // the memory load the pool's trim reads. One burst and a spread are different defects.
+    private static string describeWindow(long[] steps, long before, long ticks, int gen0, int gen1, int gen2)
+    {
+        StringBuilder moved = new();
+        long previous = before;
+        int movedCount = 0;
+
+        for (int k = 0; k <= LoopCount; k++)
+        {
+            // The first 32 steps name the shape; a spread past that is counted, not listed.
+            if (steps[k] != previous && ++movedCount <= 32)
+                moved.Append($" @{k}:+{steps[k] - previous}");
+
+            previous = steps[k];
+        }
+
+        if (movedCount > 32)
+            moved.Append($" ... {movedCount} loops moved in all");
+
+        GCMemoryInfo memory = GC.GetGCMemoryInfo();
+
+        return $"window: gc0/1/2={gen0}/{gen1}/{gen2} ms={ticks * 1000.0 / Stopwatch.Frequency:F2} " +
+               $"load={memory.MemoryLoadBytes}/{memory.HighMemoryLoadThresholdBytes} steps:{(moved.Length == 0 ? " none" : moved.ToString())}";
     }
 
     /// <summary>
@@ -93,7 +145,7 @@ public class ArrayRangeAllocationTests
         // otherwise the tiering/JIT allocations land in the measured delta and read as a regression.
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a)
+            foreach (var (i, v) in range(a))
                 total += i + v;
         }
 
@@ -103,7 +155,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a)
+            foreach (var (i, v) in range(a))
                 total += i + v;
         }
 
@@ -114,8 +166,8 @@ public class ArrayRangeAllocationTests
     }
 
     /// <summary>
-    /// The CONTROL: the same loop driven through <see cref="IEnumerable{T}"/>, which boxes the
-    /// enumerator exactly as the old iterator method did. It must still allocate — a zero here would
+    /// The CONTROL: the same loop driven through <see cref="IArray{T}"/>, which boxes the array once per
+    /// loop, as an interface-typed enumerator did before. It must still allocate — a zero here would
     /// mean the measurement window, not the enumerator, is what changed.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -125,7 +177,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach ((nint i, byte v) in (IArray<byte>)a)
+            foreach ((nint i, byte v) in range((IArray<byte>)a))
                 total += i + v;
         }
 
@@ -135,7 +187,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach ((nint i, byte v) in (IArray<byte>)a)
+            foreach ((nint i, byte v) in range((IArray<byte>)a))
                 total += i + v;
         }
 
@@ -219,7 +271,7 @@ public class ArrayRangeAllocationTests
 
         List<byte> observed = [];
 
-        foreach (var (i, v) in a)
+        foreach (var (i, v) in range(a))
         {
             if (i == 0)
                 a[1] = 91;
@@ -237,7 +289,7 @@ public class ArrayRangeAllocationTests
 
         List<byte> viaClone = [];
 
-        foreach (var (i, v) in b.Clone())
+        foreach (var (i, v) in range(b.Clone()))
         {
             if (i == 0)
                 b[1] = 91;
@@ -261,7 +313,7 @@ public class ArrayRangeAllocationTests
 
         array<byte> a = new(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
 
-        long bytes = MeasureSnapshotBytes(a, out long count, out long sum);
+        long bytes = MeasureSnapshotBytes(a, out long count, out long sum, out string trace);
 
         Assert.AreEqual((0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) * (long)LoopCount, sum,
             "the snapshot loop did not observe the expected (index, value) pairs");
@@ -274,7 +326,7 @@ public class ArrayRangeAllocationTests
         Assert.AreEqual(0L, bytes,
             $"the range snapshot allocated {bytes} bytes across {LoopCount} loops " +
             $"({bytes / (double)LoopCount:F1} B/loop) — runtime.ReadMemStats' TotalAlloc reads the " +
-            "CLR byte total directly, so a heap copy here shows up in every memory-budget assert.");
+            "CLR byte total directly, so a heap copy here shows up in every memory-budget assert. " + trace);
     }
 
     [TestMethod]
@@ -292,7 +344,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a.Clone())
+            foreach (var (i, v) in range(a.Clone()))
                 total += i + v;
         }
 
@@ -301,7 +353,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a.Clone())
+            foreach (var (i, v) in range(a.Clone()))
                 total += i + v;
         }
 
@@ -397,14 +449,14 @@ public class ArrayRangeAllocationTests
     [TestMethod]
     public void EnumeratorStillSatisfiesTheInterfaceContract()
     {
-        // array<T> is IArray<T>, whose own GetEnumerator() yields (nint, T). The pattern path must not
-        // have cost the interface path: `foreach` over an IArray<T>-typed local or a constrained type
-        // parameter still enumerates the same pairs (boxing, as it always did). LINQ sees the values.
+        // array<T> is IArray<T>: range over an IArray<T>-typed local or a constrained type parameter
+        // enumerates the same pairs through its length and indexer (boxing a struct once). LINQ and
+        // foreach see the values.
         array<byte> a = new(new byte[] { 10, 20, 30 });
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IArray<byte>)a)
+        foreach ((nint i, byte v) in range((IArray<byte>)a))
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(

@@ -18,7 +18,7 @@ internal static void Main() {
         (any)(typed),
         (any)(@string)("control"u8)
     ]);
-    foreach (var (_, v) in values) {
+    foreach (var (_, v) in range(values)) {
         fmt.Printf("%v %T\n"u8, v, v);
     }
 

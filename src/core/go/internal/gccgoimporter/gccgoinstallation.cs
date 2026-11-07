@@ -61,7 +61,7 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
         }
         case {} when line[0] is (byte)' ': {
             var argsΔ2 = strings.Fields(line);
-            foreach (var (_, arg) in argsΔ2[1..]) {
+            foreach (var (_, arg) in range(argsΔ2[1..])) {
                 if (strings.HasPrefix(arg, "-L")) {
                     inst.LibPaths = append(inst.LibPaths, arg[2..]);
                 }
@@ -84,7 +84,7 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
 public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) {
     slice<@string> paths = default;
 
-    foreach (var (_, lpath) in inst.LibPaths) {
+    foreach (var (_, lpath) in range(inst.LibPaths)) {
         @string spath = filepath.Join(lpath, "go", inst.GccVersion);
         var (fi, err) = os.Stat(spath);
         if (err != nil || !fi.IsDir()) {

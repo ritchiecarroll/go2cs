@@ -15,11 +15,11 @@ internal static readonly ж<vdsoVersionKey> ᏑvdsoLinuxVersion = new StaticBox<
 internal static ref vdsoVersionKey vdsoLinuxVersion => ref ((StaticBox<vdsoVersionKey>)ᏑvdsoLinuxVersion).ValueSlot;
 
 internal static slice<vdsoSymbolKey> vdsoSymbolKeys;
-internal static void initᴛvdsoSymbolKeys() { vdsoSymbolKeys = slice<vdsoSymbolKey>([
+internal static void initᴛvdsoSymbolKeys() { vdsoSymbolKeys = [
     new("__vdso_gettimeofday", 0x315ca59, 0xb01bca00U, ᏑvdsoGettimeofdaySym),
     new("__vdso_clock_gettime", 0xd35ec75, 0x6e43a318, ᏑvdsoClockgettimeSym),
     new("__vdso_getrandom", 0x25425d, 0x84a559bfU, ᏑvdsoGetrandomSym)
-]); }
+]; }
 
 public static readonly ж<uintptr> ᏑvdsoGettimeofdaySym = new StaticBox<uintptr>(default(uintptr));
 public static ref uintptr vdsoGettimeofdaySym => ref ((StaticBox<uintptr>)ᏑvdsoGettimeofdaySym).ValueSlot;

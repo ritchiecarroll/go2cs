@@ -15,10 +15,8 @@ internal static nint run(nint n) {
     nint total = len(m);
 
     for (nint i = 0; i < n; i++) {
-        {
-            var (v, ok) = m[i, ꟷ]; if (ok) {
-                total += (v & 1023);
-            }
+        var (v, ok) = m[i, ꟷ]; if (ok) {
+            total += (v & 1023);
         }
     }
 

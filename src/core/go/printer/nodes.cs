@@ -110,7 +110,7 @@ internal static exprListMode noIndent => 2;                  // no extra indenta
 internal static void identList(this ж<printer> Ꮡp, slice<ж<ast.Ident>> list, bool indent) {
     // convert into an expression list so we can re-use exprList formatting
     var xlist = new slice<ast.Expr>(len(list));
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         xlist[i] = new ast.IdentжExpr(x);
     }
     exprListMode mode = default;
@@ -155,7 +155,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
 
     if (prev.IsValid() && prev.Line == line && line == endLine) {
         // all list entries on a single line
-        foreach (var (i, x) in list) {
+        foreach (var (i, x) in range(list)) {
             if (i > 0) {
                 // use position of expression following the comma as
                 // comma position for correct comment placement
@@ -200,7 +200,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
 
     // print all list elements
     nint prevLine = prev.Line;
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         line = p.lineFor(x.Pos());
 
         // Determine if the next linebreak, if any, needs to use formfeed:
@@ -347,7 +347,7 @@ internal static void parameters(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfiel
     if (len(fields.List) > 0) {
         nint prevLine = p.lineFor(fields.Opening);
         var ws = indent;
-        foreach (var (i, par) in fields.List) {
+        foreach (var (i, par) in range(fields.List)) {
             // determine par begin and end line (may be different
             // if there are multiple parameter names for this par
             // or the type is on a separate line)
@@ -483,7 +483,7 @@ internal static void signature(this ж<printer> Ꮡp, ж<ast.FuncType> Ꮡsig) {
 internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxSize) {
     nint size = default;
 
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         if (i > 0) {
             size += len(", ");
         }
@@ -514,7 +514,7 @@ internal static bool isOneLineFieldList(this ref printer p, slice<ж<ast.Field>>
 }
 
 internal static void setLineComment(this ж<printer> Ꮡp, @string text) {
-    Ꮡp.setComment(Ꮡ(new ast.CommentGroup(List: slice<ж<ast.Comment>>([Ꮡ(new ast.Comment(Slash: token.NoPos, Text: text))]))));
+    Ꮡp.setComment(Ꮡ(new ast.CommentGroup(List: [Ꮡ(new ast.Comment(Slash: token.NoPos, Text: text))])));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -547,7 +547,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
             Ꮡp.print(token.LBRACE, blank);
             var f = list[0];
             if (isStruct) {
-                foreach (var (i, x) in f.Names) {
+                foreach (var (i, x) in range(f.Names)) {
                     if (i > 0) {
                         // no comments so no need for comma position
                         Ꮡp.print(token.COMMA, blank);
@@ -589,7 +589,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
             sep = blank;
         }
         ref var line = ref heap(new nint(), out var Ꮡline);
-        foreach (var (i, f) in list) {
+        foreach (var (i, f) in range(list)) {
             if (i > 0) {
                 Ꮡp.linebreak(p.lineFor(f.Pos()), 1, ignore, p.linesFrom(line) > 0);
             }
@@ -632,7 +632,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
     } else { // interface
         ref var line = ref heap(new nint(), out var Ꮡline);
         ж<ast.Ident> prev = default; // previous "type" identifier
-        foreach (var (i, f) in list) {
+        foreach (var (i, f) in range(list)) {
             ж<ast.Ident> name = default; // first name, or nil
             if (len(f.Names) > 0) {
                 name = f.Names[0];
@@ -1006,7 +1006,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         if (depth <= 1) {
             nint indexCount = default;
             bool hasBinaries = default;
-            foreach (var (_, xΔ1) in indices) {
+            foreach (var (_, xΔ1) in range(indices)) {
                 if (xΔ1 != nil) {
                     indexCount++;
                     if (isBinary(xΔ1)) {
@@ -1018,7 +1018,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
                 needsBlanks = true;
             }
         }
-        foreach (var (i, xΔ2) in indices) {
+        foreach (var (i, xΔ2) in range(indices)) {
             if (i > 0) {
                 if (indices[i - 1] != nil && needsBlanks) {
                     Ꮡp.print(blank);
@@ -1302,7 +1302,7 @@ internal static void stmtList(this ж<printer> Ꮡp, slice<ast.Stmt> list, nint 
     }
     ref var line = ref heap(new nint(), out var Ꮡline);
     nint i = 0;
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         // ignore empty statements (was issue 3466)
         var (_, isEmpty) = s._<ж<ast.EmptyStmt>>(ᐧ); if (!isEmpty) {
             // nindent == 0 only for lists of switch/select case clauses;
@@ -1441,7 +1441,7 @@ internal static bool indentList(this ref printer p, slice<ast.Expr> list) {
             // list spans multiple lines
             nint n = 0; // multi-line element count
             nint line = b;
-            foreach (var (_, x) in list) {
+            foreach (var (_, x) in range(list)) {
                 nint xb = p.lineFor(x.Pos());
                 nint xe = p.lineFor(x.End());
                 if (line < xb) {
@@ -1735,7 +1735,7 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
 
     nint i0 = -1; // if i0 >= 0 we are in a run and i0 is the start of the run
     bool keepType = default;
-    foreach (var (i, s) in specs) {
+    foreach (var (i, s) in range(specs)) {
         var t = s._<ж<ast.ValueSpec>>();
         if (t.Values != nil) {
             if (i0 < 0) {
@@ -1920,7 +1920,7 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
                 // determine if the type column must be kept
                 var keepType = keepTypeColumn(d.Specs);
                 ref var line = ref heap(new nint(), out var Ꮡline);
-                foreach (var (i, s) in d.Specs) {
+                foreach (var (i, s) in range(d.Specs)) {
                     if (i > 0) {
                         Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
                     }
@@ -1929,7 +1929,7 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
                 }
             } else {
                 ref var line = ref heap(new nint(), out var Ꮡline);
-                foreach (var (i, s) in d.Specs) {
+                foreach (var (i, s) in range(d.Specs)) {
                     if (i > 0) {
                         Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
                     }
@@ -1956,7 +1956,7 @@ partial struct sizeCounter {
 
 internal static (nint, error) Write(this ref sizeCounter c, slice<byte> p) {
     if (!c.hasNewline) {
-        foreach (var (_, b) in p) {
+        foreach (var (_, b) in range(p)) {
             if (b == '\n' || b == '\f') {
                 c.hasNewline = true;
                 break;
@@ -2028,7 +2028,7 @@ internal static nint bodySize(this ж<printer> Ꮡp, ж<ast.BlockStmt> Ꮡb, nin
     }
     // otherwise, estimate body size
     nint bodySize = Ꮡp.commentSizeBefore(p.posFor(pos2));
-    foreach (var (i, s) in b.List) {
+    foreach (var (i, s) in range(b.List)) {
         if (bodySize > maxSize) {
             break; // no need to continue
         }
@@ -2068,7 +2068,7 @@ internal static void funcBody(this ж<printer> Ꮡp, nint headerSize, whiteSpace
             Ꮡp.print(token.LBRACE);
             if (len(b.List) > 0) {
                 Ꮡp.print(blank);
-                foreach (var (i, s) in b.List) {
+                foreach (var (i, s) in range(b.List)) {
                     if (i > 0) {
                         Ꮡp.print(token.SEMICOLON, blank);
                     }
@@ -2170,7 +2170,7 @@ internal static void declList(this ж<printer> Ꮡp, slice<ast.Decl> list) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     token.Token tok = token.ILLEGAL;
-    foreach (var (_, d) in list) {
+    foreach (var (_, d) in range(list)) {
         token.Token prev = tok;
         tok = declToken(d);
         // If the declaration token changed (e.g., from CONST to TYPE)

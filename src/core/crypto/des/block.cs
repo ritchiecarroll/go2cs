@@ -66,7 +66,7 @@ internal static ref sync.Once feistelBoxOnce => ref ((StaticBox<sync.Once>)Ꮡfe
 internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutation) {
     uint64 block = default;
 
-    foreach (var (position, n) in permutation) {
+    foreach (var (position, n) in range(permutation)) {
         var bit = (src.Rsh((uint64)(n))) & 1;
         block |= (uint64)(bit.Lsh((nuint)((len(permutation) - 1) - position)));
     }
@@ -74,7 +74,7 @@ internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutati
 }
 
 internal static void initFeistelBox() {
-    foreach (var s in range(sBoxes)) {
+    foreach (var s in range(len(sBoxes))) {
         for (nint i = 0; i < 4; i++) {
             for (nint j = 0; j < 16; j++) {
                 var f = ((uint64)sBoxes[s][i][j]).Lsh((4 * (7 - (nuint)s)));

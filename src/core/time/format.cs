@@ -360,7 +360,7 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
     return (layout, 0, "");
 }
 
-internal static slice<@string> longDayNames = slice<@string>([
+internal static slice<@string> longDayNames = [
     "Sunday",
     "Monday",
     "Tuesday",
@@ -368,9 +368,9 @@ internal static slice<@string> longDayNames = slice<@string>([
     "Thursday",
     "Friday",
     "Saturday"
-]);
+];
 
-internal static slice<@string> shortDayNames = slice<@string>([
+internal static slice<@string> shortDayNames = [
     "Sun",
     "Mon",
     "Tue",
@@ -378,9 +378,9 @@ internal static slice<@string> shortDayNames = slice<@string>([
     "Thu",
     "Fri",
     "Sat"
-]);
+];
 
-internal static slice<@string> shortMonthNames = slice<@string>([
+internal static slice<@string> shortMonthNames = [
     "Jan",
     "Feb",
     "Mar",
@@ -393,9 +393,9 @@ internal static slice<@string> shortMonthNames = slice<@string>([
     "Oct",
     "Nov",
     "Dec"
-]);
+];
 
-internal static slice<@string> longMonthNames = slice<@string>([
+internal static slice<@string> longMonthNames = [
     "January",
     "February",
     "March",
@@ -408,7 +408,7 @@ internal static slice<@string> longMonthNames = slice<@string>([
     "October",
     "November",
     "December"
-]);
+];
 
 // match reports whether s1 and s2 match ignoring case.
 // It is assumed s1 and s2 are the same length.
@@ -429,7 +429,7 @@ internal static bool match(@string s1, @string s2) {
 }
 
 internal static (nint, @string, error) lookup(slice<@string> tab, @string val) {
-    foreach (var (i, v) in tab) {
+    foreach (var (i, v) in range(tab)) {
         if (len(val) >= len(v) && match(val.slice(0, len(v)), v)) {
             return (i, val.slice(len(v)), default);
         }

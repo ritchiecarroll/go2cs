@@ -18,7 +18,7 @@ public static @string String(this HardwareAddr a) {
         return ""u8;
     }
     var buf = new slice<byte>(0, len(a) * 3 - 1);
-    foreach (var (i, b) in a) {
+    foreach (var (i, b) in range<byte>(a)) {
         if (i > 0) {
             buf = append(bufᴷ, buf, (byte)':');
         }

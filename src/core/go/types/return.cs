@@ -68,7 +68,7 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
         return check.isTerminatingSwitch(sΔ1.Body, label);
     }
     case ж<ast.SelectStmt> sΔ1: {
-        foreach (var (_, sΔ2) in sΔ1.Body.List) {
+        foreach (var (_, sΔ2) in range(sΔ1.Body.List)) {
             var cc = sΔ2._<ж<ast.CommClause>>();
             if (!check.isTerminatingList(cc.Body, ""u8) || hasBreakList(cc.Body, label, true)) {
                 return false;
@@ -100,7 +100,7 @@ internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStm
     ref var body = ref Ꮡbody.DerefOrNull();
 
     var hasDefault = false;
-    foreach (var (_, s) in body.List) {
+    foreach (var (_, s) in range(body.List)) {
         var cc = s._<ж<ast.CaseClause>>();
         if (cc.List == nil) {
             hasDefault = true;
@@ -204,7 +204,7 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
 }
 
 internal static bool hasBreakList(slice<ast.Stmt> list, @string label, bool @implicit) {
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         if (hasBreak(s, label, @implicit)) {
             return true;
         }

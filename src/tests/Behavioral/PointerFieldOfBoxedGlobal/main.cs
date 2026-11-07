@@ -18,7 +18,7 @@ internal static void appendInt(ref slice<nint> s, nint v) { s = append(s, v); }
 
 internal static nint sum(this ref profBuf b) {
     nint t = 0;
-    foreach (var (_, x) in b.data) {
+    foreach (var (_, x) in range(b.data)) {
         t += x;
     }
     return t;

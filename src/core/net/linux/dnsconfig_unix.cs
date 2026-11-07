@@ -90,7 +90,7 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                 break;
             }
             case {} when exprᴛ1 == "options"u8: { // magic options
-                foreach (var (_, s) in f[1..]) {
+                foreach (var (_, s) in range(f[1..])) {
                     switch (ᐧ) {
                     case {} when stringslite.HasPrefix(s, ndotsˢ): {
                         var (n, _, _) = dtoi(s[6..]);

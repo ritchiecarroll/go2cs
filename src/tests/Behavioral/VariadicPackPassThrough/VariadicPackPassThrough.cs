@@ -9,7 +9,7 @@ partial class main_package {
 internal static void bump(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.sslice();
 
-    foreach (var i in range(xs)) {
+    foreach (var i in range(len(xs))) {
         xs[i] += 10;
     }
 }
@@ -24,7 +24,7 @@ internal static nint sum(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.sslice();
 
     nint t = 0;
-    foreach (var (_, x) in xs) {
+    foreach (var (_, x) in range(xs)) {
         t += x;
     }
     return t;
@@ -93,7 +93,7 @@ internal static void Main() {
     fmt.Println("forward wrote through:", a);
 
     fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));
-    fmt.Println("gather:", gather(slice<nint>([0]), 1, 2), gather(default, a.ꓸꓸꓸ));
+    fmt.Println("gather:", gather([0], 1, 2), gather(default, a.ꓸꓸꓸ));
 
     var d = new slice<nint>(2);
     nint n = fill(d, 8, 9, 10);

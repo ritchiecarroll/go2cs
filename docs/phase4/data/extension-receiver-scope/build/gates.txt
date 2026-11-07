@@ -1,0 +1,34 @@
+L3 receiver-home scope: gates at the merged tip (linux, 4 cores, SDK 10.0.403, go1.26.10)
+
+Battery at 3d16ccdc96cef4b9c0ea530fbd0df5aa60387d66 (master c9cb14e731 merged in), 07:47-11:50Z 2026-11-07
+  go2cs.slnx members outside Behavioral, Debug: 103 built, 0 failed
+  GenTests: 446 passed, 1 failed (AnInterfaceCarriesAStaticSourceAssertOverloadInATopLevelClass: LF working copy)
+  GolibTests Debug: 2409 passed, 1 failed, 50 skipped (NoUncountedBackingAllocations: stale allow-list entry)
+  GolibTests Release: 2434 passed, 1 failed, 25 skipped (the same)
+  go test ./... (src/go2cs): rc 0
+  CNR: NO REGRESSION, byte-identical across all 961 behavioral packages (12 platform-exclusive skipped)
+  tracked deletions: 0
+  behavioral chunks:
+    AB      aborted at the first test (CheckAdapterNameInterfaceCollision), 3-minute inactivity, cold core
+    C       241 passed, 0 failed
+    DE      276 passed, 0 failed, 4 skipped
+    F       197 passed, 0 failed, 4 skipped
+    GH      266 passed, 0 failed
+    IJK     aborted after 30 passed (CheckInterfaceMapKeyPointer), 3-minute inactivity
+    LM      279 passed, 0 failed, 4 skipped
+    N       448 passed, 0 failed
+    OP      350 passed, 0 failed, 8 skipped
+    QR      262 passed, 0 failed, 4 skipped
+    S       389 passed, 0 failed, 8 skipped
+    T       143 passed, 0 failed
+    UVWXYZ  269 passed, 0 failed, 16 skipped
+    rest     33 passed, 0 failed
+
+Fix a282b67210f0b9d6e1d359a978b36d4a61e7a1c9 (allow-list entry moved); the ten edited files checked out again (CRLF)
+  GenTests: 447 passed, 0 failed
+  behavioral AB: aborted at the first test again (core rebuilt after the checkout); then 250 passed, 0 failed
+  behavioral IJK: 177 passed, 0 failed
+  GolibTests Debug: 2410 passed, 0 failed, 50 skipped
+  GolibTests Release: 2435 passed, 0 failed, 25 skipped
+
+Behavioral total at the tip: 3580 passed, 0 failed, 48 skipped

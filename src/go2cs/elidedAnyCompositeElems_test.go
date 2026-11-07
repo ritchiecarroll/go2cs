@@ -79,10 +79,9 @@ func main() {
 	for _, want := range []string{
 		`new any[]{(nint)1, (nint)2}.array()`,
 		`new any[]{(@string)"a", (@string)"b"}.array()`,
-		`slice<any>([1.5D, (rune)'x'])`,
-		`slice<any>([(@string)("c"u8 + "d"u8), true])`,
+		`new slice<any>[]{[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]}.array()`,
 		`Ꮡ(new any[]{(nint)1, (@string)"p"}.array())`,
-		`slice<any>([p.OrTypedNil()])`,
+		`slice<slice<any>>([[p.OrTypedNil()]])`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q: an elided empty-interface element boxes at its Go type:\n%s", want, mainCs)
@@ -91,8 +90,8 @@ func main() {
 
 	// CONTROLS: an elided literal of a concrete element type, and a typed `[]any` literal, keep their emission.
 	for _, want := range []string{
-		`slice<nint>([1, 2])`,
-		`slice<@string>(["x"])`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
+		`slice<slice<nint>>([[1, 2]])`,
+		`slice<slice<@string>>([["x"]])`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
 		`slice<any>([flatˢ, (nint)3])`, // a healthy slug's any element takes the pre-boxed field (seat #51)
 	} {
 		if !strings.Contains(mainCs, want) {

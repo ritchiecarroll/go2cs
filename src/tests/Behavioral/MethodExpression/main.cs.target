@@ -53,7 +53,7 @@ internal static rune shift(this shifter s, rune r) { return r + s.delta; }
 
 internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
     var @out = new slice<rune>(len(rs));
-    foreach (var (i, r) in rs) {
+    foreach (var (i, r) in range(rs)) {
         @out[i] = f(r);
     }
     return @out;

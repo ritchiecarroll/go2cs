@@ -534,7 +534,7 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     var values = slice<int64>([0, 0]);
     slice<uint64> locs = default;
     var expandedStack = pprof_makeProfStack();
-    foreach (var (_, r) in records) {
+    foreach (var (_, r) in range(records)) {
         values[0] = r.Count;
         values[1] = (int64)((float64)r.Cycles / cpuGHz);
         // For count profiles, all stack addresses are
@@ -558,7 +558,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
     @string key(slice<uintptr> stk, ж<labelMap> lbls) {
         Ꮡbuf.Value.Reset();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "@"u8);
-        foreach (var (_, pc) in stk) {
+        foreach (var (_, pc) in range(stk)) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), " %#x"u8, pc);
         }
         if (lbls != nil) {
@@ -586,7 +586,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         // Print debug profile in legacy format
         var tw = tabwriter.NewWriter(w, 1, 8, 1, (byte)'\t', 0);
         fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%s profile: total %d\n"u8, name, p.Len());
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%d %s\n"u8, count[k], k);
             printStackRecord(new tabwriter_WriterжWriter(tw), p.Stack(index[k]), false);
         }
@@ -601,7 +601,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
 
     var values = slice<int64>([0]);
     slice<uint64> locs = default;
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         values[0] = (int64)count[k];
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
@@ -611,7 +611,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
             labels = () => {
-                foreach (var (_, lbl) in p.Label(idx).Set.List) {
+                foreach (var (_, lbl) in range(p.Label(idx).Set.List)) {
                     bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
@@ -747,7 +747,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     w = new tabwriter_WriterжWriter(tw);
 
     runtime.MemProfileRecord total = new();
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         total.AllocBytes += r.AllocBytes;
         total.AllocObjects += r.AllocObjects;
@@ -777,12 +777,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         total.AllocObjects, allocBytes,
         rate);
 
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
             r.InUseObjects(), r.InUseBytes(),
             r.AllocObjects, r.AllocBytes);
-        foreach (var (_, pc) in r.Stack) {
+        foreach (var (_, pc) in range(r.Stack)) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
         fmt.Fprintf(w, "\n"u8);
@@ -1127,12 +1127,12 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         fmt.Fprintf(w, "sampling period=%d\n"u8, runtime.SetMutexProfileFraction(-1));
     }
     var expandedStack = pprof_makeProfStack();
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%v %v @"u8, r.Cycles, r.Count);
         nint nΔ1 = expandInlinedFrames(expandedStack, r.Stack);
         var stack = expandedStack.slice(0, nΔ1);
-        foreach (var (_, pc) in stack) {
+        foreach (var (_, pc) in range(stack)) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
         fmt.Fprint(w, "\n");

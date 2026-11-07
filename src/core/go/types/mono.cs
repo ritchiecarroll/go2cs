@@ -91,7 +91,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
     while (again) {
         again = false;
 
-        foreach (var (i, edge) in check.mono.edges) {
+        foreach (var (i, edge) in range(check.mono.edges)) {
             var src = Ꮡ(check.mono.vertices, edge.src);
             var dst = Ꮡ(check.mono.vertices, edge.dst);
 
@@ -147,7 +147,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
 
     var qf = RelativeTo(check.pkg);
     stack = move2heap(stackᴷ, stack);
-    foreach (var (_, vΔ1) in stack) {
+    foreach (var (_, vΔ1) in range(stack)) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;
 
@@ -180,7 +180,7 @@ internal static void recordCanon(this ref monoGraph w, ж<TypeParam> mpar, ж<Ty
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
 internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
-    foreach (var (i, tpar) in tparams) {
+    foreach (var (i, tpar) in range(tparams)) {
         tokenꓸPos posΔ1 = pos;
         if (i < len(xlist)) {
             posΔ1 = startPos(xlist[i]);

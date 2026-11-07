@@ -2348,6 +2348,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]
+    public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
@@ -2598,6 +2601,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
+
+    [TestMethod]
+    public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
 
     [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");

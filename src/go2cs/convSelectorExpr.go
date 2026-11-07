@@ -2181,12 +2181,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							// copies *p into M's `this T` while the arguments are still being built, before they run, and a
 							// method that never reads its receiver lets the JIT drop that copy at full optimization, and the
 							// nil-pointer fault with it. Through the box the twin copies *p after the arguments, as Go does,
-							// and fails on nil through ж<T>'s own check: `Ꮡp.M()`. A `[GoRecv] this ref T` receiver has no
-							// box in scope (exprHasReceiverBoxInScope) and keeps the alias. Not for the selector of a
+							// and fails on nil through ж<T>'s own check: `Ꮡp.M()`. A pointer method that calls a value method
+							// on its own receiver is emitted over the box for this reason (bodyCallsValueMethodOnReceiver),
+							// so its receiver takes this branch too. Not for the selector of a
 							// deferred or spawned call, whose receiver Go copies at the statement (deferGoCallSelector).
 							if !needsDeref && v.exprHasReceiverBoxInScope(selectorExpr.X) && v.valueMethodHasBoxTwin(funcObj, sig) && selectorExpr != v.deferGoCallSelector {
 								return fmt.Sprintf("%s.%s", v.identBoxExpr(selectorExpr.X.(*ast.Ident)), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
+
 						}
 					}
 				}

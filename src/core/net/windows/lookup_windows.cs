@@ -156,7 +156,7 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
         return (default!, err);
     }
     var addrs = new slice<@string>(0, len(ips));
-    foreach (var (_, vᴛ1) in ips) {
+    foreach (var (_, vᴛ1) in range(ips)) {
         ref var ip = ref heap(new IPAddr(), out var Ꮡip);
         ip = vᴛ1;
 
@@ -432,7 +432,7 @@ internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡ
         }
         defer(syscall.DnsRecordListFree, rec, (uint32)(1), ref ᒐ);
         var srvs = new slice<ж<SRV>>(0, 10);
-        foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_SRV, target)) {
+        foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_SRV, target))) {
             var v = syscall.DnsRecordPayload<syscall.DNSSRVData>(p);
             srvs = append(srvs, Ꮡ(new SRV(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer(v.Target, 256))[..])), v.Port, v.Priority, v.Weight)));
         }
@@ -463,7 +463,7 @@ internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.
         }
         defer(syscall.DnsRecordListFree, rec, (uint32)(1), ref ᒐ);
         var mxs = new slice<ж<MX>>(0, 10);
-        foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_MX, name)) {
+        foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_MX, name))) {
             var v = syscall.DnsRecordPayload<syscall.DNSMXData>(p);
             mxs = append(mxs, Ꮡ(new MX(absDomainName(windows.UTF16PtrToString(v.NameExchange)), v.Preference)));
         }
@@ -494,7 +494,7 @@ internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.
         }
         defer(syscall.DnsRecordListFree, rec, (uint32)(1), ref ᒐ);
         var nss = new slice<ж<NS>>(0, 10);
-        foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_NS, name)) {
+        foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_NS, name))) {
             var v = syscall.DnsRecordPayload<syscall.DNSPTRData>(p);
             nss = append(nss, Ꮡ(new NS(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer(v.Host, 256))[..])))));
         }
@@ -524,7 +524,7 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
         }
         defer(syscall.DnsRecordListFree, rec, (uint32)(1), ref ᒐ);
         var txts = new slice<@string>(0, 10);
-        foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_TEXT, name)) {
+        foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_TEXT, name))) {
             var d = syscall.DnsRecordPayload<syscall.DNSTXTData>(p);
             @string s = ""u8;
 
@@ -534,7 +534,7 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
             // AliasPointer's managed window (clamped to the StringCount elements it holds); over a record
             // read NATIVE, golib's foreign pointer array, which reads exactly the StringCount words the
             // slice spans (G's ruling, 2026-10-19; GolibTests WindowsDnsTxtPayloadTests pins both).
-            foreach (var (_, v) in array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1024).slice(0, d.StringCount, d.StringCount)) {
+            foreach (var (_, v) in range(array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1024).slice(0, d.StringCount, d.StringCount))) {
                 s += windows.UTF16PtrToString(v);
             }
             txts = append(txts, s);
@@ -571,7 +571,7 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
         }
         defer(syscall.DnsRecordListFree, rec, (uint32)(1), ref ᒐ);
         var ptrs = new slice<@string>(0, 10);
-        foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_PTR, arpa)) {
+        foreach (var (_, p) in range(validRecs(rec, syscall.DNS_TYPE_PTR, arpa))) {
             var v = syscall.DnsRecordPayload<syscall.DNSPTRData>(p);
             ptrs = append(ptrs, absDomainName(windows.UTF16PtrToString(v.Host)));
         }

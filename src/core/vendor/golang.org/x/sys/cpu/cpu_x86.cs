@@ -11,7 +11,7 @@ partial class cpu_package {
 internal static UntypedInt cacheLineSize => 64;
 
 internal static void initOptions() {
-    options = slice<option>([
+    options = [
         new(Name: "adx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
         new(Name: "aes", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
         new(Name: "avx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
@@ -59,7 +59,7 @@ internal static void initOptions() {
 
         // These capabilities should always be enabled on amd64:
         new(Name: "sse2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
-    ]);
+    ];
 }
 
 internal static void archInit() {

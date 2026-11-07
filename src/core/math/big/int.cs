@@ -88,9 +88,9 @@ public static ж<ΔInt> NewInt(int64 x) {
     slice<Word> abs = default;
     if (x == 0) {
     } else if (_W == 32 && u >> 32 != 0) {
-        abs = slice<Word>([(Word)(nuint)u, (Word)(nuint)((u >> 32))]);
+        abs = [(Word)(nuint)u, (Word)(nuint)((u >> 32))];
     } else {
-        abs = slice<Word>([(Word)(nuint)u]);
+        abs = [(Word)(nuint)u];
     }
     return Ꮡ(new ΔInt(neg: x < 0, abs: abs));
 }

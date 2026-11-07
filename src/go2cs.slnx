@@ -1135,6 +1135,7 @@
     <Project Path="tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
     <Project Path="tests/Behavioral/TcpLoopbackRoundTrip/TcpLoopbackRoundTrip.csproj" />
     <Project Path="tests/Behavioral/TestingStructZeroLiteral/TestingStructZeroLiteral.csproj" />
+    <Project Path="tests/Behavioral/ThisRefReceiverTC0/ThisRefReceiverTC0.csproj" />
     <Project Path="tests/Behavioral/TraceUserAnnotations/TraceUserAnnotations.csproj" />
     <Project Path="tests/Behavioral/TransitiveAliasPreload/TransitiveAliasPreload.csproj" />
     <Project Path="tests/Behavioral/TupleDestructureEscapingLocal/TupleDestructureEscapingLocal.csproj" />
@@ -1223,6 +1224,7 @@
     <Project Path="tests/Behavioral/VariadicFuncFields/VariadicFuncFields.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncTypeAssert/VariadicFuncTypeAssert.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncValues/VariadicFuncValues.csproj" />
+    <Project Path="tests/Behavioral/VariadicInterfaceAssert/VariadicInterfaceAssert.csproj" />
     <Project Path="tests/Behavioral/VariadicNamedEmptyIface/VariadicNamedEmptyIface.csproj" />
     <Project Path="tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.csproj" />
     <Project Path="tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />

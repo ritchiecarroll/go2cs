@@ -1,0 +1,7 @@
+PerfMatMul	AD/AP	215.7	601.1	0.359	-64.1%	floor 1.5%	MOVED
+PerfSieve	AD/AP	152.3	296.2	0.514	-48.6%	floor 12.2%	MOVED
+PerfTlsHandshake	AD/AP	1640.4	2185.1	0.751	-24.9%	floor 1.0%	MOVED
+PerfMatMul	JD/JP	216.1	217.7	0.993	-0.7%	floor 3.7%	within
+PerfSieve	JD/JP	156.9	159.8	0.982	-1.8%	floor 11.9%	within
+PerfTlsHandshake	JD/JP	23126.7	23015.8	1.005	+0.5%	floor 2.3%	within
+PerfStartup	RD/RP	382.8	382.3	1.001	+0.1%	floor 2.3%	within

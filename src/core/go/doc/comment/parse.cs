@@ -87,7 +87,7 @@ public static bool BlankBetween(this ref List l) {
     if (l.ForceBlankBetween) {
         return true;
     }
-    foreach (var (_, item) in l.Items) {
+    foreach (var (_, item) in range(l.Items)) {
         if (len(item.Content) != 1) {
             // Unreachable for parsed comments today,
             // since the only way to get multiple item.Content
@@ -292,7 +292,7 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
     // First pass: break into block structure and collect known links.
     // The text is all recorded as Plain for now.
     span prev = default;
-    foreach (var (_, s) in parseSpans(lines)) {
+    foreach (var (_, s) in range(parseSpans(lines))) {
         Block b = default;
         switch (s.kind) {
         default: {
@@ -326,15 +326,15 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
     }
 
     // Second pass: interpret all the Plain text now that we know the links.
-    foreach (var (_, b) in d.Content) {
+    foreach (var (_, b) in range(d.Content)) {
         switch (b.type()) {
         case ж<Paragraph> bΔ1: {
             bΔ1.Text = d.parseLinkedText((@string)(bΔ1.Text[0]._<Plain>()));
             break;
         }
         case ж<List> bΔ1: {
-            foreach (var (_, i) in bΔ1.Items) {
-                foreach (var (_, c) in i.Content) {
+            foreach (var (_, i) in range(bΔ1.Items)) {
+                foreach (var (_, c) in range(i.Content)) {
                     var pΔ1 = c._<ж<Paragraph>>();
                     pΔ1.Text = d.parseLinkedText((@string)(pΔ1.Text[0]._<Plain>()));
                 }
@@ -531,14 +531,14 @@ internal static slice<@string> unindent(slice<@string> lines) {
 
     // Compute and remove common indentation.
     @string prefix = leadingSpace(lines[0]);
-    foreach (var (_, line) in lines[1..]) {
+    foreach (var (_, line) in range(lines[1..])) {
         if (!isBlank(line)) {
             prefix = commonPrefix(prefix, leadingSpace(line));
         }
     }
 
     var @out = new slice<@string>(len(lines));
-    foreach (var (i, vᴛ1) in lines) {
+    foreach (var (i, vᴛ1) in range(lines)) {
         var line = vᴛ1;
 
         line = strings.TrimPrefix(line, prefix);
@@ -661,7 +661,7 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
 
     // Is this a block of known links? Handle.
     slice<ж<LinkDef>> defs = default;
-    foreach (var (_, line) in lines) {
+    foreach (var (_, line) in range(lines)) {
         var (def, ok) = parseLink(line);
         if (!ok) {
             goto NoDefs;
@@ -669,7 +669,7 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
         defs = append(defsᴷ, defs, def);
     }
     defs = move2heap(defsᴷ, defs);
-    foreach (var (_, def) in defs) {
+    foreach (var (_, def) in range(defs)) {
         d.Links = append(d.Links, def);
         if (d.links[def.Text] == nil) {
             d.links[def.Text] = def;
@@ -726,7 +726,7 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
         Ꮡtext.ValueSlot = default;
     }
 
-    foreach (var (_, vᴛ1) in lines) {
+    foreach (var (_, vᴛ1) in range(lines)) {
         var line = vᴛ1;
 
         ref var n = ref heap<@string>(out var Ꮡn);
@@ -957,7 +957,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                     // That would allow creating links that display as one URL but
                     // when clicked go to a different URL. Not sure what the point
                     // of that is, so we're not doing that lookup here.
-                    @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: slice<ΔText>([((Plain)url)]), URL: url)))));
+                    @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: [((Plain)url)], URL: url)))));
                     i += len(url);
                     wrote = i;
                     continue;
@@ -975,7 +975,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                     if (url == ""u8) {
                         @out = append(@out, (ΔText)((Italic)id));
                     } else {
-                        @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: slice<ΔText>([((Italic)id)]), URL: url)))));
+                        @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: [((Italic)id)], URL: url)))));
                     }
                     i += len(id);
                     wrote = i;

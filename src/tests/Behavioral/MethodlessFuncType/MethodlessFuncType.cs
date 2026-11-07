@@ -51,7 +51,7 @@ internal static void Main() {
     var (p, okp) = find("q");
     fmt.Println("lookup:", p, okp);
 
-    foreach (var (_, line) in log) {
+    foreach (var (_, line) in range(log)) {
         fmt.Println(line);
     }
 }

@@ -1143,7 +1143,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
         if (err != nil) {
             (entryOut, resp, retErr) = (new CorpusEntry(), new minimizeResponse(), fmt.Errorf("workerClient.minimize unmarshaling provided value: %v"u8, err)); goto ᒐdone;
         }
-        foreach (var (i, v) in entryOut.Values) {
+        foreach (var (i, v) in range(entryOut.Values)) {
             if (!isMinimizable(reflect.TypeOf(v))) {
                 continue;
             }

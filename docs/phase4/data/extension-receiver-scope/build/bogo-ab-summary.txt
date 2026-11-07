@@ -1,0 +1,4 @@
+base225 n=32 median 544.9 ms p25 532.5 p75 576.8 rc ['0']
+fix n=32 median 460.8 ms p25 446.4 p75 484.0 rc ['0']
+paired fix-base median -90.0 ms p25 -112.4 p75 -68.7; median diff -84.1
+outputs equal

@@ -125,8 +125,8 @@ func main() {
 		t.Errorf("mixed array literal must carry its DECLARED length (8):\n%s", mainCs)
 	}
 
-	// …and an unmixed literal keeps the emission it already had.
-	if !strings.Contains(mainCs, "slice<nint>([1, 2, 3])") {
+	// …and an unmixed literal keeps its plain collection expression.
+	if !strings.Contains(mainCs, "allPositional = [1, 2, 3];") {
 		t.Errorf("an all-positional literal must be untouched by the normalization:\n%s", mainCs)
 	}
 }

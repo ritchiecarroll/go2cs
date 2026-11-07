@@ -35,7 +35,7 @@ internal static @string concatstrings(ж<tmpBuf> buf, slice<@string> a) {
     nint idx = 0;
     nint l = 0;
     nint count = 0;
-    foreach (var (i, x) in a) {
+    foreach (var (i, x) in range(a)) {
         nint n = len(x);
         if (n == 0) {
             continue;
@@ -58,7 +58,7 @@ internal static @string concatstrings(ж<tmpBuf> buf, slice<@string> a) {
         return a[idx];
     }
     var (s, b) = rawstringtmp(buf, l);
-    foreach (var (_, x) in a) {
+    foreach (var (_, x) in range(a)) {
         nint n = copy(b, x);
         b = b.slice(n);
     }
@@ -69,19 +69,19 @@ internal static @string concatstrings(ж<tmpBuf> buf, slice<@string> a) {
 // and we think this is currently more valuable than omitting one call in the
 // chain, the same goes for concatstring{3,4,5}.
 internal static @string concatstring2(ж<tmpBuf> buf, @string a0, @string a1) {
-    return concatstrings(buf, slice<@string>([a0, a1]));
+    return concatstrings(buf, [a0, a1]);
 }
 
 internal static @string concatstring3(ж<tmpBuf> buf, @string a0, @string a1, @string a2) {
-    return concatstrings(buf, slice<@string>([a0, a1, a2]));
+    return concatstrings(buf, [a0, a1, a2]);
 }
 
 internal static @string concatstring4(ж<tmpBuf> buf, @string a0, @string a1, @string a2, @string a3) {
-    return concatstrings(buf, slice<@string>([a0, a1, a2, a3]));
+    return concatstrings(buf, [a0, a1, a2, a3]);
 }
 
 internal static @string concatstring5(ж<tmpBuf> buf, @string a0, @string a1, @string a2, @string a3, @string a4) {
-    return concatstrings(buf, slice<@string>([a0, a1, a2, a3, a4]));
+    return concatstrings(buf, [a0, a1, a2, a3, a4]);
 }
 
 // concatbytes implements a Go string concatenation x+y+z+... returning a slice
@@ -91,7 +91,7 @@ internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     nint l = 0;
-    foreach (var (_, x) in a) {
+    foreach (var (_, x) in range(a)) {
         nint n = len(x);
         if (l + n < l) {
             @throw(stringConcatenationTooˢ);
@@ -100,7 +100,7 @@ internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     }
     if (l == 0) {
         // This is to match the return type of the non-optimized concatenation.
-        return slice<byte>([]);
+        return [];
     }
 
     slice<byte> b = default;
@@ -111,7 +111,7 @@ internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
         b = rawbyteslice(l);
     }
     nint offset = 0;
-    foreach (var (_, x) in a) {
+    foreach (var (_, x) in range(a)) {
         copy(b.slice(offset), x);
         offset += len(x);
     }
@@ -123,19 +123,19 @@ internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
 // and we think this is currently more valuable than omitting one call in
 // the chain, the same goes for concatbyte{3,4,5}.
 internal static slice<byte> concatbyte2(ж<tmpBuf> buf, @string a0, @string a1) {
-    return concatbytes(buf, slice<@string>([a0, a1]));
+    return concatbytes(buf, [a0, a1]);
 }
 
 internal static slice<byte> concatbyte3(ж<tmpBuf> buf, @string a0, @string a1, @string a2) {
-    return concatbytes(buf, slice<@string>([a0, a1, a2]));
+    return concatbytes(buf, [a0, a1, a2]);
 }
 
 internal static slice<byte> concatbyte4(ж<tmpBuf> buf, @string a0, @string a1, @string a2, @string a3) {
-    return concatbytes(buf, slice<@string>([a0, a1, a2, a3]));
+    return concatbytes(buf, [a0, a1, a2, a3]);
 }
 
 internal static slice<byte> concatbyte5(ж<tmpBuf> buf, @string a0, @string a1, @string a2, @string a3, @string a4) {
-    return concatbytes(buf, slice<@string>([a0, a1, a2, a3, a4]));
+    return concatbytes(buf, [a0, a1, a2, a3, a4]);
 }
 
 // slicebytetostring converts a byte slice to a string.
@@ -290,12 +290,12 @@ internal static @string slicerunetostring(ж<tmpBuf> buf, slice<rune> a) {
     }
     array<byte> dum = new(4);
     nint size1 = 0;
-    foreach (var (_, r) in a) {
+    foreach (var (_, r) in range(a)) {
         size1 += encoderune(dum[..], r);
     }
     var (s, b) = rawstringtmp(buf, size1 + 3);
     nint size2 = 0;
-    foreach (var (_, r) in a) {
+    foreach (var (_, r) in range(a)) {
         // check for race
         if (size2 >= size1) {
             break;

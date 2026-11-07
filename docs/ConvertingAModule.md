@@ -2,8 +2,8 @@
 
 The `-recurse` option converts a **whole downloaded application together with every third-party dependency
 package** in its transitive import closure — in dependency order (least-dependencies-first) — while
-**referencing** (not reconverting) the pre-converted standard library. The result is a C# solution you can
-open and build. With `-recurse=nuget` the standard library, the `golib` runtime and the `go2cs-gen`
+**referencing** (not reconverting) the pre-converted standard library. The result is a tree of C# projects you
+can open and build. With `-recurse=nuget` the standard library, the `golib` runtime and the `go2cs-gen`
 analyzer come from [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll), so nothing has to
 be staged on the machine beforehand. (Prefer the standard library as local C# source? See
 [building against a local standard library](#optional-build-against-a-local-standard-library) below.)
@@ -285,7 +285,18 @@ go2cs -recurse . -go2cspath <gopath>/src/go2cs
 
 The converted app lands under `<gopath>/src/go2cs/src/<import-path>` and its converted third-party
 dependencies under `<gopath>/src/go2cs/pkg/<import-path>`, with the standard library referenced at
-`<gopath>/src/go2cs/core/`; build and run it as in steps 3 and 4 from there. On Linux and macOS, add
+`<gopath>/src/go2cs/core/`. No solution is generated for this kind of conversion: build or publish the
+**project**, in its folder or by naming its `.csproj`, and do not build it through a solution, because the core
+projects a solution does not list build Debug (see [Known issues](KnownIssues.md#a-program-converted-with-local-standard-library-references-runs-its-standard-library-built-debug)).
+In Visual Studio, open the `.csproj`. Build and run it from the project's folder:
+
+```shell
+cd <gopath>/src/go2cs/src/example.com/colordemo
+dotnet build -c Debug
+dotnet run -c Debug
+```
+
+On Linux and macOS, add
 `-p:GoTargetOS=linux` (or `darwin`) to `dotnet build` and `dotnet run`: a local standard library builds its
 Windows flavor unless told otherwise, and that program stops at start-up with a warning that says so. The converted C# is
 the same either way — only the reference style in the generated projects differs.
@@ -293,7 +304,7 @@ the same either way — only the reference style in the generated projects diffe
 The output root does not have to be the deploy root: `go2cs -recurse -go2cspath <gopath>/src/go2cs . csharp`
 keeps the generated tree in `csharp/` while still referencing the deploy root. The conversion records that
 root as the `$(go2csPath)` default in the output root's generated `Directory.Build.props`, so the generated
-solution builds from anywhere with no extra configuration — override with a `go2csPath` environment variable
+projects build from anywhere with no extra configuration — override with a `go2csPath` environment variable
 or a `-p:go2csPath` build global if the runtime root later moves.
 
 ## Mapping modules to NuGet packages

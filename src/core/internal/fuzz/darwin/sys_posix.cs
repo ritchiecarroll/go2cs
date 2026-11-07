@@ -43,7 +43,7 @@ internal static error Close(this ref sharedMem m) {
     if (m.removeOnClose) {
         errs = append(errs, os.Remove(m.f.Name()));
     }
-    foreach (var (_, err) in errs) {
+    foreach (var (_, err) in range(errs)) {
         if (err != nil) {
             return err;
         }
@@ -57,7 +57,7 @@ internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
     var memFile = mem.f;
     comm.memMu.ᐸꟷ(mem);
-    cmd.ExtraFiles = slice<ж<os.File>>([comm.fuzzIn, comm.fuzzOut, memFile]);
+    cmd.ExtraFiles = [comm.fuzzIn, comm.fuzzOut, memFile];
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

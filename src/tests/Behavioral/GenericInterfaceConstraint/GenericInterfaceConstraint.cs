@@ -47,7 +47,7 @@ internal static float64 totalArea<S>(slice<S> shapes)
     where S : Shape
 {
     float64 sum = default;
-    foreach (var (_, s) in shapes) {
+    foreach (var (_, s) in range(shapes)) {
         sum += s.Area();
     }
     return sum;
@@ -56,7 +56,7 @@ internal static float64 totalArea<S>(slice<S> shapes)
 internal static void walkAll<S>(slice<S> shapes)
     where S : Shape
 {
-    foreach (var (_, s) in shapes) {
+    foreach (var (_, s) in range(shapes)) {
         show(s);
     }
 }

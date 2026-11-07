@@ -58,7 +58,7 @@ public static IP IPv4(byte a, byte b, byte c, byte d) {
     return p;
 }
 
-internal static slice<byte> v4InV6Prefix = slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff]);
+internal static slice<byte> v4InV6Prefix = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff];
 
 // IPv4Mask returns the IP mask (in 4-byte form) of the
 // IPv4 mask a.b.c.d.
@@ -254,7 +254,7 @@ public static IPMask DefaultMask(this IP ip) {
 }
 
 internal static bool allFF(slice<byte> b) {
-    foreach (var (_, c) in b) {
+    foreach (var (_, c) in range(b)) {
         if (c != 0xff) {
             return false;
         }
@@ -318,7 +318,7 @@ public static @string String(this IP ip) {
 
 internal static @string hexString(slice<byte> b) {
     var s = new slice<byte>(len(b) * 2);
-    foreach (var (i, tn) in b) {
+    foreach (var (i, tn) in range(b)) {
         (s[i * 2], s[i * 2 + 1]) = (hexDigit[(tn >> 4)], hexDigit[(byte)(tn & 0xf)]);
     }
     return (@string)s;
@@ -410,7 +410,7 @@ internal static bool matchAddrFamily(this IP ip, IP x) {
 // return the number of 1 bits.
 internal static nint simpleMaskLength(IPMask mask) {
     nint n = default;
-    foreach (var (iᴛ1, vᴛ1) in mask) {
+    foreach (var (iᴛ1, vᴛ1) in range<byte>(mask)) {
         var i = iᴛ1;
         var v = vᴛ1;
 

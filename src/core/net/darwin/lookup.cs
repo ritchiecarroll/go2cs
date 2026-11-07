@@ -223,7 +223,7 @@ public static (slice<IP>, error) LookupIP(@string host) {
         return (default, err);
     }
     var ips = new slice<IP>(len(addrs));
-    foreach (var (i, ia) in addrs) {
+    foreach (var (i, ia) in range(addrs)) {
         ips[i] = ia.IP;
     }
     return (ips, default);
@@ -262,7 +262,7 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
     }
 
     var ips = new slice<IP>(0, len(addrs));
-    foreach (var (_, addr) in addrs) {
+    foreach (var (_, addr) in range<ΔAddr>(addrs)) {
         ips = append(ips, addr._<ж<IPAddr>>().IP);
     }
     return (ips, default);
@@ -282,7 +282,7 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
         return (default, err);
     }
     var ret = new slice<netipꓸAddr>(0, len(ips));
-    foreach (var (_, ip) in ips) {
+    foreach (var (_, ip) in range(ips)) {
         var (a, ok) = netip.AddrFromSlice(ip); if (ok) {
             ret = append(ret, a);
         }
@@ -438,7 +438,7 @@ internal static (slice<IPAddr>, error) lookupIPReturn(any addrsi, error err, boo
 // ipAddrsEface returns an empty interface slice of addrs.
 internal static slice<any> ipAddrsEface(slice<IPAddr> addrs) {
     var s = new slice<any>(len(addrs));
-    foreach (var (i, v) in addrs) {
+    foreach (var (i, v) in range(addrs)) {
         s[i] = v;
     }
     return s;
@@ -569,7 +569,7 @@ public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr,
         return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(Err: "SRV header name is invalid", Name: name))));
     }
     var filteredAddrs = new slice<ж<SRV>>(0, len(addrs));
-    foreach (var (_, addr) in addrs) {
+    foreach (var (_, addr) in range(addrs)) {
         if (addr == nil) {
             continue;
         }
@@ -609,7 +609,7 @@ public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Co
         return (default, err);
     }
     var filteredMX = new slice<ж<MX>>(0, len(records));
-    foreach (var (_, mx) in records) {
+    foreach (var (_, mx) in range(records)) {
         if (mx == nil) {
             continue;
         }
@@ -654,7 +654,7 @@ public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Co
         return (default, err);
     }
     var filteredNS = new slice<ж<NS>>(0, len(records));
-    foreach (var (_, ns) in records) {
+    foreach (var (_, ns) in range(records)) {
         if (ns == nil) {
             continue;
         }
@@ -716,7 +716,7 @@ public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context
         return (default, err);
     }
     var filteredNames = new slice<@string>(0, len(names));
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         if (isDomainName(name)) {
             filteredNames = append(filteredNames, name);
         }
@@ -953,11 +953,11 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
         // concatenated without separator to be consistent
         // with previous Go resolver.
         nint n = 0;
-        foreach (var (_, s) in txt.TXT) {
+        foreach (var (_, s) in range(txt.TXT)) {
             n += len(s);
         }
         var txtJoin = new slice<byte>(0, n);
-        foreach (var (_, s) in txt.TXT) {
+        foreach (var (_, s) in range(txt.TXT)) {
             txtJoin = append(txtJoin, s.ꓸꓸꓸ);
         }
         if (len(txts) == 0) {

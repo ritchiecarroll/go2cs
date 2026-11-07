@@ -151,7 +151,7 @@ public static void TestTestFSWrappedErrors(ж<testing.T> t) {
     if (!ok) {
         t.Errorf("caller should be able to extract the errors as a list: %#v", err);
     } else {
-        foreach (var (_, errΔ1) in errs.Unwrap()) {
+        foreach (var (_, errΔ1) in range(errs.Unwrap())) {
             // ErrPermission is expected
             // but any other error must be reported.
             if (!errors.Is(errΔ1, fs.ErrPermission)) {

@@ -74,7 +74,7 @@ public static nint Bump<T>(this ref Cache<T> c) {
     return c.Hits;
 }
 
-public static slice<T> Wrap<T>(T v) { return slice<T>([v]); }
+public static slice<T> Wrap<T>(T v) { return [v]; }
 
 public static V Pair<K, V>(K k, V v) { return v; }
 

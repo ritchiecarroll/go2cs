@@ -14,7 +14,7 @@ internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chai
     slice<ж<node>> toCheck = default;
     toCheck = append(toCheck, Ꮡc);
 
-    foreach (var (_, cΔ1) in chain) {
+    foreach (var (_, cΔ1) in range(chain)) {
         toCheck = append(toCheck, cΔ1);
     }
 
@@ -23,7 +23,7 @@ internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chai
 }
 
 internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
-    foreach (var (_, cΔ1) in chain) {
+    foreach (var (_, cΔ1) in range(chain)) {
         return cΔ1;
     }
 
@@ -35,11 +35,11 @@ internal static void Main() {
     var a = Ꮡ(new node(name: "a"));
     var b = Ꮡ(new node(name: "b"));
 
-    foreach (var (_, n) in root.collect(slice<ж<node>>([a, b]))) {
+    foreach (var (_, n) in range(root.collect([a, b]))) {
         fmt.Println("got:", n.name);
     }
 
-    fmt.Println("first:", root.firstOr(slice<ж<node>>([a, b])).name);
+    fmt.Println("first:", root.firstOr([a, b]).name);
     fmt.Println("empty:", root.firstOr(default).name);
 }
 

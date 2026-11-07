@@ -14,7 +14,7 @@ partial struct Nested {
 }
 
 public static void Fill(this ref State s) {
-    foreach (var i in range(s.Buf)) {
+    foreach (var i in range(len(s.Buf))) {
         s.Buf[i] = (uint64)i + 1;
     }
     s.N = (uint32)len(s.Buf);
@@ -32,7 +32,7 @@ public static uint64 Sum(ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var total = (uint64)0;
-    foreach (var (_, v) in s.Buf.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(s.Buf.ΔRangeSnapshot())) {
         total += v;
     }
     return total;

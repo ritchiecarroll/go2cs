@@ -44,7 +44,7 @@ public static error WriteEvent(this ref Writer w, Event e) {
 
     // Write out all arguments.
     var spec = w.specs[e.Ev];
-    foreach (var (_, arg) in e.Args.slice(0, len(spec.Args))) {
+    foreach (var (_, arg) in range(e.Args.slice(0, len(spec.Args)))) {
         w.buf = binary.AppendUvarint(w.buf, arg);
     }
     if (spec.IsStack) {

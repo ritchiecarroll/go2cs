@@ -88,8 +88,8 @@ internal static void init(this ref compiler c) {
     c.inst(InstFail);
 }
 
-internal static slice<rune> anyRuneNotNL = slice<rune>([0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune]);
-internal static slice<rune> anyRune = slice<rune>([0, unicode.MaxRune]);
+internal static slice<rune> anyRuneNotNL = [0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune];
+internal static slice<rune> anyRune = [0, unicode.MaxRune];
 
 internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
@@ -106,7 +106,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
             return c.nop();
         }
         frag f = default;
-        foreach (var j in range(re.Rune)) {
+        foreach (var j in range(len(re.Rune))) {
             var f1 = c.rune(re.Rune.slice(j, j + 1), re.Flags);
             if (j == 0) {
                 f = f1;
@@ -163,7 +163,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
             return c.nop();
         }
         frag f = default;
-        foreach (var (i, sub) in re.Sub) {
+        foreach (var (i, sub) in range(re.Sub)) {
             if (i == 0) {
                 f = c.compile(sub);
             } else {
@@ -174,7 +174,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
     }
     case var ᴛ when ᴛ == OpAlternate: {
         frag f = default;
-        foreach (var (_, sub) in re.Sub) {
+        foreach (var (_, sub) in range(re.Sub)) {
             f = c.alt(f, c.compile(sub));
         }
         return f;

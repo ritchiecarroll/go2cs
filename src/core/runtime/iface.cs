@@ -292,8 +292,8 @@ break_imethods:;
 internal static void itabsinit() {
     lockInit(ref itabLock, lockRankItab);
     @lock(ᏑitabLock);
-    foreach (var (_, md) in activeModules()) {
-        foreach (var (_, i) in md.itablinks) {
+    foreach (var (_, md) in range(activeModules())) {
+        foreach (var (_, i) in range(md.itablinks)) {
             itabAdd(i);
         }
     }
@@ -568,7 +568,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
 
     // Count the number of entries we need.
     nint n = 1;
-    foreach (var (_, e) in oldEntries) {
+    foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
             n++;
         }
@@ -599,7 +599,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
             h = (h + 1) & (newN - 1);
         }
     }
-    foreach (var (_, e) in oldEntries) {
+    foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
             addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
         }
@@ -628,7 +628,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
     ж<itab> tab = default;
 
     // Look through each case in order.
-    foreach (var (i, c) in cases) {
+    foreach (var (i, c) in range(cases)) {
         tab = getitab(c, t, true);
         if (tab != nil) {
             case_ = i;
@@ -679,7 +679,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
 
     // Count the number of entries we need.
     nint n = 1;
-    foreach (var (_, e) in oldEntries) {
+    foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
             n++;
         }
@@ -711,7 +711,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
             h = (h + 1) & (newN - 1);
         }
     }
-    foreach (var (_, e) in oldEntries) {
+    foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
             addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), e.Case, (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
         }

@@ -70,7 +70,7 @@ public static slice<byte> UnixRights(params ꓸꓸꓸnint fdsʗp) {
     h.Level = SOL_SOCKET;
     h.Type = SCM_RIGHTS;
     h.SetLen(CmsgLen(datalen));
-    foreach (var (i, fd) in fds) {
+    foreach (var (i, fd) in range(fds)) {
         ((ж<int32>)(uintptr)(h.data(4 * (uintptr)i))).Value = (int32)fd;
     }
     return b;

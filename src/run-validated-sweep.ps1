@@ -356,6 +356,9 @@ if (-not $rows) {
 # every row, Source 'columns', and every line printed below is the line that was printed before the
 # dimension existed. That is the invariant the Windows-unchanged proof rests on.
 $targetGoos = Get-SweepTargetGoos
+# On darwin, the RID this host runs as: a darwin segment may carry the other RID's reading as a per-RID note (arch-strict
+# banking, COORD ruling (1)), and this host reads the note where it names this RID. Empty everywhere else.
+$targetRid = Get-SweepHostRid -Goos $targetGoos
 
 foreach ($row in $rows) {
     # A hop row has no expectation to resolve, in EITHER direction: no columns (the population's counts
@@ -367,7 +370,7 @@ foreach ($row in $rows) {
         [PSCustomObject]@{ Expected = $null; Disclosed = $null; Applicable = $true; Source = 'hop' }
     }
     else {
-        Get-RosterRowExpectation -Row $row -Goos $targetGoos
+        Get-RosterRowExpectation -Row $row -Goos $targetGoos -Rid $targetRid
     }
 
     Add-Member -InputObject $row -NotePropertyName 'Effective' -Force -NotePropertyValue $effective

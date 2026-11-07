@@ -17,7 +17,7 @@ partial struct testsᴛ1 /*dyn*/ {
 ]); }
 
 internal static void Main() {
-    foreach (var (_, t) in tests) {
+    foreach (var (_, t) in range(tests)) {
         fmt.Println(t.name, t.n);
     }
     fmt.Println(len("a☺b☻"), len("héllo"), len("日本語"));

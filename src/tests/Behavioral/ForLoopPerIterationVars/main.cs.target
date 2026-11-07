@@ -43,7 +43,7 @@ internal static void g2() {
     }
     fmt.Println("g2:", len(fs));
     fs = move2heap(fsᴷ, fs);
-    foreach (var (_, f) in fs) {
+    foreach (var (_, f) in range(fs)) {
         fmt.Println("g2v:", f());
     }
 }
@@ -77,7 +77,7 @@ internal static void g4() {
         iᴛ1 = i;
     }
     fs = move2heap(fsᴷ, fs);
-    foreach (var (_, f) in fs) {
+    foreach (var (_, f) in range(fs)) {
         f();
     }
 }
@@ -102,7 +102,7 @@ continue_outer:;
     }
 break_outer:;
     fs = move2heap(fsᴷ, fs);
-    foreach (var (_, f) in fs) {
+    foreach (var (_, f) in range(fs)) {
         fmt.Println("g5:", f());
     }
 }
@@ -119,7 +119,7 @@ internal static void g6() {
         }
         fs = append(fs, () => i);
     }
-    foreach (var (_, f) in fs) {
+    foreach (var (_, f) in range(fs)) {
         fmt.Println("g6:", f());
     }
 }

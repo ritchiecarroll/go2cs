@@ -98,7 +98,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
         t.BodyCloser = rr.Body;
         t.ContentLength = rr.outgoingLength();
         if (t.ContentLength < 0 && builtin.len(t.TransferEncoding) == 0 && t.shouldSendChunkedRequestBody()) {
-            t.TransferEncoding = slice<@string>(["chunked"]);
+            t.TransferEncoding = ["chunked"];
         }
         // If there's a body, conservatively flush the headers
         // to any bufio.Writer we're writing to, just in case
@@ -309,7 +309,7 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(connectionˢ, slice<@string>(["close"]));
+            trace.WroteHeaderField(connectionˢ, ["close"]);
         }
     }
 
@@ -335,7 +335,7 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(transferEncodingˢ, slice<@string>(["chunked"]));
+            trace.WroteHeaderField(transferEncodingˢ, ["chunked"]);
         }
     }
 
@@ -528,8 +528,8 @@ internal static bool bodyAllowedForStatus(nint status) {
     return true;
 }
 
-internal static slice<@string> suppressedHeaders304 = slice<@string>(["Content-Type", "Content-Length", "Transfer-Encoding"]);
-internal static slice<@string> suppressedHeadersNoBody = slice<@string>(["Content-Length", "Transfer-Encoding"]);
+internal static slice<@string> suppressedHeaders304 = ["Content-Type", "Content-Length", "Transfer-Encoding"];
+internal static slice<@string> suppressedHeadersNoBody = ["Content-Length", "Transfer-Encoding"];
 internal static map<@string, bool> excludedHeadersNoBody = new map<@string, bool>{["Content-Length"] = true, ["Transfer-Encoding"] = true};
 
 internal static slice<@string> suppressedHeaders(nint status) {
@@ -661,7 +661,7 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> r) {
         rr.Body = t.Body;
         rr.ContentLength = t.ContentLength;
         if (t.Chunked) {
-            rr.TransferEncoding = slice<@string>(["chunked"]);
+            rr.TransferEncoding = ["chunked"];
         }
         rr.Close = t.Close;
         rr.Trailer = t.Trailer;
@@ -671,7 +671,7 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> r) {
         rr.Body = t.Body;
         rr.ContentLength = t.ContentLength;
         if (t.Chunked) {
-            rr.TransferEncoding = slice<@string>(["chunked"]);
+            rr.TransferEncoding = ["chunked"];
         }
         rr.Close = t.Close;
         rr.Trailer = t.Trailer;
@@ -748,7 +748,7 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
         // If there are dups of the value, remove the dups.
         // See Issue 16490.
         @string first = textproto.TrimString(contentLens[0]);
-        foreach (var (_, ct) in contentLens[1..]) {
+        foreach (var (_, ct) in range(contentLens[1..])) {
             if (first != textproto.TrimString(ct)) {
                 return (0, fmt.Errorf("http: message cannot contain multiple Content-Length headers; got %q"u8, contentLens));
             }
@@ -866,7 +866,7 @@ internal static (ΔHeader, error) fixTrailer(ΔHeader header, bool chunked) {
 
     var trailer = new ΔHeader(0);
     ref var err = ref heap<error>(out var Ꮡerr);
-    foreach (var (_, v) in vv) {
+    foreach (var (_, v) in range(vv)) {
         var trailerʗ1 = trailer;
         foreachHeaderElement(v, (@string key) => {
             key = CanonicalHeaderKey(key);

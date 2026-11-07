@@ -205,7 +205,7 @@ internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @stri
             return (default, err);
         }
         var des = new slice<fs.DirEntry>(len(fis));
-        foreach (var (i, fi) in fis) {
+        foreach (var (i, fi) in range(fis)) {
             des[i] = fs.FileInfoToDirEntry(fi);
         }
         return (des, default);
@@ -243,7 +243,7 @@ internal static slice<@string> gopath(this ref Context ctxt) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
-    foreach (var (_, p) in ctxt.splitPathList(ctxt.GOPATH)) {
+    foreach (var (_, p) in range(ctxt.splitPathList(ctxt.GOPATH))) {
         if (p == ""u8 || p == ctxt.GOROOT) {
             // Empty paths are uninteresting.
             // If the path is the GOROOT, ignore it.
@@ -287,7 +287,7 @@ public static slice<@string> SrcDirs(this ref Context ctxt) {
             all = append(all, dir);
         }
     }
-    foreach (var (_, p) in ctxt.gopath()) {
+    foreach (var (_, p) in range(ctxt.gopath())) {
         @string dir = ctxt.joinPath(p, srcˢ);
         if (ctxt.isDir(dir)) {
             all = append(all, dir);
@@ -708,7 +708,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
             }
         }
         var all = ctxt.gopath();
-        foreach (var (i, root) in all) {
+        foreach (var (i, root) in range(all)) {
             @string rootsrc = ctxt.joinPath(root, srcˢ);
             var (sub, ok) = ctxt.hasSubdir(rootsrc, p.Dir); if (ok && !inTestdata(sub)) {
                 // We found a potential import path for dir,
@@ -720,7 +720,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
                         goto Found;
                     }
                 }
-                foreach (var (_, earlyRoot) in all.slice(0, i)) {
+                foreach (var (_, earlyRoot) in range(all.slice(0, i))) {
                     @string dir = ctxt.joinPath(earlyRoot, srcˢ, sub); if (ctxt.isDir(dir)) {
                         p.ConflictDir = dir;
                         goto Found;
@@ -787,7 +787,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
             if (ctxt.Compiler != "gccgo"u8 && ctxt.GOROOT != ""u8 && searchVendor(ctxt.GOROOT, true)) {
                 goto Found;
             }
-            foreach (var (_, root) in gopath) {
+            foreach (var (_, root) in range(gopath)) {
                 if (searchVendor(root, false)) {
                     goto Found;
                 }
@@ -828,7 +828,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
                 goto Found;
             }
         }
-        foreach (var (_, root) in gopath) {
+        foreach (var (_, root) in range(gopath)) {
             @string dir = ctxt.joinPath(root, srcˢ, path);
             var isDir = ctxt.isDir(dir);
             binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(root, pkga));
@@ -861,7 +861,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
         // package was not found
         slice<@string> paths = default;
         @string format = sVendorTreeˢ;
-        foreach (var (_, dir) in tried.vendor) {
+        foreach (var (_, dir) in range(tried.vendor)) {
             paths = append(pathsᴷ, paths, fmt.Sprintf(format, dir));
             format = "\t%s";
         }
@@ -871,7 +871,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
             paths = append(paths, (@string)"\t($GOROOT not set)");
         }
         format = sFromGopathˢ;
-        foreach (var (_, dir) in tried.gopath) {
+        foreach (var (_, dir) in range(tried.gopath)) {
             paths = append(paths, fmt.Sprintf(format, dir));
             format = "\t%s";
         }
@@ -958,7 +958,7 @@ Found:
     var xTestImportPos = new map<@string, slice<tokenꓸPosition>>();
     var allTags = new map<@string, bool>();
     var fset = token.NewFileSet();
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         if (d.IsDir()) {
             continue;
         }
@@ -1043,8 +1043,8 @@ Found:
             // existing name and mark the existing files as also invalid.
             badGoFile(name, new MultiplePackageErrorжerror(Ꮡ(new MultiplePackageError(
                 Dir: p.Dir,
-                Packages: slice<@string>([p.Name, pkg]),
-                Files: slice<@string>([firstFile, name])
+                Packages: [p.Name, pkg],
+                Files: [firstFile, name]
             ))));
         }
         // Grab the first package comment as docs, provided it is not from a test file.
@@ -1069,7 +1069,7 @@ Found:
 
         // Record imports and information about cgo.
         var isCgo = false;
-        foreach (var (_, imp) in info.imports) {
+        foreach (var (_, imp) in range(info.imports)) {
             if (imp.path == "C"u8) {
                 if (isTest) {
                     badGoFile(name, fmt.Errorf("use of cgo in test %s not supported"u8, filename));
@@ -1125,12 +1125,12 @@ Found:
         }}
         fileList.ValueSlot = append(fileList.ValueSlot, name);
         if (importMap != nil) {
-            foreach (var (_, imp) in info.imports) {
+            foreach (var (_, imp) in range(info.imports)) {
                 importMap[imp.path] = append(importMap[imp.path], fset.Position(imp.pos));
             }
         }
         if (embedMap != nil) {
-            foreach (var (_, emb) in info.embeds) {
+            foreach (var (_, emb) in range(info.embeds)) {
                 embedMap[emb.pattern] = append(embedMap[emb.pattern], emb.pos);
             }
         }
@@ -1213,7 +1213,7 @@ internal static slice<@string> uniq(slice<@string> list) {
     copy(@out, list);
     slices.Sort<slice<@string>, @string>(@out);
     var uniq = @out[..0];
-    foreach (var (_, x) in @out) {
+    foreach (var (_, x) in range(@out)) {
         if (len(uniq) == 0 || uniq[len(uniq) - 1] != x) {
             uniq = append(uniq, x);
         }
@@ -1400,7 +1400,7 @@ internal static bool hasGoFiles(ж<Context> Ꮡctxt, @string dir) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
 
     var (ents, _) = ctxt.readDir(dir);
-    foreach (var (_, ent) in ents) {
+    foreach (var (_, ent) in range(ents)) {
         if (!ent.IsDir() && strings.HasSuffix(ent.Name(), ".go")) {
             return true;
         }
@@ -1873,7 +1873,7 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         @string verb = f[len(f) - 1];
         if (len(cond) > 0) {
             var okΔ1 = false;
-            foreach (var (_, c) in cond) {
+            foreach (var (_, c) in range(cond)) {
                 if (Ꮡctxt.matchAuto(c, default)) {
                     okΔ1 = true;
                     break;
@@ -1888,7 +1888,7 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         if (err != nil) {
             return fmt.Errorf("%s: invalid #cgo line: %s"u8, filename, orig);
         }
-        foreach (var (i, vᴛ1) in args) {
+        foreach (var (i, vᴛ1) in range(args)) {
             var arg = vᴛ1;
 
             (arg, ok) = expandSrcDir(arg, di.Dir); if (!ok) {
@@ -1955,7 +1955,7 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
         return (str, safeCgoName(str));
     }
     var ok = true;
-    foreach (var (_, chunk) in chunks) {
+    foreach (var (_, chunk) in range(chunks)) {
         ok = ok && (chunk == ""u8 || safeCgoName(chunk));
     }
     ok = ok && (srcdir == ""u8 || safeCgoName(srcdir));
@@ -1976,7 +1976,7 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
 // inherently system-dependent.
 internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) {
     var nextPath = false;
-    foreach (var (i, arg) in args) {
+    foreach (var (i, arg) in range(args)) {
         if (nextPath) {
             if (!filepath.IsAbs(arg)) {
                 args[i] = filepath.Join(srcDir, arg);

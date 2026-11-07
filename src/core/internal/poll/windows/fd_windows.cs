@@ -106,7 +106,7 @@ internal static ref sync.Pool wsaBufsPool => ref ((StaticBox<sync.Pool>)ᏑwsaBu
 internal static ж<slice<Δsyscall.WSABuf>> newWSABufs(ref slice<slice<byte>> buf) {
     var bufsPtr = ᏑwsaBufsPool.Get()._<ж<slice<Δsyscall.WSABuf>>>();
     bufsPtr.ValueSlot = (bufsPtr.ValueSlot)[..0];
-    foreach (var (_, vᴛ1) in buf) {
+    foreach (var (_, vᴛ1) in range(buf)) {
         var b = vᴛ1;
 
         if (len(b) == 0) {
@@ -129,7 +129,7 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 
     // Clear pointers to buffers so they can be released by garbage collector.
     var bufs = bufsPtr;
-    foreach (var i in range(bufs)) {
+    foreach (var i in range(len(bufs))) {
         bufs[i].Buf = default;
     }
     // Proper usage of a sync.Pool requires each entry to have approximately

@@ -38,8 +38,8 @@ public static nint Sum(this Thing t) {
     return t.val + t.inner.n;
 }
 
-public static nint PtrShadowCall(this ref Thing t, ж<Thing> other) {
-    nint sum = t.Sum();
+public static nint PtrShadowCall(this ж<Thing> Ꮡt, ж<Thing> other) {
+    nint sum = Ꮡt.Sum();
     {
         var tΔ1 = other;
         sum += tΔ1.Sum();

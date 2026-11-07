@@ -1,0 +1,27 @@
+PKG	bufio	2	0	export_test.go:Scanner.MaxTokenSize export_test.go:Scanner.ErrOrEOF
+PKG	cmd/compile/internal/abt	4	1	avlint32_test.go:T.wellFormed avlint32_test.go:node32.wellFormedSubtree avlint32_test.go:T.DebugString avlint32_test.go:node32.DebugString
+PKG	crypto/internal/fips140/bigmod	4	0	nat_test.go:Nat.setBig nat_test.go:Nat.asBig nat_test.go:Nat.String nat_test.go:Nat.Generate
+PKG	crypto/internal/fips140/edwards25519	1	1	scalar_test.go:Scalar.Generate
+PKG	crypto/internal/fips140/edwards25519/field	5	0	fe_test.go:Element.String fe_test.go:Element.Generate fe_test.go:Element.fromBig fe_test.go:Element.fromDecimal fe_test.go:Element.toBig
+PKG	crypto/tls	18	45	handshake_messages_test.go:clientHelloMsg.Generate handshake_messages_test.go:serverHelloMsg.Generate handshake_messages_test.go:encryptedExtensionsMsg.Generate handshake_messages_test.go:certificateMsg.Generate handshake_messages_test.go:certificateRequestMsg.Generate handshake_messages_test.go:certificateVerifyMsg.Generate handshake_messages_test.go:certificateStatusMsg.Generate handshake_messages_test.go:clientKeyExchangeMsg.Generate handshake_messages_test.go:finishedMsg.Generate handshake_messages_test.go:newSessionTicketMsg.Generate handshake_messages_test.go:SessionState.Generate handshake_messages_test.go:SessionState.marshal handshake_messages_test.go:SessionState.unmarshal handshake_messages_test.go:endOfEarlyDataMsg.Generate handshake_messages_test.go:keyUpdateMsg.Generate handshake_messages_test.go:newSessionTicketMsgTLS13.Generate handshake_messages_test.go:certificateRequestMsgTLS13.Generate handshake_messages_test.go:certificateMsgTLS13.Generate
+PKG	database/sql	7	118	sql_test.go:DB.numDeps sql_test.go:DB.numDepsPoll sql_test.go:DB.numFreeConns sql_test.go:DB.numOpenConns sql_test.go:DB.clearAllConns sql_test.go:DB.dumpDeps sql_test.go:DB.dumpDep
+PKG	encoding/json/jsontext	2	5	coder_test.go:SyntacticError.withPos state_test.go:stateMachine.append
+PKG	encoding/json/v2	3	40	arshal_test.go:SemanticError.withVal arshal_test.go:SemanticError.withPos arshal_test.go:SemanticError.withType
+PKG	image/jpeg	1	1	dct_test.go:block.String
+PKG	internal/poll	1	5	export_posix_test.go:FD.EOFError
+PKG	internal/routebsd	5	7	route_test.go:InterfaceMessage.String route_test.go:InterfaceAddrMessage.String route_test.go:InterfaceMulticastAddrMessage.String route_test.go:LinkAddr.String route_test.go:InetAddr.String
+PKG	internal/runtime/maps	7	0	export_test.go:Map.TableCount export_test.go:Map.GroupCount export_test.go:Map.KeyFromFullGroup export_test.go:Map.TableFor export_test.go:table.GrowthLeft export_test.go:table.GroupsStart export_test.go:table.GroupsLength
+PKG	internal/syscall/windows/registry	1	0	export_test.go:Key.SetValue
+PKG	internal/trace	1	0	export_reader_test.go:Reader.GoVersion
+PKG	log/slog	8	32	value_access_benchmark_test.go:Value.AsString value_access_benchmark_test.go:Value.AsInt64 value_access_benchmark_test.go:Value.AsUint64 value_access_benchmark_test.go:Value.AsFloat64 value_access_benchmark_test.go:Value.AsBool value_access_benchmark_test.go:Value.AsDuration value_access_benchmark_test.go:Value.AsAny value_access_benchmark_test.go:Value.Visit
+PKG	math/big	2	10	float_test.go:Float.uint64 float_test.go:Float.int64
+PKG	net	3	56	error_test.go:OpError.isValid listen_test.go:TCPListener.port listen_test.go:UDPConn.port
+PKG	net/netip	2	0	export_test.go:Addr.IsZero export_test.go:Prefix.IsZero
+PKG	os	1	0	export_linux_test.go:Process.Status
+PKG	runtime	9	127	export_debuglog_test.go:dloggerImpl.End export_debuglog_test.go:dloggerImpl.B export_debuglog_test.go:dloggerImpl.I export_debuglog_test.go:dloggerImpl.I16 export_debuglog_test.go:dloggerImpl.U64 export_debuglog_test.go:dloggerImpl.Hex export_debuglog_test.go:dloggerImpl.P export_debuglog_test.go:dloggerImpl.S export_debuglog_test.go:dloggerImpl.PC
+PKG	simd/archsimd	8	0	export_test.go:Int64x2.ExportTestConcatSelectedConstant export_test.go:Float64x4.ExportTestConcatSelectedConstantGrouped export_test.go:Float32x4.ExportTestConcatSelectedConstant export_test.go:Int32x4.ExportTestConcatSelectedConstant export_test.go:Uint32x8.ExportTestConcatSelectedConstantGrouped export_test.go:Int32x8.ExportTestConcatSelectedConstantGrouped export_test.go:Int32x8.ExportTestTern export_test.go:Int32x4.ExportTestTern
+PKG	strings	3	0	export_test.go:Replacer.Replacer export_test.go:Replacer.PrintTrie export_test.go:genericReplacer.printNode
+PKG	sync	6	0	export_test.go:poolDequeue.PushHead export_test.go:poolDequeue.PopHead export_test.go:poolDequeue.PopTail export_test.go:poolChain.PushHead export_test.go:poolChain.PopHead export_test.go:poolChain.PopTail
+PKG	testing	1	1	match_test.go:alternationMatch.GoString
+PKG	text/template/parse	1	0	lex_test.go:itemType.String
+TOTAL packages-with-bridges=26 bridge-methods=106 test-own-methods=928

@@ -28,14 +28,14 @@ internal static void Main() {
     fmt.Println("8 TypeOf([]*[4]byte).Elem().Elem().Len() == 4:    ", reflect.TypeOf(ptrs).Elem().Elem().Len() == 4);
 
     fmt.Println("9 DeepEqual([][6]uint8, [][8]uint8) == false:     ", !reflect.DeepEqual(sixes, eights));
-    var m1 = new map<@string, slice<@string>>{["a"] = slice<@string>(["x"])};
-    var m2 = new map<@string, slice<@string>>{["b"] = slice<@string>(["x", "y"])};
+    var m1 = new map<@string, slice<@string>>{["a"] = ["x"]};
+    var m2 = new map<@string, slice<@string>>{["b"] = ["x", "y"]};
     fmt.Println("10 TypeOf(map[string][]string{len1}) == TypeOf(map[string][]string{len2}):", AreEqual(reflect.TypeOf(m1), reflect.TypeOf(m2)));
-    var s1 = slice<slice<nint>>([slice<nint>([1])]);
-    var s2 = slice<slice<nint>>([slice<nint>([1, 2])]);
+    var s1 = slice<slice<nint>>([[1]]);
+    var s2 = slice<slice<nint>>([[1, 2]]);
     fmt.Println("11 TypeOf([][]int{len1}) == TypeOf([][]int{len2}):", AreEqual(reflect.TypeOf(s1), reflect.TypeOf(s2)));
-    var h1 = new map<@string, slice<@string>>{["k"] = slice<@string>(["x", "y"]), ["j"] = slice<@string>(["z"])};
-    var h2 = new map<@string, slice<@string>>{["j"] = slice<@string>(["z"]), ["k"] = slice<@string>(["x", "y"])};
+    var h1 = new map<@string, slice<@string>>{["k"] = ["x", "y"], ["j"] = ["z"]};
+    var h2 = new map<@string, slice<@string>>{["j"] = ["z"], ["k"] = ["x", "y"]};
     fmt.Println("12 DeepEqual(same map, different insertion order):", reflect.DeepEqual(h1, h2));
 }
 

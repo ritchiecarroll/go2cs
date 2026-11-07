@@ -17,7 +17,7 @@ namespace go2cs;
 /// <summary>
 /// Writes golib's <c>IGoMethodSet</c> on a generated part of every value type with exported Go methods: for each one,
 /// the unbound func reflect's <c>Type.Method(i).Func</c> hands out and the binder behind <c>Value.Method(i)</c>, both as
-/// compiled delegates.
+/// compiled delegates. An unexported method with a variadic tail gets the arms too, for the interface shells below.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -27,8 +27,10 @@ namespace go2cs;
 /// so the instantiations exist for every type the program constructs.
 /// </para>
 /// <para>
-/// The arms are reached ONLY through the interface slot, which only reflect's method paths call, through the type's zero
-/// value or the receiver itself (G's ruling, 2026-10-19). Converted programs publish with a partial trim, which keeps
+/// The arms are reached ONLY through the interface slot, through the type's zero value or the receiver itself (G's
+/// ruling, 2026-10-19). Reflect's method paths call it, and so does AdapterBinder for the object shell of an interface
+/// with a variadic member: a <c>params Span&lt;T&gt;</c> tail cannot ride a boxed invoker, so the shell forwards it
+/// through the bound arm, which needs no generic instantiation at run time (DATA-aot-variadic-shell.md). Converted programs publish with a partial trim, which keeps
 /// every method of a constructed type, so the arms cost their size wherever the type is constructed (measured +2.59 MB on
 /// a fmt-only program; the owner's principle accepts it: parity outranks size).
 /// </para>
@@ -71,7 +73,7 @@ internal static class MethodSet
 
     /// <summary>
     /// The source of a generated part of <paramref name="type"/> implementing <c>IGoMethodSet</c>, or <c>null</c> when it
-    /// is not a value type, has no exported Go method with a delegate form, or cannot be reopened.
+    /// is not a value type, has no exported (or unexported variadic) Go method with a delegate form, or cannot be reopened.
     /// </summary>
     /// <param name="ns">The package namespace.</param>
     /// <param name="type">The type.</param>
@@ -149,10 +151,17 @@ internal static class MethodSet
         return GeneratedPartials.Source(ns, type, [], $" : {Interface}", body.ToString());
     }
 
-    // A method the type declares, or null when it is not an exported Go method of `type` with a delegate form.
+    // A method the type declares, or null when it is not a Go method of `type` with a delegate form that is exported or
+    // has a variadic tail.
     private static Shape? Declared(IMethodSymbol method, INamedTypeSymbol type, INamedTypeSymbol package)
     {
-        if (!method.IsExtensionMethod || method.Parameters.Length == 0 || method.ReturnsByRef || method.ReturnsByRefReadonly || !IsExported(method.Name))
+        if (!method.IsExtensionMethod || method.Parameters.Length == 0 || method.ReturnsByRef || method.ReturnsByRefReadonly)
+            return null;
+
+        // An unexported method is no member of a method set reflect sees, but one with a variadic tail is forwarded by the
+        // object shell of an interface naming it (AdapterBinder), through its bound arm: Go asserts to such an interface
+        // inside the method's own package.
+        if (!IsExported(method.Name) && (method.Parameters.Length < 2 || SpanElement(method.Parameters[method.Parameters.Length - 1].Type) is null))
             return null;
 
         IParameterSymbol receiver = method.Parameters[0];
@@ -248,11 +257,14 @@ internal static class MethodSet
         foreach (MethodDeclarationSyntax method in CSharpSyntaxTree.ParseText(generatedPart).GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())
         {
             if (!method.Modifiers.Any(SyntaxKind.StaticKeyword) || method.ParameterList.Parameters.FirstOrDefault() is not { } receiver ||
-                !receiver.Modifiers.Any(SyntaxKind.ThisKeyword) || receiver.Type is null || !IsExported(method.Identifier.ValueText) ||
-                method.Parent is not ClassDeclarationSyntax)
+                !receiver.Modifiers.Any(SyntaxKind.ThisKeyword) || receiver.Type is null || method.Parent is not ClassDeclarationSyntax)
             {
                 continue;
             }
+
+            // Unexported only with a variadic tail, as Declared reads it.
+            if (!IsExported(method.Identifier.ValueText) && !method.ParameterList.Parameters.Last().Modifiers.Any(SyntaxKind.ParamsKeyword))
+                continue;
 
             string receiverText = Unqualified(receiver.Type.ToString(), out bool boxed);
 
@@ -437,7 +449,12 @@ internal static class MethodSet
     // A cast to the delegate type golib's reflect builds for the signature (GoReflect.MakeDelegateType): the BCL
     // Func/Action through 16 parameters, golib's ladder past them, and golib's ꓸꓸꓸ family for a variadic tail, each asked
     // of the compilation so a rung golib adds is reached the day it exists. Null when no family declares one.
-    private static string? Delegate(Compilation compilation, IReadOnlyList<string> parameters, string? variadic, string returns)
+    private static string? Delegate(Compilation compilation, IReadOnlyList<string> parameters, string? variadic, string returns) =>
+        DelegateType(compilation, parameters, variadic, returns) is { } type ? $"({type})" : null;
+
+    // The delegate type itself, which the interface shell emitter names for a variadic member's bound arm too, so the
+    // shell's cast and the arm's delegate cannot disagree (InterfaceShellEmitter, MethodInfo.VariadicDelegate).
+    internal static string? DelegateType(Compilation compilation, IReadOnlyList<string> parameters, string? variadic, string returns)
     {
         bool action = returns.Length == 0;
         List<string> arguments = [.. parameters];
@@ -452,20 +469,20 @@ internal static class MethodSet
         {
             string family = (action ? "Action" : "Func") + Ellipsis;
 
-            return compilation.GetTypeByMetadataName($"go.{family}`{arguments.Count}") is null ? null : $"(global::go.{family}<{string.Join(", ", arguments)}>)";
+            return compilation.GetTypeByMetadataName($"go.{family}`{arguments.Count}") is null ? null : $"global::go.{family}<{string.Join(", ", arguments)}>";
         }
 
         if (parameters.Count <= BclDelegateParameters)
         {
             if (arguments.Count == 0)
-                return "(global::System.Action)";
+                return "global::System.Action";
 
-            return $"(global::System.{(action ? "Action" : "Func")}<{string.Join(", ", arguments)}>)";
+            return $"global::System.{(action ? "Action" : "Func")}<{string.Join(", ", arguments)}>";
         }
 
         string rung = action ? "Action" : "Func";
 
-        return compilation.GetTypeByMetadataName($"go.{rung}`{arguments.Count}") is null ? null : $"(global::go.{rung}<{string.Join(", ", arguments)}>)";
+        return compilation.GetTypeByMetadataName($"go.{rung}`{arguments.Count}") is null ? null : $"global::go.{rung}<{string.Join(", ", arguments)}>";
     }
 
     // Exported as Go judges it: the emitted name's first letter, after the collision marker's strip.
@@ -526,7 +543,7 @@ internal static class MethodSet
 
     // The element of a System.Span<T>, or null for any other type. Returned rather than an out parameter: netstandard2.0
     // has no NotNullWhen to tell the caller a true answer carries one (CS8602).
-    private static ITypeSymbol? SpanElement(ITypeSymbol type) =>
+    internal static ITypeSymbol? SpanElement(ITypeSymbol type) =>
         type is INamedTypeSymbol { Name: "Span", TypeArguments: [var argument], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } }
             ? argument
             : null;

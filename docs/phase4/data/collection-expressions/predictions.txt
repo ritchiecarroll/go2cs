@@ -1,0 +1,10 @@
+Written 2026-11-05 before any census output was read (b3census on std was still running).
+P1 std (linux, with tests): range over slice/array/ptr-array with a value variable: 6,000-12,000 sites;
+   about 2/3 of them key-blank (for _, v := range).
+P2 index-only range over slice/array: 3,000-6,000.
+P3 unkeyed unnamed slice literals: 10,000-20,000 (tests dominate, table-driven).
+P4 of those, targeted positions (assign, typed var, return, element, field, slice arg): 70-85%;
+   the largest untargeted group is := (define).
+P5 committed corpus text: `slice<...>([` occurrences within 15% of P3's linux+windows+darwin union on the converted files.
+P6 golib's own build with slice<T>/array<T> enumerators yielding T: 20-60 errors.
+P7 behavioral directories with a pair range over a slice/array: 300-450 of 898.

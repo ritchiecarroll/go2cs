@@ -81,12 +81,12 @@ internal static void testCGI() {
 
     fmt.Printf("test=Hello CGI\r\n"u8);
 
-    foreach (var (_, key) in slices.Sorted(maps.Keys<url.Values, @string, slice<@string>>(@params))) {
+    foreach (var (_, key) in range(slices.Sorted(maps.Keys<url.Values, @string, slice<@string>>(@params)))) {
         fmt.Printf("param-%s=%s\r\n"u8, key, @params.Get(key));
     }
 
     var envs = envMap(os.Environ());
-    foreach (var (_, key) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(envs))) {
+    foreach (var (_, key) in range(slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(envs)))) {
         fmt.Printf("env-%s=%s\r\n"u8, key, envs[key]);
     }
 
@@ -97,7 +97,7 @@ internal static void testCGI() {
 partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
     return (len(p), default);
@@ -165,11 +165,11 @@ internal static void childCGIProcess() {
         }
         fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "test=Hello CGI-in-CGI\n"u8);
         foreach (var (k, vv) in req.Form) {
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "param-%s=%s\n"u8, k, v);
             }
         }
-        foreach (var (_, kv) in os.Environ()) {
+        foreach (var (_, kv) in range(os.Environ())) {
             fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "env-%s\n"u8, kv);
         }
     })));

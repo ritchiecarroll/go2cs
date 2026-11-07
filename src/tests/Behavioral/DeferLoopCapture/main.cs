@@ -100,7 +100,7 @@ internal static partial void goIndexedReceiverInLoop() {
         }}
     }
     sort.Strings(got);
-    foreach (var (_, s) in got) {
+    foreach (var (_, s) in range(got)) {
         fmt.Println("closed", s);
     }
 }
@@ -168,7 +168,7 @@ internal static partial void goElementReassigned() {
         }}
     }
     sort.Strings(got);
-    foreach (var (_, s) in got) {
+    foreach (var (_, s) in range(got)) {
         fmt.Println("closed", s);
     }
 }
@@ -192,7 +192,7 @@ internal static void closureCaptureRange() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("-- control: closure capture (range) --");
-        foreach (var (_, v) in slice<@string>(["x", "y", "z"])) {
+        foreach (var (_, v) in range(slice<@string>(["x", "y", "z"]))) {
             defer(() => {
                 fmt.Println("range", v);
             }, ref ᒐ);

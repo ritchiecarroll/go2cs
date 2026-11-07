@@ -53,7 +53,7 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     var addʗ1 = add;
     var pʗ1 = p;
     p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
-        foreach (var (i, x) in @in[0]) {
+        foreach (var (i, x) in range(@in[0])) {
             var y = @in[1][i];
             addʗ1(y, x, x, (ΔCarry)(SetCarry | UseCarry));
         }

@@ -527,11 +527,11 @@ internal static ΔHeader finalTrailers(this ref response w) {
             t[kk] = vv;
         }
     }
-    foreach (var (_, k) in w.trailers) {
+    foreach (var (_, k) in range(w.trailers)) {
         if (t == nil) {
             t = new ΔHeader(0);
         }
-        foreach (var (_, v) in w.handlerHeader[k]) {
+        foreach (var (_, v) in range(w.handlerHeader[k])) {
             t.Add(k, v);
         }
     }
@@ -958,11 +958,11 @@ internal static int64 initialReadLimitSize(this ref Server s) {
 // ReadTimeout, or WriteTimeout.
 internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
     time.Duration ret = default;
-    foreach (var (_, v) in new time.Duration[]{
+    foreach (var (_, v) in range(new time.Duration[]{
         s.ReadHeaderTimeout,
         s.ReadTimeout,
         s.WriteTimeout
-    }.array()) {
+    }.array())) {
         if (v <= 0) {
             continue;
         }
@@ -1099,7 +1099,7 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
             if (!httpguts.ValidHeaderFieldName(k)) {
                 (w, err) = (default, badRequestError(invalidHeaderNameˢ)); goto ᒐdone;
             }
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 if (!httpguts.ValidHeaderFieldValue(v)) {
                     (w, err) = (default, badRequestError(invalidHeaderValueˢ)); goto ᒐdone;
                 }
@@ -1286,11 +1286,11 @@ partial struct extraHeader {
 }
 
 // Sorted the same as extraHeader.Write's loop.
-internal static slice<slice<byte>> extraHeaderKeys = slice<slice<byte>>([
+internal static slice<slice<byte>> extraHeaderKeys = [
     slice<byte>("Content-Type"u8),
     slice<byte>("Connection"u8),
     slice<byte>("Transfer-Encoding"u8)
-]);
+];
 
 internal static slice<byte> headerContentLength = slice<byte>("Content-Length: "u8);
 internal static slice<byte> headerDate = slice<byte>("Date: "u8);
@@ -1313,7 +1313,7 @@ internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
         w.Write(h.contentLength);
         w.Write(crlf);
     }
-    foreach (var (i, v) in slice<@string>([h.contentType, h.connection, h.transferEncoding])) {
+    foreach (var (i, v) in range(slice<@string>([h.contentType, h.connection, h.transferEncoding]))) {
         if (v != ""u8) {
             w.Write(extraHeaderKeys[i]);
             w.Write(colonSpace);
@@ -1387,7 +1387,7 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
             trailers = true;
         }
     }
-    foreach (var (_, v) in cw.header[trailerˢ]) {
+    foreach (var (_, v) in range(cw.header[trailerˢ])) {
         trailers = true;
         foreachHeaderElement(v, cw.res.declareTrailer);
     }
@@ -1567,7 +1567,7 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
             setHeader.contentType = DetectContentType(p);
         }
     } else {
-        foreach (var (_, k) in suppressedHeaders(code)) {
+        foreach (var (_, k) in range(suppressedHeaders(code))) {
             delHeader(k);
         }
     }
@@ -3433,7 +3433,7 @@ public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) 
 
         s.mu.Lock();
         var lnerr = s.closeListenersLocked();
-        foreach (var (_, f) in s.onShutdown) {
+        foreach (var (_, f) in range(s.onShutdown)) {
             var fʗ1 = f;
             goǃ(fʗ1);
         }
@@ -4516,7 +4516,7 @@ internal static (nint n, error err) Write(this checkConnErrorWriter w, slice<byt
 internal static nint /*n*/ numLeadingCRorLF(slice<byte> v) {
     nint n = default;
 
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range(v)) {
         if (b == '\r' || b == '\n') {
             n++;
             continue;
