@@ -2642,7 +2642,13 @@ function Get-ComparisonDivergenceLines {
         [Parameter(Mandatory)][string] $Row,
         $Comparison,        # ConvertFrom-ComparisonRecord's shape, or $null when the row wrote no record
         [int] $First = 40,
-        [int] $DetailWidth = 220
+        [int] $DetailWidth = 220,
+        # The C# side's failure output by test name (the row's go2cs_test_results.json, its `fail` events), or $null.
+        # Each printed divergence whose name it holds is followed by its first $TextLines non-blank lines, so a
+        # divergence's own words are readable where the C# FAIL listing (30 tests a row) never reached it (COORD's
+        # TestUnsafePoint ruling, 2026-11-07: its darwin failure missed the disclosed signature and was unread).
+        [hashtable] $FailureText = $null,
+        [int] $TextLines = 8
     )
 
     if ($null -eq $Comparison) {
@@ -2677,7 +2683,14 @@ function Get-ComparisonDivergenceLines {
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("${Row}: status $($Comparison.status); matched $matched of $goCount Go / $csCount C# verdicts; disclosed $disclosed; undisclosed divergences $($divergences.Count); other errors $($otherErrors.Count)")
 
-    foreach ($text in @($divergences | Select-Object -First $First)) { $lines.Add('    ' + (& $clip $text)) }
+    foreach ($text in @($divergences | Select-Object -First $First)) {
+        $lines.Add('    ' + (& $clip $text))
+
+        if ($null -ne $FailureText -and $text -match $OracleOnlyDivergencePattern -and $FailureText.ContainsKey($Matches.name)) {
+            $body = @("$($FailureText[$Matches.name])" -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -First $TextLines)
+            foreach ($bodyLine in $body) { $lines.Add('      | ' + (& $clip $bodyLine.TrimEnd())) }
+        }
+    }
     if ($divergences.Count -gt $First) { $lines.Add("    ... and $($divergences.Count - $First) more undisclosed divergence(s)") }
 
     foreach ($text in @($otherErrors | Select-Object -First 5)) { $lines.Add('    error: ' + (& $clip $text)) }
