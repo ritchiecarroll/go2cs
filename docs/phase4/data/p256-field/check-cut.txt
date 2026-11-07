@@ -1,0 +1,8 @@
+== base differential (oracle)
+real differential: 20036 pairs, 60108 checks (Mul, Square, aliased Mul), mismatches 0
+CHECK OK
+== cut differential
+real differential: 20036 pairs, 60108 checks (Mul, Square, aliased Mul), mismatches 0
+CHECK OK
+real differential: 20036 pairs, 60108 checks (Mul, Square, aliased Mul), mismatches 0
+CHECK OK

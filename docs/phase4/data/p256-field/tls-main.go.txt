@@ -1,0 +1,197 @@
+package main
+
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"fmt"
+	"io"
+	"math/big"
+	"net"
+	"strings"
+	"time"
+)
+
+// PerfTlsHandshake measures the cost of a TLS 1.3 handshake over loopback: the one
+// operation the net/http h2 write-deadline rows failed on, isolated from net/http's
+// server path so the ratio is attributable.
+//
+// Why this benchmark exists: net/http's TestWriteDeadlineEnforcedPerStream/h2 sets a
+// fixed WriteTimeout that bounds the TLS handshake itself. On the i9 reference the
+// converted handshake sits in (250ms, 500ms]; on a laptop-class host it exceeds 1s,
+// failing all three rungs of Go's own {250ms, 500ms, 1s} ladder (serve_test.go:980)
+// while Go passes at the first rung on the same host. That is a managed-vs-native
+// latency gap measured only indirectly, through a test that bounds more than TLS.
+// This row measures the handshake alone.
+//
+// Determinism: TLS internals are nondeterministic (keys, nonces, timing), so the
+// output checksum is the handshake COUNT plus the negotiated version and cipher
+// suite -- all three invariant for a fixed config -- and never key material. The
+// certificate is a fixed PEM parsed BEFORE the clock starts, so no keygen enters
+// the measurement.
+//
+// The certificate below is Go's own test-only localhost certificate, from
+// net/http/internal/testcert (BSD-style license, The Go Authors). It is embedded
+// rather than imported because that package is internal/ and unreachable from here.
+// Go's "TESTING KEY" spelling is preserved deliberately: it keeps secret scanners
+// from flagging a public, test-only key.
+
+// localhostCert is a PEM-encoded TLS cert with SAN IPs "127.0.0.1" and "[::1]",
+// expiring at Jan 29 16:00:00 2084 GMT. Copyright 2015 The Go Authors.
+var localhostCert = []byte(`
+-----BEGIN CERTIFICATE-----
+MIIDSDCCAjCgAwIBAgIQEP/md970HysdBTpuzDOf0DANBgkqhkiG9w0BAQsFADAS
+MRAwDgYDVQQKEwdBY21lIENvMCAXDTcwMDEwMTAwMDAwMFoYDzIwODQwMTI5MTYw
+MDAwWjASMRAwDgYDVQQKEwdBY21lIENvMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEAxcl69ROJdxjN+MJZnbFrYxyQooADCsJ6VDkuMyNQIix/Hk15Nk/u
+FyBX1Me++aEpGmY3RIY4fUvELqT/srvAHsTXwVVSttMcY8pcAFmXSqo3x4MuUTG/
+jCX3Vftj0r3EM5M8ImY1rzA/jqTTLJg00rD+DmuDABcqQvoXw/RV8w1yTRi5BPoH
+DFD/AWTt/YgMvk1l2Yq/xI8VbMUIpjBoGXxWsSevQ5i2s1mk9/yZzu0Ysp1tTlzD
+qOPa4ysFjBitdXiwfxjxtv5nXqOCP5rheKO0sWLk0fetMp1OV5JSJMAJw6c2ZMkl
+U2WMqAEpRjdE/vHfIuNg+yGaRRqI07NZRQIDAQABo4GXMIGUMA4GA1UdDwEB/wQE
+AwICpDATBgNVHSUEDDAKBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud
+DgQWBBQR5QIzmacmw78ZI1C4MXw7Q0wJ1jA9BgNVHREENjA0ggtleGFtcGxlLmNv
+bYINKi5leGFtcGxlLmNvbYcEfwAAAYcQAAAAAAAAAAAAAAAAAAAAATANBgkqhkiG
+9w0BAQsFAAOCAQEACrRNgiioUDzxQftd0fwOa6iRRcPampZRDtuaF68yNHoNWbOu
+LUwc05eOWxRq3iABGSk2xg+FXM3DDeW4HhAhCFptq7jbVZ+4Jj6HeJG9mYRatAxR
+Y/dEpa0D0EHhDxxVg6UzKOXB355n0IetGE/aWvyTV9SiDs6QsaC57Q9qq1/mitx5
+2GFBoapol9L5FxCc77bztzK8CpLujkBi25Vk6GAFbl27opLfpyxkM+rX/T6MXCPO
+6/YBacNZ7ff1/57Etg4i5mNA6ubCpuc4Gi9oYqCNNohftr2lkJr7REdDR6OW0lsL
+rF7r4gUnKeC7mYIH1zypY7laskopiLFAfe96Kg==
+-----END CERTIFICATE-----
+`)
+
+// localhostKey is the private key for localhostCert. Copyright 2015 The Go Authors.
+var localhostKey = []byte(testingKey(`
+-----BEGIN RSA TESTING KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFyXr1E4l3GM34
+wlmdsWtjHJCigAMKwnpUOS4zI1AiLH8eTXk2T+4XIFfUx775oSkaZjdEhjh9S8Qu
+pP+yu8AexNfBVVK20xxjylwAWZdKqjfHgy5RMb+MJfdV+2PSvcQzkzwiZjWvMD+O
+pNMsmDTSsP4Oa4MAFypC+hfD9FXzDXJNGLkE+gcMUP8BZO39iAy+TWXZir/EjxVs
+xQimMGgZfFaxJ69DmLazWaT3/JnO7RiynW1OXMOo49rjKwWMGK11eLB/GPG2/mde
+o4I/muF4o7SxYuTR960ynU5XklIkwAnDpzZkySVTZYyoASlGN0T+8d8i42D7IZpF
+GojTs1lFAgMBAAECggEAIYthUi1lFBDd5gG4Rzlu+BlBIn5JhcqkCqLEBiJIFfOr
+/4yuMRrvS3bNzqWt6xJ9MSAC4ZlN/VobRLnxL/QNymoiGYUKCT3Ww8nvPpPzR9OE
+sE68TUL9tJw/zZJcRMKwgvrGqSLimfq53MxxkE+kLdOc0v9C8YH8Re26mB5ZcWYa
+7YFyZQpKsQYnsmu/05cMbpOQrQWhtmIqRoyn8mG/par2s3NzjtpSE9NINyz26uFc
+k/3ovFJQIHkUmTS7KHD3BgY5vuCqP98HramYnOysJ0WoYgvSDNCWw3037s5CCwJT
+gCKuM+Ow6liFrj83RrdKBpm5QUGjfNpYP31o+QNP4QKBgQDSrUQ2XdgtAnibAV7u
+7kbxOxro0EhIKso0Y/6LbDQgcXgxLqltkmeqZgG8nC3Z793lhlSasz2snhzzooV5
+5fTy1y8ikXqjhG0nNkInFyOhsI0auE28CFoDowaQd+5cmCatpN4Grqo5PNRXxm1w
+HktfPEgoP11NNCFHvvN5fEKbbQKBgQDwVlOaV20IvW3IPq7cXZyiyabouFF9eTRo
+VJka1Uv+JtyvL2P0NKkjYHOdN8gRblWqxQtJoTNk020rVA4UP1heiXALy50gvj/p
+hMcybPTLYSPOhAGx838KIcvGR5oskP1aUCmFbFQzGELxhJ9diVVjxUtbG2DuwPKd
+tD9TLxT2OQKBgQCcdlHSjp+dzdgERmBa0ludjGfPv9/uuNizUBAbO6D690psPFtY
+JQMYaemgSd1DngEOFVWADt4e9M5Lose+YCoqr+UxpxmNlyv5kzJOFcFAs/4XeglB
+PHKdgNW/NVKxMc6H54l9LPr+x05sYdGlEtqnP/3W5jhEvhJ5Vjc8YiyVgQKBgQCl
+zwjyrGo+42GACy7cPYE5FeIfIDqoVByB9guC5bD98JXEDu/opQQjsgFRcBCJZhOY
+M0UsURiB8ROaFu13rpQq9KrmmF0ZH+g8FSzQbzcbsTLg4VXCDXmR5esOKowFPypr
+Sm667BfTAGP++D5ya7MLmCv6+RKQ5XD8uEQQAaV2kQKBgAD8qeJuWIXZT0VKkQrn
+nIhgtzGERF/6sZdQGW2LxTbUDWG74AfFkkEbeBfwEkCZXY/xmnYqYABhvlSex8jU
+supU6Eea21esIxIub2zv/Np0ojUb6rlqTPS4Ox1E27D787EJ3VOXpriSD10vyNnZ
+jel6uj2FOP9g54s+GzlSVg/T
+-----END RSA TESTING KEY-----
+`))
+
+func testingKey(s string) string { return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY") }
+
+// handshakes performs n full TLS 1.3 handshakes over loopback, one fresh connection
+// each, and returns the count completed plus the negotiated version and suite of the
+// last one. Server and client both pin TLS 1.3 so negotiation cannot vary the result.
+func handshakes(n int, cert tls.Certificate, curves []tls.CurveID) (int, uint16, uint16, tls.CurveID) {
+	serverConf := &tls.Config{
+		Certificates:     []tls.Certificate{cert},
+		MinVersion:       tls.VersionTLS13,
+		MaxVersion:       tls.VersionTLS13,
+		CurvePreferences: curves,
+	}
+	clientConf := &tls.Config{
+		InsecureSkipVerify: true,
+		MinVersion:         tls.VersionTLS13,
+		MaxVersion:         tls.VersionTLS13,
+		CurvePreferences:   curves,
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		panic(err)
+	}
+	defer ln.Close()
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < n; i++ {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			s := tls.Server(c, serverConf)
+			if err := s.Handshake(); err == nil {
+				// Drain the client's single byte so both sides agree the
+				// connection completed before it is torn down.
+				io.CopyN(io.Discard, s, 1)
+			}
+			s.Close()
+		}
+	}()
+
+	count := 0
+	var version, suite uint16
+	var curve tls.CurveID
+	for i := 0; i < n; i++ {
+		c, err := net.Dial("tcp", ln.Addr().String())
+		if err != nil {
+			panic(err)
+		}
+		t := tls.Client(c, clientConf)
+		if err := t.Handshake(); err != nil {
+			panic(err)
+		}
+		st := t.ConnectionState()
+		version, suite, curve = st.Version, st.CipherSuite, st.CurveID
+		t.Write([]byte{0})
+		t.Close()
+		count++
+	}
+	<-done
+	return count, version, suite, curve
+}
+
+// p256Cert is a self-signed ECDSA P-256 certificate, made before any clock starts.
+func p256Cert() tls.Certificate {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	tmpl := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{Organization: []string{"scout"}},
+		NotBefore: time.Unix(0, 0), NotAfter: time.Date(2084, 1, 1, 0, 0, 0, 0, time.UTC), DNSNames: []string{"localhost"}}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+	if err != nil {
+		panic(err)
+	}
+	return tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
+}
+
+func arm(name string, cert tls.Certificate, curves []tls.CurveID) {
+	handshakes(1, cert, curves)
+	start := time.Now().UnixNano()
+	count, version, suite, curve := handshakes(32, cert, curves)
+	elapsed := time.Now().UnixNano() - start
+	fmt.Println(name, "checksum:", count, version, suite, uint16(curve), "per_handshake_us:", elapsed/int64(count)/1000)
+}
+
+func main() {
+	rsaCert, err := tls.X509KeyPair(localhostCert, localhostKey)
+	if err != nil {
+		panic(err)
+	}
+	ecCert := p256Cert()
+	for r := 0; r < 3; r++ {
+		arm("default(rsa,x25519mlkem)", rsaCert, nil)
+		arm("p256(ecdsa-p256,ecdhe-p256)", ecCert, []tls.CurveID{tls.CurveP256})
+	}
+}

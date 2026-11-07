@@ -1,0 +1,42 @@
+P384 first_SBM_us 163999 second_SBM_us 8835 jit_in_first_us 13832
+fiat P384 Mul            min       5067.8 ns  median       5116.3 ns
+fiat P384 Square         min       4937.2 ns  median       5023.7 ns
+fiat P384 Add            min        320.8 ns  median        339.4 ns
+P384 point Add           min      82962.2 ns  median      84260.7 ns
+P384 point Double        min      75290.2 ns  median      77010.6 ns
+P384 ScalarBaseMult      min    8691674.0 ns  median    9141642.0 ns
+P384 ScalarMult          min   38390087.0 ns  median   39309315.0 ns
+fiat P256 Mul (control)  min       1570.6 ns  median       1619.7 ns
+fiat P256 Square (control) min       1610.7 ns  median       1694.4 ns
+P256 ScalarBaseMult      min    2114081.6 ns  median    2161785.8 ns
+P256 ScalarMult          min    9922065.0 ns  median   10220618.0 ns
+fiat P521 Mul (hand-own) min       1308.3 ns  median       1428.7 ns
+gc0 267 gc1 9 gc2 1
+P384 first_SBM_us 171111 second_SBM_us 10309 jit_in_first_us 17787
+fiat P384 Mul            min       5032.6 ns  median       5122.6 ns
+fiat P384 Square         min       4855.2 ns  median       4914.8 ns
+fiat P384 Add            min        320.2 ns  median        327.3 ns
+P384 point Add           min      82042.4 ns  median      82581.7 ns
+P384 point Double        min      75394.5 ns  median      76266.3 ns
+P384 ScalarBaseMult      min    8753151.0 ns  median    8839231.5 ns
+P384 ScalarMult          min   38438720.0 ns  median   39026889.0 ns
+fiat P256 Mul (control)  min       1554.4 ns  median       1589.2 ns
+fiat P256 Square (control) min       1598.0 ns  median       1621.6 ns
+P256 ScalarBaseMult      min    2057106.2 ns  median    2099546.8 ns
+P256 ScalarMult          min    9897086.5 ns  median    9963842.0 ns
+fiat P521 Mul (hand-own) min       1228.7 ns  median       1247.9 ns
+gc0 267 gc1 9 gc2 1
+P384 first_SBM_us 166040 second_SBM_us 8934 jit_in_first_us 14531
+fiat P384 Mul            min       5032.8 ns  median       5105.3 ns
+fiat P384 Square         min       4928.3 ns  median       5002.5 ns
+fiat P384 Add            min        320.2 ns  median        325.8 ns
+P384 point Add           min      82043.2 ns  median      84923.4 ns
+P384 point Double        min      75320.6 ns  median      76701.3 ns
+P384 ScalarBaseMult      min    8794258.5 ns  median    8942222.0 ns
+P384 ScalarMult          min   38596647.0 ns  median   38847338.0 ns
+fiat P256 Mul (control)  min       1591.2 ns  median       1598.4 ns
+fiat P256 Square (control) min       1637.7 ns  median       1667.0 ns
+P256 ScalarBaseMult      min    2084078.6 ns  median    2121033.6 ns
+P256 ScalarMult          min    9949316.0 ns  median    9973002.5 ns
+fiat P521 Mul (hand-own) min       1224.7 ns  median       1250.8 ns
+gc0 267 gc1 9 gc2 1

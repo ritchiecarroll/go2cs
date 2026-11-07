@@ -1,0 +1,1980 @@
+; Assembly listing for method go.crypto.internal.fips140.nistec.fiat_package:p256Mul(byref,byref,byref) (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; 0 inlinees with PGO data; 52 single block inlinees; 36 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     r15
+       push     r14
+       push     r13
+       push     r12
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       sub      rsp, 0x528
+       vxorps   xmm4, xmm4, xmm4
+       mov      rax, -960
+       vmovdqa  xmmword ptr [rsp+rax+0x470], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x480], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x490], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      rbx, rcx
+       mov      rsi, rdx
+       mov      rdi, r8
+ 
+G_M000_IG02:                ;; offset=0x004B
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG05
+ 
+G_M000_IG03:                ;; offset=0x0053
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x460], xmm0
+ 
+G_M000_IG04:                ;; offset=0x0061
+       jmp      SHORT G_M000_IG06
+ 
+G_M000_IG05:                ;; offset=0x0063
+       lea      rdx, [rsp+0x460]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG06:                ;; offset=0x0074
+       mov      rdx, gword ptr [rsp+0x460]
+       mov      ecx, dword ptr [rsp+0x468]
+       mov      ebp, dword ptr [rsp+0x46C]
+       movsxd   rax, ebp
+       test     rax, rax
+       jle      G_M000_IG73
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       cmp      ecx, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       mov      rbp, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG09
+ 
+G_M000_IG07:                ;; offset=0x00BD
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x450], xmm0
+ 
+G_M000_IG08:                ;; offset=0x00CB
+       jmp      SHORT G_M000_IG10
+ 
+G_M000_IG09:                ;; offset=0x00CD
+       lea      rdx, [rsp+0x450]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG10:                ;; offset=0x00DE
+       mov      rdx, gword ptr [rsp+0x450]
+       mov      ecx, dword ptr [rsp+0x458]
+       mov      r14d, dword ptr [rsp+0x45C]
+       movsxd   rax, r14d
+       cmp      rax, 1
+       jle      G_M000_IG74
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x01]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       inc      ecx
+       mov      r14, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG13
+ 
+G_M000_IG11:                ;; offset=0x012E
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x440], xmm0
+ 
+G_M000_IG12:                ;; offset=0x013C
+       jmp      SHORT G_M000_IG14
+ 
+G_M000_IG13:                ;; offset=0x013E
+       lea      rdx, [rsp+0x440]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG14:                ;; offset=0x014F
+       mov      rdx, gword ptr [rsp+0x440]
+       mov      ecx, dword ptr [rsp+0x448]
+       mov      r15d, dword ptr [rsp+0x44C]
+       movsxd   rax, r15d
+       cmp      rax, 2
+       jle      G_M000_IG75
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x02]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 2
+       mov      r15, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG17
+ 
+G_M000_IG15:                ;; offset=0x01A0
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x430], xmm0
+ 
+G_M000_IG16:                ;; offset=0x01AE
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG17:                ;; offset=0x01B0
+       lea      rdx, [rsp+0x430]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG18:                ;; offset=0x01C1
+       mov      rdx, gword ptr [rsp+0x430]
+       mov      ecx, dword ptr [rsp+0x438]
+       mov      esi, dword ptr [rsp+0x43C]
+       movsxd   rax, esi
+       cmp      rax, 3
+       jle      G_M000_IG76
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x03]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 3
+       mov      rsi, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rdi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG21
+ 
+G_M000_IG19:                ;; offset=0x0211
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x420], xmm0
+ 
+G_M000_IG20:                ;; offset=0x021F
+       jmp      SHORT G_M000_IG22
+ 
+G_M000_IG21:                ;; offset=0x0221
+       lea      rdx, [rsp+0x420]
+       mov      rcx, rdi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG22:                ;; offset=0x0232
+       mov      rdx, gword ptr [rsp+0x420]
+       mov      ecx, dword ptr [rsp+0x428]
+       mov      r13d, dword ptr [rsp+0x42C]
+       movsxd   rax, r13d
+       test     rax, rax
+       jle      G_M000_IG77
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       cmp      ecx, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       mov      r13, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rdi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG25
+ 
+G_M000_IG23:                ;; offset=0x027C
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x410], xmm0
+ 
+G_M000_IG24:                ;; offset=0x028A
+       jmp      SHORT G_M000_IG26
+ 
+G_M000_IG25:                ;; offset=0x028C
+       lea      rdx, [rsp+0x410]
+       mov      rcx, rdi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG26:                ;; offset=0x029D
+       mov      rdx, gword ptr [rsp+0x410]
+       mov      ecx, dword ptr [rsp+0x418]
+       mov      r12d, dword ptr [rsp+0x41C]
+       movsxd   rax, r12d
+       cmp      rax, 1
+       jle      G_M000_IG78
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x01]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       inc      ecx
+       mov      r12, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rdi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG29
+ 
+G_M000_IG27:                ;; offset=0x02ED
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x400], xmm0
+ 
+G_M000_IG28:                ;; offset=0x02FB
+       jmp      SHORT G_M000_IG30
+ 
+G_M000_IG29:                ;; offset=0x02FD
+       lea      rdx, [rsp+0x400]
+       mov      rcx, rdi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG30:                ;; offset=0x030E
+       mov      rdx, gword ptr [rsp+0x400]
+       mov      ecx, dword ptr [rsp+0x408]
+       mov      eax, dword ptr [rsp+0x40C]
+       movsxd   r8, eax
+       cmp      r8, 2
+       jle      G_M000_IG79
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x02]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 2
+       mov      rax, qword ptr [rdx+8*rcx+0x10]
+       mov      qword ptr [rsp+0x518], rax
+       mov      rdx, gword ptr [rdi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG33
+ 
+G_M000_IG31:                ;; offset=0x0366
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x3F0], xmm0
+ 
+G_M000_IG32:                ;; offset=0x0374
+       jmp      SHORT G_M000_IG34
+ 
+G_M000_IG33:                ;; offset=0x0376
+       lea      rdx, [rsp+0x3F0]
+       mov      rcx, rdi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG34:                ;; offset=0x0387
+       mov      rdx, gword ptr [rsp+0x3F0]
+       mov      ecx, dword ptr [rsp+0x3F8]
+       mov      edi, dword ptr [rsp+0x3FC]
+       movsxd   rax, edi
+       cmp      rax, 3
+       jle      G_M000_IG80
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x03]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 3
+       mov      rdx, qword ptr [rdx+8*rcx+0x10]
+       mov      qword ptr [rsp+0x510], rdx
+       mov      rcx, rbp
+       shr      rcx, 32
+       mov      qword ptr [rsp+0x68], rcx
+       mov      rax, rcx
+       mov      qword ptr [rsp+0x3E8], rax
+       mov      r8d, r13d
+       mov      r10, r13
+       shr      r10, 32
+       mov      r9, r10
+       mov      r11d, ebp
+       mov      rdi, r11
+       imul     rdi, r8
+       imul     r11, r9
+       mov      qword ptr [rsp+0x3E0], r11
+       imul     r8, rax
+       mov      rax, rdi
+       shr      rax, 32
+       mov      r11d, r11d
+       add      rax, r11
+       mov      r11d, r8d
+       add      rax, r11
+       mov      r11, rax
+       shl      r11, 32
+       mov      edi, edi
+       or       rdi, r11
+       mov      r11, qword ptr [rsp+0x3E8]
+       imul     r9, r11
+       mov      r11, qword ptr [rsp+0x3E0]
+       shr      r11, 32
+       add      r9, r11
+       shr      r8, 32
+       add      r8, r9
+       shr      rax, 32
+       add      rax, r8
+       andn     r8, rdi, rdi
+       shr      r8, 63
+       add      rax, r8
+       add      r8, rax
+       mov      rax, r14
+       shr      rax, 32
+       mov      qword ptr [rsp+0x60], rax
+       mov      qword ptr [rsp+0x3D8], rax
+       mov      r11d, r13d
+       mov      qword ptr [rsp+0x3D0], r11
+       mov      qword ptr [rsp+0x3C8], r10
+       mov      r9d, r14d
+       imul     r11, r9
+       mov      qword ptr [rsp+0x3C0], r11
+       imul     r9, qword ptr [rsp+0x3C8]
+ 
+G_M000_IG35:                ;; offset=0x04AB
+       mov      qword ptr [rsp+0x3B8], r9
+       mov      r9, qword ptr [rsp+0x3D8]
+       imul     r9, qword ptr [rsp+0x3D0]
+       mov      qword ptr [rsp+0x3B0], r9
+       shr      r11, 32
+       mov      r9d, dword ptr [rsp+0x3B8]
+       add      r9, r11
+       mov      r11d, dword ptr [rsp+0x3B0]
+       add      r9, r11
+       mov      qword ptr [rsp+0x3A8], r9
+       mov      r11, r9
+       shl      r11, 32
+       mov      r9d, dword ptr [rsp+0x3C0]
+       or       r9, r11
+       mov      r11, qword ptr [rsp+0x3D8]
+       imul     r11, qword ptr [rsp+0x3C8]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x3B8]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x3B0]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x3A8]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x4F8], r11
+       andn     r11, r9, r9
+       shr      r11, 63
+       lea      rax, [r9+r8]
+       add      r11, qword ptr [rsp+0x4F8]
+       mov      qword ptr [rsp+0x4F0], r11
+       mov      r11, r9
+       or       r11, r8
+       andn     r11, rax, r11
+       and      r8, r9
+       or       r11, r8
+       shr      r11, 63
+       mov      r8, rax
+       mov      r9, r11
+       add      r9, qword ptr [rsp+0x4F0]
+       mov      rax, r15
+       shr      rax, 32
+       mov      qword ptr [rsp+0x50], rax
+       mov      qword ptr [rsp+0x3A0], rax
+       mov      r11d, r13d
+       mov      qword ptr [rsp+0x398], r11
+       mov      qword ptr [rsp+0x390], r10
+       mov      r11d, r15d
+       mov      rax, r11
+       imul     rax, qword ptr [rsp+0x398]
+       mov      qword ptr [rsp+0x388], rax
+       imul     r11, qword ptr [rsp+0x390]
+       mov      qword ptr [rsp+0x380], r11
+       mov      r11, qword ptr [rsp+0x3A0]
+       imul     r11, qword ptr [rsp+0x398]
+       mov      qword ptr [rsp+0x378], r11
+       shr      rax, 32
+ 
+G_M000_IG36:                ;; offset=0x0619
+       mov      r11d, dword ptr [rsp+0x380]
+       add      rax, r11
+       mov      r11d, dword ptr [rsp+0x378]
+       add      rax, r11
+       mov      qword ptr [rsp+0x370], rax
+       mov      r11, rax
+       shl      r11, 32
+       mov      eax, dword ptr [rsp+0x388]
+       or       rax, r11
+       mov      r11, qword ptr [rsp+0x3A0]
+       imul     r11, qword ptr [rsp+0x390]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x380]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x378]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x520], r11
+       mov      r11, qword ptr [rsp+0x370]
+       shr      r11, 32
+       add      r11, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x4E8], r11
+       andn     r11, rax, rax
+       shr      r11, 63
+       lea      rcx, [rax+r9]
+       add      r11, qword ptr [rsp+0x4E8]
+       mov      qword ptr [rsp+0x4E0], r11
+       mov      r11, rax
+       or       r11, r9
+       andn     r11, rcx, r11
+       and      r9, rax
+       or       r11, r9
+       shr      r11, 63
+       mov      r9, rcx
+       mov      rax, r11
+       add      rax, qword ptr [rsp+0x4E0]
+       mov      rcx, rsi
+       shr      rcx, 32
+       mov      qword ptr [rsp+0x48], rcx
+       mov      qword ptr [rsp+0x368], rcx
+       mov      r13d, r13d
+       mov      qword ptr [rsp+0x360], r13
+       mov      qword ptr [rsp+0x358], r10
+       mov      r11d, esi
+       imul     r13, r11
+       mov      qword ptr [rsp+0x350], r13
+       imul     r11, r10
+       mov      qword ptr [rsp+0x348], r11
+       mov      r10, qword ptr [rsp+0x368]
+       imul     r10, qword ptr [rsp+0x360]
+       mov      qword ptr [rsp+0x340], r10
+       shr      r13, 32
+       mov      r11d, r11d
+       add      r11, r13
+       mov      r13d, r10d
+       add      r11, r13
+       mov      qword ptr [rsp+0x338], r11
+       mov      r13, r11
+       shl      r13, 32
+       mov      r11d, dword ptr [rsp+0x350]
+       or       r11, r13
+ 
+G_M000_IG37:                ;; offset=0x077A
+       mov      r13, qword ptr [rsp+0x368]
+       imul     r13, qword ptr [rsp+0x358]
+       mov      r10, qword ptr [rsp+0x348]
+       shr      r10, 32
+       add      r10, r13
+       mov      r13, qword ptr [rsp+0x340]
+       shr      r13, 32
+       add      r10, r13
+       mov      r13, qword ptr [rsp+0x338]
+       shr      r13, 32
+       add      r10, r13
+       mov      qword ptr [rsp+0x4D8], r10
+       andn     r13, r11, r11
+       shr      r13, 63
+       lea      r10, [r11+rax]
+       add      r13, qword ptr [rsp+0x4D8]
+       mov      qword ptr [rsp+0x4D0], r13
+       mov      r13, r11
+       or       r13, rax
+       andn     r13, r10, r13
+       and      rax, r11
+       or       r13, rax
+       shr      r13, 63
+       mov      rax, r10
+       mov      r11, r13
+       add      r11, qword ptr [rsp+0x4D0]
+       andn     r13, r11, r11
+       shr      r13, 63
+       mov      r10, rdi
+       shr      r10, 32
+       mov      qword ptr [rsp+0x30], r10
+       mov      qword ptr [rsp+0x330], r10
+       mov      r10d, edi
+       mov      rcx, r10
+       shl      rcx, 32
+       sub      rcx, r10
+       mov      qword ptr [rsp+0x90], rcx
+       mov      qword ptr [rsp+0x328], rcx
+       mov      qword ptr [rsp+0x320], rcx
+       mov      r10, qword ptr [rsp+0x330]
+       shl      r10, 32
+       sub      r10, qword ptr [rsp+0x330]
+       mov      qword ptr [rsp+0x88], r10
+       mov      qword ptr [rsp+0x318], r10
+       mov      r10, qword ptr [rsp+0x320]
+       shr      r10, 32
+       mov      qword ptr [rsp+0x70], r10
+       mov      r10d, dword ptr [rsp+0x320]
+       add      r10, qword ptr [rsp+0x70]
+       mov      qword ptr [rsp+0x520], r10
+       mov      r10d, dword ptr [rsp+0x318]
+       add      r10, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x310], r10
+       shl      r10, 32
+       mov      qword ptr [rsp+0x520], r10
+       mov      r10d, dword ptr [rsp+0x328]
+       or       r10, qword ptr [rsp+0x520]
+       mov      rcx, qword ptr [rsp+0x70]
+       add      rcx, qword ptr [rsp+0x88]
+ 
+G_M000_IG38:                ;; offset=0x08CD
+       mov      qword ptr [rsp+0xA8], rcx
+       mov      rcx, qword ptr [rsp+0x318]
+       shr      rcx, 32
+       add      rcx, qword ptr [rsp+0xA8]
+       mov      qword ptr [rsp+0x520], rcx
+       mov      rcx, qword ptr [rsp+0x310]
+       shr      rcx, 32
+       add      rcx, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x4C8], rcx
+       lea      rcx, [r10+rdi]
+       mov      qword ptr [rsp+0x4C0], r13
+       mov      r13, r10
+       or       r13, rdi
+       andn     rcx, rcx, r13
+       and      r10, rdi
+       or       rcx, r10
+       shr      rcx, 63
+       add      rcx, qword ptr [rsp+0x4C8]
+       mov      r10, qword ptr [rsp+0x90]
+       mov      qword ptr [rsp+0x308], r10
+       mov      r13, qword ptr [rsp+0x88]
+       mov      qword ptr [rsp+0x300], r13
+       mov      r10d, r13d
+       add      r10, qword ptr [rsp+0x70]
+       mov      qword ptr [rsp+0x2F8], r10
+       shl      r10, 32
+       mov      r13d, dword ptr [rsp+0x308]
+       or       r10, r13
+       mov      r13, qword ptr [rsp+0x300]
+       shr      r13, 32
+       mov      qword ptr [rsp+0x520], r13
+       mov      r13, qword ptr [rsp+0x2F8]
+       shr      r13, 32
+       add      r13, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x4B8], r13
+       lea      r13, [r10+r8]
+       mov      rdx, r10
+       or       rdx, r8
+       andn     rdx, r13, rdx
+       and      r8, r10
+       or       rdx, r8
+       shr      rdx, 63
+       mov      r10, r13
+       lea      r13, [r10+rcx]
+       mov      r8, rdx
+       add      r8, qword ptr [rsp+0x4B8]
+       mov      rdx, r10
+       or       rdx, rcx
+       andn     rdx, r13, rdx
+       and      rcx, r10
+       or       rdx, rcx
+       shr      rdx, 63
+       lea      rcx, [r8+rdx]
+       lea      rdx, [r9+rcx]
+       mov      r8, rdx
+       mov      r10, r9
+       or       r10, rcx
+       andn     rdx, r8, r10
+       and      r9, rcx
+       or       rdx, r9
+       shr      rdx, 63
+       mov      r10, r8
+       mov      rcx, rdx
+ 
+G_M000_IG39:                ;; offset=0x0A0B
+       mov      r9, qword ptr [rsp+0x30]
+       mov      r8d, edi
+       mov      rdx, qword ptr [rsp+0x90]
+       mov      rdi, r8
+       shr      rdi, 32
+       mov      edx, edx
+       add      rdx, rdi
+       mov      edi, r9d
+       add      rdx, rdi
+       mov      rdi, rdx
+       shl      rdi, 32
+       or       r8, rdi
+       shr      r9, 32
+       add      r9, qword ptr [rsp+0xA8]
+       shr      rdx, 32
+       add      rdx, r9
+       lea      r9, [r8+rax]
+       mov      rdi, r9
+       mov      r9, r8
+       or       r9, rax
+       andn     r9, rdi, r9
+       and      rax, r8
+       or       rax, r9
+       shr      rax, 63
+       mov      r8, rdi
+       lea      rdi, [r8+rcx]
+       add      rdx, rax
+       mov      rax, r8
+       or       rax, rcx
+       andn     rax, rdi, rax
+       and      rcx, r8
+       or       rax, rcx
+       shr      rax, 63
+       lea      rcx, [rdx+rax]
+       lea      rax, [r11+rcx]
+       mov      r8, r11
+       or       r8, rcx
+       andn     rdx, rax, r8
+       and      r11, rcx
+       or       rdx, r11
+       shr      rdx, 63
+       mov      r11, rdx
+       add      r11, qword ptr [rsp+0x4C0]
+       mov      rcx, qword ptr [rsp+0x68]
+       mov      qword ptr [rsp+0x2F0], rcx
+       mov      r9d, r12d
+       mov      qword ptr [rsp+0x2E8], r9
+       mov      rdx, r12
+       shr      rdx, 32
+       mov      qword ptr [rsp+0x58], rdx
+       mov      rcx, rdx
+       mov      qword ptr [rsp+0x2E0], rcx
+       mov      r8d, ebp
+       imul     r9, r8
+       mov      qword ptr [rsp+0x2D8], r9
+       imul     r8, rcx
+       mov      qword ptr [rsp+0x2D0], r8
+       mov      rcx, qword ptr [rsp+0x2F0]
+       imul     rcx, qword ptr [rsp+0x2E8]
+       mov      qword ptr [rsp+0x2C8], rcx
+       shr      r9, 32
+       mov      r8d, r8d
+       add      r8, r9
+       mov      r9d, ecx
+       add      r8, r9
+       mov      qword ptr [rsp+0x2C0], r8
+       mov      r9, r8
+ 
+G_M000_IG40:                ;; offset=0x0B2B
+       shl      r9, 32
+       mov      r8d, dword ptr [rsp+0x2D8]
+       or       r8, r9
+       mov      r9, qword ptr [rsp+0x2F0]
+       imul     r9, qword ptr [rsp+0x2E0]
+       mov      rcx, qword ptr [rsp+0x2D0]
+       shr      rcx, 32
+       add      rcx, r9
+       mov      r9, qword ptr [rsp+0x2C8]
+       shr      r9, 32
+       add      rcx, r9
+       mov      r9, qword ptr [rsp+0x2C0]
+       shr      r9, 32
+       add      rcx, r9
+       mov      qword ptr [rsp+0x4B0], rcx
+       lea      r9, [r8+r13]
+       mov      rcx, r8
+       or       rcx, r13
+       andn     rcx, r9, rcx
+       and      r8, r13
+       or       rcx, r8
+       shr      rcx, 63
+       mov      r8, r9
+       add      rcx, qword ptr [rsp+0x4B0]
+       andn     r8, r8, r9
+       shr      r8, 63
+       mov      r13, r9
+       add      rcx, r8
+       mov      r8, qword ptr [rsp+0x60]
+       mov      qword ptr [rsp+0x2B8], r8
+       mov      r8d, r12d
+       mov      qword ptr [rsp+0x2B0], r8
+       mov      qword ptr [rsp+0x2A8], rdx
+       mov      r9d, r14d
+       imul     r8, r9
+       mov      qword ptr [rsp+0x2A0], r8
+       imul     r9, qword ptr [rsp+0x2A8]
+       mov      qword ptr [rsp+0x298], r9
+       mov      r9, qword ptr [rsp+0x2B8]
+       imul     r9, qword ptr [rsp+0x2B0]
+       mov      qword ptr [rsp+0x290], r9
+       shr      r8, 32
+       mov      r9d, dword ptr [rsp+0x298]
+       add      r8, r9
+       mov      r9d, dword ptr [rsp+0x290]
+       add      r8, r9
+       mov      qword ptr [rsp+0x288], r8
+       mov      r9, r8
+       shl      r9, 32
+       mov      r8d, dword ptr [rsp+0x2A0]
+       or       r8, r9
+       mov      r9, qword ptr [rsp+0x2B8]
+       imul     r9, qword ptr [rsp+0x2A8]
+       mov      qword ptr [rsp+0x520], r9
+       mov      r9, qword ptr [rsp+0x298]
+       shr      r9, 32
+       add      r9, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x520], r9
+       mov      r9, qword ptr [rsp+0x290]
+       shr      r9, 32
+       add      r9, qword ptr [rsp+0x520]
+ 
+G_M000_IG41:                ;; offset=0x0C89
+       mov      qword ptr [rsp+0x520], r9
+       mov      r9, qword ptr [rsp+0x288]
+       shr      r9, 32
+       add      r9, qword ptr [rsp+0x520]
+       mov      qword ptr [rsp+0x4A8], r9
+       lea      r9, [r8+r10]
+       mov      rdx, r8
+       or       rdx, r10
+       andn     rdx, r9, rdx
+       and      r8, r10
+       or       r8, rdx
+       shr      r8, 63
+       mov      rdx, r9
+       lea      r9, [rdx+rcx]
+       mov      r10, r8
+       add      r10, qword ptr [rsp+0x4A8]
+       mov      r8, rdx
+       or       r8, rcx
+       andn     r8, r9, r8
+       and      rcx, rdx
+       or       r8, rcx
+       shr      r8, 63
+       mov      rcx, r9
+       add      r10, r8
+       mov      r8, qword ptr [rsp+0x50]
+       mov      qword ptr [rsp+0x280], r8
+       mov      edx, r12d
+       mov      qword ptr [rsp+0x278], rdx
+       mov      r8, qword ptr [rsp+0x58]
+       mov      qword ptr [rsp+0x270], r8
+       mov      r9d, r15d
+       imul     rdx, r9
+       mov      qword ptr [rsp+0x268], rdx
+       imul     r9, r8
+       mov      qword ptr [rsp+0x260], r9
+       mov      r8, qword ptr [rsp+0x280]
+       imul     r8, qword ptr [rsp+0x278]
+       mov      qword ptr [rsp+0x258], r8
+       shr      rdx, 32
+       mov      r9d, r9d
+       add      rdx, r9
+       mov      r9d, r8d
+       add      rdx, r9
+       mov      qword ptr [rsp+0x250], rdx
+       mov      r9, rdx
+       shl      r9, 32
+       mov      edx, dword ptr [rsp+0x268]
+       or       rdx, r9
+       mov      r9, qword ptr [rsp+0x280]
+       imul     r9, qword ptr [rsp+0x270]
+       mov      r8, qword ptr [rsp+0x260]
+       shr      r8, 32
+       add      r8, r9
+       mov      r9, qword ptr [rsp+0x258]
+       shr      r9, 32
+       add      r8, r9
+       mov      r9, qword ptr [rsp+0x250]
+       shr      r9, 32
+       add      r8, r9
+       mov      qword ptr [rsp+0x4A0], r8
+       lea      r9, [rdx+rdi]
+       mov      r8, rdx
+       or       r8, rdi
+       andn     r8, r9, r8
+       and      rdx, rdi
+       or       r8, rdx
+ 
+G_M000_IG42:                ;; offset=0x0DD0
+       shr      r8, 63
+       mov      rdx, r9
+       lea      r9, [rdx+r10]
+       add      r8, qword ptr [rsp+0x4A0]
+       mov      rdi, rdx
+       or       rdi, r10
+       andn     rdi, r9, rdi
+       and      r10, rdx
+       or       r10, rdi
+       shr      r10, 63
+       mov      rdi, r9
+       add      r10, r8
+       mov      r8, qword ptr [rsp+0x48]
+       mov      r9, r8
+       mov      qword ptr [rsp+0x248], r9
+       mov      edx, r12d
+       mov      qword ptr [rsp+0x240], rdx
+       mov      r12, qword ptr [rsp+0x58]
+       mov      qword ptr [rsp+0x238], r12
+       mov      r8d, esi
+       imul     rdx, r8
+       imul     r8, r12
+       mov      qword ptr [rsp+0x230], r8
+       imul     r9, qword ptr [rsp+0x240]
+       mov      r12, rdx
+       shr      r12, 32
+       mov      r8d, r8d
+       add      r8, r12
+       mov      r12d, r9d
+       add      r8, r12
+       mov      qword ptr [rsp+0x228], r8
+       mov      r12, r8
+       shl      r12, 32
+       mov      edx, edx
+       or       rdx, r12
+       mov      r12, qword ptr [rsp+0x248]
+       imul     r12, qword ptr [rsp+0x238]
+       mov      r8, qword ptr [rsp+0x230]
+       shr      r8, 32
+       add      r8, r12
+       shr      r9, 32
+       add      r8, r9
+       mov      r9, qword ptr [rsp+0x228]
+       shr      r9, 32
+       add      r8, r9
+       lea      r9, [rdx+rax]
+       mov      r12, r9
+       mov      r9, rdx
+       or       r9, rax
+       andn     r9, r12, r9
+       and      rdx, rax
+       or       rdx, r9
+       shr      rdx, 63
+       mov      r9, r12
+       lea      r12, [r9+r10]
+       add      r8, rdx
+       mov      rdx, r9
+       or       rdx, r10
+       andn     rdx, r12, rdx
+       mov      rax, r9
+       and      rax, r10
+       or       rdx, rax
+       shr      rdx, 63
+       mov      rax, r12
+       lea      r10, [r8+rdx]
+       lea      r12, [r11+r10]
+       mov      rdx, r11
+       or       rdx, r10
+ 
+G_M000_IG43:                ;; offset=0x0EEE
+       andn     rdx, r12, rdx
+       and      r11, r10
+       or       rdx, r11
+       shr      rdx, 63
+       mov      r11, r12
+       mov      r10, r13
+       shr      r10, 32
+       mov      qword ptr [rsp+0x28], r10
+       mov      r8, r10
+       mov      r9d, r13d
+       mov      r12, r9
+       shl      r12, 32
+       sub      r12, r9
+       mov      qword ptr [rsp+0x220], r12
+       mov      r9, r12
+       mov      r10, r8
+       shl      r10, 32
+       sub      r10, r8
+       mov      qword ptr [rsp+0x80], r10
+       mov      qword ptr [rsp+0x218], r10
+       mov      r8, r9
+       shr      r8, 32
+       mov      qword ptr [rsp+0x40], r8
+       mov      r9d, r9d
+       add      r9, r8
+       mov      r8d, dword ptr [rsp+0x218]
+       add      r8, r9
+       mov      qword ptr [rsp+0x210], r8
+       mov      r9, r8
+       shl      r9, 32
+       mov      r8d, dword ptr [rsp+0x220]
+       or       r9, r8
+       mov      r8, qword ptr [rsp+0x40]
+       add      r8, r10
+       mov      qword ptr [rsp+0xA0], r8
+       mov      r8, qword ptr [rsp+0x218]
+       shr      r8, 32
+       add      r8, qword ptr [rsp+0xA0]
+       mov      r10, qword ptr [rsp+0x210]
+       shr      r10, 32
+       add      r10, r8
+       lea      r8, [r9+r13]
+       mov      qword ptr [rsp+0x498], rdx
+       mov      rdx, r9
+       or       rdx, r13
+       andn     r8, r8, rdx
+       and      r9, r13
+       or       r8, r9
+       shr      r8, 63
+       add      r10, r8
+       mov      qword ptr [rsp+0x208], r12
+       mov      r8, qword ptr [rsp+0x80]
+       mov      r9d, r8d
+       add      r9, qword ptr [rsp+0x40]
+       mov      qword ptr [rsp+0x200], r9
+       mov      rdx, r9
+       shl      rdx, 32
+       mov      r9d, dword ptr [rsp+0x208]
+       or       r9, rdx
+       shr      r8, 32
+       mov      rdx, qword ptr [rsp+0x200]
+       shr      rdx, 32
+       add      rdx, r8
+       mov      qword ptr [rsp+0x490], rdx
+ 
+G_M000_IG44:                ;; offset=0x101C
+       lea      r8, [r9+rcx]
+       mov      rdx, r9
+       or       rdx, rcx
+       andn     rdx, r8, rdx
+       and      r9, rcx
+       or       rdx, r9
+       shr      rdx, 63
+       mov      r9, r8
+       lea      r8, [r9+r10]
+       mov      rcx, rdx
+       add      rcx, qword ptr [rsp+0x490]
+       mov      rdx, r9
+       or       rdx, r10
+       andn     rdx, r8, rdx
+       and      r10, r9
+       or       rdx, r10
+       shr      rdx, 63
+       mov      r9, r13
+       mov      r13, r8
+       lea      r10, [rcx+rdx]
+       lea      r8, [rdi+r10]
+       mov      rdx, rdi
+       or       rdx, r10
+       andn     rdx, r8, rdx
+       and      r10, rdi
+       or       rdx, r10
+       shr      rdx, 63
+       mov      rdi, r8
+       mov      r10, rdx
+       mov      rcx, qword ptr [rsp+0x28]
+       mov      r8d, r9d
+       mov      r9, r8
+       shr      r9, 32
+       mov      edx, r12d
+       add      rdx, r9
+       mov      r9d, ecx
+       add      rdx, r9
+       mov      r9, rdx
+       shl      r9, 32
+       or       r9, r8
+       shr      rcx, 32
+       add      rcx, qword ptr [rsp+0xA0]
+       shr      rdx, 32
+       add      rdx, rcx
+       lea      r8, [r9+rax]
+       mov      r12, r8
+       mov      rcx, r9
+       or       rcx, rax
+       andn     rcx, r12, rcx
+       and      r9, rax
+       or       rcx, r9
+       shr      rcx, 63
+       mov      r9, r12
+       lea      r12, [r9+r10]
+       add      rdx, rcx
+       mov      rcx, r9
+       or       rcx, r10
+       andn     rcx, r12, rcx
+       and      r10, r9
+       or       rcx, r10
+       shr      rcx, 63
+       lea      r10, [rdx+rcx]
+       lea      rcx, [r11+r10]
+       mov      r8, rcx
+       mov      rax, r11
+       or       rax, r10
+       andn     rcx, r8, rax
+       and      r11, r10
+       or       rcx, r11
+       shr      rcx, 63
+ 
+G_M000_IG45:                ;; offset=0x1118
+       mov      rax, r8
+       mov      r11, rcx
+       add      r11, qword ptr [rsp+0x498]
+       mov      rcx, qword ptr [rsp+0x68]
+       mov      r10, rcx
+       mov      qword ptr [rsp+0x1F8], r10
+       mov      rdx, qword ptr [rsp+0x518]
+       mov      r8d, edx
+       mov      qword ptr [rsp+0x1F0], r8
+       mov      r9, rdx
+       shr      r9, 32
+       mov      rcx, r9
+       mov      qword ptr [rsp+0x1E8], rcx
+       mov      edx, ebp
+       imul     r8, rdx
+       imul     rdx, rcx
+       mov      qword ptr [rsp+0x1E0], rdx
+       mov      rcx, r10
+       imul     rcx, qword ptr [rsp+0x1F0]
+       mov      r10, r8
+       shr      r10, 32
+       mov      edx, edx
+       add      r10, rdx
+       mov      edx, ecx
+       add      r10, rdx
+       mov      qword ptr [rsp+0x1D8], r10
+       mov      rdx, r10
+       shl      rdx, 32
+       mov      r8d, r8d
+       or       r8, rdx
+       mov      rdx, qword ptr [rsp+0x1F8]
+       imul     rdx, qword ptr [rsp+0x1E8]
+       mov      r10, qword ptr [rsp+0x1E0]
+       shr      r10, 32
+       add      r10, rdx
+       shr      rcx, 32
+       add      r10, rcx
+       mov      rdx, qword ptr [rsp+0x1D8]
+       shr      rdx, 32
+       add      r10, rdx
+       lea      rdx, [r8+r13]
+       mov      rcx, rdx
+       mov      rdx, r8
+       or       rdx, r13
+       andn     rdx, rcx, rdx
+       and      r8, r13
+       or       rdx, r8
+       shr      rdx, 63
+       mov      r8, rcx
+       add      r10, rdx
+       andn     rdx, r8, rcx
+       shr      rdx, 63
+       mov      r13, rcx
+       add      r10, rdx
+       mov      r8, qword ptr [rsp+0x60]
+       mov      qword ptr [rsp+0x1D0], r8
+       mov      r8d, dword ptr [rsp+0x518]
+       mov      qword ptr [rsp+0x1C8], r8
+       mov      rcx, r9
+       mov      qword ptr [rsp+0x1C0], rcx
+       mov      edx, r14d
+       imul     r8, rdx
+       mov      qword ptr [rsp+0x1B8], r8
+       imul     rdx, rcx
+       mov      qword ptr [rsp+0x1B0], rdx
+       mov      rcx, qword ptr [rsp+0x1D0]
+       imul     rcx, qword ptr [rsp+0x1C8]
+ 
+G_M000_IG46:                ;; offset=0x125A
+       mov      qword ptr [rsp+0x1A8], rcx
+       shr      r8, 32
+       mov      edx, edx
+       add      rdx, r8
+       mov      r8d, ecx
+       add      rdx, r8
+       mov      qword ptr [rsp+0x1A0], rdx
+       mov      r8, rdx
+       shl      r8, 32
+       mov      edx, dword ptr [rsp+0x1B8]
+       or       r8, rdx
+       mov      rdx, qword ptr [rsp+0x1D0]
+       imul     rdx, qword ptr [rsp+0x1C0]
+       mov      rcx, qword ptr [rsp+0x1B0]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      rcx, qword ptr [rsp+0x1A8]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      rcx, qword ptr [rsp+0x1A0]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      qword ptr [rsp+0x488], rdx
+       lea      rcx, [r8+rdi]
+       mov      rdx, r8
+       or       rdx, rdi
+       andn     rdx, rcx, rdx
+       and      r8, rdi
+       or       rdx, r8
+       shr      rdx, 63
+       mov      r8, rcx
+       lea      rcx, [r8+r10]
+       add      rdx, qword ptr [rsp+0x488]
+       mov      rdi, r8
+       or       rdi, r10
+       andn     rdi, rcx, rdi
+       and      r10, r8
+       or       r10, rdi
+       shr      r10, 63
+       mov      rdi, rcx
+       add      r10, rdx
+       mov      r8, qword ptr [rsp+0x50]
+       mov      qword ptr [rsp+0x198], r8
+       mov      r8d, dword ptr [rsp+0x518]
+       mov      qword ptr [rsp+0x190], r8
+       mov      rcx, r9
+       mov      qword ptr [rsp+0x188], rcx
+       mov      edx, r15d
+       imul     r8, rdx
+       mov      qword ptr [rsp+0x180], r8
+       imul     rdx, rcx
+       mov      qword ptr [rsp+0x178], rdx
+       mov      rcx, qword ptr [rsp+0x198]
+       imul     rcx, qword ptr [rsp+0x190]
+       mov      qword ptr [rsp+0x170], rcx
+       shr      r8, 32
+       mov      edx, edx
+       add      rdx, r8
+       mov      r8d, ecx
+       add      rdx, r8
+       mov      qword ptr [rsp+0x168], rdx
+       mov      r8, rdx
+       shl      r8, 32
+       mov      edx, dword ptr [rsp+0x180]
+       or       r8, rdx
+       mov      rdx, qword ptr [rsp+0x198]
+ 
+G_M000_IG47:                ;; offset=0x139F
+       imul     rdx, qword ptr [rsp+0x188]
+       mov      rcx, qword ptr [rsp+0x178]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      rcx, qword ptr [rsp+0x170]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      rcx, qword ptr [rsp+0x168]
+       shr      rcx, 32
+       add      rdx, rcx
+       mov      qword ptr [rsp+0x480], rdx
+       lea      rcx, [r8+r12]
+       mov      rdx, r8
+       or       rdx, r12
+       andn     rdx, rcx, rdx
+       and      r8, r12
+       or       rdx, r8
+       shr      rdx, 63
+       mov      r8, rcx
+       lea      rcx, [r8+r10]
+       add      rdx, qword ptr [rsp+0x480]
+       mov      r12, r8
+       or       r12, r10
+       andn     r12, rcx, r12
+       and      r10, r8
+       or       r10, r12
+       shr      r10, 63
+       mov      r12, rcx
+       add      r10, rdx
+       mov      r8, qword ptr [rsp+0x48]
+       mov      rdx, r8
+       mov      qword ptr [rsp+0x160], rdx
+       mov      ecx, dword ptr [rsp+0x518]
+       mov      qword ptr [rsp+0x158], rcx
+       mov      qword ptr [rsp+0x150], r9
+       mov      r8d, esi
+       imul     rcx, r8
+       imul     r8, r9
+       mov      qword ptr [rsp+0x148], r8
+       imul     rdx, qword ptr [rsp+0x158]
+       mov      r9, rcx
+       shr      r9, 32
+       mov      r8d, r8d
+       add      r8, r9
+       mov      r9d, edx
+       add      r8, r9
+       mov      qword ptr [rsp+0x140], r8
+       mov      r9, r8
+       shl      r9, 32
+       mov      ecx, ecx
+       or       rcx, r9
+       mov      r9, qword ptr [rsp+0x160]
+       imul     r9, qword ptr [rsp+0x150]
+       mov      r8, qword ptr [rsp+0x148]
+       shr      r8, 32
+       add      r8, r9
+       shr      rdx, 32
+       add      rdx, r8
+       mov      r8, qword ptr [rsp+0x140]
+       shr      r8, 32
+       add      rdx, r8
+       lea      r8, [rcx+rax]
+       mov      r9, rcx
+       or       r9, rax
+       andn     r9, r8, r9
+       and      rcx, rax
+ 
+G_M000_IG48:                ;; offset=0x14D2
+       or       rcx, r9
+       shr      rcx, 63
+       mov      r9, r8
+       lea      r8, [r9+r10]
+       add      rdx, rcx
+       mov      rcx, r9
+       or       rcx, r10
+       andn     rcx, r8, rcx
+       mov      rax, r9
+       and      rax, r10
+       or       rcx, rax
+       shr      rcx, 63
+       mov      rax, r8
+       lea      r10, [rdx+rcx]
+       lea      r8, [r11+r10]
+       mov      rcx, r11
+       or       rcx, r10
+       andn     rcx, r8, rcx
+       and      r11, r10
+       or       rcx, r11
+       shr      rcx, 63
+       mov      r11, r8
+       mov      r10, r13
+       shr      r10, 32
+       mov      qword ptr [rsp+0x20], r10
+       mov      rdx, r10
+       mov      r8d, r13d
+       mov      r9, r8
+       shl      r9, 32
+       sub      r9, r8
+       mov      qword ptr [rsp+0x138], r9
+       mov      r8, r9
+       mov      r10, rdx
+       shl      r10, 32
+       sub      r10, rdx
+       mov      qword ptr [rsp+0x78], r10
+       mov      qword ptr [rsp+0x130], r10
+       mov      rdx, r8
+       shr      rdx, 32
+       mov      qword ptr [rsp+0x38], rdx
+       mov      r8d, r8d
+       add      r8, rdx
+       mov      edx, dword ptr [rsp+0x130]
+       add      rdx, r8
+       mov      qword ptr [rsp+0x128], rdx
+       mov      r8, rdx
+       shl      r8, 32
+       mov      edx, dword ptr [rsp+0x138]
+       or       rdx, r8
+       mov      r8, qword ptr [rsp+0x38]
+       add      r8, r10
+       mov      qword ptr [rsp+0x98], r8
+       mov      r8, qword ptr [rsp+0x130]
+       shr      r8, 32
+       add      r8, qword ptr [rsp+0x98]
+       mov      r10, qword ptr [rsp+0x128]
+       shr      r10, 32
+       add      r10, r8
+       lea      r8, [rdx+r13]
+       mov      qword ptr [rsp+0x478], rcx
+       mov      rcx, rdx
+       or       rcx, r13
+       andn     r8, r8, rcx
+       and      rdx, r13
+       or       rdx, r8
+       shr      rdx, 63
+       add      r10, rdx
+ 
+G_M000_IG49:                ;; offset=0x15E8
+       mov      qword ptr [rsp+0x120], r9
+       mov      rcx, qword ptr [rsp+0x78]
+       mov      r8d, ecx
+       add      r8, qword ptr [rsp+0x38]
+       mov      qword ptr [rsp+0x118], r8
+       mov      rdx, r8
+       shl      rdx, 32
+       mov      r8d, dword ptr [rsp+0x120]
+       or       rdx, r8
+       shr      rcx, 32
+       mov      r8, qword ptr [rsp+0x118]
+       shr      r8, 32
+       add      rcx, r8
+       mov      qword ptr [rsp+0x470], rcx
+       lea      r8, [rdx+rdi]
+       mov      rcx, rdx
+       or       rcx, rdi
+       andn     rcx, r8, rcx
+       and      rdx, rdi
+       or       rcx, rdx
+       shr      rcx, 63
+       mov      rdx, r8
+       mov      rdi, rcx
+       add      rdi, qword ptr [rsp+0x470]
+       lea      r8, [rdx+r10]
+       mov      rcx, rdx
+       or       rcx, r10
+       andn     rcx, r8, rcx
+       and      r10, rdx
+       or       rcx, r10
+       shr      rcx, 63
+       mov      rdx, r13
+       mov      r13, r8
+       lea      r10, [rdi+rcx]
+       lea      r8, [r12+r10]
+       mov      rcx, r12
+       or       rcx, r10
+       andn     rcx, r8, rcx
+       and      r10, r12
+       or       rcx, r10
+       shr      rcx, 63
+       mov      rdi, r8
+       mov      r10, rcx
+       mov      rcx, qword ptr [rsp+0x20]
+       mov      r8d, edx
+       mov      rdx, r8
+       shr      rdx, 32
+       mov      r9d, r9d
+       add      rdx, r9
+       mov      r9d, ecx
+       add      rdx, r9
+       mov      r9, rdx
+       shl      r9, 32
+       or       r8, r9
+       mov      r9, r8
+       shr      rcx, 32
+       add      rcx, qword ptr [rsp+0x98]
+       shr      rdx, 32
+       add      rdx, rcx
+       lea      r8, [r9+rax]
+       mov      r12, r8
+       mov      rcx, r9
+       or       rcx, rax
+       andn     rcx, r12, rcx
+       and      r9, rax
+       or       rcx, r9
+       shr      rcx, 63
+       mov      r9, r12
+ 
+G_M000_IG50:                ;; offset=0x16F5
+       lea      r12, [r9+r10]
+       add      rdx, rcx
+       mov      rcx, r9
+       or       rcx, r10
+       andn     rcx, r12, rcx
+       and      r10, r9
+       or       rcx, r10
+       shr      rcx, 63
+       lea      r10, [rdx+rcx]
+       lea      rcx, [r11+r10]
+       mov      r8, rcx
+       mov      rax, r11
+       or       rax, r10
+       andn     rcx, r8, rax
+       and      r11, r10
+       or       rcx, r11
+       shr      rcx, 63
+       mov      rax, r8
+       mov      r11, rcx
+       add      r11, qword ptr [rsp+0x478]
+       mov      rcx, qword ptr [rsp+0x68]
+       mov      qword ptr [rsp+0x110], rcx
+       mov      rdx, qword ptr [rsp+0x510]
+       mov      r10d, edx
+       mov      r8, rdx
+       shr      r8, 32
+       mov      r9, r8
+       mov      ebp, ebp
+       mov      rdx, rbp
+       imul     rdx, r10
+       imul     rbp, r9
+       mov      qword ptr [rsp+0x108], rbp
+       imul     r10, rcx
+       mov      rcx, rdx
+       shr      rcx, 32
+       mov      ebp, ebp
+       add      rcx, rbp
+       mov      ebp, r10d
+       add      rcx, rbp
+       mov      rbp, rcx
+       shl      rbp, 32
+       mov      edx, edx
+       or       rdx, rbp
+       mov      rbp, qword ptr [rsp+0x110]
+       imul     r9, rbp
+       mov      rbp, qword ptr [rsp+0x108]
+       shr      rbp, 32
+       add      r9, rbp
+       shr      r10, 32
+       add      r10, r9
+       shr      rcx, 32
+       add      r10, rcx
+       lea      rcx, [rdx+r13]
+       mov      rbp, rcx
+       mov      rcx, rdx
+       or       rcx, r13
+       andn     rcx, rbp, rcx
+       and      rdx, r13
+       or       rcx, rdx
+       shr      rcx, 63
+       mov      rdx, rbp
+       add      r10, rcx
+       andn     rcx, rdx, rbp
+       shr      rcx, 63
+       mov      r13, rbp
+       add      r10, rcx
+       mov      r9, qword ptr [rsp+0x60]
+       mov      ecx, dword ptr [rsp+0x510]
+       mov      rbp, r8
+ 
+G_M000_IG51:                ;; offset=0x1801
+       mov      qword ptr [rsp+0x100], rbp
+       mov      r14d, r14d
+       mov      rdx, r14
+       imul     rdx, rcx
+       imul     r14, rbp
+       mov      qword ptr [rsp+0xF8], r14
+       imul     rcx, r9
+       mov      rbp, rdx
+       shr      rbp, 32
+       mov      r14d, r14d
+       add      rbp, r14
+       mov      r14d, ecx
+       add      rbp, r14
+       mov      r14, rbp
+       shl      r14, 32
+       mov      edx, edx
+       or       rdx, r14
+       imul     r9, qword ptr [rsp+0x100]
+       mov      r14, qword ptr [rsp+0xF8]
+       shr      r14, 32
+       add      r9, r14
+       shr      rcx, 32
+       add      rcx, r9
+       shr      rbp, 32
+       add      rcx, rbp
+       lea      rbp, [rdx+rdi]
+       mov      r9, rdx
+       or       r9, rdi
+       andn     r9, rbp, r9
+       and      rdx, rdi
+       or       rdx, r9
+       shr      rdx, 63
+       mov      r9, rbp
+       lea      rbp, [r9+r10]
+       add      rcx, rdx
+       mov      rdx, r9
+       or       rdx, r10
+       andn     rdx, rbp, rdx
+       and      r10, r9
+       or       rdx, r10
+       shr      rdx, 63
+       mov      rdi, rbp
+       lea      r10, [rcx+rdx]
+       mov      rcx, qword ptr [rsp+0x50]
+       mov      r9d, dword ptr [rsp+0x510]
+       mov      r14, r8
+       mov      r15d, r15d
+       mov      rbp, r15
+       imul     rbp, r9
+       imul     r15, r14
+       mov      qword ptr [rsp+0xF0], r15
+       imul     r9, rcx
+       mov      rdx, rbp
+       shr      rdx, 32
+       mov      r15d, r15d
+       add      rdx, r15
+       mov      r15d, r9d
+       add      rdx, r15
+       mov      r15, rdx
+       shl      r15, 32
+       mov      ebp, ebp
+       or       rbp, r15
+       imul     rcx, r14
+       mov      r15, qword ptr [rsp+0xF0]
+       shr      r15, 32
+       add      rcx, r15
+       shr      r9, 32
+       add      rcx, r9
+       shr      rdx, 32
+       add      rdx, rcx
+ 
+G_M000_IG52:                ;; offset=0x1911
+       lea      rcx, [r12+rbp]
+       mov      r14, rcx
+       mov      rcx, rbp
+       or       rcx, r12
+       andn     rcx, r14, rcx
+       mov      r9, rbp
+       and      r9, r12
+       or       rcx, r9
+       shr      rcx, 63
+       mov      rbp, r14
+       lea      r14, [r10+rbp]
+       add      rdx, rcx
+       mov      rcx, rbp
+       or       rcx, r10
+       andn     rcx, r14, rcx
+       and      r10, rbp
+       or       rcx, r10
+       shr      rcx, 63
+       mov      r12, r14
+       lea      r10, [rdx+rcx]
+       mov      rdx, qword ptr [rsp+0x48]
+       mov      r9d, dword ptr [rsp+0x510]
+       mov      ecx, esi
+       mov      rbp, rcx
+       imul     rbp, r9
+       imul     rcx, r8
+       imul     r9, rdx
+       mov      rsi, rbp
+       shr      rsi, 32
+       mov      r15d, ecx
+       add      rsi, r15
+       mov      r15d, r9d
+       add      rsi, r15
+       mov      r14, rsi
+       shl      r14, 32
+       mov      ebp, ebp
+       or       rbp, r14
+       imul     rdx, r8
+       shr      rcx, 32
+       add      rdx, rcx
+       shr      r9, 32
+       add      rdx, r9
+       shr      rsi, 32
+       add      rdx, rsi
+       lea      r14, [rax+rbp]
+       mov      rcx, rbp
+       or       rcx, rax
+       andn     rcx, r14, rcx
+       and      rax, rbp
+       or       rcx, rax
+       shr      rcx, 63
+       mov      rbp, r14
+       lea      r14, [r10+rbp]
+       add      rdx, rcx
+       mov      rcx, rbp
+       or       rcx, r10
+       andn     rcx, r14, rcx
+       and      r10, rbp
+       or       rcx, r10
+       shr      rcx, 63
+       mov      rax, r14
+       lea      r10, [rdx+rcx]
+       lea      r14, [r11+r10]
+       mov      rcx, r11
+       or       rcx, r10
+       andn     rcx, r14, rcx
+       and      r11, r10
+       or       rcx, r11
+       shr      rcx, 63
+       mov      r11, r14
+       mov      r10, r13
+ 
+G_M000_IG53:                ;; offset=0x1A0A
+       shr      r10, 32
+       mov      edx, r13d
+       mov      r8, rdx
+       shl      r8, 32
+       sub      r8, rdx
+       mov      r9, rdx
+       shl      r9, 32
+       sub      r9, rdx
+       mov      rdx, r10
+       shl      rdx, 32
+       sub      rdx, r10
+       mov      rsi, r9
+       shr      rsi, 32
+       mov      r15d, r9d
+       add      rsi, r15
+       mov      r15d, edx
+       add      rsi, r15
+       mov      rbp, rsi
+       shl      rbp, 32
+       mov      r8d, r8d
+       or       rbp, r8
+       mov      r8, rbp
+       mov      rbp, r10
+       shl      rbp, 32
+       sub      rbp, r10
+       shr      r9, 32
+       add      r9, rbp
+       shr      rdx, 32
+       add      rdx, r9
+       shr      rsi, 32
+       add      rdx, rsi
+       lea      r14, [r8+r13]
+       mov      r10, rcx
+       mov      rcx, r8
+       or       rcx, r13
+       andn     rcx, r14, rcx
+       and      r8, r13
+       or       rcx, r8
+       shr      rcx, 63
+       add      rdx, rcx
+       mov      rcx, r13
+       shr      rcx, 32
+       mov      r8d, r13d
+       mov      r9, r8
+       shl      r9, 32
+       sub      r9, r8
+       mov      r8, rcx
+       shl      r8, 32
+       sub      r8, rcx
+       mov      rcx, r9
+       shr      rcx, 32
+       mov      esi, r8d
+       add      rcx, rsi
+       mov      r14, rcx
+       shl      r14, 32
+       mov      r9d, r9d
+       or       r9, r14
+       shr      r8, 32
+       shr      rcx, 32
+       add      rcx, r8
+       lea      r14, [r9+rdi]
+       mov      r8, r9
+       or       r8, rdi
+       andn     r8, r14, r8
+       and      r9, rdi
+       or       r8, r9
+       shr      r8, 63
+ 
+G_M000_IG54:                ;; offset=0x1AEC
+       mov      r9, r14
+       lea      r14, [r9+rdx]
+       add      rcx, r8
+       mov      r8, r9
+       or       r8, rdx
+       andn     r8, r14, r8
+       and      rdx, r9
+       or       r8, rdx
+       shr      r8, 63
+       mov      r9, r13
+       mov      r13, r14
+       lea      rdx, [rcx+r8]
+       lea      r14, [r12+rdx]
+       mov      r8, r12
+       or       r8, rdx
+       andn     r8, r14, r8
+       and      rdx, r12
+       or       r8, rdx
+       shr      r8, 63
+       mov      rdi, r14
+       mov      rdx, r8
+       mov      rcx, r9
+       shr      rcx, 32
+       mov      r8d, r9d
+       mov      r9, r8
+       shl      r9, 32
+       sub      r9, r8
+       mov      rsi, r8
+       shr      rsi, 32
+       mov      ebp, r9d
+       add      rsi, rbp
+       mov      ebp, ecx
+       add      rsi, rbp
+       mov      r14, rsi
+       shl      r14, 32
+       or       r8, r14
+       mov      rbp, rcx
+       shl      rbp, 32
+       sub      rbp, rcx
+       shr      r9, 32
+       add      r9, rbp
+       shr      rcx, 32
+       add      rcx, r9
+       shr      rsi, 32
+       add      rcx, rsi
+       lea      r14, [r8+rax]
+       mov      r9, r8
+       or       r9, rax
+       andn     r9, r14, r9
+       and      r8, rax
+       or       r8, r9
+       shr      r8, 63
+       mov      rax, r14
+       lea      r14, [rax+rdx]
+       add      rcx, r8
+       mov      r8, rax
+       or       r8, rdx
+       andn     r8, r14, r8
+       and      rdx, rax
+       or       r8, rdx
+       shr      r8, 63
+       mov      r12, r14
+       lea      rdx, [rcx+r8]
+       lea      r14, [r11+rdx]
+       mov      r8, r11
+       or       r8, rdx
+       andn     r8, r14, r8
+       and      r11, rdx
+       or       r8, r11
+ 
+G_M000_IG55:                ;; offset=0x1BD7
+       shr      r8, 63
+       lea      r11, [r10+r8]
+       lea      rsi, [r13+0x01]
+       mov      rdx, r13
+       not      rdx
+       mov      rcx, r13
+       and      rcx, rsi
+       or       rdx, rcx
+       shr      rdx, 63
+       mov      rbp, 0xFFFFFFFF00000001
+       add      rbp, rdi
+       sub      rbp, rdx
+       mov      edx, edi
+       not      edx
+       mov      ecx, 0xFFFFFFFF
+       xor      rcx, rdi
+       andn     rcx, rcx, rbp
+       or       rdx, rcx
+       shr      rdx, 63
+       mov      r15, r12
+       sub      r15, rdx
+       andn     rdx, r12, r15
+       shr      rdx, 63
+       mov      eax, 0xFFFFFFFF
+       add      rax, r14
+       sub      rax, rdx
+       mov      qword ptr [rsp+0x508], rax
+       mov      rdx, 0xFFFFFFFF00000001
+       andn     rdx, r14, rdx
+       mov      rcx, 0xFFFFFFFF00000001
+       xor      rcx, r14
+       andn     rcx, rcx, rax
+       or       rdx, rcx
+       shr      rdx, 63
+       xor      rdx, 1
+       or       rdx, r11
+       mov      r8, rdx
+       neg      r8
+       mov      qword ptr [rsp+0x500], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG58
+ 
+G_M000_IG56:                ;; offset=0x1C85
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xE0], xmm0
+ 
+G_M000_IG57:                ;; offset=0x1C93
+       jmp      SHORT G_M000_IG59
+ 
+G_M000_IG58:                ;; offset=0x1C95
+       lea      rdx, [rsp+0xE0]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG59:                ;; offset=0x1CA6
+       mov      rdx, gword ptr [rsp+0xE0]
+       mov      ecx, dword ptr [rsp+0xE8]
+       mov      eax, dword ptr [rsp+0xEC]
+       movsxd   r8, eax
+       test     r8, r8
+       jle      G_M000_IG81
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       cmp      ecx, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       mov      rax, qword ptr [rsp+0x500]
+       and      rsi, rax
+       andn     r8, rax, r13
+       or       r8, rsi
+       mov      qword ptr [rdx+8*rcx+0x10], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG62
+ 
+G_M000_IG60:                ;; offset=0x1D02
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xD0], xmm0
+ 
+G_M000_IG61:                ;; offset=0x1D10
+       jmp      SHORT G_M000_IG63
+ 
+G_M000_IG62:                ;; offset=0x1D12
+       lea      rdx, [rsp+0xD0]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG63:                ;; offset=0x1D23
+       mov      rdx, gword ptr [rsp+0xD0]
+       mov      ecx, dword ptr [rsp+0xD8]
+       mov      esi, dword ptr [rsp+0xDC]
+       movsxd   rax, esi
+       cmp      rax, 1
+       jle      G_M000_IG82
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x01]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       inc      ecx
+       mov      rsi, qword ptr [rsp+0x500]
+       and      rbp, rsi
+       andn     rax, rsi, rdi
+       or       rax, rbp
+       mov      qword ptr [rdx+8*rcx+0x10], rax
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG66
+ 
+G_M000_IG64:                ;; offset=0x1D85
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xC0], xmm0
+ 
+G_M000_IG65:                ;; offset=0x1D93
+       jmp      SHORT G_M000_IG67
+ 
+G_M000_IG66:                ;; offset=0x1D95
+       lea      rdx, [rsp+0xC0]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG67:                ;; offset=0x1DA6
+       mov      rdx, gword ptr [rsp+0xC0]
+       mov      ecx, dword ptr [rsp+0xC8]
+       mov      edi, dword ptr [rsp+0xCC]
+       movsxd   rax, edi
+       cmp      rax, 2
+       jle      G_M000_IG83
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x02]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 2
+       and      r15, rsi
+       andn     rax, rsi, r12
+       or       rax, r15
+       mov      qword ptr [rdx+8*rcx+0x10], rax
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG70
+ 
+G_M000_IG68:                ;; offset=0x1E01
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xB0], xmm0
+ 
+G_M000_IG69:                ;; offset=0x1E0F
+       jmp      SHORT G_M000_IG71
+ 
+G_M000_IG70:                ;; offset=0x1E11
+       lea      rdx, [rsp+0xB0]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p256MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG71:                ;; offset=0x1E22
+       mov      rdx, gword ptr [rsp+0xB0]
+       mov      ecx, dword ptr [rsp+0xB8]
+       mov      eax, dword ptr [rsp+0xBC]
+       movsxd   r8, eax
+       cmp      r8, 3
+       jle      G_M000_IG84
+       mov      rax, 0x1F8A45F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x03]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG85
+       add      ecx, 3
+       mov      rax, rsi
+       and      rax, qword ptr [rsp+0x508]
+       andn     r8, rsi, r14
+       or       rax, r8
+       mov      qword ptr [rdx+8*rcx+0x10], rax
+ 
+G_M000_IG72:                ;; offset=0x1E7D
+       add      rsp, 0x528
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r12
+       pop      r13
+       pop      r14
+       pop      r15
+       ret      
+ 
+G_M000_IG73:                ;; offset=0x1E91
+       movsxd   rdx, ebp
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG74:                ;; offset=0x1EA5
+       movsxd   rdx, r14d
+       mov      ecx, 1
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG75:                ;; offset=0x1EBC
+       movsxd   rdx, r15d
+       mov      ecx, 2
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG76:                ;; offset=0x1ED3
+       movsxd   rdx, esi
+       mov      ecx, 3
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG77:                ;; offset=0x1EEA
+       movsxd   rdx, r13d
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG78:                ;; offset=0x1EFE
+       movsxd   rdx, r12d
+       mov      ecx, 1
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG79:                ;; offset=0x1F15
+       movsxd   rdx, eax
+       mov      ecx, 2
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG80:                ;; offset=0x1F2C
+       movsxd   rdx, edi
+       mov      ecx, 3
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG81:                ;; offset=0x1F43
+       movsxd   rdx, eax
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG82:                ;; offset=0x1F57
+       movsxd   rdx, esi
+       mov      ecx, 1
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG83:                ;; offset=0x1F6E
+       movsxd   rdx, edi
+       mov      ecx, 2
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG84:                ;; offset=0x1F85
+       movsxd   rdx, eax
+       mov      ecx, 3
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG85:                ;; offset=0x1F9C
+       call     CORINFO_HELP_RNGCHKFAIL
+       int3     
+ 
+; Total bytes of code 8098
+
