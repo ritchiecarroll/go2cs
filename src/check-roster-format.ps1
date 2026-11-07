@@ -214,6 +214,35 @@ Assert-Equal 'expectation: unannotated row falls back to the columns' 12 (Get-Ro
 Assert-Equal 'expectation: unannotated row names the columns' 'columns' (Get-RosterRowExpectation -Row $plain -Goos 'linux').Source
 Assert-Equal 'expectation: a different OS does not read another OS annotation' 'columns' (Get-RosterRowExpectation -Row $annotated -Goos 'darwin').Source
 
+# ---- 1-rid. the darwin PER-RID NOTE (COORD ruling (1), 2026-11-06: arch-strict darwin banking) ---------------------
+# A darwin segment may carry its banked RID and the OTHER RID's reading: "darwin: 7 + 3 (osx-arm64; osx-x64: 10)". The
+# parse, the per-RID expectation the sweep resolves on each mac runner, and the refusals: a note off darwin, a note
+# naming one RID twice, and prose that only looks like a note.
+$ridRow = (Read-FixtureRoster @("| [``rid/pkg``](https://x/rid) | 10 |  | Constant time. $dot darwin: 7 + 3 (osx-arm64; osx-x64: 10) $dot [proof](p.md) |"))[0]
+Assert-Equal 'per-RID note: the banked reading parses (matched)' 7 $ridRow.OS['darwin'].Expected
+Assert-Equal 'per-RID note: the banked reading parses (disclosed)' 3 $ridRow.OS['darwin'].Disclosed
+Assert-Equal 'per-RID note: the banked RID' 'osx-arm64' $ridRow.OS['darwin'].Rid
+Assert-Equal 'per-RID note: the other RID' 'osx-x64' $ridRow.OS['darwin'].Other.Rid
+Assert-Equal 'per-RID note: the other RID''s matched count' 10 $ridRow.OS['darwin'].Other.Expected
+Assert-Equal 'per-RID note: the other RID''s disclosed count (absent reads 0)' 0 $ridRow.OS['darwin'].Other.Disclosed
+$ridRowD = (Read-FixtureRoster @("| [``ridd/pkg``](https://x/ridd) | 10 |  | Both disclosed. $dot darwin: 5 + 4 (osx-x64; osx-arm64: 8 + 1) |"))[0]
+Assert-Equal 'per-RID note: an other-RID reading with disclosures, at the end of the cell' '8/1/osx-arm64' ("$($ridRowD.OS['darwin'].Other.Expected)/$($ridRowD.OS['darwin'].Other.Disclosed)/$($ridRowD.OS['darwin'].Other.Rid)")
+Assert-Equal 'per-RID note: a plain darwin segment carries no note' $true (($null -eq $byName['dar/pkg'].OS['darwin'].Rid) -and ($null -eq $byName['dar/pkg'].OS['darwin'].Other))
+Assert-Equal 'per-RID expectation: the noted RID reads the note' 10 (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-x64').Expected
+Assert-Equal 'per-RID expectation: the noted RID reads the note''s disclosed' 0 (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-x64').Disclosed
+Assert-Equal 'per-RID expectation: the noted RID names itself as the source' 'darwin (osx-x64)' (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-x64').Source
+Assert-Equal 'per-RID expectation: the banked RID reads the segment' '7/3/darwin' ("$((Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-arm64').Expected)/$((Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-arm64').Disclosed)/$((Get-RosterRowExpectation -Row $ridRow -Goos 'darwin' -Rid 'osx-arm64').Source)")
+Assert-Equal 'per-RID expectation: no RID given reads the segment, as before' 7 (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin').Expected
+Assert-Equal 'per-RID expectation: a plain darwin row ignores the RID' 'darwin' (Get-RosterRowExpectation -Row $byName['dar/pkg'] -Goos 'darwin' -Rid 'osx-x64').Source
+Assert-Equal 'per-RID expectation: windows still reads the columns' 'columns' (Get-RosterRowExpectation -Row $ridRow -Goos 'windows' -Rid 'osx-x64').Source
+Assert-Throws 'per-RID note: a note on a linux annotation is refused by name' {
+    Read-FixtureRoster @("| [``ridl/pkg``](https://x/ridl) | 3 |  | Linux. $dot linux: 3 (osx-arm64; osx-x64: 4) $dot [proof](p.md) |")
+} 'per-RID note on its ''linux'' annotation'
+Assert-Throws 'per-RID note: a note naming one RID twice is refused' {
+    Read-FixtureRoster @("| [``rid2/pkg``](https://x/rid2) | 3 |  | Twice. $dot darwin: 3 (osx-x64; osx-x64: 4) $dot [proof](p.md) |")
+} 'twice'
+Assert-Equal 'per-RID note: an unknown RID is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |"))[0].OS.Count
+
 # ---- 1a. the per-row EXECUTION annotation (owner ruling 2026-08-30, Option A) ---------------------
 # The annotation names the local execution CONFIG a row's pipeline leg runs under -- an execution
 # property, never a platform one. The load-bearing assertions here are the NEGATIVE ones: an
@@ -2232,6 +2261,59 @@ function Get-DarwinDisclosedDivergent {
     return [int]$Record.disclosed
 }
 
+# ARCH-STRICT READINGS (COORD ruling (1), 2026-11-06). Since the oracle runs at each RID's own arch (-test-oracle-goarch,
+# batch 208), the two mac RIDs can legitimately read different counts: crypto/subtle's three DIT tests are Go pass /
+# C# skip, disclosed, on osx-arm64, where Go has DIT, and skip/skip on osx-x64. Such a row banks the ARCH-STRICT
+# reading only when the whole difference is DISCLOSED on one RID, which the evidence's counts decide on their own:
+#   - both RIDs' comparisons validated: status validated, COUNT or DISC (the sweep's class against the expectation in
+#     force when it read, all three reached "Validated N"), and `new` = 0 on both, so nothing is undisclosed;
+#   - equal verdicts;
+#   - matched + disclosed-divergent equal across the RIDs, so one RID's matched shortfall is exactly its extra
+#     disclosures; and the counts differ (equal counts bank on the path above, as before).
+# The `agree` column is NOT consulted: it compares raw verdicts across the RIDs, and on such a row they differ in
+# exactly the disclosed tests. The segment is the RID with more disclosed-divergent, with the other RID's reading as
+# its note: "darwin: 7 + 3 (osx-arm64; osx-x64: 10)". An unequal pair with anything undisclosed, unequal verdicts or an
+# unbalanced count still refuses. A line without the verdicts / divergent / new columns (a fixture) never qualifies.
+# annotate_darwin.py applies the same rule.
+function Get-DarwinArchStrictReading {
+    param($A, $X)
+
+    $int = { param($record, $name) $v = 0; if ($record.PSObject.Properties[$name] -and [int]::TryParse([string]$record.$name, [ref]$v)) { $v } else { $null } }
+    $statuses = @('validated', 'COUNT', 'DISC')
+    if (($statuses -cnotcontains $A.status) -or ($statuses -cnotcontains $X.status)) { return $null }
+
+    $va = & $int $A 'verdicts'; $vx = & $int $X 'verdicts'
+    $na = & $int $A 'new'; $nx = & $int $X 'new'
+    $ma = & $int $A 'matched'; $mx = & $int $X 'matched'
+    if ((& $int $A 'divergent') -eq $null -or (& $int $X 'divergent') -eq $null) { return $null }
+    if (($null -eq $va) -or ($null -eq $vx) -or ($null -eq $na) -or ($null -eq $nx) -or ($null -eq $ma) -or ($null -eq $mx)) { return $null }
+    if (($na -ne 0) -or ($nx -ne 0) -or ($va -ne $vx)) { return $null }
+
+    $da = Get-DarwinDisclosedDivergent $A
+    $dx = Get-DarwinDisclosedDivergent $X
+    if ((($ma + $da) -ne ($mx + $dx)) -or (($ma -eq $mx) -and ($da -eq $dx))) { return $null }
+
+    # The banked RID is the one carrying the extra disclosures; the sum identity makes the two orders exclusive.
+    $bank, $other, $bm, $bd, $om, $od = if ($da -gt $dx) { $A, $X, $ma, $da, $mx, $dx } else { $X, $A, $mx, $dx, $ma, $da }
+    return [PSCustomObject]@{
+        Rid = $bank.RID; Matched = $bm; Disclosed = $bd
+        OtherRid = $other.RID; OtherMatched = $om; OtherDisclosed = $od
+        Text = "$bm" + $(if ($bd -ne 0) { " + $bd" } else { '' }) + " ($($bank.RID); $($other.RID): $om" + $(if ($od -ne 0) { " + $od" } else { '' }) + ')'
+    }
+}
+
+# A segment as the roster spells it, its per-RID note included, for comparison with what the evidence produces.
+function Format-DarwinSegment {
+    param($Segment)
+
+    $text = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    if ($null -ne $other) {
+        $text += " ($($Segment.Rid); $($other.Rid): $($other.Expected)" + $(if ($other.Disclosed) { " + $($other.Disclosed)" } else { '' }) + ')'
+    }
+    return $text
+}
+
 function Get-DarwinSegmentRefusal {
     param($Records, $Segment, [string] $AgreementRuling, $Ceiling = $null, $Superseded = $null, [string] $RuledCount = '')
 
@@ -2254,8 +2336,9 @@ function Get-DarwinSegmentRefusal {
         ((Get-DarwinDisclosedDivergent $a) -eq [int]$ruled.Groups[2].Value) -and ((Get-DarwinDisclosedDivergent $x) -eq [int]$ruled.Groups[2].Value)
     $banked = ((($a.status -ceq 'validated') -and ($x.status -ceq 'validated')) -or $atRuledCount) -and $agreed -and
         ($a.matched -eq $x.matched) -and ((Get-DarwinDisclosedDivergent $a) -eq (Get-DarwinDisclosedDivergent $x))
+    $archStrict = if ($banked) { $null } else { Get-DarwinArchStrictReading $a $x }
 
-    if (-not $banked) {
+    if (-not $banked -and ($null -eq $archStrict)) {
         if ($null -eq $Segment) { return $null }
         if ($ruled.Success -and (($a.status -ceq 'COUNT') -or ($x.status -ceq 'COUNT'))) {
             return "it read COUNT at the pin (osx-arm64 $($a.status) $($a.matched)/$(Get-DarwinDisclosedDivergent $a), osx-x64 $($x.status) $($x.matched)/$(Get-DarwinDisclosedDivergent $x), agree $($a.agree)/$($x.agree)), not its ruled count $($ruled.Groups[1].Value)/$($ruled.Groups[2].Value) on both RIDs, so it does not bank, but it carries a darwin: segment -- correct the ruling or remove the segment"
@@ -2263,8 +2346,8 @@ function Get-DarwinSegmentRefusal {
         return "it was read at the pin and did not bank (osx-arm64 $($a.status), osx-x64 $($x.status), agree $($a.agree)/$($x.agree)), but still carries a darwin: segment from an earlier hop -- re-read it at the pin or remove the segment"
     }
 
-    $divergent = Get-DarwinDisclosedDivergent $a
-    $want = "$($a.matched)" + $(if ($divergent -ne 0) { " + $divergent" } else { '' })
+    $divergent = if ($null -ne $archStrict) { $archStrict.Disclosed } else { Get-DarwinDisclosedDivergent $a }
+    $want = if ($null -ne $archStrict) { $archStrict.Text } else { "$($a.matched)" + $(if ($divergent -ne 0) { " + $divergent" } else { '' }) }
     # SUPERSEDED (COORD, 2026-11-03, bank seats 1 and 2): a reading that banked K > 0 disclosures cannot hold where the
     # row's manifest can account for fewer than K in scope on darwin, so the row owes no segment until the re-pass
     # re-reads it, and must not carry one. No manifest is ceiling 0, the same rule. A K = 0 reading is never
@@ -2276,7 +2359,7 @@ function Get-DarwinSegmentRefusal {
     }
     if ($null -eq $Segment) { return "it banked at the pin on both RIDs (darwin: $want) and carries no darwin: segment" }
     if (-not $Segment.Applicable) { return "it banked at the pin on both RIDs (darwin: $want) and carries darwin: n/a" }
-    $have = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
+    $have = Format-DarwinSegment $Segment
     if ($have -cne $want) { return "its darwin: $have is not the pin's reading, darwin: $want" }
     return $null
 }
@@ -2287,7 +2370,10 @@ function Get-DarwinSegmentRefusal {
 # reread/. The reading of record is the row's LATEST wave, by this DECLARED order and never by file time; within
 # that wave it must still be one line per RID. A subdirectory not declared here is refused by name, so a new wave
 # cannot be read in an undeclared order.
-$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread')
+# 'native-oracle' (C1, 2026-11-07, arch-strict banking, COORD ruling (1)): readings taken after batch 208 moved the
+# osx-arm64 oracle to native arm64 (-test-oracle-goarch), so a row's two RIDs can legitimately differ. Its first file,
+# C1-NO1.tsv, is crypto/subtle from run 42261290086 (headSha 8fba1e6e7, over the AES seat's DIT disclosure).
+$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle')
 
 # THE EVIDENCE DIRECTORY (COORD, 2026-10-27, PLAN-release-1-26-10-2.md, Rulings 1). The ONE place the darwin evidence
 # is named: relative to the repository root, with `{pin}` standing for the corpus pin (src/version.props'
@@ -2359,6 +2445,52 @@ function New-DarwinFixtureRecord([string] $rid, [string] $status, [string] $agre
 $darwinBanked = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'yes' 98 2), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'yes' 98 2))
 $darwinSplit = @((New-DarwinFixtureRecord 'osx-arm64' 'failing' 'NO' 107 0), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'NO' 108 0))
 $darwinSeg = { param($n, $d) [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d } }
+
+# ARCH-STRICT, against fixtures (COORD ruling (1)). Evidence lines here carry the verdicts / divergent / new columns the
+# rule reads, as the real TSVs do. The shape is crypto/subtle's after the native-arm64 oracle: osx-arm64 7 matched + 3
+# disclosed (DISC against the banked 10), osx-x64 10 matched, agree no on both.
+function New-DarwinStrictRecord([string] $rid, [string] $status, [int] $verdicts, [int] $matched, [int] $divergent, [int] $new, [string] $agree = 'no') {
+    [PSCustomObject]@{ RID = $rid; status = $status; agree = $agree; verdicts = "$verdicts"; matched = "$matched"; disclosed = "$($divergent - $new)"; divergent = "$divergent"; new = "$new" }
+}
+$strictSeg = { param($n, $d, $rid, $orid, $on, $od) [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d; Rid = $rid; Other = $(if ($orid) { [PSCustomObject]@{ Rid = $orid; Expected = $on; Disclosed = $od } } else { $null }) } }
+$strictPair = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 10 7 3 0), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0))
+Assert-Equal 'arch-strict: the reading and its note are derived from the counts' '7 + 3 (osx-arm64; osx-x64: 10)' (Get-DarwinArchStrictReading $strictPair[0] $strictPair[1]).Text
+Assert-Equal 'arch-strict: a segment with the derived reading and note banks (not refused)' $null (Get-DarwinSegmentRefusal -Records $strictPair -Segment (& $strictSeg 7 3 'osx-arm64' 'osx-x64' 10 0))
+Assert-Equal 'arch-strict: the old symmetric segment (darwin: 10) is refused' $true ((Get-DarwinSegmentRefusal -Records $strictPair -Segment (& $strictSeg 10 0 $null $null 0 0)) -match 'darwin: 7 \+ 3 \(osx-arm64; osx-x64: 10\)')
+Assert-Equal 'arch-strict: the reading WITHOUT its note is refused (the note is derived, never optional)' $true ($null -ne (Get-DarwinSegmentRefusal -Records $strictPair -Segment (& $strictSeg 7 3 $null $null 0 0)))
+Assert-Equal 'arch-strict: a hand-set note that the evidence does not produce is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $strictPair -Segment (& $strictSeg 7 3 'osx-arm64' 'osx-x64' 9 1)))
+Assert-Equal 'arch-strict: banked with no segment is refused' $true ((Get-DarwinSegmentRefusal -Records $strictPair -Segment $null) -match 'carries no darwin: segment')
+$strictOrder = @((New-DarwinStrictRecord 'osx-arm64' 'validated' 12 12 0 0), (New-DarwinStrictRecord 'osx-x64' 'DISC' 12 10 2 0))
+Assert-Equal 'arch-strict: the banked RID is the one carrying the disclosures, whichever it is' '10 + 2 (osx-x64; osx-arm64: 12)' (Get-DarwinArchStrictReading $strictOrder[0] $strictOrder[1]).Text
+$strictBoth = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 12 7 5 0), (New-DarwinStrictRecord 'osx-x64' 'DISC' 12 9 3 0))
+Assert-Equal 'arch-strict: a note reading with its own disclosures' '7 + 5 (osx-arm64; osx-x64: 9 + 3)' (Get-DarwinArchStrictReading $strictBoth[0] $strictBoth[1]).Text
+# The refusals: each must leave the row unbanked, so a segment it carries is refused and no segment is not.
+$strictUndisclosed = @((New-DarwinStrictRecord 'osx-arm64' 'FAIL' 10 7 3 1), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0))
+$strictNewOnly = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 10 7 3 1), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0))
+$strictVerdicts = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 11 7 3 0), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0))
+$strictUnbalanced = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 10 6 3 0), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0))
+# The case only the new = 0 check decides: an undisclosed divergence on BOTH RIDs keeps the sums balanced (7 + 2 = 8 + 1),
+# so neither the status nor the count identity refuses it. Statuses are planted as DISC to isolate that check (a real
+# sweep reads such a row FAIL as well). Found by the red control: without this case, dropping the check kept every
+# fixture green.
+$strictNewBoth = @((New-DarwinStrictRecord 'osx-arm64' 'DISC' 10 7 3 1), (New-DarwinStrictRecord 'osx-x64' 'DISC' 10 8 2 1))
+foreach ($case in @(
+        @('an undisclosed divergence (FAIL, new 1) on one RID', $strictUndisclosed),
+        @('new 1 under a DISC status', $strictNewOnly),
+        @('unequal verdicts', $strictVerdicts),
+        @('an unbalanced count (the shortfall is not wholly disclosed)', $strictUnbalanced),
+        @('an undisclosed divergence on BOTH RIDs with the counts still balanced', $strictNewBoth))) {
+    Assert-Equal "arch-strict refuses $($case[0]): no reading" $true ($null -eq (Get-DarwinArchStrictReading $case[1][0] $case[1][1]))
+    Assert-Equal "arch-strict refuses $($case[0]): a segment it carries is refused" $true ($null -ne (Get-DarwinSegmentRefusal -Records $case[1] -Segment (& $strictSeg 7 3 'osx-arm64' 'osx-x64' 10 0)))
+    Assert-Equal "arch-strict refuses $($case[0]): no segment is not refused" $null (Get-DarwinSegmentRefusal -Records $case[1] -Segment $null)
+}
+Assert-Equal 'arch-strict: a line without the verdicts/divergent/new columns never qualifies' $true ($null -eq (Get-DarwinArchStrictReading (New-DarwinFixtureRecord 'osx-arm64' 'validated' 'no' 7 3) (New-DarwinFixtureRecord 'osx-x64' 'validated' 'no' 10 0)))
+$strictEqual = @((New-DarwinStrictRecord 'osx-arm64' 'validated' 10 10 0 0 'yes'), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0 'yes'))
+Assert-Equal 'arch-strict: equal counts bank on the plain path, as before' $null (Get-DarwinSegmentRefusal -Records $strictEqual -Segment (& $strictSeg 10 0 $null $null 0 0))
+Assert-Equal 'arch-strict: equal counts carrying a note are refused (no note without a difference)' $true ($null -ne (Get-DarwinSegmentRefusal -Records $strictEqual -Segment (& $strictSeg 10 0 'osx-arm64' 'osx-x64' 10 0)))
+Assert-Equal 'arch-strict: equal counts that DISAGREE still refuse (the arch-strict path never waives agree for equal counts)' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinStrictRecord 'osx-arm64' 'validated' 10 10 0 0), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0)) -Segment (& $strictSeg 10 0 $null $null 0 0)))
+Assert-Equal 'arch-strict: a ceiling below the banked disclosures supersedes it, as for any + K reading' $null (Get-DarwinSegmentRefusal -Records $strictPair -Segment $null -Ceiling 2)
+
 Assert-Equal 'darwin segment age: a banked row whose segment equals the reading is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 2))
 Assert-Equal 'darwin segment age: a banked row whose segment differs is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 0)))
 Assert-Equal 'darwin segment age: a banked row with no segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment $null))

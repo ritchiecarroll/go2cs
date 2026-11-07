@@ -3930,6 +3930,13 @@ this date.
    - **A row banks a `darwin:` annotation only when the two RIDs agree verdict for verdict.** The annotation is the
      measured count read from the row's own artifacts. The sweep's count red against the windows bank is the
      reading's signal, never a stop and never the reading.
+   - **Amended 2026-11-07 (C1; COORD ruling (1), arch-strict darwin banking).** Since the oracle runs at each RID's own
+     arch (`-test-oracle-goarch`, batch 208), the two RIDs can legitimately read different counts. Such a row banks
+     only when the WHOLE difference is disclosed on one RID: both comparisons validated with nothing undisclosed,
+     equal verdicts, and matched + disclosed-divergent equal across the RIDs. It banks that RID's reading, with the
+     other RID's reading as a derived note, e.g. `darwin: 7 + 3 (osx-arm64; osx-x64: 10)`. The sweep reads the note
+     on the RID it names. The rule lives in `src/check-roster-format.ps1` section 2h (`Get-DarwinArchStrictReading`)
+     and in `annotate_darwin.py`; the note is derived from the evidence and never set by hand.
    - **Every darwin-eligible row is re-read at the new release.** An annotation from the outgoing release is
      re-derived, never carried. Platform parity is a standing owner goal, so removal is not the default (COORD, Q4).
    - **The closing checks gain two darwin terms**, beside the linux ones in close step 11: every numeric `darwin:`
