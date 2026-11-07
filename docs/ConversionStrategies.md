@@ -5501,7 +5501,7 @@ Calling the constraint's methods on the type parameter works as in Go. A generic
 only where its body uses the parameter as that interface, as `totalArea` does; otherwise the clause is left
 out, because it would refuse a pointer type argument (see *A pointer type argument goes in through adapters*
 below):
-<!-- clause dropped when unneeded: src/go2cs/methodSetConstraintNeed.go:17-41 `So the clause is emitted only where the body NEEDS it`, read at src/go2cs/constraintOperations.go:1515 `!v.methodSetConstraintNeeded(fn, i)` -->
+<!-- clause dropped when unneeded: src/go2cs/methodSetConstraintNeed.go:17-41 `So the clause is emitted only where the body NEEDS it`, read at src/go2cs/constraintOperations.go:1518 `!v.methodSetConstraintNeeded(fn, i)` -->
 
 <!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:12-59 -->
 ```go
