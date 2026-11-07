@@ -1055,7 +1055,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // above does not cover -- and only where the same rule that decides the direct form holds
         // (ReinterpretAliasing.HoldsForRoot, over the same root). A pinned real address (arm 2b) is not
         // the box's token and keeps its native box; a pair the direct form refuses keeps today's carrier.
-        if (resolved is not null && ManagedPointerTokens.CurrentToken(resolved) == (nuint)value.Value &&
+        // A NATIVE-backed box is excluded first, as IsOrderTokenAt excludes it: its order token IS its real
+        // address, reflect registers that number too, and it keeps the native-address route below.
+        if (resolved is IGoReflectBox { NativeAddress: 0 } && ManagedPointerTokens.CurrentToken(resolved) == (nuint)value.Value &&
             ReinterpretAliasing.UltimateRoot(resolved) is IReinterpretSource root &&
             ReinterpretAliasing.HoldsForRoot(root, typeof(T), Unsafe.SizeOf<T>(), RuntimeHelpers.IsReferenceOrContainsReferences<T>()))
         {
