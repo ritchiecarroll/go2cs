@@ -69,12 +69,27 @@
     <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
   </PropertyGroup>
 
-  <!-- Enable native compiled output optimizations -->
-  <PropertyGroup>
+  <!-- Enable native compiled output optimizations. Publishing is an APPLICATION operation, so these
+       are scoped off Library exactly as csproj-template.xml scopes them, for the reason its comment
+       gives. golib sets no OutputType, and the SDK defaults it to Library before this body is read,
+       so the condition holds here as written. Unconditional, they broke a consumer that references
+       golib as a local project (plain -recurse, no -recurse=nuget): `dotnet publish -c Release -r
+       win-x64` trimmed golib as its own root and failed with IL1034 ("does not have entry point")
+       and NETSDK1144. A package-built consumer never reaches this file, which is why no release
+       measurement saw it. -->
+  <PropertyGroup Condition="'$(OutputType)'!='Library'">
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <!-- The one thing the unconditional PublishTrimmed did that golib WANTS: the SDK derives
+       EnableTrimAnalyzer from it at build time, and golib's IL#### trim warnings are a to-do list
+       with an owner (see NoWarn above), unlike the converted corpus's. Stated on its own, so the
+       analysis is unchanged by the publish guard. -->
+  <PropertyGroup>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
