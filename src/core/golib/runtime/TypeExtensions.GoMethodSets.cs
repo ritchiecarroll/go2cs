@@ -487,99 +487,106 @@ public static partial class TypeExtensions
     /// </remarks>
     internal static List<MethodInfo> GetGoMethodSetCandidates(Type valueElement, bool valueIsPointer)
     {
-        return s_goMethodSetCandidates.GetOrAdd((valueElement, valueIsPointer), static key =>
+        return s_goMethodSetCandidates.GetOrAdd((valueElement, valueIsPointer), static key => CollectGoMethodSetCandidates(key.element, key.isPointer, null));
+    }
+
+    /// <summary>
+    /// The candidates of <see cref="GetGoMethodSetCandidates"/>, uncached, read from <paramref name="source"/>, or, when
+    /// it is <c>null</c>, from the hosts of the homes <paramref name="valueElement"/> can match: a receiver element
+    /// matches only if it is the element, shares its generic definition, or is assignable from it
+    /// (ReceiverElementMatches), and <see cref="ExtensionHomesOf"/> holds the home of every such receiver.
+    /// </summary>
+    internal static List<MethodInfo> CollectGoMethodSetCandidates(Type valueElement, bool valueIsPointer, IReadOnlyList<(MethodInfo, Type)>? source)
+    {
+        IReadOnlyList<(MethodInfo method, Type receiver)> allExtensionMethods = source ?? GetExtensionMethodsHomedIn(ExtensionHomesOf(valueElement));
+        List<MethodInfo> candidates = [];
+
+        foreach ((MethodInfo method, Type receiver) in allExtensionMethods)
         {
-            (Type valueElement, bool valueIsPointer) = key;
-            (MethodInfo method, Type receiver)[] allExtensionMethods = GetExtensionMethods();
-            List<MethodInfo> candidates = [];
+            Type receiverType = receiver.IsByRef ? receiver.GetElementType()! : receiver;
+            ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
 
-            foreach ((MethodInfo method, Type receiver) in allExtensionMethods)
+            // The receiver match first: it is a type comparison, and the pointer-receiver rule below reads custom
+            // attributes, which cost far more (under Native AOT each read decodes reflection metadata). Both are
+            // pure filters, so their order changes only how many methods pay the attribute reads: those of the
+            // asked type, not every method of every scanned package.
+            if (!ReceiverElementMatches(receiverElement, valueElement))
+                continue;
+
+            // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
+            // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
+            // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
+            // the line above erases the latter's pointer-ness, so ask the receiver itself
+            // (IsPointerSetByRefReceiver). A `this ref X` receiver marked [GoCopyBound] is the third
+            // shape, and it IS a value-set method: the forwarder of a pointer-receiver method
+            // promoted through an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader).
+            // It stays in the set here and is bound through a COPY of the receiver (see
+            // IsCopyBoundReceiver).
+            if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
+                continue;
+
+            // A VALUE method's ж<X> twin (go2cs-gen's `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`) is
+            // the same Go method as its original, already a candidate of the *X set, and never a pointer receiver:
+            // Go has one method per name. Only the original is a candidate, so the table, the probe and the binder
+            // see one shape of it, and reflect's call through a nil *X raises Go's panicwrap as it did before the
+            // twin existed.
+            if (receiverIsPointer && !receiver.IsByRef && IsValueMethodTwin(method, receiverElement))
+                continue;
+
+            // A method of a Go GENERIC type is emitted as a generic extension method, and the scan
+            // finds its OPEN definition (`String<K, V>(this Pair<K, V>)`). Every consumer of this
+            // list binds what it is handed, and an open method binds nothing: reflect's CreateDelegate
+            // threw, and the shell tiers missed. So it is closed HERE, once, over the value's own
+            // type arguments (CloseGoMethod), and an open method never leaves this list.
+            if (method.ContainsGenericParameters)
             {
-                Type receiverType = receiver.IsByRef ? receiver.GetElementType()! : receiver;
-                ResolveReceiverElement(receiverType, out Type receiverElement, out bool receiverIsPointer);
-
-                // The receiver match first: it is a type comparison, and the pointer-receiver rule below reads custom
-                // attributes, which cost far more (under Native AOT each read decodes reflection metadata). Both are
-                // pure filters, so their order changes only how many methods pay the attribute reads: those of the
-                // asked type, not every method of every scanned package.
-                if (!ReceiverElementMatches(receiverElement, valueElement))
+                // golib's own generic extension methods (`slice<T>(this in slice<T>)`) are plumbing,
+                // never a Go method: golib is not a converted package.
+                if (method.DeclaringType?.Assembly == typeof(TypeExtensions).Assembly)
                     continue;
 
-                // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
-                // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
-                // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
-                // the line above erases the latter's pointer-ness, so ask the receiver itself
-                // (IsPointerSetByRefReceiver). A `this ref X` receiver marked [GoCopyBound] is the third
-                // shape, and it IS a value-set method: the forwarder of a pointer-receiver method
-                // promoted through an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader).
-                // It stays in the set here and is bound through a COPY of the receiver (see
-                // IsCopyBoundReceiver).
-                if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
+                // A pointer-receiver method's `this ref X` original is closed through its ж<X> twin,
+                // which is a candidate of its own. A copy-bound one is a VALUE-set method with no
+                // twin, so it is closed itself.
+                if (receiver.IsByRef && !IsCopyBoundReceiver(method, out _))
                     continue;
 
-                // A VALUE method's ж<X> twin (go2cs-gen's `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`) is
-                // the same Go method as its original, already a candidate of the *X set, and never a pointer receiver:
-                // Go has one method per name. Only the original is a candidate, so the table, the probe and the binder
-                // see one shape of it, and reflect's call through a nil *X raises Go's panicwrap as it did before the
-                // twin existed.
-                if (receiverIsPointer && !receiver.IsByRef && IsValueMethodTwin(method, receiverElement))
+                // A Go method declares no type parameters of its own, so each of the emitted method's comes from
+                // its receiver. One the receiver does not carry (the type-assertion forms `_<T>(this X)`) makes
+                // the method something other than a Go method.
+                if (!ReceiverCarriesEveryTypeParameter(method, receiverElement))
                     continue;
 
-                // A method of a Go GENERIC type is emitted as a generic extension method, and the scan
-                // finds its OPEN definition (`String<K, V>(this Pair<K, V>)`). Every consumer of this
-                // list binds what it is handed, and an open method binds nothing: reflect's CreateDelegate
-                // threw, and the shell tiers missed. So it is closed HERE, once, over the value's own
-                // type arguments (CloseGoMethod), and an open method never leaves this list.
-                if (method.ContainsGenericParameters)
-                {
-                    // golib's own generic extension methods (`slice<T>(this in slice<T>)`) are plumbing,
-                    // never a Go method: golib is not a converted package.
-                    if (method.DeclaringType?.Assembly == typeof(TypeExtensions).Assembly)
-                        continue;
-
-                    // A pointer-receiver method's `this ref X` original is closed through its ж<X> twin,
-                    // which is a candidate of its own. A copy-bound one is a VALUE-set method with no
-                    // twin, so it is closed itself.
-                    if (receiver.IsByRef && !IsCopyBoundReceiver(method, out _))
-                        continue;
-
-                    // A Go method declares no type parameters of its own, so each of the emitted method's comes from
-                    // its receiver. One the receiver does not carry (the type-assertion forms `_<T>(this X)`) makes
-                    // the method something other than a Go method.
-                    if (!ReceiverCarriesEveryTypeParameter(method, receiverElement))
-                        continue;
-
-                    candidates.Add(CloseGoMethod(method, receiverElement, receiverIsPointer, valueElement));
-                    continue;
-                }
-
-                candidates.Add(method);
+                candidates.Add(CloseGoMethod(method, receiverElement, receiverIsPointer, valueElement));
+                continue;
             }
 
-            // A RUNTIME-MINTED struct carries its promoted methods as its OWN declared statics, not
-            // as extension methods, so the scan above cannot see them: nothing writes an extension
-            // method for a type that did not exist when the process started. GoStructSynthesis emits
-            // them receiver-first (argument 0 is the struct), which is the same shape an extension
-            // method has, so they drop into the candidate list unchanged.
-            //
-            // They belong HERE, in the candidate source, and not in the entries table alone. Both
-            // GetGoMethodSetEntries and StructurallyImplements read this list — that is what the ONE
-            // SOURCE RULE means — and a promotion added downstream in the table gave
-            // reflect.Type.MethodByName the right answer while an interface assertion on the same
-            // type still answered MISS. Measured, on TestStructOfEmbeddedIfaceMethodCall.
-            if (key.element.IsValueType && key.element.IsDynamicType())
+            candidates.Add(method);
+        }
+
+        // A RUNTIME-MINTED struct carries its promoted methods as its OWN declared statics, not
+        // as extension methods, so the scan above cannot see them: nothing writes an extension
+        // method for a type that did not exist when the process started. GoStructSynthesis emits
+        // them receiver-first (argument 0 is the struct), which is the same shape an extension
+        // method has, so they drop into the candidate list unchanged.
+        //
+        // They belong HERE, in the candidate source, and not in the entries table alone. Both
+        // GetGoMethodSetEntries and StructurallyImplements read this list — that is what the ONE
+        // SOURCE RULE means — and a promotion added downstream in the table gave
+        // reflect.Type.MethodByName the right answer while an interface assertion on the same
+        // type still answered MISS. Measured, on TestStructOfEmbeddedIfaceMethodCall.
+        if (valueElement.IsValueType && valueElement.IsDynamicType())
+        {
+            foreach (MethodInfo declared in valueElement.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
             {
-                foreach (MethodInfo declared in key.element.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
-                {
-                    ParameterInfo[] parameters = declared.GetParameters();
+                ParameterInfo[] parameters = declared.GetParameters();
 
-                    if (parameters.Length > 0 && parameters[0].ParameterType == key.element)
-                        candidates.Add(declared);
-                }
+                if (parameters.Length > 0 && parameters[0].ParameterType == valueElement)
+                    candidates.Add(declared);
             }
+        }
 
-            return candidates;
-        });
+        return candidates;
     }
 
     /// <summary>

@@ -76,6 +76,19 @@ namespace go.golib;
 //   methods, and Go's predeclared types have empty method sets. The name prefix `go.golib.` alone
 //   missed golib's own assembly name, `golib`, so a builtin uint64 "had" Rsh.
 //
+// A QUESTION READS ONLY THE HOMES IT CAN MATCH
+//   The walk finds the host classes and, for each, the HOMES its methods extend: the assembly each
+//   receiver belongs to (ExtensionHome), read from the method signatures without loading a type. A
+//   question about one type reads only the hosts of the homes a receiver matching it can have
+//   (ExtensionHomesOf: the type's, its bases', its interfaces' and the core library's), so start-up
+//   pays GetParameters for the asked packages' methods, not for every method of every package. Both
+//   consumers then filter exactly as they did over the whole scan, so each answer is the same subset in
+//   the same order (GolibTests' ExtensionReceiverScopeTests). The home is the RECEIVER's, never the
+//   declaring assembly's: a `-tests` host declares methods on its package's types (whitebox test files),
+//   and those stay in that package's answers. Under Native AOT the build-time list carries each host's
+//   foreign homes (GoExtensionHost.Homes) under a GoExtensionHostList(HomesListed) marker; a host whose
+//   homes are not listed is read at scan time (docs/phase4/DESIGN-extension-receiver-scope.md).
+//
 // CACHE INVALIDATION IS SHARED WITH THE SIBLING FILE — READ THIS BEFORE ADDING A CACHE
 //   Assemblies load LATE. A converted program's package assemblies are not all present when the
 //   first type question is asked, so any answer computed from the scan can be stale the moment
@@ -109,13 +122,127 @@ namespace go.golib;
 // ---------------------------------------------------------------------------------------------
 public static partial class TypeExtensions
 {
-    // The published scan: the extension methods found, every assembly visited to find them (skipped ones
-    // included, so none is visited twice), and the load generation the scan covers.
-    private sealed class ExtensionScan((MethodInfo, Type)[] methods, ImmutableHashSet<Assembly> visited, int generation)
+    // One class that can declare extension methods, found by the scan's walk, and the HOMES its methods extend: the
+    // assemblies their receivers belong to (ExtensionHome). Its methods are read only when a question asks one of
+    // those homes, then kept: an assembly's extension methods never change after it loads.
+    internal sealed class ExtensionHost
     {
-        public readonly (MethodInfo, Type)[] Methods = methods;
+        private readonly Module? m_module;
+        private readonly int m_token;
+        private Type? m_type;
+        private (MethodInfo method, Type receiver, Assembly? home)[]? m_methods;
+
+        // A class found in the metadata tables, loaded as a type only when its methods are read.
+        public ExtensionHost(Assembly assembly, Module module, int token, Assembly[] homes, bool anyHome)
+        {
+            Assembly = assembly;
+            m_module = module;
+            m_token = token;
+            Homes = homes;
+            AnyHome = anyHome;
+        }
+
+        // A class the scan already holds as a type, with the homes its methods extend; or, given its methods, a class
+        // read now.
+        public ExtensionHost(Type type, Assembly[] homes, bool anyHome, (MethodInfo, Type, Assembly?)[]? methods = null)
+        {
+            Assembly = type.Assembly;
+            m_type = type;
+            Homes = homes;
+            AnyHome = anyHome;
+            m_methods = methods;
+        }
+
+        /// <summary>The assembly that declares the class.</summary>
+        public Assembly Assembly { get; }
+
+        /// <summary>The assemblies the class's receivers belong to; a class listed without its methods' homes known
+        /// names its own.</summary>
+        public Assembly[] Homes { get; }
+
+        /// <summary>Whether a receiver belongs to no assembly (a type parameter, an array): read for every question.</summary>
+        public bool AnyHome { get; }
+
+        public Type Type => m_type ??= m_module!.ResolveType(m_token);
+
+        // Whether a question that can match only receivers homed in `homes` must read this class.
+        public bool Extends(IReadOnlySet<Assembly> homes)
+        {
+            if (AnyHome)
+                return true;
+
+            foreach (Assembly home in Homes)
+            {
+                if (homes.Contains(home))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // The class's extension methods, each with its receiver and the receiver's home, in GetMethods order.
+        public (MethodInfo method, Type receiver, Assembly? home)[] Methods
+        {
+            get
+            {
+                if (Volatile.Read(ref m_methods) is { } methods)
+                    return methods;
+
+                Type type = Type;
+                HostReadProbeForTest?.Invoke(type);
+                methods = ReadExtensionMethods(type);
+
+                // Two threads may read one class; both read the same methods, and the first published is kept.
+                return Interlocked.CompareExchange(ref m_methods, methods, null) ?? methods;
+            }
+        }
+
+        // A class read now, its homes taken from its methods; null when it declares none.
+        public static ExtensionHost? Read(Type type)
+        {
+            (MethodInfo method, Type receiver, Assembly? home)[] methods = ReadExtensionMethods(type);
+
+            if (methods.Length == 0)
+                return null;
+
+            Assembly[] homes = [.. methods.Where(static entry => entry.home is not null).Select(static entry => entry.home!).Distinct()];
+
+            return new ExtensionHost(type, homes, methods.Any(static entry => entry.home is null), methods);
+        }
+
+        private static (MethodInfo method, Type receiver, Assembly? home)[] ReadExtensionMethods(Type type) =>
+        [
+            .. DeclaredExtensionMethods(type).Select(static method =>
+            {
+                Type receiver = method.GetExtensionTargetType();
+                return (method, receiver, ExtensionHome(receiver));
+            })
+        ];
+    }
+
+    // The published scan: the extension hosts found, every assembly visited to find them (skipped ones included, so
+    // none is visited twice), and the load generation the scan covers.
+    private sealed class ExtensionScan(ExtensionHost[] hosts, ImmutableHashSet<Assembly> visited, int generation)
+    {
+        private (MethodInfo, Type)[]? m_methods;
+
+        public readonly ExtensionHost[] Hosts = hosts;
         public readonly ImmutableHashSet<Assembly> Visited = visited;
         public readonly int Generation = generation;
+
+        // Every extension method of every host, in scan order: what a question no home narrows reads.
+        public (MethodInfo, Type)[] Methods
+        {
+            get
+            {
+                if (Volatile.Read(ref m_methods) is { } methods)
+                    return methods;
+
+                methods = [.. Hosts.SelectMany(static host => host.Methods.Select(static entry => (entry.method, entry.receiver)))];
+
+                return Interlocked.CompareExchange(ref m_methods, methods, null) ?? methods;
+            }
+        }
     }
 
     private static ExtensionScan? s_extensionScan;
@@ -127,6 +254,10 @@ public static partial class TypeExtensions
     // test can hold a scan in flight. Null in every program -- no behaviour and no allocation when
     // unset. Never wire product code to it.
     internal static Action<Assembly>? ScanProbeForTest;
+
+    // TEST SEAM, GolibTests only: called when the scan reads a host class's methods, so a test can see which classes a
+    // question read. Null in every program. Never wire product code to it.
+    internal static Action<Type>? HostReadProbeForTest;
 
     // TEST SEAM, GolibTests only: the assemblies the scan sees in place of AppDomain.GetAssemblies(), so a test
     // can stage an assembly "loading" mid-scan. Null in every program. Never wire product code to it.
@@ -149,6 +280,65 @@ public static partial class TypeExtensions
     // published scan is returned, and the next caller visits what loaded meanwhile.
     private const int MaxScanAttempts = 4;
 
+    /// <summary>
+    /// Every extension method of every converted assembly loaded, with its receiver type: the whole scan, which reads
+    /// every host class. A question about one type reads only the hosts its homes need
+    /// (<see cref="GetExtensionMethodsHomedIn"/>).
+    /// </summary>
+    internal static (MethodInfo, Type)[] GetExtensionMethods()
+    {
+        ExtensionScan scan = WalkExtensionHosts();
+
+        // Reading a host's methods resolves their parameter types, which can load an assembly: read again from a
+        // walk that visited it.
+        for (int attempt = 1; attempt < MaxScanAttempts; attempt++)
+        {
+            int generation = scan.Generation;
+            (MethodInfo, Type)[] methods = scan.Methods;
+
+            if (Volatile.Read(ref s_extensionMethodsGeneration) == generation)
+                return methods;
+
+            scan = WalkExtensionHosts();
+        }
+
+        return scan.Methods;
+    }
+
+    /// <summary>
+    /// The extension methods whose receiver belongs to one of <paramref name="homes"/> (<see cref="ExtensionHome"/>)
+    /// or to no assembly, with their receiver types, in scan order: the subset of <see cref="GetExtensionMethods()"/>
+    /// a question about a type whose homes are <paramref name="homes"/> can match (<see cref="ExtensionHomesOf"/>),
+    /// read without reading any other host class.
+    /// </summary>
+    internal static IReadOnlyList<(MethodInfo method, Type receiver)> GetExtensionMethodsHomedIn(IReadOnlySet<Assembly> homes)
+    {
+        List<(MethodInfo method, Type receiver)> found = [];
+        ExtensionScan scan = WalkExtensionHosts();
+
+        for (int attempt = 1; ; attempt++)
+        {
+            foreach (ExtensionHost host in scan.Hosts)
+            {
+                if (!host.Extends(homes))
+                    continue;
+
+                foreach ((MethodInfo method, Type receiver, Assembly? home) in host.Methods)
+                {
+                    if (home is null || homes.Contains(home))
+                        found.Add((method, receiver));
+                }
+            }
+
+            // Reading a host's methods can load an assembly, as above.
+            if (attempt == MaxScanAttempts || Volatile.Read(ref s_extensionMethodsGeneration) == scan.Generation)
+                return found;
+
+            scan = WalkExtensionHosts();
+            found.Clear();
+        }
+    }
+
     // NO LOCK, on either side -- and that is the rule this file keeps. The runtime raises AssemblyLoad
     // SYNCHRONOUSLY while holding its own type-load lock, and a scan's Assembly.GetTypes() can wait on
     // that same lock. When the scan held a golib lock across GetTypes() and ClearTypeCaches (the
@@ -157,15 +347,15 @@ public static partial class TypeExtensions
     // only bumps a generation and clears the per-type caches; the scan runs outside any lock and
     // publishes with CompareExchange, only over the scan it extended (a scan that lost that race extends
     // the winner on its next attempt). Two concurrent scans may both run; that duplicates work and is
-    // harmless.
+    // harmless. A host's methods are read the same way (ExtensionHost.Methods).
     //
     // THE RULE FOR EVERY HANDLER: a golib AssemblyLoad / TypeResolve / AssemblyResolve handler must NEVER
     // wait on a lock that any code can hold across a type load.
-    internal static (MethodInfo, Type)[] GetExtensionMethods()
+    private static ExtensionScan WalkExtensionHosts()
     {
         if (Volatile.Read(ref s_extensionScan) is { } cached &&
             cached.Generation == Volatile.Read(ref s_extensionMethodsGeneration))
-            return cached.Methods;
+            return cached;
 
         // Register assembly load event only once, used to clear the per-type caches and move the generation
         if (Interlocked.CompareExchange(ref s_registeredAssemblyLoadEvent, 1, 0) == 0)
@@ -179,11 +369,11 @@ public static partial class TypeExtensions
             ExtensionScan? extended = Volatile.Read(ref s_extensionScan);
 
             if (extended is not null && extended.Generation == generation)
-                return extended.Methods;
+                return extended;
 
             ImmutableHashSet<Assembly> visited = extended?.Visited ?? [];
             ImmutableHashSet<Assembly>.Builder? nowVisited = null;
-            List<(MethodInfo, Type)> found = [];
+            List<ExtensionHost> found = [];
 
             foreach (Assembly assembly in AssemblySourceForTest?.Invoke() ?? AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -191,16 +381,16 @@ public static partial class TypeExtensions
                     continue;
 
                 ScanProbeForTest?.Invoke(assembly);
-                LoadAssemblyExtensionMethods(assembly, found);
+                LoadAssemblyExtensionHosts(assembly, found);
                 (nowVisited ??= visited.ToBuilder()).Add(assembly);
             }
 
-            (MethodInfo, Type)[] methods = extended?.Methods ?? [];
+            ExtensionHost[] hosts = extended?.Hosts ?? [];
 
             if (found.Count > 0)
-                methods = methods.Concat(found).ToArray();
+                hosts = [.. hosts, .. found];
 
-            latest = new ExtensionScan(methods, nowVisited?.ToImmutable() ?? visited, generation);
+            latest = new ExtensionScan(hosts, nowVisited?.ToImmutable() ?? visited, generation);
 
             // Publish only over the scan this one extended: one that another caller published meanwhile is
             // extended on the next attempt instead.
@@ -208,12 +398,12 @@ public static partial class TypeExtensions
                 continue;
 
             if (Volatile.Read(ref s_extensionMethodsGeneration) == generation)
-                return latest.Methods;
+                return latest;
 
             // An assembly loaded while this scan ran: the next attempt visits only what loaded meanwhile.
         }
 
-        return latest?.Methods ?? [];
+        return latest!;
     }
 
     // TEST SEAM, GolibTests only: forget the published scan, so the next question scans from nothing.
@@ -228,7 +418,7 @@ public static partial class TypeExtensions
         // Since not all assemblies may be loaded when initial type caches are created, a load clears the
         // caches so they are recreated, and moves the generation so the next question visits the new
         // assembly. Called by the runtime while it holds its type-load lock, so it takes NO lock of golib's
-        // and does no scanning (see GetExtensionMethods).
+        // and does no scanning (see WalkExtensionHosts).
         Interlocked.Increment(ref s_extensionMethodsGeneration);
 
         s_typeExtensionMethods.Clear();
@@ -239,7 +429,7 @@ public static partial class TypeExtensions
         s_goInterfaceMethodEntries.Clear();
     }
 
-    private static void LoadAssemblyExtensionMethods(Assembly assembly, List<(MethodInfo, Type)> extensionMethods)
+    private static void LoadAssemblyExtensionHosts(Assembly assembly, List<ExtensionHost> hosts)
     {
         // A DYNAMIC assembly is one the bridge is BUILDING — go2cs.SynthesizedStructs, where
         // reflect.StructOf mints its synthesized struct types (GoStructSynthesis). Calling
@@ -273,9 +463,17 @@ public static partial class TypeExtensions
 
         Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");
 
-        foreach (Type type in ExtensionHostTypes(assembly) ?? ListedExtensionHosts(assembly) ?? assembly.GetTypes())
-        foreach (MethodInfo extensionMethod in DeclaredExtensionMethods(type))
-            extensionMethods.Add((extensionMethod, extensionMethod.GetExtensionTargetType()));
+        if ((WalkedExtensionHosts(assembly) ?? ListedExtensionHostEntries(assembly)) is { } known)
+        {
+            hosts.AddRange(known);
+            return;
+        }
+
+        foreach (Type type in assembly.GetTypes())
+        {
+            if (ExtensionHost.Read(type) is { } host)
+                hosts.Add(host);
+        }
     }
 
     // The extension methods a type declares, in the shape the converter emits them: a sealed, non-nested,
@@ -290,23 +488,80 @@ public static partial class TypeExtensions
     }
 
     /// <summary>
-    /// The types of <paramref name="assembly"/> that can declare an extension method, read from its metadata
-    /// tables without loading any other type: the sealed, non-nested, non-generic classes that carry
-    /// <see cref="ExtensionAttribute"/>, which C# puts on every class that declares an extension method. In
-    /// metadata order, which is the order <see cref="Assembly.GetTypes"/> returns them in.
+    /// The assembly an extension method's receiver belongs to, its HOME: the assembly of the receiver type, read
+    /// through a by-ref and through golib's <c>ж&lt;X&gt;</c> box to <c>X</c>, and of a generic type's definition.
+    /// A receiver no assembly holds — a type parameter, an array, a pointer — has none (<c>null</c>), and is read for
+    /// every question.
+    /// </summary>
+    /// <remarks>
+    /// Scoping by the RECEIVER's home, never by the declaring assembly, is what keeps a <c>-tests</c> host's methods
+    /// on its package's types (a whitebox test's <c>Generate</c> on <c>clientHelloMsg</c>) in that package's answers.
+    /// </remarks>
+    internal static Assembly? ExtensionHome(Type receiver)
+    {
+        if (receiver.IsByRef)
+            receiver = receiver.GetElementType()!;
+
+        while (receiver.IsGenericType && receiver.GetGenericTypeDefinition() == typeof(ж<>))
+            receiver = receiver.GetGenericArguments()[0];
+
+        if (receiver.IsGenericParameter || receiver.HasElementType || receiver.IsFunctionPointer)
+            return null;
+
+        return receiver.Assembly;
+    }
+
+    /// <summary>
+    /// The homes a question about <paramref name="type"/> can match: those of the type, of each type it derives from
+    /// and of each interface it implements, and the core library's (<c>object</c>, which every type converts to). An
+    /// extension method's receiver matches the type only if it is the type, shares its generic definition, or is
+    /// assignable from it, and every such receiver's <see cref="ExtensionHome"/> is among these.
+    /// </summary>
+    internal static HashSet<Assembly> ExtensionHomesOf(Type type)
+    {
+        HashSet<Assembly> homes = [typeof(object).Assembly];
+
+        for (Type? current = type; current is not null; current = current.BaseType)
+            add(current);
+
+        foreach (Type interfaceType in type.GetInterfaces())
+            add(interfaceType);
+
+        return homes;
+
+        void add(Type candidate)
+        {
+            if (ExtensionHome(candidate) is { } home)
+                homes.Add(home);
+        }
+    }
+
+    /// <summary>
+    /// The extension hosts of <paramref name="assembly"/>, read from its metadata tables without loading any type: the
+    /// sealed, non-nested, non-generic classes that carry <see cref="ExtensionAttribute"/>, which C# puts on every
+    /// class that declares an extension method, in metadata order (the order <see cref="Assembly.GetTypes"/> returns
+    /// them in), each with the homes its methods extend.
     /// </summary>
     /// <returns>
-    /// The types, or <c>null</c> when the assembly has no raw metadata (Native AOT); the caller then falls back
-    /// to <see cref="Assembly.GetTypes"/>.
+    /// The hosts, or <c>null</c> when the assembly has no raw metadata (Native AOT); the caller then reads the
+    /// build-time list (<see cref="ListedExtensionHostEntries"/>), or <see cref="Assembly.GetTypes"/>.
     /// </returns>
-    internal static unsafe IReadOnlyList<Type>? ExtensionHostTypes(Assembly assembly)
+    /// <remarks>
+    /// Each extension method's receiver is read from the first parameter of its signature. One the assembly defines
+    /// (read through a by-ref, golib's <c>ж&lt;X&gt;</c> and a generic instantiation) is homed here with no type load.
+    /// Any other is resolved through the runtime's binder, which follows type forwarders, and homed where its type
+    /// loads from. Only a <c>-tests</c> host's methods on its package's types take that path.
+    /// </remarks>
+    internal static unsafe IReadOnlyList<ExtensionHost>? WalkedExtensionHosts(Assembly assembly)
     {
         if (!assembly.TryGetRawMetadata(out byte* blob, out int length))
             return null;
 
         MetadataReader reader = new(blob, length);
         Module module = assembly.ManifestModule;
-        List<Type> hosts = [];
+        SignatureDecoder<ReceiverShape, object?> decoder = new(ReceiverShapeProvider.Instance, reader, null);
+        List<ExtensionHost> hosts = [];
+        List<Assembly> homes = [];
 
         foreach (TypeDefinitionHandle handle in reader.TypeDefinitions)
         {
@@ -315,54 +570,130 @@ public static partial class TypeExtensions
             if ((definition.Attributes & TypeAttributes.Sealed) == 0 ||
                 !definition.GetDeclaringType().IsNil ||
                 definition.GetGenericParameters().Count != 0 ||
-                !carriesExtensionAttribute(definition.GetCustomAttributes()))
+                !CarriesExtensionAttribute(reader, definition.GetCustomAttributes()))
                 continue;
 
-            hosts.Add(module.ResolveType(MetadataTokens.GetToken(handle)));
+            // RED: the homes are not read yet, so every host is read for every question.
+            bool anyHome = true;
+            homes.Clear();
+
+            hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome));
         }
 
         return hosts;
 
-        bool carriesExtensionAttribute(CustomAttributeHandleCollection attributes)
+        void addHome(Assembly home)
         {
-            foreach (CustomAttributeHandle attributeHandle in attributes)
+            if (!homes.Contains(home))
+                homes.Add(home);
+        }
+    }
+
+    /// <summary>
+    /// The types of <paramref name="assembly"/> that can declare an extension method, from its metadata tables
+    /// (<see cref="WalkedExtensionHosts"/>).
+    /// </summary>
+    /// <returns>
+    /// The types, or <c>null</c> when the assembly has no raw metadata (Native AOT).
+    /// </returns>
+    internal static IReadOnlyList<Type>? ExtensionHostTypes(Assembly assembly) =>
+        WalkedExtensionHosts(assembly)?.Select(static host => host.Type).ToArray();
+
+    // Whether a metadata attribute list holds C#'s ExtensionAttribute.
+    private static bool CarriesExtensionAttribute(MetadataReader reader, CustomAttributeHandleCollection attributes)
+    {
+        foreach (CustomAttributeHandle attributeHandle in attributes)
+        {
+            EntityHandle constructor = reader.GetCustomAttribute(attributeHandle).Constructor;
+
+            // ExtensionAttribute lives in the core library, so another assembly reaches its constructor
+            // through a member reference on a type reference. Only the core library itself defines it.
+            EntityHandle parent = constructor.Kind switch
             {
-                EntityHandle constructor = reader.GetCustomAttribute(attributeHandle).Constructor;
+                HandleKind.MemberReference =>
+                    reader.GetMemberReference((MemberReferenceHandle)constructor).Parent,
+                HandleKind.MethodDefinition =>
+                    reader.GetMethodDefinition((MethodDefinitionHandle)constructor).GetDeclaringType(),
+                _ => default
+            };
 
-                // ExtensionAttribute lives in the core library, so another assembly reaches its constructor
-                // through a member reference on a type reference. Only the core library itself defines it.
-                EntityHandle parent = constructor.Kind switch
-                {
-                    HandleKind.MemberReference =>
-                        reader.GetMemberReference((MemberReferenceHandle)constructor).Parent,
-                    HandleKind.MethodDefinition =>
-                        reader.GetMethodDefinition((MethodDefinitionHandle)constructor).GetDeclaringType(),
-                    _ => default
-                };
+            StringHandle name, space;
 
-                StringHandle name, space;
-
-                switch (parent.Kind)
-                {
-                    case HandleKind.TypeReference:
-                        TypeReference reference = reader.GetTypeReference((TypeReferenceHandle)parent);
-                        (name, space) = (reference.Name, reference.Namespace);
-                        break;
-                    case HandleKind.TypeDefinition:
-                        TypeDefinition local = reader.GetTypeDefinition((TypeDefinitionHandle)parent);
-                        (name, space) = (local.Name, local.Namespace);
-                        break;
-                    default:
-                        continue;
-                }
-
-                if (reader.StringComparer.Equals(name, nameof(ExtensionAttribute)) &&
-                    reader.StringComparer.Equals(space, typeof(ExtensionAttribute).Namespace!))
-                    return true;
+            switch (parent.Kind)
+            {
+                case HandleKind.TypeReference:
+                    TypeReference reference = reader.GetTypeReference((TypeReferenceHandle)parent);
+                    (name, space) = (reference.Name, reference.Namespace);
+                    break;
+                case HandleKind.TypeDefinition:
+                    TypeDefinition local = reader.GetTypeDefinition((TypeDefinitionHandle)parent);
+                    (name, space) = (local.Name, local.Namespace);
+                    break;
+                default:
+                    continue;
             }
 
-            return false;
+            if (reader.StringComparer.Equals(name, nameof(ExtensionAttribute)) &&
+                reader.StringComparer.Equals(space, typeof(ExtensionAttribute).Namespace!))
+                return true;
         }
+
+        return false;
+    }
+
+    // What the metadata walk needs to know of a receiver's signature type: whether the assembly itself defines it.
+    private enum ReceiverShape : byte
+    {
+        Other,
+        Defined,
+        Box // golib's ж<T>, before its instantiation is read through
+    }
+
+    // Reads a signature type as a ReceiverShape, loading no type: by-refs, modifiers and golib's ж<X> are read
+    // through, and a generic instantiation is its definition.
+    private sealed class ReceiverShapeProvider : ISignatureTypeProvider<ReceiverShape, object?>
+    {
+        public static readonly ReceiverShapeProvider Instance = new();
+
+        public ReceiverShape GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind) => ReceiverShape.Defined;
+
+        public ReceiverShape GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
+        {
+            TypeReference reference = reader.GetTypeReference(handle);
+
+            return reference.ResolutionScope.Kind == HandleKind.AssemblyReference &&
+                   reader.StringComparer.Equals(reference.Name, "ж`1") &&
+                   reader.StringComparer.Equals(reference.Namespace, "go") &&
+                   reader.StringComparer.Equals(reader.GetAssemblyReference((AssemblyReferenceHandle)reference.ResolutionScope).Name, "golib")
+                ? ReceiverShape.Box
+                : ReceiverShape.Other;
+        }
+
+        public ReceiverShape GetGenericInstantiation(ReceiverShape genericType, ImmutableArray<ReceiverShape> typeArguments) =>
+            genericType == ReceiverShape.Box && typeArguments.Length == 1 ? typeArguments[0] :
+            genericType == ReceiverShape.Defined ? ReceiverShape.Defined : ReceiverShape.Other;
+
+        public ReceiverShape GetByReferenceType(ReceiverShape elementType) => elementType;
+
+        public ReceiverShape GetModifiedType(ReceiverShape modifier, ReceiverShape unmodifiedType, bool isRequired) => unmodifiedType;
+
+        public ReceiverShape GetPinnedType(ReceiverShape elementType) => elementType;
+
+        public ReceiverShape GetTypeFromSpecification(MetadataReader reader, object? genericContext, TypeSpecificationHandle handle, byte rawTypeKind) => ReceiverShape.Other;
+
+        public ReceiverShape GetPrimitiveType(PrimitiveTypeCode typeCode) => ReceiverShape.Other;
+
+        public ReceiverShape GetSZArrayType(ReceiverShape elementType) => ReceiverShape.Other;
+
+        public ReceiverShape GetArrayType(ReceiverShape elementType, ArrayShape shape) => ReceiverShape.Other;
+
+        public ReceiverShape GetPointerType(ReceiverShape elementType) => ReceiverShape.Other;
+
+        public ReceiverShape GetFunctionPointerType(MethodSignature<ReceiverShape> signature) => ReceiverShape.Other;
+
+        public ReceiverShape GetGenericMethodParameter(object? genericContext, int index) => ReceiverShape.Other;
+
+        public ReceiverShape GetGenericTypeParameter(object? genericContext, int index) => ReceiverShape.Other;
     }
 
     /// <summary>
@@ -385,6 +716,43 @@ public static partial class TypeExtensions
         {
             if (listed.Add(attribute.Host))
                 hosts.Add(attribute.Host);
+        }
+
+        return hosts;
+    }
+
+    /// <summary>
+    /// The build-time list's hosts (<see cref="ListedExtensionHosts"/>), each with the homes its methods extend: its
+    /// own assembly and the homes its listing names. A class whose homes the list does not give — the whole list from
+    /// an older generator, or a class with a receiver no assembly holds — is read now, and its homes taken from its
+    /// methods.
+    /// </summary>
+    /// <returns>
+    /// The hosts, or <c>null</c> when the assembly carries no complete list.
+    /// </returns>
+    internal static IReadOnlyList<ExtensionHost>? ListedExtensionHostEntries(Assembly assembly)
+    {
+        if (assembly.GetCustomAttribute<GoExtensionHostListAttribute>() is not { } list)
+            return null;
+
+        List<ExtensionHost> hosts = [];
+        HashSet<Type> listed = [];
+
+        foreach (GoExtensionHostAttribute attribute in assembly.GetCustomAttributes<GoExtensionHostAttribute>())
+        {
+            if (!listed.Add(attribute.Host))
+                continue;
+
+            // RED: the listed homes are not read yet.
+            if (list.HomesListed && !attribute.AnyHome && attribute.Homes is null)
+            {
+                Assembly[] homes = [assembly, .. attribute.Homes.Select(static type => type.Assembly).Where(home => home != assembly).Distinct()];
+                hosts.Add(new ExtensionHost(attribute.Host, homes, false));
+            }
+            else if (ExtensionHost.Read(attribute.Host) is { } read)
+            {
+                hosts.Add(read);
+            }
         }
 
         return hosts;
@@ -479,43 +847,52 @@ public static partial class TypeExtensions
     /// </summary>
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>
     /// <returns>Enumeration of reflected method metadata of <paramref name="targetType"/> extension methods.</returns>
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
     public static MethodInfo[] GetExtensionMethods(this Type targetType)
     {
-        return s_typeExtensionMethods.GetOrAdd(targetType, _ =>
+        return s_typeExtensionMethods.GetOrAdd(targetType, static targetType => ExtensionMethodsOf(targetType, null));
+    }
+
+    /// <summary>
+    /// The extension methods of <paramref name="targetType"/> (<see cref="GetExtensionMethods(Type)"/>), uncached, read
+    /// from <paramref name="source"/>, or, when it is <c>null</c>, from the hosts of the homes the target can match.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification = global::go.GoTypeRegistry.AotReferenceTypeJustification)]
+    internal static MethodInfo[] ExtensionMethodsOf(Type targetType, IReadOnlyList<(MethodInfo, Type)>? source)
+    {
+        // Fix W (B1 §3.1): normalize a ж box at any base-chain depth to its ж<X> base BEFORE
+        // the generic-match split, so a per-kind subclass instance matches the extension
+        // methods registered against the box family (a no-op today — every box type IS its
+        // own ж<X>). @unsafe.Pointer is exempt and keeps its assignability route.
+        if (!typeof(IUnsafePointer).IsAssignableFrom(targetType) &&
+            GoReflect.TryBoxPointee(targetType, out Type? boxPointee) &&
+            !(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(ж<>)))
         {
-            (MethodInfo method, Type type)[] extensionMethods = GetExtensionMethods();
+            targetType = typeof(ж<>).MakeGenericType(boxPointee);
+        }
 
-            // Fix W (B1 §3.1): normalize a ж box at any base-chain depth to its ж<X> base BEFORE
-            // the generic-match split, so a per-kind subclass instance matches the extension
-            // methods registered against the box family (a no-op today — every box type IS its
-            // own ж<X>). @unsafe.Pointer is exempt and keeps its assignability route.
-            if (!typeof(IUnsafePointer).IsAssignableFrom(targetType) &&
-                GoReflect.TryBoxPointee(targetType, out Type? boxPointee) &&
-                !(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(ж<>)))
-            {
-                targetType = typeof(ж<>).MakeGenericType(boxPointee);
-            }
+        bool isGenericType = (targetType == typeof(ж<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
 
-            bool isGenericType = (targetType == typeof(ж<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
+        if (isGenericType)
+            targetType = targetType.GetGenericTypeDefinition();
 
-            if (isGenericType)
-                targetType = targetType.GetGenericTypeDefinition();
+        // A box's definition matches every box receiver, whatever its pointee's home: that question reads the
+        // whole scan.
+        IEnumerable<(MethodInfo method, Type type)> extensionMethods =
+            source ?? (targetType == typeof(ж<>) ? GetExtensionMethods() : GetExtensionMethodsHomedIn(ExtensionHomesOf(targetType)));
 
-            IEnumerable<MethodInfo> methods = isGenericType ?
-                extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
-                extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+        IEnumerable<MethodInfo> methods = isGenericType ?
+            extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
+            extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
 
-            return methods.ToArray();
+        return methods.ToArray();
 
-            bool isGenericMatch(Type methodType)
-            {
-                if (methodType.IsGenericType)
-                    return methodType.GetGenericTypeDefinition() == targetType;
+        bool isGenericMatch(Type methodType)
+        {
+            if (methodType.IsGenericType)
+                return methodType.GetGenericTypeDefinition() == targetType;
 
-                return methodType == targetType;
-            }
-        });
+            return methodType == targetType;
+        }
     }
 
     /// <summary>
