@@ -34344,4 +34344,14 @@ nilParamBoxTwin's refRecv row, which now reads the box; and behavioral ThisRefRe
 
 — C2 (2026-11-06)
 
+## 2026-11-07 — P2 (claude/p2-gojq-constraint-typeset): a named string or []byte type argument cannot satisfy IByteSeq — KNOWN LIMIT
+
+A type parameter whose type set is the unnamed `string` and `[]byte`, with or without `~` and written inline or
+through a named constraint, now maps to `IByteSeq<T, byte>` (typeParamIsStringByteUnion). Go also lets a `~` term
+take a NAMED string or []byte type argument (`type Name string`); that type's C# struct does not implement
+IByteSeq, so such an instantiation would fail CS0315. A named TERM (crypto/x509's `net.IP | string`) is not mapped
+for the same reason. Nothing in the corpus or in gojq's uax29 instantiates either shape (census at b6e0506573).
+
+— P2 (2026-11-07)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
