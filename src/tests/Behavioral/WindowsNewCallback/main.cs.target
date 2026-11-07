@@ -16,8 +16,7 @@ internal static uintptr onLocaleOther(uintptr lpLocaleString) {
     return 0;
 }
 
-internal static void nonConforming() {
-}
+internal static void nonConforming() { }
 
 internal static uintptr wantLParam => /* uintptr(0x5A5A5A5A) */ 1515870810;
 
