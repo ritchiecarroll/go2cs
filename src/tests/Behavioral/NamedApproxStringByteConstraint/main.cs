@@ -10,20 +10,20 @@ partial interface Stringish<ΔT> {
 }
 
 partial struct Iterator<T>
-    where T : /* Stringish = ~[]byte | ~string */ new()
+    where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
     internal T data;
     internal nint start, pos;
 }
 
 public static ж<Iterator<T>> NewIterator<T>(T data)
-    where T : /* Stringish = ~[]byte | ~string */ new()
+    where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
     return Ꮡ(new Iterator<T>(data: data));
 }
 
 public static bool Next<T>(this ref Iterator<T> it, nint width)
-    where T : /* Stringish = ~[]byte | ~string */ new()
+    where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
     if (it.pos >= len(it.data)) {
         return false;
@@ -37,13 +37,13 @@ public static bool Next<T>(this ref Iterator<T> it, nint width)
 }
 
 public static T Value<T>(this ref Iterator<T> it)
-    where T : /* Stringish = ~[]byte | ~string */ new()
+    where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
     return it.data.slice(it.start, it.pos);
 }
 
 internal static nint count<T>(T s, byte b)
-    where T : /* ~string | ~[]byte */ new()
+    where T : /* ~string | ~[]byte */ IByteSeq<T, byte>, new()
 {
     nint n = 0;
     for (nint i = 0; i < len(s); i++) {
@@ -55,7 +55,7 @@ internal static nint count<T>(T s, byte b)
 }
 
 internal static T head<T>(T s, nint n)
-    where T : /* Stringish = ~[]byte | ~string */ new()
+    where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
     if (n > len(s)) {
         n = len(s);

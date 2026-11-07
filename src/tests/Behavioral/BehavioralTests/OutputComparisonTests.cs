@@ -1259,6 +1259,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
+    public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]

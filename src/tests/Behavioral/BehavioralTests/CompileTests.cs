@@ -1309,6 +1309,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
+    public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]
