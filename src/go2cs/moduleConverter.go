@@ -717,6 +717,20 @@ func relSolutionPath(baseDir, target string) string {
 // dependency packages under pkg, and the go2cs runtime/analyzer under core — emitted in that enforced
 // order. Project paths are relative to the .slnx's own directory; the runtime/analyzer live under the
 // deploy root ($(go2csPath)core\golib, $(go2csPath)gen\go2cs-gen).
+//
+// Only under -recurse=nuget. Under local project references no solution is written, because the dotnet
+// CLI builds a solution it finds in the folder in place of the project beside it, and a solution assigns
+// a configuration only to the projects it lists. Every $(go2csPath)core project it did not list therefore
+// built in its default configuration, Debug: a bare `dotnet build -c Release` of a fmt + strings program
+// produced 45 Debug assemblies of 46, and a bare `dotnet publish` published golib in its own right and
+// failed IL1034. Listing the whole core closure was measured and rejected — the solution publish then
+// published all 66 core libraries in their own right, and two builds of one raced on its deps.json. With
+// no solution the same commands build the project, and read 0 Debug assemblies. Under -recurse=nuget the
+// standard library is PackageReferences, so the solution lists every local project the build has.
+//
+// A re-conversion into an output root an earlier converter wrote would leave that converter's solution
+// behind, and the CLI would keep building it, so a local-reference solution this converter would have
+// written byte for byte is removed; any other is left with a warning.
 func (m *ModuleConverter) generatePerProjectSolutions() {
 	golibCsproj := filepath.Join(m.options.go2csPath, "core", "golib", "golib.csproj")
 	genCsproj := filepath.Join(m.options.go2csPath, "gen", "go2cs-gen", "go2cs-gen.csproj")
@@ -784,6 +798,11 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 		contents := buildRecurseSolutionXML(folders, anchorRel)
 		slnxFile := filepath.Join(projectDir, strings.TrimSuffix(filepath.Base(csproj), ".csproj")+".slnx")
 
+		if !m.options.nugetRefs {
+			retireLocalReferenceSolution(slnxFile, contents)
+			continue
+		}
+
 		if needToWriteFile(slnxFile, []byte(contents)) {
 			if err := os.WriteFile(slnxFile, []byte(contents), 0644); err != nil {
 				fmt.Printf("WARNING: failed to write per-project solution %q: %v\n", slnxFile, err)
@@ -797,6 +816,32 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 	if written > 0 {
 		fmt.Printf("Per-project solutions generated: %d (one .slnx next to each converted .csproj)\n", written)
 	}
+}
+
+// retireLocalReferenceSolution removes the per-project solution an earlier converter wrote beside a
+// local-reference project (see generatePerProjectSolutions), but only when its bytes are exactly what
+// that converter wrote; a solution with any other content may be the user's, and is left in place with
+// a warning, since building it still builds the unlisted core projects Debug.
+func retireLocalReferenceSolution(slnxFile string, generated string) {
+	existing, err := os.ReadFile(slnxFile)
+
+	if err != nil {
+		return
+	}
+
+	if string(existing) != generated {
+		fmt.Printf("WARNING: %s does not match the solution go2cs wrote here and was left in place. `dotnet build` in this\n", slnxFile)
+		fmt.Printf("         folder builds it instead of the project, and the core projects it does not list build\n")
+		fmt.Printf("         Debug; build or publish the .csproj instead, or remove the solution.\n")
+		return
+	}
+
+	if err := os.Remove(slnxFile); err != nil {
+		fmt.Printf("WARNING: failed to remove the earlier go2cs solution %q: %v\n", slnxFile, err)
+		return
+	}
+
+	fmt.Printf("Removed the earlier go2cs solution %s: build or publish the .csproj\n", slnxFile)
 }
 
 // generatedBuildFileMarker identifies a Directory.Build.props/.targets this converter wrote, so a

@@ -12,6 +12,42 @@ variable declared with a two-argument `//go:linkname`.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
 workarounds.
 
+## A program converted with local standard-library references runs its standard library built Debug
+
+**Symptom.** A program converted with plain `-recurse` or `-recurse=module` references the standard library as
+local projects. Built with `dotnet build -c Release` in its folder, its standard-library assemblies come out built
+Debug, unoptimized, and it runs slower than the same program built from its `.csproj`.
+`dotnet publish -c Release -r <rid>` in the folder can fail with
+`ILLink : error IL1034: Root assembly 'golib' ... does not have entry point`, and when it succeeds the published
+program carries the same Debug assemblies. A `-recurse=nuget` conversion is not affected.
+
+**Cause.** The converter wrote a `.slnx` beside each project, and in a folder that holds both, `dotnet build` and
+`dotnet publish` take the solution. A solution build gives its configuration only to the projects the solution
+lists, which were the program, `golib` and the analyzer, so every other standard-library project it built took its
+default configuration, Debug. Publishing the solution also published `golib` as a project of its own.
+
+**Fix.** Re-convert with a converter that includes the fix. It writes no solution for a local-reference conversion,
+and it removes the one an earlier converter wrote, if that file is unchanged.
+
+**Workaround.** Build or publish the **project**, not a solution: run the command in a folder that holds no `.sln`
+or `.slnx`, or name the `.csproj` (`dotnet build <app>.csproj -c Release`). Do not build these conversions through
+a solution: the core projects a solution does not list build Debug. In Visual Studio, open the `.csproj`.
+
+<!-- Found 2026-11-06 by G and root-caused there: read from DebuggableAttribute, a converted TLS closure was 160 of
+     163 assemblies Debug and a Sieve closure 64 of 67, and building the .csproj instead gave 0 Debug and the TLS
+     program's release time, 1,070 ms against about 23 s. G also traced the IL1034 publish failure to the same
+     solution. Measured on H at master df7c09ab7b, with a fmt + strings program (66 core projects) converted with
+     plain -recurse. Today's output: a bare `dotnet build -c Release` gave 45 of 46 standard-library assemblies Debug
+     (only golib, which the solution listed, was Release), and a bare `dotnet publish -c Release -r win-x64` failed
+     IL1034. With the publish-guarded golib.csproj (batch 223) the publish succeeded but shipped the same 45 Debug
+     assemblies. Three remedies were measured. (a) ShouldUnsetParentConfigurationAndPlatform=false in the generated
+     Directory.Build.props: 0 Debug in the output, but 63 core projects were also built a second time in Debug
+     (+70% wall). (b) The solution listing the whole core closure: 0 Debug, but the solution publish published all 66
+     core libraries in their own right, and two builds of one library raced on its deps.json (MSB4018). (c) No
+     solution: 0 Debug and no Debug build, and the bare publish succeeded even without the golib guard, its output
+     equal to go run. (c) was ruled, scoped to local references. Under -recurse=nuget the i9 measured, as relayed by
+     the coordinator, a bare build through the generated solution: 0 Debug, and the bare publish succeeded. -->
+
 ## Ubuntu's packaged .NET 10 can end a converted program early
 
 On Ubuntu's own build of .NET 10 (the `dotnet` installed with `apt`, runtime identifier `ubuntu.*-x64`), a

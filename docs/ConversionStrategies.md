@@ -1801,7 +1801,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 that imports `fmt` gets these lines in its `.csproj`:
 
 <!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:408,411,519#a5a0d6 -->
-<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:264-266 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
+<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:230-232 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
 <PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />
@@ -1811,7 +1811,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
 example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:836-837 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:881-882 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:276 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
