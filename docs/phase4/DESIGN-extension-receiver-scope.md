@@ -5,6 +5,12 @@
 > savings and the falsifiers. Measured on one linux lane box (4 cores, SDK 10.0.403, go1.26.10) at master
 > `df7c09ab7b`, with a startup-hook instrument that is never shipped. Data:
 > [`data/extension-receiver-scope/`](data/extension-receiver-scope/).
+>
+> **Amended 2026-11-07: BUILT.** COORD approved this design at 02:12Z. The build, its guards and the scored prediction
+> are in [`DATA-extension-receiver-scope.md`](DATA-extension-receiver-scope.md). Two points differ from §4 as written.
+> A question's homes include those of the type's bases and interfaces, because a method-set receiver also matches by
+> assignability. A TypeRef receiver is resolved through the runtime's binder rather than homed by its scope name,
+> which follows type forwarders.
 
 ## 1. What L3 is
 

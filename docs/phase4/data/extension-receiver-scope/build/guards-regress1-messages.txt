@@ -1,0 +1,12 @@
+  Error Message:
+   Assert.AreEqual failed. Expected:<l3fx, l3fx.moved, l3fx.tests>. Actual:<l3fx.tests>. the bridge host's homes
+  Error Message:
+   CollectionAssert.Contains failed. 
+  Error Message:
+   Assert.AreEqual failed. Expected:<l3fx.tests>. Actual:<l3fx, l3fx.moved, l3fx.tests>. fx_internal_test_package: the listed homes
+  Error Message:
+   CollectionAssert.AreEquivalent failed. The number of elements in the collections do not match. Expected:<2>. Actual:<0>.the *point method set
+  Error Message:
+   Assert.AreEqual failed. Expected:<0>. Actual:<15>. go.fx.point (X method set): the whole scan answers [fx_internal_test_package.Generate(point)], the home-scoped scan []
+  Error Message:
+   Assert.AreEqual failed. Expected:<0>. Actual:<15>. 15 answers differ, first 20:
