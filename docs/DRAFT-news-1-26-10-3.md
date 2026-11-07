@@ -49,7 +49,7 @@ C# source that uses the packages and assemblies already compiled against 1.26.10
 - **A collection expression builds a slice** where C# knows the target is a `slice<T>`:
   `slice<nint> primes = [2, 3, 5];` as Go's `primes := []int{2, 3, 5}`. `[]` is an empty slice, not nil.
 
-**PENDING (batch 239). Revisions within a Go release stay compatible.** From 1.26.10.3 on, every go.* and nugetgo
+**Revisions within a Go release stay compatible.** From 1.26.10.3 on, every go.* and nugetgo
 package is checked against its previous revision before it ships. Within one Go release line (1.26.10.x), a newer
 revision keeps every public member the previous one had, so code built against it keeps running. The exception is a
 break that a release announces under *Upgrading*, as this one does for `foreach`.
@@ -57,7 +57,9 @@ break that a release announces under *Upgrading*, as this one does for `foreach`
      4cb835968d), docs/phase4/DESIGN-binary-compat-guard.md section 6 (the policy) and PLAN-rebank-1-26-10-3.md section 8.
      The whole-surface census read 362 packages and 525 assets, plus the 7 published modules' 23, with 0 failures after
      the two suppression files: B3's 12 in golib, and batch 235's 5 in vendored cryptobyte, which no consumer can reach
-     and so take no line here. PENDING until 239 lands. -->
+     and so take no line here. Landed: batch 239, master 2e2b0bae6e -> d07c7600cb (release-nuget -VerifyOnly reads
+     "2 suppression file(s), 17 announced break(s)"). -->
+
 
 **Faster under Native AOT.** Reading a slice element is now an inlined bounds-checked load under Native AOT, as it
 already was under the JIT. On `win-x64`, on one development machine, against the build before this change: a
