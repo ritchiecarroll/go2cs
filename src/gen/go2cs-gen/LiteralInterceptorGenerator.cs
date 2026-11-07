@@ -188,8 +188,8 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
             sites.Add((location!, method, slots));
         }
 
-        bool declareHost = semanticModel.Compilation.GetTypeByMetadataName(GeneratedSource.ExtensionHostAttributeMetadataName) is not null;
-        string source = sites.Count == 0 ? string.Empty : Emit(sites, declareHost);
+        Compilation? hostCompilation = semanticModel.Compilation.GetTypeByMetadataName(GeneratedSource.ExtensionHostAttributeMetadataName) is null ? null : semanticModel.Compilation;
+        string source = sites.Count == 0 ? string.Empty : Emit(sites, hostCompilation);
 
         if (source.Length == 0 && diagnostics.Count == 0)
             return null;
@@ -511,7 +511,7 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
 
     // The generated file: one file-local cache of pre-boxed Go strings (one per distinct literal, by first use) and one
     // file-local class of interceptors (one per method and slot pattern, sharing its InterceptsLocation attributes).
-    private static string Emit(List<(InterceptableLocation location, IMethodSymbol method, List<Slot> slots)> sites, bool declareHost)
+    private static string Emit(List<(InterceptableLocation location, IMethodSymbol method, List<Slot> slots)> sites, Compilation? hostCompilation)
     {
         Dictionary<string, string> cacheFields = new(StringComparer.Ordinal);
         StringBuilder cache = new();
@@ -555,9 +555,20 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
         source.Append("#nullable disable\r\n\r\n");
         // An instance target's interceptor takes its receiver as `this`, so ˢInterceptors declares extension methods
         // and golib's scan reads it like any class that does; only this file can name a `file` class. A compilation
-        // whose golib predates the list has no attribute to write.
-        if (declareHost)
-            source.Append(GeneratedSource.ExtensionHostDeclaration("global::go2cs.Interceptors.ˢInterceptors")).Append("\r\n\r\n");
+        // whose golib predates the list has no attribute to write. Its receivers are the targets' types, which another
+        // assembly can declare (golib's, a package's), so the listing names their homes.
+        if (hostCompilation is not null)
+        {
+            const string host = "global::go2cs.Interceptors.ˢInterceptors";
+
+            IEnumerable<ITypeSymbol> receivers = order.Select(key => groups[key].method)
+                .Select(method => !method.IsStatic ? method.ContainingType : method is { IsExtensionMethod: true, Parameters.Length: > 0 } ? method.Parameters[0].Type : null)
+                .OfType<ITypeSymbol>();
+
+            source.Append(GeneratedSource.CanListExtensionHomes(hostCompilation)
+                ? GeneratedSource.ExtensionHostDeclaration(host, receivers, hostCompilation)
+                : GeneratedSource.ExtensionHostDeclaration(host)).Append("\r\n\r\n");
+        }
         source.Append("namespace System.Runtime.CompilerServices\r\n{\r\n");
         source.Append("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]\r\n");
         source.Append("    file sealed class InterceptsLocationAttribute : global::System.Attribute\r\n    {\r\n");

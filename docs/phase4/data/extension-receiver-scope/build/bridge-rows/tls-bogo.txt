@@ -1,0 +1,4 @@
+fix-run1 C# TestBogoSuite [('pass', 448.0)] Go pass Go rows 4921 C# rows 4921
+base-run1 C# TestBogoSuite [('fail', 600.5)] Go pass Go rows 1395 C# rows 1395
+base-run2 C# TestBogoSuite [('fail', 600.4)] Go pass Go rows 1395 C# rows 1395
+fix-run2 C# TestBogoSuite [('pass', 593.0)] Go pass Go rows 4921 C# rows 4921

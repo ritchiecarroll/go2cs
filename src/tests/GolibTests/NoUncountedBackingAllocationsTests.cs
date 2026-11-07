@@ -112,7 +112,7 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return methods.ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
-        ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|methods = methods.Concat(found).ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
+        ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|WalkedExtensionHosts(assembly)?.Select(static host => host.Type).ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/TypeExtensions.GoMethodSets.cs|Type[] typeArguments = new Type[open.GetGenericArguments().Length];", "reflection metadata: the type arguments that close a generic type's method"),
         ("runtime/WaitReason.cs|WaitReason[] parked = new WaitReason[all.Length - 1];", "runtime metadata: the static table of wait reasons"),
         ("ж.PointerExtensions.cs|Type[] fieldTypes = new Type[fields.Length];", "reflection metadata: the field types of a reinterpreted struct"),

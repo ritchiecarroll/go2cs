@@ -1,0 +1,121 @@
+// Census of -tests whitebox bridges: methods declared in a package's INTERNAL test files (package p, *_test.go)
+// on a receiver type its NON-test files declare. Those become extension methods in the test host assembly on a
+// production type (another assembly). Methods on types the test files declare stay in the host's own assembly.
+package main
+
+import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+)
+
+func recvName(fd *ast.FuncDecl) string {
+	t := fd.Recv.List[0].Type
+	if s, ok := t.(*ast.StarExpr); ok {
+		t = s.X
+	}
+	switch x := t.(type) {
+	case *ast.Ident:
+		return x.Name
+	case *ast.IndexExpr:
+		if id, ok := x.X.(*ast.Ident); ok {
+			return id.Name
+		}
+	case *ast.IndexListExpr:
+		if id, ok := x.X.(*ast.Ident); ok {
+			return id.Name
+		}
+	}
+	return "?"
+}
+
+func main() {
+	root := os.Args[1]
+	dirs := map[string]bool{}
+	filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		if d.IsDir() && (d.Name() == "testdata" || d.Name() == "vendor" || strings.HasPrefix(d.Name(), "_")) {
+			return filepath.SkipDir
+		}
+		if !d.IsDir() && strings.HasSuffix(p, "_test.go") {
+			dirs[filepath.Dir(p)] = true
+		}
+		return nil
+	})
+	var keys []string
+	for d := range dirs {
+		keys = append(keys, d)
+	}
+	sort.Strings(keys)
+	totBridge, totOwn, pkgs := 0, 0, 0
+	for _, dir := range keys {
+		fset := token.NewFileSet()
+		ents, _ := os.ReadDir(dir)
+		prodTypes := map[string]bool{}
+		pkgName := ""
+		var testFiles []*ast.File
+		var testNames []string
+		for _, e := range ents {
+			n := e.Name()
+			if e.IsDir() || !strings.HasSuffix(n, ".go") {
+				continue
+			}
+			f, err := parser.ParseFile(fset, filepath.Join(dir, n), nil, parser.SkipObjectResolution)
+			if err != nil {
+				continue
+			}
+			if strings.HasSuffix(n, "_test.go") {
+				testFiles = append(testFiles, f)
+				testNames = append(testNames, n)
+				continue
+			}
+			pkgName = f.Name.Name
+			for _, decl := range f.Decls {
+				if gd, ok := decl.(*ast.GenDecl); ok && gd.Tok == token.TYPE {
+					for _, s := range gd.Specs {
+						prodTypes[s.(*ast.TypeSpec).Name.Name] = true
+					}
+				}
+			}
+		}
+		if pkgName == "" {
+			continue
+		}
+		bridge, own := 0, 0
+		var where []string
+		for i, f := range testFiles {
+			if f.Name.Name != pkgName {
+				continue // external test package: cannot declare methods on p's types
+			}
+			for _, decl := range f.Decls {
+				fd, ok := decl.(*ast.FuncDecl)
+				if !ok || fd.Recv == nil || len(fd.Recv.List) == 0 {
+					continue
+				}
+				r := recvName(fd)
+				if prodTypes[r] {
+					bridge++
+					where = append(where, testNames[i]+":"+r+"."+fd.Name.Name)
+				} else {
+					own++
+				}
+			}
+		}
+		rel, _ := filepath.Rel(root, dir)
+		if bridge > 0 {
+			pkgs++
+			fmt.Printf("PKG\t%s\t%d\t%d\t%s\n", rel, bridge, own, strings.Join(where, " "))
+		}
+		totBridge += bridge
+		totOwn += own
+	}
+	fmt.Printf("TOTAL packages-with-bridges=%d bridge-methods=%d test-own-methods=%d\n", pkgs, totBridge, totOwn)
+}

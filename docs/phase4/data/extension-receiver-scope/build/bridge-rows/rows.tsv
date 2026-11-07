@@ -1,0 +1,12 @@
+# fix 914cce6b70
+crypto/tls	PASS	4921	True	0	0	980	980	0	60m	15m
+sync	PASS	48	True	9	0	188	188	0	30m	15m
+log/slog	PASS	228	True	21	0	57	57	0	30m	15m
+runtime	DIVERGED	11088	False	73	1	1644	1644	1	120m	60m
+# base 4d1874d9c0, run 1
+runtime	DIVERGED	11088	False	73	1	1607	1607	1	120m	60m
+crypto/tls	PASS	1394	True	1	0	1272	1272	0	60m	15m
+# after the container restart (07:00Z on): base 4d1874d9c0, run 2
+crypto/tls	PASS	1394	True	1	0	1259	1259	0	60m	15m
+# fix 914cce6b70, run 2
+crypto/tls	PASS	4921	True	0	0	1253	1253	0	60m	15m

@@ -4,6 +4,9 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -45,7 +48,20 @@ public static class GeneratedSource
     /// The assembly attribute that marks this assembly's extension-host list complete, written once per assembly by
     /// <see cref="ExtensionHostListGenerator"/>.
     /// </summary>
-    public const string ExtensionHostListDeclaration = "[assembly: global::go.GoExtensionHostList]";
+    public const string ExtensionHostListDeclaration = "[assembly: global::go.GoExtensionHostList(HomesListed = true)]";
+
+    /// <summary>
+    /// The list marker an assembly gets when its golib's <c>GoExtensionHostListAttribute</c> predates
+    /// <c>HomesListed</c>: its hosts are then listed without their homes.
+    /// </summary>
+    public const string ExtensionHostListDeclarationWithoutHomes = "[assembly: global::go.GoExtensionHostList]";
+
+    /// <summary>
+    /// Whether <paramref name="compilation"/>'s golib can take each host's homes
+    /// (<c>GoExtensionHostListAttribute.HomesListed</c>, docs/phase4/DESIGN-extension-receiver-scope.md).
+    /// </summary>
+    public static bool CanListExtensionHomes(Compilation compilation) =>
+        compilation.GetTypeByMetadataName("go.GoExtensionHostListAttribute")?.GetMembers("HomesListed").Length > 0;
 
     /// <summary>
     /// The assembly attribute that lists <paramref name="fullyQualifiedTypeName"/> (a <c>global::</c> name) as a class
@@ -56,6 +72,69 @@ public static class GeneratedSource
     /// </summary>
     public static string ExtensionHostDeclaration(string fullyQualifiedTypeName) =>
         $"[assembly: global::go.GoExtensionHost(typeof({fullyQualifiedTypeName}))]";
+
+    /// <summary>
+    /// The assembly attribute that lists <paramref name="fullyQualifiedTypeName"/> as a class that declares extension
+    /// methods with <paramref name="receivers"/>, naming the homes beyond <paramref name="compilation"/>'s own assembly
+    /// those receivers belong to (<see cref="ExtensionHomes"/>): a class whose receivers are all its own assembly's types
+    /// is listed as <see cref="ExtensionHostDeclaration(string)"/> lists it.
+    /// </summary>
+    public static string ExtensionHostDeclaration(string fullyQualifiedTypeName, IEnumerable<ITypeSymbol> receivers, Compilation compilation)
+    {
+        (string[] homes, bool anyHome) = ExtensionHomes(receivers, compilation);
+
+        if (anyHome)
+            return $"[assembly: global::go.GoExtensionHost(typeof({fullyQualifiedTypeName}), AnyHome = true)]";
+
+        if (homes.Length == 0)
+            return ExtensionHostDeclaration(fullyQualifiedTypeName);
+
+        return $"[assembly: global::go.GoExtensionHost(typeof({fullyQualifiedTypeName}), Homes = new[] {{ {string.Join(", ", homes.Select(home => $"typeof({home})"))} }})]";
+    }
+
+    /// <summary>
+    /// The homes of extension methods with <paramref name="receivers"/> beyond <paramref name="compilation"/>'s own
+    /// assembly, as golib's <c>TypeExtensions.ExtensionHome</c> reads them at run time: the assembly of the receiver,
+    /// read through golib's <c>ж&lt;X&gt;</c> box to <c>X</c>, and of a generic type's definition. One type names each
+    /// home, the first by name, and the homes are ordered by assembly name. <c>anyHome</c> is whether a receiver belongs
+    /// to no assembly (a type parameter, an array, a pointer).
+    /// </summary>
+    public static (string[] homes, bool anyHome) ExtensionHomes(IEnumerable<ITypeSymbol> receivers, Compilation compilation)
+    {
+        SortedDictionary<string, string> homes = new(StringComparer.Ordinal);
+        bool anyHome = false;
+
+        foreach (ITypeSymbol receiver in receivers)
+        {
+            ITypeSymbol type = receiver;
+
+            while (type is INamedTypeSymbol { Name: "ж", Arity: 1, ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } } box &&
+                   box.ContainingAssembly?.Name == "golib")
+                type = box.TypeArguments[0];
+
+            if (type.TypeKind == TypeKind.Dynamic)
+                type = compilation.ObjectType;
+
+            if (type is not INamedTypeSymbol named || named.TypeKind == TypeKind.Error)
+            {
+                anyHome |= type.TypeKind != TypeKind.Error;
+                continue;
+            }
+
+            IAssemblySymbol? home = named.OriginalDefinition.ContainingAssembly;
+
+            if (home is null || SymbolEqualityComparer.Default.Equals(home, compilation.Assembly))
+                continue;
+
+            INamedTypeSymbol definition = named.OriginalDefinition;
+            string name = (definition.IsGenericType ? definition.ConstructUnboundGenericType() : definition).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            if (!homes.TryGetValue(home.Name, out string? first) || StringComparer.Ordinal.Compare(name, first) < 0)
+                homes[home.Name] = name;
+        }
+
+        return ([.. homes.Values], anyHome);
+    }
 
     /// <summary>
     /// <paramref name="source"/> with CRLF line endings, no trailing whitespace, no run of blank lines, no leading or

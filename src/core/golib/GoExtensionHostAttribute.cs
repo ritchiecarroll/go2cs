@@ -20,11 +20,20 @@ namespace go;
 /// An assembly without this marker, such as one built by an older generator, is scanned with <c>GetTypes()</c>.
 /// </para>
 /// <para>
-/// See docs/phase4/DESIGN-extension-host-list.md.
+/// See docs/phase4/DESIGN-extension-host-list.md and docs/phase4/DESIGN-extension-receiver-scope.md.
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoExtensionHostListAttribute : Attribute;
+public sealed class GoExtensionHostListAttribute : Attribute
+{
+    /// <summary>
+    /// Gets or sets whether every listed class names the other assemblies whose types its extension methods extend
+    /// (<see cref="GoExtensionHostAttribute.Homes"/>), so that a listed class naming none extends only this assembly's
+    /// types. Without it, as in an assembly from an older generator, the scan reads every listed class for every
+    /// question.
+    /// </summary>
+    public bool HomesListed { get; set; }
+}
 
 /// <summary>
 /// Lists one class of this assembly that declares extension methods, for golib's extension-method scan.
@@ -47,4 +56,17 @@ public sealed class GoExtensionHostAttribute([DynamicallyAccessedMembers(GoExten
     /// </summary>
     [DynamicallyAccessedMembers(HostMembers)]
     public Type Host => host;
+
+    /// <summary>
+    /// Gets or sets one type from each assembly OTHER than this one whose types the class's extension methods take
+    /// as their receiver (a <c>-tests</c> host's methods on its package's types). Empty for a class whose methods all
+    /// extend this assembly's types.
+    /// </summary>
+    public Type[] Homes { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets whether one of the class's extension methods takes a receiver no assembly holds, such as a type
+    /// parameter or an array, so that the scan reads the class for every question.
+    /// </summary>
+    public bool AnyHome { get; set; }
 }
