@@ -213,3 +213,142 @@ M3 depends on M1 (records and pages) and should land after M2 (the lock is the d
 - **OQ-4d:** does the driver require an explicit `<outRoot>` (recommended: yes, refusing in-place), and may it run the Go
   oracle against the module cache's read-only tree (it must, for dependencies' own tests, which D1 does NOT run: only
   the main module's packages are validated)?
+
+---
+
+## AMENDMENT 2026-11-07 — refreshed against master `c6cddb6903`, with gojq as the concrete case (G, COORD order)
+
+> **What this block is:** a refresh, appended under the 2026-09-29 text, which stays as the record. It says:
+> - what landed for D1-D7 and M1-M6;
+> - what changed since 2026-09-29;
+> - a recommended ruling for each of OQ-4a-d;
+> - the questions gojq raises now that the flow exists.
+>
+> **Sources:**
+> - read at master `c6cddb6903`; none of the files it cites changed through batch 237 (`6c2a77a4bd`), the base;
+> - gojq and timefmt-go read with `go list` from the Go module proxy at v0.12.19 / v0.1.8 and v0.12.20 / v0.1.9, on
+>   go1.26.10;
+> - published nugetgo versions read from nuget.org's flat container the same day.
+>
+> P1's closure census (which packages, which tests) is the authority for the conversion itself. The counts below come
+> from `go list` and are a prediction for it to confirm.
+
+### A1. What landed
+
+| | status at `c6cddb6903` | where | differs from the design |
+|:--|:--|:--|:--|
+| **D1** `-tests -recurse` driver (M3) | LANDED | `src/go2cs/moduleTestsDriver.go` (`runModuleTests`); refusals in `main.go` | Plain `-recurse` only: `=module` and `=nuget` are refused ("-tests -recurse supports the plain -recurse form only"). Phase B recompiles production with the test closure. A module with no Go test files is refused. |
+| **D2** records by full import path (M1) | LANDED | `testConversion.go` (`comparisonRecordPackage`) | The record keeps its file name in each package's own `src/<importPath>` directory. The import path is in its `package` field. No JSON module record: MODULE.md sums. |
+| **D3** module ancestry (M4) | LANDED | `src/core/testing/PackageAncestry.cs` (`TryStageModule`), via `GO2CS_MODULE_ROOT` | A real COPY of the module, not a link. `StageFixtureLinks` still refuses a non-GOROOT package that is not module-staged. |
+| **D4** `go` line (M3, M6) | LANDED | `checkModuleGoLine` in the driver; `godebugDefault.go` plus golib's `GoDefaultGodebugAttribute` | The newer-than-corpus refusal is in the `-tests` driver. Plain `-recurse` meets it only through `go mod download`'s own "requires go >=". |
+| **D5** lock and preflight (M2) | LANDED | `modulesLock.go` (`go2cs.modules.lock`), `go mod download` with `-mod=readonly`, `goModCacheDir()` in the resolver | Applies to every `-recurse` run. A second lock, `go2cs.nuget.lock`, pins each mapped module's package version and content hash. |
+| **D6** packaging (M5) | LANDED, ID changed | `src/tools/nugetgo/nugetgo-pack.ps1`: one nupkg per module, one assembly per package, `go2cs/source-metadata.txt` | The ID is `nugetgo.<dotted module path>` (B2 as amended 2026-10-02), not `go.<…>`. Added since: per-OS flavors, the B4 range, README and icon, `-ThirdPartyPackage` dependencies, `-ExcludePackage`. |
+| **D7** proof pages (M1) | LANDED | `validationProofPages.go`: `<outRoot>/validation/<modulePath>/…` plus MODULE.md, packed as VALIDATION.md | Published modules' pages are committed under `docs/validation/modules/<module>@<version>/`. A module with no Go tests gets a behavioral proof (mousetrap). The host-fatal check was not generalized; `-module-disclosures` reads per-module manifests instead. |
+
+### A2. What changed since 2026-09-29
+
+- **Identity, versions, ranges** (PLAN-nugetgo's owner rulings, 2026-09-30, and their amendments):
+  - **B2:** every non-stdlib ID is `nugetgo.<dotted module path>`, and `go.` is the stdlib only.
+  - **B3:** a release's rebuilds are `X.Y.Z.N`. A prerelease or pseudo-version is `L.0.N`.
+  - **B4:** stdlib dependency `[build, next Go minor)`. A third-party edge takes the first revision built for the same
+    corpus.
+  - **B8:** "gojq's scope is ruled before it is packed".
+- **`-recurse` modes:** bare (the module plus its third-party closure, converted), `module` and `nuget` (published
+  go.* packages, and with the registry, published nugetgo packages: exact-pinned, one `PackageReference` per module),
+  combinable as `-recurse=module,nuget`.
+- **Published:** uuid, jwt, x/sync, hashset, pflag, cobra and mousetrap, seven modules. The five on
+  `ValidatedModules.md` were read on Go 1.24.13. cobra's counts live in `nugetgo-modules.psd1`, and mousetrap's proof is
+  behavioral. **gojq would be the first module read on the Go 1.26.10 corpus.**
+- **The precedent for a published dependency is cobra.**
+  - It is validated with its dependencies converted from source, by the plain `-tests -recurse` driver.
+  - It is packed depending on the published pflag and mousetrap, through `-ThirdPartyPackage`.
+  - Hosted sample rows are "additional evidence, never the validation" (COORD ruling 2026-10-12).
+- **B3's binary break (batch 231)** and the binary-compatibility guard (COORD ruling 2026-11-07,
+  `DESIGN-binary-compat-guard.md`):
+  - every module revision built before 1.26.10.3 is rebuilt with it;
+  - `nugetgo-pack.ps1` now refuses a revision that drops its previous revision's surface.
+
+### A3. OQ-4a-d: recommended rulings
+
+- **OQ-4a: RATIFY as landed.** One assembly per Go package and one nupkg per module, with the ID per B2 (`nugetgo.`),
+  not D6's `go.`. Seven modules have shipped this way.
+- **OQ-4b: RATIFY as landed.** The version-free `pkg/<importPath>` with `go2cs.modules.lock`, held for every
+  `-recurse` run, not only the driver. Plus `go2cs.nuget.lock` for mapped modules (its content hash is refused on a
+  mismatch).
+- **OQ-4c: RATIFY as landed.** `<outRoot>/validation/<modulePath>/…` beside the conversion, and a committed copy under
+  `docs/validation/modules/<module>@<version>/` for each published module. Nothing is written into the stdlib roster.
+- **OQ-4d: RATIFY as landed, with one point open.**
+  - The driver requires an explicit output root and refuses one inside the module. Only main-module packages are
+    validated, and dependencies' own tests are not run.
+  - The Go oracle is `go test -json .` in the input directory. No module has yet been validated with its main module
+    read straight from the read-only module cache, so gojq's first run is the measurement.
+  - A main module whose tests write into their own directory needs a writable clone. gojq's root tests only read
+    (`builtin.jq`).
+
+### A4. gojq: the questions the flow raises (new, for ruling)
+
+> **Owner, 2026-11-07, relayed by COORD:** "Yes, let's shoot for being able to publish gojq with .3". This section
+> rests on P1's scout of gojq v0.12.19 (`SCOUT-gojq.md`, measured on linux/amd64 at `c6cddb6903`) and C2's scout of
+> timefmt-go v0.1.8 (`SCOUT-timefmt-go.md`). The per-GOOS closure was read with `go list -deps` here.
+
+**The facts.**
+
+| package | reached by | closure on windows | closure on linux and darwin | converted tests, measured with the scout's patches |
+|:--|:--|:--|:--|:--|
+| `gojq` (library root) | — | timefmt-go | timefmt-go | 162 of 164 (2 fail on defect E) |
+| `gojq/cli` | `cmd/gojq` | go-yaml, go-isatty, go-runewidth, uax29/v2 (graphemes, internal/iterators), stringish | the same plus **`golang.org/x/sys/unix`** (through go-isatty) | 898 of 914 (16 fail on defects F and H) |
+| `gojq/cmd/gojq` | — | `package main` | `package main` | no tests |
+
+- **The root's build tag** is `gojq_debug`, which is not a GOOS tag. So its flavors should compare equal and the root
+  ships neutral. The pack decides.
+- **timefmt-go** validates clean: 417 matched, 0 disclosed.
+- **Before gojq builds:** three converter defects (A, B, C) block the build. A fourth (D) fails `-tests`. golib's
+  defect E costs the root its 2 tests. Defects F and H cost `cli` its 16. Seats are dealt for A to H; G is a 440x
+  slowdown in 2 `cli` subtests, which needs a `-test-timeout` of about 50 minutes until it is fixed.
+- **The driver validates the whole module.** It has no package filter, so its exit (NugetgoPublish section 1, gate 3)
+  is `cli`'s exit too, even when `cli` is not shipped.
+
+**The questions:**
+
+- **OQ-4e: scope (B8).** Recommend **the library root only for 1.26.10.3**, packed with
+  `-ExcludePackage github.com/itchyny/gojq/cli`. `cmd/gojq` is a main package and is never packed.
+  - **Precedent:** cobra/doc, a public package that was validated and excluded because its imports are not nugetgo
+    packages (`nugetgo-modules.psd1`).
+  - **What the root is:** what the Roadmap row promises, an in-process jq for .NET. Its whole third-party closure is
+    timefmt-go.
+  - **Why not `cli` at 1.26.10.3:** shipping it means publishing six more modules first (OQ-4f), x/sys among them.
+  - **Cost:** none in converter work beyond the seats already dealt. `cli` must still validate in the same run
+    (previous bullet), so F and H stay on the critical path, or `cli`'s verdicts go into a disclosure manifest under
+    `-module-disclosures`.
+- **OQ-4f: the dependency order.** Recommend **timefmt-go v0.1.8 validated, packed and published first**, as its own
+  module, then gojq packed against it.
+  - The edge: `-ThirdPartyPackage github.com/itchyny/timefmt-go=nugetgo.github.com.itchyny.timefmt-go@0.1.8`, a
+    bare minimum at its first revision for the corpus (B4). This is cobra's route.
+  - gojq's validation run converts timefmt-go from source (`=nuget` is refused under `-tests`). The published binding
+    is checked by hosted sample rows.
+  - **Cost:** timefmt-go must be live on nuget.org, and visible to gojq's `-recurse=nuget` conversion, before gojq's
+    pack. That means its registry row (owner, NugetgoPublish section 5), or a local `-nuget-map` source naming it.
+- **OQ-4g: the version.** Recommend **gojq v0.12.19 with timefmt-go v0.1.8**, the Roadmap's pins.
+  - **Revised from the draft's v0.12.20:** the scout and every seat were measured at v0.12.19. A version change now
+    re-opens the conversion, the build and the test readings a week before the release.
+  - v0.12.20 (tagged 2026-11-01, needing timefmt-go v0.1.9) becomes a new package version in a later wave, not a
+    revision.
+  - **Cost:** the first publish is one release behind upstream.
+- **OQ-4h: the corpus.** Build on **1.26.10.3**, after B3, in the 1.26.10.3 nugetgo wave.
+  - NugetgoPublish section 0 makes `T` the release's record commit, so gojq packs after the go.* push, with C2's
+    rebuild wave.
+  - Its first revision then becomes the guard's first nugetgo baseline on the 1.26 line.
+- **OQ-4i: the rest of the closure (new).** Recommend that it **waits for a later wave**. Of the six modules `cli`
+  needs, `golang.org/x/sys` cannot be packed by today's rules:
+  - **The pack refuses it.** Its `unix` package has no Windows build, and `nugetgo-pack.ps1` converts every GOOS
+    flavor and refuses "the windows flavor has no <package>: a package missing on one GOOS is not packed".
+  - **It is large:** 12 packages on Windows alone, 61 test files.
+  - **Its tests exercise the kernel**, so its validation is host-bound.
+  - **go-isatty differs per flavor:** its Windows flavor imports no x/sys at all, and its unix flavors import
+    `x/sys/unix`.
+  - **go-yaml would be the first pseudo-version package** (B3's `L.0.N` route).
+  - **What it would take:**
+    - a pack rule for a package that exists on some GOOS only: runtimes/ assets for those RIDs and no lib/ compile
+      asset, a design question for COORD;
+    - a validation route for x/sys;
+    - five more conversion repositories.
