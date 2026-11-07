@@ -68,6 +68,37 @@
      (os-matrix.yml aot-smoke, osx-x64 read NOT MEASURED on its bound); the macOS gaps named under Phase 5
      shipped in 1.24.13.6 (NEWS.md, October 12). -->
 
+<!-- Refreshed 2026-11-07 at master 499c30c95d (owner request: "This probably needs a refresh"), G. Every change is read
+     from a committed record or the mailbox ledger (docs/phase4/LEDGER.md on claude/mailbox), cited here:
+     (1) Phase 4, macOS: the -tests oracle runs at the row's own GOARCH (batch 208, C1 oracle arch), and a row whose two
+         chips differ banks the stricter reading with the difference disclosed (C1 AES ruling (1), ledger 2026-11-06 06:31;
+         applied from the 1.26.10.3 re-bank; crypto/subtle is the named instance). The roster's darwin provenance still
+         states the agree-only rule it banked under.
+     (2) Go releases: the version-line policy (master carries the current Go line; the next minor is prepared on a hop
+         branch; no Go 1.25 line), and 1.26.10.3 in preparation (docs/PLAN-rebank-1-26-10-3.md on claude/g-dot3-prep).
+     (3) Host limits: TestBogoSuite's figure is DATA-bogo-startup.md §3 (1.18 s per launch, linux-x64, one 4-core box;
+         Go about 85 ms) and its §7 (the remaining lever is the host's start-up: about 0.95 s of it loads about 240
+         assemblies), replacing "about 10 s". The roster's crypto/tls class text (throughput-bound, 2026-08-28) predates
+         that record; it is left to the re-bank, not edited here.
+     (4) Native AOT and trimming: a 1.26.10.3 bullet from DATA-hop126-perf.md §11.7 and §11.9 (slice reads, the zero-size
+         check, the 64-bit multiply), DATA-extension-host-list.md (the first interface assertion) and §11.8 plus batch
+         214 (single-file per-assembly ReadyToRun); the default instruction set from §11.6 (x86-64-v3 measured no suite
+         gain; the owner's ruling, ledger 2026-11-06).
+     (5) Performance: the comparison is published at 1.26.10.2 (docs/Performance.md, batch 170), so the re-baseline
+         bullet becomes that; the start-up bullet takes DATA-bogo-startup.md and the levers that shipped (batches 206,
+         210, 218, 219); allocations: the stack-allocation parity design is written (docs/DESIGN-stack-allocation.md,
+         PROPOSED) and the owner ruled the work post-hop (ledger 2026-10-21 09:55); goroutine scheduling is new, from
+         docs/DESIGN-mn-scheduler-sizing.md (PROPOSED, its rulings asked) over the landed cooperative scheduler
+         (phase4/DESIGN-cooperative-scheduler.md); the source-reference build fix (DATA-hop126-perf.md §11.9; batch 223
+         landed, H's .slnx fix pending).
+     (6) Timeline: the 1.26.10.1 re-baseline leaves "Next" (published); 1.26.10.3 and the start-up work join "Now";
+         goroutine scheduling joins "Unscheduled"; the allocation row stays in Q1 2027, now "whose design is written"
+         where it read "design kickoff" (the owner is asked whether Q1 2027 still holds).
+     Not changed, re-read and still true: Where things stand; How the project moves; .NET; Platforms; Real-world Go
+     modules (five, Go 1.24.13 readings, ValidatedModules.md); NuGet packages; cgo; Phase 4D; Phase 5; IDE mode; Open
+     converter items (the cross-package address-of-global bullet matches the struct-types reference and Limitations at
+     this master); How progress is tracked. -->
+
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
 library, and the runtime and converter work still ahead. It states what is planned. The completed
@@ -109,7 +140,8 @@ It is not finished, and it stands in three parts:
   validation are done: every implementable package validates on Windows and Linux. Their record is in
   [Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests).
 - **macOS parity is in progress.** Each roster row gains a macOS count when the package validates on
-  both Apple silicon and Intel with the two agreeing test for test. The
+  both Apple silicon and Intel, each chip's results compared with Go built for that same chip. Where the two
+  chips' results differ, the row records the stricter of the two and discloses the difference. The
   [roster](ValidatedTestPackages.md) rows carry the live state; see [Platforms](#platforms).
 - **Phase 4D is planned.** It widens validation to examples, fuzz seed corpora and benchmarks; see
   [below](#phase-4d-examples-fuzz-seed-corpora-and-benchmarks).
@@ -135,7 +167,10 @@ move is Go 1.27, before the 1.26 series leaves support. 1.24.13.7 is the last 1.
 
 Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so
 packages built from either carry none of the Go security fixes issued since. The Go 1.24 line is
-closed: 1.24.13.7 is its last release, and there is no Go 1.25 release. The next hop brings Go 1.27:
+closed: 1.24.13.7 is its last release, and there is no Go 1.25 release. Fix releases on the Go 1.26.10
+line continue; 1.26.10.3 is in preparation. The main line of development carries the current Go
+line, and the next Go minor is prepared separately until its packages ship. The next hop brings
+Go 1.27:
 
 | Hop | When | What it involves |
 |:--|:--|:--|
@@ -179,8 +214,8 @@ and relaunch their own binary pass.
 Entries remain in `crypto/tls`, `os`, `os/exec` and `syscall`, and not every one retires through the
 deployment shape; the roster's class text names what each one needs. In `crypto/tls`'s
 `TestBogoSuite`, BoringSSL's test runner starts a converted helper process once per case inside Go's
-own 10-minute test deadline. Each launch costs about 10 s where Go's costs about 85 ms: .NET's process
-start and package initialization, then compiling the handshake path in each new process. That
+own 10-minute test deadline. Each launch costs about 1.2 s where Go's costs about 85 ms, measured on
+`linux-x64` on one 4-core machine, and most of that is the converted process loading its packages. That
 per-process start-up cost is what keeps the run outside the deadline, and the entry retires when the
 start-up work under [Performance](#performance) brings it inside.
 
@@ -204,7 +239,17 @@ library and the source generators:
   methods again, and reflection reaches a struct's fields through a pointer. Both cost size, and a
   Native AOT publish now takes longer: the `osx-x64` publish no longer fits the hosted runner the release
   check uses, so 1.24.13.7 was measured on `linux-x64` and `win-x64` only.
+- **In 1.26.10.3 (in preparation).** Reading a slice element inlines under Native AOT, as it does under
+  the JIT, so slice-heavy code runs at its JIT speed: on `win-x64`, on one development machine, a
+  matrix-multiply benchmark takes about 36% of its earlier time and a prime sieve about 51%. A 64-bit
+  multiply with a 128-bit result inlines too, which speeds up the TLS handshake. The first type
+  assertion to an interface a type satisfies without declaring it takes about half its earlier time
+  (`linux-x64`, one 4-core machine). A single-file publish compiles ReadyToRun one assembly at a time,
+  which starts in a fraction of the time of the SDK's compressed composite image.
 - **Later stages** cover method sets and stack frames.
+
+Converted packages are built for the default x64 instruction set. Building for `x86-64-v3` gave no gain
+across the benchmark suite, and an image built that way does not start on a processor without AVX2.
 
 The check that gates each release publishes a program with Native AOT and runs it on `linux-x64`,
 `win-x64` and `osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted
@@ -406,24 +451,27 @@ The published [performance comparison](Performance.md) measures converted C# aga
 and under Native AOT, and [Tuning converted code](Tuning.md) says which deployment and runtime settings to choose.
 The follow-ups run off the critical path:
 
-- **The re-baseline on the published 1.26.10.2 packages** is measured, against 1.24.13.7 in the
-  same session, and its numbers go into the published comparison next. It is also the before picture
-  for the .NET 11 measurement stage, and it brings the TLS-handshake benchmark, already in the suite,
-  into the published table. Its follow-ups for 1.26.10.3 are planned: tracing a full-optimization
-  slowdown in two benchmarks, and a start-up cost in the ReadyToRun build. Profiling the crypto paths
-  behind the handshake gap is planned too.
-- **Start-up cost of a converted process** (planned). A converted process pays .NET's process start,
-  package initialization and compiling its code paths each time it starts: a converted `crypto/tls`
-  helper takes about 10 s to start and run its handshake, where Go's takes about 85 ms. The planned
-  levers are ReadyToRun-compiled test hosts and tiered compilation in spawned child processes. This
-  cost is also what keeps the `crypto/tls`
+- **The published comparison is measured on the 1.26.10.2 packages**, the TLS-handshake benchmark
+  included. It is the before picture for the .NET 11 measurement stage. The Native AOT work it pointed
+  to is in 1.26.10.3 ([Native AOT and trimming](#native-aot-and-trimming)).
+- **Start-up cost of a converted process** (in progress). A converted process pays .NET's process
+  start and loads its converted packages each time it starts: a converted `crypto/tls` helper takes
+  about 1.2 s to start and run one handshake, where Go's takes about 85 ms (`linux-x64`, one 4-core
+  machine). Loading the packages is most of it. Faster P-521 key setup and a cheaper first interface
+  assertion are in 1.26.10.3; the remaining lever is the converted process's own start-up. This cost
+  is also what keeps the `crypto/tls`
   [host-limit entry](#declared-host-limits-and-their-retirement-path) open.
-- **Allocations** (committed; design kickoff planned for Q1 2027): the retirement plan named by each
-  deferred allocation-count disclosure on the roster. Go meets those assertions through compiler
-  optimizations, chiefly escape analysis keeping values off the heap, that the converted code does
-  not yet reproduce. The work closes the gap by construction (storage for Go array values,
-  frame-local allocations kept off the heap, and ref-receiver method emission), and each disclosure
-  retires when its assertion matches.
+- **Allocations** (committed; planned for Q1 2027): the retirement plan named by each deferred allocation-count disclosure
+  on the roster. Go meets those assertions through compiler optimizations, chiefly escape analysis
+  keeping values off the heap, that the converted code does not yet reproduce. The work closes the gap
+  by construction (storage for Go array values, frame-local allocations kept off the heap, and
+  ref-receiver method emission), and each disclosure retires when its assertion matches. Its design,
+  stack-allocation parity, is written.
+- **Goroutine scheduling** (unscheduled): each live goroutine runs on its own OS thread today. A sizing
+  study weighs moving to Go's model of many goroutines over a few threads; nothing is decided.
+- **Building against local standard-library sources** (planned for 1.26.10.3): a program converted against a
+  local go2cs source tree and built in its folder gets a Release standard library and publishes. Until
+  then, build the project file itself, `dotnet build MyProgram.csproj -c Release`.
 - **Interface conversions** (unscheduled): the remaining interface-shell caching items, a per-value
   shell-cache experiment and a base-class marker.
   <!-- items from the [interface-shell caching design](phase4/DESIGN-iface-shell-caching.md) (internal
@@ -501,10 +549,10 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
-| Next | The performance re-baseline on the 1.26.10.1 packages. The start-up cost of a converted process. The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
-| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
-| Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Now | The 1.26.10.3 fix release. macOS validation of the standard library, package by package. The trimming work for Native AOT. The start-up cost of a converted process. Further converted modules as NuGet packages. |
+| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work, whose design is written. |
+| Unscheduled | Goroutine scheduling. The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
