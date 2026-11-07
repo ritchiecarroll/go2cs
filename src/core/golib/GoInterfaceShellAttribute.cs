@@ -55,8 +55,10 @@ public sealed class GoInterfaceShellAttribute : Attribute
     /// </param>
     /// <param name="objectShell">
     /// Non-generic reflective shell, or <c>null</c> when the interface has a member the reflective
-    /// invoker cannot forward (a by-ref or ref-struct parameter — a Go variadic tail lowers to
-    /// <c>Span&lt;T&gt;</c>, which cannot be boxed — or a generic method).
+    /// invoker cannot forward and no bound delegate can carry either (a by-ref parameter, a generic
+    /// method, or a variadic tail no delegate family of golib's declares). A Go variadic tail lowers to
+    /// <c>Span&lt;T&gt;</c>, which cannot be boxed; the object shell forwards such a member through a
+    /// bound delegate instead (see <see cref="VariadicMethods"/>).
     /// </param>
     /// <param name="methodNames">
     /// The interface's transitive Go method set, in the order the object shell's forwarders index it.
@@ -85,4 +87,25 @@ public sealed class GoInterfaceShellAttribute : Attribute
     /// Gets the interface's transitive method names, in object-shell forwarding order.
     /// </summary>
     public string[] MethodNames { get; }
+
+    /// <summary>
+    /// Gets or sets the names, among <see cref="MethodNames"/>, of the members the object shell forwards through a
+    /// BOUND DELEGATE rather than a reflective invoker: those with a Go variadic tail (<c>params Span&lt;T&gt;</c>),
+    /// which no invoker can box. <c>null</c> when the interface has none.
+    /// </summary>
+    /// <remarks>
+    /// Without them an interface with any variadic method had no object shell, and a value-typed dynamic value could
+    /// bind only through the generic shell, closed over the value's type by <c>MakeGenericType</c>: under Native AOT
+    /// that has no native code for a struct, so every such assertion read false where Go and the JIT read true
+    /// (DATA-aot-variadic-shell.md). The delegate comes from the type's generated method set (<c>IGoMethodSet</c>),
+    /// compiled code, so no run-time instantiation is needed.
+    /// </remarks>
+    public string[]? VariadicMethods { get; set; }
+
+    /// <summary>
+    /// Gets or sets the delegate type the object shell casts each of <see cref="VariadicMethods"/> to, in the same
+    /// order: the type golib's reflect builds for the member's signature without its receiver, which is the type a
+    /// generated method-set arm's bound delegate has. The binder takes a delegate only when its type is exactly this.
+    /// </summary>
+    public Type[]? VariadicDelegates { get; set; }
 }

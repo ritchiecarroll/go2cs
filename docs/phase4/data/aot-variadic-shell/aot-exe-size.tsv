@@ -1,0 +1,4 @@
+program	base_bytes	fix_bytes	delta
+PerfStartup	149516152	149553336	37184
+VariadicInterfaceAssert	160249024	160294624	45600
+XpkgPromotedMethodSet	-	168966864	-
