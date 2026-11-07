@@ -125,7 +125,7 @@ loop:
         }
     }
     slice<nint> @out = default;
-    foreach (var (_, f) in fns) {
+    foreach (var (_, f) in range(fns)) {
         @out = append(outᴷ, @out, f());
     }
     @out = move2heap(outᴷ, @out);

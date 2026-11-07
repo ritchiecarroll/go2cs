@@ -495,10 +495,10 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
         }
 
         // Assign attributes.
-        foreach (var (_, a) in start.Attr) {
+        foreach (var (_, a) in range(start.Attr)) {
             var handled = false;
             nint any = -1;
-            foreach (var i in range(tinfo.fields)) {
+            foreach (var i in range(len(tinfo.fields))) {
                 var finfo = Ꮡ(tinfo.fields, i);
                 switch ((fieldFlags)(finfo.flags & fMode)) {
                 case var ᴛ2 when ᴛ2 == fAttr: {
@@ -528,7 +528,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
         }
 
         // Determine whether we need to save character data or comments.
-        foreach (var i in range(tinfo.fields)) {
+        foreach (var i in range(len(tinfo.fields))) {
             var finfo = Ꮡ(tinfo.fields, i);
             switch ((fieldFlags)(finfo.flags & fMode)) {
             case var ᴛ2 when ᴛ2 == fCDATA || ᴛ2 == fCharData: {
@@ -756,7 +756,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
     case var ᴛ when ᴛ == reflect.ΔSlice: {
         if (len(src) == 0) {
             // non-nil to flag presence
-            src = slice<byte>([]);
+            src = [];
         }
         dst.SetBytes(src);
         break;
@@ -777,12 +777,12 @@ internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, 
 
     var recurse = false;
 Loop:
-    foreach (var i in range(tinfo.fields)) {
+    foreach (var i in range(len(tinfo.fields))) {
         var finfo = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)(finfo.flags & fElement) == 0 || len(finfo.parents) < len(parents) || finfo.xmlns != ""u8 && finfo.xmlns != start.Name.Space) {
             continue;
         }
-        foreach (var j in range(parents)) {
+        foreach (var j in range(len(parents))) {
             if (parents[j] != finfo.parents[j]) {
                 goto continue_Loop;
             }

@@ -140,13 +140,13 @@ internal static (@string, error) nextLine(this ref TextReader r) {
     }
 }
 
-internal static slice<@string> frameFields = slice<@string>(["pc", "func", "file", "line"]);
+internal static slice<@string> frameFields = ["pc", "func", "file", "line"];
 
 internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names) {
     var argsᴷ = new stackAppend<uint64>(moves: true);
 
     slice<uint64> args = default;
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         var (arg, value, rest, err) = readArg(s);
         if (err != nil) {
             return (default, err);

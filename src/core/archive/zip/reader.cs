@@ -167,7 +167,7 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
         return err;
     }
     if (zipinsecurepath.Value() == "0"u8) {
-        foreach (var (_, f) in r.File) {
+        foreach (var (_, f) in range(r.File)) {
             if (f.Name == ""u8) {
                 // Zip permits an empty file name field.
                 continue;
@@ -611,7 +611,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     // look for directoryEndSignature in the last 1k, then in the last 65k
     slice<byte> buf = default;
     int64 directoryEndOffset = default;
-    foreach (var (i, vᴛ1) in slice<int64>([1024, 65 * 1024])) {
+    foreach (var (i, vᴛ1) in range(slice<int64>([1024, 65 * 1024]))) {
         var bLen = vᴛ1;
 
         if (bLen > size) {
@@ -870,7 +870,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
         // because it appears as a prefix in a path.
         var dirs = new map<@string, bool>();
 
-        foreach (var (_, @file) in Ꮡr.Value.File) {
+        foreach (var (_, @file) in range(Ꮡr.Value.File)) {
             var isDir = len(@file.Name) > 0 && @file.Name[len(@file.Name) - 1] == '/';
             @string name = toValidName(@file.Name);
             if (name == ""u8) {
@@ -1052,7 +1052,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         return (default, io.EOF);
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var i in range(list)) {
+    foreach (var i in range(len(list))) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
         if (err != nil) {
             return (default, err);

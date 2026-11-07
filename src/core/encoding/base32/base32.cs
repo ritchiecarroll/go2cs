@@ -556,7 +556,7 @@ partial struct newlineFilteringReader {
 // of non-newline characters copied to dst.
 internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
     nint offset = 0;
-    foreach (var (_, b) in src) {
+    foreach (var (_, b) in range(src)) {
         if (b == '\r' || b == '\n') {
             continue;
         }

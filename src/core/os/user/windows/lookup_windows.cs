@@ -435,7 +435,7 @@ internal static (slice<@string>, error) listGroups(ref User user) {
                     if (errΔ2 != nil) {
                         return errΔ2;
                     }
-                    foreach (var (_, g) in groups.AllGroups()) {
+                    foreach (var (_, g) in range(groups.AllGroups())) {
                         var (sid, errΔ3) = g.Sid.String();
                         if (errΔ3 != nil) {
                             return errΔ3;
@@ -467,7 +467,7 @@ internal static (slice<@string>, error) listGroups(ref User user) {
     }
     // Add the primary group of the user to the list if it is not already there.
     // This is done only to comply with the POSIX concept of a primary group.
-    foreach (var (_, sid) in sids) {
+    foreach (var (_, sid) in range(sids)) {
         if (sid == user.Gid) {
             return (sids, default);
         }

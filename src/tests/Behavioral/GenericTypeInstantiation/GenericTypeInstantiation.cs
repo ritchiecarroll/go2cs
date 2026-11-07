@@ -36,7 +36,7 @@ public static slice<U> MapElements<T, U>(ж<Stack<T>> Ꮡs, Func<T, U> mapper)
     ref var s = ref Ꮡs.DerefOrNull();
 
     var result = new slice<U>(0, len(s.elements));
-    foreach (var (_, elem) in s.elements) {
+    foreach (var (_, elem) in range(s.elements)) {
         result = append(result, mapper(elem));
     }
     return result;

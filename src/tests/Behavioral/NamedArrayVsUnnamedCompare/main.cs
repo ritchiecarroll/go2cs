@@ -8,7 +8,7 @@ partial struct Hash /*[4]byte*/;
 
 internal static array<byte> sum(slice<byte> b) {
     array<byte> @out = new(4);
-    foreach (var (i, v) in b) {
+    foreach (var (i, v) in range(b)) {
         @out[i % 4] += v;
     }
     return @out.Clone();
@@ -23,8 +23,8 @@ internal static void Main() {
 
     fmt.Println("equal");
 
-    var g = (Hash)sum(slice<byte>([1, 2, 3, 4]));
-    fmt.Println(g == ((Hash)(sum(slice<byte>([1, 2, 3, 4])))), ((Hash)(sum(slice<byte>([1, 2, 3, 4])))) == g);
+    var g = (Hash)sum([1, 2, 3, 4]);
+    fmt.Println(g == ((Hash)(sum([1, 2, 3, 4]))), ((Hash)(sum([1, 2, 3, 4]))) == g);
     fmt.Println(g != ((Hash)(sum(default))), ((Hash)(sum(default))) != g, ((Hash)(sum(default))) == h);
 }
 

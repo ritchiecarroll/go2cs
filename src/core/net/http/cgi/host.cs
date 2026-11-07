@@ -106,11 +106,11 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     slice<@string> ret = default;
     var retᴷ = new stackAppend<@string>(moves: true);
 
-    foreach (var (i, e) in env) {
+    foreach (var (i, e) in range(env)) {
         var found = false;
         nint eq = strings.IndexByte(e, (byte)'='); if (eq != -1) {
             @string keq = e.slice(0, eq + 1); // "key="
-            foreach (var (_, e2) in env.slice(i + 1)) {
+            foreach (var (_, e2) in range(env.slice(i + 1))) {
                 if (strings.HasPrefix(e2, keq)) {
                     found = true;
                     break;
@@ -215,13 +215,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         }
         env = append(env, "PATH="u8 + envPath);
 
-        foreach (var (_, e) in h.InheritEnv) {
+        foreach (var (_, e) in range(h.InheritEnv)) {
             @string v = os.Getenv(e); if (v != ""u8) {
                 env = append(env, e + "="u8 + v);
             }
         }
 
-        foreach (var (_, e) in osDefaultInheritEnv) {
+        foreach (var (_, e) in range(osDefaultInheritEnv)) {
             @string v = os.Getenv(e); if (v != ""u8) {
                 env = append(env, e + "="u8 + v);
             }
@@ -364,7 +364,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         // go into handleInternalRedirect, which won't want its rw
         // headers to have been touched.
         foreach (var (k, vv) in headers) {
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 rw.Header().Add(k, v);
             }
         }

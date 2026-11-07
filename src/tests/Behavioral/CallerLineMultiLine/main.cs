@@ -48,7 +48,7 @@ internal static partial nint Line(this impl _Δp0) {
     return l;
 }
 
-internal static slice<nint> three(nint a, nint b, nint c) { return slice<nint>([a, b, c]); }
+internal static slice<nint> three(nint a, nint b, nint c) { return [a, b, c]; }
 
 internal static slice<nint> recorded;
 

@@ -205,7 +205,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok) {
                 // all elements must have keys
                 var visited = new slice<bool>(len(fields));
-                foreach (var (_, eΔ1) in e.Elts) {
+                foreach (var (_, eΔ1) in range(e.Elts)) {
                     var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
                     if (kv == nil) {
                         Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
@@ -242,7 +242,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                 }
             } else {
                 // no element must have a key
-                foreach (var (i, eΔ2) in e.Elts) {
+                foreach (var (i, eΔ2) in range(e.Elts)) {
                     var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
                         Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
                         continue;
@@ -300,7 +300,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // duplicates.
             var keyIsInterface = isNonTypeParamInterface(utyp.key);
             var visited = new map<any, slice<ΔType>>(len(e.Elts));
-            foreach (var (_, eΔ3) in e.Elts) {
+            foreach (var (_, eΔ3) in range(e.Elts)) {
                 var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
                 if (kv == nil) {
                     Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
@@ -315,7 +315,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                     var duplicate = false;
                     var xkey = keyVal(x.val);
                     if (keyIsInterface) {
-                        foreach (var (_, vtyp) in visited[xkey]) {
+                        foreach (var (_, vtyp) in range(visited[xkey])) {
                             if (Identical(vtyp, x.typ)) {
                                 duplicate = true;
                                 break;
@@ -340,7 +340,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             var utyp = u;
             // when "using" all elements unpack KeyValueExpr
             // explicitly because check.use doesn't accept them
-            foreach (var (_, vᴛ1) in e.Elts) {
+            foreach (var (_, vᴛ1) in range(e.Elts)) {
                 var eΔ4 = vᴛ1;
 
                 var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
@@ -385,7 +385,7 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
     var visited = new map<int64, bool>(len(elts));
     int64 index = default;
     int64 max = default;
-    foreach (var (_, e) in elts) {
+    foreach (var (_, e) in range(elts)) {
         // determine and check index
         var validIndex = false;
         var eval = e;

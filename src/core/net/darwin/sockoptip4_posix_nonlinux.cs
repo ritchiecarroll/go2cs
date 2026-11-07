@@ -29,7 +29,7 @@ internal static error setIPv4MreqToInterface(ref syscall.IPMreq mreq, ж<Interfa
     if (err != nil) {
         return err;
     }
-    foreach (var (_, ifa) in ifat) {
+    foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {
         case ж<IPAddr> v: {
             {

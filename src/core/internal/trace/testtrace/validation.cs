@@ -443,7 +443,7 @@ internal static void checkStack(ж<errAccumulator> Ꮡe, traceꓸStack stk) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     // Check for non-empty values, but we also check for crashes due to incorrect validation.
-    foreach (var (i, f) in slices.Collect(stk.Frames())) {
+    foreach (var (i, f) in range(slices.Collect(stk.Frames()))) {
         if (i == 0) {
             // Allow for one fully zero stack.
             //

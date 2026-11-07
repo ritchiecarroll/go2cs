@@ -141,7 +141,7 @@ internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<Strin
         return false;
     }
     uint32 length = default;
-    foreach (var (_, b) in lenBytes) {
+    foreach (var (_, b) in range(lenBytes)) {
         length = length << 8;
         length = length | (uint32)b;
     }

@@ -374,7 +374,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
 
     // determine package name and collect valid files
     var pkg = check.pkg;
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         @string name = @file.Name.Name;
         var exprᴛ1 = pkg.name;
         var matchᴛ1 = false;
@@ -409,7 +409,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     }
 
     // determine Go version for each file
-    foreach (var (_, @file) in check.files) {
+    foreach (var (_, @file) in range(check.files)) {
         // use unaltered Config.GoVersion by default
         // (This version string may contain dot-release numbers as in go1.20.1,
         // unlike file versions which are Go language versions only, if valid.)

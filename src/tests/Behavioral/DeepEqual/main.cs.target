@@ -69,9 +69,9 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(nan, nan));
     fmt.Println(reflect.DeepEqual(nan, slice<float64>([nan[0]])));
 
-    var p1 = new point(1, 2, slice<@string>(["n"]));
-    var p2 = new point(1, 2, slice<@string>(["n"]));
-    var p3 = new point(1, 3, slice<@string>(["n"]));
+    var p1 = new point(1, 2, ["n"]);
+    var p2 = new point(1, 2, ["n"]);
+    var p3 = new point(1, 3, ["n"]);
     fmt.Println(reflect.DeepEqual(p1, p2));
     fmt.Println(reflect.DeepEqual(p1, p3));
 
@@ -125,9 +125,9 @@ internal static void Main() {
 
     fmt.Println(reflect.DeepEqual(new wrap(n1), new wrap(n2)));
     fmt.Println(reflect.DeepEqual(new wrap(n1), new wrap(n3)));
-    var s1 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])});
-    var s2 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])});
-    var s3 = new namedSlices(new map<@string, slice<nint>>{["k"] = slice<nint>([1, 3])});
+    var s1 = new namedSlices(new map<@string, slice<nint>>{["k"] = [1, 2]});
+    var s2 = new namedSlices(new map<@string, slice<nint>>{["k"] = [1, 2]});
+    var s3 = new namedSlices(new map<@string, slice<nint>>{["k"] = [1, 3]});
     fmt.Println(reflect.DeepEqual(s1, s2));
     fmt.Println(reflect.DeepEqual(s1, s3));
 

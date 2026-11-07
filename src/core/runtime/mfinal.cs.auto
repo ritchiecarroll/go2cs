@@ -132,7 +132,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
                 if ((/* unsafe.Sizeof(finalizer{}) */ (uintptr)40 != (uintptr)(5 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.fn) */ (uintptr)0 != 0 || /* unsafe.Offsetof(finalizer{}.arg) */ (uintptr)8 != goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.nret) */ (uintptr)16 != (uintptr)(2 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.fint) */ (uintptr)24 != (uintptr)(3 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.ot) */ (uintptr)32 != (uintptr)(4 * goarch.PtrSize))) {
                     @throw("finalizer out of sync"u8);
                 }
-                foreach (var i in range(finptrmask)) {
+                foreach (var i in range(len(finptrmask))) {
                     finptrmask[i] = finalizer1[i % len(finalizer1)];
                 }
             }
@@ -542,7 +542,7 @@ public static void SetFinalizer(any objʗp, any finalizerʗp) {
 okarg:
     var nret = (uintptr)0;
     // compute size needed for return parameters
-    foreach (var (_, t) in ft.OutSlice()) {
+    foreach (var (_, t) in range(ft.OutSlice())) {
         nret = alignUp(nret, (uintptr)t.Align_) + t.Size_;
     }
     nret = alignUp(nret, goarch.PtrSize);

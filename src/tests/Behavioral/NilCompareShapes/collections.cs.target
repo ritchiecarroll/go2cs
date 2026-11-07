@@ -74,13 +74,13 @@ internal static void collections() {
 
     bag b = default;
     fmt.Println("zero struct fields:", b.items == nil, b.index == nil, b.done == nil);
-    b = new bag(items: slice<@string>([]), index: new map<@string, nint>{}, done: new channel<EmptyStruct>(0));
+    b = new bag(items: [], index: new map<@string, nint>{}, done: new channel<EmptyStruct>(0));
     fmt.Println("assigned struct fields:", b.items == nil, b.index == nil, b.done == nil);
 
     var p = Ꮡs;
     fmt.Println("through a pointer:", p.ValueSlot == nil);
 
-    var lookup = new map<@string, slice<nint>>{["x"] = slice<nint>([1])};
+    var lookup = new map<@string, slice<nint>>{["x"] = [1]};
     fmt.Println("map lookups:", lookup["x"] == nil, lookup["y"] == nil);
 
     fmt.Println("variadic:", variadic(), variadic(1), variadic(s.ꓸꓸꓸ));

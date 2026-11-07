@@ -12,7 +12,7 @@ using io = io_package;
 
 partial class cryptotest_package {
 
-internal static slice<nint> lengths = slice<nint>([0, 156, 8192, 8193, 8208]);
+internal static slice<nint> lengths = [0, 156, 8192, 8193, 8208];
 
 // MakeAEAD returns a cipher.AEAD instance.
 //
@@ -54,8 +54,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ1 = aead;
     t.Run(roundtripˢ, (ж<testing.T> tΔ1) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ2 = aeadʗ1;
                 tΔ1.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ2) => {
                     var rng = newRandReader(tΔ2);
@@ -81,8 +81,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ3 = aead;
     t.Run(inputNotModifiedˢ, (ж<testing.T> tΔ3) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ4 = aeadʗ3;
                 tΔ3.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ4) => {
                     var aeadʗ5 = aeadʗ4;
@@ -135,11 +135,11 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ7 = aead;
     t.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
             if (ptLen <= 1) { // We need enough room for an inexact overlap to occur.
                 continue;
             }
-            foreach (var (_, adLen) in lengths) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ8 = aeadʗ7;
                 tΔ7.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ8) => {
                     var aeadʗ9 = aeadʗ8;
@@ -232,8 +232,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ15 = aead;
     t.Run(appendDstˢ, (ж<testing.T> tΔ11) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ16 = aeadʗ15;
                 tΔ11.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ12) => {
                     var aeadʗ17 = aeadʗ16;
@@ -249,7 +249,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var prefixes = slice<slice<byte>>([shortBuff, longBuff]);
 
                         // Check each prefix gets appended to by Seal without altering them.
-                        foreach (var (_, prefix) in prefixes) {
+                        foreach (var (_, prefix) in range(prefixes)) {
                             var (plaintext, addData) = (new slice<byte>(ptLen), new slice<byte>(adLen));
                             rng.Read(plaintext);
                             rng.Read(addData);
@@ -283,7 +283,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var prefixes = slice<slice<byte>>([shortBuff, longBuff]);
 
                         // Check each prefix gets appended to by Open without altering them.
-                        foreach (var (_, prefix) in prefixes) {
+                        foreach (var (_, prefix) in range(prefixes)) {
                             var (before, addData) = (new slice<byte>(adLen), new slice<byte>(ptLen));
                             rng.Read(before);
                             rng.Read(addData);
@@ -314,8 +314,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
             tΔ15.Skip(aeadDoesNotUseANonceˢ);
         }
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ20 = aeadʗ19;
                 tΔ15.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ16) => {
                     var rng = newRandReader(tΔ16);
@@ -346,8 +346,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ21 = aead;
     t.Run(wrongAddDataˢ, (ж<testing.T> tΔ17) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 if (adLen == 0) {
                     continue;
                 }
@@ -382,8 +382,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     var aeadʗ23 = aead;
     t.Run(wrongCiphertextˢ, (ж<testing.T> tΔ19) => {
         // Test all combinations of plaintext and additional data lengths.
-        foreach (var (_, ptLen) in lengths) {
-            foreach (var (_, adLen) in lengths) {
+        foreach (var (_, ptLen) in range(lengths)) {
+            foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ24 = aeadʗ23;
                 tΔ19.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ20) => {
                     var rng = newRandReader(tΔ20);

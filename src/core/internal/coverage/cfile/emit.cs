@@ -198,7 +198,7 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     if (s.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= GOCOVERDIR is %s\n"u8, os.Getenv(gocoverdirˢ));
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= contents of covmetalist:\n"u8);
-        foreach (var (k, vᴛ1) in ml) {
+        foreach (var (k, vᴛ1) in range(ml)) {
             var b = vᴛ1.ΔClone();
 
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= slot: %d path: %s "u8, k, b.PkgPath);
@@ -217,7 +217,7 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
 
     var h = fnv.New128a();
     var tlen = (uint64)/* unsafe.Sizeof(coverage.MetaFileHeader{}) */ (uintptr)56;
-    foreach (var (_, vᴛ2) in ml) {
+    foreach (var (_, vᴛ2) in range(ml)) {
         var entry = vᴛ2.ΔClone();
 
         var (_, err) = h.Write(entry.Hash[..]); if (err != nil) {
@@ -481,7 +481,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
     var mfw = encodemeta.NewCoverageMetaFileWriter(ioWriterˢ, w);
 
     slice<slice<byte>> blobs = default;
-    foreach (var (_, vᴛ1) in metalist) {
+    foreach (var (_, vᴛ1) in range(metalist)) {
         var e = vᴛ1.ΔClone();
 
         var sd = @unsafe.Slice(e.P, (nint)e.Len);
@@ -495,14 +495,14 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
         ctrs = ctrs[..0];
-        foreach (var i in range(actrs)) {
+        foreach (var i in range(len(actrs))) {
             ctrs = append(ctrs, Ꮡ(actrs, i).Load());
         }
         return ctrs;
     }
 
     var dpkg = (uint32)0;
-    foreach (var (_, c) in s.counterlist) {
+    foreach (var (_, c) in range(s.counterlist)) {
         var sd = @unsafe.Slice(c.Counters.Reinterpret<uint32, atomic.Uint32>(), (nint)c.Len);
         for (nint i = 0; i < len(sd); i++) {
             // Skip ahead until the next non-zero value.
@@ -600,7 +600,7 @@ private static readonly @string goarchˢᵇ = "GOARCH"u8;
 internal static map<@string, @string> captureOsArgs() {
     var m = new map<@string, @string>();
     m[argcˢ] = strconv.Itoa(len(os.Args));
-    foreach (var (k, a) in os.Args) {
+    foreach (var (k, a) in range(os.Args)) {
         m[fmt.Sprintf("argv%d"u8, k)] = a;
     }
     m[goosˢ] = runtime.GOOS;
@@ -640,7 +640,7 @@ internal static void reportErrorInHardcodedList(int32 slot, int32 pkgID, uint32 
     println((@string)"[see the comment on the 'rtPkgs' var in ");
     println((@string)" <goroot>/src/internal/coverage/pkid.go]");
     println((@string)"registered list:");
-    foreach (var (k, vᴛ1) in metaList) {
+    foreach (var (k, vᴛ1) in range(metaList)) {
         var b = vᴛ1.ΔClone();
 
         print((@string)"slot: ", k, (@string)" path='", b.PkgPath, (@string)"' ");

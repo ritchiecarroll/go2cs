@@ -121,12 +121,12 @@ public class MintedAddressSinkTests
 
         // Both enumerators read inline rather than through the indexer: the (index, value) one a Go range
         // lowers to, and the IEnumerable<T> one (ToString, LINQ).
-        StringAssert.Contains(Assert.ThrowsException<PanicException>(() => { foreach ((nint _, byte _) in window) { } }).Message, "nil pointer dereference");
+        StringAssert.Contains(Assert.ThrowsException<PanicException>(() => { foreach ((nint _, byte _) in range(window)) { } }).Message, "nil pointer dereference");
         StringAssert.Contains(Assert.ThrowsException<PanicException>(() => { foreach (byte _ in (System.Collections.Generic.IEnumerable<byte>)window) { } }).Message, "nil pointer dereference");
 
         // An EMPTY window reads nothing, and Go does not fault on one.
         go.slice<byte> empty = go.slice<byte>.OverNativeMemory((nuint)CallerTokenByteBefore, 0);
-        foreach ((nint _, byte _) in empty)
+        foreach ((nint _, byte _) in range(empty))
             Assert.Fail("an empty window has no elements");
     }
 

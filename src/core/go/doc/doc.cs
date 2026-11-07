@@ -147,15 +147,15 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
 }
 
 internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
-    foreach (var (_, v) in values) {
-        foreach (var (_, name) in v.Names) {
+    foreach (var (_, v) in range(values)) {
+        foreach (var (_, name) in range(v.Names)) {
             p.syms[name] = true;
         }
     }
 }
 
 internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
-    foreach (var (_, t) in types) {
+    foreach (var (_, t) in range(types)) {
         if (p.syms[t.Name]) {
             // Shouldn't be any cycles but stop just in case.
             continue;
@@ -171,7 +171,7 @@ internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
 }
 
 internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
-    foreach (var (_, f) in funcs) {
+    foreach (var (_, f) in range(funcs)) {
         if (f.Recv != ""u8) {
             @string r = strings.TrimPrefix(f.Recv, "*");
             nint i = strings.IndexByte(r, (byte)'['); if (i >= 0) {
@@ -196,7 +196,7 @@ internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
 internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, s) in t.Decl.Specs) {
+    foreach (var (_, s) in range(t.Decl.Specs)) {
         var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
         if (!ok) {
             continue;
@@ -205,8 +205,8 @@ internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) 
         if (isStruct) {
             continue;
         }
-        foreach (var (_, field) in list) {
-            foreach (var (_, name) in field.Names) {
+        foreach (var (_, field) in range(list)) {
+            foreach (var (_, name) in range(field.Names)) {
                 p.syms[t.Name + "."u8 + name.Name] = true;
             }
         }
@@ -216,7 +216,7 @@ internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) 
 internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, s) in t.Decl.Specs) {
+    foreach (var (_, s) in range(t.Decl.Specs)) {
         var (spec, ok) = s._<ж<ast.TypeSpec>>(ᐧ);
         if (!ok) {
             continue;
@@ -225,8 +225,8 @@ internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
         if (!isStruct) {
             continue;
         }
-        foreach (var (_, field) in list) {
-            foreach (var (_, name) in field.Names) {
+        foreach (var (_, field) in range(list)) {
+            foreach (var (_, name) in range(field.Names)) {
                 p.syms[t.Name + "."u8 + name.Name] = true;
             }
         }
@@ -291,7 +291,7 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж
     ref var pkgName = ref heap(new @string(), out var ᏑpkgName);
     map<@string, ж<ast.File>> goFiles = new map<@string, ж<ast.File>>();
     slice<ж<ast.File>> testGoFiles = default;
-    foreach (var (i, @file) in files) {
+    foreach (var (i, @file) in range(files)) {
         var f = fset.File(@file.Pos());
         if (f == nil) {
             return (default, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));

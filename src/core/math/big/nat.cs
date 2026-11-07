@@ -512,7 +512,7 @@ internal static nuint sticky(this Δnat x, nuint i) {
         return 1;
     }
     // 0 <= j < len(x)
-    foreach (var (_, xΔ1) in x.slice(0, (nint)(j))) {
+    foreach (var (_, xΔ1) in range<Word>(x.slice(0, (nint)(j)))) {
         if (xΔ1 != 0) {
             return 1;
         }
@@ -627,13 +627,13 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
     for (;;) {
         switch (_W) {
         case var ᴛ when ᴛ == 32: {
-            foreach (var i in range(z)) {
+            foreach (var i in range(len(z))) {
                 z[i] = (Word)(nuint)randΔ1.Uint32();
             }
             break;
         }
         case var ᴛ when ᴛ == 64: {
-            foreach (var i in range(z)) {
+            foreach (var i in range(len(z))) {
                 z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | ((Word)(nuint)randΔ1.Uint32()) << 32);
             }
             break;
@@ -860,7 +860,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         UntypedInt n = 4;
         // powers[i] contains x^i.
         ref var powers = ref heap(new array<Δnat>(16), out var Ꮡpowers);
-        foreach (var iΔ1 in range(powers)) {
+        foreach (var iΔ1 in range(len(powers))) {
             powers[iΔ1] = stk.nat(w);
         }
         powers[0] = powers[0].set(natOne);
@@ -1036,7 +1036,7 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
     i = len(buf);
-    foreach (var (_, vᴛ1) in z) {
+    foreach (var (_, vᴛ1) in range<Word>(z)) {
         var d = vᴛ1;
 
         for (nint j = 0; j < _S; j++) {
@@ -1164,7 +1164,7 @@ internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
     while ((nuint)len(z) * (nuint)_W < n) {
         z = append(z, (Word)0);
     }
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         z[i] = ~z[i];
     }
     z = z.trunc(z, n);

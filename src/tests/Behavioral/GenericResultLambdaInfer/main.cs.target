@@ -31,7 +31,7 @@ public static Func<(A, B)> Once2<A, B>(Func<(A, B)> f) {
 
 internal static E reduce<E>(slice<E> xs, Func<E, E, E> combine) {
     var acc = xs[0];
-    foreach (var (_, x) in xs[1..]) {
+    foreach (var (_, x) in range(xs[1..])) {
         acc = combine(acc, x);
     }
     return acc;
@@ -39,7 +39,7 @@ internal static E reduce<E>(slice<E> xs, Func<E, E, E> combine) {
 
 internal static E pick<E>(slice<E> xs, Func<E, E, bool> better) {
     var best = xs[0];
-    foreach (var (_, x) in xs[1..]) {
+    foreach (var (_, x) in range(xs[1..])) {
         if (better(x, best)) {
             best = x;
         }

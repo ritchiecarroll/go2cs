@@ -30,7 +30,7 @@ internal static void Main() {
     version joined = @short + ((version)(@string)"/x");
 
     var typed = slice<version>([@base + "-t1"u8, @base + "-t2"u8]);
-    var elided = slice<slice<version>>([slice<version>([@base + "-e1"u8])]);
+    var elided = slice<slice<version>>([[@base + "-e1"u8]]);
 
     var inMap = new map<@string, version>{["k"] = @base + "-m"u8};
     var inStruct = new main_rec(@base + "-s"u8);

@@ -22,7 +22,7 @@ public static (nint major, nint minor) KernelVersion() {
     array<nint> values = new(2);
     nint value = default;
     nint vi = default;
-    foreach (var (_, c) in uname.Release.ΔRangeSnapshot()) {
+    foreach (var (_, c) in range(uname.Release.ΔRangeSnapshot())) {
         if ('0' <= c && c <= '9') {
             value = (value * 10) + (nint)((int8)(c - '0'));
         } else {

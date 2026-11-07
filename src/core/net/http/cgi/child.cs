@@ -38,7 +38,7 @@ public static (ж<http.Request>, error) Request() {
 
 internal static map<@string, @string> envMap(slice<@string> env) {
     var m = new map<@string, @string>();
-    foreach (var (_, kv) in env) {
+    foreach (var (_, kv) in range(env)) {
         var (k, v, ok) = strings.Cut(kv, "="); if (ok) {
             m[k] = v;
         }

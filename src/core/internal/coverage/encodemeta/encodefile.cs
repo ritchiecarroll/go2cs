@@ -87,7 +87,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     var off = preambleLength;
     var off2 = mhsz;
     var buf = new slice<byte>(8);
-    foreach (var (_, blob) in blobs) {
+    foreach (var (_, blob) in range(blobs)) {
         binary.LittleEndian.PutUint64(buf, off);
         (_, err) = m.w.Write(buf); if (err != nil) {
             return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
@@ -98,7 +98,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         off += (uint64)len(blob);
         off2 += 8;
     }
-    foreach (var (_, blob) in blobs) {
+    foreach (var (_, blob) in range(blobs)) {
         var bl = (uint64)len(blob);
         binary.LittleEndian.PutUint64(buf, bl);
         (_, err) = m.w.Write(buf); if (err != nil) {
@@ -116,7 +116,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     }
 
     // Now emit blobs themselves.
-    foreach (var (k, blob) in blobs) {
+    foreach (var (k, blob) in range(blobs)) {
         if (m.debug) {
             var h = fnv.New128a();
             h.Write(blob);

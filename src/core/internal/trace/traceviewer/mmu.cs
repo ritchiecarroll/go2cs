@@ -138,7 +138,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     slice<float64> quantiles = default;
     foreach (var flagStr in range<@string>(strings.SplitSeq(r.FormValue(flagsˢ), "|").Invoke)) {
         if (flagStr == "mut"u8) {
-            quantiles = slice<float64>([0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D]);
+            quantiles = [0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D];
             break;
         }
     }
@@ -155,7 +155,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     var xMax = xMin * 1000000;
     // But no more than the length of the trace.
     var (minEvent, maxEvent) = (mu[0][0].Time, mu[0][len(mu[0]) - 1].Time);
-    foreach (var (_, mu1) in mu[1..]) {
+    foreach (var (_, mu1) in range(mu[1..])) {
         if (mu1[0].Time < minEvent) {
             minEvent = mu1[0].Time;
         }
@@ -411,7 +411,7 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
 
     // Construct a link for each window.
     slice<linkedUtilWindow> links = default;
-    foreach (var (_, ui) in worst) {
+    foreach (var (_, ui) in range(worst)) {
         links = append(links, m.newLinkedUtilWindow(ui, (time.Duration)(int64)window));
     }
 
@@ -430,7 +430,7 @@ partial struct linkedUtilWindow {
 internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
     Range r = default;
-    foreach (var (_, vᴛ1) in m.ranges) {
+    foreach (var (_, vᴛ1) in range(m.ranges)) {
         r = vᴛ1;
 
         if (r.EndTime > ui.Time) {

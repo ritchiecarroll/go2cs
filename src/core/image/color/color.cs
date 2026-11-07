@@ -314,7 +314,7 @@ public static nint Index(this Palette p, Color c) {
     var (cr, cg, cb, ca) = c.RGBA();
     nint ret = 0;
     var bestSum = unchecked((uint32)(4294967295UL));
-    foreach (var (i, v) in p) {
+    foreach (var (i, v) in range<Color>(p)) {
         var (vr, vg, vb, va) = v.RGBA();
         var sum = sqDiff(cr, vr) + sqDiff(cg, vg) + sqDiff(cb, vb) + sqDiff(ca, va);
         if (sum < bestSum) {

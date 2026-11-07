@@ -59,7 +59,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     const nint barWidth = 400;
 
     nint maxCount = 0;
-    foreach (var (_, count) in h.Buckets) {
+    foreach (var (_, count) in range(h.Buckets)) {
         if (count > maxCount) {
             maxCount = count;
         }

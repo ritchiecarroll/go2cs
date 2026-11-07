@@ -50,7 +50,7 @@ internal static partial nint nestedBlockShadow(nint kind) {
     return total;
 }
 
-internal static map<@string, slice<@string>> hosts = new map<@string, slice<@string>>{["a"] = slice<@string>(["x", "y"])};
+internal static map<@string, slice<@string>> hosts = new map<@string, slice<@string>>{["a"] = ["x", "y"]};
 
 internal static partial nint tupleInitShadow(@string key) {
     var (hostsΔ1, ok) = hosts[key, ꟷ]; if (ok) {

@@ -44,7 +44,7 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Ac
         depth: 1
     ));
 
-    foreach (var (_, decl) in @file.Decls) {
+    foreach (var (_, decl) in range(@file.Decls)) {
         ast.Walk(new resolverжVisitor(r), decl);
     }
 
@@ -54,7 +54,7 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Ac
 
     // resolve global identifiers within the same file
     nint i = 0;
-    foreach (var (_, ident) in r.unresolved) {
+    foreach (var (_, ident) in range(r.unresolved)) {
         // i <= index for current ident
         assert(ident.Obj == unresolved, objectAlreadyResolvedˢ);
         ident.Obj = r.pkgScope.Lookup(ident.Name); // also removes unresolved sentinel
@@ -95,7 +95,7 @@ internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸ
 internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    foreach (var (i, arg) in args) {
+    foreach (var (i, arg) in range(args)) {
         switch (arg.type()) {
         case tokenꓸPos argΔ1: {
             args[i] = r.handle.Position(argΔ1);
@@ -141,7 +141,7 @@ internal static void closeLabelScope(this ref resolver r) {
     // resolve labels
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
-    foreach (var (_, ident) in r.targetStack[n]) {
+    foreach (var (_, ident) in range(r.targetStack[n])) {
         ident.Obj = scope.Lookup(ident.Name);
         if (ident.Obj == nil && r.declErr != nil) {
             r.declErr(ident.Pos(), fmt.Sprintf("label %s undefined"u8, ident.Name));
@@ -160,7 +160,7 @@ internal static void declare(this ref resolver r, any decl, any data, ж<ast.Sco
     var idents = identsʗp.sslice();
     ref var scope = ref Ꮡscope.DerefOrNull();
 
-    foreach (var (_, ident) in idents) {
+    foreach (var (_, ident) in range(idents)) {
         if (ident.Obj != nil) {
             throw panic(fmt.Sprintf("%v: identifier %s already declared or resolved"u8, ident.Pos(), ident.Name));
         }
@@ -202,7 +202,7 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
     // provided they were originally declared in the same block with
     // the same type, and at least one of the non-blank variables is new.
     nint n = 0; // number of new variables
-    foreach (var (_, x) in decl.Lhs) {
+    foreach (var (_, x) in range(decl.Lhs)) {
         var (ident, isIdent) = x._<ж<ast.Ident>>(ᐧ); if (isIdent) {
             assert(ident.Obj == nil, identifierAlreadyˢ);
             var obj = ast.NewObj(ast.Var, ident.Name);
@@ -277,13 +277,13 @@ internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool c
 }
 
 internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
-    foreach (var (_, node) in list) {
+    foreach (var (_, node) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), node);
     }
 }
 
 internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
-    foreach (var (_, expr) in list) {
+    foreach (var (_, expr) in range(list)) {
         var exprΔ1 = ast.Unparen(expr);
         var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
             ast.Walk(new resolverжVisitor(Ꮡr), exprΔ1);
@@ -292,7 +292,7 @@ internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
 }
 
 internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
-    foreach (var (_, stmt) in list) {
+    foreach (var (_, stmt) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), stmt);
     }
 }
@@ -345,7 +345,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
             if (n.Type != nil) {
                 ast.Walk(new resolverжVisitor(Ꮡr), n.Type);
             }
-            foreach (var (_, e) in n.Elts) {
+            foreach (var (_, e) in range(n.Elts)) {
                 var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
                     // See go.dev/issue/45160: try to resolve composite lit keys, but don't
                     // collect them as unresolved if resolution failed. This replicates
@@ -508,7 +508,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
                         Lhs: lhs,
                         Tok: token.DEFINE,
                         TokPos: n.TokPos,
-                        Rhs: slice<ast.Expr>([new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: n.X)))])
+                        Rhs: [new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(Op: token.RANGE, X: n.X)))]
                     ));
                     // TODO(rFindley): this walkLHS reproduced the parser resolution, but
                     // is it necessary? By comparison, for a normal AssignStmt we don't
@@ -526,7 +526,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
         case ж<ast.GenDecl> n: {
             switch (n.Tok) {
             case var ᴛ when ᴛ == token.CONST || ᴛ == token.VAR: {
-                foreach (var (i, spec) in n.Specs) {
+                foreach (var (i, spec) in range(n.Specs)) {
                     var specΔ1 = spec._<ж<ast.ValueSpec>>();
                     ast.ObjKind kind = ast.Con;
                     if (n.Tok == token.VAR) {
@@ -541,7 +541,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
                 break;
             }
             case var ᴛ when ᴛ == token.TYPE: {
-                foreach (var (_, spec) in n.Specs) {
+                foreach (var (_, spec) in range(n.Specs)) {
                     var specΔ1 = spec._<ж<ast.TypeSpec>>();
                     // Go spec: The scope of a type identifier declared inside a function begins
                     // at the identifier in the TypeSpec and ends at the end of the innermost
@@ -614,7 +614,7 @@ internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡli
     if (Ꮡlist == nil) {
         return;
     }
-    foreach (var (_, f) in list.List) {
+    foreach (var (_, f) in range(list.List)) {
         if (f.Type != nil) {
             ast.Walk(new resolverжVisitor(Ꮡr), f.Type);
         }
@@ -627,7 +627,7 @@ internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist,
     if (Ꮡlist == nil) {
         return;
     }
-    foreach (var (_, f) in list.List) {
+    foreach (var (_, f) in range(list.List)) {
         r.declare(f.OrTypedNil(), default, r.topScope, kind, f.Names.ꓸꓸꓸ);
     }
 }
@@ -652,7 +652,7 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     slice<ast.Expr> resolveExprs = default; // exprs to resolve
     switch (typ.type()) {
     case ж<ast.IndexExpr> typΔ1: {
-        declareExprs = slice<ast.Expr>([typΔ1.Index]);
+        declareExprs = [typΔ1.Index];
         resolveExprs = append(resolveExprsᴷ, resolveExprs, typΔ1.X);
         break;
     }
@@ -666,7 +666,7 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
         resolveExprs = append(resolveExprs, typΔ1);
         break;
     }}
-    foreach (var (_, expr) in declareExprs) {
+    foreach (var (_, expr) in range(declareExprs)) {
         var (id, _) = expr._<ж<ast.Ident>>(ᐧ); if (id != nil) {
             r.declare(expr, default, r.topScope, ast.Typ, id);
         } else {
@@ -675,13 +675,13 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
             resolveExprs = append(resolveExprs, expr);
         }
     }
-    foreach (var (_, expr) in resolveExprs) {
+    foreach (var (_, expr) in range(resolveExprs)) {
         if (expr != nil) {
             ast.Walk(new resolverжVisitor(Ꮡr), expr);
         }
     }
     // The receiver is invalid, but try to resolve it anyway for consistency.
-    foreach (var (_, f) in recv.List[1..]) {
+    foreach (var (_, f) in range(recv.List[1..])) {
         if (f.Type != nil) {
             ast.Walk(new resolverжVisitor(Ꮡr), f.Type);
         }

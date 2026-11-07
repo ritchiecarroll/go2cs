@@ -172,14 +172,14 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
     var bufᴷ = new stackAppend<byte>();
 
     nint size = 0;
-    foreach (var (_, e) in elem) {
+    foreach (var (_, e) in range(elem)) {
         size += len(e);
     }
     if (size == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, size + len(elem) - 1);
-    foreach (var (_, e) in elem) {
+    foreach (var (_, e) in range(elem)) {
         if (len(buf) > 0 || e != ""u8) {
             if (len(buf) > 0) {
                 buf = builtin.append(bufᴷ, buf, (byte)'/');

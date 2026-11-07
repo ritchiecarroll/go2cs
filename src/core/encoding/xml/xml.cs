@@ -309,7 +309,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
         // attributes apply to the element name and
         // to the other attribute names, so process
         // the translations first.
-        foreach (var (_, a) in t1.Attr) {
+        foreach (var (_, a) in range(t1.Attr)) {
             if (a.Name.Space == xmlnsPrefix) {
                 var (v, ok) = d.ns[a.Name.Local, ꟷ];
                 d.pushNs(a.Name.Local, v, ok);
@@ -325,7 +325,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
 
         d.pushElement(t1.Name);
         d.translate(Ꮡt1.ᏑName, true);
-        foreach (var i in range(t1.Attr)) {
+        foreach (var i in range(len(t1.Attr))) {
             d.translate(Ꮡ(t1.Attr, i).ᏑName, false);
         }
         t = t1;
@@ -546,7 +546,7 @@ internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
     if (d.stk == nil || d.stk.kind != stkStart) {
         return (default, false);
     }
-    foreach (var (_, s) in d.AutoClose) {
+    foreach (var (_, s) in range(d.AutoClose)) {
         if (strings.EqualFold(s, d.stk.name.Local)) {
             // This one should be auto closed if t doesn't close it.
             var (et, ok) = t._<EndElement>(ᐧ);
@@ -847,7 +847,7 @@ HandleB:
         return (default, d.err);
     }
 
-    attr = slice<Attr>([]);
+    attr = [];
     for (;;) {
         d.space();
         (b, ok) = d.mustgetc(); if (!ok) {
@@ -1358,7 +1358,7 @@ internal static bool isNameString(@string s) {
 // and then reformatting. First corresponds to (Letter | '_' | ':')
 // and second corresponds to NameChar.
 [GoLazy] partial class lazyᴛfirst { internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
-    R16: slice<unicode.Range16>([
+    R16: [
         new(0x003A, 0x003A, 1),
         new(0x0041, 0x005A, 1),
         new(0x005F, 0x005F, 1),
@@ -1549,11 +1549,11 @@ internal static bool isNameString(@string s) {
         new(0x3105, 0x312C, 1),
         new(0x4E00, 0x9FA5, 1),
         new(0xAC00, 0xD7A3, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛsecond { internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
-    R16: slice<unicode.Range16>([
+    R16: [
         new(0x002D, 0x002E, 1),
         new(0x0030, 0x0039, 1),
         new(0x00B7, 0x00B7, 1),
@@ -1666,7 +1666,7 @@ internal static bool isNameString(@string s) {
         new(0x3099, 0x309A, 1),
         new(0x309D, 0x309E, 1),
         new(0x30FC, 0x30FE, 1)
-    ])
+    ]
 )); }
 
 // HTMLEntity is an entity map containing translations for the
@@ -1947,7 +1947,7 @@ public static readonly ж<slice<@string>> ᏑHTMLAutoClose = new StaticBox<slice
 public static ref slice<@string> HTMLAutoClose => ref ((StaticBox<slice<@string>>)ᏑHTMLAutoClose).ValueSlot;
 internal static void initᴛHTMLAutoClose() { HTMLAutoClose = htmlAutoClose; }
 
-internal static slice<@string> htmlAutoClose = slice<@string>([
+internal static slice<@string> htmlAutoClose = [
     /*
 		hget http://www.w3.org/TR/html4/loose.dtd |
 		9 sed -n 's/<!ELEMENT ([^ ]*) +- O EMPTY.+/	"\1",/p' | tr A-Z a-z
@@ -1965,7 +1965,7 @@ internal static slice<@string> htmlAutoClose = slice<@string>([
     "isindex",
     "base",
     "meta"
-]);
+];
 
 internal static slice<byte> escQuot = slice<byte>("&#34;"u8); // shorter than "&quot;"
 internal static slice<byte> escApos = slice<byte>("&#39;"u8); // shorter than "&apos;"

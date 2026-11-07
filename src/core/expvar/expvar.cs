@@ -296,7 +296,7 @@ public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) {
 
         Ꮡv.ᏑkeysMu.RLock();
         ᒐd1 = true;
-        foreach (var (_, k) in v.keys) {
+        foreach (var (_, k) in range(v.keys)) {
             var (i, _) = Ꮡv.Ꮡm.Load(k);
             var (val, _) = i._<Var>(ᐧ);
             f(new KeyValue(k, val));

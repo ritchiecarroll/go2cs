@@ -21,7 +21,7 @@ internal static void Main() {
         new("tcp", "go2cs-no-such-service")
     ]);
 
-    foreach (var (_, q) in queries) {
+    foreach (var (_, q) in range(queries)) {
         var (port, err) = Δnet.LookupPort(q.network, q.service);
 
         if (err != nil) {

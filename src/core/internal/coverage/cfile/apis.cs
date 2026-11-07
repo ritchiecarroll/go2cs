@@ -135,7 +135,7 @@ public static error ClearCounters() {
     // inconsistency when reading the counter array from the thread
     // running ClearCounters.
 
-    foreach (var (_, c) in cl) {
+    foreach (var (_, c) in range(cl)) {
         var sd = @unsafe.Slice(c.Counters.Reinterpret<uint32, atomic.Uint32>(), (nint)c.Len);
         for (nint i = 0; i < len(sd); i++) {
             // Skip ahead until the next non-zero value.

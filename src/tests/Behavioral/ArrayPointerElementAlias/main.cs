@@ -18,10 +18,10 @@ internal static void bumpAll(ж<byte> p) {
 
 internal static void Main() {
     var dst = new slice<uint16>(8);
-    nint n = readInto(Ꮡ(dst, 0), 4, slice<uint16>([1, 2, 3, 4]));
+    nint n = readInto(Ꮡ(dst, 0), 4, [1, 2, 3, 4]);
     fmt.Println("copied:", n, "dst:", dst);
 
-    n = readInto(Ꮡ(dst, 4), 3, slice<uint16>([7, 8, 9]));
+    n = readInto(Ꮡ(dst, 4), 3, [7, 8, 9]);
     fmt.Println("copied:", n, "dst:", dst);
 
     var p = array<uint16>.AliasPointer(Ꮡ(dst, 2), 4);
@@ -49,7 +49,7 @@ internal static void Main() {
     fmt.Println("array length:", 4, len(p.Value));
 
     ref var raw = ref heap(new array<byte>(8), out var Ꮡraw);
-    foreach (var i in range(raw)) {
+    foreach (var i in range(len(raw))) {
         raw[i] = (byte)i;
     }
     bumpAll(Ꮡraw.at<byte>(3));

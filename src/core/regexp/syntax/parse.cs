@@ -209,7 +209,7 @@ internal static void checkSize(this ref parser p, ж<Regexp> Ꮡre) {
         // Make the map and belatedly populate it
         // with info about everything we've constructed so far.
         p.size = new map<ж<Regexp>, int64>();
-        foreach (var (_, reΔ1) in p.stack) {
+        foreach (var (_, reΔ1) in range(p.stack)) {
             p.checkSize(reΔ1);
         }
     }
@@ -244,13 +244,13 @@ internal static int64 calcSize(this ref parser p, ж<Regexp> Ꮡre, bool force) 
         break;
     }
     case var ᴛ when ᴛ == OpConcat: {
-        foreach (var (_, sub) in re.Sub) {
+        foreach (var (_, sub) in range(re.Sub)) {
             size += p.calcSize(sub, false);
         }
         break;
     }
     case var ᴛ when ᴛ == OpAlternate: {
-        foreach (var (_, sub) in re.Sub) {
+        foreach (var (_, sub) in range(re.Sub)) {
             size += p.calcSize(sub, false);
         }
         if (len(re.Sub) > 1) {
@@ -284,7 +284,7 @@ internal static void checkHeight(this ref parser p, ж<Regexp> re) {
     }
     if (p.height == nil) {
         p.height = new map<ж<Regexp>, nint>();
-        foreach (var (_, reΔ1) in p.stack) {
+        foreach (var (_, reΔ1) in range(p.stack)) {
             p.checkHeight(reΔ1);
         }
     }
@@ -302,7 +302,7 @@ internal static nint calcHeight(this ref parser p, ж<Regexp> Ꮡre, bool force)
         }
     }
     nint h = 1;
-    foreach (var (_, sub) in re.Sub) {
+    foreach (var (_, sub) in range(re.Sub)) {
         nint hsub = p.calcHeight(sub, false);
         if (h < 1 + hsub) {
             h = 1 + hsub;
@@ -485,7 +485,7 @@ internal static bool repeatIsValid(ref Regexp re, nint n) {
             n = quo(n, m);
         }
     }
-    foreach (var (_, sub) in re.Sub) {
+    foreach (var (_, sub) in range(re.Sub)) {
         if (!repeatIsValid(ref (sub).DerefOrNull(), n)) {
             return false;
         }
@@ -575,7 +575,7 @@ internal static ж<Regexp> collapse(this ref parser p, slice<ж<Regexp>> subs, O
     }
     var re = p.newRegexp(op);
     re.Sub = re.Sub0[..0];
-    foreach (var (_, sub) in subs) {
+    foreach (var (_, sub) in range(subs)) {
         if (sub.Op == op) {
             re.Sub = builtin.appendꓸꓸꓸ(re.Sub, sub.Sub);
             p.reuse(sub);
@@ -785,7 +785,7 @@ internal static slice<ж<Regexp>> factor(this ref parser p, slice<ж<Regexp>> su
     // Round 4: Collapse runs of empty matches into a single empty match.
     start = 0;
     @out = sub[..0];
-    foreach (var i in range(sub)) {
+    foreach (var i in range(len(sub))) {
         if (i + 1 < len(sub) && sub[i].Op == OpEmptyMatch && sub[i + 1].Op == OpEmptyMatch) {
             continue;
         }
@@ -1786,20 +1786,20 @@ internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, cha
 }
 
 [GoLazy] partial class lazyᴛanyTable { internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
-    R16: slice<unicode.Range16>([new(Lo: 0, Hi: (uint16)((1 << 16) - 1), Stride: 1)]),
-    R32: slice<unicode.Range32>([new(Lo: ((uint32)1 << 16), Hi: unicode.MaxRune, Stride: 1)])
+    R16: [new(Lo: 0, Hi: (uint16)((1 << 16) - 1), Stride: 1)],
+    R32: [new(Lo: ((uint32)1 << 16), Hi: unicode.MaxRune, Stride: 1)]
 )); }
 
 [GoLazy] partial class lazyᴛasciiTable { internal static ж<unicode.RangeTable> asciiTable = Ꮡ(new unicode.RangeTable(
-    R16: slice<unicode.Range16>([new(Lo: 0, Hi: 0x7F, Stride: 1)])
+    R16: [new(Lo: 0, Hi: 0x7F, Stride: 1)]
 )); }
 
 [GoLazy] partial class lazyᴛasciiFoldTable { internal static ж<unicode.RangeTable> asciiFoldTable = Ꮡ(new unicode.RangeTable(
-    R16: slice<unicode.Range16>([
+    R16: [
         new(Lo: 0, Hi: 0x7F, Stride: 1),
         new(Lo: 0x017F, Hi: 0x017F, Stride: 1), // Old English long s (ſ), folds to S/s.
         new(Lo: 0x212A, Hi: 0x212A, Stride: 1)  // Kelvin K, folds to K/k.
-    ])
+    ]
 )); }
 
 // categoryAliases is a lazily constructed copy of unicode.CategoryAliases
@@ -2255,7 +2255,7 @@ internal static slice<rune> appendNegatedClass(slice<rune> r, slice<rune> x) {
 
 // appendTable returns the result of appending x to the class r.
 internal static slice<rune> appendTable(slice<rune> r, ref unicode.RangeTable x) {
-    foreach (var (_, xr) in x.R16) {
+    foreach (var (_, xr) in range(x.R16)) {
         var (lo, hi, stride) = ((rune)xr.Lo, (rune)xr.Hi, (rune)xr.Stride);
         if (stride == 1) {
             r = appendRange(r, lo, hi);
@@ -2265,7 +2265,7 @@ internal static slice<rune> appendTable(slice<rune> r, ref unicode.RangeTable x)
             r = appendRange(r, c, c);
         }
     }
-    foreach (var (_, xr) in x.R32) {
+    foreach (var (_, xr) in range(x.R32)) {
         var (lo, hi, stride) = ((rune)xr.Lo, (rune)xr.Hi, (rune)xr.Stride);
         if (stride == 1) {
             r = appendRange(r, lo, hi);
@@ -2281,7 +2281,7 @@ internal static slice<rune> appendTable(slice<rune> r, ref unicode.RangeTable x)
 // appendNegatedTable returns the result of appending the negation of x to the class r.
 internal static slice<rune> appendNegatedTable(slice<rune> r, ref unicode.RangeTable x) {
     var nextLo = (rune)'\u0000'; // lo end of next class to add
-    foreach (var (_, xr) in x.R16) {
+    foreach (var (_, xr) in range(x.R16)) {
         var (lo, hi, stride) = ((rune)xr.Lo, (rune)xr.Hi, (rune)xr.Stride);
         if (stride == 1) {
             if (nextLo <= lo - 1) {
@@ -2297,7 +2297,7 @@ internal static slice<rune> appendNegatedTable(slice<rune> r, ref unicode.RangeT
             nextLo = c + 1;
         }
     }
-    foreach (var (_, xr) in x.R32) {
+    foreach (var (_, xr) in range(x.R32)) {
         var (lo, hi, stride) = ((rune)xr.Lo, (rune)xr.Hi, (rune)xr.Stride);
         if (stride == 1) {
             if (nextLo <= lo - 1) {

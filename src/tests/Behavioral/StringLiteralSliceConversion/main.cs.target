@@ -9,10 +9,10 @@ partial struct vector {
     internal slice<byte> key;
 }
 
-internal static slice<vector> vectors = slice<vector>([
+internal static slice<vector> vectors = [
     new("split", slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
     new("plain", slice<byte>("single"u8))
-]);
+];
 
 internal static void Main() {
     var bs = slice<byte>("hello"u8);
@@ -35,7 +35,7 @@ internal static void Main() {
     fmt.Println(len(rsplit), (@string)rsplit);
     fmt.Println(slice<byte>((@string)(@"raw "u8 + "cooked"u8)));
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         fmt.Println(v.name, len(v.key), v.key[0], v.key[len(v.key) - 1]);
     }
 

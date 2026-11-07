@@ -6,15 +6,15 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static slice<@string> wellKnown = slice<@string>([
+internal static slice<@string> wellKnown = [
     "S-1-5-18",
     "S-1-5-32-544",
     "S-1-1-0",
     "S-1-0-0"
-]);
+];
 
 internal static void Main() {
-    foreach (var (_, s) in wellKnown) {
+    foreach (var (_, s) in range(wellKnown)) {
         var (sid, err) = syscall.StringToSid(s);
         if (err != nil) {
             fmt.Println("StringToSid error:", err);

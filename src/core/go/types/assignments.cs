@@ -320,7 +320,7 @@ internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
     slice<ΔType> res = default;
     var resᴷ = new stackAppend<ΔType>(moves: true);
 
-    foreach (var (_, x) in list) {
+    foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
     res = move2heap(resᴷ, res);
@@ -332,7 +332,7 @@ internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
     slice<ΔType> res = default;
     var resᴷ = new stackAppend<ΔType>(moves: true);
 
-    foreach (var (_, x) in list) {
+    foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
     }
     res = move2heap(resᴷ, res);
@@ -359,7 +359,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
 
     assert(!(variadic && hasDots));
     slice<@string> res = default;
-    foreach (var (i, t) in list) {
+    foreach (var (i, t) in range(list)) {
         @string s = default;
         var matchᴛ1 = false;
         if (t == nil) { matchᴛ1 = true; // should not happen but be cautious
@@ -489,7 +489,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     // each value can be assigned to its corresponding variable.
     if (l == r && !isCall) {
         ref var x = ref heap(new operand(), out var Ꮡx);
-        foreach (var (i, lhsΔ1) in lhs) {
+        foreach (var (i, lhsΔ1) in range(lhs)) {
             @string desc = lhsΔ1.name;
             if (returnStmt != nil && desc == ""u8) {
                 desc = resultVariableˢ;
@@ -513,7 +513,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
             }
         }
         // ensure that LHS variables have a type
-        foreach (var (_, v) in lhs) {
+        foreach (var (_, v) in range(lhs)) {
             if (v.typ == nil) {
                 v.typ = new BasicжΔType(Typ[Invalid]);
             }
@@ -524,7 +524,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2 && returnStmt == nil);
     r = len(rhs);
     if (l == r) {
-        foreach (var (i, lhsΔ2) in lhs) {
+        foreach (var (i, lhsΔ2) in range(lhs)) {
             Ꮡcheck.initVar(lhsΔ2, rhs[i], context);
         }
         // Only record comma-ok expression if both initializations succeeded
@@ -545,7 +545,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
     }
     // ensure that LHS variables have a type
-    foreach (var (_, v) in lhs) {
+    foreach (var (_, v) in range(lhs)) {
         if (v.typ == nil) {
             v.typ = new BasicжΔType(Typ[Invalid]);
         }
@@ -570,7 +570,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
     // If we have a n:n mapping from lhs variable to rhs expression,
     // each value can be assigned to its corresponding variable.
     if (l == r && !isCall) {
-        foreach (var (i, lhsΔ1) in lhs) {
+        foreach (var (i, lhsΔ1) in range(lhs)) {
             Ꮡcheck.assignVar(lhsΔ1, orig_rhs[i], nil, assignmentˢ);
         }
         return;
@@ -591,7 +591,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
     var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2);
     r = len(rhs);
     if (l == r) {
-        foreach (var (i, lhsΔ2) in lhs) {
+        foreach (var (i, lhsΔ2) in range(lhs)) {
             Ꮡcheck.assignVar(lhsΔ2, default, rhs[i], assignmentˢ);
         }
         // Only record comma-ok expression if both assignments succeeded
@@ -623,7 +623,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     var lhsVars = new slice<ж<Var>>(len(lhs));
     var newVars = new slice<ж<Var>>(0, len(lhs));
     var hasErr = false;
-    foreach (var (i, lhsΔ1) in lhs) {
+    foreach (var (i, lhsΔ1) in range(lhs)) {
         var (ident, _) = lhsΔ1._<ж<ast.Ident>>(ᐧ);
         if (ident == nil) {
             Ꮡcheck.useLHS(lhsΔ1);
@@ -669,7 +669,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     }
 
     // create dummy variables where the lhs is invalid
-    foreach (var (i, obj) in lhsVars) {
+    foreach (var (i, obj) in range(lhsVars)) {
         if (obj == nil) {
             lhsVars[i] = newVar(LocalVar, lhs[i].Pos(), check.pkg, "_", default);
         }
@@ -691,7 +691,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     // for short variable declarations) and ends at the end of the innermost
     // containing block."
     tokenꓸPos scopePos = endPos(rhs[len(rhs) - 1]);
-    foreach (var (_, obj) in newVars) {
+    foreach (var (_, obj) in range(newVars)) {
         Ꮡcheck.declare(scope, nil, new VarжObject(obj), scopePos); // id = nil: recordDef already called
     }
 }

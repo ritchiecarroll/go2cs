@@ -29,7 +29,7 @@ internal static nint center;
 [GoInit] internal static void init() {
     println((@string)"init fn 1");
     nint n = 0;
-    foreach (var (pos, field) in board) {
+    foreach (var (pos, field) in range(board)) {
         if (field == '○') {
             center = pos;
             n++;
@@ -66,9 +66,9 @@ internal static void unmove(nint pos, nint dir) {
 internal static bool solve() {
     nint last = default;
     nint n = default;
-    foreach (var (pos, field) in board) {
+    foreach (var (pos, field) in range(board)) {
         if (field == '●') {
-            foreach (var (_, dir) in new nint[]{-1, -N, +1, +N}.array()) {
+            foreach (var (_, dir) in range(new nint[]{-1, -N, +1, +N}.array())) {
                 if (move(pos, dir)) {
                     if (solve()) {
                         unmove(pos, dir);

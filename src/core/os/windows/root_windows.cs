@@ -58,13 +58,13 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
 
     @string fixedPrefix = fixedPrefixᶜ;
     var buf = slice<byte>(fixedPrefix);
-    foreach (var (_, p) in prefix) {
+    foreach (var (_, p) in range(prefix)) {
         buf = append(bufᴷ, buf, (byte)'\\');
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
     buf = append(buf, (byte)'\\');
     buf = appendꓸꓸꓸ(buf, slice<byte>(s));
-    foreach (var (_, p) in suffix) {
+    foreach (var (_, p) in range(suffix)) {
         buf = append(buf, (byte)'\\');
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }

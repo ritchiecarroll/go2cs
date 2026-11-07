@@ -44,7 +44,7 @@ internal static void simplePopulateTable(uint32 poly, ref Table t) {
 // was previously computed using simpleMakeTable.
 internal static uint32 simpleUpdate(uint32 crc, ref Table tab, slice<byte> p) {
     crc = ~crc;
-    foreach (var (_, v) in p) {
+    foreach (var (_, v) in range(p)) {
         crc = tab[(byte)((byte)crc ^ v)] ^ (crc >> 8);
     }
     return ~crc;

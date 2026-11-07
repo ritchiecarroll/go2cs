@@ -57,7 +57,7 @@ partial struct compressionLevel {
     internal nint level, good, lazy, nice, chain, fastSkipHashing;
 }
 
-[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = slice<compressionLevel>([
+[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = [
     new(0, 0, 0, 0, 0, 0), // NoCompression.
     new(1, 0, 0, 0, 0, 0), // BestSpeed uses a custom algorithm; see deflatefast.go.
     // For levels 2-3 we don't bother trying with lazy matches.
@@ -71,7 +71,7 @@ partial struct compressionLevel {
     new(7, 8, 32, 128, 256, skipNever),
     new(8, 32, 128, 258, 1024, skipNever),
     new(9, 32, 258, 258, 4096, skipNever)
-]); }
+]; }
 
 partial struct compressor {
     /*embed*/ internal compressionLevel compressionLevel;
@@ -129,14 +129,14 @@ internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
 
             // Iterate over slices instead of arrays to avoid copying
             // the entire table onto the stack (Issue #18625).
-            foreach (var (i, v) in d.hashPrev[..]) {
+            foreach (var (i, v) in range(d.hashPrev[..])) {
                 if ((nint)v > delta) {
                     d.hashPrev[i] = (uint32)((nint)v - delta);
                 } else {
                     d.hashPrev[i] = 0;
                 }
             }
-            foreach (var (i, v) in d.hashHead[..]) {
+            foreach (var (i, v) in range(d.hashHead[..])) {
                 if ((nint)v > delta) {
                     d.hashHead[i] = (uint32)((nint)v - delta);
                 } else {
@@ -200,7 +200,7 @@ internal static void fillWindow(this ref compressor d, slice<byte> b) {
 
         var dst = d.hashMatch.slice(0, dstSize);
         d.bulkHasher(toCheck, dst);
-        foreach (var (i, val) in dst) {
+        foreach (var (i, val) in range(dst)) {
             nint di = i + index;
             var hh = Ꮡ(d.hashHead, (val & (uint32)hashMask));
             // Get previous value with the same hash.
@@ -311,7 +311,7 @@ internal static void bulkHash4(slice<byte> b, slice<uint32> dst) {
 internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
     a = a.slice(0, max);
     b = b.slice(0, len(a));
-    foreach (var (i, av) in a) {
+    foreach (var (i, av) in range(a)) {
         if (b[i] != av) {
             return i;
         }

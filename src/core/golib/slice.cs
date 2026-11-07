@@ -210,6 +210,7 @@ public interface IGoReflectSlice
 [Serializable]
 [System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(slice<>.DebugView))]
+[CollectionBuilder(typeof(SliceBuilder), nameof(SliceBuilder.Create))]
 public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, ISliceWrap<slice<T>, T>, IByteSeq<slice<T>, T>, ISliceBacking
 {
     // The debugger's view (DebuggerTypeProxy): Go's len and cap, and the elements of the len window --
@@ -1001,18 +1002,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     /// <summary>
-    /// Gets an allocation-free enumerator over the slice's (index, value) pairs — the shape a
-    /// converted <c>for i, v := range s</c> binds.
+    /// Gets an allocation-free enumerator over the slice's VALUES, the element type a collection expression
+    /// <c>[1, 2, 3]</c> builds a slice from: <c>foreach (var v in s)</c>.
     /// </summary>
     /// <remarks>
-    /// The return type is the concrete <see cref="Enumerator"/> STRUCT, not <c>IEnumerator&lt;(nint, T)&gt;</c>.
-    /// C#'s <c>foreach</c> binds <c>GetEnumerator</c> by pattern before it considers any interface, so
-    /// every ranged loop in the converted corpus now enumerates with zero heap traffic. The previous
-    /// signature returned an interface from an ITERATOR method, which cost two allocations on entry to
-    /// every loop — the compiler-generated state machine plus the inner <c>SliceEnumerator</c> class —
-    /// and made Go code that allocates nothing allocate per loop in C#. <see cref="Enumerator"/> still
-    /// implements the interface, so an explicit <c>IEnumerator&lt;(nint, T)&gt;</c> consumer keeps
-    /// working (it boxes, exactly as it did before); only the pattern path avoids the box.
+    /// Go's <c>for i, v := range s</c> is <c>foreach (var (i, v) in range(s))</c>: the pairs come from
+    /// <see cref="builtin.range{T}(slice{T})"/>, whose <see cref="RangeEnumerator"/> is the same allocation-free
+    /// struct this enumerator is (docs/PLAN-collection-expressions.md, ruled 2026-11-05). Both are concrete
+    /// structs because C#'s <c>foreach</c> binds <c>GetEnumerator</c> by pattern before any interface, so a loop
+    /// enumerates with zero heap traffic.
     /// </remarks>
     public Enumerator GetEnumerator()
     {
@@ -1020,16 +1018,68 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     /// <summary>
-    /// Allocation-free (index, value) enumerator over a <see cref="slice{T}"/>.
+    /// Allocation-free enumerator over a <see cref="slice{T}"/>'s values.
+    /// </summary>
+    /// <remarks>
+    /// Mutable struct by design: the <c>foreach</c> pattern copies it into a local and drives that copy. It reads
+    /// the same window and the same backing as <see cref="RangeEnumerator"/>, which yields the index beside it.
+    /// </remarks>
+    [Serializable]
+    public struct Enumerator : IEnumerator<T>
+    {
+        private RangeEnumerator m_pairs;
+
+        internal Enumerator(slice<T> slice)
+        {
+            m_pairs = new RangeEnumerator(slice);
+        }
+
+        public readonly T Current => m_pairs.Current.Item2;
+
+        readonly object? IEnumerator.Current => Current;
+
+        public bool MoveNext() => m_pairs.MoveNext();
+
+        void IEnumerator.Reset()
+        {
+            IEnumerator pairs = m_pairs;
+            pairs.Reset();
+            m_pairs = (RangeEnumerator)pairs;
+        }
+
+        public readonly void Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// What <see cref="builtin.range{T}(slice{T})"/> returns: the slice's (index, value) pairs, Go's
+    /// <c>range s</c>, for <c>foreach (var (i, v) in range(s))</c>. The slice header is copied once, when the loop
+    /// starts, so the loop reads the length Go reads once; the elements are read live, as Go's are.
+    /// </summary>
+    public readonly struct RangeOver
+    {
+        private readonly slice<T> m_slice;
+
+        internal RangeOver(slice<T> slice)
+        {
+            m_slice = slice;
+        }
+
+        public RangeEnumerator GetEnumerator() => new(m_slice);
+    }
+
+    /// <summary>
+    /// Allocation-free (index, value) enumerator over a <see cref="slice{T}"/>: the loop
+    /// <c>foreach (var (i, v) in range(s))</c> drives.
     /// </summary>
     /// <remarks>
     /// Mutable struct by design — the <c>foreach</c> pattern copies it into a local and drives that
     /// copy, which is how the loop stays allocation-free. It implements
-    /// <see cref="IEnumerator{T}"/> so interface-typed and LINQ consumers still bind; those paths box
-    /// the struct, which is the same cost they always paid.
+    /// <see cref="IEnumerator{T}"/> so interface-typed consumers still bind; those paths box the struct.
     /// </remarks>
     [Serializable]
-    public struct Enumerator : IEnumerator<(nint, T)>
+    public struct RangeEnumerator : IEnumerator<(nint, T)>
     {
         private readonly T[] m_array;
         private readonly nuint m_nativeBase; // 0 = managed backing; else the aliased memory's base
@@ -1037,7 +1087,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         private readonly nint m_end;
         private nint m_current;
 
-        internal Enumerator(slice<T> slice)
+        internal RangeEnumerator(slice<T> slice)
         {
             // A nil slice (null m_array) enumerates as zero elements — Go's `range nil` — via the
             // zero start/end window; the backing array is never indexed.
@@ -1389,15 +1439,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new SliceEnumerator(this);
     }
 
-    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
-    // implicitly while it returned the interface. It now returns the concrete struct, so the
-    // interface contract needs this explicit member — the boxing path, taken only by a consumer that
-    // asked for the interface.
-    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
-    {
-        return new Enumerator(this);
-    }
-
     IEnumerator IEnumerable.GetEnumerator()
     {
         return new SliceEnumerator(this);
@@ -1407,7 +1448,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     private sealed class SliceEnumerator : IEnumerator<T>
     {
         private readonly T[] m_array;
-        private readonly nuint m_nativeBase; // 0 = managed backing (see the struct Enumerator)
+        private readonly nuint m_nativeBase; // 0 = managed backing (see the struct RangeEnumerator)
         private readonly nint m_start;
         private readonly nint m_end;
         private nint m_current;
@@ -1444,7 +1485,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                     throw new InvalidOperationException("slice enumeration has ended.");
 
                 // Zero-size elements: the shared value, never a backing read (see the struct
-                // Enumerator's Current).
+                // RangeEnumerator's Current).
                 if (GoZeroSizeFacts<T>.IsZeroSize)
                     return GoZeroSizeFacts<T>.Storage[0];
 

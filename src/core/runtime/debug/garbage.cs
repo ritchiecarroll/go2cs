@@ -58,7 +58,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
         stats.PauseEnd = new slice<time.Time>(0, maxPause);
     }
     stats.PauseEnd = stats.PauseEnd[..0];
-    foreach (var (_, ns) in stats.Pause.slice(n, n + n)) {
+    foreach (var (_, ns) in range(stats.Pause.slice(n, n + n))) {
         stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, (int64)ns));
     }
 

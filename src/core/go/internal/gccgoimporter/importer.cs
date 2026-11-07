@@ -46,17 +46,17 @@ partial struct InitData {
 // Locate the file from which to read export data.
 // This is intended to replicate the logic in gofrontend.
 internal static (@string, error) findExportFile(slice<@string> searchpaths, @string pkgpath) {
-    foreach (var (_, spath) in searchpaths) {
+    foreach (var (_, spath) in range(searchpaths)) {
         @string pkgfullpath = filepath.Join(spath, pkgpath);
         var (pkgdir, name) = filepath.Split(pkgfullpath);
 
-        foreach (var (_, filepathΔ1) in new @string[]{
+        foreach (var (_, filepathΔ1) in range(new @string[]{
             pkgfullpath,
             pkgfullpath + ".gox"u8,
             pkgdir + "lib"u8 + name + ".so"u8,
             pkgdir + "lib"u8 + name + ".a"u8,
             pkgfullpath + ".o"u8
-        }.array()) {
+        }.array())) {
             var (fi, err) = os.Stat(filepathΔ1);
             if (err == nil && !fi.IsDir()) {
                 return (filepathΔ1, default);

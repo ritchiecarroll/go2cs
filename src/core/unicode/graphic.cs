@@ -21,16 +21,16 @@ internal static UntypedInt pLo => /* pLl | pLu */ 96; // a letter that is neithe
 internal static UntypedInt pLmask => /* pLo */ 96;
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
-[GoLazy] partial class lazyᴛGraphicRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑGraphicRanges = new StaticBox<slice<ж<RangeTable>>>(slice<ж<RangeTable>>([
+[GoLazy] partial class lazyᴛGraphicRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑGraphicRanges = new StaticBox<slice<ж<RangeTable>>>([
     lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial, lazyᴛZs.initial
-])); }
+]); }
 public static ref slice<ж<RangeTable>> GraphicRanges => ref ((StaticBox<slice<ж<RangeTable>>>)ᏑGraphicRanges).ValueSlot;
 
 // PrintRanges defines the set of printable characters according to Go.
 // ASCII space, U+0020, is handled separately.
-[GoLazy] partial class lazyᴛPrintRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑPrintRanges = new StaticBox<slice<ж<RangeTable>>>(slice<ж<RangeTable>>([
+[GoLazy] partial class lazyᴛPrintRanges { public static readonly ж<slice<ж<RangeTable>>> ᏑPrintRanges = new StaticBox<slice<ж<RangeTable>>>([
     lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial
-])); }
+]); }
 public static ref slice<ж<RangeTable>> PrintRanges => ref ((StaticBox<slice<ж<RangeTable>>>)ᏑPrintRanges).ValueSlot;
 
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode.
@@ -60,7 +60,7 @@ public static bool IsPrint(rune r) {
 // IsOneOf reports whether the rune is a member of one of the ranges.
 // The function "In" provides a nicer signature and should be used in preference to IsOneOf.
 public static bool IsOneOf(slice<ж<RangeTable>> ranges, rune r) {
-    foreach (var (_, inside) in ranges) {
+    foreach (var (_, inside) in range(ranges)) {
         if (Is(inside, r)) {
             return true;
         }
@@ -72,7 +72,7 @@ public static bool IsOneOf(slice<ж<RangeTable>> ranges, rune r) {
 public static bool In(rune r, params ꓸꓸꓸжRangeTable rangesʗp) {
     var ranges = rangesʗp.sslice();
 
-    foreach (var (_, inside) in ranges) {
+    foreach (var (_, inside) in range(ranges)) {
         if (Is(inside, r)) {
             return true;
         }

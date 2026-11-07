@@ -336,7 +336,7 @@ internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirE
         }
     }
 
-    foreach (var (_, d1) in dirs) {
+    foreach (var (_, d1) in range(dirs)) {
         @string path1 = Join(path, d1.Name());
         var errΔ2 = walkDir(path1, d1, walkDirFn); if (errΔ2 != nil) {
             if (AreEqual(errΔ2, SkipDir)) {
@@ -367,7 +367,7 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
         return err1;
     }
 
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         @string filename = Join(path, name);
         var (fileInfo, errΔ1) = lstat(filename);
         if (errΔ1 != nil) {

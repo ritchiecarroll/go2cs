@@ -160,7 +160,7 @@ internal static (@string, error) readString(this ref Reader z) {
             // Strings are ISO 8859-1, Latin-1 (RFC 1952, section 2.3.1).
             if (needConv) {
                 var s = new slice<rune>(0, i);
-                foreach (var (_, v) in z.buf.slice(0, i)) {
+                foreach (var (_, v) in range(z.buf.slice(0, i))) {
                     s = append(sᴷ, s, (rune)v);
                 }
                 return ((@string)s, default);

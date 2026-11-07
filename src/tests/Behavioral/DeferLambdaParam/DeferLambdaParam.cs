@@ -44,7 +44,7 @@ internal static void Main() {
         fmt.Println("IIFE variadic:", ((Funcꓸꓸꓸ<nint, nint>)((params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.sslice();
             nint total = 0;
-            foreach (var (_, p) in parts) {
+            foreach (var (_, p) in range(parts)) {
                 total += p;
             }
             return total;

@@ -93,7 +93,7 @@ public static error Samples(slice<uint8> samples, ж<ScratchBuffer> memory) {
         // Warm up the source to avoid any initial bias.
         _ = s.Sample();
     }
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         samples[i] = s.Sample();
     }
     {
@@ -178,7 +178,7 @@ private static readonly @string entropyRepetitionCountˢᵇ = "entropy: repetiti
 public static error RepetitionCountTest(slice<uint8> samples) {
     var x = samples[0];
     nint count = 1;
-    foreach (var (_, y) in samples[1..]) {
+    foreach (var (_, y) in range(samples[1..])) {
         if (y == x) {
             count++;
             if (count >= 41) {
@@ -214,7 +214,7 @@ private static readonly @string entropyAdaptiveˢᵇ = "entropy: adaptive propor
 //	410
 public static error AdaptiveProportionTest(slice<uint8> samples) {
     array<nint> counts = new(256);
-    foreach (var (i, x) in samples) {
+    foreach (var (i, x) in range(samples)) {
         counts[x]++;
         if (i >= 512) {
             counts[samples[i - 512]]--;

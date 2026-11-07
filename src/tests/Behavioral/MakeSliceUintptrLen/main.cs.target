@@ -25,7 +25,7 @@ internal static partial void run() {
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);
 
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = (byte)i;
     }
     fmt.Println(len(a), len(b), len(c), len(d), len(e));

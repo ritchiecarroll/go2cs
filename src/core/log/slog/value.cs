@@ -56,7 +56,7 @@ public static ΔKind KindUint64 => 7;
 public static ΔKind KindGroup => 8;
 public static ΔKind KindLogValuer => 9;
 
-internal static slice<@string> kindStrings = slice<@string>([
+internal static slice<@string> kindStrings = [
     "Any",
     "Bool",
     "Duration",
@@ -67,7 +67,7 @@ internal static slice<@string> kindStrings = slice<@string>([
     "Uint64",
     "Group",
     "LogValuer"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownSlogKindˢ => ref unknownSlogKindˢᵇ;
@@ -192,7 +192,7 @@ public static Value GroupValue(params ꓸꓸꓸAttr @asʗp) {
     // to check each Group recursively for emptiness.
     nint n = countEmptyGroups(@as); if (n > 0) {
         var as2 = new slice<Attr>(0, len(@as) - n);
-        foreach (var (_, a) in @as) {
+        foreach (var (_, a) in range(@as)) {
             if (!a.Value.isEmptyGroup()) {
                 as2 = builtin.append(as2, a);
             }
@@ -205,7 +205,7 @@ public static Value GroupValue(params ꓸꓸꓸAttr @asʗp) {
 // countEmptyGroups returns the number of empty group values in its argument.
 internal static nint countEmptyGroups(slice<Attr> @as) {
     nint n = 0;
-    foreach (var (_, a) in @as) {
+    foreach (var (_, a) in range(@as)) {
         if (a.Value.isEmptyGroup()) {
             n++;
         }

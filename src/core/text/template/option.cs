@@ -43,7 +43,7 @@ public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
-    foreach (var (_, s) in opt) {
+    foreach (var (_, s) in range(opt)) {
         t.setOption(s);
     }
     return Ꮡt;

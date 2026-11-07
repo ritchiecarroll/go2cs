@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static slice<@string> lines = slice<@string>([
+internal static slice<@string> lines = [
     "//go:build linux && amd64",
     "// regular comment line",
     "package main",
@@ -17,9 +17,9 @@ internal static slice<@string> lines = slice<@string>([
     "//go:build windows",
     "var y = false",
     "// another comment"
-]);
+];
 
-internal static slice<@string> words = slice<@string>(["true", "false", "linux", "windows", "amd64", "arm64", "ignore", "main"]);
+internal static slice<@string> words = ["true", "false", "linux", "windows", "amd64", "arm64", "ignore", "main"];
 
 internal static nint classify(@string w) {
     var exprᴛ1 = w;

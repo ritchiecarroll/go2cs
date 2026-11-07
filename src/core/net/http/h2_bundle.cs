@@ -530,7 +530,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
     }
     for (;;) {
         p.mu.Lock();
-        foreach (var (_, ccΔ1) in p.conns[addr]) {
+        foreach (var (_, ccΔ1) in range(p.conns[addr])) {
             if (ccΔ1.ReserveNewRequest()) {
                 // When a connection is presented to us by the net/http package,
                 // the GetConn hook has already been called.
@@ -621,7 +621,7 @@ internal static partial (bool used, error err) addConnIfNeeded(this ж<http2clie
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
-    foreach (var (_, cc) in p.conns[key]) {
+    foreach (var (_, cc) in range(p.conns[key])) {
         if (cc.CanTakeNewRequest()) {
             p.mu.Unlock();
             return (false, default);
@@ -674,7 +674,7 @@ internal static void run(this ref http2addConnCall c, ж<http2Transport> t, @str
 
 // p.mu must be held
 internal static void addConnLocked(this ref http2clientConnPool p, @string key, ж<http2ClientConn> cc) {
-    foreach (var (_, v) in p.conns[key]) {
+    foreach (var (_, v) in range(p.conns[key])) {
         if (v == cc) {
             return;
         }
@@ -697,7 +697,7 @@ internal static void MarkDead(this ж<http2clientConnPool> Ꮡp, ж<http2ClientC
 
         p.mu.Lock();
         ᒐd1 = true;
-        foreach (var (_, key) in p.keys[cc]) {
+        foreach (var (_, key) in range(p.keys[cc])) {
             var (vv, ok) = p.conns[key, ꟷ];
             if (!ok) {
                 continue;
@@ -730,7 +730,7 @@ internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) {
         // somebody else can concurrently call CloseIdleConns and
         // break some caller's RoundTrip.
         foreach (var (_, vv) in p.conns) {
-            foreach (var (_, cc) in vv) {
+            foreach (var (_, cc) in range(vv)) {
                 cc.closeIfIdle();
             }
         }
@@ -741,7 +741,7 @@ internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) {
 
 internal static slice<ж<http2ClientConn>> http2filterOutClientConn(slice<ж<http2ClientConn>> @in, ж<http2ClientConn> exclude) {
     var @out = @in[..0];
-    foreach (var (_, v) in @in) {
+    foreach (var (_, v) in range(@in)) {
         if (v != exclude) {
             @out = append(@out, v);
         }
@@ -2130,7 +2130,7 @@ internal static error startWriteDataPadded(this ref http2Framer f, uint32 stream
             return http2errPadLength;
         }
         if (!f.AllowIllegalWrites) {
-            foreach (var (_, b) in pad) {
+            foreach (var (_, b) in range(pad)) {
                 if (b != 0) {
                     // "Padding octets MUST be set to zero when sending."
                     return http2errPadBytes;
@@ -2291,7 +2291,7 @@ internal static error WriteSettings(this ж<http2Framer> Ꮡf, params ꓸꓸꓸh
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.startWrite(http2FrameSettings, 0, 0);
-    foreach (var (_, s) in settings) {
+    foreach (var (_, s) in range(settings)) {
         f.writeUint16((uint16)s.ID);
         f.writeUint32(s.Val);
     }
@@ -3008,7 +3008,7 @@ partial struct http2MetaHeadersFrame {
 // PseudoValue returns the given pseudo header field's value.
 // The provided pseudo field should not contain the leading colon.
 internal static @string PseudoValue(this ref http2MetaHeadersFrame mh, @string pseudo) {
-    foreach (var (_, hf) in mh.Fields) {
+    foreach (var (_, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return ""u8;
         }
@@ -3022,7 +3022,7 @@ internal static @string PseudoValue(this ref http2MetaHeadersFrame mh, @string p
 // RegularFields returns the regular (non-pseudo) header fields of mh.
 // The caller does not own the returned slice.
 internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeadersFrame mh) {
-    foreach (var (i, hf) in mh.Fields) {
+    foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(i);
         }
@@ -3033,7 +3033,7 @@ internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeaders
 // PseudoFields returns the pseudo header fields of mh.
 // The caller does not own the returned slice.
 internal static slice<hpack.HeaderField> PseudoFields(this ref http2MetaHeadersFrame mh) {
-    foreach (var (i, hf) in mh.Fields) {
+    foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(0, i);
         }
@@ -3045,7 +3045,7 @@ internal static error checkPseudos(this ref http2MetaHeadersFrame mh) {
     bool isRequest = default;
     bool isResponse = default;
     var pf = mh.PseudoFields();
-    foreach (var (i, hf) in pf) {
+    foreach (var (i, hf) in range(pf)) {
         var exprᴛ1 = hf.Name;
         switch (ᐧ) {
         case {} when exprᴛ1 == ":method"u8 || exprᴛ1 == ":path"u8 || exprᴛ1 == ":scheme"u8 || exprᴛ1 == ":authority"u8 || exprᴛ1 == ":protocol"u8: {
@@ -3062,7 +3062,7 @@ internal static error checkPseudos(this ref http2MetaHeadersFrame mh) {
         // Check for duplicates.
         // This would be a bad algorithm, but N is 5.
         // And this doesn't allocate.
-        foreach (var (_, hf2) in pf.slice(0, i)) {
+        foreach (var (_, hf2) in range(pf.slice(0, i))) {
             if (hf.Name == hf2.Name) {
                 return ((http2duplicatePseudoHeaderError)hf.Name);
             }
@@ -4345,7 +4345,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
         // error if it is missing ECDHE_RSA_WITH_AES_128_GCM_SHA256 or
         // ECDHE_ECDSA_WITH_AES_128_GCM_SHA256.
         var haveRequired = false;
-        foreach (var (_, cs) in s.TLSConfig.CipherSuites) {
+        foreach (var (_, cs) in range(s.TLSConfig.CipherSuites)) {
             switch (cs) {
             case tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 or tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256: {
                 // Alternative MTI cipher to not discourage ECDSA-only servers.
@@ -6552,7 +6552,7 @@ internal static error processTrailerHeaders(this ж<http2stream> Ꮡst, ж<http2
         return sc.countError(trailersPseudoˢ, http2streamError(st.id, http2ErrCodeProtocol));
     }
     if (st.trailer != nil) {
-        foreach (var (_, hf) in f.RegularFields()) {
+        foreach (var (_, hf) in range(f.RegularFields())) {
             @string key = sc.canonicalHeader(hf.Name);
             if (!httpguts.ValidTrailerHeader(key)) {
                 // TODO: send more details to the peer somehow. But http2 has
@@ -6691,7 +6691,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
 
     var header = new ΔHeader(0);
     rp.Header = header;
-    foreach (var (_, hf) in f.RegularFields()) {
+    foreach (var (_, hf) in range(f.RegularFields())) {
         header.Add(sc.canonicalHeader(hf.Name), hf.Value);
     }
     if (rp.Authority == ""u8) {
@@ -7118,7 +7118,7 @@ internal static (nint n, error err) Write(this http2chunkWriter cw, slice<byte> 
 internal static bool hasTrailers(this ref http2responseWriterState rws) { return builtin.len(rws.trailers) > 0; }
 
 internal static bool hasNonemptyTrailers(this ref http2responseWriterState rws) {
-    foreach (var (_, trailer) in rws.trailers) {
+    foreach (var (_, trailer) in range(rws.trailers)) {
         var (_, ok) = rws.handlerHeader[trailer, ꟷ]; if (ok) {
             return true;
         }
@@ -7198,7 +7198,7 @@ internal static (nint n, error err) writeChunk(this ж<http2responseWriterState>
             date = time.Now().UTC().Format(TimeFormat);
         }
 
-        foreach (var (_, v) in rws.snapHeader[trailerˢ]) {
+        foreach (var (_, v) in range(rws.snapHeader[trailerˢ])) {
             http2foreachHeaderElement(v, Ꮡrws.declareTrailer);
         }
 
@@ -7809,7 +7809,7 @@ internal static void http2foreachHeaderElement(@string v, Action<@string> fn) {
         fn(v);
         return;
     }
-    foreach (var (_, vᴛ1) in strings.Split(v, ",")) {
+    foreach (var (_, vᴛ1) in range(strings.Split(v, ","))) {
         var f = vᴛ1;
 
         f = textproto.TrimString(f); if (f != ""u8) {
@@ -7819,13 +7819,13 @@ internal static void http2foreachHeaderElement(@string v, Action<@string> fn) {
 }
 
 // From http://httpwg.org/specs/rfc7540.html#rfc.section.8.1.2.2
-internal static slice<@string> http2connHeaders = slice<@string>([
+internal static slice<@string> http2connHeaders = [
     "Connection",
     "Keep-Alive",
     "Proxy-Connection",
     "Transfer-Encoding",
     "Upgrade"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requestHeaderTeMayOnlyBeˢ => ref requestHeaderTeMayOnlyBeˢᵇ;
@@ -7835,7 +7835,7 @@ private static readonly @string requestHeaderTeMayOnlyBeˢᵇ = @"request header
 // per RFC 7540 Section 8.1.2.2.
 // The returned error is reported to users.
 internal static error http2checkValidHTTP2RequestHeaders(ΔHeader h) {
-    foreach (var (_, k) in http2connHeaders) {
+    foreach (var (_, k) in range(http2connHeaders)) {
         var (_, ok) = h[k, ꟷ]; if (ok) {
             return fmt.Errorf("request header %q is not valid in HTTP/2"u8, k);
         }
@@ -10243,7 +10243,7 @@ internal static (slice<byte>, error) encodeTrailers(this ref http2ClientConn cc,
 
     var hlSize = (uint64)0;
     foreach (var (k, vv) in trailer) {
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             var hf = new hpack.HeaderField(Name: k, Value: v);
             hlSize += (uint64)hf.Size();
         }
@@ -10261,7 +10261,7 @@ internal static (slice<byte>, error) encodeTrailers(this ref http2ClientConn cc,
         }
         // Transfer-Encoding, etc.. have already been filtered at the
         // start of RoundTrip
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             cc.writeHeader(lowKey, v);
         }
     }
@@ -10696,7 +10696,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
         StatusCode: statusCode,
         Status: status + " "u8 + StatusText(statusCode)
     ));
-    foreach (var (_, hf) in regularFields) {
+    foreach (var (_, hf) in range(regularFields)) {
         @string key = httpcommon.CanonicalHeader(hf.Name);
         if (key == "Trailer"u8) {
             ref var t = ref heap<ΔHeader>(res.Trailer, out var Ꮡt);
@@ -10746,7 +10746,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
             var t1 = cs.cc.t.t1; if (t1 != nil && t1.MaxResponseHeaderBytes > limit) {
                 limit = t1.MaxResponseHeaderBytes;
             }
-            foreach (var (_, h) in f.Fields) {
+            foreach (var (_, h) in range(f.Fields)) {
                 cs.totalHeaderSize += (int64)h.Size();
             }
             if (cs.totalHeaderSize > limit) {
@@ -10783,7 +10783,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
 
     // Connection-specific header fields must not appear in an HTTP/2 message,
     // and any message containing them is malformed. RFC 9113, Section 8.2.2.
-    foreach (var (_, k) in http2connHeaders) {
+    foreach (var (_, k) in range(http2connHeaders)) {
         delete(res.Header, k);
     }
     res.ContentLength = -1;
@@ -10860,7 +10860,7 @@ internal static error processTrailers(this ж<http2clientConnReadLoop> Ꮡrl, ж
     }
 
     var trailer = new ΔHeader(0);
-    foreach (var (_, hf) in f.RegularFields()) {
+    foreach (var (_, hf) in range(f.RegularFields())) {
         @string key = httpcommon.CanonicalHeader(hf.Name);
         trailer[key] = append(trailer[key], hf.Value);
     }
@@ -11564,7 +11564,7 @@ internal static error Close(this http2missingBody _) { return default; }
 internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) { return (0, io.ErrUnexpectedEOF); }
 
 internal static bool http2strSliceContains(slice<@string> ss, @string s) {
-    foreach (var (_, v) in ss) {
+    foreach (var (_, v) in range(ss)) {
         if (v == s) {
             return true;
         }
@@ -12395,7 +12395,7 @@ internal static void http2encodeHeaders(ж<hpack.Encoder> enc, ΔHeader h, slice
             defer(Ꮡhttp2sorterPool.Put, sorter.OrTypedNil(), ref ᒐ);
             keys = sorter.Keys(h);
         }
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             var vv = h[k];
             var (kΔ1, ascii) = httpcommon.LowerHeader(k);
             if (!ascii) {
@@ -12410,7 +12410,7 @@ internal static void http2encodeHeaders(ж<hpack.Encoder> enc, ΔHeader h, slice
                 continue;
             }
             var isTE = kΔ1 == "transfer-encoding"u8;
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 if (!httpguts.ValidHeaderFieldValue(v)) {
                     // TODO: return an error? golang.org/issue/14048
                     // For now just omit it.
@@ -12690,10 +12690,10 @@ partial struct http2writeQueuePool /*[]ж<http2writeQueue>*/;
 internal static void put(this ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
-    foreach (var i in range(q.currQueue)) {
+    foreach (var i in range(builtin.len(q.currQueue))) {
         q.currQueue[i] = new http2FrameWriteRequest();
     }
-    foreach (var i in range(q.nextQueue)) {
+    foreach (var i in range(builtin.len(q.nextQueue))) {
         q.nextQueue[i] = new http2FrameWriteRequest();
     }
     q.currQueue = q.currQueue[..0];
@@ -13324,8 +13324,8 @@ internal static (http2FrameWriteRequest, bool) Pop(this ref http2priorityWriteSc
     ws.prioritizeIncremental = !ws.prioritizeIncremental;
 
     // Always prioritize lowest u (i.e. highest urgency level).
-    foreach (var u in range(ws.heads)) {
-        foreach (var iᴛ1 in range(ws.heads[u])) {
+    foreach (var u in range(builtin.len(ws.heads))) {
+        foreach (var iᴛ1 in range(builtin.len(ws.heads[u]))) {
             var i = iᴛ1;
             // When we want to prioritize incremental, we try to pop i=true
             // first before i=false when u is the same.

@@ -582,7 +582,8 @@ public readonly struct @string :
 
     public static implicit operator @string(rune value)
     {
-        return new @string([value]);
+        // A span of the one rune: a bare [value] now also converts to slice<rune>, which has its own constructor.
+        return new @string(new ReadOnlySpan<rune>(in value));
     }
 
     public static explicit operator rune(@string value)

@@ -77,7 +77,7 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
     GoFrame ᒐ = default;
     try {
         var serverConf = Ꮡ(new tls.Config(
-            Certificates: slice<tls.Certificate>([cert]),
+            Certificates: [cert],
             MinVersion: tls.VersionTLS13,
             MaxVersion: tls.VersionTLS13
         ));
@@ -136,7 +136,7 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
             }
             var st = t.ConnectionState();
             (version, suite) = (st.Version, st.CipherSuite);
-            t.Write(slice<byte>([0]));
+            t.Write([0]);
             t.Close();
             count++;
         }

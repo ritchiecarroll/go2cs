@@ -74,7 +74,7 @@ partial struct interlaceScan {
 
 // interlacing defines Adam7 interlacing, with 7 passes of reduced images.
 // See https://www.w3.org/TR/PNG/#8Interlace
-[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = slice<interlaceScan>([
+[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = [
     new(8, 8, 0, 0),
     new(8, 8, 4, 0),
     new(4, 8, 0, 4),
@@ -82,7 +82,7 @@ partial struct interlaceScan {
     new(2, 4, 0, 2),
     new(2, 2, 1, 0),
     new(1, 2, 0, 1)
-]); }
+]; }
 
 // Decoding stage.
 // The PNG specification says that the IHDR, PLTE (if present), tRNS (if
@@ -635,7 +635,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             break;
         }
         case var ᴛ when ᴛ == ftUp: {
-            foreach (var (i, p) in pdat) {
+            foreach (var (i, p) in range(pdat)) {
                 cdat[i] += p;
             }
             break;

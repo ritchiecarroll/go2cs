@@ -88,6 +88,8 @@
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets.go" />
+    <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />

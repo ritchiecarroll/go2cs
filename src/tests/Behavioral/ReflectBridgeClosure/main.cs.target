@@ -80,13 +80,13 @@ private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = 
 internal static void Main() {
     var ht = reflect.TypeOf(new host());
     fmt.Println("fields:", ht.NumField());
-    foreach (var (_, name) in slice<@string>(["Plain", "inner", "tagged", "Named"])) {
+    foreach (var (_, name) in range(slice<@string>(["Plain", "inner", "tagged", "Named"]))) {
         var (f, ok) = ht.FieldByName(name);
         fmt.Printf("field %s found=%v anonymous=%v tag=%q exported=%v type=%s\n"u8, name, ok, f.Anonymous, (@string)f.Tag, f.IsExported(), f.Type);
     }
 
     handler named = (nint _Δp0) => default;
-    foreach (var (_, f) in slice<any>([noArgs, oneIn, oneOut, twoOut, (Actionꓸꓸꓸ<@string, nint>)(variadic), mixed, (named).OrTypedNilFunc()])) {
+    foreach (var (_, f) in range(slice<any>([noArgs, oneIn, oneOut, twoOut, (Actionꓸꓸꓸ<@string, nint>)(variadic), mixed, (named).OrTypedNilFunc()]))) {
         var t = reflect.TypeOf(f);
         fmt.Printf("func %-34s name=%q variadic=%v\n"u8, t.String(), t.Name(), t.IsVariadic());
     }
@@ -125,7 +125,7 @@ internal static void Main() {
     var built = reflect.MakeSlice(reflect.TypeOf(lit), 1, 1);
     fmt.Printf("nil element: %v %v deepequal=%v\n"u8, lit, built.Interface(), reflect.DeepEqual(built.Interface(), lit));
 
-    var want = new holder(Ps: slice<ж<inner>>([Ꮡ(new inner(X: 1)), default]));
+    var want = new holder(Ps: [Ꮡ(new inner(X: 1)), default]);
     ref var target = ref heap(new holder(), out var Ꮡtarget);
     var tv = reflect.ValueOf(Ꮡtarget).Elem().Field(0);
     var grown = reflect.MakeSlice(tv.Type(), 2, 2);

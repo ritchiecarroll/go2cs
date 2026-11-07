@@ -124,7 +124,7 @@ internal static void setTrackMass(this ref mud d, float64 mass) {
     // Find the bucket currently containing trackMass by computing
     // the cumulative sum.
     var sum = 0.0D;
-    foreach (var (i, val) in d.hist[..]) {
+    foreach (var (i, val) in range(d.hist[..])) {
         var newSum = sum + val;
         if (newSum > mass) {
             // mass falls in bucket i.
@@ -174,7 +174,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
         var newSorted = new slice<edge>(len(oldSorted) + len(edges));
         nint i = 0;
         nint j = 0;
-        foreach (var o in range(newSorted)) {
+        foreach (var o in range(len(newSorted))) {
             if (i >= len(oldSorted)) {
                 copy(newSorted.slice(o), edges.slice(j));
                 break;
@@ -194,7 +194,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
 
     // Traverse edges in order computing a cumulative sum.
     var (csum, rate, prevX) = (0.0D, 0.0D, 0.0D);
-    foreach (var (_, e) in d.sorted) {
+    foreach (var (_, e) in range(d.sorted)) {
         var newCsum = csum + (e.x - prevX) * rate;
         if (newCsum >= y) {
             // y was exceeded between the previous edge

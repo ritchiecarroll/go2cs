@@ -75,7 +75,7 @@ internal static void Main() {
     (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
         var ns = nsʗp.sslice();
         ref var t = ref heap(tʗp, out var Ꮡt);
-        foreach (var (_, n) in ns) {
+        foreach (var (_, n) in range(ns)) {
             Ꮡt.Add(n);
         }
         return (t.total, t.log);

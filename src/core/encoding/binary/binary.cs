@@ -402,13 +402,13 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<bool> dataΔ1: {
-        foreach (var (i, x) in bs) { // Easier to loop over the input for 8-bit values.
+        foreach (var (i, x) in range(bs)) { // Easier to loop over the input for 8-bit values.
             dataΔ1[i] = x != 0;
         }
         break;
     }
     case slice<int8> dataΔ1: {
-        foreach (var (i, x) in bs) {
+        foreach (var (i, x) in range(bs)) {
             dataΔ1[i] = (int8)x;
         }
         break;
@@ -418,49 +418,49 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int16> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int16)order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<uint16> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<int32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int32)order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<uint32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<int64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int64)order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<uint64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<float32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = math.Float32frombits(order.Uint32(bs.slice(4 * i)));
         }
         break;
     }
     case slice<float64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = math.Float64frombits(order.Uint64(bs.slice(8 * i)));
         }
         break;
@@ -580,7 +580,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<bool> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             if (x) {
                 bs[i] = 1;
             } else {
@@ -598,7 +598,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int8> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             bs[i] = (byte)x;
         }
         break;
@@ -624,7 +624,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int16> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint16(bs.slice(2 * i), (uint16)x);
         }
         break;
@@ -638,7 +638,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint16> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint16(bs.slice(2 * i), x);
         }
         break;
@@ -652,7 +652,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), (uint32)x);
         }
         break;
@@ -666,7 +666,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), x);
         }
         break;
@@ -680,7 +680,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), (uint64)x);
         }
         break;
@@ -694,7 +694,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), x);
         }
         break;
@@ -708,7 +708,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<float32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), math.Float32bits(x));
         }
         break;
@@ -722,7 +722,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<float64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), math.Float64bits(x));
         }
         break;

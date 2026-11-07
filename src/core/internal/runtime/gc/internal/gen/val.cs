@@ -103,7 +103,7 @@ public static T Deref<W, T>(Ptr<W> ptr)
     }
 
     W y = GoZero<W>();
-    return y.wrap(Ꮡ(new op(Δop: "deref", kind: y.kind(), args: slice<ж<op>>([@base]), c: off)));
+    return y.wrap(Ꮡ(new op(Δop: "deref", kind: y.kind(), args: [@base], c: off)));
 }
 
 partial struct Array<T>
@@ -153,7 +153,7 @@ internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
     v.op = Ꮡx;
 
     // Figure out this value's function.
-    foreach (var (_, arg) in x.args) {
+    foreach (var (_, arg) in range(x.args)) {
         var fn = arg.fn; if (fn != nil) {
             fn.attach(Ꮡx);
             break;

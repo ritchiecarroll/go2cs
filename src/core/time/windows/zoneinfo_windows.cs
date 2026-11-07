@@ -90,7 +90,7 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
         if (err != nil) {
             return ("", err);
         }
-        foreach (var (_, name) in names) {
+        foreach (var (_, name) in range(names)) {
             var (matched, errΔ1) = matchZoneKey(k, name, stdname, dstname);
             if (errΔ1 == nil && matched) {
                 return (name, default);

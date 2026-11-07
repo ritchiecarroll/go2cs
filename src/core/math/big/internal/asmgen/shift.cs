@@ -45,7 +45,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
     }
     var unroll = slice<nint>([1, 4]);
     if (a.Arch == Arch386) {
-        unroll = slice<nint>([1]); // too few registers for more
+        unroll = [1]; // too few registers for more
         p.SetUseIndexCounter();
     }
     p.LoadPtrs(n);
@@ -84,7 +84,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
             // After writing the outputs to memory, we can copy the final x value into prev
             // for the next iteration.
             var old = prevʗ1;
-            foreach (var (i, x) in @in[0]) {
+            foreach (var (i, x) in range(@in[0])) {
                 shiftWideʗ1(sʗ1, x, old, old);
                 @out[0][i] = old;
                 old = x;
@@ -125,7 +125,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
                 // one output at a time, and since we don't use multi-register
                 // stores on ARM, that doesn't hurt us.
                 @out[0] = @out[0][..1];
-                foreach (var (_, x) in @in[0]) {
+                foreach (var (_, x) in range(@in[0])) {
                     Ꮡa.Or(negShiftRegʗ1(sNegʗ1, x), prevʗ2, prevʗ2);
                     @out[0][0] = prevʗ2;
                     pʗ2.StoreN(@out);
@@ -136,7 +136,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
             // We reuse the input registers as output, delayed one cycle; z0 is the first output.
             var z0 = Ꮡa.Reg();
             var z = z0;
-            foreach (var (i, x) in @in[0]) {
+            foreach (var (i, x) in range(@in[0])) {
                 negShiftʗ1(sNegʗ1, x, z);
                 Ꮡa.Or(prevʗ2, z, z);
                 shiftʗ1(sʗ2, x, prevʗ2);
@@ -147,7 +147,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         });
         Ꮡa.Comment(storeFinalShiftedBitsˢ);
     }
-    p.StoreN(slice<slice<ΔReg>>([slice<ΔReg>([prev])]));
+    p.StoreN([[prev]]);
     p.Done();
     Ꮡa.Free(s);
     Ꮡa.Ret();

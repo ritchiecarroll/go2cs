@@ -27,7 +27,7 @@ partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c) {
     var list = cmap[n];
     if (len(list) == 0) {
-        list = slice<ж<CommentGroup>>([c]);
+        list = [c];
     } else {
         list = append(list, c);
     }
@@ -154,7 +154,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
     tokenꓸPosition pgend = default; // end of pg
     nodeStack stack = default;      // stack of node groups
 
-    foreach (var (_, q) in nodes) {
+    foreach (var (_, q) in range(nodes)) {
         tokenꓸPosition qpos = default;
         if (q != nil) {
             qpos = fset.Position(q.Pos()); // current node position
@@ -275,11 +275,11 @@ internal static @string summary(slice<ж<CommentGroup>> list) {
 
     // collect comments text
 loop:
-    foreach (var (_, group) in list) {
+    foreach (var (_, group) in range(list)) {
         // Note: CommentGroup.Text() does too much work for what we
         //       need and would only replace this innermost loop.
         //       Just do it explicitly.
-        foreach (var (_, comment) in group.List) {
+        foreach (var (_, comment) in range(group.List)) {
             if (buf.Len() >= maxLen) {
                 goto break_loop;
             }
@@ -297,7 +297,7 @@ break_loop:;
 
     // replace any invisibles with blanks
     var bytesΔ1 = buf.Bytes();
-    foreach (var (i, b) in bytesΔ1) {
+    foreach (var (i, b) in range(bytesΔ1)) {
         switch (b) {
         case (byte)'\t' or (byte)'\n' or (byte)'\r': {
             bytesΔ1[i] = (byte)' ';
@@ -329,7 +329,7 @@ public static @string String(this CommentMap cmap) {
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢ);
-    foreach (var (_, node) in nodes) {
+    foreach (var (_, node) in range(nodes)) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes
         @string s = default;

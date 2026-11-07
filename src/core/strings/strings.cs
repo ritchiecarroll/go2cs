@@ -488,7 +488,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
 
     // Create strings from recorded field indices.
     var a = new slice<@string>(len(spans));
-    foreach (var (i, span) in spans) {
+    foreach (var (i, span) in range(spans)) {
         a[i] = s.slice(span.start, span.end);
     }
 
@@ -513,7 +513,7 @@ public static @string Join(slice<@string> elems, @string sep) {
         }
         n += len(sep) * (len(elems) - 1);
     }
-    foreach (var (_, elem) in elems) {
+    foreach (var (_, elem) in range(elems)) {
         if (len(elem) > maxInt - n) {
             throw panic("strings: Join output length overflow");
         }
@@ -523,7 +523,7 @@ public static @string Join(slice<@string> elems, @string sep) {
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(n);
     Ꮡb.WriteString(elems[0]);
-    foreach (var (_, s) in elems[1..]) {
+    foreach (var (_, s) in range(elems[1..])) {
         Ꮡb.WriteString(sep);
         Ꮡb.WriteString(s);
     }
@@ -1118,7 +1118,7 @@ internal static @string trimRightUnicode(@string s, @string cutset) {
 // as defined by Unicode.
 public static @string TrimSpace(@string s) {
     // Fast path for ASCII: look for the first ASCII non-space byte.
-    foreach (var (lo, c) in slice<byte>(s)) {
+    foreach (var (lo, c) in range(slice<byte>(s))) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
             // slower unicode-aware method on the remaining bytes.

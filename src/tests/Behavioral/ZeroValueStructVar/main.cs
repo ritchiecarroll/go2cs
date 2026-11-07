@@ -23,11 +23,11 @@ internal static void Main() {
     holder z = new();
     fmt.Println(len(z.name), len(z.tbl), len(z.tail));
 
-    foreach (var i in range(z.tbl)) {
+    foreach (var i in range(len(z.tbl))) {
         z.tbl[i] = i * i;
     }
     nint sum = 0;
-    foreach (var (_, v) in z.tbl.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(z.tbl.ΔRangeSnapshot())) {
         sum += v;
     }
     fmt.Println(sum, z.tbl[7]);

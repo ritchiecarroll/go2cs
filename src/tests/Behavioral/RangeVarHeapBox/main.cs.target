@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static nint sumWithinIter(slice<nint> s) {
     nint sum = 0;
-    foreach (var iᴛ1 in range(s)) {
+    foreach (var iᴛ1 in range(len(s))) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
 
@@ -20,7 +20,7 @@ internal static slice<ж<nint>> collectPointers(slice<nint> s) {
     var ptrsᴷ = new stackAppend<ж<nint>>(moves: true);
 
     slice<ж<nint>> ptrs = default;
-    foreach (var iᴛ1 in range(s)) {
+    foreach (var iᴛ1 in range(len(s))) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
 
@@ -86,17 +86,17 @@ internal static void Main() {
     fmt.Println(sumWithinIter(s));
 
     var ptrs = collectPointers(s);
-    foreach (var (_, p) in ptrs) {
+    foreach (var (_, p) in range(ptrs)) {
         fmt.Print(p.Value, " ");
     }
     fmt.Println();
 
-    foreach (var (_, f) in intClosures()) {
+    foreach (var (_, f) in range(intClosures())) {
         fmt.Print(f(), " ");
     }
     fmt.Println();
 
-    foreach (var (_, f) in stringClosures("aé!")) {
+    foreach (var (_, f) in range(stringClosures("aé!"))) {
         fmt.Print(f(), " ");
     }
     fmt.Println();
@@ -106,7 +106,7 @@ internal static void Main() {
     ch.ᐸꟷ(8);
     ch.ᐸꟷ(9);
     close(ch);
-    foreach (var (_, f) in chanClosures(ch)) {
+    foreach (var (_, f) in range(chanClosures(ch))) {
         fmt.Print(f(), " ");
     }
     fmt.Println();

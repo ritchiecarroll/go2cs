@@ -123,7 +123,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         if (isDef) {
             // short variable declaration
             slice<ж<Var>> vars = default;
-            foreach (var (i, lhsΔ1) in lhs.ΔRangeSnapshot()) {
+            foreach (var (i, lhsΔ1) in range(lhs.ΔRangeSnapshot())) {
                 if (lhsΔ1 == nil) {
                     continue;
                 }
@@ -171,7 +171,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
             if (len(vars) > 0) {
                 tokenꓸPos scopePos = rangeStmt.Body.Pos();
                 vars = move2heap(varsᴷ, vars);
-                foreach (var (_, obj) in vars) {
+                foreach (var (_, obj) in range(vars)) {
                     Ꮡcheck.declare(check.scope, nil, /* recordDef already called */ new VarжObject(obj), scopePos);
                 }
             } else {
@@ -180,7 +180,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         } else if (sKey != nil) {
             /* lhs[0] != nil */
             // ordinary assignment
-            foreach (var (i, lhsΔ2) in lhs.ΔRangeSnapshot()) {
+            foreach (var (i, lhsΔ2) in range(lhs.ΔRangeSnapshot())) {
                 if (lhsΔ2 == nil) {
                     continue;
                 }

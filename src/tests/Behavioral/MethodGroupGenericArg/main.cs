@@ -10,7 +10,7 @@ internal static E foldSlice<S, E>(S s, Func<E, E, E> combine)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     E acc = GoZero<E>();
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         acc = combine(acc, v);
     }
     return acc;
@@ -26,7 +26,7 @@ internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> 
         return false;
     }
 
-    foreach (var i in range(s1)) {
+    foreach (var i in range(len(s1))) {
         if (!eq(s1[i], s2[i])) {
             return false;
         }
@@ -67,7 +67,7 @@ internal static bool sliceEq<S, E>(S a, S b)
         return false;
     }
 
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         if (!AreEqual(a[i], b[i])) {
             return false;
         }
@@ -101,8 +101,8 @@ internal static void Main() {
     applyTo<namedInts>(named, reverse<namedInts, nint>);
     fmt.Println(named);
 
-    fmt.Println(rowsEqual(slice<row>([slice<nint>([1, 2]), slice<nint>([3])]), slice<row>([slice<nint>([1, 2]), slice<nint>([3])])));
-    fmt.Println(rowsEqual(slice<row>([slice<nint>([1, 2]), slice<nint>([3])]), slice<row>([slice<nint>([1, 2]), slice<nint>([4])])));
+    fmt.Println(rowsEqual([slice<nint>([1, 2]), slice<nint>([3])], [slice<nint>([1, 2]), slice<nint>([3])]));
+    fmt.Println(rowsEqual([slice<nint>([1, 2]), slice<nint>([3])], [slice<nint>([1, 2]), slice<nint>([4])]));
 }
 
 } // end main_package

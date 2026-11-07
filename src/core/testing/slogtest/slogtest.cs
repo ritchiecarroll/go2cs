@@ -272,7 +272,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     var errsᴷ = new stackAppend<error>();
 
     // Run the handler on the test cases.
-    foreach (var (_, c) in cases) {
+    foreach (var (_, c) in range(cases)) {
         var ht = h;
         if (c.mod != nil) {
             ht = new wrapperжΔHandler(Ꮡ(new wrapper(h, c.mod)));
@@ -288,9 +288,9 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     nint w = len(cases); if (g != w) {
         return fmt.Errorf("got %d results, want %d"u8, g, w);
     }
-    foreach (var (i, got) in res) {
+    foreach (var (i, got) in range(res)) {
         var c = cases[i];
-        foreach (var (_, check) in c.checks) {
+        foreach (var (_, check) in range(c.checks)) {
             @string problem = check(got); if (problem != ""u8) {
                 errs = append(errsᴷ, errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
             }
@@ -304,7 +304,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
 // get an instance of the handler under test, then runs the test case, then
 // calls result to get the result. If the test case fails, it calls t.Error.
 public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var c = ref heap(new testCase(), out var Ꮡc);
         c = vᴛ1;
 
@@ -317,7 +317,7 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newH
             var l = slog.New(h);
             cʗ1.f(l);
             var got = result(tΔ1);
-            foreach (var (_, check) in cʗ1.checks) {
+            foreach (var (_, check) in range(cʗ1.checks)) {
                 @string p = check(got); if (p != ""u8) {
                     tΔ1.Errorf("%s: %s", p, cʗ1.explanation);
                 }

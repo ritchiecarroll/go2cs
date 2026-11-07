@@ -35,7 +35,7 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
         mappings: new map<mappingKey, ж<Mapping>>(len(srcs[0].Mapping))
     ));
 
-    foreach (var (_, src) in srcs) {
+    foreach (var (_, src) in range(srcs)) {
         // Clear the profile-specific hash tables
         pm.locationsByID = new map<uint64, ж<Location>>(len(src.Location));
         pm.functionsByID = new map<uint64, ж<Function>>(len(src.Function));
@@ -49,18 +49,18 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
             pm.mapMapping(src.Mapping[0]);
         }
 
-        foreach (var (_, s) in src.Sample) {
+        foreach (var (_, s) in range(src.Sample)) {
             if (!isZeroSample(ref (s).DerefOrNull())) {
                 pm.mapSample(s);
             }
         }
     }
 
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         if (isZeroSample(ref (s).DerefOrNull())) {
             // If there are any zero samples, re-merge the profile to GC
             // them.
-            return Merge(slice<ж<Profile>>([p]));
+            return Merge([p]);
         }
     }
 
@@ -78,21 +78,21 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     }
 
     var baseVals = new slice<int64>(len(p.SampleType));
-    foreach (var (_, s) in pb.Sample) {
-        foreach (var (i, v) in (~s).Value) {
+    foreach (var (_, s) in range(pb.Sample)) {
+        foreach (var (i, v) in range((~s).Value)) {
             baseVals[i] += v;
         }
     }
 
     var srcVals = new slice<int64>(len(p.SampleType));
-    foreach (var (_, s) in p.Sample) {
-        foreach (var (i, v) in (~s).Value) {
+    foreach (var (_, s) in range(p.Sample)) {
+        foreach (var (i, v) in range((~s).Value)) {
             srcVals[i] += v;
         }
     }
 
     var normScale = new slice<float64>(len(baseVals));
-    foreach (var i in range(baseVals)) {
+    foreach (var i in range(len(baseVals))) {
         if (srcVals[i] == 0) {
             normScale[i] = 0.0D;
         } else {
@@ -104,7 +104,7 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
 }
 
 internal static bool isZeroSample(ref Sample s) {
-    foreach (var (_, v) in s.Value) {
+    foreach (var (_, v) in range(s.Value)) {
         if (v != 0) {
             return false;
         }
@@ -140,7 +140,7 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
         NumLabel: new map<@string, slice<int64>>(len(src.NumLabel)),
         NumUnit: new map<@string, slice<@string>>(len(src.NumLabel))
     ));
-    foreach (var (i, l) in src.Location) {
+    foreach (var (i, l) in range(src.Location)) {
         s.Location[i] = pm.mapLocation(l);
     }
     foreach (var (kΔ1, v) in src.Label) {
@@ -162,7 +162,7 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
     // existing sample.
     var k = s.key();
     var (ss, ok) = pm.samples[k, ꟷ]; if (ok) {
-        foreach (var (i, v) in src.Value) {
+        foreach (var (i, v) in range(src.Value)) {
             ss.Value.Value[i] += v;
         }
         return ss;
@@ -179,7 +179,7 @@ internal static sampleKey key(this ref Sample sample) {
     var numlabelsᴷ = new stackAppend<@string>();
 
     var ids = new slice<@string>(len(sample.Location));
-    foreach (var (i, l) in sample.Location) {
+    foreach (var (i, l) in range(sample.Location)) {
         ids[i] = strconv.FormatUint(l.ID, 16);
     }
 
@@ -228,7 +228,7 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
         Line: new slice<Line>(len(src.Line)),
         IsFolded: src.IsFolded
     ));
-    foreach (var (i, ln) in src.Line) {
+    foreach (var (i, ln) in range(src.Line)) {
         l.Line[i] = pm.mapLine(ln);
     }
     // Check memoization table. Must be done on the remapped location to
@@ -256,7 +256,7 @@ internal static locationKey key(this ref Location l) {
         key.mappingID = l.Mapping.ID;
     }
     var lines = new slice<@string>(len(l.Line) * 2);
-    foreach (var (i, line) in l.Line) {
+    foreach (var (i, line) in range(l.Line)) {
         if (line.Function != nil) {
             lines[i * 2] = strconv.FormatUint(line.Function.ID, 16);
         }
@@ -402,7 +402,7 @@ partial struct functionKey {
 // combineHeaders checks that all profiles can be merged and returns
 // their combined profile.
 internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
-    foreach (var (_, s) in srcs[1..]) {
+    foreach (var (_, s) in range(srcs[1..])) {
         var err = srcs[0].compatible(s); if (err != nil) {
             return (default, err);
         }
@@ -414,7 +414,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     slice<@string> comments = default;
     var seenComments = new map<@string, bool>{};
     ref var defaultSampleType = ref heap(new @string(), out var ᏑdefaultSampleType);
-    foreach (var (_, s) in srcs) {
+    foreach (var (_, s) in range(srcs)) {
         if (timeNanos == 0 || s.TimeNanos < timeNanos) {
             timeNanos = s.TimeNanos;
         }
@@ -422,7 +422,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
         if (period == 0 || period < s.Period) {
             period = s.Period;
         }
-        foreach (var (_, c) in s.Comments) {
+        foreach (var (_, c) in range(s.Comments)) {
             var seen = seenComments[c]; if (!seen) {
                 comments = append(comments, c);
                 seenComments[c] = true;
@@ -465,7 +465,7 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var i in range(p.SampleType)) {
+    foreach (var i in range(len(p.SampleType))) {
         if (!equalValueType(ref (p.SampleType[i]).DerefOrNull(), ref (pb.SampleType[i]).DerefOrNull())) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }

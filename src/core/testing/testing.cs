@@ -111,7 +111,7 @@ public static partial class testing_package
 
         List<(string Name, Action<ж<T>> F)> list = [];
 
-        foreach (var (_, test) in tests)
+        foreach (var test in tests)
             list.Add((test.Name.ToString(), test.F));
 
         // Go's root writes to os.Stdout as it is NOW. Redirected by the program (a pipe, a file: anything

@@ -107,7 +107,7 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
 
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
-    buf = bytes.TrimSuffix(buf, slice<byte>([(byte)'\n']));
+    buf = bytes.TrimSuffix(buf, [(byte)'\n']);
     var r = NewRecord(time_package.Now(), level, (@string)buf, pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }

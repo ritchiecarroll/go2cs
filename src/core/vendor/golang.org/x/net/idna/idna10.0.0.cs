@@ -211,7 +211,7 @@ partial struct Profile {
 }
 
 internal static void apply(ж<options> o, slice<Action<ж<options>>> opts) {
-    foreach (var (_, f) in opts) {
+    foreach (var (_, f) in range(opts)) {
         f(o);
     }
 }
@@ -451,7 +451,7 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
 }
 
 internal static bool isASCII(@string s) {
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         if (c >= 0x80) {
             return false;
         }

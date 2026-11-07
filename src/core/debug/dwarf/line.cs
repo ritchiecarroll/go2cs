@@ -246,7 +246,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     if (buf.err != nil) {
         return buf.err;
     }
-    foreach (var (i, length) in r.opcodeLengths) {
+    foreach (var (i, length) in range(r.opcodeLengths)) {
         var (known, ok) = knownOpcodeLengths[i, ꟷ]; if (ok && known != length) {
             return new DecodeError("line", hdrOffset, fmt.Sprintf("opcode %d expected to have length %d, but has length %d"u8, i, known, length));
         }
@@ -254,7 +254,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
 
     if (r.version < 5) {
         // Read include directories table.
-        r.directories = slice<@string>([compDir]);
+        r.directories = [compDir];
         for (;;) {
             @string directory = buf.@string();
             if (buf.err != nil) {
@@ -285,7 +285,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var dirFormat = r.readLNCTFormat();
         var c = buf.@uint();
         r.directories = new slice<@string>((nint)(c));
-        foreach (var i in range(r.directories)) {
+        foreach (var i in range(len(r.directories))) {
             var (dir, _, _, err) = r.readLNCT(dirFormat, dwarf64);
             if (err != nil) {
                 return err;
@@ -295,7 +295,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var fileFormat = r.readLNCTFormat();
         c = buf.@uint();
         r.fileEntries = new slice<ж<LineFile>>((nint)(c));
-        foreach (var i in range(r.fileEntries)) {
+        foreach (var i in range(len(r.fileEntries))) {
             ref var name = ref heap<@string>(out var Ꮡname);
             ref var mtime = ref heap<uint64>(out var Ꮡmtime);
             (name, mtime, var size, var err) = r.readLNCT(fileFormat, dwarf64);
@@ -323,7 +323,7 @@ partial struct lnctForm {
 internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
     var c = r.buf.uint8();
     var ret = new slice<lnctForm>(c);
-    foreach (var i in range(ret)) {
+    foreach (var i in range(len(ret))) {
         ret[i].lnct = (nint)r.buf.@uint();
         ret[i].form = (format)(uint32)r.buf.@uint();
     }
@@ -337,7 +337,7 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
     uint64 size = default;
 
     @string dir = default;
-    foreach (var (_, lf) in s) {
+    foreach (var (_, lf) in range(s)) {
         @string str = default;
         uint64 val = default;
         switch (lf.form) {

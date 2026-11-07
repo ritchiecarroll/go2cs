@@ -33,7 +33,7 @@ internal static void selectsetpc(ref uintptr pc) {
 
 internal static void sellock(slice<scase> scases, slice<uint16> lockorder) {
     ж<Δhchan> c = default;
-    foreach (var (_, o) in lockorder) {
+    foreach (var (_, o) in range(lockorder)) {
         var c0 = scases[o].c;
         if (c0 != c) {
             c = c0;
@@ -180,7 +180,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     // generate permuted order
     nint norder = 0;
     var allSynctest = true;
-    foreach (var i in range(scases)) {
+    foreach (var i in range(len(scases))) {
         var casΔ1 = Ꮡ(scases, i);
 
         // Omit cases without channels from the poll and lock orders.
@@ -218,7 +218,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
 
     // sort the cases by Hchan address to get the locking order.
     // simple heap sort, to guarantee n log n time and constant stack footprint.
-    foreach (var i in range(lockorder)) {
+    foreach (var i in range(len(lockorder))) {
         nint j = i;
         // Start with the pollorder to permute cases on the same channel.
         var cΔ1 = scases[pollorder[i]].c;
@@ -278,7 +278,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     bool caseSuccess = default;
     int64 caseReleaseTime = -1;
     bool recvOK = default;
-    foreach (var (_, casei) in pollorder) {
+    foreach (var (_, casei) in range(pollorder)) {
         casi = (nint)casei;
         cas = Ꮡ(scases, casi);
         c = cas.c;
@@ -322,7 +322,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
         @throw(gpWaitingNilˢ);
     }
     nextp = gp.of(g.Ꮡwaiting);
-    foreach (var (_, casei) in lockorder) {
+    foreach (var (_, casei) in range(lockorder)) {
         casi = (nint)casei;
         cas = Ꮡ(scases, casi);
         c = cas.c;
@@ -384,7 +384,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     }
     gp.Value.waiting = default;
 
-    foreach (var (_, casei) in lockorder) {
+    foreach (var (_, casei) in range(lockorder)) {
         k = Ꮡ(scases, casei);
         if (k.c.timer != nil) {
             unblockTimerChan(ref (k.c).DerefOrNull());
@@ -594,7 +594,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     nint nsends = 0;
     nint nrecvs = 0;
     nint dflt = -1;
-    foreach (var (i, rc) in cases) {
+    foreach (var (i, rc) in range(cases)) {
         nint j = default;
         switch (rc.dir) {
         case var ᴛ when ᴛ == selectDefault: {
@@ -632,7 +632,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     ж<uintptr> pc0 = default;
     if (raceenabled) {
         var pcs = new slice<uintptr>(nsends + nrecvs);
-        foreach (var i in range(pcs)) {
+        foreach (var i in range(len(pcs))) {
             selectsetpc(ref pcs[i]);
         }
         pc0 = Ꮡ(pcs, 0);

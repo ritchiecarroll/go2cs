@@ -166,7 +166,7 @@ internal static partial slice<byte> movedBytes(nint n) {
 }
 
 internal static void movedCaps() {
-    foreach (var (_, n) in slice<nint>([1, 3, 9, 17, 25, 33])) {
+    foreach (var (_, n) in range(slice<nint>([1, 3, 9, 17, 25, 33]))) {
         fmt.Print(cap(movedBytes(n)), " ");
     }
     fmt.Println();
@@ -185,7 +185,7 @@ internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
 
 internal static void movedPtrCaps() {
     ref var r = ref heap<slice<ж<nint>>>(out var Ꮡr);
-    foreach (var (_, n) in slice<nint>([1, 2, 3, 4, 5, 9])) {
+    foreach (var (_, n) in range(slice<nint>([1, 2, 3, 4, 5, 9]))) {
         movedPtrs(n, ref r);
         fmt.Print(cap(r), " ");
     }

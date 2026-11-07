@@ -366,7 +366,7 @@ internal static @string scanIdentifier(this ref Scanner s) {
     //
     // In case we encounter a non-ASCII character, fall back on the slower path
     // of calling into s.next().
-    foreach (var (rdOffset, b) in s.src.slice(s.rdOffset)) {
+    foreach (var (rdOffset, b) in range(s.src.slice(s.rdOffset))) {
         if ('a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || b == '_' || '0' <= b && b <= '9') {
             // Avoid assigning a rune for the common case of an ascii character.
             continue;
@@ -771,7 +771,7 @@ internal static @string scanString(this ref Scanner s) {
 internal static slice<byte> stripCR(slice<byte> b, bool comment) {
     var c = new slice<byte>(len(b));
     nint i = 0;
-    foreach (var (j, ch) in b) {
+    foreach (var (j, ch) in range(b)) {
         // In a /*-style comment, don't strip \r from *\r/ (incl.
         // sequences of \r from *\r\r...\r/) since the resulting
         // */ would terminate the comment too early unless the \r

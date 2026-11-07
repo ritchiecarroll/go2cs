@@ -123,7 +123,7 @@ partial class hpack_package {
         [new(name: "via", value: "")] = 60,
         [new(name: "www-authenticate", value: "")] = 61
     },
-    ents: slice<HeaderField>([
+    ents: [
         new(Name: ":authority", Value: "", Sensitive: false),
         new(Name: ":method", Value: "GET", Sensitive: false),
         new(Name: ":method", Value: "POST", Sensitive: false),
@@ -185,7 +185,7 @@ partial class hpack_package {
         new(Name: "vary", Value: "", Sensitive: false),
         new(Name: "via", Value: "", Sensitive: false),
         new(Name: "www-authenticate", Value: "", Sensitive: false)
-    ])
+    ]
 )); }
 
 } // end hpack_package

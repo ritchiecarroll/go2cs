@@ -23,21 +23,21 @@ internal static void preEncode(this ref Profile p) {
     var strings = new map<@string, nint>();
     addString(strings, ""u8);
 
-    foreach (var (_, st) in p.SampleType) {
+    foreach (var (_, st) in range(p.SampleType)) {
         st.typeX = addString(strings, st.Type);
         st.unitX = addString(strings, st.Unit);
     }
 
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         s.labelX = default;
         slice<@string> keys = default;
         foreach (var (k, _) in s.Label) {
             keys = append(keysᴷ, keys, k);
         }
         sort.Strings(keys);
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             var vs = s.Label[k];
-            foreach (var (_, v) in vs) {
+            foreach (var (_, v) in range(vs)) {
                 s.labelX = append(s.labelX,
                     new Label(
                         keyX: addString(strings, k),
@@ -50,9 +50,9 @@ internal static void preEncode(this ref Profile p) {
             numKeys = append(numKeysᴷ, numKeys, k);
         }
         sort.Strings(numKeys);
-        foreach (var (_, k) in numKeys) {
+        foreach (var (_, k) in range(numKeys)) {
             var vs = s.NumLabel[k];
-            foreach (var (_, v) in vs) {
+            foreach (var (_, v) in range(vs)) {
                 s.labelX = append(s.labelX,
                     new Label(
                         keyX: addString(strings, k),
@@ -61,18 +61,18 @@ internal static void preEncode(this ref Profile p) {
             }
         }
         s.locationIDX = default;
-        foreach (var (_, l) in s.Location) {
+        foreach (var (_, l) in range(s.Location)) {
             s.locationIDX = append(s.locationIDX, l.ID);
         }
     }
 
-    foreach (var (_, m) in p.Mapping) {
+    foreach (var (_, m) in range(p.Mapping)) {
         m.fileX = addString(strings, m.File);
         m.buildIDX = addString(strings, m.BuildID);
     }
 
-    foreach (var (_, l) in p.Location) {
-        foreach (var (i, ln) in l.Line) {
+    foreach (var (_, l) in range(p.Location)) {
+        foreach (var (i, ln) in range(l.Line)) {
             if (ln.Function != nil) {
                 l.Line[i].functionIDX = ln.Function.ID;
             } else {
@@ -85,7 +85,7 @@ internal static void preEncode(this ref Profile p) {
             l.mappingIDX = 0;
         }
     }
-    foreach (var (_, f) in p.Function) {
+    foreach (var (_, f) in range(p.Function)) {
         f.nameX = addString(strings, f.Name);
         f.systemNameX = addString(strings, f.SystemName);
         f.filenameX = addString(strings, f.Filename);
@@ -106,19 +106,19 @@ internal static void preEncode(this ref Profile p) {
 }
 
 internal static void encode(this ref Profile p, ж<buffer> b) {
-    foreach (var (_, x) in p.SampleType) {
+    foreach (var (_, x) in range(p.SampleType)) {
         encodeMessage(b, 1, new ValueTypeжmessage(x));
     }
-    foreach (var (_, x) in p.Sample) {
+    foreach (var (_, x) in range(p.Sample)) {
         encodeMessage(b, 2, new Sampleжmessage(x));
     }
-    foreach (var (_, x) in p.Mapping) {
+    foreach (var (_, x) in range(p.Mapping)) {
         encodeMessage(b, 3, new Mappingжmessage(x));
     }
-    foreach (var (_, x) in p.Location) {
+    foreach (var (_, x) in range(p.Location)) {
         encodeMessage(b, 4, new Locationжmessage(x));
     }
-    foreach (var (_, x) in p.Function) {
+    foreach (var (_, x) in range(p.Function)) {
         encodeMessage(b, 5, new Functionжmessage(x));
     }
     encodeStrings(ref (b).DerefOrNull(), 6, p.stringTable);
@@ -132,7 +132,7 @@ internal static void encode(this ref Profile p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 12, p.Period);
 }
 
-[GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = [
     default, // 0
     // repeated ValueType sample_type = 1
     (ж<buffer> b, message m) => {
@@ -201,7 +201,7 @@ internal static void encode(this ref Profile p, ж<buffer> b) {
     (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑcommentX),
     // int64 defaultSampleType = 14
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdefaultSampleTypeX)
-]); }
+]; }
 
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
@@ -212,14 +212,14 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
     error err = default;
 
     var mappings = new map<uint64, ж<Mapping>>();
-    foreach (var (_, m) in p.Mapping) {
+    foreach (var (_, m) in range(p.Mapping)) {
         (m.File, err) = getString(p.stringTable, ref (m.ᏑfileX).DerefOrNull(), err);
         (m.BuildID, err) = getString(p.stringTable, ref (m.ᏑbuildIDX).DerefOrNull(), err);
         mappings[m.ID] = m;
     }
 
     var functions = new map<uint64, ж<Function>>();
-    foreach (var (_, f) in p.Function) {
+    foreach (var (_, f) in range(p.Function)) {
         (f.Name, err) = getString(p.stringTable, ref (f.ᏑnameX).DerefOrNull(), err);
         (f.SystemName, err) = getString(p.stringTable, ref (f.ᏑsystemNameX).DerefOrNull(), err);
         (f.Filename, err) = getString(p.stringTable, ref (f.ᏑfilenameX).DerefOrNull(), err);
@@ -227,10 +227,10 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
     }
 
     var locations = new map<uint64, ж<Location>>();
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, l) in range(p.Location)) {
         l.Mapping = mappings[l.mappingIDX];
         l.mappingIDX = 0;
-        foreach (var (i, ln) in l.Line) {
+        foreach (var (i, ln) in range(l.Line)) {
             var id = ln.functionIDX; if (id != 0) {
                 l.Line[i].Function = functions[id];
                 if (l.Line[i].Function == nil) {
@@ -242,15 +242,15 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
         locations[l.ID] = l;
     }
 
-    foreach (var (_, st) in p.SampleType) {
+    foreach (var (_, st) in range(p.SampleType)) {
         (st.Type, err) = getString(p.stringTable, ref (st.ᏑtypeX).DerefOrNull(), err);
         (st.Unit, err) = getString(p.stringTable, ref (st.ᏑunitX).DerefOrNull(), err);
     }
 
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         var labels = new map<@string, slice<@string>>();
         var numLabels = new map<@string, slice<int64>>();
-        foreach (var (_, vᴛ1) in s.labelX) {
+        foreach (var (_, vᴛ1) in range(s.labelX)) {
             var l = vᴛ1;
 
             @string key = default;
@@ -270,7 +270,7 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
             s.NumLabel = numLabels;
         }
         s.Location = default;
-        foreach (var (_, lid) in s.locationIDX) {
+        foreach (var (_, lid) in range(s.locationIDX)) {
             s.Location = append(s.Location, locations[lid]);
         }
         s.locationIDX = default;
@@ -291,7 +291,7 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
             (pt.Unit, err) = getString(p.stringTable, ref (pt.ᏑunitX).DerefOrNull(), err);
         }
     }
-    foreach (var (_, vᴛ2) in p.commentX) {
+    foreach (var (_, vᴛ2) in range(p.commentX)) {
         var i = vᴛ2;
 
         @string c = default;
@@ -314,13 +314,13 @@ internal static void encode(this ref ValueType p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.unitX);
 }
 
-[GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = [
     default, // 0
     // optional int64 type = 1
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑtypeX),
     // optional int64 unit = 2
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑunitX)
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) {
     return sampleDecoder;
@@ -328,15 +328,15 @@ internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample 
 
 internal static void encode(this ref Sample p, ж<buffer> b) {
     encodeUint64s(ref (b).DerefOrNull(), 1, p.locationIDX);
-    foreach (var (_, x) in p.Value) {
+    foreach (var (_, x) in range(p.Value)) {
         encodeInt64(ref (b).DerefOrNull(), 2, x);
     }
-    foreach (var (_, x) in p.labelX) {
+    foreach (var (_, x) in range(p.labelX)) {
         encodeMessage(b, 3, x);
     }
 }
 
-[GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = [
     default, // 0
     // repeated uint64 location = 1
     (ж<buffer> b, message m) => decodeUint64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().ᏑlocationIDX),
@@ -349,7 +349,7 @@ internal static void encode(this ref Sample p, ж<buffer> b) {
         s.labelX = append(s.labelX, new Label());
         return decodeMessage(b, new Labelжmessage(Ꮡ(s.labelX, n)));
     }
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) {
     return labelDecoder;
@@ -361,7 +361,7 @@ internal static void encode(this Label p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.numX);
 }
 
-[GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = [
     default, // 0
     // optional int64 key = 1
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑkeyX),
@@ -369,7 +369,7 @@ internal static void encode(this Label p, ж<buffer> b) {
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑstrX),
     // optional int64 num = 3
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑnumX)
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) {
     return mappingDecoder;
@@ -388,7 +388,7 @@ internal static void encode(this ref Mapping p, ж<buffer> b) {
     encodeBoolOpt(ref (b).DerefOrNull(), 10, p.HasInlineFrames);
 }
 
-[GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = [
     default, // 0
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑID),           // optional uint64 id = 1
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑStart),        // optional uint64 memory_offset = 2
@@ -400,7 +400,7 @@ internal static void encode(this ref Mapping p, ж<buffer> b) {
     (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFilenames),   // optional bool has_filenames = 8
     (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasLineNumbers), // optional bool has_line_numbers = 9
     (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasInlineFrames) // optional bool has_inline_frames = 10
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) {
     return locationDecoder;
@@ -410,12 +410,12 @@ internal static void encode(this ref Location p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (b).DerefOrNull(), 2, p.mappingIDX);
     encodeUint64Opt(ref (b).DerefOrNull(), 3, p.Address);
-    foreach (var i in range(p.Line)) {
+    foreach (var i in range(len(p.Line))) {
         encodeMessage(b, 4, new Lineжmessage(Ꮡ(p.Line, i)));
     }
 }
 
-[GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = [
     default, // 0
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑID),         // optional uint64 id = 1;
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑmappingIDX), // optional uint64 mapping_id = 2;
@@ -426,7 +426,7 @@ internal static void encode(this ref Location p, ж<buffer> b) {
         pp.Line = append(pp.Line, new Line());
         return decodeMessage(b, new Lineжmessage(Ꮡ(pp.Line, n)));
     }
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) {
     return lineDecoder;
@@ -437,13 +437,13 @@ internal static void encode(this ref Line p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.ΔLine);
 }
 
-[GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = [
     default, // 0
     // optional uint64 function_id = 1
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑfunctionIDX),
     // optional int64 line = 2
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑΔLine)
-]); }
+]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) {
     return functionDecoder;
@@ -457,7 +457,7 @@ internal static void encode(this ref Function p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 5, p.StartLine);
 }
 
-[GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = slice<Func<ж<buffer>, message, error>>([
+[GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = [
     default, // 0
     // optional uint64 id = 1
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑID),
@@ -469,7 +469,7 @@ internal static void encode(this ref Function p, ж<buffer> b) {
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑfilenameX),
     // optional int64 start_line = 5
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑStartLine)
-]); }
+]; }
 
 internal static int64 addString(map<@string, nint> strings, @string s) {
     var (i, ok) = strings[s, ꟷ];

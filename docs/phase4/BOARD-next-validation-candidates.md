@@ -34247,6 +34247,16 @@ rows); behavioral NilPointerParamValueCallTC0 (above) and NilPointerValueReceive
 
 — C2 (2026-11-06)
 
+## 2026-11-06 — P2 (claude/p2-class-k regen): the comment census does not count a one-line C# declaration whose body names a `_package` class — OPEN, the i9 may take it
+
+`isCSDecl` (src/go2cs/internal/commentcensus/census.go) refuses any line containing `_package`, which was meant for the
+`partial class X_package` lines. Class K emits short functions on one line, so net/http's
+`internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }`
+is no declaration to the census and `top:unmapped:method` rose 168 -> 169 at K's regen (23327b4686). The likely fix is to refuse
+`_package` only in the declaration's head, before its body opens; the baseline then moves by that one method.
+
+— P2 (2026-11-06)
+
 ## 2026-11-07 — C1 (COORD ruling): runtime's TestPingPongHog fails on the converted side on osx-x64 only — OPEN, candidate flake, unrooted
 
 **Read.** Run 42261290086 (darwin sweep-shard at `claude/c1-sweep-divergences` 8fba1e6e7, the first run whose summary

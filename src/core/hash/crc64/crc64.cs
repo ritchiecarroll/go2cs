@@ -172,7 +172,7 @@ internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
         }
     }
     // For reminders or small sizes
-    foreach (var (_, v) in p) {
+    foreach (var (_, v) in range(p)) {
         crc = tab[(byte)((byte)crc ^ v)] ^ (crc >> 8);
     }
     return ~crc;
@@ -206,7 +206,7 @@ internal static uint64 tableSum(ж<Table> Ꮡt) {
     array<byte> a = new(2048);
     var b = a[..0];
     if (Ꮡt != nil) {
-        foreach (var (_, x) in t) {
+        foreach (var (_, x) in range(t)) {
             b = byteorder.BEAppendUint64(b, x);
         }
     }

@@ -445,7 +445,7 @@ break_parseField:;
     }
     dst = dst.slice(0, len(r.fieldIndexes));
     nint preIdx = default;
-    foreach (var (i, idx) in r.fieldIndexes) {
+    foreach (var (i, idx) in range(r.fieldIndexes)) {
         dst[i] = str.slice(preIdx, idx);
         preIdx = idx;
     }

@@ -22,7 +22,7 @@ public static void ResetCoverage() {
 // multiple values for each counter by OR'ing them together.
 public static void SnapshotCoverage() {
     var cov = coverage();
-    foreach (var (i, b) in cov) {
+    foreach (var (i, b) in range(cov)) {
         coverageSnapshot[i] = pow2Table[b];
     }
 }
@@ -34,7 +34,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
         throw panic(fmt.Sprintf("the number of coverage bits changed: before=%d, after=%d"u8, len(@base), len(snapshot)));
     }
     var found = false;
-    foreach (var i in range(snapshot)) {
+    foreach (var i in range(len(snapshot))) {
         if ((byte)(snapshot[i] & ~@base[i]) != 0) {
             found = true;
             break;
@@ -44,7 +44,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
         return default;
     }
     var diff = new slice<byte>(len(snapshot));
-    foreach (var i in range(diff)) {
+    foreach (var i in range(len(diff))) {
         diff[i] = (byte)(snapshot[i] & ~@base[i]);
     }
     return diff;
@@ -54,7 +54,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
 // set in base.
 internal static nint countNewCoverageBits(slice<byte> @base, slice<byte> snapshot) {
     nint n = 0;
-    foreach (var i in range(snapshot)) {
+    foreach (var i in range(len(snapshot))) {
         n += bits.OnesCount8((uint8)((byte)(snapshot[i] & ~@base[i])));
     }
     return n;
@@ -63,7 +63,7 @@ internal static nint countNewCoverageBits(slice<byte> @base, slice<byte> snapsho
 // isCoverageSubset returns true if all the base coverage bits are set in
 // snapshot.
 internal static bool isCoverageSubset(slice<byte> @base, slice<byte> snapshot) {
-    foreach (var (i, v) in @base) {
+    foreach (var (i, v) in range(@base)) {
         if ((byte)(v & snapshot[i]) != v) {
             return false;
         }
@@ -74,7 +74,7 @@ internal static bool isCoverageSubset(slice<byte> @base, slice<byte> snapshot) {
 // hasCoverageBit returns true if snapshot has at least one bit set that is
 // also set in base.
 internal static bool hasCoverageBit(slice<byte> @base, slice<byte> snapshot) {
-    foreach (var i in range(snapshot)) {
+    foreach (var i in range(len(snapshot))) {
         if ((byte)(snapshot[i] & @base[i]) != 0) {
             return true;
         }
@@ -84,7 +84,7 @@ internal static bool hasCoverageBit(slice<byte> @base, slice<byte> snapshot) {
 
 internal static nint countBits(slice<byte> cov) {
     nint n = 0;
-    foreach (var (_, c) in cov) {
+    foreach (var (_, c) in range(cov)) {
         n += bits.OnesCount8(c);
     }
     return n;
@@ -107,7 +107,7 @@ internal static ref array<byte> _ecounters => ref ((StaticBox<array<byte>>)Ꮡ_e
 internal static array<byte> pow2Table = new(256);
 
 [GoInit] internal static void init() {
-    foreach (var i in range(pow2Table)) {
+    foreach (var i in range(len(pow2Table))) {
         var b = (byte)i;
         b |= (byte)((b >> 1));
         b |= (byte)((b >> 2));

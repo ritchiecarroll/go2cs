@@ -168,7 +168,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
 // isZero reports whether x is all zeroes in constant time.
 internal static bool isZero(slice<byte> x) {
     byte acc = default;
-    foreach (var (_, b) in x) {
+    foreach (var (_, b) in range(x)) {
         acc |= (byte)(b);
     }
     return acc == 0;

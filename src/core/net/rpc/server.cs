@@ -396,7 +396,7 @@ internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mute
         Ꮡmtype.of(methodType.ᏑMutex).Unlock();
         var function = mtype.method.Func;
         // Invoke the method, providing a new value for the reply.
-        var returnValues = function.Call(slice<reflectꓸValue>([s.rcvr, argv, replyv]));
+        var returnValues = function.Call([s.rcvr, argv, replyv]);
         // The return value for the method is an error.
         var errInter = returnValues[0].Interface();
         @string errmsg = ""u8;

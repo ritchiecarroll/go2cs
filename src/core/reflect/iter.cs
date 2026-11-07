@@ -40,7 +40,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
     if (canRangeFunc(v.abiType())) {
         return (Func<ΔValue, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => slice<ΔValue>([ValueOf(yield(@in[0]))]));
-            v.Call(slice<ΔValue>([rf]));
+            v.Call([rf]);
         };
     }
     switch (v.kind()) {
@@ -139,7 +139,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
     if (canRangeFunc2(v.abiType())) {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => slice<ΔValue>([ValueOf(yield(@in[0], @in[1]))]));
-            v.Call(slice<ΔValue>([rf]));
+            v.Call([rf]);
         };
     }
     switch (v.Kind()) {

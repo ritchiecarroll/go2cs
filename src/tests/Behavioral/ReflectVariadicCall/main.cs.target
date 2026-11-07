@@ -14,7 +14,7 @@ internal static @string join(@string prefix, params ꓸꓸꓸnint partsʗp) {
     var parts = partsʗp.sslice();
 
     @string @out = prefix;
-    foreach (var (_, p) in parts) {
+    foreach (var (_, p) in range(parts)) {
         @out += fmt.Sprintf("/%d"u8, p);
     }
     return @out;
@@ -24,7 +24,7 @@ internal static nint sum(params ꓸꓸꓸnint numsʗp) {
     var nums = numsʗp.sslice();
 
     nint total = 0;
-    foreach (var (_, n) in nums) {
+    foreach (var (_, n) in range(nums)) {
         total += n;
     }
     return total;
@@ -39,7 +39,7 @@ internal static @string describe(@string tag, params ꓸꓸꓸany valsʗp) {
 internal static (nint, error) firstNonZero(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         if (v != 0) {
             return (v, default);
         }
@@ -53,7 +53,7 @@ internal static void record(@string label, params ꓸꓸꓸstring partsʗp) {
     var parts = partsʗp.sslice();
 
     @string line = label;
-    foreach (var (_, p) in parts) {
+    foreach (var (_, p) in range(parts)) {
         line += ":"u8 + p;
     }
     recorded = append(recorded, line);
@@ -63,7 +63,7 @@ internal static nint between(nint lo, nint hi, params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint n = 0;
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         if (v >= lo && v <= hi) {
             n++;
         }
@@ -79,7 +79,7 @@ internal static nint Total(this counter c, params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint t = c.@base;
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         t += v;
     }
     return t;
@@ -89,12 +89,12 @@ internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var @in = new slice<reflectꓸValue>(len(args), () => new(nil));
-    foreach (var (i, a) in args) {
+    foreach (var (i, a) in range(args)) {
         @in[i] = reflect.ValueOf(a);
     }
     var @out = reflect.ValueOf(fn).Call(@in);
     var parts = new slice<@string>(len(@out));
-    foreach (var (i, o) in @out) {
+    foreach (var (i, o) in range(@out)) {
         parts[i] = fmt.Sprintf("%v"u8, o.Interface());
     }
     return "["u8 + fmt.Sprint(parts) + "]"u8;
@@ -128,7 +128,7 @@ internal static void Main() {
         ["cat"] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.sslice();
             @string @out = "";
-            foreach (var (i, p) in parts) {
+            foreach (var (i, p) in range(parts)) {
                 if (i > 0) {
                     @out += sep;
                 }
@@ -143,7 +143,7 @@ internal static void Main() {
         ["pair"] = ((Funcꓸꓸꓸ<nint, nint, (nint, nint)>)((nint, nint) (nint a, params ꓸꓸꓸnint restʗp) => {
             var rest = restʗp.sslice();
             nint t = 0;
-            foreach (var (_, r) in rest) {
+            foreach (var (_, r) in range(rest)) {
                 t += r;
             }
             return (a, t);
@@ -154,7 +154,7 @@ internal static void Main() {
         names = append(namesᴷ, names, name);
     }
     sort.Strings(names);
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         var fn = reflect.ValueOf(funcs[name]);
         fmt.Printf("funcmap %-6s: variadic=%v numIn=%d in-last=%v\n"u8,
             name, fn.Type().IsVariadic(), fn.Type().NumIn(), fn.Type().In(fn.Type().NumIn() - 1));

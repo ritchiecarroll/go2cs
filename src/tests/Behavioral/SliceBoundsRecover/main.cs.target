@@ -238,7 +238,7 @@ internal static void Main() {
         })
     ]);
 
-    foreach (var (_, c) in cases) {
+    foreach (var (_, c) in range(cases)) {
         @try(c.name, c.f);
     }
 

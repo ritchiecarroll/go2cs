@@ -16,7 +16,7 @@ internal static partial ж<holder> makeHolder(@string name) {
         tail: new slice<nint>(2)
     ));
 
-    foreach (var i in range(h.tbl)) {
+    foreach (var i in range(len(h.tbl))) {
         h.tbl[i] = len(name);
     }
 
@@ -29,7 +29,7 @@ internal static void Main() {
     var h = makeHolder("abc");
     nint sum = 0;
 
-    foreach (var (i, v) in h.tbl.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(h.tbl.ΔRangeSnapshot())) {
         sum += i * v;
     }
 

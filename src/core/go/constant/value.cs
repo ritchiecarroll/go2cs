@@ -828,7 +828,7 @@ public static slice<byte> Bytes(Value x) {
     var bytes = new slice<byte>(len(words) * (nint)wordSize);
 
     nint i = 0;
-    foreach (var (_, vᴛ1) in words) {
+    foreach (var (_, vᴛ1) in range(words)) {
         var w = vᴛ1;
 
         for (nint j = 0; j < wordSize; j++) {
@@ -853,7 +853,7 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     nint i = 0;
     big.Word w = default;
     nuint s = default;
-    foreach (var (_, b) in bytes) {
+    foreach (var (_, b) in range(bytes)) {
         w |= (big.Word)((((big.Word)(nuint)b) << s));
         s += 8; if (s == (nuint)(wordSize * 8)) {
             words[i] = w;

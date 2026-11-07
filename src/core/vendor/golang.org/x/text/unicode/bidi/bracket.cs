@@ -127,7 +127,7 @@ internal static UntypedInt maxPairingDepth => 63;
 internal static void locateBrackets(this ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
     // traverse the run
     // do that explicitly (not in a for-each) so we can record position
-    foreach (var (i, index) in p.indexes) {
+    foreach (var (i, index) in range(p.indexes)) {
         // look at the bracket type for each character
         if (pairTypes[index] == bpNone || p.codesIsolatedRun[i] != ON) {
             // continue scanning
@@ -324,7 +324,7 @@ internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc
 
 // resolveBrackets implements rule N0 for a list of pairs.
 internal static void resolveBrackets(this ref bracketPairer p, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
-    foreach (var (_, loc) in p.pairPositions) {
+    foreach (var (_, loc) in range<bracketPair>(p.pairPositions)) {
         p.assignBracketType(loc, dirEmbed, initialTypes);
     }
 }

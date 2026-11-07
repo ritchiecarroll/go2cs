@@ -197,7 +197,7 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, Re
     r.Data.Reset(pr.DataIdx(k, idx));
     Ꮡr.Sync(SyncRelocs);
     r.Relocs = new slice<RefTableEntry>(Ꮡr.Len());
-    foreach (var i in range(r.Relocs)) {
+    foreach (var i in range(len(r.Relocs))) {
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
@@ -223,7 +223,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, R
     } else {
         r.Relocs = new slice<RefTableEntry>(l);
     }
-    foreach (var i in range(r.Relocs)) {
+    foreach (var i in range(len(r.Relocs))) {
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
@@ -316,7 +316,7 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     var (pos, _) = r.Data.Seek(0, io.SeekCurrent);
     SyncMarker mHave = (SyncMarker)(nint)Ꮡr.rawUvarint();
     var writerPCs = new slice<nint>((nint)(Ꮡr.rawUvarint()));
-    foreach (var i in range(writerPCs)) {
+    foreach (var i in range(len(writerPCs))) {
         writerPCs[i] = (nint)Ꮡr.rawUvarint();
     }
 
@@ -346,14 +346,14 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     if (len(writerPCs) == 0) {
         fmt.Printf("\t[stack trace unavailable; recompile package %q with -d=syncframes]\n"u8, r.common.pkgPath);
     }
-    foreach (var (_, pc) in writerPCs) {
+    foreach (var (_, pc) in range(writerPCs)) {
         fmt.Printf("\t%s\n"u8, r.common.StringIdx(r.rawReloc(SectionString, pc)));
     }
 
     fmt.Printf("\nexpected %v, reading at:\n"u8, mWant);
     array<uintptr> readerPCs = new(32); // TODO(mdempsky): Dynamically size?
     nint n = Δruntime.Callers(2, readerPCs[..]);
-    foreach (var (_, pc) in fmtFrames(readerPCs.slice(0, n).ꓸꓸꓸ)) {
+    foreach (var (_, pc) in range(fmtFrames(readerPCs.slice(0, n).ꓸꓸꓸ))) {
         fmt.Printf("\t%s\n"u8, pc);
     }
 
@@ -444,7 +444,7 @@ public static @string String(this ж<Decoder> Ꮡr) {
 // the element bitstream.
 public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
-    foreach (var i in range(res)) {
+    foreach (var i in range(len(res))) {
         res[i] = Ꮡr.String();
     }
     return res;

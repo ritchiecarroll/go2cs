@@ -431,7 +431,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     bool filesSource = default;
     bool dnsSource = default;
     @string first = default;
-    foreach (var (i, src) in srcs) {
+    foreach (var (i, src) in range(srcs)) {
         if (src.source == "files"u8 || src.source == "dns"u8) {
             if (canUseCgo && !src.standardCriteria()) {
                 // non-standard; let libc deal with it.
@@ -510,7 +510,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
 
         if (!hasDNSSourceChecked) {
             hasDNSSourceChecked = true;
-            foreach (var (_, v) in srcs.slice(i + 1)) {
+            foreach (var (_, v) in range(srcs.slice(i + 1))) {
                 if (v.source == "dns"u8) {
                     hasDNSSource = true;
                     break;

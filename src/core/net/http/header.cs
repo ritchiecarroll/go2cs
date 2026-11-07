@@ -120,11 +120,11 @@ public static ΔHeader Clone(this ΔHeader h) {
 }
 
 internal static slice<@string> timeFormats;
-internal static void initᴛtimeFormats() { timeFormats = slice<@string>([
+internal static void initᴛtimeFormats() { timeFormats = [
     TimeFormat,
     time.RFC850,
     time.ANSIC
-]); }
+]; }
 
 // ParseTime parses a time header (such as the Date: header),
 // trying each of the three formats allowed by HTTP/1.1:
@@ -133,7 +133,7 @@ public static (time.Time t, error err) ParseTime(@string text) {
     time.Time t = default;
     error err = default;
 
-    foreach (var (_, layout) in timeFormats) {
+    foreach (var (_, layout) in range(timeFormats)) {
         (t, err) = time.Parse(layout, text);
         if (err == nil) {
             return (t, err);
@@ -206,7 +206,7 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
     }
     var (kvs, sorter) = h.sortedKeyValues(exclude);
     slice<@string> formattedVals = default;
-    foreach (var (_, kv) in kvs) {
+    foreach (var (_, kv) in range(kvs)) {
         if (!httpguts.ValidHeaderFieldName(kv.key)) {
             // This could be an error. In the common case of
             // writing response headers, however, we have no good
@@ -214,12 +214,12 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
             // handler, so just drop invalid headers instead.
             continue;
         }
-        foreach (var (_, vᴛ1) in kv.values) {
+        foreach (var (_, vᴛ1) in range(kv.values)) {
             var v = vᴛ1;
 
             v = headerNewlineToSpace.Replace(v);
             v = textproto.TrimString(v);
-            foreach (var (_, s) in slice<@string>([kv.key, ": ", v, "\r\n"])) {
+            foreach (var (_, s) in range(slice<@string>([kv.key, ": ", v, "\r\n"]))) {
                 var (_, err) = ws.WriteString(s); if (err != nil) {
                     ᏑheaderSorterPool.Put(sorter.OrTypedNil());
                     return err;

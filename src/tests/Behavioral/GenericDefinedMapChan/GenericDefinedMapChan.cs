@@ -23,7 +23,7 @@ public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
 
     var s = new Set<T>(len(items));
 
-    foreach (var (_, item) in items) {
+    foreach (var (_, item) in range(items)) {
         s.Add(item);
     }
 

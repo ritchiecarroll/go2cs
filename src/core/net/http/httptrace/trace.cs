@@ -58,7 +58,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
         if (trace.DNSDone != nil) {
             nt.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
                 var addrs = new slice<net.IPAddr>(len(netIPs));
-                foreach (var (i, ip) in netIPs) {
+                foreach (var (i, ip) in range(netIPs)) {
                     addrs[i] = ip._<net.IPAddr>();
                 }
                 Ꮡtrace.Value.DNSDone(new DNSDoneInfo(

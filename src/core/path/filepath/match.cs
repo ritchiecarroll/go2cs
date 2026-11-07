@@ -297,7 +297,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     if (err != nil) {
         return (matches, err);
     }
-    foreach (var (_, d) in m) {
+    foreach (var (_, d) in range(m)) {
         (matches, err) = glob(d, @file, matches);
         if (err != nil) {
             return (matches, err);
@@ -371,7 +371,7 @@ internal static (slice<@string> m, error e) glob(@string dir, @string pattern, s
         var (names, _) = d.Readdirnames(-1);
         slices.Sort<slice<@string>, @string>(names);
 
-        foreach (var (_, n) in names) {
+        foreach (var (_, n) in range(names)) {
             var (matched, errΔ1) = Match(pattern, n);
             if (errΔ1 != nil) {
                 (m, e) = (m, errΔ1); goto ᒐdone;

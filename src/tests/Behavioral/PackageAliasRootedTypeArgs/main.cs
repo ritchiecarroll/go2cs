@@ -62,7 +62,7 @@ private static readonly object twoˢ = (@string)"two"u8;
 internal static void Main() {
     names a = slice<@string>(["x", "y"]);
     sizes b = new sizes{["k"] = 7};
-    grid c = slice<slice<@string>>([slice<@string>(["g"])]);
+    grid c = slice<slice<@string>>([["g"]]);
     errs d = slice<error>([default]);
     cplx e = slice<complex64>([complex(1F, 2F)]);
     cplx2 e2 = slice<complex128>([complex(3D, 4D)]);
@@ -76,7 +76,7 @@ internal static void Main() {
     fn0 k0 = () => {
         fmt.Println("fn0 ran");
     };
-    nested l = new nested{["z"] = slice<Header>([new(Name: "q", Size: 2)])};
+    nested l = new nested{["z"] = [new(Name: "q", Size: 2)]};
     hmap m = new hmap{["z"] = new(Name: "hm", Size: 3)};
     u8s n = slice<uint8>([7, 8]);
     ifs o = slice<any>([(nint)1, twoˢ]);

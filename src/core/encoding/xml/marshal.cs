@@ -294,7 +294,7 @@ internal static bool isValidDirective(Directive dir) {
     nint depth = default;
     uint8 inquote = default;
     bool incomment = default;
-    foreach (var (i, c) in dir) {
+    foreach (var (i, c) in range<byte>(dir)) {
         switch (ᐧ) {
         case {} when incomment: {
             if (c == '>') {
@@ -569,7 +569,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     }
 
     // Attributes
-    foreach (var i in range(tinfo.fields)) {
+    foreach (var i in range(len(tinfo.fields))) {
         var finfoΔ1 = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)(finfoΔ1.flags & fAttr) == 0) {
             continue;
@@ -805,7 +805,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     }
 
     // Attributes
-    foreach (var (_, attr) in start.Attr) {
+    foreach (var (_, attr) in range(start.Attr)) {
         var name = attr.Name;
         if (name.Local == ""u8) {
             continue;
@@ -910,7 +910,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
 
     var s = new parentStack(p: Ꮡp);
-    foreach (var i in range(tinfo.fields)) {
+    foreach (var i in range(len(tinfo.fields))) {
         var finfo = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)(finfo.flags & fAttr) != 0) {
             continue;

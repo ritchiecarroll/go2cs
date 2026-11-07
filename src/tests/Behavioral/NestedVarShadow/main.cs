@@ -51,7 +51,7 @@ internal static @string g(@string s) {
 }
 
 internal static @string pkgShadow(@string s) {
-    @string doubled = strings.Join(slice<@string>([s, s]), "-");
+    @string doubled = strings.Join([s, s], "-");
     nint stringsΔ1 = len(doubled);
     return fmt.Sprint(stringsΔ1);
 }

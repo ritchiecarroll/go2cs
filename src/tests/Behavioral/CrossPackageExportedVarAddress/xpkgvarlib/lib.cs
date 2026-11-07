@@ -27,7 +27,7 @@ public static ref array<nint> Arr => ref ((StaticBox<array<nint>>)ᏑArr).ValueS
 public static readonly ж<bool> ᏑFlag = new StaticBox<bool>(default(bool));
 public static ref bool Flag => ref ((StaticBox<bool>)ᏑFlag).ValueSlot;
 
-public static readonly ж<slice<nint>> ᏑTable = new StaticBox<slice<nint>>(slice<nint>([1, 2, 3]));
+public static readonly ж<slice<nint>> ᏑTable = new StaticBox<slice<nint>>([1, 2, 3]);
 public static ref slice<nint> Table => ref ((StaticBox<slice<nint>>)ᏑTable).ValueSlot;
 
 public static nint ReadN() { return N; }

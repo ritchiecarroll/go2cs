@@ -34,7 +34,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
 
     Ꮡs.Ꮡmutex.Lock();
     s.@base = ss.Base;
-    foreach (var (_, f) in ss.Files) {
+    foreach (var (_, f) in range(ss.Files)) {
         Ꮡs.Ꮡtree.add(Ꮡ(new ΔFile(
             name: f.Name,
             @base: f.Base,

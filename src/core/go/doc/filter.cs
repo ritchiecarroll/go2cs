@@ -14,8 +14,8 @@ internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
-        foreach (var (_, field) in fields.List) {
-            foreach (var (_, name) in field.Names) {
+        foreach (var (_, field) in range(fields.List)) {
+            foreach (var (_, name) in range(field.Names)) {
                 if (f(name.Name)) {
                     return true;
                 }
@@ -26,10 +26,10 @@ internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool
 }
 
 internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
-    foreach (var (_, dΔ1) in d.Specs) {
+    foreach (var (_, dΔ1) in range(d.Specs)) {
         switch (dΔ1.type()) {
         case ж<ast.ValueSpec> v: {
-            foreach (var (_, name) in v.Names) {
+            foreach (var (_, name) in range(v.Names)) {
                 if (f(name.Name)) {
                     return true;
                 }
@@ -63,7 +63,7 @@ internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
 
 internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, bool> f) {
     nint w = 0;
-    foreach (var (_, vd) in a) {
+    foreach (var (_, vd) in range(a)) {
         if (matchDecl(ref (vd.Decl).DerefOrNull(), f)) {
             a[w] = vd;
             w++;
@@ -74,7 +74,7 @@ internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, 
 
 internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, bool> f) {
     nint w = 0;
-    foreach (var (_, fd) in a) {
+    foreach (var (_, fd) in range(a)) {
         if (f(fd.Name)) {
             a[w] = fd;
             w++;
@@ -85,7 +85,7 @@ internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, boo
 
 internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, bool> f) {
     nint w = 0;
-    foreach (var (_, td) in a) {
+    foreach (var (_, td) in range(a)) {
         nint n = 0; // number of matches
         if (matchDecl(ref (td.Decl).DerefOrNull(), f)) {
             n = 1;

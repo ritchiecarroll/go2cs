@@ -66,7 +66,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             return Ꮡcheck.validType0(pos, t.elem, nest, path);
         }
         case ж<Struct> t: {
-            foreach (var (_, f) in t.fields) {
+            foreach (var (_, f) in range(t.fields)) {
                 if (!Ꮡcheck.validType0(pos, f.typ, nest, path)) {
                     return false;
                 }
@@ -74,7 +74,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Union> t: {
-            foreach (var (_, tΔ1) in t.terms) {
+            foreach (var (_, tΔ1) in range(t.terms)) {
                 if (!Ꮡcheck.validType0(pos, (~tΔ1).typ, nest, path)) {
                     return false;
                 }
@@ -82,7 +82,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Interface> t: {
-            foreach (var (_, etyp) in t.embeddeds) {
+            foreach (var (_, etyp) in range(t.embeddeds)) {
                 if (!Ꮡcheck.validType0(pos, etyp, nest, path)) {
                     return false;
                 }
@@ -112,7 +112,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
 
             // If the current type t is also found in nest, (the memory of) t is
             // embedded in itself, indicating an invalid recursive type.
-            foreach (var (_, e) in nest) {
+            foreach (var (_, e) in range(nest)) {
                 if (Identical(new NamedжΔType(e), new NamedжΔType(t))) {
                     // We have a cycle. If t != t.Origin() then t is an instance of
                     // the generic type t.Origin(). Because t is in the nest, t must
@@ -146,7 +146,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // type t must be in path since it was found in nest. But not every type in path
                     // is in nest. Specifically t may appear in path with an earlier index than the
                     // index of t in nest. Search again.
-                    foreach (var (start, p) in path) {
+                    foreach (var (start, p) in range(path)) {
                         if (Identical(new NamedжΔType(p), new NamedжΔType(t))) {
                             Ꮡcheck.cycleError(makeObjList(path.slice(start)), 0);
                             return false;
@@ -177,7 +177,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                 var inst = nest[d]; // the type instance
                 // Find the corresponding type argument for the type parameter
                 // and proceed with checking that type argument.
-                foreach (var (i, tparam) in inst.TypeParams().list()) {
+                foreach (var (i, tparam) in range(inst.TypeParams().list())) {
                     // The type parameter and type argument lists should
                     // match in length but be careful in case of errors.
                     if (t == tparam && i < inst.TypeArgs().Len()) {
@@ -210,7 +210,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
 // list of named types.
 internal static slice<Object> makeObjList(slice<ж<Named>> tlist) {
     var olist = new slice<Object>(len(tlist));
-    foreach (var (i, t) in tlist) {
+    foreach (var (i, t) in range(tlist)) {
         olist[i] = new TypeNameжObject(t.obj);
     }
     return olist;

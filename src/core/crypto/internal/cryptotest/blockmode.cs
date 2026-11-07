@@ -103,7 +103,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
 
         var (src, dst, before) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
 
-        foreach (var (_, length) in slice<nint>([0, blockSize, blockSize * 2])) {
+        foreach (var (_, length) in range(slice<nint>([0, blockSize, blockSize * 2]))) {
             rng.Read(src);
             copy(before, src);
 
@@ -120,7 +120,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
 
         var (buff, expectedOutput) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
 
-        foreach (var (_, length) in slice<nint>([0, blockSize, blockSize * 2])) {
+        foreach (var (_, length) in range(slice<nint>([0, blockSize, blockSize * 2]))) {
             // Record what output is when src and dst are different
             rng.Read(buff);
             bm(b, ivʗ4).CryptBlocks(expectedOutput.slice(0, length), buff.slice(0, length));
@@ -253,7 +253,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     var ivʗ12 = iv;
     t.Run(partialBlocksˢ, (ж<testing.T> tΔ8) => {
         // Check a few cases of not being a multiple of BlockSize
-        foreach (var (_, srcSize) in slice<nint>([blockSize - 1, blockSize + 1, 2 * blockSize - 1, 2 * blockSize + 1])) {
+        foreach (var (_, srcSize) in range(slice<nint>([blockSize - 1, blockSize + 1, 2 * blockSize - 1, 2 * blockSize + 1]))) {
             var src = new slice<byte>(srcSize);
             var dst = new slice<byte>(3 * blockSize); // Make a dst large enough for all src
             var dstʗ1 = dst;

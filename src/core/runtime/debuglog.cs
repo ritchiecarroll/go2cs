@@ -347,7 +347,7 @@ internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintp
 
     l.w.@byte(debugLogTraceback);
     l.w.uvarint((uint64)len(x));
-    foreach (var (_, pc) in x) {
+    foreach (var (_, pc) in range(x)) {
         l.w.uvarint((uint64)pc);
     }
     return Ꮡl;
@@ -520,7 +520,7 @@ internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
 //go:nosplit
 internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = r.data.b[pos % (uint64)len(r.data.b)];
         pos++;
     }

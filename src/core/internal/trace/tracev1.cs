@@ -183,7 +183,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
             ᏑaddErr.ValueSlot = err;
         }
     }
-    foreach (var (id, s) in pr.InlineStrings) {
+    foreach (var (id, s) in range(pr.InlineStrings)) {
         var nid = max + 1 + (uint64)id;
         it.inlineToStringID = builtin.append(it.inlineToStringID, nid);
         add((stringID)nid, s);
@@ -421,7 +421,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoStartLabel: {
-        it.extra = slice<ΔEvent>([new(
+        it.extra = [new(
             ctx: new schedCtx(
                 G: ((GoID)(int64)ev.G),
                 P: ((ProcID)(int64)ev.P),
@@ -434,7 +434,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
                 args: new timedEventArgs(new uint64[]{ev.Args[2]}.array(4))
             )
         )
-        ]);
+        ];
         return (new ΔEvent(
             ctx: new schedCtx(
                 G: ((GoID)(int64)ev.G),

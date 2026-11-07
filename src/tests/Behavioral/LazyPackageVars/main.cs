@@ -10,7 +10,7 @@ internal static void Main() {
     var (first, second) = tables.Seen();
     fmt.Println("order:", tables.Order, first, second);
 
-    tables.Heavy = slice<tables.Entry>([new(Name: "replaced", Weight: -1)]);
+    tables.Heavy = [new(Name: "replaced", Weight: -1)];
     fmt.Println("heavy now:", tables.Heavy[0].Name, len(tables.Heavy));
     fmt.Println("ByName heavy:", len(tables.ByName["heavy"]), tables.ByName["heavy"][0].Name, tables.ByName["heavy"][2].Weight);
     fmt.Println("ByName all:", len(tables.ByName["all"]), tables.ByName["all"][0].Name);
@@ -19,7 +19,7 @@ internal static void Main() {
     p.Weight = 20;
     fmt.Println("roots:", tables.Roots[1] == p, tables.Roots[1].Weight, tables.Roots[3].Name);
 
-    foreach (var (_, rule) in tables.Rules.ΔRangeSnapshot()) {
+    foreach (var (_, rule) in range(tables.Rules.ΔRangeSnapshot())) {
         fmt.Println("rule:", rule.Name, rule.Apply(7));
     }
 

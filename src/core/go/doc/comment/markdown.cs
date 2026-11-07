@@ -29,7 +29,7 @@ public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ));
 
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
-    foreach (var (i, x) in d.Content) {
+    foreach (var (i, x) in range(d.Content)) {
         if (i > 0) {
             @out.WriteByte((byte)'\n');
         }
@@ -84,7 +84,7 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in xΔ1.Items) {
+        foreach (var (i, item) in range(xΔ1.Items)) {
             if (i > 0 && loose) {
                 @out.WriteString("\n");
             }
@@ -95,7 +95,7 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
             } else {
                 @out.WriteString("  - "); // SP SP - SP
             }
-            foreach (var (iΔ1, blk) in item.Content) {
+            foreach (var (iΔ1, blk) in range(item.Content)) {
                 @string fourSpace = fourSpaceᶜ;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
@@ -147,7 +147,7 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
 internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    foreach (var (_, t) in x) {
+    foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
             p.escape(Ꮡout, (@string)tΔ1);

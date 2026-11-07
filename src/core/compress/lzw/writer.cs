@@ -110,7 +110,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
         w.overflow = clear << 1;
-        foreach (var i in range(w.table)) {
+        foreach (var i in range(len(w.table))) {
             w.table[i] = invalidEntry;
         }
         return errOutOfCodes;
@@ -134,7 +134,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         return (0, default);
     }
     var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
-        foreach (var (_, x) in p) {
+        foreach (var (_, x) in range(p)) {
             if (x > maxLit) {
                 w.err = errors.New(lzwInputByteTooLargeForˢ);
                 return (0, w.err);
@@ -160,7 +160,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
         (code, p) = ((uint32)p[0], p[1..]);
     }
 loop:
-    foreach (var (_, x) in p) {
+    foreach (var (_, x) in range(p)) {
         var literal = (uint32)x;
         var key = code << 8 | literal;
         // If there is a hash table hit for this key then we continue the loop

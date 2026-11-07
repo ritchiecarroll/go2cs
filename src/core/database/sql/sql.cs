@@ -783,7 +783,7 @@ internal static error finalClose(this ж<driverConn> Ꮡdc) {
         }
         Ꮡdc.Value.openStmt = default;
     });
-    foreach (var (_, ds) in openStmt) {
+    foreach (var (_, ds) in range(openStmt)) {
         ds.Close();
     }
     withLock(new driverConnжLocker(Ꮡdc), () => {
@@ -1062,14 +1062,14 @@ public static error Close(this ж<DB> Ꮡdb) {
     }
     error err = default;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
-    foreach (var (_, dc) in db.freeConn) {
+    foreach (var (_, dc) in range(db.freeConn)) {
         fns = append(fnsᴷ, fns, dc.closeDBLocked());
     }
     db.freeConn = default;
     db.closed = true;
     db.connRequests.CloseAndRemoveAll();
     db.mu.Unlock();
-    foreach (var (_, fn) in fns) {
+    foreach (var (_, fn) in range(fns)) {
         var err1 = fn();
         if (err1 != nil) {
             err = err1;
@@ -1145,7 +1145,7 @@ public static void SetMaxIdleConns(this ж<DB> Ꮡdb, nint n) {
     }
     db.maxIdleClosed += (int64)len(closing);
     db.mu.Unlock();
-    foreach (var (_, c) in closing) {
+    foreach (var (_, c) in range(closing)) {
         c.Close();
     }
 }
@@ -1278,7 +1278,7 @@ internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
 
         var (dΔ1, closing) = db.connectionCleanerRunLocked(d);
         db.mu.Unlock();
-        foreach (var (_, c) in closing) {
+        foreach (var (_, c) in range(closing)) {
             c.Close();
         }
 
@@ -1713,7 +1713,7 @@ internal static void putConn(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err,
     dc.inUse = false;
     dc.returnedAt = nowFunc();
 
-    foreach (var (_, fn) in dc.onPut) {
+    foreach (var (_, fn) in range(dc.onPut)) {
         fn();
     }
     dc.onPut = default;
@@ -1872,7 +1872,7 @@ internal static (ж<ΔStmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context
         // connections they are prepared on and record the stmt dependency on
         // the DB.
         if (cg == nil) {
-            stmt.css = slice<ΔconnStmt>([new(dc, ds)]);
+            stmt.css = [new(dc, ds)];
             stmt.lastNumClosed = Ꮡdb.ᏑnumClosed.Load();
             Ꮡdb.addDep(new ΔStmtжfinalCloser(stmt), stmt.OrTypedNil());
         }
@@ -2580,7 +2580,7 @@ internal static void closePrepared(this ж<Tx> Ꮡtx) {
 
         Ꮡtx.Ꮡstmts.of(Tx_stmts.ᏑMutex).Lock();
         ᒐd1 = true;
-        foreach (var (_, stmt) in tx.stmts.v) {
+        foreach (var (_, stmt) in range(tx.stmts.v)) {
             stmt.Close();
         }
     }
@@ -2771,7 +2771,7 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
             stmt.removeClosedStmtLocked();
             // See if the statement has already been prepared on this connection,
             // and reuse it if possible.
-            foreach (var (_, v) in stmt.css) {
+            foreach (var (_, v) in range(stmt.css)) {
                 if (v.dc == dc) {
                     si = v.ds.si;
                     break;
@@ -3111,7 +3111,7 @@ internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> 
     }
 
     s.mu.Lock();
-    foreach (var (_, v) in s.css) {
+    foreach (var (_, v) in range(s.css)) {
         if (v.dc == dc) {
             s.mu.Unlock();
             return (dc, dc.releaseConn, v.ds, default);
@@ -3320,7 +3320,7 @@ internal static error finalClose(this ж<ΔStmt> Ꮡs) {
         s.mu.Lock();
         ᒐd1 = true;
         if (s.css != nil) {
-            foreach (var (_, v) in s.css) {
+            foreach (var (_, v) in range(s.css)) {
                 s.db.noteUnusedDriverStatement(v.dc, v.ds);
                 v.dc.removeOpenStmt(v.ds);
             }
@@ -3735,7 +3735,7 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
     var names = rowsi.Columns();
 
     var list = new slice<ж<ColumnType>>(len(names));
-    foreach (var i in range(list)) {
+    foreach (var i in range(len(list))) {
         var ci = Ꮡ(new ColumnType(
             name: names[i]
         ));
@@ -3875,7 +3875,7 @@ internal static error scanLocked(this ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗ
         return fmt.Errorf("sql: expected %d destination arguments in Scan, not %d"u8, len(rs.lastcols), len(dest));
     }
 
-    foreach (var (i, sv) in rs.lastcols) {
+    foreach (var (i, sv) in range(rs.lastcols)) {
         var err = convertAssignRows(dest[i], sv, Ꮡrs);
         if (err != nil) {
             return fmt.Errorf(@"sql: Scan error on column index %d, name %q: %w"u8, i, rs.rowsi.Columns()[i], err);
@@ -3896,7 +3896,7 @@ internal static void closemuRUnlockIfHeldByScan(this ж<Rows> Ꮡrs) {
 }
 
 internal static bool scanArgsContainRawBytes(slice<any> args) {
-    foreach (var (_, a) in args) {
+    foreach (var (_, a) in range(args)) {
         var (_, ok) = a._<ж<RawBytes>>(ᐧ); if (ok) {
             return true;
         }
@@ -4117,7 +4117,7 @@ partial struct connRequestAndIndex {
 // CloseAndRemoveAll closes all channels in the set
 // and clears the set.
 internal static void CloseAndRemoveAll(this ref connRequestSet s) {
-    foreach (var (_, v) in s.s) {
+    foreach (var (_, v) in range(s.s)) {
         v.curIdx.Value = -1;
         builtin.close(v.req);
     }

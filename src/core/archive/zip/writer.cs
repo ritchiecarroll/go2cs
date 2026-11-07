@@ -98,7 +98,7 @@ public static error Close(this ref Writer w) {
 
     // write central directory
     var start = w.cw.count;
-    foreach (var (_, h) in w.dir) {
+    foreach (var (_, h) in range(w.dir)) {
         array<byte> bufΔ1 = new(46); /* directoryHeaderLen */
         var bΔ1 = (writeBuf)(bufΔ1[..]);
         bΔ1.uint32((uint32)directoryHeaderSignature);

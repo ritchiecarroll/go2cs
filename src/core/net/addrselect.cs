@@ -22,7 +22,7 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAd
         throw panic("internal error");
     }
     var addrInfos = new slice<byRFC6724Info>(len(addrs));
-    foreach (var (i, v) in addrs) {
+    foreach (var (i, v) in range(addrs)) {
         var (addrAttrIP, _) = netip.AddrFromSlice(v.IP);
         addrInfos[i] = new byRFC6724Info(
             addr: addrs[i],
@@ -32,7 +32,7 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAd
         );
     }
     slices.SortStableFunc<slice<byRFC6724Info>, byRFC6724Info>(addrInfos, compareByRFC6724);
-    foreach (var i in range(addrInfos)) {
+    foreach (var i in range(len(addrInfos))) {
         addrs[i] = addrInfos[i].addr;
     }
 }
@@ -47,7 +47,7 @@ private static readonly @string udpˢᵇ = "udp"u8;
 internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
     var srcs = new slice<netipꓸAddr>(len(addrs));
     ref var dst = ref heap<UDPAddr>(new UDPAddr(Port: 53), out var Ꮡdst);
-    foreach (var i in range(addrs)) {
+    foreach (var i in range(len(addrs))) {
         dst.IP = addrs[i].IP;
         dst.Zone = addrs[i].Zone;
         var (c, err) = DialUDP(udpˢ, nil, Ꮡdst);
@@ -289,7 +289,7 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
     if (ip.Is4()) {
         ip = netip.AddrFrom16(ip.As16());
     }
-    foreach (var (_, ent) in t) {
+    foreach (var (_, ent) in range<policyTableEntry>(t)) {
         if (ent.Prefix.Contains(ip)) {
             return ent;
         }

@@ -57,7 +57,7 @@ partial struct ΔSet /*map[@string, nint]*/;
 
 partial struct Hdr /*map[@string, slice<@string>]*/;
 
-public static void Set(this Hdr h, @string k, @string v) { h[strings.ToUpper(k)] = slice<@string>([v]); }
+public static void Set(this Hdr h, @string k, @string v) { h[strings.ToUpper(k)] = [v]; }
 
 internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;

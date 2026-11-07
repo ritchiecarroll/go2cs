@@ -137,7 +137,7 @@ internal static bool ipNetworkSubset(ж<net.IPNet> a, ж<net.IPNet> Ꮡb) {
         return false;
     }
     var broadcast = new net.IP(builtin.len(b.IP));
-    foreach (var i in range(b.IP)) {
+    foreach (var i in range(builtin.len(b.IP))) {
         broadcast[i] = (byte)(b.IP[i] | (((byte)(~b.Mask[i]))));
     }
     return a.Contains(broadcast);
@@ -184,7 +184,7 @@ internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> 
     }
     slice<ж<net.IPNet>> ipv4 = default;
     slice<ж<net.IPNet>> ipv6 = default;
-    foreach (var (_, n) in l) {
+    foreach (var (_, n) in range(l)) {
         if (builtin.len(n.IP) == net.IPv4len) {
             ipv4 = append(ipv4, n);
         } else {
@@ -350,7 +350,7 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
     if (builtin.len(l) == 0) {
         return default;
     }
-    foreach (var (_, n) in l) {
+    foreach (var (_, n) in range(l)) {
         if (builtin.len(n) == 0) {
             return new dnsConstraintsжnewDNSConstraints_R0(Ꮡ(new dnsConstraints(all: true)));
         }
@@ -368,7 +368,7 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
 
     if (!permitted) {
         var parentConstraints = new map<@string, @string>{};
-        foreach (var (_, vᴛ1) in nc.constraints.set) {
+        foreach (var (_, vᴛ1) in range(nc.constraints.set)) {
             var name = vᴛ1;
 
             name = strings.ToLower(name);
@@ -430,7 +430,7 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
     }
     var exactMap = new map<rfc2821Mailbox, EmptyStruct>{};
     slice<@string> domains = default;
-    foreach (var (_, c) in l) {
+    foreach (var (_, c) in range(l)) {
         if (!strings.ContainsRune(c, '@')) {
             domains = append(domainsᴷ, domains, c);
             continue;
@@ -508,12 +508,12 @@ partial struct chainConstraints {
 }
 
 internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
-    foreach (var (_, ip) in ips) {
+    foreach (var (_, ip) in range(ips)) {
         var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
             return err;
         }
     }
-    foreach (var (_, d) in dns) {
+    foreach (var (_, d) in range(dns)) {
         if (!domainNameValid(d, false)) {
             return fmt.Errorf("x509: cannot parse dnsName %q"u8, d);
         }
@@ -521,7 +521,7 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
             return err;
         }
     }
-    foreach (var (_, u) in uris) {
+    foreach (var (_, u) in range(uris)) {
         if (!domainNameValid(u.domain, false)) {
             return fmt.Errorf("x509: internal error: URI SAN %q failed to parse"u8, u);
         }
@@ -529,7 +529,7 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
             return err;
         }
     }
-    foreach (var (_, e) in emails) {
+    foreach (var (_, e) in range(emails)) {
         if (!domainNameValid(e.domain, false)) {
             return fmt.Errorf("x509: cannot parse rfc822Name %q"u8, e);
         }
@@ -543,7 +543,7 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
 internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
     ж<chainConstraints> currentConstraints = default;
     ж<chainConstraints> last = default;
-    foreach (var (iᴛ1, c) in chain) {
+    foreach (var (iᴛ1, c) in range(chain)) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
 
@@ -569,7 +569,7 @@ internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
         return default;
     }
 
-    foreach (var (i, c) in chain) {
+    foreach (var (i, c) in range(chain)) {
         if (!c.hasSANExtension()) {
             continue;
         }
@@ -612,7 +612,7 @@ internal static @string String(this parsedURI u) {
 
 internal static (slice<parsedURI>, error) parseURIs(slice<ж<url.URL>> uris) {
     var parsed = new slice<parsedURI>(0, builtin.len(uris));
-    foreach (var (_, uri) in uris) {
+    foreach (var (_, uri) in range(uris)) {
         @string host = strings.ToLower(uri.Host);
         if (builtin.len(host) == 0) {
             return (default, fmt.Errorf("URI with empty host (%q) cannot be matched against constraints"u8, uri.String()));
@@ -641,7 +641,7 @@ internal static (slice<parsedURI>, error) parseURIs(slice<ж<url.URL>> uris) {
 
 internal static (slice<rfc2821Mailbox>, error) parseMailboxes(slice<@string> emails) {
     var parsed = new slice<rfc2821Mailbox>(0, builtin.len(emails));
-    foreach (var (_, email) in emails) {
+    foreach (var (_, email) in range(emails)) {
         var (mailbox, ok) = parseRFC2821Mailbox(email);
         if (!ok) {
             return (default, fmt.Errorf("cannot parse rfc822Name %q"u8, email));

@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static void Main() {
     fmt.Printf("%s:"u8, tableName);
-    foreach (var (_, v) in lookupTable.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(lookupTable.ΔRangeSnapshot())) {
         fmt.Printf(" %d"u8, v);
     }
     fmt.Println();

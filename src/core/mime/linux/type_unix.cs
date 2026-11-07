@@ -17,18 +17,18 @@ partial class mime_package {
 
 // See https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-0.21.html
 // for the FreeDesktop Shared MIME-info Database specification.
-internal static slice<@string> mimeGlobs = slice<@string>([
+internal static slice<@string> mimeGlobs = [
     "/usr/local/share/mime/globs2",
     "/usr/share/mime/globs2"
-]);
+];
 
 // Common locations for mime.types files on unix.
-internal static slice<@string> typeFiles = slice<@string>([
+internal static slice<@string> typeFiles = [
     "/etc/mime.types",
     "/etc/apache2/mime.types",
     "/etc/apache/mime.types",
     "/etc/httpd/conf/mime.types"
-]);
+];
 
 internal static error loadMimeGlobsFile(@string filename) {
     GoFrame ᒐ = default;
@@ -98,7 +98,7 @@ internal static void loadMimeFile(@string filename) {
                 continue;
             }
             @string mimeType = fields[0];
-            foreach (var (_, ext) in fields[1..]) {
+            foreach (var (_, ext) in range(fields[1..])) {
                 if (ext[0] == '#') {
                     break;
                 }
@@ -114,21 +114,21 @@ internal static void loadMimeFile(@string filename) {
 }
 
 internal static void initMimeUnix() {
-    foreach (var (_, filename) in mimeGlobs) {
+    foreach (var (_, filename) in range(mimeGlobs)) {
         var err = loadMimeGlobsFile(filename); if (err == nil) {
             return; // Stop checking more files if mimetype database is found.
         }
     }
 
     // Fallback if no system-generated mimetype database exists.
-    foreach (var (_, filename) in typeFiles) {
+    foreach (var (_, filename) in range(typeFiles)) {
         loadMimeFile(filename);
     }
 }
 
 internal static map<@string, @string> initMimeForTests() {
-    mimeGlobs = slice<@string>([""]);
-    typeFiles = slice<@string>(["testdata/test.types"]);
+    mimeGlobs = [""];
+    typeFiles = ["testdata/test.types"];
     return new map<@string, @string>{
         [".T1"] = "application/test",
         [".t2"] = "text/test; charset=utf-8",

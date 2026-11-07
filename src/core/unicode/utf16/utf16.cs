@@ -67,7 +67,7 @@ public static nint RuneLen(rune r) {
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
 public static slice<uint16> Encode(slice<rune> s) {
     nint n = len(s);
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         if (v >= surrSelf) {
             n++;
         }
@@ -75,7 +75,7 @@ public static slice<uint16> Encode(slice<rune> s) {
 
     var a = new slice<uint16>(n);
     n = 0;
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         switch (RuneLen(v)) {
         case 1: { // normal rune
             a[n] = (uint16)v;

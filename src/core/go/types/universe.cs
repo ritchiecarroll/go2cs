@@ -80,10 +80,10 @@ internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
 private static readonly @string errorˢ2ᵇ = "Error"u8;
 
 internal static void defPredeclaredTypes() {
-    foreach (var (_, t) in Typ) {
+    foreach (var (_, t) in range(Typ)) {
         def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
-    foreach (var (_, t) in basicAliases.ΔRangeSnapshot()) {
+    foreach (var (_, t) in range(basicAliases.ΔRangeSnapshot())) {
         def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
     }
 
@@ -129,7 +129,7 @@ internal static void defPredeclaredTypes() {
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
         // interface{ Error() string }
-        var ityp = Ꮡ(new Interface(methods: slice<ж<Func>>([err]), complete: true));
+        var ityp = Ꮡ(new Interface(methods: [err], complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
         typ.fromRHS = new InterfaceжΔType(ityp);
@@ -163,7 +163,7 @@ internal static array<predeclaredConstsᴛ1> predeclaredConsts = new predeclared
 }.array();
 
 internal static void defPredeclaredConsts() {
-    foreach (var (_, c) in predeclaredConsts.ΔRangeSnapshot()) {
+    foreach (var (_, c) in range(predeclaredConsts.ΔRangeSnapshot())) {
         def(new ConstжObject(NewConst(nopos, nil, c.name, new BasicжΔType(Typ[c.kind]), c.val)));
     }
 }
@@ -250,7 +250,7 @@ partial struct predeclaredFuncsᴛ1 /*dyn*/ {
 }.array(); }
 
 internal static void defPredeclaredFuncs() {
-    foreach (var i in range(predeclaredFuncs)) {
+    foreach (var i in range(len(predeclaredFuncs))) {
         builtinId id = (builtinId)i;
         if (id == _Assert || id == _Trace) {
             continue; // only define these in testing environment

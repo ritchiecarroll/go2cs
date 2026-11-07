@@ -20,7 +20,7 @@ internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.sslice();
 
     var o = Ꮡ(new options());
-    foreach (var (_, opt) in opts) {
+    foreach (var (_, opt) in range(opts)) {
         opt(o);
     }
     return o.level;

@@ -98,7 +98,7 @@ public static ref map<@string, ж<RangeTable>> Categories => ref ((StaticBox<map
 public static ref map<@string, @string> CategoryAliases => ref ((StaticBox<map<@string, @string>>)ᏑCategoryAliases).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_C { internal static ж<RangeTable> _C = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0000, 0x001f, 1),
         new(0x007f, 0x009f, 1),
         new(0x00ad, 0x0378, 715),
@@ -388,8 +388,8 @@ public static ref map<@string, @string> CategoryAliases => ref ((StaticBox<map<@
         new(0xffe7, 0xffef, 8),
         new(0xfff0, 0xfffb, 1),
         new(0xfffe, 0xffff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1000c, 0x10027, 27),
         new(0x1003b, 0x1003e, 3),
         new(0x1004e, 0x1004f, 1),
@@ -710,20 +710,20 @@ public static ref map<@string, @string> CategoryAliases => ref ((StaticBox<map<@
         new(0x3134b, 0x3134f, 1),
         new(0x323b0, 0xe00ff, 1),
         new(0xe01f0, 0x10ffff, 1)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
 internal static ж<RangeTable> _Cc = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0000, 0x001f, 1),
         new(0x007f, 0x009f, 1)
-    ]),
+    ],
     LatinOffset: 2
 ));
 
 [GoLazy] partial class lazyᴛ_Cf { internal static ж<RangeTable> _Cf = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00ad, 0x0600, 1363),
         new(0x0601, 0x0605, 1),
         new(0x061c, 0x06dd, 193),
@@ -736,19 +736,19 @@ internal static ж<RangeTable> _Cc = Ꮡ(new RangeTable(
         new(0x2066, 0x206f, 1),
         new(0xfeff, 0xfff9, 250),
         new(0xfffa, 0xfffb, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x110bd, 0x110cd, 16),
         new(0x13430, 0x1343f, 1),
         new(0x1bca0, 0x1bca3, 1),
         new(0x1d173, 0x1d17a, 1),
         new(0xe0001, 0xe0020, 31),
         new(0xe0021, 0xe007f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Cn { internal static ж<RangeTable> _Cn = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0378, 0x0379, 1),
         new(0x0380, 0x0383, 1),
         new(0x038b, 0x038d, 2),
@@ -1031,8 +1031,8 @@ internal static ж<RangeTable> _Cc = Ꮡ(new RangeTable(
         new(0xffe7, 0xffef, 8),
         new(0xfff0, 0xfff8, 1),
         new(0xfffe, 0xffff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1000c, 0x10027, 27),
         new(0x1003b, 0x1003e, 3),
         new(0x1004e, 0x1004f, 1),
@@ -1355,27 +1355,27 @@ internal static ж<RangeTable> _Cc = Ꮡ(new RangeTable(
         new(0xe01f0, 0xeffff, 1),
         new(0xffffe, 0xfffff, 1),
         new(0x10fffe, 0x10ffff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Co { internal static ж<RangeTable> _Co = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xe000, 0xf8ff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0xf0000, 0xffffd, 1),
         new(0x100000, 0x10fffd, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xd800, 0xdfff, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_L { internal static ж<RangeTable> _L = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
         new(0x0061, 0x007a, 1),
         new(0x00aa, 0x00b5, 11),
@@ -1735,8 +1735,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xffca, 0xffcf, 1),
         new(0xffd2, 0xffd7, 1),
         new(0xffda, 0xffdc, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10000, 0x1000b, 1),
         new(0x1000d, 0x10026, 1),
         new(0x10028, 0x1003a, 1),
@@ -2001,12 +2001,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x2f800, 0x2fa1d, 1),
         new(0x30000, 0x3134a, 1),
         new(0x31350, 0x323af, 1)
-    ]),
+    ],
     LatinOffset: 6
 )); }
 
 [GoLazy] partial class lazyᴛ_LC { internal static ж<RangeTable> _LC = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
         new(0x0061, 0x007a, 1),
         new(0x00b5, 0x00c0, 11),
@@ -2093,8 +2093,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfb13, 0xfb17, 1),
         new(0xff21, 0xff3a, 1),
         new(0xff41, 0xff5a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10400, 0x1044f, 1),
         new(0x104b0, 0x104d3, 1),
         new(0x104d8, 0x104fb, 1),
@@ -2144,12 +2144,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1df0b, 0x1df1e, 1),
         new(0x1df25, 0x1df2a, 1),
         new(0x1e900, 0x1e943, 1)
-    ]),
+    ],
     LatinOffset: 5
 )); }
 
 [GoLazy] partial class lazyᴛ_Ll { internal static ж<RangeTable> _Ll = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0061, 0x007a, 1),
         new(0x00b5, 0x00df, 42),
         new(0x00e0, 0x00f6, 1),
@@ -2272,8 +2272,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfb00, 0xfb06, 1),
         new(0xfb13, 0xfb17, 1),
         new(0xff41, 0xff5a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10428, 0x1044f, 1),
         new(0x104d8, 0x104fb, 1),
         new(0x10597, 0x105a1, 1),
@@ -2315,12 +2315,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1df0b, 0x1df1e, 1),
         new(0x1df25, 0x1df2a, 1),
         new(0x1e922, 0x1e943, 1)
-    ]),
+    ],
     LatinOffset: 4
 )); }
 
 [GoLazy] partial class lazyᴛ_Lm { internal static ж<RangeTable> _Lm = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x02b0, 0x02c1, 1),
         new(0x02c6, 0x02d1, 1),
         new(0x02e0, 0x02e4, 1),
@@ -2362,8 +2362,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xab5c, 0xab5f, 1),
         new(0xab69, 0xff70, 21511),
         new(0xff9e, 0xff9f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10780, 0x10785, 1),
         new(0x10787, 0x107b0, 1),
         new(0x107b2, 0x107ba, 1),
@@ -2377,11 +2377,11 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1e030, 0x1e06d, 1),
         new(0x1e137, 0x1e13d, 1),
         new(0x1e4eb, 0x1e94b, 1120)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Lo { internal static ж<RangeTable> _Lo = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00aa, 0x00ba, 16),
         new(0x01bb, 0x01c0, 5),
         new(0x01c1, 0x01c3, 1),
@@ -2661,8 +2661,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xffca, 0xffcf, 1),
         new(0xffd2, 0xffd7, 1),
         new(0xffda, 0xffdc, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10000, 0x1000b, 1),
         new(0x1000d, 0x10026, 1),
         new(0x10028, 0x1003a, 1),
@@ -2868,12 +2868,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x2f800, 0x2fa1d, 1),
         new(0x30000, 0x3134a, 1),
         new(0x31350, 0x323af, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Lt { internal static ж<RangeTable> _Lt = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x01c5, 0x01cb, 3),
         new(0x01f2, 0x1f88, 7574),
         new(0x1f89, 0x1f8f, 1),
@@ -2881,11 +2881,11 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1fa8, 0x1faf, 1),
         new(0x1fbc, 0x1fcc, 16),
         new(0x1ffc, 0x1ffc, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Lu { internal static ж<RangeTable> _Lu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
         new(0x00c0, 0x00d6, 1),
         new(0x00d8, 0x00de, 1),
@@ -2995,8 +2995,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xa7d6, 0xa7d8, 2),
         new(0xa7f5, 0xff21, 22316),
         new(0xff22, 0xff3a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10400, 0x10427, 1),
         new(0x104b0, 0x104d3, 1),
         new(0x10570, 0x1057a, 1),
@@ -3037,12 +3037,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1d790, 0x1d7a8, 1),
         new(0x1d7ca, 0x1e900, 4406),
         new(0x1e901, 0x1e921, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_M { internal static ж<RangeTable> _M = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0300, 0x036f, 1),
         new(0x0483, 0x0489, 1),
         new(0x0591, 0x05bd, 1),
@@ -3225,8 +3225,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfb1e, 0xfe00, 738),
         new(0xfe01, 0xfe0f, 1),
         new(0xfe20, 0xfe2f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x101fd, 0x102e0, 227),
         new(0x10376, 0x1037a, 1),
         new(0x10a01, 0x10a03, 1),
@@ -3344,11 +3344,11 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1e8d0, 0x1e8d6, 1),
         new(0x1e944, 0x1e94a, 1),
         new(0xe0100, 0xe01ef, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Mc { internal static ж<RangeTable> _Mc = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0903, 0x093b, 56),
         new(0x093e, 0x0940, 1),
         new(0x0949, 0x094c, 1),
@@ -3447,8 +3447,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xabe4, 0xabe6, 2),
         new(0xabe7, 0xabe9, 2),
         new(0xabea, 0xabec, 2)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11000, 0x11002, 2),
         new(0x11082, 0x110b0, 46),
         new(0x110b1, 0x110b2, 1),
@@ -3509,21 +3509,21 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x16ff0, 0x16ff1, 1),
         new(0x1d165, 0x1d166, 1),
         new(0x1d16d, 0x1d172, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Me { internal static ж<RangeTable> _Me = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0488, 0x0489, 1),
         new(0x1abe, 0x20dd, 1567),
         new(0x20de, 0x20e0, 1),
         new(0x20e2, 0x20e4, 1),
         new(0xa670, 0xa672, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Mn { internal static ж<RangeTable> _Mn = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0300, 0x036f, 1),
         new(0x0483, 0x0487, 1),
         new(0x0591, 0x05bd, 1),
@@ -3707,8 +3707,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xabed, 0xfb1e, 20273),
         new(0xfe00, 0xfe0f, 1),
         new(0xfe20, 0xfe2f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x101fd, 0x102e0, 227),
         new(0x10376, 0x1037a, 1),
         new(0x10a01, 0x10a03, 1),
@@ -3834,11 +3834,11 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1e8d0, 0x1e8d6, 1),
         new(0x1e944, 0x1e94a, 1),
         new(0xe0100, 0xe01ef, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_N { internal static ж<RangeTable> _N = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0030, 0x0039, 1),
         new(0x00b2, 0x00b3, 1),
         new(0x00b9, 0x00bc, 3),
@@ -3905,8 +3905,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xaa50, 0xaa59, 1),
         new(0xabf0, 0xabf9, 1),
         new(0xff10, 0xff19, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10107, 0x10133, 1),
         new(0x10140, 0x10178, 1),
         new(0x1018a, 0x1018b, 1),
@@ -3976,12 +3976,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1ed2f, 0x1ed3d, 1),
         new(0x1f100, 0x1f10c, 1),
         new(0x1fbf0, 0x1fbf9, 1)
-    ]),
+    ],
     LatinOffset: 4
 )); }
 
 [GoLazy] partial class lazyᴛ_Nd { internal static ж<RangeTable> _Nd = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0030, 0x0039, 1),
         new(0x0660, 0x0669, 1),
         new(0x06f0, 0x06f9, 1),
@@ -4019,8 +4019,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xaa50, 0xaa59, 1),
         new(0xabf0, 0xabf9, 1),
         new(0xff10, 0xff19, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x104a0, 0x104a9, 1),
         new(0x10d30, 0x10d39, 1),
         new(0x11066, 0x1106f, 1),
@@ -4048,12 +4048,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1e4f0, 0x1e4f9, 1),
         new(0x1e950, 0x1e959, 1),
         new(0x1fbf0, 0x1fbf9, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Nl { internal static ж<RangeTable> _Nl = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x16ee, 0x16f0, 1),
         new(0x2160, 0x2182, 1),
         new(0x2185, 0x2188, 1),
@@ -4061,17 +4061,17 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x3022, 0x3029, 1),
         new(0x3038, 0x303a, 1),
         new(0xa6e6, 0xa6ef, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10140, 0x10174, 1),
         new(0x10341, 0x1034a, 9),
         new(0x103d1, 0x103d5, 1),
         new(0x12400, 0x1246e, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_No { internal static ж<RangeTable> _No = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00b2, 0x00b3, 1),
         new(0x00b9, 0x00bc, 3),
         new(0x00bd, 0x00be, 1),
@@ -4100,8 +4100,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x3280, 0x3289, 1),
         new(0x32b1, 0x32bf, 1),
         new(0xa830, 0xa835, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10107, 0x10133, 1),
         new(0x10175, 0x10178, 1),
         new(0x1018a, 0x1018b, 1),
@@ -4145,12 +4145,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1ed01, 0x1ed2d, 1),
         new(0x1ed2f, 0x1ed3d, 1),
         new(0x1f100, 0x1f10c, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_P { internal static ж<RangeTable> _P = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0021, 0x0023, 1),
         new(0x0025, 0x002a, 1),
         new(0x002c, 0x002f, 1),
@@ -4266,8 +4266,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xff3f, 0xff5b, 28),
         new(0xff5d, 0xff5f, 2),
         new(0xff60, 0xff65, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10100, 0x10102, 1),
         new(0x1039f, 0x103d0, 49),
         new(0x1056f, 0x10857, 744),
@@ -4320,22 +4320,22 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x16fe2, 0x1bc9f, 19645),
         new(0x1da87, 0x1da8b, 1),
         new(0x1e95e, 0x1e95f, 1)
-    ]),
+    ],
     LatinOffset: 11
 )); }
 
 [GoLazy] partial class lazyᴛ_Pc { internal static ж<RangeTable> _Pc = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x005f, 0x203f, 8160),
         new(0x2040, 0x2054, 20),
         new(0xfe33, 0xfe34, 1),
         new(0xfe4d, 0xfe4f, 1),
         new(0xff3f, 0xff3f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Pd { internal static ж<RangeTable> _Pd = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x002d, 0x058a, 1373),
         new(0x05be, 0x1400, 3650),
         new(0x1806, 0x2010, 2058),
@@ -4347,14 +4347,14 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x30a0, 0xfe31, 52625),
         new(0xfe32, 0xfe58, 38),
         new(0xfe63, 0xff0d, 170)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10ead, 0x10ead, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Pe { internal static ж<RangeTable> _Pe = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0029, 0x005d, 52),
         new(0x007d, 0x0f3b, 3774),
         new(0x0f3d, 0x169c, 1887),
@@ -4378,33 +4378,33 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfe5c, 0xfe5e, 2),
         new(0xff09, 0xff3d, 52),
         new(0xff5d, 0xff63, 3)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Pf { internal static ж<RangeTable> _Pf = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00bb, 0x2019, 8030),
         new(0x201d, 0x203a, 29),
         new(0x2e03, 0x2e05, 2),
         new(0x2e0a, 0x2e0d, 3),
         new(0x2e1d, 0x2e21, 4)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Pi { internal static ж<RangeTable> _Pi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00ab, 0x2018, 8045),
         new(0x201b, 0x201c, 1),
         new(0x201f, 0x2039, 26),
         new(0x2e02, 0x2e04, 2),
         new(0x2e09, 0x2e0c, 3),
         new(0x2e1c, 0x2e20, 4)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Po { internal static ж<RangeTable> _Po = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0021, 0x0023, 1),
         new(0x0025, 0x0027, 1),
         new(0x002a, 0x002e, 2),
@@ -4518,8 +4518,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xff20, 0xff3c, 28),
         new(0xff61, 0xff64, 3),
         new(0xff65, 0xff65, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10100, 0x10102, 1),
         new(0x1039f, 0x103d0, 49),
         new(0x1056f, 0x10857, 744),
@@ -4571,12 +4571,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x16fe2, 0x1bc9f, 19645),
         new(0x1da87, 0x1da8b, 1),
         new(0x1e95e, 0x1e95f, 1)
-    ]),
+    ],
     LatinOffset: 8
 )); }
 
 [GoLazy] partial class lazyᴛ_Ps { internal static ж<RangeTable> _Ps = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0028, 0x005b, 51),
         new(0x007b, 0x0f3a, 3775),
         new(0x0f3c, 0x169b, 1887),
@@ -4603,12 +4603,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xff08, 0xff3b, 51),
         new(0xff5b, 0xff5f, 4),
         new(0xff62, 0xff62, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_S { internal static ж<RangeTable> _S = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0024, 0x002b, 7),
         new(0x003c, 0x003e, 1),
         new(0x005e, 0x0060, 2),
@@ -4738,8 +4738,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xffe0, 0xffe6, 1),
         new(0xffe8, 0xffee, 1),
         new(0xfffc, 0xfffd, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10137, 0x1013f, 1),
         new(0x10179, 0x10189, 1),
         new(0x1018c, 0x1018e, 1),
@@ -4812,12 +4812,12 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1faf0, 0x1faf8, 1),
         new(0x1fb00, 0x1fb92, 1),
         new(0x1fb94, 0x1fbca, 1)
-    ]),
+    ],
     LatinOffset: 10
 )); }
 
 [GoLazy] partial class lazyᴛ_Sc { internal static ж<RangeTable> _Sc = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0024, 0x00a2, 126),
         new(0x00a3, 0x00a5, 1),
         new(0x058f, 0x060b, 124),
@@ -4831,16 +4831,16 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfe69, 0xff04, 155),
         new(0xffe0, 0xffe1, 1),
         new(0xffe5, 0xffe6, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11fdd, 0x11fe0, 1),
         new(0x1e2ff, 0x1ecb0, 2481)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
 [GoLazy] partial class lazyᴛ_Sk { internal static ж<RangeTable> _Sk = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x005e, 0x0060, 2),
         new(0x00a8, 0x00af, 7),
         new(0x00b4, 0x00b8, 4),
@@ -4866,15 +4866,15 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xfbb3, 0xfbc2, 1),
         new(0xff3e, 0xff40, 2),
         new(0xffe3, 0xffe3, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1f3fb, 0x1f3ff, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_Sm { internal static ж<RangeTable> _Sm = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x002b, 0x003c, 17),
         new(0x003d, 0x003e, 1),
         new(0x007c, 0x007e, 2),
@@ -4918,20 +4918,20 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xff5c, 0xff5e, 2),
         new(0xffe2, 0xffe9, 7),
         new(0xffea, 0xffec, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1d6c1, 0x1d6db, 26),
         new(0x1d6fb, 0x1d715, 26),
         new(0x1d735, 0x1d74f, 26),
         new(0x1d76f, 0x1d789, 26),
         new(0x1d7a9, 0x1d7c3, 26),
         new(0x1eef0, 0x1eef1, 1)
-    ]),
+    ],
     LatinOffset: 5
 )); }
 
 [GoLazy] partial class lazyᴛ_So { internal static ж<RangeTable> _So = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00a6, 0x00a9, 3),
         new(0x00ae, 0x00b0, 2),
         new(0x0482, 0x058d, 267),
@@ -5031,8 +5031,8 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0xffe4, 0xffe8, 4),
         new(0xffed, 0xffee, 1),
         new(0xfffc, 0xfffd, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10137, 0x1013f, 1),
         new(0x10179, 0x10189, 1),
         new(0x1018c, 0x1018e, 1),
@@ -5100,42 +5100,42 @@ internal static ж<RangeTable> _Cs = Ꮡ(new RangeTable(
         new(0x1faf0, 0x1faf8, 1),
         new(0x1fb00, 0x1fb92, 1),
         new(0x1fb94, 0x1fbca, 1)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
 [GoLazy] partial class lazyᴛ_Z { internal static ж<RangeTable> _Z = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0020, 0x00a0, 128),
         new(0x1680, 0x2000, 2432),
         new(0x2001, 0x200a, 1),
         new(0x2028, 0x2029, 1),
         new(0x202f, 0x205f, 48),
         new(0x3000, 0x3000, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 internal static ж<RangeTable> _Zl = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2028, 0x2028, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Zp = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2029, 0x2029, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Zs { internal static ж<RangeTable> _Zs = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0020, 0x00a0, 128),
         new(0x1680, 0x2000, 2432),
         new(0x2001, 0x200a, 1),
         new(0x202f, 0x205f, 48),
         new(0x3000, 0x3000, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
@@ -5359,32 +5359,32 @@ internal static ж<RangeTable> _Zp = Ꮡ(new RangeTable(
 public static ref map<@string, ж<RangeTable>> Scripts => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑScripts).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_Adlam { internal static ж<RangeTable> _Adlam = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e900, 0x1e94b, 1),
         new(0x1e950, 0x1e959, 1),
         new(0x1e95e, 0x1e95f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Ahom { internal static ж<RangeTable> _Ahom = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11700, 0x1171a, 1),
         new(0x1171d, 0x1172b, 1),
         new(0x11730, 0x11746, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Anatolian_Hieroglyphs = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x14400, 0x14646, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Arabic { internal static ж<RangeTable> _Arabic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0600, 0x0604, 1),
         new(0x0606, 0x060b, 1),
         new(0x060d, 0x061a, 1),
@@ -5407,8 +5407,8 @@ internal static ж<RangeTable> _Anatolian_Hieroglyphs = Ꮡ(new RangeTable(
         new(0xfdf1, 0xfdff, 1),
         new(0xfe70, 0xfe74, 1),
         new(0xfe76, 0xfefc, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10e60, 0x10e7e, 1),
         new(0x10efd, 0x10eff, 1),
         new(0x1ee00, 0x1ee03, 1),
@@ -5436,59 +5436,59 @@ internal static ж<RangeTable> _Anatolian_Hieroglyphs = Ꮡ(new RangeTable(
         new(0x1eea5, 0x1eea9, 1),
         new(0x1eeab, 0x1eebb, 1),
         new(0x1eef0, 0x1eef1, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Armenian { internal static ж<RangeTable> _Armenian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0531, 0x0556, 1),
         new(0x0559, 0x058a, 1),
         new(0x058d, 0x058f, 1),
         new(0xfb13, 0xfb17, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Avestan { internal static ж<RangeTable> _Avestan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10b00, 0x10b35, 1),
         new(0x10b39, 0x10b3f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Balinese = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1b00, 0x1b4c, 1),
         new(0x1b50, 0x1b7e, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Bamum { internal static ж<RangeTable> _Bamum = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa6a0, 0xa6f7, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x16800, 0x16a38, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Bassa_Vah { internal static ж<RangeTable> _Bassa_Vah = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16ad0, 0x16aed, 1),
         new(0x16af0, 0x16af5, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Batak = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1bc0, 0x1bf3, 1),
         new(0x1bfc, 0x1bff, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Bengali { internal static ж<RangeTable> _Bengali = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0980, 0x0983, 1),
         new(0x0985, 0x098c, 1),
         new(0x098f, 0x0990, 1),
@@ -5503,114 +5503,114 @@ internal static ж<RangeTable> _Batak = Ꮡ(new RangeTable(
         new(0x09dd, 0x09df, 2),
         new(0x09e0, 0x09e3, 1),
         new(0x09e6, 0x09fe, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Bhaiksuki { internal static ж<RangeTable> _Bhaiksuki = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11c00, 0x11c08, 1),
         new(0x11c0a, 0x11c36, 1),
         new(0x11c38, 0x11c45, 1),
         new(0x11c50, 0x11c6c, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Bopomofo { internal static ж<RangeTable> _Bopomofo = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x02ea, 0x02eb, 1),
         new(0x3105, 0x312f, 1),
         new(0x31a0, 0x31bf, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Brahmi { internal static ж<RangeTable> _Brahmi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11000, 0x1104d, 1),
         new(0x11052, 0x11075, 1),
         new(0x1107f, 0x1107f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Braille = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2800, 0x28ff, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Buginese = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1a00, 0x1a1b, 1),
         new(0x1a1e, 0x1a1f, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Buhid = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1740, 0x1753, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Canadian_Aboriginal { internal static ж<RangeTable> _Canadian_Aboriginal = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1400, 0x167f, 1),
         new(0x18b0, 0x18f5, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11ab0, 0x11abf, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Carian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x102a0, 0x102d0, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Caucasian_Albanian { internal static ж<RangeTable> _Caucasian_Albanian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10530, 0x10563, 1),
         new(0x1056f, 0x1056f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Chakma { internal static ж<RangeTable> _Chakma = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11100, 0x11134, 1),
         new(0x11136, 0x11147, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Cham { internal static ж<RangeTable> _Cham = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xaa00, 0xaa36, 1),
         new(0xaa40, 0xaa4d, 1),
         new(0xaa50, 0xaa59, 1),
         new(0xaa5c, 0xaa5f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Cherokee { internal static ж<RangeTable> _Cherokee = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x13a0, 0x13f5, 1),
         new(0x13f8, 0x13fd, 1),
         new(0xab70, 0xabbf, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Chorasmian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10fb0, 0x10fcb, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Common { internal static ж<RangeTable> _Common = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0000, 0x0040, 1),
         new(0x005b, 0x0060, 1),
         new(0x007b, 0x00a9, 1),
@@ -5693,8 +5693,8 @@ internal static ж<RangeTable> _Chorasmian = Ꮡ(new RangeTable(
         new(0xffe1, 0xffe6, 1),
         new(0xffe8, 0xffee, 1),
         new(0xfff9, 0xfffd, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10100, 0x10102, 1),
         new(0x10107, 0x10133, 1),
         new(0x10137, 0x1013f, 1),
@@ -5777,48 +5777,48 @@ internal static ж<RangeTable> _Chorasmian = Ꮡ(new RangeTable(
         new(0x1fbf0, 0x1fbf9, 1),
         new(0xe0001, 0xe0020, 31),
         new(0xe0021, 0xe007f, 1)
-    ]),
+    ],
     LatinOffset: 6
 )); }
 
 [GoLazy] partial class lazyᴛ_Coptic { internal static ж<RangeTable> _Coptic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x03e2, 0x03ef, 1),
         new(0x2c80, 0x2cf3, 1),
         new(0x2cf9, 0x2cff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Cuneiform { internal static ж<RangeTable> _Cuneiform = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x12000, 0x12399, 1),
         new(0x12400, 0x1246e, 1),
         new(0x12470, 0x12474, 1),
         new(0x12480, 0x12543, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Cypriot { internal static ж<RangeTable> _Cypriot = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10800, 0x10805, 1),
         new(0x10808, 0x1080a, 2),
         new(0x1080b, 0x10835, 1),
         new(0x10837, 0x10838, 1),
         new(0x1083c, 0x1083f, 3)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Cypro_Minoan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x12f90, 0x12ff2, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Cyrillic { internal static ж<RangeTable> _Cyrillic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0400, 0x0484, 1),
         new(0x0487, 0x052f, 1),
         new(0x1c80, 0x1c88, 1),
@@ -5826,35 +5826,35 @@ internal static ж<RangeTable> _Cypro_Minoan = Ꮡ(new RangeTable(
         new(0x2de0, 0x2dff, 1),
         new(0xa640, 0xa69f, 1),
         new(0xfe2e, 0xfe2f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1e030, 0x1e06d, 1),
         new(0x1e08f, 0x1e08f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Deseret = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10400, 0x1044f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Devanagari { internal static ж<RangeTable> _Devanagari = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0900, 0x0950, 1),
         new(0x0955, 0x0963, 1),
         new(0x0966, 0x097f, 1),
         new(0xa8e0, 0xa8ff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11b00, 0x11b09, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Dives_Akuru { internal static ж<RangeTable> _Dives_Akuru = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11900, 0x11906, 1),
         new(0x11909, 0x1190c, 3),
         new(0x1190d, 0x11913, 1),
@@ -5863,50 +5863,50 @@ internal static ж<RangeTable> _Deseret = Ꮡ(new RangeTable(
         new(0x11937, 0x11938, 1),
         new(0x1193b, 0x11946, 1),
         new(0x11950, 0x11959, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Dogra = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11800, 0x1183b, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Duployan { internal static ж<RangeTable> _Duployan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1bc00, 0x1bc6a, 1),
         new(0x1bc70, 0x1bc7c, 1),
         new(0x1bc80, 0x1bc88, 1),
         new(0x1bc90, 0x1bc99, 1),
         new(0x1bc9c, 0x1bc9f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Egyptian_Hieroglyphs = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x13000, 0x13455, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Elbasan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10500, 0x10527, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Elymaic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10fe0, 0x10ff6, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Ethiopic { internal static ж<RangeTable> _Ethiopic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1200, 0x1248, 1),
         new(0x124a, 0x124d, 1),
         new(0x1250, 0x1256, 1),
@@ -5939,17 +5939,17 @@ internal static ж<RangeTable> _Elymaic = Ꮡ(new RangeTable(
         new(0xab11, 0xab16, 1),
         new(0xab20, 0xab26, 1),
         new(0xab28, 0xab2e, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1e7e0, 0x1e7e6, 1),
         new(0x1e7e8, 0x1e7eb, 1),
         new(0x1e7ed, 0x1e7ee, 1),
         new(0x1e7f0, 0x1e7fe, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Georgian { internal static ж<RangeTable> _Georgian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x10a0, 0x10c5, 1),
         new(0x10c7, 0x10cd, 6),
         new(0x10d0, 0x10fa, 1),
@@ -5958,32 +5958,32 @@ internal static ж<RangeTable> _Elymaic = Ꮡ(new RangeTable(
         new(0x1cbd, 0x1cbf, 1),
         new(0x2d00, 0x2d25, 1),
         new(0x2d27, 0x2d2d, 6)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Glagolitic { internal static ж<RangeTable> _Glagolitic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2c00, 0x2c5f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1e000, 0x1e006, 1),
         new(0x1e008, 0x1e018, 1),
         new(0x1e01b, 0x1e021, 1),
         new(0x1e023, 0x1e024, 1),
         new(0x1e026, 0x1e02a, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10330, 0x1034a, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Grantha { internal static ж<RangeTable> _Grantha = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11300, 0x11303, 1),
         new(0x11305, 0x1130c, 1),
         new(0x1130f, 0x11310, 1),
@@ -5998,11 +5998,11 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x1135d, 0x11363, 1),
         new(0x11366, 0x1136c, 1),
         new(0x11370, 0x11374, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Greek { internal static ж<RangeTable> _Greek = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0370, 0x0373, 1),
         new(0x0375, 0x0377, 1),
         new(0x037a, 0x037d, 1),
@@ -6032,16 +6032,16 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x1ff2, 0x1ff4, 1),
         new(0x1ff6, 0x1ffe, 1),
         new(0x2126, 0xab65, 35391)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10140, 0x1018e, 1),
         new(0x101a0, 0x1d200, 53344),
         new(0x1d201, 0x1d245, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Gujarati { internal static ж<RangeTable> _Gujarati = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0a81, 0x0a83, 1),
         new(0x0a85, 0x0a8d, 1),
         new(0x0a8f, 0x0a91, 1),
@@ -6056,23 +6056,23 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x0ae1, 0x0ae3, 1),
         new(0x0ae6, 0x0af1, 1),
         new(0x0af9, 0x0aff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Gunjala_Gondi { internal static ж<RangeTable> _Gunjala_Gondi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11d60, 0x11d65, 1),
         new(0x11d67, 0x11d68, 1),
         new(0x11d6a, 0x11d8e, 1),
         new(0x11d90, 0x11d91, 1),
         new(0x11d93, 0x11d98, 1),
         new(0x11da0, 0x11da9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Gurmukhi { internal static ж<RangeTable> _Gurmukhi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0a01, 0x0a03, 1),
         new(0x0a05, 0x0a0a, 1),
         new(0x0a0f, 0x0a10, 1),
@@ -6089,11 +6089,11 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x0a5a, 0x0a5c, 1),
         new(0x0a5e, 0x0a66, 8),
         new(0x0a67, 0x0a76, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Han { internal static ж<RangeTable> _Han = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2e80, 0x2e99, 1),
         new(0x2e9b, 0x2ef3, 1),
         new(0x2f00, 0x2fd5, 1),
@@ -6104,8 +6104,8 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x4e00, 0x9fff, 1),
         new(0xf900, 0xfa6d, 1),
         new(0xfa70, 0xfad9, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x16fe2, 0x16fe3, 1),
         new(0x16ff0, 0x16ff1, 1),
         new(0x20000, 0x2a6df, 1),
@@ -6116,11 +6116,11 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0x2f800, 0x2fa1d, 1),
         new(0x30000, 0x3134a, 1),
         new(0x31350, 0x323af, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Hangul { internal static ж<RangeTable> _Hangul = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1100, 0x11ff, 1),
         new(0x302e, 0x302f, 1),
         new(0x3131, 0x318e, 1),
@@ -6135,34 +6135,34 @@ internal static ж<RangeTable> _Gothic = Ꮡ(new RangeTable(
         new(0xffca, 0xffcf, 1),
         new(0xffd2, 0xffd7, 1),
         new(0xffda, 0xffdc, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Hanifi_Rohingya { internal static ж<RangeTable> _Hanifi_Rohingya = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10d00, 0x10d27, 1),
         new(0x10d30, 0x10d39, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1720, 0x1734, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Hatran { internal static ж<RangeTable> _Hatran = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x108e0, 0x108f2, 1),
         new(0x108f4, 0x108f5, 1),
         new(0x108fb, 0x108ff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Hebrew { internal static ж<RangeTable> _Hebrew = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0591, 0x05c7, 1),
         new(0x05d0, 0x05ea, 1),
         new(0x05ef, 0x05f4, 1),
@@ -6172,32 +6172,32 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0xfb41, 0xfb43, 2),
         new(0xfb44, 0xfb46, 2),
         new(0xfb47, 0xfb4f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Hiragana { internal static ж<RangeTable> _Hiragana = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x3041, 0x3096, 1),
         new(0x309d, 0x309f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1b001, 0x1b11f, 1),
         new(0x1b132, 0x1b150, 30),
         new(0x1b151, 0x1b152, 1),
         new(0x1f200, 0x1f200, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Imperial_Aramaic { internal static ж<RangeTable> _Imperial_Aramaic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10840, 0x10855, 1),
         new(0x10857, 0x1085f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Inherited { internal static ж<RangeTable> _Inherited = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0300, 0x036f, 1),
         new(0x0485, 0x0486, 1),
         new(0x064b, 0x0655, 1),
@@ -6216,8 +6216,8 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0x3099, 0x309a, 1),
         new(0xfe00, 0xfe0f, 1),
         new(0xfe20, 0xfe2d, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x101fd, 0x102e0, 227),
         new(0x1133b, 0x1cf00, 48069),
         new(0x1cf01, 0x1cf2d, 1),
@@ -6227,43 +6227,43 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0x1d185, 0x1d18b, 1),
         new(0x1d1aa, 0x1d1ad, 1),
         new(0xe0100, 0xe01ef, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Inscriptional_Pahlavi { internal static ж<RangeTable> _Inscriptional_Pahlavi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10b60, 0x10b72, 1),
         new(0x10b78, 0x10b7f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Inscriptional_Parthian { internal static ж<RangeTable> _Inscriptional_Parthian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10b40, 0x10b55, 1),
         new(0x10b58, 0x10b5f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Javanese { internal static ж<RangeTable> _Javanese = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa980, 0xa9cd, 1),
         new(0xa9d0, 0xa9d9, 1),
         new(0xa9de, 0xa9df, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Kaithi { internal static ж<RangeTable> _Kaithi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11080, 0x110c2, 1),
         new(0x110cd, 0x110cd, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Kannada { internal static ж<RangeTable> _Kannada = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0c80, 0x0c8c, 1),
         new(0x0c8e, 0x0c90, 1),
         new(0x0c92, 0x0ca8, 1),
@@ -6277,11 +6277,11 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0x0ce0, 0x0ce3, 1),
         new(0x0ce6, 0x0cef, 1),
         new(0x0cf1, 0x0cf3, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Katakana { internal static ж<RangeTable> _Katakana = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x30a1, 0x30fa, 1),
         new(0x30fd, 0x30ff, 1),
         new(0x31f0, 0x31ff, 1),
@@ -6289,8 +6289,8 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0x3300, 0x3357, 1),
         new(0xff66, 0xff6f, 1),
         new(0xff71, 0xff9d, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1aff0, 0x1aff3, 1),
         new(0x1aff5, 0x1affb, 1),
         new(0x1affd, 0x1affe, 1),
@@ -6298,28 +6298,28 @@ internal static ж<RangeTable> _Hanunoo = Ꮡ(new RangeTable(
         new(0x1b121, 0x1b122, 1),
         new(0x1b155, 0x1b164, 15),
         new(0x1b165, 0x1b167, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Kawi { internal static ж<RangeTable> _Kawi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11f00, 0x11f10, 1),
         new(0x11f12, 0x11f3a, 1),
         new(0x11f3e, 0x11f59, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Kayah_Li = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa900, 0xa92d, 1),
         new(0xa92f, 0xa92f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Kharoshthi { internal static ж<RangeTable> _Kharoshthi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10a00, 0x10a03, 1),
         new(0x10a05, 0x10a06, 1),
         new(0x10a0c, 0x10a13, 1),
@@ -6328,44 +6328,44 @@ internal static ж<RangeTable> _Kayah_Li = Ꮡ(new RangeTable(
         new(0x10a38, 0x10a3a, 1),
         new(0x10a3f, 0x10a48, 1),
         new(0x10a50, 0x10a58, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Khitan_Small_Script { internal static ж<RangeTable> _Khitan_Small_Script = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16fe4, 0x18b00, 6940),
         new(0x18b01, 0x18cd5, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Khmer { internal static ж<RangeTable> _Khmer = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1780, 0x17dd, 1),
         new(0x17e0, 0x17e9, 1),
         new(0x17f0, 0x17f9, 1),
         new(0x19e0, 0x19ff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Khojki { internal static ж<RangeTable> _Khojki = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11200, 0x11211, 1),
         new(0x11213, 0x11241, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Khudawadi { internal static ж<RangeTable> _Khudawadi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x112b0, 0x112ea, 1),
         new(0x112f0, 0x112f9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Lao { internal static ж<RangeTable> _Lao = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0e81, 0x0e82, 1),
         new(0x0e84, 0x0e86, 2),
         new(0x0e87, 0x0e8a, 1),
@@ -6377,11 +6377,11 @@ internal static ж<RangeTable> _Kayah_Li = Ꮡ(new RangeTable(
         new(0x0ec9, 0x0ece, 1),
         new(0x0ed0, 0x0ed9, 1),
         new(0x0edc, 0x0edf, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Latin { internal static ж<RangeTable> _Latin = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
         new(0x0061, 0x007a, 1),
         new(0x00aa, 0x00ba, 16),
@@ -6413,47 +6413,47 @@ internal static ж<RangeTable> _Kayah_Li = Ꮡ(new RangeTable(
         new(0xfb00, 0xfb06, 1),
         new(0xff21, 0xff3a, 1),
         new(0xff41, 0xff5a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10780, 0x10785, 1),
         new(0x10787, 0x107b0, 1),
         new(0x107b2, 0x107ba, 1),
         new(0x1df00, 0x1df1e, 1),
         new(0x1df25, 0x1df2a, 1)
-    ]),
+    ],
     LatinOffset: 5
 )); }
 
 [GoLazy] partial class lazyᴛ_Lepcha { internal static ж<RangeTable> _Lepcha = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1c00, 0x1c37, 1),
         new(0x1c3b, 0x1c49, 1),
         new(0x1c4d, 0x1c4f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Limbu { internal static ж<RangeTable> _Limbu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1900, 0x191e, 1),
         new(0x1920, 0x192b, 1),
         new(0x1930, 0x193b, 1),
         new(0x1940, 0x1944, 4),
         new(0x1945, 0x194f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Linear_A { internal static ж<RangeTable> _Linear_A = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10600, 0x10736, 1),
         new(0x10740, 0x10755, 1),
         new(0x10760, 0x10767, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Linear_B { internal static ж<RangeTable> _Linear_B = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10000, 0x1000b, 1),
         new(0x1000d, 0x10026, 1),
         new(0x10028, 0x1003a, 1),
@@ -6461,49 +6461,49 @@ internal static ж<RangeTable> _Kayah_Li = Ꮡ(new RangeTable(
         new(0x1003f, 0x1004d, 1),
         new(0x10050, 0x1005d, 1),
         new(0x10080, 0x100fa, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Lisu { internal static ж<RangeTable> _Lisu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa4d0, 0xa4ff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11fb0, 0x11fb0, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Lycian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10280, 0x1029c, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Lydian { internal static ж<RangeTable> _Lydian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10920, 0x10939, 1),
         new(0x1093f, 0x1093f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Mahajani = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11150, 0x11176, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Makasar = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11ee0, 0x11ef8, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Malayalam { internal static ж<RangeTable> _Malayalam = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0d00, 0x0d0c, 1),
         new(0x0d0e, 0x0d10, 1),
         new(0x0d12, 0x0d44, 1),
@@ -6511,36 +6511,36 @@ internal static ж<RangeTable> _Makasar = Ꮡ(new RangeTable(
         new(0x0d4a, 0x0d4f, 1),
         new(0x0d54, 0x0d63, 1),
         new(0x0d66, 0x0d7f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Mandaic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0840, 0x085b, 1),
         new(0x085e, 0x085e, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Manichaean { internal static ж<RangeTable> _Manichaean = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10ac0, 0x10ae6, 1),
         new(0x10aeb, 0x10af6, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Marchen { internal static ж<RangeTable> _Marchen = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11c70, 0x11c8f, 1),
         new(0x11c92, 0x11ca7, 1),
         new(0x11ca9, 0x11cb6, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Masaram_Gondi { internal static ж<RangeTable> _Masaram_Gondi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11d00, 0x11d06, 1),
         new(0x11d08, 0x11d09, 1),
         new(0x11d0b, 0x11d36, 1),
@@ -6548,253 +6548,253 @@ internal static ж<RangeTable> _Mandaic = Ꮡ(new RangeTable(
         new(0x11d3d, 0x11d3f, 2),
         new(0x11d40, 0x11d47, 1),
         new(0x11d50, 0x11d59, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Medefaidrin = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16e40, 0x16e9a, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Meetei_Mayek { internal static ж<RangeTable> _Meetei_Mayek = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xaae0, 0xaaf6, 1),
         new(0xabc0, 0xabed, 1),
         new(0xabf0, 0xabf9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Mende_Kikakui { internal static ж<RangeTable> _Mende_Kikakui = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e800, 0x1e8c4, 1),
         new(0x1e8c7, 0x1e8d6, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Meroitic_Cursive { internal static ж<RangeTable> _Meroitic_Cursive = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x109a0, 0x109b7, 1),
         new(0x109bc, 0x109cf, 1),
         new(0x109d2, 0x109ff, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Meroitic_Hieroglyphs = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10980, 0x1099f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Miao { internal static ж<RangeTable> _Miao = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16f00, 0x16f4a, 1),
         new(0x16f4f, 0x16f87, 1),
         new(0x16f8f, 0x16f9f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Modi { internal static ж<RangeTable> _Modi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11600, 0x11644, 1),
         new(0x11650, 0x11659, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Mongolian { internal static ж<RangeTable> _Mongolian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1800, 0x1801, 1),
         new(0x1804, 0x1806, 2),
         new(0x1807, 0x1819, 1),
         new(0x1820, 0x1878, 1),
         new(0x1880, 0x18aa, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11660, 0x1166c, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Mro { internal static ж<RangeTable> _Mro = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16a40, 0x16a5e, 1),
         new(0x16a60, 0x16a69, 1),
         new(0x16a6e, 0x16a6f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Multani { internal static ж<RangeTable> _Multani = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11280, 0x11286, 1),
         new(0x11288, 0x1128a, 2),
         new(0x1128b, 0x1128d, 1),
         new(0x1128f, 0x1129d, 1),
         new(0x1129f, 0x112a9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Myanmar { internal static ж<RangeTable> _Myanmar = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1000, 0x109f, 1),
         new(0xa9e0, 0xa9fe, 1),
         new(0xaa60, 0xaa7f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Nabataean { internal static ж<RangeTable> _Nabataean = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10880, 0x1089e, 1),
         new(0x108a7, 0x108af, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Nag_Mundari = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e4d0, 0x1e4f9, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Nandinagari { internal static ж<RangeTable> _Nandinagari = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x119a0, 0x119a7, 1),
         new(0x119aa, 0x119d7, 1),
         new(0x119da, 0x119e4, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_New_Tai_Lue { internal static ж<RangeTable> _New_Tai_Lue = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1980, 0x19ab, 1),
         new(0x19b0, 0x19c9, 1),
         new(0x19d0, 0x19da, 1),
         new(0x19de, 0x19df, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Newa { internal static ж<RangeTable> _Newa = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11400, 0x1145b, 1),
         new(0x1145d, 0x11461, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Nko = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x07c0, 0x07fa, 1),
         new(0x07fd, 0x07ff, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Nushu { internal static ж<RangeTable> _Nushu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16fe1, 0x1b170, 16783),
         new(0x1b171, 0x1b2fb, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Nyiakeng_Puachue_Hmong { internal static ж<RangeTable> _Nyiakeng_Puachue_Hmong = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e100, 0x1e12c, 1),
         new(0x1e130, 0x1e13d, 1),
         new(0x1e140, 0x1e149, 1),
         new(0x1e14e, 0x1e14f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Ogham = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1680, 0x169c, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Ol_Chiki = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1c50, 0x1c7f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Old_Hungarian { internal static ж<RangeTable> _Old_Hungarian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10c80, 0x10cb2, 1),
         new(0x10cc0, 0x10cf2, 1),
         new(0x10cfa, 0x10cff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Old_Italic { internal static ж<RangeTable> _Old_Italic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10300, 0x10323, 1),
         new(0x1032d, 0x1032f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Old_North_Arabian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10a80, 0x10a9f, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Old_Permic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10350, 0x1037a, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Old_Persian { internal static ж<RangeTable> _Old_Persian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x103a0, 0x103c3, 1),
         new(0x103c8, 0x103d5, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Old_Sogdian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10f00, 0x10f27, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Old_South_Arabian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10a60, 0x10a7f, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Old_Turkic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10c00, 0x10c48, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Old_Uyghur = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10f70, 0x10f89, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Oriya { internal static ж<RangeTable> _Oriya = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0b01, 0x0b03, 1),
         new(0x0b05, 0x0b0c, 1),
         new(0x0b0f, 0x0b10, 1),
@@ -6809,134 +6809,134 @@ internal static ж<RangeTable> _Old_Uyghur = Ꮡ(new RangeTable(
         new(0x0b5c, 0x0b5d, 1),
         new(0x0b5f, 0x0b63, 1),
         new(0x0b66, 0x0b77, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Osage { internal static ж<RangeTable> _Osage = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x104b0, 0x104d3, 1),
         new(0x104d8, 0x104fb, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Osmanya { internal static ж<RangeTable> _Osmanya = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10480, 0x1049d, 1),
         new(0x104a0, 0x104a9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Pahawh_Hmong { internal static ж<RangeTable> _Pahawh_Hmong = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16b00, 0x16b45, 1),
         new(0x16b50, 0x16b59, 1),
         new(0x16b5b, 0x16b61, 1),
         new(0x16b63, 0x16b77, 1),
         new(0x16b7d, 0x16b8f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Palmyrene = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10860, 0x1087f, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Pau_Cin_Hau = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11ac0, 0x11af8, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Phags_Pa = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa840, 0xa877, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Phoenician { internal static ж<RangeTable> _Phoenician = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10900, 0x1091b, 1),
         new(0x1091f, 0x1091f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Psalter_Pahlavi { internal static ж<RangeTable> _Psalter_Pahlavi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10b80, 0x10b91, 1),
         new(0x10b99, 0x10b9c, 1),
         new(0x10ba9, 0x10baf, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Rejang = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa930, 0xa953, 1),
         new(0xa95f, 0xa95f, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Runic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x16a0, 0x16ea, 1),
         new(0x16ee, 0x16f8, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Samaritan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0800, 0x082d, 1),
         new(0x0830, 0x083e, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Saurashtra = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa880, 0xa8c5, 1),
         new(0xa8ce, 0xa8d9, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Sharada = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11180, 0x111df, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Shavian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10450, 0x1047f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Siddham { internal static ж<RangeTable> _Siddham = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11580, 0x115b5, 1),
         new(0x115b8, 0x115dd, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_SignWriting { internal static ж<RangeTable> _SignWriting = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1d800, 0x1da8b, 1),
         new(0x1da9b, 0x1da9f, 1),
         new(0x1daa1, 0x1daaf, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Sinhala { internal static ж<RangeTable> _Sinhala = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0d81, 0x0d83, 1),
         new(0x0d85, 0x0d96, 1),
         new(0x0d9a, 0x0db1, 1),
@@ -6949,105 +6949,105 @@ internal static ж<RangeTable> _Shavian = Ꮡ(new RangeTable(
         new(0x0dd9, 0x0ddf, 1),
         new(0x0de6, 0x0def, 1),
         new(0x0df2, 0x0df4, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x111e1, 0x111f4, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Sogdian = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10f30, 0x10f59, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Sora_Sompeng { internal static ж<RangeTable> _Sora_Sompeng = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x110d0, 0x110e8, 1),
         new(0x110f0, 0x110f9, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Soyombo = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11a50, 0x11aa2, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Sundanese = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1b80, 0x1bbf, 1),
         new(0x1cc0, 0x1cc7, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Syloti_Nagri = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa800, 0xa82c, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Syriac { internal static ж<RangeTable> _Syriac = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0700, 0x070d, 1),
         new(0x070f, 0x074a, 1),
         new(0x074d, 0x074f, 1),
         new(0x0860, 0x086a, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Tagalog = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1700, 0x1715, 1),
         new(0x171f, 0x171f, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Tagbanwa { internal static ж<RangeTable> _Tagbanwa = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1760, 0x176c, 1),
         new(0x176e, 0x1770, 1),
         new(0x1772, 0x1773, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Tai_Le = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1950, 0x196d, 1),
         new(0x1970, 0x1974, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Tai_Tham { internal static ж<RangeTable> _Tai_Tham = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1a20, 0x1a5e, 1),
         new(0x1a60, 0x1a7c, 1),
         new(0x1a7f, 0x1a89, 1),
         new(0x1a90, 0x1a99, 1),
         new(0x1aa0, 0x1aad, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Tai_Viet = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xaa80, 0xaac2, 1),
         new(0xaadb, 0xaadf, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Takri { internal static ж<RangeTable> _Takri = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11680, 0x116b9, 1),
         new(0x116c0, 0x116c9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Tamil { internal static ж<RangeTable> _Tamil = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0b82, 0x0b83, 1),
         new(0x0b85, 0x0b8a, 1),
         new(0x0b8e, 0x0b90, 1),
@@ -7063,33 +7063,33 @@ internal static ж<RangeTable> _Tai_Viet = Ꮡ(new RangeTable(
         new(0x0bca, 0x0bcd, 1),
         new(0x0bd0, 0x0bd7, 7),
         new(0x0be6, 0x0bfa, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x11fc0, 0x11ff1, 1),
         new(0x11fff, 0x11fff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Tangsa { internal static ж<RangeTable> _Tangsa = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16a70, 0x16abe, 1),
         new(0x16ac0, 0x16ac9, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Tangut { internal static ж<RangeTable> _Tangut = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x16fe0, 0x17000, 32),
         new(0x17001, 0x187f7, 1),
         new(0x18800, 0x18aff, 1),
         new(0x18d00, 0x18d08, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Telugu { internal static ж<RangeTable> _Telugu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0c00, 0x0c0c, 1),
         new(0x0c0e, 0x0c10, 1),
         new(0x0c12, 0x0c28, 1),
@@ -7103,24 +7103,24 @@ internal static ж<RangeTable> _Tai_Viet = Ꮡ(new RangeTable(
         new(0x0c61, 0x0c63, 1),
         new(0x0c66, 0x0c6f, 1),
         new(0x0c77, 0x0c7f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Thaana = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0780, 0x07b1, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Thai = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0e01, 0x0e3a, 1),
         new(0x0e40, 0x0e5b, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Tibetan { internal static ж<RangeTable> _Tibetan = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0f00, 0x0f47, 1),
         new(0x0f49, 0x0f6c, 1),
         new(0x0f71, 0x0f97, 1),
@@ -7128,49 +7128,49 @@ internal static ж<RangeTable> _Thai = Ꮡ(new RangeTable(
         new(0x0fbe, 0x0fcc, 1),
         new(0x0fce, 0x0fd4, 1),
         new(0x0fd9, 0x0fda, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Tifinagh { internal static ж<RangeTable> _Tifinagh = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2d30, 0x2d67, 1),
         new(0x2d6f, 0x2d70, 1),
         new(0x2d7f, 0x2d7f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Tirhuta { internal static ж<RangeTable> _Tirhuta = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11480, 0x114c7, 1),
         new(0x114d0, 0x114d9, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Toto = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e290, 0x1e2ae, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Ugaritic { internal static ж<RangeTable> _Ugaritic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10380, 0x1039d, 1),
         new(0x1039f, 0x1039f, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Vai = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa500, 0xa62b, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Vithkuqi { internal static ж<RangeTable> _Vithkuqi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10570, 0x1057a, 1),
         new(0x1057c, 0x1058a, 1),
         new(0x1058c, 0x10592, 1),
@@ -7179,46 +7179,46 @@ internal static ж<RangeTable> _Vai = Ꮡ(new RangeTable(
         new(0x105a3, 0x105b1, 1),
         new(0x105b3, 0x105b9, 1),
         new(0x105bb, 0x105bc, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Wancho { internal static ж<RangeTable> _Wancho = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1e2c0, 0x1e2f9, 1),
         new(0x1e2ff, 0x1e2ff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Warang_Citi { internal static ж<RangeTable> _Warang_Citi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x118a0, 0x118f2, 1),
         new(0x118ff, 0x118ff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Yezidi { internal static ж<RangeTable> _Yezidi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x10e80, 0x10ea9, 1),
         new(0x10eab, 0x10ead, 1),
         new(0x10eb0, 0x10eb1, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Yi = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xa000, 0xa48c, 1),
         new(0xa490, 0xa4c6, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x11a00, 0x11a47, 1)
-    ])
+    ]
 ));
 
 // These variables have type *RangeTable.
@@ -7427,25 +7427,25 @@ internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
 public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑProperties).ValueSlot;
 
 [GoLazy] partial class lazyᴛ_ASCII_Hex_Digit { internal static ж<RangeTable> _ASCII_Hex_Digit = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0030, 0x0039, 1),
         new(0x0041, 0x0046, 1),
         new(0x0061, 0x0066, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_Bidi_Control { internal static ж<RangeTable> _Bidi_Control = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x061c, 0x200e, 6642),
         new(0x200f, 0x202a, 27),
         new(0x202b, 0x202e, 1),
         new(0x2066, 0x2069, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Dash { internal static ж<RangeTable> _Dash = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x002d, 0x058a, 1373),
         new(0x05be, 0x1400, 3650),
         new(0x1806, 0x2010, 2058),
@@ -7459,27 +7459,27 @@ public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map
         new(0x30a0, 0xfe31, 52625),
         new(0xfe32, 0xfe58, 38),
         new(0xfe63, 0xff0d, 170)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10ead, 0x10ead, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Deprecated { internal static ж<RangeTable> _Deprecated = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0149, 0x0673, 1322),
         new(0x0f77, 0x0f79, 2),
         new(0x17a3, 0x17a4, 1),
         new(0x206a, 0x206f, 1),
         new(0x2329, 0x232a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0xe0001, 0xe0001, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Diacritic { internal static ж<RangeTable> _Diacritic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x005e, 0x0060, 2),
         new(0x00a8, 0x00af, 7),
         new(0x00b4, 0x00b7, 3),
@@ -7590,8 +7590,8 @@ public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map
         new(0xff3e, 0xff40, 2),
         new(0xff70, 0xff9e, 46),
         new(0xff9f, 0xffe3, 68)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x102e0, 0x10780, 1184),
         new(0x10781, 0x10785, 1),
         new(0x10787, 0x107b0, 1),
@@ -7645,12 +7645,12 @@ public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map
         new(0x1e8d0, 0x1e8d6, 1),
         new(0x1e944, 0x1e946, 1),
         new(0x1e948, 0x1e94a, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_Extender { internal static ж<RangeTable> _Extender = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00b7, 0x02d0, 537),
         new(0x02d1, 0x0640, 879),
         new(0x07fa, 0x0b55, 859),
@@ -7666,8 +7666,8 @@ public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map
         new(0xaa70, 0xaadd, 109),
         new(0xaaf3, 0xaaf4, 1),
         new(0xff70, 0xff70, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10781, 0x10782, 1),
         new(0x1135d, 0x115c6, 617),
         new(0x115c7, 0x115c8, 1),
@@ -7676,48 +7676,48 @@ public static ref map<@string, ж<RangeTable>> Properties => ref ((StaticBox<map
         new(0x16fe1, 0x16fe3, 2),
         new(0x1e13c, 0x1e13d, 1),
         new(0x1e944, 0x1e946, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Hex_Digit { internal static ж<RangeTable> _Hex_Digit = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0030, 0x0039, 1),
         new(0x0041, 0x0046, 1),
         new(0x0061, 0x0066, 1),
         new(0xff10, 0xff19, 1),
         new(0xff21, 0xff26, 1),
         new(0xff41, 0xff46, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_Hyphen { internal static ж<RangeTable> _Hyphen = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x002d, 0x00ad, 128),
         new(0x058a, 0x1806, 4732),
         new(0x2010, 0x2011, 1),
         new(0x2e17, 0x30fb, 740),
         new(0xfe63, 0xff0d, 170),
         new(0xff65, 0xff65, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 internal static ж<RangeTable> _IDS_Binary_Operator = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2ff0, 0x2ff1, 1),
         new(0x2ff4, 0x2ffb, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> _IDS_Trinary_Operator = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2ff2, 0x2ff3, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Ideographic { internal static ж<RangeTable> _Ideographic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x3006, 0x3007, 1),
         new(0x3021, 0x3029, 1),
         new(0x3038, 0x303a, 1),
@@ -7725,8 +7725,8 @@ internal static ж<RangeTable> _IDS_Trinary_Operator = Ꮡ(new RangeTable(
         new(0x4e00, 0x9fff, 1),
         new(0xf900, 0xfa6d, 1),
         new(0xfa70, 0xfad9, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x16fe4, 0x17000, 28),
         new(0x17001, 0x187f7, 1),
         new(0x18800, 0x18cd5, 1),
@@ -7740,32 +7740,32 @@ internal static ж<RangeTable> _IDS_Trinary_Operator = Ꮡ(new RangeTable(
         new(0x2f800, 0x2fa1d, 1),
         new(0x30000, 0x3134a, 1),
         new(0x31350, 0x323af, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x200c, 0x200d, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Logical_Order_Exception { internal static ж<RangeTable> _Logical_Order_Exception = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0e40, 0x0e44, 1),
         new(0x0ec0, 0x0ec4, 1),
         new(0x19b5, 0x19b7, 1),
         new(0x19ba, 0xaab5, 37115),
         new(0xaab6, 0xaab9, 3),
         new(0xaabb, 0xaabc, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Noncharacter_Code_Point { internal static ж<RangeTable> _Noncharacter_Code_Point = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0xfdd0, 0xfdef, 1),
         new(0xfffe, 0xffff, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1fffe, 0x1ffff, 1),
         new(0x2fffe, 0x2ffff, 1),
         new(0x3fffe, 0x3ffff, 1),
@@ -7782,11 +7782,11 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0xefffe, 0xeffff, 1),
         new(0xffffe, 0xfffff, 1),
         new(0x10fffe, 0x10ffff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Alphabetic { internal static ж<RangeTable> _Other_Alphabetic = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0345, 0x05b0, 619),
         new(0x05b1, 0x05bd, 1),
         new(0x05bf, 0x05c1, 2),
@@ -7935,8 +7935,8 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0xaaf5, 0xabe3, 238),
         new(0xabe4, 0xabea, 1),
         new(0xfb1e, 0xfb1e, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10376, 0x1037a, 1),
         new(0x10a01, 0x10a03, 1),
         new(0x10a05, 0x10a06, 1),
@@ -8019,27 +8019,27 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0x1f130, 0x1f149, 1),
         new(0x1f150, 0x1f169, 1),
         new(0x1f170, 0x1f189, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Default_Ignorable_Code_Point { internal static ж<RangeTable> _Other_Default_Ignorable_Code_Point = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x034f, 0x115f, 3600),
         new(0x1160, 0x17b4, 1620),
         new(0x17b5, 0x2065, 2224),
         new(0x3164, 0xffa0, 52796),
         new(0xfff0, 0xfff8, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0xe0000, 0xe0002, 2),
         new(0xe0003, 0xe001f, 1),
         new(0xe0080, 0xe00ff, 1),
         new(0xe01f0, 0xe0fff, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Grapheme_Extend { internal static ж<RangeTable> _Other_Grapheme_Extend = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x09be, 0x09d7, 25),
         new(0x0b3e, 0x0b57, 25),
         new(0x0bbe, 0x0bd7, 25),
@@ -8050,35 +8050,35 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0x200c, 0x302e, 4130),
         new(0x302f, 0xff9e, 53103),
         new(0xff9f, 0xff9f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1133e, 0x11357, 25),
         new(0x114b0, 0x114bd, 13),
         new(0x115af, 0x11930, 897),
         new(0x1d165, 0x1d16e, 9),
         new(0x1d16f, 0x1d172, 1),
         new(0xe0020, 0xe007f, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_ID_Continue { internal static ж<RangeTable> _Other_ID_Continue = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00b7, 0x0387, 720),
         new(0x1369, 0x1371, 1),
         new(0x19da, 0x19da, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_ID_Start { internal static ж<RangeTable> _Other_ID_Start = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x1885, 0x1886, 1),
         new(0x2118, 0x212e, 22),
         new(0x309b, 0x309c, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Lowercase { internal static ж<RangeTable> _Other_Lowercase = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00aa, 0x00ba, 16),
         new(0x02b0, 0x02b8, 1),
         new(0x02c0, 0x02c1, 1),
@@ -8099,19 +8099,19 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0xa7f8, 0xa7f9, 1),
         new(0xab5c, 0xab5f, 1),
         new(0xab69, 0xab69, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10780, 0x10783, 3),
         new(0x10784, 0x10785, 1),
         new(0x10787, 0x107b0, 1),
         new(0x107b2, 0x107ba, 1),
         new(0x1e030, 0x1e06d, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Math { internal static ж<RangeTable> _Other_Math = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x005e, 0x03d0, 882),
         new(0x03d1, 0x03d2, 1),
         new(0x03d5, 0x03f0, 27),
@@ -8175,8 +8175,8 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0xfe61, 0xfe63, 2),
         new(0xfe68, 0xff3c, 212),
         new(0xff3e, 0xff3e, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1d400, 0x1d454, 1),
         new(0x1d456, 0x1d49c, 1),
         new(0x1d49e, 0x1d49f, 1),
@@ -8232,23 +8232,23 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0x1eea1, 0x1eea3, 1),
         new(0x1eea5, 0x1eea9, 1),
         new(0x1eeab, 0x1eebb, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Other_Uppercase { internal static ж<RangeTable> _Other_Uppercase = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2160, 0x216f, 1),
         new(0x24b6, 0x24cf, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1f130, 0x1f149, 1),
         new(0x1f150, 0x1f169, 1),
         new(0x1f170, 0x1f189, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Pattern_Syntax { internal static ж<RangeTable> _Pattern_Syntax = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0021, 0x002f, 1),
         new(0x003a, 0x0040, 1),
         new(0x005b, 0x005e, 1),
@@ -8273,34 +8273,34 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0x3030, 0xfd3e, 52494),
         new(0xfd3f, 0xfe45, 262),
         new(0xfe46, 0xfe46, 1)
-    ]),
+    ],
     LatinOffset: 10
 )); }
 
 [GoLazy] partial class lazyᴛ_Pattern_White_Space { internal static ж<RangeTable> _Pattern_White_Space = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0009, 0x000d, 1),
         new(0x0020, 0x0085, 101),
         new(0x200e, 0x200f, 1),
         new(0x2028, 0x2029, 1)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
 [GoLazy] partial class lazyᴛ_Prepended_Concatenation_Mark { internal static ж<RangeTable> _Prepended_Concatenation_Mark = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0600, 0x0605, 1),
         new(0x06dd, 0x070f, 50),
         new(0x0890, 0x0891, 1),
         new(0x08e2, 0x08e2, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x110bd, 0x110cd, 16)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Quotation_Mark { internal static ж<RangeTable> _Quotation_Mark = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0022, 0x0027, 5),
         new(0x00ab, 0x00bb, 16),
         new(0x2018, 0x201f, 1),
@@ -8311,27 +8311,27 @@ internal static ж<RangeTable> _Join_Control = Ꮡ(new RangeTable(
         new(0xfe41, 0xfe44, 1),
         new(0xff02, 0xff07, 5),
         new(0xff62, 0xff63, 1)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
 [GoLazy] partial class lazyᴛ_Radical { internal static ж<RangeTable> _Radical = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x2e80, 0x2e99, 1),
         new(0x2e9b, 0x2ef3, 1),
         new(0x2f00, 0x2fd5, 1)
-    ])
+    ]
 )); }
 
 internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
-    R16: slice<Range16>([]),
-    R32: slice<Range32>([
+    R16: [],
+    R32: [
         new(0x1f1e6, 0x1f1ff, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛ_Sentence_Terminal { internal static ж<RangeTable> _Sentence_Terminal = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0021, 0x002e, 13),
         new(0x003f, 0x0589, 1354),
         new(0x061d, 0x061f, 1),
@@ -8370,8 +8370,8 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0xfe56, 0xfe57, 1),
         new(0xff01, 0xff0e, 13),
         new(0xff1f, 0xff61, 66)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10a56, 0x10a57, 1),
         new(0x10f55, 0x10f59, 1),
         new(0x10f86, 0x10f89, 1),
@@ -8399,12 +8399,12 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x16b38, 0x16b44, 12),
         new(0x16e98, 0x1bc9f, 19975),
         new(0x1da88, 0x1da88, 1)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Soft_Dotted { internal static ж<RangeTable> _Soft_Dotted = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0069, 0x006a, 1),
         new(0x012f, 0x0249, 282),
         new(0x0268, 0x029d, 53),
@@ -8415,8 +8415,8 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x1e2d, 0x1ecb, 158),
         new(0x2071, 0x2148, 215),
         new(0x2149, 0x2c7c, 2867)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1d422, 0x1d423, 1),
         new(0x1d456, 0x1d457, 1),
         new(0x1d48a, 0x1d48b, 1),
@@ -8432,12 +8432,12 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x1d692, 0x1d693, 1),
         new(0x1df1a, 0x1e04c, 306),
         new(0x1e04d, 0x1e068, 27)
-    ]),
+    ],
     LatinOffset: 1
 )); }
 
 [GoLazy] partial class lazyᴛ_Terminal_Punctuation { internal static ж<RangeTable> _Terminal_Punctuation = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0021, 0x002c, 11),
         new(0x002e, 0x003a, 12),
         new(0x003b, 0x003f, 4),
@@ -8493,8 +8493,8 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0xff0e, 0xff1a, 12),
         new(0xff1b, 0xff1f, 4),
         new(0xff61, 0xff64, 3)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x1039f, 0x103d0, 49),
         new(0x10857, 0x1091f, 200),
         new(0x10a56, 0x10a57, 1),
@@ -8532,12 +8532,12 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x16b44, 0x16e97, 851),
         new(0x16e98, 0x1bc9f, 19975),
         new(0x1da87, 0x1da8a, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛ_Unified_Ideograph { internal static ж<RangeTable> _Unified_Ideograph = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x3400, 0x4dbf, 1),
         new(0x4e00, 0x9fff, 1),
         new(0xfa0e, 0xfa0f, 1),
@@ -8546,8 +8546,8 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0xfa21, 0xfa23, 2),
         new(0xfa24, 0xfa27, 3),
         new(0xfa28, 0xfa29, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x20000, 0x2a6df, 1),
         new(0x2a700, 0x2b739, 1),
         new(0x2b740, 0x2b81d, 1),
@@ -8555,22 +8555,22 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x2ceb0, 0x2ebe0, 1),
         new(0x30000, 0x3134a, 1),
         new(0x31350, 0x323af, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_Variation_Selector { internal static ж<RangeTable> _Variation_Selector = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x180b, 0x180d, 1),
         new(0x180f, 0xfe00, 58865),
         new(0xfe01, 0xfe0f, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0xe0100, 0xe01ef, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛ_White_Space { internal static ж<RangeTable> _White_Space = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0009, 0x000d, 1),
         new(0x0020, 0x0085, 101),
         new(0x00a0, 0x1680, 5600),
@@ -8578,7 +8578,7 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
         new(0x2028, 0x2029, 1),
         new(0x202f, 0x205f, 48),
         new(0x3000, 0x3000, 1)
-    ]),
+    ],
     LatinOffset: 2
 )); }
 
@@ -8623,7 +8623,7 @@ internal static ж<RangeTable> _Regional_Indicator = Ꮡ(new RangeTable(
 // non-self mappings.
 [GoLazy] partial class lazyᴛCaseRanges { public static readonly ж<slice<CaseRange>> ᏑCaseRanges = new StaticBox<slice<CaseRange>>(_CaseRanges); }
 public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange>>)ᏑCaseRanges).ValueSlot;
-[GoLazy] partial class lazyᴛ_CaseRanges { internal static slice<CaseRange> _CaseRanges = slice<CaseRange>([
+[GoLazy] partial class lazyᴛ_CaseRanges { internal static slice<CaseRange> _CaseRanges = [
     new(0x0041, 0x005A, new d(new rune[]{0, 32, 0}.array())),
     new(0x0061, 0x007A, new d(new rune[]{-32, 0, -32}.array())),
     new(0x00B5, 0x00B5, new d(new rune[]{743, 0, 743}.array())),
@@ -8952,7 +8952,7 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     new(0x16E60, 0x16E7F, new d(new rune[]{-32, 0, -32}.array())),
     new(0x1E900, 0x1E921, new d(new rune[]{0, 34, 0}.array())),
     new(0x1E922, 0x1E943, new d(new rune[]{-34, 0, -34}.array()))
-]); }
+]; }
 [GoLazy] partial class lazyᴛproperties { internal static array<uint8> properties = new array<uint8>(256){
     [0x00] = pC,                              // '\x00'
     [0x01] = pC,                              // '\x01'
@@ -9343,7 +9343,7 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     0x007F
 }.array(); }
 
-[GoLazy] partial class lazyᴛcaseOrbit { internal static slice<foldPair> caseOrbit = slice<foldPair>([
+[GoLazy] partial class lazyᴛcaseOrbit { internal static slice<foldPair> caseOrbit = [
     new(0x004B, 0x006B),
     new(0x0053, 0x0073),
     new(0x006B, 0x212A),
@@ -9432,7 +9432,7 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     new(0x212B, 0x00C5),
     new(0xA64A, 0xA64B),
     new(0xA64B, 0x1C88)
-]); }
+]; }
 
 // FoldCategory maps a category name to a table of
 // code points outside the category that are equivalent under
@@ -9449,13 +9449,13 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
 public static ref map<@string, ж<RangeTable>> FoldCategory => ref ((StaticBox<map<@string, ж<RangeTable>>>)ᏑFoldCategory).ValueSlot;
 
 internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0345, 0x0345, 1)
-    ])
+    ]
 ));
 
 [GoLazy] partial class lazyᴛfoldLl { internal static ж<RangeTable> foldLl = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
         new(0x00c0, 0x00d6, 1),
         new(0x00d8, 0x00de, 1),
@@ -9564,8 +9564,8 @@ internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
         new(0xa7d6, 0xa7d8, 2),
         new(0xa7f5, 0xff21, 22316),
         new(0xff22, 0xff3a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10400, 0x10427, 1),
         new(0x104b0, 0x104d3, 1),
         new(0x10570, 0x1057a, 1),
@@ -9576,12 +9576,12 @@ internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
         new(0x118a0, 0x118bf, 1),
         new(0x16e40, 0x16e5f, 1),
         new(0x1e900, 0x1e921, 1)
-    ]),
+    ],
     LatinOffset: 3
 )); }
 
 [GoLazy] partial class lazyᴛfoldLt { internal static ж<RangeTable> foldLt = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x01c4, 0x01c6, 2),
         new(0x01c7, 0x01c9, 2),
         new(0x01ca, 0x01cc, 2),
@@ -9591,11 +9591,11 @@ internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
         new(0x1fa0, 0x1fa7, 1),
         new(0x1fb3, 0x1fc3, 16),
         new(0x1ff3, 0x1ff3, 1)
-    ])
+    ]
 )); }
 
 [GoLazy] partial class lazyᴛfoldLu { internal static ж<RangeTable> foldLu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0061, 0x007a, 1),
         new(0x00b5, 0x00df, 42),
         new(0x00e0, 0x00f6, 1),
@@ -9705,8 +9705,8 @@ internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
         new(0xab53, 0xab70, 29),
         new(0xab71, 0xabbf, 1),
         new(0xff41, 0xff5a, 1)
-    ]),
-    R32: slice<Range32>([
+    ],
+    R32: [
         new(0x10428, 0x1044f, 1),
         new(0x104d8, 0x104fb, 1),
         new(0x10597, 0x105a1, 1),
@@ -9717,22 +9717,22 @@ internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
         new(0x118c0, 0x118df, 1),
         new(0x16e60, 0x16e7f, 1),
         new(0x1e922, 0x1e943, 1)
-    ]),
+    ],
     LatinOffset: 4
 )); }
 
 internal static ж<RangeTable> foldM = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0399, 0x03b9, 32),
         new(0x1fbe, 0x1fbe, 1)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> foldMn = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0399, 0x03b9, 32),
         new(0x1fbe, 0x1fbe, 1)
-    ])
+    ]
 ));
 
 // FoldScript maps a script name to a table of
@@ -9748,22 +9748,22 @@ internal static void initᴛFoldScript() { FoldScript = new map<@string, ж<Rang
 }; }
 
 internal static ж<RangeTable> foldCommon = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x039c, 0x03bc, 32)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> foldGreek = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x00b5, 0x0345, 656)
-    ])
+    ]
 ));
 
 internal static ж<RangeTable> foldInherited = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0399, 0x03b9, 32),
         new(0x1fbe, 0x1fbe, 1)
-    ])
+    ]
 ));
 
 // Range entries: 4177 16-bit, 2714 32-bit, 6891 total.

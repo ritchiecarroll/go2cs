@@ -28,7 +28,7 @@ public static @string DetectContentType(slice<byte> data) {
     for (; firstNonWS < builtin.len(data) && isWS(data[firstNonWS]); firstNonWS++) {
     }
 
-    foreach (var (_, sig) in sniffSignatures) {
+    foreach (var (_, sig) in range(sniffSignatures)) {
         @string ct = sig.match(data, firstNonWS); if (ct != ""u8) {
             return ct;
         }
@@ -86,7 +86,7 @@ partial interface sniffSig {
 // RAR v5+
 // should be last
 // Data matching the table in section 6.
-[GoLazy] partial class lazyᴛsniffSignatures { internal static slice<sniffSig> sniffSignatures = slice<sniffSig>([((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8)), ((htmlSig)slice<byte>((@string)"<HTML"u8)), ((htmlSig)slice<byte>((@string)"<HEAD"u8)), ((htmlSig)slice<byte>((@string)"<SCRIPT"u8)), ((htmlSig)slice<byte>((@string)"<IFRAME"u8)), ((htmlSig)slice<byte>((@string)"<H1"u8)), ((htmlSig)slice<byte>((@string)"<DIV"u8)), ((htmlSig)slice<byte>((@string)"<FONT"u8)), ((htmlSig)slice<byte>((@string)"<TABLE"u8)), ((htmlSig)slice<byte>((@string)"<A"u8)), ((htmlSig)slice<byte>((@string)"<STYLE"u8)), ((htmlSig)slice<byte>((@string)"<TITLE"u8)), ((htmlSig)slice<byte>((@string)"<B"u8)), ((htmlSig)slice<byte>((@string)"<BODY"u8)), ((htmlSig)slice<byte>((@string)"<BR"u8)), ((htmlSig)slice<byte>((@string)"<P"u8)), ((htmlSig)slice<byte>((@string)"<!--"u8)), new maskedSigжsniffSig(Ꮡ(new maskedSig(
+[GoLazy] partial class lazyᴛsniffSignatures { internal static slice<sniffSig> sniffSignatures = [((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8)), ((htmlSig)slice<byte>((@string)"<HTML"u8)), ((htmlSig)slice<byte>((@string)"<HEAD"u8)), ((htmlSig)slice<byte>((@string)"<SCRIPT"u8)), ((htmlSig)slice<byte>((@string)"<IFRAME"u8)), ((htmlSig)slice<byte>((@string)"<H1"u8)), ((htmlSig)slice<byte>((@string)"<DIV"u8)), ((htmlSig)slice<byte>((@string)"<FONT"u8)), ((htmlSig)slice<byte>((@string)"<TABLE"u8)), ((htmlSig)slice<byte>((@string)"<A"u8)), ((htmlSig)slice<byte>((@string)"<STYLE"u8)), ((htmlSig)slice<byte>((@string)"<TITLE"u8)), ((htmlSig)slice<byte>((@string)"<B"u8)), ((htmlSig)slice<byte>((@string)"<BODY"u8)), ((htmlSig)slice<byte>((@string)"<BR"u8)), ((htmlSig)slice<byte>((@string)"<P"u8)), ((htmlSig)slice<byte>((@string)"<!--"u8)), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}))),
     pat: slice<byte>("<?xml"u8),
     skipWS: true,
@@ -137,7 +137,7 @@ partial interface sniffSig {
     mask: slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff}))),
     ct: "application/vnd.ms-fontobject"
 ))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x01\x00\x00"u8), "font/ttf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("OTTO"u8), "font/otf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("ttcf"u8), "font/collection"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOFF"u8), "font/woff"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOF2"u8), "font/woff2"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("PK\x03\x04"u8), "application/zip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x61\x73\x6D"u8), "application/wasm"))), new textSig()
-]); }
+]; }
 
 partial struct exactSig {
     internal slice<byte> sig;
@@ -170,7 +170,7 @@ internal static @string match(this ref maskedSig m, slice<byte> data, nint first
     if (builtin.len(data) < builtin.len(m.pat)) {
         return ""u8;
     }
-    foreach (var (i, pb) in m.pat) {
+    foreach (var (i, pb) in range(m.pat)) {
         var maskedData = (byte)(data[i] & m.mask[i]);
         if (maskedData != pb) {
             return ""u8;
@@ -186,7 +186,7 @@ internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS)
     if (builtin.len(data) < builtin.len(h) + 1) {
         return ""u8;
     }
-    foreach (var (i, b) in h) {
+    foreach (var (i, b) in range<byte>(h)) {
         var db = data[i];
         if ('A' <= b && b <= 'Z') {
             db &= (byte)(0xDF);
@@ -242,7 +242,7 @@ partial struct textSig {
 
 internal static @string match(this textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
-    foreach (var (_, b) in data.slice(firstNonWS)) {
+    foreach (var (_, b) in range(data.slice(firstNonWS))) {
         switch (ᐧ) {
         case {} when (b <= 0x08) || (b == 0x0B) || (0x0E <= b && b <= 0x1A) || (0x1C <= b && b <= 0x1F): {
             return ""u8;

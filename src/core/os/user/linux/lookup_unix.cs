@@ -61,7 +61,7 @@ internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, 
 
             // Check if we read the whole line (or enough columns)
             // already.
-            if (!isPrefix || bytes.Count(wholeLine, slice<byte>([(byte)':'])) >= readCols) {
+            if (!isPrefix || bytes.Count(wholeLine, [(byte)':']) >= readCols) {
                 break;
             }
         }

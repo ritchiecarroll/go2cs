@@ -47,7 +47,7 @@ partial class runtime_package
 
         // Collect running/runnable from per-P run queues.
         a.gCreated += Ꮡsched.of(schedt.ᏑgoroutinesCreated).Load();
-        foreach (var (_, Δp) in allp) {
+        foreach (var (_, Δp) in range(allp)) {
             if (Δp == nil || (~Δp).status == _Pdead) {
                 break;
             }

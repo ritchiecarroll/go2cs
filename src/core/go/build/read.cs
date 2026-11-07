@@ -32,7 +32,7 @@ partial struct importReader {
     internal tokenꓸPosition pos;
 }
 
-internal static slice<byte> bom = slice<byte>([0xef, 0xbb, 0xbf]);
+internal static slice<byte> bom = [0xef, 0xbb, 0xbf];
 
 internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     var b = bufio.NewReader(r);
@@ -331,12 +331,12 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     }
 
     var hasEmbed = false;
-    foreach (var (_, decl) in info.parsed.Decls) {
+    foreach (var (_, decl) in range(info.parsed.Decls)) {
         var (d, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
         if (!ok) {
             continue;
         }
-        foreach (var (_, dspec) in d.Specs) {
+        foreach (var (_, dspec) in range(d.Specs)) {
             var (spec, okΔ1) = dspec._<ж<ast.ImportSpec>>(ᐧ);
             if (!okΔ1) {
                 continue;
@@ -366,11 +366,11 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     }
 
     // Extract directives.
-    foreach (var (_, group) in info.parsed.Comments) {
+    foreach (var (_, group) in range(info.parsed.Comments)) {
         if (group.Pos() >= info.parsed.Package) {
             break;
         }
-        foreach (var (_, c) in group.List) {
+        foreach (var (_, c) in range(group.List)) {
             if (strings.HasPrefix(c.Text, "//go:")) {
                 info.directives = append(info.directives, new Directive(c.Text, info.fset.Position(c.Slash)));
             }
@@ -441,7 +441,7 @@ internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> fset, t
         return (default, err);
     }
     slice<fileEmbed> list = default;
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         list = append(list, new fileEmbed(arg.Arg, fset.Position(arg.Pos)));
     }
     return (list, default);

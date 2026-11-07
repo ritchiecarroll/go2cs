@@ -781,7 +781,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             // Build our final right-sized slice.
             finalSize += len(b);
             var final = appendꓸꓸꓸ(slice<byte>(default), makeꓸꓸꓸ<byte>(finalSize))[..0];
-            foreach (var (_, chunk) in chunks) {
+            foreach (var (_, chunk) in range(chunks)) {
                 final = appendꓸꓸꓸ(final, chunk);
             }
             final = appendꓸꓸꓸ(final, b);

@@ -1053,7 +1053,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     {
         var (p, ok) = dst._<ж<image.Paletted>>(ᐧ); if (ok) {
             palette = GoReflect.WithElemDims(new slice<array<int32>>(len(p.Palette), () => new(4)), 4);
-            foreach (var (i, col) in p.Palette) {
+            foreach (var (i, col) in range<color.Color>(p.Palette)) {
                 var (rΔ1, g, b, a) = col.RGBA();
                 palette[i][0] = (int32)rΔ1;
                 palette[i][1] = (int32)g;
@@ -1120,7 +1120,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 // TODO(nigeltao): consider smarter algorithms.
                 nint bestIndex = 0;
                 var bestSum = unchecked((uint32)(4294967295UL));
-                foreach (var (index, vᴛ1) in palette) {
+                foreach (var (index, vᴛ1) in range(palette)) {
                     var p = vᴛ1.Clone();
 
                     var sum = sqDiff(er, p[0]) + sqDiff(eg, p[1]) + sqDiff(eb, p[2]) + sqDiff(ea, p[3]);

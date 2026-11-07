@@ -146,7 +146,7 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
     var digits = x.abs.utoa(@base);
     if (ch == 'X') {
         // faster than bytes.ToUpper
-        foreach (var (i, d) in digits) {
+        foreach (var (i, d) in range(digits)) {
             if ('a' <= d && d <= 'z') {
                 digits[i] = (byte)('A' + (d - 'a'));
             }

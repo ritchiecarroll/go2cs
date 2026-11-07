@@ -44,8 +44,8 @@ internal static void Main() {
     nint different = 0;
 
     for (nint i = 0; i < 100; i++) {
-        foreach (var (j, a) in values) {
-            foreach (var (k, b) in values) {
+        foreach (var (j, a) in range(values)) {
+            foreach (var (k, b) in range(values)) {
                 if (AreEqual(lener(a), lener(b))) {
                     same++;
                 } else if (j != k) {

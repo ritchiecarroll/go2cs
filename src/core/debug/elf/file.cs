@@ -283,7 +283,7 @@ public static error Close(this ref File f) {
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
 public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
         }
@@ -646,7 +646,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (err != nil) {
         return (default, err);
     }
-    foreach (var (i, s) in f.Sections) {
+    foreach (var (i, s) in range(f.Sections)) {
         bool ok = default;
         (s.Name, ok) = getString(shstrtab, (nint)names[i]);
         if (!ok) {
@@ -804,7 +804,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 // Section returns a section with the given name, or nil if no such
 // section exists.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
         }
@@ -1411,7 +1411,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
             return (b, default);
         }
 
-        foreach (var (_, r) in Ꮡf.Value.Sections) {
+        foreach (var (_, r) in range(Ꮡf.Value.Sections)) {
             if (r.Type != SHT_RELA && r.Type != SHT_REL) {
                 continue;
             }
@@ -1433,7 +1433,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     // There are many DWARF sections, but these are the ones
     // the debug/dwarf package started with.
     map<@string, slice<byte>> dat = new map<@string, slice<byte>>{["abbrev"] = default, ["info"] = default, ["str"] = default, ["line"] = default, ["ranges"] = default};
-    foreach (var (i, s) in f.Sections) {
+    foreach (var (i, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -1454,7 +1454,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     }
 
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
-    foreach (var (i, s) in f.Sections) {
+    foreach (var (i, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -1513,7 +1513,7 @@ public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
         return (default, err);
     }
     if (hasVersions) {
-        foreach (var i in range(sym)) {
+        foreach (var i in range(len(sym))) {
             (sym[i].HasVersion, sym[i].VersionIndex, sym[i].Version, sym[i].Library) = f.gnuVersion(i);
         }
     }
@@ -1539,7 +1539,7 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
         return (default, errΔ1);
     }
     slice<ImportedSymbol> all = default;
-    foreach (var (i, s) in sym) {
+    foreach (var (i, s) in range(sym)) {
         if (ST_BIND(s.Info) == STB_GLOBAL && s.Section == SHN_UNDEF) {
             all = append(all, new ImportedSymbol(Name: s.Name));
             var symΔ1 = Ꮡ(all, len(all) - 1);
@@ -1836,15 +1836,15 @@ internal static (bool hasVersion, VersionIndex versionIndex, @string version, @s
         return (true, vi, "", "");
     }
 
-    foreach (var (_, v) in f.dynVerNeeds) {
-        foreach (var (_, n) in v.Needs) {
+    foreach (var (_, v) in range(f.dynVerNeeds)) {
+        foreach (var (_, n) in range(v.Needs)) {
             if (ndx == n.Index) {
                 return (true, vi, n.Dep, v.Name);
             }
         }
     }
 
-    foreach (var (_, v) in f.dynVers) {
+    foreach (var (_, v) in range(f.dynVers)) {
         if (ndx == v.Index) {
             return (true, vi, v.Name, "");
         }

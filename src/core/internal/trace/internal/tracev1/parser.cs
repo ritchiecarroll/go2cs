@@ -411,7 +411,7 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
     ref var frontier = ref heap<orderEventList>(out var Ꮡfrontier);
 
     var availableProcs = new slice<ж<proc>>(len(allProcs));
-    foreach (var i in range(allProcs)) {
+    foreach (var i in range(len(allProcs))) {
         availableProcs[i] = Ꮡ(allProcs, i);
     }
     for (;;) {
@@ -468,7 +468,7 @@ continue_pidLoop:;
 break_pidLoop:;
 
         if (len(frontier) == 0) {
-            foreach (var i in range(allProcs)) {
+            foreach (var i in range(len(allProcs))) {
                 if (!allProcs[i].done) {
                     return (new Events(), fmt.Errorf("no consistent ordering of events possible"u8));
                 }
@@ -1461,7 +1461,7 @@ public static @string String(this ref Event ev) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(ev.Type));
     var w = @new<bytes.Buffer>();
     fmt.Fprintf(new bytes_BufferжWriter(w), "%d %s p=%d g=%d stk=%d"u8, ev.Ts, (~desc).Name, ev.P, ev.G, ev.StkID);
-    foreach (var (i, a) in (~desc).Args) {
+    foreach (var (i, a) in range((~desc).Args)) {
         fmt.Fprintf(new bytes_BufferжWriter(w), " %s=%d"u8, a, ev.Args[i]);
     }
     return w.String();
@@ -1550,56 +1550,56 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
     public slice<@string> SArgs; // string arguments
 }
 [GoLazy] partial class lazyᴛEventDescriptions { public static readonly ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StaticBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
-    [EvNone] = new("None", 5, false, slice<@string>([]), default),
-    [EvBatch] = new("Batch", 5, false, slice<@string>(["p", "ticks"]), default),   // in 1.5 format it was {"p", "seq", "ticks"}
-    [EvFrequency] = new("Frequency", 5, false, slice<@string>(["freq"]), default), // in 1.5 format it was {"freq", "unused"}
-    [EvStack] = new("Stack", 5, false, slice<@string>(["id", "siz"]), default),
-    [EvGomaxprocs] = new("Gomaxprocs", 5, true, slice<@string>(["procs"]), default),
-    [EvProcStart] = new("ProcStart", 5, false, slice<@string>(["thread"]), default),
-    [EvProcStop] = new("ProcStop", 5, false, slice<@string>([]), default),
-    [EvGCStart] = new("GCStart", 5, true, slice<@string>(["seq"]), default), // in 1.5 format it was {}
-    [EvGCDone] = new("GCDone", 5, false, slice<@string>([]), default),
-    [EvSTWStart] = new("GCSTWStart", 5, false, slice<@string>(["kindid"]), slice<@string>(["kind"])), // <= 1.9, args was {} (implicitly {0})
-    [EvSTWDone] = new("GCSTWDone", 5, false, slice<@string>([]), default),
-    [EvGCSweepStart] = new("GCSweepStart", 5, true, slice<@string>([]), default),
-    [EvGCSweepDone] = new("GCSweepDone", 5, false, slice<@string>(["swept", "reclaimed"]), default), // before 1.9, format was {}
-    [EvGoCreate] = new("GoCreate", 5, true, slice<@string>(["g", "stack"]), default),
-    [EvGoStart] = new("GoStart", 5, false, slice<@string>(["g", "seq"]), default), // in 1.5 format it was {"g"}
-    [EvGoEnd] = new("GoEnd", 5, false, slice<@string>([]), default),
-    [EvGoStop] = new("GoStop", 5, true, slice<@string>([]), default),
-    [EvGoSched] = new("GoSched", 5, true, slice<@string>([]), default),
-    [EvGoPreempt] = new("GoPreempt", 5, true, slice<@string>([]), default),
-    [EvGoSleep] = new("GoSleep", 5, true, slice<@string>([]), default),
-    [EvGoBlock] = new("GoBlock", 5, true, slice<@string>([]), default),
-    [EvGoUnblock] = new("GoUnblock", 5, true, slice<@string>(["g", "seq"]), default), // in 1.5 format it was {"g"}
-    [EvGoBlockSend] = new("GoBlockSend", 5, true, slice<@string>([]), default),
-    [EvGoBlockRecv] = new("GoBlockRecv", 5, true, slice<@string>([]), default),
-    [EvGoBlockSelect] = new("GoBlockSelect", 5, true, slice<@string>([]), default),
-    [EvGoBlockSync] = new("GoBlockSync", 5, true, slice<@string>([]), default),
-    [EvGoBlockCond] = new("GoBlockCond", 5, true, slice<@string>([]), default),
-    [EvGoBlockNet] = new("GoBlockNet", 5, true, slice<@string>([]), default),
-    [EvGoSysCall] = new("GoSysCall", 5, true, slice<@string>([]), default),
-    [EvGoSysExit] = new("GoSysExit", 5, false, slice<@string>(["g", "seq", "ts"]), default),
-    [EvGoSysBlock] = new("GoSysBlock", 5, false, slice<@string>([]), default),
-    [EvGoWaiting] = new("GoWaiting", 5, false, slice<@string>(["g"]), default),
-    [EvGoInSyscall] = new("GoInSyscall", 5, false, slice<@string>(["g"]), default),
-    [EvHeapAlloc] = new("HeapAlloc", 5, false, slice<@string>(["mem"]), default),
-    [EvHeapGoal] = new("HeapGoal", 5, false, slice<@string>(["mem"]), default),
-    [EvTimerGoroutine] = new("TimerGoroutine", 5, false, slice<@string>(["g"]), default), // in 1.5 format it was {"g", "unused"}
-    [EvFutileWakeup] = new("FutileWakeup", 5, false, slice<@string>([]), default),
-    [EvString] = new("String", 7, false, slice<@string>([]), default),
-    [EvGoStartLocal] = new("GoStartLocal", 7, false, slice<@string>(["g"]), default),
-    [EvGoUnblockLocal] = new("GoUnblockLocal", 7, true, slice<@string>(["g"]), default),
-    [EvGoSysExitLocal] = new("GoSysExitLocal", 7, false, slice<@string>(["g", "ts"]), default),
-    [EvGoStartLabel] = new("GoStartLabel", 8, false, slice<@string>(["g", "seq", "labelid"]), slice<@string>(["label"])),
-    [EvGoBlockGC] = new("GoBlockGC", 8, true, slice<@string>([]), default),
-    [EvGCMarkAssistStart] = new("GCMarkAssistStart", 9, true, slice<@string>([]), default),
-    [EvGCMarkAssistDone] = new("GCMarkAssistDone", 9, false, slice<@string>([]), default),
-    [EvUserTaskCreate] = new("UserTaskCreate", 11, true, slice<@string>(["taskid", "pid", "typeid"]), slice<@string>(["name"])),
-    [EvUserTaskEnd] = new("UserTaskEnd", 11, true, slice<@string>(["taskid"]), default),
-    [EvUserRegion] = new("UserRegion", 11, true, slice<@string>(["taskid", "mode", "typeid"]), slice<@string>(["name"])),
-    [EvUserLog] = new("UserLog", 11, true, slice<@string>(["id", "keyid"]), slice<@string>(["category", "message"])),
-    [EvCPUSample] = new("CPUSample", 19, true, slice<@string>(["ts", "p", "g"]), default)
+    [EvNone] = new("None", 5, false, [], default),
+    [EvBatch] = new("Batch", 5, false, ["p", "ticks"], default),   // in 1.5 format it was {"p", "seq", "ticks"}
+    [EvFrequency] = new("Frequency", 5, false, ["freq"], default), // in 1.5 format it was {"freq", "unused"}
+    [EvStack] = new("Stack", 5, false, ["id", "siz"], default),
+    [EvGomaxprocs] = new("Gomaxprocs", 5, true, ["procs"], default),
+    [EvProcStart] = new("ProcStart", 5, false, ["thread"], default),
+    [EvProcStop] = new("ProcStop", 5, false, [], default),
+    [EvGCStart] = new("GCStart", 5, true, ["seq"], default), // in 1.5 format it was {}
+    [EvGCDone] = new("GCDone", 5, false, [], default),
+    [EvSTWStart] = new("GCSTWStart", 5, false, ["kindid"], ["kind"]), // <= 1.9, args was {} (implicitly {0})
+    [EvSTWDone] = new("GCSTWDone", 5, false, [], default),
+    [EvGCSweepStart] = new("GCSweepStart", 5, true, [], default),
+    [EvGCSweepDone] = new("GCSweepDone", 5, false, ["swept", "reclaimed"], default), // before 1.9, format was {}
+    [EvGoCreate] = new("GoCreate", 5, true, ["g", "stack"], default),
+    [EvGoStart] = new("GoStart", 5, false, ["g", "seq"], default), // in 1.5 format it was {"g"}
+    [EvGoEnd] = new("GoEnd", 5, false, [], default),
+    [EvGoStop] = new("GoStop", 5, true, [], default),
+    [EvGoSched] = new("GoSched", 5, true, [], default),
+    [EvGoPreempt] = new("GoPreempt", 5, true, [], default),
+    [EvGoSleep] = new("GoSleep", 5, true, [], default),
+    [EvGoBlock] = new("GoBlock", 5, true, [], default),
+    [EvGoUnblock] = new("GoUnblock", 5, true, ["g", "seq"], default), // in 1.5 format it was {"g"}
+    [EvGoBlockSend] = new("GoBlockSend", 5, true, [], default),
+    [EvGoBlockRecv] = new("GoBlockRecv", 5, true, [], default),
+    [EvGoBlockSelect] = new("GoBlockSelect", 5, true, [], default),
+    [EvGoBlockSync] = new("GoBlockSync", 5, true, [], default),
+    [EvGoBlockCond] = new("GoBlockCond", 5, true, [], default),
+    [EvGoBlockNet] = new("GoBlockNet", 5, true, [], default),
+    [EvGoSysCall] = new("GoSysCall", 5, true, [], default),
+    [EvGoSysExit] = new("GoSysExit", 5, false, ["g", "seq", "ts"], default),
+    [EvGoSysBlock] = new("GoSysBlock", 5, false, [], default),
+    [EvGoWaiting] = new("GoWaiting", 5, false, ["g"], default),
+    [EvGoInSyscall] = new("GoInSyscall", 5, false, ["g"], default),
+    [EvHeapAlloc] = new("HeapAlloc", 5, false, ["mem"], default),
+    [EvHeapGoal] = new("HeapGoal", 5, false, ["mem"], default),
+    [EvTimerGoroutine] = new("TimerGoroutine", 5, false, ["g"], default), // in 1.5 format it was {"g", "unused"}
+    [EvFutileWakeup] = new("FutileWakeup", 5, false, [], default),
+    [EvString] = new("String", 7, false, [], default),
+    [EvGoStartLocal] = new("GoStartLocal", 7, false, ["g"], default),
+    [EvGoUnblockLocal] = new("GoUnblockLocal", 7, true, ["g"], default),
+    [EvGoSysExitLocal] = new("GoSysExitLocal", 7, false, ["g", "ts"], default),
+    [EvGoStartLabel] = new("GoStartLabel", 8, false, ["g", "seq", "labelid"], ["label"]),
+    [EvGoBlockGC] = new("GoBlockGC", 8, true, [], default),
+    [EvGCMarkAssistStart] = new("GCMarkAssistStart", 9, true, [], default),
+    [EvGCMarkAssistDone] = new("GCMarkAssistDone", 9, false, [], default),
+    [EvUserTaskCreate] = new("UserTaskCreate", 11, true, ["taskid", "pid", "typeid"], ["name"]),
+    [EvUserTaskEnd] = new("UserTaskEnd", 11, true, ["taskid"], default),
+    [EvUserRegion] = new("UserRegion", 11, true, ["taskid", "mode", "typeid"], ["name"]),
+    [EvUserLog] = new("UserLog", 11, true, ["id", "keyid"], ["category", "message"]),
+    [EvCPUSample] = new("CPUSample", 19, true, ["ts", "p", "g"], default)
 }.array(256)); }
 public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((StaticBox<array<EventDescriptionsᴛ1>>)ᏑEventDescriptions).ValueSlot;
 

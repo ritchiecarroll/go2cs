@@ -43,7 +43,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
         error err = default;
         while (len(v) > 0) {
             iovecs = iovecs[..0];
-            foreach (var (_, chunk) in v) {
+            foreach (var (_, chunk) in range(v)) {
                 if (len(chunk) == 0) {
                     continue;
                 }

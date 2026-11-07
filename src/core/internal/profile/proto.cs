@@ -69,7 +69,7 @@ internal static void encodeUint64s(ref buffer b, nint tag, slice<uint64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
-        foreach (var (_, u) in x) {
+        foreach (var (_, u) in range(x)) {
             encodeVarint(ref b, u);
         }
         nint n2 = len(b.data);
@@ -80,7 +80,7 @@ internal static void encodeUint64s(ref buffer b, nint tag, slice<uint64> x) {
         copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
-    foreach (var (_, u) in x) {
+    foreach (var (_, u) in range(x)) {
         encodeUint64(ref b, tag, u);
     }
 }
@@ -108,7 +108,7 @@ internal static void encodeInt64s(ref buffer b, nint tag, slice<int64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
-        foreach (var (_, u) in x) {
+        foreach (var (_, u) in range(x)) {
             encodeVarint(ref b, (uint64)u);
         }
         nint n2 = len(b.data);
@@ -119,7 +119,7 @@ internal static void encodeInt64s(ref buffer b, nint tag, slice<int64> x) {
         copy(b.data.slice(n1), b.tmp.slice(0, n3 - n2));
         return;
     }
-    foreach (var (_, u) in x) {
+    foreach (var (_, u) in range(x)) {
         encodeInt64(ref b, tag, u);
     }
 }
@@ -130,7 +130,7 @@ internal static void encodeString(ref buffer b, nint tag, @string x) {
 }
 
 internal static void encodeStrings(ref buffer b, nint tag, slice<@string> x) {
-    foreach (var (_, s) in x) {
+    foreach (var (_, s) in range(x)) {
         encodeString(ref b, tag, s);
     }
 }

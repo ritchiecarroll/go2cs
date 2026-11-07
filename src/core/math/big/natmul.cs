@@ -177,7 +177,7 @@ internal static Δnat mulAddWW(this Δnat z, Δnat x, Word y, Word r) {
 // The (non-normalized) result is placed in z[0 : len(x) + len(y)].
 internal static void basicMul(Δnat z, Δnat x, Δnat y) {
     clear(z.slice(0, len(x) + len(y))); // initialize z
-    foreach (var (i, d) in y) {
+    foreach (var (i, d) in range<Word>(y)) {
         if (d != 0) {
             z[len(x) + i] = addMulVVWW(z.slice(i, i + len(x)), z.slice(i, i + len(x)), x, d, 0);
         }

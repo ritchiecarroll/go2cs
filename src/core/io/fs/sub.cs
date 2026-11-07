@@ -162,7 +162,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
 
     @string full = f.dir + "/"u8 + pattern;
     var (list, err) = Glob(f.fsys, full);
-    foreach (var (i, name) in list) {
+    foreach (var (i, name) in range(list)) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
             return (default, errors.New("invalid result from inner fsys Glob: "u8 + nameΔ1 + " not in "u8 + f.dir)); // can't use fmt in this package

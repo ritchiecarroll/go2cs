@@ -59,7 +59,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a.ΔRangeSnapshot())
+            foreach (var (i, v) in range(a.ΔRangeSnapshot()))
                 total += i + v;
         }
 
@@ -70,7 +70,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a.ΔRangeSnapshot())
+            foreach (var (i, v) in range(a.ΔRangeSnapshot()))
                 total += i + v;
         }
 
@@ -93,7 +93,7 @@ public class ArrayRangeAllocationTests
         // otherwise the tiering/JIT allocations land in the measured delta and read as a regression.
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a)
+            foreach (var (i, v) in range(a))
                 total += i + v;
         }
 
@@ -103,7 +103,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a)
+            foreach (var (i, v) in range(a))
                 total += i + v;
         }
 
@@ -114,8 +114,8 @@ public class ArrayRangeAllocationTests
     }
 
     /// <summary>
-    /// The CONTROL: the same loop driven through <see cref="IEnumerable{T}"/>, which boxes the
-    /// enumerator exactly as the old iterator method did. It must still allocate — a zero here would
+    /// The CONTROL: the same loop driven through <see cref="IArray{T}"/>, which boxes the array once per
+    /// loop, as an interface-typed enumerator did before. It must still allocate — a zero here would
     /// mean the measurement window, not the enumerator, is what changed.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -125,7 +125,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach ((nint i, byte v) in (IArray<byte>)a)
+            foreach ((nint i, byte v) in range((IArray<byte>)a))
                 total += i + v;
         }
 
@@ -135,7 +135,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach ((nint i, byte v) in (IArray<byte>)a)
+            foreach ((nint i, byte v) in range((IArray<byte>)a))
                 total += i + v;
         }
 
@@ -219,7 +219,7 @@ public class ArrayRangeAllocationTests
 
         List<byte> observed = [];
 
-        foreach (var (i, v) in a)
+        foreach (var (i, v) in range(a))
         {
             if (i == 0)
                 a[1] = 91;
@@ -237,7 +237,7 @@ public class ArrayRangeAllocationTests
 
         List<byte> viaClone = [];
 
-        foreach (var (i, v) in b.Clone())
+        foreach (var (i, v) in range(b.Clone()))
         {
             if (i == 0)
                 b[1] = 91;
@@ -292,7 +292,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in a.Clone())
+            foreach (var (i, v) in range(a.Clone()))
                 total += i + v;
         }
 
@@ -301,7 +301,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in a.Clone())
+            foreach (var (i, v) in range(a.Clone()))
                 total += i + v;
         }
 
@@ -397,14 +397,14 @@ public class ArrayRangeAllocationTests
     [TestMethod]
     public void EnumeratorStillSatisfiesTheInterfaceContract()
     {
-        // array<T> is IArray<T>, whose own GetEnumerator() yields (nint, T). The pattern path must not
-        // have cost the interface path: `foreach` over an IArray<T>-typed local or a constrained type
-        // parameter still enumerates the same pairs (boxing, as it always did). LINQ sees the values.
+        // array<T> is IArray<T>: range over an IArray<T>-typed local or a constrained type parameter
+        // enumerates the same pairs through its length and indexer (boxing a struct once). LINQ and
+        // foreach see the values.
         array<byte> a = new(new byte[] { 10, 20, 30 });
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IArray<byte>)a)
+        foreach ((nint i, byte v) in range((IArray<byte>)a))
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(

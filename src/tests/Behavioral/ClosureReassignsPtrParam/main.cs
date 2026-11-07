@@ -14,7 +14,7 @@ internal static nint accumulate(ж<nint> Ꮡcounter, slice<nint> vals) {
         Ꮡcounter.Value += v;
     }
 
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         add(v);
     }
 
@@ -23,7 +23,7 @@ internal static nint accumulate(ж<nint> Ꮡcounter, slice<nint> vals) {
 
 internal static void Main() {
     ref var n = ref heap<nint>(0, out var Ꮡn);
-    fmt.Println(accumulate(Ꮡn, slice<nint>([1, 2, 3, 4])));
+    fmt.Println(accumulate(Ꮡn, [1, 2, 3, 4]));
     fmt.Println(n);
 }
 

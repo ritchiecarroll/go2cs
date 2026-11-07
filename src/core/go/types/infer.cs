@@ -78,7 +78,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
 
         // If we have invalid (ordinary) arguments, an error was reported before.
         // Avoid additional inference errors and exit early (go.dev/issue/60434).
-        foreach (var (_, arg) in args) {
+        foreach (var (_, arg) in range(args)) {
             if (arg.mode == invalid) {
                 inferred = default; goto ᒐdone;
             }
@@ -140,7 +140,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 // If none of them could be inferred, don't try
                 // to provide the inferred type in the error msg.
                 var allFailed = true;
-                foreach (var (_, targΔ1) in targsΔ1) {
+                foreach (var (_, targΔ1) in range(targsΔ1)) {
                     if (targΔ1 != nil) {
                         allFailed = false;
                         break;
@@ -180,7 +180,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             u.tracef("-- function arguments : %s", args);
         }
 
-        foreach (var (i, arg) in args) {
+        foreach (var (i, arg) in range(args)) {
             if (arg.mode == invalid) {
                 // An error was reported earlier. Ignore this arg
                 // and continue, we may still be able to infer all
@@ -249,7 +249,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 u.tracef("-- iteration %d", i);
             }
 
-            foreach (var (_, tpar) in tparams) {
+            foreach (var (_, tpar) in range(tparams)) {
                 var tx = u.at(tpar);
                 var (core, single) = coreTerm(tpar);
                 if (traceInference) {
@@ -352,7 +352,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // maximum untyped type for each of those parameters, if possible.
         map<ж<TypeParam>, ΔType> maxUntyped = default; // lazily allocated (we may not need it)
         untyped = move2heap(untypedᴷ, untyped);
-        foreach (var (_, index) in untyped) {
+        foreach (var (_, index) in range(untyped)) {
             var tpar = @params.At(index).typ._<ж<TypeParam>>(); // is type parameter (no alias) by construction of untyped
             if (u.at(tpar) == nil) {
                 var arg = args[index]; // arg corresponding to tpar
@@ -392,7 +392,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // until nothing changes anymore.
         inferred = u.inferred(tparams);
         if (debug) {
-            foreach (var (i, targ) in targs) {
+            foreach (var (i, targ) in range(targs)) {
                 assert(targ == nil || AreEqual(inferred[i], targ));
             }
         }
@@ -426,7 +426,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // We know that nil type entries and entries corresponding to provided (non-nil)
         // type arguments are clean, so exclude them from the start.
         slice<nint> dirty = default;
-        foreach (var (i, typ) in inferred) {
+        foreach (var (i, typ) in range(inferred)) {
             if (typ != nil && (i >= len(targs) || targs[i] == nil)) {
                 dirty = append(dirtyᴷ, dirty, i);
             }
@@ -441,7 +441,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             // needed. Optimization.
             var smap = makeSubstMap(tparams, inferred);
             nint nΔ1 = 0;
-            foreach (var (_, index) in dirty) {
+            foreach (var (_, index) in range(dirty)) {
                 var t0 = inferred[index];
                 var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
                     // t0 was simplified to t1.
@@ -471,7 +471,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // e.g., a constraint with core type *P may match a type parameter Q but
         // we don't have any type arguments to fill in for *P or Q (go.dev/issue/45548).
         // Don't let such inferences escape; instead treat them as unresolved.
-        foreach (var (i, typ) in inferred) {
+        foreach (var (i, typ) in range(inferred)) {
             if (typ == nil || isParameterized(tparams, typ)) {
                 var obj = tparams[i].obj;
                 err.addf(posn, "cannot infer %s (declared at %v)", obj.name, obj.pos);
@@ -526,14 +526,14 @@ internal static (slice<ж<TypeParam>>, ΔType) renameTParams(this ж<Checker> �
     }
 
     var tparams2 = new slice<ж<TypeParam>>(len(tparams));
-    foreach (var (i, tparam) in tparams) {
+    foreach (var (i, tparam) in range(tparams)) {
         var tname = NewTypeName(tparam.Obj().of(TypeName.Ꮡobject).Pos(), tparam.Obj().of(TypeName.Ꮡobject).Pkg(), tparam.Obj().of(TypeName.Ꮡobject).Name(), default);
         tparams2[i] = NewTypeParam(tname, default);
         tparams2[i].index = tparam.index; // == i
     }
 
     var renameMap = makeRenameMap(tparams, tparams2);
-    foreach (var (i, tparam) in tparams) {
+    foreach (var (i, tparam) in range(tparams)) {
         tparams2[i].bound = Ꮡcheck.subst(pos, tparam.bound, renameMap, nil, check.context());
     }
 
@@ -562,7 +562,7 @@ internal static @string typeParamsString(slice<ж<TypeParam>> list) {
 
     // general case (n > 2)
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (i, tname) in list.slice(0, n - 1)) {
+    foreach (var (i, tname) in range(list.slice(0, n - 1))) {
         if (i > 0) {
             Ꮡbuf.WriteString(", ");
         }
@@ -644,7 +644,7 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
         }
         case ж<Interface> t: {
             var tset = t.typeSet();
-            foreach (var (_, m) in tset.methods) {
+            foreach (var (_, m) in range(tset.methods)) {
                 if (Ꮡw.isParameterized(m.typ)) {
                     res = true; goto ᒐdone;
                 }
@@ -658,7 +658,7 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
             res = Ꮡw.isParameterized(t.elem); goto ᒐdone;
         }
         case ж<Named> t: {
-            foreach (var (_, tΔ2) in t.TypeArgs().list()) {
+            foreach (var (_, tΔ2) in range(t.TypeArgs().list())) {
                 if (Ꮡw.isParameterized(tΔ2)) {
                     res = true; goto ᒐdone;
                 }
@@ -682,7 +682,7 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
 }
 
 internal static bool varList(this ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
-    foreach (var (_, v) in list) {
+    foreach (var (_, v) in range(list)) {
         if (Ꮡw.isParameterized(v.typ)) {
             return true;
         }
@@ -738,7 +738,7 @@ internal static (ж<Δterm>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
 // found a single cycle.
 internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> inferred) {
     ref var w = ref heap<cycleFinder>(new cycleFinder(tparams, inferred, new map<ΔType, bool>()), out var Ꮡw);
-    foreach (var (_, t) in tparams) {
+    foreach (var (_, t) in range(tparams)) {
         Ꮡw.typ(new TypeParamжΔType(t)); // t != nil
     }
 }
@@ -809,16 +809,16 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
             break;
         }
         case ж<Union> t: {
-            foreach (var (_, tΔ1) in t.terms) {
+            foreach (var (_, tΔ1) in range(t.terms)) {
                 Ꮡw.typ((~tΔ1).typ);
             }
             break;
         }
         case ж<Interface> t: {
-            foreach (var (_, m) in t.methods) {
+            foreach (var (_, m) in range(t.methods)) {
                 Ꮡw.typ(m.typ);
             }
-            foreach (var (_, tΔ2) in t.embeddeds) {
+            foreach (var (_, tΔ2) in range(t.embeddeds)) {
                 Ꮡw.typ(tΔ2);
             }
             break;
@@ -833,7 +833,7 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
             break;
         }
         case ж<Named> t: {
-            foreach (var (_, tpar) in t.TypeArgs().list()) {
+            foreach (var (_, tpar) in range(t.TypeArgs().list())) {
                 Ꮡw.typ(tpar);
             }
             break;
@@ -855,7 +855,7 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
 }
 
 internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
-    foreach (var (_, v) in list) {
+    foreach (var (_, v) in range(list)) {
         Ꮡw.typ(v.typ);
     }
 }

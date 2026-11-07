@@ -57,7 +57,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
     }
 
     var parts = strings.Split(name, (@string)sep);
-    foreach (var i in range(parts)) {
+    foreach (var i in range(builtin.len(parts))) {
         if (parts[i] == "") {
             continue;
         }
@@ -203,12 +203,12 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
     var h = w.Header();
 
     var nonDefault = false;
-    foreach (var (_, k) in slice<@string>([
+    foreach (var (_, k) in range(slice<@string>([
         "Cache-Control",
         "Content-Encoding",
         "Etag",
         "Last-Modified"
-    ])) {
+    ]))) {
         if (!h.has(k)) {
             continue;
         }
@@ -416,7 +416,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             var pwʗ1 = pw;
             var rangesʗ1 = ranges;
             goǃ(() => {
-                foreach (var (_, vᴛ1) in rangesʗ1) {
+                foreach (var (_, vᴛ1) in range(rangesʗ1)) {
                     ref var ra = ref heap(new httpRange(), out var Ꮡra);
                     ra = vᴛ1;
 
@@ -1049,7 +1049,7 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
     slice<fs.FileInfo> list = default;
     for (;;) {
         var (dirs, err) = d.ReadDir(count - builtin.len(list));
-        foreach (var (_, dir) in dirs) {
+        foreach (var (_, dir) in range(dirs)) {
             var (info, errΔ1) = dir.Info();
             if (errΔ1 != nil) {
                 // Pretend it doesn't exist, like (*os.File).Readdir does.
@@ -1127,7 +1127,7 @@ internal static @string contentRange(this httpRange r, int64 size) {
 internal static textproto.MIMEHeader mimeHeader(this httpRange r, @string contentType, int64 size) {
     return new textproto.MIMEHeader(new map<@string, slice<@string>>{
         ["Content-Range"] = slice<@string>([r.contentRange(size)]),
-        ["Content-Type"] = slice<@string>([contentType])
+        ["Content-Type"] = [contentType]
     });
 }
 
@@ -1258,7 +1258,7 @@ internal static int64 /*encSize*/ rangesMIMESize(slice<httpRange> ranges, @strin
 
     ref var w = ref heap(new countingWriter(), out var Ꮡw);
     var mw = multipart.NewWriter(new countingWriterжWriter(Ꮡw));
-    foreach (var (_, ra) in ranges) {
+    foreach (var (_, ra) in range(ranges)) {
         mw.CreatePart(ra.mimeHeader(contentType, contentSize));
         encSize += ra.length;
     }
@@ -1270,7 +1270,7 @@ internal static int64 /*encSize*/ rangesMIMESize(slice<httpRange> ranges, @strin
 internal static int64 /*size*/ sumRangesSize(slice<httpRange> ranges) {
     int64 size = default;
 
-    foreach (var (_, ra) in ranges) {
+    foreach (var (_, ra) in range(ranges)) {
         size += ra.length;
     }
     return size;

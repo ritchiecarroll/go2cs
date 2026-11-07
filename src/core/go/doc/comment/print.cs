@@ -161,7 +161,7 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 
     var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
-    foreach (var (i, x) in d.Content) {
+    foreach (var (i, x) in range(d.Content)) {
         if (i > 0 && blankBefore(x)) {
             @out.WriteString("\n");
         }
@@ -176,7 +176,7 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     for (nint i = 0; i < 2; i++) {
         var used = i == 0;
         var first = true;
-        foreach (var (_, def) in d.Links) {
+        foreach (var (_, def) in range(d.Links)) {
             if (def.Used == used) {
                 if (first) {
                     @out.WriteString("\n");
@@ -243,7 +243,7 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in xΔ1.Items) {
+        foreach (var (i, item) in range(xΔ1.Items)) {
             if (i > 0 && loose) {
                 @out.WriteString("\n");
             }
@@ -254,7 +254,7 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
                 @out.WriteString(item.Number);
                 @out.WriteString(". ");
             }
-            foreach (var (iΔ1, blk) in item.Content) {
+            foreach (var (iΔ1, blk) in range(item.Content)) {
                 @string fourSpace = fourSpaceᶜ1;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
@@ -271,7 +271,7 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
 internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    foreach (var (_, t) in x) {
+    foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
             p.indent(Ꮡout, indent, (@string)tΔ1);

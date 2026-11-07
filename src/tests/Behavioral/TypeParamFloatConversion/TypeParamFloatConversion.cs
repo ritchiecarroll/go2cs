@@ -17,7 +17,7 @@ internal static @string csv<T>(@string name, slice<T> values)
     where T : /* int | float64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     @string @out = name;
-    foreach (var (_, v) in values) {
+    foreach (var (_, v) in range(values)) {
         if (Δmath.IsInf(ConvertToFloat64<T>(v), +1)) {
             @out += ",inf"u8;
         } else {

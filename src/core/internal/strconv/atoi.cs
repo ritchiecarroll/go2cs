@@ -136,7 +136,7 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
 
     var underscores = false;
     uint64 n = default;
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         byte d = default;
         switch (ᐧ) {
         case {} when c == (byte)'_' && base0: {
@@ -277,7 +277,7 @@ public static (nint, error) Atoi(@string s) {
         }
 
         nint n = 0;
-        foreach (var (_, vᴛ1) in slice<byte>(s)) {
+        foreach (var (_, vᴛ1) in range(slice<byte>(s))) {
             var ch = vᴛ1;
 
             ch -= (byte)'0';

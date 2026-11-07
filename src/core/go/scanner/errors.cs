@@ -78,7 +78,7 @@ public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
     sort.Sort(new ErrorListжInterface(Ꮡp));
     tokenꓸPosition last = default; // initial last.Line is != any legal error line
     nint i = 0;
-    foreach (var (_, e) in p) {
+    foreach (var (_, e) in range<ж<ΔError>>(p)) {
         if (e.Pos.Filename != last.Filename || e.Pos.Line != last.Line) {
             last = e.Pos;
             (p)[i] = e;
@@ -118,7 +118,7 @@ public static error Err(this ErrorList p) {
 // it prints the err string.
 public static void PrintError(io.Writer w, error err) {
     var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
-        foreach (var (_, e) in list) {
+        foreach (var (_, e) in range<ж<ΔError>>(list)) {
             fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
         }
     } else if (err != nil) {

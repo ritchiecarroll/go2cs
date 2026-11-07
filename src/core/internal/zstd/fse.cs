@@ -177,7 +177,7 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
 
     array<uint16> next = new(256);
 
-    foreach (var (i, n) in norm) {
+    foreach (var (i, n) in range(norm)) {
         if (n >= 0) {
             next[(uint8)i] = (uint16)n;
         } else {
@@ -190,7 +190,7 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
     nint pos = 0;
     nint step = (tableSize >> 1) + (tableSize >> 3) + 3;
     nint mask = tableSize - 1;
-    foreach (var (i, n) in norm) {
+    foreach (var (i, n) in range(norm)) {
         for (nint j = 0; j < (nint)n; j++) {
             table[pos].sym = (uint8)i;
             pos = (pos + step) & mask;
@@ -240,7 +240,7 @@ partial struct fseBaselineEntry {
 // state and the number of bits is zero. RFC 3.1.1.3.2.1.1.
 internal static UntypedInt literalLengthOffset => 16;
 
-[GoLazy] partial class lazyᴛliteralLengthBase { internal static slice<uint32> literalLengthBase = slice<uint32>([
+[GoLazy] partial class lazyᴛliteralLengthBase { internal static slice<uint32> literalLengthBase = [
     (uint32)(16 | (1 << 24)),
     (uint32)(18 | (1 << 24)),
     (uint32)(20 | (1 << 24)),
@@ -261,7 +261,7 @@ internal static UntypedInt literalLengthOffset => 16;
     (uint32)(16384 | (14 << 24)),
     (uint32)(32768 | (15 << 24)),
     (uint32)(65536 | (16 << 24))
-]); }
+]; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fseBaselineSymbolˢ => ref fseBaselineSymbolˢᵇ;
@@ -269,7 +269,7 @@ private static readonly @string fseBaselineSymbolˢᵇ = "FSE baseline symbol ov
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
 internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
-    foreach (var (i, e) in fseTable) {
+    foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
             @base: e.@base
@@ -297,7 +297,7 @@ private static readonly @string fseOffsetSymbolOverflowˢᵇ = "FSE offset symbo
 
 // makeOffsetBaselineFSE converts the offset length fseTable to baselineTable.
 internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
-    foreach (var (i, e) in fseTable) {
+    foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
             @base: e.@base
@@ -339,7 +339,7 @@ internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<f
 // the number of bits is zero. RFC 3.1.1.3.2.1.1.
 internal static UntypedInt matchLengthOffset => 32;
 
-[GoLazy] partial class lazyᴛmatchLengthBase { internal static slice<uint32> matchLengthBase = slice<uint32>([
+[GoLazy] partial class lazyᴛmatchLengthBase { internal static slice<uint32> matchLengthBase = [
     (uint32)(35 | (1 << 24)),
     (uint32)(37 | (1 << 24)),
     (uint32)(39 | (1 << 24)),
@@ -361,11 +361,11 @@ internal static UntypedInt matchLengthOffset => 32;
     (uint32)(16387 | (14 << 24)),
     (uint32)(32771 | (15 << 24)),
     (uint32)(65539 | (16 << 24))
-]); }
+]; }
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
 internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
-    foreach (var (i, e) in fseTable) {
+    foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
             @base: e.@base

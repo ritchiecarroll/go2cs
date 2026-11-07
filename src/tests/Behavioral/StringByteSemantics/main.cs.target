@@ -17,7 +17,7 @@ internal static void Main() {
 
     var runes = slice<rune>(bad);
     fmt.Println(len(runes));
-    foreach (var i in range(runes)) {
+    foreach (var i in range(len(runes))) {
         fmt.Println(i, (int32)runes[i]);
     }
 

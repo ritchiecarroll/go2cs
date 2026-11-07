@@ -93,7 +93,7 @@ public static (slice<ж<ΔCookie>>, error) ParseCookie(@string line) {
         return (default, errBlankCookie);
     }
     var cookies = new slice<ж<ΔCookie>>(0, builtin.len(parts));
-    foreach (var (_, vᴛ1) in parts) {
+    foreach (var (_, vᴛ1) in range(parts)) {
         var s = vᴛ1;
 
         s = textproto.TrimString(s);
@@ -264,16 +264,16 @@ private static readonly @string setCookieˢᵇ = "Set-Cookie"u8;
 internal static slice<ж<ΔCookie>> readSetCookies(ΔHeader h) {
     nint cookieCount = builtin.len(h[setCookieˢ]);
     if (cookieCount == 0) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
     // Cookie limit was unfortunately introduced at a later point in time.
     // As such, we can only fail by returning an empty slice rather than
     // explicit error.
     if (!cookieNumWithinMax(cookieCount)) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
     var cookies = new slice<ж<ΔCookie>>(0, cookieCount);
-    foreach (var (_, line) in h[setCookieˢ]) {
+    foreach (var (_, line) in range(h[setCookieˢ])) {
         var (cookie, err) = ParseSetCookie(line); if (err == nil) {
             cookies = append(cookies, cookie);
         }
@@ -454,22 +454,22 @@ public static error Valid(this ж<ΔCookie> Ꮡc) {
 internal static slice<ж<ΔCookie>> readCookies(ΔHeader h, @string filter) {
     var lines = h[cookieˢ];
     if (builtin.len(lines) == 0) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
 
     // Cookie limit was unfortunately introduced at a later point in time.
     // As such, we can only fail by returning an empty slice rather than
     // explicit error.
     nint cookieCount = 0;
-    foreach (var (_, line) in lines) {
+    foreach (var (_, line) in range(lines)) {
         cookieCount += strings.Count(line, ";") + 1;
     }
     if (!cookieNumWithinMax(cookieCount)) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
 
     var cookies = new slice<ж<ΔCookie>>(0, builtin.len(lines) + strings.Count(lines[0], ";"));
-    foreach (var (_, vᴛ1) in lines) {
+    foreach (var (_, vᴛ1) in range(lines)) {
         var line = vᴛ1;
 
         line = textproto.TrimString(line);

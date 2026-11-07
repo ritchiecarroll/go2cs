@@ -48,7 +48,7 @@ internal static void Main() {
 
     new By((ж<item> a, ж<item> b) => a.rank < b.rank).Sort(items);
 
-    foreach (var (_, it) in items) {
+    foreach (var (_, it) in range(items)) {
         fmt.Println(it.name, it.rank);
     }
 

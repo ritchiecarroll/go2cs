@@ -62,7 +62,7 @@ public static @string String(this ref @decimal a) {
 }
 
 internal static nint digitZero(slice<byte> dst) {
-    foreach (var i in range(dst)) {
+    foreach (var i in range(len(dst))) {
         dst[i] = (byte)'0';
     }
     return len(dst);
@@ -179,7 +179,7 @@ partial struct leftCheat {
     internal @string cutoff; // minus one digit if original < a.
 }
 
-[GoLazy] partial class lazyᴛleftcheats { internal static slice<leftCheat> leftcheats = slice<leftCheat>([
+[GoLazy] partial class lazyᴛleftcheats { internal static slice<leftCheat> leftcheats = [
     // Leading digits of 1/2^i = 5^i.
     // 5^23 is not an exact 64-bit floating point number,
     // so have to use bc for the math.
@@ -254,7 +254,7 @@ partial struct leftCheat {
     new(18, "34694469519536141888238489627838134765625"),  // * 288230376151711744
     new(18, "173472347597680709441192448139190673828125"), // * 576460752303423488
     new(19, "867361737988403547205962240695953369140625")  // * 1152921504606846976
-]); }
+]; }
 
 // Is the leading prefix of b lexicographically less than s?
 internal static bool prefixIsLessThan(slice<byte> b, @string s) {

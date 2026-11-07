@@ -337,7 +337,7 @@ public static (ж<net.Interface>, error) LoopbackInterface() {
     if (err != nil) {
         return (default, errNoAvailableInterface);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new net.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -365,7 +365,7 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
     if (err != nil) {
         return (default, errNoAvailableInterface);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new net.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -385,7 +385,7 @@ internal static (net.IP, bool) hasRoutableIP(@string network, ж<net.Interface> 
     if (err != nil) {
         return (default, false);
     }
-    foreach (var (_, ifa) in ifat) {
+    foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {
         case ж<net.IPAddr> ifaΔ1: {
             {

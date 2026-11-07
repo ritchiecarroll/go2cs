@@ -435,7 +435,7 @@ internal static void modulesinit() {
     // contains the main function.
     //
     // See Issue #18729.
-    foreach (var (i, md) in modules.ValueSlot) {
+    foreach (var (i, md) in range(modules.ValueSlot)) {
         if (md.hasmain != 0) {
             (modules.ValueSlot)[0] = md;
             (modules.ValueSlot)[i] = Ꮡfirstmoduledata;
@@ -548,7 +548,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
         @throw(minpcOrMaxpcInvalidˢ);
     }
 
-    foreach (var (_, modulehash) in datap.modulehashes) {
+    foreach (var (_, modulehash) in range(datap.modulehashes)) {
         if (modulehash.linktimehash != modulehash.runtimehash.Value) {
             println((@string)"abi mismatch detected between", datap.modulename, (@string)"and", modulehash.modulename);
             @throw(abiMismatchˢ);
@@ -582,7 +582,7 @@ internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
     var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
-        foreach (var (i, sect) in md.textsectmap) {
+        foreach (var (i, sect) in range(md.textsectmap)) {
             // For the last section, include the end address (etext), as it is included in the functab.
             if (off >= sect.vaddr && off < sect.end || (i == len(md.textsectmap) - 1 && off == sect.end)) {
                 res = sect.baseaddr + off - sect.vaddr;
@@ -624,7 +624,7 @@ internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
         if (GOARCH == "wasm"u8) {
             fatal(unexpectedMultipleTextˢ);
         }
-        foreach (var (i, sect) in md.textsectmap) {
+        foreach (var (i, sect) in range(md.textsectmap)) {
             if (sect.baseaddr > pc) {
                 // pc is not in any section.
                 return (0, false);
@@ -869,7 +869,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         // even if we get signaled in the middle of it.
         cache.inUse++;
         if (cache.inUse == 1) {
-            foreach (var i in range(cache.entries[ck])) {
+            foreach (var i in range(len(cache.entries[ck]))) {
                 // We check off first because we're more
                 // likely to have multiple entries with
                 // different offsets for the same targetpc

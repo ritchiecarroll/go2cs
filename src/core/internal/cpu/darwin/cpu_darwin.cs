@@ -50,7 +50,7 @@ internal static bool darwinKernelVersionCheck(nint major, nint minor, nint patch
     array<nint> mmp = new(3);
     nint c = 0;
 Loop:
-    foreach (var (_, b) in release[..]) {
+    foreach (var (_, b) in range(release[..])) {
         switch (ᐧ) {
         case {} when b >= (byte)'0' && b <= (byte)'9': {
             mmp[c] = 10 * mmp[c] + (nint)((byte)(b - '0'));

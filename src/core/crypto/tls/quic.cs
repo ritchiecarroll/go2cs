@@ -403,7 +403,7 @@ public static ΔConnectionState ConnectionState(this ref QUICConn q) {
 // receiving the client's transport parameters. See [QUICTransportParametersRequired].
 public static void SetTransportParameters(this ref QUICConn q, slice<byte> @params) {
     if (@params == nil) {
-        @params = slice<byte>([]);
+        @params = [];
     }
     q.conn.quic.transportParams = @params;
     if (q.conn.quic.started) {

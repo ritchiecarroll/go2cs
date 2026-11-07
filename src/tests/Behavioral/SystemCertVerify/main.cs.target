@@ -32,8 +32,8 @@ internal static void Main() {
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
         KeyUsage: (x509.KeyUsage)(x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign),
-        ExtKeyUsage: slice<x509.ExtKeyUsage>([x509.ExtKeyUsageServerAuth]),
-        DNSNames: slice<@string>(["go2cs.example"]),
+        ExtKeyUsage: [x509.ExtKeyUsageServerAuth],
+        DNSNames: ["go2cs.example"],
         IsCA: true,
         BasicConstraintsValid: true
     ));

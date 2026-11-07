@@ -20,7 +20,7 @@ internal static void Main() {
         (htmlSig)slice<byte>((@string)"<HTML"u8),
         (htmlSig)slice<byte>((@string)"<!--"u8)
     ]);
-    foreach (var (_, s) in sigs) {
+    foreach (var (_, s) in range(sigs)) {
         fmt.Println(len(s), (@string)(slice<byte>)s);
     }
 

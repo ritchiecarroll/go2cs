@@ -33,7 +33,7 @@ internal static slice<allocsPerRunTestsᴛ1> allocsPerRunTests = slice<allocsPer
 ]);
 
 public static void TestAllocsPerRun(ж<testing.T> t) {
-    foreach (var (_, tt) in allocsPerRunTests) {
+    foreach (var (_, tt) in range(allocsPerRunTests)) {
         {
             var allocs = testing.AllocsPerRun(100, tt.fn); if (allocs != tt.allocs) {
                 t.Errorf("AllocsPerRun(100, %s) = %v, want %v", tt.name, allocs, tt.allocs);

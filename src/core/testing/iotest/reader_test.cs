@@ -305,7 +305,7 @@ public static void TestErrReader(ж<testing.T> t) {
         new("io.EOF", io.EOF)
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tt = ref heap(new TestErrReader_cases(), out var Ꮡtt);
         tt = vᴛ1;
 

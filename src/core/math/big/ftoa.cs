@@ -231,7 +231,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
 
     // Now we can figure out the minimum number of digits required.
     // Walk along until d has distinguished itself from upper and lower.
-    foreach (var (i, m) in d.mant) {
+    foreach (var (i, m) in range(d.mant)) {
         var l = lower.at(i);
         var u = upper.at(i);
 

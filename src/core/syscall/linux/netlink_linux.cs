@@ -100,7 +100,7 @@ done:
             if (errΔ3 != nil) {
                 return (default, errΔ3);
             }
-            foreach (var (_, m) in msgs) {
+            foreach (var (_, m) in range(msgs)) {
                 if (m.Header.Seq != 1 || m.Header.Pid != lsanl.Pid) {
                     return (default, EINVAL);
                 }

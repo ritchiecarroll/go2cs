@@ -9,7 +9,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
     (slice<nint> e, slice<nint> o, error err) classify(slice<nint> vals) {
         slice<nint> e = default;
         slice<nint> o = default;
-        foreach (var (_, v) in vals) {
+        foreach (var (_, v) in range(vals)) {
             if (v < 0) {
                 return (default, default, errors.New("negative value"));
             }
@@ -26,7 +26,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
 }
 
 internal static void Main() {
-    var (e, o, err) = parse(slice<nint>([1, 2, 3, 4, 5, 6]));
+    var (e, o, err) = parse([1, 2, 3, 4, 5, 6]);
     fmt.Println(e, o, err);
 }
 
