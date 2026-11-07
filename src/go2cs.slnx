@@ -875,6 +875,7 @@
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/OsGetpagesize/OsGetpagesize.csproj" />
+    <Project Path="tests/Behavioral/P256CurveBytes/P256CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P384CurveBytes/P384CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />

@@ -1651,6 +1651,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
 
     [TestMethod]
+    public void CheckP256CurveBytes() => CheckTarget("P256CurveBytes");
+
+    [TestMethod]
     public void CheckP384CurveBytes() => CheckTarget("P384CurveBytes");
 
     [TestMethod]
