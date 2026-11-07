@@ -431,6 +431,7 @@
     <Project Path="tests/Behavioral/DeepEqual/DeepEqual.csproj" />
     <Project Path="tests/Behavioral/DeepSelectRecursion/DeepSelectRecursion.csproj" />
     <Project Path="tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
+    <Project Path="tests/Behavioral/DeferCallFuncLitArgCapture/DeferCallFuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="tests/Behavioral/DeferClosure/DeferClosure.csproj" />
     <Project Path="tests/Behavioral/DeferDiscardedMultiValue/DeferDiscardedMultiValue.csproj" />

@@ -156,7 +156,7 @@ func (v *Visitor) writeAboveLabelComments(colon token.Pos) {
 		v.file = v.fset.File(colon)
 	}
 
-	afterLine := v.file.Line(span.after)
+	afterLine := v.goLine(span.after)
 
 	var above []token.Pos
 
@@ -165,7 +165,7 @@ func (v *Visitor) writeAboveLabelComments(colon token.Pos) {
 			break
 		}
 
-		if _, found := v.standAloneComments[pos]; found && pos > span.after && v.file.Line(pos) > afterLine {
+		if _, found := v.standAloneComments[pos]; found && pos > span.after && v.goLine(pos) > afterLine {
 			above = append(above, pos)
 		}
 	}
@@ -210,9 +210,9 @@ func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
 
 		switch clause := stmt.(type) {
 		case *ast.CaseClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.fset.Position(clause.Case).Column}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.goPosition(clause.Case).Column}
 		case *ast.CommClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.fset.Position(clause.Case).Column}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.goPosition(clause.Case).Column}
 		}
 
 		after = stmt.End()
@@ -237,7 +237,7 @@ func (v *Visitor) holdClauseComments(colon token.Pos) {
 	// After the clause's last statement, a comment at the next label's column or left of it documents
 	// the next clause (gofmt indents a body's comments deeper), so it is not held.
 	for _, pos := range v.sortedCommentPos {
-		if pos > span.after && pos < span.before && (pos < span.end || v.fset.Position(pos).Column > span.caseColumn) {
+		if pos > span.after && pos < span.before && (pos < span.end || v.goPosition(pos).Column > span.caseColumn) {
 			held = append(held, pos)
 		} else {
 			kept = append(kept, pos)
@@ -321,14 +321,14 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) int 
 	// A one-line comment on the `:` line trails the clause's opening line, as it trails `case X:` in Go.
 	// It is written first, while the output's current line is still that header; the clause's other
 	// leading comments follow on their own lines.
-	colonLine := v.file.Line(colon)
+	colonLine := v.goLine(colon)
 	header := v.currentLine()
 	trailHeader := header != "" && !strings.HasPrefix(header, "//") && !strings.HasPrefix(header, "/*")
 
 	var onLabel, ownLine []token.Pos
 
 	for _, pos := range leading {
-		if trailHeader && pos > colon && v.file.Line(pos) == colonLine && !strings.Contains(v.standAloneComments[pos], "\n") {
+		if trailHeader && pos > colon && v.goLine(pos) == colonLine && !strings.Contains(v.standAloneComments[pos], "\n") {
 			onLabel = append(onLabel, pos)
 		} else {
 			ownLine = append(ownLine, pos)
@@ -348,7 +348,7 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) int 
 	lastLine := colonLine
 
 	for _, pos := range ownLine {
-		line := v.file.Line(pos)
+		line := v.goLine(pos)
 
 		if line > colonLine && lastLine > colonLine && line-lastLine > 1 {
 			v.writeGapLine()
@@ -398,11 +398,11 @@ func (v *Visitor) writeLeadingComments(lbrace token.Pos, first ast.Stmt, prefix 
 		}
 	}
 
-	lastLine := v.file.Line(lbrace)
+	lastLine := v.goLine(lbrace)
 	wrote := false
 
 	for _, pos := range pending {
-		line := v.file.Line(pos)
+		line := v.goLine(pos)
 
 		if wrote && line-lastLine > 1 {
 			v.writeGapLine()
@@ -445,12 +445,12 @@ func (v *Visitor) writeLineTrailingComments(lbrace, limit token.Pos) {
 		return
 	}
 
-	braceLine := v.file.Line(lbrace)
+	braceLine := v.goLine(lbrace)
 
 	var trailing []token.Pos
 
 	for _, pos := range v.sortedCommentPos {
-		if pos >= limit || v.file.Line(pos) > braceLine {
+		if pos >= limit || v.goLine(pos) > braceLine {
 			break
 		}
 
@@ -483,7 +483,7 @@ func (v *Visitor) writeClosingComments(after, limit token.Pos, minColumn int) {
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
-	lastLine := v.file.Line(after)
+	lastLine := v.goLine(after)
 
 	var pending []token.Pos
 
@@ -492,13 +492,13 @@ func (v *Visitor) writeClosingComments(after, limit token.Pos, minColumn int) {
 			break
 		}
 
-		if _, found := v.standAloneComments[pos]; found && (minColumn == 0 || pos > after && v.fset.Position(pos).Column > minColumn) {
+		if _, found := v.standAloneComments[pos]; found && (minColumn == 0 || pos > after && v.goPosition(pos).Column > minColumn) {
 			pending = append(pending, pos)
 		}
 	}
 
 	for _, pos := range pending {
-		line := v.file.Line(pos)
+		line := v.goLine(pos)
 
 		if line-lastLine > 1 {
 			v.writeGapLine()
@@ -539,7 +539,7 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
-	lastLine := v.file.Line(prev.End())
+	lastLine := v.goLine(prev.End())
 	nextPos := next.Pos()
 
 	// Take the pending positions first: writing a comment removes it from sortedCommentPos.
@@ -556,7 +556,7 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 	}
 
 	for _, pos := range pending {
-		line := v.file.Line(pos)
+		line := v.goLine(pos)
 		endLine := line + strings.Count(v.standAloneComments[pos], "\n")
 
 		if line-lastLine > 1 {
@@ -585,7 +585,7 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 // goBlankLineBetween reports whether a line between from's line and to's line is blank in the Go source:
 // not on either end's line, and covered by no comment group.
 func (v *Visitor) goBlankLineBetween(from, to token.Pos) bool {
-	last := v.file.Line(from)
+	last := v.goLine(from)
 	first := sort.Search(len(v.commentGroups), func(i int) bool { return v.commentGroups[i].Pos() > from })
 
 	for _, group := range v.commentGroups[first:] {
@@ -593,14 +593,14 @@ func (v *Visitor) goBlankLineBetween(from, to token.Pos) bool {
 			break
 		}
 
-		if v.file.Line(group.Pos())-last > 1 {
+		if v.goLine(group.Pos())-last > 1 {
 			return true
 		}
 
-		last = max(last, v.file.Line(group.End()))
+		last = max(last, v.goLine(group.End()))
 	}
 
-	return v.file.Line(to)-last > 1
+	return v.goLine(to)-last > 1
 }
 
 // writeGapLine writes the line break that makes Go's blank line, and reports whether it did. It writes

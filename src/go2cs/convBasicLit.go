@@ -908,7 +908,7 @@ func (v *Visitor) brokenByteArrayConst(spec *ast.ValueSpec, value ast.Expr, fold
 		v.file = v.fset.File(value.Pos())
 	}
 
-	if v.file.Line(leaves[0].Pos()) == v.file.Line(leaves[len(leaves)-1].End()) {
+	if v.goLine(leaves[0].Pos()) == v.goLine(leaves[len(leaves)-1].End()) {
 		return "", false
 	}
 
@@ -941,7 +941,7 @@ func (v *Visitor) brokenByteArrayConst(spec *ast.ValueSpec, value ast.Expr, fold
 
 	tookSpecComment := false
 
-	if spec.Comment != nil && v.file.Line(spec.Comment.Pos()) == v.file.Line(value.End()) {
+	if spec.Comment != nil && v.goLine(spec.Comment.Pos()) == v.goLine(value.End()) {
 		comments = append(comments, spec.Comment.List...)
 		tookSpecComment = true
 	}
@@ -983,9 +983,9 @@ func (v *Visitor) brokenByteArrayConst(spec *ast.ValueSpec, value ast.Expr, fold
 		}
 
 		// this operand's trailing comments: after it, on its line
-		line := v.file.Line(leaf.End())
+		line := v.goLine(leaf.End())
 
-		for next < len(comments) && v.file.Line(comments[next].Pos()) == line {
+		for next < len(comments) && v.goLine(comments[next].Pos()) == line {
 			fmt.Fprintf(builder, " %s", v.markTrailingComment(comments[next].Slash, comments[next].Text))
 			next++
 		}

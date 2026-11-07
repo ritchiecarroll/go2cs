@@ -53,10 +53,10 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 			return false, 0
 		}
 
-		return false, v.fset.Position(prevEnd).Line
+		return false, v.goLine(prevEnd)
 	}
 
-	prevLine := v.fset.Position(prevEnd).Line
+	prevLine := v.goLine(prevEnd)
 	lastLine := prevLine
 	handledPos := []token.Pos{}
 	endsInLineComment := false
@@ -74,7 +74,7 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 			continue
 		}
 
-		line := v.fset.Position(pos).Line
+		line := v.goLine(pos)
 
 		if pos > prevEnd && line == prevLine {
 			builder.WriteString(" ")
