@@ -1,0 +1,123 @@
+start 2026-11-06 19:37:03 P=53b3eb88d7 D=da3f68520d dotnet=10.0.400 go=go1.26.10
+binary-reaching diff P..D: src/core/golib/slice.cs 
+all paths P..D: docs/ConversionStrategies-Reference/defer-panic-recover.md docs/ConversionStrategies.md src/core/golib/slice.cs 
+P tree /c/go2cs/abw/g-inl-p HEAD 53b3eb88d704758498e5f2ffcc0f7e79003545f9 golib 4ddea4a55eb25b5df607290da237204521f1f521
+D tree /c/go2cs/abw/g-inl-d HEAD da3f68520dbeebde18c057bd0704475048fe5abc golib fc93d416d7b467ff487b0101c5be6c2b1e289047
+converter b17211a1536c6665
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfTlsHandshake\src
+Closure: 163 packages discovered — converting 1 app + 0 third-party, referencing 161 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfTlsHandshake
+
+Recursive conversion complete in 2.21s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfTlsHandshake\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfTlsHandshake\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:05:18.57
+P/PerfTlsHandshake jit rc=0 exe 958820cee8102bc8 dll ee48393d0accabe3 golib 23c7db635fbb662a
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfTlsHandshake\src
+Closure: 163 packages discovered — converting 1 app + 0 third-party, referencing 161 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfTlsHandshake
+
+Recursive conversion complete in 3.83s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfTlsHandshake\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfTlsHandshake\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:05:39.41
+D/PerfTlsHandshake jit rc=0 exe 958820cee8102bc8 dll ca1596d62dcf2847 golib 8dd0baeeb8f3d302
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfSieve\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSieve
+
+Recursive conversion complete in 1.55s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfSieve\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfSieve\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:03:28.98
+P/PerfSieve jit rc=0 exe 1c446595a7c4e3da dll c153475926f3242b golib 23c7db635fbb662a
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfSieve\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfSieve
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfSieve\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfSieve\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:03:30.92
+D/PerfSieve jit rc=0 exe 1c446595a7c4e3da dll 5a45f5ef373f7204 golib 8dd0baeeb8f3d302
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfMatMul\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMatMul
+
+Recursive conversion complete in 1.57s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfMatMul\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfMatMul\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:03:29.95
+P/PerfMatMul jit rc=0 exe bf9bb3b4e41696cd dll f0565fba1b565004 golib 23c7db635fbb662a
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfMatMul\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfMatMul
+
+Recursive conversion complete in 1.55s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfMatMul\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfMatMul\out\Directory.Build.targets
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:03:23.48
+D/PerfMatMul jit rc=0 exe bf9bb3b4e41696cd dll be85e78308bbe33e golib 8dd0baeeb8f3d302
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.55s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\out\Directory.Build.targets
+P/PerfStartup r2r rc=0 exe 13a984ccd6ea2736 dll 26d067b5306d2398 golib 7cb111b41fcf508e
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.54s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\out\Directory.Build.targets
+D/PerfStartup r2r rc=0 exe 13a984ccd6ea2736 dll 264d02f8defa405a golib ebe448900d99f983
+end 2026-11-06 20:10:51 rc=0

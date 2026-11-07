@@ -1,0 +1,202 @@
+  000000014001CA80: 57                 push        rdi
+  000000014001CA81: 56                 push        rsi
+  000000014001CA82: 55                 push        rbp
+  000000014001CA83: 53                 push        rbx
+  000000014001CA84: 48 81 EC 38 01 00  sub         rsp,138h
+  000000014001CA8B: 0F 29 B4 24 20 01  movaps      xmmword ptr [rsp+120h],xmm6
+  000000014001CA93: 0F 29 BC 24 10 01  movaps      xmmword ptr [rsp+110h],xmm7
+  000000014001CA9B: 0F 57 E4           xorps       xmm4,xmm4
+  000000014001CA9E: 48 B8 10 FF FF FF  mov         rax,0FFFFFFFFFFFFFF10h
+  000000014001CAA8: 0F 29 A4 04 10 01  movaps      xmmword ptr [rsp+rax+110h],xmm4
+  000000014001CAB0: 0F 29 A4 04 20 01  movaps      xmmword ptr [rsp+rax+120h],xmm4
+  000000014001CAB8: 0F 29 A4 04 30 01  movaps      xmmword ptr [rsp+rax+130h],xmm4
+  000000014001CAC0: 48 83 C0 30        add         rax,30h
+  000000014001CAC4: 75 E2              jne         000000014001CAA8
+  000000014001CAC6: 48 8B D9           mov         rbx,rcx
+  000000014001CAC9: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CAD1: 48 8B D3           mov         rdx,rbx
+  000000014001CAD4: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CADE: 45 33 C9           xor         r9d,r9d
+  000000014001CAE1: E8 7A F0 BF 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CAE6: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CAEE: 48 8B D3           mov         rdx,rbx
+  000000014001CAF1: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CAFB: 45 33 C9           xor         r9d,r9d
+  000000014001CAFE: E8 5D F0 BF 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CB03: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CB0B: 48 8B D3           mov         rdx,rbx
+  000000014001CB0E: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CB18: 45 33 C9           xor         r9d,r9d
+  000000014001CB1B: E8 40 F0 BF 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CB20: 33 ED              xor         ebp,ebp
+  000000014001CB22: F2 0F 10 35 9E 20  movsd       xmm6,mmword ptr [__readonlydata_PerfMatMul_go_main_package__matmul]
+  000000014001CB2A: F2 0F 10 3D 9E 20  movsd       xmm7,mmword ptr [148D2EBD0h]
+  000000014001CB32: 48 3B EB           cmp         rbp,rbx
+  000000014001CB35: 0F 8D D7 01 00 00  jge         000000014001CD12
+  000000014001CB3B: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CB3E: 0F 11 44 24 70     movups      xmmword ptr [rsp+70h],xmm0
+  000000014001CB43: 0F 11 84 24 80 00  movups      xmmword ptr [rsp+80h],xmm0
+  000000014001CB4B: 0F 11 84 24 88 00  movups      xmmword ptr [rsp+88h],xmm0
+  000000014001CB53: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CB5B: 48 8B D5           mov         rdx,rbp
+  000000014001CB5E: E8 1D 32 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CB63: 48 8B F8           mov         rdi,rax
+  000000014001CB66: 48 8D 4C 24 70     lea         rcx,[rsp+70h]
+  000000014001CB6B: 48 8B D3           mov         rdx,rbx
+  000000014001CB6E: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CB78: 45 33 C9           xor         r9d,r9d
+  000000014001CB7B: E8 80 7C A4 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CB80: 48 8D 74 24 70     lea         rsi,[rsp+70h]
+  000000014001CB85: E8 06 59 84 03     call        RhpByRefAssignRef
+  000000014001CB8A: B9 04 00 00 00     mov         ecx,4
+  000000014001CB8F: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CB92: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CB95: 0F 11 44 24 48     movups      xmmword ptr [rsp+48h],xmm0
+  000000014001CB9A: 0F 11 44 24 58     movups      xmmword ptr [rsp+58h],xmm0
+  000000014001CB9F: 0F 11 44 24 60     movups      xmmword ptr [rsp+60h],xmm0
+  000000014001CBA4: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CBAC: 48 8B D5           mov         rdx,rbp
+  000000014001CBAF: E8 CC 31 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CBB4: 48 8B F8           mov         rdi,rax
+  000000014001CBB7: 48 8D 4C 24 48     lea         rcx,[rsp+48h]
+  000000014001CBBC: 48 8B D3           mov         rdx,rbx
+  000000014001CBBF: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CBC9: 45 33 C9           xor         r9d,r9d
+  000000014001CBCC: E8 2F 7C A4 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CBD1: 48 8D 74 24 48     lea         rsi,[rsp+48h]
+  000000014001CBD6: E8 B5 58 84 03     call        RhpByRefAssignRef
+  000000014001CBDB: B9 04 00 00 00     mov         ecx,4
+  000000014001CBE0: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CBE3: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CBE6: 0F 11 44 24 20     movups      xmmword ptr [rsp+20h],xmm0
+  000000014001CBEB: 0F 11 44 24 30     movups      xmmword ptr [rsp+30h],xmm0
+  000000014001CBF0: 0F 11 44 24 38     movups      xmmword ptr [rsp+38h],xmm0
+  000000014001CBF5: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CBFD: 48 8B D5           mov         rdx,rbp
+  000000014001CC00: E8 7B 31 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CC05: 48 8B F8           mov         rdi,rax
+  000000014001CC08: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CC0D: 48 8B D3           mov         rdx,rbx
+  000000014001CC10: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CC1A: 45 33 C9           xor         r9d,r9d
+  000000014001CC1D: E8 DE 7B A4 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CC22: 48 8D 74 24 20     lea         rsi,[rsp+20h]
+  000000014001CC27: E8 64 58 84 03     call        RhpByRefAssignRef
+  000000014001CC2C: B9 04 00 00 00     mov         ecx,4
+  000000014001CC31: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CC34: 33 F6              xor         esi,esi
+  000000014001CC36: 48 85 DB           test        rbx,rbx
+  000000014001CC39: 0F 8E C7 00 00 00  jle         000000014001CD06
+  000000014001CC3F: 48 8B FD           mov         rdi,rbp
+  000000014001CC42: 48 0F AF FB        imul        rdi,rbx
+  000000014001CC46: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CC4E: 48 8B D5           mov         rdx,rbp
+  000000014001CC51: E8 2A 31 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CC56: 48 8B C8           mov         rcx,rax
+  000000014001CC59: 48 8B D6           mov         rdx,rsi
+  000000014001CC5C: E8 BF 7F A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CC61: 48 8B C8           mov         rcx,rax
+  000000014001CC64: 4C 8D 04 37        lea         r8,[rdi+rsi]
+  000000014001CC68: 48 BA 0B D7 A3 70  mov         rdx,0A3D70A3D70A3D70Bh
+  000000014001CC72: 48 8B C2           mov         rax,rdx
+  000000014001CC75: 49 F7 E8           imul        r8
+  000000014001CC78: 49 03 D0           add         rdx,r8
+  000000014001CC7B: 48 8B C2           mov         rax,rdx
+  000000014001CC7E: 48 C1 E8 3F        shr         rax,3Fh
+  000000014001CC82: 48 C1 FA 06        sar         rdx,6
+  000000014001CC86: 48 03 D0           add         rdx,rax
+  000000014001CC89: 48 6B D2 64        imul        rdx,rdx,64h
+  000000014001CC8D: 4C 2B C2           sub         r8,rdx
+  000000014001CC90: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CC93: F2 49 0F 2A C0     cvtsi2sd    xmm0,r8
+  000000014001CC98: F2 0F 59 C6        mulsd       xmm0,xmm6
+  000000014001CC9C: F2 0F 11 01        movsd       mmword ptr [rcx],xmm0
+  000000014001CCA0: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CCA8: 48 8B D5           mov         rdx,rbp
+  000000014001CCAB: E8 D0 30 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CCB0: 48 8B C8           mov         rcx,rax
+  000000014001CCB3: 48 8B D6           mov         rdx,rsi
+  000000014001CCB6: E8 65 7F A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CCBB: 48 8B C8           mov         rcx,rax
+  000000014001CCBE: 4C 8D 04 2E        lea         r8,[rsi+rbp]
+  000000014001CCC2: 48 BA 0B D7 A3 70  mov         rdx,0A3D70A3D70A3D70Bh
+  000000014001CCCC: 48 8B C2           mov         rax,rdx
+  000000014001CCCF: 49 F7 E8           imul        r8
+  000000014001CCD2: 49 03 D0           add         rdx,r8
+  000000014001CCD5: 48 8B C2           mov         rax,rdx
+  000000014001CCD8: 48 C1 E8 3F        shr         rax,3Fh
+  000000014001CCDC: 48 C1 FA 06        sar         rdx,6
+  000000014001CCE0: 48 03 D0           add         rdx,rax
+  000000014001CCE3: 48 6B D2 64        imul        rdx,rdx,64h
+  000000014001CCE7: 4C 2B C2           sub         r8,rdx
+  000000014001CCEA: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CCED: F2 49 0F 2A C0     cvtsi2sd    xmm0,r8
+  000000014001CCF2: F2 0F 59 C7        mulsd       xmm0,xmm7
+  000000014001CCF6: F2 0F 11 01        movsd       mmword ptr [rcx],xmm0
+  000000014001CCFA: 48 FF C6           inc         rsi
+  000000014001CCFD: 48 3B F3           cmp         rsi,rbx
+  000000014001CD00: 0F 8C 40 FF FF FF  jl          000000014001CC46
+  000000014001CD06: 48 FF C5           inc         rbp
+  000000014001CD09: 48 3B EB           cmp         rbp,rbx
+  000000014001CD0C: 0F 8C 29 FE FF FF  jl          000000014001CB3B
+  000000014001CD12: 33 F6              xor         esi,esi
+  000000014001CD14: 48 85 DB           test        rbx,rbx
+  000000014001CD17: 0F 8E 80 00 00 00  jle         000000014001CD9D
+  000000014001CD1D: 33 FF              xor         edi,edi
+  000000014001CD1F: 0F 57 F6           xorps       xmm6,xmm6
+  000000014001CD22: 33 ED              xor         ebp,ebp
+  000000014001CD24: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CD2C: 48 8B D6           mov         rdx,rsi
+  000000014001CD2F: E8 4C 30 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CD34: 48 8B C8           mov         rcx,rax
+  000000014001CD37: 48 8B D5           mov         rdx,rbp
+  000000014001CD3A: E8 E1 7E A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CD3F: F2 0F 10 38        movsd       xmm7,mmword ptr [rax]
+  000000014001CD43: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CD4B: 48 8B D5           mov         rdx,rbp
+  000000014001CD4E: E8 2D 30 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CD53: 48 8B C8           mov         rcx,rax
+  000000014001CD56: 48 8B D7           mov         rdx,rdi
+  000000014001CD59: E8 C2 7E A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CD5E: F2 0F 59 38        mulsd       xmm7,mmword ptr [rax]
+  000000014001CD62: F2 0F 58 F7        addsd       xmm6,xmm7
+  000000014001CD66: 48 FF C5           inc         rbp
+  000000014001CD69: 48 3B EB           cmp         rbp,rbx
+  000000014001CD6C: 7C B6              jl          000000014001CD24
+  000000014001CD6E: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CD76: 48 8B D6           mov         rdx,rsi
+  000000014001CD79: E8 02 30 E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CD7E: 48 8B C8           mov         rcx,rax
+  000000014001CD81: 48 8B D7           mov         rdx,rdi
+  000000014001CD84: E8 97 7E A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CD89: F2 0F 11 30        movsd       mmword ptr [rax],xmm6
+  000000014001CD8D: 48 FF C7           inc         rdi
+  000000014001CD90: 48 3B FB           cmp         rdi,rbx
+  000000014001CD93: 7C 8A              jl          000000014001CD1F
+  000000014001CD95: 48 FF C6           inc         rsi
+  000000014001CD98: 48 3B F3           cmp         rsi,rbx
+  000000014001CD9B: 7C 80              jl          000000014001CD1D
+  000000014001CD9D: 0F 57 F6           xorps       xmm6,xmm6
+  000000014001CDA0: 33 F6              xor         esi,esi
+  000000014001CDA2: 48 85 DB           test        rbx,rbx
+  000000014001CDA5: 7E 27              jle         000000014001CDCE
+  000000014001CDA7: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CDAF: 48 8B D6           mov         rdx,rsi
+  000000014001CDB2: E8 C9 2F E3 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0
+  000000014001CDB7: 48 8B C8           mov         rcx,rax
+  000000014001CDBA: 48 8B D6           mov         rdx,rsi
+  000000014001CDBD: E8 5E 7E A4 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014001CDC2: F2 0F 58 30        addsd       xmm6,mmword ptr [rax]
+  000000014001CDC6: 48 FF C6           inc         rsi
+  000000014001CDC9: 48 3B F3           cmp         rsi,rbx
+  000000014001CDCC: 7C D9              jl          000000014001CDA7
+  000000014001CDCE: 0F 28 C6           movaps      xmm0,xmm6
+  000000014001CDD1: 0F 28 B4 24 20 01  movaps      xmm6,xmmword ptr [rsp+120h]
+  000000014001CDD9: 0F 28 BC 24 10 01  movaps      xmm7,xmmword ptr [rsp+110h]
+  000000014001CDE1: 48 81 C4 38 01 00  add         rsp,138h
+  000000014001CDE8: 5B                 pop         rbx
+  000000014001CDE9: 5D                 pop         rbp
+  000000014001CDEA: 5E                 pop         rsi
+  000000014001CDEB: 5F                 pop         rdi
+  000000014001CDEC: C3                 ret
+  000000014001CDED: 90                 nop

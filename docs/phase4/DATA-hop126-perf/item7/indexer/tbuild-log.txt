@@ -1,0 +1,22 @@
+start 2026-11-06 20:13:11 converter b17211a1536c6665
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.59s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\P\PerfStartup\out\Directory.Build.targets
+P/PerfStartup r2r-template rc=0 exe 13a984ccd6ea2736 golib 7cb111b41fcf508e
+Recursively converting module at C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\src
+Closure: 65 packages discovered — converting 1 app + 0 third-party, referencing 63 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStartup
+
+Recursive conversion complete in 1.62s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\inl-src\tmp\D\PerfStartup\out\Directory.Build.targets
+D/PerfStartup r2r-template rc=0 exe 13a984ccd6ea2736 golib ebe448900d99f983
+end 2026-11-06 20:15:16 rc=0
