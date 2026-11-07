@@ -115,6 +115,36 @@ mints it):
 }
 ```
 
+**RULED (COORD, 2026-11-07, on `6fbb049209`).**
+
+| row | ruling | banks at 1.26.10.3 if |
+|:--|:--|:--|
+| `runtime/pprof` | **TestVMInfo: mint APPROVED**, darwin `host-identity`, with the entry above. TestGoroutineSwitch: C1 captures `-test.v` and a goroutine dump at the deadline in the re-bank leg. If P2's follow-on reds surface, P2 mints and roots them. | the arm64 cascade is rooted. Otherwise it stays unbanked |
+| `internal/trace` | **Route 1 only.** C1 reads the x64 testprog's `tracing=on` sample count. Route 2 is not for 1.26.10.3 (below). | both RIDs pass: `darwin: n` |
+| `testing` | **Mint `TestChdir/relative`** as darwin `host-identity` (fix A). Owner: C1. | both RIDs read `m + 3` |
+| `syscall` | **No `deferred` entry.** TestGetdirentries is a real gap: the reinterpret seam, a Go-layout byte view over a reference-bearing box. A deferral would read as coverage the row does not have. The seam is a seat after 1.26.10.3. | — stays darwin-unbanked at 1.26.10.3 |
+| `internal/synctest` | C1 reads its existing run and **writes the verdict**. The prediction stands: 59 on both RIDs. | it validates |
+| `net` | H drafts `TestDialerFallbackDelay` as darwin `host-limit` (arm64, the 395 ms bound). The NXDOMAIN class needs a resolver that answers NXDOMAIN in time, which the hosted mac runners do not give. | C1 finds a runner whose resolver does. Otherwise it stays darwin-unbanked |
+
+**The comparator question, ruled for after 1.26.10.3** (route 2 above, and `net`'s mirror shape): may a disclosure
+cover a test where GO is the side that skipped or failed?
+- **Go=SKIP / C#=pass MAY be admitted, narrowly.**
+  - Per entry, keyed on Go's own PINNED skip message, read from the Go side's output.
+  - Only where the skip is a host-DATA predicate the converted side legitimately does not share, as D-W1's zero CPU
+    samples are.
+  - It reads as a disclosure, never as a match.
+  - G sizes it after 1.26.10.3.
+- **Go=FAIL / C#=pass is NEVER admitted.** A failing oracle means the host is unfit, and the answer is a clean host, as
+  `net` banks on windows from a GitHub-hosted runner.
+
+**The plan's prediction for the 1.26.10.3 darwin bank:**
+- **Certain:** `runtime`, `testing` and `internal/synctest` join the 229 banked rows, giving **232**.
+- **If the readings cooperate:** `internal/trace` (route 1) and `runtime/pprof` (the cascade rooted) join too, giving
+  **234**.
+- **Stay unbanked:** `syscall` (the seam) and `net` (the resolver).
+- **So 232 to 234 of the 236 rows that apply to darwin.** The two `internal/syscall/windows` rows are Windows-only.
+- **Score at the bank:** a row outside this range, in either direction, is a finding.
+
 ## 5. Pages that re-render at the bank (stale renders)
 
 These pages carry text from before a landed record change. The re-bank re-renders them, and no count moves:
