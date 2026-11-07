@@ -86,9 +86,19 @@ $RosterConditionalDisclosurePattern = 'host-conditional-disclosure\s*(?:\([^)]*\
 # The per-OS expectation annotation. Anchored on the cell separator at BOTH ends (the closing
 # lookahead also admits the row's terminating pipe) so it can only match a segment of its own --
 # prose that happens to say "on linux: five of them" is not an annotation and must not read as one.
+#
+# THE PER-RID NOTE (COORD ruling (1), 2026-11-06, ARCH-STRICT darwin banking). darwin ships one build under two RIDs,
+# and since the oracle runs at each RID's own arch the two can legitimately read different counts: crypto/subtle's
+# three DIT tests are Go pass / C# skip (disclosed) on osx-arm64 and skip/skip on osx-x64. Such a row banks the
+# ARCH-STRICT reading -- the RID whose difference is disclosed -- and names the other RID's reading beside it:
+#     darwin: 7 + 3 (osx-arm64; osx-x64: 10)
+# Groups 4-7: the banked RID, the other RID, and its matched and disclosed counts. darwin only (a linux note is
+# refused by name), the two RIDs must differ, and both are derived by annotate_darwin.py from the evidence, never set
+# by hand: section 2h of check-roster-format.ps1 refuses a note the evidence does not produce.
 $RosterOsPattern =
     [regex]::Escape($RosterSegmentSeparator) +
-    '\s*([a-z][a-z0-9]*)\s*:\s*(\d+)\s*(?:\+\s*(\d+)\s*)?(?=' +
+    '\s*([a-z][a-z0-9]*)\s*:\s*(\d+)\s*(?:\+\s*(\d+)\s*)?' +
+    '(?:\(\s*(osx-arm64|osx-x64)\s*;\s*(osx-arm64|osx-x64)\s*:\s*(\d+)\s*(?:\+\s*(\d+)\s*)?\)\s*)?(?=' +
     [regex]::Escape($RosterSegmentSeparator) + '|\||$)'
 
 # The permanently-inapplicable form of the same annotation (ruled 2026-08-29, from the registry
@@ -211,6 +221,23 @@ function Get-SweepTargetGoos {
     return 'windows'
 }
 
+# The mac RID this sweep's converted host runs as, for a darwin segment's per-RID note (Get-RosterRowExpectation -Rid):
+# os-matrix's RID when the leg sets it, otherwise the host's architecture on macOS. Empty off darwin, where no note
+# applies, so windows and linux resolve exactly as before.
+function Get-SweepHostRid {
+    param([string] $Goos)
+
+    if ($Goos -cne 'darwin') { return '' }
+    if ($env:RID -in @('osx-arm64', 'osx-x64')) { return $env:RID }
+    if (-not $IsMacOS) { return '' }
+
+    switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+        'Arm64' { return 'osx-arm64' }
+        'X64' { return 'osx-x64' }
+        default { return '' }
+    }
+}
+
 <#
 .SYNOPSIS
     Parses the roster table into row objects.
@@ -272,10 +299,35 @@ function Get-ValidatedRosterRows {
                 throw "Roster row '$rowPackage' carries more than one '$key' annotation."
             }
 
+            # The per-RID note ($RosterOsPattern, THE PER-RID NOTE): darwin only, and two different RIDs.
+            $noteRid = $null
+            $noteOther = $null
+
+            if ($match.Groups[4].Success) {
+                if ($key -cne 'darwin') {
+                    throw ("Roster row '$rowPackage' carries a per-RID note on its '$key' annotation. Only darwin " +
+                        'ships one build under two RIDs; the note is darwin''s arch-strict reading.')
+                }
+
+                if ($match.Groups[4].Value -ceq $match.Groups[5].Value) {
+                    throw ("Roster row '$rowPackage' carries a darwin per-RID note naming $($match.Groups[4].Value) " +
+                        'twice. The note names the banked RID, then the OTHER RID''s reading.')
+                }
+
+                $noteRid = $match.Groups[4].Value
+                $noteOther = [PSCustomObject]@{
+                    Rid       = $match.Groups[5].Value
+                    Expected  = [int]$match.Groups[6].Value
+                    Disclosed = if ($match.Groups[7].Success) { [int]$match.Groups[7].Value } else { 0 }
+                }
+            }
+
             $rowOs[$key] = [PSCustomObject]@{
                 Expected   = [int]$match.Groups[2].Value
                 Disclosed  = if ($match.Groups[3].Success) { [int]$match.Groups[3].Value } else { 0 }
                 Applicable = $true
+                Rid        = $noteRid
+                Other      = $noteOther
             }
         }
 
@@ -1565,12 +1617,28 @@ function Update-FrozenRosterDisclosureLink {
 function Get-RosterRowExpectation {
     param(
         [Parameter(Mandatory)][PSCustomObject] $Row,
-        [Parameter(Mandatory)][string] $Goos
+        [Parameter(Mandatory)][string] $Goos,
+        # The host RID (osx-arm64 / osx-x64), for a darwin segment with a per-RID note: where the note names this RID,
+        # its reading is this host's expectation (THE PER-RID NOTE, above). Empty, or a RID the note does not name,
+        # reads the segment itself, exactly as before.
+        [string] $Rid = ''
     )
 
     $key = $Goos.Trim().ToLowerInvariant()
 
     if ($key -ne 'windows' -and $Row.OS -and $Row.OS.ContainsKey($key)) {
+        $entry = $Row.OS[$key]
+        $other = if ($entry.PSObject.Properties['Other']) { $entry.Other } else { $null }
+
+        if ($Rid -and ($null -ne $other) -and ($other.Rid -ceq $Rid)) {
+            return [PSCustomObject]@{
+                Expected   = $other.Expected
+                Disclosed  = $other.Disclosed
+                Source     = "$key ($Rid)"
+                Applicable = $entry.Applicable
+            }
+        }
+
         return [PSCustomObject]@{
             Expected   = $Row.OS[$key].Expected
             Disclosed  = $Row.OS[$key].Disclosed
