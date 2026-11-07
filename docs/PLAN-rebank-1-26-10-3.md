@@ -101,3 +101,22 @@ These pages carry text from before a landed record change. The re-bank re-render
   skip; both runtimes match; the count does not move), and no box is reconfigured to steer a test (§2, §6). This
   replaces the same day's earlier ruling that moved `os` to H, which has no `C:\pagefile.sys` either.
 - The linux hosts: R-WSL is primary, as at 1.26.10.2, with G's WSL as the backup lane (§3).
+
+## 8. The publish: gating steps
+
+- **The nugetgo rebuild wave ships with 1.26.10.3, as part of the publish, not after it** (COORD ruling, 2026-11-07).
+  - Why: B3 (batch 231) changes the member a compiled `foreach` over a slice binds. At the `nuget-1.26.10.2` tag,
+    golib's `slice<T>.Enumerator` implements `IEnumerator<(nint, T)>`; at 1.26.10.3, a type of the same name implements
+    `IEnumerator<T>`. So `get_Current`'s return type differs, and a module built against .2 throws
+    `MissingMethodException` at its first loop under .3.
+  - A nugetgo package's go.* dependency is a range up to the next Go minor (PLAN-nugetgo B4), so NuGet restores a
+    .2-built package against .3 without an error. The failure shows at run time.
+  - Who: C2 owns the wave.
+  - On what: the FINAL 1.26.10.3 golib, after this re-bank.
+  - What: every published module (uuid, jwt, x/sync, hashset, pflag, mousetrap, cobra) takes its next B3 revision built
+    on .3. A rebuild moves the version and the digests, never a count; a count that moves is a finding.
+  - **The release is not published until the wave's packages are ready to publish with it.**
+- **Then, once the wave is live: deprecate the published 1.26.10.2 revisions** (owner, 2026-11-07: "Can deprecate
+  existing published modules, no prob"). Each published 1.26.10.2 nugetgo revision is deprecated on nuget.org with its
+  1.26.10.3 revision as the alternate. It is an OWNER hand (an owner-account action), and C2 prepares the exact package
+  and version list.

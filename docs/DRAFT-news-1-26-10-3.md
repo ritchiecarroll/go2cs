@@ -11,14 +11,26 @@
 ## <DATE>, 2026 — Faster Native AOT, and a Release standard library from source
 
 **NuGet 1.26.10.3.** The second fix release on the Go 1.26 line. The converted standard library is still built from
-Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. One change below breaks C#
-source that uses the packages; it is first under *Upgrading from 1.26.10.2*.
-<!-- TO CONFIRM at release: whether any change breaks COMPILED C# (an assembly built against 1.26.10.2 needing a rebuild),
-     as 1.26.10.2's exported-variable change did. None of the landed batches 149-223 is known to; B3 is a source break. -->
+Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. One change below breaks both
+C# source that uses the packages and assemblies already compiled against 1.26.10.2; it is first under *Upgrading from
+1.26.10.2*.
+<!-- The compiled-C# break, VERIFIED at the tree (G finding, COORD ruling 2026-11-07): at the nuget-1.26.10.2 tag golib's
+     slice<T>.Enumerator implements IEnumerator<(nint, T)>; at 1.26.10.3 (batch 231) a type of the same name implements
+     IEnumerator<T>, with the pairs on slice<T>.RangeEnumerator. So get_Current's return type
+     differs, and an assembly built against .2 that loops over a slice throws MissingMethodException at its first loop
+     under .3. A nugetgo package's go.* dependency is a range up to the next Go minor (PLAN-nugetgo B4), so NuGet restores
+     a .2-built package against .3 without an error. The nugetgo rebuild wave ships with this release (C2). The published .2
+     revisions are deprecated once the wave is live (owner, 2026-11-07: "Can deprecate existing published modules, no
+     prob"); an owner-account action, with C2 preparing the package and version list. -->
 
 **Upgrading from 1.26.10.2.**
 
-- **PENDING (B3).** **`foreach` over a slice gives its values.** A Go slice is `slice<T>`, and `foreach` over it gives
+- **Rebuild what you built against 1.26.10.2.** An assembly or nugetgo package compiled against go.* 1.26.10.2 that
+  loops over a Go slice fails at its first such loop under 1.26.10.3, because a slice's enumerator now gives values (see
+  the next item). NuGet restores an older nugetgo package under 1.26.10.3 without an error, so the failure shows only
+  when the program runs. Rebuild against 1.26.10.3, and move each `nugetgo.*` reference to its 1.26.10.3 revision. The 1.26.10.2 revisions of
+  the published nugetgo packages are deprecated on nuget.org, each naming its 1.26.10.3 revision as the alternate.
+- **`foreach` over a slice gives its values.** A Go slice is `slice<T>`, and `foreach` over it gives
   its elements, as over any C# collection. Go's `(index, value)` pairs come from `range(s)`, and the indexes alone
   from `range(len(s))`:
 
@@ -33,8 +45,8 @@ source that uses the packages; it is first under *Upgrading from 1.26.10.2*.
   `foreach (var i in range(s))` for the indexes alone now receives the pairs, so write `range(len(s))` there. The
   same holds for a Go array and for a named slice or array type; a named slice type ranges with its element type
   named, `range<uint>(x)`. [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
-  <!-- source: claude/p2-collection-expressions (B3), docs/ConsumingGoFromCSharp.md at bb0c2bbfae. PENDING landing. -->
-- **PENDING (B3).** **A collection expression builds a slice** where C# knows the target is a `slice<T>`:
+  <!-- source: batch 231 (P2 B3, aaebdc2fb2), docs/ConsumingGoFromCSharp.md. Landed. -->
+- **A collection expression builds a slice** where C# knows the target is a `slice<T>`:
   `slice<nint> primes = [2, 3, 5];` as Go's `primes := []int{2, 3, 5}`. `[]` is an empty slice, not nil.
 
 **Faster under Native AOT.** Reading a slice element is now an inlined bounds-checked load under Native AOT, as it
@@ -73,16 +85,17 @@ start. On `win-x64`, on one development machine, a small converted program start
 <!-- source: DATA-hop126-perf.md §11.8 (PerfStartup wall: per-assembly compressed 470 ms, composite compressed 3,480 ms;
      composite uncompressed 320 ms; exe 33 MB vs 571 MB). Batch 214 (C2, csproj-template). -->
 
-**A conversion against standard library sources builds Release.** **PENDING (H).** A program converted with
-`-recurse` against a local go2cs source tree (`-go2cspath`) now builds its standard library in Release when you run
-`dotnet build -c Release` in the program's folder, and `dotnet publish -c Release -r <rid>` there succeeds. Before
-this release, that build compiled every standard library package but golib in Debug, about 21 times slower on a TLS
-handshake under the JIT, and the publish failed. A program converted against the published packages
-(`-recurse=nuget`) was never affected. To build any converted program, name its project file:
-`dotnet build MyProgram.csproj -c Release`.
+**A conversion against standard library sources builds Release.** A program converted with `-recurse` or
+`-recurse=module` against a local go2cs source tree (`-go2cspath`) no longer gets a solution file beside its project.
+So `dotnet build -c Release` in the program's folder builds the standard library in Release, and
+`dotnet publish -c Release -r <rid>` there succeeds. With 1.26.10.2, that build compiled the standard library in
+Debug, about 21 times slower on a TLS handshake under the JIT, and the publish failed. A solution file an earlier
+converter wrote is removed only when it is exactly the one that converter wrote. A program converted against the
+published packages (`-recurse=nuget`) keeps its solution and was never affected. To build any converted program, name
+its project file: `dotnet build MyProgram.csproj -c Release`.
 <!-- source: DATA-hop126-perf.md §11.9 (the three-way build experiment, 64/67 Debug through the folder or the .slnx, 0/67
-     through the csproj; TLS 1,071 ms via the csproj). Batch 223 (golib's publish guard) landed; H's .slnx fix is
-     PENDING (batch 227): fill in the fix as landed, and drop "before this release" wording if it changes. -->
+     through the csproj; TLS 1,071 ms via the csproj). Batch 223 (golib's publish guard) and batch 227 (H, no solution
+     beside a local-reference conversion's project: 0 of 46 Debug, was 45; -recurse=nuget keeps its solution), landed. -->
 
 **Faster P-521 and P-384.** The P-521 field multiply is hand-written, constant-time code in place of the generated
 code, which made the first P-521 operation in a process, which builds a precomputed table, take 42.6 ms under
