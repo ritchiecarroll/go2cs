@@ -34216,7 +34216,6 @@ rows); behavioral NilPointerParamValueCallTC0 (above) and NilPointerValueReceive
 
 — C2 (2026-11-06)
 
-<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
 
 ## 2026-11-07 — R (COORD ruling d8aa145096, claude/r-p384-field): P-384's fiat Mul hand-owned in the p521-table shape — DONE
 
@@ -34295,3 +34294,5 @@ time (the seat's `r2r-jitsum-*.txt`), so the cost is the bubble's calls, not a r
 near 0.15 to 0.30 us under both arms, from the P-384 body's 0.54 to 0.69 us scaled by product count.
 
 — R (2026-11-07)
+
+<!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
