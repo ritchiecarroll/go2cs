@@ -34303,4 +34303,45 @@ written before that dump and met 7 of 7; the ratchet's two class totals had been
 
 — i9 (2026-11-07)
 
+### 2026-11-06: a pointer method that calls a value method on its own receiver is emitted over the box (CLOSED: the 10 `this ref T` receiver calls)
+
+Closes the OPEN half of the 2026-11-06 nil-param row: "the 10 calls on `this ref T` receivers (archive/tar 8,
+cryptobyte 2)". Branch claude/c2-thisref-box. Remedy (b), ruled by COORD over remedy (a) on parity.
+
+**The fix.** A new direct-ж trigger, bodyCallsValueMethodOnReceiver: a pointer method whose body calls a value method
+directly on its own receiver is emitted over the box, `M(this ж<T> Ꮡt)`, and the call reads `Ꮡt.M()`. It binds
+go2cs-gen's twin, which copies `*t` after the arguments run, as Go does, and fails on a nil `t` through `ж<T>`'s own
+check. This is the corpus's existing direct-ж form (archive/tar's WriteTo in the same file; parameters since batch
+221). With a `this ref T` receiver the ref was copied while the arguments were still being built.
+
+**Measured** on linux/amd64, .NET SDK 10.0.112, go1.26.10, at master 7fbb8fabfa (before P2's class K):
+- ThisRefReceiverTC0 (4 methods, 6 cases, tiered compilation off):
+  - master: 0/3 runs match Go at TC0, 3 lines wrong. A nil receiver whose callee ignores it returns. A nil receiver
+    panics before a side-effecting argument runs. A write the argument makes to `*t` is not seen.
+  - master at TC1: 0/3, the 2 argument-order lines.
+  - over the box: 3/3 at both tierings.
+- Remedy (a), `nonnil(ref t).M()` at the call, measured and not taken: 0/3 at both tierings. It fixes only the nil
+  drop, and the order lines stay wrong because the ref is still copied first.
+- At the 10 corpus sites master showed no observable divergence: the callees read their receiver and the arguments
+  are pure. The gap was in the shape.
+
+**Footprint**, two-seeded, three targets (360/358/358), identical per target, marker gate 0:
+- 8 files, +38/-33, against a posted prediction of about 40 to 80 lines.
+- 7 methods move: sparseFileReader.Read, sparseFileWriter.Write, and String.ReadOptionalASN1, SkipOptionalASN1,
+  ReadOptionalASN1Integer, ReadOptionalASN1OctetString and ReadOptionalASN1Boolean.
+- crypto/x509 parser.cs moves 8 call lines.
+- 3 GoPositionMap records re-encode.
+- Two specifics MISSED: x509's String locals already had boxes (no declaration change), and 3 records moved, not 4.
+- CNR: ShadowLocalOverRecvName only, main.cs +2/-2.
+- Per call: no new allocation at these sites, and no measurable time cost (200M calls, best of 5).
+- In general, a VALUE local that calls such a method needs a heap box. That cost is zero in this corpus.
+- Re-derived at master 80aed2b086, after class K and B3, with the cut converter: the same 8 files at +38/-33, and the
+  57 non-map lines byte-identical to the measurement above. Only the 3 map records' bytes moved, under K. The guard's
+  golden was re-minted there, and K collapses its one-line methods.
+
+**Guards:** converter test TestPointerMethodCallingAValueMethodOnItsReceiverIsEmittedOverTheBox (red at the base);
+nilParamBoxTwin's refRecv row, which now reads the box; and behavioral ThisRefReceiverTC0.
+
+— C2 (2026-11-06)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

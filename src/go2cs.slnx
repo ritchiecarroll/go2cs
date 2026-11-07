@@ -1135,6 +1135,7 @@
     <Project Path="tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
     <Project Path="tests/Behavioral/TcpLoopbackRoundTrip/TcpLoopbackRoundTrip.csproj" />
     <Project Path="tests/Behavioral/TestingStructZeroLiteral/TestingStructZeroLiteral.csproj" />
+    <Project Path="tests/Behavioral/ThisRefReceiverTC0/ThisRefReceiverTC0.csproj" />
     <Project Path="tests/Behavioral/TraceUserAnnotations/TraceUserAnnotations.csproj" />
     <Project Path="tests/Behavioral/TransitiveAliasPreload/TransitiveAliasPreload.csproj" />
     <Project Path="tests/Behavioral/TupleDestructureEscapingLocal/TupleDestructureEscapingLocal.csproj" />

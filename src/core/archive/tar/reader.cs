@@ -814,13 +814,14 @@ partial struct sparseFileReader {
     internal int64 pos;      // Current position in sparse file
 }
 
-internal static (nint n, error err) Read(this ref sparseFileReader sr, slice<byte> b) {
+internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<byte> b) {
     nint n = default;
     error err = default;
+    ref var sr = ref Ꮡsr.DerefOrNull();
 
-    var finished = (int64)len(b) >= sr.logicalRemaining();
+    var finished = (int64)len(b) >= Ꮡsr.logicalRemaining();
     if (finished) {
-        b = b.slice(0, (nint)(sr.logicalRemaining()));
+        b = b.slice(0, (nint)(Ꮡsr.logicalRemaining()));
     }
 
     var b0 = b;
@@ -850,7 +851,7 @@ internal static (nint n, error err) Read(this ref sparseFileReader sr, slice<byt
     case {} when err != nil: {
         return (n, err);
     }
-    case {} when sr.logicalRemaining() == 0 && sr.physicalRemaining() > 0: {
+    case {} when Ꮡsr.logicalRemaining() == 0 && Ꮡsr.physicalRemaining() > 0: {
         return (n, errUnrefData); // More data in dense file than sparse file
     }
     case {} when finished: {

@@ -2422,6 +2422,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]
+    public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]

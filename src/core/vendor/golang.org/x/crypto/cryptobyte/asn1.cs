@@ -702,10 +702,11 @@ public static bool SkipASN1(this ref String s, asn1.Tag tag) {
 // element (not including tag and length bytes) tagged with the given tag into
 // out. It stores whether an element with the tag was found in outPresent,
 // unless outPresent is nil. It reports whether the read was successful.
-public static bool ReadOptionalASN1(this ref String s, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+public static bool ReadOptionalASN1(this ж<String> Ꮡs, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+    ref var s = ref Ꮡs.DerefOrNull();
     ref var outPresent = ref ᏑoutPresent.DerefOrNull();
 
-    var present = s.PeekASN1Tag(tag);
+    var present = Ꮡs.PeekASN1Tag(tag);
     if (ᏑoutPresent != nil) {
         outPresent = present;
     }
@@ -717,8 +718,10 @@ public static bool ReadOptionalASN1(this ref String s, ж<String> @out, ж<bool>
 
 // SkipOptionalASN1 advances s over an ASN.1 element with the given tag, or
 // else leaves s unchanged. It reports whether the operation was successful.
-public static bool SkipOptionalASN1(this ref String s, asn1.Tag tag) {
-    if (!s.PeekASN1Tag(tag)) {
+public static bool SkipOptionalASN1(this ж<String> Ꮡs, asn1.Tag tag) {
+    ref var s = ref Ꮡs.DerefOrNull();
+
+    if (!Ꮡs.PeekASN1Tag(tag)) {
         return true;
     }
     ref var unused = ref heap<String>(out var Ꮡunused);
@@ -729,10 +732,10 @@ public static bool SkipOptionalASN1(this ref String s, asn1.Tag tag) {
 // tagged with tag into out and advances. If no element with a matching tag is
 // present, it writes defaultValue into out instead. Otherwise, it behaves like
 // ReadASN1Integer.
-public static bool ReadOptionalASN1Integer(this ref String s, any @out, asn1.Tag tag, any defaultValue) {
+public static bool ReadOptionalASN1Integer(this ж<String> Ꮡs, any @out, asn1.Tag tag, any defaultValue) {
     ref var present = ref heap(new bool(), out var Ꮡpresent);
     ref var i = ref heap<String>(out var Ꮡi);
-    if (!s.ReadOptionalASN1(Ꮡi, Ꮡpresent, tag)) {
+    if (!Ꮡs.ReadOptionalASN1(Ꮡi, Ꮡpresent, tag)) {
         return false;
     }
     if (!present) {
@@ -775,13 +778,13 @@ public static bool ReadOptionalASN1Integer(this ref String s, any @out, asn1.Tag
 // explicitly tagged with tag into out and advances. If no element with a
 // matching tag is present, it sets "out" to nil instead. It reports
 // whether the read was successful.
-public static bool ReadOptionalASN1OctetString(this ref String s, ж<slice<byte>> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+public static bool ReadOptionalASN1OctetString(this ж<String> Ꮡs, ж<slice<byte>> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var outPresent = ref ᏑoutPresent.DerefOrNull();
 
     ref var present = ref heap(new bool(), out var Ꮡpresent);
     ref var child = ref heap<String>(out var Ꮡchild);
-    if (!s.ReadOptionalASN1(Ꮡchild, Ꮡpresent, tag)) {
+    if (!Ꮡs.ReadOptionalASN1(Ꮡchild, Ꮡpresent, tag)) {
         return false;
     }
     if (ᏑoutPresent != nil) {
@@ -803,12 +806,12 @@ public static bool ReadOptionalASN1OctetString(this ref String s, ж<slice<byte>
 // explicitly tagged with tag into out and advances. If no element with a
 // matching tag is present, it sets "out" to defaultValue instead. It reports
 // whether the read was successful.
-public static bool ReadOptionalASN1Boolean(this ref String s, ж<bool> Ꮡout, asn1.Tag tag, bool defaultValue) {
+public static bool ReadOptionalASN1Boolean(this ж<String> Ꮡs, ж<bool> Ꮡout, asn1.Tag tag, bool defaultValue) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var present = ref heap(new bool(), out var Ꮡpresent);
     ref var child = ref heap<String>(out var Ꮡchild);
-    if (!s.ReadOptionalASN1(Ꮡchild, Ꮡpresent, tag)) {
+    if (!Ꮡs.ReadOptionalASN1(Ꮡchild, Ꮡpresent, tag)) {
         return false;
     }
 
