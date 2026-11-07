@@ -132,6 +132,28 @@ $long = 'TestL: Go="pass" C#="fail" (' + ('y' * 400) + ')'
 $clipped = Get-ComparisonDivergenceLines -Row 'fix/long' -Comparison (Read-PlantedRecord -Name 'long' -Errors @($long)) -DetailWidth 60
 Assert-Equal 'clip: the line is cut at the width and marked' ('    ' + $long.Substring(0, 60) + ' ...') $clipped[1]
 
+# ---- 6. the C# side's own failure text under each undisclosed divergence (COORD's TestUnsafePoint ruling) ----
+# The planted row again, with failure text for two of its divergences: TestF's (blank lines skipped, capped at
+# -TextLines) and TestE's; TestB and TestC have none and print none. Without -FailureText the lines are exactly those
+# of section 1, which its own asserts already pin.
+$failureText = @{
+    TestF = "    unsafepoint_test.go:21: can't objdump exit status 1`n`n    second line`n    third line`n    fourth line"
+    TestE = 'one line only'
+}
+$withText = Get-ComparisonDivergenceLines -Row 'fix/planted' -Comparison $planted -FailureText $failureText -TextLines 3
+
+Assert-Equal 'text: the headline is unchanged' $lines[0] $withText[0]
+Assert-Equal 'text: a divergence with no text prints no body' '    TestC: Go="skip" C#="pass"' $withText[2]
+Assert-Equal 'text: a divergence with text is followed by it' '    TestE: Go="fail" C#=""' $withText[3]
+Assert-Equal 'text: its one line, marked' '      | one line only' $withText[4]
+Assert-Equal 'text: the signature-mismatch divergence, then its first line' '      |     unsafepoint_test.go:21: can''t objdump exit status 1' $withText[6]
+Assert-Equal 'text: a blank line is skipped' '      |     second line' $withText[7]
+Assert-Equal 'text: capped at -TextLines' '      |     third line' $withText[8]
+Assert-Equal 'text: the line after the cap is the next entry' '    error: go test: exit status 1' $withText[9]
+Assert-Equal 'text: header + 4 divergences + 4 text lines + 1 error' 10 $withText.Count
+$clippedText = Get-ComparisonDivergenceLines -Row 'fix/long' -Comparison (Read-PlantedRecord -Name 'long2' -Errors @('TestL: Go="pass" C#="fail"')) -FailureText @{ TestL = ('z' * 300) } -DetailWidth 40
+Assert-Equal 'text: a long text line is clipped like a divergence line' ('      | ' + ('z' * 40) + ' ...') $clippedText[2]
+
 # ---- verdict -----------------------------------------------------------------------------------------
 
 Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
