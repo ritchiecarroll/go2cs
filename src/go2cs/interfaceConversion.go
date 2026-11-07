@@ -546,6 +546,36 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		packageLock.Unlock()
 	}
 
+	// An OPEN generic target of a LOCAL generic type, converted to an interface with no type parameters, is
+	// recorded by its DEFINITION: `[assembly: GoImplement(typeof(sliceIter<>), typeof(Iter), Pointer = true)]`.
+	// The conversion is written once for every instantiation (`return &sliceIter[T](values)` inside NewIter[T],
+	// gojq), so a closed record can stand in only when some cast in the package happens to instantiate the
+	// pair, and none does for a generic its package never instantiates or one reached through a type-parameter
+	// chain. go2cs-gen keys the adapter (or the value partial) by the open definition plus the interface, so an
+	// open record and closed records of one pair generate one adapter (crypto/ecdh's nistCurve has both).
+	// Two cases keep today's behavior, with no record:
+	//   - a FOREIGN generic: go2cs-gen keys a foreign generic's adapter per CLOSED instantiation, so a
+	//     definition record has no adapter shape to land in;
+	//   - an interface over T (`Seq[T]`): the adapter would need a mapping from the interface's type
+	//     parameters to the struct's, which this record does not carry.
+	if targetIsOpenGeneric && recordable && !productionPointerImplemented && !typeContainsTypeParams(interfaceType) {
+		if recordName, ok := openGenericImplementRecordName(targetType, targetTypeName); ok {
+			if pointerTarget {
+				recordName = PointerPrefix + "<" + recordName + ">"
+			}
+
+			packageLock.Lock()
+
+			if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
+				implementations.Add(recordName)
+			} else {
+				interfaceImplementations[interfaceTypeName] = hashset.NewHashSet([]string{recordName})
+			}
+
+			packageLock.Unlock()
+		}
+	}
+
 	if ((recordable && !productionPointerImplemented) || recordableValueForeign || recordableValueSameAssembly) && !targetIsOpenGeneric {
 		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
 		// it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter wrapper
@@ -1122,4 +1152,32 @@ func interfaceTypeLiteralTarget(fun ast.Expr) *ast.InterfaceType {
 			return nil
 		}
 	}
+}
+
+// openGenericImplementRecordPrefix opens the record name of an open-generic implementation (`typeof(sliceIter<>)`, or
+// its pointer form `ж<typeof(sliceIter<>)>`), which writePackageInfoFile emits as the TYPEOF form of GoImplement.
+const openGenericImplementRecordPrefix = "typeof("
+
+// openGenericImplementRecordName renders the definition of a generic named target as the record name the package-info
+// writer emits as `typeof(Name<>)`: the rendered name up to its type-argument list, with one comma per extra type
+// parameter. It reports false for a target that is not a generic named type.
+func openGenericImplementRecordName(targetType types.Type, targetTypeName string) (string, bool) {
+	if ptr, ok := targetType.(*types.Pointer); ok {
+		targetType = ptr.Elem()
+	}
+
+	named, ok := types.Unalias(targetType).(*types.Named)
+
+	if !ok {
+		return "", false
+	}
+
+	typeParams := named.Origin().TypeParams().Len()
+	base, _, hasArgs := strings.Cut(targetTypeName, "<")
+
+	if typeParams == 0 || !hasArgs || base == "" {
+		return "", false
+	}
+
+	return openGenericImplementRecordPrefix + base + "<" + strings.Repeat(",", typeParams-1) + ">)", true
 }

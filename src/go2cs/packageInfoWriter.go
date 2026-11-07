@@ -445,6 +445,15 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		return qualifyAmbiguousTestTypeRefs(qualifySystemCollidingLocalTypeRefs(stripLocalTypeQualifier(rootQualifySubNamespaceTypeRefs(name), localTypePrefix), localTypePrefix), anchorTypePrefix)
 	}
 
+	// openGenericTypeofRef qualifies the type name inside an open-generic record name (`typeof(sliceIter<>)`) the way
+	// every other local record type is qualified, keeping the unbound argument list as written.
+	openGenericTypeofRef := func(record string) string {
+		inner := strings.TrimSuffix(strings.TrimPrefix(record, openGenericImplementRecordPrefix), ")")
+		base, args, _ := strings.Cut(inner, "<")
+
+		return openGenericImplementRecordPrefix + qualifyLocalTypeRef(base) + "<" + args + ")"
+	}
+
 	// Handle interface implementations
 	startLineIndex = -1
 	endLineIndex = -1
@@ -587,6 +596,18 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				if aliasCoveredImplementations.Contains(canonKey) {
 					continue
 				}
+				// An open-generic record (convertToInterfaceType) names the type's DEFINITION, which only a typeof
+				// argument can carry: an attribute's type argument cannot be an unbound generic.
+				if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok && strings.HasPrefix(inner, openGenericImplementRecordPrefix) {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement(%s, typeof(%s), Pointer = true)]", openGenericTypeofRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName)))
+					continue
+				}
+
+				if strings.HasPrefix(implementation, openGenericImplementRecordPrefix) {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement(%s, typeof(%s))]", openGenericTypeofRef(implementation), qualifyLocalTypeRef(interfaceName)))
+					continue
+				}
+
 				if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
 					record := fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", qualifyLocalTypeRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName))
 
