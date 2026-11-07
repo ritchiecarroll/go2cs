@@ -24,6 +24,22 @@ namespace GolibTests;
 /// which the run encode places one stride in. Before the fix that read lands past a one-record buffer and
 /// cannot hold the marker, so the fake writes nothing and fails the call; nothing is written out of bounds.
 /// </para>
+/// <para>
+/// <b>Every arm holds its element box across the call, and collects before it.</b> The token registry holds a
+/// box only weakly, so a token whose box nothing else holds resolves to nothing once a collection runs, and the
+/// funnel then passes the token through, as designed (EFAULT). The emitted wrappers hold it: Getfsstat's
+/// <c>var ᴋ0 = _p0; ... GC.KeepAlive(ᴋ0)</c>. These arms once kept only the number, so a collection between
+/// the mint and the call failed the keystone arm once in about 24 observed suite runs (Release only: Debug
+/// keeps the temporary alive to the method's end). The collection now runs every time, so a dropped hold
+/// fails here in every Release run.
+/// </para>
+/// <para>
+/// <b>What that guard does not cover, measured with every hold removed.</b> Four arms fail in Release. Two do
+/// not: <see cref="ANonNilPointerFieldAnywhereInTheRunKeepsTheToken"/> expects the token by construction, and
+/// <see cref="ASecondPointerInsideTheRunIsTheRunsOwnElement"/> passed with both of its boxes surviving the
+/// collection, for a reason not rooted. Neither guards a dropped hold. No arm fails in Debug, where the
+/// temporary lives to the method's end.
+/// </para>
 /// </remarks>
 [TestClass]
 public unsafe class DarwinFunnelRunTests
@@ -152,17 +168,29 @@ public unsafe class DarwinFunnelRunTests
         return buf;
     }
 
+    // A collection between the mint and the call: a box held only by the token registry dies here. Forced,
+    // blocking and compacting, so a held box can also move, and the arms then show that resolution does not
+    // depend on the box's address.
+    private static void collectBeforeTheCall()
+    {
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+        GC.WaitForPendingFinalizers();
+    }
+
     [TestMethod]
     public void AnElementPointerCarriesTheRunToTheEndOfTheBackingAndEveryRecordComesBack()
     {
         Assert.AreEqual((nuint?)Stride, NativeStructMarshal.MarshalledSizeOf(typeof(StatfsLike), nilPointersAsZero: true), "StatfsLike's Go size");
 
         slice<StatfsLike> buf = Records(3);
-        nuint token = (nuint)(uintptr)Ꮡ(buf, 0);
+        ж<StatfsLike> first = Ꮡ(buf, 0);
+        nuint token = (nuint)(uintptr)first;
         Assert.IsTrue(ManagedPointerTokens.IsTaggedToken(token), "&buf[0] must reach the funnel as a token, as Getfsstat's does");
 
+        collectBeforeTheCall();
         delegate* unmanaged[Cdecl]<nuint, nuint, nuint, nuint> fake = &FakeGetfsstat;
         nuint r = Call((nint)fake, token, (nuint)(Stride * len(buf)), 0);
+        GC.KeepAlive(first);
 
         Assert.IsFalse(ManagedPointerTokens.IsTaggedToken(s_received), "libc must receive a native address, never the token");
         Assert.AreEqual((nuint)3, r, "libc read the second record's marker, so the whole run reached it");
@@ -180,10 +208,13 @@ public unsafe class DarwinFunnelRunTests
         slice<StatfsLike> buf = Records(4);
         buf[0].Bsize = 0x0F0F;
         buf[2].Bsize = Marker;
-        nuint token = (nuint)(uintptr)Ꮡ(buf, 1);
+        ж<StatfsLike> second = Ꮡ(buf, 1);
+        nuint token = (nuint)(uintptr)second;
 
+        collectBeforeTheCall();
         delegate* unmanaged[Cdecl]<nuint, nuint, nuint, nuint> fake = &FakeGetfsstat;
         nuint r = Call((nint)fake, token, (nuint)(Stride * 3), 0);
+        GC.KeepAlive(second);
 
         Assert.AreEqual((nuint)3, r, "&buf[1]'s run holds buf[1..4]: its second record is buf[2]");
         Assert.AreEqual(0x0F0FL, buf[0].Bsize, "the element before the run is not touched");
@@ -197,8 +228,14 @@ public unsafe class DarwinFunnelRunTests
     {
         slice<StatfsLike> buf = Records(3);
 
+        ж<StatfsLike> first = Ꮡ(buf, 0), third = Ꮡ(buf, 2);
+        nuint a = (nuint)(uintptr)first, b = (nuint)(uintptr)third;
+
+        collectBeforeTheCall();
         delegate* unmanaged[Cdecl]<nuint, nuint, nuint> fake = &FakeTwoPointers;
-        nuint r = Call((nint)fake, (nuint)(uintptr)Ꮡ(buf, 0), (nuint)(uintptr)Ꮡ(buf, 2));
+        nuint r = Call((nint)fake, a, b);
+        GC.KeepAlive(first);
+        GC.KeepAlive(third);
 
         Assert.AreEqual((nuint)0, r, "both pointers reach libc as native addresses");
         Assert.AreEqual(s_received + (nuint)(2 * Stride), s_second, "&buf[2] is the run's third native record, not a copy of its own");
@@ -213,8 +250,13 @@ public unsafe class DarwinFunnelRunTests
         for (int i = 0; i < 3; i++)
             events[i] = new KeventLike();
 
+        ж<KeventLike> first = Ꮡ(events, 0);
+        nuint token = (nuint)(uintptr)first;
+
+        collectBeforeTheCall();
         delegate* unmanaged[Cdecl]<nuint, nuint, nuint> fake = &FakeKeventList;
-        nuint r = Call((nint)fake, (nuint)(uintptr)Ꮡ(events, 0), 3);
+        nuint r = Call((nint)fake, token, 3);
+        GC.KeepAlive(first);
 
         Assert.AreEqual((nuint)3, r, "every record's nil Udata reads 0");
 
@@ -232,10 +274,13 @@ public unsafe class DarwinFunnelRunTests
 
         heap((byte)1, out ж<byte> udata);
         events[2].Udata = udata;
-        nuint token = (nuint)(uintptr)Ꮡ(events, 0);
+        ж<KeventLike> first = Ꮡ(events, 0);
+        nuint token = (nuint)(uintptr)first;
 
+        collectBeforeTheCall();
         delegate* unmanaged[Cdecl]<nuint, nuint, nuint> fake = &FakeKeventList;
         Call((nint)fake, token, 3);
+        GC.KeepAlive(first);
 
         Assert.AreEqual(token, s_received, "a non-nil Udata in the run leaves the token (EFAULT), as for one record");
         Assert.AreEqual((nuint)EFAULT, s_lastErrno);
@@ -246,10 +291,12 @@ public unsafe class DarwinFunnelRunTests
     public void TheLinuxKeystoneCarriesTheRunToo()
     {
         slice<StatfsLike> buf = Records(3);
-        nuint token = (nuint)(uintptr)Ꮡ(buf, 0);
+        ж<StatfsLike> first = Ꮡ(buf, 0);
+        nuint token = (nuint)(uintptr)first;
         nuint seen = 0;
         bool sawMarker = false;
 
+        collectBeforeTheCall();
         NativeStructMarshal.Call(new uintptr(1), new uintptr(token), new uintptr((nuint)(Stride * 3)), new uintptr(0), new uintptr(0), new uintptr(0), new uintptr(0),
             (num, a1, a2, a3, a4, a5, a6) =>
             {
@@ -269,6 +316,7 @@ public unsafe class DarwinFunnelRunTests
 
                 return (new uintptr(3), new uintptr(0), new uintptr(0));
             });
+        GC.KeepAlive(first);
 
         Assert.IsFalse(ManagedPointerTokens.IsTaggedToken(seen), "the keystone passes a native address");
         Assert.IsTrue(sawMarker, "the second record reached the callee");
