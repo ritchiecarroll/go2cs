@@ -91,6 +91,17 @@
     must be on PATH; an origin that cannot be reached is reported by name and the tag comparison runs
     on the local tags.
 
+    It also proves the binary-compatibility guard's instrument: the pinned ApiCompat tool restores from
+    .config\dotnet-tools.json and answers its pin, and every committed CompatibilitySuppressions.xml under
+    src\core reads as this guard's format. That needs dotnet on PATH and the tool's feed.
+
+.PARAMETER ApiCompatFlatContainer
+    Where the binary-compatibility guard reads each package's BASELINE: the flat container of the feed
+    the last release was published to. Defaults to nuget.org's. After the merge, every package is compared,
+    asset by asset, with the highest published version on its line (the same first three numbers) below
+    the version being packed; an unannounced break refuses the pack (docs\phase4\
+    DESIGN-binary-compat-guard.md, src\tools\pushnuget\GoApiCompat.psm1).
+
 .PARAMETER VersionSuffix
     A LOCAL REHEARSAL's prerelease label (e.g. local.1): every package is packed as
     <GoStdLibVersion>.<GoBuildNumber>-<VersionSuffix>, and every go.* dependency between them carries that
@@ -135,6 +146,7 @@ param(
     [switch]$BumpBuild,
     [switch]$Push,
     [switch]$VerifyOnly,
+    [string]$ApiCompatFlatContainer = 'https://api.nuget.org/v3-flatcontainer/',
     [string]$VersionSuffix
 )
 
@@ -854,6 +866,18 @@ if ($preflightProblems.Count) {
            "named identity accounts for is fixed by accounting for it BY NAME -- a roster row, an " +
            "exclusion row or a row's [proof] link -- never by deleting a page or inventing a badge.")
 }
+
+# The binary-compatibility guard's instrument, proved before anything moves: the pinned tool restores and answers its
+# pin, and every committed suppression file reads as the guard's format. The guard itself runs after the merge, below.
+Import-Module (Join-Path $PSScriptRoot 'tools/pushnuget/GoApiCompat.psm1') -Force
+$apiCompatVersion = Initialize-GoApiCompatTool -RepoRoot $repoRoot
+# Each suppression file keyed by the package id of its directory (Get-GoApiCompatSuppressionMap says why never the
+# reverse).
+$suppressionMap = Get-GoApiCompatSuppressionMap (Join-Path $src 'core')
+$suppressionEntries = 0
+foreach ($file in $suppressionMap.Values) { $suppressionEntries += @(Read-GoApiCompatSuppressions $file).Count }
+Write-Step ("Binary-compatibility guard: apicompat $apiCompatVersion restored from .config\dotnet-tools.json; " +
+            "$($suppressionMap.Count) suppression file(s), $suppressionEntries announced break(s)")
 
 if ($VerifyOnly) {
     Write-Step "Pre-flight clean. -VerifyOnly: nothing was bumped, tagged, frozen, packed or pushed."
@@ -2112,6 +2136,43 @@ if ($pathLeaks.Count -gt 0) {
     throw "Pack paths: $($pathLeaks.Count) entr(y/ies) embed an absolute path -- nothing may ship that names the pack box's tree"
 }
 Write-Step "Pack paths: CLEAN -- no absolute path in any assembly or symbol file of $($pkgs.Count) package(s)"
+
+# --- The binary-compatibility guard ---------------------------------------------------------------
+# Every MERGED package is compared, asset by asset, with its last published revision on this Go line, by the pinned
+# ApiCompat tool called directly, one process per asset (src\tools\pushnuget\GoApiCompat.psm1 says why each of those
+# matters). A break is refused unless the package's CompatibilitySuppressions.xml lists it: an announced break, which
+# the release notes carry under "Upgrading" and the nugetgo rebuild wave ships with. A listed break that no longer
+# happens is refused too, so a suppression file empties itself once its release is the baseline. The guard proves it
+# ran: the assets it compared must equal the baselines' assets. docs\phase4\DESIGN-binary-compat-guard.md.
+. (Join-Path $PSScriptRoot '_nugetpush.ps1')
+$apiCompatWork = Join-Path ([System.IO.Path]::GetTempPath()) ('go2cs-apicompat-' + [guid]::NewGuid().ToString('N'))
+try {
+    $apiCompat = Invoke-GoApiCompatGuard -Packages $pkgs -RepoRoot $repoRoot -WorkDir $apiCompatWork `
+        -FlatContainer $ApiCompatFlatContainer `
+        -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
+        -SuppressionFor { param($id) $suppressionMap[$id] }
+}
+finally {
+    if (Test-Path -LiteralPath $apiCompatWork) { Remove-Item -LiteralPath $apiCompatWork -Recurse -Force }
+}
+if ($apiCompat.Compared -ne $apiCompat.Expected -and $apiCompat.Failures.Count -eq 0) {
+    throw "Binary compatibility: compared $($apiCompat.Compared) of $($apiCompat.Expected) baseline asset(s) and named no failure -- the guard is broken"
+}
+# A suppression file whose directory names no packed package is never read, so its entries would pass unexamined.
+$packedIds = @($pkgs | ForEach-Object { (Get-GoNuGetPackageIdentity $_.FullName).Id })
+$apiCompatFailures = @($apiCompat.Failures) + @($suppressionMap.Keys | Where-Object { $packedIds -notcontains $_ } | Sort-Object |
+    ForEach-Object { "${_}: $($suppressionMap[$_]) names no packed package, so the guard never reads it" })
+if ($apiCompatFailures.Count -gt 0) {
+    $apiCompatFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw ("Binary compatibility: $($apiCompatFailures.Count) failure(s) across $($apiCompat.Packages) package(s) -- an " +
+           "unannounced break cannot ship. A deliberate break is listed in the package's CompatibilitySuppressions.xml, " +
+           "announced in the release notes, and ships with the nugetgo rebuild wave (DESIGN-binary-compat-guard.md section 6)")
+}
+Write-Step ("Binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) of $($apiCompat.Packages) package(s) compared " +
+            "with their baselines by apicompat $apiCompatVersion; $($apiCompat.NoBaseline.Count) package(s) with no " +
+            "published version on this line (reported, not gated)")
+if ($apiCompat.NoBaseline.Count -gt 0) { Write-Host "  no baseline: $($apiCompat.NoBaseline -join ', ')" }
+if ($apiCompat.NoSurface.Count -gt 0) { Write-Host "  no lib/ or runtimes/ asset to compare (an analyzer): $($apiCompat.NoSurface -join ', ')" }
 
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {

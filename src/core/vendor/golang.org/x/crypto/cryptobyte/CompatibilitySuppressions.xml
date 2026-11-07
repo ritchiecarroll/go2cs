@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Vendored cryptobyte's binary breaks at 1.26.10.3, read by the release's binary-compatibility guard
+  (src/tools/pushnuget/GoApiCompat.psm1; docs/phase4/DESIGN-binary-compat-guard.md).
+
+  Every entry is batch 235 (C2, claude/c2-thisref-box): a pointer method that calls a value method on its own
+  receiver is emitted over the box, so these five exported pointer methods take this ж<String> where 1.26.10.2
+  took this ref String.
+
+  NOT REACHABLE BY A CONSUMER, so no release-notes line (whole-surface census, 2026-11-07):
+  - Go's std-vendored packages are importable only by the standard library. A module that imports
+    golang.org/x/crypto/cryptobyte gets the real x/crypto module, never this package.
+  - Its one caller is crypto/x509 (parser.cs). go.crypto.x509 pins this package EXACTLY ([1.26.10.2] at .2,
+    [build] at .3), so a .2 x509 with a .3 cryptobyte is refused at restore and never bound at run time.
+
+  Baseline: the published go.vendor.golang.org.x.crypto.cryptobyte 1.26.10.2. When 1.26.10.3 is published it
+  becomes the baseline, every entry here matches nothing, and the guard reads each one RED as unnecessary: delete
+  this file then.
+-->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- batch 235: ReadOptionalASN1's receiver was this ref String; it is this ж<String> -->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.vendor.golang.org.x.crypto.cryptobyte_package.ReadOptionalASN1(go.vendor.golang.org.x.crypto.cryptobyte_package.String@,go.ж{go.vendor.golang.org.x.crypto.cryptobyte_package.String},go.ж{System.Boolean},go.vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag)</Target>
+    <Left>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Left>
+    <Right>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Right>
+  </Suppression>
+  <!-- batch 235: ReadOptionalASN1Boolean's receiver was this ref String; it is this ж<String> -->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.vendor.golang.org.x.crypto.cryptobyte_package.ReadOptionalASN1Boolean(go.vendor.golang.org.x.crypto.cryptobyte_package.String@,go.ж{System.Boolean},go.vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag,System.Boolean)</Target>
+    <Left>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Left>
+    <Right>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Right>
+  </Suppression>
+  <!-- batch 235: ReadOptionalASN1Integer's receiver was this ref String; it is this ж<String> -->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.vendor.golang.org.x.crypto.cryptobyte_package.ReadOptionalASN1Integer(go.vendor.golang.org.x.crypto.cryptobyte_package.String@,System.Object,go.vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag,System.Object)</Target>
+    <Left>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Left>
+    <Right>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Right>
+  </Suppression>
+  <!-- batch 235: ReadOptionalASN1OctetString's receiver was this ref String; it is this ж<String> -->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.vendor.golang.org.x.crypto.cryptobyte_package.ReadOptionalASN1OctetString(go.vendor.golang.org.x.crypto.cryptobyte_package.String@,go.ж{go.slice{System.Byte}},go.ж{System.Boolean},go.vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag)</Target>
+    <Left>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Left>
+    <Right>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Right>
+  </Suppression>
+  <!-- batch 235: SkipOptionalASN1's receiver was this ref String; it is this ж<String> -->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.vendor.golang.org.x.crypto.cryptobyte_package.SkipOptionalASN1(go.vendor.golang.org.x.crypto.cryptobyte_package.String@,go.vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag)</Target>
+    <Left>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Left>
+    <Right>lib/net10.0/vendor.golang.org.x.crypto.cryptobyte.dll</Right>
+  </Suppression>
+</Suppressions>
