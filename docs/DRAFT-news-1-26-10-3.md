@@ -49,6 +49,16 @@ C# source that uses the packages and assemblies already compiled against 1.26.10
 - **A collection expression builds a slice** where C# knows the target is a `slice<T>`:
   `slice<nint> primes = [2, 3, 5];` as Go's `primes := []int{2, 3, 5}`. `[]` is an empty slice, not nil.
 
+**PENDING (batch 239). Revisions within a Go release stay compatible.** From 1.26.10.3 on, every go.* and nugetgo
+package is checked against its previous revision before it ships. Within one Go release line (1.26.10.x), a newer
+revision keeps every public member the previous one had, so code built against it keeps running. The exception is a
+break that a release announces under *Upgrading*, as this one does for `foreach`.
+<!-- source: the binary-compatibility guard, batch 239 (claude/g-binary-compat-guard f1172d0d00 + claude/g-apicompat-noassets
+     4cb835968d), docs/phase4/DESIGN-binary-compat-guard.md section 6 (the policy) and PLAN-rebank-1-26-10-3.md section 8.
+     The whole-surface census read 362 packages and 525 assets, plus the 7 published modules' 23, with 0 failures after
+     the two suppression files: B3's 12 in golib, and batch 235's 5 in vendored cryptobyte, which no consumer can reach
+     and so take no line here. PENDING until 239 lands. -->
+
 **Faster under Native AOT.** Reading a slice element is now an inlined bounds-checked load under Native AOT, as it
 already was under the JIT. On `win-x64`, on one development machine, against the build before this change: a
 matrix-multiply benchmark ran in about 36% of the time, a prime sieve in about 51%, and a TLS handshake in about 75%.
@@ -118,6 +128,22 @@ does not change.
 converted standard library is built for `amd64` and runs as a native arm64 process on Apple silicon, so it now
 reads the processor's AES and PMULL support from arm64.
 <!-- source: src/core/crypto/tls/go2cs_test_disclosures.json note (batch 216, C1); DESIGN-aeshash-arm64.md. -->
+
+**PENDING (the gojq seats and the nugetgo wave). gojq for .NET.** [`itchyny/gojq`](https://github.com/itchyny/gojq),
+a jq implementation in Go, is a NuGet package: `nugetgo.github.com.itchyny.gojq` 0.12.19 gives a .NET program an
+in-process, fully managed jq, with no native binary per platform. Its one dependency,
+[`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go), ships with it as `nugetgo.github.com.itchyny.timefmt-go`
+0.1.8. The package is gojq's library. Its command-line package is not included: gojq's own `gojq` command already does
+that job. Each package's tests are converted and compared with Go's, and the result ships in the package as
+VALIDATION.md. The converted sources are in
+[ritchiecarroll/gojq-cs](https://github.com/ritchiecarroll/gojq-cs) and
+[ritchiecarroll/timefmt-go-cs](https://github.com/ritchiecarroll/timefmt-go-cs).
+<!-- source: OQ-4 RULED 2026-11-07 (DESIGN-multi-package-modules.md; the owner on 4e: "Yes, command line deffered is fine,
+     lib focus for .3"), PLAN-rebank-1-26-10-3.md section 8 (the closure plan: -ExcludePackage github.com/itchyny/gojq/cli;
+     timefmt-go first, then gojq against it), SCOUT-gojq.md (P1) and SCOUT-timefmt-go.md (C2). The conversion repositories
+     were created empty by the owner on 2026-11-07. PENDING until both packages publish in the wave: gojq needs seats A-H.
+     Before release, replace "Each package's tests ..." with the validated counts from each MODULE.md, and delete the item
+     if gojq misses the wave. -->
 
 **Also in this release:**
 
