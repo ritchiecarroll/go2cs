@@ -134,6 +134,11 @@ names the entry:
 - `host-data-skip` with `halves` or the host-conditional fields: refused.
 - `goSkipSignature` on any OTHER class: refused, as `hostConditionalSignature` is refused off its class.
 - A `goSkipSignature` that is only Go's own banner (`--- SKIP`) or shorter than a word: refused as too wide.
+- **A `reason` with no Go source cite** (added 2026-11-07, COORD's acceptance note): a `host-data-skip` entry's
+  `reason` must name Go's predicate by `file:line`, matched by `\b[A-Za-z0-9_]+(_test)?\.go:[0-9]+\b`, or it is
+  refused at load. This is the part of section 5's three-part reason a machine can check. Whether the cited predicate
+  really reads host data, and whether the converted side differs without a defect, stays the reviewer's judgement: a
+  regex can require a citation, but it cannot read one.
 
 **Size:** about 25 lines plus their test arms.
 
