@@ -34,7 +34,7 @@ internal static void Main() {
     slice<any> anys = default;
     var data = slice<byte>([7, 8, 9]);
     anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
-    anys = append(anysᴷ, anys, (any)5);
+    anys = append(anysᴷ, anys, (any)((nint)5));
     fmt.Println(len(anys), len(anys[0]._<slice<byte>>()), anys[1]);
 }
 
