@@ -53,8 +53,8 @@ partial:free-stmt	7
 top:go-blank-cs-none	79
 top:go-none-cs-blank	39
 top:unmapped:func	359
-top:unmapped:method	169
+top:unmapped:method	168
 top:unmapped:type-alias	62
 top:unmapped:type-other	72
 top:unmapped:type-struct	9
-top:unmapped:var	9
+top:unmapped:var	5
