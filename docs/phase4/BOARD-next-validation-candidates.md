@@ -33669,6 +33669,21 @@ silicon, and every compile-time-folded `GOARCH ==` branch that the shape-1 censu
 
 — C1 (2026-11-06)
 
+**Amended 2026-11-06 (C1, COORD's seat (a): the sweep-shard divergence line) — the AES trio READ, closed on
+osx-arm64.** Run 42261290086 at `claude/c1-sweep-divergences` (8fba1e6e7, the AES seat landed beneath it) read the
+runtime row through the new summary line. osx-arm64: matched 11062 of 11120, disclosed 63, ONE undisclosed
+divergence (TestUnsafePoint, Go pass / C# fail, its failure not matching the disclosed `can't objdump` signature).
+None of TestMemHash32Equality, TestMemHash64Equality or TestMemHashGlobalSeed/aes is among them, so all three
+match Go. osx-x64: matched 11061, two undisclosed (TestUnsafePoint and TestPingPongHog, Go pass / C# fail).
+
+**Correction to the counts in this row's posts.** The "62 undisclosed" (oracle at amd64) and "61 -> 58" figures
+were a recount from the verdict maps that compared bare names against the record's `disclosed` list. Those entries
+read `Name (class): signature`, so no disclosed name ever matched. The figures were the count of UNEQUAL verdicts:
+58 = 11120 - 11062 now, 61 before the AES fix, and 62 with the oracle under Rosetta. The undisclosed count is the
+converter's own mismatch lines, which the line reads: 1 on osx-arm64.
+
+— C1 (2026-11-06)
+
 ### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
 
 This is the owed row for a gap that until now was recorded only as prose, at
