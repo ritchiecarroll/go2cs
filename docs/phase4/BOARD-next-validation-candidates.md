@@ -34344,4 +34344,43 @@ nilParamBoxTwin's refRecv row, which now reads the box; and behavioral ThisRefRe
 
 — C2 (2026-11-06)
 
+## 2026-11-07 — C2 (gojq seat C, claude/c2-open-generic-implement): a generic type converted at its own type parameters is recorded by its definition — CLOSED for local generics; two known limits OPEN
+
+**Defect:** inside a generic function, `return &it` (it a `sliceIter[T]`) converts a LOCAL generic type,
+instantiated at the function's own type parameters, to `Iter`. The cast site names the generic adapter
+`sliceIterжIter<T>`, but the converter wrote no record for the pair, because a generic attribute's type argument
+cannot name `T` (CS0246). The adapter then existed only when another cast closed the pair. A type reached only
+through its parameters did not compile: master's emission of the new guard is main.cs(55,53) CS0246
+'counterжIter<>' and main.cs(40,56) CS0029 for the value form.
+
+**Fix:** a non-generic golib `GoImplementAttribute(Type, Type)` with `Pointer`, written as
+`[assembly: GoImplement(typeof(sliceIter<>), typeof(Iter), Pointer = true)]`. ImplementGenerator reads the
+unbound generic as its definition, so the record takes the existing local-generic arms. An open record and a
+closed record of one pair generate one adapter, byte-identical to the closed record's.
+
+**Footprint:** zero. The two-seeded -stdlib reconvert (base b6e0506573 against the seat, windows/linux/darwin
+amd64, each arm into its own seed) differs in 0 files; each arm wrote only its 358 `.md` files and left every
+`.cs` unchanged. CNR: byte-identical across all 963 behavioral packages (12 platform-exclusive skipped).
+- The prediction (pre-seat design note) was that only new package_info records would move, "expected: crypto/ecdh's
+  nistCurve". The mechanism HELD (no line outside a record) and the instance MISSED: at Go 1.26 crypto/ecdh's
+  `nistCurve` is not generic, and crypto/elliptic's `nistCurve[Point]` is converted to an interface only at
+  closed instantiations, which already carry closed records. The instance came from the older release's shape.
+- crypto/elliptic's 35 generated sources, the nistCurve adapters among them, are byte-identical built with the
+  base generator and with the seat generator.
+
+**Known limit 1 (OPEN):** a FOREIGN generic converted at its own type parameters keeps today's emission. Its
+adapter is keyed per closed instantiation, so there is no definition-keyed adapter to share. Its pointer path
+(interfaceConversion.go, the foreign-pointer arm) still records the open instantiation,
+`GoImplement<…lib_package.Box<T>, Iter>(Pointer = true)`, which names `T` out of scope. No corpus instance is known.
+
+**Known limit 2 (OPEN):** an interface over the type parameter (`Getter[T]`, converted inside a generic
+function) has no closed form `typeof` can name; the pair stays unrecorded, as before. No corpus instance is known.
+
+**Guards:** converter test TestOpenGenericImplementIsRecordedByDefinition (red at the base on the three
+definition records; the foreign and interface-over-T controls assert no definition record); GenTests
+OpenGenericImplementRecordTests (two arms red at the base, the dedupe arm fails with CS0102 when the pointer key
+is split by instantiation); behavioral OpenGenericPointerImplement, output-compared with Go.
+
+— C2 (2026-11-07)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
