@@ -1312,6 +1312,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
+    public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]

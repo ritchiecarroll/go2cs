@@ -1327,7 +1327,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 				// UNION is checked FIRST: its `[]byte | string` ordering starts with "[]" and would
 				// otherwise take the ISlice branch with the raw union as the element type
 				// (`ISlice<byte | string>` — CS1003 cascade, time/format.go's appendNano family).
-				if constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
+				// It is decided from the TYPE SET, never the constraint's text, so `~[]byte | ~string`
+				// and a named constraint (uax29's stringish.Interface) map too; see
+				// typeParamIsStringByteUnion for the terms that count and the one limit.
+				if typeParamIsStringByteUnion(typeParam) {
 					// Go's `string | []byte` union — emit the read-only byte-sequence interface
 					// both @string and slice<byte> implement; C# cannot express the "or" directly.
 					// SELF-REFERENTIAL in the type parameter (`IByteSeq<bytes, byte>`, the CRTP

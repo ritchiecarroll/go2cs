@@ -755,6 +755,7 @@
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
     <Project Path="tests/Behavioral/MultiValueReturnOrder/MultiValueReturnOrder.csproj" />
     <Project Path="tests/Behavioral/NamedAnySliceType/NamedAnySliceType.csproj" />
+    <Project Path="tests/Behavioral/NamedApproxStringByteConstraint/NamedApproxStringByteConstraint.csproj" />
     <Project Path="tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />
