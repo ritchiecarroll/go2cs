@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Scratch P-384 field-multiply bench (never committed). JIT arm: Release build, run with DOTNET_TieredCompilation=0.
+       R2R arm: dotnet publish -p:R2RArm=true (self-contained single file, ReadyToRun, composite off as the converted
+       template now sets it). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS8632;CS0168;CS0219</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(R2RArm)' == 'true'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>false</PublishReadyToRunComposite>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/crypto.internal.fips140.nistec.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/fiat/crypto.internal.fips140.nistec.fiat.csproj" />
+    <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+  </ItemGroup>
+</Project>

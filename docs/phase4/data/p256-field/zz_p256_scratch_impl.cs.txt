@@ -1,0 +1,136 @@
+// SCRATCH, never committed: in-tree measurement of a hand-owned p256Mul (R scout).
+using go;
+namespace go.crypto.@internal.fips140.nistec;
+partial class fiat_package {
+internal static void p256Mul(ref p256MontgomeryDomainFieldElement out1, ref p256MontgomeryDomainFieldElement arg1, ref p256MontgomeryDomainFieldElement arg2) {
+    // Inputs are read whole before any output is written: out1 may alias arg1 or arg2 (Mul(t3, t3, t4)).
+    ulong a0 = arg1[0]; ulong a1 = arg1[1]; ulong a2 = arg1[2]; ulong a3 = arg1[3];
+    ulong b0 = arg2[0]; ulong b1 = arg2[1]; ulong b2 = arg2[2]; ulong b3 = arg2[3];
+    ulong t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0;
+    ulong hi, lo, c, k, s, m;
+
+    // Round 0: t += a * b0, then t = (t + m*p) / 2^64 with m = t0.
+    c = 0;
+    hi = Mul64(a0, b0, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    hi = Mul64(a1, b0, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t1 = s; c = hi + k;
+    hi = Mul64(a2, b0, out lo);
+    s = lo + t2; k = ((lo & t2) | ((lo | t2) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    hi = Mul64(a3, b0, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t3 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t4 = s; t5 = k;
+    m = t0;
+    hi = Mul64(m, ulong.MaxValue, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; c = hi + k;
+    hi = Mul64(m, 0xFFFFFFFFUL, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    s = t2 + c; k = ((t2 & c) | ((t2 | c) & ~s)) >> 63; t1 = s; c = k;
+    hi = Mul64(m, 0xFFFFFFFF00000001UL, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t3 = s; t4 = t5 + k; t5 = 0;
+
+    // Round 1: t += a * b1, then t = (t + m*p) / 2^64 with m = t0.
+    c = 0;
+    hi = Mul64(a0, b1, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    hi = Mul64(a1, b1, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t1 = s; c = hi + k;
+    hi = Mul64(a2, b1, out lo);
+    s = lo + t2; k = ((lo & t2) | ((lo | t2) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    hi = Mul64(a3, b1, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t3 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t4 = s; t5 = k;
+    m = t0;
+    hi = Mul64(m, ulong.MaxValue, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; c = hi + k;
+    hi = Mul64(m, 0xFFFFFFFFUL, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    s = t2 + c; k = ((t2 & c) | ((t2 | c) & ~s)) >> 63; t1 = s; c = k;
+    hi = Mul64(m, 0xFFFFFFFF00000001UL, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t3 = s; t4 = t5 + k; t5 = 0;
+
+    // Round 2: t += a * b2, then t = (t + m*p) / 2^64 with m = t0.
+    c = 0;
+    hi = Mul64(a0, b2, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    hi = Mul64(a1, b2, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t1 = s; c = hi + k;
+    hi = Mul64(a2, b2, out lo);
+    s = lo + t2; k = ((lo & t2) | ((lo | t2) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    hi = Mul64(a3, b2, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t3 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t4 = s; t5 = k;
+    m = t0;
+    hi = Mul64(m, ulong.MaxValue, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; c = hi + k;
+    hi = Mul64(m, 0xFFFFFFFFUL, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    s = t2 + c; k = ((t2 & c) | ((t2 | c) & ~s)) >> 63; t1 = s; c = k;
+    hi = Mul64(m, 0xFFFFFFFF00000001UL, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t3 = s; t4 = t5 + k; t5 = 0;
+
+    // Round 3: t += a * b3, then t = (t + m*p) / 2^64 with m = t0.
+    c = 0;
+    hi = Mul64(a0, b3, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    hi = Mul64(a1, b3, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t1 = s; c = hi + k;
+    hi = Mul64(a2, b3, out lo);
+    s = lo + t2; k = ((lo & t2) | ((lo | t2) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    hi = Mul64(a3, b3, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t3 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t4 = s; t5 = k;
+    m = t0;
+    hi = Mul64(m, ulong.MaxValue, out lo);
+    s = lo + t0; k = ((lo & t0) | ((lo | t0) & ~s)) >> 63; c = hi + k;
+    hi = Mul64(m, 0xFFFFFFFFUL, out lo);
+    s = lo + t1; k = ((lo & t1) | ((lo | t1) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t0 = s; c = hi + k;
+    s = t2 + c; k = ((t2 & c) | ((t2 | c) & ~s)) >> 63; t1 = s; c = k;
+    hi = Mul64(m, 0xFFFFFFFF00000001UL, out lo);
+    s = lo + t3; k = ((lo & t3) | ((lo | t3) & ~s)) >> 63; lo = s; hi += k;
+    s = lo + c; k = ((lo & c) | ((lo | c) & ~s)) >> 63; t2 = s; c = hi + k;
+    s = t4 + c; k = ((t4 & c) | ((t4 | c) & ~s)) >> 63; t3 = s; t4 = t5 + k; t5 = 0;
+
+    // t < 2p. Subtract p once with a borrow chain, then select the result by mask: d when the
+    // subtraction did not borrow or t4 carries (t >= p), t otherwise. No branch reads a limb.
+    ulong borrow = 0;
+    ulong d0 = t0 - ulong.MaxValue - borrow; borrow = ((~t0 & ulong.MaxValue) | (~(t0 ^ ulong.MaxValue) & d0)) >> 63;
+    ulong d1 = t1 - 0xFFFFFFFFUL - borrow; borrow = ((~t1 & 0xFFFFFFFFUL) | (~(t1 ^ 0xFFFFFFFFUL) & d1)) >> 63;
+    ulong d2 = t2 - 0x0UL - borrow; borrow = ((~t2 & 0x0UL) | (~(t2 ^ 0x0UL) & d2)) >> 63;
+    ulong d3 = t3 - 0xFFFFFFFF00000001UL - borrow; borrow = ((~t3 & 0xFFFFFFFF00000001UL) | (~(t3 ^ 0xFFFFFFFF00000001UL) & d3)) >> 63;
+    ulong keepD = 0UL - ((borrow ^ 1) | t4);
+    out1[0] = (d0 & keepD) | (t0 & ~keepD);
+    out1[1] = (d1 & keepD) | (t1 & ~keepD);
+    out1[2] = (d2 & keepD) | (t2 & ~keepD);
+    out1[3] = (d3 & keepD) | (t3 & ~keepD);
+}
+internal static void p256Square(ref p256MontgomeryDomainFieldElement out1, ref p256MontgomeryDomainFieldElement arg1) {
+    p256Mul(ref out1, ref arg1, ref arg1);
+}
+}
