@@ -352,3 +352,25 @@ M3 depends on M1 (records and pages) and should land after M2 (the lock is the d
       asset, a design question for COORD;
     - a validation route for x/sys;
     - five more conversion repositories.
+
+---
+
+> **RULED, 2026-11-07 (COORD, on `4b62f179e6`; OQ-4e by the owner): the recommendation is adopted in full.**
+> - **OQ-4a, 4b, 4c: RATIFIED as landed.**
+>   - 4a: one assembly per package, one nupkg per module, with B2's ID.
+>   - 4b: the version-free `pkg/` with both locks.
+>   - 4c: proof copies under `docs/validation/modules/<m>@<v>/`.
+> - **OQ-4d: RATIFIED.** gojq's first run measures the oracle against the read-only module cache, and that reading
+>   goes in the gojq record, stated as the first.
+> - **OQ-4e: RULED BY THE OWNER**, relayed by COORD: "Yes, command line deffered is fine, lib focus for .3".
+>   - The library root for 1.26.10.3: `-ExcludePackage github.com/itchyny/gojq/cli`, on cobra/doc's precedent.
+>     `cmd/gojq` is never packed.
+>   - No driver package filter for 1.26.10.3. The driver still converts and tests `cli`, so seats F and H (P1) and A
+>     (batch 241) stay in 1.26.10.3, so that `cli` validates or is disclosed.
+> - **OQ-4f, 4g, 4h: RATIFIED.**
+>   - timefmt-go v0.1.8 first, then gojq v0.12.19 packed against it with a bare-minimum edge.
+>   - Both are in the 1.26.10.3 wave, with `T` the record commit.
+>   - v0.12.20 and v0.1.9 come later, as new package versions.
+> - **OQ-4i: DEFERRED**, until after 1.26.10.3. x/sys/unix has no windows build, and packing a package that exists on
+>   some GOOS only is a design question. So 1.26.10.3 packs TWO closure packages, timefmt-go and the gojq library.
+>   The plan and the owner's steps are in `PLAN-rebank-1-26-10-3.md` section 8.
