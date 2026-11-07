@@ -60,10 +60,10 @@ internal static void startCheckmarks() {
             builtin.clear(bitmap.b[..]);
         }
     }
-    foreach (var (_, ai) in mheap_.heapArenas) {
+    foreach (var (_, ai) in range(mheap_.heapArenas)) {
         clearCheckmarks(ai);
     }
-    foreach (var (_, ai) in mheap_.userArenaArenas) {
+    foreach (var (_, ai) in range(mheap_.userArenaArenas)) {
         clearCheckmarks(ai);
     }
 
@@ -251,7 +251,7 @@ internal static void checkFinalizersAndCleanups() {
         var lastPtr = (uintptr)0;
         println((@string)"WARNING: LIKELY CLEANUP/FINALIZER ISSUES");
         println();
-        foreach (var (_, r) in reports.slice(0, nreports)) {
+        foreach (var (_, r) in range(reports.slice(0, nreports))) {
             ж<specialCheckFinalizer> ctx = default;
             @string kind = default;
             if (r.sp.kind == _KindSpecialFinalizer) {
@@ -328,11 +328,11 @@ internal static void forEachSpecial(Func<uintptr, ж<mspan>, ж<special>, bool> 
     assertWorldStopped();
 
     // Find the arena and page index into that arena for this shard.
-    foreach (var (_, ai) in mheap_.markArenas) {
+    foreach (var (_, ai) in range(mheap_.markArenas)) {
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
 
         // Construct slice of bitmap which we'll iterate over.
-        foreach (var i in range(ha.pageSpecials[..])) {
+        foreach (var i in range(len(ha.pageSpecials[..]))) {
             // Find set bits, which correspond to spans with specials.
             var specials = atomic.Load8(ha.at(heapArena.ᏑpageSpecials, i));
             if (specials == 0) {

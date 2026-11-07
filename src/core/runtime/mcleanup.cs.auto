@@ -544,7 +544,7 @@ internal static void flush(this ж<cleanupQueue> Ꮡq) {
     // We use the number of coalesced blocks to process as a signal for demand to create
     // new cleanup goroutines.
     ж<cleanupBlock> cb = default;
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         if (pp == nil) {
             // This function is reachable via mallocgc in the
             // middle of procresize, when allp has been resized,
@@ -710,7 +710,7 @@ internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQ
     // N.B. This is inconsistent, but that's intentional. It's just an estimate.
     // Read this _after_ reading executed to decrease the chance that we observe
     // an inconsistency in the statistics (executed > queued).
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         queued += pp.Value.cleanupsQueued;
     }
     return (queued, executed);

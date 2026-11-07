@@ -657,7 +657,7 @@ internal static partial void resyncConn(ж<testing.T> t, net.Conn c) {
     var errCh = new channel<error>(0);
     var errChʗ1 = errCh;
     goǃ(() => {
-        var (_, err) = c.Write(slice<byte>([0xff]));
+        var (_, err) = c.Write([0xff]);
         errChʗ1.ᐸꟷ(err);
     });
     var buf = new slice<byte>(1024);

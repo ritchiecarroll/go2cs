@@ -143,8 +143,8 @@ public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Wri
         n += (int64)nw;
 
         // Write all the data.
-        foreach (var (_, gen) in gens) {
-            foreach (var (_, data) in gen.batches) {
+        foreach (var (_, gen) in range(gens)) {
+            foreach (var (_, data) in range(gen.batches)) {
                 // Write batch data.
                 (nw, err) = w.Write(data);
                 n += (int64)nw;

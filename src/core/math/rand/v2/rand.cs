@@ -221,7 +221,7 @@ public static float32 Float32(this ref Rand r) {
 // in the half-open interval [0,n).
 public static slice<nint> Perm(this ref Rand r, nint n) {
     var p = new slice<nint>(n);
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = i;
     }
     var pʗ1 = p;

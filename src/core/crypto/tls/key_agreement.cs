@@ -129,7 +129,7 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
 // sha1Hash calculates a SHA1 hash over the given byte slices.
 internal static slice<byte> sha1Hash(slice<slice<byte>> slices) {
     var hsha1 = sha1.New();
-    foreach (var (_, Δslice) in slices) {
+    foreach (var (_, Δslice) in range(slices)) {
         hsha1.Write(Δslice);
     }
     return hsha1.Sum(default);
@@ -140,7 +140,7 @@ internal static slice<byte> sha1Hash(slice<slice<byte>> slices) {
 internal static slice<byte> md5SHA1Hash(slice<slice<byte>> slices) {
     var md5sha1 = new slice<byte>(md5.ΔSize + sha1.ΔSize);
     var hmd5 = md5.New();
-    foreach (var (_, Δslice) in slices) {
+    foreach (var (_, Δslice) in range(slices)) {
         hmd5.Write(Δslice);
     }
     copy(md5sha1, hmd5.Sum(default));
@@ -189,7 +189,7 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var hello = ref Ꮡhello.DerefOrNull();
 
-    foreach (var (_, c) in clientHello.supportedCurves) {
+    foreach (var (_, c) in range(clientHello.supportedCurves)) {
         if (Ꮡconfig.supportsCurve(ka.version, c)) {
             ka.curveID = c;
             break;

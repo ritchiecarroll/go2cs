@@ -197,7 +197,7 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
 
     uint32 v = default;
     nint nb = default;
-    foreach (var (i, b) in src) {
+    foreach (var (i, b) in range(src)) {
         if (len(dst) - ndst < 4) {
             return (ndst, nsrc, err);
         }

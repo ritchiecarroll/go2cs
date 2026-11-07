@@ -54,7 +54,7 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     return true;
 }
 
-internal static slice<error> errs = slice<error>([default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc]);
+internal static slice<error> errs = [default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc];
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.

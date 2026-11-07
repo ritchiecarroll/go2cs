@@ -317,7 +317,7 @@ internal static ж<Δindirect<T>> newIndirectNode<T>(ж<Δindirect<T>> parent) {
 }
 
 internal static bool empty<T>(this ref Δindirect<T> i) {
-    foreach (var j in range(i.children)) {
+    foreach (var j in range(len(i.children))) {
         if (Ꮡ(i.children, j).Load() != nil) {
             return false;
         }

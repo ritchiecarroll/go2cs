@@ -126,7 +126,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
         bΔ1.AddBytes(Ꮡs.Value.secret);
     });
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
-        foreach (var (_, extra) in Ꮡs.Value.Extra) {
+        foreach (var (_, extra) in range(Ꮡs.Value.Extra)) {
             var extraʗ1 = extra;
             bΔ2.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
                 bΔ3.AddBytes(extraʗ1);
@@ -149,7 +149,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
         SignedCertificateTimestamps: s.scts
     ));
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
-        foreach (var (_, chain) in Ꮡs.Value.verifiedChains) {
+        foreach (var (_, chain) in range(Ꮡs.Value.verifiedChains)) {
             var chainʗ1 = chain;
             bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
                 // We elide the first certificate because it's always the leaf.
@@ -157,7 +157,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
                     bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢ));
                     return;
                 }
-                foreach (var (_, cert) in chainʗ1[1..]) {
+                foreach (var (_, cert) in range(chainʗ1[1..])) {
                     var certʗ1 = cert;
                     bΔ5.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
                         bΔ6.AddBytes(certʗ1.Raw);
@@ -184,7 +184,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
 
 internal static slice<slice<byte>> certificatesToBytesSlice(slice<ж<Δx509.Certificate>> certs) {
     var s = new slice<slice<byte>>(0, len(certs));
-    foreach (var (_, c) in certs) {
+    foreach (var (_, c) in range(certs)) {
         s = append(s, c.Raw);
     }
     return s;
@@ -253,7 +253,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     default: {
         return (default, errors.New(tlsInvalidSessionˢ));
     }}
-    foreach (var (_, certΔ1) in cert.ΔCertificate) {
+    foreach (var (_, certΔ1) in range(cert.ΔCertificate)) {
         var (c, err) = globalCertCache.newCert(certΔ1);
         if (err != nil) {
             return (default, err);
@@ -405,7 +405,7 @@ internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypt
     var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
     var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
 
-    foreach (var (_, vᴛ1) in ticketKeys) {
+    foreach (var (_, vᴛ1) in range(ticketKeys)) {
         var key = vᴛ1.ΔClone();
 
         var mac = hmac.New(sha256.New, key.hmacKey[..]);

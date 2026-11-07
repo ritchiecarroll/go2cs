@@ -177,7 +177,7 @@ internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs;
 internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs)); }
 
 [GoInit] internal static void initΔ1() {
-    foreach (var (_, eku) in extKeyUsageOIDs) {
+    foreach (var (_, eku) in range(extKeyUsageOIDs)) {
         windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(eku.oid.String() + "\x00");
     }
 }
@@ -217,7 +217,7 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     // double-checking all ECDSA signatures. If the system was tricked into
     // using spoofed parameters, the signature will be invalid for the correct
     // ones we parsed. (We don't support custom curves ourselves.)
-    foreach (var (i, parent) in chain[1..]) {
+    foreach (var (i, parent) in range(chain[1..])) {
         if (parent.PublicKeyAlgorithm != ECDSA) {
             continue;
         }
@@ -249,10 +249,10 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         var keyUsages = opts.KeyUsages;
         if (builtin.len(keyUsages) == 0) {
-            keyUsages = slice<ExtKeyUsage>([ExtKeyUsageServerAuth]);
+            keyUsages = [ExtKeyUsageServerAuth];
         }
         var oids = new slice<ж<byte>>(0, builtin.len(keyUsages));
-        foreach (var (_, eku) in keyUsages) {
+        foreach (var (_, eku) in range(keyUsages)) {
             if (eku == ExtKeyUsageAny) {
                 oids = default;
                 break;
@@ -297,7 +297,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         var lqCtxCount = topCtx.LowerQualityChainCount; if (lqCtxCount > 0) {
             var lqCtxs = @unsafe.Slice(topCtx.LowerQualityChains, lqCtxCount);
-            foreach (var (_, ctx) in lqCtxs) {
+            foreach (var (_, ctx) in range(lqCtxs)) {
                 var (chainΔ1, errΔ1) = verifyChain(Ꮡc, ctx, Ꮡopts);
                 if (errΔ1 == nil) {
                     chains = append(chains, chainΔ1);

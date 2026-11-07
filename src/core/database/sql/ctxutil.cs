@@ -166,7 +166,7 @@ private static readonly @string sqlDriverDoesNotSupportˢ3ᵇ = "sql: driver doe
 
 internal static (slice<driverꓸValue>, error) namedValueToValue(slice<driver.NamedValue> named) {
     var dargs = new slice<driverꓸValue>(len(named));
-    foreach (var (n, param) in named) {
+    foreach (var (n, param) in range(named)) {
         if (len(param.Name) > 0) {
             return (default, errors.New(sqlDriverDoesNotSupportˢ3));
         }

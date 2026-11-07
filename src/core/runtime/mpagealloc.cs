@@ -479,7 +479,7 @@ internal static void enableChunkHugePages(this ref pageAlloc Δp) {
     // For a 1 GiB contiguous heap, a 48-bit address space, 13 L1 bits, a palloc chunk size
     // of 4 MiB, and adherence to the default set of heap address hints, this will result in
     // exactly 1 call to sysHugePage.
-    foreach (var (_, r) in Δp.inUse.ranges) {
+    foreach (var (_, r) in range(Δp.inUse.ranges)) {
         for (nuint i = chunkIndex(r.@base.addr()).l1(); i < chunkIndex(r.limit.addr() - 1).l1(); i++) {
             // N.B. We can assume that p.chunks[i] is non-nil and in a mapped part of p.chunks
             // because it's derived from inUse, which never shrinks.
@@ -528,7 +528,7 @@ internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npage
         if (alloc) {
             builtin.clear(whole);
         } else {
-            foreach (var i in range(whole)) {
+            foreach (var i in range(len(whole))) {
                 whole[i] = freeChunkSum;
             }
         }

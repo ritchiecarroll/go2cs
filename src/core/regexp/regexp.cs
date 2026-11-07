@@ -240,7 +240,7 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
     m.p = re.prog;
     if (cap(m.matchcap) < re.matchcap) {
         m.matchcap = new slice<nint>(re.matchcap);
-        foreach (var (_, t) in m.pool) {
+        foreach (var (_, t) in range(m.pool)) {
             t.cap = new slice<nint>(re.matchcap);
         }
     }
@@ -279,7 +279,7 @@ internal static nint minInputLen(ref syntax.Regexp re) {
     }
     case var ᴛ when ᴛ == syntax.OpLiteral: {
         nint l = 0;
-        foreach (var (_, r) in re.Rune) {
+        foreach (var (_, r) in range(re.Rune)) {
             if (r == utf8.RuneError) {
                 l++;
             } else {
@@ -296,7 +296,7 @@ internal static nint minInputLen(ref syntax.Regexp re) {
     }
     case var ᴛ when ᴛ == syntax.OpConcat: {
         nint l = 0;
-        foreach (var (_, sub) in re.Sub) {
+        foreach (var (_, sub) in range(re.Sub)) {
             l += minInputLen(ref (sub).DerefOrNull());
         }
         return l;
@@ -304,7 +304,7 @@ internal static nint minInputLen(ref syntax.Regexp re) {
     case var ᴛ when ᴛ == syntax.OpAlternate: {
         nint l = minInputLen(ref (re.Sub[0]).DerefOrNull());
         nint lnext = default;
-        foreach (var (_, sub) in re.Sub[1..]) {
+        foreach (var (_, sub) in range(re.Sub[1..])) {
             lnext = minInputLen(ref (sub).DerefOrNull());
             if (lnext < l) {
                 l = lnext;
@@ -366,7 +366,7 @@ public static slice<@string> SubexpNames(this ref Regexp re) {
 // in the regular expression.
 public static nint SubexpIndex(this ref Regexp re, @string name) {
     if (name != ""u8) {
-        foreach (var (i, s) in re.subexpNames) {
+        foreach (var (i, s) in range(re.subexpNames)) {
             if (name == s) {
                 return i;
             }
@@ -714,7 +714,7 @@ internal static bool special(byte b) {
 }
 
 [GoInit] internal static void init() {
-    foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$"u8)) {
+    foreach (var (_, b) in range(slice<byte>(@"\.+*?()|[]{}^$"u8))) {
         specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)(b / 16)));
     }
 }
@@ -894,7 +894,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
         return default;
     }
     var ret = new slice<slice<byte>>(1 + re.numSubexp);
-    foreach (var i in range(ret)) {
+    foreach (var i in range(len(ret))) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = b.slice(a[2 * i], a[2 * i + 1], a[2 * i + 1]);
         }
@@ -960,7 +960,7 @@ internal static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string 
                 }
             }
         } else {
-            foreach (var (i, namei) in re.subexpNames) {
+            foreach (var (i, namei) in range(re.subexpNames)) {
                 if (name == namei && 2 * i + 1 < len(match) && match[2 * i] >= 0) {
                     if (bsrc != nil) {
                         dst = appendꓸꓸꓸ(dst, bsrc.slice(match[2 * i], match[2 * i + 1]));
@@ -1058,7 +1058,7 @@ public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡre, @string s
         return default;
     }
     var ret = new slice<@string>(1 + re.numSubexp);
-    foreach (var i in range(ret)) {
+    foreach (var i in range(len(ret))) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = s.slice(a[2 * i], a[2 * i + 1]);
         }
@@ -1178,7 +1178,7 @@ public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, s
             Ꮡresult.ValueSlot = new slice<slice<slice<byte>>>(0, startSize);
         }
         var Δslice = new slice<slice<byte>>(len(match) / 2);
-        foreach (var j in range(Δslice)) {
+        foreach (var j in range(len(Δslice))) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = bʗ1.slice(match[2 * j], match[2 * j + 1], match[2 * j + 1]);
             }
@@ -1220,7 +1220,7 @@ public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre,
             Ꮡresult.ValueSlot = new slice<slice<@string>>(0, startSize);
         }
         var Δslice = new slice<@string>(len(match) / 2);
-        foreach (var j in range(Δslice)) {
+        foreach (var j in range(len(Δslice))) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = s.slice(match[2 * j], match[2 * j + 1]);
             }
@@ -1273,7 +1273,7 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
     }
 
     if (len(re.expr) > 0 && len(s) == 0) {
-        return slice<@string>([""]);
+        return [""];
     }
 
     var matches = Ꮡre.FindAllStringIndex(s, n);
@@ -1281,7 +1281,7 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
 
     nint beg = 0;
     nint end = 0;
-    foreach (var (_, match) in matches) {
+    foreach (var (_, match) in range(matches)) {
         if (n > 0 && len(strings) >= n - 1) {
             break;
         }

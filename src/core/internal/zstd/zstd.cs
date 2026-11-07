@@ -266,7 +266,7 @@ retry:
     if (dictionaryIdSize != 0) {
         var dictionaryId = r.scratch.slice(windowDescriptorSize, windowDescriptorSize + dictionaryIdSize);
         // Allow only zero Dictionary ID.
-        foreach (var (_, b) in dictionaryId) {
+        foreach (var (_, b) in range(dictionaryId)) {
             if (b != 0) {
                 return r.makeError(relativeOffset, dictionariesAreNotˢ);
             }
@@ -446,7 +446,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         relativeOffset++;
         var v = r.scratch[0];
-        foreach (var i in range(r.buffer)) {
+        foreach (var i in range(builtin.len(r.buffer))) {
             r.buffer[i] = v;
         }
         r.blockOffset += (int64)relativeOffset;

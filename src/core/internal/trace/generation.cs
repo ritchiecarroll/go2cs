@@ -312,7 +312,7 @@ internal static error validateStackStrings(ж<dataTable<stackID, stack>> Ꮡstac
     ref var err = ref heap<error>(out var Ꮡerr);
     var framesʗ1 = frames;
     stacks.forEach((stackID id, stack stk) => {
-        foreach (var (_, pc) in stk.pcs) {
+        foreach (var (_, pc) in range(stk.pcs)) {
             var (frame, ok) = framesʗ1[pc, ꟷ];
             if (!ok) {
                 Ꮡerr.ValueSlot = fmt.Errorf("found unknown pc %x for stack %d"u8, pc, id);
@@ -643,7 +643,7 @@ internal static error addExperimentalBatch(map<tracev2.Experiment, slice<Experim
 
 internal static void fixUpCPUSamples(slice<cpuSample> samples, frequency freq) {
     // Fix up the CPU sample timestamps.
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         var s = Ꮡ(samples, i);
         s.time = freq.mul((timestamp)(uint64)s.time);
     }

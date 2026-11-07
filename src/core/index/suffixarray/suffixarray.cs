@@ -282,11 +282,11 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
         if (n > 0) {
             result = new slice<nint>(n);
             if (matches.int32 != nil) {
-                foreach (var i in range(result)) {
+                foreach (var i in range(builtin.len(result))) {
                     result[i] = (nint)matches.int32[i];
                 }
             } else {
-                foreach (var i in range(result)) {
+                foreach (var i in range(builtin.len(result))) {
                     result[i] = (nint)matches.int64[i];
                 }
             }
@@ -336,7 +336,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
             result = new slice<slice<nint>>(builtin.len(indices));
             nint count = 0;
             nint prev = 0;
-            foreach (var (_, i) in indices) {
+            foreach (var (_, i) in range(indices)) {
                 if (count == n) {
                     break;
                 }
@@ -379,7 +379,7 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
         slices.Sort<slice<nint>, nint>(indices);
         result = result[0..0];
         nint prev = 0;
-        foreach (var (_, i) in indices) {
+        foreach (var (_, i) in range(indices)) {
             if (builtin.len(result) == n) {
                 break;
             }

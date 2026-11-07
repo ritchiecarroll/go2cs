@@ -1154,7 +1154,7 @@ internal static error writeChangeCipherRecord(this ж<Conn> Ꮡc) {
     try {
         Ꮡc.Ꮡout.of(halfConn.ᏑMutex).Lock();
         ᒐd1 = true;
-        var (_, err) = Ꮡc.writeRecordLocked(recordTypeChangeCipherSpec, slice<byte>([1]));
+        var (_, err) = Ꮡc.writeRecordLocked(recordTypeChangeCipherSpec, [1]);
         return err;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

@@ -88,7 +88,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
 
     // Iterate through the trace, tracking mutator utilization.
     ж<ΔEvent> lastEv = default;
-    foreach (var i in range(events)) {
+    foreach (var i in range(len(events))) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
 
@@ -107,7 +107,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             if (len(ps) > gomaxprocs) {
                 if ((UtilFlags)(flags & UtilPerProc) != 0) {
                     // End each P's series.
-                    foreach (var (_, p) in ps.slice(gomaxprocs)) {
+                    foreach (var (_, p) in range(ps.slice(gomaxprocs))) {
                         @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)ev.Time(), 0D));
                     }
                 }
@@ -269,7 +269,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             if (stw > 0) {
                 gcPs = len(ps);
             } else {
-                foreach (var iΔ1 in range(ps)) {
+                foreach (var iΔ1 in range(len(ps))) {
                     if (ps[iΔ1].gc > 0) {
                         gcPs++;
                     }
@@ -282,7 +282,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             @out[0] = addUtil(@out[0], muΔ1);
         } else {
             // Check for per-P utilization changes.
-            foreach (var iΔ2 in range(ps)) {
+            foreach (var iΔ2 in range(len(ps))) {
                 var p = Ꮡ(ps, iΔ2);
                 var util = 1.0D;
                 if (stw > 0 || p.gc > 0) {
@@ -303,7 +303,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     // shouldn't matter since no window should extend beyond this,
     // but using 0 is symmetric with the start of the trace.
     var mu = new MutatorUtil((int64)lastEv.Time(), 0D);
-    foreach (var i in range(ps)) {
+    foreach (var i in range(len(ps))) {
         @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
     }
     @out = move2heap(outᴷ, @out);
@@ -374,7 +374,7 @@ partial struct mmuBand {
 // function.
 public static ж<MMUCurve> NewMMUCurve(slice<slice<MutatorUtil>> utils) {
     var series = new slice<mmuSeries>(len(utils));
-    foreach (var (i, util) in utils) {
+    foreach (var (i, util) in range(utils)) {
         series[i] = newMMUSeries(util);
     }
     return Ꮡ(new MMUCurve(series));
@@ -389,7 +389,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     var sums = new slice<totalUtil>(len(util));
     MutatorUtil prev = default;
     totalUtil sum = default;
-    foreach (var (j, u) in util) {
+    foreach (var (j, u) in range(util)) {
         sum += totalUtilOf(prev.Util, u.Time - prev.Time);
         sums[j] = sum;
         prev = u;
@@ -416,7 +416,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     var bands = new slice<mmuBand>(numBands + 1);
     ref var s = ref heap<mmuSeries>(new mmuSeries(util, sums, bands, bandDur), out var Ꮡs);
     var leftSum = new integrator(Ꮡs, 0);
-    foreach (var i in range(bands)) {
+    foreach (var i in range(len(bands))) {
         var (startTime, endTime) = s.bandTime(i);
         var cumUtil = leftSum.advance(startTime);
         nint predIdx = leftSum.pos;
@@ -564,7 +564,7 @@ internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 m
         // Check if there's any overlapping window
         // already in the heap and keep whichever is
         // worse.
-        foreach (var (i, ui) in acc.wHeap) {
+        foreach (var (i, ui) in range<UtilWindow>(acc.wHeap)) {
             if (timeΔ1 + (int64)window > ui.Time && ui.Time + (int64)window > timeΔ1) {
                 if (ui.MutatorUtil <= mu) {
                     // Keep the first window.
@@ -649,7 +649,7 @@ public static slice<UtilWindow> /*worst*/ Examples(this ref MMUCurve c, time.Dur
 // more efficient to use the MMU method.)
 public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slice<float64> quantiles) {
     if (len(quantiles) == 0) {
-        return slice<float64>([]);
+        return [];
     }
 
     // Each unrefined band contributes a known total mass to the
@@ -665,7 +665,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
     //
     // First, find the highest desired distribution quantile.
     var maxQ = quantiles[0];
-    foreach (var (_, q) in quantiles) {
+    foreach (var (_, q) in range(quantiles)) {
         if (q > maxQ) {
             maxQ = q;
         }
@@ -677,7 +677,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
     // minus the window size. Using this, we can compute the mass
     // corresponding to quantile maxQ.
     int64 duration = default;
-    foreach (var (_, s) in c.series) {
+    foreach (var (_, s) in range(c.series)) {
         var duration1 = s.util[len(s.util) - 1].Time - s.util[0].Time;
         if (duration1 >= (int64)window) {
             duration += duration1 - (int64)window;
@@ -693,7 +693,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
 
     // Evaluate the quantiles on the accumulated MUD.
     var @out = new slice<float64>(len(quantiles));
-    foreach (var i in range(@out)) {
+    foreach (var i in range(len(@out))) {
         var (mu, _) = acc.mud.invCumulativeSum((float64)duration * quantiles[i]);
         if (math.IsNaN(mu)) {
             // There are a few legitimate ways this can
@@ -726,7 +726,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
 
     ref var bandU = ref heap<bandUtilHeap>(out var ᏑbandU);
     var windows = new slice<time.Duration>(len(c.series));
-    foreach (var (i, vᴛ1) in c.series) {
+    foreach (var (i, vᴛ1) in range(c.series)) {
         var s = vᴛ1;
 
         windows[i] = window;
@@ -773,7 +773,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         nUtil = 0;
     }
     var bandU = new slice<bandUtil>(nUtil);
-    foreach (var i in range(bandU)) {
+    foreach (var i in range(len(bandU))) {
         // To compute the worst-case MU, we assume the minimum
         // for any bands that are only partially overlapped by
         // some window and the mean for any bands that are
@@ -939,7 +939,7 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
 // next returns the smallest time t' > time of a change in the
 // utilization function.
 internal static int64 next(this ref integrator @in, int64 time) {
-    foreach (var (_, u) in @in.u.util.slice(@in.pos)) {
+    foreach (var (_, u) in range(@in.u.util.slice(@in.pos))) {
         if (u.Time > time) {
             return u.Time;
         }

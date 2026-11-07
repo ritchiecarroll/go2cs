@@ -774,7 +774,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                 if (d.errorContext == nil) {
                     d.errorContext = @new<errorContext>();
                 }
-                foreach (var (i, ind) in f.index) {
+                foreach (var (i, ind) in range(f.index)) {
                     if (subv.Kind() == reflect.ΔPointer) {
                         if (subv.IsNil()) {
                             // If a struct embeds a pointer to an unexported type,
@@ -1304,7 +1304,7 @@ internal static rune getu4(slice<byte> s) {
         return -1;
     }
     rune r = default;
-    foreach (var (_, vᴛ1) in s[2..6]) {
+    foreach (var (_, vᴛ1) in range(s[2..6])) {
         var c = vᴛ1;
 
         switch (ᐧ) {

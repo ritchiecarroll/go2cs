@@ -275,7 +275,7 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
 
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
-[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = slice<Func<ж<mutator>, slice<byte>, slice<byte>>>([
+[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = [
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,
@@ -294,7 +294,7 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
     byteSliceOverwriteConstantBytes,
     byteSliceShuffleBytes,
     byteSliceSwapBytes
-]); }
+]; }
 
 internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
     GoFrame ᒐ = default;
@@ -322,18 +322,18 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
     finally { ᒐ.Run(); }
 }
 
-internal static slice<int8> interesting8 = slice<int8>([(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127]);
-internal static slice<int16> interesting16 = slice<int16>([(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767]);
-internal static slice<int32> interesting32 = slice<int32>([-2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647]);
+internal static slice<int8> interesting8 = [(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127];
+internal static slice<int16> interesting16 = [(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767];
+internal static slice<int32> interesting32 = [-2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647];
 
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
 [GoInit] internal static void initΔ1() {
-    foreach (var (_, v) in interesting8) {
+    foreach (var (_, v) in range(interesting8)) {
         interesting16 = append(interesting16, (int16)v);
     }
-    foreach (var (_, v) in interesting16) {
+    foreach (var (_, v) in range(interesting16)) {
         interesting32 = append(interesting32, (int32)v);
     }
 }

@@ -11,7 +11,7 @@ partial class asmgen_package {
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: slice<@string>([
+    regs: [
         // R0 is set to 0.
         // R1 is LR.
         // R2 is ???
@@ -23,7 +23,7 @@ partial class asmgen_package {
         "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19",
         "R20", "R21", "R23", "R24", "R25", "R26", "R27",
         "R31"
-    ]),
+    ],
     reg0: "R0",
     regCarry: "R28",
     regAltCarry: "R29",

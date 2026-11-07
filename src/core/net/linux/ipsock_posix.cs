@@ -70,7 +70,7 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
             probes = probes[..1];
             break;
         }}
-        foreach (var i in range(probes)) {
+        foreach (var i in range(len(probes))) {
             var (sΔ1, errΔ1) = sysSocket(syscall.AF_INET6, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
             if (errΔ1 != nil) {
                 continue;

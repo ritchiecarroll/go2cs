@@ -204,7 +204,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
             keyStream = keyStream.slice(0, len(src));
         }
         _ = src[len(keyStream) - 1]; // bounds check elimination hint
-        foreach (var (i, b) in keyStream) {
+        foreach (var (i, b) in range(keyStream)) {
             dst[i] = (byte)(src[i] ^ b);
         }
         s.len -= len(keyStream);

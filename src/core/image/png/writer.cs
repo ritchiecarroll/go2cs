@@ -201,7 +201,7 @@ internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) {
         return;
     }
     nint last = -1;
-    foreach (var (i, c) in p) {
+    foreach (var (i, c) in range<color.Color>(p)) {
         var c1 = color.NRGBAModel.Convert(c)._<color.NRGBA>();
         e.tmp[3 * i + 0] = c1.R;
         e.tmp[3 * i + 1] = c1.G;
@@ -397,7 +397,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         // The +1 is for the per-row filter type, which is at cr[*][0].
         var b = m.Bounds();
         nint sz = 1 + (bitsPerPixel * b.Dx() + 7) / 8;
-        foreach (var i in range(e.cr)) {
+        foreach (var i in range(len(e.cr))) {
             if (cap(e.cr[i]) < sz) {
                 e.cr[i] = new slice<uint8>(sz);
             } else {

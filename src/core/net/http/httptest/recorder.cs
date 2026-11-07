@@ -241,7 +241,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
     {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
             res.Trailer = new httpꓸHeader(len(trailers));
-            foreach (var (_, k) in trailers) {
+            foreach (var (_, k) in range(trailers)) {
                 foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ",").Invoke)) {
                     var kΔ1 = iᴛ1;
                     kΔ1 = http.CanonicalHeaderKey(textproto.TrimString(kΔ1));
@@ -267,7 +267,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         if (res.Trailer == nil) {
             res.Trailer = new httpꓸHeader(0);
         }
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             res.Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
         }
     }

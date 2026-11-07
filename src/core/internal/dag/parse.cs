@@ -110,12 +110,12 @@ public static (ж<Graph>, error) Parse(@string dag) {
         var a = aʗp.sslice();
         Ꮡerrors.ValueSlot = append(Ꮡerrors.ValueSlot, fmt.Sprintf(format, a.ꓸꓸꓸ));
     }
-    foreach (var (_, r) in rules) {
+    foreach (var (_, r) in range(rules)) {
         if (r.op == "!<"u8) {
             disallowed = append(disallowed, r);
             continue;
         }
-        foreach (var (_, def) in r.def) {
+        foreach (var (_, def) in range(r.def)) {
             if (def == "NONE"u8) {
                 errorf("NONE cannot be a predecessor");
                 continue;
@@ -123,7 +123,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
             if (!g.addNode(def)) {
                 errorf("multiple definitions for %s", def);
             }
-            foreach (var (_, less) in r.less) {
+            foreach (var (_, less) in range(r.less)) {
                 if (less == "NONE"u8) {
                     continue;
                 }
@@ -146,9 +146,9 @@ public static (ж<Graph>, error) Parse(@string dag) {
     }
 
     // Complete transitive closure.
-    foreach (var (_, k) in g.Nodes) {
-        foreach (var (_, i) in g.Nodes) {
-            foreach (var (_, j) in g.Nodes) {
+    foreach (var (_, k) in range(g.Nodes)) {
+        foreach (var (_, i) in range(g.Nodes)) {
+            foreach (var (_, j) in range(g.Nodes)) {
                 if (i != k && k != j && g.HasEdge(i, k) && g.HasEdge(k, j)) {
                     if (i == j) {
                         // Can only happen along with a "use of X before deps" error above,
@@ -163,9 +163,9 @@ public static (ж<Graph>, error) Parse(@string dag) {
     }
 
     // Check negative assertions against completed allowed graph.
-    foreach (var (_, bad) in disallowed) {
-        foreach (var (_, less) in bad.less) {
-            foreach (var (_, def) in bad.def) {
+    foreach (var (_, bad) in range(disallowed)) {
+        foreach (var (_, less) in range(bad.less)) {
+            foreach (var (_, def) in range(bad.def)) {
                 if (g.HasEdge(def, less)) {
                     errorf("graph edge assertion failed: %s !< %s", less, def);
                 }

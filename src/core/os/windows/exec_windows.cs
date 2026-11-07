@@ -134,7 +134,7 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     @string cmd = windows.UTF16PtrToString(syscall.GetCommandLine());
     if (len(cmd) == 0) {
         var (arg0, _) = Executable();
-        Args = slice<@string>([arg0]);
+        Args = [arg0];
     } else {
         Args = commandLineToArgv(cmd);
     }

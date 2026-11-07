@@ -45,7 +45,7 @@ public static (@string, error) Ptsname(nint fd) {
     if (errno != 0) {
         return ("", errno);
     }
-    foreach (var (i, c) in buf) {
+    foreach (var (i, c) in range(buf)) {
         if (c == 0) {
             buf = buf.slice(0, i);
             break;

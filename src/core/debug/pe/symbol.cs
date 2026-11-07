@@ -59,7 +59,7 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
     }
     var syms = new slice<ж<Symbol>>(0);
     var aux = (uint8)0;
-    foreach (var (_, vᴛ1) in allsyms) {
+    foreach (var (_, vᴛ1) in range(allsyms)) {
         var sym = vᴛ1.ΔClone();
 
         if (aux > 0) {

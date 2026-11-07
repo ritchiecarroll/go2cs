@@ -277,7 +277,7 @@ internal static error setExtensionType(@string extension, @string mimeType) {
         var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
             exts = ei._<slice<@string>>();
         }
-        foreach (var (_, v) in exts) {
+        foreach (var (_, v) in range(exts)) {
             if (v == extLower) {
                 return default;
             }

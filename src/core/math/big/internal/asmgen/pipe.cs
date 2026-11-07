@@ -139,10 +139,10 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
 
     // Load the actual pointers.
     p.loaded = true;
-    foreach (var (_, name) in p.f.inputs) {
+    foreach (var (_, name) in range(p.f.inputs)) {
         p.inPtr = append(p.inPtr, (RegPtr)p.f.Arg(name + "_base"u8));
     }
-    foreach (var (_, name) in p.f.outputs) {
+    foreach (var (_, name) in range(p.f.outputs)) {
         p.outPtr = append(p.outPtr, (RegPtr)p.f.Arg(name + "_base"u8));
     }
 
@@ -169,10 +169,10 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
         a.Comment(useCounterAsNegativeˢ);
         p.indexCounter = -1;
         p.index = n;
-        foreach (var (_, ptr) in p.inPtr) {
+        foreach (var (_, ptr) in range(p.inPtr)) {
             a.AddWords(n, ptr, ptr);
         }
-        foreach (var (_, ptr) in p.outPtr) {
+        foreach (var (_, ptr) in range(p.outPtr)) {
             a.AddWords(n, ptr, ptr);
         }
         a.Neg(n, n);
@@ -193,10 +193,10 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
         // but it's less important since once the pointers go off the slice
         // in a forward loop, the loop is over and the slice won't be accessed anymore.)
         a.Comment(runLoopBackwardˢ);
-        foreach (var (_, ptr) in p.inPtr) {
+        foreach (var (_, ptr) in range(p.inPtr)) {
             a.AddWords(n, ptr, ptr);
         }
-        foreach (var (_, ptr) in p.outPtr) {
+        foreach (var (_, ptr) in range(p.outPtr)) {
             a.AddWords(n, ptr, ptr);
         }
         break;
@@ -213,7 +213,7 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
 public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
     var a = p.f.Asm;
     var regs = new slice<slice<ΔReg>>(len(p.inPtr));
-    foreach (var (i, vᴛ1) in p.inPtr) {
+    foreach (var (i, vᴛ1) in range(p.inPtr)) {
         ref var ptr = ref heap(new RegPtr(), out var Ꮡptr);
         ptr = vᴛ1;
 
@@ -221,7 +221,7 @@ public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
         switch (ᐧ) {
         case {} when a.Arch.loadIncN != nil: {
             // Load from memory and advance pointers at the same time.
-            foreach (var j in range(regs[i])) {
+            foreach (var j in range(len(regs[i]))) {
                 regs[i][j] = p.f.Asm.Reg();
             }
             if (p.backward) {
@@ -272,7 +272,7 @@ public static void StoreN(this ref ΔPipe p, slice<slice<ΔReg>> regs) {
         p.f.Asm.Fatalf("wrong number of output rows");
     }
     nint n = len(regs[0]);
-    foreach (var (i, vᴛ1) in p.outPtr) {
+    foreach (var (i, vᴛ1) in range(p.outPtr)) {
         ref var ptr = ref heap(new RegPtr(), out var Ꮡptr);
         ptr = vᴛ1;
 
@@ -289,7 +289,7 @@ public static void StoreN(this ref ΔPipe p, slice<slice<ΔReg>> regs) {
         default: {
             // Store to memory using offsets.
             // We'll advance the pointers or the index counter later.
-            foreach (var (j, r) in regs[i]) {
+            foreach (var (j, r) in range(regs[i])) {
                 nint off = p.writeOff + j;
                 if (p.backward) {
                     off = -(off + 1);
@@ -328,10 +328,10 @@ internal static void advancePtrs(this ref ΔPipe p, nint step) {
             if (p.backward) {
                 step = -step;
             }
-            foreach (var (_, ptr) in p.inPtr) {
+            foreach (var (_, ptr) in range(p.inPtr)) {
                 a.Add(a.Imm(step * a.Arch.WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
             }
-            foreach (var (_, ptr) in p.outPtr) {
+            foreach (var (_, ptr) in range(p.outPtr)) {
                 a.Add(a.Imm(step * a.Arch.WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
             }
         }
@@ -432,7 +432,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
     p.factors = factors;
     p.counts = new slice<ΔReg>(len(factors));
     if (len(factors) == 0) {
-        factors = slice<nint>([1]);
+        factors = [1];
     }
 
     // Compute the loop lengths for each unrolled section into separate registers.
@@ -449,7 +449,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
     case {} when factors[0] is 1: {
         // increasing loop factors
         nint div = 1;
-        foreach (var (i, vᴛ1) in factors[1..]) {
+        foreach (var (i, vᴛ1) in range(factors[1..])) {
             var f = vᴛ1;
 
             if (f <= factors[i]) {
@@ -470,7 +470,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
     }
     case {} when factors[len(factors) - 1] is 1: {
         // decreasing loop factors
-        foreach (var (i, f) in factors.slice(0, len(factors) - 1)) {
+        foreach (var (i, f) in range(factors.slice(0, len(factors) - 1))) {
             if (f <= factors[i + 1]) {
                 a.Fatalf("non-decreasing factors %v", factors);
             }
@@ -489,11 +489,11 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
 
 // Done frees all the registers allocated by the pipe.
 public static void Done(this ref ΔPipe p) {
-    foreach (var (_, ptr) in p.inPtr) {
+    foreach (var (_, ptr) in range(p.inPtr)) {
         p.f.Asm.Free((ΔReg)ptr);
     }
     p.inPtr = default;
-    foreach (var (_, ptr) in p.outPtr) {
+    foreach (var (_, ptr) in range(p.outPtr)) {
         p.f.Asm.Free((ΔReg)ptr);
     }
     p.outPtr = default;
@@ -524,7 +524,7 @@ public static void Loop(this ref ΔPipe p, Action<slice<slice<ΔReg>>, slice<sli
     if (p.factors == nil) {
         p.f.Asm.Fatalf("Pipe.Start not called");
     }
-    foreach (var (i, factor) in p.factors) {
+    foreach (var (i, factor) in range(p.factors)) {
         var n = p.counts[i];
         p.unroll(n, factor, block);
         if (i < len(p.factors) - 1) {
@@ -579,7 +579,7 @@ internal static void unroll(this ref ΔPipe p, ΔReg n, nint factor, Action<slic
         nint batch = min(factor - done, p.maxColumns);
         var regs = a.RegsUsed();
         var @out = new slice<slice<ΔReg>>(len(p.outPtr));
-        foreach (var i in range(@out)) {
+        foreach (var i in range(len(@out))) {
             @out[i] = new slice<ΔReg>(batch);
         }
         var @in = p.LoadN(batch);

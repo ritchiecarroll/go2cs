@@ -76,7 +76,7 @@ public static T Or<T>(params Span<T> valsʗp) {
     var vals = valsʗp.sslice();
 
     T zero = GoZero<T>();
-    foreach (var (_, val) in vals) {
+    foreach (var (_, val) in range(vals)) {
         if (!AreEqual(val, zero)) {
             return val;
         }

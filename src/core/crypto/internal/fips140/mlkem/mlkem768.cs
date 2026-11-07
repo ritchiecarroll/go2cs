@@ -97,12 +97,12 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
     var b = new slice<byte>(0, decapsulationKeySize768);
 
     // ByteEncode₁₂(s)
-    foreach (var i in range(dk.s)) {
+    foreach (var i in range(len(dk.s))) {
         b = polyByteEncode(b, dk.s[i]);
     }
 
     // ByteEncode₁₂(t) || ρ
-    foreach (var i in range(dk.t)) {
+    foreach (var i in range(len(dk.t))) {
         b = polyByteEncode(b, dk.t[i]);
     }
     b = appendꓸꓸꓸ(b, dk.ρ[..]);
@@ -140,7 +140,7 @@ public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
 }
 
 internal static slice<byte> bytes(this ref EncapsulationKey768 ek, slice<byte> b) {
-    foreach (var i in range(ek.t)) {
+    foreach (var i in range(len(ek.t))) {
         b = polyByteEncode(b, ek.t[i]);
     }
     b = appendꓸꓸꓸ(b, ek.ρ[..]);
@@ -219,7 +219,7 @@ public static (ж<DecapsulationKey768>, error) TestingOnlyNewDecapsulationKey768
     }
 
     var dk = Ꮡ(new DecapsulationKey768());
-    foreach (var i in range(dk.s)) {
+    foreach (var i in range(len(dk.s))) {
         error errΔ1 = default;
         (dk.s[i], errΔ1) = polyByteDecode<nttElement>(b[..(int)(encodingSize12)]);
         if (errΔ1 != nil) {
@@ -267,7 +267,7 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
 
     var g = sha3.New512();
     g.Write(d[..]);
-    g.Write(slice<byte>([k])); // Module dimension as a domain separator.
+    g.Write([k]); // Module dimension as a domain separator.
     var G = g.Sum(new slice<byte>(0, 64));
     var (ρ, σ) = (G[..32], G[32..]);
     dk.ρ = new array<byte>(ρ, 32);
@@ -286,7 +286,7 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
         N++;
     }
     var e = GoReflect.WithElemDims(new slice<nttElement>(k), 256);
-    foreach (var i in range(e)) {
+    foreach (var i in range(len(e))) {
         e[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
@@ -397,7 +397,7 @@ internal static (ж<EncapsulationKey768>, error) parseEK(ж<EncapsulationKey768>
     h.Write(ekPKE);
     h.Sum(ek.h[..0]);
 
-    foreach (var i in range(ek.t)) {
+    foreach (var i in range(len(ek.t))) {
         error err = default;
         (ek.t[i], err) = polyByteDecode<nttElement>(ekPKE[..(int)(encodingSize12)]);
         if (err != nil) {
@@ -425,20 +425,20 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
 
     byte N = default;
     var (r, e1) = (GoReflect.WithElemDims(new slice<nttElement>(k), 256), GoReflect.WithElemDims(new slice<ringElement>(k), 256));
-    foreach (var i in range(r)) {
+    foreach (var i in range(len(r))) {
         r[i] = ntt(samplePolyCBD(rnd, N));
         N++;
     }
-    foreach (var i in range(e1)) {
+    foreach (var i in range(len(e1))) {
         e1[i] = samplePolyCBD(rnd, N);
         N++;
     }
     var e2 = samplePolyCBD(rnd, N);
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k), 256); // NTT⁻¹(AT ◦ r) + e1
-    foreach (var i in range(u)) {
+    foreach (var i in range(len(u))) {
         nttElement uHat = default;
-        foreach (var j in range(r)) {
+        foreach (var j in range(len(r))) {
             // Note that i and j are inverted, as we need the transposed of A.
             uHat = polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k + i], r[j]));
         }
@@ -448,13 +448,13 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
     var μ = ringDecodeAndDecompress1(ref (m).DerefOrNull());
 
     nttElement vNTT = default; // t⊺ ◦ r
-    foreach (var i in range(ex.t)) {
+    foreach (var i in range(len(ex.t))) {
         vNTT = polyAdd(vNTT, nttMul(ex.t[i], r[i]));
     }
     var v = polyAdd(polyAdd(inverseNTT(vNTT), e2), μ);
 
     var c = cc[..0];
-    foreach (var (_, vᴛ1) in u) {
+    foreach (var (_, vᴛ1) in range(u)) {
         var f = vᴛ1.Clone();
 
         c = ringCompressAndEncode10(c, f);
@@ -519,7 +519,7 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array
     ref var c = ref Ꮡc.DerefOrNull();
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k), 256);
-    foreach (var i in range(u)) {
+    foreach (var i in range(len(u))) {
         var bΔ1 = Ꮡ(array<byte>.Alias(c.slice((nint)encodingSize10 * i, (nint)encodingSize10 * (i + 1)), 320));
         u[i] = ringDecodeAndDecompress10(bΔ1);
     }
@@ -528,7 +528,7 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array
     var v = ringDecodeAndDecompress4(ref (b).DerefOrNull());
 
     nttElement mask = default; // s⊺ ◦ NTT(u)
-    foreach (var i in range(dx.s)) {
+    foreach (var i in range(len(dx.s))) {
         mask = polyAdd(mask, nttMul(dx.s[i], ntt(u[i])));
     }
     var w = polySub(v, inverseNTT(mask));

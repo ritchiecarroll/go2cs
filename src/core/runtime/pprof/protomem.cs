@@ -39,7 +39,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
 
     var values = slice<int64>([0, 0, 0, 0]);
     slice<uint64> locs = default;
-    foreach (var (_, vᴛ1) in p) {
+    foreach (var (_, vᴛ1) in range(p)) {
         var r = vᴛ1;
 
         var hideRuntime = true;
@@ -49,7 +49,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             // addresses are return PCs, which is
             // what appendLocsForStack expects.
             if (hideRuntime) {
-                foreach (var (i, addr) in stk) {
+                foreach (var (i, addr) in range(stk)) {
                     var f = runtime.FuncForPC(addr); if (f != nil && (strings_package.HasPrefix(f.Name(), runtimeˢ) || strings_package.HasPrefix(f.Name(), internalRuntimeˢ))) {
                         continue;
                     }

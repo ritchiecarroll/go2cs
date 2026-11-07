@@ -124,7 +124,7 @@ internal static error removeAllFrom(syscallꓸHandle parentFd, @string @base) {
             }
 
             respSize = len(names);
-            foreach (var (_, name) in names) {
+            foreach (var (_, name) in range(names)) {
                 var errΔ2 = removeAllFrom((syscallꓸHandle)@file.Fd(), name);
                 if (errΔ2 != nil) {
                     var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {

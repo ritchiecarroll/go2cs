@@ -173,11 +173,11 @@ internal static void stackinit() {
     if ((UntypedInt)(_StackCacheSize & pageMask) != 0) {
         @throw(cacheSizeMustBeAMultipleˢ);
     }
-    foreach (var i in range(stackpool)) {
+    foreach (var i in range(len(stackpool))) {
         stackpool[i].item.span.init();
         lockInit(ref stackpool[i].item.mu, lockRankStackpool);
     }
-    foreach (var i in range(stackLarge.free)) {
+    foreach (var i in range(len(stackLarge.free))) {
         stackLarge.free[i].init();
         lockInit(ref stackLarge.@lock, lockRankStackLarge);
     }
@@ -822,7 +822,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
     // Adjust pointers in all stack objects (whether they are live or not).
     // See comments in mgcmark.go:scanframeworker.
     if (frame.varp != 0) {
-        foreach (var i in range(objs)) {
+        foreach (var i in range(len(objs))) {
             var obj = Ꮡ(objs, i);
             var off = obj.off;
             var @base = frame.varp; // locals base pointer
@@ -1373,7 +1373,7 @@ internal static bool isShrinkStackSafe(ж<g> Ꮡgp) {
 // freeStackSpans frees unused stack spans at the end of GC.
 internal static void freeStackSpans() {
     // Scan stack pools for empty stack spans.
-    foreach (var order in range(stackpool)) {
+    foreach (var order in range(len(stackpool))) {
         @lock(Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).Ꮡmu);
         var list = Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).Ꮡspan;
         for (var s = list.first; s != nil; ) {
@@ -1391,7 +1391,7 @@ internal static void freeStackSpans() {
 
     // Free large stack spans.
     @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
-    foreach (var i in range(stackLarge.free)) {
+    foreach (var i in range(len(stackLarge.free))) {
         for (var s = stackLarge.free[i].first; s != nil; ) {
             var next = s.next;
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, i).remove(s);
@@ -1476,7 +1476,7 @@ internal static void gcComputeStartingStackSize() {
     // too large can still shrink.
     uint64 scannedStackSize = default;
     uint64 scannedStacks = default;
-    foreach (var (_, Δp) in allp) {
+    foreach (var (_, Δp) in range(allp)) {
         scannedStackSize += Δp.Value.scannedStackSize;
         scannedStacks += Δp.Value.scannedStacks;
         // Reset for next time

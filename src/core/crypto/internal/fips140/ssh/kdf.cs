@@ -23,8 +23,8 @@ public static readonly ж<Direction> ᏑClientKeys = new StaticBox<Direction>(de
 public static ref Direction ClientKeys => ref ((StaticBox<Direction>)ᏑClientKeys).ValueSlot;
 
 [GoInit] internal static void init() {
-    ServerKeys = new Direction(slice<byte>([(byte)'B']), slice<byte>([(byte)'D']), slice<byte>([(byte)'F']));
-    ClientKeys = new Direction(slice<byte>([(byte)'A']), slice<byte>([(byte)'C']), slice<byte>([(byte)'E']));
+    ServerKeys = new Direction([(byte)'B'], [(byte)'D'], [(byte)'F']);
+    ClientKeys = new Direction([(byte)'A'], [(byte)'C'], [(byte)'E']);
 }
 
 public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash>(Func<Hash> hashΔ1, Direction d, slice<byte> K, slice<byte> H, slice<byte> sessionID, nint ivKeyLen, nint keyLen, nint macKeyLen)

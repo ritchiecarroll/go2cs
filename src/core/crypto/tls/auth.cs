@@ -121,7 +121,7 @@ private static readonly @string serverSignatureContextᵇ = "TLS 1.3, server Cer
 internal static ref readonly @string clientSignatureContext => ref clientSignatureContextᵇ;
 private static readonly @string clientSignatureContextᵇ = "TLS 1.3, client CertificateVerify\x00"u8;
 
-[GoLazy] partial class lazyᴛsignaturePadding { internal static slice<byte> signaturePadding = slice<byte>([
+[GoLazy] partial class lazyᴛsignaturePadding { internal static slice<byte> signaturePadding = [
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -130,7 +130,7 @@ private static readonly @string clientSignatureContextᵇ = "TLS 1.3, client Cer
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
-]); }
+]; }
 
 // signedMessage returns the (unhashed) message to be signed by certificate keys
 // in TLS 1.3. See RFC 8446, Section 4.4.3.
@@ -244,22 +244,22 @@ internal static slice<SignatureScheme> signatureSchemesForPublicKey(uint16 versi
         if (version < VersionTLS13) {
             // In TLS 1.2 and earlier, ECDSA algorithms are not
             // constrained to a single curve.
-            return slice<SignatureScheme>([
+            return [
                 ECDSAWithP256AndSHA256,
                 ECDSAWithP384AndSHA384,
                 ECDSAWithP521AndSHA512,
                 ECDSAWithSHA1
-            ]);
+            ];
         }
         switch (pubΔ1.Curve) {
         case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
-            return slice<SignatureScheme>([ECDSAWithP256AndSHA256]);
+            return [ECDSAWithP256AndSHA256];
         }
         case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
-            return slice<SignatureScheme>([ECDSAWithP384AndSHA384]);
+            return [ECDSAWithP384AndSHA384];
         }
         case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
-            return slice<SignatureScheme>([ECDSAWithP521AndSHA512]);
+            return [ECDSAWithP521AndSHA512];
         }
         default: {
             return default;
@@ -269,7 +269,7 @@ internal static slice<SignatureScheme> signatureSchemesForPublicKey(uint16 versi
     case ж<rsa.PublicKey> pubΔ1: {
         nint size = pubΔ1.Size();
         var sigAlgs = new slice<SignatureScheme>(0, len(rsaSignatureSchemes));
-        foreach (var (_, candidate) in rsaSignatureSchemes) {
+        foreach (var (_, candidate) in range(rsaSignatureSchemes)) {
             if (size >= candidate.minModulusBytes) {
                 sigAlgs = append(sigAlgs, candidate.scheme);
             }
@@ -277,7 +277,7 @@ internal static slice<SignatureScheme> signatureSchemesForPublicKey(uint16 versi
         return sigAlgs;
     }
     case ed25519.PublicKey pubΔ1: {
-        return slice<SignatureScheme>([Ed25519]);
+        return [Ed25519];
     }
     default: {
         var pubΔ1 = pub;
@@ -319,11 +319,11 @@ internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<C
         if (tlssha1.Value() != "1"u8) {
             return (0, errors.New(tlsMissingSignatureˢ));
         }
-        peerAlgs = slice<SignatureScheme>([PKCS1WithSHA1, ECDSAWithSHA1]);
+        peerAlgs = [PKCS1WithSHA1, ECDSAWithSHA1];
     }
     // Pick signature scheme in the peer's preference order, as our
     // preference order is not configurable.
-    foreach (var (_, preferredAlg) in peerAlgs) {
+    foreach (var (_, preferredAlg) in range(peerAlgs)) {
         if (isSupportedSignatureAlgorithm(preferredAlg, supportedAlgs)) {
             return (preferredAlg, default);
         }

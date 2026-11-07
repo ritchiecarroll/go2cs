@@ -766,7 +766,7 @@ internal static ж<g> atomicAllGIndex(ж<ж<g>> ptr, uintptr i) {
 // forEachG takes a lock to exclude concurrent addition of new Gs.
 internal static void forEachG(Action<ж<g>> fn) {
     @lock(Ꮡallglock);
-    foreach (var (_, gp) in allgs) {
+    foreach (var (_, gp) in range(allgs)) {
         fn(gp);
     }
     unlock(Ꮡallglock);
@@ -1700,7 +1700,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     sched.stopwait--;
 
     // Try to retake all P's in syscalls.
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         var (thread, ok) = setBlockOnExitSyscall(pp); if (ok) {
             thread.gcstopP();
             thread.resume();
@@ -1750,7 +1750,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     if (sched.stopwait != 0) {
         bad = stopTheWorldNotStoppedˢ;
     } else {
-        foreach (var (_, pp) in allp) {
+        foreach (var (_, pp) in range(allp)) {
             if ((~pp).status != _Pgcstop) {
                 bad = stopTheWorldNotStoppedˢ2;
             }
@@ -2208,7 +2208,7 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
     sched.safePointFn = fn;
 
     // Ask all Ps to run the safe point function.
-    foreach (var (_, p2) in allp) {
+    foreach (var (_, p2) in range(allp)) {
         if (p2 != pp) {
             atomic.Store(p2.of(runtime_package.Δp.ᏑrunSafePointFn), 1);
         }
@@ -2236,7 +2236,7 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
 
     // Force Ps currently in a system call into _Pidle and hand them
     // off to induce safe point function execution.
-    foreach (var (_, p2) in allp) {
+    foreach (var (_, p2) in range(allp)) {
         if (atomic.Load(p2.of(runtime_package.Δp.ᏑrunSafePointFn)) != 1) {
             // Already ran it.
             continue;
@@ -2265,7 +2265,7 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
     if (sched.safePointWait != 0) {
         @throw(forEachPNotDoneˢ);
     }
-    foreach (var (_, p2) in allp) {
+    foreach (var (_, p2) in range(allp)) {
         if ((~p2).runSafePointFn != 0) {
             @throw(forEachPPDidNotRunFnˢ);
         }
@@ -4054,7 +4054,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
 // the P is returned which the caller should acquire and attempt to steal the
 // work to.
 internal static ж<Δp> checkRunqsNoP(slice<ж<Δp>> allpSnapshot, pMask idlepMaskSnapshot) {
-    foreach (var (id, p2) in allpSnapshot) {
+    foreach (var (id, p2) in range(allpSnapshot)) {
         if (!idlepMaskSnapshot.read((uint32)id) && !runqempty(p2)) {
             @lock(Ꮡsched.of(schedt.Ꮡlock));
             var (pp, _) = pidlegetSpinning(0);
@@ -4076,7 +4076,7 @@ internal static ж<Δp> checkRunqsNoP(slice<ж<Δp>> allpSnapshot, pMask idlepMa
 //
 // Returns updated pollUntil value.
 internal static int64 checkTimersNoP(slice<ж<Δp>> allpSnapshot, pMask timerpMaskSnapshot, int64 pollUntil) {
-    foreach (var (id, p2) in allpSnapshot) {
+    foreach (var (id, p2) in range(allpSnapshot)) {
         if (timerpMaskSnapshot.read((uint32)id)) {
             var w = p2.of(runtime_package.Δp.Ꮡtimers).wakeTime();
             if (w != 0 && (pollUntil == 0 || w < pollUntil)) {
@@ -6194,7 +6194,7 @@ internal static void checkdead() {
     }
 
     // There are no goroutines running, so we can look at the P's.
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         if (len((~pp).timers.heap) > 0) {
             return;
         }
@@ -6586,7 +6586,7 @@ internal static void resume(this syscallingThread s) {
 // Returns true if preemption request was issued to at least one goroutine.
 internal static bool preemptall() {
     var res = false;
-    foreach (var (_, pp) in allp) {
+    foreach (var (_, pp) in range(allp)) {
         if ((~pp).status != _Prunning) {
             continue;
         }
@@ -6654,7 +6654,7 @@ internal static void schedtrace(bool detailed) {
     // We must be careful while reading data from P's, M's and G's.
     // Even if we hold schedlock, most data can be changed concurrently.
     // E.g. (p->m ? p->m->id : -1) can crash if p->m changes from non-nil to nil.
-    foreach (var (i, pp) in allp) {
+    foreach (var (i, pp) in range(allp)) {
         var h = atomic.Load(pp.of(runtime_package.Δp.Ꮡrunqhead));
         var t = atomic.Load(pp.of(runtime_package.Δp.Ꮡrunqtail));
         if (detailed) {
@@ -6683,7 +6683,7 @@ internal static void schedtrace(bool detailed) {
     if (!detailed) {
         // Format per-P schedticks as: schedticks=[ tick1 tick2 tick3 tick4 ].
         print((@string)" schedticks=[ ");
-        foreach (var (_, pp) in allp) {
+        foreach (var (_, pp) in range(allp)) {
             print((~pp).schedtick);
             print((@string)" ");
         }
@@ -7087,7 +7087,7 @@ internal static void clear(this pMask Δp, int32 id) {
 
 // any returns true if any bit in p is set.
 internal static bool any(this pMask Δp) {
-    foreach (var i in range(Δp)) {
+    foreach (var i in range(len(Δp))) {
         if (atomic.Load(Ꮡ(Δp, i)) != 0) {
             return true;
         }
@@ -7845,7 +7845,7 @@ partial struct tracestat {
 }
 
 internal static void doInit(slice<ж<initTask>> ts) {
-    foreach (var (_, t) in ts) {
+    foreach (var (_, t) in range(ts)) {
         doInit1(t);
     }
 }

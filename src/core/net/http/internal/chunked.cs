@@ -309,7 +309,7 @@ internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
     if (len(v) == 0) {
         return (0, errors.New(emptyHexNumberForChunkˢ));
     }
-    foreach (var (i, vᴛ1) in v) {
+    foreach (var (i, vᴛ1) in range(v)) {
         var b = vᴛ1;
 
         switch (ᐧ) {

@@ -244,7 +244,7 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
         // The template.Template set has been updated; update ours.
         t.nameSpace.Ꮡmu.Lock();
         defer(Ꮡt.Value.nameSpace.Ꮡmu.Unlock, ref ᒐ);
-        foreach (var (_, v) in ret.Templates()) {
+        foreach (var (_, v) in range(ret.Templates())) {
             @string name = v.Name();
             var tmpl = t.set[name];
             if (tmpl == nil) {
@@ -322,7 +322,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
             ns
         ));
         ret.set[ret.Name()] = ret;
-        foreach (var (_, x) in textClone.Templates()) {
+        foreach (var (_, x) in range(textClone.Templates())) {
             @string name = x.Name();
             var src = t.set[name];
             if (src == nil || src.escapeErr != nil) {
@@ -494,7 +494,7 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         // Not really a problem, but be consistent.
         return (default, fmt.Errorf("html/template: no files named in call to ParseFiles"u8));
     }
-    foreach (var (_, filename) in filenames) {
+    foreach (var (_, filename) in range(filenames)) {
         var (name, b, err) = readFile(filename);
         if (err != nil) {
             return (default, err);
@@ -594,7 +594,7 @@ public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1,
 
 internal static (ж<Template>, error) parseFS(ж<Template> t, fs.FS fsys, slice<@string> patterns) {
     slice<@string> filenames = default;
-    foreach (var (_, pattern) in patterns) {
+    foreach (var (_, pattern) in range(patterns)) {
         var (list, err) = fs.Glob(fsys, pattern);
         if (err != nil) {
             return (default, err);

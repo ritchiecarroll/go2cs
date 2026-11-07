@@ -322,7 +322,7 @@ public static bool Opaque(this ref NYCbCrA p) {
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
-        foreach (var (_, a) in p.A.slice(i0, i1)) {
+        foreach (var (_, a) in range(p.A.slice(i0, i1))) {
             if (a != 0xff) {
                 return false;
             }

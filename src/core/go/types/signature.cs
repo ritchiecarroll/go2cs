@@ -303,7 +303,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
         // "func (r T[T]) f() {}" starts after f, not at r, so we declare it
         // after typechecking rbase (see go.dev/issue/52038).
         var recvTParams = new slice<ж<TypeParam>>(len(rtparams));
-        foreach (var (i, rparamΔ1) in rtparams) {
+        foreach (var (i, rparamΔ1) in range(rtparams)) {
             var tpar = Ꮡcheck.declareTypeParam(rparamΔ1, scopePos);
             recvTParams[i] = tpar;
             // For historic reasons, type parameters in receiver type expressions
@@ -320,7 +320,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             var baseTParams = baseType.TypeParams().list();
             if (len(recvTParams) == len(baseTParams)) {
                 var smap = makeRenameMap(baseTParams, recvTParams);
-                foreach (var (i, recvTPar) in recvTParams) {
+                foreach (var (i, recvTPar) in range(recvTParams)) {
                     var baseTPar = baseTParams[i];
                     check.mono.recordCanon(recvTPar, baseTPar);
                     // baseTPar.bound is possibly parameterized by other type parameters
@@ -337,7 +337,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             // type arguments for the receiver type. Instantiate the receiver.
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(rbase), go1_18, "type instantiation");
             var targs = new slice<ΔType>(len(recvTParams));
-            foreach (var (i, targ) in recvTParams) {
+            foreach (var (i, targ) in range(recvTParams)) {
                 targs[i] = new TypeParamжΔType(targ);
             }
             recvType = Ꮡcheck.instance(rparam.Type.Pos(), new NamedжΔgenericType(baseType), targs, nil, check.context());
@@ -456,7 +456,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
 
     bool named = default;
     bool anonymous = default;
-    foreach (var (i, field) in list.List) {
+    foreach (var (i, field) in range(list.List)) {
         var ftype = field.Type;
         var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
             ftype = t.Elt;
@@ -472,7 +472,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
         // care if a constructed AST contains a non-nil tag.
         if (len(field.Names) > 0) {
             // named parameter
-            foreach (var (_, name) in field.Names) {
+            foreach (var (_, name) in range(field.Names)) {
                 if (name.Name == ""u8) {
                     Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢ);
                     // ok to continue
@@ -514,7 +514,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
 internal static void declareParams(this ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, tokenꓸPos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    foreach (var (i, name) in names) {
+    foreach (var (i, name) in range(names)) {
         if (name != nil && name.Name != ""u8) {
             Ꮡcheck.declare(check.scope, name, new VarжObject(@params[i]), scopePos);
         }

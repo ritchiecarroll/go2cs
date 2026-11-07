@@ -221,7 +221,7 @@ internal static slice<byte> bitPackSlow(slice<byte> buf, ringElement r, nint a, 
     var (@out, v) = sliceForAppend(buf, (nint)n * bitlen / 8);
     uint32 acc = default;
     nuint accBits = default;
-    foreach (var i in range(r)) {
+    foreach (var i in range(len(r))) {
         var w = (int32)b - fieldCenteredMod(r[i]);
         acc |= (uint32)(((uint32)w).Lsh(accBits));
         accBits += (nuint)bitlen;
@@ -261,7 +261,7 @@ internal static (ringElement, error) bitUnpackSlow(slice<byte> v, nint a, nint b
     nuint accBits = default;
     nint vIdx = 0;
 
-    foreach (var i in range(r)) {
+    foreach (var i in range(len(r))) {
         while (accBits < (nuint)bitlen) {
             if (vIdx < len(v)) {
                 acc |= (uint32)(((uint32)v[vIdx]).Lsh(accBits));

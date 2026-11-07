@@ -176,7 +176,7 @@ internal static error ehlo(this ж<Client> Ꮡc) {
     var extList = strings.Split(msg, "\n");
     if (len(extList) > 1) {
         extList = extList[1..];
-        foreach (var (_, line) in extList) {
+        foreach (var (_, line) in range(extList)) {
             var (k, v, _) = strings.Cut(line, " ");
             ext[k] = v;
         }
@@ -411,7 +411,7 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
         var errΔ1 = validateLine(from); if (errΔ1 != nil) {
             return errΔ1;
         }
-        foreach (var (_, recp) in to) {
+        foreach (var (_, recp) in range(to)) {
             var errΔ2 = validateLine(recp); if (errΔ2 != nil) {
                 return errΔ2;
             }
@@ -447,7 +447,7 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
         err = c.Mail(from); if (err != nil) {
             return err;
         }
-        foreach (var (_, addrΔ1) in to) {
+        foreach (var (_, addrΔ1) in range(to)) {
             err = c.Rcpt(addrΔ1); if (err != nil) {
                 return err;
             }

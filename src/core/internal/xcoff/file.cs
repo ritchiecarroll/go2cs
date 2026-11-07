@@ -119,7 +119,7 @@ public static error Close(this ref File f) {
 // Xcoff have section's name limited to 8 bytes. Some sections like .gosymtab
 // can be trunked but this method will still find them.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name || (len(name) > 8 && s.Name == name[..8])) {
             return s;
         }
@@ -130,7 +130,7 @@ public static ж<ΔSection> Section(this ref File f, @string name) {
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
 public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
         }
@@ -445,7 +445,7 @@ skip:
 
     // Read relocations
     // Only for .data or .text section
-    foreach (var (sectNum, sect) in f.Sections) {
+    foreach (var (sectNum, sect) in range(f.Sections)) {
         if (sect.Type != STYP_TEXT && sect.Type != STYP_DATA) {
             continue;
         }
@@ -535,7 +535,7 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 
 // CSect reads and returns the contents of a csect.
 public static slice<byte> CSect(this ref File f, @string name) {
-    foreach (var (_, sym) in f.Symbols) {
+    foreach (var (_, sym) in range(f.Symbols)) {
         if (sym.Name == name && sym.AuxCSect.SymbolType == XTY_SD) {
             nint i = sym.SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
                 var s = f.Sections[i];
@@ -560,7 +560,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     // Don't bother loading others.
     array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
     array<slice<byte>> dat = new(5); /* len(subtypes) */
-    foreach (var (i, subtype) in subtypes.ΔRangeSnapshot()) {
+    foreach (var (i, subtype) in range(subtypes.ΔRangeSnapshot())) {
         var s = f.SectionByType((uint32)STYP_DWARF | subtype);
         if (s != nil) {
             var (b, err) = s.Data();

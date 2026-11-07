@@ -926,7 +926,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
         return (m, ok);
     }
     ж<abi.Imethod> p = default;
-    foreach (var i in range(t.Methods)) {
+    foreach (var i in range(len(t.Methods))) {
         p = Ꮡ(t.Methods, i);
         if (Ꮡt.nameOff(p.Name).Name() == name) {
             return (Ꮡt.Method(i), true);
@@ -1071,7 +1071,7 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
         // One possibility is CL 5371098, but we postponed that
         // ugliness until there is a demonstrated
         // need for the performance. This is issue 2320.
-        f.Index = slice<nint>([i]);
+        f.Index = [i];
     }
     return f;
 }
@@ -1091,7 +1091,7 @@ internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<n
     StructField f = default;
 
     f.Type = toType(Ꮡt.of(structType.ᏑType));
-    foreach (var (i, x) in index) {
+    foreach (var (i, x) in range(index)) {
         if (i > 0) {
             var ft = f.Type;
             if (ft.Kind() == ΔPointer && ft.Elem().Kind() == Struct) {
@@ -1152,7 +1152,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
         // The loop queues embedded fields found in 'next', for processing during the next
         // iteration. The multiplicity of the 'current' field counts is recorded
         // in 'count'; the multiplicity of the 'next' field counts is recorded in 'nextCount'.
-        foreach (var (_, scan) in current) {
+        foreach (var (_, scan) in range(current)) {
             var tΔ1 = scan.typ;
             if (visited[tΔ1]) {
                 // We've looked through this type before, at a higher level.
@@ -1161,7 +1161,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                 continue;
             }
             visited[tΔ1] = true;
-            foreach (var i in range(tΔ1.Fields)) {
+            foreach (var i in range(len(tΔ1.Fields))) {
                 var f = Ꮡ(tΔ1.Fields, i);
                 // Find name and (for embedded field) type for field f.
                 @string fname = f.Name.Name();
@@ -1230,7 +1230,7 @@ internal static (StructField f, bool present) FieldByName(this ж<structType> �
     // Quick check for top-level name, or struct without embedded fields.
     var hasEmbeds = false;
     if (name != ""u8) {
-        foreach (var i in range(t.Fields)) {
+        foreach (var i in range(len(t.Fields))) {
             var tf = Ꮡ(t.Fields, i);
             if (tf.Name.Name() == name) {
                 return (t.Field(i), true);
@@ -1291,7 +1291,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
 
     // Look in known types.
     @string s = "*"u8 + Ꮡt.String();
-    foreach (var (_, tt) in typesByString(s)) {
+    foreach (var (_, tt) in range(typesByString(s))) {
         var p = tt.Reinterpret<abi.Type, ptrType>();
         if ((~p).Elem != Ꮡt.Ꮡt) {
             continue;
@@ -1332,7 +1332,7 @@ internal static ж<abi.Type> ptrTo(ж<abi.Type> t) {
 internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
     var list = listʗp.sslice();
 
-    foreach (var (_, b) in list) {
+    foreach (var (_, b) in range(list)) {
         x = x * 16777619 ^ (uint32)b;
     }
     return x;
@@ -1458,7 +1458,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
     var (sections, offset) = typelinks();
     slice<ж<abi.Type>> ret = default;
 
-    foreach (var (offsI, offs) in offset) {
+    foreach (var (offsI, offs) in range(offset)) {
         @unsafe.Pointer section = sections[offsI];
 
         // We are looking for the first index i where the string becomes >= s.
@@ -1565,7 +1565,7 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
 
     var repr = new slice<byte>(0, 64);
     repr = builtin.append(repr, ((@string)"func(").ꓸꓸꓸ);
-    foreach (var (i, t) in Ꮡft.InSlice()) {
+    foreach (var (i, t) in range(Ꮡft.InSlice())) {
         if (i > 0) {
             repr = builtin.append(repr, ((@string)", ").ꓸꓸꓸ);
         }
@@ -1583,7 +1583,7 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
     } else if (len(@out) > 1) {
         repr = builtin.append(repr, ((@string)" (").ꓸꓸꓸ);
     }
-    foreach (var (i, t) in @out) {
+    foreach (var (i, t) in range(@out)) {
         if (i > 0) {
             repr = builtin.append(repr, ((@string)", ").ꓸꓸꓸ);
         }
@@ -1613,7 +1613,7 @@ internal static bool isReflexive(ж<abi.Type> Ꮡt) {
     }
     case var ᴛ when ᴛ == Struct: {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
-        foreach (var (_, f) in tt.Fields) {
+        foreach (var (_, f) in range(tt.Fields)) {
             if (!isReflexive(f.Typ)) {
                 return false;
             }
@@ -1647,7 +1647,7 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
     }
     case var ᴛ when ᴛ == Struct: {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
-        foreach (var (_, f) in tt.Fields) {
+        foreach (var (_, f) in range(tt.Fields)) {
             if (needKeyUpdate(f.Typ)) {
                 return true;
             }
@@ -1675,7 +1675,7 @@ internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
     }
     case var ᴛ when ᴛ == Struct: {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
-        foreach (var (_, f) in tt.Fields) {
+        foreach (var (_, f) in range(tt.Fields)) {
             if (hashMightPanic(f.Typ)) {
                 return true;
             }
@@ -1836,7 +1836,7 @@ internal static uintptr typeptrdata(ж<abi.Type> Ꮡt) {
         var st = Ꮡt.Reinterpret<abi.Type, structType>();
         // find the last field that has pointers.
         nint field = -1;
-        foreach (var i in range(st.Fields)) {
+        foreach (var i in range(len(st.Fields))) {
             var ft = st.Fields[i].Typ;
             if (ft.Pointers()) {
                 field = i;

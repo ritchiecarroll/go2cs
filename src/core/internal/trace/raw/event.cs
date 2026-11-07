@@ -39,7 +39,7 @@ public static @string String(this ref Event e) {
 
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.WriteString(spec.Name);
-    foreach (var i in range(spec.Args)) {
+    foreach (var i in range(len(spec.Args))) {
         Ꮡs.WriteString(" ");
         Ꮡs.WriteString(spec.Args[i]);
         Ꮡs.WriteString("=");
@@ -69,7 +69,7 @@ public static @string String(this ref Event e) {
 public static nint EncodedSize(this ref Event e) {
     nint size = 1;
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
-    foreach (var (_, arg) in e.Args) {
+    foreach (var (_, arg) in range(e.Args)) {
         size += binary.PutUvarint(buf[..], arg);
     }
     var spec = e.Version.Specs()[e.Ev];

@@ -79,7 +79,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     w.stringData(typName);
 
     // Recursively walk all child nodes.
-    foreach (var i in range(node.children)) {
+    foreach (var i in range(len(node.children))) {
         @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;

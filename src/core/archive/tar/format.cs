@@ -285,7 +285,7 @@ internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b)
     int64 unsigned = default;
     int64 signed = default;
 
-    foreach (var (i, vᴛ1) in b.Value) {
+    foreach (var (i, vᴛ1) in range(b.Value)) {
         var c = vᴛ1;
 
         if (148 <= i && i < 156) {

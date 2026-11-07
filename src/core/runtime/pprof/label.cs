@@ -48,7 +48,7 @@ internal static @string String(this ж<labelMap> Ꮡl) {
     }
     var keyVals = new slice<@string>(0, len(l.Set.List));
 
-    foreach (var (_, lbl) in l.Set.List) {
+    foreach (var (_, lbl) in range(l.Set.List)) {
         keyVals = append(keyValsᴷ, keyVals, fmt.Sprintf("%q:%q"u8, lbl.Key, lbl.Value));
     }
 
@@ -123,7 +123,7 @@ public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
         // slow path: keys are unsorted, contain duplicates, or both
         slices.SortStableFunc(list, (label.Label a, label.Label b) => strings_package.Compare(a.Key, b.Key));
         var deduped = new slice<label.Label>(0, len(list));
-        foreach (var (i, lbl) in list) {
+        foreach (var (i, lbl) in range(list)) {
             if (i == 0 || lbl.Key != list[i - 1].Key) {
                 deduped = append(deduped, lbl);
             } else {
@@ -139,7 +139,7 @@ public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
 // whether that label exists.
 public static (@string, bool) Label(context.Context ctx, @string key) {
     var ctxLabels = labelValue(ctx);
-    foreach (var (_, lbl) in ctxLabels.Set.List) {
+    foreach (var (_, lbl) in range(ctxLabels.Set.List)) {
         if (lbl.Key == key) {
             return (lbl.Value, true);
         }
@@ -151,7 +151,7 @@ public static (@string, bool) Label(context.Context ctx, @string key) {
 // The function f should return true to continue iteration or false to stop iteration early.
 public static void ForLabels(context.Context ctx, Func<@string, @string, bool> f) {
     var ctxLabels = labelValue(ctx);
-    foreach (var (_, lbl) in ctxLabels.Set.List) {
+    foreach (var (_, lbl) in range(ctxLabels.Set.List)) {
         if (!f(lbl.Key, lbl.Value)) {
             break;
         }

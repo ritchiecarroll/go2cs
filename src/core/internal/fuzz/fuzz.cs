@@ -186,14 +186,14 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 
         var errC = new channel<error>(0);
         var workers = new slice<ж<worker>>(opts.Parallel);
-        foreach (var i in range(workers)) {
+        foreach (var i in range(len(workers))) {
             error errΔ3 = default;
             (workers[i], errΔ3) = newWorker(c, dir, binPath, args, env);
             if (errΔ3 != nil) {
                 err = errΔ3; goto ᒐdone;
             }
         }
-        foreach (var i in range(workers)) {
+        foreach (var i in range(len(workers))) {
             var w = workers[i];
             var errCʗ1 = errC;
             var fuzzCtxʗ2 = fuzzCtx;
@@ -460,7 +460,7 @@ internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addT
     var entries = entriesʗp.sslice();
 
     var noDupes = true;
-    foreach (var (_, vᴛ1) in entries) {
+    foreach (var (_, vᴛ1) in range(entries)) {
         ref var e = ref heap(new CorpusEntry(), out var Ꮡe);
         e = vᴛ1;
 
@@ -652,7 +652,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     var valsᴷ = new stackAppend<any>();
 
     // Make sure all the seed corpus has marshaled data.
-    foreach (var i in range(opts.Seed)) {
+    foreach (var i in range(len(opts.Seed))) {
         if (opts.Seed[i].Data == nil && opts.Seed[i].Values != nil) {
             opts.Seed[i].Data = marshalCorpusFile(opts.Seed[i].Values.ꓸꓸꓸ);
         }
@@ -670,7 +670,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         return (default, err);
     }
     if (opts.MinimizeLimit > 0 || opts.MinimizeTimeout > 0) {
-        foreach (var (_, t) in opts.Types) {
+        foreach (var (_, t) in range(opts.Types)) {
             if (isMinimizable(t)) {
                 c.minimizationAllowed = true;
                 break;
@@ -685,12 +685,12 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         // of the seed corpus to make sure there are no existing failures before
         // we start fuzzing.
         c.warmupInputCount = len(c.opts.Seed);
-        foreach (var (_, e) in c.opts.Seed) {
+        foreach (var (_, e) in range(c.opts.Seed)) {
             c.ᏑinputQueue.enqueue(e);
         }
     } else {
         c.warmupInputCount = len(c.corpus.entries);
-        foreach (var (_, e) in c.corpus.entries) {
+        foreach (var (_, e) in range(c.corpus.entries)) {
             c.ᏑinputQueue.enqueue(e);
         }
         // Set c.coverageMask to a clean []byte full of zeros.
@@ -701,7 +701,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     if (len(c.corpus.entries) == 0) {
         fmt.Fprintf(c.opts.Log, "warning: starting with empty corpus\n"u8);
         slice<any> vals = default;
-        foreach (var (_, t) in opts.Types) {
+        foreach (var (_, t) in range(opts.Types)) {
             vals = append(valsᴷ, vals, zeroValue(t));
         }
         var data = marshalCorpusFile(vals.ꓸꓸꓸ);
@@ -809,7 +809,7 @@ internal static void sentInput(this ref coordinator c, fuzzInput input) {
 // refillInputQueue refills the input queue from the corpus after it becomes
 // empty.
 internal static void refillInputQueue(this ref coordinator c) {
-    foreach (var (_, e) in c.corpus.entries) {
+    foreach (var (_, e) in range(c.corpus.entries)) {
         c.inputQueue.enqueue(e);
     }
 }
@@ -907,7 +907,7 @@ internal static nint updateCoverage(this ref coordinator c, slice<byte> newCover
         throw panic(fmt.Sprintf("number of coverage counters changed at runtime: %d, expected %d"u8, len(newCoverage), len(c.coverageMask)));
     }
     nint newBitCount = 0;
-    foreach (var i in range(newCoverage)) {
+    foreach (var i in range(len(newCoverage))) {
         var diff = (byte)(newCoverage[i] & ~c.coverageMask[i]);
         newBitCount += bits.OnesCount8(diff);
         c.coverageMask[i] |= (byte)(newCoverage[i]);
@@ -962,7 +962,7 @@ public static @string Error(this ref MalformedCorpusError e) {
     var msgsᴷ = new stackAppend<@string>();
 
     slice<@string> msgs = default;
-    foreach (var (_, s) in e.errs) {
+    foreach (var (_, s) in range(e.errs)) {
         msgs = append(msgsᴷ, msgs, s.Error());
     }
     return strings.Join(msgs, "\n");
@@ -981,7 +981,7 @@ public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflect�
     }
     slice<CorpusEntry> corpus = default;
     slice<error> errs = default;
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         // TODO(jayconrod,katiehockman): determine when a file is a fuzzing input
         // based on its name. We should only read files created by writeToCorpus.
         // If we read ALL files, we won't be able to change the file format by
@@ -1027,10 +1027,10 @@ public static error CheckCorpus(slice<any> vals, slice<reflectꓸType> types) {
         return fmt.Errorf("wrong number of values in corpus entry: %d, want %d"u8, len(vals), len(types));
     }
     var valsT = new slice<reflectꓸType>(len(vals));
-    foreach (var (valsI, v) in vals) {
+    foreach (var (valsI, v) in range(vals)) {
         valsT[valsI] = reflect.TypeOf(v);
     }
-    foreach (var i in range(types)) {
+    foreach (var i in range(len(types))) {
         if (!AreEqual(valsT[i], types[i])) {
             return fmt.Errorf("mismatched types in corpus entry: %v, want %v"u8, valsT, types);
         }
@@ -1062,7 +1062,7 @@ internal static @string testName(@string path) {
 }
 
 internal static any zeroValue(reflectꓸType t) {
-    foreach (var (_, v) in zeroVals) {
+    foreach (var (_, v) in range(zeroVals)) {
         if (AreEqual(reflect.TypeOf(v), t)) {
             return v;
         }
@@ -1070,7 +1070,7 @@ internal static any zeroValue(reflectꓸType t) {
     throw panic(fmt.Sprintf("unsupported type: %v"u8, t));
 }
 
-[GoLazy] partial class lazyᴛzeroVals { internal static slice<any> zeroVals = slice<any>([
+[GoLazy] partial class lazyᴛzeroVals { internal static slice<any> zeroVals = [
     slice<byte>(""u8),
     (@string)""u8,
     false,
@@ -1088,7 +1088,7 @@ internal static any zeroValue(reflectꓸType t) {
     (uint16)0,
     (uint32)0,
     (uint64)0
-]); }
+]; }
 
 internal static bool debugInfo = godebug.New("#fuzzdebug").Value() == "1"u8;
 

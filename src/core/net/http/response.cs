@@ -218,7 +218,7 @@ private static readonly @string cacheControlˢᵇ = "Cache-Control"u8;
 internal static void fixPragmaCacheControl(ΔHeader header) {
     var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
         var (_, presentcc) = header[cacheControlˢ, ꟷ]; if (!presentcc) {
-            header[cacheControlˢ] = slice<@string>(["no-cache"]);
+            header[cacheControlˢ] = ["no-cache"];
         }
     }
 }

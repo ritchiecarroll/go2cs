@@ -624,7 +624,7 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
         nint offset = 0;
-        foreach (var (i, b) in p.slice(0, n)) {
+        foreach (var (i, b) in range(p.slice(0, n))) {
             if (b != '\r' && b != '\n') {
                 if (i != offset) {
                     p[offset] = b;

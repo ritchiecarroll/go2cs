@@ -77,7 +77,7 @@ public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> 
     var (i, j) = (c.i, c.j);
     _ = dst[len(src) - 1];
     dst = dst.slice(0, len(src)); // eliminate bounds check from loop
-    foreach (var (k, v) in src) {
+    foreach (var (k, v) in range(src)) {
         i += 1;
         var x = c.s[i];
         j += (uint8)x;

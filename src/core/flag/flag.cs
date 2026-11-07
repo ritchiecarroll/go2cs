@@ -471,7 +471,7 @@ public static void SetOutput(this ref FlagSet f, Δio.Writer output) {
 // VisitAll visits the flags in lexicographical order, calling fn for each.
 // It visits all flags, even those not set.
 public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) {
-    foreach (var (_, flag) in sortFlags(f.formal)) {
+    foreach (var (_, flag) in range(sortFlags(f.formal))) {
         fn(flag);
     }
 }
@@ -485,7 +485,7 @@ public static void VisitAll(Action<ж<Flag>> fn) {
 // Visit visits the flags in lexicographical order, calling fn for each.
 // It visits only those flags that have been set.
 public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) {
-    foreach (var (_, flag) in sortFlags(f.actual)) {
+    foreach (var (_, flag) in range(sortFlags(f.actual))) {
         fn(flag);
     }
 }
@@ -706,7 +706,7 @@ public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
     // knows to fix the panic.
     var errs = isZeroValueErrs; if (len(errs) > 0) {
         fmt.Fprintln(f.Output());
-        foreach (var (_, err) in errs) {
+        foreach (var (_, err) in range(errs)) {
             fmt.Fprintln(f.Output(), err);
         }
     }

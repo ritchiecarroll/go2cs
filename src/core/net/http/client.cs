@@ -185,7 +185,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this 
         cookieURL.Host = req.Host;
     }
     if (c.Jar != nil) {
-        foreach (var (_, cookie) in c.Jar.Cookies(cookieURL)) {
+        foreach (var (_, cookie) in range(c.Jar.Cookies(cookieURL))) {
             req.AddCookie(cookie);
         }
     }
@@ -854,7 +854,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
     map<@string, slice<ж<ΔCookie>>> icookies = default;
     if (c.Jar != nil && ireq.Header.Get(cookieˢ) != ""u8) {
         icookies = new map<@string, slice<ж<ΔCookie>>>();
-        foreach (var (_, cΔ1) in ireq.Cookies()) {
+        foreach (var (_, cΔ1) in range(ireq.Cookies())) {
             icookies[cΔ1.Name] = append(icookies[cΔ1.Name], cΔ1);
         }
     }
@@ -877,7 +877,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
         if (Ꮡc.Value.Jar != nil && icookiesʗ1 != nil) {
             bool changed = default;
             var resp = req.Response; // The response that caused the upcoming redirect
-            foreach (var (_, cΔ2) in resp.Cookies()) {
+            foreach (var (_, cΔ2) in range(resp.Cookies())) {
                 var (_, ok) = icookiesʗ1[cΔ2.Name, ꟷ]; if (ok) {
                     delete(icookiesʗ1, cΔ2.Name);
                     changed = true;
@@ -887,7 +887,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
                 ireqhdrʗ1.Del(cookieˢ);
                 slice<@string> ss = default;
                 foreach (var (_, cs) in icookiesʗ1) {
-                    foreach (var (_, cΔ3) in cs) {
+                    foreach (var (_, cΔ3) in range(cs)) {
                         ss = append(ssᴷ, ss, cΔ3.Name + "="u8 + (~cΔ3).Value);
                     }
                 }

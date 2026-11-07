@@ -23,7 +23,7 @@ public static @string GoString(this ref ΔSVCBResource r) {
     var b = slice<byte>("dnsmessage.SVCBResource{" + "Priority: " + printUint16(r.Priority) + ", " + "Target: " + r.Target.GoString() + ", " + "Params: []dnsmessage.SVCParam{");
     if (len(r.Params) > 0) {
         b = append(b, r.Params[0].GoString().ꓸꓸꓸ);
-        foreach (var (_, p) in r.Params[1..]) {
+        foreach (var (_, p) in range(r.Params[1..])) {
             b = append(b, ((@string)(", "u8 + p.GoString())).ꓸꓸꓸ);
         }
     }
@@ -49,7 +49,7 @@ public static @string GoString(this ref ΔHTTPSResource r) {
 
 // GetParam returns a parameter value by key.
 public static (slice<byte> value, bool ok) GetParam(this ref ΔSVCBResource r, SVCParamKey key) {
-    foreach (var i in range(r.Params)) {
+    foreach (var i in range(len(r.Params))) {
         if (r.Params[i].Key == key) {
             return (r.Params[i].Value, true);
         }
@@ -82,7 +82,7 @@ public static void SetParam(this ref ΔSVCBResource r, SVCParamKey key, slice<by
 // DeleteParam deletes a parameter by key.
 // It returns true if the parameter was present.
 public static bool DeleteParam(this ref ΔSVCBResource r, SVCParamKey key) {
-    foreach (var i in range(r.Params)) {
+    foreach (var i in range(len(r.Params))) {
         if (r.Params[i].Key == key) {
             r.Params = slices.Delete<slice<SVCParam>, SVCParam>(r.Params, i, i + 1);
             return true;
@@ -161,7 +161,7 @@ internal static (slice<byte>, error) pack(this ref ΔSVCBResource r, slice<byte>
         return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Target", err))));
     }
     SVCParamKey previousKey = default;
-    foreach (var (i, param) in r.Params) {
+    foreach (var (i, param) in range(r.Params)) {
         if (i > 0 && param.Key <= previousKey) {
             return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Params", errParamOutOfOrder))));
         }

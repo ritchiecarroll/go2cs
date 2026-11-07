@@ -118,7 +118,7 @@ public static (slice<byte>, error) Source(slice<byte> src) {
 }
 
 internal static bool hasUnsortedImports(ref ast.File @file) {
-    foreach (var (_, d) in @file.Decls) {
+    foreach (var (_, d) in range(@file.Decls)) {
         var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ);
         if (!ok || dΔ1.Tok != token.IMPORT) {
             // Not an import declaration, so we're done.

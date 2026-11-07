@@ -45,7 +45,7 @@ public static Uint8x64 /*y*/ Shuffle(this Uint8x64 x, Uint8x64 shuf) {
         // permutation instead of a full byte permutation.
 
         // Range check the shuffle
-        foreach (var (i, inp) in shuf.op.c._<array<uint8>>()) {
+        foreach (var (i, inp) in range(shuf.op.c._<array<uint8>>())) {
             // 0xff is a special "don't care" value
             if (!(inp == 0xff || inp < 64)) {
                 fatalf("shuffle[%d] = %d out of range [0, %d) or 0xff", i, inp, (nint)64);
@@ -122,14 +122,14 @@ public static Uint64x8 /*y*/ ConstUint64x8(/*[8]*/ array<uint64> c, @string name
 public static Uint64x8 /*z*/ BroadcastUint64x8Zeroed(Uint64 src, Mask8 mask) {
     Uint64x8 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPBROADCASTQ.Z", kind: z.kind(), args: slice<ж<op>>([src.op, mask.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPBROADCASTQ.Z", kind: z.kind(), args: [src.op, mask.op])));
     return z;
 }
 
 public static Uint64x8 /*z*/ BroadcastMasked(this Uint64x8 x, Uint64 src, Mask8 mask) {
     Uint64x8 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPBROADCASTQ.mask", kind: z.kind(), args: slice<ж<op>>([src.op, mask.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPBROADCASTQ.mask", kind: z.kind(), args: [src.op, mask.op, x.op])));
     return z;
 }
 
@@ -146,7 +146,7 @@ internal static Uint64x8 wrap(this Uint64x8 _, ж<op> x) {
 public static Uint64x8 /*z*/ Or(this Uint64x8 x, Uint64x8 y) {
     Uint64x8 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPORQ", kind: z.kind(), args: slice<ж<op>>([y.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
@@ -154,7 +154,7 @@ public static Uint64x8 /*z*/ Sub(this Uint64x8 x, Uint64x8 y) {
     Uint64x8 z = new(nil);
 
     // Arguments are backwards
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPSUBQ", kind: z.kind(), args: slice<ж<op>>([y.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPSUBQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
@@ -169,14 +169,14 @@ public static Uint8x64 /*z*/ GF2P8Affine(this Uint64x8 x, Uint8x64 y) {
     Uint8x64 z = new(nil);
 
     // matrix, vector
-    z.valAny.initOp(Ꮡ(new op(Δop: "VGF2P8AFFINEQB", kind: z.kind(), args: slice<ж<op>>([x.op, y.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VGF2P8AFFINEQB", kind: z.kind(), args: [x.op, y.op])));
     return z;
 }
 
 public static Mask64 /*z*/ ShuffleBits(this Uint64x8 x, Uint8x64 y) {
     Mask64 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: slice<ж<op>>([y.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
@@ -184,7 +184,7 @@ public static Mask64 /*z*/ ShuffleBitsMasked(this Uint64x8 x, Uint8x64 y, Mask64
     Mask64 z = new(nil);
 
     // This is always zeroing if the mask is provided.
-    z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: slice<ж<op>>([y.op, x.op, mask.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: [y.op, x.op, mask.op])));
     return z;
 }
 
@@ -199,7 +199,7 @@ public static Mask8 /*y*/ ConstMask8(uint8 c) {
 
     Uint64 tmp = new(nil);
     tmp.valGP.valAny.initOp(Ꮡ(new op(Δop: "MOVQ", kind: tmp.kind(), args: slice<ж<op>>([imm(c)]))));
-    y.valAny.initOp(Ꮡ(new op(Δop: "KMOVB", kind: y.kind(), args: slice<ж<op>>([tmp.op]))));
+    y.valAny.initOp(Ꮡ(new op(Δop: "KMOVB", kind: y.kind(), args: [tmp.op])));
     return y;
 }
 
@@ -216,14 +216,14 @@ internal static Mask8 wrap(this Mask8 _, ж<op> x) {
 public static Uint64 /*z*/ ToUint8(this Mask8 x) {
     Uint64 z = new(nil);
 
-    z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVB", kind: z.kind(), args: slice<ж<op>>([x.op]))));
+    z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVB", kind: z.kind(), args: [x.op])));
     return z;
 }
 
 public static Mask8 /*z*/ Or(this Mask8 x, Mask8 y) {
     Mask8 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: slice<ж<op>>([y.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
@@ -249,7 +249,7 @@ public static Mask64 /*y*/ ConstMask64(uint64 c) {
 
     Uint64 tmp = new(nil);
     tmp.valGP.valAny.initOp(Ꮡ(new op(Δop: "MOVQ", kind: tmp.kind(), args: slice<ж<op>>([imm(c)]))));
-    y.valAny.initOp(Ꮡ(new op(Δop: "KMOVQ", kind: y.kind(), args: slice<ж<op>>([tmp.op]))));
+    y.valAny.initOp(Ꮡ(new op(Δop: "KMOVQ", kind: y.kind(), args: [tmp.op])));
     return y;
 }
 
@@ -266,14 +266,14 @@ internal static Mask64 wrap(this Mask64 _, ж<op> x) {
 public static Uint64 /*z*/ ToUint64(this Mask64 x) {
     Uint64 z = new(nil);
 
-    z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVQ", kind: z.kind(), args: slice<ж<op>>([x.op]))));
+    z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVQ", kind: z.kind(), args: [x.op])));
     return z;
 }
 
 public static Mask64 /*z*/ Or(this Mask64 x, Mask64 y) {
     Mask64 z = new(nil);
 
-    z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: slice<ж<op>>([y.op, x.op]))));
+    z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 

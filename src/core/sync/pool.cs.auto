@@ -283,13 +283,13 @@ internal static void poolCleanup() {
     // pinned section (in effect, this has all Ps pinned).
 
     // Drop victim caches from all pools.
-    foreach (var (_, p) in oldPools) {
+    foreach (var (_, p) in range(oldPools)) {
         p.Value.victim = default;
         p.Value.victimSize = 0;
     }
 
     // Move primary cache to victim cache.
-    foreach (var (_, p) in allPools) {
+    foreach (var (_, p) in range(allPools)) {
         p.Value.victim = p.Value.local;
         p.Value.victimSize = p.Value.localSize;
         p.Value.local = default;

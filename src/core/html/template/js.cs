@@ -199,7 +199,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
             break;
         }}
     } else {
-        foreach (var (i, arg) in args) {
+        foreach (var (i, arg) in range(args)) {
             args[i] = indirectToJSONMarshaler(arg);
         }
         a = fmt.Sprint(args.ꓸꓸꓸ);

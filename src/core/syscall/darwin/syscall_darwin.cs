@@ -61,7 +61,7 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
 
     // Magic sysctl: "setting" 0.3 to a string name
     // lets you read back the array of integers form.
-    err = sysctl(slice<_C_int>([0, 3]), p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != nil) {
+    err = sysctl([0, 3], p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != nil) {
         return (default, err);
     }
     return (buf.slice(0, (nint)(n / siz)), default);

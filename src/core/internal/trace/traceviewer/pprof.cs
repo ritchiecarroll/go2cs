@@ -131,16 +131,16 @@ public static ж<profile.Profile> BuildProfile(slice<ProfileRecord> prof) {
     var p = Ꮡ(new profile.Profile(
         PeriodType: Ꮡ(new profile.ValueType(Type: "trace", Unit: "count")),
         Period: 1,
-        SampleType: slice<ж<profile.ValueType>>([
+        SampleType: [
             Ꮡ(new profile.ValueType(Type: "contentions", Unit: "count")),
             Ꮡ(new profile.ValueType(Type: "delay", Unit: "nanoseconds"))
-        ])
+        ]
     ));
     var locs = new map<uint64, ж<profile.Location>>();
     var funcs = new map<@string, ж<profile.Function>>();
-    foreach (var (_, rec) in prof) {
+    foreach (var (_, rec) in range(prof)) {
         slice<ж<profile.Location>> sloc = default;
-        foreach (var (_, frame) in rec.Stack) {
+        foreach (var (_, frame) in range(rec.Stack)) {
             var loc = locs[frame.PC];
             if (loc == nil) {
                 var fn = funcs[frame.File + frame.Func];
@@ -157,12 +157,12 @@ public static ж<profile.Profile> BuildProfile(slice<ProfileRecord> prof) {
                 loc = Ꮡ(new profile.Location(
                     ID: (uint64)(len(p.Location) + 1),
                     Address: frame.PC,
-                    Line: slice<profile.Line>([
+                    Line: [
                         new(
                             Function: fn,
                             ΔLine: (int64)frame.Line
                         )
-                    ])
+                    ]
                 ));
                 p.Location = append(p.Location, loc);
                 locs[frame.PC] = loc;
@@ -170,7 +170,7 @@ public static ж<profile.Profile> BuildProfile(slice<ProfileRecord> prof) {
             sloc = append(sloc, loc);
         }
         p.Sample = append(p.Sample, Ꮡ(new profile.Sample(
-            Value: slice<int64>([(int64)rec.Count, (int64)rec.Time]),
+            Value: [(int64)rec.Count, (int64)rec.Time],
             Location: sloc
         )));
     }

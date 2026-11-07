@@ -114,7 +114,7 @@ internal static uint64 Sum64(this ref sum64a s) { return (uint64)(s); }
 
 internal static (nint, error) Write(this ref sum32 s, slice<byte> data) {
     var hash = s;
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         hash *= prime32;
         hash ^= (sum32)(((sum32)(uint32)c));
     }
@@ -124,7 +124,7 @@ internal static (nint, error) Write(this ref sum32 s, slice<byte> data) {
 
 internal static (nint, error) Write(this ref sum32a s, slice<byte> data) {
     var hash = s;
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         hash ^= (sum32a)(((sum32a)(uint32)c));
         hash *= prime32;
     }
@@ -134,7 +134,7 @@ internal static (nint, error) Write(this ref sum32a s, slice<byte> data) {
 
 internal static (nint, error) Write(this ref sum64 s, slice<byte> data) {
     var hash = s;
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         hash *= prime64;
         hash ^= (sum64)(((sum64)(uint64)c));
     }
@@ -144,7 +144,7 @@ internal static (nint, error) Write(this ref sum64 s, slice<byte> data) {
 
 internal static (nint, error) Write(this ref sum64a s, slice<byte> data) {
     var hash = s;
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         hash ^= (sum64a)(((sum64a)(uint64)c));
         hash *= prime64;
     }
@@ -153,7 +153,7 @@ internal static (nint, error) Write(this ref sum64a s, slice<byte> data) {
 }
 
 internal static (nint, error) Write(this ref sum128 s, slice<byte> data) {
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         // Compute the multiplication
         var (s0, s1) = bits.Mul64(prime128Lower, s.Value[1]);
         s0 += (s.Value[1] << (int)(prime128Shift)) + (uint64)prime128Lower * s.Value[0];
@@ -166,7 +166,7 @@ internal static (nint, error) Write(this ref sum128 s, slice<byte> data) {
 }
 
 internal static (nint, error) Write(this ref sum128a s, slice<byte> data) {
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         s.Value[1] ^= (uint64)((uint64)c);
         // Compute the multiplication
         var (s0, s1) = bits.Mul64(prime128Lower, s.Value[1]);

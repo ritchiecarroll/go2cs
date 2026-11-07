@@ -15,7 +15,7 @@ public static partial nint CountString(@string s, byte c);
 // A backup implementation to use by assembly.
 internal static nint countGeneric(slice<byte> b, byte c) {
     nint n = 0;
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         if (x == c) {
             n++;
         }

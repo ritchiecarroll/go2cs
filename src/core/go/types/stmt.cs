@@ -83,11 +83,11 @@ internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
         }
     }
     slices.SortFunc(unused, (ж<Var> a, ж<Var> b) => cmpPos(a.pos, b.pos));
-    foreach (var (_, v) in unused) {
+    foreach (var (_, v) in range(unused)) {
         Ꮡcheck.softErrorf(new Varжpositioner(v), UnusedVar, "declared and not used: %s", v.name);
     }
 
-    foreach (var (_, scopeΔ1) in scope.children) {
+    foreach (var (_, scopeΔ1) in range(scope.children)) {
         // Don't go inside function literal scopes a second time;
         // they are handled explicitly by funcBody.
         if (!scopeΔ1.isFunc) {
@@ -130,7 +130,7 @@ internal static void stmtList(this ж<Checker> Ꮡcheck, stmtContext ctxt, slice
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
     stmtContext inner = (stmtContext)(ctxt & ~fallthroughOk);
     list = trimTrailingEmptyStmts(list); // trailing empty statements are "invisible" to fallthrough analysis
-    foreach (var (i, s) in list) {
+    foreach (var (i, s) in range(list)) {
         stmtContext innerΔ1 = inner;
         if (ok && i + 1 == len(list)) {
             innerΔ1 |= (stmtContext)(fallthroughOk);
@@ -147,7 +147,7 @@ internal static void multipleDefaults(this ж<Checker> Ꮡcheck, slice<ast.Stmt>
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ast.Stmt first = default;
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         ast.Stmt d = default;
         switch (s.type()) {
         case ж<ast.CaseClause> c: {
@@ -284,7 +284,7 @@ internal static void caseValues(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, sli
     ref var x = ref Ꮡx.DerefOrNull();
 
 L:
-    foreach (var (_, e) in values) {
+    foreach (var (_, e) in range(values)) {
         ref var v = ref heap(new operand(), out var Ꮡv);
         Ꮡcheck.expr(nil, Ꮡv, e);
         if (x.mode == invalid || v.mode == invalid) {
@@ -307,7 +307,7 @@ L:
         var val = goVal(v.val); if (val != nil) {
             // look for duplicate types for a given value
             // (quadratic algorithm, but these lists tend to be very short)
-            foreach (var (_, vt) in seen[val]) {
+            foreach (var (_, vt) in range(seen[val])) {
                 if (Identical(v.typ, vt.typ)) {
                     var err = Ꮡcheck.newError(DuplicateCase);
                     err.addf(new operandжpositioner(Ꮡv), "duplicate case %s in expression switch", Ꮡv);
@@ -361,7 +361,7 @@ internal static ΔType caseTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, sl
     ΔType T = default;
     ref var dummy = ref heap(new operand(), out var Ꮡdummy);
 L:
-    foreach (var (_, e) in types) {
+    foreach (var (_, e) in range(types)) {
         // The spec allows the value nil instead of a type.
         if (check.isNil(e)) {
             T = default;
@@ -418,7 +418,7 @@ internal static ΔType caseTypes_currently_unused(this ж<Checker> Ꮡcheck, ж<
     ΔType T = default;
     ref var dummy = ref heap(new operand(), out var Ꮡdummy);
 L:
-    foreach (var (_, e) in types) {
+    foreach (var (_, e) in range(types)) {
         // The spec allows the value nil instead of a type.
         @string hash = default;
         if (check.isNil(e)) {
@@ -690,7 +690,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 // spec: "Implementation restriction: A compiler may disallow an empty expression
                 // list in a "return" statement if a different entity (constant, type, or variable)
                 // with the same name as a result parameter is in scope at the place of the return."
-                foreach (var (_, obj) in res.vars) {
+                foreach (var (_, obj) in range(res.vars)) {
                     var alt = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(obj.name); if (alt != nil && !AreEqual(alt, obj)) {
                         var err = Ꮡcheck.newError(OutOfScopeResult);
                         err.addf(new ast_ReturnStmtжpositioner(sΔ1), "result parameter %s not in scope at return", obj.name);
@@ -817,7 +817,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             Ꮡcheck.multipleDefaults(sΔ1.Body.List);
 
             var seen = new valueMap(0); // map of seen case values to positions and types
-            foreach (var (i, c) in sΔ1.Body.List) {
+            foreach (var (i, c) in range(sΔ1.Body.List)) {
                 var (clause, _) = c._<ж<ast.CaseClause>>(ᐧ);
                 if (clause == nil) {
                     Ꮡcheck.error(new ast_Stmtᴠpositioner(c), InvalidSyntaxTree, incorrectExpressionˢ);
@@ -913,7 +913,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
 
             slice<ж<Var>> lhsVars = default;       // list of implicitly declared lhs variables
             var seen = new map<ΔType, ast.Expr>(); // map of seen types to positions
-            foreach (var (_, sΔ2) in sΔ1.Body.List) {
+            foreach (var (_, sΔ2) in range(sΔ1.Body.List)) {
                 var (clause, _) = sΔ2._<ж<ast.CaseClause>>(ᐧ);
                 if (clause == nil) {
                     Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ2), InvalidSyntaxTree, incorrectTypeSwitchCaseˢ);
@@ -943,7 +943,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             if (lhs != nil) {
                 bool used = default;
                 lhsVars = move2heap(lhsVarsᴷ, lhsVars);
-                foreach (var (_, v) in lhsVars) {
+                foreach (var (_, v) in range(lhsVars)) {
                     if (check.usedVars[v]) {
                         used = true;
                     }
@@ -960,7 +960,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
 
             Ꮡcheck.multipleDefaults(sΔ1.Body.List);
 
-            foreach (var (_, sΔ3) in sΔ1.Body.List) {
+            foreach (var (_, sΔ3) in range(sΔ1.Body.List)) {
                 var (clause, _) = sΔ3._<ж<ast.CommClause>>(ᐧ);
                 if (clause == nil) {
                     continue; // error reported before

@@ -44,7 +44,7 @@ internal static void initᴛemptyInterface() { emptyInterface = new Interface(co
 // Deprecated: Use NewInterfaceType instead which allows arbitrary embedded types.
 public static ж<Interface> NewInterface(slice<ж<Func>> methods, slice<ж<Named>> embeddeds) {
     var tnames = new slice<ΔType>(len(embeddeds));
-    foreach (var (i, t) in embeddeds) {
+    foreach (var (i, t) in range(embeddeds)) {
         tnames[i] = new NamedжΔType(t);
     }
     return NewInterfaceType(methods, tnames);
@@ -63,7 +63,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
 
     // set method receivers if necessary
     var typ = (((ж<Checker>)nil)).newInterface();
-    foreach (var (_, m) in methods) {
+    foreach (var (_, m) in range(methods)) {
         var sig = m.typ._<ж<ΔSignature>>(); if (sig.recv == nil) {
             sig.recv = newVar(RecvVar, m.pos, m.pkg, ""u8, new InterfaceжΔType(typ));
         }
@@ -187,7 +187,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         Ꮡityp.Value.embedPos.ValueSlot = append(Ꮡityp.Value.embedPos.ValueSlot, pos);
     }
 
-    foreach (var (_, f) in iface.Methods.List) {
+    foreach (var (_, f) in range(iface.Methods.List)) {
         if (len(f.Names) == 0) {
             addEmbedded(f.Type.Pos(), parseUnion(Ꮡcheck, f.Type));
             continue;

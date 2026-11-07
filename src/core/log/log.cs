@@ -237,7 +237,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
                     line = 0;
                 }
             } else {
-                var fs = runtime.CallersFrames(slice<uintptr>([pc]));
+                var fs = runtime.CallersFrames([pc]);
                 var (f, _) = fs.Next();
                 @file = f.File;
                 if (@file == ""u8) {

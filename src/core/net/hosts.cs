@@ -116,7 +116,7 @@ internal static void readHosts() {
                     }
 
                     hs[key] = new byName(
-                        addrs: slice<@string>([addr]),
+                        addrs: [addr],
                         canonicalName: canonical
                     );
                 }

@@ -20,7 +20,7 @@ public static void Add(this MIMEHeader h, @string key, @string value) {
 // the single element value. It replaces any existing
 // values associated with key.
 public static void Set(this MIMEHeader h, @string key, @string value) {
-    h[CanonicalMIMEHeaderKey(key)] = slice<@string>([value]);
+    h[CanonicalMIMEHeaderKey(key)] = [value];
 }
 
 // Get gets the first value associated with the given key.

@@ -68,7 +68,7 @@ internal static UntypedInt cpuid_RDTSCP => /* 1 << 27 */ 134217728;
 internal static uint32 maxExtendedFunctionInformation;
 
 internal static void doinit() {
-    options = slice<option>([
+    options = [
         new(Name: "adx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
         new(Name: "aes", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
         new(Name: "erms", Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
@@ -77,7 +77,7 @@ internal static void doinit() {
         new(Name: "rdtscp", Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
         new(Name: "sha", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
         new(Name: "vpclmulqdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
-    ]);
+    ];
     var level = getGOAMD64level();
     if (level < 2) {
         // These options are required at level 2. At lower levels
@@ -258,7 +258,7 @@ public static @string Name() {
     }
 
     // Trim tail after and including the first null byte.
-    foreach (var (i, c) in data) {
+    foreach (var (i, c) in range(data)) {
         if (c == '\x00') {
             data = data.slice(0, i);
             break;
@@ -272,7 +272,7 @@ internal static slice<byte> appendBytes(slice<byte> b, params ꓸꓸꓸuint32 ar
     var args = argsʗp.sslice();
     var bᴷ = new stackAppend<byte>(moves: true);
 
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         b = append(bᴷ, b,
             (byte)(arg >> 0),
             (byte)(arg >> 8),

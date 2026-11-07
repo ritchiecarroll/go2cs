@@ -140,7 +140,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
 
     // If we don't have an interface, wrap constraint into an implicit interface.
     if (ityp == nil) {
-        ityp = NewInterfaceType(default, slice<ΔType>([bound]));
+        ityp = NewInterfaceType(default, [bound]);
         ityp.@implicit = true;
         t.bound = new InterfaceжΔType(ityp); // update t.bound for next time (optimization)
     }

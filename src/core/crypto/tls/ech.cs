@@ -153,7 +153,7 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
 }
 
 internal static (ж<echConfig>, hpkeꓸPublicKey, hpke.KDF, hpke.AEAD) pickECHConfig(slice<echConfig> list) {
-    foreach (var (_, vᴛ1) in list) {
+    foreach (var (_, vᴛ1) in range(list)) {
         ref var ec = ref heap(new echConfig(), out var Ꮡec);
         ec = vᴛ1;
 
@@ -161,7 +161,7 @@ internal static (ж<echConfig>, hpkeꓸPublicKey, hpke.KDF, hpke.AEAD) pickECHCo
             continue;
         }
         bool unsupportedExt = default;
-        foreach (var (_, ext) in ec.Extensions) {
+        foreach (var (_, ext) in range(ec.Extensions)) {
             // If high order bit is set to 1 the extension is mandatory.
             // Since we don't support any extensions, if we see a mandatory
             // bit, we skip the config.
@@ -182,7 +182,7 @@ internal static (ж<echConfig>, hpkeꓸPublicKey, hpke.KDF, hpke.AEAD) pickECHCo
             // excessive.
             continue;
         }
-        foreach (var (_, cs) in ec.SymmetricCipherSuite) {
+        foreach (var (_, cs) in range(ec.SymmetricCipherSuite)) {
             // All of the supported AEADs and KDFs are fine, rather than
             // imposing some sort of preference here, we just pick the first
             // valid suite.
@@ -311,7 +311,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     // The specification says we must verify that the trailing padding is all
     // zeros. This is kind of weird for TLS messages, where we generally just
     // throw away any trailing garbage.
-    foreach (var (_, p) in innerReader) {
+    foreach (var (_, p) in range<byte>(innerReader)) {
         if (p != 0) {
             return (default, errors.New(tlsInvalidInnerClientˢ));
         }
@@ -407,12 +407,12 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
         return (default, errors.New(tlsInvalidReconstructedˢ));
     }
 
-    if (!bytes.Equal(inner.encryptedClientHello, slice<byte>([(uint8)innerECHExt]))) {
+    if (!bytes.Equal(inner.encryptedClientHello, [(uint8)innerECHExt])) {
         return (default, errInvalidECHExt);
     }
 
     var hasTLS13 = false;
-    foreach (var (_, v) in inner.supportedVersions) {
+    foreach (var (_, v) in range(inner.supportedVersions)) {
         // Skip GREASE values (values of the form 0x?A0A).
         // GREASE (Generate Random Extensions And Sustain Extensibility) is a mechanism used by
         // browsers like Chrome to ensure TLS implementations correctly ignore unknown values.
@@ -509,7 +509,7 @@ internal static bool validDNSName(@string name) {
     if (len(labels) <= 1) {
         return false;
     }
-    foreach (var (_, l) in labels) {
+    foreach (var (_, l) in range(labels)) {
         nint labelLen = len(l);
         if (labelLen == 0) {
             return false;
@@ -631,7 +631,7 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
         return (Ꮡouter, default, default);
     }
 
-    foreach (var (_, echKey) in echKeys) {
+    foreach (var (_, echKey) in range(echKeys)) {
         var (skip, config, errΔ1) = parseECHConfig(echKey.Config);
         if (errΔ1 != nil || skip) {
             Ꮡc.sendAlert(alertInternalError);
@@ -702,7 +702,7 @@ internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientH
     ref var retryBuilder = ref heap(new cryptobyte.Builder(), out var ᏑretryBuilder);
     var keysʗ1 = keys;
     ᏑretryBuilder.AddUint16LengthPrefixed((ж<cryptobyte.Builder> b) => {
-        foreach (var (_, c) in keysʗ1) {
+        foreach (var (_, c) in range(keysʗ1)) {
             if (!c.SendAsRetry) {
                 continue;
             }

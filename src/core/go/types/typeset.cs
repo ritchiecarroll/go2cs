@@ -86,7 +86,7 @@ internal static @string String(this ref _TypeSet s) {
             Ꮡbuf.WriteString("; ");
         }
     }
-    foreach (var (i, m) in s.methods) {
+    foreach (var (i, m) in range(s.methods)) {
         if (i > 0) {
             Ꮡbuf.WriteString("; ");
         }
@@ -123,7 +123,7 @@ internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
         return f(default, default);
     }
 
-    foreach (var (_, t) in s.terms) {
+    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
         assert(t.typ != nil);
         // Unalias(x) == x.Underlying() for ~x terms
         var u = Unalias(t.typ);
@@ -147,7 +147,7 @@ internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }
-    foreach (var (_, t) in s.terms) {
+    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
         assert(t.typ != nil);
         if (!f(t)) {
             return false;
@@ -281,14 +281,14 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             }
         }
 
-        foreach (var (_, m) in ityp.methods) {
+        foreach (var (_, m) in range(ityp.methods)) {
             addMethod(m.pos, m, true);
         }
 
         // collect embedded elements
         var allTerms = allTermlist;
         var allComparable = false;
-        foreach (var (i, typ) in ityp.embeddeds) {
+        foreach (var (i, typ) in range(ityp.embeddeds)) {
             // The embedding position is nil for imported interfaces.
             // We don't need to do version checks in those cases.
             tokenꓸPos posΔ2 = default; // embedding position
@@ -308,7 +308,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                     continue;
                 }
                 comparable = tset.comparable;
-                foreach (var (_, m) in tset.methods) {
+                foreach (var (_, m) in range(tset.methods)) {
                     addMethod(posΔ2, m, false); // use embedding position pos rather than m.pos
                 }
                 terms = tset.terms;
@@ -372,7 +372,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
     if (comp && !terms.isAll()) {
         // only keep comparable terms
         nint i = 0;
-        foreach (var (_, t) in terms) {
+        foreach (var (_, t) in range<ж<Δterm>>(terms)) {
             assert(t.typ != nil);
             if (comparableType(t.typ, false, /* strictly comparable */ default) == nil) {
                 terms[i] = t;
@@ -424,7 +424,7 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union
     unionSets[Ꮡutyp] = @new<_TypeSet>();
 
     termlist allTerms = default;
-    foreach (var (_, vᴛ1) in utyp.terms) {
+    foreach (var (_, vᴛ1) in range(utyp.terms)) {
         var t = vᴛ1;
 
         termlist terms = default;

@@ -96,7 +96,7 @@ internal static (nint n, error err) Write(this ref printer p, slice<byte> data) 
     error err = default;
 
     nint m = default;
-    foreach (var (i, b) in data) {
+    foreach (var (i, b) in range(data)) {
         // invariant: data[0:n] has been written
         if (b == '\n') {
             (m, err) = p.output.Write(data.slice(n, i + 1));
@@ -167,7 +167,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         if (x.Len() > 0) {
             p.indent++;
             Ꮡp.printf("\n");
-            foreach (var (_, key) in x.MapKeys()) {
+            foreach (var (_, key) in range(x.MapKeys())) {
                 Ꮡp.print(key);
                 Ꮡp.printf(": ");
                 Ꮡp.print(x.MapIndex(key));

@@ -38,7 +38,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
         Ꮡb.WriteString(strings.ToLower(sub));
     }
 
-    foreach (var (_, attribute) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param))) {
+    foreach (var (_, attribute) in range(slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param)))) {
         @string value = param[attribute];
         Ꮡb.WriteByte((byte)';');
         Ꮡb.WriteByte((byte)' ');

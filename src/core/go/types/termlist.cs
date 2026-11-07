@@ -30,7 +30,7 @@ internal static @string String(this termlist xl) {
         return "∅";
     }
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (i, x) in xl) {
+    foreach (var (i, x) in range<ж<Δterm>>(xl)) {
         if (i > 0) {
             Ꮡbuf.WriteString(termSep);
         }
@@ -44,7 +44,7 @@ internal static bool isEmpty(this termlist xl) {
     // If there's a non-nil term, the entire list is not empty.
     // If the termlist is in normal form, this requires at most
     // one iteration.
-    foreach (var (_, x) in xl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
         if (x != nil) {
             return false;
         }
@@ -57,7 +57,7 @@ internal static bool isAll(this termlist xl) {
     // If there's a 𝓤 term, the entire list is 𝓤.
     // If the termlist is in normal form, this requires at most
     // one iteration.
-    foreach (var (_, x) in xl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
         if (x != nil && x.typ == nil) {
             return true;
         }
@@ -73,7 +73,7 @@ internal static termlist norm(this termlist xl) {
     // TODO(gri) fix asymptotic performance
     var used = new slice<bool>(len(xl));
     termlist rl = default;
-    foreach (var (i, vᴛ1) in xl) {
+    foreach (var (i, vᴛ1) in range<ж<Δterm>>(xl)) {
         var xi = vᴛ1;
 
         if (xi == nil || used[i]) {
@@ -120,8 +120,8 @@ internal static termlist intersect(this termlist xl, termlist yl) {
     // Quadratic algorithm, but good enough for now.
     // TODO(gri) fix asymptotic performance
     termlist rl = default;
-    foreach (var (_, x) in xl) {
-        foreach (var (_, y) in yl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
+        foreach (var (_, y) in range<ж<Δterm>>(yl)) {
             var r = x.intersect(y); if (r != nil) {
                 rl = append(rlᴷ, rl, r);
             }
@@ -138,7 +138,7 @@ internal static bool equal(this termlist xl, termlist yl) {
 
 // includes reports whether t ∈ xl.
 internal static bool includes(this termlist xl, ΔType t) {
-    foreach (var (_, x) in xl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
         if (x.includes(t)) {
             return true;
         }
@@ -148,7 +148,7 @@ internal static bool includes(this termlist xl, ΔType t) {
 
 // supersetOf reports whether y ⊆ xl.
 internal static bool supersetOf(this termlist xl, ж<Δterm> y) {
-    foreach (var (_, x) in xl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
         if (y.subsetOf(x)) {
             return true;
         }
@@ -163,7 +163,7 @@ internal static bool subsetOf(this termlist xl, termlist yl) {
     }
 
     // each term x of xl must be a subset of yl
-    foreach (var (_, x) in xl) {
+    foreach (var (_, x) in range<ж<Δterm>>(xl)) {
         if (!yl.supersetOf(x)) {
             return false; // x is not a subset yl
         }

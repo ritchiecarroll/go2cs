@@ -61,7 +61,7 @@ internal static level implicitLevel => -1;
 internal static bool @in(this ΔClass c, params ꓸꓸꓸClass setʗp) {
     var set = setʗp.sslice();
 
-    foreach (var (_, s) in set) {
+    foreach (var (_, s) in range(set)) {
         if (c == s) {
             return true;
         }
@@ -158,7 +158,7 @@ internal static void run(this ж<paragraph> Ꮡp) {
 
     // Rule X10.
     // Run remainder of algorithm one isolating run sequence at a time
-    foreach (var (_, seq) in Ꮡp.determineIsolatingRunSequences()) {
+    foreach (var (_, seq) in range(Ꮡp.determineIsolatingRunSequences())) {
         // 3) resolving weak types
         // Rules W1-W7.
         seq.resolveWeakTypes();
@@ -204,11 +204,11 @@ internal static void determineMatchingIsolates(this ref paragraph p) {
     p.matchingPDI = new slice<nint>(p.Len());
     p.matchingIsolateInitiator = new slice<nint>(p.Len());
 
-    foreach (var i in range(p.matchingIsolateInitiator)) {
+    foreach (var i in range(len(p.matchingIsolateInitiator))) {
         p.matchingIsolateInitiator[i] = -1;
     }
 
-    foreach (var i in range(p.matchingPDI)) {
+    foreach (var i in range(len(p.matchingPDI))) {
         p.matchingPDI[i] = -1;
 
         ΔClass t = p.resultTypes[i]; if (t.@in(LRI, RLI, FSI)) {
@@ -312,7 +312,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
     // Rule X1.
     stack.push(p.embeddingLevel, ON, false);
 
-    foreach (var (i, t) in p.resultTypes) {
+    foreach (var (i, t) in range(p.resultTypes)) {
         // Rules X2, X3, X4, X5, X5a, X5b, X5c
         switch (t) {
         case var ᴛ when ᴛ == RLE || ᴛ == LRE || ᴛ == RLO || ᴛ == LRO || ᴛ == RLI || ᴛ == LRI || ᴛ == FSI: {
@@ -448,7 +448,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
 
     nint length = len(indexes);
     var types = new slice<ΔClass>(length);
-    foreach (var (i, x) in indexes) {
+    foreach (var (i, x) in range(indexes)) {
         types[i] = p.resultTypes[x];
     }
 
@@ -498,7 +498,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     // Rule W1.
     // Changes all NSMs.
     ΔClass precedingCharacterType = s.sos;
-    foreach (var (i, t) in s.types) {
+    foreach (var (i, t) in range(s.types)) {
         if (t == NSM) {
             s.types[i] = precedingCharacterType;
         } else {
@@ -511,7 +511,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
 
     // Rule W2.
     // EN does not change at the start of the run, because sos != AL.
-    foreach (var (i, t) in s.types) {
+    foreach (var (i, t) in range(s.types)) {
         if (t == EN) {
             for (nint j = i - 1; j >= 0; j--) {
                 ΔClass tΔ1 = s.types[j]; if (tΔ1.@in(L, R, AL)) {
@@ -525,7 +525,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     }
 
     // Rule W3.
-    foreach (var (i, t) in s.types) {
+    foreach (var (i, t) in range(s.types)) {
         if (t == AL) {
             s.types[i] = R;
         }
@@ -558,7 +558,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     }
 
     // Rule W5.
-    foreach (var (iᴛ1, t) in s.types) {
+    foreach (var (iᴛ1, t) in range(s.types)) {
         var i = iᴛ1;
 
         if (t == ET) {
@@ -586,14 +586,14 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     }
 
     // Rule W6.
-    foreach (var (i, t) in s.types) {
+    foreach (var (i, t) in range(s.types)) {
         if (t.@in(ES, ET, CS)) {
             s.types[i] = ON;
         }
     }
 
     // Rule W7.
-    foreach (var (i, vᴛ1) in s.types) {
+    foreach (var (i, vᴛ1) in range(s.types)) {
         var t = vᴛ1;
 
         if (t == EN) {
@@ -618,7 +618,7 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN, B, S, WS, ON, RLI, LRI, FSI, PDI);
 
-    foreach (var (iᴛ1, t) in s.types) {
+    foreach (var (iᴛ1, t) in range(s.types)) {
         var i = iᴛ1;
 
         switch (t) {
@@ -671,13 +671,13 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
 }
 
 internal static void setLevels(slice<level> levels, level newLevel) {
-    foreach (var i in range(levels)) {
+    foreach (var i in range(len(levels))) {
         levels[i] = newLevel;
     }
 }
 
 internal static void setTypes(slice<ΔClass> types, ΔClass newType) {
-    foreach (var i in range(types)) {
+    foreach (var i in range(len(types))) {
         types[i] = newType;
     }
 }
@@ -691,7 +691,7 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
     setLevels(s.resolvedLevels, s.level);
 
     if (((level)(s.level & 1)) == 0) { // even level
-        foreach (var (i, t) in s.types) {
+        foreach (var (i, t) in range(s.types)) {
             // Rule I1.
             if (t == L) {
                 // no change
@@ -702,7 +702,7 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
             }
         }
     } else { // odd level
-        foreach (var (i, t) in s.types) {
+        foreach (var (i, t) in range(s.types)) {
             // Rule I2.
             if (t == R) {
                 // no change
@@ -716,7 +716,7 @@ internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
 // Applies the levels and types resolved in rules W1-I2 to the
 // resultLevels array.
 internal static void applyLevelsAndTypes(this ref ΔisolatingRunSequence s) {
-    foreach (var (i, x) in s.indexes) {
+    foreach (var (i, x) in range(s.indexes)) {
         s.p.resultTypes[x] = s.types[i];
         s.p.resultLevels[x] = s.resolvedLevels[i];
     }
@@ -731,7 +731,7 @@ internal static nint findRunLimit(this ref ΔisolatingRunSequence s, nint index,
 loop:
     for (; index < len(s.types); index++) {
         ΔClass t = s.types[index];
-        foreach (var (_, valid) in validSet) {
+        foreach (var (_, valid) in range(validSet)) {
             if (t == valid) {
                 goto continue_loop;
             }
@@ -749,8 +749,8 @@ internal static void assertOnly(this ref ΔisolatingRunSequence s, params ꓸꓸ
     var codes = codesʗp.sslice();
 
 loop:
-    foreach (var (i, t) in s.types) {
-        foreach (var (_, c) in codes) {
+    foreach (var (i, t) in range(s.types)) {
+        foreach (var (_, c) in range(codes)) {
             if (t == c) {
                 goto continue_loop;
             }
@@ -772,7 +772,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
     var allRuns = slice<slice<nint>>([]);
     var currentLevel = implicitLevel;
 
-    foreach (var i in range(p.initialTypes)) {
+    foreach (var i in range(len(p.initialTypes))) {
         if (!isRemovedByX9(p.initialTypes[i])) {
             if (p.resultLevels[i] != currentLevel) {
                 // we just encountered a new run; wrap up last run
@@ -802,8 +802,8 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
 
     // Compute the run that each character belongs to
     var runForCharacter = new slice<nint>(p.Len());
-    foreach (var (i, run) in levelRuns) {
-        foreach (var (_, index) in run) {
+    foreach (var (i, run) in range(levelRuns)) {
+        foreach (var (_, index) in range(run)) {
             runForCharacter[index] = i;
         }
     }
@@ -812,7 +812,7 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
 
     slice<nint> currentRunSequence = default;
 
-    foreach (var (_, vᴛ1) in levelRuns) {
+    foreach (var (_, vᴛ1) in range(levelRuns)) {
         var run = vᴛ1;
 
         nint first = run[0];
@@ -843,7 +843,7 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
 // that the levels assigned to these codes are arbitrary, they're chosen so
 // as to avoid breaking level runs.
 internal static void assignLevelsToCharactersRemovedByX9(this ref paragraph p) {
-    foreach (var (i, t) in p.initialTypes) {
+    foreach (var (i, t) in range(p.initialTypes)) {
         if (t.@in(LRE, RLE, LRO, RLO, PDF, BN)) {
             p.resultTypes[i] = t;
             p.resultLevels[i] = (level)(-1);
@@ -894,7 +894,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
     // don't worry about linebreaks since if there is a break within
     // a series of WS values preceding S, the linebreak itself
     // causes the reset.
-    foreach (var (i, t) in p.initialTypes) {
+    foreach (var (i, t) in range(p.initialTypes)) {
         if (t.@in(B, S)) {
             // Rule L1, clauses one and two.
             result[i] = p.embeddingLevel;
@@ -912,7 +912,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
 
     // Rule L1, clause four.
     nint start = 0;
-    foreach (var (_, limit) in linebreaks) {
+    foreach (var (_, limit) in range(linebreaks)) {
         for (nint j = limit - 1; j >= start; j--) {
             if (isWhitespace(p.initialTypes[j])) { // including format codes
                 result[j] = p.embeddingLevel;
@@ -953,11 +953,11 @@ internal static slice<nint> computeMultilineReordering(slice<level> levels, slic
     var result = new slice<nint>(len(levels));
 
     nint start = 0;
-    foreach (var (_, limit) in linebreaks) {
+    foreach (var (_, limit) in range(linebreaks)) {
         var tempLevels = new slice<level>(limit - start);
         copy(tempLevels, levels.slice(start));
 
-        foreach (var (j, order) in computeReordering(tempLevels)) {
+        foreach (var (j, order) in range(computeReordering(tempLevels))) {
             result[start + j] = order + start;
         }
         start = limit;
@@ -971,7 +971,7 @@ internal static slice<nint> computeMultilineReordering(slice<level> levels, slic
 internal static slice<nint> computeReordering(slice<level> levels) {
     var result = new slice<nint>(len(levels));
     // initialize order
-    foreach (var i in range(result)) {
+    foreach (var i in range(len(result))) {
         result[i] = i;
     }
 
@@ -980,7 +980,7 @@ internal static slice<nint> computeReordering(slice<level> levels) {
     // performed, so this is sufficient.
     var highestLevel = (level)0;
     var lowestOddLevel = (level)(maxDepth + 2);
-    foreach (var (_, level) in levels) {
+    foreach (var (_, level) in range(levels)) {
         if (level > highestLevel) {
             highestLevel = level;
         }
@@ -1042,7 +1042,7 @@ internal static error validateTypes(slice<ΔClass> types) {
     if (len(types) == 0) {
         return fmt.Errorf("types is null"u8);
     }
-    foreach (var (i, t) in types.slice(0, len(types) - 1)) {
+    foreach (var (i, t) in range(types.slice(0, len(types) - 1))) {
         if (t == B) {
             return fmt.Errorf("B type before end of paragraph at index: %d"u8, i);
         }
@@ -1059,7 +1059,7 @@ internal static error validateParagraphEmbeddingLevel(level embeddingLevel) {
 
 internal static error validateLineBreaks(slice<nint> linebreaks, nint textLength) {
     nint prev = 0;
-    foreach (var (i, next) in linebreaks) {
+    foreach (var (i, next) in range(linebreaks)) {
         if (next <= prev) {
             return fmt.Errorf("bad linebreak: %d at index: %d"u8, next, i);
         }
@@ -1075,7 +1075,7 @@ internal static error validatePbTypes(slice<bracketType> pairTypes) {
     if (len(pairTypes) == 0) {
         return fmt.Errorf("pairTypes is null"u8);
     }
-    foreach (var (i, pt) in pairTypes) {
+    foreach (var (i, pt) in range(pairTypes)) {
         switch (pt) {
         case var ᴛ when ᴛ == bpNone || ᴛ == bpOpen || ᴛ == bpClose: {
             break;

@@ -57,7 +57,7 @@ public static (slice<nint> gids, error err) Getgroups() {
         return (default, err);
     }
     gids = new slice<nint>(n);
-    foreach (var (i, v) in a.slice(0, n)) {
+    foreach (var (i, v) in range(a.slice(0, n))) {
         gids[i] = (nint)v;
     }
     return (gids, err);
@@ -69,7 +69,7 @@ public static error /*err*/ Setgroups(slice<nint> gids) {
     }
 
     var a = new slice<_Gid_t>(len(gids));
-    foreach (var (i, v) in gids) {
+    foreach (var (i, v) in range(gids)) {
         a[i] = (_Gid_t)(uint32)v;
     }
     return setgroups(len(a), Ꮡ(a, 0));

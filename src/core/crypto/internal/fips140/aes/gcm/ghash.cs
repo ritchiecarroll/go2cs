@@ -64,7 +64,7 @@ internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<by
     }
 
     gcmFieldElement y = default;
-    foreach (var (_, input) in inputs) {
+    foreach (var (_, input) in range(inputs)) {
         ghashUpdate(ref productTable, ref y, input);
     }
 
@@ -110,10 +110,10 @@ internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
     return @double;
 }
 
-internal static slice<uint16> ghashReductionTable = slice<uint16>([
+internal static slice<uint16> ghashReductionTable = [
     0x0000, 0x1c20, 0x3840, 0x2460, 0x7080, 0x6ca0, 0x48c0, 0x54e0,
     0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0
-]);
+];
 
 // ghashMul sets y to y*H, where H is the GCM key, fixed during New.
 internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFieldElement y) {

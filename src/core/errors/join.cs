@@ -21,7 +21,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     var errs = errsʗp.sslice();
 
     nint n = 0;
-    foreach (var (_, err) in errs) {
+    foreach (var (_, err) in range(errs)) {
         if (err != nil) {
             n++;
         }
@@ -32,7 +32,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     var e = Ꮡ(new joinError(
         errs: new slice<error>(0, n)
     ));
-    foreach (var (_, err) in errs) {
+    foreach (var (_, err) in range(errs)) {
         if (err != nil) {
             e.errs = append(e.errs, err);
         }
@@ -52,7 +52,7 @@ internal static @string Error(this ref joinError e) {
     }
 
     var b = slice<byte>(e.errs[0].Error());
-    foreach (var (_, err) in e.errs[1..]) {
+    foreach (var (_, err) in range(e.errs[1..])) {
         b = append(b, (byte)'\n');
         b = append(b, err.Error().ꓸꓸꓸ);
     }

@@ -140,7 +140,7 @@ internal static (@string, error) toASCII(@string s) {
         return (s, default);
     }
     var labels = strings.Split(s, ".");
-    foreach (var (i, label) in labels) {
+    foreach (var (i, label) in range(labels)) {
         if (!ascii.Is(label)) {
             var (a, err) = encode(acePrefix, label);
             if (err != nil) {

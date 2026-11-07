@@ -521,7 +521,7 @@ internal static void mallocinit() {
     lockInit(ref profInsertLock, lockRankProfInsert);
     lockInit(ref profBlockLock, lockRankProfBlock);
     lockInit(ref profMemActiveLock, lockRankProfMemActive);
-    foreach (var i in range(profMemFutureLock)) {
+    foreach (var i in range(len(profMemFutureLock))) {
         lockInit(ref profMemFutureLock[i], lockRankProfMemFuture);
     }
     lockInit(ref globalAlloc.mutex, lockRankGlobalAlloc);
@@ -738,7 +738,7 @@ internal static void mallocinit() {
             (uintptr)256 << 20,
             (uintptr)128 << 20
         ]);
-        foreach (var (_, arenaSize) in arenaSizes) {
+        foreach (var (_, arenaSize) in range(arenaSizes)) {
             var (a, size) = sysReserveAligned((@unsafe.Pointer)Δp, arenaSize, heapArenaBytes, heapReservationˢ);
             if (a != nil) {
                 Ꮡmheap_.Ꮡarena.init((uintptr)a, size, false);
@@ -1028,7 +1028,7 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
 
     // N.B. The arenas L1 map is quite small on all platforms, so it's fine to
     // just iterate over the whole thing.
-    foreach (var i in range(h.arenas)) {
+    foreach (var i in range(len(h.arenas))) {
         var l2 = (ж<array<ж<heapArena>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡ(h.arenas, i))));
         if (l2 == nil) {
             continue;

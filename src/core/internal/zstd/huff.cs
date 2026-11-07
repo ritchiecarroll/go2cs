@@ -147,7 +147,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
 
     array<uint32> weightMark = new(13);
     var weightMask = (uint32)0;
-    foreach (var (_, w) in weights.slice(0, count)) {
+    foreach (var (_, w) in range(weights.slice(0, count))) {
         if (w > 12) {
             return (0, 0, r.makeError(off, huffmanWeightOverflowˢ));
         }
@@ -200,7 +200,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         weightMark[i + 1] = cur;
     }
 
-    foreach (var (i, w) in weights.slice(0, count)) {
+    foreach (var (i, w) in range(weights.slice(0, count))) {
         if (w == 0) {
             continue;
         }

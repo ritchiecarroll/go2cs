@@ -80,7 +80,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             }
             if (combineFiles && numDiskFiles > 1) {
                 foreach (var (_, fhs) in formʗ1.File) {
-                    foreach (var (_, fh) in fhs) {
+                    foreach (var (_, fh) in range(fhs)) {
                         fh.tmpshared = true;
                     }
                 }
@@ -235,7 +235,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
     foreach (var (k, vs) in h) {
         size += (int64)len(k);
         size += 200; // map entry overhead
-        foreach (var (_, v) in vs) {
+        foreach (var (_, v) in range(vs)) {
             size += (int64)len(v);
         }
     }
@@ -256,7 +256,7 @@ partial struct Form {
 public static error RemoveAll(this ref Form f) {
     error err = default;
     foreach (var (_, fhs) in f.File) {
-        foreach (var (_, fh) in fhs) {
+        foreach (var (_, fh) in range(fhs)) {
             if (fh.tmpfile != ""u8) {
                 var e = os.Remove(fh.tmpfile);
                 if (e != nil && !errors.Is(e, os.ErrNotExist) && err == nil) {

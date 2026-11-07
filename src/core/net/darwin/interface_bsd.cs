@@ -25,7 +25,7 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     }
     var ift = new slice<Interface>(n);
     n = 0;
-    foreach (var (_, m) in msgs) {
+    foreach (var (_, m) in range(msgs)) {
         switch (m.type()) {
         case ж<routebsd.InterfaceMessage> mΔ1: {
             if (ifindex != 0 && ifindex != mΔ1.Index) {
@@ -87,7 +87,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
         return (default, err);
     }
     var ifat = new slice<ΔAddr>(0, len(msgs));
-    foreach (var (_, m) in msgs) {
+    foreach (var (_, m) in range(msgs)) {
         switch (m.type()) {
         case ж<routebsd.InterfaceAddrMessage> mΔ1: {
             if (index != 0 && index != mΔ1.Index) {

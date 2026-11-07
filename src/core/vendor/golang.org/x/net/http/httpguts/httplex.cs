@@ -99,7 +99,7 @@ public static bool IsTokenRune(rune r) {
 // HeaderValuesContainsToken reports whether any string in values
 // contains the provided token, ASCII case-insensitively.
 public static bool HeaderValuesContainsToken(slice<@string> values, @string token) {
-    foreach (var (_, v) in values) {
+    foreach (var (_, v) in range(values)) {
         if (headerValueContainsToken(v, token)) {
             return true;
         }

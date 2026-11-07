@@ -1051,7 +1051,7 @@ internal static partial void ensureSigM() {
             // sigenable/sigdisable in turn notify this thread to update its signal
             // mask accordingly.
             ref var sigBlocked = ref heap<sigset>(sigset_all, out var ᏑsigBlocked);
-            foreach (var i in range(sigtable)) {
+            foreach (var i in range(len(sigtable))) {
                 if (!blockableSig((uint32)i)) {
                     sigdelset(ref (ᏑsigBlocked).DerefOrNull(), i);
                 }
@@ -1351,7 +1351,7 @@ internal static void minitSignalStack() {
 // After this is called the thread can receive signals.
 internal static void minitSignalMask() {
     ref var nmask = ref heap<sigset>(getg().Value.m.Value.sigmask, out var Ꮡnmask);
-    foreach (var i in range(sigtable)) {
+    foreach (var i in range(len(sigtable))) {
         if (!blockableSig((uint32)i)) {
             sigdelset(ref nmask, i);
         }

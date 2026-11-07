@@ -199,7 +199,7 @@ internal static @string printByteSlice(slice<byte> b) {
     }
     var buf = new slice<byte>(0, 5 * len(b));
     buf = printUint8Bytes(buf, (uint8)b[0]);
-    foreach (var (_, n) in b[1..]) {
+    foreach (var (_, n) in range(b[1..])) {
         buf = append(bufᴷ, buf, (byte)',', (byte)' ');
         buf = printUint8Bytes(buf, (uint8)n);
     }
@@ -1142,25 +1142,25 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
     // compression will help ensure compliance.
     var compression = new map<@string, uint16>{};
 
-    foreach (var i in range(m.Questions)) {
+    foreach (var i in range(len(m.Questions))) {
         error err = default;
         (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != nil) {
             return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Question", err))));
         }
     }
-    foreach (var i in range(m.Answers)) {
+    foreach (var i in range(len(m.Answers))) {
         error err = default;
         (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != nil) {
             return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Answer", err))));
         }
     }
-    foreach (var i in range(m.Authorities)) {
+    foreach (var i in range(len(m.Authorities))) {
         error err = default;
         (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != nil) {
             return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Authority", err))));
         }
     }
-    foreach (var i in range(m.Additionals)) {
+    foreach (var i in range(len(m.Additionals))) {
         error err = default;
         (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != nil) {
             return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Additional", err))));
@@ -1175,7 +1175,7 @@ public static @string GoString(this ref Message m) {
     @string s = "dnsmessage.Message{Header: "u8 + m.Header.GoString() + ", "u8 + "Questions: []dnsmessage.Question{"u8;
     if (len(m.Questions) > 0) {
         s += m.Questions[0].GoString();
-        foreach (var (_, vᴛ1) in m.Questions[1..]) {
+        foreach (var (_, vᴛ1) in range(m.Questions[1..])) {
             var q = vᴛ1.ΔClone();
 
             s += ", "u8 + q.GoString();
@@ -1184,7 +1184,7 @@ public static @string GoString(this ref Message m) {
     s += "}, Answers: []dnsmessage.Resource{"u8;
     if (len(m.Answers) > 0) {
         s += m.Answers[0].GoString();
-        foreach (var (_, vᴛ2) in m.Answers[1..]) {
+        foreach (var (_, vᴛ2) in range(m.Answers[1..])) {
             var a = vᴛ2.ΔClone();
 
             s += ", "u8 + a.GoString();
@@ -1193,7 +1193,7 @@ public static @string GoString(this ref Message m) {
     s += "}, Authorities: []dnsmessage.Resource{"u8;
     if (len(m.Authorities) > 0) {
         s += m.Authorities[0].GoString();
-        foreach (var (_, vᴛ3) in m.Authorities[1..]) {
+        foreach (var (_, vᴛ3) in range(m.Authorities[1..])) {
             var a = vᴛ3.ΔClone();
 
             s += ", "u8 + a.GoString();
@@ -1202,7 +1202,7 @@ public static @string GoString(this ref Message m) {
     s += "}, Additionals: []dnsmessage.Resource{"u8;
     if (len(m.Additionals) > 0) {
         s += m.Additionals[0].GoString();
-        foreach (var (_, vᴛ4) in m.Additionals[1..]) {
+        foreach (var (_, vᴛ4) in range(m.Additionals[1..])) {
             var a = vᴛ4.ΔClone();
 
             s += ", "u8 + a.GoString();
@@ -2116,7 +2116,7 @@ Loop:
 
             // Reject names containing dots.
             // See issue golang/go#56246
-            foreach (var (_, v) in msg.slice(currOff, endOff)) {
+            foreach (var (_, v) in range(msg.slice(currOff, endOff))) {
                 if (v == '.') {
                     return (off, errInvalidName);
                 }
@@ -2563,7 +2563,7 @@ internal static Type realType(this ref ΔTXTResource r) {
 // pack appends the wire format of the TXTResource to msg.
 internal static (slice<byte>, error) pack(this ref ΔTXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
-    foreach (var (_, s) in r.TXT) {
+    foreach (var (_, s) in range(r.TXT)) {
         error err = default;
         (msg, err) = packText(msg, s);
         if (err != nil) {
@@ -2584,7 +2584,7 @@ public static @string GoString(this ref ΔTXTResource r) {
         return s + "}}"u8;
     }
     s += @""""u8 + printString(slice<byte>(r.TXT[0]));
-    foreach (var (_, t) in r.TXT[1..]) {
+    foreach (var (_, t) in range(r.TXT[1..])) {
         s += @""", """u8 + printString(slice<byte>(t));
     }
     return s + @"""}}"u8;
@@ -2739,7 +2739,7 @@ internal static Type realType(this ref ΔOPTResource r) {
 }
 
 internal static (slice<byte>, error) pack(this ref ΔOPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
-    foreach (var (_, opt) in r.Options) {
+    foreach (var (_, opt) in range(r.Options)) {
         msg = packUint16(msg, opt.Code);
         var l = (uint16)len(opt.Data);
         msg = packUint16(msg, l);
@@ -2759,7 +2759,7 @@ public static @string GoString(this ref ΔOPTResource r) {
         return s + "}}"u8;
     }
     s += r.Options[0].GoString();
-    foreach (var (_, vᴛ1) in r.Options[1..]) {
+    foreach (var (_, vᴛ1) in range(r.Options[1..])) {
         var o = vᴛ1;
 
         s += ", "u8 + o.GoString();

@@ -315,7 +315,7 @@ public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> 
 
     var directory = new slice<ж<table>>((nint)(dirSize));
 
-    foreach (var i in range(directory)) {
+    foreach (var i in range(len(directory))) {
         // TODO: Think more about initial table capacity.
         directory[i] = newTable(Ꮡmt, (uint64)targetCapacity / dirSize, i, m.globalDepth);
     }
@@ -851,7 +851,7 @@ public static ж<ΔMap> Clone(this ж<ΔMap> Ꮡm, ж<abiꓸMapType> typ) {
         // Clone each (different) table.
         var oldDir = @unsafe.Slice((ж<ж<table>>)(uintptr)(m.dirPtr), m.dirLen);
         var newDir = new slice<ж<table>>(m.dirLen);
-        foreach (var (i, t) in oldDir) {
+        foreach (var (i, t) in range(oldDir)) {
             if (i > 0 && t == oldDir[i - 1]) {
                 newDir[i] = newDir[i - 1];
                 continue;
@@ -925,7 +925,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     }
     case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.Reinterpret<abi.Type, abiꓸStructType>();
-        foreach (var (_, f) in s.Fields) {
+        foreach (var (_, f) in range(s.Fields)) {
             if (f.Name.IsBlank()) {
                 continue;
             }

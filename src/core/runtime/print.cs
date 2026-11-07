@@ -233,13 +233,13 @@ internal static void printquoted(@string s) {
             break;
         }
         case '\\' or '"': {
-            gwrite(slice<byte>([(byte)'\\', (byte)r]));
+            gwrite([(byte)'\\', (byte)r]);
             continue;
             break;
         }}
         // For now, only allow basic printable ascii through unescaped
         if (r >= ' ' && r <= '~') {
-            gwrite(slice<byte>([(byte)r]));
+            gwrite([(byte)r]);
         } else if (r < 127) {
             gwrite(bytes(@"\x"));
             printhexopts(false, 2, (uint64)r);
@@ -251,7 +251,7 @@ internal static void printquoted(@string s) {
             printhexopts(false, 8, (uint64)r);
         }
     }
-    gwrite(slice<byte>([(byte)'"']));
+    gwrite([(byte)'"']);
     printunlock();
 }
 

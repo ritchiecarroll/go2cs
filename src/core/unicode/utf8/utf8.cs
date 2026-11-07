@@ -155,7 +155,7 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
     // Inlineable fast path for ASCII characters; see #48195.
     // This implementation is weird but effective at rendering the
     // function inlineable.
-    foreach (var (_, b) in p) {
+    foreach (var (_, b) in range(p)) {
         if (b < RuneSelf) {
             return ((rune)b, 1);
         }

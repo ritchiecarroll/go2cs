@@ -16,7 +16,7 @@ internal static void setReadMsgCloseOnExec(slice<byte> oob) {
         return;
     }
 
-    foreach (var (_, vᴛ1) in scms) {
+    foreach (var (_, vᴛ1) in range(scms)) {
         ref var scm = ref heap(new syscall.SocketControlMessage(), out var Ꮡscm);
         scm = vᴛ1;
 
@@ -25,7 +25,7 @@ internal static void setReadMsgCloseOnExec(slice<byte> oob) {
             if (errΔ1 != nil) {
                 continue;
             }
-            foreach (var (_, fd) in fds) {
+            foreach (var (_, fd) in range(fds)) {
                 syscall.CloseOnExec(fd);
             }
         }

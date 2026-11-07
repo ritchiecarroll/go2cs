@@ -65,11 +65,11 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
     var flistᴷ = new stackAppend<ж<Example>>();
 
     slice<ж<Example>> list = default;
-    foreach (var (_, @file) in testFiles) {
+    foreach (var (_, @file) in range(testFiles)) {
         var hasTests = false; // file contains tests, fuzz test, or benchmarks
         nint numDecl = 0;     // number of non-import declarations in the file
         slice<ж<Example>> flist = default;
-        foreach (var (_, decl) in @file.Decls) {
+        foreach (var (_, decl) in range(@file.Decls)) {
             var (g, okΔ1) = decl._<ж<ast.GenDecl>>(ᐧ); if (okΔ1 && g.Tok != token.IMPORT) {
                 numDecl++;
                 continue;
@@ -191,7 +191,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     var topDecls = new map<ж<ast.Object>, ast.Decl>();
     var typMethods = new map<@string, slice<ast.Decl>>();
 
-    foreach (var (_, decl) in @file.Decls) {
+    foreach (var (_, decl) in range(@file.Decls)) {
         switch (decl.type()) {
         case ж<ast.FuncDecl> d: {
             if (d.Recv == nil) {
@@ -206,14 +206,14 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             break;
         }
         case ж<ast.GenDecl> d: {
-            foreach (var (_, spec) in d.Specs) {
+            foreach (var (_, spec) in range(d.Specs)) {
                 switch (spec.type()) {
                 case ж<ast.TypeSpec> s: {
                     topDecls[s.Name.Obj] = new ast.GenDeclжDecl(d);
                     break;
                 }
                 case ж<ast.ValueSpec> s: {
-                    foreach (var (_, name) in s.Names) {
+                    foreach (var (_, name) in range(s.Names)) {
                         topDecls[name.Obj] = new ast.GenDeclжDecl(d);
                     }
                     break;
@@ -238,7 +238,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     var groupStarts = findImportGroupStarts(@file.Imports);
     var groupStartsʗ1 = groupStarts;
     tokenꓸPos groupStart(ж<ast.ImportSpec> s) {
-        foreach (var (i, start) in groupStartsʗ1) {
+        foreach (var (i, start) in range(groupStartsʗ1)) {
             if (s.Path.ValuePos < start) {
                 return groupStartsʗ1[i - 1];
             }
@@ -246,7 +246,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
         return groupStartsʗ1[len(groupStartsʗ1) - 1];
     }
 
-    foreach (var (_, s) in @file.Imports) {
+    foreach (var (_, s) in range(@file.Imports)) {
         var (p, err) = strconv.Unquote((~s.Path).Value);
         if (err != nil) {
             continue;
@@ -297,14 +297,14 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
 
     // Include documentation belonging to blank imports.
     slice<ж<ast.CommentGroup>> comments = default;
-    foreach (var (_, s) in blankImports) {
+    foreach (var (_, s) in range(blankImports)) {
         var c = s._<ж<ast.ImportSpec>>().Doc; if (c != nil) {
             comments = append(comments, c);
         }
     }
 
     // Include comments that are inside the function body.
-    foreach (var (_, c) in @file.Comments) {
+    foreach (var (_, c) in range(@file.Comments)) {
         if (body.Pos() <= c.Pos() && c.End() <= body.End()) {
             comments = append(comments, c);
         }
@@ -315,7 +315,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     (body, comments) = stripOutputComment(body, comments);
 
     // Include documentation belonging to dependent declarations.
-    foreach (var (_, d) in depDecls) {
+    foreach (var (_, d) in range(depDecls)) {
         switch (d.type()) {
         case ж<ast.GenDecl> dΔ1: {
             if (dΔ1.Doc != nil) {
@@ -418,7 +418,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
 
     void inspectFieldList(ж<ast.FieldList> fl) {
         if (fl != nil) {
-            foreach (var (_, f) in fl.List) {
+            foreach (var (_, f) in range(fl.List)) {
                 ast.Inspect(f.Type, ᏑinspectFunc.ValueSlot);
             }
         }
@@ -444,7 +444,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
             break;
         }
         case ж<ast.GenDecl> d: {
-            foreach (var (_, spec) in d.Specs) {
+            foreach (var (_, spec) in range(d.Specs)) {
                 switch (spec.type()) {
                 case ж<ast.TypeSpec> s: {
                     inspectFieldList(s.TypeParams);
@@ -456,7 +456,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                     if (s.Type != nil) {
                         ast.Inspect(s.Type, inspectFunc);
                     }
-                    foreach (var (_, val) in s.Values) {
+                    foreach (var (_, val) in range(s.Values)) {
                         ast.Inspect(val, inspectFunc);
                     }
                     break;
@@ -475,7 +475,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     // values of subsequent ones.
     // See testdata/examples/iota.go for a minimal example.
     slice<ast.Decl> ds = default;
-    foreach (var (_, d) in depDecls) {
+    foreach (var (_, d) in range(depDecls)) {
         switch (d.type()) {
         case ж<ast.FuncDecl> dΔ1: {
             ds = append(ds, (ast.Decl)(new ast.FuncDeclжDecl(dΔ1)));
@@ -485,7 +485,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
             var containsIota = false; // does any spec have iota?
             // Collect all Specs that were mentioned in the example.
             slice<ast.Spec> specs = default;
-            foreach (var (_, s) in dΔ1.Specs) {
+            foreach (var (_, s) in range(dΔ1.Specs)) {
                 switch (s.type()) {
                 case ж<ast.TypeSpec> sΔ1: {
                     if (usedObjs[sΔ1.Name.Obj]) {
@@ -509,7 +509,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
                     ref var ns = ref heap<ast.ValueSpec>(sΔ1.Value, out var Ꮡns);
                     ns.Names = default;
                     ns.Values = default;
-                    foreach (var (i, n) in sΔ1.Names) {
+                    foreach (var (i, n) in range(sΔ1.Names)) {
                         if (usedObjs[n.Obj]) {
                             ns.Names = append(ns.Names, n);
                             if (sΔ1.Values != nil) {
@@ -560,7 +560,7 @@ internal static bool hasIota(ast.Spec s) {
 internal static slice<tokenꓸPos> findImportGroupStarts(slice<ж<ast.ImportSpec>> imps) {
     var startImps = findImportGroupStarts1(imps);
     var groupStarts = new slice<tokenꓸPos>(len(startImps));
-    foreach (var (i, imp) in startImps) {
+    foreach (var (i, imp) in range(startImps)) {
         groupStarts[i] = imp.Pos();
     }
     return groupStarts;
@@ -579,7 +579,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     // if and only if they are more than 2 positions apart (newline, tab).
     slice<ж<ast.ImportSpec>> groupStarts = default;
     tokenꓸPos prevEnd = (tokenꓸPos)(-2);
-    foreach (var (_, imp) in imps) {
+    foreach (var (_, imp) in range(imps)) {
         if (imp.Pos() - prevEnd > 2) {
             groupStarts = append(groupStartsᴷ, groupStarts, imp);
         }
@@ -610,7 +610,7 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
 
     // Copy declaration slice, rewriting the ExampleX function to main.
     slice<ast.Decl> decls = default;
-    foreach (var (_, vᴛ1) in @file.Decls) {
+    foreach (var (_, vᴛ1) in range(@file.Decls)) {
         var d = vᴛ1;
 
         var (fΔ1, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && isTest(fΔ1.Name.Name, exampleˢ)) {
@@ -666,7 +666,7 @@ internal static (nint i, ж<ast.CommentGroup> last) lastComment(ж<ast.BlockStmt
     }
     tokenꓸPos pos = b.Pos();
     tokenꓸPos end = b.End();
-    foreach (var (j, cg) in c) {
+    foreach (var (j, cg) in range(c)) {
         if (cg.Pos() < pos) {
             continue;
         }
@@ -698,24 +698,24 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
     // Mapping of names for funcs, types, and methods to the example listing.
     var ids = new map<@string, ж<slice<ж<Example>>>>();
     ids[""u8] = Ꮡp.ᏑExamples; // package-level examples have an empty name
-    foreach (var (_, f) in p.Funcs) {
+    foreach (var (_, f) in range(p.Funcs)) {
         if (!token.IsExported(f.Name)) {
             continue;
         }
         ids[f.Name] = f.ᏑExamples;
     }
-    foreach (var (_, t) in p.Types) {
+    foreach (var (_, t) in range(p.Types)) {
         if (!token.IsExported(t.Name)) {
             continue;
         }
         ids[t.Name] = t.ᏑExamples;
-        foreach (var (_, f) in t.Funcs) {
+        foreach (var (_, f) in range(t.Funcs)) {
             if (!token.IsExported(f.Name)) {
                 continue;
             }
             ids[f.Name] = f.ᏑExamples;
         }
-        foreach (var (_, m) in t.Methods) {
+        foreach (var (_, m) in range(t.Methods)) {
             if (!token.IsExported(m.Name)) {
                 continue;
             }
@@ -724,7 +724,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
     }
 
     // Group each example with the associated func, type, or method.
-    foreach (var (_, ex) in examples) {
+    foreach (var (_, ex) in range(examples)) {
         // Consider all possible split points for the suffix
         // by starting at the end of string (no suffix case),
         // then trying all positions that contain a '_' character.

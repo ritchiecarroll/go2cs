@@ -125,7 +125,7 @@ internal static error processDHT(this ref decoder d, nint n) {
         // h.nCodes is the total number of codes.
         h.nCodes = 0;
         array<int32> nCodes = new(16); /* maxCodeLength */
-        foreach (var i in range(nCodes)) {
+        foreach (var i in range(len(nCodes))) {
             nCodes[i] = (int32)d.tmp[i + 1];
             h.nCodes += nCodes[i];
         }
@@ -170,7 +170,7 @@ internal static error processDHT(this ref decoder d, nint n) {
         // Derive minCodes, maxCodes, and valsIndices.
         int32 c = default;
         int32 index = default;
-        foreach (var (i, nΔ1) in nCodes.ΔRangeSnapshot()) {
+        foreach (var (i, nΔ1) in range(nCodes.ΔRangeSnapshot())) {
             if (nΔ1 == 0) {
                 h.minCodes[i] = -1;
                 h.maxCodes[i] = -1;

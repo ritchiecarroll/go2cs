@@ -79,7 +79,7 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> n) {
             var nMinus1 = @new<bigꓸInt>().Neg(n);
             nMinus1.Sub(nMinus1, bigOne);
             var bytes = nMinus1.Bytes();
-            foreach (var i in range(bytes)) {
+            foreach (var i in range(len(bytes))) {
                 bytes[i] ^= (byte)(0xff);
             }
             if (len(bytes) == 0 || (byte)(bytes[0] & 0x80) == 0) {
@@ -177,7 +177,7 @@ internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
         return false;
     }
 
-    foreach (var (_, v) in oid) {
+    foreach (var (_, v) in range<nint>(oid)) {
         if (v < 0) {
             return false;
         }
@@ -195,7 +195,7 @@ public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.
         }
 
         bΔ1.addBase128Int((int64)oidʗ1[0] * 40 + (int64)oidʗ1[1]);
-        foreach (var (_, v) in oidʗ1[2..]) {
+        foreach (var (_, v) in range<nint>(oidʗ1[2..])) {
             bΔ1.addBase128Int((int64)v);
         }
     });
@@ -353,7 +353,7 @@ internal static bool readASN1BigInt(this ref String s, ж<bigꓸInt> @out) {
     if ((byte)(bytes[0] & 0x80) == 0x80) {
         // Negative number.
         var neg = new slice<byte>(len(bytes));
-        foreach (var (i, b) in bytes) {
+        foreach (var (i, b) in range<byte>(bytes)) {
             neg[i] = (byte)(((byte)(~b)));
         }
         @out.SetBytes(neg);

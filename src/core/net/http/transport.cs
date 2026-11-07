@@ -570,7 +570,7 @@ internal static @string validateHeaders(ΔHeader hdrs) {
         if (!httpguts.ValidHeaderFieldName(k)) {
             return fmt.Sprintf("field name %q"u8, k);
         }
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             if (!httpguts.ValidHeaderFieldValue(v)) {
                 // Don't include the value in the error,
                 // because it may be sensitive.
@@ -947,7 +947,7 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
     t.idleLRU = new connLRU();
     t.idleMu.Unlock();
     foreach (var (_, conns) in m) {
-        foreach (var (_, pconn) in conns) {
+        foreach (var (_, pconn) in range(conns)) {
             pconn.close(errCloseIdleConns);
         }
     }
@@ -1198,7 +1198,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         if (builtin.len(idles) >= t.maxIdleConnsPerHost()) {
             return errTooManyIdleHost;
         }
-        foreach (var (_, exist) in idles) {
+        foreach (var (_, exist) in range(idles)) {
             if (exist == Ꮡpconn) {
                 log.Fatalf("dup idle pconn %p in freelist", Ꮡpconn.OrTypedNil());
             }
@@ -1373,7 +1373,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
         break;
     }
     default: {
-        foreach (var (i, v) in pconns) {
+        foreach (var (i, v) in range(pconns)) {
             if (v != Ꮡpconn) {
                 continue;
             }
@@ -1611,10 +1611,10 @@ internal static void cleanFrontCanceled(this ref wantConnQueue q) {
 // all iterates over all wantConns in the queue.
 // The caller must not modify the queue while iterating.
 internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
-    foreach (var (_, w) in q.head.slice(q.headPos)) {
+    foreach (var (_, w) in range(q.head.slice(q.headPos))) {
         f(w);
     }
-    foreach (var (_, w) in q.tail) {
+    foreach (var (_, w) in range(q.tail)) {
         f(w);
     }
 }
@@ -2050,10 +2050,10 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
                         Username: u.Username()
                     ));
                     (auth.Password, _) = u.Password();
-                    d.AuthMethods = slice<socksAuthMethod>([
+                    d.AuthMethods = [
                         socksAuthMethodNotRequired,
                         socksAuthMethodUsernamePassword
-                    ]);
+                    ];
                     var authʗ1 = auth;
                                         d.Authenticate = (context.Context p1, io.ReadWriter p2, socksAuthMethod p3) => authʗ1.Authenticate(p1, p2, p3);
                 }

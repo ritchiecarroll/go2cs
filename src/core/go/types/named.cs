@@ -277,7 +277,7 @@ internal static ж<Named> unpack(this ж<Named> Ꮡn) {
             n.methods = methods;
 
             Ꮡn.setState(lazyLoaded); // avoid deadlock calling delayed functions
-            foreach (var (_, f) in delayed) {
+            foreach (var (_, f) in range(delayed)) {
                 f();
             }
         }
@@ -595,13 +595,13 @@ internal static nint methodIndex(this ref Named t, @string name, bool foldCase) 
         return -1;
     }
     if (foldCase) {
-        foreach (var (i, m) in t.methods) {
+        foreach (var (i, m) in range(t.methods)) {
             if (strings.EqualFold(m.name, name)) {
                 return i;
             }
         }
     } else {
-        foreach (var (i, m) in t.methods) {
+        foreach (var (i, m) in range(t.methods)) {
             if (m.name == name) {
                 return i;
             }
@@ -720,7 +720,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
     }
 
     path = move2heap(pathᴷ, path);
-    foreach (var (_, t) in path) {
+    foreach (var (_, t) in range(path)) {
         var tʗ1 = t;
         var uʗ1 = u;
         func(() => {

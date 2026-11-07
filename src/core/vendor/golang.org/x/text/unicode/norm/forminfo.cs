@@ -56,7 +56,7 @@ partial struct formInfo {
     internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = slice<ж<formInfo>>([Ꮡ(new formInfo(
+[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = [Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,
@@ -77,7 +77,7 @@ partial struct formInfo {
     compatibility: true,
     info: lookupInfoNFKC,
     nextMain: nextDecomposed))
-]); }
+]; }
 
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
 // unexpected behavior for the user.  For example, in NFD, there is a boundary

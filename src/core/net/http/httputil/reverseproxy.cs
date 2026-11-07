@@ -366,7 +366,7 @@ internal static void rewriteRequestURL(ref http.Request req, ж<url.URL> Ꮡtarg
 
 internal static void copyHeader(httpꓸHeader dst, httpꓸHeader src) {
     foreach (var (k, vv) in src) {
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             dst.Add(k, v);
         }
     }
@@ -377,7 +377,7 @@ internal static void copyHeader(httpꓸHeader dst, httpꓸHeader src) {
 // Connection header field. These are the headers defined by the
 // obsoleted RFC 2616 (section 13.5.1) and are used for backward
 // compatibility.
-internal static slice<@string> hopHeaders = slice<@string>([
+internal static slice<@string> hopHeaders = [
     "Connection",
     "Proxy-Connection", // non-standard but still sent by libcurl and rejected by e.g. google
     "Keep-Alive",
@@ -387,7 +387,7 @@ internal static slice<@string> hopHeaders = slice<@string>([
     "Trailer", // not Trailers per URL above; https://www.rfc-editor.org/errata_search.php?eid=4522
     "Transfer-Encoding",
     "Upgrade"
-]);
+];
 
 internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
     p.logf("http: proxy error: %v", err);
@@ -703,7 +703,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             var k = kᴛ1;
 
             k = http.TrailerPrefix + k;
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 rw.Header().Add(k, v);
             }
         }
@@ -739,7 +739,7 @@ internal static bool shouldPanicOnCopyError(ж<http.Request> Ꮡreq) {
 // removeHopByHopHeaders removes hop-by-hop headers.
 internal static void removeHopByHopHeaders(httpꓸHeader h) {
     // RFC 7230, section 6.1: Remove headers listed in the "Connection" header.
-    foreach (var (_, f) in h[connectionˢ]) {
+    foreach (var (_, f) in range(h[connectionˢ])) {
         foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ",").Invoke)) {
             var sf = iᴛ1;
             sf = textproto.TrimString(sf); if (sf != ""u8) {
@@ -750,7 +750,7 @@ internal static void removeHopByHopHeaders(httpꓸHeader h) {
     // RFC 2616, section 13.5.1: Remove a set of known hop-by-hop headers.
     // This behavior is superseded by the RFC 7230 Connection header, but
     // preserve it for backwards compatibility.
-    foreach (var (_, f) in hopHeaders) {
+    foreach (var (_, f) in range(hopHeaders)) {
         h.Del(f);
     }
 }

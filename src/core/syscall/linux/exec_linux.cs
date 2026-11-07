@@ -298,7 +298,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     // that we can't run the risk of overwriting any of them.
     var fd = new slice<nint>(len(attr.Files));
     nextfd = len(attr.Files);
-    foreach (var (iΔ1, ufd) in attr.Files) {
+    foreach (var (iΔ1, ufd) in range(attr.Files)) {
         if (nextfd < (nint)ufd) {
             nextfd = (nint)ufd;
         }
@@ -555,7 +555,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             goto childerror;
         }
 
-        foreach (var (_, vᴛ1) in sys.AmbientCaps) {
+        foreach (var (_, vᴛ1) in range(sys.AmbientCaps)) {
             c = vᴛ1;
 
             // Add the c capability to the permitted and inheritable capability mask,
@@ -572,7 +572,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             goto childerror;
         }
 
-        foreach (var (_, vᴛ2) in sys.AmbientCaps) {
+        foreach (var (_, vᴛ2) in range(sys.AmbientCaps)) {
             c = vᴛ2;
 
             (_, _, err1) = RawSyscall6(SYS_PRCTL, PR_CAP_AMBIENT, (uintptr)PR_CAP_AMBIENT_RAISE, c, 0, 0, 0);
@@ -736,7 +736,7 @@ childerror:
 
 internal static slice<byte> formatIDMappings(slice<SysProcIDMap> idMap) {
     slice<byte> data = default;
-    foreach (var (_, im) in idMap) {
+    foreach (var (_, im) in range(idMap)) {
         data = append(data, ((@string)(strconv.Itoa(im.ContainerID) + " "u8 + strconv.Itoa(im.HostID) + " "u8 + strconv.Itoa(im.Size) + "\n"u8)).ꓸꓸꓸ);
     }
     return data;

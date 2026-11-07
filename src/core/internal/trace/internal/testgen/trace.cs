@@ -138,12 +138,12 @@ public static slice<byte> Generate(this ref Trace t) {
     }
 
     // Write raw top-level events.
-    foreach (var (_, e) in t.events) {
+    foreach (var (_, e) in range(t.events)) {
         tw.WriteEvent(e);
     }
 
     // Write generations.
-    foreach (var (_, g) in t.gens) {
+    foreach (var (_, g) in range(t.gens)) {
         g.writeEventsTo(tw);
     }
 
@@ -186,7 +186,7 @@ partial struct stack {
 
 public static readonly ж<@string> ᏑNoString = new StaticBox<@string>("");
 public static ref @string NoString => ref ((StaticBox<@string>)ᏑNoString).ValueSlot;
-public static readonly ж<slice<trace.StackFrame>> ᏑNoStack = new StaticBox<slice<trace.StackFrame>>(slice<trace.StackFrame>([]));
+public static readonly ж<slice<trace.StackFrame>> ᏑNoStack = new StaticBox<slice<trace.StackFrame>>([]);
 public static ref slice<trace.StackFrame> NoStack => ref ((StaticBox<slice<trace.StackFrame>>)ᏑNoStack).ValueSlot;
 
 // Generation represents a single generation in the trace.
@@ -301,7 +301,7 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     }
 
     // Write event batches for the generation.
-    foreach (var (_, bΔ2) in g.batches) {
+    foreach (var (_, bΔ2) in range(g.batches)) {
         bΔ2.writeEventsTo(Ꮡtw);
     }
 
@@ -321,7 +321,7 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
 
         var stkΔ1 = stk.stk.slice(0, stk.len);
         var args = slice<uint64>([id, (uint64)len(stkΔ1)]);
-        foreach (var (_, f) in stkΔ1) {
+        foreach (var (_, f) in range(stkΔ1)) {
             args = append(args, f.PC, g.String(f.Func), g.String(f.File), f.Line);
         }
         b.RawEvent(tracev2.EvStack, default, args.ꓸꓸꓸ);
@@ -388,10 +388,10 @@ public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany a
     nint argOff = 0;
     if (b.gen.trace.specs[ev].IsTimedEvent) {
         if (b.gen.trace.validTimestamps) {
-            uintArgs = slice<uint64>([1]);
+            uintArgs = [1];
             b.gen.trace.lastTs += 1;
         } else {
-            uintArgs = slice<uint64>([0]);
+            uintArgs = [0];
         }
         argOff = 1;
     }
@@ -399,7 +399,7 @@ public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany a
     nint arity = len(spec.Args) - argOff; if (len(args) != arity) {
         throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
     }
-    foreach (var (i, arg) in args) {
+    foreach (var (i, arg) in range(args)) {
         uintArgs = append(uintArgs, b.uintArgFor(arg, spec.Args[i + argOff]));
     }
     b.RawEvent(ev, default, uintArgs.ꓸꓸꓸ);
@@ -472,7 +472,7 @@ public static void RawEvent(this ref ΔBatch b, tracev2.EventType typ, slice<byt
     // Compute the size of the event and add it to the batch.
     b.size += 1; // One byte for the event header.
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         b.size += (uint64)binary.PutUvarint(buf[..], arg);
     }
     if (len(data) != 0) {
@@ -491,9 +491,9 @@ internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw)
     tw.WriteEvent(new raw.Event(
         Version: b.gen.trace.ver,
         Ev: tracev2.EvEventBatch,
-        Args: slice<uint64>([b.gen.gen, (uint64)b.thread, (uint64)b.timestamp, b.size])
+        Args: [b.gen.gen, (uint64)b.thread, (uint64)b.timestamp, b.size]
     ));
-    foreach (var (_, e) in b.events) {
+    foreach (var (_, e) in range(b.events)) {
         tw.WriteEvent(e);
     }
 }

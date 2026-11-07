@@ -120,7 +120,7 @@ private static readonly @string alwaysIn0IntArgRegsˢᵇ = "always in [0:IntArgR
 //
 //go:nosplit
 internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> ctxt, ref abi.RegArgs args) {
-    foreach (var (i, arg) in args.Ints.ΔRangeSnapshot()) {
+    foreach (var (i, arg) in range(args.Ints.ΔRangeSnapshot())) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
         // Also avoid bounds checks, we don't have the stack space for it.

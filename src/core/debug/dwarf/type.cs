@@ -266,7 +266,7 @@ public static @string Defn(this ref StructType t) {
         return s;
     }
     s += " {"u8;
-    foreach (var (i, f) in t.Field) {
+    foreach (var (i, f) in range(t.Field)) {
         if (i > 0) {
             s += "; "u8;
         }
@@ -306,7 +306,7 @@ public static @string String(this ref EnumType t) {
         s += " "u8 + t.EnumName;
     }
     s += " {"u8;
-    foreach (var (i, v) in t.Val) {
+    foreach (var (i, v) in range(t.Val)) {
         if (i > 0) {
             s += "; "u8;
         }
@@ -329,7 +329,7 @@ private static readonly @string funcˢᵇ = "func("u8;
 
 public static @string String(this ref FuncType t) {
     @string s = funcˢ;
-    foreach (var (i, tΔ1) in t.ParamType) {
+    foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
             s += ", "u8;
         }
@@ -410,10 +410,10 @@ internal static void recordArrayType(this ref typeFixer tf, ж<ΔType> Ꮡt) {
 }
 
 internal static void apply(this ref typeFixer tf) {
-    foreach (var (_, t) in tf.typedefs) {
+    foreach (var (_, t) in range(tf.typedefs)) {
         t.of(TypedefType.ᏑCommonType).Common().ByteSize = t.Type.Size();
     }
-    foreach (var (_, t) in tf.arraytypes) {
+    foreach (var (_, t) in range(tf.arraytypes)) {
         zeroArray(ref (t).DerefOrNull());
     }
 }
@@ -599,7 +599,7 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             }
             if (len(dims) == 0) {
                 // LLVM generates this for x[].
-                dims = slice<int64>([-1]);
+                dims = [-1];
             }
 
             t.Count = dims[0];

@@ -112,7 +112,7 @@ internal static error processSOS(this ref decoder d, nint n) {
     for (nint i = 0; i < nComp; i++) {
         var cs = d.tmp[1 + 2 * i]; // Component selector.
         nint compIndex = -1;
-        foreach (var (j, comp) in d.comp.slice(0, d.nComp)) {
+        foreach (var (j, comp) in range(d.comp.slice(0, d.nComp))) {
             if (cs == comp.c) {
                 compIndex = j;
             }

@@ -135,7 +135,7 @@ internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref 
         // If literal is fold-sensitive, return (flagI, 0) or (0, flagI)
         // according to whether (?i) is active.
         // If literal is not fold-sensitive, return 0, 0.
-        foreach (var (_, r) in re.Rune) {
+        foreach (var (_, r) in range(re.Rune)) {
             if (minFold <= r && r <= maxFold && unicode.SimpleFold(r) != r) {
                 if ((Flags)(re.Flags & FoldCase) != 0) {
                     return (flagI, 0);
@@ -190,7 +190,7 @@ internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref 
         nint start = 0;
         nint last = 0;
         var did = false;
-        foreach (var (i, sub) in re.Sub) {
+        foreach (var (i, sub) in range(re.Sub)) {
             var (subMust, subCant) = calcFlags(ref (sub).DerefOrNull(), ref flags);
             if ((printFlags)(mustΔ2 & subCant) != 0 || (printFlags)(subMust & cantΔ2) != 0) {
                 if (mustΔ2 != 0) {
@@ -286,7 +286,7 @@ internal static void writeRegexp(ж<strings.Builder> b, ж<Regexp> Ꮡre, printF
             break;
         }
         case var ᴛ when ᴛ == OpLiteral: {
-            foreach (var (_, r) in re.Rune) {
+            foreach (var (_, r) in range(re.Rune)) {
                 escape(b, r, false);
             }
             break;
@@ -413,7 +413,7 @@ internal static void writeRegexp(ж<strings.Builder> b, ж<Regexp> Ꮡre, printF
             break;
         }
         case var ᴛ when ᴛ == OpConcat: {
-            foreach (var (_, sub) in re.Sub) {
+            foreach (var (_, sub) in range(re.Sub)) {
                 var p = (printFlags)0;
                 if (sub.Op == OpAlternate) {
                     p = flagPrec;
@@ -423,7 +423,7 @@ internal static void writeRegexp(ж<strings.Builder> b, ж<Regexp> Ꮡre, printF
             break;
         }
         case var ᴛ when ᴛ == OpAlternate: {
-            foreach (var (i, sub) in re.Sub) {
+            foreach (var (i, sub) in range(re.Sub)) {
                 if (i > 0) {
                     b.WriteRune('|');
                 }
@@ -508,7 +508,7 @@ public static nint MaxCap(this ref Regexp re) {
     if (re.Op == OpCapture) {
         m = re.Cap;
     }
-    foreach (var (_, sub) in re.Sub) {
+    foreach (var (_, sub) in range(re.Sub)) {
         nint n = sub.MaxCap(); if (m < n) {
             m = n;
         }
@@ -527,7 +527,7 @@ internal static void capNames(this ref Regexp re, slice<@string> names) {
     if (re.Op == OpCapture) {
         names[re.Cap] = re.Name;
     }
-    foreach (var (_, sub) in re.Sub) {
+    foreach (var (_, sub) in range(re.Sub)) {
         sub.capNames(names);
     }
 }

@@ -51,7 +51,7 @@ private static readonly @string fuzzseedˢᵇ = "fuzzseed="u8;
 
 internal static ж<nint> godebugSeed() {
     var debug = strings.Split(os.Getenv(godebugˢ), ",");
-    foreach (var (_, f) in debug) {
+    foreach (var (_, f) in range(debug)) {
         if (strings.HasPrefix(f, fuzzseedˢ)) {
             ref var seed = ref heap<nint>(out var Ꮡseed);
             (seed, var err) = strconv.Atoi(strings.TrimPrefix(f, fuzzseedˢ));

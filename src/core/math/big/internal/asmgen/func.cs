@@ -71,7 +71,7 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
 
     // Record mapping from names to offsets.
     nint off = 0;
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         var (nameΔ1, typΔ1, _) = strings.Cut(arg, " ");
         var exprᴛ1 = typΔ1;
         switch (ᐧ) {

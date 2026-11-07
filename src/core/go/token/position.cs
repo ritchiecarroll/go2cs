@@ -210,7 +210,7 @@ public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
 
     // verify validity of lines table
     nint size = f.size;
-    foreach (var (i, offset) in lines) {
+    foreach (var (i, offset) in range(lines)) {
         if (i > 0 && offset <= lines[i - 1] || size <= offset) {
             return false;
         }
@@ -231,7 +231,7 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
 
     slice<nint> lines = default;
     nint line = 0;
-    foreach (var (offset, b) in content) {
+    foreach (var (offset, b) in range(content)) {
         if (line >= 0) {
             lines = append(linesᴷ, lines, line);
         }
@@ -523,7 +523,7 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
         ref var s = ref Ꮡs.DerefOrNull();
 
         // Allocate f outside the critical section.
-        var f = Ꮡ(new ΔFile(name: filename, size: size, lines: slice<nint>([0])));
+        var f = Ꮡ(new ΔFile(name: filename, size: size, lines: [0]));
 
         Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
@@ -584,7 +584,7 @@ public static void AddExistingFiles(this ж<FileSet> Ꮡs, params ꓸꓸꓸжFil
         Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
 
-        foreach (var (_, f) in files) {
+        foreach (var (_, f) in range(files)) {
             Ꮡs.Ꮡtree.add(f);
             s.@base = max(s.@base, f.Base() + f.Size() + 1);
         }
