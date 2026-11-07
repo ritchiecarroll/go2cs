@@ -57,7 +57,7 @@ public static class InterfaceDeclarationSyntaxExtensions
 
                 // Skip methods that might be overridden in the derived interface
                 if (!allMethods.Any(method => method.IsSameSignature(member)))
-                    allMethods.Add(member.GetMethodInfo());
+                    allMethods.Add(member.GetMethodInfo(context.Compilation));
             }
         }
 

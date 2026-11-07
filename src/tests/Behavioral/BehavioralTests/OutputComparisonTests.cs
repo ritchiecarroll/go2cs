@@ -2600,6 +2600,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]
+    public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
+
+    [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]

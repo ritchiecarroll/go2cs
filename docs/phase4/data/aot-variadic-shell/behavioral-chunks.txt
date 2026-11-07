@@ -1,0 +1,15 @@
+chunk 1 [AB] rc=1 22:45:12 | 
+chunk 2 [C] rc=0 22:56:23 | Passed!  - Failed:     0, Passed:   241, Skipped:     0, Total:   241, Duration: 10 m 54 s - BehavioralTests.dll (net10.
+chunk 3 [DE] rc=0 23:09:36 | Passed!  - Failed:     0, Passed:   276, Skipped:     4, Total:   280, Duration: 12 m 59 s - BehavioralTests.dll (net10.
+chunk 4 [F] rc=0 23:18:58 | Passed!  - Failed:     0, Passed:   197, Skipped:     4, Total:   201, Duration: 9 m 8 s - BehavioralTests.dll (net10.0)
+chunk 5 [GH] rc=0 23:31:10 | Passed!  - Failed:     0, Passed:   266, Skipped:     0, Total:   266, Duration: 11 m 58 s - BehavioralTests.dll (net10.
+chunk 6 [IJK] rc=0 23:39:22 | Passed!  - Failed:     0, Passed:   177, Skipped:     0, Total:   177, Duration: 7 m 59 s - BehavioralTests.dll (net10.0
+chunk 7 [AB] rc=0 23:51:00 | Passed!  - Failed:     0, Passed:   250, Skipped:     0, Total:   250, Duration: 10 m 57 s - BehavioralTests.dll (net10.
+chunk 8 [LM] rc=0 00:02:57 | Passed!  - Failed:     0, Passed:   279, Skipped:     4, Total:   283, Duration: 11 m 44 s - BehavioralTests.dll (net10.
+chunk 9 [N] rc=0 00:21:28 | Passed!  - Failed:     0, Passed:   444, Skipped:     0, Total:   444, Duration: 18 m 18 s - BehavioralTests.dll (net10.
+chunk 10 [OP] rc=0 00:36:45 | Passed!  - Failed:     0, Passed:   350, Skipped:     8, Total:   358, Duration: 15 m 4 s - BehavioralTests.dll (net10.0
+chunk 11 [R] rc=0 00:48:56 | Passed!  - Failed:     0, Passed:   262, Skipped:     4, Total:   266, Duration: 11 m 28 s - BehavioralTests.dll (net10.
+chunk 12 [S] rc=0 01:05:15 | Passed!  - Failed:     0, Passed:   389, Skipped:     8, Total:   397, Duration: 16 m 6 s - BehavioralTests.dll (net10.0
+chunk 13 [T] rc=0 01:11:25 | Passed!  - Failed:     0, Passed:   143, Skipped:     0, Total:   143, Duration: 5 m 56 s - BehavioralTests.dll (net10.0
+chunk 14 [UVWXZ] rc=0 01:23:06 | Passed!  - Failed:     0, Passed:   269, Skipped:    16, Total:   285, Duration: 11 m 29 s - BehavioralTests.dll (net10.
+chunk rest rc=0 | Passed!  - Failed:     0, Passed:    33, Skipped:     0, Total:    33, Duration: 3 s - BehavioralTests.dll (net10.0)
