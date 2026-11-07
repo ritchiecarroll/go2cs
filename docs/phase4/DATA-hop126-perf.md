@@ -1099,6 +1099,26 @@ was re-measured alone (below), and the window's 0.834 for Sieve is not read.
   software fallback's share (169 ms exclusive in §11.3).
 - **Open:** the remaining `get_Item` call is the next lever, and R holds that scout (an AOT indexer inline).
 
+**Amended 2026-11-07 (R): the AOT indexer inline, priced by G, and its prediction scored.** The change is
+AggressiveInlining on `slice<T>`'s int, nint and ulong getters (`claude/r-aot-indexer-inline`, `da3f68520d`): ILC
+sizes an inlinee on its IL before the zero-size gate folds, so the getter stayed a call. The prediction was posted to
+COORD at `e584ee6d1f` (2026-11-06 21:17Z), after R-LAPTOP's own 21-round A/B read Sieve 0.507 and MatMul 0.361. G
+priced it in a valid window (win-x64, every A/A under 3%, Fib held, all arms source-built, the AOT arms built by the
+i9), D/P:
+
+| row | predicted | G measured | score |
+|:--|:--|:--|:--|
+| AOT Sieve | 0.45-0.58 | 0.514 (296 -> 152 ms) | HIT |
+| AOT MatMul | 0.30-0.45 | 0.359 (601 -> 216 ms) | HIT |
+| AOT TlsHandshake | 0.86-0.93 | 0.751 (2185 -> 1640 ms, -545 ms) | **MISSED**, below the band |
+| JIT rows within 3% | flat | 0.993 / 0.982 / 1.005 | HIT |
+| ReadyToRun Startup | flat | 1.001 | HIT |
+
+Every falsifier held. The TLS band priced only what §11.7 left of `get_Item` inside the multiply loop (about 252 of
+item 7's 448 ms, at four calls per `addMulVVW` iteration). The measured saving is about twice that, so the getter was
+also a call on hot paths outside `addMulVVW` that the band did not count. Which paths is NOT measured; the miss stands
+as scored rather than re-scoped. Under Native AOT, Sieve and MatMul now match the JIT.
+
 ### 11.8 Amended 2026-11-06: the ReadyToRun composite lever in single-file publishes, and what the 3 s really is
 
 Raw files are in [`item7/r2r-lever/`](DATA-hop126-perf/item7/r2r-lever/). The question, from the i9's discriminator: does
