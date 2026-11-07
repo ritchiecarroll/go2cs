@@ -1,0 +1,3 @@
+proto differential: 20036 pairs x 2 spellings, mismatches 0
+proto P384 Mul BigMul    min        629.8 ns  median        656.4 ns
+proto P384 Mul four      min        413.6 ns  median        435.1 ns

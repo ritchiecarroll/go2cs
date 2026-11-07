@@ -1,0 +1,24 @@
+goos: windows
+goarch: amd64
+pkg: crypto/internal/fips140/nistec/fiat
+cpu: AMD Ryzen 7 PRO 6850U with Radeon Graphics     
+BenchmarkMul/P224-16  	29889036	        39.63 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P224-16  	29984781	        39.42 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P224-16  	30536992	        41.38 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P384-16  	14838024	        76.91 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P384-16  	15526182	        78.66 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P384-16  	16287285	        75.05 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P521-16  	 3395073	       375.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P521-16  	 3314779	       368.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P521-16  	 3309332	       365.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P224-16         	32656704	        35.98 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P224-16         	33503736	        35.28 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P224-16         	29944602	        35.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P384-16         	15235753	        72.71 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P384-16         	16906789	        70.40 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P384-16         	16948458	        69.60 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-16         	 7843167	       147.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-16         	 8103672	       149.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-16         	 8000361	       147.8 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	crypto/internal/fips140/nistec/fiat	24.541s

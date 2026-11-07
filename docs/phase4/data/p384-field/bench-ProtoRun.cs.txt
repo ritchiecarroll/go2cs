@@ -1,0 +1,56 @@
+// Scratch, never committed: BigInteger differential and timing for Proto384 (both product spellings).
+using System;
+using System.Diagnostics;
+using System.Numerics;
+
+static class ProtoRun
+{
+    static readonly BigInteger P = BigInteger.Pow(2, 384) - BigInteger.Pow(2, 128) - BigInteger.Pow(2, 96) + BigInteger.Pow(2, 32) - 1;
+    static readonly BigInteger RInv = BigInteger.ModPow(BigInteger.Pow(2, 384), P - 2, P);
+
+    static ulong[] Limbs(BigInteger v) { var r = new ulong[6]; for (int j = 0; j < 6; j++) { r[j] = (ulong)(v & ulong.MaxValue); v >>= 64; } return r; }
+    static BigInteger Value(ulong[] l) { BigInteger v = 0; for (int j = 5; j >= 0; j--) v = (v << 64) | l[j]; return v; }
+
+    public static bool Differential(int pairs)
+    {
+        var rng = new Random(384);
+        var edges = new[] { BigInteger.Zero, BigInteger.One, P - 1, P - 2, BigInteger.Pow(2, 383), BigInteger.Pow(2, 64) - 1 };
+        var cases = new System.Collections.Generic.List<(BigInteger, BigInteger)>();
+        foreach (var x in edges) foreach (var y in edges) cases.Add((x, y));
+        var buf = new byte[49];
+        for (int i = 0; i < pairs; i++)
+        {
+            rng.NextBytes(buf); buf[48] = 0; var x = new BigInteger(buf) % P;
+            rng.NextBytes(buf); buf[48] = 0; var y = new BigInteger(buf) % P;
+            cases.Add((x, y));
+        }
+        int bad = 0;
+        var o = new ulong[6];
+        foreach (var (x, y) in cases)
+        {
+            var want = x * y % P * RInv % P;
+            Proto384.MulBig(o, Limbs(x), Limbs(y)); if (Value(o) != want) bad++;
+            Proto384.MulFour(o, Limbs(x), Limbs(y)); if (Value(o) != want) bad++;
+        }
+        Console.WriteLine($"proto differential: {cases.Count} pairs x 2 spellings, mismatches {bad}");
+        return bad == 0;
+    }
+
+    static double Time(string name, Action body, int iters = 200_000, int rounds = 7)
+    {
+        body(); body();
+        var r = new double[rounds];
+        for (int k = 0; k < rounds; k++) { var sw = Stopwatch.StartNew(); for (int i = 0; i < iters; i++) body(); r[k] = sw.Elapsed.TotalNanoseconds / iters; }
+        Array.Sort(r);
+        Console.WriteLine($"{name,-24} min {r[0],12:F1} ns  median {r[rounds / 2],12:F1} ns");
+        return r[rounds / 2];
+    }
+
+    public static void Run()
+    {
+        if (!Differential(20_000)) { Console.WriteLine("PROTO WRONG"); return; }
+        var a = Limbs(P - 12345); var b = Limbs(P - 67890); var o = new ulong[6];
+        Time("proto P384 Mul BigMul", () => Proto384.MulBig(o, a, b));
+        Time("proto P384 Mul four", () => Proto384.MulFour(o, a, b));
+    }
+}
