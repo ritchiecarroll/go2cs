@@ -26,8 +26,8 @@ The windows roster (238 rows) was read in full at master between `4aebdadc1a` an
 
 | host | rows | projected | basis |
 |:--|--:|--:|:--|
-| **the i9** | 182: every row it read except `runtime` and `net`, with `crypto` included | **1.74 h** (6,275 s) | the sum of the i9's per-row walls ([`i9-canary-walls.tsv`](phase4/data/rebank-1.26.10.3/i9-canary-walls.tsv)), which counts four first-row converter builds (one per wave) where the bank has one |
-| **H** | 55: the 54 TLS-ban rows (`os/exec` among them: its suite calls StartTLS) plus `runtime` | **at least 2.55 h** (9,171 s) | H's 57-row total of 11,087 s, less `net` (1,599 s) and `crypto` (317 s). `crypto` carried that run's first converter build, so removing it and adding the build back nets to about zero. `runtime`'s 3,633 s was read under a 60-minute deadline, so at 90 minutes it is a floor, not an estimate |
+| **the i9** | 181: every row it read except `runtime`, `net` and `os`, with `crypto` included | **1.69 h** (6,095 s) | the sum of the i9's per-row walls ([`i9-canary-walls.tsv`](phase4/data/rebank-1.26.10.3/i9-canary-walls.tsv)), less `os` (180 s), which counts four first-row converter builds (one per wave) where the bank has one |
+| **H** | 56: the 54 TLS-ban rows (`os/exec` among them: its suite calls StartTLS), `runtime` and `os` | **at least 2.6 h** (9,351 s) | H's 57-row total of 11,087 s, less `net` (1,599 s) and `crypto` (317 s), plus `os` at the i9's 180 s. `crypto` carried that run's first converter build, so removing it and adding the build back nets to about zero. `runtime`'s 3,633 s was read under a 60-minute deadline, so at 90 minutes it is a floor, not an estimate |
 | **a GitHub-hosted windows runner** | `net` | about 0.4 h (1,513 to 1,599 s on the two LAN boxes) | ruling (1), 13:16 |
 
 **The rules each host reads under:**
@@ -37,6 +37,7 @@ The windows roster (238 rows) was read in full at master between `4aebdadc1a` an
   the i9's.
 - *H* reads `runtime` with a **90-minute test deadline** (ruling (2), 13:16): its read took 3,633 s under 60 minutes,
   the tightest margin on the roster.
+- *H* reads `os`, and first confirms that `C:\pagefile.sys` exists (COORD ruling, 2026-11-07; §6).
 - *`net`* banks from the os-matrix `sweep-shard` windows job against that runner's own Go oracle (ruling (1), 13:16).
   The LAN resolver answers SERVFAIL for `invalid.invalid` on both LAN boxes, and no LAN box banks `net`. There is no
   network change.
@@ -59,7 +60,7 @@ linux wall exists yet:
 | **P2** (cloud container) | P2-1, P2-2 | 47 | 5.03 h | `crypto/x509` in P2-1 |
 
 - **The backup lane is G's WSL**, qualified for 1.26.10.2 and kept: go1.26.10 and dotnet 10.0.401 under its home,
-  TMPDIR=/tmp, act `all`. It takes R-WSL's shards if R is not available. It never runs beside a windows shard on G,
+  TMPDIR=/tmp, act `all`. R-WSL is primary (COORD ruling, 2026-11-07). It never runs beside a windows shard on G,
   because both share G's system drive.
 - The linux critical path is about 5.0 h from dispatch, plus about 15 minutes per shard for clone and build, as at .2.
 
@@ -90,11 +91,11 @@ These pages carry text from before a landed record change. The re-bank re-render
 
 | row | what the host changes | where it banks |
 |:--|:--|:--|
-| `os` | `TestStatPagefile` skips where `C:\pagefile.sys` does not exist; the i9's pagefile is on another drive, so the i9 reads skip|skip where the page has pass|pass | the i9 reads it; the bank records the page's one-line change as host truth, unless the owner rules that `os` banks on a host whose pagefile is on `C:` (05:44) |
+| `os` | `TestStatPagefile` skips where `C:\pagefile.sys` does not exist; the i9's pagefile is on another drive, so the i9 reads skip|skip where the page has pass|pass (05:44) | H, which first confirms `C:\pagefile.sys` exists: if it does, `os` banks at its banked pass|pass; if not, the bank records skip|skip as host truth with the reason (COORD ruling, 2026-11-07) |
 | `archive/tar` | `TestFileInfoHeaderSymlink` passes where Windows Developer Mode is on (the i9 since 2026-10-26), and skips without it | the i9; the skip-to-pass line is host truth (06:25) |
 | `net` | the LAN resolver answers SERVFAIL for an invalid name, so `TestLookupNoSuchHost` fails on every LAN box | the GitHub-hosted windows runner (§2) |
 
-## 7. Open for the owner
+## 7. Rulings (COORD, 2026-11-07)
 
-- `os`'s bank host: accept the i9's skip|skip as host truth, or bank `os` where `C:\pagefile.sys` exists (§6).
-- The linux hosts: R-WSL as at .2, or G's WSL if R is still away.
+- `os` banks on H, which first confirms that `C:\pagefile.sys` exists (§2, §6).
+- The linux hosts: R-WSL is primary, as at 1.26.10.2, with G's WSL as the backup lane (§3).

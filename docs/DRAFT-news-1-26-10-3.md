@@ -22,6 +22,7 @@ source that uses the packages; it is first under *Upgrading from 1.26.10.2*.
   its elements, as over any C# collection. Go's `(index, value)` pairs come from `range(s)`, and the indexes alone
   from `range(len(s))`:
 
+  <!-- illustration: the loop forms from B3's ConsumingGoFromCSharp.md (bb0c2bbfae), itself an adapted example -->
   ```csharp
   foreach (var (i, w) in range(words))     // Go: for i, w := range words
   foreach (var w in words) letters += len(w);  // Go: for _, w := range words
