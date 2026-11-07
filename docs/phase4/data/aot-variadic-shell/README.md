@@ -13,4 +13,5 @@ Readings from one linux lane box (4 cores, 15 GB, ILC 10.0.14, SDK 10.0.403, go1
 | `bogo/sequential-*-wall.tsv` | BoGo probe launches, base then fix: launch index, wall in µs, exit code (index 0 is the dropped warm-up) |
 | `bogo/interleaved-wall.tsv` | the interleaved run: arm, pair index, wall in µs, exit code (pair 0 dropped) |
 | `census/main.go.txt`, `census/goroot-go1.26.10.txt` | the go/ast census tool and its output over go1.26.10 `src`: generic variadic receivers, generic embeds, variadic interface members |
+| `behavioral-chunks.txt` | the full behavioral suite at `9c645c5e93`, one line per chunk (chunk 1 is the hang-guard stop, rerun as chunk 7) |
 | `kit/` | the scripts: `aot.sh` (one AOT read), `bogo.sh` (sequential launches), `bogo-ab.sh` (interleaved launches) |

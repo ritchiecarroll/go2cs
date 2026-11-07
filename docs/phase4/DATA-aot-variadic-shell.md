@@ -112,7 +112,33 @@ grows by 54,136 bytes (525,898,507 to 525,952,643).
 
 ## 6. Gates
 
-GATES_RESULT
+At `9c645c5e93` (the fix plus one gates commit), same box, SDK 10.0.403, go1.26.10. The counts were posted before the
+run: GenTests 440 + 6, GolibTests the same-box base + 5 in each configuration.
+
+| gate | base (`7447aa5b64`) | fix | |
+|:--|:--|:--|:--|
+| `go2cs.slnx` members outside `tests/Behavioral`, Debug | — | 103 of 103 `.csproj` built | |
+| GenTests | 440 passed | **446 passed**, 0 failed | +6, as posted |
+| GolibTests Debug | 2,398 passed, 50 skipped | **2,403 passed**, 50 skipped, 0 failed | +5, as posted |
+| GolibTests Release | 2,423 passed, 25 skipped | **2,428 passed**, 25 skipped, 0 failed | +5, as posted |
+| `go test ./...` (`src/go2cs`, the full repoguard) | — | ok | |
+| CNR | — | byte-identical over 960 behavioral packages (12 platform-exclusive skipped) | |
+| full behavioral suite (13 letter chunks plus the non-letter classes) | — | **3,576 passed**, 48 skipped, 0 failed | |
+
+The first gate run named three things, fixed in `9c645c5e93` before the run above:
+- `NoUncountedBackingAllocations` listed the binder's two new arrays and its now-nullable invoker table. They are
+  binder plumbing with no Go backing, now listed by name with their reason.
+- Two docs pages' provenance notes cited `MethodSet.cs` lines that the fix's additions moved; re-cited at the same text.
+- CNR re-emitted `VariadicInterfaceAssert.csproj` with two lines the committed copy lacked (the
+  `PublishReadyToRunComposite` default); committed as the converter emits it.
+
+That first run also filled the disk building the whole solution at once, so the solution's behavioral members are
+built by the behavioral suite instead, as L2 did.
+
+The behavioral suite ran Debug in letter chunks, purging the behavioral build output between chunks, since the box
+cannot hold every project's output at once. The first A-B chunk was stopped by the 3-minute hang guard on its first
+compile, the first build after a container restart; rerun, it passed 250 of 250. The V chunk carries the new
+project's four checks.
 
 ## 7. The prediction, scored
 
@@ -123,8 +149,8 @@ same predictions and falsifiers.
 |:--|:--|:--|
 | AOT repro 10/10 = Go | 10/10 (probe subset); 15/15 on the committed repro | MET |
 | XpkgPromotedMethodSet AOT 61/61 = Go | 61/61 | MET |
-| JIT asserts unchanged: full behavioral suite, 0 new failures | JIT_VERDICT | JIT_MET |
-| CNR byte-identical | CNR_VERDICT | CNR_MET |
+| JIT asserts unchanged: full behavioral suite, 0 new failures | 3,576 passed, 0 failed | MET |
+| CNR byte-identical | byte-identical over 960 packages | MET |
 | A method of a Go GENERIC type stays a miss under AOT (the stated limit) | it binds: `G[int]` reads true | MISSED |
 
 The generic limit was predicted for the thunk design, whose thunk would have needed a generic instantiation at run
