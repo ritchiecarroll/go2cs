@@ -310,11 +310,30 @@
     },
     {
       "name": "TestUnsafePoint",
-      "class": "runtime-capability",
-      "signature": "can't objdump exit status 1",
-      "reason": "The test runs `go tool objdump` over its own binary (os.Args[0]) and then checks, instruction by instruction, that every instruction Go's assembler marks as an unsafe point is reported unsafe. That needs Go machine code. The converted host is a CLR assembly with none, so objdump exits 1 and the first Fatalf (unsafepoint_test.go:21) fires before any check that reads an instruction. The signature is that first Fatalf on purpose: the checks behind it (`can't parse pc`, `instruction ... must be marked unsafe`, `no instructions`, `no interruptible instructions`) print different texts, so none of them can hide under it. Measured on linux (Release with tiering off, .NET 10.0.12, go1.24.13); windows and darwin are not measured. Retires if the host's binary ever carries Go text for objdump to read; by design it does not.",
-      "history": "runtime-capability: the test runs `go tool objdump` over its own binary (os.Args[0]) and then checks, instruction by instruction, that every instruction Go's assembler marks as an unsafe point is reported unsafe. That needs Go machine code. The converted host is a CLR assembly with none, so objdump exits 1 and the FIRST Fatalf (unsafepoint_test.go:21) fires before any arm that reads an instruction. The pin is that first Fatalf on purpose: the arms behind it (`can't parse pc`, `instruction ... must be marked unsafe`, `no instructions`, `no interruptible instructions`) print different texts, so none of them can hide under it. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host's binary ever carries Go text for objdump to read; by design it does not.",
-      "records": 1
+      "halves": [
+        {
+          "class": "runtime-capability",
+          "signature": "can't objdump exit status 1",
+          "reason": "The test runs `go tool objdump` over its own binary (os.Args[0]) and then checks, instruction by instruction, that every instruction Go's assembler marks as an unsafe point is reported unsafe. That needs Go machine code. The converted host is a CLR assembly with none, so objdump exits 1 and the first Fatalf (unsafepoint_test.go:21) fires before any check that reads an instruction. The signature is that first Fatalf on purpose: the checks behind it (`can't parse pc`, `instruction ... must be marked unsafe`, `no instructions`, `no interruptible instructions`) print different texts, so none of them can hide under it. Measured on linux (Release with tiering off, .NET 10.0.12, go1.24.13); windows and darwin are not measured. Retires if the host's binary ever carries Go text for objdump to read; by design it does not.",
+          "history": "runtime-capability: the test runs `go tool objdump` over its own binary (os.Args[0]) and then checks, instruction by instruction, that every instruction Go's assembler marks as an unsafe point is reported unsafe. That needs Go machine code. The converted host is a CLR assembly with none, so objdump exits 1 and the FIRST Fatalf (unsafepoint_test.go:21) fires before any arm that reads an instruction. The pin is that first Fatalf on purpose: the arms behind it (`can't parse pc`, `instruction ... must be marked unsafe`, `no instructions`, `no interruptible instructions`) print different texts, so none of them can hide under it. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host's binary ever carries Go text for objdump to read; by design it does not. SCOPED 2026-11-07 to windows and linux when the darwin half was added beside it: on darwin objdump does not exit 1, so this Fatalf never fires there.",
+          "platforms": ["windows", "linux"]
+        },
+        {
+          "class": "runtime-capability",
+          "signature": "no instructions",
+          "reason": "The same missing capability, reported by a different path. The test disassembles its own binary with `go tool objdump -s setGlobalPointer` and reads Go machine code that a CLR host does not have. On macOS the host is a Mach-O executable, and Go's objdump reads a Mach-O file with no Go line table or symbol table as empty rather than as an error, so it prints nothing and exits 0. The test then counts zero instructions, and its two closing checks fail: `no instructions` (the signature) and `no interruptible instructions` (an optional record, below). On Windows and Linux the same objdump fails outright on the PE or ELF host and the first Fatalf fires instead (the other half). Measured: Go's objdump with the test's own arguments exits 0 with no output on the .NET 10.0.14 osx-arm64 application host, and exits 1 with `no symbol section` on the linux-x64 one; the converted host reads exactly those two lines on both mac runners (osx-arm64 and osx-x64). Retires if the host's binary ever carries Go text for objdump to read; by design it does not.",
+          "history": "runtime-capability, the darwin half (C1, 2026-11-07, COORD's TestUnsafePoint ruling, step 2: the same capability by another path on Mach-O, the measured text, the mechanism named). READ by the sweep summary's failure-text line (claude/c1-unsafepoint-darwin 99adca5b4), run 42350988153, runtime on both mac RIDs: `unsafepoint_test.go:112: no instructions` and `unsafepoint_test.go:115: no interruptible instructions`, the row's only undisclosed divergence on osx-arm64 before this half. MECHANISM, from cmd/internal/objfile at go1.26.10: machoFile.symbols() returns no error when the file has no LC_SYMTAB and machoFile.pcln() returns an empty table when there is no __gopclntab, so disasm builds and `-s` matches nothing; elfFile.symbols() returns ErrNoSymbols (`no symbol section`) and peFile.pcln() errors without runtime.pclntab, so objdump exits 1 there. MEASURED locally with go1.26.10's objdump and the test's arguments: Microsoft.NETCore.App.Host.osx-arm64 10.0.14 apphost exit 0, 0 bytes; Microsoft.NETCore.App.Host.linux-x64 10.0.14 apphost exit 1, `no symbol section`.",
+          "platforms": ["darwin"]
+        }
+      ],
+      "records": 1,
+      "optionalRecords": [
+        {
+          "contains": ["unsafepoint_test.go:", "no interruptible instructions"],
+          "reason": "On macOS only: the test's second closing check, which fails with the first once objdump reads no instructions (the darwin half).",
+          "history": "C1, 2026-11-07: run 42350988153 reads it on both mac RIDs beside `no instructions`; never on windows or linux, where the first Fatalf ends the test before either check."
+        }
+      ]
     },
     {
       "name": "TestInlineUnwinder",

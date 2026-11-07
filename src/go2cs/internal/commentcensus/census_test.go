@@ -362,6 +362,69 @@ func TestCommentAfterAConverterNoteIsTrailing(t *testing.T) {
 	}
 }
 
+// A `_package` name marks a line as not a member's declaration only when the line declares the package class itself.
+// A member can name a package class anywhere else on its declaration line: in a one-line body
+// (`{ return AreEqual(err, context_package.DeadlineExceeded); }`, net/http's timeoutError.Is) or in its signature
+// (`global::go.context_package.Context`). Both are the declarations the top-level walk maps; the package class's own
+// lines, in each form the corpus writes them, are not.
+func TestPackageNameInAMemberLineIsTheDeclaration(t *testing.T) {
+	for line, want := range map[string]bool{
+		"internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }": true,
+		"public static global::go.context_package.Context Background() {":                                                         true,
+		"partial class p_package {":                         false,
+		"public static partial class p_package":             false,
+		"public static unsafe partial class unsafe_package": false,
+		"unsafe partial class unsafe_package  {":            false,
+	} {
+		if got := isCSDecl(&csFile{codeText: []string{line}}, 1); got != want {
+			t.Errorf("isCSDecl(%q) = %v, want %v", line, got, want)
+		}
+	}
+
+	const goSrc = "package p\n\nimport \"context\"\n\ntype timeoutError struct{}\n\n" +
+		"func (e *timeoutError) Is(err error) bool { return err == context.DeadlineExceeded }\n\n" +
+		"func Background() context.Context { return context.Background() }\n\nfunc F() {}\n"
+	const csSrc = "namespace go;\n\nusing context = context_package;\n\npartial class p_package {\n\n" +
+		"[GoType] partial struct timeoutError {\n}\n\n" +
+		"internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context_package.DeadlineExceeded); }\n\n" +
+		"public static global::go.context_package.Context Background() {\n    return context.Background();\n}\n\n" +
+		"public static void F() {\n}\n\n} // end p_package\n"
+
+	dir := t.TempDir()
+	goFile, csFile := dir+"/p.go", dir+"/p.cs"
+
+	if err := os.WriteFile(goFile, []byte(goSrc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(csFile, []byte(csSrc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	r := NewResults()
+
+	if err := r.AnalyzeFiles(goFile, csFile, "p/p"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Vacuity: the four declarations after the import are all mapped and separated as Go separates them.
+	if n := r.r.topLevel["same"]; n != 4 {
+		t.Errorf("%d top-level separations alike, want 4", n)
+	}
+
+	for k, n := range r.Counts() {
+		if n > 0 && strings.HasPrefix(k, "top:") {
+			t.Errorf("%s = %d, want 0", k, n)
+		}
+	}
+
+	if t.Failed() {
+		for _, f := range r.Findings("") {
+			t.Logf("%s at %s: %s", f.Class, f.Where, f.Detail)
+		}
+	}
+}
+
 // The census leaves out a hand-owned file, and a file is hand-owned when it carries the attribute
 // `[module: GoManualConversion]` (or `[module: go.GoManualConversion]`) on a line of its own, the predicate
 // repoguard's hand-own guards use. A converted file can MENTION the marker without carrying it: the

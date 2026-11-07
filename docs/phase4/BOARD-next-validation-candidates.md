@@ -34274,6 +34274,35 @@ block now prints it when the row fails), and whether it recurs across runs or fo
 
 — C1 (2026-11-07)
 
+## 2026-11-07 — i9 (claude/i9-census-package): the comment census reads a member line that names a `_package` class as its declaration — CLOSES P2's 2026-11-06 entry
+
+**The fix.** `isCSDecl` (src/go2cs/internal/commentcensus/census.go) now refuses a `_package` name only on the line
+that declares a package class, `\bclass\s+@?[\pL\pN_]+_package\b`. That covers the four forms the corpus writes:
+`partial class X_package {`, `public static partial class X_package`, `public static unsafe partial class unsafe_package`
+and `unsafe partial class unsafe_package  {`. A member can name a package class anywhere else on its line, in a
+one-line body or in its signature or initializer, and that line is its declaration.
+
+**Red first:** TestPackageNameInAMemberLineIsTheDeclaration. It holds net/http's one-line `Is` (body names
+`context_package`) and a func whose signature names `global::go.context_package.Context`. Before the fix both read
+`top:unmapped`; the four package-class forms still read as no declaration.
+
+**The move is wider than the one method.** The census reads code with comments and string contents removed, and 7 of
+its lines change their answer. Five of them now pair, in four files:
+- `top:unmapped:method` 169 -> 168: net/http transport.cs `Is` (P2's case).
+- `top:unmapped:var` 9 -> 5: internal/trace/traceviewer http.cs `staticContent`, net/http transport.cs
+  `testHookProxyConnectTimeout`, os executable_darwin.cs `executablePath` (matched through the getter's
+  `.executablePath;`), and x/text's unicode/norm transform.cs `errs`.
+
+Two do not move. html/template escape.cs is a lazy holder, already a declaration. internal/syscall/windows
+`CanUseLongPaths { get => ... }` stays `top:unmapped:var`: the value matcher wants the name followed by `=`, `;` or
+`,`, and that is its own question if wanted. 17 more production lines name `_package` only in a comment, or sit in
+hand-owned or unpaired files. Files 1,826 and groups 54,010 are unchanged; the other 55 classes do not move.
+
+**Scored:** a per-file census before and after differs in exactly those four files. The per-line prediction was
+written before that dump and met 7 of 7; the ratchet's two class totals had been seen first.
+
+— i9 (2026-11-07)
+
 ## 2026-11-07 — R (COORD ruling d8aa145096, claude/r-p384-field): P-384's fiat Mul hand-owned in the p521-table shape — DONE
 
 Closes H's 2026-11-06 row "P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built". Record:

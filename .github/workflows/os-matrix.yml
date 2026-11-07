@@ -1481,7 +1481,22 @@ jobs:
                   }
               }
 
-              foreach ($line in (Get-ComparisonDivergenceLines -Row $name -Comparison $comparison -First 40)) { $divergenceLines.Add($line) }
+              # The C# side's own failure text for each divergence, from the row's results record (its `fail` events):
+              # the first 8 lines each, under the divergence they explain. Unreadable or absent, the lines print without.
+              $failureText = @{}
+              $resultsPath = Join-Path $PWD "src/core/$name/go2cs_test_results.json"
+
+              if (Test-Path -LiteralPath $resultsPath) {
+                  try {
+                      $results = Get-Content -LiteralPath $resultsPath -Raw | ConvertFrom-Json
+                      foreach ($event in @($results.events | Where-Object { $_.action -eq 'fail' -and $_.test })) {
+                          if (-not $failureText.ContainsKey($event.test)) { $failureText[$event.test] = "$($event.output)" }
+                      }
+                  }
+                  catch { $divergenceLines.Add("${name}: results record unreadable for failure text: $($_.Exception.Message)") }
+              }
+
+              foreach ($line in (Get-ComparisonDivergenceLines -Row $name -Comparison $comparison -First 40 -FailureText $failureText -TextLines 8)) { $divergenceLines.Add($line) }
           }
 
           foreach ($line in $divergenceLines) { Write-Host "==> divergences: $line" }
