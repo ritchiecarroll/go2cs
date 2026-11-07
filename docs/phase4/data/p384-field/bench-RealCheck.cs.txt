@@ -1,0 +1,44 @@
+// Scratch, never committed: public-API differential for whatever p384Mul/p384Square the fiat build carries.
+using System;
+using System.Numerics;
+using go;
+using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
+using static go.crypto.@internal.fips140.nistec.fiat_package;
+
+static class RealCheck
+{
+    static readonly BigInteger P = BigInteger.Pow(2, 384) - BigInteger.Pow(2, 128) - BigInteger.Pow(2, 96) + BigInteger.Pow(2, 32) - 1;
+    static slice<byte> Enc(BigInteger v) { var b = v.ToByteArray(isUnsigned: true, isBigEndian: true); var o = new byte[48]; b.CopyTo(o, 48 - b.Length); return new slice<byte>(o); }
+    static BigInteger Dec(slice<byte> s) { var b = new byte[48]; for (int i = 0; i < 48; i++) b[i] = s[i]; return new BigInteger(b, isUnsigned: true, isBigEndian: true); }
+
+    public static bool Run(int pairs)
+    {
+        var rng = new Random(3841);
+        var edges = new[] { BigInteger.Zero, BigInteger.One, P - 1, P - 2, BigInteger.Pow(2, 383), BigInteger.Pow(2, 64) - 1 };
+        var cases = new System.Collections.Generic.List<(BigInteger, BigInteger)>();
+        foreach (var x in edges) foreach (var y in edges) cases.Add((x, y));
+        var buf = new byte[49];
+        for (int i = 0; i < pairs; i++)
+        {
+            rng.NextBytes(buf); buf[48] = 0; var x = new BigInteger(buf) % P;
+            rng.NextBytes(buf); buf[48] = 0; var y = new BigInteger(buf) % P;
+            cases.Add((x, y));
+        }
+        int bad = 0, n = 0;
+        foreach (var (x, y) in cases)
+        {
+            var (ex, e1) = builtin.@new<fiat.P384Element>().SetBytes(Enc(x));
+            var (ey, e2) = builtin.@new<fiat.P384Element>().SetBytes(Enc(y));
+            if (e1 != null || e2 != null) { bad++; continue; }
+            var r = builtin.@new<fiat.P384Element>().Mul(ex, ey);
+            if (Dec(r.Bytes()) != x * y % P) bad++;
+            var q = builtin.@new<fiat.P384Element>().Square(ex);
+            if (Dec(q.Bytes()) != x * x % P) bad++;
+            ex.Mul(ex, ey); // aliasing: out == arg1
+            if (Dec(ex.Bytes()) != x * y % P) bad++;
+            n += 3;
+        }
+        Console.WriteLine($"real differential: {cases.Count} pairs, {n} checks (Mul, Square, aliased Mul), mismatches {bad}");
+        return bad == 0 && n >= 3 * 36;
+    }
+}

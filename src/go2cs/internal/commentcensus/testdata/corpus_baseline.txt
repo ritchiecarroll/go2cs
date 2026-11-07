@@ -47,12 +47,12 @@ missed:spec-doc-in-group	2
 missed:trailing-field	3
 missed:trailing-spec	4
 missed:trailing-stmt	43
-partial:decl-doc	56
+partial:decl-doc	62
 partial:directive	6
 partial:free-stmt	7
 top:go-blank-cs-none	79
 top:go-none-cs-blank	39
-top:unmapped:func	359
+top:unmapped:func	361
 top:unmapped:method	168
 top:unmapped:type-alias	62
 top:unmapped:type-other	72

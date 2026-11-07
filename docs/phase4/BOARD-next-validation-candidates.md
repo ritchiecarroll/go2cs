@@ -33978,6 +33978,48 @@ Read while gating batches 202-203 (re-merged as 205-206) and 207 on the i7 and t
 - One earlier i7 Release failure at 386e95397a stays UNNAMED: it ran at -v q with no trx, so it is not attributed to either test.
 Both tests read clean in every other run: 13 Release and 3 Debug across the two boxes. **Open; owner to be assigned.** The fix shape is the owner's: a deterministic precondition (no GC inside the window, a private pool, or a bounded retry) without hiding a real regression.
 
+**Amended 2026-11-07 (H, COORD's flakes seat, claude/h-golib-flakes) — (2) CLOSED; (1) still OPEN, source unnamed.**
+
+**(2) TestSemaHandoffsRatio: CLOSED.** The mechanism was measured: the ratio reads the host OS scheduler, not
+the code. Instrumented, H's 12 idle full suites (12,000 trials) had 4 losses, all after the waiter had resumed.
+Under 8 busy loops on H's 8 logical CPUs the test read 868/902/875, and under 16 it read 14 of 1000, the class of
+the i9's 383 and linux's 25. Every loss was one of two kinds, and neither is reachable by code:
+- (A) the waiter's thread was not scheduled within the 10 ms bound (Go's forcePreemptNS), so the releaser went on;
+- (B) the waiter resumed and released the releaser, then lost the core before its CAS.
+In Go both goroutines share one P; here each is an OS thread. The ratio assert is replaced by what the yield
+guarantees, per trial, with zero tolerance: unless the bound fired, the waiter has left its park when Release
+returns (`RuntimeSemaphoreHandoffTests.cs:110`). The waiter's park scope writes its wait reason Zero before it sets
+the event the releaser waits on, so this holds on any scheduler. 27,000 trials (18,000 idle, 9,000 loaded) read 0
+violations, including two runs under 12 busy loops that read 303 and 412 of 1000, which fail the old ratio. A
+planted no-yield handoff (the wait elided in `RuntimeSemaphore.Release`) fails it in 1000 of 1000 trials, in Debug
+and in Release; restored byte-identical. yields == Trials stays, the ratio is still printed, and the bound is
+untouched. The disclosed limit is in the test's comment: a waiter that never sets the event rides the bound in
+every trial and passes both the old test and the new one.
+
+**(1) RangeSnapshotChargesNothingOnEitherMeter: still OPEN.** The 4,984 and 6,352 B source is unnamed: it did not
+reproduce on H. Every window read 0 B in 12 instrumented suites, 9 isolated Release windows and 5 under 8 busy
+loops. Each candidate was probed inside the window and falsified:
+- a GC (gen0, gen2, gen2 plus finalizers, 40 windows each): 0 B;
+- a high-pressure pool trim clearing the thread's slot: 40 B;
+- the measuring loop's own tier-up (OSR): 0 B;
+- the tiering worker idled out for 5 s and then re-created: 0 B;
+- a concurrent `GC.GetTotalAllocatedBytes(precise: true)`, 39k EE suspensions: 0 B.
+One non-steady activity was measured in the window: in Release it held the measuring method's own tier-up, on the
+test thread, at 13-17 ms. The same window reads 0.03 ms with tiering off, 0.07 ms under AggressiveOptimization,
+and 0.17 ms in Debug, which does not tier.
+
+COORD ruled the change on the seat branch:
+- AggressiveOptimization on the measuring method (`ArrayRangeAllocationTests.cs:72`), which removes that tier-up
+  from the window and is NOT named as the cause;
+- the per-loop byte trace in the failure message: each step's loop, GC counts per generation, window ms and
+  memory load;
+- the zero assert untouched.
+A planted heap copy (the enumerator's pool rent replaced by `new T[length]`) fails it in both configurations, at
+32,000 B with a step on every loop; restored byte-identical. Source unnamed; the in-window tier-up is removed; the
+next failure self-describes. The i7 reproduced it, and it is the box to read on if it recurs.
+
+— H (2026-11-07)
+
 ## 2026-11-06 — H (COORD ruling, claude/h-p521-table): P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built
 
 **The shape.** fiat's converted p384Mul declares 460 named locals before the converter's tuple temporaries, against
@@ -34343,6 +34385,110 @@ check. This is the corpus's existing direct-ж form (archive/tar's WriteTo in th
 nilParamBoxTwin's refRecv row, which now reads the box; and behavioral ThisRefReceiverTC0.
 
 — C2 (2026-11-06)
+
+## 2026-11-07 — R (COORD ruling d8aa145096, claude/r-p384-field): P-384's fiat Mul hand-owned in the p521-table shape — DONE
+
+Closes H's 2026-11-06 row "P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built". Record:
+[DATA-p384-field.md](DATA-p384-field.md).
+
+**Cause, read on R-LAPTOP.** The converted `p384Mul` starts at about 460 locals and each inlined callee adds
+temporaries, so the JIT stops after about 74 inlinees and 590 calls remain per field multiply (292 `p384Uint1`
+conversions, 137 `bits.Add64`, 73 `bits.Mul64`, 36 limb reads, 7 `bits.Sub64`, 6 `p384CmovznzU64`). Under ReadyToRun
+no `bits.*` call inlines at all.
+
+**Cure.** `manualConversionFuncs` displaces `p384Mul` and `p384Square` onto `fiat/p384_impl.cs`: a straight-line
+six-limb CIOS with m' = 0x100000001, p521_impl.cs's four-product `Mul64` (one constant-time primitive for both curves),
+bitwise carries and a mask-selected final subtraction, generated by `data/p384-field/gen_p384_impl.py`. Pinned by
+source hash; checked by GolibTests `P384FieldDifferentialTests` and behavioral `P384CurveBytes`.
+
+**Measured** (R-LAPTOP, win-x64, runtime 10.0.11, tiering off, base and cut interleaved, 3 processes per arm):
+
+| P-384 | Go | base JIT | cut JIT | base ReadyToRun | cut ReadyToRun |
+|:--|--:|--:|--:|--:|--:|
+| field Mul | 75 to 79 ns | 2.10 to 2.22 us | 542 to 566 ns | 4.99 to 5.10 us | 659 to 694 ns |
+| ScalarBaseMult | 176 to 190 us | 3.43 to 3.53 ms | 1.35 to 1.38 ms | 8.70 to 8.87 ms | 2.79 to 2.85 ms |
+| ScalarMult | 646 to 658 us | 15.5 to 15.6 ms | 5.18 to 5.41 ms | 38.3 to 38.7 ms | 9.31 to 9.64 ms |
+| table build, cold | | | | 164 to 176 ms | 55.4 to 55.8 ms |
+
+Corpus: exactly `fiat/p384_fiat64.cs` and fiat `package_info.cs`, identical on three targets. The runtime keeps the
+ReadyToRun body (no fiat method JIT-compiled at run time). Constant time read in both listings; G reviews at landing.
+
+**A cross-box disagreement, reported, not resolved.** H's row measured the converted P-384 multiply on H at 946 ns
+(JIT) and 1.03 to 1.17 us (ReadyToRun), runtime 10.0.13. R-LAPTOP reads 2.10 to 2.22 us and 4.99 to 5.10 us, runtime
+10.0.11. Go's own multiply reads 55 ns on H and 75 to 79 ns here, about 1.4x; the JIT ratio is about 2.2x and the
+ReadyToRun ratio about 4.5x, so neither is the boxes' general speed alone, and neither the runtime patch level nor the
+CPU has been varied alone. The cure's readings do not depend on
+it: both boxes' bases are past 12x Go.
+
+— R (2026-11-07)
+
+## 2026-11-07 — R (COORD ruling d8aa145096, SEEN while scouting P-384): ReadyToRun field Add/Sub at about 4x the JIT, from cross-bubble `bits.Add64`/`Sub64` — OPEN
+
+**The reading** (R-LAPTOP, the P-384 seat's bench, tiering off): fiat `P384Element.Add` 81 to 88 ns under the JIT and
+323 to 333 ns under ReadyToRun, in both the base and the cut (the seat does not touch it). After the P-384 cure, a
+ReadyToRun point Add is 20 us, of which 14 multiplies are about 9.4 us and its 20 Add/Sub about 6.5 us: Add/Sub is now
+the largest remaining share of a ReadyToRun point operation.
+
+**Cause, inferred from the P-384 listings and H's C2 (DATA-p521-table §4).** `p384Add`/`p384Sub` call `bits.Add64`,
+`bits.Sub64` and the limb wrappers; under JIT tier-1 those inline, and a precompiled body cannot inline across the
+version bubble into math.bits or golib. Not yet read for Add specifically.
+
+**Shape of a lever, not sized.** The same displacement for `p384Add`/`p384Sub` (and the P-256/P-521 siblings), or a
+class answer that reaches every fiat curve at once. Owner to be assigned.
+
+— R (2026-11-07)
+
+## 2026-11-07 — R (COORD ruling d8aa145096, SEEN while scouting P-384): P-256's fiat Mul at about 5x its JIT under ReadyToRun, on the purego path TLS uses — OPEN, a next-seat candidate
+
+**The size** (R-LAPTOP, win-x64, runtime 10.0.11, tiering off, 3 processes per arm; Go from its own nistec
+benchmarks with `-tags purego,math_big_pure_go`, the corpus flavour):
+
+| P-256 | Go | C# JIT | C# ReadyToRun |
+|:--|--:|--:|--:|
+| field Mul | (no Go fiat benchmark) | 312 to 347 ns | 1.56 to 1.65 us |
+| field Square | | 306 to 344 ns | 1.54 to 1.59 us |
+| ScalarBaseMult | 44.0 to 44.6 us | 0.80 to 0.87 ms (about 19x) | 2.06 to 2.17 ms (about 47x) |
+| ScalarMult | 218 to 221 us | 2.82 to 3.01 ms (about 13x) | 9.69 to 10.21 ms (about 45x) |
+
+**Why it matters more than P-384.** P-256 is the curve TLS negotiates first, and the corpus is the purego flavour, so
+ECDHE and ECDSA on P-256 run through fiat's `p256Mul` on every handshake.
+
+**What is known.** `p256Mul` has 182 locals and inlines fully under the JIT (H: 28 `mulx`, calls only on cold
+paths). Under ReadyToRun it keeps 84 `bits` calls and 24 array `get_Item` (H, DATA-p521-table §4). The ReadyToRun
+body is KEPT in this publish shape: with composite off and tiering off, no fiat P-256 method is JIT-compiled at run
+time (the seat's `r2r-jitsum-*.txt`), so the cost is the bubble's calls, not a rejected body.
+
+**Shape of a lever.** A P-256 hand-own in the same shape: four limbs, 16 products for a * b and 16 for the reduction
+(p's limbs include 0 and 2^32 - 1, so some fold), the shared `Mul64`. ESTIMATE, not a measurement: a field multiply
+near 0.15 to 0.30 us under both arms, from the P-384 body's 0.54 to 0.69 us scaled by product count.
+
+— R (2026-11-07)
+
+## 2026-11-07 — H (COORD seat, found in the batch 237 union gate on the i7): GolibTests `TheLinuxKeystoneCarriesTheRunToo` failed once, "the keystone passes a native address" — a TEST artifact, CLOSED by claude/h-keystone-flake; one hand-owned arm named, unreached
+
+**Read.** One Release failure in about 24 observed suite runs (the i7, `claude/coord-b237-gate` 6c2a77a4bd, Release run 1 of 2). The test predates 237 (4e45210c4c). `Ꮡ(buf, 0)` over a slice of reference-bearing records returns a fresh element box (`ElemRefBox`). Its uintptr conversion takes the token arm: it registers the box in the managed-pointer-token table and returns the box's order token. The table holds a box WEAKLY, by design. The test kept only the number, so a collection between the mint and the keystone's Resolve took the box. The keystone then left the token in place, its designed degrade (EFAULT, nothing written; NativeStructMarshal.cs remarks), and the callee saw the tag. Once Resolve succeeds, the marshal holds the box and the run's backing until decode, so the window is mint-to-resolve only, and only for a caller that holds nothing.
+
+**Reproduced.** A scratch probe ran the keystone arm's exact shape 20 times per cell, with a blocking compacting collection between the mint and the call. Release: 0 of 20 missed without the collection, 20 of 20 with it, and 0 of 20 either way with the box held in a local plus `GC.KeepAlive` after the call. Debug read 0 in every cell: the Debug JIT keeps the temporary alive to the method's end, which is why the i7's red was Release.
+
+**Fix (test only, golib untouched).** All six DarwinFunnelRunTests arms hold their element box in a local and `GC.KeepAlive` it after the call, which is the emitted wrappers' own contract. The five darwin-funnel arms shared the shape and were the same latent flake. Every arm also collects between the mint and the call, so a dropped hold fails deterministically in Release. Planted red (every hold removed, the collections kept): 4 of 6 arms fail in Release, the keystone arm with the i7's exact message. Disclosed, and kept in the test's remarks: `ANonNilPointerFieldAnywhereInTheRunKeepsTheToken` cannot fail by construction (it expects the token). `ASecondPointerInsideTheRunIsTheRunsOwnElement` passed planted, with both boxes surviving the collection, for a reason not rooted. No arm can fail in Debug. Restored byte-identical and green in both configurations.
+
+**Production holds the box: the emitted contract.** The generated wrappers hoist each pointer argument and keep it alive across the call: `var ᴋ0 = _p0; ... syscall(..., (uintptr)ᴋ0, ...); System.GC.KeepAlive(ᴋ0);` (darwin Getfsstat; the linux and windows wrappers likewise).
+
+**The hand-owned audit (COORD's addition).** Scope: every `*_impl.cs` file and every `[module: GoManualConversion]` file in `src/core`, 311 files. The doors are the three that resolve a token: the linux keystone (`internal/runtime/syscall` Syscall6 → `NativeStructMarshal.Call`), the darwin libc funnel (`GoLibcCall.Call` / `CallFiveAndDouble` → `CallLibc`), and the windows deep form (`syscalln` → `NativeStructMarshal.CallDeep`). Every call to `Syscall`, `Syscall6`, `Syscall9`, `SyscallN`, `RawSyscall*`, the darwin `syscall*`/`rawSyscall*` family or the funnel was read, 591 call lines, and each pointer argument was typed from its declaration in the enclosing function.
+
+| Class | Sites | Verdict |
+|---|---|---|
+| Hoisted argument (`ᴋN`) in the emitted shape, inside a hand-owned file | 488 arguments | HELD: every `ᴋN` has its `GC.KeepAlive(ᴋN)` in the same file |
+| Native memory (`(void*)` stack or NativeMemory, `cellAddr`, `&native` struct copies) | all remaining native arguments | N/A: a real address, no box, no token |
+| darwin `libcCall` args pointer (`runtime/darwin/libccall_impl.cs`, `ManagedPointerTokens.Resolve` at the entry) | 1 | HELD: the argument is an `unsafe.Pointer`, which retains its box (`m_retainedSource`), and it is resolved into a strong local before dispatch |
+| windows certchain `nativeIdentityOf(Ꮡx)` (`syscall/windows/zsyscall_windows_certchain_impl.cs`: CertGetCertificateChain, CertAddCertificateContextToStore, CertFreeCertificateContext, CertFreeCertificateChain, CertVerifyCertificateChainPolicy) | 5 | NATIVE for every context crypt32 issued: a view answers its remembered crypt32 address, and CertCreateCertificateContext's NativeBox answers its own address. **The fallback `(uintptr)box` is UNHELD**: for a managed-built `CertContext`/`CertChainContext` (both reference-bearing) it would mint a token from the parameter box with no hold. UNREACHED in the stdlib: crypto/x509's only producers are crypt32's own (CertCreateCertificateContext, the add-to-store out cell, CertGetCertificateChain). Posted to COORD as its own finding and not fixed here: the sub-finding below. |
+| Reference-free pointee (`ж<byte>`, `ж<uint16>`, `ж<uint32>`, `ж<uintptr>`, `ж<Overlapped>`, `ж<SID>`) passed un-hoisted: deadline_prepay `SyscallN`, darwin Getaddrinfo, Getpwnam/Getpwuid/Getgrnam/Getgrgid, the windows WSASendMsg/WSARecvMsg/WSARecv/WSASend/WSARecvFrom croutine, NetUserGetLocalGroups, GetOverlappedResult, ConnectEx, _DnsQuery, fileIO, ConvertSidToStringSid/ConvertStringSidToSid, NetGetJoinInformation, NetUserGetInfo, linux Statfs and fstatat `_p0` | about 24 sites, 29 arguments | NOT this class: a reference-free pointee takes the PIN arm, not the token arm. Whether each pin is held across its call is the separate "syscall buffer pin unheld" item, and is not classified here. |
+
+**Sub-finding — OPEN, post-.3, owner H (COORD ruling 2026-11-07): the certchain `nativeIdentityOf<T>` fallback.** The window is real but UNREACHED. For a managed-built `CertContext` or `CertChainContext`, `return (uintptr)box;` mints a token from the parameter box with no hold, across five crypt32 calls (CertGetCertificateChain, CertAddCertificateContextToStore, CertFreeCertificateContext, CertFreeCertificateChain, CertVerifyCertificateChainPolicy). crypto/x509's `root_windows.cs` is the only caller set, every context it passes is crypt32's own, and src/core holds 0 managed constructions of either type. The disposition is a post-.3 seat, held off master: .3's scope is frozen, nothing in std reaches the arm, and crypto/x509 is a validated row. SHAPE when cut: hoist the box and `GC.KeepAlive` it across each of the five calls, the emitted wrappers' own contract. That changes no reachable behavior, where a refusal would change the contract. Its proof is a GolibTests arm built like this row's fix: a managed-built reference-bearing context and a forced collection, red without the hold. The existing reach guard (`certContextReachGuard_test.go`) already reds on any new use site in `root_windows.cs`.
+
+**Box to read on if it recurs:** the i7 (the red's host). The guard now fails every Release run if a hold is dropped. A recurrence with the holds in place would be a new mechanism.
+
+— H (2026-11-07)
 
 ## 2026-11-07 — C2 (gojq seat C, claude/c2-open-generic-implement): a generic type converted at its own type parameters is recorded by its definition — CLOSED for local generics; two known limits OPEN
 

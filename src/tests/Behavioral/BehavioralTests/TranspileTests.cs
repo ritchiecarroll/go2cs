@@ -1654,6 +1654,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
 
     [TestMethod]
+    public void CheckP384CurveBytes() => CheckTarget("P384CurveBytes");
+
+    [TestMethod]
     public void CheckP521CurveBytes() => CheckTarget("P521CurveBytes");
 
     [TestMethod]
