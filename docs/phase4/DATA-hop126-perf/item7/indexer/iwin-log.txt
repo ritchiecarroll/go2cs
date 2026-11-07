@@ -1,0 +1,75 @@
+start 2026-11-06 18:44:56 
+AOT verified: 12 lines
+JIT/R2R verified against manifest-P/D
+      P PerfSieve call golib_go_slice_1<Bool>___ctor_12
+      P PerfSieve call golib_go_slice_1<Bool>__get_Item_0  [indexer]
+ok    P PerfSieve sieve makes indexer calls: yes (distinct targets 1)
+      D PerfSieve call RhpThrowEx
+      D PerfSieve call S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+      D PerfSieve call golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+      D PerfSieve call golib_go_slice_1<Bool>__NativeElementRef
+      D PerfSieve call golib_go_slice_1<Bool>___ctor_12
+ok    D PerfSieve sieve makes indexer calls: no (distinct targets 0)
+      P PerfMatMul call RhpByRefAssignRef
+      P PerfMatMul call golib_go_slice_1<Double>___ctor_12
+      P PerfMatMul call golib_go_slice_1<Double>__get_Item_0  [indexer]
+      P PerfMatMul call golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+      P PerfMatMul call golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__get_Item_0  [indexer]
+ok    P PerfMatMul matmul makes indexer calls: yes (distinct targets 2)
+      D PerfMatMul call RhpByRefAssignRef
+      D PerfMatMul call RhpThrowEx
+      D PerfMatMul call S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+      D PerfMatMul call golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+      D PerfMatMul call golib_go_slice_1<Double>__NativeElementRef
+      D PerfMatMul call golib_go_slice_1<Double>___ctor_12
+      D PerfMatMul call golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+      D PerfMatMul call golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+ok    D PerfMatMul matmul makes indexer calls: no (distinct targets 0)
+      P PerfTlsHandshake call S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+      P PerfTlsHandshake call golib_go_slice_1<Double>__get_Item_0  [indexer]
+ok    P PerfTlsHandshake addMulVVW makes indexer calls: yes (distinct targets 1)
+      D PerfTlsHandshake call RhpThrowEx
+      D PerfTlsHandshake call S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+      D PerfTlsHandshake call S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+      D PerfTlsHandshake call golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+      D PerfTlsHandshake call golib_go_slice_1<Double>__NativeElementRef
+ok    D PerfTlsHandshake addMulVVW makes indexer calls: no (distinct targets 0)
+GATES PASS
+arms 8 + 20
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== iwin-warm-ctl.tsv 18:46:24
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin-ctl-start.tsv 18:46:27
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin-arms-1.tsv 18:46:31
+PerfTlsHandshake: verified 8 arms, output equal
+PerfTlsHandshake: 11 rounds done
+== iwin-ctl-mid.tsv 19:10:47
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin-arms-2.tsv 19:10:50
+PerfSieve: verified 8 arms, output equal
+PerfSieve: 11 rounds done
+PerfMatMul: verified 8 arms, output equal
+PerfMatMul: 11 rounds done
+PerfStartup: verified 4 arms, output equal
+PerfStartup: 11 rounds done
+== iwin-ctl-end.tsv 19:13:17
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 19:13:23 rc=0

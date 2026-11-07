@@ -350,6 +350,11 @@ public static partial class GoReflect
 
     private static readonly ConcurrentDictionary<Type, IGoMethodSet?> s_generatedMethodSets = [];
 
+    // The generated method set (go2cs-gen's IGoMethodSet) of value type `element`, or null when it has none: the zero
+    // value of the type, as GeneratedMethod reads it. AdapterBinder's object shell binds a variadic member through it.
+    internal static IGoMethodSet? GeneratedMethodSet(Type element) =>
+        element.IsValueType ? s_generatedMethodSets.GetOrAdd(element, static type => GoTypeOps.Uninitialized(type) as IGoMethodSet) : null;
+
     // The method's delegate from the generated method set of the type it is reached through (go2cs-gen's IGoMethodSet),
     // or null when the type has none or no arm for it. The set is the element type's zero value, read only here: a
     // table that registration filled would root every arm in every program, and this way only a program that reaches

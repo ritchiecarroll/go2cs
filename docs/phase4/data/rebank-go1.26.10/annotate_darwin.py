@@ -16,6 +16,11 @@
 #     non-matching verdicts), NOT the `disclosed` column: that is len(comparison.disclosed), the disclosure LIST, which
 #     the converter builds as the divergent set PLUS every host-fatal name in scope, tests with no verdict on either side
 #     (COORD 2026-10-26, R's finding; runtime/debug read 8 + 2 by the list and is 8 + 1, as windows banks it);
+#   - ARCH-STRICT (COORD ruling (1), 2026-11-06; the guard's Get-DarwinArchStrictReading): RIDs that read UNEQUAL
+#     counts bank only when the whole difference is disclosed on one RID -- both statuses validated, COUNT or DISC,
+#     `new` 0 on both, equal verdicts, and matched + disclosed-divergent equal across the RIDs. The segment is the RID
+#     with more disclosed-divergent, with the other RID's reading as its note: "7 + 3 (osx-arm64; osx-x64: 10)". The
+#     `agree` column is not consulted there: the RIDs' raw verdicts differ in exactly the disclosed tests;
 #   - read and not banked: the row carries NO darwin: segment;
 #   - a row the evidence does not name is left as it is.
 # The waves are the guard's own list, read from the script so the two cannot drift.
@@ -71,6 +76,15 @@ for d, _, files in os.walk(evdir):
             for r in csv.DictReader(open(os.path.join(d, f), encoding='utf-8'), delimiter='\t'):
                 by_row.setdefault(r['row'], []).append((waves.index(rel), f[:-4], r))
 
+def latest_pair(records):
+    latest = max(w for w, _, _ in records)
+    in_wave = [(s, r) for w, s, r in records if w == latest]
+    stems = sorted({s for s, _ in in_wave})
+    if len(stems) > 1 and all(stems[k].startswith(stems[k - 1]) for k in range(1, len(stems))):
+        in_wave = [(s, r) for s, r in in_wave if s == stems[-1]]
+    rs = [r for _, r in in_wave]
+    return [r for r in rs if r['RID'] == 'osx-arm64'][0], [r for r in rs if r['RID'] == 'osx-x64'][0]
+
 def reading(records):
     latest = max(w for w, _, _ in records)
     in_wave = [(s, r) for w, s, r in records if w == latest]
@@ -100,9 +114,31 @@ def reading(records):
         return None
     return a['matched'] + (f' + {div_a}' if div_a else '')
 
+def arch_strict(a, x):
+    # The guard's Get-DarwinArchStrictReading, rule for rule.
+    if a['status'] not in ('validated', 'COUNT', 'DISC') or x['status'] not in ('validated', 'COUNT', 'DISC'):
+        return None
+    try:
+        va, vx, na, nx = int(a['verdicts']), int(x['verdicts']), int(a['new']), int(x['new'])
+        ma, mx = int(a['matched']), int(x['matched'])
+        da, dx = int(a['divergent']) - na, int(x['divergent']) - nx
+    except (KeyError, ValueError):
+        return None
+    if na or nx or va != vx or ma + da != mx + dx or (ma == mx and da == dx):
+        return None
+    (rb, mb, db), (ro, mo, do) = ((a['RID'], ma, da), (x['RID'], mx, dx)) if da > dx else ((x['RID'], mx, dx), (a['RID'], ma, da))
+    return f'{mb}' + (f' + {db}' if db else '') + f' ({rb}; {ro}: {mo}' + (f' + {do}' if do else '') + ')'
+
+def reading_of_record(records):
+    banked = reading(records)
+    if banked is not None:
+        return banked
+    a, x = latest_pair(records)
+    return arch_strict(a, x)
+
 table = os.path.join(tree, 'docs/ValidatedTestPackages.md')
 lines = open(table, encoding='utf-8', newline='').read().split('\n')
-SEG = re.compile(r' · darwin: (?:\d+(?: \+ \d+)?|n/a)(?= · | \|$)')
+SEG = re.compile(r' · darwin: (?:\d+(?: \+ \d+)?(?: \((?:osx-arm64|osx-x64); (?:osx-arm64|osx-x64): \d+(?: \+ \d+)?\))?|n/a)(?= · | \|$)')
 row_re = re.compile(r'^\| \[`([^`]+)`\]\(')
 changes = []
 for i, line in enumerate(lines):
@@ -110,7 +146,7 @@ for i, line in enumerate(lines):
     if not m or m.group(1) not in by_row:
         continue
     pkg = m.group(1)
-    want = reading(by_row[pkg])
+    want = reading_of_record(by_row[pkg])
     have = SEG.search(line)
     if want is None:
         new = SEG.sub('', line) if have else line

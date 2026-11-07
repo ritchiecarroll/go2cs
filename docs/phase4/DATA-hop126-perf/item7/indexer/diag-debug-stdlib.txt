@@ -1,0 +1,21 @@
+# §11.9 Debug-stdlib diagnostic. asmflags reads each DLL's DebuggableAttribute from metadata (0x107 = optimizations DISABLED; 0x2 = optimized) and its ReadyToRun header.
+# One converted PerfSieve (P 53b3eb88d7, plain -recurse, -go2cspath at P's worktree), built three ways on SDK 10.0.400:
+dotnet build -c Release (no file named; the folder holds PerfSieve.csproj and PerfSieve.slnx)  ->  assemblies 67, Debug 64, optimized 3
+dotnet build PerfSieve.slnx -c Release  ->  assemblies 67, Debug 64, optimized 3
+dotnet build PerfSieve.csproj -c Release  ->  assemblies 67, Debug 0, optimized 67
+# The generated PerfSieve.slnx (the solution a bare build enters):
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="PerfSieve.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/core/">
+    <Project Path="../../../../../../../abw/g-inl-p/src/core/golib/golib.csproj" />
+    <Project Path="../../../../../../../abw/g-inl-p/src/gen/go2cs-gen/go2cs-gen.csproj" />
+  </Folder>
+</Solution>
+# Fix-check: P's PerfTlsHandshake built via the explicit csproj: assemblies 163, Debug 0; three diagnostic runs (not a window), in-program elapsed_ns 1071393300, 1070527100, 1098443300.

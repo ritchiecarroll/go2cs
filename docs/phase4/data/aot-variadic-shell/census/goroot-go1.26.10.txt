@@ -1,0 +1,50 @@
+GEMBED	cmd/internal/par/work.go	false	ErrCache	Cache[K, errValue[V]]
+GEMBED	encoding/json/v2/arshal_funcs.go	false	typedArshalers	nonComparable
+GEMBED	internal/runtime/gc/internal/gen/val.go	false	Array	valAny
+GEMBED	internal/runtime/gc/internal/gen/val.go	false	Ptr	valGP
+GEMBED	internal/sync/hashtriemap.go	false	entry	node[K, V]
+GEMBED	internal/sync/hashtriemap.go	false	indirect	node[K, V]
+GEMBED	unique/canonmap.go	false	entry	node[T]
+GEMBED	unique/canonmap.go	false	indirect	node[T]
+GEMBED	unique/handle.go	false	uniqueMap	*canonMap[T]
+GEMBED	unique/handle.go	false	uniqueMap	cloneSeq
+IFACE	cmd/compile/internal/ssa/config.go	false	Fatalf
+IFACE	cmd/compile/internal/ssa/config.go	false	Logf
+IFACE	cmd/compile/internal/ssa/config.go	false	Warnl
+IFACE	cmd/go/internal/load/printer.go	false	Errorf
+IFACE	cmd/go/internal/load/printer.go	false	Printf
+IFACE	cmd/internal/dwarf/dwarf.go	false	Logf
+IFACE	cmd/internal/script/engine.go	false	Run
+IFACE	context/context_test.go	true	Error
+IFACE	context/context_test.go	true	Errorf
+IFACE	context/context_test.go	true	Fatal
+IFACE	context/context_test.go	true	Fatalf
+IFACE	context/context_test.go	true	Log
+IFACE	context/context_test.go	true	Logf
+IFACE	context/context_test.go	true	Skip
+IFACE	context/context_test.go	true	Skipf
+IFACE	runtime/importx_test.go	true	Error
+IFACE	runtime/importx_test.go	true	Errorf
+IFACE	runtime/importx_test.go	true	Fatal
+IFACE	runtime/importx_test.go	true	Fatalf
+IFACE	runtime/importx_test.go	true	Log
+IFACE	runtime/importx_test.go	true	Logf
+IFACE	runtime/importx_test.go	true	Skip
+IFACE	runtime/importx_test.go	true	Skipf
+IFACE	testing/testing.go	false	Error
+IFACE	testing/testing.go	false	Errorf
+IFACE	testing/testing.go	false	Fatal
+IFACE	testing/testing.go	false	Fatalf
+IFACE	testing/testing.go	false	Log
+IFACE	testing/testing.go	false	Logf
+IFACE	testing/testing.go	false	Skip
+IFACE	testing/testing.go	false	Skipf
+IFACE	time/abs_test.go	true	Error
+IFACE	time/abs_test.go	true	Errorf
+IFACE	time/abs_test.go	true	Fatal
+IFACE	time/abs_test.go	true	Fatalf
+IFACE	time/abs_test.go	true	Log
+IFACE	time/abs_test.go	true	Logf
+IFACE	time/abs_test.go	true	Skip
+IFACE	time/abs_test.go	true	Skipf
+TOTAL generic=0 plain=294 iface-variadic-members=39

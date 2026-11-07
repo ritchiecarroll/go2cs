@@ -1,0 +1,99 @@
+  000000014001CA80: 41 57              push        r15
+  000000014001CA82: 41 56              push        r14
+  000000014001CA84: 57                 push        rdi
+  000000014001CA85: 56                 push        rsi
+  000000014001CA86: 55                 push        rbp
+  000000014001CA87: 53                 push        rbx
+  000000014001CA88: 48 83 EC 48        sub         rsp,48h
+  000000014001CA8C: 0F 57 E4           xorps       xmm4,xmm4
+  000000014001CA8F: 0F 29 64 24 20     movaps      xmmword ptr [rsp+20h],xmm4
+  000000014001CA94: 0F 29 64 24 30     movaps      xmmword ptr [rsp+30h],xmm4
+  000000014001CA99: 33 C0              xor         eax,eax
+  000000014001CA9B: 48 89 44 24 40     mov         qword ptr [rsp+40h],rax
+  000000014001CAA0: 48 8B F1           mov         rsi,rcx
+  000000014001CAA3: 48 8B DA           mov         rbx,rdx
+  000000014001CAA6: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CAAB: 48 8B D3           mov         rdx,rbx
+  000000014001CAAE: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CAB8: 45 33 C9           xor         r9d,r9d
+  000000014001CABB: E8 80 97 A0 00     call        golib_go_slice_1<Bool>___ctor_12
+  000000014001CAC0: 33 FF              xor         edi,edi
+  000000014001CAC2: 33 ED              xor         ebp,ebp
+  000000014001CAC4: 41 BE 02 00 00 00  mov         r14d,2
+  000000014001CACA: 48 83 FB 02        cmp         rbx,2
+  000000014001CACE: 0F 8E B8 00 00 00  jle         000000014001CB8C
+  000000014001CAD4: 4D 85 F6           test        r14,r14
+  000000014001CAD7: 0F 8C C6 00 00 00  jl          000000014001CBA3
+  000000014001CADD: 4C 3B 74 24 30     cmp         r14,qword ptr [rsp+30h]
+  000000014001CAE2: 0F 8D BB 00 00 00  jge         000000014001CBA3
+  000000014001CAE8: 48 83 7C 24 40 00  cmp         qword ptr [rsp+40h],0
+  000000014001CAEE: 74 0F              je          000000014001CAFF
+  000000014001CAF0: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CAF5: 49 8B D6           mov         rdx,r14
+  000000014001CAF8: E8 C3 9B A0 00     call        golib_go_slice_1<Bool>__NativeElementRef
+  000000014001CAFD: EB 1E              jmp         000000014001CB1D
+  000000014001CAFF: 48 8B 44 24 20     mov         rax,qword ptr [rsp+20h]
+  000000014001CB04: 49 8B CE           mov         rcx,r14
+  000000014001CB07: 48 03 4C 24 28     add         rcx,qword ptr [rsp+28h]
+  000000014001CB0C: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CB0F: 48 3B CA           cmp         rcx,rdx
+  000000014001CB12: 0F 83 B7 00 00 00  jae         000000014001CBCF
+  000000014001CB18: 48 8D 44 08 10     lea         rax,[rax+rcx+10h]
+  000000014001CB1D: 80 38 00           cmp         byte ptr [rax],0
+  000000014001CB20: 75 5E              jne         000000014001CB80
+  000000014001CB22: 48 FF C7           inc         rdi
+  000000014001CB25: 49 03 EE           add         rbp,r14
+  000000014001CB28: 4D 8B FE           mov         r15,r14
+  000000014001CB2B: 4D 0F AF FE        imul        r15,r14
+  000000014001CB2F: 4C 3B FB           cmp         r15,rbx
+  000000014001CB32: 7D 4C              jge         000000014001CB80
+  000000014001CB34: 4D 85 FF           test        r15,r15
+  000000014001CB37: 0F 8C 7C 00 00 00  jl          000000014001CBB9
+  000000014001CB3D: 4C 3B 7C 24 30     cmp         r15,qword ptr [rsp+30h]
+  000000014001CB42: 7D 75              jge         000000014001CBB9
+  000000014001CB44: 48 83 7C 24 40 00  cmp         qword ptr [rsp+40h],0
+  000000014001CB4A: 74 0F              je          000000014001CB5B
+  000000014001CB4C: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CB51: 49 8B D7           mov         rdx,r15
+  000000014001CB54: E8 67 9B A0 00     call        golib_go_slice_1<Bool>__NativeElementRef
+  000000014001CB59: EB 1A              jmp         000000014001CB75
+  000000014001CB5B: 48 8B 44 24 20     mov         rax,qword ptr [rsp+20h]
+  000000014001CB60: 49 8B CF           mov         rcx,r15
+  000000014001CB63: 48 03 4C 24 28     add         rcx,qword ptr [rsp+28h]
+  000000014001CB68: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CB6B: 48 3B CA           cmp         rcx,rdx
+  000000014001CB6E: 73 5F              jae         000000014001CBCF
+  000000014001CB70: 48 8D 44 08 10     lea         rax,[rax+rcx+10h]
+  000000014001CB75: C6 00 01           mov         byte ptr [rax],1
+  000000014001CB78: 4D 03 FE           add         r15,r14
+  000000014001CB7B: 4C 3B FB           cmp         r15,rbx
+  000000014001CB7E: 7C B4              jl          000000014001CB34
+  000000014001CB80: 49 FF C6           inc         r14
+  000000014001CB83: 4C 3B F3           cmp         r14,rbx
+  000000014001CB86: 0F 8C 48 FF FF FF  jl          000000014001CAD4
+  000000014001CB8C: 48 89 3E           mov         qword ptr [rsi],rdi
+  000000014001CB8F: 48 89 6E 08        mov         qword ptr [rsi+8],rbp
+  000000014001CB93: 48 8B C6           mov         rax,rsi
+  000000014001CB96: 48 83 C4 48        add         rsp,48h
+  000000014001CB9A: 5B                 pop         rbx
+  000000014001CB9B: 5D                 pop         rbp
+  000000014001CB9C: 5E                 pop         rsi
+  000000014001CB9D: 5F                 pop         rdi
+  000000014001CB9E: 41 5E              pop         r14
+  000000014001CBA0: 41 5F              pop         r15
+  000000014001CBA2: C3                 ret
+  000000014001CBA3: 49 8B CE           mov         rcx,r14
+  000000014001CBA6: 48 8B 54 24 30     mov         rdx,qword ptr [rsp+30h]
+  000000014001CBAB: E8 60 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001CBB0: 48 8B C8           mov         rcx,rax
+  000000014001CBB3: E8 A8 21 89 03     call        RhpThrowEx
+  000000014001CBB8: CC                 int         3
+  000000014001CBB9: 49 8B CF           mov         rcx,r15
+  000000014001CBBC: 48 8B 54 24 30     mov         rdx,qword ptr [rsp+30h]
+  000000014001CBC1: E8 4A 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001CBC6: 48 8B C8           mov         rcx,rax
+  000000014001CBC9: E8 92 21 89 03     call        RhpThrowEx
+  000000014001CBCE: CC                 int         3
+  000000014001CBCF: E8 1C E1 0E 00     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014001CBD4: CC                 int         3
+  000000014001CBD5: 90                 nop

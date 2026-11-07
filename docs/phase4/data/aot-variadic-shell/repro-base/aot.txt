@@ -1,0 +1,16 @@
+TT    Error(...any)         : false
+TT    Name() string         : true
+TT    Logf(string, ...any)  : false
+TT    Failed() bool         : true
+TT    Errorer               : false
+*TT   Error(...any)         : false
+*T    Error(...any)         : false
+*T    Name() string         : true
+LL    Error(...any)         : false
+V     Error(...any)         : false
+V     Join(string, ...string): false
+*V    Errorer               : true
+V.Error 8 2 throughpointer
+G     Error(...any)         : false
+u     logf(string, ...any)  : false
+V     Error(...string)      : false
