@@ -97,7 +97,10 @@
      Not changed, re-read and still true: Where things stand; How the project moves; .NET; Platforms; Real-world Go
      modules (five, Go 1.24.13 readings, ValidatedModules.md); NuGet packages; cgo; Phase 4D; Phase 5; IDE mode; Open
      converter items (the cross-package address-of-global bullet matches the struct-types reference and Limitations at
-     this master); How progress is tracked. -->
+     this master); How progress is tracked.
+     The owner answered the three questions this refresh raised (2026-11-07, relayed by COORD): the allocation work
+     "Keep Q1 2027"; gojq and timefmt-go "Keep Q4 2026"; goroutine scheduling "List as unscheduled". The page holds
+     all three as drafted. -->
 
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
