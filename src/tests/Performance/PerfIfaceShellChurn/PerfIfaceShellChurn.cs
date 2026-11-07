@@ -12,17 +12,13 @@ partial struct counter {
     internal nint n;
 }
 
-internal static nint Len(this counter c) {
-    return c.n;
-}
+internal static nint Len(this counter c) { return c.n; }
 
 partial struct box {
     internal nint n;
 }
 
-internal static nint Len(this ref box b) {
-    return b.n;
-}
+internal static nint Len(this ref box b) { return b.n; }
 
 internal partial interface run_type /*dyn*/ {
     nint Len();
