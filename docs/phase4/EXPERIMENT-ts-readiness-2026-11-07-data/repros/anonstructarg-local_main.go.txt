@@ -1,0 +1,28 @@
+package main
+
+type Set[T comparable] struct{ m map[T]struct{} }
+
+func (s *Set[T]) AddIfAbsent(v T) bool {
+	if _, ok := s.m[v]; ok {
+		return false
+	}
+	if s.m == nil {
+		s.m = map[T]struct{}{}
+	}
+	s.m[v] = struct{}{}
+	return true
+}
+
+func main() {
+	var seen Set[struct {
+		name string
+		kind int32
+	}]
+	for _, n := range []string{"a", "b", "a"} {
+		key := struct {
+			name string
+			kind int32
+		}{n, 1}
+		println(seen.AddIfAbsent(key))
+	}
+}

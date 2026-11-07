@@ -60,10 +60,63 @@ All Go steps ran pinned to logical CPUs 6-11 (mask 0xFC0), sharing the box with 
 | Stage | go2cs tip | rc | Wall | Result |
 |---|---|---|---|---|
 | 1. converted stdlib build (`src\go2cs-stdlib.slnx`, Debug, local, no NuGet go.*) | 2e2b0bae6e | 0 | 1,404 s (cold restore, 6 cores, contended) | 363/363 projects, 0 errors, 1 warning (CS9113 `testing\TestReporter.cs:98`) |
+| 2. `go2cs -recurse -go2cspath <clone>\src <tsc> <out>\recurse` (local refs) | a0fba9b08a (`claude/coord-b245-gate`: 243 + 244 + 245 on master d07c7600cb) | **1** | 2,429 s | 139/139 packages converted (104 app + 35 third-party; 149 stdlib referenced; `fourslash/tests` skipped, test files only) → 138 csproj. 0 panics, 0 refusals during conversion. **rc=1 is the end-of-run guard**: 8 unresolved dynamic types emitted as raw Go (rows C1, C2). Because the run fails at that guard, the per-project `.slnx` step never runs; stage 3 builds a hand-written `_all.slnx` over the 138 csproj. |
+
+### Stage 2 warning tally (82 WARNING lines)
+
+| Count | Warning | Catalogue |
+|---|---|---|
+| 51 | move2heap not emitted: appends at more than one site without observing capacity | informational (see C-notes) |
+| 13 | move2heap not emitted: targets or an inlined copy disagree on its appends | informational |
+| 7 + 1 | Unresolved dynamic struct type (`interface{KindString() string}` ×7, anonymous struct ×1) | C1, C2 |
+| 2 | embedded-interface promoted method `watchCompilerHost.Trace` / `cachedCompilerHost.Trace` is variadic: pointer-form forwarder not emitted | C3 (stage 3 decides) |
+| 1 | `@getGenericDefinition`: union pointer constraint `*ast.Node \| *ast.Symbol \| *checker.Type` (checker `relater.go`) not erased; "emission may not compile" | C4 (stage 3 decides) |
+| 4 | const via `unsafe.Sizeof` may not match the run-time value (x/sys/windows `security_windows.go` ×2, `types_windows.go`; go-winio `hvsock.go`) | watch item |
+| 2 | slow-package notices (checker, ast > 2 m) | perf only |
+| 1 | package license unspecified (tsc module root LICENSE not referenced) | packaging only |
+
+Box-sharing datum: CPU affinity (0xFC0 vs COORD's 0-5) protects CPU but **not disk or memory bandwidth**. While this experiment's go test baseline and the stdlib cold build ran on the upper half, COORD's repoguard step on the lower half took 2,880 s against its usual 200-340 s.
 
 ## Defect catalogue
 
-<!-- one row per ROOT CAUSE -->
+One row per ROOT CAUSE. Repro modules live in `H:\go2cs-ts-exp\repros\<name>` on the i7. Each one is quoted below in full, so the record stands alone.
+
+### C1: anonymous interface parameter type, satisfied across a package boundary (converter, S-M)
+
+- **Mechanism:** an implicit conversion of a concrete pointer to ANOTHER package's anonymous-interface parameter type. The call site names the adapter after the raw Go type string (`ast_Nodeжinterface{KindString() string}`) because the anonymous interface's lifted name is not resolvable from the calling package. The same shape **within one package converts clean** (repro `anoniface-local`, rc=0).
+- **TS site:** `internal/debug/debug.go:17` `func FailBadSyntaxKind(node interface{ KindString() string }, message ...any)`, called with `*ast.Node` from ast, ls (×2), pseudochecker, scanner, transformers/estransforms and transformers/tstransforms: **7 sites**.
+- **Repro** (`anoniface`, rc=1 "Unresolved dynamic struct type: interface{K() string}"):
+  ```go
+  // dbg/dbg.go
+  package dbg
+  func Fail(n interface{ K() string }) string { return "fail:" + n.K() }
+  // main.go
+  package main
+  import "repro/anoniface/dbg"
+  type N struct{ k string }
+  func (n *N) K() string { return n.k }
+  func main() { println(dbg.Fail(&N{k: "x"})) } // Go: fail:x
+  ```
+- **Blast radius:** 7 files in 7 packages. ast and scanner sit at the root of the graph, so this one shape gates nearly every package's compile.
+
+### C2: anonymous struct as a type argument in a `var` declaration (converter, S-M)
+
+- **Mechanism:** `var seen Set[struct{...}]` emits `Set<struct{name string; kind int32}> seen = default;` as raw Go. The identical anonymous struct in the composite literal beside it IS lifted (`ProvideDocumentSymbols_key`), but the type-argument position of the var's declared type is not matched to that lift. Neither a cross-package generic nor a cross-package field type is needed: the repro `anonstructarg-local` is one package with builtin fields only.
+- **TS site:** `internal/ls/symbols.go:29` (`var seen collections.Set[struct{ name string; kind lsproto.SymbolKind; rng lsproto.Range }]`): 1 site.
+- **Repro** (`anonstructarg-local`, rc=1):
+  ```go
+  package main
+  type Set[T comparable] struct{ m map[T]struct{} }
+  func (s *Set[T]) AddIfAbsent(v T) bool { if _, ok := s.m[v]; ok { return false }; if s.m == nil { s.m = map[T]struct{}{} }; s.m[v] = struct{}{}; return true }
+  func main() {
+  	var seen Set[struct{ name string; kind int32 }]
+  	for _, n := range []string{"a", "b", "a"} {
+  		key := struct{ name string; kind int32 }{n, 1}
+  		println(seen.AddIfAbsent(key)) // Go: true true false
+  	}
+  }
+  ```
+- **Blast radius:** 1 file (ls), so only ls and its dependents.
 
 ## Closing planning read
 

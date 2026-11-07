@@ -1,0 +1,21 @@
+package main
+
+import (
+	"repro/anonstructarg/coll"
+	"repro/anonstructarg/kinds"
+)
+
+func main() {
+	// Anonymous struct as a TYPE ARGUMENT of a zero-value var (TS: ls.ProvideDocumentSymbols).
+	var seen coll.Set[struct {
+		name string
+		kind kinds.Kind
+	}]
+	for _, n := range []string{"a", "b", "a"} {
+		key := struct {
+			name string
+			kind kinds.Kind
+		}{n, 1}
+		println(seen.AddIfAbsent(key))
+	}
+}

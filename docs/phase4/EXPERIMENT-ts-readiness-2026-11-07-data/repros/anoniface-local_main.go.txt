@@ -1,0 +1,9 @@
+package main
+
+func Fail(n interface{ K() string }) string { return "fail:" + n.K() }
+
+type N struct{ k string }
+
+func (n *N) K() string { return n.k }
+
+func main() { println(Fail(&N{k: "x"})) }
