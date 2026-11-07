@@ -18,7 +18,9 @@
 // destination guards (manualConversionDestination_test.go) already tie each registration to a body.
 // The first entries are fiat's p521Mul and p521Square: fiat-crypto's formally verified output, replaced
 // by hand-written arithmetic because the converted bodies declare 1,006 locals, past the JIT's 512-local
-// inlining cut-off (docs/phase4/DATA-p521-table.md).
+// inlining cut-off (docs/phase4/DATA-p521-table.md). Then p384Mul and p384Square, for the same reason at a
+// smaller scale: the inliner stops after about 74 callees, leaving 590 calls per field multiply
+// (docs/phase4/DATA-p384-field.md).
 //
 // The pin is the SHA-256 of the function's source text, from the `func` keyword to its closing brace,
 // read from GOROOT at the version src/version.props pins. Doc comments are outside the span, so a
@@ -70,6 +72,20 @@ var handOwnSourcePins = []handOwnSourcePin{
 		sha256:   "c72e1a294a05a9d7520c7d6036b892927f9ff73ac3760a712417c25e792a8f7e",
 		handOwn:  "src/core/crypto/internal/fips140/nistec/fiat/p521_impl.cs",
 		reverify: "GolibTests P521FieldDifferentialTests and the P521CurveBytes behavioral test",
+	},
+	{
+		goFile:   "crypto/internal/fips140/nistec/fiat/p384_fiat64.go",
+		funcName: "p384Mul",
+		sha256:   "2e8917365b874d68dabcc13e0b3916ec13665585b5240e49fd56b147e15e4010",
+		handOwn:  "src/core/crypto/internal/fips140/nistec/fiat/p384_impl.cs",
+		reverify: "GolibTests P384FieldDifferentialTests and the P384CurveBytes behavioral test",
+	},
+	{
+		goFile:   "crypto/internal/fips140/nistec/fiat/p384_fiat64.go",
+		funcName: "p384Square",
+		sha256:   "471ea92f472c38c09d94f734a06a5cdedc8f353280dc3e06dd1ebda6e90ff9d4",
+		handOwn:  "src/core/crypto/internal/fips140/nistec/fiat/p384_impl.cs",
+		reverify: "GolibTests P384FieldDifferentialTests and the P384CurveBytes behavioral test",
 	},
 }
 
