@@ -92,6 +92,15 @@ rewritten the same way.
      laptop H). Batch 218. P-384: claude/r-p384-field, docs/phase4/DATA-p384-field.md, PENDING landing (after B3);
      fill its measured number from that record. -->
 
+**PENDING (R), may move to the next release.** P-256's field multiply is rewritten the same way. A TLS 1.3
+handshake with a P-256 certificate and ECDHE takes about two thirds of its earlier time under ReadyToRun (about
+60 ms to about 40 ms), on `win-x64`, on one development machine. The default handshake, with an RSA certificate,
+does not change.
+<!-- source: R's P-256 field seat, GO'd 2026-11-07 (COORD), building on P-384. R2R on R's laptop, win-x64, scratch-
+     measured: the P-256 field Mul about 0.20 of base; the P-256 + ECDHE TLS 1.3 handshake about 0.64 (60 -> 40 ms); the
+     default RSA handshake unchanged. It rides 1.26.10.3 only if it lands before the end regen; otherwise delete this
+     item and carry it to the next release. Replace the scratch figures with the seat's committed record at landing. -->
+
 **AES-GCM on Apple silicon.** On `osx-arm64`, `crypto/tls` prefers the AES-GCM cipher suites, as Go does there. The
 converted standard library is built for `amd64` and runs as a native arm64 process on Apple silicon, so it now
 reads the processor's AES and PMULL support from arm64.
