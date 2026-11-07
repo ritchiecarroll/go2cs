@@ -67,7 +67,7 @@ internal static void Main() {
     fmt.Println("ecdsa other message verifies:", ecdsa.VerifyASN1(priv.ᏑPublicKey, h[..], sig));
 
     var p = elliptic.P256();
-    foreach (var (i, k) in slice<int64>([1, 2, 3, 0xff, 1099511627776L])) {
+    foreach (var (i, k) in range(slice<int64>([1, 2, 3, 0xff, 1099511627776L]))) {
         var (x, y) = p.ScalarBaseMult(big.NewInt(k).Bytes());
         var (x2, y2) = p.ScalarMult(x, y, key(fmt.Sprintf("go2cs P-256 scalar %d"u8, i)));
         fmt.Printf("elliptic %d base %x %x\n"u8, i, x.OrTypedNil(), y.OrTypedNil());
