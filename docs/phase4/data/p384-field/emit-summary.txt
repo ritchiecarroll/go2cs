@@ -1,0 +1,26 @@
+start 2026-11-07T01:09:26Z go=go version go1.26.10 windows/amd64 GOROOT=%USERPROFILE%\sdk\go1.26.10
+-rwxr-xr-x 1 <user> <group> 23539200 2026-11-06 19:09:50.147130000 -0600 /c/go2cs-tmp/r-p384-regen/go2cs-base.exe
+-rwxr-xr-x 1 <user> <group> 23536128 2026-11-06 19:09:52.475356300 -0600 /c/go2cs-tmp/r-p384-regen/go2cs-cut.exe
+C:/go2cs-tmp/r-p384-regen/go2cs-base.exe: go1.26.10
+C:/go2cs-tmp/r-p384-regen/go2cs-cut.exe: go1.26.10
+seeded .cs: snap=4564 base=4564 cut=4564
+== arm base 2026-11-07T01:16:06Z
+arm base rc=0 wall=2400s written=0
+  runtime
+  runtime/pprof
+  syscall
+  time
+  vendor/golang.org/x/sys/cpu
+== arm cut 2026-11-07T01:56:08Z
+arm cut rc=0 wall=2259s written=2
+  runtime
+  runtime/pprof
+  syscall
+  time
+  vendor/golang.org/x/sys/cpu
+DYNTYPE markers: base=0 cut=0
+== diff base vs cut
+Files /c/go2cs-tmp/r-p384-regen/root-base/src/core/crypto/internal/fips140/nistec/fiat/p384_fiat64.cs and /c/go2cs-tmp/r-p384-regen/root-cut/src/core/crypto/internal/fips140/nistec/fiat/p384_fiat64.cs differ
+Files /c/go2cs-tmp/r-p384-regen/root-base/src/core/crypto/internal/fips140/nistec/fiat/package_info.cs and /c/go2cs-tmp/r-p384-regen/root-cut/src/core/crypto/internal/fips140/nistec/fiat/package_info.cs differ
+diff-rc=1
+end 2026-11-07T02:37:02Z

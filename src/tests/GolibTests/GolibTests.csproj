@@ -245,8 +245,8 @@
          copyOut pair at two rates. -->
     <ProjectReference Include="..\..\core\crypto\sha3\crypto.sha3.csproj" />
 
-    <!-- P521FieldDifferentialTests: fiat's p521Mul and p521Square are HAND-OWNED arithmetic
-         (fiat/p521_impl.cs) in place of fiat-crypto's verified output, and a behavioral test reaches
+    <!-- P521FieldDifferentialTests and P384FieldDifferentialTests: fiat's p521Mul, p521Square, p384Mul
+         and p384Square are HAND-OWNED arithmetic (fiat/p521_impl.cs, fiat/p384_impl.cs) in place of fiat-crypto's verified output, and a behavioral test reaches
          them only through whole ECDH/ECDSA operations, never at the limb edges of fiat's input
          contract. The differential against BigInteger does, through the package's public element API. -->
     <ProjectReference Include="..\..\core\crypto\internal\fips140\nistec\fiat\crypto.internal.fips140.nistec.fiat.csproj" />
