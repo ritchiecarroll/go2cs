@@ -142,17 +142,51 @@ These pages carry text from before a landed record change. The re-bank re-render
   - Across a Go minor there is no baseline: the guard reports and does not gate.
 - **gojq publishes with 1.26.10.3, in the nugetgo wave** (owner, 2026-11-07, relayed by COORD: "Yes, let's shoot for
   being able to publish gojq with .3").
-  - **Scope:** the library root, `github.com/itchyny/gojq`, and its one third-party dependency, timefmt-go. The
-    command-line package `cli` and its six-module closure wait. This is OQ-4e/f/g/i in
-    `DESIGN-multi-package-modules.md`'s 2026-11-07 amendment, for COORD's ruling.
+  - **Scope (COORD RULED 2026-11-07 on OQ-4; the owner ruled 4e: "Yes, command line deffered is fine, lib focus for .3"):** TWO closure
+    packages in the 1.26.10.3 wave, timefmt-go v0.1.8 and the gojq library root v0.12.19. `cli` and its six-module
+    closure are deferred until after 1.26.10.3 (OQ-4i). The rulings are in `DESIGN-multi-package-modules.md`, in its
+    RULED block of 2026-11-07.
   - **Inputs:** P1's `SCOUT-gojq.md` and C2's `SCOUT-timefmt-go.md`, both measured on linux/amd64 at `c6cddb6903`.
     The per-GOOS closure was read with `go list -deps`, and every ID was read as 404 on nuget.org, so all are free.
-  - **Sequence:**
-    1. The go.* push, then C2's rebuild wave for the 7 published modules. `T` is the 1.26.10.3 record commit, as
-       NugetgoPublish section 0 requires.
-    2. timefmt-go: validate, pack, rehearse, publish. Then its registry row, or a local `-nuget-map` source naming
-       it, so that gojq's `-recurse=nuget` conversion references the published package.
-    3. gojq: validate, pack against the published timefmt-go, rehearse, publish.
+  - **The owner's steps, written so that each is one step.** Each conversion repository follows the existing
+    modules' pattern: `https://github.com/ritchiecarroll/<last module path element>-cs` (as `pflag-cs`, `sync-cs`
+    and `jwt-cs`), public, with default branch `main`.
+
+    | repository | description (the existing repositories' form) |
+    |:--|:--|
+    | `ritchiecarroll/timefmt-go-cs` | `Unofficial go2cs C# conversion of github.com/itchyny/timefmt-go (proof; not affiliated with the upstream authors)` |
+    | `ritchiecarroll/gojq-cs` | `Unofficial go2cs C# conversion of github.com/itchyny/gojq (proof; not affiliated with the upstream authors)` |
+
+    - **Create each EMPTY:** no README, license or `.gitignore` from GitHub's form. COORD pushes the first commit
+      (NugetgoPublish section 4, step 5): the converted source, the module's LICENSE verbatim, the README,
+      `.gitignore`, VALIDATION.md and its proof pages. COORD then mints the signed tag `nuget-<PV>` on it
+      (`nuget-0.1.8`, `nuget-0.12.19`) before the package is signed.
+    - **timefmt-go's registry row**, one line in `v1/mappings.txt` of the nugetgo registry repository (served at
+      `https://nugetgo.net/v1/mappings.txt`), in sorted order: after `github.com/inconshreveable/mousetrap`, before
+      `github.com/ritchiecarroll/hashset`. Six fields separated by single TAB characters; the fifth is the date the
+      row is added:
+      ```
+      github.com/itchyny/timefmt-go<TAB>nugetgo.github.com.itchyny.timefmt-go<TAB>community<TAB>https://github.com/ritchiecarroll/timefmt-go-cs<TAB><YYYY-MM-DD><TAB>ritchiecarroll
+      ```
+      - **Status:** `community`, as every third-party row is. It never gets `auto-merge-eligible`, so a maintainer
+        merges it after review.
+      - **Before it:** if `1.26.10.3` is not yet in `cmd/sitegen/go2cs-releases.txt`, a maintainer adds it in its own
+        pull request first (NugetgoPublish section 5, step 1). Check 4(b) refuses a package built against an unlisted
+        release.
+    - gojq's own row, the same form with `github.com/itchyny/gojq`, `nugetgo.github.com.itchyny.gojq` and
+      `gojq-cs`, follows its publish. No 1.26.10.3 package depends on it, so it is not on the wave's critical path.
+  - **The order, relative to the go.* push:**
+    1. **Any time before:** create the two empty repositories (owner).
+    2. **The go.* push** (release-nuget Phase 3), then the record commit (Phase 4). That commit is `T`.
+    3. **C2's rebuild wave** for the 7 published modules, at `T` (owner sheet).
+    4. **timefmt-go:** validate, pack and rehearse at `T`. COORD pushes `timefmt-go-cs` and its tag. The owner signs
+       and pushes the package (sheet).
+    5. **The release listing**, if needed, then **timefmt-go's row** (maintainer merges).
+       - gojq's `-recurse=nuget` conversion needs the row served at `nugetgo.net`, or a local `-nuget-map` source with
+         the same row. The local source lets step 6 start before the merge.
+    6. **gojq:** validate (whole module, `-test-timeout` of about 50 minutes) and pack against the published
+       timefmt-go. Rehearse. COORD pushes `gojq-cs` and its tag. The owner signs and pushes the package (sheet).
+       Then gojq's row.
 
   | order | module @ version | nugetgo ID | route | flavors | B4 edges | license | blocked today by |
   |--:|:--|:--|:--|:--|:--|:--|:--|
