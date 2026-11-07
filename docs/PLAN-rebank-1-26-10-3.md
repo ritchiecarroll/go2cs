@@ -120,3 +120,20 @@ These pages carry text from before a landed record change. The re-bank re-render
   existing published modules, no prob"). Each published 1.26.10.2 nugetgo revision is deprecated on nuget.org with its
   1.26.10.3 revision as the alternate. It is an OWNER hand (an owner-account action), and C2 prepares the exact package
   and version list.
+- **The binary-compatibility guard gates the pack** (COORD ruling, 2026-11-07: it rides 1.26.10.3; design and
+  measurements in `docs/phase4/DESIGN-binary-compat-guard.md`, which lands with the guard).
+  - `push-nuget.ps1` compares every merged package with its last published 1.26.10.x revision, one asset at a time,
+    using the ApiCompat tool pinned in `.config/dotnet-tools.json`. `nugetgo-pack.ps1` compares each module with its
+    previous revision.
+  - 1.26.10.3 carries one announced break, B3. It is golib's 12 entries in `src/core/golib/CompatibilitySuppressions.xml`.
+  - **The policy the guard enforces:** within one Go minor, every published revision of a go.* or nugetgo.* package
+    is binary-compatible with the revision before it, except for the breaks listed in that release's suppression
+    files. A release that lists any break:
+    1. announces it in the release notes' *Upgrading* section;
+    2. ships the nugetgo rebuild wave with it, built on that release (the first step above);
+    3. deprecates the earlier revision of every published module on nuget.org, with the new revision as the
+       alternate (the second step above, an owner hand).
+  - Under that policy B4's `[build, next Go minor)` range stands as ruled. It is true for every revision the guard
+    passed with no suppression. For an announced break, the published packages' ranges cannot be narrowed, and step
+    3's deprecation is what reaches their consumers.
+  - Across a Go minor there is no baseline: the guard reports and does not gate.

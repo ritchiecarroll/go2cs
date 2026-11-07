@@ -123,8 +123,9 @@ reads the processor's AES and PMULL support from arm64.
 
 - A panic raised inside a deferred closure keeps the closure's frame in `recover`, `runtime.Callers` and the crash
   traceback, as in Go. <!-- batch 217 (R B1) -->
-- Calling a value-receiver method through a nil pointer panics, as in Go. <!-- batch 221 (C2); PENDING: C2's this-ref
-  box fix, fill in or drop -->
+- Calling a value-receiver method through a nil pointer panics, as in Go, including when a pointer method calls a
+  value method on its own receiver; there the arguments are also evaluated in Go's order. <!-- batch 221 (C2); batch
+  235 (C2, claude/c2-thisref-box 13715e9df6): the self-call is emitted over the box, at TC0 as at TC1. Landed. -->
 - A crash on a goroutine other than `main` prints that goroutine's id and, under its frames, Go's
   `created by <function> in goroutine <id>` line. <!-- batch 178 (C1, .3 S1) -->
 - `runtime.Goexit` called from `main` runs `main`'s deferred calls, then waits for the other goroutines, as in Go.
