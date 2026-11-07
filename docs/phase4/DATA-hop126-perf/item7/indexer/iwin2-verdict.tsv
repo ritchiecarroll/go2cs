@@ -1,0 +1,5 @@
+PerfMatMul	JD/JP	220.9	221.4	0.998	-0.2%	floor 12.5%	within
+PerfSieve	JD/JP	159.9	158.6	1.008	+0.8%	floor 18.2%	within
+PerfTlsHandshake	JD/JP	1107.9	1099.4	1.008	+0.8%	floor 2.3%	within
+PerfStartup	RD/RP	386.7	386.3	1.001	+0.1%	floor 2.9%	within
+PerfStartup	TD/TP	388.9	393.3	0.989	-1.1%	floor 3.7%	within
