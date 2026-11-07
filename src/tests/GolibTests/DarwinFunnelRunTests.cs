@@ -168,10 +168,12 @@ public unsafe class DarwinFunnelRunTests
         return buf;
     }
 
-    // A collection between the mint and the call: a box held only by the token registry dies here.
+    // A collection between the mint and the call: a box held only by the token registry dies here. Forced,
+    // blocking and compacting, so a held box can also move, and the arms then show that resolution does not
+    // depend on the box's address.
     private static void collectBeforeTheCall()
     {
-        GC.Collect();
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
         GC.WaitForPendingFinalizers();
     }
 
