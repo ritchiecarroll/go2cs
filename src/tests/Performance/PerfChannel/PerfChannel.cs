@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 
 partial class main_package {
 
@@ -18,7 +17,7 @@ internal static partial nint run(nint n) {
             total += (v & 4095);
         }
         doneʗ1.ᐸꟷ(total);
-    }, GoStack.Bounded);
+    });
 
     for (nint i = 0; i < n; i++) {
         ch.ᐸꟷ(i);

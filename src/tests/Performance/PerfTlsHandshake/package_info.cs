@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("PerfTlsHandshake.go", "PerfTlsHandshake.cs", "AA1MABgwACA+gKqiytyCgpSkgtKCgoKClIKAhqS0pIKSgoKClIKAgqSCgoKClILWhIKCqJSCgpSC", "117-132:1", "", "", "95:21,104:29")]
+[assembly: GoPositionMap("PerfTlsHandshake.go", "PerfTlsHandshake.cs", "AAxMABgwACA+mqLK3IKClKSC0oKCgoKUgoaUtKSCkoKCgpSCgpSCgoKClILWhIKCqJSCgpSC", "117-132:1", "", "", "92:21,101:29")]
 // </GoSourcePositionMaps>
 
 namespace go;
