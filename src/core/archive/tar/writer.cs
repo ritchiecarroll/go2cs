@@ -640,13 +640,14 @@ partial struct sparseFileWriter {
     internal int64 pos;      // Current position in sparse file
 }
 
-internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<byte> b) {
+internal static (nint n, error err) Write(this ж<sparseFileWriter> Ꮡsw, slice<byte> b) {
     nint n = default;
     error err = default;
+    ref var sw = ref Ꮡsw.DerefOrNull();
 
-    var overwrite = (int64)len(b) > sw.logicalRemaining();
+    var overwrite = (int64)len(b) > Ꮡsw.logicalRemaining();
     if (overwrite) {
-        b = b.slice(0, (nint)(sw.logicalRemaining()));
+        b = b.slice(0, (nint)(Ꮡsw.logicalRemaining()));
     }
 
     var b0 = b;
@@ -676,7 +677,7 @@ internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<by
     case {} when err != nil: {
         return (n, err);
     }
-    case {} when sw.logicalRemaining() == 0 && sw.physicalRemaining() > 0: {
+    case {} when Ꮡsw.logicalRemaining() == 0 && Ꮡsw.physicalRemaining() > 0: {
         return (n, errUnrefData); // Not possible; implies bug in validation logic
     }
     case {} when overwrite: {
