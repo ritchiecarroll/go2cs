@@ -247,6 +247,14 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// 2026-11-06). fiat/p384_impl.cs holds the same shape of body, a six-limb CIOS with m' = 0x100000001
 		// that reuses p521_impl.cs's four-product Mul64, checked by GolibTests P384FieldDifferentialTests and
 		// the P384CurveBytes behavioral test, with both Go bodies pinned the same way.
+		// p256Mul and p256Square inline fully under the JIT, but under ReadyToRun every bits.* call and limb
+		// read crosses the version bubble: 136 calls per field multiply, 1.6 us against the JIT's 0.32 to
+		// 0.43 us, and a P-256 TLS handshake 60 ms under ReadyToRun on R-LAPTOP (docs/phase4/DATA-p256-field.md;
+		// COORD ruling 2026-11-07). fiat/p256_field_impl.cs holds the same shape of body, a four-limb CIOS with
+		// m' = 1, checked by GolibTests P256FieldDifferentialTests and the P256CurveBytes behavioral test, with
+		// both Go bodies pinned; fiat/p256_impl.cs stays the limb loader and displaces nothing.
+		"p256Mul":    goosAny,
+		"p256Square": goosAny,
 		"p384Mul":    goosAny,
 		"p384Square": goosAny,
 		"p521Mul":    goosAny,
