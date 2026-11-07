@@ -1768,6 +1768,30 @@ func (v *Visitor) operandRendersWidenedFold(expr ast.Expr) bool {
 	return false
 }
 
+// concatYieldsNamedString reports whether a non-constant concatenation has a NAMED string type —
+// `"-" + v` with v a json.Number (gojq funcOpNegate). Go keeps the name, and the generated type's
+// span operators (`operator +(ReadOnlySpan<byte>, Number)`) keep it too, so its literal operand keeps
+// the `u8` form even in an object slot: the sum is the named type, never a bare span. Rendering the
+// literal as a plain C# string bound @string's operator instead, and the result boxed as a string.
+// A constant concatenation is excluded: two literals fold to a span, which an object slot cannot take.
+func (v *Visitor) concatYieldsNamedString(binaryExpr *ast.BinaryExpr) bool {
+	tv, ok := v.info.Types[binaryExpr]
+
+	if !ok || tv.Value != nil {
+		return false
+	}
+
+	named, isNamed := types.Unalias(tv.Type).(*types.Named)
+
+	if !isNamed {
+		return false
+	}
+
+	basic, isBasic := named.Underlying().(*types.Basic)
+
+	return isBasic && basic.Info()&types.IsString != 0
+}
+
 func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
@@ -1788,8 +1812,11 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// derived from `!u8StringOK`: a span-hostile slot may still render a STANDALONE literal in the
 	// combined `(@string)"…"u8` form it accepts, and the old coupling turned that rendering choice
 	// into a concat compile break.
-	concatSuppressed := litContext.spanTargetUnsupported && binaryExpr.Op == token.ADD
-	basicLitContext.u8StringOK = !concatSuppressed && v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
+	// A concatenation of a named string type keeps its literal operand in `u8` form wherever it sits,
+	// including beside a sub-slice operand, which renders as the named type too (see concatYieldsNamedString).
+	namedConcat := binaryExpr.Op == token.ADD && v.concatYieldsNamedString(binaryExpr)
+	concatSuppressed := litContext.spanTargetUnsupported && binaryExpr.Op == token.ADD && !namedConcat
+	basicLitContext.u8StringOK = !concatSuppressed && (namedConcat || v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y))
 
 	// Propagate to the OPERAND context so a nested concat is suppressed exactly where the old
 	// coupling suppressed it. That coupling read `!litContext.u8StringOK`, so the signal a child

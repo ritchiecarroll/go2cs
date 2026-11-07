@@ -1451,6 +1451,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");
+
+    [TestMethod]
     public void CheckNamedStringZeroValue() => CheckTarget("NamedStringZeroValue");
 
     [TestMethod]
@@ -2535,6 +2538,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
+
+    [TestMethod]
+    public void CheckUntypedConstAppendAny() => CheckTarget("UntypedConstAppendAny");
 
     [TestMethod]
     public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");

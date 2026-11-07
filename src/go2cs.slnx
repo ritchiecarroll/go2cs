@@ -815,6 +815,7 @@
     <Project Path="tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="tests/Behavioral/NamedStringConsts/NamedStringConsts.csproj" />
     <Project Path="tests/Behavioral/NamedStringDefine/NamedStringDefine.csproj" />
+    <Project Path="tests/Behavioral/NamedStringSliceConcatBoxing/NamedStringSliceConcatBoxing.csproj" />
     <Project Path="tests/Behavioral/NamedStringZeroValue/NamedStringZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
     <Project Path="tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.csproj" />
@@ -1206,6 +1207,7 @@
     <Project Path="tests/Behavioral/UnsafeSliceDataAliasing/UnsafeSliceDataAliasing.csproj" />
     <Project Path="tests/Behavioral/UnsignedIndexPastIntRange/UnsignedIndexPastIntRange.csproj" />
     <Project Path="tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
+    <Project Path="tests/Behavioral/UntypedConstAppendAny/UntypedConstAppendAny.csproj" />
     <Project Path="tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedConstDefine/UntypedConstDefine.csproj" />
     <Project Path="tests/Behavioral/UntypedConstFloatContext/UntypedConstFloatContext.csproj" />

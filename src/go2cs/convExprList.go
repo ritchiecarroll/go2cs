@@ -449,6 +449,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					label, value, keyed = "", resultExpr, false
 				}
 
+				// An untyped constant cast to the empty interface boxes at Go's DEFAULT type first:
+				// `append(path, 0)` with `path []any` stores an int, and a bare `(any)0` boxed a C# int
+				// (gojq's --stream encoder: "invalid type: int32 (0)") — a named constant boxed its
+				// UntypedInt wrapper. See untypedConstBoxCast.
+				if castType == "any" {
+					value = v.applyUntypedConstBoxCast(expr, value)
+				}
+
 				// Skip when the WHOLE value is already `(castType)(…)` (convBinaryExpr casts a
 				// same-type named/narrow binary result on its own — a redundant
 				// `(uint16)((uint16)…)` would only add noise); apply where the render actually

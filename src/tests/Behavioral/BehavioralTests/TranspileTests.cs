@@ -1501,6 +1501,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");
+
+    [TestMethod]
     public void CheckNamedStringZeroValue() => CheckTarget("NamedStringZeroValue");
 
     [TestMethod]
@@ -2612,6 +2615,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
+
+    [TestMethod]
+    public void CheckUntypedConstAppendAny() => CheckTarget("UntypedConstAppendAny");
 
     [TestMethod]
     public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
