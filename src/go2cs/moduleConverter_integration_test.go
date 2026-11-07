@@ -10,11 +10,10 @@ package main
 
 import (
 	"go/build"
+	"io/fs"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -118,47 +117,14 @@ func TestRecurseSyntheticModule(t *testing.T) {
 		t.Errorf("app csproj missing the stdlib fmt reference:\n%s", appCsproj)
 	}
 
-	// A per-project solution sits next to the app csproj, over the app + its transitive converted
-	// dependency (lib) + the shared runtime (golib) + the analyzer (go2cs-gen) — no stdlib listed. This
-	// is the build-everything solution for the app; no separate flat deploy-root solution is written.
-	appSlnx := readGenerated(t, filepath.Join(options.recurseOutputRoot, "src", "example.com", "app", "example.com.app.slnx"))
-
-	for _, want := range []string{"example.com.app.csproj", "example.com.lib.csproj", "golib.csproj", "go2cs-gen.csproj"} {
-		if !strings.Contains(appSlnx, want) {
-			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
-		}
-	}
-
-	// Projects are grouped into the %GOPATH%-mirroring solution folders, emitted in the enforced
-	// src → pkg → core order (deliberately NOT alphabetic): the app under /src/, its converted dependency
-	// (lib) under /pkg/, and the runtime + analyzer under /core/.
-	for _, want := range []string{`<Folder Name="/src/">`, `<Folder Name="/pkg/">`, `<Folder Name="/core/">`} {
-		if !strings.Contains(appSlnx, want) {
-			t.Errorf("app per-project solution missing folder %q:\n%s", want, appSlnx)
-		}
-	}
-
-	srcIdx := strings.Index(appSlnx, `<Folder Name="/src/">`)
-	pkgIdx := strings.Index(appSlnx, `<Folder Name="/pkg/">`)
-	coreIdx := strings.Index(appSlnx, `<Folder Name="/core/">`)
-
-	if !(srcIdx < pkgIdx && pkgIdx < coreIdx) {
-		t.Errorf("solution folders not in enforced src→pkg→core order (src=%d pkg=%d core=%d):\n%s", srcIdx, pkgIdx, coreIdx, appSlnx)
-	}
-
-	// The app project is marked the Visual Studio default startup project.
-	if !strings.Contains(appSlnx, `example.com.app.csproj" DefaultStartup="true"`) {
-		t.Errorf("app per-project solution does not mark the app as the startup project:\n%s", appSlnx)
-	}
-
-	// The retired flat deploy-root solution must no longer be generated.
-	if _, err := os.Stat(filepath.Join(options.recurseOutputRoot, "go2cs-recurse.slnx")); !os.IsNotExist(err) {
-		t.Errorf("unexpected flat deploy-root solution go2cs-recurse.slnx was written")
-	}
-
-	if strings.Contains(appSlnx, "fmt.csproj") {
-		t.Errorf("app per-project solution should not list stdlib projects (found fmt.csproj):\n%s", appSlnx)
-	}
+	// Under local project references NO solution is written beside any converted project, and no flat
+	// deploy-root one either: `dotnet build -c Release` in the folder must build the PROJECT. A solution
+	// assigns a configuration only to the projects it lists, so the core projects it did not list built
+	// Debug (45 of 46 assemblies in a fmt + strings closure), and publishing it published golib in its
+	// own right (IL1034).
+	assertNoSolutionBeside(t, appProjectDir)
+	assertNoSolutionBeside(t, filepath.Dir(libProject))
+	assertNoSolutionBeside(t, options.recurseOutputRoot)
 
 	// Issue #36: the emitted output-root Directory.Build.props defaults go2csPath to the runtime
 	// root the conversion resolved against, so the $(go2csPath)core/... references resolve without
@@ -331,6 +297,21 @@ func TestRecurseNuGetReferences(t *testing.T) {
 			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
 		}
 	}
+
+	// The folders mirror %GOPATH% in the enforced src → pkg order (deliberately NOT alphabetic), and the
+	// app is the Visual Studio default startup project.
+	if srcIdx, pkgIdx := strings.Index(appSlnx, `<Folder Name="/src/">`), strings.Index(appSlnx, `<Folder Name="/pkg/">`); !(srcIdx < pkgIdx) {
+		t.Errorf("solution folders not in enforced src→pkg order (src=%d pkg=%d):\n%s", srcIdx, pkgIdx, appSlnx)
+	}
+
+	if !strings.Contains(appSlnx, `example.com.app.csproj" DefaultStartup="true"`) {
+		t.Errorf("app per-project solution does not mark the app as the startup project:\n%s", appSlnx)
+	}
+
+	// The retired flat deploy-root solution must no longer be generated.
+	if _, err := os.Stat(filepath.Join(options.recurseOutputRoot, "go2cs-recurse.slnx")); !os.IsNotExist(err) {
+		t.Errorf("unexpected flat deploy-root solution go2cs-recurse.slnx was written")
+	}
 }
 
 // TestRecurseModuleOnly is the -recurse=module counterpart to TestRecurseSyntheticModule: the same
@@ -429,21 +410,8 @@ func TestRecurseModuleOnly(t *testing.T) {
 		t.Errorf("app csproj missing the stdlib fmt reference:\n%s", appCsproj)
 	}
 
-	// The per-project solution lists the app + runtime + analyzer; the unconverted dependency has no
-	// project to list, so the /pkg/ folder is empty and skipped.
-	appSlnx := readGenerated(t, filepath.Join(appProjectDir, "example.com.app.slnx"))
-
-	for _, want := range []string{"example.com.app.csproj", "golib.csproj", "go2cs-gen.csproj", `<Folder Name="/src/">`} {
-		if !strings.Contains(appSlnx, want) {
-			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
-		}
-	}
-
-	for _, notWant := range []string{"example.com.lib.csproj", `<Folder Name="/pkg/">`} {
-		if strings.Contains(appSlnx, notWant) {
-			t.Errorf("app per-project solution should not list %q under -recurse=module:\n%s", notWant, appSlnx)
-		}
-	}
+	// -recurse=module references the standard library locally too, so it writes no solution either.
+	assertNoSolutionBeside(t, appProjectDir)
 }
 
 // TestModuleCachePoisonedGoWorkLoad guards the issue-#32 module-cache load fix: a dependency
@@ -935,28 +903,37 @@ func TestRecurseGoFileFreeContainerDirsKeepDistinctProjectNames(t *testing.T) {
 	}
 
 	appProjectDir := filepath.Join(options.recurseOutputRoot, "src", "example.com", "app")
-	appSlnx := readGenerated(t, filepath.Join(appProjectDir, "example.com.app.slnx"))
-
-	// The invariant the issue is actually about: no two projects in the solution share a name.
+	// The invariant the issue is actually about: no two converted projects share a name. A local-reference
+	// conversion writes no solution (assertNoSolutionBeside), so it is read over the projects themselves —
+	// the population any solution a user or a -recurse=nuget conversion builds over them would list.
 	seen := make(map[string]string)
 
-	for _, match := range regexp.MustCompile(`<Project Path="([^"]+)"`).FindAllStringSubmatch(appSlnx, -1) {
-		project := match[1]
-		name := path.Base(project)
-
-		if prior, dup := seen[name]; dup {
-			t.Errorf("solution lists two projects named %q (%q and %q) — Visual Studio will not open it:\n%s",
-				name, prior, project, appSlnx)
+	err := filepath.WalkDir(options.recurseOutputRoot, func(project string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || !strings.HasSuffix(entry.Name(), ".csproj") {
+			return err
 		}
 
-		seen[name] = project
+		if prior, dup := seen[entry.Name()]; dup {
+			t.Errorf("two converted projects are named %q (%q and %q) — Visual Studio will not open a solution holding both",
+				entry.Name(), prior, project)
+		}
+
+		seen[entry.Name()] = project
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("walking %s: %v", options.recurseOutputRoot, err)
 	}
 
 	for _, name := range wantProjects {
 		if _, ok := seen[name]; !ok {
-			t.Errorf("app per-project solution missing %q:\n%s", name, appSlnx)
+			t.Errorf("no converted project is named %q", name)
 		}
 	}
+
+	assertNoSolutionBeside(t, appProjectDir)
 
 	// The reference side agrees with the declaration side: the app's csproj names both dependencies by
 	// their qualified project names, and its converted code qualifies the two same-named Go packages
@@ -1299,4 +1276,47 @@ func readGenerated(t *testing.T, path string) string {
 	}
 
 	return string(data)
+}
+
+// A re-conversion removes the local-reference solution an earlier converter wrote, and only that one: a
+// solution whose bytes differ may be the user's, so it stays.
+func TestRetireLocalReferenceSolutionRemovesOnlyItsOwn(t *testing.T) {
+	dir := t.TempDir()
+	generated := buildRecurseSolutionXML([]solutionFolder{{name: "/src/", projects: []string{"example.com.app.csproj"}}}, "example.com.app.csproj")
+
+	own := filepath.Join(dir, "own.slnx")
+	foreign := filepath.Join(dir, "foreign.slnx")
+
+	writeModuleFile(t, own, generated)
+	writeModuleFile(t, foreign, generated+"<!-- edited -->")
+
+	retireLocalReferenceSolution(own, generated)
+	retireLocalReferenceSolution(foreign, generated)
+	retireLocalReferenceSolution(filepath.Join(dir, "absent.slnx"), generated)
+
+	if _, err := os.Stat(own); !os.IsNotExist(err) {
+		t.Errorf("the solution go2cs wrote was not removed (stat: %v)", err)
+	}
+
+	if _, err := os.Stat(foreign); err != nil {
+		t.Errorf("a solution with other content was removed: %v", err)
+	}
+}
+
+// assertNoSolutionBeside fails if dir holds a .sln or .slnx: the dotnet CLI builds a solution it finds
+// in the folder rather than the project beside it.
+func assertNoSolutionBeside(t *testing.T, dir string) {
+	t.Helper()
+
+	for _, pattern := range []string{"*.sln", "*.slnx"} {
+		matches, err := filepath.Glob(filepath.Join(dir, pattern))
+
+		if err != nil {
+			t.Fatalf("glob %s in %s: %v", pattern, dir, err)
+		}
+
+		for _, match := range matches {
+			t.Errorf("a local-reference conversion wrote a solution beside its project: %s", match)
+		}
+	}
 }
