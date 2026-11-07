@@ -313,7 +313,8 @@ real code. The next candidate:
 | [`itchyny/gojq`](https://github.com/itchyny/gojq) v0.12.19, with its dependency [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go) v0.1.8 | The first conversion with a dependency. It gives .NET an in-process, fully managed jq, with no native binary per platform. | Q4 2026 |
 
 gojq's full command-line conformance suite is a later second stage, once its command-line package's
-own dependencies convert. Further modules follow; the
+own dependencies convert. Further modules follow, and libraries come first: a converted module is most useful as Go
+code a .NET program calls, not as a stand-in for a command-line tool Go already runs well. The
 [go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is one input to their selection.
 
 ## NuGet packages of converted modules
