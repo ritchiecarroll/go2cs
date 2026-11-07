@@ -1046,6 +1046,22 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (aliasesAnOrderToken && resolveInterior(resolved!, 0, fromArm3: false) is { } prefix)
             return prefix;
 
+        // THE REINTERPRET STEP, at offset 0: the view the DIRECT conversion builds. Go's
+        // `(*int)(unsafe.Pointer(&r.op))` over `op opcode` is Reinterpret<opcode, nint>, an alias of the
+        // field's storage; `(*int)(unsafe.Pointer(v.UnsafeAddr()))`, the same pointer through reflect's
+        // number, arrived here and fell through to a native box over the token, whose first dereference
+        // panics (gojq's code tests; BOARD 2026-11-07). Taken only where the number IS the resolved box's
+        // own order token -- reflect hands out that token for a reference-free pointee too, which the flag
+        // above does not cover -- and only where the same rule that decides the direct form holds
+        // (ReinterpretAliasing.HoldsForRoot, over the same root). A pinned real address (arm 2b) is not
+        // the box's token and keeps its native box; a pair the direct form refuses keeps today's carrier.
+        if (resolved is not null && ManagedPointerTokens.CurrentToken(resolved) == (nuint)value.Value &&
+            ReinterpretAliasing.UltimateRoot(resolved) is IReinterpretSource root &&
+            ReinterpretAliasing.HoldsForRoot(root, typeof(T), Unsafe.SizeOf<T>(), RuntimeHelpers.IsReferenceOrContainsReferences<T>()))
+        {
+            return root as ж<T> ?? new FieldRefBox<T>(root, RootReinterpretRef);
+        }
+
         // THE REFUSAL. A number inside a LIVE token's own 4 GiB block, that is not that token, is
         // a token somebody did arithmetic on — `unsafe.Add(unsafe.Pointer(&v), offset)` over storage
         // that has no address. Answering a native box over it is not "best effort": the write that

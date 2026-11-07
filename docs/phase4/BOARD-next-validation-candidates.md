@@ -34490,4 +34490,20 @@ near 0.15 to 0.30 us under both arms, from the P-384 body's 0.54 to 0.69 us scal
 
 — H (2026-11-07)
 
+## 2026-11-07 — H (COORD seat, gojq for .3): a reflect address read through another layout-identical pointer type panicked (gojq class E) — CLOSED by claude/h-gojq-class-e
+
+**Read.** P1's scout (claude/p1-scout-gojq 58943863c0, `docs/phase4/SCOUT-gojq.md` §5, class E) named two gojq library-root tests, `TestCodeCompile_OptimizeTailRec_While` and `…_CallRec`, that read a field through `*(*int)(unsafe.Pointer(reflect.Value.UnsafeAddr()))`. The C# side panicked with a nil dereference. A probe narrowed the trigger. It is neither the unexported field nor the reference-bearing record: it is a DEFINED type read through another layout-identical type. An `op opcode` field read as `*int` panicked, in a plain struct as well, while `*opcode`, and an `int` field read as `*int`, both read correctly. `int` as `*uint` panicked, and `float64` (a non-first field) as `*uint64` died in the token-arithmetic refusal.
+
+**Mechanism.** `UnsafeAddr` is `v.Addr().Pointer()`: the field box's ORDER TOKEN, registered. `(*int)(unsafe.Pointer(n))` converts as `(ж<nint>)(uintptr)n`. Resolve finds the live `FieldRefBox<opcode>`, so the exact arm misses. The Q44 census read 4 arrivals at arm 2a, `requested=IntPtr resolved=FieldRefBox<opcode>(blittable) alias-expressible=YES`, with the interior step never run: its flag (`IsOrderTokenAt`) requires `StorageKind None`, i.e. a reference-bearing pointee, and reflect hands out the order token for a reference-free field box too. The conversion fell through to a native box over the token, whose first dereference panics. A non-first field, whose token is the base token plus the Go offset, met the token-arithmetic refusal first. Go's DIRECT form of the same pointer, `(*int)(unsafe.Pointer(&r.op))`, is `Reinterpret<opcode, nint>`, which aliases the field. Only the uintptr route refused. `GoReflect.InteriorAlias.cs` names exactly this as its follow-up.
+
+**Fix (golib, `ж.cs`, COORD ruling: the FULL rule, one rule for one Go pointer).** In `explicit operator ж<T>(uintptr)`, after the interior step: where the number IS the resolved box's own order token (`ManagedPointerTokens.CurrentToken`, the census's 2a test) and the rule that decides the direct form holds over the same root (`ReinterpretAliasing.UltimateRoot` plus `HoldsForRoot`), answer the direct form's view, the root itself or `FieldRefBox<T>` over it with `RootReinterpretRef`. Unchanged: the exact arm, a pinned real address (arm 2b, not the box's token), a pair the direct form refuses, and the reference-bearing interior walk, which still runs first.
+
+**Guard.** Behavioral `ReflectUnsafeAddrDeref`, 11 arms: 6 re-typed (opcode as `*int` in a plain and a reference-bearing record, gojq's `[]*code` → `Index(i).Elem().FieldByName("op")`, a write through it, `int` as `*uint`, `float64` as `*uint64`) and 5 exact-type controls. Planted red (`false &&` on the new condition): the Output phase fails. All 6 re-typed arms panic as at master, and the 5 controls read as Go. Restored byte-identical, 4 of 4 phases pass.
+
+**Disclosed, a PRE-EXISTING class, not changed.** `uintptr(unsafe.Pointer((*T)(unsafe.Pointer(a)))) == a`, for `a` from `UnsafeAddr`, reads `false` on the C# side and `true` in Go. Measured: for the EXACT type at master it already reads `false` (the exact arm returns the field box, whose uintptr is its pinned address, not reflect's token). For a defined type, master PANICKED (the arithmetic refusal) and the fix reads `false`, the same as the exact case. The class is reflect's token against a pinned address. It is kept out of the committed project, which must match Go.
+
+**Neighbour, not taken:** `reflect.NewAt` over the same number still resolves exactly only (`ResolveInteriorAlias`, non-generic in the target). That would be its own cut.
+
+— H (2026-11-07)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
