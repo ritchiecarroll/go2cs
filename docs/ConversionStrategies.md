@@ -1329,7 +1329,7 @@ var _Lu = &RangeTable{
 <!-- source: src/core/unicode/tables.cs:2887-5188 -->
 ```csharp
 [GoLazy] partial class lazyᴛ_Lu { internal static ж<RangeTable> _Lu = Ꮡ(new RangeTable(
-    R16: slice<Range16>([
+    R16: [
         new(0x0041, 0x005a, 1),
 …
 )); }
@@ -12842,7 +12842,7 @@ func Encode(s []rune) []uint16 {
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
 public static slice<uint16> Encode(slice<rune> s) {
     nint n = len(s);
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         if (v >= surrSelf) {
             n++;
         }
@@ -12850,7 +12850,7 @@ public static slice<uint16> Encode(slice<rune> s) {
 
     var a = new slice<uint16>(n);
     n = 0;
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         switch (RuneLen(v)) {
         case 1: { // normal rune
             a[n] = (uint16)v;

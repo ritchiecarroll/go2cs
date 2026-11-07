@@ -2792,7 +2792,7 @@ call-argument pointer arm). The routing mirrors the struct-field pointer arm: th
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
 <!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
-list = slice<ж<CommentGroup>>([c]);
+list = [c];
 ```
 Gated to bare idents of pointer type — keyed elements (maps) and address-of/composite elements
 manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the
