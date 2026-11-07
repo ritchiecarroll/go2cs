@@ -131,6 +131,11 @@ param(
     # Library packages of the module left out of the pack, by import path (a package holding the module's own test fixtures).
     [string[]]$ExcludePackage = @(),
     [string[]]$VList,
+    # The binary-compatibility guard (src/tools/pushnuget/GoApiCompat.psm1): the packed module is compared, asset by
+    # asset, with its previous published revision of the same module version, read from this flat container. A break
+    # refuses the pack unless this suppression file lists it (an announced break).
+    [string]$ApiCompatSuppressions,
+    [string]$ApiCompatFlatContainer = 'https://api.nuget.org/v3-flatcontainer/',
     [string]$Authors = 'go2cs conversion',
     [string]$Gpf = $(if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' })
 )
@@ -791,4 +796,20 @@ foreach ($r in $requires) {
         throw "the third-party dependency $($r.NuGetId) $($r.PackageVersion) (for $($r.Module)) is not in the nuspec"
     }
 }
+# The binary-compatibility guard: B4's edge between third-party packages is a bare minimum version, so a consumer who
+# takes this revision gets it under every module built against the one before. It must keep that revision's surface,
+# except for a break -ApiCompatSuppressions lists. A module version's first revision has no baseline and is reported.
+Import-Module (Join-Path $PSScriptRoot '../pushnuget/GoApiCompat.psm1') -Force
+$toolRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+$apiCompatVersion = Initialize-GoApiCompatTool -RepoRoot $toolRoot
+$packedIdentity = [pscustomobject]@{ Id = "$($md.id)"; Version = "$($md.version)" }
+$apiCompat = Invoke-GoApiCompatGuard -Packages @(Get-Item -LiteralPath $nupkg) -RepoRoot $toolRoot -WorkDir (Join-Path $Scratch 'apicompat') `
+    -FlatContainer $ApiCompatFlatContainer -Identity { param($path) $packedIdentity }.GetNewClosure() `
+    -SuppressionFor { param($packageId) $ApiCompatSuppressions }.GetNewClosure()
+if ($apiCompat.Failures.Count -gt 0 -or $apiCompat.Compared -ne $apiCompat.Expected) {
+    Remove-Item -LiteralPath $nupkg   # a refused package is never left where a push could pick it up
+    Refuse "the module's public surface is not its previous revision's (apicompat $apiCompatVersion, $($apiCompat.Compared) of $($apiCompat.Expected) asset(s) compared) -- $($apiCompat.Failures -join '; ')"
+}
+if ($apiCompat.NoBaseline.Count) { Write-Host "    binary compatibility: no published revision of $($md.id) $GoVersion before this one (reported, not gated)" }
+else { Write-Host "    binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) compared with the previous revision by apicompat $apiCompatVersion" }
 Write-Host "==> packed $nupkg (global packages folder unchanged: $($gpfAfter.Count) go.*/nugetgo.* pairs)"

@@ -4119,6 +4119,17 @@ release published nothing: §2, AMENDED
    which is **a PIN prompt of its own, before Phase 2's**, and packs `go2cs.<rid>` for the six platforms and the
    `go2cs` package that names them into the artifacts folder. Phase 2 signs them with the `go.*` set; Phase 3
    pushes `go2cs` last. `-OfflineSigning` packs no tool and says how to pack it on the signing machine.
+   **The binary-compatibility guard** *(added 2026-11-07, COORD ruling: it rides 1.26.10.3;
+   [DESIGN-binary-compat-guard.md](phase4/DESIGN-binary-compat-guard.md))*: Phase 1's pack ends with it.
+   - **What it checks:** every merged package, one asset at a time, against its last published revision on the line.
+     It uses the ApiCompat tool pinned in `.config/dotnet-tools.json`, restored from nuget.org, and downloads each
+     baseline from nuget.org's flat container. So Phase 1 needs that network as well as the SDK.
+   - **When it is red:** the break is either a defect, fixed before the release, or an announced break. An announced
+     break is listed in the package's `CompatibilitySuppressions.xml`, stated under the release notes' *Upgrading*,
+     and shipped with the nugetgo rebuild wave.
+   - **An entry that matches nothing is red too.** After a release publishes, delete the entries it announced: they
+     are its baseline now.
+   - **`-VerifyOnly`** proves the tool restores and every suppression file reads.
 4. **To resume a failed Phase 2, NEVER re-run release-nuget** — it re-bumps the version. Run the signer's census,
    then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push. Nothing is re-packed.
 5. **After the publish**, "indexed" means every id in the walkthrough's restore closure is listed — a partial

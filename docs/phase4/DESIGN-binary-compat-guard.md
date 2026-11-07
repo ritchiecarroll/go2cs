@@ -162,3 +162,60 @@ revision before it, except for the breaks listed in that release's suppression f
 | golib's B3 suppressions | `src/core/golib/CompatibilitySuppressions.xml` | 12 entries (M2) |
 | the module check | `nugetgo-pack.ps1`, against the module's previous published revision | about 30 lines plus the shared driver |
 | the negative control | a test that regresses one golib member in a fixture copy and requires the driver to name it (M3's shape), plus a missing-asset case | one test |
+
+---
+
+> **RULED AND CUT, 2026-11-07 (COORD ruling on `761cff788b`): the guard rides 1.26.10.3.** Sections 3-6 were accepted
+> as recommended, and §6's policy went into `PLAN-rebank-1-26-10-3.md` §8. The ruling set four conditions:
+> (a) the driver must not be fooled by an incremental skip, and must assert that it ran, by a compared-asset count and
+> not by exit 0 alone; (b) the negative control is part of the cut and runs under the plain `go test`; (c) the tool is
+> pinned in a local tool manifest, at an exact version, and restored by the script; (d) census and repoguard.
+> The text above stays as the sizing record. This block says what the cut does and where it differs from the sizing.
+>
+> **What landed:**
+> - `src/tools/pushnuget/GoApiCompat.psm1` is the driver.
+>   - Each asset gets its own `dotnet tool run apicompat` process: no MSBuild, so nothing can be skipped.
+>   - Each process must print exactly one verdict line, and an asset counts as compared only then.
+>   - Each caller requires the compared count to equal the baselines' asset count.
+> - `.config/dotnet-tools.json` pins `microsoft.dotnet.apicompat.tool` 10.0.403. `Initialize-GoApiCompatTool` restores
+>   it and refuses any other version.
+> - `push-nuget.ps1`:
+>   - pre-flight (with `-VerifyOnly` too): restores the tool and reads every committed suppression file;
+>   - after the merge and the path guard, on **every** pack, not only `-Push`: the guard over every merged package.
+>     `release-nuget.ps1` Phase 1 packs without `-Push`, and that pack is the one that ships.
+> - `nugetgo-pack.ps1` compares a module with its previous published revision of the same module version, and refuses
+>   and removes the package on a break. `-ApiCompatSuppressions` names an announced break.
+> - `src/core/golib/CompatibilitySuppressions.xml`: B3's 12 entries, each with a comment citing B3 and batch 231.
+> - `src/tools/pushnuget/Test-GoApiCompat.ps1` is the negative control, run by repoguard's `TestNugetgoSuitesPass`
+>   under the plain `go test`. Fixtures are in `testdata/apicompat`, built by `build-apicompat-fixtures.ps1`.
+>
+> **Where the cut differs from the sizing, each measured:**
+> 1. **The tool exits 0 on an unnecessary suppression.** It prints "Unnecessary suppressions found" and lists the
+>    entries, but does not fail, even without `--permit-unnecessary-suppressions`. So §4's "the file empties itself"
+>    holds only because the driver reads that line and counts each listed entry as red.
+> 2. **The suppression file is in assembly-mode form, not the SDK's.** The SDK's package-mode entries
+>    (`IsBaselineSuppression=true`) do not match in assembly mode: all 12 came back with "Unnecessary suppressions".
+>    The cut's entries name the package-relative asset on both sides, through a transformation pattern applied to the
+>    scratch paths. The reader refuses a package-mode entry by name, and one that names two assets.
+> 3. **Each asset is judged only by its own entries.** One file serves all of a package's assets, so the driver hands
+>    each process just the entries for that asset. An entry for an asset the baseline lacks is red.
+> 4. **`-VerifyOnly` packs nothing,** so there it proves the instrument (restore plus every suppression file read), not
+>    a comparison.
+> 5. A module whose version is a Go prerelease or pseudo-version (`L.0.N`, B3) has no baseline under the
+>    same-three-numbers rule. It is reported, not gated.
+>
+> **The gate's readings** (tree as cut; dotnet 10.0.400, apicompat 10.0.403):
+> - **The suite reads 28 of 28.** Among its arms: a member made internal reads red, naming
+>   `Fixture.Widget.Instance`, CP0002 and its asset, with both assets still compared; restored, it reads green.
+> - **The suite reads red when the guard is broken.** Three regressions of the driver, each restored with an identical
+>   sha256:
+>   - dropping the tool's diagnostics reds 3 arms, the negative control first;
+>   - ignoring unnecessary suppressions reds 2;
+>   - skipping the verdict count (trap (a)) reds 2: a comparison the tool could not make, and its count.
+> - **Real packages**, through the module as `push-nuget.ps1` calls it, against nuget.org:
+>   - master's golib against go.lib 1.26.10.2: CLEAN, 1 of 1 asset, with golib's file; RED, the 12 B3 members named,
+>     without it. The same at `c6cddb6903` and at the cut's base `6c2a77a4bd`. Batch 236 changed golib's extension-method
+>     registry between the two and added no break.
+>   - the 38 platform-neutral packages among M4's 46, repacked from the `c6cddb6903` Release build: 38 of 38 compared,
+>     0 failures, about 1 s each. Batches 235-237 changed none of the 38 (only archive/tar, crypto/x509 and vendored
+>     cryptobyte in the converted stdlib).
