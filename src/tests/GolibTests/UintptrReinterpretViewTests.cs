@@ -67,6 +67,14 @@ public class UintptrReinterpretViewTests
         public object? Value;
     }
 
+    // Reference-free, so it can live in native memory; the opcode is NOT first.
+    [GoType]
+    public struct NativeWide
+    {
+        public nint A;
+        public Opcode Op;
+    }
+
     // reflect's own field box, the one `v.FieldByName(name).Addr()` answers: GoReflect.FieldAliasBox.
     private static ж<Opcode> field<S>(ж<S> box, string name) =>
         (ж<Opcode>)GoReflect.FieldAliasBox(box, Array.Find(GoReflect.GoFields(typeof(S)), f => f.Name == name));
@@ -213,6 +221,42 @@ public class UintptrReinterpretViewTests
             asInt.Value = 0x5A;
             Assert.AreEqual((nint)0x5A, native.Value.V, "over the same memory");
             GC.KeepAlive(native);
+        }
+        finally
+        {
+            NativeMemory.Free((void*)memory);
+        }
+    }
+
+    [TestMethod]
+    public unsafe void ARegisteredFieldOfANativeElementReadAsAnotherTypeKeepsTheNativeRoute()
+    {
+        const int N = 2;
+        nint memory = (nint)NativeMemory.AllocZeroed((nuint)(N * sizeof(NativeWide)));
+
+        try
+        {
+            global::go.slice<NativeWide> native = global::go.slice<NativeWide>.OverNativeMemory((nuint)memory, N);
+
+            // The element box ж<array<T>>.at() takes over native storage, then a NON-first field of it: a view
+            // whose token is a REAL address (the element's plus the Go offset), though the view itself answers
+            // NativeAddress 0. A field of a NativeBox root is not this shape: its token is tagged.
+            ж<NativeWide> element = new ElemRefBox<NativeWide>((IArray)native, 1);
+            ж<Opcode> op = field(element, "Op");
+            nuint token = register(op);
+            nuint address = (nuint)memory + (nuint)sizeof(NativeWide) + (nuint)sizeof(nint);
+
+            Assert.IsFalse(op.IsNative, "the premise: a field view, not a native box");
+            Assert.AreEqual(address, token, "the premise: its token is the field's real address");
+
+            ж<nint> asInt = (ж<nint>)(uintptr)token;
+
+            Assert.IsTrue(asInt.IsNative, "a native box over the address, never a view over the field view");
+            Assert.AreEqual(address, asInt.NativeAddress);
+
+            asInt.Value = 0x5A;
+            Assert.AreEqual((nint)0x5A, native[1].Op.V, "over the same memory");
+            GC.KeepAlive(op);
         }
         finally
         {
