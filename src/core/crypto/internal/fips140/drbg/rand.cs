@@ -24,7 +24,6 @@ partial class drbg_package {
 // last use. Frequent concurrent uses will fill the pool and use it.
 internal static readonly ж<atomic.Pointer<Counter>> ᏑdrbgInstance = new StaticBox<atomic.Pointer<Counter>>(default(atomic.Pointer<Counter>));
 internal static ref atomic.Pointer<Counter> drbgInstance => ref ((StaticBox<atomic.Pointer<Counter>>)ᏑdrbgInstance).ValueSlot;
-
 internal static readonly ж<sync.Pool> ᏑdrbgPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool drbgPool => ref ((StaticBox<sync.Pool>)ᏑdrbgPool).ValueSlot;
 internal static void initᴛdrbgPool() { drbgPool = new sync.Pool(

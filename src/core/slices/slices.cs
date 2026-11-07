@@ -24,7 +24,7 @@ public static bool Equal<S, E>(S s1, S s2)
     if (len(s1) != len(s2)) {
         return false;
     }
-    foreach (var i in range(s1)) {
+    foreach (var i in range(len(s1))) {
         if (!AreEqual(s1[i], s2[i])) {
             return false;
         }
@@ -44,7 +44,7 @@ public static bool EqualFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> eq
     if (len(s1) != len(s2)) {
         return false;
     }
-    foreach (var (i, v1) in s1) {
+    foreach (var (i, v1) in range(s1)) {
         var v2 = s2[i];
         if (!eq(v1, v2)) {
             return false;
@@ -64,7 +64,7 @@ public static nint Compare<S, E>(S s1, S s2)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    foreach (var (i, v1) in s1) {
+    foreach (var (i, v1) in range(s1)) {
         if (i >= len(s2)) {
             return +1;
         }
@@ -88,7 +88,7 @@ public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> 
     where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, ISliceWrap<S1, E1>, new()
     where S2 : /* ~[]E2 */ ISlice<E2>, ISupportMake<S2>, ISliceWrap<S2, E2>, new()
 {
-    foreach (var (i, v1) in s1) {
+    foreach (var (i, v1) in range(s1)) {
         if (i >= len(s2)) {
             return +1;
         }
@@ -108,7 +108,7 @@ public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> 
 public static nint Index<S, E>(S s, E v)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         if (AreEqual(v, s[i])) {
             return i;
         }
@@ -121,7 +121,7 @@ public static nint Index<S, E>(S s, E v)
 public static nint IndexFunc<S, E>(S s, Func<E, bool> f)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         if (f(s[i])) {
             return i;
         }
@@ -487,7 +487,6 @@ internal static void rotateLeft<E>(slice<E> s, nint r) {
     Reverse<slice<E>, E>(s.slice(r));
     Reverse<slice<E>, E>(s);
 }
-
 internal static void rotateRight<E>(slice<E> s, nint r) {
     rotateLeft(s, len(s) - r);
 }
@@ -498,7 +497,7 @@ internal static void rotateRight<E>(slice<E> s, nint r) {
 // prerequisite: the needle must be aliased entirely inside the haystack.
 internal static nint startIdx<E>(slice<E> haystack, slice<E> needle) {
     var p = Ꮡ(needle, 0);
-    foreach (var i in range(haystack)) {
+    foreach (var i in range(len(haystack))) {
         if (p == Ꮡ(haystack, i)) {
             return i;
         }
@@ -524,7 +523,7 @@ public static S Concat<S, E>(params Span<S> slicesʗp)
     var slices = slicesʗp.sslice();
 
     nint size = 0;
-    foreach (var (_, s) in slices) {
+    foreach (var (_, s) in range(slices)) {
         size += len(s);
         if (size < 0) {
             throw panic("len out of range");
@@ -534,7 +533,7 @@ public static S Concat<S, E>(params Span<S> slicesʗp)
     // the extra space is otherwise unused and helps
     // callers that append a few elements to the result.
     var newslice = Grow<S, E>((S)(default), size);
-    foreach (var (_, s) in slices) {
+    foreach (var (_, s) in range(slices)) {
         newslice = appendꓸꓸꓸ<S, E>(newslice, s);
     }
     return newslice;

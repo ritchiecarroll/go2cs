@@ -29,7 +29,7 @@ partial struct profMapEntry {
 internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
-    foreach (var (_, x) in stk) {
+    foreach (var (_, x) in range(stk)) {
         h = (uintptr)(h << 8 | (h >> (int)(8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))));
         h += (uintptr)x * 41;
     }
@@ -43,7 +43,7 @@ Search:
         if (len(eΔ1.stk) != len(stk) || eΔ1.tag != tag) {
             continue;
         }
-        foreach (var j in range(stk)) {
+        foreach (var j in range(len(stk))) {
             if (eΔ1.stk[j] != (uintptr)stk[j]) {
                 goto continue_Search;
             }
@@ -75,7 +75,7 @@ break_Search:;
     e.stk = m.freeStk.slice(0, len(stk), len(stk));
     m.freeStk = m.freeStk.slice(len(stk));
 
-    foreach (var j in range(stk)) {
+    foreach (var j in range(len(stk))) {
         e.stk[j] = (uintptr)stk[j];
     }
     if (m.hash == nil) {

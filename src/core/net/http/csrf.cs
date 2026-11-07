@@ -89,8 +89,7 @@ public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @strin
 partial struct noopHandler {
 }
 
-internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) {
-}
+internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
 
 internal static ΔHandler sentinelHandler = new noopHandlerжΔHandler(Ꮡ(new noopHandler()));
 

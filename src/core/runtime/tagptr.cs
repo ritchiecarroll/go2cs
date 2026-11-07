@@ -21,7 +21,6 @@ internal static UntypedInt minTagBits => 16;
 // gcBgMarkWorkerNode is also small, but we don't make many of those
 // so it is ok to waste space on them.
 internal static UntypedInt tagAlignBits => 9;
-
 internal static UntypedInt tagAlign => /* 1 << tagAlignBits */ 512;
 
 } // end runtime_package

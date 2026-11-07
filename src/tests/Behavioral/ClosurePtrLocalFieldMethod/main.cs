@@ -21,9 +21,7 @@ partial struct cachelike {
     internal nint pad;
 }
 
-internal static partial void run(Action f) {
-    f();
-}
+internal static partial void run(Action f) { f(); }
 
 internal static partial ж<cachelike> alloc() {
     return Ꮡ(new cachelike());

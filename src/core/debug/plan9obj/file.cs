@@ -71,9 +71,7 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSection s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
 partial struct Sym {
@@ -194,7 +192,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
     var off = (uint32)f.HdrSize;
 
-    foreach (var (i, sect) in sects) {
+    foreach (var (i, sect) in range(sects)) {
         var s = @new<ΔSection>();
         s.SectionHeader = new SectionHeader(
             Name: sect.name,
@@ -349,7 +347,7 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
 // Section returns a section with the given name, or nil if no such
 // section exists.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
         }

@@ -18,11 +18,8 @@ using ꓸꓸꓸuintptr = Span<uintptr>;
 partial class syscall_package {
 
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3);
-
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
-
 public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3);
-
 public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
 
 internal static uintptr dupTrampoline = abi.FuncPCABI0(libc_dup2_trampoline);
@@ -64,7 +61,7 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
 
     // Magic sysctl: "setting" 0.3 to a string name
     // lets you read back the array of integers form.
-    err = sysctl(slice<_C_int>([0, 3]), p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != nil) {
+    err = sysctl([0, 3], p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != nil) {
         return (default, err);
     }
     return (buf.slice(0, (nint)(n / siz)), default);
@@ -82,13 +79,8 @@ internal static (uint64, bool) direntNamlen(slice<byte> buf) {
     return readInt(buf, /* unsafe.Offsetof(Dirent{}.Namlen) */ (uintptr)18, /* unsafe.Sizeof(Dirent{}.Namlen) */ (uintptr)2);
 }
 
-public static error /*err*/ PtraceAttach(nint pid) {
-    return ptrace(PT_ATTACH, pid, 0, 0);
-}
-
-public static error /*err*/ PtraceDetach(nint pid) {
-    return ptrace(PT_DETACH, pid, 0, 0);
-}
+public static error /*err*/ PtraceAttach(nint pid) { return ptrace(PT_ATTACH, pid, 0, 0); }
+public static error /*err*/ PtraceDetach(nint pid) { return ptrace(PT_DETACH, pid, 0, 0); }
 
 //sysnb pipe(p *[2]int32) (err error)
 public static error /*err*/ Pipe(slice<nint> p) {
@@ -142,9 +134,7 @@ internal static partial void libc_getfsstat_trampoline();
  * Wrapped
  */
 //sys	kill(pid int, signum int, posix int) (err error)
-public static error /*err*/ Kill(nint pid, ΔSignal signum) {
-    return kill(pid, (nint)signum, 1);
-}
+public static error /*err*/ Kill(nint pid, ΔSignal signum) { return kill(pid, (nint)signum, 1); }
 
 /*
  * Exposed directly

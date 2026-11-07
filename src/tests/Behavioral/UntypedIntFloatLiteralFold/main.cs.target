@@ -5,20 +5,14 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt retainExtraPercent => 10;
-
 internal static UntypedInt baseline => /* 100 << 20 */ 104857600;
-
 internal static UntypedInt pct => 29;
-
 internal static UntypedInt procs => 14;
-
 internal static UntypedFloat capacityPerProc => 1e9;
 
 partial struct duration /*num:int64*/;
 
-internal static int64 advance(duration d) {
-    return (int64)d;
-}
+internal static int64 advance(duration d) { return (int64)d; }
 
 internal static void Main() {
     fmt.Println((uint64)(/* 1.0 / (retainExtraPercent / 100.0) */ 10UL));

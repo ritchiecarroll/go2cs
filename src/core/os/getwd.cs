@@ -128,7 +128,7 @@ public static (@string dir, error err) Getwd() {
                 }
                 return ("", NewSyscallError(getwdˢ, errENOSYS));
             }
-            foreach (var (_, name) in names) {
+            foreach (var (_, name) in range(names)) {
                 var (d, _) = lstatNolog(parent + "/"u8 + name);
                 if (SameFile(d, dot)) {
                     dir = "/"u8 + name + dir;

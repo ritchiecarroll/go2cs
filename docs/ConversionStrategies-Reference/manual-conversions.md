@@ -194,7 +194,7 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      landed
      in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1029
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:287 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:288 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -653,8 +653,8 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
      :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:414
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:419 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :380 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :127-128
+     src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -2834,7 +2834,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:35-40 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
 ```csharp
 partial struct host {
     public nint Plain;
@@ -4600,7 +4600,7 @@ The case is fiat-crypto's P-521 field multiply. Its generated body declares more
 inline into, so every 64-bit multiply, carry add and limb read in it stays a call. The registry displaces
 `p521Mul` and `p521Square`, and the converter emits a placeholder for each:
 
-<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs:80-82 -->
+<!-- source: src/core/crypto/internal/fips140/nistec/fiat/p521_fiat64.cs:79-81 -->
 ```csharp
 // go2cs generated this placeholder — func p521Mul is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

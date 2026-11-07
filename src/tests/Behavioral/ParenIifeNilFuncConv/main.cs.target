@@ -40,7 +40,7 @@ internal static void Main() {
     fmt.Println(h == nil, h.call("abcd"));
 
     var table = slice<handlerFunc>([default(handlerFunc)!, h]);
-    foreach (var (_, entry) in table) {
+    foreach (var (_, entry) in range(table)) {
         fmt.Println(entry.call("zz"));
     }
 }

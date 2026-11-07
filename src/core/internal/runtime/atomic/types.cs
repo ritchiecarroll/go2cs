@@ -581,11 +581,8 @@ partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lock(this ref noCopy _) {
-}
-
-internal static void Unlock(this ref noCopy _) {
-}
+internal static void Lock(this ref noCopy _) { }
+internal static void Unlock(this ref noCopy _) { }
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

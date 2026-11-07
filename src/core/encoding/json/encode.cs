@@ -300,9 +300,7 @@ public static @string Error(this ref MarshalerError e) {
 }
 
 // Unwrap returns the underlying error.
-public static error Unwrap(this ref MarshalerError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref MarshalerError e) { return e.Err; }
 
 internal static ref readonly @string hex => ref hexᵇ;
 private static readonly @string hexᵇ = "0123456789abcdef"u8;
@@ -760,12 +758,12 @@ partial struct structFields {
 internal static void encode(this structEncoder se, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
     var next = (byte)'{';
 FieldLoop:
-    foreach (var i in range(se.fields.list)) {
+    foreach (var i in range(len(se.fields.list))) {
         var f = Ꮡ(se.fields.list, i);
 
         // Find the nested struct field by following f.index.
         var fv = v;
-        foreach (var (_, iΔ1) in f.index) {
+        foreach (var (_, iΔ1) in range(f.index)) {
             if (fv.Kind() == reflect.ΔPointer) {
                 if (fv.IsNil()) {
                     goto continue_FieldLoop;
@@ -842,7 +840,7 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
         }
         slices.SortFunc(sv, (reflectWithString i, reflectWithString j) => strings.Compare(i.ks, j.ks));
 
-        foreach (var (i, kv) in sv) {
+        foreach (var (i, kv) in range(sv)) {
             if (i > 0) {
                 Ꮡe.of(encodeState.ᏑBuffer).WriteByte((byte)',');
             }
@@ -1042,7 +1040,7 @@ internal static bool isValidTag(@string s) {
 }
 
 internal static reflectꓸType typeByIndex(reflectꓸType t, slice<nint> index) {
-    foreach (var (_, i) in index) {
+    foreach (var (_, i) in range(index)) {
         if (t.Kind() == reflect.ΔPointer) {
             t = t.Elem();
         }
@@ -1215,7 +1213,7 @@ internal static structFields typeFields(reflectꓸType t) {
         (current, next) = (next, current[..0]);
         (count, nextCount) = (nextCount, new map<reflectꓸType, nint>{});
 
-        foreach (var (_, f) in current) {
+        foreach (var (_, f) in range(current)) {
             if (visited[f.typ]) {
                 continue;
             }
@@ -1400,13 +1398,13 @@ internal static structFields typeFields(reflectꓸType t) {
     fields = @out;
     slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
 
-    foreach (var i in range(fields)) {
+    foreach (var i in range(len(fields))) {
         var f = Ꮡ(fields, i);
         f.encoder = typeEncoder(typeByIndex(t, f.index));
     }
     var exactNameIndex = new map<@string, ж<field>>(len(fields));
     var foldedNameIndex = new map<@string, ж<field>>(len(fields));
-    foreach (var (i, field) in fields) {
+    foreach (var (i, field) in range(fields)) {
         exactNameIndex[field.name] = Ꮡ(fields, i);
         // For historical reasons, first folded match takes precedence.
         var (_, ok) = foldedNameIndex[tmpstring(foldName(field.nameBytes)), ꟷ]; if (!ok) {

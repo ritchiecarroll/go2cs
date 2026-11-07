@@ -34,13 +34,9 @@ partial class runtime_package {
 // complain about a division by zero. Its replaced value will always be greater
 // than zero.
 internal static UntypedInt elemsize_ => 8;
-
 internal static UntypedInt sizeclass_ => 0;
-
 internal static UntypedInt noscanint_ => 0;
-
 internal static UntypedInt size_ => 0;
-
 internal const bool isTiny_ = false;
 
 internal static @unsafe.Pointer malloc0(uintptr size, ref _type typ, bool needzero) {

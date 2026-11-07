@@ -10,13 +10,11 @@ partial struct wa {
     internal array<nint> a = new(3);
     internal nint n;
 }
-
 partial struct ns /*[2]wa*/;
 
 partial struct nb /*[4]byte*/;
 
 partial struct ni /*[3]nint*/;
-
 partial struct no /*[2]ni*/;
 
 partial struct holder {

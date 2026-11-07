@@ -16,7 +16,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-[GoLazy] partial class lazyᴛarches { internal static slice<ж<Arch>> arches = slice<ж<Arch>>([
+[GoLazy] partial class lazyᴛarches { internal static slice<ж<Arch>> arches = [
     lazyᴛArch386.initial,
     lazyᴛArchAMD64.initial,
     lazyᴛArchARM.initial,
@@ -27,7 +27,7 @@ partial class asmgen_package {
     lazyᴛArchPPC64x.initial,
     lazyᴛArchRISCV64.initial,
     lazyᴛArchS390X.initial
-]); }
+]; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addVVˢ => ref addVVˢᵇ;

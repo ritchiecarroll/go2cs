@@ -34,9 +34,7 @@ public static UntypedInt ΔSize => 4;
 // The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
-internal static void Reset(this ref digest d) {
-    d = 1;
-}
+internal static void Reset(this ref digest d) { d = 1; }
 
 // New returns a new hash.Hash32 computing the Adler-32 checksum. Its
 // Sum method will lay the value out in big-endian byte order. The
@@ -49,13 +47,9 @@ public static hash.Hash32 New() {
     return new digestжHash32(d);
 }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return 4;
-}
+internal static nint BlockSize(this ref digest d) { return 4; }
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "adl\x01"u8;
@@ -112,7 +106,7 @@ internal static digest update(digest d, slice<byte> p) {
             s2 += s1;
             p = p[4..];
         }
-        foreach (var (_, x) in p) {
+        foreach (var (_, x) in range(p)) {
             s1 += (uint32)x;
             s2 += s1;
         }
@@ -128,9 +122,7 @@ internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
     return (len(p), default);
 }
 
-internal static uint32 Sum32(this ref digest d) {
-    return (uint32)(d);
-}
+internal static uint32 Sum32(this ref digest d) { return (uint32)(d); }
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
@@ -138,8 +130,6 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 }
 
 // Checksum returns the Adler-32 checksum of data.
-public static uint32 Checksum(slice<byte> data) {
-    return (uint32)update(1, data);
-}
+public static uint32 Checksum(slice<byte> data) { return (uint32)update(1, data); }
 
 } // end adler32_package

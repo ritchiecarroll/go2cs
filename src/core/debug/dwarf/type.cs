@@ -28,13 +28,9 @@ partial struct CommonType {
     public @string Name;   // name that can be used to refer to type
 }
 
-public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
-    return Ꮡc;
-}
+public static ж<CommonType> Common(this ж<CommonType> Ꮡc) { return Ꮡc; }
 
-public static int64 Size(this ref CommonType c) {
-    return c.ByteSize;
-}
+public static int64 Size(this ref CommonType c) { return c.ByteSize; }
 
 // Basic types
 
@@ -49,9 +45,7 @@ partial struct BasicType {
     public int64 DataBitOffset;
 }
 
-public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) {
-    return Ꮡb;
-}
+public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) { return Ꮡb; }
 
 public static @string String(this ref BasicType t) {
     if (t.Name != ""u8) {
@@ -114,13 +108,9 @@ partial struct QualType {
     public ΔType Type;
 }
 
-public static @string String(this ref QualType t) {
-    return t.Qual + " "u8 + t.Type.String();
-}
+public static @string String(this ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
 
-public static int64 Size(this ref QualType t) {
-    return t.Type.Size();
-}
+public static int64 Size(this ref QualType t) { return t.Type.Size(); }
 
 // An ArrayType represents a fixed size array type.
 partial struct ArrayType {
@@ -150,9 +140,7 @@ partial struct VoidType {
 internal static ref readonly @string voidˢ => ref voidˢᵇ;
 private static readonly @string voidˢᵇ = "void"u8;
 
-public static @string String(this ref VoidType t) {
-    return voidˢ;
-}
+public static @string String(this ref VoidType t) { return voidˢ; }
 
 // A PtrType represents a pointer type.
 partial struct PtrType {
@@ -160,9 +148,7 @@ partial struct PtrType {
     public ΔType Type;
 }
 
-public static @string String(this ref PtrType t) {
-    return "*"u8 + t.Type.String();
-}
+public static @string String(this ref PtrType t) { return "*"u8 + t.Type.String(); }
 
 // A StructType represents a struct, union, or C++ class type.
 partial struct StructType {
@@ -280,7 +266,7 @@ public static @string Defn(this ref StructType t) {
         return s;
     }
     s += " {"u8;
-    foreach (var (i, f) in t.Field) {
+    foreach (var (i, f) in range(t.Field)) {
         if (i > 0) {
             s += "; "u8;
         }
@@ -320,7 +306,7 @@ public static @string String(this ref EnumType t) {
         s += " "u8 + t.EnumName;
     }
     s += " {"u8;
-    foreach (var (i, v) in t.Val) {
+    foreach (var (i, v) in range(t.Val)) {
         if (i > 0) {
             s += "; "u8;
         }
@@ -343,7 +329,7 @@ private static readonly @string funcˢᵇ = "func("u8;
 
 public static @string String(this ref FuncType t) {
     @string s = funcˢ;
-    foreach (var (i, tΔ1) in t.ParamType) {
+    foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
             s += ", "u8;
         }
@@ -361,9 +347,7 @@ partial struct DotDotDotType {
     /*embed*/ public CommonType CommonType;
 }
 
-public static @string String(this ref DotDotDotType t) {
-    return "...";
-}
+public static @string String(this ref DotDotDotType t) { return "..."; }
 
 // A TypedefType represents a named type.
 partial struct TypedefType {
@@ -371,13 +355,9 @@ partial struct TypedefType {
     public ΔType Type;
 }
 
-public static @string String(this ref TypedefType t) {
-    return t.Name;
-}
+public static @string String(this ref TypedefType t) { return t.Name; }
 
-public static int64 Size(this ref TypedefType t) {
-    return t.Type.Size();
-}
+public static int64 Size(this ref TypedefType t) { return t.Type.Size(); }
 
 // An UnsupportedType is a placeholder returned in situations where we
 // encounter a type that isn't supported.
@@ -430,10 +410,10 @@ internal static void recordArrayType(this ref typeFixer tf, ж<ΔType> Ꮡt) {
 }
 
 internal static void apply(this ref typeFixer tf) {
-    foreach (var (_, t) in tf.typedefs) {
+    foreach (var (_, t) in range(tf.typedefs)) {
         t.of(TypedefType.ᏑCommonType).Common().ByteSize = t.Type.Size();
     }
-    foreach (var (_, t) in tf.arraytypes) {
+    foreach (var (_, t) in range(tf.arraytypes)) {
         zeroArray(ref (t).DerefOrNull());
     }
 }
@@ -619,7 +599,7 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             }
             if (len(dims) == 0) {
                 // LLVM generates this for x[].
-                dims = slice<int64>([-1]);
+                dims = [-1];
             }
 
             t.Count = dims[0];

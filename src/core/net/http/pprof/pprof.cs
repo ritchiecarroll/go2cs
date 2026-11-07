@@ -392,7 +392,7 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
 
         p0.Scale(-1D);
 
-        (p1, err) = profile.Merge(slice<ж<profile.Profile>>([p0, p1]));
+        (p1, err) = profile.Merge([p0, p1]);
         if (err != nil) {
             serveError(w, http.StatusInternalServerError, failedToComputeDeltaˢ);
             return;
@@ -483,7 +483,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     w.Header().Set(contentTypeˢ, textHtmlCharsetUtf8ˢ);
 
     slice<profileEntry> profiles = default;
-    foreach (var (_, p) in pprof.Profiles()) {
+    foreach (var (_, p) in range(pprof.Profiles())) {
         profiles = append(profiles, new profileEntry(
             Name: p.Name(),
             Href: p.Name(),
@@ -493,7 +493,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     }
 
     // Adding other profiles exposed from within this package
-    foreach (var (_, p) in slice<@string>(["cmdline", "profile", "symbol", "trace"])) {
+    foreach (var (_, p) in range(slice<@string>(["cmdline", "profile", "symbol", "trace"]))) {
         profiles = append(profiles, new profileEntry(
             Name: p,
             Href: p,
@@ -553,13 +553,13 @@ internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     b.WriteString(htmlHeadTitleDebugPprofˢ);
 
-    foreach (var (_, profile) in profiles) {
+    foreach (var (_, profile) in range(profiles)) {
         var link = Ꮡ(new url.URL(Path: profile.Href, RawQuery: "debug=1"));
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<tr><td>%d</td><td><a href='%s'>%s</a></td></tr>\n"u8, profile.Count, link.OrTypedNil(), html.EscapeString(profile.Name));
     }
 
     b.WriteString(tableAHrefGoroutineDebugˢ);
-    foreach (var (_, profile) in profiles) {
+    foreach (var (_, profile) in range(profiles)) {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<li><div class=profile-name>%s: </div> %s</li>\n"u8, html.EscapeString(profile.Name), html.EscapeString(profile.Desc));
     }
     b.WriteString(ulPBodyHtmlˢ);

@@ -167,7 +167,7 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
         return err;
     }
     if (zipinsecurepath.Value() == "0"u8) {
-        foreach (var (_, f) in r.File) {
+        foreach (var (_, f) in range(r.File)) {
             if (f.Name == ""u8) {
                 // Zip permits an empty file name field.
                 continue;
@@ -346,9 +346,7 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
     return (n, err);
 }
 
-internal static error Close(this ref checksumReader r) {
-    return r.rc.Close();
-}
+internal static error Close(this ref checksumReader r) { return r.rc.Close(); }
 
 // findBodyOffset does the minimum work to verify the file has a header
 // and returns the file body offset.
@@ -613,7 +611,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     // look for directoryEndSignature in the last 1k, then in the last 65k
     slice<byte> buf = default;
     int64 directoryEndOffset = default;
-    foreach (var (i, vᴛ1) in slice<int64>([1024, 65 * 1024])) {
+    foreach (var (i, vᴛ1) in range(slice<int64>([1024, 65 * 1024]))) {
         var bLen = vᴛ1;
 
         if (bLen > size) {
@@ -824,25 +822,11 @@ internal static @string Name(this ref fileListEntry f) {
     return elem;
 }
 
-internal static int64 Size(this ref fileListEntry f) {
-    return 0;
-}
-
-internal static fs.FileMode Mode(this ref fileListEntry f) {
-    return (fs.FileMode)(fs.ModeDir | 365);
-}
-
-internal static fs.FileMode Type(this ref fileListEntry f) {
-    return fs.ModeDir;
-}
-
-internal static bool IsDir(this ref fileListEntry f) {
-    return true;
-}
-
-internal static any Sys(this ref fileListEntry f) {
-    return default;
-}
+internal static int64 Size(this ref fileListEntry f) { return 0; }
+internal static fs.FileMode Mode(this ref fileListEntry f) { return (fs.FileMode)(fs.ModeDir | 365); }
+internal static fs.FileMode Type(this ref fileListEntry f) { return fs.ModeDir; }
+internal static bool IsDir(this ref fileListEntry f) { return true; }
+internal static any Sys(this ref fileListEntry f) { return default; }
 
 internal static time.Time ModTime(this ref fileListEntry f) {
     if (f.@file == nil) {
@@ -851,9 +835,7 @@ internal static time.Time ModTime(this ref fileListEntry f) {
     return f.@file.FileHeader.Modified.UTC();
 }
 
-internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) {
-    return (new fileListEntryжFileInfo(Ꮡf), default);
-}
+internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) { return (new fileListEntryжFileInfo(Ꮡf), default); }
 
 internal static @string String(this ж<fileListEntry> Ꮡf) {
     return fs.FormatDirEntry(new fileListEntryжDirEntry(Ꮡf));
@@ -888,7 +870,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
         // because it appears as a prefix in a path.
         var dirs = new map<@string, bool>();
 
-        foreach (var (_, @file) in Ꮡr.Value.File) {
+        foreach (var (_, @file) in range(Ꮡr.Value.File)) {
             var isDir = len(@file.Name) > 0 && @file.Name[len(@file.Name) - 1] == '/';
             @string name = toValidName(@file.Name);
             if (name == ""u8) {
@@ -1047,13 +1029,8 @@ partial struct openDir {
     internal nint offset;
 }
 
-internal static error Close(this ref openDir d) {
-    return default;
-}
-
-internal static (fs.FileInfo, error) Stat(this ref openDir d) {
-    return d.e.stat();
-}
+internal static error Close(this ref openDir d) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openDir d) { return d.e.stat(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
@@ -1075,7 +1052,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         return (default, io.EOF);
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var i in range(list)) {
+    foreach (var i in range(len(list))) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
         if (err != nil) {
             return (default, err);

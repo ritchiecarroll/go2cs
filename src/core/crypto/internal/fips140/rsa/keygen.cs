@@ -365,7 +365,7 @@ internal static bool isPrime(slice<byte> w) {
 // Adding primes can still be marginally useful since they only compete with the
 // (much more expensive) first Miller-Rabin round for candidates that were not
 // rejected by the previous primes.
-[GoLazy] partial class lazyᴛprimes { internal static slice<nuint> primes = slice<nuint>([
+[GoLazy] partial class lazyᴛprimes { internal static slice<nuint> primes = [
     3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
     59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127,
     131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
@@ -384,7 +384,7 @@ internal static bool isPrime(slice<byte> w) {
     1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487,
     1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583,
     1597, 1601, 1607, 1609, 1613, 1619
-]); }
+]; }
 
 partial struct millerRabin {
     internal ж<bigmod.Modulus> w;
@@ -432,7 +432,6 @@ internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
 }
 
 internal const bool millerRabinCOMPOSITE = false;
-
 internal const bool millerRabinPOSSIBLYPRIME = true;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

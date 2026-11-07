@@ -92,7 +92,7 @@ internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, par
     // Write out event.
     w.@byte((byte)ev);
     w.varint(tsDiff);
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         w.varint((uint64)arg);
     }
     return w;
@@ -303,7 +303,7 @@ internal static void @byte(this ref traceBuf buf, byte v) {
 internal static void varint(this ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
-    foreach (var i in range(arr)) {
+    foreach (var i in range(len(arr))) {
         if (v < 0x80) {
             pos += i + 1;
             arr[i] = (byte)v;

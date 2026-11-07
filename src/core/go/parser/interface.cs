@@ -177,7 +177,7 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
     }
 
     pkgs = new map<@string, ж<ast.Package>>();
-    foreach (var (_, d) in list) {
+    foreach (var (_, d) in range(list)) {
         if (d.IsDir() || !strings.HasSuffix(d.Name(), ".go")) {
             continue;
         }

@@ -111,7 +111,7 @@ public static ж<Config> FromEnvironment() {
 internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
     var names = namesʗp.sslice();
 
-    foreach (var (_, n) in names) {
+    foreach (var (_, n) in range(names)) {
         @string val = os.Getenv(n); if (val != ""u8) {
             return val;
         }
@@ -210,13 +210,13 @@ internal static bool useProxy(this ref config cfg, @string addr) {
     addr = strings.ToLower(strings.TrimSpace(host));
 
     if (ip != nil) {
-        foreach (var (_, m) in cfg.ipMatchers) {
+        foreach (var (_, m) in range(cfg.ipMatchers)) {
             if (m.match(addr, port, ip)) {
                 return false;
             }
         }
     }
-    foreach (var (_, m) in cfg.domainMatchers) {
+    foreach (var (_, m) in range(cfg.domainMatchers)) {
         if (m.match(addr, port, ip)) {
             return false;
         }
@@ -236,7 +236,7 @@ internal static void init(this ref config c) {
         }
     }
 
-    foreach (var (_, vᴛ1) in strings.Split(c.NoProxy, ",")) {
+    foreach (var (_, vᴛ1) in range(strings.Split(c.NoProxy, ","))) {
         var p = vᴛ1;
 
         p = strings.ToLower(strings.TrimSpace(p));
@@ -245,8 +245,8 @@ internal static void init(this ref config c) {
         }
 
         if (p == "*"u8) {
-            c.ipMatchers = slice<matcher>([new allMatch()]);
-            c.domainMatchers = slice<matcher>([new allMatch()]);
+            c.ipMatchers = [new allMatch()];
+            c.domainMatchers = [new allMatch()];
             return;
         }
 
@@ -326,9 +326,7 @@ internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
 
 // Given a string of the form "host", "host:port", or "[ipv6::address]:port",
 // return true if the string includes a port.
-internal static bool hasPort(@string s) {
-    return strings.LastIndex(s, ":") > strings.LastIndex(s, "]");
-}
+internal static bool hasPort(@string s) { return strings.LastIndex(s, ":") > strings.LastIndex(s, "]"); }
 
 internal static (@string, error) idnaASCII(@string v) {
     // TODO: Consider removing this check after verifying performance is okay.

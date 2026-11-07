@@ -31,7 +31,7 @@ partial struct Deep {
 internal static void Main() {
     var shapes = slice<ж<Shape>>([Ꮡ(new Shape(Point: new Point(1, 2), Named: new Named("tri"), sides: 3)), Ꮡ(new Shape(Point: new Point(4, 5), Named: new Named("sq"), sides: 4))]);
 
-    foreach (var (_, s) in shapes) {
+    foreach (var (_, s) in range(shapes)) {
         s.X += 10;
         s.Y *= 2;
         s.Name += "!"u8;

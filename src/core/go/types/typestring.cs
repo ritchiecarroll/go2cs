@@ -172,7 +172,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
         }
         case ж<Struct> t: {
             w.@string(structˢ);
-            foreach (var (i, f) in t.fields) {
+            foreach (var (i, f) in range(t.fields)) {
                 if (i > 0) {
                     w.@byte((byte)';');
                 }
@@ -231,7 +231,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                 w.error(emptyUnionˢ);
                 break;
             }
-            foreach (var (i, tΔ1) in t.terms) {
+            foreach (var (i, tΔ1) in range(t.terms)) {
                 if (i > 0) {
                     w.@string(termSep);
                 }
@@ -271,7 +271,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             if (w.ctxt != nil) {
                 Ꮡw.typeSet(t.typeSet());
             } else {
-                foreach (var (_, m) in t.methods) {
+                foreach (var (_, m) in range(t.methods)) {
                     if (!first) {
                         w.@byte((byte)';');
                     }
@@ -279,7 +279,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                     w.@string(m.name);
                     Ꮡw.signature(m.typ._<ж<ΔSignature>>());
                 }
-                foreach (var (_, typΔ1) in t.embeddeds) {
+                foreach (var (_, typΔ1) in range(t.embeddeds)) {
                     if (!first) {
                         w.@byte((byte)';');
                     }
@@ -415,7 +415,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
 
     assert(w.ctxt != nil);
     var first = true;
-    foreach (var (_, m) in s.methods) {
+    foreach (var (_, m) in range(s.methods)) {
         if (!first) {
             w.@byte((byte)';');
         }
@@ -434,7 +434,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }
     default: {
         slice<@string> termHashes = default;
-        foreach (var (_, Δterm) in s.terms) {
+        foreach (var (_, Δterm) in range<ж<Δterm>>(s.terms)) {
             // terms are not canonically sorted, so we sort their hashes instead.
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             if (Δterm.tilde) {
@@ -456,7 +456,7 @@ internal static void typeList(this ж<typeWriter> Ꮡw, slice<ΔType> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
-    foreach (var (i, typ) in list) {
+    foreach (var (i, typ) in range(list)) {
         if (i > 0) {
             w.@byte((byte)',');
         }
@@ -474,7 +474,7 @@ internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> l
 
     w.@byte((byte)'[');
     ΔType prev = default;
-    foreach (var (i, tpar) in list) {
+    foreach (var (i, tpar) in range(list)) {
         // Determine the type parameter and its constraint.
         // list is expected to hold type parameter names,
         // but don't crash if that's not the case.
@@ -513,7 +513,7 @@ internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool vari
 
     w.@byte((byte)'(');
     if (Ꮡtup != nil) {
-        foreach (var (i, v) in tup.vars) {
+        foreach (var (i, v) in range(tup.vars)) {
             if (i > 0) {
                 w.@byte((byte)',');
             }

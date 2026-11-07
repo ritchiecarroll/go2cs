@@ -98,7 +98,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
     p.pairValues = default;
     p.types = default;
 
-    foreach (var (_, r) in p.runes) {
+    foreach (var (_, r) in range(p.runes)) {
         var (props, i) = LookupRune(r);
         bytecount += i;
         ΔClass cls = props.Class();
@@ -170,7 +170,7 @@ public static ΔDirection Direction(this ref Paragraph p) {
 public static ΔRun RunAt(this ref Paragraph p, nint pos) {
     nint c = 0;
     nint runNumber = 0;
-    foreach (var (i, r) in p.o.runes) {
+    foreach (var (i, r) in range(p.o.runes)) {
         c += len(r);
         if (pos < c) {
             runNumber = i;
@@ -188,7 +188,7 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
     var o = new Ordering();
     // lvl = 0,2,4,...: left to right
     // lvl = 1,3,5,...: right to left
-    foreach (var (i, lvl) in levels) {
+    foreach (var (i, lvl) in range(levels)) {
         if ((level)(lvl % 2) == 0) {
             curDir = LeftToRight;
         } else {
@@ -218,7 +218,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
         return (new Ordering(), default);
     }
 
-    foreach (var (_, fn) in p.opts) {
+    foreach (var (_, fn) in range(p.opts)) {
         fn(Ꮡp.Ꮡoptions);
     }
     var lvl = (level)(-1);
@@ -328,7 +328,7 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     copy(ret, @out);
     var inRunes = bytes.Runes(@in);
 
-    foreach (var (i, r) in inRunes) {
+    foreach (var (i, r) in range(inRunes)) {
         var (prop, _) = LookupRune(r);
         if (prop.IsBracket()) {
             inRunes[i] = prop.reverseBracket(r);
@@ -350,7 +350,7 @@ public static @string ReverseString(@string s) {
     var input = slice<rune>(s);
     nint li = len(input);
     var ret = new slice<rune>(li);
-    foreach (var (i, r) in input) {
+    foreach (var (i, r) in range(input)) {
         var (prop, _) = LookupRune(r);
         if (prop.IsBracket()) {
             ret[li - i - 1] = prop.reverseBracket(r);

@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool PreemptibleLoops = false;
-
 public static UntypedInt PreemptibleLoopsInt => 0;
 
 } // end goexperiment_package

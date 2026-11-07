@@ -52,8 +52,8 @@ break_out:;
 
     var nums = slice<nint>([1, 2, 3, 4]);
 scan:
-    foreach (var (_, n) in nums) {
-        foreach (var (_, m) in nums) {
+    foreach (var (_, n) in range(nums)) {
+        foreach (var (_, m) in range(nums)) {
             if (n == m) {
                 goto continue_scan;
             }

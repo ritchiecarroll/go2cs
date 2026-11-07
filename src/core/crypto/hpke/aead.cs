@@ -45,27 +45,19 @@ public static (AEAD, error) NewAEAD(uint16 id) {
 }
 
 // AES128GCM returns an AES-128-GCM AEAD implementation.
-public static AEAD AES128GCM() {
-    return new ΔaeadжAEAD(aes128GCM);
-}
+public static AEAD AES128GCM() { return new ΔaeadжAEAD(aes128GCM); }
 
 // AES256GCM returns an AES-256-GCM AEAD implementation.
-public static AEAD AES256GCM() {
-    return new ΔaeadжAEAD(aes256GCM);
-}
+public static AEAD AES256GCM() { return new ΔaeadжAEAD(aes256GCM); }
 
 // ChaCha20Poly1305 returns a ChaCha20Poly1305 AEAD implementation.
-public static AEAD ChaCha20Poly1305() {
-    return new ΔaeadжAEAD(chacha20poly1305AEAD);
-}
+public static AEAD ChaCha20Poly1305() { return new ΔaeadжAEAD(chacha20poly1305AEAD); }
 
 // ExportOnly returns a placeholder AEAD implementation that cannot encrypt or
 // decrypt, but only export secrets with [Sender.Export] or [Recipient.Export].
 //
 // When this is used, [Sender.Seal] and [Recipient.Open] return errors.
-public static AEAD ExportOnly() {
-    return new exportOnlyAEAD();
-}
+public static AEAD ExportOnly() { return new exportOnlyAEAD(); }
 
 partial struct Δaead {
     internal nint nK;

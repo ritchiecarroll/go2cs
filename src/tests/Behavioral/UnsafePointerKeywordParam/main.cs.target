@@ -9,33 +9,21 @@ partial struct holder {
     internal @unsafe.Pointer p;
 }
 
-internal static bool sameAs(@unsafe.Pointer old, @unsafe.Pointer @new) {
-    return @new == old;
-}
+internal static bool sameAs(@unsafe.Pointer old, @unsafe.Pointer @new) { return @new == old; }
 
-internal static bool notNil(@unsafe.Pointer @new) {
-    return @new != nil;
-}
+internal static bool notNil(@unsafe.Pointer @new) { return @new != nil; }
 
-internal static uintptr asUintptr(@unsafe.Pointer @new) {
-    return (uintptr)@new;
-}
+internal static uintptr asUintptr(@unsafe.Pointer @new) { return (uintptr)@new; }
 
-internal static int32 deref(@unsafe.Pointer @new) {
-    return ~(ж<int32>)(uintptr)(@new);
-}
+internal static int32 deref(@unsafe.Pointer @new) { return ~(ж<int32>)(uintptr)(@new); }
 
-internal static void store(ref holder h, @unsafe.Pointer @new) {
-    h.p = @new;
-}
+internal static void store(ref holder h, @unsafe.Pointer @new) { h.p = @new; }
 
 internal static @unsafe.Pointer offset(@unsafe.Pointer @new, uintptr d) {
     return (@unsafe.Pointer)((uintptr)@new + d);
 }
 
-internal static uintptr pass(@unsafe.Pointer @new) {
-    return asUintptr(@new);
-}
+internal static uintptr pass(@unsafe.Pointer @new) { return asUintptr(@new); }
 
 internal static void Main() {
     ref var x = ref heap(new int32(), out var Ꮡx);

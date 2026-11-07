@@ -157,7 +157,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
         }
     }
     // Arg pairs themselves.
-    foreach (var (_, k) in akeys) {
+    foreach (var (_, k) in range(akeys)) {
         nuint ki = (nuint)cfw.stab.Lookup(k);
         {
             var err = wrULEB128(ki); if (err != nil) {
@@ -304,7 +304,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
                 return err;
             }
         }
-        foreach (var (_, val) in counters) {
+        foreach (var (_, val) in range(counters)) {
             var err = wrvalʗ1(val); if (err != nil) {
                 return err;
             }

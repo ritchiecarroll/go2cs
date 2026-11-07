@@ -12,11 +12,9 @@ partial struct sElemᴛ1 /*dyn*/ {
 }
 
 partial struct sElem /*[]sElemᴛ1*/;
-
 partial struct embeds {
     /*embed*/ internal sElem sElem;
 }
-
 partial struct holds {
     internal sElem f;
 }
@@ -24,25 +22,19 @@ partial struct holds {
 partial struct @base {
     public nint B;
 }
-
-internal static nint M(this @base b) {
-    return b.B;
-}
+internal static nint M(this @base b) { return b.B; }
 
 partial struct viaX {
     /*embed*/ internal @base @base;
 }
-
 partial struct viaY {
     /*embed*/ internal @base @base;
 }
-
 partial struct twice {
     /*embed*/ internal viaX viaX;
     /*embed*/ internal ж<viaY> viaY;
     public nint D;
 }
-
 partial struct once {
     /*embed*/ internal viaX viaX;
     public nint D;
@@ -55,19 +47,15 @@ partial struct deeper {
 partial struct local /*global::go.ReflectFieldMetadata.fieldlib_package.Outer*/;
 
 partial struct myInt /*num:nint*/;
-
 partial struct embedsInt {
     /*embed*/ internal nint @int;
 }
-
 partial struct embedsIntPtr {
     /*embed*/ internal ж<nint> @int;
 }
-
 partial struct holdsNamed {
     internal myInt n;
 }
-
 partial struct embedsNamed {
     /*embed*/ internal myInt myInt;
 }

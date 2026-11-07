@@ -81,13 +81,8 @@ public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {
     return h.inner.Write(p);
 }
 
-public static nint Size(this ref HMAC h) {
-    return h.outer.Size();
-}
-
-public static nint BlockSize(this ref HMAC h) {
-    return h.inner.BlockSize();
-}
+public static nint Size(this ref HMAC h) { return h.outer.Size(); }
+public static nint BlockSize(this ref HMAC h) { return h.inner.BlockSize(); }
 
 public static void Reset(this ref HMAC h) {
     if (h.marshaled) {
@@ -215,10 +210,10 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
     }
     copy(hm.ipad, key);
     copy(hm.opad, key);
-    foreach (var i in range(hm.ipad)) {
+    foreach (var i in range(len(hm.ipad))) {
         hm.ipad[i] ^= (byte)(0x36);
     }
-    foreach (var i in range(hm.opad)) {
+    foreach (var i in range(len(hm.opad))) {
         hm.opad[i] ^= (byte)(0x5c);
     }
     hm.inner.Write(hm.ipad);

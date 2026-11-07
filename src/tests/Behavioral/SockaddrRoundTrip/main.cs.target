@@ -182,7 +182,7 @@ internal static void Main() {
         });
 
         decodeRawAny("rawunix", syscall.AF_UNIX, (Action<nint, byte> put) => {
-            foreach (var (i, c) in slice<byte>("go2cs.sock"u8)) {
+            foreach (var (i, c) in range(slice<byte>("go2cs.sock"u8))) {
                 put(2 + i, c);
             }
         });

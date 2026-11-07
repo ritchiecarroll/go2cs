@@ -57,7 +57,7 @@ public static error Unsetenv(@string key) {
 }
 
 public static void Clearenv() {
-    foreach (var (_, s) in Environ()) {
+    foreach (var (_, s) in range(Environ())) {
         // Environment variables can begin with =
         // so start looking for the separator = at j=1.
         // https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133

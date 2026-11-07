@@ -360,11 +360,11 @@ internal static mSpanState mSpanManual => 2; // allocated for manual management 
 
 // mSpanStateNames are the names of the span states, indexed by
 // mSpanState.
-internal static slice<@string> mSpanStateNames = slice<@string>([
+internal static slice<@string> mSpanStateNames = [
     "mSpanDead",
     "mSpanInUse",
     "mSpanManual"
-]);
+];
 
 // mSpanStateBox holds an atomic.Uint8 to provide atomic operations on
 // an mSpanState. This is a separate type to disallow accidental comparison
@@ -753,7 +753,7 @@ internal static void init(this ж<mheap> Ꮡh) {
 
     // h->mapcache needs no init
 
-    foreach (var i in range(h.central)) {
+    foreach (var i in range(len(h.central))) {
         h.central[i].mcentral.init((spanClass)(uint8)i);
     }
 
@@ -881,7 +881,7 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
 
         // Scan this bitmap chunk for spans that are in-use
         // but have no marked objects on them.
-        foreach (var i in range(inUse)) {
+        foreach (var i in range(len(inUse))) {
             var inUseUnmarked = (uint8)(atomic.Load8(Ꮡ(inUse, i)) & ~marked[i]);
             if (inUseUnmarked == 0) {
                 continue;
@@ -2959,7 +2959,6 @@ internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr
 }
 
 internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;
-
 internal static uintptr gcBitsHeaderBytes => /* unsafe.Sizeof(gcBitsHeader{}) */ 16;
 
 partial struct gcBitsHeader {

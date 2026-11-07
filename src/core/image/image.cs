@@ -114,13 +114,9 @@ partial struct ΔRGBA {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref ΔRGBA p) {
-    return color.RGBAModel;
-}
+public static color.Model ColorModel(this ref ΔRGBA p) { return color.RGBAModel; }
 
-public static Rectangle Bounds(this ref ΔRGBA p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref ΔRGBA p) { return p.Rect; }
 
 public static color.Color At(this ref ΔRGBA p, nint x, nint y) {
     return p.RGBAAt(x, y);
@@ -257,13 +253,9 @@ partial struct RGBA64 {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref RGBA64 p) {
-    return color.RGBA64Model;
-}
+public static color.Model ColorModel(this ref RGBA64 p) { return color.RGBA64Model; }
 
-public static Rectangle Bounds(this ref RGBA64 p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref RGBA64 p) { return p.Rect; }
 
 public static color.Color At(this ref RGBA64 p, nint x, nint y) {
     return p.RGBA64At(x, y);
@@ -383,13 +375,9 @@ partial struct NRGBA {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref NRGBA p) {
-    return color.NRGBAModel;
-}
+public static color.Model ColorModel(this ref NRGBA p) { return color.NRGBAModel; }
 
-public static Rectangle Bounds(this ref NRGBA p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref NRGBA p) { return p.Rect; }
 
 public static color.Color At(this ref NRGBA p, nint x, nint y) {
     return p.NRGBAAt(x, y);
@@ -519,13 +507,9 @@ partial struct NRGBA64 {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref NRGBA64 p) {
-    return color.NRGBA64Model;
-}
+public static color.Model ColorModel(this ref NRGBA64 p) { return color.NRGBA64Model; }
 
-public static Rectangle Bounds(this ref NRGBA64 p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref NRGBA64 p) { return p.Rect; }
 
 public static color.Color At(this ref NRGBA64 p, nint x, nint y) {
     return p.NRGBA64At(x, y);
@@ -672,13 +656,9 @@ partial struct Alpha {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref Alpha p) {
-    return color.AlphaModel;
-}
+public static color.Model ColorModel(this ref Alpha p) { return color.AlphaModel; }
 
-public static Rectangle Bounds(this ref Alpha p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref Alpha p) { return p.Rect; }
 
 public static color.Color At(this ref Alpha p, nint x, nint y) {
     return p.AlphaAt(x, y);
@@ -789,13 +769,9 @@ partial struct Alpha16 {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref Alpha16 p) {
-    return color.Alpha16Model;
-}
+public static color.Model ColorModel(this ref Alpha16 p) { return color.Alpha16Model; }
 
-public static Rectangle Bounds(this ref Alpha16 p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref Alpha16 p) { return p.Rect; }
 
 public static color.Color At(this ref Alpha16 p, nint x, nint y) {
     return p.Alpha16At(x, y);
@@ -909,13 +885,9 @@ partial struct Gray {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref Gray p) {
-    return color.GrayModel;
-}
+public static color.Model ColorModel(this ref Gray p) { return color.GrayModel; }
 
-public static Rectangle Bounds(this ref Gray p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref Gray p) { return p.Rect; }
 
 public static color.Color At(this ref Gray p, nint x, nint y) {
     return p.GrayAt(x, y);
@@ -1014,13 +986,9 @@ partial struct Gray16 {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref Gray16 p) {
-    return color.Gray16Model;
-}
+public static color.Model ColorModel(this ref Gray16 p) { return color.Gray16Model; }
 
-public static Rectangle Bounds(this ref Gray16 p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref Gray16 p) { return p.Rect; }
 
 public static color.Color At(this ref Gray16 p, nint x, nint y) {
     return p.Gray16At(x, y);
@@ -1122,13 +1090,9 @@ partial struct CMYK {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref CMYK p) {
-    return color.CMYKModel;
-}
+public static color.Model ColorModel(this ref CMYK p) { return color.CMYKModel; }
 
-public static Rectangle Bounds(this ref CMYK p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref CMYK p) { return p.Rect; }
 
 public static color.Color At(this ref CMYK p, nint x, nint y) {
     return p.CMYKAt(x, y);
@@ -1241,13 +1205,9 @@ partial struct Paletted {
     public color.Palette Palette;
 }
 
-public static color.Model ColorModel(this ref Paletted p) {
-    return p.Palette;
-}
+public static color.Model ColorModel(this ref Paletted p) { return p.Palette; }
 
-public static Rectangle Bounds(this ref Paletted p) {
-    return p.Rect;
-}
+public static Rectangle Bounds(this ref Paletted p) { return p.Rect; }
 
 public static color.Color At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
@@ -1345,13 +1305,13 @@ public static bool Opaque(this ref Paletted p) {
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
-        foreach (var (_, c) in p.Pix.slice(i0, i1)) {
+        foreach (var (_, c) in range(p.Pix.slice(i0, i1))) {
             present[c] = true;
         }
         i0 += p.Stride;
         i1 += p.Stride;
     }
-    foreach (var (i, c) in p.Palette) {
+    foreach (var (i, c) in range<color.Color>(p.Palette)) {
         if (!present[i]) {
             continue;
         }

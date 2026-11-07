@@ -51,7 +51,7 @@ private static readonly @string fuzzseedˢᵇ = "fuzzseed="u8;
 
 internal static ж<nint> godebugSeed() {
     var debug = strings.Split(os.Getenv(godebugˢ), ",");
-    foreach (var (_, f) in debug) {
+    foreach (var (_, f) in range(debug)) {
         if (strings.HasPrefix(f, fuzzseedˢ)) {
             ref var seed = ref heap<nint>(out var Ꮡseed);
             (seed, var err) = strconv.Atoi(strings.TrimPrefix(f, fuzzseedˢ));
@@ -148,10 +148,7 @@ partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lock(this ref noCopy _) {
-}
-
-internal static void Unlock(this ref noCopy _) {
-}
+internal static void Lock(this ref noCopy _) { }
+internal static void Unlock(this ref noCopy _) { }
 
 } // end fuzz_package

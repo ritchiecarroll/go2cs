@@ -9,9 +9,7 @@ partial class main_package {
 
 internal static UntypedInt letter => /* 'c' */ 99;
 
-internal static (rune, bool) pair() {
-    return ('p', true);
-}
+internal static (rune, bool) pair() { return ('p', true); }
 
 internal static void Main() {
     var noArgs = () => {
@@ -26,7 +24,7 @@ internal static void Main() {
     var sum = (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         nint total = 0;
-        foreach (var (_, x) in xs) {
+        foreach (var (_, x) in range(xs)) {
             total += x;
         }
         return total;

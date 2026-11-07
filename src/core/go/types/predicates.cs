@@ -13,48 +13,20 @@ using token = global::go.go.token_package;
 partial class types_package {
 
 // isValid reports whether t is a valid type.
-internal static bool isValid(ΔType t) {
-    return !AreEqual(Unalias(t), Typ[Invalid]);
-}
+internal static bool isValid(ΔType t) { return !AreEqual(Unalias(t), Typ[Invalid]); }
 
 // The isX predicates below report whether t is an X.
 // If t is a type parameter the result is false; i.e.,
 // these predicates don't look inside a type parameter.
-internal static bool isBoolean(ΔType t) {
-    return isBasic(t, IsBoolean);
-}
-
-internal static bool isInteger(ΔType t) {
-    return isBasic(t, IsInteger);
-}
-
-internal static bool isUnsigned(ΔType t) {
-    return isBasic(t, IsUnsigned);
-}
-
-internal static bool isFloat(ΔType t) {
-    return isBasic(t, IsFloat);
-}
-
-internal static bool isComplex(ΔType t) {
-    return isBasic(t, IsComplex);
-}
-
-internal static bool isNumeric(ΔType t) {
-    return isBasic(t, IsNumeric);
-}
-
-internal static bool isString(ΔType t) {
-    return isBasic(t, IsString);
-}
-
-internal static bool isIntegerOrFloat(ΔType t) {
-    return isBasic(t, (BasicInfo)(IsInteger | IsFloat));
-}
-
-internal static bool isConstType(ΔType t) {
-    return isBasic(t, IsConstType);
-}
+internal static bool isBoolean(ΔType t) { return isBasic(t, IsBoolean); }
+internal static bool isInteger(ΔType t) { return isBasic(t, IsInteger); }
+internal static bool isUnsigned(ΔType t) { return isBasic(t, IsUnsigned); }
+internal static bool isFloat(ΔType t) { return isBasic(t, IsFloat); }
+internal static bool isComplex(ΔType t) { return isBasic(t, IsComplex); }
+internal static bool isNumeric(ΔType t) { return isBasic(t, IsNumeric); }
+internal static bool isString(ΔType t) { return isBasic(t, IsString); }
+internal static bool isIntegerOrFloat(ΔType t) { return isBasic(t, (BasicInfo)(IsInteger | IsFloat)); }
+internal static bool isConstType(ΔType t) { return isBasic(t, IsConstType); }
 
 // isBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter the result is false; i.e.,
@@ -67,33 +39,13 @@ internal static bool isBasic(ΔType t, BasicInfo info) {
 // The allX predicates below report whether t is an X.
 // If t is a type parameter the result is true if isX is true
 // for all specified types of the type parameter's type set.
-internal static bool allBoolean(ΔType t) {
-    return allBasic(t, IsBoolean);
-}
-
-internal static bool allInteger(ΔType t) {
-    return allBasic(t, IsInteger);
-}
-
-internal static bool allUnsigned(ΔType t) {
-    return allBasic(t, IsUnsigned);
-}
-
-internal static bool allNumeric(ΔType t) {
-    return allBasic(t, IsNumeric);
-}
-
-internal static bool allString(ΔType t) {
-    return allBasic(t, IsString);
-}
-
-internal static bool allOrdered(ΔType t) {
-    return allBasic(t, IsOrdered);
-}
-
-internal static bool allNumericOrString(ΔType t) {
-    return allBasic(t, (BasicInfo)(IsNumeric | IsString));
-}
+internal static bool allBoolean(ΔType t) { return allBasic(t, IsBoolean); }
+internal static bool allInteger(ΔType t) { return allBasic(t, IsInteger); }
+internal static bool allUnsigned(ΔType t) { return allBasic(t, IsUnsigned); }
+internal static bool allNumeric(ΔType t) { return allBasic(t, IsNumeric); }
+internal static bool allString(ΔType t) { return allBasic(t, IsString); }
+internal static bool allOrdered(ΔType t) { return allBasic(t, IsOrdered); }
+internal static bool allNumericOrString(ΔType t) { return allBasic(t, (BasicInfo)(IsNumeric | IsString)); }
 
 // allBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter, the result is true if isBasic(t, info) is true
@@ -237,7 +189,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
         break;
     }
     case ж<Struct> t: {
-        foreach (var (_, f) in t.fields) {
+        foreach (var (_, f) in range(t.fields)) {
             if (comparableType(f.typ, dynamic, seen) != nil) {
                 return typeErrorf("struct containing %s cannot be compared", f.typ);
             }
@@ -372,7 +324,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // name. Lower-case field names from different packages are always different.
         if (y._<ж<Struct>>(out var yΔ4)) {
             if (xΔ1.NumFields() == yΔ4.NumFields()) {
-                foreach (var (i, f) in xΔ1.fields) {
+                foreach (var (i, f) in range(xΔ1.fields)) {
                     var g = yΔ4.fields[i];
                     if (f.embedded != g.embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId(g.pkg, g.name, false) || !c.identical(f.typ, g.typ, Ꮡp)) {
                         return false;
@@ -396,7 +348,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         if (y._<ж<Tuple>>(out var yΔ6)) {
             if (xΔ1.Len() == yΔ6.Len()) {
                 if (xΔ1 != nil) {
-                    foreach (var (i, v) in xΔ1.vars) {
+                    foreach (var (i, v) in range(xΔ1.vars)) {
                         var w = yΔ6.vars[i];
                         if (!c.identical(v.typ, w.typ, Ꮡp)) {
                             return false;
@@ -436,7 +388,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ytparams = yΔ7.TypeParams().list();
 
             slice<ΔType> targs = default;
-            foreach (var i in range(xtparams)) {
+            foreach (var i in range(len(xtparams))) {
                 targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
@@ -445,7 +397,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ctxt = NewContext();    // need a non-nil Context for the substitution below
 
             // Constraints must be pair-wise identical, after substitution.
-            foreach (var (i, xtparam) in xtparams) {
+            foreach (var (i, xtparam) in range(xtparams)) {
                 var ybound = check.subst(nopos, ytparams[i].bound, smap, nil, ctxt);
                 if (!c.identical(xtparam.bound, ybound, Ꮡp)) {
                     return false;
@@ -522,7 +474,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
                     assertSortedMethods(a);
                     assertSortedMethods(b);
                 }
-                foreach (var (i, f) in a) {
+                foreach (var (i, f) in range(a)) {
                     var g = b[i];
                     if (f.of(Func.Ꮡobject).Id() != g.of(Func.Ꮡobject).Id() || !c.identical(f.typ, g.typ, q)) {
                         return false;
@@ -561,7 +513,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             if (len(xargs) != len(yargs)) {
                 return false;
             }
-            foreach (var (i, xarg) in xargs) {
+            foreach (var (i, xarg) in range(xargs)) {
                 if (!Identical(xarg, yargs[i])) {
                     return false;
                 }

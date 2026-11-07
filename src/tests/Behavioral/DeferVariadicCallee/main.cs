@@ -15,7 +15,7 @@ internal static void note(params ꓸꓸꓸstring tagsʗp) {
         order = append(order, (@string)"note()");
         return;
     }
-    foreach (var (_, t) in tags) {
+    foreach (var (_, t) in range(tags)) {
         order = append(order, "note("u8 + t + ")"u8);
     }
 }
@@ -31,7 +31,7 @@ internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
         c.n++;
         return;
     }
-    foreach (var (_, d) in deltas) {
+    foreach (var (_, d) in range(deltas)) {
         c.n += d;
     }
 }
@@ -62,14 +62,14 @@ internal static void signalDone(params Span<channel<EmptyStruct>> chansʗp) {
         close(defaultDone);
         return;
     }
-    foreach (var (_, ch) in chans) {
+    foreach (var (_, ch) in range(chans)) {
         close(ch);
     }
 }
 
 internal static partial void Main() {
     var c = run();
-    foreach (var (_, s) in order) {
+    foreach (var (_, s) in range(order)) {
         fmt.Println(s);
     }
     fmt.Println("counter:", c.n);

@@ -625,7 +625,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
                 return errΔ1;
             }
             buf.Write(blkʗ1[..]);
-            foreach (var (_, c) in blkʗ1.ΔRangeSnapshot()) {
+            foreach (var (_, c) in range(blkʗ1.ΔRangeSnapshot())) {
                 if (c == '\n') {
                     cntNewline++;
                 }
@@ -901,7 +901,7 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
     // If the last fragment is a hole, then seek to 1-byte before EOF, and
     // write a single byte to ensure the file is the right size.
     if (writeLastByte && err == nil) {
-        (_, err) = ws.Write(slice<byte>([0]));
+        (_, err) = ws.Write([0]);
         sr.pos++;
     }
 
@@ -924,7 +924,6 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
 internal static int64 logicalRemaining(this sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
 }
-
 internal static int64 physicalRemaining(this sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }

@@ -32,9 +32,7 @@ internal static void write(this ж<builder> Ꮡb, @string s) {
     b.buf = append(b.buf, s.ꓸꓸꓸ);
 }
 
-internal static @string String(this ref builder b) {
-    return (@string)b.buf;
-}
+internal static @string String(this ref builder b) { return (@string)b.buf; }
 
 internal static void Main() {
     ref var b = ref heap(new builder(), out var Ꮡb);

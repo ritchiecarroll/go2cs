@@ -15,9 +15,7 @@ partial struct box {
     internal slice<nint> data;
 }
 
-internal static void clear(this ref box b) {
-    b.data = default;
-}
+internal static void clear(this ref box b) { b.data = default; }
 
 partial struct guard {
     internal error err;
@@ -52,7 +50,7 @@ internal static void Main() {
     builtin.clear(s);
     fmt.Println(s[0], s[1], s[2]);
 
-    var b = Ꮡ(new box(data: slice<nint>([4, 5])));
+    var b = Ꮡ(new box(data: [4, 5]));
     b.clear();
     fmt.Println(len(b.data));
 
@@ -64,7 +62,7 @@ internal static void Main() {
     g.run();
     fmt.Println(g.err);
 
-    var h = new header(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"]), ["b"] = slice<@string>(["2"])});
+    var h = new header(new map<@string, slice<@string>>{["a"] = ["1"], ["b"] = ["2"]});
     var alias = h;
     builtin.clear(h);
     fmt.Println(len(h), len(alias));

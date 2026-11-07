@@ -94,7 +94,7 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
             break;
         }
         var name = rec.slice((nint)(namoff), (nint)(namoff + namlen));
-        foreach (var (i, c) in name) {
+        foreach (var (i, c) in range(name)) {
             if (c == 0) {
                 name = name.slice(0, i);
                 break;

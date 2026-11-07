@@ -13,19 +13,15 @@ partial class signal_package {
 /*linkname*/ internal static partial void signal_disable(uint32 _) {
     go.runtime_package.signal_disable(_);
 }
-
 /*linkname*/ internal static partial void signal_enable(uint32 _) {
     go.runtime_package.signal_enable(_);
 }
-
 /*linkname*/ internal static partial void signal_ignore(uint32 _) {
     go.runtime_package.signal_ignore(_);
 }
-
 /*linkname*/ internal static partial bool signal_ignored(uint32 _) {
     return go.runtime_package.signal_ignored(_);
 }
-
 /*linkname*/ internal static partial uint32 signal_recv() {
     return go.runtime_package.signal_recv();
 }

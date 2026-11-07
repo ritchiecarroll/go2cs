@@ -36,9 +36,7 @@ partial struct PkgEncoder {
 }
 
 // SyncMarkers reports whether pw uses sync markers.
-public static bool SyncMarkers(this ref PkgEncoder pw) {
-    return pw.syncFrames >= 0;
-}
+public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >= 0; }
 
 // NewPkgEncoder returns an initialized PkgEncoder.
 //
@@ -82,7 +80,7 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
     // TODO(markfreeman): Also can use delta encoding to write section ends,
     // but not as impactful.
     uint32 sum = default;
-    foreach (var (_, elems) in Ꮡpw.Ꮡelems.Value) {
+    foreach (var (_, elems) in range(Ꮡpw.Ꮡelems.Value)) {
         sum += (uint32)len(elems);
         writeUint32(sum);
     }
@@ -91,16 +89,16 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
     // back to this representation during decoding; the numbers will be much
     // smaller.
     sum = 0;
-    foreach (var (_, elems) in Ꮡpw.Ꮡelems.Value) {
-        foreach (var (_, elem) in elems) {
+    foreach (var (_, elems) in range(Ꮡpw.Ꮡelems.Value)) {
+        foreach (var (_, elem) in range(elems)) {
             sum += (uint32)len(elem);
             writeUint32(sum);
         }
     }
 
     // Write elemData.
-    foreach (var (_, elems) in Ꮡpw.Ꮡelems.Value) {
-        foreach (var (_, elem) in elems) {
+    foreach (var (_, elems) in range(Ꮡpw.Ꮡelems.Value)) {
+        foreach (var (_, elem) in range(elems)) {
             var (_, errΔ1) = io.WriteString(@out, elem);
             assert(errΔ1 == nil);
         }
@@ -185,7 +183,7 @@ public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
     w.encodingRelocHeader = true;
     w.Sync(SyncRelocs);
     w.Len(len(w.Relocs));
-    foreach (var (_, rEnt) in w.Relocs) {
+    foreach (var (_, rEnt) in range(w.Relocs)) {
         w.Sync(SyncReloc);
         w.Len((nint)rEnt.Kind);
         w.Len((nint)rEnt.Idx);
@@ -257,7 +255,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
     // linked list so we can share common stack frames.
     w.rawUvarint((uint64)m);
     w.rawUvarint((uint64)len(frames));
-    foreach (var (_, frame) in frames) {
+    foreach (var (_, frame) in range(frames)) {
         w.rawUvarint((uint64)w.rawReloc(SectionString, w.p.StringIdx(frame)));
     }
 }
@@ -305,14 +303,10 @@ public static void Len(this ref Encoder w, nint x) {
 }
 
 // Int encodes and writes an int value into the element bitstream.
-public static void Int(this ref Encoder w, nint x) {
-    w.Int64((int64)x);
-}
+public static void Int(this ref Encoder w, nint x) { w.Int64((int64)x); }
 
 // Uint encodes and writes a uint value into the element bitstream.
-public static void Uint(this ref Encoder w, nuint x) {
-    w.Uint64((uint64)x);
-}
+public static void Uint(this ref Encoder w, nuint x) { w.Uint64((uint64)x); }
 
 // Reloc encodes and writes a relocation for the given (section,
 // index) pair into the element bitstream.
@@ -352,7 +346,7 @@ public static void StringRef(this ref Encoder w, RelElemIdx idx) {
 // the element bitstream.
 public static void Strings(this ref Encoder w, slice<@string> ss) {
     w.Len(len(ss));
-    foreach (var (_, s) in ss) {
+    foreach (var (_, s) in range(ss)) {
         w.String(s);
     }
 }
@@ -424,8 +418,6 @@ internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
 }
 
 // Version reports the version of the bitstream.
-public static ΔVersion Version(this ref Encoder w) {
-    return w.p.version;
-}
+public static ΔVersion Version(this ref Encoder w) { return w.p.version; }
 
 } // end pkgbits_package

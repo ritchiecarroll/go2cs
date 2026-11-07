@@ -11,9 +11,7 @@ partial struct Guarded {
     internal nint n;
 }
 
-public static ж<Guarded> New(nint n) {
-    return Ꮡ(new Guarded(n: n));
-}
+public static ж<Guarded> New(nint n) { return Ꮡ(new Guarded(n: n)); }
 
 public static nint Add(this ж<Guarded> Ꮡg, nint d) {
     GoFrame ᒐ = default;
@@ -30,8 +28,6 @@ public static nint Add(this ж<Guarded> Ꮡg, nint d) {
     finally { if (ᒐd1) Ꮡg.of(Guarded.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-public static nint Base() {
-    return isync.NewGauge(3).Value();
-}
+public static nint Base() { return isync.NewGauge(3).Value(); }
 
 } // end lib_package

@@ -56,13 +56,8 @@ internal static UntypedInt vdsoHashSize => /* vdsoArrayMax / 4 */ 28147497671065
 internal static uintptr vdsoBloomSizeScale => /* unsafe.Sizeof(uintptr(0)) / 4 */ 2; // uint32
 
 /* How to extract and insert information held in the st_info field.  */
-internal static byte _ELF_ST_BIND(byte val) {
-    return (byte)((val >> 4));
-}
-
-internal static byte _ELF_ST_TYPE(byte val) {
-    return (byte)(val & 0xf);
-}
+internal static byte _ELF_ST_BIND(byte val) { return (byte)((val >> 4)); }
+internal static byte _ELF_ST_TYPE(byte val) { return (byte)(val & 0xf); }
 
 partial struct vdsoSymbolKey {
     internal @string name;
@@ -251,7 +246,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
 
     if (!info.isGNUHash) {
         // Old-style DT_HASH table.
-        foreach (var (_, k) in vdsoSymbolKeys) {
+        foreach (var (_, k) in range(vdsoSymbolKeys)) {
             if (len(info.bucket) > 0) {
                 for (var chain = info.bucket[k.symHash % (uint32)len(info.bucket)]; chain != 0; chain = info.chain[chain]) {
                     if (apply(chain, k)) {
@@ -264,7 +259,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
     }
 
     // New-style DT_GNU_HASH table.
-    foreach (var (_, k) in vdsoSymbolKeys) {
+    foreach (var (_, k) in range(vdsoSymbolKeys)) {
         var symIndex = info.bucket[k.gnuHash % (uint32)len(info.bucket)];
         if (symIndex < info.symOff) {
             continue;

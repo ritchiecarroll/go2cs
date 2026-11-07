@@ -196,7 +196,7 @@ internal static partial (slice<ж<ast.File>>, error) parseFiles(this ж<Importer
 
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(len(filenames));
-    foreach (var (i, filename) in filenames) {
+    foreach (var (i, filename) in range(filenames)) {
         var errorsʗ1 = errors;
         var filesʗ1 = files;
         var openʗ1 = open;
@@ -219,7 +219,7 @@ internal static partial (slice<ж<ast.File>>, error) parseFiles(this ж<Importer
     Ꮡwg.Wait();
 
     // if there are errors, return the first one for deterministic results
-    foreach (var (_, err) in errors) {
+    foreach (var (_, err) in range(errors)) {
         if (err != nil) {
             return (default, err);
         }

@@ -7,7 +7,6 @@ partial class main_package {
 partial struct inner {
     internal uint32 v;
 }
-
 partial struct outer {
     internal inner @in;
 }
@@ -15,7 +14,6 @@ partial struct outer {
 partial struct core {
     internal uint32 sema;
 }
-
 partial struct holder {
     internal core c;
 }

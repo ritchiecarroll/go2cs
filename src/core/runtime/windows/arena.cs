@@ -885,7 +885,7 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
         unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
 
         Ꮡs.setUserArenaChunkToFault();
-        foreach (var (_, lc) in faultList) {
+        foreach (var (_, lc) in range(faultList)) {
             lc.mspan.setUserArenaChunkToFault();
         }
 

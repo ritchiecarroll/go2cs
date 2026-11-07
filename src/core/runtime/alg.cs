@@ -263,7 +263,7 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
     }
     case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var (_, f) in s.Fields) {
+        foreach (var (_, f) in range(s.Fields)) {
             if (f.Name.IsBlank()) {
                 continue;
             }
@@ -287,59 +287,46 @@ internal static uintptr reflect_typehash(ж<_type> t, @unsafe.Pointer Δp, uintp
 internal static bool memequal0(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return true;
 }
-
 internal static bool memequal8(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<int8>)(uintptr)(Δp) == ~(ж<int8>)(uintptr)(q);
 }
-
 internal static bool memequal16(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<int16>)(uintptr)(Δp) == ~(ж<int16>)(uintptr)(q);
 }
-
 internal static bool memequal32(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<int32>)(uintptr)(Δp) == ~(ж<int32>)(uintptr)(q);
 }
-
 internal static bool memequal64(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<int64>)(uintptr)(Δp) == ~(ж<int64>)(uintptr)(q);
 }
-
 internal static bool memequal128(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<array<int64>>)(uintptr)(Δp) == ~(ж<array<int64>>)(uintptr)(q);
 }
-
 internal static bool f32equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<float32>)(uintptr)(Δp) == ~(ж<float32>)(uintptr)(q);
 }
-
 internal static bool f64equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<float64>)(uintptr)(Δp) == ~(ж<float64>)(uintptr)(q);
 }
-
 internal static bool c64equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<complex64>)(uintptr)(Δp) == ~(ж<complex64>)(uintptr)(q);
 }
-
 internal static bool c128equal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<complex128>)(uintptr)(Δp) == ~(ж<complex128>)(uintptr)(q);
 }
-
 internal static bool strequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     return ~(ж<@string>)(uintptr)(Δp) == ~(ж<@string>)(uintptr)(q);
 }
-
 internal static bool interequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     var x = ~(ж<iface>)(uintptr)(Δp);
     var y = ~(ж<iface>)(uintptr)(q);
     return x.tab == y.tab && ifaceeq(x.tab, x.data, y.data);
 }
-
 internal static bool nilinterequal(@unsafe.Pointer Δp, @unsafe.Pointer q) {
     var x = ~(ж<eface>)(uintptr)(Δp);
     var y = ~(ж<eface>)(uintptr)(q);
     return x._type == y._type && efaceeq(x._type, x.data, y.data);
 }
-
 internal static bool efaceeq(ж<_type> Ꮡt, @unsafe.Pointer x, @unsafe.Pointer y) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -358,7 +345,6 @@ internal static bool efaceeq(ж<_type> Ꮡt, @unsafe.Pointer x, @unsafe.Pointer 
     }
     return eq(x, y);
 }
-
 internal static bool ifaceeq(ж<itab> Ꮡtab, @unsafe.Pointer x, @unsafe.Pointer y) {
     ref var tab = ref Ꮡtab.DerefOrNull();
 
@@ -448,7 +434,7 @@ internal static void alginit() {
         initAlgAES();
         return;
     }
-    foreach (var i in range(hashkey)) {
+    foreach (var i in range(len(hashkey))) {
         hashkey[i] = (uintptr)bootstrapRand();
     }
 }

@@ -102,7 +102,7 @@ public static nint IndexByte(slice<byte> b, byte c) {
 }
 
 internal static nint indexBytePortable(slice<byte> s, byte c) {
-    foreach (var (i, b) in s) {
+    foreach (var (i, b) in range(s)) {
         if (b == c) {
             return i;
         }
@@ -260,7 +260,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
     }
     if (len(s) > 8) {
         var (@as, isASCII) = makeASCIISet(chars); if (isASCII) {
-            foreach (var (i, c) in s) {
+            foreach (var (i, c) in range(s)) {
                 if (@as.contains(c)) {
                     return i;
                 }
@@ -431,9 +431,7 @@ internal static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint
 //   - n < 0: all subslices.
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<slice<byte>> SplitN(slice<byte> s, slice<byte> sep, nint n) {
-    return genSplit(s, sep, 0, n);
-}
+public static slice<slice<byte>> SplitN(slice<byte> s, slice<byte> sep, nint n) { return genSplit(s, sep, 0, n); }
 
 // SplitAfterN slices s into subslices after each instance of sep and
 // returns a slice of those subslices.
@@ -452,9 +450,7 @@ public static slice<slice<byte>> SplitAfterN(slice<byte> s, slice<byte> sep, nin
 // It is equivalent to SplitN with a count of -1.
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<slice<byte>> Split(slice<byte> s, slice<byte> sep) {
-    return genSplit(s, sep, 0, -1);
-}
+public static slice<slice<byte>> Split(slice<byte> s, slice<byte> sep) { return genSplit(s, sep, 0, -1); }
 
 // SplitAfter slices s into all subslices after each instance of sep and
 // returns a slice of those subslices.
@@ -570,7 +566,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
 
     // Create subslices from recorded field indices.
     var a = new slice<slice<byte>>(len(spans));
-    foreach (var (i, span) in spans) {
+    foreach (var (i, span) in range(spans)) {
         a[i] = s.slice(span.start, span.end, span.end);
     }
 
@@ -581,7 +577,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
 // sep is placed between elements in the resulting slice.
 public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
     if (len(s) == 0) {
-        return slice<byte>([]);
+        return [];
     }
     if (len(s) == 1) {
         // Just return a copy.
@@ -595,7 +591,7 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
         }
         n += len(sep) * (len(s) - 1);
     }
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         if (len(v) > maxInt - n) {
             throw panic("bytes: Join output length overflow");
         }
@@ -604,7 +600,7 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
 
     var b = bytealg.MakeNoZero(n).slice(0, n, n);
     nint bp = copy(b, s[0]);
-    foreach (var (_, v) in s[1..]) {
+    foreach (var (_, v) in range(s[1..])) {
         bp += copy(b.slice(bp), sep);
         bp += copy(b.slice(bp), v);
     }
@@ -659,7 +655,7 @@ public static slice<byte> Map(Func<rune, rune> mapping, slice<byte> s) {
 // overflows.
 public static slice<byte> Repeat(slice<byte> b, nint count) {
     if (count == 0) {
-        return slice<byte>([]);
+        return [];
     }
 
     // Since we cannot return an error on overflow,
@@ -675,7 +671,7 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
     nint n = (nint)lo; // lo = len(b) * count
 
     if (len(b) == 0) {
-        return slice<byte>([]);
+        return [];
     }
 
     // Past a certain chunk size it is counterproductive to use
@@ -767,9 +763,7 @@ public static slice<byte> ToLower(slice<byte> s) {
 }
 
 // ToTitle treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their title case.
-public static slice<byte> ToTitle(slice<byte> s) {
-    return Map(Δunicode.ToTitle, s);
-}
+public static slice<byte> ToTitle(slice<byte> s) { return Map(Δunicode.ToTitle, s); }
 
 // ToUpperSpecial treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their
 // upper case, giving priority to the special casing rules.
@@ -1143,7 +1137,7 @@ internal static slice<byte> trimRightUnicode(slice<byte> s, @string cutset) {
 // trailing white space, as defined by Unicode.
 public static slice<byte> TrimSpace(slice<byte> s) {
     // Fast path for ASCII: look for the first ASCII non-space byte.
-    foreach (var (lo, c) in s) {
+    foreach (var (lo, c) in range(s)) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
             // slower unicode-aware method on the remaining bytes.

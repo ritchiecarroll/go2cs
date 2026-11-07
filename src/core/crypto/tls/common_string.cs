@@ -78,7 +78,6 @@ public static @string String(this SignatureScheme i) {
         return "SignatureScheme("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
-
 internal static void _ᴛ2() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -119,7 +118,6 @@ public static @string String(this CurveID i) {
         return "CurveID("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
-
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.

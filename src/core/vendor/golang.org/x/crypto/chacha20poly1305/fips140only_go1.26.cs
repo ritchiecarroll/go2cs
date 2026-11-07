@@ -9,8 +9,6 @@ using go.crypto;
 
 partial class chacha20poly1305_package {
 
-internal static bool fips140Enforced() {
-    return fips140.Enforced();
-}
+internal static bool fips140Enforced() { return fips140.Enforced(); }
 
 } // end chacha20poly1305_package

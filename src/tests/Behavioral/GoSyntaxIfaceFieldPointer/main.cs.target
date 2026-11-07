@@ -16,13 +16,8 @@ partial struct UnixAddr {
     public @string Net;
 }
 
-public static @string Network(this ref UnixAddr a) {
-    return a.Net;
-}
-
-public static @string String(this ref UnixAddr a) {
-    return a.Name;
-}
+public static @string Network(this ref UnixAddr a) { return a.Net; }
+public static @string String(this ref UnixAddr a) { return a.Name; }
 
 internal partial struct main_type /*dyn*/ {
     internal Addr got, want;
@@ -41,7 +36,7 @@ internal static void Main() {
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))))
     }.array();
 
-    foreach (var (i, ca) in connAddrs.ΔRangeSnapshot()) {
+    foreach (var (i, ca) in range(connAddrs.ΔRangeSnapshot())) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);
         fmt.Printf("%d want T=%T v=%#v\n"u8, i, ca.want, ca.want);
         fmt.Printf("%d deepequal=%v\n"u8, i, reflect.DeepEqual(ca.got, ca.want));

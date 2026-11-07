@@ -148,17 +148,13 @@ public static slice<byte> AppendUint64(this littleEndian _, slice<byte> b, uint6
 internal static ref readonly @string littleEndianˢ => ref littleEndianˢᵇ;
 private static readonly @string littleEndianˢᵇ = "LittleEndian"u8;
 
-public static @string String(this littleEndian _) {
-    return littleEndianˢ;
-}
+public static @string String(this littleEndian _) { return littleEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryLittleEndianˢ => ref binaryLittleEndianˢᵇ;
 private static readonly @string binaryLittleEndianˢᵇ = "binary.LittleEndian"u8;
 
-public static @string GoString(this littleEndian _) {
-    return binaryLittleEndianˢ;
-}
+public static @string GoString(this littleEndian _) { return binaryLittleEndianˢ; }
 
 public partial struct bigEndian {
 }
@@ -243,33 +239,25 @@ public static slice<byte> AppendUint64(this bigEndian _, slice<byte> b, uint64 v
 internal static ref readonly @string bigEndianˢ => ref bigEndianˢᵇ;
 private static readonly @string bigEndianˢᵇ = "BigEndian"u8;
 
-public static @string String(this bigEndian _) {
-    return bigEndianˢ;
-}
+public static @string String(this bigEndian _) { return bigEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryBigEndianˢ => ref binaryBigEndianˢᵇ;
 private static readonly @string binaryBigEndianˢᵇ = "binary.BigEndian"u8;
 
-public static @string GoString(this bigEndian _) {
-    return binaryBigEndianˢ;
-}
+public static @string GoString(this bigEndian _) { return binaryBigEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nativeEndianˢ => ref nativeEndianˢᵇ;
 private static readonly @string nativeEndianˢᵇ = "NativeEndian"u8;
 
-public static @string String(this nativeEndian _) {
-    return nativeEndianˢ;
-}
+public static @string String(this nativeEndian _) { return nativeEndianˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string binaryNativeEndianˢ => ref binaryNativeEndianˢᵇ;
 private static readonly @string binaryNativeEndianˢᵇ = "binary.NativeEndian"u8;
 
-public static @string GoString(this nativeEndian _) {
-    return binaryNativeEndianˢ;
-}
+public static @string GoString(this nativeEndian _) { return binaryNativeEndianˢ; }
 
 // Read reads structured binary data from r into data.
 // Data must be a pointer to a fixed-size value or a slice
@@ -414,13 +402,13 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<bool> dataΔ1: {
-        foreach (var (i, x) in bs) { // Easier to loop over the input for 8-bit values.
+        foreach (var (i, x) in range(bs)) { // Easier to loop over the input for 8-bit values.
             dataΔ1[i] = x != 0;
         }
         break;
     }
     case slice<int8> dataΔ1: {
-        foreach (var (i, x) in bs) {
+        foreach (var (i, x) in range(bs)) {
             dataΔ1[i] = (int8)x;
         }
         break;
@@ -430,49 +418,49 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int16> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int16)order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<uint16> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint16(bs.slice(2 * i));
         }
         break;
     }
     case slice<int32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int32)order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<uint32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint32(bs.slice(4 * i));
         }
         break;
     }
     case slice<int64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = (int64)order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<uint64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = order.Uint64(bs.slice(8 * i));
         }
         break;
     }
     case slice<float32> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = math.Float32frombits(order.Uint32(bs.slice(4 * i)));
         }
         break;
     }
     case slice<float64> dataΔ1: {
-        foreach (var i in range(dataΔ1)) {
+        foreach (var i in range(len(dataΔ1))) {
             dataΔ1[i] = math.Float64frombits(order.Uint64(bs.slice(8 * i)));
         }
         break;
@@ -592,7 +580,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<bool> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             if (x) {
                 bs[i] = 1;
             } else {
@@ -610,7 +598,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int8> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             bs[i] = (byte)x;
         }
         break;
@@ -636,7 +624,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int16> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint16(bs.slice(2 * i), (uint16)x);
         }
         break;
@@ -650,7 +638,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint16> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint16(bs.slice(2 * i), x);
         }
         break;
@@ -664,7 +652,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), (uint32)x);
         }
         break;
@@ -678,7 +666,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), x);
         }
         break;
@@ -692,7 +680,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<int64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), (uint64)x);
         }
         break;
@@ -706,7 +694,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<uint64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), x);
         }
         break;
@@ -720,7 +708,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<float32> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint32(bs.slice(4 * i), math.Float32bits(x));
         }
         break;
@@ -734,7 +722,7 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<float64> v: {
-        foreach (var (i, x) in v) {
+        foreach (var (i, x) in range(v)) {
             order.PutUint64(bs.slice(8 * i), math.Float64bits(x));
         }
         break;
@@ -958,7 +946,6 @@ partial struct coder {
 }
 
 partial struct decoder /*coder*/;
-
 partial struct encoder /*coder*/;
 
 internal static bool @bool(this ref decoder d) {
@@ -1020,37 +1007,21 @@ internal static void uint64(this ref encoder e, uint64 x) {
     e.offset += 8;
 }
 
-internal static int8 int8(this ref decoder d) {
-    return (int8)d.uint8();
-}
+internal static int8 int8(this ref decoder d) { return (int8)d.uint8(); }
 
-internal static void int8(this ref encoder e, int8 x) {
-    e.uint8((uint8)x);
-}
+internal static void int8(this ref encoder e, int8 x) { e.uint8((uint8)x); }
 
-internal static int16 int16(this ref decoder d) {
-    return (int16)d.uint16();
-}
+internal static int16 int16(this ref decoder d) { return (int16)d.uint16(); }
 
-internal static void int16(this ref encoder e, int16 x) {
-    e.uint16((uint16)x);
-}
+internal static void int16(this ref encoder e, int16 x) { e.uint16((uint16)x); }
 
-internal static int32 int32(this ref decoder d) {
-    return (int32)d.uint32();
-}
+internal static int32 int32(this ref decoder d) { return (int32)d.uint32(); }
 
-internal static void int32(this ref encoder e, int32 x) {
-    e.uint32((uint32)x);
-}
+internal static void int32(this ref encoder e, int32 x) { e.uint32((uint32)x); }
 
-internal static int64 int64(this ref decoder d) {
-    return (int64)d.uint64();
-}
+internal static int64 int64(this ref decoder d) { return (int64)d.uint64(); }
 
-internal static void int64(this ref encoder e, int64 x) {
-    e.uint64((uint64)x);
-}
+internal static void int64(this ref encoder e, int64 x) { e.uint64((uint64)x); }
 
 internal static void value(this ref decoder d, reflectꓸValue v) {
     switch (v.Kind()) {

@@ -301,9 +301,7 @@ public static Token Lookup(@string ident) {
 
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
-public static bool IsLiteral(this Token tok) {
-    return literal_beg < tok && tok < literal_end;
-}
+public static bool IsLiteral(this Token tok) { return literal_beg < tok && tok < literal_end; }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
@@ -313,9 +311,7 @@ public static bool IsOperator(this Token tok) {
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
-public static bool IsKeyword(this Token tok) {
-    return keyword_beg < tok && tok < keyword_end;
-}
+public static bool IsKeyword(this Token tok) { return keyword_beg < tok && tok < keyword_end; }
 
 // IsExported reports whether name starts with an upper-case letter.
 public static bool IsExported(@string name) {

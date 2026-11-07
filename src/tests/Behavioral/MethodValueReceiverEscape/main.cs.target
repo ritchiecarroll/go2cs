@@ -15,9 +15,7 @@ internal static nint dec(this ref counter c, nint step) {
     return c.n;
 }
 
-internal static nint peek(this counter c) {
-    return c.n;
-}
+internal static nint peek(this counter c) { return c.n; }
 
 partial struct holder {
     internal counter c;
@@ -25,13 +23,9 @@ partial struct holder {
 
 partial struct intList /*[]nint*/;
 
-internal static void push(this ref intList l, nint v) {
-    l = append(l, v);
-}
+internal static void push(this ref intList l, nint v) { l = append(l, v); }
 
-internal static nint applyInt(Func<nint, nint> f, nint a, nint b) {
-    return f(a) + f(b);
-}
+internal static nint applyInt(Func<nint, nint> f, nint a, nint b) { return f(a) + f(b); }
 
 internal static void applyPush(Action<nint> f) {
     f(1);
@@ -70,7 +64,7 @@ internal static (nint, nint) viaNamedSlice() {
     ref var l = ref heap<intList>(out var Ꮡl);
     applyPush(Ꮡl.push);
     nint total = 0;
-    foreach (var (_, v) in l) {
+    foreach (var (_, v) in range<nint>(l)) {
         total += v;
     }
     return (len(l), total);

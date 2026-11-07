@@ -22,7 +22,6 @@ partial struct poolᴛ1 /*dyn*/ {
 internal static array<poolᴛ1> pool = new(2, () => new());
 
 internal static array<nint> nums = new(3);
-
 internal static readonly ж<array<nint>> Ꮡaddr = new StaticBox<array<nint>>(new array<nint>(2));
 internal static ref array<nint> addr => ref ((StaticBox<array<nint>>)Ꮡaddr).ValueSlot;
 
@@ -59,9 +58,7 @@ internal partial struct reservedIsNil_type /*dyn*/ {
     internal nint r7;
 }
 
-internal static bool reservedIsNil() {
-    return ((ж<reservedIsNil_type>)nil) == nil;
-}
+internal static bool reservedIsNil() { return ((ж<reservedIsNil_type>)nil) == nil; }
 
 internal static nint statsTotal() {
     var s = new Stats(Total: 42);

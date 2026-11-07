@@ -15,9 +15,7 @@ internal static partial @string here() {
     return runtime.FuncForPC(pc).Name();
 }
 
-internal static partial @string plain() {
-    return here();
-}
+internal static partial @string plain() { return here(); }
 
 internal static partial @string variadic(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.sslice();
@@ -30,29 +28,21 @@ internal static partial (@string name, nint n) pair() {
     return (runtime.FuncForPC(pc).Name(), 1);
 }
 
-internal static partial @string generic<T>(T x) {
-    return here();
-}
+internal static partial @string generic<T>(T x) { return here(); }
 
 partial struct counter {
     internal nint n;
 }
 
-internal static partial @string ptr(this ref counter c) {
-    return here();
-}
+internal static partial @string ptr(this ref counter c) { return here(); }
 
-internal static partial @string val(this counter c) {
-    return here();
-}
+internal static partial @string val(this counter c) { return here(); }
 
 partial struct box<T> {
     internal T v;
 }
 
-internal static partial @string get<T>(this ref box<T> b) {
-    return here();
-}
+internal static partial @string get<T>(this ref box<T> b) { return here(); }
 
 internal static @string fromInit;
 

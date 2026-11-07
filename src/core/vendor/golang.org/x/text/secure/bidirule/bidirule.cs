@@ -198,9 +198,7 @@ internal static bool isRTL(this ref Transformer t) {
 }
 
 // Reset implements transform.Transformer.
-public static void Reset(this ref Transformer t) {
-    t = new Transformer();
-}
+public static void Reset(this ref Transformer t) { t = new Transformer(); }
 
 // Transform implements transform.Transformer. This Transformer has state and
 // needs to be reset between uses.
@@ -254,7 +252,7 @@ public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, 
 internal static array<bidi.Properties> asciiTable = new(128);
 
 [GoInit] internal static void init() {
-    foreach (var i in range(asciiTable)) {
+    foreach (var i in range(len(asciiTable))) {
         var (p, _) = bidi.LookupRune((rune)i);
         asciiTable[i] = p;
     }

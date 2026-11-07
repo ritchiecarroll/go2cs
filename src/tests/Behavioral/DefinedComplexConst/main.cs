@@ -6,13 +6,11 @@ using ꓸꓸꓸC128 = Span<main_package.C128>;
 partial class main_package {
 
 partial struct C128 /*num:complex128*/;
-
 partial struct C64 /*num:complex64*/;
 
 partial struct C128b /*num:complex128*/;
 
 partial struct F64 /*num:float64*/;
-
 partial struct F32 /*num:float32*/;
 
 partial struct F32b /*num:float32*/;
@@ -61,35 +59,21 @@ internal static void deferred() {
     finally { ᒐ.Run(); }
 }
 
-internal static C128 takeC128(C128 c) {
-    return c;
-}
-
-internal static C64 takeC64(C64 c) {
-    return c;
-}
-
+internal static C128 takeC128(C128 c) { return c; }
+internal static C64 takeC64(C64 c) { return c; }
 internal static C128 takeMany(params ꓸꓸꓸC128 csʗp) {
     var cs = csʗp.sslice();
 
     C128 sum = default;
-    foreach (var (_, c) in cs) {
+    foreach (var (_, c) in range(cs)) {
         sum += c;
     }
     return sum;
 }
 
-internal static C128 retC128() {
-    return 3D;
-}
-
-internal static C64 retC64() {
-    return 2.5F;
-}
-
-internal static (C128, C64) retMulti() {
-    return (1D, 2F);
-}
+internal static C128 retC128() { return 3D; }
+internal static C64 retC64() { return 2.5F; }
+internal static (C128, C64) retMulti() { return (1D, 2F); }
 
 internal static void Main() {
     C128 a = 0D;

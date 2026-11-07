@@ -80,11 +80,11 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint total = 0;
-    foreach (var (_, val) in vals) {
+    foreach (var (_, val) in range(vals)) {
         total += val;
     }
     @string s = "";
-    foreach (var (_, val) in vals) {
+    foreach (var (_, val) in range(vals)) {
         if (s != ""u8) {
             s += ", "u8;
         }
@@ -96,13 +96,13 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
 
 internal static void Main() {
     var strategies = new slice<strategy>(win);
-    foreach (var kΔ1 in range(strategies)) {
+    foreach (var kΔ1 in range(len(strategies))) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
 
     nint k = default;
-    foreach (var iᴛ1 in range(strategies)) {
+    foreach (var iᴛ1 in range(len(strategies))) {
         k = iᴛ1;
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
@@ -125,7 +125,7 @@ internal static void Main() {
 
     var wk = Ꮡ(new worker(n: 3));
     var err = wk.initWorker(0); if (err == nil) {
-        fmt.Println(wk.run(slice<byte>([1, 2])), lastN.Value);
+        fmt.Println(wk.run([1, 2]), lastN.Value);
     }
 
     var res = new resolver(
@@ -157,9 +157,7 @@ internal static @string passThrough() {
     return joinPair(ᴛ1, ᴛ2);
 }
 
-internal static (@string, error) fetchPair() {
-    return ("pair", default);
-}
+internal static (@string, error) fetchPair() { return ("pair", default); }
 
 internal static @string joinPair(@string s, error err) {
     if (err != nil) {
@@ -194,9 +192,7 @@ internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     return len(b) + w.n;
 }
 
-internal static void bump(this ref worker w) {
-    w.n++;
-}
+internal static void bump(this ref worker w) { w.n++; }
 
 internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {
@@ -221,9 +217,7 @@ internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
 
 internal delegate nint handler(nint _);
 
-internal static @string tag(this handler h) {
-    return "handler";
-}
+internal static @string tag(this handler h) { return "handler"; }
 
 partial interface tagged {
     @string tag();

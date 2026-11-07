@@ -64,9 +64,9 @@ using static go.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4kKaQppA=", "124-124:1;132-132:1;140-140:1")]
+[assembly: GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4gJaAloA=", "124-124:1;132-132:1;140-140:1")]
 [assembly: GoPositionMap("sort/slice.go", "slice.cs", "AAwwAAwCgoKCggACGAAJAoKCAAIQ0oKCgoKm")]
-[assembly: GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgKKAooCmkOyAAAIQ4KKAppKokNqAooCigKaQrtCswKqwqrCswKqwAAJIACIC")]
+[assembly: GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgoKWgNwAARDQgpaSqIDKgoKWgJ7AnLCaoJqgnLCaoAABSAAiAg==")]
 [assembly: GoPositionMap("sort/zsortfunc.go", "zsortfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 [assembly: GoPositionMap("sort/zsortinterface.go", "zsortinterface.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 // </GoSourcePositionMaps>

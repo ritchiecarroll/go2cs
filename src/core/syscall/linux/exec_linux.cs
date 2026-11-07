@@ -118,9 +118,7 @@ internal static ref bool forceClone3 => ref ((StaticBox<bool>)ᏑforceClone3).Va
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeFork();
-
 internal static partial void runtime_AfterFork();
-
 internal static partial void runtime_AfterForkInChild();
 
 // Fork, dup fd onto 0..len(fd), and exec(argv0, argvv, envv) in child.
@@ -185,21 +183,16 @@ partial struct capData {
     internal uint32 permitted;
     internal uint32 inheritable;
 }
-
 partial struct caps {
     internal capHeader hdr;
     internal array<capData> data = new(2);
 }
 
 // See CAP_TO_INDEX in linux/capability.h:
-internal static uintptr capToIndex(uintptr cap) {
-    return cap >> 5;
-}
+internal static uintptr capToIndex(uintptr cap) { return cap >> 5; }
 
 // See CAP_TO_MASK in linux/capability.h:
-internal static uint32 capToMask(uintptr cap) {
-    return ((uint32)1).Lsh((nuint)((uintptr)(cap & 31)));
-}
+internal static uint32 capToMask(uintptr cap) { return ((uint32)1).Lsh((nuint)((uintptr)(cap & 31))); }
 
 // cloneArgs holds arguments for clone3 Linux syscall.
 partial struct cloneArgs {
@@ -305,7 +298,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
     // that we can't run the risk of overwriting any of them.
     var fd = new slice<nint>(len(attr.Files));
     nextfd = len(attr.Files);
-    foreach (var (iΔ1, ufd) in attr.Files) {
+    foreach (var (iΔ1, ufd) in range(attr.Files)) {
         if (nextfd < (nint)ufd) {
             nextfd = (nint)ufd;
         }
@@ -562,7 +555,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             goto childerror;
         }
 
-        foreach (var (_, vᴛ1) in sys.AmbientCaps) {
+        foreach (var (_, vᴛ1) in range(sys.AmbientCaps)) {
             c = vᴛ1;
 
             // Add the c capability to the permitted and inheritable capability mask,
@@ -579,7 +572,7 @@ internal static partial (uintptr pid, int32 pidfd, Errno err1, array<nint> mapPi
             goto childerror;
         }
 
-        foreach (var (_, vᴛ2) in sys.AmbientCaps) {
+        foreach (var (_, vᴛ2) in range(sys.AmbientCaps)) {
             c = vᴛ2;
 
             (_, _, err1) = RawSyscall6(SYS_PRCTL, PR_CAP_AMBIENT, (uintptr)PR_CAP_AMBIENT_RAISE, c, 0, 0, 0);
@@ -743,7 +736,7 @@ childerror:
 
 internal static slice<byte> formatIDMappings(slice<SysProcIDMap> idMap) {
     slice<byte> data = default;
-    foreach (var (_, im) in idMap) {
+    foreach (var (_, im) in range(idMap)) {
         data = append(data, ((@string)(strconv.Itoa(im.ContainerID) + " "u8 + strconv.Itoa(im.HostID) + " "u8 + strconv.Itoa(im.Size) + "\n"u8)).ꓸꓸꓸ);
     }
     return data;

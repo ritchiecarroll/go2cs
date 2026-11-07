@@ -110,9 +110,7 @@ internal static (Animal, @string) pick(nint kind) {
     return (a, name);
 }
 
-public static Animal Self(this ж<Cat> Ꮡc) {
-    return new CatжAnimal(Ꮡc);
-}
+public static Animal Self(this ж<Cat> Ꮡc) { return new CatжAnimal(Ꮡc); }
 
 internal static void Main() {
     var packᴷ = new stackAppend<Animal>();
@@ -124,7 +122,7 @@ internal static void Main() {
     fmt.Printf("%v %v\n"u8, f(), err);
 
     var animals = slice<Animal>([new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(), new JavaProgrammer()]);
-    foreach (var (_, animal) in animals) {
+    foreach (var (_, animal) in range(animals)) {
         fmt.Println(animal.Speak());
     }
 
@@ -217,13 +215,8 @@ partial struct badge {
     internal nint num;
 }
 
-internal static @string @string(this ref badge b) {
-    return b.text;
-}
-
-internal static nint @int(this ref badge b) {
-    return b.num;
-}
+internal static @string @string(this ref badge b) { return b.text; }
+internal static nint @int(this ref badge b) { return b.num; }
 
 internal static void replaceAnimal(ref Animal a) {
     a = new CatжAnimal(Ꮡ(new Cat()));
@@ -238,14 +231,11 @@ partial struct wrapSink {
     /*embed*/ public Animal Animal;
 }
 
-internal static @string Shut(this wrapSink w) {
-    return "shut";
-}
+internal static @string Shut(this wrapSink w) { return "shut"; }
 
 partial interface rdr {
     @string read();
 }
-
 partial interface clsr {
     @string close();
 }
@@ -259,25 +249,16 @@ partial interface rdCloser :
 partial struct strRdr {
 }
 
-internal static @string read(this strRdr _) {
-    return "strRdr";
-}
+internal static @string read(this strRdr _) { return "strRdr"; }
 
 partial struct fileRdr {
     internal @string name;
 }
 
-internal static @string read(this fileRdr f) {
-    return "read:"u8 + f.name;
-}
+internal static @string read(this fileRdr f) { return "read:"u8 + f.name; }
+internal static @string close(this fileRdr f) { return "close:"u8 + f.name; }
 
-internal static @string close(this fileRdr f) {
-    return "close:"u8 + f.name;
-}
-
-internal static rdCloser open(@string name) {
-    return new fileRdr(name);
-}
+internal static rdCloser open(@string name) { return new fileRdr(name); }
 
 partial interface sink {
     @string drain();
@@ -287,9 +268,7 @@ partial struct basin {
     internal @string tag;
 }
 
-internal static @string drain(this basin b) {
-    return "b:"u8 + b.tag;
-}
+internal static @string drain(this basin b) { return "b:"u8 + b.tag; }
 
 partial struct plumbing {
     internal sink s;

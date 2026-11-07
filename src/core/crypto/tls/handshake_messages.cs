@@ -209,7 +209,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionSupportedCurves);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ12) => {
                 extsΔ12.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ13) => {
-                    foreach (var (_, curve) in Ꮡm.Value.supportedCurves) {
+                    foreach (var (_, curve) in range(Ꮡm.Value.supportedCurves)) {
                         extsΔ13.AddUint16((uint16)curve);
                     }
                 });
@@ -224,7 +224,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionSignatureAlgorithms);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ14) => {
                 extsΔ14.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ15) => {
-                    foreach (var (_, sigAlgo) in Ꮡm.Value.supportedSignatureAlgorithms) {
+                    foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithms)) {
                         extsΔ15.AddUint16((uint16)sigAlgo);
                     }
                 });
@@ -239,7 +239,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionSignatureAlgorithmsCert);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ16) => {
                 extsΔ16.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ17) => {
-                    foreach (var (_, sigAlgo) in Ꮡm.Value.supportedSignatureAlgorithmsCert) {
+                    foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithmsCert)) {
                         extsΔ17.AddUint16((uint16)sigAlgo);
                     }
                 });
@@ -254,7 +254,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionALPN);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ18) => {
                 extsΔ18.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ19) => {
-                    foreach (var (_, proto) in Ꮡm.Value.alpnProtocols) {
+                    foreach (var (_, proto) in range(Ꮡm.Value.alpnProtocols)) {
                         extsΔ19.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ20) => {
                             extsΔ20.AddBytes(slice<byte>(proto));
                         });
@@ -271,7 +271,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionSupportedVersions);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ21) => {
                 extsΔ21.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ22) => {
-                    foreach (var (_, vers) in Ꮡm.Value.supportedVersions) {
+                    foreach (var (_, vers) in range(Ꮡm.Value.supportedVersions)) {
                         extsΔ22.AddUint16(vers);
                     }
                 });
@@ -299,7 +299,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             exts.AddUint16(extensionKeyShare);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ25) => {
                 extsΔ25.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ26) => {
-                    foreach (var (_, vᴛ1) in Ꮡm.Value.keyShares) {
+                    foreach (var (_, vᴛ1) in range(Ꮡm.Value.keyShares)) {
                         ref var ks = ref heap(new keyShare(), out var Ꮡks);
                         ks = vᴛ1;
 
@@ -332,19 +332,19 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ30) => {
             var echOuterExtsʗ2 = echOuterExtsʗ1;
             extsΔ30.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ31) => {
-                foreach (var (_, e) in echOuterExtsʗ2) {
+                foreach (var (_, e) in range(echOuterExtsʗ2)) {
                     extsΔ31.AddUint16(e);
                 }
             });
         });
     }
     // pre_shared_key must be the last extension
-    if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, slice<byte>([(byte)innerECHExt])))) {
+    if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, [(byte)innerECHExt]))) {
         // RFC 8446, Section 4.2.11
         exts.AddUint16(extensionPreSharedKey);
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ32) => {
             extsΔ32.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ33) => {
-                foreach (var (_, vᴛ2) in Ꮡm.Value.pskIdentities) {
+                foreach (var (_, vᴛ2) in range(Ꮡm.Value.pskIdentities)) {
                     ref var psk = ref heap(new pskIdentity(), out var Ꮡpsk);
                     psk = vᴛ2;
 
@@ -356,7 +356,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
                 }
             });
             extsΔ32.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ35) => {
-                foreach (var (_, binder) in Ꮡm.Value.pskBinders) {
+                foreach (var (_, binder) in range(Ꮡm.Value.pskBinders)) {
                     var binderʗ1 = binder;
                     extsΔ35.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ36) => {
                         extsΔ36.AddBytes(binderʗ1);
@@ -382,7 +382,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             }
         });
         bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
-            foreach (var (_, suite) in Ꮡm.Value.cipherSuites) {
+            foreach (var (_, suite) in range(Ꮡm.Value.cipherSuites)) {
                 bΔ3.AddUint16(suite);
             }
         });
@@ -412,7 +412,7 @@ internal static (slice<byte>, error) marshalWithoutBinders(this ж<clientHelloMs
     ref var m = ref Ꮡm.DerefOrNull();
 
     nint bindersLen = 2; // uint16 length prefix
-    foreach (var (_, binder) in m.pskBinders) {
+    foreach (var (_, binder) in range(m.pskBinders)) {
         bindersLen += 1; // uint8 length prefix
         bindersLen += len(binder);
     }
@@ -440,7 +440,7 @@ internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>
     if (len(pskBinders) != len(m.pskBinders)) {
         return errors.New(tlsInternalErrorˢ5);
     }
-    foreach (var i in range(m.pskBinders)) {
+    foreach (var i in range(len(m.pskBinders))) {
         if (len(pskBinders[i]) != len(m.pskBinders[i])) {
             return errors.New(tlsInternalErrorˢ5);
         }
@@ -465,7 +465,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
         return false;
     }
-    m.cipherSuites = slice<uint16>([]);
+    m.cipherSuites = [];
     m.secureRenegotiationSupported = false;
     while (!ΔcipherSuites.Empty()) {
         ref var suite = ref heap(new uint16(), out var Ꮡsuite);
@@ -843,7 +843,7 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
         exts.AddUint16(extensionSCT);
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ6) => {
             extsΔ6.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ7) => {
-                foreach (var (_, sct) in Ꮡm.Value.scts) {
+                foreach (var (_, sct) in range(Ꮡm.Value.scts)) {
                     var sctʗ1 = sct;
                     extsΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ8) => {
                         extsΔ8.AddBytes(sctʗ1);
@@ -1376,7 +1376,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
                 bΔ2.AddUint16(extensionSignatureAlgorithms);
                 bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
                     bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
-                        foreach (var (_, sigAlgo) in Ꮡm.Value.supportedSignatureAlgorithms) {
+                        foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithms)) {
                             bΔ4.AddUint16((uint16)sigAlgo);
                         }
                     });
@@ -1386,7 +1386,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
                 bΔ2.AddUint16(extensionSignatureAlgorithmsCert);
                 bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
                     bΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
-                        foreach (var (_, sigAlgo) in Ꮡm.Value.supportedSignatureAlgorithmsCert) {
+                        foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithmsCert)) {
                             bΔ6.AddUint16((uint16)sigAlgo);
                         }
                     });
@@ -1396,7 +1396,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
                 bΔ2.AddUint16(extensionCertificateAuthorities);
                 bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
                     bΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ8) => {
-                        foreach (var (_, ca) in Ꮡm.Value.certificateAuthorities) {
+                        foreach (var (_, ca) in range(Ꮡm.Value.certificateAuthorities)) {
                             var caʗ1 = ca;
                             bΔ8.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ9) => {
                                 bΔ9.AddBytes(caʗ1);
@@ -1502,7 +1502,7 @@ partial struct certificateMsg {
 
 internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     nint i = default;
-    foreach (var (_, Δslice) in m.certificates) {
+    foreach (var (_, Δslice) in range(m.certificates)) {
         i += len(Δslice);
     }
 
@@ -1519,7 +1519,7 @@ internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     x[6] = (uint8)certificateOctets;
 
     var y = x[7..];
-    foreach (var (_, Δslice) in m.certificates) {
+    foreach (var (_, Δslice) in range(m.certificates)) {
         y[0] = (uint8)(len(Δslice) >> 16);
         y[1] = (uint8)(len(Δslice) >> 8);
         y[2] = (uint8)len(Δslice);
@@ -1594,7 +1594,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
 internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate certificate) {
     var certificateʗ1 = certificate;
     b.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
-        foreach (var (i, cert) in certificateʗ1.ΔCertificate) {
+        foreach (var (i, cert) in range(certificateʗ1.ΔCertificate)) {
             var certʗ1 = cert;
             bΔ1.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
                 bΔ2.AddBytes(certʗ1);
@@ -1622,7 +1622,7 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate ce
                     bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
                         var certificateʗ6 = certificateʗ5;
                         bΔ6.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
-                            foreach (var (_, sct) in certificateʗ6.SignedCertificateTimestamps) {
+                            foreach (var (_, sct) in range(certificateʗ6.SignedCertificateTimestamps)) {
                                 var sctʗ1 = sct;
                                 bΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ8) => {
                                     bΔ8.AddBytes(sctʗ1);
@@ -1844,7 +1844,7 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
     // See RFC 4346, Section 7.4.4.
     nint length = 1 + len(m.certificateTypes) + 2;
     nint casLength = 0;
-    foreach (var (_, ca) in m.certificateAuthorities) {
+    foreach (var (_, ca) in range(m.certificateAuthorities)) {
         casLength += 2 + len(ca);
     }
     length += casLength;
@@ -1869,7 +1869,7 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
         y[0] = (uint8)(n >> 8);
         y[1] = (uint8)n;
         y = y[2..];
-        foreach (var (_, sigAlgo) in m.supportedSignatureAlgorithms) {
+        foreach (var (_, sigAlgo) in range(m.supportedSignatureAlgorithms)) {
             y[0] = (uint8)(sigAlgo >> 8);
             y[1] = (uint8)sigAlgo;
             y = y[2..];
@@ -1879,7 +1879,7 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
     y[0] = (uint8)(casLength >> 8);
     y[1] = (uint8)casLength;
     y = y[2..];
-    foreach (var (_, ca) in m.certificateAuthorities) {
+    foreach (var (_, ca) in range(m.certificateAuthorities)) {
         y[0] = (uint8)(len(ca) >> 8);
         y[1] = (uint8)len(ca);
         y = y[2..];
@@ -1927,7 +1927,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         }
         var numSigAlgos = (uint16)(sigAndHashLen / 2);
         m.supportedSignatureAlgorithms = new slice<SignatureScheme>(numSigAlgos);
-        foreach (var i in range(m.supportedSignatureAlgorithms)) {
+        foreach (var i in range(len(m.supportedSignatureAlgorithms))) {
             m.supportedSignatureAlgorithms[i] = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)data[0]) << 8) | ((SignatureScheme)(uint16)data[1]));
             data = data[2..];
         }

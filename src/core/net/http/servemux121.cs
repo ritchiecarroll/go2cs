@@ -184,7 +184,7 @@ internal static (ΔHandler h, @string pattern) match(this ref serveMux121 mux, @
 
     // Check for longest valid match.  mux.es contains all patterns
     // that end in / sorted from longest to shortest.
-    foreach (var (_, e) in mux.es) {
+    foreach (var (_, e) in range(mux.es)) {
         if (strings.HasPrefix(path, e.pattern)) {
             return (e.h, e.pattern);
         }
@@ -217,7 +217,7 @@ internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡ
 internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
     var p = slice<@string>([path, host + path]);
 
-    foreach (var (_, c) in p) {
+    foreach (var (_, c) in range(p)) {
         var (_, exist) = mux.m[c, ꟷ]; if (exist) {
             return false;
         }
@@ -227,7 +227,7 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
     if (n == 0) {
         return false;
     }
-    foreach (var (_, c) in p) {
+    foreach (var (_, c) in range(p)) {
         var (_, exist) = mux.m[c + "/"u8, ꟷ]; if (exist) {
             return path[n - 1] != '/';
         }

@@ -11,8 +11,7 @@ using go.vendor.golang.org.x.text;
 partial class norm_package {
 
 // Reset implements the Reset method of the transform.Transformer interface.
-public static void Reset(this Form _) {
-}
+public static void Reset(this Form _) { }
 
 // Transform implements the Transform method of the transform.Transformer
 // interface. It may need to write segments of up to MaxSegmentSize at once.
@@ -55,7 +54,7 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     return true;
 }
 
-internal static slice<error> errs = slice<error>([default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc]);
+internal static slice<error> errs = [default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc];
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.

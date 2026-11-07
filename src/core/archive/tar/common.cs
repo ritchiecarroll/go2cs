@@ -56,7 +56,7 @@ internal static @string Error(this headerError he) {
 
     @string prefix = prefixᶜ;
     slice<@string> ss = default;
-    foreach (var (_, s) in he) {
+    foreach (var (_, s) in range<@string>(he)) {
         if (s != ""u8) {
             ss = append(ssᴷ, ss, s);
         }
@@ -237,9 +237,7 @@ partial struct sparseEntry {
     public int64 Offset, Length;
 }
 
-internal static int64 endOffset(this sparseEntry s) {
-    return s.Offset + s.Length;
-}
+internal static int64 endOffset(this sparseEntry s) { return s.Offset + s.Length; }
 
 // A sparse file can be represented as either a sparseDatas or a sparseHoles.
 // As long as the total size is known, they are equivalent and one can be
@@ -286,7 +284,7 @@ internal static bool validateSparseEntries(slice<sparseEntry> sp, int64 size) {
         return false;
     }
     sparseEntry pre = default;
-    foreach (var (_, cur) in sp) {
+    foreach (var (_, cur) in range(sp)) {
         switch (ᐧ) {
         case {} when cur.Offset < 0 || cur.Length < 0: {
             return false; // Negative values are never okay
@@ -314,7 +312,7 @@ internal static bool validateSparseEntries(slice<sparseEntry> sp, int64 size) {
 // offsets and lengths that are multiples of blockSize.
 internal static slice<sparseEntry> alignSparseEntries(slice<sparseEntry> src, int64 size) {
     var dst = src[..0];
-    foreach (var (_, s) in src) {
+    foreach (var (_, s) in range(src)) {
         var (pos, end) = (s.Offset, s.endOffset());
         pos += blockPadding(+pos); // Round-up to nearest blockSize
         if (end != size) {
@@ -338,7 +336,7 @@ internal static slice<sparseEntry> alignSparseEntries(slice<sparseEntry> src, in
 internal static slice<sparseEntry> invertSparseEntries(slice<sparseEntry> src, int64 size) {
     var dst = src[..0];
     sparseEntry pre = default;
-    foreach (var (_, cur) in src) {
+    foreach (var (_, cur) in range(src)) {
         if (cur.Length == 0) {
             continue; // Skip empty fragments
         }
@@ -640,21 +638,10 @@ partial struct headerFileInfo {
     internal ж<Header> h;
 }
 
-internal static int64 Size(this headerFileInfo fi) {
-    return fi.h.Size;
-}
-
-internal static bool IsDir(this headerFileInfo fi) {
-    return fi.Mode().IsDir();
-}
-
-internal static time.Time ModTime(this headerFileInfo fi) {
-    return fi.h.ModTime;
-}
-
-internal static any Sys(this headerFileInfo fi) {
-    return fi.h.OrTypedNil();
-}
+internal static int64 Size(this headerFileInfo fi) { return fi.h.Size; }
+internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime(this headerFileInfo fi) { return fi.h.ModTime; }
+internal static any Sys(this headerFileInfo fi) { return fi.h.OrTypedNil(); }
 
 // Name returns the base name of the file.
 internal static @string Name(this headerFileInfo fi) {

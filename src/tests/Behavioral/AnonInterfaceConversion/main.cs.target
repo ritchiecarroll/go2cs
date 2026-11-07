@@ -8,9 +8,7 @@ partial struct T {
     internal nint n;
 }
 
-public static nint Foo(this T t) {
-    return t.n;
-}
+public static nint Foo(this T t) { return t.n; }
 
 internal partial interface main_d /*dyn*/ {
     nint Foo();

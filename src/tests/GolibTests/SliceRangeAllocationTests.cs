@@ -16,9 +16,10 @@ namespace GolibTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A converted <c>for i, v := range s</c> emits <c>foreach (var (i, v) in s)</c>. C# binds
+/// A converted <c>for i, v := range s</c> emits <c>foreach (var (i, v) in range(s))</c>. C# binds
 /// <c>GetEnumerator</c> by PATTERN — the concrete return type, no interface — so the enumerator only
-/// stays off the heap while <c>slice&lt;T&gt;.GetEnumerator()</c> returns a struct. It used to return
+/// stays off the heap while <c>range(s)</c> and its <c>GetEnumerator()</c> return structs, as
+/// <c>slice&lt;T&gt;.GetEnumerator()</c> over the values does. It used to return
 /// <c>IEnumerator&lt;(nint, T)&gt;</c> from an iterator method, which cost two heap objects on entry
 /// to EVERY ranged loop in the corpus (the compiler-generated state machine plus the inner
 /// <c>SliceEnumerator</c> class): Go code that allocates nothing allocated per loop in C#. That is the
@@ -49,7 +50,7 @@ public class SliceRangeAllocationTests
         // otherwise the tiering/JIT allocations land in the measured delta and read as a regression.
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach (var (i, v) in s)
+            foreach (var (i, v) in range(s))
                 total += i + v;
         }
 
@@ -59,7 +60,7 @@ public class SliceRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach (var (i, v) in s)
+            foreach (var (i, v) in range(s))
                 total += i + v;
         }
 
@@ -83,7 +84,7 @@ public class SliceRangeAllocationTests
         Assert.AreEqual(0L, bytes,
             $"`foreach` over slice<T> allocated {bytes} bytes across {LoopCount} loops " +
             $"({bytes / (double)LoopCount:F1} B/loop) — GetEnumerator() must return the concrete " +
-            "struct enumerator, not IEnumerator<(nint, T)>.");
+            "struct enumerator, not an interface.");
     }
 
     [TestMethod]
@@ -116,14 +117,14 @@ public class SliceRangeAllocationTests
     [TestMethod]
     public void EnumeratorStillSatisfiesTheInterfaceContract()
     {
-        // slice<T> is IArray<T>, whose own GetEnumerator() yields (nint, T). The pattern path must not
-        // have cost the interface path: `foreach` over an IArray<T>-typed local or a constrained type
-        // parameter still enumerates the same pairs (boxing, as it always did). LINQ sees the values.
+        // slice<T> is IArray<T>: range over an IArray<T>-typed local or a constrained type parameter
+        // enumerates the same pairs through its length and indexer (boxing a struct once). LINQ and
+        // foreach see the values.
         slice<byte> s = new([10, 20, 30]);
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IArray<byte>)s)
+        foreach ((nint i, byte v) in range((IArray<byte>)s))
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(

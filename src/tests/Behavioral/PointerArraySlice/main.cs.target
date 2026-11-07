@@ -8,7 +8,7 @@ partial struct grid /*[4]nint*/;
 
 internal static nint firstTwo(this ref grid b) {
     nint total = 0;
-    foreach (var (_, v) in b.Value[..2]) {
+    foreach (var (_, v) in range(b.Value[..2])) {
         total += v;
     }
     return total;
@@ -18,7 +18,7 @@ internal static nint sumParam(ж<grid> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint total = 0;
-    foreach (var (_, v) in p.Value[..]) {
+    foreach (var (_, v) in range(p.Value[..])) {
         total += v;
     }
     return total;

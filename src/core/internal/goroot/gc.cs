@@ -32,7 +32,7 @@ public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> 
         if (err != nil) {
             return false;
         }
-        foreach (var (_, dirent) in dirents) {
+        foreach (var (_, dirent) in range(dirents)) {
             if (strings.HasSuffix(dirent.Name(), ".go")) {
                 return true;
             }
@@ -106,7 +106,7 @@ internal static void init(this ref gccgoDirs gd) {
     var dirsEntries = strings.Split((@string)allDirs, "\n");
     @string prefix = prefixᶜ;
     slice<@string> dirs = default;
-    foreach (var (_, dirEntry) in dirsEntries) {
+    foreach (var (_, dirEntry) in range(dirsEntries)) {
         var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
             dirs = filepath.SplitList(after);
             break;
@@ -117,7 +117,7 @@ internal static void init(this ref gccgoDirs gd) {
     }
 
     slice<@string> lastDirs = default;
-    foreach (var (_, dir) in dirs) {
+    foreach (var (_, dir) in range(dirs)) {
         @string goDir = filepath.Join(dir, "go", version);
         {
             var (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == nil && fi.IsDir()) {
@@ -164,7 +164,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
         return true;
     }
 
-    foreach (var (_, dir) in gd.dirs) {
+    foreach (var (_, dir) in range(gd.dirs)) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
         var (fi, err) = os.Stat(full); if (err == nil && !fi.IsDir()) {
             return true;

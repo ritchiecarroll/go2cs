@@ -14,13 +14,9 @@ internal static void add(this ref counter c, nint k) {
     c.tag += "+"u8;
 }
 
-internal static void writeThrough(ref counter p, nint k) {
-    p.n += k;
-}
+internal static void writeThrough(ref counter p, nint k) { p.n += k; }
 
-internal static void run(Action f) {
-    f();
-}
+internal static void run(Action f) { f(); }
 
 internal static void n1() {
     run(() => {

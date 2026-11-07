@@ -16,40 +16,25 @@ internal static nint Add(this ref counter c, nint d) {
     return c.n;
 }
 
-internal static void Reset(this ref counter c) {
-    c.n = 0;
-}
-
-internal static nint Value(this counter c) {
-    return c.n;
-}
-
+internal static void Reset(this ref counter c) { c.n = 0; }
+internal static nint Value(this counter c) { return c.n; }
 internal static @string Label(this counter c, @string p) {
     return fmt.Sprintf("%s=%d"u8, p, c.n);
 }
 
-internal static nint hidden(this counter c) {
-    return -1;
-}
+internal static nint hidden(this counter c) { return -1; }
 
 partial struct embedded {
 }
 
-internal static @string Zeta(this embedded _) {
-    return "zeta";
-}
+internal static @string Zeta(this embedded _) { return "zeta"; }
 
 partial struct outer {
     /*embed*/ internal embedded embedded;
 }
 
-internal static @string Beta(this outer _) {
-    return "beta";
-}
-
-internal static @string Alpha(this outer _) {
-    return "alpha";
-}
+internal static @string Beta(this outer _) { return "beta"; }
+internal static @string Alpha(this outer _) { return "alpha"; }
 
 internal static slice<@string> names(reflectꓸType t) {
     var @out = new slice<@string>(0, t.NumMethod());
@@ -116,8 +101,6 @@ internal static void Main() {
 
 partial struct stringish /*@string*/;
 
-internal static @string String(this stringish s) {
-    return "<"u8 + ((@string)s) + ">"u8;
-}
+internal static @string String(this stringish s) { return "<"u8 + ((@string)s) + ">"u8; }
 
 } // end main_package

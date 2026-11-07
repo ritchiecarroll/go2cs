@@ -13,15 +13,11 @@ partial struct vec {
     internal nint x, y;
 }
 
-internal static vec Add(this vec v, vec o) {
-    return new vec(v.x + o.x, v.y + o.y);
-}
+internal static vec Add(this vec v, vec o) { return new vec(v.x + o.x, v.y + o.y); }
 
 partial struct num /*num:nint*/;
 
-internal static num Add(this num n, num o) {
-    return n + o;
-}
+internal static num Add(this num n, num o) { return n + o; }
 
 public static A Sum<A>(params Span<A> xsʗp)
     where A : Adder<A>
@@ -29,7 +25,7 @@ public static A Sum<A>(params Span<A> xsʗp)
     var xs = xsʗp.sslice();
 
     A total = GoZero<A>();
-    foreach (var (_, x) in xs) {
+    foreach (var (_, x) in range(xs)) {
         total = total.Add(x);
     }
     return total;
@@ -42,9 +38,7 @@ partial interface Ordered<T>
 
 partial struct age /*num:nint*/;
 
-internal static bool Less(this age a, age b) {
-    return a < b;
-}
+internal static bool Less(this age a, age b) { return a < b; }
 
 public static T Min<T>(T a, T b)
     where T : Ordered<T>
@@ -63,15 +57,13 @@ partial struct MinSet<T>
 
 public static void Put<T>(this ref MinSet<T> s, T x)
     where T : Ordered<T>
-{
-    s.items = append(s.items, x);
-}
+{ s.items = append(s.items, x); }
 
 public static T Least<T>(this ref MinSet<T> s)
     where T : Ordered<T>
 {
     var m = s.items[0];
-    foreach (var (_, x) in s.items[1..]) {
+    foreach (var (_, x) in range(s.items[1..])) {
         m = Min(m, x);
     }
     return m;
@@ -114,17 +106,9 @@ partial struct gnode {
     internal @string name;
 }
 
-internal static ж<gnode> Next(this ref gnode n) {
-    return n.next;
-}
-
-internal static ж<Graph<gnodeжGraphNode>> Owner(this ref gnode n) {
-    return n.g;
-}
-
-internal static @string Label(this ref gnode n) {
-    return n.name;
-}
+internal static ж<gnode> Next(this ref gnode n) { return n.next; }
+internal static ж<Graph<gnodeжGraphNode>> Owner(this ref gnode n) { return n.g; }
+internal static @string Label(this ref gnode n) { return n.name; }
 
 internal static void Main() {
     fmt.Println(Sum(new vec(1, 2), new vec(3, 4), new vec(5, 6)));

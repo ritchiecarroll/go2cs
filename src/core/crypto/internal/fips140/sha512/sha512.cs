@@ -264,9 +264,7 @@ public static nint Size(this ref Digest d) {
     return d.size;
 }
 
-public static nint BlockSize(this ref Digest d) {
-    return blockSize;
-}
+public static nint BlockSize(this ref Digest d) { return blockSize; }
 
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default;

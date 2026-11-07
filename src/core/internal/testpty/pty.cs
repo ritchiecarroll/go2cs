@@ -26,9 +26,7 @@ public static @string Error(this ref PtyError e) {
     return fmt.Sprintf("%s: %s"u8, e.FuncName, e.ErrorString);
 }
 
-public static error Unwrap(this ref PtyError e) {
-    return e.Errno;
-}
+public static error Unwrap(this ref PtyError e) { return e.Errno; }
 
 public static error ErrNotSupported = errors.New("testpty.Open not implemented on this platform");
 

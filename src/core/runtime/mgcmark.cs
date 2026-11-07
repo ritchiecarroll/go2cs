@@ -72,7 +72,7 @@ internal static (slice<ж<g>>, nint) allGsSnapshotSortedForGC() {
 
     // Reset the status of leaked goroutines in order to improve
     // the precision of goroutine leak detection.
-    foreach (var (_, gp) in allgs) {
+    foreach (var (_, gp) in range(allgs)) {
         gp.of(g.Ꮡatomicstatus).CompareAndSwap(_Gleaked, _Gwaiting);
     }
 
@@ -81,7 +81,7 @@ internal static (slice<ж<g>>, nint) allGsSnapshotSortedForGC() {
     // Indices cutting off runnable and blocked Gs.
     nint currIndex = 0;
     nint blockedIndex = len(allgsSorted) - 1;
-    foreach (var (_, gp) in allgs) {
+    foreach (var (_, gp) in range(allgs)) {
         // not sure if we need atomic load because we are stopping the world,
         // but do it just to be safe for now
         var status = readgstatus(gp); if (status != _Gwaiting || gp.internalBlocked()) {
@@ -115,7 +115,7 @@ internal static void gcPrepareMarkRoots() {
     work.nBSSRoots = 0;
 
     // Scan globals.
-    foreach (var (_, datap) in activeModules()) {
+    foreach (var (_, datap) in range(activeModules())) {
         nint nDataRoots = nBlocks(datap.edata - datap.data);
         if (nDataRoots > work.nDataRoots) {
             work.nDataRoots = nDataRoots;
@@ -235,14 +235,14 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
     switch (ᐧ) {
     case {} when work.baseData <= i && i < work.baseBSS: {
         workCounter = ᏑgcController.ᏑglobalsScanWork;
-        foreach (var (_, datap) in activeModules()) {
+        foreach (var (_, datap) in range(activeModules())) {
             workDone += markrootBlock(datap.data, datap.edata - datap.data, datap.gcdatamask.bytedata, gcw, (nint)(i - work.baseData));
         }
         break;
     }
     case {} when work.baseBSS <= i && i < work.baseSpans: {
         workCounter = ᏑgcController.ᏑglobalsScanWork;
-        foreach (var (_, datap) in activeModules()) {
+        foreach (var (_, datap) in range(activeModules())) {
             workDone += markrootBlock(datap.bss, datap.ebss - datap.bss, datap.gcbssmask.bytedata, gcw, (nint)(i - work.baseBSS));
         }
         break;
@@ -445,7 +445,7 @@ internal static void markrootSpans(ж<gcWork> gcw, nint shard) {
     // Construct slice of bitmap which we'll iterate over.
     var specialsbits = ha.pageSpecials.slice((nint)(arenaPage / 8));
     specialsbits = specialsbits[..(int)(pagesPerSpanRoot / 8)];
-    foreach (var i in range(specialsbits)) {
+    foreach (var i in range(len(specialsbits))) {
         // Find set bits, which correspond to spans with specials.
         var specials = atomic.Load8(Ꮡ(specialsbits, i));
         if (specials == 0) {
@@ -1217,7 +1217,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
         // varp is 0 for defers, where there are no locals.
         // In that case, there can't be a pointer to its args, either.
         // (And all args would be scanned above anyway.)
-        foreach (var i in range(objs)) {
+        foreach (var i in range(len(objs))) {
             var obj = Ꮡ(objs, i);
             var off = obj.off;
             var @base = frame.varp; // locals base pointer
@@ -1895,7 +1895,7 @@ internal static void gcmarknewobject(ж<mspan> Ꮡspan, uintptr obj) {
 internal static void gcMarkTinyAllocs() {
     assertWorldStopped();
 
-    foreach (var (_, Δp) in allp) {
+    foreach (var (_, Δp) in range(allp)) {
         var c = Δp.Value.mcache;
         if (c == nil || c.tiny == 0) {
             continue;

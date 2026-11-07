@@ -30,7 +30,7 @@ public static @string String(this ref MethodSet s) {
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2);
-    foreach (var (_, f) in s.list) {
+    foreach (var (_, f) in range(s.list)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s\n"u8, f.OrTypedNil());
     }
     fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), "}");
@@ -38,14 +38,10 @@ public static @string String(this ref MethodSet s) {
 }
 
 // Len returns the number of methods in s.
-public static nint Len(this ref MethodSet s) {
-    return len(s.list);
-}
+public static nint Len(this ref MethodSet s) { return len(s.list); }
 
 // At returns the i'th method in s for 0 <= i < s.Len().
-public static ж<Selection> At(this ref MethodSet s, nint i) {
-    return s.list[i];
-}
+public static ж<Selection> At(this ref MethodSet s, nint i) { return s.list[i]; }
 
 // Lookup returns the method with matching package and name, or nil if not found.
 public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
@@ -125,7 +121,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
         map<@string, bool> fset = default; // we only care about the field names
         methodSet mset = default;
 
-        foreach (var (_, e) in current) {
+        foreach (var (_, e) in range(current)) {
             var typΔ1 = e.typ;
 
             // If we have a named type, we may have associated methods.
@@ -148,7 +144,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
 
             switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
-                foreach (var (i, f) in t.fields) {
+                foreach (var (i, f) in range(t.fields)) {
                     if (fset == nil) {
                         fset = new map<@string, bool>();
                     }
@@ -235,7 +231,7 @@ internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint
     if (len(list) == 0) {
         return s;
     }
-    foreach (var (i, f) in list) {
+    foreach (var (i, f) in range(list)) {
         s = s.addOne(f, concat(index, i), indirect, multiples);
     }
     return s;

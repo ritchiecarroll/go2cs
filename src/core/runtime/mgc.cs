@@ -188,7 +188,7 @@ internal static void gcinit() {
     ᏑgcController.init(readGOGC(), readGOMEMLIMIT());
 
     // Set up the cleanup block ptr mask.
-    foreach (var i in range(cleanupBlockPtrMask)) {
+    foreach (var i in range(len(cleanupBlockPtrMask))) {
         cleanupBlockPtrMask[i] = 0xff;
     }
 
@@ -727,7 +727,7 @@ internal static void gcStart(gcTrigger trigger) {
         }
 
         // Check and setup per-P state.
-        foreach (var (_, Δp) in allp) {
+        foreach (var (_, Δp) in range(allp)) {
             // Check that all Ps have finished deferred mcache flushes.
             var fg = (~Δp).mcache.ᏑflushGen.Load(); if (fg != mheap_.sweepgen) {
                 println((@string)"runtime: p", (~Δp).id, (@string)"flushGen", fg, (@string)"!= sweepgen", mheap_.sweepgen);
@@ -1035,7 +1035,7 @@ top:
     // it doesn't matter because we're non-preemptible anyway.
     var restart = false;
     systemstack(() => {
-        foreach (var (_, Δp) in allp) {
+        foreach (var (_, Δp) in range(allp)) {
             wbBufFlush1(Δp);
             if (!Δp.of(runtime_package.Δp.Ꮡgcw).empty()) {
                 restart = true;
@@ -1531,7 +1531,7 @@ internal static void gcMarkTermination(worldStop stw) {
         }
         print((@string)": ");
         var prev = work.tSweepTerm;
-        foreach (var (i, ns) in slice<int64>([work.tMark, work.tMarkTerm, work.tEnd])) {
+        foreach (var (i, ns) in range(slice<int64>([work.tMark, work.tMarkTerm, work.tEnd]))) {
             if (i != 0) {
                 print((@string)"+");
             }
@@ -1539,13 +1539,13 @@ internal static void gcMarkTermination(worldStop stw) {
             prev = ns;
         }
         print((@string)" ms clock, ");
-        foreach (var (i, ns) in slice<int64>([
+        foreach (var (i, ns) in range(slice<int64>([
             (int64)work.stwprocs * (work.tMark - work.tSweepTerm),
             ᏑgcController.ᏑassistTime.Load(),
             ᏑgcController.ᏑdedicatedMarkTime.Load() + ᏑgcController.ᏑfractionalMarkTime.Load(),
             ᏑgcController.ᏑidleMarkTime.Load(),
             (int64)work.stwprocs * (work.tEnd - work.tMarkTerm)
-        ])) {
+        ]))) {
             if (i == 2 || i == 3) {
                 // Separate mark time components with /.
                 print((@string)"/");
@@ -1589,7 +1589,7 @@ internal static void gcMarkTermination(worldStop stw) {
     var faultList = userArenaState.fault;
     userArenaState.fault = default;
     unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
-    foreach (var (_, lc) in faultList) {
+    foreach (var (_, lc) in range(faultList)) {
         lc.mspan.setUserArenaChunkToFault();
     }
 
@@ -1687,7 +1687,6 @@ partial struct gcBgMarkWorkerNode {
     // gcBgMarkWorker().
     internal muintptr m;
 }
-
 partial struct gcBgMarkWorkerNodePadded {
     /*embed*/ internal gcBgMarkWorkerNode gcBgMarkWorkerNode;
     internal array<byte> pad = new((uintptr)((uintptr)tagAlign - /* unsafe.Sizeof(gcBgMarkWorkerNode{}) */ (uintptr)32) - gcBgMarkWorkerNodeRedZoneSize);
@@ -1965,7 +1964,7 @@ internal static void gcMark(int64 startTime) {
     //
     // TODO: We could clear out buffers just before mark if this
     // has a non-negligible impact on STW time.
-    foreach (var (_, Δp) in allp) {
+    foreach (var (_, Δp) in range(allp)) {
         // The write barrier may have buffered pointers since
         // the gcMarkDone barrier. However, since the barrier
         // ensured all reachable objects were marked, all of
@@ -2009,7 +2008,7 @@ internal static void gcMark(int64 startTime) {
     //
     // Note that it's not important to retain this information; we know
     // exactly what heapScan is at this point via scanWork.
-    foreach (var (_, Δp) in allp) {
+    foreach (var (_, Δp) in range(allp)) {
         var c = Δp.Value.mcache;
         if (c == nil) {
             continue;
@@ -2058,7 +2057,7 @@ internal static bool gcSweep(gcMode mode) {
         mheap_.sweepPagesPerByte = 0D;
         unlock(Ꮡmheap_.Ꮡlock);
         // Flush all mcaches.
-        foreach (var (_, pp) in allp) {
+        foreach (var (_, pp) in range(allp)) {
             (~pp).mcache.prepareForSweep();
         }
         // Sweep all spans eagerly.
@@ -2110,7 +2109,7 @@ internal static void gcResetMarkState() {
     @lock(Ꮡmheap_.Ꮡlock);
     var arenas = mheap_.heapArenas;
     unlock(Ꮡmheap_.Ꮡlock);
-    foreach (var (_, ai) in arenas) {
+    foreach (var (_, ai) in range(arenas)) {
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
         builtin.clear(ha.pageMarks[..]);
     }
@@ -2121,7 +2120,6 @@ internal static void gcResetMarkState() {
 
 // Hooks for other packages
 internal static Action poolcleanup;
-
 internal static slice<@unsafe.Pointer> boringCaches; // for crypto/internal/boring
 
 // sync_runtime_registerPoolCleanup should be an internal detail,
@@ -2150,7 +2148,7 @@ internal static void clearpools() {
     }
 
     // clear boringcrypto caches
-    foreach (var (_, Δp) in boringCaches) {
+    foreach (var (_, Δp) in range(boringCaches)) {
         atomicstorep(Δp, nil);
     }
 
@@ -2266,7 +2264,7 @@ internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
     var (@base, _, _) = findObject(p2, 0, 0); if (@base != 0) {
         return heapˢ;
     }
-    foreach (var (_, datap) in activeModules()) {
+    foreach (var (_, datap) in range(activeModules())) {
         if (datap.data <= p2 && p2 < datap.edata || datap.noptrdata <= p2 && p2 < datap.enoptrdata) {
             return dataˢ;
         }

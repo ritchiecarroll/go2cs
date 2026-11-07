@@ -38,9 +38,7 @@ partial struct SysProcAttr {
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeFork();
-
 internal static partial void runtime_AfterFork();
-
 internal static partial void runtime_AfterForkInChild();
 
 // Fork, dup fd onto 0..len(fd), and exec(argv0, argvv, envv) in child.
@@ -75,7 +73,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> argv0, slice<
     // that we can't run the risk of overwriting any of them.
     var fd = new slice<nint>(len(attr.Files));
     nextfd = len(attr.Files);
-    foreach (var (iΔ1, ufd) in attr.Files) {
+    foreach (var (iΔ1, ufd) in range(attr.Files)) {
         if (nextfd < (nint)ufd) {
             nextfd = (nint)ufd;
         }

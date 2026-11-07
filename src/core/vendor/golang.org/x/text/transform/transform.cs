@@ -105,8 +105,7 @@ partial struct NopResetter {
 }
 
 // Reset implements the Reset method of the Transformer interface.
-public static void Reset(this NopResetter _) {
-}
+public static void Reset(this NopResetter _) { }
 
 // Reader wraps another io.Reader by transforming the bytes read.
 partial struct Reader {
@@ -399,12 +398,12 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
         return new nop();
     }
     var c = Ꮡ(new chain(link: new slice<link>(len(t) + 1)));
-    foreach (var (i, tt) in t) {
+    foreach (var (i, tt) in range(t)) {
         c.link[i].t = tt;
     }
     // Allocate intermediate buffers.
     var b = GoReflect.WithElemDims(new slice<array<byte>>(len(t) - 1, () => new(4096)), 4096);
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         c.link[i + 1].b = b[i][..];
     }
     return new chainжTransformer(c);
@@ -412,7 +411,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
 internal static void Reset(this ref chain c) {
-    foreach (var (i, l) in c.link) {
+    foreach (var (i, l) in range(c.link)) {
         if (l.t != nil) {
             l.t.Reset();
         }
@@ -528,8 +527,7 @@ public static Transformer RemoveFunc(Func<rune, bool> f) {
 
 internal delegate bool removeF(rune r);
 
-internal static void Reset(this removeF _) {
-}
+internal static void Reset(this removeF _) { }
 
 // Transform implements the Transformer interface.
 internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {

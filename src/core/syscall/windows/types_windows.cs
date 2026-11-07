@@ -830,9 +830,7 @@ partial struct IpAddrString {
 }
 
 public static UntypedInt MAX_ADAPTER_NAME_LENGTH => 256;
-
 public static UntypedInt MAX_ADAPTER_DESCRIPTION_LENGTH => 128;
-
 public static UntypedInt MAX_ADAPTER_ADDRESS_LENGTH => 8;
 
 partial struct IpAdapterInfo {
@@ -857,9 +855,7 @@ partial struct IpAdapterInfo {
 }
 
 public static UntypedInt MAXLEN_PHYSADDR => 8;
-
 public static UntypedInt MAX_INTERFACE_NAME_LEN => 256;
-
 public static UntypedInt MAXLEN_IFDESCR => 256;
 
 partial struct MibIfRow {

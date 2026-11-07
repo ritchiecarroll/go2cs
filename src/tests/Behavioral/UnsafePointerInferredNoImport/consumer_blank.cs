@@ -12,9 +12,7 @@ internal static bool blankImportInfersUnsafe() {
     return p == nil;
 }
 
-internal static (nint, bool) pair() {
-    return (21, true);
-}
+internal static (nint, bool) pair() { return (21, true); }
 
 internal static nint discardInBlankImportFile() {
     var (n, _) = pair();

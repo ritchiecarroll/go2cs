@@ -67,7 +67,7 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
     var result = new slice<byte>(len(data));
     nint n = 0;
 
-    foreach (var (_, b) in data) {
+    foreach (var (_, b) in range(data)) {
         if (b == ' ' || b == '\t') {
             continue;
         }
@@ -79,11 +79,8 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
 }
 
 internal static slice<byte> pemStart = slice<byte>("\n-----BEGIN "u8);
-
 internal static slice<byte> pemEnd = slice<byte>("\n-----END "u8);
-
 internal static slice<byte> pemEndOfLine = slice<byte>("-----"u8);
-
 internal static slice<byte> colon = slice<byte>(":"u8);
 
 // Decode will find the next PEM formatted block (certificate, private key
@@ -185,7 +182,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             continue;
         }
 
-        p.Bytes = slice<byte>([]);
+        p.Bytes = [];
         if (endIndex > 0) {
             var base64Data = removeSpacesAndTabs(rest.slice(0, endIndex));
             p.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
@@ -211,7 +208,7 @@ partial struct lineBreaker {
     internal io.Writer @out;
 }
 
-internal static slice<byte> nl = slice<byte>([(byte)'\n']);
+internal static slice<byte> nl = [(byte)'\n'];
 
 internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) {
     nint n = default;
@@ -312,7 +309,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
         }
         // For consistency of output, write other headers sorted by key.
         slices.Sort<slice<@string>, @string>(h);
-        foreach (var (_, k) in h) {
+        foreach (var (_, k) in range(h)) {
             var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != nil) {
                 return errΔ4;
             }

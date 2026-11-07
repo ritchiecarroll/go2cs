@@ -16,9 +16,7 @@ partial struct cell {
 internal static UntypedInt idx => 2;
 
 internal static array<byte> pkgEmpty = new byte[]{}.array(8);
-
 internal static array<byte> pkgPartial = new byte[]{1, 2}.array(8);
-
 internal static array<array<uint8>> pkgNested = new array<uint8>[]{}.array(2, () => new(3));
 
 internal static void Main() {

@@ -58,7 +58,7 @@ public static (slice<uint16>, error) UTF16FromString(@string s) {
 // using WTF-8 instead of UTF-8 encoding.
 public static @string UTF16ToString(slice<uint16> s) {
     nint maxLen = 0;
-    foreach (var (i, v) in s) {
+    foreach (var (i, v) in range(s)) {
         if (v == 0) {
             s = s.slice(0, i);
             break;
@@ -108,9 +108,7 @@ internal static @string utf16PtrToString(ж<uint16> p) {
 // returning an error.
 //
 // Deprecated: Use [UTF16PtrFromString] instead.
-public static ж<uint16> StringToUTF16Ptr(@string s) {
-    return Ꮡ(StringToUTF16(s), 0);
-}
+public static ж<uint16> StringToUTF16Ptr(@string s) { return Ꮡ(StringToUTF16(s), 0); }
 
 // UTF16PtrFromString returns pointer to the UTF-16 encoding of
 // the UTF-8 string s, with a terminating NUL added. If s
@@ -133,9 +131,7 @@ public static (ж<uint16>, error) UTF16PtrFromString(@string s) {
 //	if errors.Is(err, fs.ErrNotExist) ...
 partial struct Errno /*num:uintptr*/;
 
-internal static uint32 langid(uint16 pri, uint16 sub) {
-    return (uint32)sub << 10 | (uint32)pri;
-}
+internal static uint32 langid(uint16 pri, uint16 sub) { return (uint32)sub << 10 | (uint32)pri; }
 
 // FormatMessage is deprecated (msgsrc should be uintptr, not uint32, but can
 // not be changed due to the Go 1 compatibility guarantee).
@@ -1111,41 +1107,23 @@ partial struct WaitStatus {
     public uint32 ExitCode;
 }
 
-public static bool Exited(this WaitStatus w) {
-    return true;
-}
+public static bool Exited(this WaitStatus w) { return true; }
 
-public static nint ExitStatus(this WaitStatus w) {
-    return (nint)w.ExitCode;
-}
+public static nint ExitStatus(this WaitStatus w) { return (nint)w.ExitCode; }
 
-public static ΔSignal Signal(this WaitStatus w) {
-    return -1;
-}
+public static ΔSignal Signal(this WaitStatus w) { return -1; }
 
-public static bool CoreDump(this WaitStatus w) {
-    return false;
-}
+public static bool CoreDump(this WaitStatus w) { return false; }
 
-public static bool Stopped(this WaitStatus w) {
-    return false;
-}
+public static bool Stopped(this WaitStatus w) { return false; }
 
-public static bool Continued(this WaitStatus w) {
-    return false;
-}
+public static bool Continued(this WaitStatus w) { return false; }
 
-public static ΔSignal StopSignal(this WaitStatus w) {
-    return -1;
-}
+public static ΔSignal StopSignal(this WaitStatus w) { return -1; }
 
-public static bool Signaled(this WaitStatus w) {
-    return false;
-}
+public static bool Signaled(this WaitStatus w) { return false; }
 
-public static nint TrapCause(this WaitStatus w) {
-    return -1;
-}
+public static nint TrapCause(this WaitStatus w) { return -1; }
 
 // Timespec is an invented structure on Windows, but here for
 // consistency with the syscall package for other operating systems.
@@ -1154,9 +1132,7 @@ partial struct Timespec {
     public int64 Nsec;
 }
 
-public static int64 TimespecToNsec(Timespec ts) {
-    return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
-}
+public static int64 TimespecToNsec(Timespec ts) { return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec; }
 
 public static Timespec /*ts*/ NsecToTimespec(int64 nsec) {
     Timespec ts = default;
@@ -1167,21 +1143,12 @@ public static Timespec /*ts*/ NsecToTimespec(int64 nsec) {
 }
 
 // TODO(brainman): fix all needed for net
-public static (ΔHandle nfd, ΔSockaddr sa, error err) Accept(ΔHandle fd) {
-    return (0, default, EWINDOWS);
-}
-
+public static (ΔHandle nfd, ΔSockaddr sa, error err) Accept(ΔHandle fd) { return (0, default, EWINDOWS); }
 public static (nint n, ΔSockaddr from, error err) Recvfrom(ΔHandle fd, slice<byte> p, nint flags) {
     return (0, default, EWINDOWS);
 }
-
-public static error /*err*/ Sendto(ΔHandle fd, slice<byte> p, nint flags, ΔSockaddr to) {
-    return EWINDOWS;
-}
-
-public static error /*err*/ SetsockoptTimeval(ΔHandle fd, nint level, nint opt, ж<Timeval> tv) {
-    return EWINDOWS;
-}
+public static error /*err*/ Sendto(ΔHandle fd, slice<byte> p, nint flags, ΔSockaddr to) { return EWINDOWS; }
+public static error /*err*/ SetsockoptTimeval(ΔHandle fd, nint level, nint opt, ж<Timeval> tv) { return EWINDOWS; }
 
 // The Linger struct is wrong but we only noticed after Go 1.
 // sysLinger is the real system call structure.
@@ -1227,14 +1194,10 @@ public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint op
 
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡvalue.at<byte>(0), 4);
 }
-
 // go2cs generated this placeholder — func SetsockoptIPMreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 // go2cs generated this placeholder — func SetsockoptIPv6Mreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static nint /*pid*/ Getpid() {
-    return (nint)getCurrentProcessId();
-}
+public static nint /*pid*/ Getpid() { return (nint)getCurrentProcessId(); }
 
 public static (ΔHandle handle, error err) FindFirstFile(ж<uint16> name, ж<Win32finddata> data) {
     ΔHandle handle = default;
@@ -1343,54 +1306,23 @@ public static error /*err*/ Fchdir(ΔHandle fd) {
 }
 
 // TODO(brainman): fix all needed for os
-public static error /*err*/ Link(@string oldpath, @string newpath) {
-    return EWINDOWS;
-}
+public static error /*err*/ Link(@string oldpath, @string newpath) { return EWINDOWS; }
+public static error /*err*/ Symlink(@string path, @string link) { return EWINDOWS; }
 
-public static error /*err*/ Symlink(@string path, @string link) {
-    return EWINDOWS;
-}
+public static error /*err*/ Fchmod(ΔHandle fd, uint32 mode) { return EWINDOWS; }
+public static error /*err*/ Chown(@string path, nint uid, nint gid) { return EWINDOWS; }
+public static error /*err*/ Lchown(@string path, nint uid, nint gid) { return EWINDOWS; }
+public static error /*err*/ Fchown(ΔHandle fd, nint uid, nint gid) { return EWINDOWS; }
 
-public static error /*err*/ Fchmod(ΔHandle fd, uint32 mode) {
-    return EWINDOWS;
-}
-
-public static error /*err*/ Chown(@string path, nint uid, nint gid) {
-    return EWINDOWS;
-}
-
-public static error /*err*/ Lchown(@string path, nint uid, nint gid) {
-    return EWINDOWS;
-}
-
-public static error /*err*/ Fchown(ΔHandle fd, nint uid, nint gid) {
-    return EWINDOWS;
-}
-
-public static nint /*uid*/ Getuid() {
-    return -1;
-}
-
-public static nint /*euid*/ Geteuid() {
-    return -1;
-}
-
-public static nint /*gid*/ Getgid() {
-    return -1;
-}
-
-public static nint /*egid*/ Getegid() {
-    return -1;
-}
-
-public static (slice<nint> gids, error err) Getgroups() {
-    return (default, EWINDOWS);
-}
+public static nint /*uid*/ Getuid() { return -1; }
+public static nint /*euid*/ Geteuid() { return -1; }
+public static nint /*gid*/ Getgid() { return -1; }
+public static nint /*egid*/ Getegid() { return -1; }
+public static (slice<nint> gids, error err) Getgroups() { return (default, EWINDOWS); }
 
 partial struct ΔSignal /*num:nint*/;
 
-public static void Signal(this ΔSignal s) {
-}
+public static void Signal(this ΔSignal s) { }
 
 public static @string String(this ΔSignal s) {
     if (0 <= s && (nint)s < len(signals)) {

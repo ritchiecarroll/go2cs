@@ -45,13 +45,9 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 }
 
 internal static FS _ᴛ1ʗ = new subFSжFS(((ж<subFS>)nil));
-
 internal static ReadDirFS _ᴛ2ʗ = new subFSжReadDirFS(((ж<subFS>)nil));
-
 internal static ReadFileFS _ᴛ3ʗ = new subFSжReadFileFS(((ж<subFS>)nil));
-
 internal static ReadLinkFS _ᴛ4ʗ = new subFSжReadLinkFS(((ж<subFS>)nil));
-
 internal static GlobFS _ᴛ5ʗ = new subFSжGlobFS(((ж<subFS>)nil));
 
 partial struct subFS {
@@ -166,7 +162,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
 
     @string full = f.dir + "/"u8 + pattern;
     var (list, err) = Glob(f.fsys, full);
-    foreach (var (i, name) in list) {
+    foreach (var (i, name) in range(list)) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
             return (default, errors.New("invalid result from inner fsys Glob: "u8 + nameΔ1 + " not in "u8 + f.dir)); // can't use fmt in this package

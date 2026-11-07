@@ -27,7 +27,6 @@ internal static UntypedInt numCodes => 19; // number of codes in Huffman meta-co
 // Initialize the fixedHuffmanDecoder only once upon first use.
 internal static readonly ж<sync.Once> ᏑfixedOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once fixedOnce => ref ((StaticBox<sync.Once>)ᏑfixedOnce).ValueSlot;
-
 internal static readonly ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StaticBox<huffmanDecoder>(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ((StaticBox<huffmanDecoder>)ᏑfixedHuffmanDecoder).ValueSlot;
 
@@ -41,9 +40,7 @@ public static @string Error(this CorruptInputError e) {
 // An InternalError reports an error in the flate code itself.
 partial struct InternalError /*@string*/;
 
-public static @string Error(this InternalError e) {
-    return "flate: internal error: "u8 + ((@string)e);
-}
+public static @string Error(this InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
 
 // A ReadError reports an error encountered while reading input.
 //
@@ -128,7 +125,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     array<nint> count = new(16); /* maxCodeLen */
     nint min = default;
     nint max = default;
-    foreach (var (_, n) in lengths) {
+    foreach (var (_, n) in range(lengths)) {
         if (n == 0) {
             continue;
         }
@@ -189,7 +186,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         }
     }
 
-    foreach (var (i, n) in lengths) {
+    foreach (var (i, n) in range(lengths)) {
         if (n == 0) {
             continue;
         }
@@ -233,7 +230,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         // Above we've sanity checked that we never overwrote
         // an existing entry. Here we additionally check that
         // we filled the tables completely.
-        foreach (var (i, chunk) in h.chunks.ΔRangeSnapshot()) {
+        foreach (var (i, chunk) in range(h.chunks.ΔRangeSnapshot())) {
             if (chunk == 0) {
                 // As an exception, in the degenerate
                 // single-code case, we allow odd
@@ -244,8 +241,8 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
                 throw panic("impossible: missing chunk");
             }
         }
-        foreach (var (_, linktab) in h.links) {
-            foreach (var (_, chunk) in linktab) {
+        foreach (var (_, linktab) in range(h.links)) {
+            foreach (var (_, chunk) in range(linktab)) {
                 if (chunk == 0) {
                     throw panic("impossible: missing chunk");
                 }

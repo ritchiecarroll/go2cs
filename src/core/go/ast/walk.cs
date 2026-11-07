@@ -18,7 +18,7 @@ partial interface Visitor {
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
 {
-    foreach (var (_, node) in list) {
+    foreach (var (_, node) in range(list)) {
         Walk(v, node);
     }
 }

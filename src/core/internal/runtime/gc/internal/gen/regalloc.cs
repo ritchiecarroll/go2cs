@@ -104,8 +104,7 @@ internal static UntypedInt regSB => iota;
 internal static UntypedInt regFP => 1;
 
 internal static slice<@string> fixedRegs = new golib.SparseArray<@string>{[regSB] = "SB", [regFP] = "FP"}.slice();
-
-internal static slice<@string> gpRegs = slice<@string>(["AX", "BX", "CX", "DI", "SI", "R8", "R9", "R10", "R11"]); // ABI argument order
+internal static slice<@string> gpRegs = ["AX", "BX", "CX", "DI", "SI", "R8", "R9", "R10", "R11"]; // ABI argument order
 
 partial struct regSet {
     internal array<uint32> inUse = new(numRegClasses);
@@ -155,7 +154,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
 
     // Create map from op -> fn.ops index
     var opIndexes = new map<ж<op>, nint>(len(fn.ops));
-    foreach (var (i, o) in fn.ops) {
+    foreach (var (i, o) in range(fn.ops)) {
         opIndexes[o] = i;
     }
 
@@ -167,9 +166,9 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     // range we'll use.
     var canon = new map<ж<op>, ж<op>>();
     var overwritten = new map<ж<op>, bool>();
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         // Check that this op doesn't use any overwritten inputs.
-        foreach (var (_, arg) in o.args) {
+        foreach (var (_, arg) in range(o.args)) {
             if (overwritten[arg]) {
                 // TODO: The solution to this is to insert copy ops.
                 fatalf("op %+v uses overwritten input %+v", o.OrTypedNil(), arg.OrTypedNil());
@@ -193,8 +192,8 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     //
     // First, find the last use of each op.
     var lastUses = new map<ж<op>, ж<op>>(); // Canonical creation op -> last use op
-    foreach (var (_, op) in fn.ops) {
-        foreach (var (_, arg) in op.args) {
+    foreach (var (_, op) in range(fn.ops)) {
+        foreach (var (_, arg) in range(op.args)) {
             lastUses[canon[arg]] = op;
         }
     }
@@ -207,7 +206,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
 
     // Prepare for assignments
     var regUsed = new slice<regSet>(len(fn.ops), () => new()); // In-use registers at each op
-    foreach (var i in range(regUsed)) {
+    foreach (var i in range(len(regUsed))) {
         // X15/Y15/Z15 is reserved by the Go ABI
         regUsed[i].inUse[regClassZ] |= (uint32)(((uint32)1 << 15));
         // K0 is contextual (if used as an opmask, it means no mask). Too
@@ -236,7 +235,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
 
     // Assign fixed locations
     nint id = 0;
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         var exprᴛ1 = o.Δop;
         switch (ᐧ) {
         case {} when exprᴛ1 == "arg"u8: {
@@ -268,7 +267,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
             // TODO: argZ should start at 0.
             nint argGP = 0;
             nint argZ = 1;
-            foreach (var (_, arg) in o.args) {
+            foreach (var (_, arg) in range(o.args)) {
                 switch (arg.kind.reg) {
                 default: {
                     fatalf("bad register class for return value");
@@ -294,7 +293,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     }
 
     // Assign locations.
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         if (traceRegAlloc) {
             log.Printf("assign %+v", o.OrTypedNil());
         }

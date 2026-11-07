@@ -91,7 +91,7 @@ internal static void Main() {
 
     var total = (uint32)0;
 
-    foreach (var (_, sect) in sects) {
+    foreach (var (_, sect) in range(sects)) {
         total += sect.size;
     }
 

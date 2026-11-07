@@ -56,7 +56,7 @@ public static uint32 Size(this ref Writer stw) {
     stw.tmp = stw.tmp[..0];
     stw.tmp = uleb128.AppendUleb128(stw.tmp, (nuint)len(stw.strs));
     rval += (uint32)len(stw.tmp);
-    foreach (var (_, s) in stw.strs) {
+    foreach (var (_, s) in range(stw.strs)) {
         stw.tmp = stw.tmp[..0];
         nuint slen = (nuint)len(s);
         stw.tmp = uleb128.AppendUleb128(stw.tmp, slen);
@@ -85,7 +85,7 @@ public static error Write(this ж<Writer> Ꮡstw, io.Writer w) {
             return err;
         }
     }
-    foreach (var (_, s) in stw.strs) {
+    foreach (var (_, s) in range(stw.strs)) {
         {
             var err = wr128((nuint)len(s)); if (err != nil) {
                 return err;

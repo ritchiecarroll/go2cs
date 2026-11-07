@@ -92,7 +92,6 @@ internal static uintptr /*r1*/ crypto_x509_syscall(uintptr fn, uintptr a1, uintp
     exitsyscall();
     return args.r1;
 }
-
 internal static partial void syscall_x509();
 
 internal partial struct pthread_attr_init_args /*dyn*/ {
@@ -111,7 +110,6 @@ internal static int32 pthread_attr_init(ж<pthreadattr> attr) {
     KeepAlive(attr.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_attr_init_trampoline();
 
 internal partial struct pthread_attr_getstacksize_args /*dyn*/ {
@@ -129,7 +127,6 @@ internal static int32 pthread_attr_getstacksize(ж<pthreadattr> attr, ж<uintptr
     KeepAlive(size.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_attr_getstacksize_trampoline();
 
 internal partial struct pthread_attr_setdetachstate_args /*dyn*/ {
@@ -146,7 +143,6 @@ internal static int32 pthread_attr_setdetachstate(ж<pthreadattr> attr, nint sta
     KeepAlive(attr.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_attr_setdetachstate_trampoline();
 
 internal partial struct pthread_create_args /*dyn*/ {
@@ -165,7 +161,6 @@ internal static int32 pthread_create(ж<pthreadattr> attr, uintptr start, @unsaf
     KeepAlive(@unsafe.Pointer.OrTypedNil(arg)); // Just for consistency. Arg of course needs to be kept alive for the start function.
     return ret;
 }
-
 internal static partial void pthread_create_trampoline();
 
 internal partial struct raise_args /*dyn*/ {
@@ -179,7 +174,6 @@ internal static void raise(uint32 sig) {
 
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(raise_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void raise_trampoline();
 
 //go:nosplit
@@ -190,7 +184,6 @@ internal static pthread /*t*/ pthread_self() {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_self_trampoline), @unsafe.Pointer.FromBox(Ꮡt));
     return t;
 }
-
 internal static partial void pthread_self_trampoline();
 
 internal partial struct pthread_kill_args /*dyn*/ {
@@ -206,7 +199,6 @@ internal static void pthread_kill(pthread t, uint32 sig) {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(pthread_kill_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     return;
 }
-
 internal static partial void pthread_kill_trampoline();
 
 // osinit_hack is a clumsy hack to work around Apple libc bugs
@@ -248,15 +240,12 @@ internal static void osinit_hack() {
     }
     return;
 }
-
 internal static partial void osinit_hack_trampoline();
 
 // go2cs generated this placeholder — func mmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void mmap_trampoline();
 
 // go2cs generated this placeholder — func munmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void munmap_trampoline();
 
 internal partial struct madvise_args /*dyn*/ {
@@ -273,7 +262,6 @@ internal static void madvise(@unsafe.Pointer addr, uintptr n, int32 flags) {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(madvise_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     KeepAlive(@unsafe.Pointer.OrTypedNil(addr)); // Just for consistency. Hopefully addr is not a Go address.
 }
-
 internal static partial void madvise_trampoline();
 
 internal partial struct mlock_args /*dyn*/ {
@@ -289,15 +277,12 @@ internal static void mlock(@unsafe.Pointer addr, uintptr n) {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(mlock_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     KeepAlive(@unsafe.Pointer.OrTypedNil(addr)); // Just for consistency. Hopefully addr is not a Go address.
 }
-
 internal static partial void mlock_trampoline();
 
 // go2cs generated this placeholder — func read is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void read_trampoline();
 
 // go2cs generated this placeholder — func pipe is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void pipe_trampoline();
 
 internal partial struct closefd_args /*dyn*/ {
@@ -311,7 +296,6 @@ internal static int32 closefd(int32 fd) {
 
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(close_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void close_trampoline();
 
 internal partial struct exit_args /*dyn*/ {
@@ -328,7 +312,6 @@ internal static void exit(int32 code) {
 
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(exit_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void exit_trampoline();
 
 internal partial struct usleep_args /*dyn*/ {
@@ -342,7 +325,6 @@ internal static void usleep(uint32 usec) {
 
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(usleep_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void usleep_trampoline();
 
 //go:nosplit
@@ -354,7 +336,6 @@ internal static void usleep_no_g(uint32 usecʗp) {
 }
 
 // go2cs generated this placeholder — func write1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void write_trampoline();
 
 internal partial struct open_args /*dyn*/ {
@@ -373,11 +354,9 @@ internal static int32 /*ret*/ open(ж<byte> name, int32 mode, int32 perm) {
     KeepAlive(name.OrTypedNil());
     return ret;
 }
-
 internal static partial void open_trampoline();
 
 // go2cs generated this placeholder — func nanotime1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void nanotime_trampoline();
 
 // walltime should be an internal detail,
@@ -396,15 +375,12 @@ internal static (int64, int32) walltime() {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(walltime_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡt));
     return (t.tv_sec, (int32)t.tv_nsec);
 }
-
 internal static partial void walltime_trampoline();
 
 // go2cs generated this placeholder — func sigaction is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void sigaction_trampoline();
 
 // go2cs generated this placeholder — func sigprocmask is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 internal static partial void sigprocmask_trampoline();
 
 internal partial struct sigaltstack_args /*dyn*/ {
@@ -429,7 +405,6 @@ internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> old) {
     KeepAlive(Ꮡnew.OrTypedNil());
     KeepAlive(old.OrTypedNil());
 }
-
 internal static partial void sigaltstack_trampoline();
 
 internal partial struct raiseproc_args /*dyn*/ {
@@ -443,7 +418,6 @@ internal static void raiseproc(uint32 sig) {
 
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(raiseproc_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void raiseproc_trampoline();
 
 internal partial struct setitimer_args /*dyn*/ {
@@ -461,7 +435,6 @@ internal static void setitimer(int32 mode, ж<itimerval> @new, ж<itimerval> old
     KeepAlive(@new.OrTypedNil());
     KeepAlive(old.OrTypedNil());
 }
-
 internal static partial void setitimer_trampoline();
 
 internal partial struct sysctl_args /*dyn*/ {
@@ -485,7 +458,6 @@ internal static int32 sysctl(ж<uint32> mib, uint32 miblen, ж<byte> oldp, ж<ui
     KeepAlive(newp.OrTypedNil());
     return ret;
 }
-
 internal static partial void sysctl_trampoline();
 
 internal partial struct sysctlbyname_args /*dyn*/ {
@@ -508,7 +480,6 @@ internal static int32 sysctlbyname(ж<byte> name, ж<byte> oldp, ж<uintptr> old
     KeepAlive(newp.OrTypedNil());
     return ret;
 }
-
 internal static partial void sysctlbyname_trampoline();
 
 internal partial struct fcntl_args /*dyn*/ {
@@ -523,7 +494,6 @@ public static (int32 ret, int32 errno) fcntl(int32 fd, int32 cmd, int32 arg) {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(fcntl_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     return (args.ret, args.errno);
 }
-
 internal static partial void fcntl_trampoline();
 
 //go:nosplit
@@ -532,7 +502,6 @@ internal static int32 kqueue() {
     var v = libcCall((@unsafe.Pointer)abi.FuncPCABI0(kqueue_trampoline), nil);
     return v;
 }
-
 internal static partial void kqueue_trampoline();
 
 internal partial struct kevent_args /*dyn*/ {
@@ -555,7 +524,6 @@ internal static int32 kevent(int32 kq, ж<keventt> ch, int32 nch, ж<keventt> ev
     KeepAlive(ts.OrTypedNil());
     return ret;
 }
-
 internal static partial void kevent_trampoline();
 
 internal partial struct pthread_mutex_init_args /*dyn*/ {
@@ -573,7 +541,6 @@ internal static int32 pthread_mutex_init(ж<pthreadmutex> m, ж<pthreadmutexattr
     KeepAlive(attr.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_mutex_init_trampoline();
 
 internal partial struct pthread_mutex_lock_args /*dyn*/ {
@@ -589,7 +556,6 @@ internal static int32 pthread_mutex_lock(ж<pthreadmutex> m) {
     KeepAlive(m.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_mutex_lock_trampoline();
 
 internal partial struct pthread_mutex_unlock_args /*dyn*/ {
@@ -605,7 +571,6 @@ internal static int32 pthread_mutex_unlock(ж<pthreadmutex> m) {
     KeepAlive(m.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_mutex_unlock_trampoline();
 
 internal partial struct pthread_cond_init_args /*dyn*/ {
@@ -623,7 +588,6 @@ internal static int32 pthread_cond_init(ж<pthreadcond> c, ж<pthreadcondattr> a
     KeepAlive(attr.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_cond_init_trampoline();
 
 internal partial struct pthread_cond_wait_args /*dyn*/ {
@@ -641,7 +605,6 @@ internal static int32 pthread_cond_wait(ж<pthreadcond> c, ж<pthreadmutex> m) {
     KeepAlive(m.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_cond_wait_trampoline();
 
 internal partial struct pthread_cond_timedwait_relative_np_args /*dyn*/ {
@@ -661,7 +624,6 @@ internal static int32 pthread_cond_timedwait_relative_np(ж<pthreadcond> c, ж<p
     KeepAlive(t.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_cond_timedwait_relative_np_trampoline();
 
 internal partial struct pthread_cond_signal_args /*dyn*/ {
@@ -677,7 +639,6 @@ internal static int32 pthread_cond_signal(ж<pthreadcond> c) {
     KeepAlive(c.OrTypedNil());
     return ret;
 }
-
 internal static partial void pthread_cond_signal_trampoline();
 
 internal partial struct arc4random_buf_args /*dyn*/ {
@@ -694,7 +655,6 @@ internal static void arc4random_buf(@unsafe.Pointer Δp, int32 n) {
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(arc4random_buf_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     KeepAlive(@unsafe.Pointer.OrTypedNil(Δp));
 }
-
 internal static partial void arc4random_buf_trampoline();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -717,7 +677,6 @@ internal static void setNonblock(int32 fd) {
 internal static int32 issetugid() {
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(issetugid_trampoline), nil);
 }
-
 internal static partial void issetugid_trampoline();
 
 internal partial struct mach_vm_region_args /*dyn*/ {
@@ -756,7 +715,6 @@ public static int32 mach_vm_region(ж<uint64> address, ж<uint64> region_size, @
     ), out var Ꮡargs);
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(mach_vm_region_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void mach_vm_region_trampoline();
 
 internal partial struct proc_regionfilename_args /*dyn*/ {
@@ -776,7 +734,6 @@ public static int32 proc_regionfilename(nint pid, uint64 address, ж<byte> buf, 
     ), out var Ꮡargs);
     return libcCall((@unsafe.Pointer)abi.FuncPCABI0(proc_regionfilename_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
 }
-
 internal static partial void proc_regionfilename_trampoline();
 
 // Tell the linker that the libc_* functions are to be found

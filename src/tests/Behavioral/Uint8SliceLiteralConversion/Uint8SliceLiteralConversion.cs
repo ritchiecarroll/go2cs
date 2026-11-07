@@ -8,9 +8,7 @@ partial class main_package {
 
 partial struct buf /*[]uint8*/;
 
-internal static nint take(slice<uint8> b) {
-    return len(b);
-}
+internal static nint take(slice<uint8> b) { return len(b); }
 
 internal static slice<uint8> g = slice<uint8>("glob"u8);
 

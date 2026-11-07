@@ -279,9 +279,7 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
 // used, independent of the functions being tested.
 partial struct SetupError /*@string*/;
 
-public static @string Error(this SetupError s) {
-    return (@string)s;
-}
+public static @string Error(this SetupError s) { return (@string)s; }
 
 // A CheckError is the result of Check finding an error.
 partial struct CheckError {
@@ -455,7 +453,7 @@ internal static (reflectꓸValue v, reflectꓸType t, bool ok) functionAndType(a
 
 internal static slice<any> toInterfaces(slice<reflectꓸValue> values) {
     var ret = new slice<any>(len(values));
-    foreach (var (i, v) in values) {
+    foreach (var (i, v) in range(values)) {
         ret[i] = v.Interface();
     }
     return ret;
@@ -463,7 +461,7 @@ internal static slice<any> toInterfaces(slice<reflectꓸValue> values) {
 
 internal static @string toString(slice<any> interfaces) {
     var s = new slice<@string>(len(interfaces));
-    foreach (var (i, v) in interfaces) {
+    foreach (var (i, v) in range(interfaces)) {
         s[i] = fmt.Sprintf("%#v"u8, v);
     }
     return strings.Join(s, ", ");

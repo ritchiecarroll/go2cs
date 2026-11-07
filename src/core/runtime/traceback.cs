@@ -629,7 +629,7 @@ internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
     var ctxt = (~u.g.ptr()).cgoCtxt[u.cgoCtxt];
     u.cgoCtxt--;
     cgoContextPCs(ctxt, pcBuf);
-    foreach (var (i, pc) in pcBuf) {
+    foreach (var (i, pc) in range(pcBuf)) {
         if (pc == 0) {
             return i;
         }
@@ -982,7 +982,7 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
     if (gp.ancestors == nil) {
         return;
     }
-    foreach (var (_, ancestor) in gp.ancestors.ValueSlot) {
+    foreach (var (_, ancestor) in range(gp.ancestors.ValueSlot)) {
         printAncestorTraceback(ancestor);
     }
 }
@@ -1068,7 +1068,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
             ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
             var anySymbolized = false;
             var stop = false;
-            foreach (var (_, pc) in cgoBuf.slice(0, cgoN)) {
+            foreach (var (_, pc) in range(cgoBuf.slice(0, cgoN))) {
                 if (!cgoSymbolizerAvailable()) {
                     var (pr, stopΔ1) = commitFrame(); if (stopΔ1) {
                         break;
@@ -1100,7 +1100,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
 // TODO: Unify this with gentraceback and CallersFrames.
 internal static void printAncestorTraceback(ancestorInfo ancestor) {
     print((@string)"[originating from goroutine ", ancestor.goid, (@string)"]:\n");
-    foreach (var (fidx, pc) in ancestor.pcs) {
+    foreach (var (fidx, pc) in range(ancestor.pcs)) {
         var fΔ1 = findfunc(pc); // f previously validated
         if (showfuncinfo(fΔ1.srcFunc(), fidx == 0, abi.FuncIDNormal)) {
             printAncestorTracebackFuncInfo(fΔ1, pc);
@@ -1315,7 +1315,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
         var labels = ((ж<label.Set>)(uintptr)(gp.labels)).Value.List;
         if (len(labels) > 0) {
             print((@string)" labels:{");
-            foreach (var (i, kv) in labels) {
+            foreach (var (i, kv) in range(labels)) {
                 print((quoted)kv.Key, (@string)": ", (quoted)kv.Value);
                 if (i < len(labels) - 1) {
                     print((@string)", ");
@@ -1674,9 +1674,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
 }
 
 internal static @unsafe.Pointer cgoTraceback;
-
 internal static @unsafe.Pointer cgoContext;
-
 internal static @unsafe.Pointer cgoSymbolizer;
 
 internal static bool cgoTracebackAvailable() {
@@ -1718,7 +1716,7 @@ partial struct cgoSymbolizerArg {
 // printCgoTraceback prints a traceback of callers.
 internal static void printCgoTraceback(ref ΔcgoCallers callers) {
     if (!cgoSymbolizerAvailable()) {
-        foreach (var (_, c) in callers) {
+        foreach (var (_, c) in range(callers)) {
             if (c == 0) {
                 break;
             }
@@ -1731,7 +1729,7 @@ internal static void printCgoTraceback(ref ΔcgoCallers callers) {
         return (true, false);
     };
     ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
-    foreach (var (_, c) in callers) {
+    foreach (var (_, c) in range(callers)) {
         if (c == 0) {
             break;
         }

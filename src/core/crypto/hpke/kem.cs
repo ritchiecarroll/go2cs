@@ -145,13 +145,10 @@ internal static nint encSize(this ref dhKEM kem) {
 
 internal static ж<dhKEM> dhKEMP256;
 internal static void initᴛdhKEMP256() { dhKEMP256 = Ꮡ(new dhKEM(HKDFSHA256(), 0x0010, ecdh.P256(), 32, 32, 65)); }
-
 internal static ж<dhKEM> dhKEMP384;
 internal static void initᴛdhKEMP384() { dhKEMP384 = Ꮡ(new dhKEM(HKDFSHA384(), 0x0011, ecdh.P384(), 48, 48, 97)); }
-
 internal static ж<dhKEM> dhKEMP521;
 internal static void initᴛdhKEMP521() { dhKEMP521 = Ꮡ(new dhKEM(HKDFSHA512(), 0x0012, ecdh.P521(), 64, 66, 133)); }
-
 internal static ж<dhKEM> dhKEMX25519;
 internal static void initᴛdhKEMX25519() { dhKEMX25519 = Ꮡ(new dhKEM(HKDFSHA256(), 0x0020, ecdh.X25519(), 32, 32, 32)); }
 
@@ -191,7 +188,6 @@ partial struct unsupportedCurveKEM {
 internal static uint16 ID(this unsupportedCurveKEM _) {
     return 0;
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unsupportedCurveˢ => ref unsupportedCurveˢᵇ;
 private static readonly @string unsupportedCurveˢᵇ = "unsupported curve"u8;
@@ -199,19 +195,15 @@ private static readonly @string unsupportedCurveˢᵇ = "unsupported curve"u8;
 internal static (PrivateKey, error) GenerateKey(this unsupportedCurveKEM _) {
     return (default, errors.New(unsupportedCurveˢ));
 }
-
 internal static (ΔPublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢ));
 }
-
 internal static (PrivateKey, error) NewPrivateKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢ));
 }
-
 internal static (PrivateKey, error) DeriveKeyPair(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢ));
 }
-
 internal static nint encSize(this unsupportedCurveKEM _) {
     return 0;
 }
@@ -363,7 +355,7 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<b
     }
     uint8 counter = default;
     while (counter < 4) {
-        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, slice<byte>([counter]), kem.Nsk);
+        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, [counter], kem.Nsk);
         if (errΔ2 != nil) {
             return (default, errΔ2);
         }

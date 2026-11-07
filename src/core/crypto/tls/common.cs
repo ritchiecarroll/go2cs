@@ -221,12 +221,12 @@ internal static crypto.Hash directSigning = 0;
 
 // helloRetryRequestRandom is set as the Random value of a ServerHello
 // to signal that the message is actually a HelloRetryRequest.
-[GoLazy] partial class lazyᴛhelloRetryRequestRandom { internal static slice<byte> helloRetryRequestRandom = slice<byte>([ // See RFC 8446, Section 4.1.3.
+[GoLazy] partial class lazyᴛhelloRetryRequestRandom { internal static slice<byte> helloRetryRequestRandom = [ // See RFC 8446, Section 4.1.3.
     0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11,
     0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
     0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E,
     0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C
-]); }
+]; }
 
 // downgradeCanaryTLS12 or downgradeCanaryTLS11 is embedded in the server
 // random as a downgrade protection if the server would be capable of
@@ -1077,7 +1077,7 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
             }
             var valid = new slice<ticketKey>(0, () => new(), len(c.autoSessionTicketKeys) + 1);
             valid = append(valid, c.ticketKeyFromBytes(newKey));
-            foreach (var (_, vᴛ1) in c.autoSessionTicketKeys) {
+            foreach (var (_, vᴛ1) in range(c.autoSessionTicketKeys)) {
                 var k = vᴛ1.ΔClone();
 
                 // While rotating the current key, also remove any expired ones.
@@ -1114,7 +1114,7 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     }
 
     var newKeys = new slice<ticketKey>(len(keys), () => new());
-    foreach (var (i, vᴛ1) in keys) {
+    foreach (var (i, vᴛ1) in range(keys)) {
         var bytes = vᴛ1.Clone();
 
         newKeys[i] = c.ticketKeyFromBytes(bytes);
@@ -1163,17 +1163,16 @@ internal static slice<uint16> supportedCipherSuites(this ж<Config> Ꮡc) {
     return Ꮡc.cipherSuites(false);
 }
 
-internal static slice<uint16> ΔsupportedVersions = slice<uint16>([
+internal static slice<uint16> ΔsupportedVersions = [
     VersionTLS13,
     VersionTLS12,
     VersionTLS11,
     VersionTLS10
-]);
+];
 
 // roleClient and roleServer are meant to call supportedVersions and parents
 // with more readability at the callsite.
 internal const bool roleClient = true;
-
 internal const bool roleServer = false;
 
 internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
@@ -1184,7 +1183,7 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
     ref var c = ref Ꮡc.DerefOrNull();
 
     var versions = new slice<uint16>(0, len(ΔsupportedVersions));
-    foreach (var (_, v) in ΔsupportedVersions) {
+    foreach (var (_, v) in range(ΔsupportedVersions)) {
         if (fips140tls.Required() && !slices.Contains(allowedSupportedVersionsFIPS, v)) {
             continue;
         }
@@ -1220,7 +1219,7 @@ internal static uint16 maxSupportedVersion(this ж<Config> Ꮡc, bool isClient) 
 // library are returned. Any newer peer will use supportedVersions anyway.
 internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
     var versions = new slice<uint16>(0, len(ΔsupportedVersions));
-    foreach (var (_, v) in ΔsupportedVersions) {
+    foreach (var (_, v) in range(ΔsupportedVersions)) {
         if (v > maxVersion) {
             continue;
         }
@@ -1253,7 +1252,7 @@ internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID
 // versions of the peer. The highest supported version is preferred.
 internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
-    foreach (var (_, v) in ΔsupportedVersions) {
+    foreach (var (_, v) in range(ΔsupportedVersions)) {
         if (slices.Contains(peerVersions, v)) {
             return (v, true);
         }
@@ -1310,7 +1309,7 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
         }
     }
 
-    foreach (var (_, vᴛ1) in c.Certificates) {
+    foreach (var (_, vᴛ1) in range(c.Certificates)) {
         ref var cert = ref heap(new Certificate(), out var Ꮡcert);
         cert = vᴛ1;
 
@@ -1461,7 +1460,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                     return supportsRSAFallback(unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
                 }}
                 bool curveOk = default;
-                foreach (var (_, cΔ2) in chi.SupportedCurves) {
+                foreach (var (_, cΔ2) in range(chi.SupportedCurves)) {
                     if (cΔ2 == curve && config.supportsCurve(vers, cΔ2)) {
                         curveOk = true;
                         break;
@@ -1540,7 +1539,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
         return default;
     }
 
-    foreach (var (j, cert) in c.ΔCertificate) {
+    foreach (var (j, cert) in range(c.ΔCertificate)) {
         var x509Cert = c.Leaf;
         // Parse the certificate if this isn't the leaf node, or if
         // chain.Leaf was nil.
@@ -1551,7 +1550,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
             }
         }
 
-        foreach (var (_, ca) in cri.AcceptableCAs) {
+        foreach (var (_, ca) in range(cri.AcceptableCAs)) {
             if (bytes.Equal(x509Cert.RawIssuer, ca)) {
                 return default;
             }
@@ -1569,7 +1568,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
 // compatible chain from Certificates.
 public static void BuildNameToCertificate(this ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
-    foreach (var i in range(c.Certificates)) {
+    foreach (var i in range(len(c.Certificates))) {
         var cert = Ꮡ(c.Certificates, i);
         var (x509Cert, err) = cert.leaf();
         if (err != nil) {
@@ -1580,7 +1579,7 @@ public static void BuildNameToCertificate(this ref Config c) {
         if (x509Cert.Subject.CommonName != ""u8 && len(x509Cert.DNSNames) == 0) {
             c.NameToCertificate[x509Cert.Subject.CommonName] = cert;
         }
-        foreach (var (_, san) in x509Cert.DNSNames) {
+        foreach (var (_, san) in range(x509Cert.DNSNames)) {
             c.NameToCertificate[san] = cert;
         }
     }
@@ -1859,7 +1858,7 @@ internal static (slice<slice<ж<Δx509.Certificate>>>, error) fipsAllowedChains(
     }
 
     var permittedChains = new slice<slice<ж<Δx509.Certificate>>>(0, len(chains));
-    foreach (var (_, chain) in chains) {
+    foreach (var (_, chain) in range(chains)) {
         if (fipsAllowChain(chain)) {
             permittedChains = append(permittedChains, chain);
         }
@@ -1877,7 +1876,7 @@ internal static bool fipsAllowChain(slice<ж<Δx509.Certificate>> chain) {
         return false;
     }
 
-    foreach (var (_, cert) in chain) {
+    foreach (var (_, cert) in range(chain)) {
         if (!isCertificateAllowedFIPS(ref (cert).DerefOrNull())) {
             return false;
         }
@@ -1891,7 +1890,7 @@ internal static bool fipsAllowChain(slice<ж<Δx509.Certificate>> chain) {
 // being in opts.Roots (or in the system root pool if opts.Roots is nil). If
 // verifiedChains is empty, it returns false.
 internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> verifiedChains, Δx509.VerifyOptions opts) {
-    foreach (var (_, chain) in verifiedChains) {
+    foreach (var (_, chain) in range(verifiedChains)) {
         if (len(chain) == 0) {
             continue;
         }
@@ -1907,7 +1906,7 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         // CertPool.Contains if/once that is available. See go.dev/issue/77376.
         if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
             opts.Intermediates = Δx509.NewCertPool();
-            foreach (var (_, cert) in chain.slice(1, max(1, len(chain) - 1))) {
+            foreach (var (_, cert) in range(chain.slice(1, max(1, len(chain) - 1)))) {
                 opts.Intermediates.AddCert(cert);
             }
             var leaf = chain[0];

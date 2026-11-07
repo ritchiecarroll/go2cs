@@ -15,12 +15,12 @@ partial class time_package {
 // Many systems use /usr/share/zoneinfo, Solaris 2 has
 // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ,
 // NixOS has /etc/zoneinfo.
-internal static slice<@string> platformZoneSources = slice<@string>([
+internal static slice<@string> platformZoneSources = [
     "/usr/share/zoneinfo/",
     "/usr/share/lib/zoneinfo/",
     "/usr/lib/locale/TZ/",
     "/etc/zoneinfo"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string localtimeˢ => ref localtimeˢᵇ;
@@ -39,7 +39,7 @@ internal static void initLocal() {
     var (tz, ok) = syscall.Getenv("TZ");
     switch (ᐧ) {
     case {} when !ok: {
-        var (z, err) = loadLocation(localtimeˢ, slice<@string>(["/etc"]));
+        var (z, err) = loadLocation(localtimeˢ, ["/etc"]);
         if (err == nil) {
             localLoc = z.Value;
             localLoc.name = localˢ;
@@ -52,7 +52,7 @@ internal static void initLocal() {
             tz = tz[1..];
         }
         if (tz != ""u8 && tz[0] == '/') {
-            var (z, err) = loadLocation(tz, slice<@string>([""])); if (err == nil) {
+            var (z, err) = loadLocation(tz, [""]); if (err == nil) {
                 localLoc = z.Value;
                 if (tz == "/etc/localtime"u8) {
                     localLoc.name = localˢ;

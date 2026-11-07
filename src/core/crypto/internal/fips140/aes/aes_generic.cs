@@ -145,9 +145,7 @@ internal static uint32 subw(uint32 w) {
 }
 
 // Rotate
-internal static uint32 rotw(uint32 w) {
-    return w << 8 | w >> 24;
-}
+internal static uint32 rotw(uint32 w) { return w << 8 | w >> 24; }
 
 // Key expansion algorithm. See FIPS-197, Figure 11.
 // Their rcon[i] is our powx[i-1] << 24.

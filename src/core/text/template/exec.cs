@@ -245,7 +245,7 @@ internal static error /*err*/ execute(this ж<Template> Ꮡt, io.Writer wr, any 
         var state = Ꮡ(new state(
             tmpl: Ꮡt,
             wr: wr,
-            vars: slice<variable>([new("$", value)])
+            vars: [new("$", value)]
         ));
         if (t.Tree == nil || t.Root == nil) {
             state.errorf("%q is an incomplete or empty template", t.Name());
@@ -330,7 +330,7 @@ internal static void walk(this ж<state> Ꮡs, reflectꓸValue dot, parse.Node n
         break;
     }
     case ж<parse.ListNode> nodeΔ1: {
-        foreach (var (_, nodeΔ2) in nodeΔ1.Nodes) {
+        foreach (var (_, nodeΔ2) in range(nodeΔ1.Nodes)) {
             Ꮡs.walk(dot, nodeΔ2);
         }
         break;
@@ -533,7 +533,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
                     break;
                 }
                 var om = fmtsort.Sort(val);
-                foreach (var (_, m) in om) {
+                foreach (var (_, m) in range<fmtsort.KeyValue>(om)) {
                     oneIteration(m.Key, m.Value);
                 }
                 return;
@@ -635,7 +635,7 @@ internal static void walkTemplate(this ref state s, reflectꓸValue dot, ж<pars
     newState.depth++;
     newState.tmpl = tmpl;
     // No dynamic scoping: template invocations inherit no variables.
-    newState.vars = slice<variable>([new("$", dot)]);
+    newState.vars = [new("$", dot)];
     ᏑnewState.walk(dot, new parse.ListNodeжNode(tmpl.Root));
 }
 
@@ -656,14 +656,14 @@ internal static reflectꓸValue /*value*/ evalPipeline(this ref state s, reflect
     }
     s.at(new parse.PipeNodeжNode(Ꮡpipe));
     value = missingVal;
-    foreach (var (_, cmd) in pipe.Cmds) {
+    foreach (var (_, cmd) in range(pipe.Cmds)) {
         value = s.evalCommand(dot, cmd, value); // previous value is this one's final arg.
         // If the object has type interface{}, dig down one level to the thing inside.
         if (value.Kind() == reflect.ΔInterface && value.Type().NumMethod() == 0) {
             value = value.Elem();
         }
     }
-    foreach (var (_, variable) in pipe.Decl) {
+    foreach (var (_, variable) in range(pipe.Decl)) {
         if (pipe.IsAssign) {
             s.setVar(variable.Ident[0], value);
         } else {
@@ -962,7 +962,7 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
     if (isBuiltin && (name == "and"u8 || name == "or"u8)) {
         var argType = typ.In(0);
         reflectꓸValue vΔ2 = new(nil);
-        foreach (var (_, arg) in args) {
+        foreach (var (_, arg) in range(args)) {
             vΔ2 = s.evalArg(dot, argType, arg).Interface()._<reflectꓸValue>();
             if (truth(vΔ2) == (name == "or"u8)) {
                 // This value was already unwrapped
@@ -1111,7 +1111,7 @@ internal static reflectꓸValue evalArg(this ref state s, reflectꓸValue dot, r
         break;
     }
     case ж<parse.FieldNode> arg: {
-        return s.validateType(s.evalFieldNode(dot, arg, slice<parse.Node>([n]), missingVal), typ);
+        return s.validateType(s.evalFieldNode(dot, arg, [n], missingVal), typ);
     }
     case ж<parse.VariableNode> arg: {
         return s.validateType(s.evalVariableNode(dot, arg, default, missingVal), typ);

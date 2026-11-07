@@ -172,17 +172,14 @@ internal static void goPanicSlice3Alen(nint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: true, y: y, code: abi.BoundsSlice3Alen));
 }
-
 internal static void goPanicSlice3AlenU(nuint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: false, y: y, code: abi.BoundsSlice3Alen));
 }
-
 internal static void goPanicSlice3Acap(nint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: true, y: y, code: abi.BoundsSlice3Acap));
 }
-
 internal static void goPanicSlice3AcapU(nuint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: false, y: y, code: abi.BoundsSlice3Acap));
@@ -193,7 +190,6 @@ internal static void goPanicSlice3B(nint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: true, y: y, code: abi.BoundsSlice3B));
 }
-
 internal static void goPanicSlice3BU(nuint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: false, y: y, code: abi.BoundsSlice3B));
@@ -204,7 +200,6 @@ internal static void goPanicSlice3C(nint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: true, y: y, code: abi.BoundsSlice3C));
 }
-
 internal static void goPanicSlice3CU(nuint x, nint y) {
     panicCheck1(sys.GetCallerPC(), sliceBoundsOutOfRangeˢ);
     throw panic(new boundsError(x: (int64)x, signed: false, y: y, code: abi.BoundsSlice3C));
@@ -222,7 +217,6 @@ internal static void goPanicSliceConvert(nint x, nint y) {
 
 // Implemented in assembly. Declared here to mark them as ABIInternal.
 internal static partial void panicBounds();
-
 // in asm_GOARCH.s files, called from generated code
 internal static partial void panicExtend();
 
@@ -419,11 +413,8 @@ internal static void deferproc(Action fn) {
 }
 
 internal static error rangeDoneError = ((error)((errorString)(@string)"range function continued iteration after function for loop body returned false"));
-
 internal static error rangePanicError = ((error)((errorString)(@string)"range function continued iteration after loop body panic"));
-
 internal static error rangeExhaustedError = ((error)((errorString)(@string)"range function continued iteration after whole loop exit"));
-
 internal static error rangeMissingPanicError = ((error)((errorString)(@string)"range function recovered a loop body panic and did not resume panicking"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -863,12 +854,8 @@ partial struct PanicNilError {
 internal static ref readonly @string panicCalledWithNilˢ => ref panicCalledWithNilˢᵇ;
 private static readonly @string panicCalledWithNilˢᵇ = "panic called with nil argument"u8;
 
-public static @string Error(this ref PanicNilError _) {
-    return panicCalledWithNilˢ;
-}
-
-public static void RuntimeError(this ref PanicNilError _) {
-}
+public static @string Error(this ref PanicNilError _) { return panicCalledWithNilˢ; }
+public static void RuntimeError(this ref PanicNilError _) { }
 
 internal static ж<godebugInc> panicnil = Ꮡ(new godebugInc(name: "panicnil"));
 
@@ -1640,7 +1627,6 @@ internal static bool startpanic_m() {
 }
 
 internal static bool didothers;
-
 internal static readonly ж<mutex> Ꮡdeadlock = new StaticBox<mutex>(new mutex(nil));
 internal static ref mutex deadlock => ref ((StaticBox<mutex>)Ꮡdeadlock).ValueSlot;
 

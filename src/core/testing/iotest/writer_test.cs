@@ -24,7 +24,7 @@ internal static slice<truncateWriterTestsᴛ1> truncateWriterTests = slice<trunc
 ]);
 
 public static void TestTruncateWriter(ж<testing.T> t) {
-    foreach (var (_, tt) in truncateWriterTests) {
+    foreach (var (_, tt) in range(truncateWriterTests)) {
         var buf = @new<strings.Builder>();
         var tw = TruncateWriter(new iotest_test_package.strings_BuilderжWriter(buf), tt.trunc);
         var (n, err) = tw.Write(slice<byte>(tt.@in));

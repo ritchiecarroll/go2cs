@@ -32,13 +32,9 @@ partial struct DLLError {
     public @string Msg;
 }
 
-public static @string Error(this ref DLLError e) {
-    return e.Msg;
-}
+public static @string Error(this ref DLLError e) { return e.Msg; }
 
-public static error Unwrap(this ref DLLError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref DLLError e) { return e.Err; }
 
 // N.B. For the Syscall functions below:
 //

@@ -2,7 +2,7 @@
 <!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#slices-and-arrays)
-Go slices and arrays are converted to the golib [`slice<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/slice.cs) and [`array<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/array.cs) structures. A `make`-style allocation uses a constructor; a slice literal is golib's `slice<T>` builtin over a C# collection expression ([below](#a-slice-literal-is-golibs-builtin-over-a-collection-expression)); an array literal builds a C# array and projects it with the `.array()` extension:
+Go slices and arrays are converted to the golib [`slice<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/slice.cs) and [`array<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/array.cs) structures. A `make`-style allocation uses a constructor; a slice literal is a C# collection expression, bare where C# knows its type and inside golib's `slice<T>` builtin elsewhere ([below](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target)); an array literal builds a C# array and projects it with the `.array()` extension:
 
 ```go
 package main
@@ -29,28 +29,57 @@ internal static void Main() {
 }
 ```
 
-### A slice literal is golib's builtin over a collection expression
+<a id="a-slice-literal-is-golibs-builtin-over-a-collection-expression"></a>
+### A slice literal is a collection expression where C# knows its target
 
-An unkeyed literal of an **unnamed** slice type renders as golib's `slice<T>` builtin called on a C# collection
-expression, in every position: `[]int{10, 20, 30}` → `slice<nint>([10, 20, 30])`, nested literals composing
-(`[][]int{{1, 2}, {3}}` → `slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3])])`). The collection expression
-binds golib's array overload, `builtin.slice<T>(T[])`: C# builds the fresh array, one element store per element, and
-the overload wraps it, so the result keeps Go's literal semantics. It is never nil (`[]int{}` → `slice<nint>([])` is
-empty and not nil, over the shared zero-length array, with no allocation), `len == cap`, and two evaluations of one
-literal share no elements. `T` is always written, so nothing is inferred from the elements: an untyped `1` would infer
-`System.Int32` where Go's `[]int` is `nint`.
+An unkeyed literal of an **unnamed** slice type renders as a bare C# collection expression wherever its position
+gives C# the literal's own `slice<T>` as the target, and as golib's `slice<T>` builtin called on one everywhere
+else:
 
-A collection expression cannot target `slice<T>` itself. C# takes a collection's element type from its public
-enumerator, and `slice<T>`'s yields Go's range pair `(nint, T)`, which `foreach (var (i, x) in xs)` relies on. Of the
-builtin's overloads a collection expression converts to, C# prefers the span one, so the array overload carries the
-higher `[OverloadResolutionPriority]`. Every other `slice<T>(…)` call binds as it did: a `u8` literal (`[]byte("…")`)
-keeps the counted span overload, and an array, a golib `array<T>` and an `@string` keep the array overload they already
-bound. The array target is what keeps a call inside an element on its own Go line in an optimized build. A span
-target lowers to an inline stack buffer whose element stores the optimizing JIT maps to no IL offset of their own, so
+```go
+var primes = []int{2, 3, 5}          // package level: a typed field
+func pair() []int { return []int{1, 2} }
+
+grid := [][]int{{1, 2}, {3}}         // the inner literals are elements of the outer one
+total(grid[0], []int{4})             // a non-generic function's parameter
+show([]int{5})                       // show(x any)
+```
+<!-- illustration: not converter output -->
+```csharp
+internal static slice<nint> primes = [2, 3, 5];
+internal static slice<nint> pair() { return [1, 2]; }
+
+var grid = slice<slice<nint>>([[1, 2], [3]]);
+total(grid[0], [4]);
+show(slice<nint>([5]));
+```
+
+The bare form is written at a single `x = []T{…}` assignment, a package var's initializer, the only result of a
+function declaration that has one result, an element, field value or map value of another composite literal, and
+an argument to a non-generic function's fixed parameter outside `defer` and `go`. In each, the destination's Go type
+is identical to the literal's: an `any` slot, a named slice type or a type parameter takes the builtin. golib's
+`slice<T>` carries `[CollectionBuilder]`, so C# builds the bare form through `SliceBuilder.Create`, which copies the
+elements into a backing the slice owns. Every other position keeps the builtin: `x := []T{…}` (C#'s `var` has no
+target), a local `var x T = …`, a func literal's return, a multi-result return, a range operand, a conversion, a
+builtin's argument, and a generic call's argument, where C# would infer the element type and an untyped `1` would
+infer `System.Int32` where Go's `[]int` is `nint`. The builtin's `T` is always written for the same reason.
+
+Either form keeps Go's literal semantics. It is never nil (`[]int{}` → `[]` or `slice<nint>([])` is empty and not
+nil, over the shared zero-length array, with no allocation), `len == cap`, and two evaluations of one literal share
+no elements. Neither backing is charged to `testing.AllocsPerRun`'s counter, like the `new T[]{…}` array the earlier
+form allocated: a counted copy moved math/big's `TestNewIntAllocs` from 1 to 2 allocations per run, away from Go's 0.
+
+The builtin's collection expression binds golib's array overload, `builtin.slice<T>(T[])`: C# builds the fresh array,
+one element store per element, and the overload wraps it. Of the builtin's overloads a collection expression converts
+to, C# prefers the span one, so the array overload carries the higher `[OverloadResolutionPriority]`. Every other
+`slice<T>(…)` call binds as it did: a `u8` literal (`[]byte("…")`) keeps the counted span overload, and an array, a
+golib `array<T>` and an `@string` keep the array overload they already bound.
+
+A literal whose element holds a function call keeps the builtin in every position. The array target is what keeps a
+call inside an element on its own Go line in an optimized build. A span target, which is what `SliceBuilder.Create`
+takes, lowers to an inline stack buffer whose element stores the optimizing JIT maps to no IL offset of their own, so
 `runtime.Caller` inside a struct element answered its literal's spec line, and with tiering off even the previous
-statement's (seat #54). The array is not charged to `testing.AllocsPerRun`'s counter, like the `new T[]{…}` array the
-earlier form allocated: a counted copy moved math/big's `TestNewIntAllocs` from 1 to 2 allocations per run, away from
-Go's 0.
+statement's (seat #54).
 
 An element that begins with a call to a Go function named `with` is written `@with(…)`: from C# 15, a
 collection-expression element spelled `with(…)` is the collection's construction arguments, not a call, so
@@ -65,7 +94,8 @@ elided element of a named slice type, which takes no constructor and binds throu
 
 A keyed literal keeps its sparse form, a fixed array its `.array()` projection, a slice of arrays its
 `GoReflect.WithElemDims(new array<T>[]{…}.slice(), n)` form (the element dims are recorded on it), and a named slice
-type's own literal its constructor (below). (Guarded by the behavioral test `CollectionExpressionSlices`, by golib's
+type's own literal its constructor (below). (Guarded by the converter test
+`TestSliceLiteralsAtTargetedPositionsAreCollectionExpressions`, by the behavioral test `CollectionExpressionSlices`, by golib's
 `SliceLiteralBindingTests` and, for the lines, `CallerLineSliceLiteralsReleaseTests` over the behavioral project
 `CallerLineSliceLiterals`; 1.26.10.2 parity seats #30 and #54.)
 
@@ -167,7 +197,7 @@ directly (`Ꮡarr.slice(0, 4)`), and that test guards the index range, value ran
 result. The standard-library sites of the Span form are runtime's `os_windows`, `heapdump` and `mbitmap`. The length
 narrowing is covered by `StdLibInternalAbi`.
 
-An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the [slice-literal form](#a-slice-literal-is-golibs-builtin-over-a-collection-expression) for a slice — `{rA, rB}` (inferred `[]rank`) → `slice<rank>([rA, rB])` — and the element-array projection for an array — an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
+An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the [slice-literal form](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target) for a slice — `{rA, rB}` (inferred `[]rank`) → `slice<rank>([rA, rB])` — and the element-array projection for an array — an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
 
 An **indexed (keyed) slice/array literal** — `[]string{lockRankSysmon: "sysmon", …}` — is emitted as a golib `golib.SparseArray<T>` collection initializer (`[index] = value`). Its indexer takes a Go `int`. When an index key's Go type is a **defined integer type** whose underlying type does not implicitly widen to C# `int` (i.e. `int`/`int64`/`uint`/`uint32`/`uint64`/`uintptr`, as opposed to `int8`/`uint8`/`int16`/`uint16`/`int32`), the key is cast to `int` so it satisfies the indexer (CS1503 otherwise): `[lockRankSysmon]` (a `type lockRank int`) → `[(int)lockRankSysmon]`. A key that already widens (e.g. a `uint8`-backed `Kind`) is left uncast.
 
@@ -586,7 +616,7 @@ or pointer-deref — `exprReadsValueNeedingClone` in `arrayCloneOperations.go`; 
 literal or call result is freshly constructed and needs none):
 
 ```go
-for _, row := range m { row[0] = 99 }  // → foreach (var (_, vᴛ1) in m.ΔRangeSnapshot()) { var row = vᴛ1.Clone(); … }
+for _, row := range m { row[0] = 99 }  // → foreach (var (_, vᴛ1) in range(m.ΔRangeSnapshot())) { var row = vᴛ1.Clone(); … }
 for i, row = range m { … }             // pre-existing vars → row = vᴛ1.Clone(); inside the body
 m := [2][3]int{a, b}                   // → new array<nint>[]{a.Clone(), b.Clone()}.array()
 s1 := holder{arr: a}                   // keyed struct field  → new holder(arr: a.Clone())
@@ -704,7 +734,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 213, 216-217 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-214 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -1403,7 +1433,7 @@ nsLit := ns{}                 // type ns [2]withArray — withArray has a [2][3]
 nbLit := nb{}                 // type nb [4]byte — element needs nothing
 ```
 
-<!-- source: src/tests/Behavioral/CompositeLiteralElements/main.cs:128, 131, 138, 147 -->
+<!-- source: src/tests/Behavioral/CompositeLiteralElements/main.cs:126, 129, 136, 145 -->
 ```csharp
 var nnLit = new nn(new array<array<nint>>(2, () => new(3)));
 …
@@ -1490,7 +1520,7 @@ var x [2][4]byte           // len(x), len(x[1]) => 2 4
 var deep [2][3][4]byte
 var se [2]inner            // type inner struct { b [3]byte }
 ```
-<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs:24, 31, 41 -->
+<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs:22, 29, 39 -->
 ```csharp
 array<array<byte>> x = new(2, () => new(4));
 …
@@ -1666,7 +1696,7 @@ rule, one predicate, both containers:
 grid := make([][4]int32, 3)
 capped := make([][2]int, 1, 3)
 ```
-<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs.target:99, 105 -->
+<!-- source: src/tests/Behavioral/NestedFixedArrays/main.cs.target:97, 103 -->
 ```csharp
 var grid = GoReflect.WithElemDims(new slice<array<int32>>(3, () => new(4)), 4);
 …
@@ -1848,7 +1878,7 @@ lifted anonymous elements and cross-package generic elements:
 ```go
 ptrs := vals.([]*atomic.Int32)
 ```
-<!-- source: src/tests/Behavioral/ArrayOfCrossPackageType/main.cs.target:18 -->
+<!-- source: src/tests/Behavioral/ArrayOfCrossPackageType/main.cs.target:17 -->
 ```csharp
 var ptrs = vals._<slice<ж<atomic.Int32>>>();
 ```
@@ -1875,7 +1905,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:161-162 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

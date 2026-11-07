@@ -190,9 +190,7 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
 
 // Level returns the receiver.
 // It implements [Leveler].
-public static ΔLevel Level(this ΔLevel l) {
-    return l;
-}
+public static ΔLevel Level(this ΔLevel l) { return l; }
 
 // A LevelVar is a [Level] variable, to allow a [Handler] level to change
 // dynamically.

@@ -11,34 +11,22 @@ public static UntypedInt Sep => /* ':' */ 58;
 
 partial struct Celsius /*num:float64*/;
 
-public static Celsius Boiling() {
-    return 100D;
-}
+public static Celsius Boiling() { return 100D; }
 
-public static Temperature Freezing() {
-    return 0D;
-}
+public static Temperature Freezing() { return 0D; }
 
-public static Celsius Add(this Celsius c, Celsius d) {
-    return c + d;
-}
+public static Celsius Add(this Celsius c, Celsius d) { return c + d; }
 
 partial struct Sensor {
     public @string Name;
     public Celsius Temp;
 }
 
-public static bool Hot(this Sensor s) {
-    return s.Temp > 50D;
-}
+public static bool Hot(this Sensor s) { return s.Temp > 50D; }
 
-public static @string Label(this Sensor s) {
-    return s.Name;
-}
+public static @string Label(this Sensor s) { return s.Name; }
 
-public static void Calibrate(this ref Sensor s, Celsius d) {
-    s.Temp += d;
-}
+public static void Calibrate(this ref Sensor s, Celsius d) { s.Temp += d; }
 
 partial interface Labeled {
     @string Label();
@@ -46,13 +34,9 @@ partial interface Labeled {
 
 internal static Labeled _ᴛ1ʗ = new Sensor();
 
-public static @string Describe(Labeled l) {
-    return l.Label();
-}
+public static @string Describe(Labeled l) { return l.Label(); }
 
-public static Labeled LabeledOf(ж<Sensor> s) {
-    return new SensorжLabeled(s);
-}
+public static Labeled LabeledOf(ж<Sensor> s) { return new SensorжLabeled(s); }
 
 partial struct Meter {
     internal nint count;
@@ -63,33 +47,23 @@ public static nint Bump(this ref Meter m) {
     return m.count;
 }
 
-public static ж<Meter> NewMeter() {
-    return Ꮡ(new Meter());
-}
+public static ж<Meter> NewMeter() { return Ꮡ(new Meter()); }
 
 partial interface Reporter {
     @string Report();
 }
 
-public static @string Report(this ref Meter m) {
-    return "count";
-}
+public static @string Report(this ref Meter m) { return "count"; }
 
 partial struct Alarm {
     public @string Msg;
 }
 
-public static @string Error(this ref Alarm a) {
-    return a.Msg;
-}
+public static @string Error(this ref Alarm a) { return a.Msg; }
 
-public static error AsErr(ж<Alarm> a) {
-    return new Alarmжerror(a);
-}
+public static error AsErr(ж<Alarm> a) { return new Alarmжerror(a); }
 
-public static Reporter AsReporter(ж<Meter> m) {
-    return new MeterжReporter(m);
-}
+public static Reporter AsReporter(ж<Meter> m) { return new MeterжReporter(m); }
 
 partial struct Cache<T> {
     public nint Hits;
@@ -100,19 +74,13 @@ public static nint Bump<T>(this ref Cache<T> c) {
     return c.Hits;
 }
 
-public static slice<T> Wrap<T>(T v) {
-    return slice<T>([v]);
-}
+public static slice<T> Wrap<T>(T v) { return [v]; }
 
-public static V Pair<K, V>(K k, V v) {
-    return v;
-}
+public static V Pair<K, V>(K k, V v) { return v; }
 
 // type ΔSift is a methodless func type — rendered inline as its base delegate
 
-public static bool Sift(this Sensor s, Func<nint, bool> f) {
-    return f((nint)s.Temp);
-}
+public static bool Sift(this Sensor s, Func<nint, bool> f) { return f((nint)s.Temp); }
 
 partial struct Node {
     public nint ID;
@@ -120,9 +88,7 @@ partial struct Node {
 
 // type Resolver is a methodless func type — rendered inline as its base delegate
 
-public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> r, @string path) {
-    return r(default, path);
-}
+public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> r, @string path) { return r(default, path); }
 
 partial struct Probe {
     public nint Hits;
@@ -151,23 +117,15 @@ partial struct ΔStatus {
     public nint Code;
 }
 
-public static nint Status(this Sensor s) {
-    return (nint)s.Temp;
-}
+public static nint Status(this Sensor s) { return (nint)s.Temp; }
 
 partial struct ΔGrade /*num:nint*/;
 
-public static nint Grade(this Sensor s) {
-    return 1;
-}
+public static nint Grade(this Sensor s) { return 1; }
 
-public static nint Token(this Sensor s) {
-    return (nint)s.Temp;
-}
+public static nint Token(this Sensor s) { return (nint)s.Temp; }
 
-public static ΔToken AsToken(nint v) {
-    return v;
-}
+public static ΔToken AsToken(nint v) { return v; }
 
 public partial struct snapshot {
     public nint At;
@@ -176,9 +134,7 @@ public partial struct snapshot {
 public static readonly ж<snapshot> ᏑLatest = new StaticBox<snapshot>(new snapshot(At: 42));
 public static ref snapshot Latest => ref ((StaticBox<snapshot>)ᏑLatest).ValueSlot;
 
-public static snapshot Peek() {
-    return Latest;
-}
+public static snapshot Peek() { return Latest; }
 
 partial struct Ticks /*num:uintptr*/;
 
@@ -191,13 +147,9 @@ partial struct ΔMarker {
     public @string ΔΔMarker;
 }
 
-public static @string Marker(this Sensor s) {
-    return s.Name;
-}
+public static @string Marker(this Sensor s) { return s.Name; }
 
-public static ΔMarker MakeMarker(@string s) {
-    return new ΔMarker(ΔΔMarker: s);
-}
+public static ΔMarker MakeMarker(@string s) { return new ΔMarker(ΔΔMarker: s); }
 
 partial interface Emitter {
     @string Emit();
@@ -205,48 +157,34 @@ partial interface Emitter {
     @string nodeTag();
 }
 
-public static @string DescribeEmitter(Emitter e) {
-    return e.Emit() + "/"u8 + e.nodeTag();
-}
+public static @string DescribeEmitter(Emitter e) { return e.Emit() + "/"u8 + e.nodeTag(); }
 
 partial struct Leaf {
     public @string Text;
 }
 
-public static @string Emit(this ref Leaf l) {
-    return l.Text;
-}
+public static @string Emit(this ref Leaf l) { return l.Text; }
 
-internal static void emitNode(this ref Leaf l) {
-}
+internal static void emitNode(this ref Leaf l) { }
 
-internal static @string nodeTag(this ref Leaf l) {
-    return "lf";
-}
+internal static @string nodeTag(this ref Leaf l) { return "lf"; }
 
-public static ж<Leaf> NewLeaf(@string text) {
-    return Ꮡ(new Leaf(Text: text));
-}
+public static ж<Leaf> NewLeaf(@string text) { return Ꮡ(new Leaf(Text: text)); }
 
 partial struct EmitBase {
     public @string Label;
 }
 
-public static @string Emit(this ref EmitBase e) {
-    return e.Label;
-}
+public static @string Emit(this ref EmitBase e) { return e.Label; }
 
 partial struct Branch {
     /*embed*/ public EmitBase EmitBase;
     public nint Kind;
 }
 
-internal static void emitNode(this ref Branch b) {
-}
+internal static void emitNode(this ref Branch b) { }
 
-internal static @string nodeTag(this ref Branch b) {
-    return "brn";
-}
+internal static @string nodeTag(this ref Branch b) { return "brn"; }
 
 public static ж<Branch> NewBranch(@string label, nint kind) {
     return Ꮡ(new Branch(EmitBase: new EmitBase(Label: label), Kind: kind));
@@ -254,9 +192,7 @@ public static ж<Branch> NewBranch(@string label, nint kind) {
 
 partial struct Verdict /*num:nint*/;
 
-public static nint Score(this Verdict v) {
-    return (nint)v * 10;
-}
+public static nint Score(this Verdict v) { return (nint)v * 10; }
 
 partial interface Scored {
     nint Score();

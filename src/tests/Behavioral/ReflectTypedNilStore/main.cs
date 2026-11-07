@@ -15,9 +15,7 @@ partial struct Holder {
     public map<@string, nint> M;
 }
 
-internal static @string take(any v) {
-    return fmt.Sprintf("%#v"u8, v);
-}
+internal static @string take(any v) { return fmt.Sprintf("%#v"u8, v); }
 
 internal static void Main() {
     var h = new Holder();
@@ -35,7 +33,7 @@ internal static void Main() {
 
         var s = reflect.Append(reflect.ValueOf(slice<any>([])), f).Interface()._<slice<any>>();
 
-        var @out = reflect.ValueOf(take).Call(slice<reflectꓸValue>([f]))[0].Interface();
+        var @out = reflect.ValueOf(take).Call([f])[0].Interface();
 
         var ch = new channel<any>(1);
         reflect.ValueOf(ch).Send(f);

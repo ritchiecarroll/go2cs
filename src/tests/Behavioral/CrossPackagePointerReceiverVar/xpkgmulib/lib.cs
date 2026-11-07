@@ -14,13 +14,9 @@ partial struct Counter {
     internal nint n;
 }
 
-public static void Inc(this ref Counter c) {
-    c.n++;
-}
+public static void Inc(this ref Counter c) { c.n++; }
 
-public static nint Value(this Counter c) {
-    return c.n;
-}
+public static nint Value(this Counter c) { return c.n; }
 
 public static readonly ж<Counter> ᏑCnt = new StaticBox<Counter>(default(Counter));
 public static ref Counter Cnt => ref ((StaticBox<Counter>)ᏑCnt).ValueSlot;

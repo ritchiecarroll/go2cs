@@ -222,9 +222,7 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
     return (n, oobn, err);
 }
 
-internal static ж<UnixConn> newUnixConn(ж<netFD> fd) {
-    return Ꮡ(new UnixConn(new conn(fd)));
-}
+internal static ж<UnixConn> newUnixConn(ж<netFD> fd) { return Ꮡ(new UnixConn(new conn(fd))); }
 
 // DialUnix acts like [Dial] for Unix networks.
 //
@@ -335,9 +333,7 @@ public static error Close(this ж<UnixListener> Ꮡl) {
 // Addr returns the listener's network address.
 // The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
-public static ΔAddr Addr(this ref UnixListener l) {
-    return l.fd.laddr;
-}
+public static ΔAddr Addr(this ref UnixListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.

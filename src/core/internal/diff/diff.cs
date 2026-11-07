@@ -70,7 +70,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     pair chunk = default;           // start lines of current chunk
     pair count = default;           // number of lines from each side in current chunk
     slice<@string> ctext = default; // lines for current chunk
-    foreach (var (_, m) in tgs(x, y)) {
+    foreach (var (_, m) in range(tgs(x, y))) {
         if (m.x < done.x) {
             // Already handled scanning forward from earlier match.
             continue;
@@ -93,11 +93,11 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 
         // Emit the mismatched lines before start into this chunk.
         // (No effect on first sentinel iteration, when start = {0,0}.)
-        foreach (var (_, s) in x.slice(done.x, start.x)) {
+        foreach (var (_, s) in range(x.slice(done.x, start.x))) {
             ctext = append(ctextᴷ, ctext, "-"u8 + s);
             count.x++;
         }
-        foreach (var (_, s) in y.slice(done.y, start.y)) {
+        foreach (var (_, s) in range(y.slice(done.y, start.y))) {
             ctext = append(ctext, "+"u8 + s);
             count.y++;
         }
@@ -106,7 +106,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         // the chunk includes all the common lines and continues.
         UntypedInt C = 3; // number of context lines
         if ((end.x < len(x) || end.y < len(y)) && (end.x - start.x < C || (len(ctext) > 0 && end.x - start.x < (nint)(2 * C)))) {
-            foreach (var (_, s) in x.slice(start.x, end.x)) {
+            foreach (var (_, s) in range(x.slice(start.x, end.x))) {
                 ctext = append(ctext, " "u8 + s);
                 count.x++;
                 count.y++;
@@ -121,7 +121,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             if (n > C) {
                 n = C;
             }
-            foreach (var (_, s) in x.slice(start.x, start.x + n)) {
+            foreach (var (_, s) in range(x.slice(start.x, start.x + n))) {
                 ctext = append(ctext, " "u8 + s);
                 count.x++;
                 count.y++;
@@ -138,7 +138,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
                 chunk.y++;
             }
             fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "@@ -%d,%d +%d,%d @@\n"u8, chunk.x, count.x, chunk.y, count.y);
-            foreach (var (_, s) in ctext) {
+            foreach (var (_, s) in range(ctext)) {
                 @out.WriteString(s);
             }
             count.x = 0;
@@ -153,7 +153,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 
         // Otherwise start a new chunk.
         chunk = new pair(end.x - (nint)C, end.y - (nint)C);
-        foreach (var (_, s) in x.slice(chunk.x, end.x)) {
+        foreach (var (_, s) in range(x.slice(chunk.x, end.x))) {
             ctext = append(ctext, " "u8 + s);
             count.x++;
             count.y++;
@@ -197,12 +197,12 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     // for the x side and 0, -4, -8 for the y side.
     // Using negative numbers now lets us distinguish positive line numbers later.
     var m = new map<@string, nint>();
-    foreach (var (_, s) in x) {
+    foreach (var (_, s) in range(x)) {
         nint c = m[s]; if (c > -2) {
             m[s] = c - 1;
         }
     }
-    foreach (var (_, s) in y) {
+    foreach (var (_, s) in range(y)) {
         nint c = m[s]; if (c > -8) {
             m[s] = c - 4;
         }
@@ -217,13 +217,13 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     slice<nint> xi = default;
     slice<nint> yi = default;
     slice<nint> inv = default;
-    foreach (var (i, s) in y) {
+    foreach (var (i, s) in range(y)) {
         if (m[s] == -1 + -4) {
             m[s] = len(yi);
             yi = append(yiᴷ, yi, i);
         }
     }
-    foreach (var (i, s) in x) {
+    foreach (var (i, s) in range(x)) {
         var (j, ok) = m[s, ꟷ]; if (ok && j >= 0) {
             xi = append(xiᴷ, xi, i);
             inv = append(invᴷ, inv, j);
@@ -239,7 +239,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     nint n = len(xi);
     var T = new slice<nint>(n);
     var L = new slice<nint>(n);
-    foreach (var i in range(T)) {
+    foreach (var i in range(len(T))) {
         T[i] = n + 1;
     }
     for (nint iᴛ1 = 0; iᴛ1 < n; iᴛ1++) {
@@ -251,7 +251,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
         L[i] = kΔ1 + 1;
     }
     nint k = 0;
-    foreach (var (_, v) in L) {
+    foreach (var (_, v) in range(L)) {
         if (k < v) {
             k = v;
         }

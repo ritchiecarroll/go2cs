@@ -45,14 +45,10 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 }
 
 // Parent returns the scope's containing (parent) scope.
-public static ж<ΔScope> Parent(this ref ΔScope s) {
-    return s.parent;
-}
+public static ж<ΔScope> Parent(this ref ΔScope s) { return s.parent; }
 
 // Len returns the number of scope elements.
-public static nint Len(this ref ΔScope s) {
-    return len(s.elems);
-}
+public static nint Len(this ref ΔScope s) { return len(s.elems); }
 
 // Names returns the scope's element names in sorted order.
 public static slice<@string> Names(this ref ΔScope s) {
@@ -67,14 +63,10 @@ public static slice<@string> Names(this ref ΔScope s) {
 }
 
 // NumChildren returns the number of scopes nested in s.
-public static nint NumChildren(this ref ΔScope s) {
-    return len(s.children);
-}
+public static nint NumChildren(this ref ΔScope s) { return len(s.children); }
 
 // Child returns the i'th child scope for 0 <= i < NumChildren().
-public static ж<ΔScope> Child(this ref ΔScope s, nint i) {
-    return s.children[i];
-}
+public static ж<ΔScope> Child(this ref ΔScope s, nint i) { return s.children[i]; }
 
 // Lookup returns the object in scope s with the given name if such an
 // object exists; otherwise the result is nil.
@@ -101,7 +93,7 @@ internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string nam
     var matchesᴷ = new stackAppend<Object>(moves: true);
 
     slice<Object> matches = default;
-    foreach (var (_, n) in s.Names()) {
+    foreach (var (_, n) in range(s.Names())) {
         if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
             matches = append(matchesᴷ, matches, s.Lookup(n));
         }
@@ -176,12 +168,12 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
     fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, Ꮡs.OrTypedNil());
 
     @string indn1 = indn + ind;
-    foreach (var (_, name) in s.Names()) {
+    foreach (var (_, name) in range(s.Names())) {
         fmt.Fprintf(w, "%s%s\n"u8, indn1, s.Lookup(name));
     }
 
     if (recurse) {
-        foreach (var (_, sΔ1) in s.children) {
+        foreach (var (_, sΔ1) in range(s.children)) {
             sΔ1.WriteTo(w, n + 1, recurse);
         }
     }
@@ -235,64 +227,20 @@ internal static Object resolve(@string name, Object obj) {
 
 // stub implementations so *lazyObject implements Object and we can
 // store them directly into Scope.elems.
-internal static ж<ΔScope> Parent(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static tokenꓸPos Pos(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static ж<Package> Pkg(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static @string Name(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static ΔType Type(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static bool Exported(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static @string Id(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static @string String(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static uint32 order(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
-    throw panic("unreachable");
-}
-
-internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
-    throw panic("unreachable");
-}
-
-internal static void setParent(this ref lazyObject _Δp0, ж<ΔScope> _Δp1) {
-    throw panic("unreachable");
-}
-
-internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) {
-    throw panic("unreachable");
-}
-
-internal static tokenꓸPos scopePos(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
-internal static void setScopePos(this ref lazyObject _Δp0, tokenꓸPos _Δp1) {
-    throw panic("unreachable");
-}
+internal static ж<ΔScope> Parent(this ref lazyObject _) { throw panic("unreachable"); }
+internal static tokenꓸPos Pos(this ref lazyObject _) { throw panic("unreachable"); }
+internal static ж<Package> Pkg(this ref lazyObject _) { throw panic("unreachable"); }
+internal static @string Name(this ref lazyObject _) { throw panic("unreachable"); }
+internal static ΔType Type(this ref lazyObject _) { throw panic("unreachable"); }
+internal static bool Exported(this ref lazyObject _) { throw panic("unreachable"); }
+internal static @string Id(this ref lazyObject _) { throw panic("unreachable"); }
+internal static @string String(this ref lazyObject _) { throw panic("unreachable"); }
+internal static uint32 order(this ref lazyObject _) { throw panic("unreachable"); }
+internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) { throw panic("unreachable"); }
+internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) { throw panic("unreachable"); }
+internal static void setParent(this ref lazyObject _Δp0, ж<ΔScope> _Δp1) { throw panic("unreachable"); }
+internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) { throw panic("unreachable"); }
+internal static tokenꓸPos scopePos(this ref lazyObject _) { throw panic("unreachable"); }
+internal static void setScopePos(this ref lazyObject _Δp0, tokenꓸPos _Δp1) { throw panic("unreachable"); }
 
 } // end types_package

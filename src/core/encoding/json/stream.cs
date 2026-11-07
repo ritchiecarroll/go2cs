@@ -44,16 +44,12 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
-public static void UseNumber(this ref Decoder dec) {
-    dec.d.useNumber = true;
-}
+public static void UseNumber(this ref Decoder dec) { dec.d.useNumber = true; }
 
 // DisallowUnknownFields causes the Decoder to return an error when the destination
 // is a struct and the input contains object keys which do not match any
 // non-ignored, exported fields in the destination.
-public static void DisallowUnknownFields(this ref Decoder dec) {
-    dec.d.disallowUnknownFields = true;
-}
+public static void DisallowUnknownFields(this ref Decoder dec) { dec.d.disallowUnknownFields = true; }
 
 // Decode reads the next JSON-encoded value from its
 // input and stores it in the value pointed to by v.
@@ -193,7 +189,7 @@ internal static error refill(this ref Decoder dec) {
 }
 
 internal static bool nonSpace(slice<byte> b) {
-    foreach (var (_, c) in b) {
+    foreach (var (_, c) in range(b)) {
         if (!isSpace(c)) {
             return true;
         }
@@ -312,7 +308,6 @@ public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
 }
 
 internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)nil));
-
 internal static Unmarshaler _ᴛ2ʗ = new RawMessageжUnmarshaler(((ж<RawMessage>)nil));
 
 internal static UntypedInt tokenTopValue => iota;

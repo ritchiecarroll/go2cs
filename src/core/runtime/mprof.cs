@@ -248,7 +248,7 @@ internal static bool eqslice(slice<uintptr> x, slice<uintptr> y) {
     if (len(x) != len(y)) {
         return false;
     }
-    foreach (var (i, xi) in x) {
+    foreach (var (i, xi) in range(x)) {
         if (xi != y[i]) {
             return false;
         }
@@ -713,7 +713,7 @@ partial struct StackRecord {
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
 public static slice<uintptr> Stack(this ref StackRecord r) {
-    foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
         }
@@ -752,9 +752,7 @@ partial struct MemProfileRecord {
 }
 
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
-public static int64 InUseBytes(this ref MemProfileRecord r) {
-    return r.AllocBytes - r.FreeBytes;
-}
+public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
 
 // InUseObjects returns the number of objects in use (AllocObjects - FreeObjects).
 public static int64 InUseObjects(this ref MemProfileRecord r) {
@@ -764,7 +762,7 @@ public static int64 InUseObjects(this ref MemProfileRecord r) {
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
 public static slice<uintptr> Stack(this ref MemProfileRecord r) {
-    foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
         }
@@ -842,7 +840,7 @@ internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inu
         n = 0;
         for (var b = head; b != nil; b = b.allnext) {
             var mp = b.mp();
-            foreach (var c in range(mp.future)) {
+            foreach (var c in range(len(mp.future))) {
                 @lock(ᏑprofMemFutureLock.at<mutex>(c));
                 mp.Ꮡactive.add(mp.at(memRecord.Ꮡfuture, c));
                 mp.future[c] = new memRecordCycle();
@@ -944,7 +942,7 @@ public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
 
 internal static partial void expandFrames(slice<BlockProfileRecord> Δp) {
     var expandedStack = makeProfStack();
-    foreach (var i in range(Δp)) {
+    foreach (var i in range(len(Δp))) {
         var cf = CallersFrames(Δp[i].StackRecord.Stack());
         nint j = 0;
         while (j < len(expandedStack)) {
@@ -1585,7 +1583,7 @@ public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> Δp) {
     if (!ok) {
         return (n, ok);
     }
-    foreach (var (i, mr) in records.slice(0, n)) {
+    foreach (var (i, mr) in range(records.slice(0, n))) {
         nint l = copy(Δp[i].Stack0[..], mr.Stack);
         builtin.clear(Δp[i].Stack0.slice(l));
     }

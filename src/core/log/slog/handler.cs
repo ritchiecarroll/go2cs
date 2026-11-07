@@ -383,7 +383,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
     if (s.h.json) {
         // Close all open groups.
-        foreach (var _ᴛ1 in range(s.h.groups.slice(0, nOpenGroups))) {
+        foreach (var _ᴛ1 in range(len(s.h.groups.slice(0, nOpenGroups)))) {
             s.buf.WriteByte((byte)'}');
         }
         // Close the top-level object.
@@ -447,7 +447,7 @@ internal static void free(this ref handleState s) {
 }
 
 internal static void openGroups(this ref handleState s) {
-    foreach (var (_, n) in s.h.groups.slice(s.h.nOpenGroups)) {
+    foreach (var (_, n) in range(s.h.groups.slice(s.h.nOpenGroups))) {
         s.openGroup(n);
     }
 }
@@ -490,7 +490,7 @@ internal static void closeGroup(this ref handleState s, @string name) {
 // It reports whether something was appended.
 internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) {
     var nonEmpty = false;
-    foreach (var (_, a) in @as) {
+    foreach (var (_, a) in range(@as)) {
         if (Ꮡs.appendAttr(a)) {
             nonEmpty = true;
         }
@@ -688,20 +688,9 @@ public static ΔHandler DiscardHandler = new discardHandler();
 partial struct discardHandler {
 }
 
-internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) {
-    return false;
-}
-
-internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) {
-    return default;
-}
-
-internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) {
-    return dh;
-}
-
-internal static ΔHandler WithGroup(this discardHandler dh, @string name) {
-    return dh;
-}
+internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) { return false; }
+internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
+internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
+internal static ΔHandler WithGroup(this discardHandler dh, @string name) { return dh; }
 
 } // end slog_package

@@ -25,7 +25,7 @@ internal static slice<item> items(this group g) {
 
 internal static void show(@string label, slice<item> items) {
     fmt.Print(label, ":");
-    foreach (var (_, it) in items) {
+    foreach (var (_, it) in range(items)) {
         fmt.Print(" ", it.key, "=", it.val);
     }
     fmt.Println();

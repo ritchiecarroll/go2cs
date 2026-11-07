@@ -147,14 +147,14 @@ public static slice<EventSpec> Specs() {
     // "Structural" Events.
     [EvEventBatch] = new(
         Name: "EventBatch",
-        Args: slice<@string>(["gen", "m", "time", "size"])
+        Args: ["gen", "m", "time", "size"]
     ),
     [EvStacks] = new(
         Name: "Stacks"
     ),
     [EvStack] = new(
         Name: "Stack",
-        Args: slice<@string>(["id", "nframes"]),
+        Args: ["id", "nframes"],
         IsStack: true
     ),
     [EvStrings] = new(
@@ -162,7 +162,7 @@ public static slice<EventSpec> Specs() {
     ),
     [EvString] = new(
         Name: "String",
-        Args: slice<@string>(["id"]),
+        Args: ["id"],
         HasData: true
     ),
     [EvCPUSamples] = new(
@@ -170,19 +170,19 @@ public static slice<EventSpec> Specs() {
     ),
     [EvCPUSample] = new(
         Name: "CPUSample",
-        Args: slice<@string>(["time", "m", "p", "g", "stack"]),
+        Args: ["time", "m", "p", "g", "stack"],
         // N.B. There's clearly a timestamp here, but these Events
         // are special in that they don't appear in the regular
         // M streams.
-        StackIDs: slice<nint>([4])
+        StackIDs: [4]
     ),
     [EvFrequency] = new(
         Name: "Frequency",
-        Args: slice<@string>(["freq"])
+        Args: ["freq"]
     ),
     [EvExperimentalBatch] = new(
         Name: "ExperimentalBatch",
-        Args: slice<@string>(["exp", "gen", "m", "time"]),
+        Args: ["exp", "gen", "m", "time"],
         HasData: true // Easier to represent for raw readers.
 
     ),
@@ -196,242 +196,242 @@ public static slice<EventSpec> Specs() {
     // "Timed" Events.
     [EvProcsChange] = new(
         Name: "ProcsChange",
-        Args: slice<@string>(["dt", "procs_value", "stack"]),
+        Args: ["dt", "procs_value", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2])
+        StackIDs: [2]
     ),
     [EvProcStart] = new(
         Name: "ProcStart",
-        Args: slice<@string>(["dt", "p", "p_seq"]),
+        Args: ["dt", "p", "p_seq"],
         IsTimedEvent: true
     ),
     [EvProcStop] = new(
         Name: "ProcStop",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         IsTimedEvent: true
     ),
     [EvProcSteal] = new(
         Name: "ProcSteal",
-        Args: slice<@string>(["dt", "p", "p_seq", "m"]),
+        Args: ["dt", "p", "p_seq", "m"],
         IsTimedEvent: true
     ),
     [EvProcStatus] = new(
         Name: "ProcStatus",
-        Args: slice<@string>(["dt", "p", "pstatus"]),
+        Args: ["dt", "p", "pstatus"],
         IsTimedEvent: true
     ),
     [EvGoCreate] = new(
         Name: "GoCreate",
-        Args: slice<@string>(["dt", "new_g", "new_stack", "stack"]),
+        Args: ["dt", "new_g", "new_stack", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([3, 2])
+        StackIDs: [3, 2]
     ),
     [EvGoCreateSyscall] = new(
         Name: "GoCreateSyscall",
-        Args: slice<@string>(["dt", "new_g"]),
+        Args: ["dt", "new_g"],
         IsTimedEvent: true
     ),
     [EvGoStart] = new(
         Name: "GoStart",
-        Args: slice<@string>(["dt", "g", "g_seq"]),
+        Args: ["dt", "g", "g_seq"],
         IsTimedEvent: true
     ),
     [EvGoDestroy] = new(
         Name: "GoDestroy",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         IsTimedEvent: true
     ),
     [EvGoDestroySyscall] = new(
         Name: "GoDestroySyscall",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         IsTimedEvent: true
     ),
     [EvGoStop] = new(
         Name: "GoStop",
-        Args: slice<@string>(["dt", "reason_string", "stack"]),
+        Args: ["dt", "reason_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2]),
-        StringIDs: slice<nint>([1])
+        StackIDs: [2],
+        StringIDs: [1]
     ),
     [EvGoBlock] = new(
         Name: "GoBlock",
-        Args: slice<@string>(["dt", "reason_string", "stack"]),
+        Args: ["dt", "reason_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2]),
-        StringIDs: slice<nint>([1])
+        StackIDs: [2],
+        StringIDs: [1]
     ),
     [EvGoUnblock] = new(
         Name: "GoUnblock",
-        Args: slice<@string>(["dt", "g", "g_seq", "stack"]),
+        Args: ["dt", "g", "g_seq", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([3])
+        StackIDs: [3]
     ),
     [EvGoSyscallBegin] = new(
         Name: "GoSyscallBegin",
-        Args: slice<@string>(["dt", "p_seq", "stack"]),
+        Args: ["dt", "p_seq", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2])
+        StackIDs: [2]
     ),
     [EvGoSyscallEnd] = new(
         Name: "GoSyscallEnd",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         StartEv: EvGoSyscallBegin,
         IsTimedEvent: true
     ),
     [EvGoSyscallEndBlocked] = new(
         Name: "GoSyscallEndBlocked",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         StartEv: EvGoSyscallBegin,
         IsTimedEvent: true
     ),
     [EvGoStatus] = new(
         Name: "GoStatus",
-        Args: slice<@string>(["dt", "g", "m", "gstatus"]),
+        Args: ["dt", "g", "m", "gstatus"],
         IsTimedEvent: true
     ),
     [EvSTWBegin] = new(
         Name: "STWBegin",
-        Args: slice<@string>(["dt", "kind_string", "stack"]),
+        Args: ["dt", "kind_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2]),
-        StringIDs: slice<nint>([1])
+        StackIDs: [2],
+        StringIDs: [1]
     ),
     [EvSTWEnd] = new(
         Name: "STWEnd",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         StartEv: EvSTWBegin,
         IsTimedEvent: true
     ),
     [EvGCActive] = new(
         Name: "GCActive",
-        Args: slice<@string>(["dt", "gc_seq"]),
+        Args: ["dt", "gc_seq"],
         IsTimedEvent: true,
         StartEv: EvGCBegin
     ),
     [EvGCBegin] = new(
         Name: "GCBegin",
-        Args: slice<@string>(["dt", "gc_seq", "stack"]),
+        Args: ["dt", "gc_seq", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2])
+        StackIDs: [2]
     ),
     [EvGCEnd] = new(
         Name: "GCEnd",
-        Args: slice<@string>(["dt", "gc_seq"]),
+        Args: ["dt", "gc_seq"],
         StartEv: EvGCBegin,
         IsTimedEvent: true
     ),
     [EvGCSweepActive] = new(
         Name: "GCSweepActive",
-        Args: slice<@string>(["dt", "p"]),
+        Args: ["dt", "p"],
         StartEv: EvGCSweepBegin,
         IsTimedEvent: true
     ),
     [EvGCSweepBegin] = new(
         Name: "GCSweepBegin",
-        Args: slice<@string>(["dt", "stack"]),
+        Args: ["dt", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([1])
+        StackIDs: [1]
     ),
     [EvGCSweepEnd] = new(
         Name: "GCSweepEnd",
-        Args: slice<@string>(["dt", "swept_value", "reclaimed_value"]),
+        Args: ["dt", "swept_value", "reclaimed_value"],
         StartEv: EvGCSweepBegin,
         IsTimedEvent: true
     ),
     [EvGCMarkAssistActive] = new(
         Name: "GCMarkAssistActive",
-        Args: slice<@string>(["dt", "g"]),
+        Args: ["dt", "g"],
         StartEv: EvGCMarkAssistBegin,
         IsTimedEvent: true
     ),
     [EvGCMarkAssistBegin] = new(
         Name: "GCMarkAssistBegin",
-        Args: slice<@string>(["dt", "stack"]),
+        Args: ["dt", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([1])
+        StackIDs: [1]
     ),
     [EvGCMarkAssistEnd] = new(
         Name: "GCMarkAssistEnd",
-        Args: slice<@string>(["dt"]),
+        Args: ["dt"],
         StartEv: EvGCMarkAssistBegin,
         IsTimedEvent: true
     ),
     [EvHeapAlloc] = new(
         Name: "HeapAlloc",
-        Args: slice<@string>(["dt", "heapalloc_value"]),
+        Args: ["dt", "heapalloc_value"],
         IsTimedEvent: true
     ),
     [EvHeapGoal] = new(
         Name: "HeapGoal",
-        Args: slice<@string>(["dt", "heapgoal_value"]),
+        Args: ["dt", "heapgoal_value"],
         IsTimedEvent: true
     ),
     [EvGoLabel] = new(
         Name: "GoLabel",
-        Args: slice<@string>(["dt", "label_string"]),
+        Args: ["dt", "label_string"],
         IsTimedEvent: true,
-        StringIDs: slice<nint>([1])
+        StringIDs: [1]
     ),
     [EvUserTaskBegin] = new(
         Name: "UserTaskBegin",
-        Args: slice<@string>(["dt", "task", "parent_task", "name_string", "stack"]),
+        Args: ["dt", "task", "parent_task", "name_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([4]),
-        StringIDs: slice<nint>([3])
+        StackIDs: [4],
+        StringIDs: [3]
     ),
     [EvUserTaskEnd] = new(
         Name: "UserTaskEnd",
-        Args: slice<@string>(["dt", "task", "stack"]),
+        Args: ["dt", "task", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([2])
+        StackIDs: [2]
     ),
     [EvUserRegionBegin] = new(
         Name: "UserRegionBegin",
-        Args: slice<@string>(["dt", "task", "name_string", "stack"]),
+        Args: ["dt", "task", "name_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([3]),
-        StringIDs: slice<nint>([2])
+        StackIDs: [3],
+        StringIDs: [2]
     ),
     [EvUserRegionEnd] = new(
         Name: "UserRegionEnd",
-        Args: slice<@string>(["dt", "task", "name_string", "stack"]),
+        Args: ["dt", "task", "name_string", "stack"],
         StartEv: EvUserRegionBegin,
         IsTimedEvent: true,
-        StackIDs: slice<nint>([3]),
-        StringIDs: slice<nint>([2])
+        StackIDs: [3],
+        StringIDs: [2]
     ),
     [EvUserLog] = new(
         Name: "UserLog",
-        Args: slice<@string>(["dt", "task", "key_string", "value_string", "stack"]),
+        Args: ["dt", "task", "key_string", "value_string", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([4]),
-        StringIDs: slice<nint>([2, 3])
+        StackIDs: [4],
+        StringIDs: [2, 3]
     ),
     [EvGoSwitch] = new(
         Name: "GoSwitch",
-        Args: slice<@string>(["dt", "g", "g_seq"]),
+        Args: ["dt", "g", "g_seq"],
         IsTimedEvent: true
     ),
     [EvGoSwitchDestroy] = new(
         Name: "GoSwitchDestroy",
-        Args: slice<@string>(["dt", "g", "g_seq"]),
+        Args: ["dt", "g", "g_seq"],
         IsTimedEvent: true
     ),
     [EvGoCreateBlocked] = new(
         Name: "GoCreateBlocked",
-        Args: slice<@string>(["dt", "new_g", "new_stack", "stack"]),
+        Args: ["dt", "new_g", "new_stack", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([3, 2])
+        StackIDs: [3, 2]
     ),
     [EvGoStatusStack] = new(
         Name: "GoStatusStack",
-        Args: slice<@string>(["dt", "g", "m", "gstatus", "stack"]),
+        Args: ["dt", "g", "m", "gstatus", "stack"],
         IsTimedEvent: true,
-        StackIDs: slice<nint>([4])
+        StackIDs: [4]
     ),
     [EvClockSnapshot] = new(
         Name: "ClockSnapshot",
-        Args: slice<@string>(["dt", "mono", "sec", "nsec"]),
+        Args: ["dt", "mono", "sec", "nsec"],
         IsTimedEvent: true
     ),
 
@@ -439,55 +439,55 @@ public static slice<EventSpec> Specs() {
 
     [EvSpan] = new(
         Name: "Span",
-        Args: slice<@string>(["dt", "id", "npages_value", "kindclass"]),
+        Args: ["dt", "id", "npages_value", "kindclass"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvSpanAlloc] = new(
         Name: "SpanAlloc",
-        Args: slice<@string>(["dt", "id", "npages_value", "kindclass"]),
+        Args: ["dt", "id", "npages_value", "kindclass"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvSpanFree] = new(
         Name: "SpanFree",
-        Args: slice<@string>(["dt", "id"]),
+        Args: ["dt", "id"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvHeapObject] = new(
         Name: "HeapObject",
-        Args: slice<@string>(["dt", "id", "type"]),
+        Args: ["dt", "id", "type"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvHeapObjectAlloc] = new(
         Name: "HeapObjectAlloc",
-        Args: slice<@string>(["dt", "id", "type"]),
+        Args: ["dt", "id", "type"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvHeapObjectFree] = new(
         Name: "HeapObjectFree",
-        Args: slice<@string>(["dt", "id"]),
+        Args: ["dt", "id"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvGoroutineStack] = new(
         Name: "GoroutineStack",
-        Args: slice<@string>(["dt", "id", "order"]),
+        Args: ["dt", "id", "order"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvGoroutineStackAlloc] = new(
         Name: "GoroutineStackAlloc",
-        Args: slice<@string>(["dt", "id", "order"]),
+        Args: ["dt", "id", "order"],
         IsTimedEvent: true,
         Experiment: AllocFree
     ),
     [EvGoroutineStackFree] = new(
         Name: "GoroutineStackFree",
-        Args: slice<@string>(["dt", "id"]),
+        Args: ["dt", "id"],
         IsTimedEvent: true,
         Experiment: AllocFree
     )

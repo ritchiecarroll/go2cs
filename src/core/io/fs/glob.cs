@@ -75,7 +75,7 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
     if (err != nil) {
         return (default, err);
     }
-    foreach (var (_, d) in m) {
+    foreach (var (_, d) in range(m)) {
         (matches, err) = glob(fsys, d, @file, matches);
         if (err != nil) {
             return (matches, err);
@@ -110,7 +110,7 @@ internal static (slice<@string> m, error e) glob(FS fs, @string dir, @string pat
         return (m, e); // ignore I/O error
     }
 
-    foreach (var (_, info) in infos) {
+    foreach (var (_, info) in range(infos)) {
         @string n = info.Name();
         var (matched, errΔ1) = path.Match(pattern, n);
         if (errΔ1 != nil) {

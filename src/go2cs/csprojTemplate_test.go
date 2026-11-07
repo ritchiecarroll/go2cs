@@ -506,6 +506,76 @@ func TestPublishPropertiesAreScopedOffLibrariesButAllowUnsafeBlocksIsNot(t *test
 	}
 }
 
+// The same scoping, held over every project file ON DISK rather than over the template alone. A
+// hand-written project never passes through the template, so the template's guard says nothing about
+// it: golib.csproj carried PublishTrimmed and PublishReadyToRun unconditionally, and a consumer that
+// referenced golib as a local project failed `dotnet publish -r <rid>` with IL1034 ("Root assembly
+// 'golib' does not have entry point") then NETSDK1144. Package-built consumers never load the file,
+// so no release measurement could see it. Every project the tree ships from -- src/core, converted
+// and hand-owned alike, and the analyzer -- keeps both properties off Library.
+func TestEveryShippedProjectScopesPublishPropertiesOffLibraries(t *testing.T) {
+	const guard = "'$(OutputType)'!='Library'"
+
+	var projects []string
+
+	for _, root := range []string{filepath.Join("..", "core"), filepath.Join("..", "gen")} {
+		err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if entry.IsDir() && (entry.Name() == "bin" || entry.Name() == "obj") {
+				return filepath.SkipDir
+			}
+
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".csproj") {
+				projects = append(projects, path)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			t.Fatalf("walking %s: %v", root, err)
+		}
+	}
+
+	// golib is the project this guard exists for; a walk that missed it would pass vacuously.
+	if !slices.Contains(projects, filepath.Join("..", "core", "golib", "golib.csproj")) {
+		t.Fatalf("the walk found %d projects but not golib.csproj", len(projects))
+	}
+
+	for _, path := range projects {
+		contents, err := os.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("cannot read %s: %v", path, err)
+		}
+
+		groups := propertyGroupsOf(t, path, strings.TrimPrefix(string(contents), "\ufeff"))
+
+		// An executable has the entry point IL1034 asks for, so the hazard is a LIBRARY's alone. The
+		// -tests hosts are Exe and scope ReadyToRun on _IsPublishing instead (test-csproj-template.xml).
+		if outputType, _ := groups.unconditionalValue("OutputType"); outputType == "Exe" {
+			continue
+		}
+
+		for _, group := range groups {
+			for _, property := range group.Properties {
+				name := property.XMLName.Local
+
+				if name != "PublishTrimmed" && name != "PublishReadyToRun" {
+					continue
+				}
+
+				if !strings.Contains(group.Condition, guard) && !strings.Contains(property.Condition, guard) {
+					t.Errorf("%s sets <%s> outside a %s condition (group Condition %q): a consumer referencing it as a local project fails `dotnet publish -r <rid>` with IL1034", filepath.ToSlash(path), name, guard, group.Condition)
+				}
+			}
+		}
+	}
+}
+
 // msbuildProperty is one element inside a <PropertyGroup>: its name, its own Condition and
 // its text. The element-level Condition matters independently of the enclosing group's: it is
 // how ONE property is made overridable (TargetFramework defers to src/Directory.Build.props
@@ -538,6 +608,26 @@ func (groups propertyGroups) value(name string) string {
 	}
 
 	return value
+}
+
+// unconditionalValue returns the last value set for name by an unconditional group and an
+// unconditional element -- the value that holds whatever the build's properties are.
+func (groups propertyGroups) unconditionalValue(name string) (string, bool) {
+	value, found := "", false
+
+	for _, group := range groups {
+		if group.Condition != "" {
+			continue
+		}
+
+		for _, property := range group.Properties {
+			if property.XMLName.Local == name && property.Condition == "" {
+				value, found = property.Value, true
+			}
+		}
+	}
+
+	return value, found
 }
 
 // conditionOf returns the Condition of the first group that sets name ("" for an unconditional

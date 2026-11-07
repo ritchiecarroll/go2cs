@@ -15,7 +15,6 @@ partial interface byteOrder {
 
 partial struct littleEndian {
 }
-
 partial struct bigEndian {
 }
 

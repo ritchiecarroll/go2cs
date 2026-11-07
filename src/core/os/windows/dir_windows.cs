@@ -102,21 +102,10 @@ partial struct dirEntry {
     internal ж<fileStat> fs;
 }
 
-internal static @string Name(this dirEntry de) {
-    return de.fs.Name();
-}
-
-internal static bool IsDir(this dirEntry de) {
-    return de.fs.IsDir();
-}
-
-internal static FileMode Type(this dirEntry de) {
-    return de.fs.Mode().Type();
-}
-
-internal static (FileInfo, error) Info(this dirEntry de) {
-    return (new fileStatжFileInfo(de.fs), default);
-}
+internal static @string Name(this dirEntry de) { return de.fs.Name(); }
+internal static bool IsDir(this dirEntry de) { return de.fs.IsDir(); }
+internal static FileMode Type(this dirEntry de) { return de.fs.Mode().Type(); }
+internal static (FileInfo, error) Info(this dirEntry de) { return (new fileStatжFileInfo(de.fs), default); }
 
 internal static @string String(this dirEntry de) {
     return fs.FormatDirEntry(de);

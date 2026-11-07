@@ -48,7 +48,7 @@ public static @string String(this RDNSequence r) {
         if (i > 0) {
             s += ","u8;
         }
-        foreach (var (j, tv) in rdn) {
+        foreach (var (j, tv) in range<AttributeTypeAndValue>(rdn)) {
             if (j > 0) {
                 s += "+"u8;
             }
@@ -149,12 +149,12 @@ partial struct Name {
 public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) {
     ref var rdns = ref Ꮡrdns.DerefOrNull();
 
-    foreach (var (_, rdn) in rdns) {
+    foreach (var (_, rdn) in range<RelativeDistinguishedNameSET>(rdns)) {
         if (len(rdn) == 0) {
             continue;
         }
 
-        foreach (var (_, atv) in rdn) {
+        foreach (var (_, atv) in range<AttributeTypeAndValue>(rdn)) {
             n.Names = append(n.Names, atv);
             var (value, ok) = atv.Value._<@string>(ᐧ);
             if (!ok) {
@@ -205,15 +205,15 @@ public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns)
     }
 }
 
-internal static slice<nint> oidCountry = slice<nint>([2, 5, 4, 6]);
-internal static slice<nint> oidOrganization = slice<nint>([2, 5, 4, 10]);
-internal static slice<nint> oidOrganizationalUnit = slice<nint>([2, 5, 4, 11]);
-internal static slice<nint> oidCommonName = slice<nint>([2, 5, 4, 3]);
-internal static slice<nint> oidSerialNumber = slice<nint>([2, 5, 4, 5]);
-internal static slice<nint> oidLocality = slice<nint>([2, 5, 4, 7]);
-internal static slice<nint> oidProvince = slice<nint>([2, 5, 4, 8]);
-internal static slice<nint> oidStreetAddress = slice<nint>([2, 5, 4, 9]);
-internal static slice<nint> oidPostalCode = slice<nint>([2, 5, 4, 17]);
+internal static slice<nint> oidCountry = [2, 5, 4, 6];
+internal static slice<nint> oidOrganization = [2, 5, 4, 10];
+internal static slice<nint> oidOrganizationalUnit = [2, 5, 4, 11];
+internal static slice<nint> oidCommonName = [2, 5, 4, 3];
+internal static slice<nint> oidSerialNumber = [2, 5, 4, 5];
+internal static slice<nint> oidLocality = [2, 5, 4, 7];
+internal static slice<nint> oidProvince = [2, 5, 4, 8];
+internal static slice<nint> oidStreetAddress = [2, 5, 4, 9];
+internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
 
 // appendRDNs appends a relativeDistinguishedNameSET to the given RDNSequence
 // and returns the new value. The relativeDistinguishedNameSET contains an
@@ -225,7 +225,7 @@ internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@stri
     }
 
     var s = new slice<AttributeTypeAndValue>(len(values));
-    foreach (var (i, value) in values) {
+    foreach (var (i, value) in range(values)) {
         s[i].Type = oid;
         s[i].Value = value;
     }
@@ -256,12 +256,12 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
     ret = n.appendRDNs(ret, n.Organization, oidOrganization);
     ret = n.appendRDNs(ret, n.OrganizationalUnit, oidOrganizationalUnit);
     if (len(n.CommonName) > 0) {
-        ret = n.appendRDNs(ret, slice<@string>([n.CommonName]), oidCommonName);
+        ret = n.appendRDNs(ret, [n.CommonName], oidCommonName);
     }
     if (len(n.SerialNumber) > 0) {
-        ret = n.appendRDNs(ret, slice<@string>([n.SerialNumber]), oidSerialNumber);
+        ret = n.appendRDNs(ret, [n.SerialNumber], oidSerialNumber);
     }
-    foreach (var (_, atv) in n.ExtraNames) {
+    foreach (var (_, atv) in range(n.ExtraNames)) {
         ret = append(ret, (RelativeDistinguishedNameSET)(slice<AttributeTypeAndValue>([atv])));
     }
 
@@ -277,7 +277,7 @@ public static @string String(this Name n) {
     // If there are no ExtraNames, surface the parsed value (all entries in
     // Names) instead.
     if (n.ExtraNames == nil) {
-        foreach (var (_, atv) in n.Names) {
+        foreach (var (_, atv) in range(n.Names)) {
             var t = atv.Type;
             if (len(t) == 4 && t[0] == 2 && t[1] == 5 && t[2] == 4) {
                 switch (t[3]) {
@@ -299,7 +299,7 @@ public static @string String(this Name n) {
 // oidInAttributeTypeAndValue reports whether a type with the given OID exists
 // in atv.
 internal static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice<AttributeTypeAndValue> atv) {
-    foreach (var (_, a) in atv) {
+    foreach (var (_, a) in range(atv)) {
         if (a.Type.Equal(oid)) {
             return true;
         }

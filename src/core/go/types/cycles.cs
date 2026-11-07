@@ -17,7 +17,7 @@ internal static void directCycles(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pathIdx = new map<ж<TypeName>, nint>();
-    foreach (var (_, obj) in check.objList) {
+    foreach (var (_, obj) in range(check.objList)) {
         var (tname, ok) = obj._<ж<TypeName>>(ᐧ); if (ok) {
             Ꮡcheck.directCycle(tname, pathIdx);
         }
@@ -73,7 +73,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 
             // collect type names on cycle
             slice<Object> cycle = default;
-            foreach (var (_, tnameΔ1) in path.slice(start)) {
+            foreach (var (_, tnameΔ1) in range(path.slice(start))) {
                 cycle = append(cycleᴷ, cycle, (Object)(new TypeNameжObject(tnameΔ1)));
             }
 
@@ -108,7 +108,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 
     // Mark all traversed type names black.
     // (ensure that pathIdx doesn't contain any grey entries upon returning)
-    foreach (var (_, tnameΔ2) in path) {
+    foreach (var (_, tnameΔ2) in range(path)) {
         pathIdx[tnameΔ2] = -1;
     }
 
@@ -161,7 +161,7 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
             return Ꮡcheck.finiteSize(tΔ1.elem);
         }
         case ж<Struct> tΔ1: {
-            foreach (var (_, f) in tΔ1.fields) {
+            foreach (var (_, f) in range(tΔ1.fields)) {
                 if (!Ꮡcheck.finiteSize(f.typ)) {
                     return false;
                 }

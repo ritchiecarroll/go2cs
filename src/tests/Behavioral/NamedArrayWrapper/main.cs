@@ -7,24 +7,14 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct pageBits /*[4]uint64*/;
-
 partial struct pallocBits /*pageBits*/;
-
 partial struct pm /*[]uint32*/;
-
 partial struct tb /*[4]byte*/;
 
-internal static void zeroTB(ref tb buf) {
-    buf = new tb(new byte[4].array());
-}
+internal static void zeroTB(ref tb buf) { buf = new tb(new byte[4].array()); }
 
-internal static void set(this ref pageBits b, nuint i, uint64 v) {
-    b.Value[i] = v;
-}
-
-internal static uint64 get(this ref pageBits b, nuint i) {
-    return b.Value[i];
-}
+internal static void set(this ref pageBits b, nuint i, uint64 v) { b.Value[i] = v; }
+internal static uint64 get(this ref pageBits b, nuint i) { return b.Value[i]; }
 
 internal static void fill(this ж<pallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -153,9 +143,7 @@ public static nint Total(this Grid g) {
 }
 
 partial struct mont /*[4]uint64*/;
-
 partial struct nonMont /*[4]uint64*/;
-
 partial struct scal {
     internal mont s;
 }
@@ -184,13 +172,9 @@ partial struct slot {
 
 partial struct slots /*[4]slot*/;
 
-internal static ж<slot> at(this ref slots s, nint i) {
-    return Ꮡ(s.Value, i);
-}
+internal static ж<slot> at(this ref slots s, nint i) { return Ꮡ(s.Value, i); }
 
-internal static nint sum(this ref slots s) {
-    return s.Value[0].v + s.Value[1].v + s.Value[2].v + s.Value[3].v;
-}
+internal static nint sum(this ref slots s) { return s.Value[0].v + s.Value[1].v + s.Value[2].v + s.Value[3].v; }
 
 partial struct counter2 {
     internal int32 n;
@@ -210,8 +194,6 @@ internal static ж<counters> bumpAll(this ж<counters> Ꮡc) {
     return Ꮡc;
 }
 
-internal static int32 bumpVia(ж<counters> c, nint i) {
-    return c.at<counter2>(i).bump();
-}
+internal static int32 bumpVia(ж<counters> c, nint i) { return c.at<counter2>(i).bump(); }
 
 } // end main_package

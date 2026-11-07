@@ -40,7 +40,7 @@ internal static void declare(this ж<Checker> Ꮡcheck, ж<ΔScope> scope, ж<as
 // pathString returns a string of the form a->b-> ... ->g for a path [a, b, ... g].
 internal static @string pathString(slice<Object> path) {
     @string s = default;
-    foreach (var (i, p) in path) {
+    foreach (var (i, p) in range(path)) {
         if (i > 0) {
             s += "->"u8;
         }
@@ -242,7 +242,7 @@ internal static bool /*valid*/ validCycle(this ж<Checker> Ꮡcheck, Object obj)
         nint nval = 0;         // number of (constant or variable) values in the cycle
         nint ndef = 0;         // number of type definitions in the cycle
 loop:
-        foreach (var (_, objΔ1) in cycle) {
+        foreach (var (_, objΔ1) in range(cycle)) {
             switch (objΔ1.type()) {
             case ж<Const> _:
             case ж<Var> _: {
@@ -381,7 +381,7 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
         err.addf(new Objectᴠpositioner(obj), "invalid cycle in declaration of %s", name(obj));
     }
     // "cycle[i] refers to cycle[j]" for (i,j) = (s,s+1), (s+1,s+2), ..., (n-1,0), (0,1), ..., (s-1,s) for len(cycle) = n, s = start.
-    foreach (var i in range(cycle)) {
+    foreach (var i in range(len(cycle))) {
         var next = cycle[(start + i + 1) % len(cycle)];
         err.addf(new Objectᴠpositioner(obj), "%s refers to %s", name(obj), name(next));
         obj = next;
@@ -394,7 +394,7 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
 internal static nint firstInSrc(slice<Object> path) {
     nint fst = 0;
     tokenꓸPos pos = path[0].Pos();
-    foreach (var (i, t) in path[1..]) {
+    foreach (var (i, t) in range(path[1..])) {
         if (cmpPos(t.Pos(), pos) < 0) {
             (fst, pos) = (i + 1, t.Pos());
         }
@@ -430,28 +430,14 @@ partial struct ΔfuncDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
-internal static ast.Node node(this importDecl d) {
-    return new ast.ImportSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔconstDecl d) {
-    return new ast.ValueSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔvarDecl d) {
-    return new ast.ValueSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔtypeDecl d) {
-    return new ast.TypeSpecжNode(d.spec);
-}
-
-internal static ast.Node node(this ΔfuncDecl d) {
-    return new ast.FuncDeclжNode(d.decl);
-}
+internal static ast.Node node(this importDecl d) { return new ast.ImportSpecжNode(d.spec); }
+internal static ast.Node node(this ΔconstDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node(this ΔvarDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node(this ΔtypeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+internal static ast.Node node(this ΔfuncDecl d) { return new ast.FuncDeclжNode(d.decl); }
 
 internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
-    foreach (var (_, d) in decls) {
+    foreach (var (_, d) in range(decls)) {
         Ꮡcheck.walkDecl(d, f);
     }
 }
@@ -464,7 +450,7 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
     }
     case ж<ast.GenDecl> dΔ1: {
         ж<ast.ValueSpec> last = default; // last ValueSpec with type or init exprs seen
-        foreach (var (iota, s) in dΔ1.Specs) {
+        foreach (var (iota, s) in range(dΔ1.Specs)) {
             switch (s.type()) {
             case ж<ast.ImportSpec> sΔ1: {
                 f(new importDecl(sΔ1));
@@ -629,12 +615,12 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
     // one was specified, otherwise they assume the type of the
     // init expression values (was go.dev/issue/15755).
     if (typ != nil) {
-        foreach (var (_, lhsΔ1) in lhs) {
+        foreach (var (_, lhsΔ1) in range(lhs)) {
             lhsΔ1.typ = obj.typ;
         }
     }
 
-    Ꮡcheck.initVars(lhs, slice<ast.Expr>([init]), default);
+    Ꮡcheck.initVars(lhs, [init], default);
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
@@ -804,8 +790,8 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
         // The scope of type parameters starts at the beginning of the type parameter
         // list (so we can have mutually recursive parameterized interfaces).
         tokenꓸPos scopePos = list.Pos();
-        foreach (var (_, f) in list.List) {
-            foreach (var (_, name) in f.Names) {
+        foreach (var (_, f) in range(list.List)) {
+            foreach (var (_, name) in range(f.Names)) {
                 tparams = append(tparams, Ꮡcheck.declareTypeParam(name, scopePos));
             }
         }
@@ -829,7 +815,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
         }, ref ᒐ);
 
         nint index = 0;
-        foreach (var (_, f) in list.List) {
+        foreach (var (_, f) in range(list.List)) {
             ΔType bound = default;
             // NOTE: we may be able to assert that f.Type != nil here, but this is not
             // an invariant of the AST, so we are cautious.
@@ -846,7 +832,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
             } else {
                 bound = new BasicжΔType(Typ[Invalid]);
             }
-            foreach (var i in range(f.Names)) {
+            foreach (var i in range(len(f.Names))) {
                 tparams[index + i].bound = bound;
             }
             index += len(f.Names);
@@ -871,7 +857,7 @@ internal static ΔType bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
         break;
     }}
     if (wrap) {
-        x = new ast.InterfaceTypeжExpr(Ꮡ(new ast.InterfaceType(Methods: Ꮡ(new ast.FieldList(List: slice<ж<ast.Field>>([Ꮡ(new ast.Field(Type: x))]))))));
+        x = new ast.InterfaceTypeжExpr(Ꮡ(new ast.InterfaceType(Methods: Ꮡ(new ast.FieldList(List: [Ꮡ(new ast.Field(Type: x))])))));
         var t = Ꮡcheck.typ(x);
         // mark t as implicit interface if all went well
         var (tΔ1, _) = t._<ж<Interface>>(ᐧ); if (tΔ1 != nil) {
@@ -940,7 +926,7 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
     }
 
     // add valid methods
-    foreach (var (_, m) in methods) {
+    foreach (var (_, m) in range(methods)) {
         // spec: "For a base type, the non-blank names of methods bound
         // to it must be unique."
         assert(m.name != "_"u8);
@@ -970,7 +956,7 @@ internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @
 
         // Check that any non-blank field names of base are distinct from its
         // method names.
-        foreach (var (_, fld) in t.fields) {
+        foreach (var (_, fld) in range(t.fields)) {
             if (fld.name != "_"u8) {
                 var alt = mset.insert(new VarжObject(fld)); if (alt != nil) {
                     // Struct fields should already be unique, so we should only
@@ -1038,7 +1024,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
 
             // declare all constants
             var lhs = new slice<ж<Const>>(len(dΔ2.spec.Names));
-            foreach (var (i, name) in dΔ2.spec.Names) {
+            foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 var obj = NewConst(name.Pos(), pkgʗ1, name.Name, default, constant.MakeInt64((int64)dΔ2.iota));
                 lhs[i] = obj;
 
@@ -1058,7 +1044,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
             // (ShortVarDecl for short variable declarations) and ends at the
             // end of the innermost containing block."
             tokenꓸPos scopePos = dΔ2.spec.End();
-            foreach (var (i, name) in dΔ2.spec.Names) {
+            foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 Ꮡcheck.declare(Ꮡcheck.Value.scope, name, new ConstжObject(lhs[i]), scopePos);
             }
             break;
@@ -1067,12 +1053,12 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
             nint top = len(Ꮡcheck.Value.delayed);
 
             var lhs0 = new slice<ж<Var>>(len(dΔ2.spec.Names));
-            foreach (var (i, name) in dΔ2.spec.Names) {
+            foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 lhs0[i] = newVar(LocalVar, name.Pos(), pkgʗ1, name.Name, default);
             }
 
             // initialize all variables
-            foreach (var (i, obj) in lhs0) {
+            foreach (var (i, obj) in range(lhs0)) {
                 slice<ж<Var>> lhs = default;
                 ast.Expr init = default;
                 switch (len(dΔ2.spec.Values)) {
@@ -1101,7 +1087,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
                     // variable will cause all lhs variables to have a type
                     // assigned, and we are done as well.
                     if (debug) {
-                        foreach (var (_, objΔ1) in lhs0) {
+                        foreach (var (_, objΔ1) in range(lhs0)) {
                             assert(objΔ1.typ != nil);
                         }
                     }
@@ -1115,7 +1101,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
             // declare all variables
             // (only at this point are the variable scopes (parents) set)
             tokenꓸPos scopePos = dΔ2.spec.End(); // see constant declarations
-            foreach (var (i, name) in dΔ2.spec.Names) {
+            foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 // see constant declarations
                 Ꮡcheck.declare(Ꮡcheck.Value.scope, name, new VarжObject(lhs0[i]), scopePos);
             }

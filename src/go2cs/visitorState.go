@@ -145,6 +145,7 @@ type Visitor struct {
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
 	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
+	lastDeclShape      declShape           // the shape of the top-level declaration just emitted (topLevelSeparation.go)
 	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
 	trailingRuns       map[token.Pos]int // each Go trailing // comment's gofmt-aligned run (trailingCommentAlignment.go)
@@ -242,6 +243,10 @@ type Visitor struct {
 	// escapes an element spelled `with(…)` (escapeCollectionWithElement). It is cleared for every list nested
 	// inside an element, so a call's arguments keep their bare spelling.
 	collectionExpressionElements bool
+
+	// targetedSliceLiterals marks the slice literals whose position gives C# their slice<T> target, which render as
+	// a bare collection expression, `[1, 2]` (see markTargetedSliceLiterals).
+	targetedSliceLiterals map[*ast.CompositeLit]bool
 
 	// ImportSpec variables
 	currentImportPath     string

@@ -36,7 +36,7 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
     ref var scan = ref Ꮡscan.DerefOrNull();
 
     scan.reset();
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         scan.bytes++;
         if (scan.step(Ꮡscan, c) == scanError) {
             return scan.err;
@@ -55,9 +55,7 @@ partial struct SyntaxError {
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
-public static @string Error(this ref SyntaxError e) {
-    return e.msg;
-}
+public static @string Error(this ref SyntaxError e) { return e.msg; }
 
 // A scanner is a JSON scanning state machine.
 // Callers call scan.reset and then pass bytes in one at a time

@@ -8,21 +8,16 @@ partial struct holder {
     internal Func<nint, nint> fn;
 }
 
-internal static void method(this holder h) {
-}
+internal static void method(this holder h) { }
 
 partial struct row {
     internal any v;
     internal bool ok;
 }
 
-internal static any take(any v) {
-    return v;
-}
+internal static any take(any v) { return v; }
 
-internal static nint declared(nint x) {
-    return x;
-}
+internal static nint declared(nint x) { return x; }
 
 internal static void Main() {
     Func<nint, nint> zero = default;

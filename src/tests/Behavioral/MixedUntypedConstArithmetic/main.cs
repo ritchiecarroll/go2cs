@@ -5,17 +5,11 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt procs => 14;
-
 internal static UntypedFloat capacityPerProc => 1e9;
-
 internal static UntypedInt three => 3;
-
 internal static UntypedFloat half => 0.5;
-
 internal static UntypedInt seven => 7;
-
 internal static UntypedFloat two => 2.0;
-
 internal static UntypedFloat quadrillion => 1e15;
 
 internal static void Main() {

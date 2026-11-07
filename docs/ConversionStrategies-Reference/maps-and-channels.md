@@ -154,7 +154,7 @@ v, ok := m[nil]
 delete(m, nil)
 lit := map[any]int{nil: 1, "b": 2}
 ```
-<!-- source: src/tests/Behavioral/NilMapKey/main.cs:16-18, 25, 44, 57 -->
+<!-- source: src/tests/Behavioral/NilMapKey/main.cs:14-16, 23, 42, 55 -->
 ```csharp
 var m = new map<any, @string>();
 

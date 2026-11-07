@@ -15,14 +15,13 @@ public static partial nint CountString(@string s, byte c);
 // A backup implementation to use by assembly.
 internal static nint countGeneric(slice<byte> b, byte c) {
     nint n = 0;
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         if (x == c) {
             n++;
         }
     }
     return n;
 }
-
 internal static nint countGenericString(@string s, byte c) {
     nint n = 0;
     for (nint i = 0; i < len(s); i++) {

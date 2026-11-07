@@ -8,9 +8,7 @@ partial struct V {
     public nint X;
 }
 
-public static @string Show(this V v, nint n) {
-    return fmt.Sprint(v.X, " ", n);
-}
+public static @string Show(this V v, nint n) { return fmt.Sprint(v.X, " ", n); }
 
 public static nint Bump(this V v) {
     v.X++;
@@ -21,15 +19,11 @@ partial struct Box<T> {
     public T Item;
 }
 
-public static @string Get<T>(this Box<T> b, @string tag) {
-    return fmt.Sprint((b.Item).OrTypedNilOf(), " ", tag);
-}
+public static @string Get<T>(this Box<T> b, @string tag) { return fmt.Sprint((b.Item).OrTypedNilOf(), " ", tag); }
 
 internal static ж<V> shared = Ꮡ(new V(X: 1));
 
-internal static ж<V> current() {
-    return shared;
-}
+internal static ж<V> current() { return shared; }
 
 internal static void Main() {
     var p = Ꮡ(new V(X: 1));

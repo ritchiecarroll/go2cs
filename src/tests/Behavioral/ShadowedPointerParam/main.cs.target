@@ -8,9 +8,7 @@ partial struct T {
     internal nint n;
 }
 
-internal static nint use(ref T t) {
-    return t.n;
-}
+internal static nint use(ref T t) { return t.n; }
 
 internal static nint outer(ref T t) {
     nint r = use(ref t);

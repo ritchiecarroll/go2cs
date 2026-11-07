@@ -350,7 +350,7 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
         var ft = Ꮡt.funcTab();
         var funcs = new slice<Func>(ft.Count(), () => new(nil));
         var syms = new slice<Sym>(len(funcs));
-        foreach (var i in range(funcs)) {
+        foreach (var i in range(len(funcs))) {
             var f = Ꮡ(funcs, i);
             f.Entry = ft.pc(i);
             f.End = ft.pc(i + 1);
@@ -513,25 +513,11 @@ internal static uint64 entryPC(this ref ΔfuncData f) {
     return f.t.uintptr(f.data);
 }
 
-internal static uint32 nameOff(this ΔfuncData f) {
-    return f.field(1);
-}
-
-internal static uint32 deferreturn(this ΔfuncData f) {
-    return f.field(3);
-}
-
-internal static uint32 pcfile(this ΔfuncData f) {
-    return f.field(5);
-}
-
-internal static uint32 pcln(this ΔfuncData f) {
-    return f.field(6);
-}
-
-internal static uint32 cuOffset(this ΔfuncData f) {
-    return f.field(8);
-}
+internal static uint32 nameOff(this ΔfuncData f) { return f.field(1); }
+internal static uint32 deferreturn(this ΔfuncData f) { return f.field(3); }
+internal static uint32 pcfile(this ΔfuncData f) { return f.field(5); }
+internal static uint32 pcln(this ΔfuncData f) { return f.field(6); }
+internal static uint32 cuOffset(this ΔfuncData f) { return f.field(8); }
 
 // field returns the nth field of the _func struct.
 // It panics if n == 0 or n > 9; for n == 0, call f.entryPC.

@@ -23,7 +23,6 @@ internal static float32 f32Return() {
 }
 
 internal static float64 directBig = 123456789123456789123456789D;
-
 internal static float64 directSmall = 42D;
 
 internal static float64 decimalControl = 339.7784D;
@@ -34,7 +33,7 @@ internal static void Main() {
         new("decimal", 339.7784D, 3.5F),
         new("small", 33909D, 8F)
     ]);
-    foreach (var (_, s) in samples) {
+    foreach (var (_, s) in range(samples)) {
         fmt.Println(s.name, s.value, s.small);
     }
     fmt.Println(bigReturn(), smallReturn(), f32Return());

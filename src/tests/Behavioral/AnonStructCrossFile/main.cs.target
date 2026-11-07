@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    foreach (var (_, vᴛ1) in compareTests) {
+    foreach (var (_, vᴛ1) in range(compareTests)) {
         ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -13,7 +13,7 @@ internal static void Main() {
         fmt.Println((@string)(~p).a, (@string)(~p).b, (~p).i);
     }
 
-    foreach (var (_, vᴛ2) in sizeTests) {
+    foreach (var (_, vᴛ2) in range(sizeTests)) {
         ref var st = ref heap(new sizeTestsᴛ1(), out var Ꮡst);
         st = vᴛ2;
 

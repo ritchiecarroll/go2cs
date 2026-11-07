@@ -17,17 +17,17 @@ partial struct RegArgs {
 
 public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:");
-    foreach (var (_, x) in r.Ints.ΔRangeSnapshot()) {
+    foreach (var (_, x) in range(r.Ints.ΔRangeSnapshot())) {
         print((@string)" ", x);
     }
     println();
     print((@string)"Floats:");
-    foreach (var (_, x) in r.Floats.ΔRangeSnapshot()) {
+    foreach (var (_, x) in range(r.Floats.ΔRangeSnapshot())) {
         print((@string)" ", x);
     }
     println();
     print((@string)"Ptrs:");
-    foreach (var (_, x) in r.Ptrs.ΔRangeSnapshot()) {
+    foreach (var (_, x) in range(r.Ptrs.ΔRangeSnapshot())) {
         print((@string)" ", @unsafe.Pointer.OrTypedNil(x));
     }
     println();

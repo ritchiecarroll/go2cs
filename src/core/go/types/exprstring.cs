@@ -246,7 +246,7 @@ internal static void writeSigExpr(ж<bytes.Buffer> Ꮡbuf, ref ast.FuncType sig)
 internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>> list, @string sep, bool iface) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    foreach (var (i, f) in list) {
+    foreach (var (i, f) in range(list)) {
         if (i > 0) {
             buf.WriteString(sep);
         }
@@ -274,7 +274,7 @@ internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>
 internal static void writeIdentList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Ident>> list) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         if (i > 0) {
             buf.WriteString(", ");
         }
@@ -285,7 +285,7 @@ internal static void writeIdentList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Ident>
 internal static void writeExprList(ж<bytes.Buffer> Ꮡbuf, slice<ast.Expr> list) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         if (i > 0) {
             buf.WriteString(", ");
         }

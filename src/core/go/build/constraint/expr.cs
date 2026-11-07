@@ -42,8 +42,7 @@ partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
-internal static void isExpr(this ref TagExpr x) {
-}
+internal static void isExpr(this ref TagExpr x) { }
 
 public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
@@ -53,17 +52,14 @@ public static @string String(this ref TagExpr x) {
     return x.Tag;
 }
 
-internal static Expr tag(@string tag) {
-    return new TagExprжExpr(Ꮡ(new TagExpr(tag)));
-}
+internal static Expr tag(@string tag) { return new TagExprжExpr(Ꮡ(new TagExpr(tag))); }
 
 // A NotExpr represents the expression !X (the negation of X).
 partial struct NotExpr {
     public Expr X;
 }
 
-internal static void isExpr(this ref NotExpr x) {
-}
+internal static void isExpr(this ref NotExpr x) { }
 
 public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
@@ -80,17 +76,14 @@ public static @string String(this ref NotExpr x) {
     return "!"u8 + s;
 }
 
-internal static Expr not(Expr x) {
-    return new NotExprжExpr(Ꮡ(new NotExpr(x)));
-}
+internal static Expr not(Expr x) { return new NotExprжExpr(Ꮡ(new NotExpr(x))); }
 
 // An AndExpr represents the expression X && Y.
 partial struct AndExpr {
     public Expr X, Y;
 }
 
-internal static void isExpr(this ref AndExpr x) {
-}
+internal static void isExpr(this ref AndExpr x) { }
 
 public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
@@ -120,8 +113,7 @@ partial struct OrExpr {
     public Expr X, Y;
 }
 
-internal static void isExpr(this ref OrExpr x) {
-}
+internal static void isExpr(this ref OrExpr x) { }
 
 public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
@@ -535,11 +527,11 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
 
     // Split into AND of ORs of ANDs of literals (tag or NOT tag).
     slice<slice<slice<Expr>>> split = default;
-    foreach (var (_, or) in appendSplitAnd(default, x)) {
+    foreach (var (_, or) in range(appendSplitAnd(default, x))) {
         slice<slice<Expr>> ands = default;
-        foreach (var (_, and) in appendSplitOr(default, or)) {
+        foreach (var (_, and) in range(appendSplitOr(default, or))) {
             slice<Expr> lits = default;
-            foreach (var (_, lit) in appendSplitAnd(default, and)) {
+            foreach (var (_, lit) in range(appendSplitAnd(default, and))) {
                 switch (lit.type()) {
                 case ж<TagExpr> _:
                 case ж<NotExpr> _: {
@@ -559,27 +551,27 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     // push the top-level ANDs to the bottom level, so that we get
     // one // +build line instead of many.
     nint maxOr = 0;
-    foreach (var (_, or) in split) {
+    foreach (var (_, or) in range(split)) {
         if (maxOr < len(or)) {
             maxOr = len(or);
         }
     }
     if (maxOr == 1) {
         slice<Expr> lits = default;
-        foreach (var (_, or) in split) {
+        foreach (var (_, or) in range(split)) {
             lits = appendꓸꓸꓸ(lits, or[0]);
         }
-        split = slice<slice<slice<Expr>>>([slice<slice<Expr>>([lits])]);
+        split = [[lits]];
     }
 
     // Prepare the +build lines.
     slice<@string> lines = default;
-    foreach (var (_, or) in split) {
+    foreach (var (_, or) in range(split)) {
         ref var line = ref heap(new strings.Builder(), out var Ꮡline);
         Ꮡline.WriteString(buildˢ2);
-        foreach (var (_, and) in or) {
+        foreach (var (_, and) in range(or)) {
             Ꮡline.WriteString(" ");
-            foreach (var (i, lit) in and) {
+            foreach (var (i, lit) in range(and)) {
                 if (i > 0) {
                     Ꮡline.WriteString(",");
                 }

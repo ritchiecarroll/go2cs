@@ -13,39 +13,23 @@ partial struct note {
 
 internal static nint count;
 
-internal static void setup(ж<note> _) {
-    count += 1;
-}
+internal static void setup(ж<note> _) { count += 1; }
+internal static void discard(nint _) { count += 10; }
 
-internal static void discard(nint _) {
-    count += 10;
-}
+internal static void unnamedVariadic(params ꓸꓸꓸstring ʗp) { count += 100; }
+internal static void blankVariadic(params ꓸꓸꓸnint _ʗp) { count += 1000; }
 
-internal static void unnamedVariadic(params ꓸꓸꓸstring ʗp) {
-    count += 100;
-}
+internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) { count += 10000; }
 
-internal static void blankVariadic(params ꓸꓸꓸnint _ʗp) {
-    count += 1000;
-}
+internal static @string label(@string tag, params ꓸꓸꓸnint _ʗp) { return tag + "!"u8; }
 
-internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {
-    count += 10000;
-}
-
-internal static @string label(@string tag, params ꓸꓸꓸnint _ʗp) {
-    return tag + "!"u8;
-}
-
-internal static nint tally(this note n, params ꓸꓸꓸbyte ʗp) {
-    return n.x;
-}
+internal static nint tally(this note n, params ꓸꓸꓸbyte ʗp) { return n.x; }
 
 internal static nint total(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint sum = 0;
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         sum += v;
     }
     return sum;

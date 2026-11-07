@@ -16,7 +16,7 @@ public static Entry NewEntry(@string name, nint count) {
 
 public static nint Total(slice<Entry> entries) {
     nint sum = 0;
-    foreach (var (_, e) in entries) {
+    foreach (var (_, e) in range(entries)) {
         sum += e.Count;
     }
     return sum;

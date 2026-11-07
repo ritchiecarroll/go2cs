@@ -212,7 +212,7 @@ internal static slice<int64> freq_8_64(slice<byte> text, slice<int64> freq, slic
 
     freq = freq[..256]; // eliminate bounds check for freq[c] below
     clear(freq);
-    foreach (var (_, c) in text) {
+    foreach (var (_, c) in range(text)) {
         freq[c]++;
     }
     return freq;
@@ -227,7 +227,7 @@ internal static slice<int32> freq_32(slice<int32> text, slice<int32> freq, slice
     }
 
     clear(freq);
-    foreach (var (_, c) in text) {
+    foreach (var (_, c) in range(text)) {
         freq[c]++;
     }
     return freq;
@@ -242,7 +242,7 @@ internal static slice<int64> freq_64(slice<int64> text, slice<int64> freq, slice
     }
 
     clear(freq);
-    foreach (var (_, c) in text) {
+    foreach (var (_, c) in range(text)) {
         freq[(nint)(c)]++;
     }
     return freq;
@@ -253,7 +253,7 @@ internal static void bucketMin_8_64(slice<byte> text, slice<int64> freq, slice<i
     freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int64)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         bucket[i] = total;
         total += n;
     }
@@ -262,7 +262,7 @@ internal static void bucketMin_8_64(slice<byte> text, slice<int64> freq, slice<i
 internal static void bucketMin_32(slice<int32> text, slice<int32> freq, slice<int32> bucket) {
     freq = freq_32(text, freq, bucket);
     var total = (int32)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         bucket[i] = total;
         total += n;
     }
@@ -271,7 +271,7 @@ internal static void bucketMin_32(slice<int32> text, slice<int32> freq, slice<in
 internal static void bucketMin_64(slice<int64> text, slice<int64> freq, slice<int64> bucket) {
     freq = freq_64(text, freq, bucket);
     var total = (int64)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         bucket[i] = total;
         total += n;
     }
@@ -282,7 +282,7 @@ internal static void bucketMax_8_64(slice<byte> text, slice<int64> freq, slice<i
     freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int64)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         total += n;
         bucket[i] = total;
     }
@@ -291,7 +291,7 @@ internal static void bucketMax_8_64(slice<byte> text, slice<int64> freq, slice<i
 internal static void bucketMax_32(slice<int32> text, slice<int32> freq, slice<int32> bucket) {
     freq = freq_32(text, freq, bucket);
     var total = (int32)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         total += n;
         bucket[i] = total;
     }
@@ -300,7 +300,7 @@ internal static void bucketMax_32(slice<int32> text, slice<int32> freq, slice<in
 internal static void bucketMax_64(slice<int64> text, slice<int64> freq, slice<int64> bucket) {
     freq = freq_64(text, freq, bucket);
     var total = (int64)0;
-    foreach (var (i, n) in freq) {
+    foreach (var (i, n) in range(freq)) {
         total += n;
         bucket[i] = total;
     }
@@ -1072,7 +1072,7 @@ internal static nint assignID_8_64(slice<byte> text, slice<int64> sa, nint numLM
     nint id = 0;
     var lastLen = (int64)(-1); // impossible
     var lastPos = (int64)0;
-    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
+    foreach (var (_, j) in range(sa.slice(builtin.len(sa) - numLMS))) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[(nint)(j / 2)];
         if (n != lastLen) {
@@ -1108,7 +1108,7 @@ internal static nint assignID_32(slice<int32> text, slice<int32> sa, nint numLMS
     nint id = 0;
     var lastLen = (int32)(-1); // impossible
     var lastPos = (int32)0;
-    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
+    foreach (var (_, j) in range(sa.slice(builtin.len(sa) - numLMS))) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[j / 2];
         if (n != lastLen) {
@@ -1144,7 +1144,7 @@ internal static nint assignID_64(slice<int64> text, slice<int64> sa, nint numLMS
     nint id = 0;
     var lastLen = (int64)(-1); // impossible
     var lastPos = (int64)0;
-    foreach (var (_, j) in sa.slice(builtin.len(sa) - numLMS)) {
+    foreach (var (_, j) in range(sa.slice(builtin.len(sa) - numLMS))) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[(nint)(j / 2)];
         if (n != lastLen) {

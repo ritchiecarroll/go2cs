@@ -42,18 +42,18 @@ public static Flags FlagPointToPoint => 8;       // interface belongs to a point
 public static Flags FlagMulticast => 16;         // interface supports multicast access capability
 public static Flags FlagRunning => 32;           // interface is in running state
 
-internal static slice<@string> flagNames = slice<@string>([
+internal static slice<@string> flagNames = [
     "up",
     "broadcast",
     "loopback",
     "pointtopoint",
     "multicast",
     "running"
-]);
+];
 
 public static @string String(this Flags f) {
     @string s = ""u8;
-    foreach (var (i, name) in flagNames) {
+    foreach (var (i, name) in range(flagNames)) {
         if ((Flags)(f & ((Flags)((nuint)1 << (int)((nuint)i)))) != 0) {
             if (s != ""u8) {
                 s += "|"u8;
@@ -139,7 +139,7 @@ public static (ж<Interface>, error) InterfaceByIndex(nint index) {
 }
 
 internal static (ж<Interface>, error) interfaceByIndex(slice<Interface> ift, nint index) {
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -162,7 +162,7 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
     if (len(ift) != 0) {
         ᏑzoneCache.update(ift, false);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -216,7 +216,7 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
         }
         zc.toIndex = new map<@string, nint>(len(ift));
         zc.toName = new map<nint, @string>(len(ift));
-        foreach (var (_, ifi) in ift) {
+        foreach (var (_, ifi) in range(ift)) {
             if (ifi.Name != ""u8) {
                 zc.toIndex[ifi.Name] = ifi.Index;
                 var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {

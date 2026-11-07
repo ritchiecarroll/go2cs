@@ -14,9 +14,7 @@ partial class iotest_package {
 
 // OneByteReader returns a Reader that implements
 // each non-empty Read by reading one byte from r.
-public static io.Reader OneByteReader(io.Reader r) {
-    return new oneByteReaderжReader(Ꮡ(new oneByteReader(r)));
-}
+public static io.Reader OneByteReader(io.Reader r) { return new oneByteReaderжReader(Ꮡ(new oneByteReader(r))); }
 
 partial struct oneByteReader {
     internal io.Reader r;
@@ -31,9 +29,7 @@ internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) {
 
 // HalfReader returns a Reader that implements Read
 // by reading half as many requested bytes from r.
-public static io.Reader HalfReader(io.Reader r) {
-    return new halfReaderжReader(Ꮡ(new halfReader(r)));
-}
+public static io.Reader HalfReader(io.Reader r) { return new halfReaderжReader(Ꮡ(new halfReader(r))); }
 
 partial struct halfReader {
     internal io.Reader r;
@@ -48,9 +44,7 @@ internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
 // last piece of data is read. DataErrReader wraps a Reader and changes its
 // behavior so the final error is returned along with the final data, instead
 // of in the first call after the final data.
-public static io.Reader DataErrReader(io.Reader r) {
-    return new dataErrReaderжReader(Ꮡ(new dataErrReader(r, default, new slice<byte>(1024))));
-}
+public static io.Reader DataErrReader(io.Reader r) { return new dataErrReaderжReader(Ꮡ(new dataErrReader(r, default, new slice<byte>(1024)))); }
 
 partial struct dataErrReader {
     internal io.Reader r;
@@ -84,9 +78,7 @@ public static error ErrTimeout = errors.New("timeout");
 
 // TimeoutReader returns [ErrTimeout] on the second read
 // with no data. Subsequent calls to read succeed.
-public static io.Reader TimeoutReader(io.Reader r) {
-    return new timeoutReaderжReader(Ꮡ(new timeoutReader(r, 0)));
-}
+public static io.Reader TimeoutReader(io.Reader r) { return new timeoutReaderжReader(Ꮡ(new timeoutReader(r, 0))); }
 
 partial struct timeoutReader {
     internal io.Reader r;
@@ -253,7 +245,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 
     if (r._<io.ReaderAt>(out var rΔ2)) {
         var dataΔ2 = new slice<byte>(len(content), len(content) + 1);
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
         var (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2, 0);
@@ -269,7 +261,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 0, EOF"u8, len(dataΔ2), nΔ2, errΔ11);
         }
 
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
         (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(0, cap(dataΔ2)), 0);
@@ -280,10 +272,10 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
         }
 
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
             if (nΔ2 != 1 || errΔ11 != nil && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
                 @string want = nilˢ;

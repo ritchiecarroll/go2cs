@@ -265,7 +265,7 @@ internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs,
 
     t.Root = default;
     t.lex = Ꮡlex;
-    t.vars = slice<@string>(["$"]);
+    t.vars = ["$"];
     t.funcs = funcs;
     t.treeSet = treeSet;
     t.stackDepth = 0;
@@ -342,7 +342,7 @@ public static bool IsEmptyTree(Node n) {
         break;
     }
     case ж<ListNode> nΔ1: {
-        foreach (var (_, node) in nΔ1.Nodes) {
+        foreach (var (_, node) in range(nΔ1.Nodes)) {
             if (!IsEmptyTree(node)) {
                 return false;
             }
@@ -665,7 +665,7 @@ internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @strin
         t.errorf("missing value for %s", context);
     }
     // Only the first command of a pipeline can start with a non executable operand
-    foreach (var (i, c) in pipe.Cmds[1..]) {
+    foreach (var (i, c) in range(pipe.Cmds[1..])) {
         switch (c.Args[0].Type()) {
         case var ᴛ when ᴛ == NodeBool || ᴛ == NodeDot || ᴛ == NodeNil || ᴛ == NodeNumber || ᴛ == NodeString: {
             // With A|B|C, pipeline stage 2 is B
@@ -1055,7 +1055,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 
 // hasFunction reports if a function name exists in the Tree's maps.
 internal static bool hasFunction(this ref Tree t, @string name) {
-    foreach (var (_, funcMap) in t.funcs) {
+    foreach (var (_, funcMap) in range(t.funcs)) {
         if (funcMap == nil) {
             continue;
         }
@@ -1077,7 +1077,7 @@ internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var v = Ꮡt.newVariable(pos, name);
-    foreach (var (_, varName) in t.vars) {
+    foreach (var (_, varName) in range(t.vars)) {
         if (varName == v.Ident[0]) {
             return new VariableNodeжNode(v);
         }

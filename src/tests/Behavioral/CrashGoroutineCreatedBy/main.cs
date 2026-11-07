@@ -56,7 +56,7 @@ internal static void parent() {
     }
 
     lines = move2heap(linesᴷ, lines);
-    foreach (var (i, line) in lines) {
+    foreach (var (i, line) in range(lines)) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, "panic: "): {
             fmt.Println(line);

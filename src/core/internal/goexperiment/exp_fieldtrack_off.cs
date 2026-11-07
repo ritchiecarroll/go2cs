@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool FieldTrack = false;
-
 public static UntypedInt FieldTrackInt => 0;
 
 } // end goexperiment_package

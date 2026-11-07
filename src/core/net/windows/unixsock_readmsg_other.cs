@@ -8,7 +8,6 @@ partial class net_package {
 
 internal static UntypedInt readMsgFlags => 0;
 
-internal static void setReadMsgCloseOnExec(slice<byte> oob) {
-}
+internal static void setReadMsgCloseOnExec(slice<byte> oob) { }
 
 } // end net_package

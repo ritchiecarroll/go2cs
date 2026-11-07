@@ -56,7 +56,7 @@ partial struct formInfo {
     internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = slice<ж<formInfo>>([Ꮡ(new formInfo(
+[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = [Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,
@@ -77,7 +77,7 @@ partial struct formInfo {
     compatibility: true,
     info: lookupInfoNFKC,
     nextMain: nextDecomposed))
-]); }
+]; }
 
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
 // unexpected behavior for the user.  For example, in NFD, there is a boundary
@@ -115,25 +115,12 @@ public static bool BoundaryAfter(this ΔProperties p) {
 // influenced by normalization.
 partial struct qcInfo /*num:uint8*/;
 
-internal static bool isYesC(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x10) == 0;
-}
+internal static bool isYesC(this ΔProperties p) { return (qcInfo)(p.flags & 0x10) == 0; }
+internal static bool isYesD(this ΔProperties p) { return (qcInfo)(p.flags & 0x4) == 0; }
 
-internal static bool isYesD(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x4) == 0;
-}
-
-internal static bool combinesForward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x20) != 0;
-}
-
-internal static bool combinesBackward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x8) != 0; // == isMaybe
-}
-
-internal static bool hasDecomposition(this ΔProperties p) {
-    return (qcInfo)(p.flags & 0x4) != 0; // == isNoD
-}
+internal static bool combinesForward(this ΔProperties p) { return (qcInfo)(p.flags & 0x20) != 0; }
+internal static bool combinesBackward(this ΔProperties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
+internal static bool hasDecomposition(this ΔProperties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
 
 internal static bool isInert(this ΔProperties p) {
     return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;

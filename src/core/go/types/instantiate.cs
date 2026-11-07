@@ -112,7 +112,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     // Compute all hashes; hashes may differ across contexts due to different
     // unique IDs for Named types within the hasher.
     var hashes = new slice<@string>(len(ctxts));
-    foreach (var (i, ctxtΔ1) in ctxts) {
+    foreach (var (i, ctxtΔ1) in range(ctxts)) {
         hashes[i] = ctxtΔ1.instanceHash(orig, targs);
     }
 
@@ -131,7 +131,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
 
     // typ may already have been instantiated with identical type arguments. In
     // that case, re-use the existing instance.
-    foreach (var (i, ctxtΔ2) in ctxts) {
+    foreach (var (i, ctxtΔ2) in range(ctxts)) {
         var inst = ctxtΔ2.lookup(hashes[i], orig, targs); if (inst != nil) {
             return updateContexts(inst);
         }
@@ -225,7 +225,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 // check may be nil; pos is used only if check is non-nil.
 internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Context> ctxt) {
     var smap = makeSubstMap(tparams, targs);
-    foreach (var (i, tpar) in tparams) {
+    foreach (var (i, tpar) in range(tparams)) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).
         tpar.iface();
         // The type parameter bound is parameterized with the same type parameters
@@ -410,7 +410,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
 internal static bool mentions(ΔType T, ΔType typ) {
     switch (T.type()) {
     case ж<Interface> TΔ1: {
-        foreach (var (_, e) in TΔ1.embeddeds) {
+        foreach (var (_, e) in range(TΔ1.embeddeds)) {
             if (mentions(e, typ)) {
                 return true;
             }
@@ -418,7 +418,7 @@ internal static bool mentions(ΔType T, ΔType typ) {
         break;
     }
     case ж<Union> TΔ1: {
-        foreach (var (_, t) in TΔ1.terms) {
+        foreach (var (_, t) in range(TΔ1.terms)) {
             if (mentions((~t).typ, typ)) {
                 return true;
             }

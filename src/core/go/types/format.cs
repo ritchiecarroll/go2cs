@@ -22,7 +22,7 @@ private static readonly @string nilˢᵇ = "<nil>"u8;
 internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    foreach (var (i, vᴛ1) in args) {
+    foreach (var (i, vᴛ1) in range(args)) {
         var arg = vᴛ1;
 
         switch (arg.type()) {
@@ -41,7 +41,7 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
         case slice<ж<operand>> a: {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
             Ꮡbuf.WriteByte((byte)'[');
-            foreach (var (iΔ1, x) in a) {
+            foreach (var (iΔ1, x) in range(a)) {
                 if (iΔ1 > 0) {
                     Ꮡbuf.WriteString(", ");
                 }
@@ -86,7 +86,7 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
             var w = newTypeWriter(Ꮡbuf, qf);
             w.tpSubscripts = tpSubscripts;
             buf.WriteByte((byte)'[');
-            foreach (var (iΔ2, x) in a) {
+            foreach (var (iΔ2, x) in range(a)) {
                 if (iΔ2 > 0) {
                     buf.WriteString(", ");
                 }
@@ -101,7 +101,7 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
             var w = newTypeWriter(Ꮡbuf, qf);
             w.tpSubscripts = tpSubscripts;
             buf.WriteByte((byte)'[');
-            foreach (var (iΔ3, x) in a) {
+            foreach (var (iΔ3, x) in range(a)) {
                 if (iΔ3 > 0) {
                     buf.WriteString(", ");
                 }
@@ -207,7 +207,7 @@ internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) {
     }
     forName[pkg.path] = true;
 
-    foreach (var (_, imp) in pkg.imports) {
+    foreach (var (_, imp) in range(pkg.imports)) {
         check.markImports(imp);
     }
 }

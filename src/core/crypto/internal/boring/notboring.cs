@@ -26,77 +26,35 @@ public static void Unreachable() {
 
 // UnreachableExceptTests marks code that should be unreachable
 // when BoringCrypto is in use. It is a no-op without BoringCrypto.
-public static void UnreachableExceptTests() {
-}
+public static void UnreachableExceptTests() { }
 
 public partial struct randReader /*num:nint*/;
 
-public static (nint, error) Read(this randReader _, slice<byte> b) {
-    throw panic("boringcrypto: not available");
-}
+public static (nint, error) Read(this randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
 
 public static randReader RandReader => /* randReader(0) */ 0;
 
-public static hash.Hash NewSHA1() {
-    throw panic("boringcrypto: not available");
-}
+public static hash.Hash NewSHA1() { throw panic("boringcrypto: not available"); }
+public static hash.Hash NewSHA224() { throw panic("boringcrypto: not available"); }
+public static hash.Hash NewSHA256() { throw panic("boringcrypto: not available"); }
+public static hash.Hash NewSHA384() { throw panic("boringcrypto: not available"); }
+public static hash.Hash NewSHA512() { throw panic("boringcrypto: not available"); }
 
-public static hash.Hash NewSHA224() {
-    throw panic("boringcrypto: not available");
-}
+public static array<byte> SHA1(slice<byte> _) { throw panic("boringcrypto: not available"); }
+public static array<byte> SHA224(slice<byte> _) { throw panic("boringcrypto: not available"); }
+public static array<byte> SHA256(slice<byte> _) { throw panic("boringcrypto: not available"); }
+public static array<byte> SHA384(slice<byte> _) { throw panic("boringcrypto: not available"); }
+public static array<byte> SHA512(slice<byte> _) { throw panic("boringcrypto: not available"); }
 
-public static hash.Hash NewSHA256() {
-    throw panic("boringcrypto: not available");
-}
+public static hash.Hash NewHMAC(Func<hash.Hash> h, slice<byte> key) { throw panic("boringcrypto: not available"); }
 
-public static hash.Hash NewSHA384() {
-    throw panic("boringcrypto: not available");
-}
-
-public static hash.Hash NewSHA512() {
-    throw panic("boringcrypto: not available");
-}
-
-public static array<byte> SHA1(slice<byte> _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static array<byte> SHA224(slice<byte> _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static array<byte> SHA256(slice<byte> _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static array<byte> SHA384(slice<byte> _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static array<byte> SHA512(slice<byte> _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static hash.Hash NewHMAC(Func<hash.Hash> h, slice<byte> key) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (cipher.Block, error) NewAESCipher(slice<byte> key) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (cipher.AEAD, error) NewGCMTLS(cipher.Block _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (cipher.AEAD, error) NewGCMTLS13(cipher.Block _) {
-    throw panic("boringcrypto: not available");
-}
+public static (cipher.Block, error) NewAESCipher(slice<byte> key) { throw panic("boringcrypto: not available"); }
+public static (cipher.AEAD, error) NewGCMTLS(cipher.Block _) { throw panic("boringcrypto: not available"); }
+public static (cipher.AEAD, error) NewGCMTLS13(cipher.Block _) { throw panic("boringcrypto: not available"); }
 
 partial struct PublicKeyECDSA {
     internal nint _;
 }
-
 partial struct PrivateKeyECDSA {
     internal nint _;
 }
@@ -104,19 +62,15 @@ partial struct PrivateKeyECDSA {
 public static (BigInt X, BigInt Y, BigInt D, error err) GenerateKeyECDSA(@string curve) {
     throw panic("boringcrypto: not available");
 }
-
 public static (ж<PrivateKeyECDSA>, error) NewPrivateKeyECDSA(@string curve, BigInt X, BigInt Y, BigInt D) {
     throw panic("boringcrypto: not available");
 }
-
 public static (ж<PublicKeyECDSA>, error) NewPublicKeyECDSA(@string curve, BigInt X, BigInt Y) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) SignMarshalECDSA(ж<PrivateKeyECDSA> priv, slice<byte> hash) {
     throw panic("boringcrypto: not available");
 }
-
 public static bool VerifyECDSA(ж<PublicKeyECDSA> pub, slice<byte> hash, slice<byte> sig) {
     throw panic("boringcrypto: not available");
 }
@@ -124,7 +78,6 @@ public static bool VerifyECDSA(ж<PublicKeyECDSA> pub, slice<byte> hash, slice<b
 partial struct PublicKeyRSA {
     internal nint _;
 }
-
 partial struct PrivateKeyRSA {
     internal nint _;
 }
@@ -132,83 +85,51 @@ partial struct PrivateKeyRSA {
 public static (slice<byte>, error) DecryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PrivateKeyRSA> priv, slice<byte> ciphertext, slice<byte> label) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) DecryptRSAPKCS1(ж<PrivateKeyRSA> priv, slice<byte> ciphertext) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) DecryptRSANoPadding(ж<PrivateKeyRSA> priv, slice<byte> ciphertext) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) EncryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PublicKeyRSA> pub, slice<byte> msg, slice<byte> label) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) EncryptRSAPKCS1(ж<PublicKeyRSA> pub, slice<byte> msg) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) EncryptRSANoPadding(ж<PublicKeyRSA> pub, slice<byte> msg) {
     throw panic("boringcrypto: not available");
 }
-
 public static (BigInt N, BigInt E, BigInt D, BigInt P, BigInt Q, BigInt Dp, BigInt Dq, BigInt Qinv, error err) GenerateKeyRSA(nint bits) {
     throw panic("boringcrypto: not available");
 }
-
 public static (ж<PrivateKeyRSA>, error) NewPrivateKeyRSA(BigInt N, BigInt E, BigInt D, BigInt P, BigInt Q, BigInt Dp, BigInt Dq, BigInt Qinv) {
     throw panic("boringcrypto: not available");
 }
-
-public static (ж<PublicKeyRSA>, error) NewPublicKeyRSA(BigInt N, BigInt E) {
-    throw panic("boringcrypto: not available");
-}
-
+public static (ж<PublicKeyRSA>, error) NewPublicKeyRSA(BigInt N, BigInt E) { throw panic("boringcrypto: not available"); }
 public static (slice<byte>, error) SignRSAPKCS1v15(ж<PrivateKeyRSA> priv, crypto.Hash h, slice<byte> hashed) {
     throw panic("boringcrypto: not available");
 }
-
 public static (slice<byte>, error) SignRSAPSS(ж<PrivateKeyRSA> priv, crypto.Hash h, slice<byte> hashed, nint saltLen) {
     throw panic("boringcrypto: not available");
 }
-
 public static error VerifyRSAPKCS1v15(ж<PublicKeyRSA> pub, crypto.Hash h, slice<byte> hashed, slice<byte> sig) {
     throw panic("boringcrypto: not available");
 }
-
 public static error VerifyRSAPSS(ж<PublicKeyRSA> pub, crypto.Hash h, slice<byte> hashed, slice<byte> sig, nint saltLen) {
     throw panic("boringcrypto: not available");
 }
 
 partial struct PublicKeyECDH {
 }
-
 partial struct PrivateKeyECDH {
 }
 
-public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> _Δp0, ж<PublicKeyECDH> _Δp1) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (ж<PrivateKeyECDH>, slice<byte>, error) GenerateKeyECDH(@string _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _Δp0, slice<byte> _Δp1) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<byte> _Δp1) {
-    throw panic("boringcrypto: not available");
-}
-
-public static slice<byte> Bytes(this ref PublicKeyECDH _) {
-    throw panic("boringcrypto: not available");
-}
-
-public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) {
-    throw panic("boringcrypto: not available");
-}
+public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> _Δp0, ж<PublicKeyECDH> _Δp1) { throw panic("boringcrypto: not available"); }
+public static (ж<PrivateKeyECDH>, slice<byte>, error) GenerateKeyECDH(@string _) { throw panic("boringcrypto: not available"); }
+public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
+public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
+public static slice<byte> Bytes(this ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
+public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
 
 } // end boring_package

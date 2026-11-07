@@ -183,12 +183,12 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
 
             map<@string, format.Frame> frames = new map<@string, format.Frame>();
             nint framesSize = 0;
-            foreach (var (i, ev) in Ꮡsizes.ValueSlot) {
+            foreach (var (i, ev) in range(Ꮡsizes.ValueSlot)) {
                 eventsSize += ev.Sz;
 
                 // Add required stack frames. Note that they
                 // may already be in the map.
-                foreach (var (_, id) in ev.Frames) {
+                foreach (var (_, id) in range(ev.Frames)) {
                     @string sΔ3 = strconv.Itoa(id);
                     var (_, ok) = frames[sΔ3, ꟷ];
                     if (ok) {
@@ -846,7 +846,7 @@ private static readonly @string colorKellyGreenᵇ = "cq_build_attempt_passed"u8
 internal static ref readonly @string colorAnotherGrey => ref colorAnotherGreyᵇ;
 private static readonly @string colorAnotherGreyᵇ = "cq_build_attempt_failed"u8;     // 187, 187, 187
 
-[GoLazy] partial class lazyᴛcolorForTask { internal static slice<@string> colorForTask = slice<@string>([
+[GoLazy] partial class lazyᴛcolorForTask { internal static slice<@string> colorForTask = [
     colorLightMauve,
     colorOrange,
     colorSeafoamGreen,
@@ -870,7 +870,7 @@ private static readonly @string colorAnotherGreyᵇ = "cq_build_attempt_failed"u
     colorSilver,
     colorManzGreen,
     colorKellyGreen
-]); }
+]; }
 
 internal static @string pickTaskColor(uint64 id) {
     var idx = id % (uint64)len(colorForTask);

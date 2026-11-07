@@ -79,11 +79,11 @@ using static go.crypto.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkupCmkKaQrMAACRLu7u6C5oKClKaCpoLagqaCpoKmgg==")]
+[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkuoCWgJaAnLAACBLu7u6C5oKClKaCpoLagqaCpoKmgg==")]
 [assembly: GoPositionMap("crypto/hpke/aead_fips140v1.26.go", "aead_fips140v1.26.cs", "AA8egoKClA==")]
 [assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADpWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQABhDSgpSCgqyygoKUgoKU6qKClAACENKClIKClILssoKClJKCgpSqooKUpoKCgoKUpoKCgoKCgg==", "71-73:1;114-116:2", "", "74=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
-[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqQppCmkAAIEJKSlIKmgqaC5oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSkpSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
-[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACtcwpSkpKSkpKSkpKQAMmSCgoKClKaCpoK2oqKiAAEUAAgClKSkpNrsguSCpIKkgqSCpIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClAAIBrSCgoKUgoKClJSCgoKClIKUgoKClJSmguYACRSCgpSCgoKCgpSmgtyCgoKUgoKUgg==", "", "", "416=PublicKey/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqAloCWgAAHEIKClIKmgqaC5oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSgpSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
+[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACtcwpSkpKSkpKSkpKQAMmSCgoKClKaCpoK2kpKSAAEUAAgClKSkpNrsgtSClIKUgpSClIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClAAIBrSCgoKUgoKClJSCgoKClIKUgoKClJSmguYACRSCgpSCgoKCgpSmgtyCgoKUgoKUgg==", "", "", "408=PublicKey/1/1/2")]
 [assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABcoAAwYtsyipgAKFrbKkqYACha2ypIADiKCpoKmgoKCgoKCggAQLAAPApSClKSClKSClKT4ooKUkoKUgpKUgpSmgqaCyrKCgpSClIKUgoKUgpSUgoKmgoIACTIADwKmgoKC5qKCpoKUgoKSgqaCgoKCkqSClLiClIKUpIKUpIKUpPiigoKClKaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCpri2tsqSpri2tsqSAAoWgqaCAAsmAAsClKSkuIKCgpSmgqaCpoKCgpQAByYACwKUpKS4goKClKaCgoKUpoKCgoKUpoLmgoaClKaC3II=", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "24=X25519/1/1/4;52=P256/1/1/3;77=P384/1/1/3;381=PublicKey/1/1/2,Encapsulator/1/1/3;611=Encapsulator/1/1/2")]
 // </GoSourcePositionMaps>
 

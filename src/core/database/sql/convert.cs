@@ -149,7 +149,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     // argument list.
     error err = default;
     nint n = default;
-    foreach (var (_, vᴛ1) in args) {
+    foreach (var (_, vᴛ1) in range(args)) {
         var arg = vᴛ1;
 
         var nv = Ꮡ(nvargs, n);

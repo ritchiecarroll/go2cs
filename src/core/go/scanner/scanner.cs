@@ -366,7 +366,7 @@ internal static @string scanIdentifier(this ref Scanner s) {
     //
     // In case we encounter a non-ASCII character, fall back on the slower path
     // of calling into s.next().
-    foreach (var (rdOffset, b) in s.src.slice(s.rdOffset)) {
+    foreach (var (rdOffset, b) in range(s.src.slice(s.rdOffset))) {
         if ('a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || b == '_' || '0' <= b && b <= '9') {
             // Avoid assigning a rune for the common case of an ascii character.
             continue;
@@ -412,17 +412,9 @@ internal static nint digitVal(rune ch) {
     return 16; // larger than any legal digit val
 }
 
-internal static rune lower(rune ch) {
-    return (rune)(((rune)'a' - (rune)'A') | ch); // returns lower-case ch iff ch is ASCII letter
-}
-
-internal static bool isDecimal(rune ch) {
-    return '0' <= ch && ch <= '9';
-}
-
-internal static bool isHex(rune ch) {
-    return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f';
-}
+internal static rune lower(rune ch) { return (rune)(((rune)'a' - (rune)'A') | ch); } // returns lower-case ch iff ch is ASCII letter
+internal static bool isDecimal(rune ch) { return '0' <= ch && ch <= '9'; }
+internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f'; }
 
 // digits accepts the sequence { digit | '_' }.
 // If base <= 10, digits accepts any decimal digit but records
@@ -779,7 +771,7 @@ internal static @string scanString(this ref Scanner s) {
 internal static slice<byte> stripCR(slice<byte> b, bool comment) {
     var c = new slice<byte>(len(b));
     nint i = 0;
-    foreach (var (j, ch) in b) {
+    foreach (var (j, ch) in range(b)) {
         // In a /*-style comment, don't strip \r from *\r/ (incl.
         // sequences of \r from *\r\r...\r/) since the resulting
         // */ would terminate the comment too early unless the \r

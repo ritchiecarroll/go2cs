@@ -39,7 +39,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     } else if (strings.HasPrefix(list[0].Text, "//")) {
         kind = "//";
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-        foreach (var (_, c) in list) {
+        foreach (var (_, c) in range(list)) {
             var (after, found) = strings.CutPrefix(c.Text, "//");
             if (!found) {
                 return list;
@@ -76,7 +76,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             Slash: slash,
             Text: "/*\n"u8 + text + "*/"u8
         ));
-        return slice<ж<ast.Comment>>([c]);
+        return [c];
     }
 
     // For // comment, return sequence of // lines.
@@ -102,7 +102,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             Text: "//"
         )));
         directives = move2heap(directivesᴷ, directives);
-        foreach (var (_, c) in directives) {
+        foreach (var (_, c) in range(directives)) {
             @out = append(@out, Ꮡ(new ast.Comment(
                 Slash: slash,
                 Text: c.Text

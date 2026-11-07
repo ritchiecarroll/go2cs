@@ -78,13 +78,8 @@ partial interface InlineEmbed :
 partial struct embeddedImpl {
 }
 
-internal static error Close(this embeddedImpl _) {
-    return default;
-}
-
-internal static error Flush(this embeddedImpl _) {
-    return default;
-}
+internal static error Close(this embeddedImpl _) { return default; }
+internal static error Flush(this embeddedImpl _) { return default; }
 
 internal static void testInterfaceEmbedding(InlineEmbed x) {
     _ = x.Close();
@@ -103,17 +98,9 @@ internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
 partial struct fakeError {
 }
 
-internal static @string Error(this fakeError _) {
-    return "fake error";
-}
-
-internal static error Unwrap(this fakeError _) {
-    return Δio.EOF;
-}
-
-internal static bool Is(this fakeError _, error err) {
-    return AreEqual(err, Δio.EOF);
-}
+internal static @string Error(this fakeError _) { return "fake error"; }
+internal static error Unwrap(this fakeError _) { return Δio.EOF; }
+internal static bool Is(this fakeError _, error err) { return AreEqual(err, Δio.EOF); }
 
 partial struct tally {
     internal nint total;
@@ -141,7 +128,7 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
         return (0, Δio.EOF);
     }
     nint n = 0;
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         if (b.left == 0) {
             break;
         }
@@ -160,7 +147,7 @@ partial struct frame {
 
 internal static nint checksum(ref frame f) {
     nint s = 0;
-    foreach (var (_, v) in f.data[..]) {
+    foreach (var (_, v) in range(f.data[..])) {
         s += (nint)v;
     }
     return s;

@@ -82,7 +82,7 @@ public static slice<ж<byte>> StringSlicePtr(slice<@string> ss) {
 // a NUL byte, it returns (nil, [EINVAL]).
 public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     nint n = 0;
-    foreach (var (_, s) in ss) {
+    foreach (var (_, s) in range(ss)) {
         if (bytealg.IndexByteString(s, 0) != -1) {
             return (default, EINVAL);
         }
@@ -91,7 +91,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     var bb = new slice<ж<byte>>(len(ss) + 1);
     var b = new slice<byte>(n);
     n = 0;
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         bb[i] = Ꮡ(b, n);
         copy(b.slice(n), s);
         n += len(s) + 1;
@@ -99,9 +99,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     return (bb, default);
 }
 
-public static void CloseOnExec(nint fd) {
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-}
+public static void CloseOnExec(nint fd) { fcntl(fd, F_SETFD, FD_CLOEXEC); }
 
 public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
     error err = default;
@@ -142,7 +140,6 @@ partial struct ProcAttr {
 
 internal static readonly ж<ProcAttr> ᏑzeroProcAttr = new StaticBox<ProcAttr>(default(ProcAttr));
 internal static ref ProcAttr zeroProcAttr => ref ((StaticBox<ProcAttr>)ᏑzeroProcAttr).ValueSlot;
-
 internal static readonly ж<SysProcAttr> ᏑzeroSysProcAttr = new StaticBox<SysProcAttr>(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ((StaticBox<SysProcAttr>)ᏑzeroSysProcAttr).ValueSlot;
 
@@ -164,7 +161,6 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
 
 // Implemented in runtime package.
 internal static partial void runtime_BeforeExec();
-
 internal static partial void runtime_AfterExec();
 
 // execveLibc is non-nil on OS using libc syscall, set to execve in exec_libc.go; this

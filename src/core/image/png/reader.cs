@@ -74,7 +74,7 @@ partial struct interlaceScan {
 
 // interlacing defines Adam7 interlacing, with 7 passes of reduced images.
 // See https://www.w3.org/TR/PNG/#8Interlace
-[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = slice<interlaceScan>([
+[GoLazy] partial class lazyᴛinterlacing { internal static slice<interlaceScan> interlacing = [
     new(8, 8, 0, 0),
     new(8, 8, 4, 0),
     new(4, 8, 0, 4),
@@ -82,7 +82,7 @@ partial struct interlaceScan {
     new(2, 4, 0, 2),
     new(2, 2, 1, 0),
     new(1, 2, 0, 1)
-]); }
+]; }
 
 // Decoding stage.
 // The PNG specification says that the IHDR, PLTE (if present), tRNS (if
@@ -121,18 +121,14 @@ partial struct decoder {
 // A FormatError reports that the input is not a valid PNG.
 partial struct FormatError /*@string*/;
 
-public static @string Error(this FormatError e) {
-    return "png: invalid format: "u8 + ((@string)e);
-}
+public static @string Error(this FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
 
 internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order");
 
 // An UnsupportedError reports that the input uses a valid but unimplemented PNG feature.
 partial struct UnsupportedError /*@string*/;
 
-public static @string Error(this UnsupportedError e) {
-    return "png: unsupported feature: "u8 + ((@string)e);
-}
+public static @string Error(this UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badIhdrLengthˢ => ref badIhdrLengthˢᵇ;
@@ -639,7 +635,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             break;
         }
         case var ᴛ when ᴛ == ftUp: {
-            foreach (var (i, p) in pdat) {
+            foreach (var (i, p) in range(pdat)) {
                 cdat[i] += p;
             }
             break;

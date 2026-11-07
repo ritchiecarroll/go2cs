@@ -66,7 +66,7 @@ var names = []string{"stdin", "stdout"}
 ```
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 -->
 ```csharp
-internal static slice<@string> names = slice<@string>(["stdin", "stdout"]);
+internal static slice<@string> names = ["stdin", "stdout"];
 ```
 
 golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted on each evaluation and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil).
@@ -176,7 +176,7 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
-<!-- source: src/core/net/http/pattern.cs:466-472 -->
+<!-- source: src/core/net/http/pattern.cs:464-470 -->
 ```csharp
         return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
@@ -414,7 +414,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
-  <!-- source: src/core/fmt/print.cs:272-280 -->
+  <!-- source: src/core/fmt/print.cs:268-276 -->
   ```csharp
   public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …

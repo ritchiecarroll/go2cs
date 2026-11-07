@@ -15,20 +15,16 @@ partial struct Leaf {
     internal slice<Leaf> kids;
 }
 
-public static slice<Leaf> Children(this Leaf l) {
-    return l.kids;
-}
+public static slice<Leaf> Children(this Leaf l) { return l.kids; }
 
-public static @string Label(this Leaf l) {
-    return l.name;
-}
+public static @string Label(this Leaf l) { return l.name; }
 
 public static nint Count<N>(N n)
     where N : Tree<N>
 {
     nint total = 1;
 
-    foreach (var (_, kid) in n.Children()) {
+    foreach (var (_, kid) in range(n.Children())) {
         total += Count(kid);
     }
 
@@ -40,7 +36,7 @@ public static slice<@string> Labels<N>(N n)
 {
     var @out = slice<@string>([n.Label()]);
 
-    foreach (var (_, kid) in n.Children()) {
+    foreach (var (_, kid) in range(n.Children())) {
         @out = appendꓸꓸꓸ(@out, Labels(kid));
     }
 
@@ -52,7 +48,7 @@ public static void Rename<N>(N n, Func<N, N> rename)
 {
     var kids = n.Children();
 
-    foreach (var i in range(kids)) {
+    foreach (var i in range(len(kids))) {
         kids[i] = rename(kids[i]);
     }
 }
@@ -79,9 +75,7 @@ public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
     return () => Ꮡn.Value.next;
 }
 
-public static array<ж<Node>> Triple(this ж<Node> Ꮡn) {
-    return new ж<Node>[]{Ꮡn, Ꮡn, Ꮡn}.array();
-}
+public static array<ж<Node>> Triple(this ж<Node> Ꮡn) { return new ж<Node>[]{Ꮡn, Ꮡn, Ꮡn}.array(); }
 
 public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     return (Func<ж<Node>, bool> yield) => {
@@ -93,9 +87,7 @@ public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
     };
 }
 
-public static @string Label(this ref Node n) {
-    return n.name;
-}
+public static @string Label(this ref Node n) { return n.name; }
 
 public static slice<@string> Walk<N>(N n)
     where N : Stepper<N>
@@ -134,7 +126,7 @@ public static slice<@string> Names<N>(N n)
 }
 
 internal static void Main() {
-    var root = new Leaf(name: "root", kids: slice<Leaf>([new(name: "a"), new(name: "b", kids: slice<Leaf>([new(name: "c")]))]));
+    var root = new Leaf(name: "root", kids: [new(name: "a"), new(name: "b", kids: [new(name: "c")])]);
 
     fmt.Println(Count(root));
     fmt.Println(Labels(root));

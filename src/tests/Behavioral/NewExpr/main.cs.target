@@ -7,12 +7,9 @@ partial class main_package {
 partial struct point {
     internal nint x, y;
 }
-
 partial struct row /*[3]byte*/;
 
-internal static nint answer() {
-    return 42;
-}
+internal static nint answer() { return 42; }
 
 
 partial struct cfgᴛ1 /*dyn*/ {
@@ -20,12 +17,9 @@ partial struct cfgᴛ1 /*dyn*/ {
     internal nint n;
 }
 internal static ж<cfgᴛ1> cfg = Ꮡ(new cfgᴛ1("cfg", 3));
-
 internal static ж<int64> limit = Ꮡ((int64)(1099511627776L));
 
-internal static ж<nint> boxed(nint v) {
-    return Ꮡ(v * 2);
-}
+internal static ж<nint> boxed(nint v) { return Ꮡ(v * 2); }
 
 partial struct holder {
     internal ж<@string> p;

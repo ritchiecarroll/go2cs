@@ -97,8 +97,6 @@ public static void Run(nint code) {
 
 partial struct exitError /*@string*/;
 
-internal static @string Error(this exitError e) {
-    return (@string)e;
-}
+internal static @string Error(this exitError e) { return (@string)e; }
 
 } // end exithook_package

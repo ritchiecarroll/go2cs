@@ -13,16 +13,14 @@ internal static void inc(this ж<counter> Ꮡc, nint by) {
     p.Value += by;
 }
 
-internal static nint get(this counter c) {
-    return c.n;
-}
+internal static nint get(this counter c) { return c.n; }
 
 partial struct entry {
     internal @string name;
     internal Func<nint> f;
 }
 
-[GoLazy] partial class lazyᴛtable { internal static slice<entry> table = slice<entry>([
+[GoLazy] partial class lazyᴛtable { internal static slice<entry> table = [
     new("var-decl", () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         Ꮡc.inc(3);
@@ -63,7 +61,7 @@ partial struct entry {
     }),
     new("range-value", () => {
         nint total = 0;
-        foreach (var (_, vᴛ1) in slice<counter>([new(n: 1), new(n: 2)])) {
+        foreach (var (_, vᴛ1) in range(slice<counter>([new(n: 1), new(n: 2)]))) {
             ref var c = ref heap(new counter(), out var Ꮡc);
             c = vᴛ1;
 
@@ -81,7 +79,7 @@ partial struct entry {
         inner();
         return Ꮡc.Value.get();
     })
-]); }
+]; }
 
 [GoLazy] partial class lazyᴛsingle { internal static Func<nint> single = () => {
     ref var c = ref heap(new counter(), out var Ꮡc);
@@ -106,7 +104,7 @@ internal static slice<nint> inDecl() {
 }
 
 internal static void Main() {
-    foreach (var (_, e) in table) {
+    foreach (var (_, e) in range(table)) {
         fmt.Println(e.name, e.f());
     }
     fmt.Println("single", single());

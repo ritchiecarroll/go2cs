@@ -16,19 +16,15 @@ internal static UntypedFloat shiftBy => 4e0;
 internal static UntypedInt intLen => 100;
 
 internal static array<byte> pkgArr = new(100);
-
 internal static array<nint> pkgCplxArr = new(10);
-
 internal static array<byte> pkgExprArr = new(100);
 
 internal static array<byte> pkgIntArr = new(100);
 
 /* [namedLen]byte */
 partial struct floatLenArr /*[10]byte*/;
-
 /* [cplxLen]int32 */
 partial struct cplxLenArr /*[10]int32*/;
-
 /* [exprLen]byte */
 partial struct exprLenArr /*[100]byte*/;
 

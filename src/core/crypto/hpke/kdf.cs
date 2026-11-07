@@ -54,19 +54,13 @@ public static (KDF, error) NewKDF(uint16 id) {
 }
 
 // HKDFSHA256 returns an HKDF-SHA256 KDF implementation.
-public static KDF HKDFSHA256() {
-    return new hkdfKDFжKDF(hkdfSHA256);
-}
+public static KDF HKDFSHA256() { return new hkdfKDFжKDF(hkdfSHA256); }
 
 // HKDFSHA384 returns an HKDF-SHA384 KDF implementation.
-public static KDF HKDFSHA384() {
-    return new hkdfKDFжKDF(hkdfSHA384);
-}
+public static KDF HKDFSHA384() { return new hkdfKDFжKDF(hkdfSHA384); }
 
 // HKDFSHA512 returns an HKDF-SHA512 KDF implementation.
-public static KDF HKDFSHA512() {
-    return new hkdfKDFжKDF(hkdfSHA512);
-}
+public static KDF HKDFSHA512() { return new hkdfKDFжKDF(hkdfSHA512); }
 
 partial struct hkdfKDF {
     internal Func<hash.Hash> hash;
@@ -75,9 +69,7 @@ partial struct hkdfKDF {
 }
 
 internal static ж<hkdfKDF> hkdfSHA256 = Ꮡ(new hkdfKDF(hash: sha256.New, id: 0x0001, nH: sha256.Size));
-
 internal static ж<hkdfKDF> hkdfSHA384 = Ꮡ(new hkdfKDF(hash: sha512.New384, id: 0x0002, nH: sha512.Size384));
-
 internal static ж<hkdfKDF> hkdfSHA512 = Ꮡ(new hkdfKDF(hash: sha512.New, id: 0x0003, nH: sha512.Size));
 
 internal static uint16 ID(this ref hkdfKDF kdf) {
@@ -136,7 +128,6 @@ partial struct shakeKDF {
 }
 
 internal static ж<shakeKDF> shake128KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE128, id: 0x0010, nH: 32));
-
 internal static ж<shakeKDF> shake256KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE256, id: 0x0011, nH: 64));
 
 internal static uint16 ID(this ref shakeKDF kdf) {
@@ -158,7 +149,7 @@ internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<
     H.Write(suiteID);
     H.Write(slice<byte>([(byte)(len(label) >> 8), (byte)len(label)]));
     H.Write(slice<byte>(label));
-    H.Write(slice<byte>([(byte)(length >> 8), (byte)length]));
+    H.Write([(byte)(length >> 8), (byte)length]);
     H.Write(context);
     var @out = new slice<byte>(length);
     H.Read(@out);

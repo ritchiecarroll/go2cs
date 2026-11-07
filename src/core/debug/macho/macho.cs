@@ -40,20 +40,15 @@ public static Type TypeExec => 2;
 public static Type TypeDylib => 6;
 public static Type TypeBundle => 8;
 
-[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = slice<intName>([
+[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = [
     new((uint32)TypeObj, "Obj"),
     new((uint32)TypeExec, "Exec"),
     new((uint32)TypeDylib, "Dylib"),
     new((uint32)TypeBundle, "Bundle")
-]); }
+]; }
 
-public static @string String(this Type t) {
-    return stringName((uint32)t, typeStrings, false);
-}
-
-public static @string GoString(this Type t) {
-    return stringName((uint32)t, typeStrings, true);
-}
+public static @string String(this Type t) { return stringName((uint32)t, typeStrings, false); }
+public static @string GoString(this Type t) { return stringName((uint32)t, typeStrings, true); }
 
 // A Cpu is a Mach-O cpu type.
 partial struct Cpu /*num:uint32*/;
@@ -67,22 +62,17 @@ public static Cpu CpuArm64 => /* CpuArm | cpuArch64 */ 16777228;
 public static Cpu CpuPpc => 18;
 public static Cpu CpuPpc64 => /* CpuPpc | cpuArch64 */ 16777234;
 
-[GoLazy] partial class lazyᴛcpuStrings { internal static slice<intName> cpuStrings = slice<intName>([
+[GoLazy] partial class lazyᴛcpuStrings { internal static slice<intName> cpuStrings = [
     new((uint32)Cpu386, "Cpu386"),
     new((uint32)CpuAmd64, "CpuAmd64"),
     new((uint32)CpuArm, "CpuArm"),
     new((uint32)CpuArm64, "CpuArm64"),
     new((uint32)CpuPpc, "CpuPpc"),
     new((uint32)CpuPpc64, "CpuPpc64")
-]); }
+]; }
 
-public static @string String(this Cpu i) {
-    return stringName((uint32)i, cpuStrings, false);
-}
-
-public static @string GoString(this Cpu i) {
-    return stringName((uint32)i, cpuStrings, true);
-}
+public static @string String(this Cpu i) { return stringName((uint32)i, cpuStrings, false); }
+public static @string GoString(this Cpu i) { return stringName((uint32)i, cpuStrings, true); }
 
 // A LoadCmd is a Mach-O load command.
 partial struct LoadCmd /*num:uint32*/;
@@ -97,22 +87,17 @@ public static LoadCmd LoadCmdDylinker => 0xf; // id dylinker command (not load d
 public static LoadCmd LoadCmdSegment64 => 0x19;
 public static LoadCmd LoadCmdRpath => 0x8000001c;
 
-[GoLazy] partial class lazyᴛcmdStrings { internal static slice<intName> cmdStrings = slice<intName>([
+[GoLazy] partial class lazyᴛcmdStrings { internal static slice<intName> cmdStrings = [
     new((uint32)LoadCmdSegment, "LoadCmdSegment"),
     new((uint32)LoadCmdThread, "LoadCmdThread"),
     new((uint32)LoadCmdUnixThread, "LoadCmdUnixThread"),
     new((uint32)LoadCmdDylib, "LoadCmdDylib"),
     new((uint32)LoadCmdSegment64, "LoadCmdSegment64"),
     new((uint32)LoadCmdRpath, "LoadCmdRpath")
-]); }
+]; }
 
-public static @string String(this LoadCmd i) {
-    return stringName((uint32)i, cmdStrings, false);
-}
-
-public static @string GoString(this LoadCmd i) {
-    return stringName((uint32)i, cmdStrings, true);
-}
+public static @string String(this LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
+public static @string GoString(this LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
 
 // A Segment32 is a 32-bit Mach-O segment load command.
 partial struct Segment32 {
@@ -330,7 +315,7 @@ partial struct intName {
 }
 
 internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax) {
-    foreach (var (_, n) in names) {
+    foreach (var (_, n) in range(names)) {
         if (n.i == i) {
             if (goSyntax) {
                 return "macho."u8 + n.s;

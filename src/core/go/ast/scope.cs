@@ -109,7 +109,7 @@ public static tokenꓸPos Pos(this ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
     case ж<Field> d: {
-        foreach (var (_, n) in d.Names) {
+        foreach (var (_, n) in range(d.Names)) {
             if (n.Name == name) {
                 return n.Pos();
             }
@@ -123,7 +123,7 @@ public static tokenꓸPos Pos(this ref Object obj) {
         return d.Path.Pos();
     }
     case ж<ValueSpec> d: {
-        foreach (var (_, n) in d.Names) {
+        foreach (var (_, n) in range(d.Names)) {
             if (n.Name == name) {
                 return n.Pos();
             }
@@ -149,7 +149,7 @@ public static tokenꓸPos Pos(this ref Object obj) {
         break;
     }
     case ж<AssignStmt> d: {
-        foreach (var (_, x) in d.Lhs) {
+        foreach (var (_, x) in range(d.Lhs)) {
             var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && ident.Name == name) {
                 return ident.Pos();
             }
@@ -185,8 +185,6 @@ public static ObjKind Lbl => 6;            // label
     [(int)Lbl] = "label"
 }.array(); }
 
-public static @string String(this ObjKind kind) {
-    return objKindStrings[kind];
-}
+public static @string String(this ObjKind kind) { return objKindStrings[kind]; }
 
 } // end ast_package

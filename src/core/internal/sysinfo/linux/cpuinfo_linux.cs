@@ -78,7 +78,7 @@ internal static @string osCPUInfoName() {
     // modelName filed example:
     //	Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
     var f = new @string[]{"GHz", "MHz"}.array();
-    foreach (var (_, v) in f.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(f.ΔRangeSnapshot())) {
         if (strings.Contains(modelName, v)) {
             return modelName;
         }

@@ -216,7 +216,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
     b.minwidth = minwidth;
     b.tabwidth = tabwidth;
     b.padding = padding;
-    foreach (var i in range(b.padbytes)) {
+    foreach (var i in range(len(b.padbytes))) {
         b.padbytes[i] = padchar;
     }
     if (padchar == '\t') {
@@ -233,9 +233,9 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
 // debugging support (keep code around)
 internal static void dump(this ref Writer b) {
     nint pos = 0;
-    foreach (var (i, line) in b.lines) {
+    foreach (var (i, line) in range(b.lines)) {
         print((@string)"(", i, (@string)") ");
-        foreach (var (_, c) in line) {
+        foreach (var (_, c) in range(line)) {
             print((@string)"[", (@string)(b.buf.slice(pos, pos + c.size)), (@string)"]");
             pos += c.size;
         }
@@ -268,7 +268,7 @@ internal static void writeN(this ref Writer b, slice<byte> src, nint n) {
     b.write0(src.slice(0, n));
 }
 
-internal static slice<byte> newline = slice<byte>([(byte)'\n']);
+internal static slice<byte> newline = [(byte)'\n'];
 internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
@@ -291,7 +291,7 @@ internal static void writePadding(this ref Writer b, nint textw, nint cellw, boo
     b.writeN(b.padbytes[0..], cellw - textw);
 }
 
-internal static slice<byte> vbar = slice<byte>([(byte)'|']);
+internal static slice<byte> vbar = [(byte)'|'];
 
 internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
@@ -303,7 +303,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
         // if TabIndent is set, use tabs to pad leading empty cells
         var useTabs = (b.flags & TabIndent) != 0;
 
-        foreach (var (j, c) in line) {
+        foreach (var (j, c) in range(line)) {
             if (j > 0 && (b.flags & Debug) != 0) {
                 // indicate column break
                 b.write0(vbar);
@@ -573,7 +573,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
 
         // split text into cells
         n = 0;
-        foreach (var (i, ch) in buf) {
+        foreach (var (i, ch) in range(buf)) {
             if (b.endChar == 0) {
                 // outside escape
                 switch (ch) {

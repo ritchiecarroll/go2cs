@@ -23,17 +23,11 @@ partial struct store {
     internal slice<uintptr> data;
 }
 
-internal static slice<uintptr> stk(this ref store s) {
-    return s.data;
-}
+internal static slice<uintptr> stk(this ref store s) { return s.data; }
 
-internal static partial void bump(ref uintptr p) {
-    p = p + 7;
-}
+internal static partial void bump(ref uintptr p) { p = p + 7; }
 
-internal static partial void bumpInt(ref nint p) {
-    p = p + 3;
-}
+internal static partial void bumpInt(ref nint p) { p = p + 3; }
 
 internal static void Main() {
     var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: new uintptr[]{10, 20, 30, 40}.array())));
@@ -52,7 +46,7 @@ internal static void Main() {
     bumpInt(ref (cache.at(cacheT.Ꮡentries, 1).at<nint>(2)).DerefOrNull());
     fmt.Println(cache.entries[1][2], cache.entries[0][0]);
 
-    var st = Ꮡ(new store(id: 5, data: slice<uintptr>([11, 22, 33])));
+    var st = Ꮡ(new store(id: 5, data: [11, 22, 33]));
     bump(ref (Ꮡ(st.stk(), 0)).DerefOrNull());
     fmt.Println(st.data[0], st.stk()[0]);
     bump(ref (Ꮡ(st.stk(), 2)).DerefOrNull());

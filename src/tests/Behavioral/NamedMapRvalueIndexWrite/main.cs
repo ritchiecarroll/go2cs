@@ -12,19 +12,15 @@ partial struct response {
     internal ΔHeader hdr;
 }
 
-internal static ΔHeader Header(this ref response r) {
-    return r.hdr;
-}
+internal static ΔHeader Header(this ref response r) { return r.hdr; }
 
-internal static ж<response> newResponse() {
-    return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{})));
-}
+internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{}))); }
 
 internal static void Main() {
     var r = newResponse();
 
-    r.Header()["Content-Type"] = slice<@string>(["text/plain"]);
-    r.Header()["X-Trace"] = slice<@string>(["a", "b"]);
+    r.Header()["Content-Type"] = ["text/plain"];
+    r.Header()["X-Trace"] = ["a", "b"];
 
     fmt.Println(r.hdr["Content-Type"], len(r.hdr["X-Trace"]));
 

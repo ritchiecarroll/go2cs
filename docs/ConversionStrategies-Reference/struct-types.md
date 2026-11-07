@@ -121,10 +121,10 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     internal @string str;
     /*embed*/ internal error error;
 }
-[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = slice<ж<ptrElemsᴛ1>>([
+[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = [
     Ꮡ(new ptrElemsᴛ1(1, "one", default)),
     Ꮡ(new ptrElemsᴛ1(2, "two", default))
-]); }
+]; }
 ```
 
 (The `[GoLazy]` holder class around the var is unrelated to the lift: a package var whose value is pure data is
@@ -169,7 +169,7 @@ type Composed struct {
 	ByKey map[string]struct{ Count int }
 }
 ```
-<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:29-31, 37-39, 45-46, 48, 50 -->
+<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:28-30, 36-38, 44-45, 47, 49 -->
 ```csharp
 partial struct Composed_Ptrs /*dyn*/ {
     public uint32 Size;

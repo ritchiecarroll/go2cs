@@ -43,18 +43,14 @@ partial struct StructuralError {
     public @string Msg;
 }
 
-public static @string Error(this StructuralError e) {
-    return "asn1: structure error: "u8 + e.Msg;
-}
+public static @string Error(this StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
 
 // A SyntaxError suggests that the ASN.1 data is invalid.
 partial struct SyntaxError {
     public @string Msg;
 }
 
-public static @string Error(this SyntaxError e) {
-    return "asn1: syntax error: "u8 + e.Msg;
-}
+public static @string Error(this SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
 
 // We start by dealing with each of the primitive types in turn.
 // BOOLEAN
@@ -158,7 +154,7 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
     if (len(bytes) > 0 && (byte)(bytes[0] & 0x80) == 0x80) {
         // This is a negative number.
         var notBytes = new slice<byte>(len(bytes));
-        foreach (var i in range(notBytes)) {
+        foreach (var i in range(len(notBytes))) {
             notBytes[i] = (byte)(((byte)(~bytes[i])));
         }
         ret.SetBytes(notBytes);
@@ -235,7 +231,7 @@ public static readonly ж<RawValue> ᏑNullRawValue = new StaticBox<RawValue>(ne
 public static ref RawValue NullRawValue => ref ((StaticBox<RawValue>)ᏑNullRawValue).ValueSlot;
 
 // NullBytes contains bytes representing the DER-encoded ASN.1 NULL type.
-public static readonly ж<slice<byte>> ᏑNullBytes = new StaticBox<slice<byte>>(slice<byte>([TagNull, 0]));
+public static readonly ж<slice<byte>> ᏑNullBytes = new StaticBox<slice<byte>>([TagNull, 0]);
 public static ref slice<byte> NullBytes => ref ((StaticBox<slice<byte>>)ᏑNullBytes).ValueSlot;
 
 // OBJECT IDENTIFIER
@@ -253,7 +249,7 @@ public static @string String(this ObjectIdentifier oi) {
     Ꮡs.Grow(32);
 
     var buf = new slice<byte>(0, 19);
-    foreach (var (i, v) in oi) {
+    foreach (var (i, v) in range<nint>(oi)) {
         if (i > 0) {
             Ꮡs.WriteByte((byte)'.');
         }
@@ -415,7 +411,7 @@ internal static (time.Time ret, error err) parseGeneralizedTime(slice<byte> byte
 // parseNumericString parses an ASN.1 NumericString from the given byte array
 // and returns it.
 internal static (@string ret, error err) parseNumericString(slice<byte> bytes) {
-    foreach (var (_, b) in bytes) {
+    foreach (var (_, b) in range(bytes)) {
         if (!isNumeric(b)) {
             return ("", new SyntaxError("NumericString contains invalid character"));
         }
@@ -436,7 +432,7 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
     @string ret = default;
     error err = default;
 
-    foreach (var (_, b) in bytes) {
+    foreach (var (_, b) in range(bytes)) {
         if (!isPrintable(b, allowAsterisk, allowAmpersand)) {
             err = new SyntaxError("PrintableString contains invalid character");
             return (ret, err);
@@ -447,7 +443,6 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
 }
 
 partial struct asteriskFlag /*bool*/;
-
 partial struct ampersandFlag /*bool*/;
 
 internal static asteriskFlag allowAsterisk => true;
@@ -480,7 +475,7 @@ internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
     @string ret = default;
     error err = default;
 
-    foreach (var (_, b) in bytes) {
+    foreach (var (_, b) in range(bytes)) {
         if (b >= utf8.RuneSelf) {
             err = new SyntaxError("IA5String contains invalid character");
             return (ret, err);
@@ -505,7 +500,7 @@ internal static (@string ret, error err) parseT61String(slice<byte> bytes) {
     // we just treat these strings as being encoded using Latin-1. This matches
     // what most of the world does, including BoringSSL.
     var buf = new slice<byte>(0, len(bytes));
-    foreach (var (_, v) in bytes) {
+    foreach (var (_, v) in range(bytes)) {
         // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
         buf = utf8.AppendRune(buf, (rune)v);
     }

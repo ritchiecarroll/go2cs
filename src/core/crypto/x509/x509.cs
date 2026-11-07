@@ -255,7 +255,7 @@ public static SignatureAlgorithm SHA512WithRSAPSS => 15;
 public static SignatureAlgorithm PureEd25519 => 16;
 
 internal static bool isRSAPSS(this SignatureAlgorithm algo) {
-    foreach (var (_, details) in signatureAlgorithmDetails) {
+    foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.isRSAPSS;
         }
@@ -264,7 +264,7 @@ internal static bool isRSAPSS(this SignatureAlgorithm algo) {
 }
 
 internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
-    foreach (var (_, details) in signatureAlgorithmDetails) {
+    foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.hash;
         }
@@ -273,7 +273,7 @@ internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
 }
 
 public static @string String(this SignatureAlgorithm algo) {
-    foreach (var (_, details) in signatureAlgorithmDetails) {
+    foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.name;
         }
@@ -386,7 +386,7 @@ partial struct signatureAlgorithmDetailsᴛ1 /*dyn*/ {
     internal bool isRSAPSS;
 }
 internal static slice<signatureAlgorithmDetailsᴛ1> signatureAlgorithmDetails;
-internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDetails = slice<signatureAlgorithmDetailsᴛ1>([
+internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDetails = [
     new(MD5WithRSA, "MD5-RSA", oidSignatureMD5WithRSA, asn1.NullRawValue, RSA, crypto.MD5, false),
     new(SHA1WithRSA, "SHA1-RSA", oidSignatureSHA1WithRSA, asn1.NullRawValue, RSA, crypto.SHA1, false),
     new(SHA1WithRSA, "SHA1-RSA", oidISOSignatureSHA1WithRSA, asn1.NullRawValue, RSA, crypto.SHA1, false),
@@ -403,7 +403,7 @@ internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDeta
     new(ECDSAWithSHA384, "ECDSA-SHA384", oidSignatureECDSAWithSHA384, emptyRawValue, ECDSA, crypto.SHA384, false),
     new(ECDSAWithSHA512, "ECDSA-SHA512", oidSignatureECDSAWithSHA512, emptyRawValue, ECDSA, crypto.SHA512, false),
     new(PureEd25519, "Ed25519", oidSignatureEd25519, emptyRawValue, Ed25519, (crypto.Hash)0, /* no pre-hashing */ false)
-]); }
+]; }
 
 internal static asn1.RawValue emptyRawValue = new asn1.RawValue();
 
@@ -414,9 +414,9 @@ internal static asn1.RawValue emptyRawValue = new asn1.RawValue();
 //   - maskGenAlgorithm always contains the default mgf1SHA1 identifier
 //   - saltLength contains the length of the associated hash
 //   - trailerField always contains the default trailerFieldBC value
-[GoLazy] partial class lazyᴛpssParametersSHA256 { internal static asn1.RawValue pssParametersSHA256 = new asn1.RawValue(FullBytes: slice<byte>([48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 162, 3, 2, 1, 32])); }
-[GoLazy] partial class lazyᴛpssParametersSHA384 { internal static asn1.RawValue pssParametersSHA384 = new asn1.RawValue(FullBytes: slice<byte>([48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 162, 3, 2, 1, 48])); }
-[GoLazy] partial class lazyᴛpssParametersSHA512 { internal static asn1.RawValue pssParametersSHA512 = new asn1.RawValue(FullBytes: slice<byte>([48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 162, 3, 2, 1, 64])); }
+[GoLazy] partial class lazyᴛpssParametersSHA256 { internal static asn1.RawValue pssParametersSHA256 = new asn1.RawValue(FullBytes: [48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 162, 3, 2, 1, 32]); }
+[GoLazy] partial class lazyᴛpssParametersSHA384 { internal static asn1.RawValue pssParametersSHA384 = new asn1.RawValue(FullBytes: [48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 162, 3, 2, 1, 48]); }
+[GoLazy] partial class lazyᴛpssParametersSHA512 { internal static asn1.RawValue pssParametersSHA512 = new asn1.RawValue(FullBytes: [48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 162, 3, 2, 1, 64]); }
 
 // pssParameters reflects the parameters in an AlgorithmIdentifier that
 // specifies RSA PSS. See RFC 3447, Appendix A.2.3.
@@ -440,7 +440,7 @@ internal static SignatureAlgorithm getSignatureAlgorithmFromAI(pkix.AlgorithmIde
     }
 
     if (!ai.Algorithm.Equal(oidSignatureRSAPSS)) {
-        foreach (var (_, details) in signatureAlgorithmDetails) {
+        foreach (var (_, details) in range(signatureAlgorithmDetails)) {
             if (ai.Algorithm.Equal(details.oid)) {
                 return details.algo;
             }
@@ -673,7 +673,7 @@ partial struct extKeyUsageOIDsᴛ1 /*dyn*/ {
     internal ExtKeyUsage extKeyUsage;
     internal asn1.ObjectIdentifier oid;
 }
-[GoLazy] partial class lazyᴛextKeyUsageOIDs { internal static slice<extKeyUsageOIDsᴛ1> extKeyUsageOIDs = slice<extKeyUsageOIDsᴛ1>([
+[GoLazy] partial class lazyᴛextKeyUsageOIDs { internal static slice<extKeyUsageOIDsᴛ1> extKeyUsageOIDs = [
     new(ExtKeyUsageAny, oidExtKeyUsageAny),
     new(ExtKeyUsageServerAuth, oidExtKeyUsageServerAuth),
     new(ExtKeyUsageClientAuth, oidExtKeyUsageClientAuth),
@@ -688,13 +688,13 @@ partial struct extKeyUsageOIDsᴛ1 /*dyn*/ {
     new(ExtKeyUsageNetscapeServerGatedCrypto, oidExtKeyUsageNetscapeServerGatedCrypto),
     new(ExtKeyUsageMicrosoftCommercialCodeSigning, oidExtKeyUsageMicrosoftCommercialCodeSigning),
     new(ExtKeyUsageMicrosoftKernelCodeSigning, oidExtKeyUsageMicrosoftKernelCodeSigning)
-]); }
+]; }
 
 internal static (ExtKeyUsage eku, bool ok) extKeyUsageFromOID(asn1.ObjectIdentifier oid) {
     ExtKeyUsage eku = default;
     bool ok = default;
 
-    foreach (var (_, pair) in extKeyUsageOIDs) {
+    foreach (var (_, pair) in range(extKeyUsageOIDs)) {
         if (oid.Equal(pair.oid)) {
             return (pair.extKeyUsage, true);
         }
@@ -706,7 +706,7 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
     asn1.ObjectIdentifier oid = default;
     bool ok = default;
 
-    foreach (var (_, pair) in extKeyUsageOIDs) {
+    foreach (var (_, pair) in range(extKeyUsageOIDs)) {
         if (eku == pair.extKeyUsage) {
             return (pair.oid, true);
         }
@@ -979,7 +979,7 @@ internal static bool hasNameConstraints(this ref Certificate c) {
 }
 
 internal static slice<byte> getSANExtension(this ref Certificate c) {
-    foreach (var (_, e) in c.Extensions) {
+    foreach (var (_, e) in range(c.Extensions)) {
         if (e.Id.Equal(oidExtensionSubjectAltName)) {
             return e.Value;
         }
@@ -1005,7 +1005,7 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
     crypto.Hash hashType = default;
     PublicKeyAlgorithm pubKeyAlgo = default;
 
-    foreach (var (_, details) in signatureAlgorithmDetails) {
+    foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             hashType = details.hash;
             pubKeyAlgo = details.pubKeyAlgo;
@@ -1140,7 +1140,7 @@ internal static byte reverseBitsInAByte(byte @in) {
 internal static nint asn1BitLength(slice<byte> bitString) {
     nint bitLen = builtin.len(bitString) * 8;
 
-    foreach (var i in range(bitString)) {
+    foreach (var i in range(builtin.len(bitString))) {
         var b = bitString[builtin.len(bitString) - i - 1];
 
         for (nuint bit = (nuint)0; bit < 8; bit++) {
@@ -1154,18 +1154,18 @@ internal static nint asn1BitLength(slice<byte> bitString) {
     return 0;
 }
 
-internal static slice<nint> oidExtensionSubjectKeyId = slice<nint>([2, 5, 29, 14]);
-internal static slice<nint> oidExtensionKeyUsage = slice<nint>([2, 5, 29, 15]);
-internal static slice<nint> oidExtensionExtendedKeyUsage = slice<nint>([2, 5, 29, 37]);
-internal static slice<nint> oidExtensionAuthorityKeyId = slice<nint>([2, 5, 29, 35]);
-internal static slice<nint> oidExtensionBasicConstraints = slice<nint>([2, 5, 29, 19]);
-internal static slice<nint> oidExtensionSubjectAltName = slice<nint>([2, 5, 29, 17]);
-internal static slice<nint> oidExtensionCertificatePolicies = slice<nint>([2, 5, 29, 32]);
-internal static slice<nint> oidExtensionNameConstraints = slice<nint>([2, 5, 29, 30]);
-internal static slice<nint> oidExtensionCRLDistributionPoints = slice<nint>([2, 5, 29, 31]);
-internal static slice<nint> oidExtensionAuthorityInfoAccess = slice<nint>([1, 3, 6, 1, 5, 5, 7, 1, 1]);
-internal static slice<nint> oidExtensionCRLNumber = slice<nint>([2, 5, 29, 20]);
-internal static slice<nint> oidExtensionReasonCode = slice<nint>([2, 5, 29, 21]);
+internal static slice<nint> oidExtensionSubjectKeyId = [2, 5, 29, 14];
+internal static slice<nint> oidExtensionKeyUsage = [2, 5, 29, 15];
+internal static slice<nint> oidExtensionExtendedKeyUsage = [2, 5, 29, 37];
+internal static slice<nint> oidExtensionAuthorityKeyId = [2, 5, 29, 35];
+internal static slice<nint> oidExtensionBasicConstraints = [2, 5, 29, 19];
+internal static slice<nint> oidExtensionSubjectAltName = [2, 5, 29, 17];
+internal static slice<nint> oidExtensionCertificatePolicies = [2, 5, 29, 32];
+internal static slice<nint> oidExtensionNameConstraints = [2, 5, 29, 30];
+internal static slice<nint> oidExtensionCRLDistributionPoints = [2, 5, 29, 31];
+internal static slice<nint> oidExtensionAuthorityInfoAccess = [1, 3, 6, 1, 5, 5, 7, 1, 1];
+internal static slice<nint> oidExtensionCRLNumber = [2, 5, 29, 20];
+internal static slice<nint> oidExtensionReasonCode = [2, 5, 29, 21];
 
 internal static asn1.ObjectIdentifier oidAuthorityInfoAccessOcsp = new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 5, 5, 7, 48, 1}.slice());
 internal static asn1.ObjectIdentifier oidAuthorityInfoAccessIssuers = new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 5, 5, 7, 48, 2}.slice());
@@ -1173,7 +1173,7 @@ internal static asn1.ObjectIdentifier oidAuthorityInfoAccessIssuers = new asn1.O
 // oidInExtensions reports whether an extension with the given oid exists in
 // extensions.
 internal static bool oidInExtensions(asn1.ObjectIdentifier oid, slice<pkix.Extension> extensions) {
-    foreach (var (_, e) in extensions) {
+    foreach (var (_, e) in range(extensions)) {
         if (e.Id.Equal(oid)) {
             return true;
         }
@@ -1185,19 +1185,19 @@ internal static bool oidInExtensions(asn1.ObjectIdentifier oid, slice<pkix.Exten
 // SubjectAlternativeName extension.
 internal static (slice<byte> derBytes, error err) marshalSANs(slice<@string> dnsNames, slice<@string> emailAddresses, slice<net.IP> ipAddresses, slice<ж<url.URL>> uris) {
     slice<asn1.RawValue> rawValues = default;
-    foreach (var (_, name) in dnsNames) {
+    foreach (var (_, name) in range(dnsNames)) {
         var errΔ1 = isIA5String(name); if (errΔ1 != nil) {
             return (default, errΔ1);
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeDNS, Class: 2, Bytes: slice<byte>(name)));
     }
-    foreach (var (_, email) in emailAddresses) {
+    foreach (var (_, email) in range(emailAddresses)) {
         var errΔ2 = isIA5String(email); if (errΔ2 != nil) {
             return (default, errΔ2);
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeEmail, Class: 2, Bytes: slice<byte>(email)));
     }
-    foreach (var (_, rawIP) in ipAddresses) {
+    foreach (var (_, rawIP) in range(ipAddresses)) {
         // If possible, we always want to encode IPv4 addresses in 4 bytes.
         var ip = rawIP.To4();
         if (ip == nil) {
@@ -1205,7 +1205,7 @@ internal static (slice<byte> derBytes, error err) marshalSANs(slice<@string> dns
         }
         rawValues = append(rawValues, new asn1.RawValue(Tag: nameTypeIP, Class: 2, Bytes: ip));
     }
-    foreach (var (_, uri) in uris) {
+    foreach (var (_, uri) in range(uris)) {
         @string uriStr = uri.String();
         var errΔ3 = isIA5String(uriStr); if (errΔ3 != nil) {
             return (default, errΔ3);
@@ -1281,13 +1281,13 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
     if ((builtin.len(template.OCSPServer) > 0 || builtin.len(template.IssuingCertificateURL) > 0) && !oidInExtensions(oidExtensionAuthorityInfoAccess, template.ExtraExtensions)) {
         ret[n].Id = oidExtensionAuthorityInfoAccess;
         slice<authorityInfoAccess> aiaValues = default;
-        foreach (var (_, name) in template.OCSPServer) {
+        foreach (var (_, name) in range(template.OCSPServer)) {
             aiaValues = append(aiaValues, new authorityInfoAccess(
                 Method: oidAuthorityInfoAccessOcsp,
                 Location: new asn1.RawValue(Tag: 6, Class: 2, Bytes: slice<byte>(name))
             ));
         }
-        foreach (var (_, name) in template.IssuingCertificateURL) {
+        foreach (var (_, name) in range(template.IssuingCertificateURL)) {
             aiaValues = append(aiaValues, new authorityInfoAccess(
                 Method: oidAuthorityInfoAccessIssuers,
                 Location: new asn1.RawValue(Tag: 6, Class: 2, Bytes: slice<byte>(name))
@@ -1339,7 +1339,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             error errΔ1 = default;
             ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
 
-            foreach (var (_, name) in dns) {
+            foreach (var (_, name) in range(dns)) {
                 errΔ1 = isIA5String(name); if (errΔ1 != nil) {
                     return (default, errΔ1);
                 }
@@ -1351,7 +1351,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                 });
             }
 
-            foreach (var (_, ipNet) in ips) {
+            foreach (var (_, ipNet) in range(ips)) {
                 var ipAndMaskʗ2 = ipAndMaskʗ1;
                 var ipNetʗ1 = ipNet;
                 ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ4) => {
@@ -1363,7 +1363,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                 });
             }
 
-            foreach (var (_, email) in emails) {
+            foreach (var (_, email) in range(emails)) {
                 errΔ1 = isIA5String(email); if (errΔ1 != nil) {
                     return (default, errΔ1);
                 }
@@ -1375,7 +1375,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                 });
             }
 
-            foreach (var (_, uriDomain) in uriDomains) {
+            foreach (var (_, uriDomain) in range(uriDomains)) {
                 errΔ1 = isIA5String(uriDomain); if (errΔ1 != nil) {
                     return (default, errΔ1);
                 }
@@ -1430,12 +1430,12 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         ret[n].Id = oidExtensionCRLDistributionPoints;
 
         slice<distributionPoint> crlDp = default;
-        foreach (var (_, name) in template.CRLDistributionPoints) {
+        foreach (var (_, name) in range(template.CRLDistributionPoints)) {
             var dp = new distributionPoint(
                 DistributionPoint: new distributionPointName(
-                    FullName: slice<asn1.RawValue>([
+                    FullName: [
                         new(Tag: 6, Class: 2, Bytes: slice<byte>(name))
-                    ])
+                    ]
                 )
             );
             crlDp = append(crlDp, dp);
@@ -1481,7 +1481,7 @@ internal static (pkix.Extension, error) marshalExtKeyUsage(slice<ExtKeyUsage> ex
     var ext = new pkix.Extension(Id: oidExtensionExtendedKeyUsage);
 
     var oids = new slice<asn1.ObjectIdentifier>(builtin.len(extUsages) + builtin.len(unknownUsages));
-    foreach (var (i, u) in extUsages) {
+    foreach (var (i, u) in range(extUsages)) {
         var (oid, ok) = oidFromExtKeyUsage(u); if (ok) {
             oids[i] = oid;
         } else {
@@ -1522,7 +1522,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<ΔOID> 
     b.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> child) => {
         if (x509usepolicies.Value() != "0"u8) {
             x509usepolicies.IncNonDefault();
-            foreach (var (_, vᴛ1) in policiesʗ1) {
+            foreach (var (_, vᴛ1) in range(policiesʗ1)) {
                 ref var v = ref heap(new ΔOID(), out var Ꮡv);
                 v = vᴛ1;
 
@@ -1539,7 +1539,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<ΔOID> 
                 });
             }
         } else {
-            foreach (var (_, v) in policyIdentifiersʗ1) {
+            foreach (var (_, v) in range(policyIdentifiersʗ1)) {
                 var vʗ3 = v;
                 child.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> childΔ3) => {
                     childΔ3.AddASN1ObjectIdentifier(vʗ3);
@@ -1638,7 +1638,7 @@ internal static (SignatureAlgorithm, pkix.AlgorithmIdentifier, error) signingPar
         sigAlgo = defaultAlgo;
     }
 
-    foreach (var (_, details) in signatureAlgorithmDetails) {
+    foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == sigAlgo) {
             if (details.pubKeyAlgo != pubType) {
                 return (0, ai, errors.New(x509Requestedˢ));
@@ -1683,7 +1683,7 @@ internal static (slice<byte>, error) signTBS(slice<byte> tbs, crypto.Signer key,
 
 // emptyASN1Subject is the ASN.1 DER encoding of an empty Subject, which is
 // just an empty SEQUENCE.
-internal static slice<byte> emptyASN1Subject = slice<byte>([0x30, 0]);
+internal static slice<byte> emptyASN1Subject = [0x30, 0];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificatePrivateˢ => ref x509CertificatePrivateˢᵇ;
@@ -1955,7 +1955,7 @@ public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c
 
     // Force revocation times to UTC per RFC 5280.
     var revokedCertsUTC = new slice<pkix.RevokedCertificate>(builtin.len(revokedCerts));
-    foreach (var (i, vᴛ1) in revokedCerts) {
+    foreach (var (i, vᴛ1) in range(revokedCerts)) {
         var rc = vᴛ1;
 
         rc.RevocationTime = rc.RevocationTime.UTC();
@@ -2083,7 +2083,7 @@ internal static (slice<asn1.RawValue>, error) newRawAttributes(slice<pkix.Attrib
 // parseRawAttributes Unmarshals RawAttributes into AttributeTypeAndValueSETs.
 internal static slice<pkix.AttributeTypeAndValueSET> parseRawAttributes(slice<asn1.RawValue> rawAttributes) {
     slice<pkix.AttributeTypeAndValueSET> attributes = default;
-    foreach (var (_, rawAttr) in rawAttributes) {
+    foreach (var (_, rawAttr) in range(rawAttributes)) {
         ref var attr = ref heap(new pkix.AttributeTypeAndValueSET(), out var Ꮡattr);
         var (rest, err) = asn1.Unmarshal(rawAttr.FullBytes, Ꮡattr);
         // Ignore attributes that don't parse into pkix.AttributeTypeAndValueSET
@@ -2110,7 +2110,7 @@ internal partial struct parseCSRExtensions_pkcs10Attribute /*dyn*/ {
 internal static (slice<pkix.Extension>, error) parseCSRExtensions(slice<asn1.RawValue> rawAttributes) {
     slice<pkix.Extension> ret = default;
     var requestedExts = new map<@string, bool>();
-    foreach (var (_, rawAttr) in rawAttributes) {
+    foreach (var (_, rawAttr) in range(rawAttributes)) {
         ref var attr = ref heap(new parseCSRExtensions_pkcs10Attribute(), out var Ꮡattr);
         {
             var (rest, err) = asn1.Unmarshal(rawAttr.FullBytes, Ꮡattr); if (err != nil || builtin.len(rest) != 0 || builtin.len(attr.Values) == 0) {
@@ -2129,7 +2129,7 @@ internal static (slice<pkix.Extension>, error) parseCSRExtensions(slice<asn1.Raw
                 return (default, err);
             }
         }
-        foreach (var (_, ext) in extensions) {
+        foreach (var (_, ext) in range(extensions)) {
             @string oidStr = ext.Id.String();
             if (requestedExts[oidStr]) {
                 return (default, errors.New(x509CertificateRequestˢ));
@@ -2194,7 +2194,7 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
 
     // Make a copy of template.Attributes because we may alter it below.
     var attributes = new slice<pkix.AttributeTypeAndValueSET>(0, builtin.len(template.Attributes));
-    foreach (var (_, attr) in template.Attributes) {
+    foreach (var (_, attr) in range(template.Attributes)) {
         var values = new slice<slice<pkix.AttributeTypeAndValue>>(builtin.len(attr.Value));
         copy(values, attr.Value);
         attributes = append(attributes, new pkix.AttributeTypeAndValueSET(
@@ -2206,7 +2206,7 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
     var extensionsAppended = false;
     if (builtin.len(extensions) > 0) {
         // Append the extensions to an existing attribute if possible.
-        foreach (var (_, atvSet) in attributes) {
+        foreach (var (_, atvSet) in range(attributes)) {
             if (!atvSet.Type.Equal(oidExtensionRequest) || builtin.len(atvSet.Value) == 0) {
                 continue;
             }
@@ -2215,8 +2215,8 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
             // found specified via template.Attributes.
             var specifiedExtensions = new map<@string, bool>();
 
-            foreach (var (_, atvs) in atvSet.Value) {
-                foreach (var (_, atv) in atvs) {
+            foreach (var (_, atvs) in range(atvSet.Value)) {
+                foreach (var (_, atv) in range(atvs)) {
                     specifiedExtensions[atv.Type.String()] = true;
                 }
             }
@@ -2224,7 +2224,7 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
             var newValue = new slice<pkix.AttributeTypeAndValue>(0, builtin.len(atvSet.Value[0]) + builtin.len(extensions));
             newValue = appendꓸꓸꓸ(newValue, atvSet.Value[0]);
 
-            foreach (var (_, e) in extensions) {
+            foreach (var (_, e) in range(extensions)) {
                 if (specifiedExtensions[e.Id.String()]) {
                     // Attributes already contained a value for
                     // this extension and it takes priority.
@@ -2255,7 +2255,7 @@ public static (slice<byte> csr, error err) CreateCertificateRequest(io.Reader ra
     if (builtin.len(extensions) > 0 && !extensionsAppended) {
         var attr = new CreateCertificateRequest_attr(
             Type: oidExtensionRequest,
-            Value: slice<slice<pkix.Extension>>([extensions])
+            Value: [extensions]
         );
 
         var (b, errΔ1) = asn1.Marshal(attr);
@@ -2366,7 +2366,7 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
         return (default, err);
     }
 
-    foreach (var (_, extension) in @out.Extensions) {
+    foreach (var (_, extension) in range(@out.Extensions)) {
         switch (ᐧ) {
         case {} when extension.Id.Equal(oidExtensionSubjectAltName): {
             (@out.DNSNames, @out.EmailAddresses, @out.IPAddresses, @out.URIs, err) = parseSANExtension(extension.Value);
@@ -2566,7 +2566,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
     if (builtin.len(template.RevokedCertificates) > 0 && builtin.len(template.RevokedCertificateEntries) == 0) {
         // Force revocation times to UTC per RFC 5280.
         revokedCerts = new slice<pkix.RevokedCertificate>(builtin.len(template.RevokedCertificates));
-        foreach (var (i, vᴛ1) in template.RevokedCertificates) {
+        foreach (var (i, vᴛ1) in range(template.RevokedCertificates)) {
             var rc = vᴛ1;
 
             rc.RevocationTime = rc.RevocationTime.UTC();
@@ -2576,7 +2576,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
         // Convert the ReasonCode field to a proper extension, and force revocation
         // times to UTC per RFC 5280.
         revokedCerts = new slice<pkix.RevokedCertificate>(builtin.len(template.RevokedCertificateEntries));
-        foreach (var (i, rce) in template.RevokedCertificateEntries) {
+        foreach (var (i, rce) in range(template.RevokedCertificateEntries)) {
             if (rce.SerialNumber == nil) {
                 return (default, errors.New(x509TemplateContainsˢ));
             }
@@ -2592,7 +2592,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
             // Copy over any extra extensions, except for a Reason Code extension,
             // because we'll synthesize that ourselves to ensure it is correct.
             var exts = new slice<pkix.Extension>(0, builtin.len(rce.ExtraExtensions));
-            foreach (var (_, ext) in rce.ExtraExtensions) {
+            foreach (var (_, ext) in range(rce.ExtraExtensions)) {
                 if (ext.Id.Equal(oidExtensionReasonCode)) {
                     return (default, errors.New(x509TemplateContainsˢ3));
                 }
@@ -2645,7 +2645,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
         Issuer: new asn1.RawValue(FullBytes: issuerSubject),
         ThisUpdate: template.ThisUpdate.UTC(),
         NextUpdate: template.NextUpdate.UTC(),
-        Extensions: slice<pkix.Extension>([
+        Extensions: [
             new(
                 Id: oidExtensionAuthorityKeyId,
                 Value: aki
@@ -2654,7 +2654,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
                 Id: oidExtensionCRLNumber,
                 Value: crlNum
             )
-        ])
+        ]
     );
     if (builtin.len(revokedCerts) > 0) {
         tbsCertList.RevokedCertificates = revokedCerts;

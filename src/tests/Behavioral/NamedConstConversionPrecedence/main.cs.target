@@ -5,13 +5,9 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct rf /*num:float64*/;
-
 partial struct rf32 /*num:float32*/;
-
 partial struct ri /*num:nint*/;
-
 partial struct rc64 /*num:complex64*/;
-
 partial struct rc128 /*num:complex128*/;
 
 internal static rf divA = ((rf)(3 / 2));

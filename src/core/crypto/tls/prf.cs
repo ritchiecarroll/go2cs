@@ -66,7 +66,7 @@ internal static slice<byte> prf10(slice<byte> secret, @string label, slice<byte>
     var result2 = new slice<byte>(len(result));
     pHash(result2, s2, labelAndSeed, hashSHA1);
 
-    foreach (var (i, b) in result2) {
+    foreach (var (i, b) in range(result2)) {
         result[i] ^= (byte)(b);
     }
 
@@ -83,16 +83,12 @@ internal static UntypedInt finishedVerifyLength => 12; // Length of verify_data 
 
 internal static ref readonly @string masterSecretLabel => ref masterSecretLabelᵇ;
 private static readonly @string masterSecretLabelᵇ = "master secret"u8;
-
 internal static ref readonly @string extendedMasterSecretLabel => ref extendedMasterSecretLabelᵇ;
 private static readonly @string extendedMasterSecretLabelᵇ = "extended master secret"u8;
-
 internal static ref readonly @string keyExpansionLabel => ref keyExpansionLabelᵇ;
 private static readonly @string keyExpansionLabelᵇ = "key expansion"u8;
-
 internal static ref readonly @string clientFinishedLabel => ref clientFinishedLabelᵇ;
 private static readonly @string clientFinishedLabelᵇ = "client finished"u8;
-
 internal static ref readonly @string serverFinishedLabel => ref serverFinishedLabelᵇ;
 private static readonly @string serverFinishedLabelᵇ = "server finished"u8;
 
@@ -175,7 +171,7 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
 internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite cipherSuite) {
     slice<byte> buffer = default;
     if (version >= VersionTLS12) {
-        buffer = slice<byte>([]);
+        buffer = [];
     }
 
     var (prf, hash) = prfAndHashForVersion(version, ref cipherSuite);

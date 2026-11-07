@@ -36,8 +36,7 @@ public static ref nint NOPTRBSS => ref ((StaticBox<nint>)ᏑNOPTRBSS).ValueSlot;
 
 public static ж<nint> BSS;
 
-public static void TEXT() {
-}
+public static void TEXT() { }
 
 internal static array<byte> globl12 = new(12);
 internal static array<byte> globl8 = new(8);
@@ -48,7 +47,7 @@ internal static array<byte> globl8 = new(8);
     runtime.Gosched();
 
     var sum = (byte)0;
-    foreach (var (_, x) in globl12.ΔRangeSnapshot()) {
+    foreach (var (_, x) in range(globl12.ΔRangeSnapshot())) {
         sum += x;
     }
     if (sum != 78) {
@@ -56,7 +55,7 @@ internal static array<byte> globl8 = new(8);
     }
 
     sum = (byte)0;
-    foreach (var (_, x) in globl8.ΔRangeSnapshot()) {
+    foreach (var (_, x) in range(globl8.ΔRangeSnapshot())) {
         sum += x;
     }
     if (sum != 36) {

@@ -19,16 +19,12 @@ partial class jpeg_package {
 // A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
-public static @string Error(this FormatError e) {
-    return "invalid JPEG format: "u8 + ((@string)e);
-}
+public static @string Error(this FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
 
 // An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
-public static @string Error(this UnsupportedError e) {
-    return "unsupported JPEG feature: "u8 + ((@string)e);
-}
+public static @string Error(this UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
 
 internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio");
 
@@ -492,7 +488,7 @@ loop:
             var errΔ3 = d.readFull(d.tmp[..(int)(blockSize)]); if (errΔ3 != nil) {
                 return errΔ3;
             }
-            foreach (var i in range(d.quant[tq])) {
+            foreach (var i in range(len(d.quant[tq]))) {
                 d.quant[tq][i] = (int32)d.tmp[i];
             }
             break;
@@ -505,7 +501,7 @@ loop:
             var errΔ4 = d.readFull(d.tmp[..(int)(2 * blockSize)]); if (errΔ4 != nil) {
                 return errΔ4;
             }
-            foreach (var i in range(d.quant[tq])) {
+            foreach (var i in range(len(d.quant[tq]))) {
                 d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
             }
             break;
@@ -807,7 +803,7 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
         new(d.img3.Cr, d.img3.CStride),
         new(d.blackPix, d.blackStride)
     }.array();
-    foreach (var (t, translation) in translations.ΔRangeSnapshot()) {
+    foreach (var (t, translation) in range(translations.ΔRangeSnapshot())) {
         var subsample = d.comp[t].h != d.comp[0].h || d.comp[t].v != d.comp[0].v;
         for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + img.Stride, y + 1)) {
             nint sy = y - bounds.Min.Y;

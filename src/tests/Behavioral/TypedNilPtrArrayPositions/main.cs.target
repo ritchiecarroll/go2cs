@@ -11,13 +11,9 @@ partial struct holder {
     internal /*[3]*/ ж<array<uint16>> versym;
 }
 
-internal static nint takeArg(ж<Sigset> p) {
-    return reflect.ValueOf(p.OrTypedNil()).Type().Elem().Len();
-}
+internal static nint takeArg(ж<Sigset> p) { return reflect.ValueOf(p.OrTypedNil()).Type().Elem().Len(); }
 
-internal static ж<array<byte>> ret() {
-    return ж<array<byte>>.NilBoxOfDims(5L);
-}
+internal static ж<array<byte>> ret() { return ж<array<byte>>.NilBoxOfDims(5L); }
 
 internal static void Main() {
     var a = Ꮡ(new nint[]{1, 2, 3}.array());

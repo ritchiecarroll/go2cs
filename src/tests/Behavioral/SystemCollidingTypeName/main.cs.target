@@ -8,17 +8,13 @@ partial struct ValueType {
     internal @string unit;
 }
 
-internal static @string describe(this ValueType v) {
-    return v.unit;
-}
+internal static @string describe(this ValueType v) { return v.unit; }
 
 partial interface message {
     @string describe();
 }
 
-internal static void show(message m) {
-    fmt.Println(m.describe());
-}
+internal static void show(message m) { fmt.Println(m.describe()); }
 
 internal static void Main() {
     message m = new ValueType(unit: "cpu in nanoseconds");

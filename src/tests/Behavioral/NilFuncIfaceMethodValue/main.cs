@@ -14,9 +14,7 @@ public static @string Greet(this Greeter g) {
     return g();
 }
 
-public static @string Shout(this Greeter g) {
-    return g() + "!"u8;
-}
+public static @string Shout(this Greeter g) { return g() + "!"u8; }
 
 partial interface Greetable {
     @string Greet();

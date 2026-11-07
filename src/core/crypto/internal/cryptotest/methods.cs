@@ -27,7 +27,7 @@ public static void NoExtraMethods(ж<testing.T> t, any ms, params ꓸꓸꓸstrin
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, m) in extraMethodsΔ1) {
+    foreach (var (_, m) in range(extraMethodsΔ1)) {
         if (slices.Contains(allowed, m)) {
             continue;
         }

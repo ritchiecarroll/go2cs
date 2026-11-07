@@ -1,0 +1,57 @@
+  000000014001CA80: 41 57              push        r15
+  000000014001CA82: 41 56              push        r14
+  000000014001CA84: 57                 push        rdi
+  000000014001CA85: 56                 push        rsi
+  000000014001CA86: 55                 push        rbp
+  000000014001CA87: 53                 push        rbx
+  000000014001CA88: 48 83 EC 48        sub         rsp,48h
+  000000014001CA8C: 0F 57 E4           xorps       xmm4,xmm4
+  000000014001CA8F: 0F 29 64 24 20     movaps      xmmword ptr [rsp+20h],xmm4
+  000000014001CA94: 0F 29 64 24 30     movaps      xmmword ptr [rsp+30h],xmm4
+  000000014001CA99: 33 C0              xor         eax,eax
+  000000014001CA9B: 48 89 44 24 40     mov         qword ptr [rsp+40h],rax
+  000000014001CAA0: 48 8B F1           mov         rsi,rcx
+  000000014001CAA3: 48 8B DA           mov         rbx,rdx
+  000000014001CAA6: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CAAB: 48 8B D3           mov         rdx,rbx
+  000000014001CAAE: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CAB8: 45 33 C9           xor         r9d,r9d
+  000000014001CABB: E8 E0 69 9F 00     call        golib_go_slice_1<Bool>___ctor_12
+  000000014001CAC0: 33 FF              xor         edi,edi
+  000000014001CAC2: 33 ED              xor         ebp,ebp
+  000000014001CAC4: 41 BE 02 00 00 00  mov         r14d,2
+  000000014001CACA: 48 83 FB 02        cmp         rbx,2
+  000000014001CACE: 7E 44              jle         000000014001CB14
+  000000014001CAD0: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CAD5: 49 8B D6           mov         rdx,r14
+  000000014001CAD8: E8 F3 6E 9F 00     call        golib_go_slice_1<Bool>__get_Item_0
+  000000014001CADD: 80 38 00           cmp         byte ptr [rax],0
+  000000014001CAE0: 75 2A              jne         000000014001CB0C
+  000000014001CAE2: 48 FF C7           inc         rdi
+  000000014001CAE5: 49 03 EE           add         rbp,r14
+  000000014001CAE8: 4D 8B FE           mov         r15,r14
+  000000014001CAEB: 4D 0F AF FE        imul        r15,r14
+  000000014001CAEF: 4C 3B FB           cmp         r15,rbx
+  000000014001CAF2: 7D 18              jge         000000014001CB0C
+  000000014001CAF4: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CAF9: 49 8B D7           mov         rdx,r15
+  000000014001CAFC: E8 CF 6E 9F 00     call        golib_go_slice_1<Bool>__get_Item_0
+  000000014001CB01: C6 00 01           mov         byte ptr [rax],1
+  000000014001CB04: 4D 03 FE           add         r15,r14
+  000000014001CB07: 4C 3B FB           cmp         r15,rbx
+  000000014001CB0A: 7C E8              jl          000000014001CAF4
+  000000014001CB0C: 49 FF C6           inc         r14
+  000000014001CB0F: 4C 3B F3           cmp         r14,rbx
+  000000014001CB12: 7C BC              jl          000000014001CAD0
+  000000014001CB14: 48 89 3E           mov         qword ptr [rsi],rdi
+  000000014001CB17: 48 89 6E 08        mov         qword ptr [rsi+8],rbp
+  000000014001CB1B: 48 8B C6           mov         rax,rsi
+  000000014001CB1E: 48 83 C4 48        add         rsp,48h
+  000000014001CB22: 5B                 pop         rbx
+  000000014001CB23: 5D                 pop         rbp
+  000000014001CB24: 5E                 pop         rsi
+  000000014001CB25: 5F                 pop         rdi
+  000000014001CB26: 41 5E              pop         r14
+  000000014001CB28: 41 5F              pop         r15
+  000000014001CB2A: C3                 ret
+  000000014001CB2B: 90                 nop

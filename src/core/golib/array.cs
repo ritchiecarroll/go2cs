@@ -37,18 +37,10 @@ public interface IArray : IEnumerable, ICloneable
     }
 }
 
+// The only generic sequence interface is IEnumerable<T>, so foreach and LINQ see the values. Go's range pairs come
+// from builtin.range (RangePairs.cs), as they do for slice<T> and array<T>.
 public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
 {
-    /// <summary>
-    /// Go's <c>range</c> over the sequence: its <c>(index, value)</c> pairs, which <c>foreach</c> binds by pattern.
-    /// </summary>
-    /// <remarks>
-    /// The pairs are this interface's own member, not a second <c>IEnumerable&lt;(nint, T)&gt;</c>: with two generic
-    /// sequence interfaces, LINQ could infer neither element type and every LINQ call on a slice failed. The only
-    /// generic sequence interface is <c>IEnumerable&lt;T&gt;</c>, so LINQ sees the values.
-    /// </remarks>
-    new IEnumerator<(nint, T)> GetEnumerator();
-
     new T[] Source { get; }
 
     new ref T this[nint index] { get; }
@@ -598,22 +590,17 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     /// <summary>
-    /// Gets an allocation-free enumerator over the array's (index, value) pairs — the shape a
-    /// converted <c>for i, v := range a</c> binds.
+    /// Gets an allocation-free enumerator over the array's VALUES: <c>foreach (var v in a)</c>.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The return type is the concrete <see cref="Enumerator"/> STRUCT, not
-    /// <c>IEnumerator&lt;(nint, T)&gt;</c>: C#'s <c>foreach</c> binds <c>GetEnumerator</c> by pattern
-    /// before it considers any interface, so a ranged loop over an array enumerates with zero heap
-    /// traffic. The previous signature returned an interface from an ITERATOR method, which cost the
-    /// compiler-generated state machine on entry to every such loop — the same shape and the same
-    /// ~136 B/loop <see cref="slice{T}.Enumerator"/> shed. <see cref="Enumerator"/> still implements
-    /// the interface, so an explicit <c>IEnumerator&lt;(nint, T)&gt;</c> consumer keeps working (it
-    /// boxes, exactly as it did before); only the pattern path avoids the box.
+    /// Go's <c>for i, v := range a</c> is <c>foreach (var (i, v) in range(a))</c>: the pairs come from
+    /// <see cref="builtin.range{T}(array{T})"/> and its <see cref="RangeEnumerator"/>, as a slice's do
+    /// (docs/PLAN-collection-expressions.md, ruled 2026-11-05). Both are concrete structs, which <c>foreach</c>
+    /// binds by pattern, so a loop allocates nothing.
     /// </para>
     /// <para>
-    /// The enumerator reads the array's LIVE backing — it does not snapshot. Go's <c>range</c> over an
+    /// The enumerators read the array's LIVE backing — they do not snapshot. Go's <c>range</c> over an
     /// array VALUE does iterate a copy, but that copy is the range EXPRESSION's, taken once before the
     /// loop, and the converter emits it as the same explicit <see cref="Clone"/> every other Go array
     /// value-copy site takes (see visitRangeStmt's array-snapshot arm). Snapshotting here instead would
@@ -627,23 +614,70 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     /// <summary>
-    /// Allocation-free (index, value) enumerator over an <see cref="array{T}"/>.
+    /// Allocation-free enumerator over an <see cref="array{T}"/>'s values.
+    /// </summary>
+    [Serializable]
+    public struct Enumerator : IEnumerator<T>
+    {
+        private RangeEnumerator m_pairs;
+
+        internal Enumerator(array<T> array)
+        {
+            m_pairs = new RangeEnumerator(array);
+        }
+
+        public readonly T Current => m_pairs.Current.Item2;
+
+        readonly object? IEnumerator.Current => Current;
+
+        public bool MoveNext() => m_pairs.MoveNext();
+
+        void IEnumerator.Reset()
+        {
+            IEnumerator pairs = m_pairs;
+            pairs.Reset();
+            m_pairs = (RangeEnumerator)pairs;
+        }
+
+        public readonly void Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// What <see cref="builtin.range{T}(array{T})"/> returns: the array's (index, value) pairs, Go's
+    /// <c>range a</c>, for <c>foreach (var (i, v) in range(a))</c>.
+    /// </summary>
+    public readonly struct RangeOver
+    {
+        private readonly array<T> m_array;
+
+        internal RangeOver(array<T> array)
+        {
+            m_array = array;
+        }
+
+        public RangeEnumerator GetEnumerator() => new(m_array);
+    }
+
+    /// <summary>
+    /// Allocation-free (index, value) enumerator over an <see cref="array{T}"/>: the loop
+    /// <c>foreach (var (i, v) in range(a))</c> drives.
     /// </summary>
     /// <remarks>
     /// Mutable struct by design — the <c>foreach</c> pattern copies it into a local and drives that
     /// copy, which is how the loop stays allocation-free. It implements <see cref="IEnumerator{T}"/> so
-    /// interface-typed and LINQ consumers still bind; those paths box the struct, which is the same
-    /// cost they always paid.
+    /// interface-typed consumers still bind; those paths box the struct.
     /// </remarks>
     [Serializable]
-    public struct Enumerator : IEnumerator<(nint, T)>
+    public struct RangeEnumerator : IEnumerator<(nint, T)>
     {
         private readonly T[] m_backing;
         private readonly nint m_low;
         private readonly nint m_length;
         private nint m_current;
 
-        internal Enumerator(array<T> array)
+        internal RangeEnumerator(array<T> array)
         {
             // Backing, not m_array: `default(array<T>)` ran no constructor, so its backing is null and
             // its length is 0 — the same null-safe empty view every other read takes.
@@ -1065,15 +1099,6 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
         return WindowArray.AsEnumerable().GetEnumerator();
-    }
-
-    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
-    // implicitly while it returned the interface. Now that it returns the concrete struct — so
-    // `foreach` binds the pattern and allocates nothing — the interface member becomes explicit:
-    // the boxing path, taken only when a consumer asks for the interface.
-    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
-    {
-        return new Enumerator(this);
     }
 
     IEnumerator IEnumerable.GetEnumerator()

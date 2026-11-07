@@ -143,7 +143,6 @@ public static (ж<Profile>, error) Parse(io.Reader r) {
 }
 
 internal static error errMalformed = fmt.Errorf("malformed profile format"u8);
-
 public static error ErrNoData = fmt.Errorf("empty input file"u8);
 
 internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
@@ -195,7 +194,7 @@ public static error CheckValid(this ref Profile p) {
     if (sampleLen == 0 && len(p.Sample) != 0) {
         return fmt.Errorf("missing sample type information"u8);
     }
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         if (len((~s).Value) != sampleLen) {
             return fmt.Errorf("mismatch: sample has: %d values vs. %d types"u8, len((~s).Value), len(p.SampleType));
         }
@@ -204,7 +203,7 @@ public static error CheckValid(this ref Profile p) {
     // Check that all mappings/locations/functions are in the tables
     // Check that there are no duplicate ids
     var mappings = new map<uint64, ж<Mapping>>(len(p.Mapping));
-    foreach (var (_, m) in p.Mapping) {
+    foreach (var (_, m) in range(p.Mapping)) {
         if (m.ID == 0) {
             return fmt.Errorf("found mapping with reserved ID=0"u8);
         }
@@ -214,7 +213,7 @@ public static error CheckValid(this ref Profile p) {
         mappings[m.ID] = m;
     }
     var functions = new map<uint64, ж<Function>>(len(p.Function));
-    foreach (var (_, f) in p.Function) {
+    foreach (var (_, f) in range(p.Function)) {
         if (f.ID == 0) {
             return fmt.Errorf("found function with reserved ID=0"u8);
         }
@@ -224,7 +223,7 @@ public static error CheckValid(this ref Profile p) {
         functions[f.ID] = f;
     }
     var locations = new map<uint64, ж<Location>>(len(p.Location));
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, l) in range(p.Location)) {
         if (l.ID == 0) {
             return fmt.Errorf("found location with reserved id=0"u8);
         }
@@ -237,7 +236,7 @@ public static error CheckValid(this ref Profile p) {
                 return fmt.Errorf("inconsistent mapping %p: %d"u8, m.OrTypedNil(), m.ID);
             }
         }
-        foreach (var (_, ln) in l.Line) {
+        foreach (var (_, ln) in range(l.Line)) {
             var f = ln.Function; if (f != nil) {
                 if (f.ID == 0 || functions[f.ID] != f) {
                     return fmt.Errorf("inconsistent function %p: %d"u8, f.OrTypedNil(), f.ID);
@@ -252,7 +251,7 @@ public static error CheckValid(this ref Profile p) {
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
 public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
-    foreach (var (_, m) in p.Mapping) {
+    foreach (var (_, m) in range(p.Mapping)) {
         m.HasInlineFrames = m.HasInlineFrames && inlineFrame;
         m.HasFunctions = m.HasFunctions && function;
         m.HasFilenames = m.HasFilenames && filename;
@@ -261,7 +260,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
 
     // Aggregate functions
     if (!function || !filename) {
-        foreach (var (_, f) in p.Function) {
+        foreach (var (_, f) in range(p.Function)) {
             if (!function) {
                 f.Name = ""u8;
                 f.SystemName = ""u8;
@@ -274,12 +273,12 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
 
     // Aggregate locations
     if (!inlineFrame || !address || !linenumber) {
-        foreach (var (_, l) in p.Location) {
+        foreach (var (_, l) in range(p.Location)) {
             if (!inlineFrame && len(l.Line) > 1) {
                 l.Line = l.Line.slice(len(l.Line) - 1);
             }
             if (!linenumber) {
-                foreach (var i in range(l.Line)) {
+                foreach (var i in range(len(l.Line))) {
                     l.Line[i].ΔLine = 0;
                 }
             }
@@ -315,17 +314,17 @@ public static @string String(this ref Profile p) {
 
     ss = append(ss, (@string)"Samples:");
     @string sh1 = default;
-    foreach (var (_, s) in p.SampleType) {
+    foreach (var (_, s) in range(p.SampleType)) {
         sh1 = sh1 + fmt.Sprintf("%s/%s "u8, s.Type, s.Unit);
     }
     ss = append(ss, strings.TrimSpace(sh1));
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         @string sv = default;
-        foreach (var (_, v) in (~s).Value) {
+        foreach (var (_, v) in range((~s).Value)) {
             sv = fmt.Sprintf("%s %10d"u8, sv, v);
         }
         sv = sv + ": "u8;
-        foreach (var (_, l) in s.Location) {
+        foreach (var (_, l) in range(s.Location)) {
             sv = sv + fmt.Sprintf("%d "u8, l.ID);
         }
         ss = append(ss, sv);
@@ -347,7 +346,7 @@ public static @string String(this ref Profile p) {
     }
 
     ss = append(ss, (@string)"Locations");
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, l) in range(p.Location)) {
         @string locStr = fmt.Sprintf("%6d: %#x "u8, l.ID, l.Address);
         var m = l.Mapping; if (m != nil) {
             locStr = locStr + fmt.Sprintf("M=%d "u8, m.ID);
@@ -355,7 +354,7 @@ public static @string String(this ref Profile p) {
         if (len(l.Line) == 0) {
             ss = append(ss, locStr);
         }
-        foreach (var li in range(l.Line)) {
+        foreach (var li in range(len(l.Line))) {
             @string lnStr = "??";
             var fn = l.Line[li].Function; if (fn != nil) {
                 lnStr = fmt.Sprintf("%s %s:%d s=%d"u8,
@@ -374,7 +373,7 @@ public static @string String(this ref Profile p) {
     }
 
     ss = append(ss, (@string)"Mappings");
-    foreach (var (_, m) in p.Mapping) {
+    foreach (var (_, m) in range(p.Mapping)) {
         @string bits = ""u8;
         if (m.HasFunctions) {
             bits += "[FN]"u8;
@@ -420,21 +419,21 @@ public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     p.DurationNanos += pb.DurationNanos;
 
     p.Mapping = appendꓸꓸꓸ(p.Mapping, pb.Mapping);
-    foreach (var (i, m) in p.Mapping) {
+    foreach (var (i, m) in range(p.Mapping)) {
         m.ID = (uint64)(i + 1);
     }
     p.Location = appendꓸꓸꓸ(p.Location, pb.Location);
-    foreach (var (i, l) in p.Location) {
+    foreach (var (i, l) in range(p.Location)) {
         l.ID = (uint64)(i + 1);
     }
     p.Function = appendꓸꓸꓸ(p.Function, pb.Function);
-    foreach (var (i, f) in p.Function) {
+    foreach (var (i, f) in range(p.Function)) {
         f.ID = (uint64)(i + 1);
     }
 
     if (r != 1.0D) {
-        foreach (var (_, s) in pb.Sample) {
-            foreach (var (i, v) in (~s).Value) {
+        foreach (var (_, s) in range(pb.Sample)) {
+            foreach (var (i, v) in range((~s).Value)) {
                 s.Value.Value[i] = (int64)((float64)v * r);
             }
         }
@@ -457,7 +456,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var i in range(p.SampleType)) {
+    foreach (var i in range(len(p.SampleType))) {
         if (!compatibleValueTypes(p.SampleType[i], pb.SampleType[i])) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }
@@ -469,7 +468,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
 // HasFunctions determines if all locations in this profile have
 // symbolized function information.
 public static bool HasFunctions(this ref Profile p) {
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || !l.Mapping.HasFunctions) {
             return false;
         }
@@ -480,7 +479,7 @@ public static bool HasFunctions(this ref Profile p) {
 // HasFileLines determines if all locations in this profile have
 // symbolized file and line number information.
 public static bool HasFileLines(this ref Profile p) {
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || (!l.Mapping.HasFilenames || !l.Mapping.HasLineNumbers)) {
             return false;
         }
@@ -531,7 +530,7 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default;
-    foreach (var (_, fn) in p.Function) {
+    foreach (var (_, fn) in range(p.Function)) {
         names = append(names, fn.SystemName);
     }
 
@@ -540,7 +539,7 @@ public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@stri
     if (err != nil) {
         return err;
     }
-    foreach (var (_, fn) in p.Function) {
+    foreach (var (_, fn) in range(p.Function)) {
         var (dd, ok) = demangled[fn.SystemName, ꟷ]; if (ok) {
             fn.Name = dd;
         }
@@ -559,7 +558,7 @@ public static void Scale(this ref Profile p, float64 ratio) {
         return;
     }
     var ratios = new slice<float64>(len(p.SampleType));
-    foreach (var i in range(p.SampleType)) {
+    foreach (var i in range(len(p.SampleType))) {
         ratios[i] = ratio;
     }
     p.ScaleN(ratios);
@@ -571,7 +570,7 @@ public static error ScaleN(this ref Profile p, slice<float64> ratios) {
         return fmt.Errorf("mismatched scale ratios, got %d, want %d"u8, len(ratios), len(p.SampleType));
     }
     var allOnes = true;
-    foreach (var (_, r) in ratios) {
+    foreach (var (_, r) in range(ratios)) {
         if (r != 1D) {
             allOnes = false;
             break;
@@ -580,8 +579,8 @@ public static error ScaleN(this ref Profile p, slice<float64> ratios) {
     if (allOnes) {
         return default;
     }
-    foreach (var (_, s) in p.Sample) {
-        foreach (var (i, v) in (~s).Value) {
+    foreach (var (_, s) in range(p.Sample)) {
+        foreach (var (i, v) in range((~s).Value)) {
             if (ratios[i] != 1D) {
                 s.Value.Value[i] = (int64)((float64)v * ratios[i]);
             }

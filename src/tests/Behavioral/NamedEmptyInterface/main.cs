@@ -10,17 +10,11 @@ partial struct point {
     public nint X, Y;
 }
 
-internal static void show(I v) {
-    fmt.Printf("I: %T %v\n"u8, v, v);
-}
+internal static void show(I v) { fmt.Printf("I: %T %v\n"u8, v, v); }
 
-internal static void anon(any v) {
-    fmt.Printf("interface{}: %T %v\n"u8, v, v);
-}
+internal static void anon(any v) { fmt.Printf("interface{}: %T %v\n"u8, v, v); }
 
-internal static I back(int8 n) {
-    return n;
-}
+internal static I back(int8 n) { return n; }
 
 internal static I pick(nint which) {
     switch (which) {

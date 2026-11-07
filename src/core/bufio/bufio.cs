@@ -39,7 +39,6 @@ partial struct Reader {
 }
 
 internal static UntypedInt minReadBufferSize => 16;
-
 internal static UntypedInt maxConsecutiveEmptyReads => 100;
 
 // NewReaderSize returns a new [Reader] whose buffer has at least the specified
@@ -62,9 +61,7 @@ public static ж<Reader> NewReader(io.Reader rd) {
 }
 
 // Size returns the size of the underlying buffer in bytes.
-public static nint Size(this ref Reader b) {
-    return len(b.buf);
-}
+public static nint Size(this ref Reader b) { return len(b.buf); }
 
 // Reset discards any buffered data, resets all state, and switches
 // the buffered reader to read from r.
@@ -343,9 +340,7 @@ public static error UnreadRune(this ref Reader b) {
 }
 
 // Buffered returns the number of bytes that can be read from the current buffer.
-public static nint Buffered(this ref Reader b) {
-    return b.w - b.r;
-}
+public static nint Buffered(this ref Reader b) { return b.w - b.r; }
 
 // ReadSlice reads until the first occurrence of delim in the input,
 // returning a slice pointing at the bytes in the buffer.
@@ -508,7 +503,7 @@ public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var buf = new slice<byte>(n);
     n = 0;
     // Copy full pieces and fragment in.
-    foreach (var i in range(full)) {
+    foreach (var i in range(len(full))) {
         n += copy(buf.slice(n), full[i]);
     }
     copy(buf.slice(n), frag);
@@ -528,7 +523,7 @@ public static (@string, error) ReadString(this ref Reader b, byte delim) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.Grow(n);
     // Copy full pieces and fragment in.
-    foreach (var (_, fb) in full) {
+    foreach (var (_, fb) in range(full)) {
         Ꮡbuf.Write(fb);
     }
     Ꮡbuf.Write(frag);
@@ -639,9 +634,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 }
 
 // Size returns the size of the underlying buffer in bytes.
-public static nint Size(this ref Writer b) {
-    return len(b.buf);
-}
+public static nint Size(this ref Writer b) { return len(b.buf); }
 
 // Reset discards any unflushed buffered data, clears any error, and
 // resets b to write its output to w.
@@ -690,9 +683,7 @@ public static error Flush(this ref Writer b) {
 }
 
 // Available returns how many bytes are unused in the buffer.
-public static nint Available(this ref Writer b) {
-    return len(b.buf) - b.n;
-}
+public static nint Available(this ref Writer b) { return len(b.buf) - b.n; }
 
 // AvailableBuffer returns an empty buffer with b.Available() capacity.
 // This buffer is intended to be appended to and
@@ -703,9 +694,7 @@ public static slice<byte> AvailableBuffer(this ref Writer b) {
 }
 
 // Buffered returns the number of bytes that have been written into the current buffer.
-public static nint Buffered(this ref Writer b) {
-    return b.n;
-}
+public static nint Buffered(this ref Writer b) { return b.n; }
 
 // Write writes the contents of p into the buffer.
 // It returns the number of bytes written.

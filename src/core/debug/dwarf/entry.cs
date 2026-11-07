@@ -89,7 +89,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         a.tag = (Tag)(uint32)b.@uint();
         a.children = b.uint8() != 0;
         a.field = new slice<afield>(n);
-        foreach (var i in range(a.field)) {
+        foreach (var i in range(len(a.field))) {
             a.field[i].attr = (Attr)(uint32)b.@uint();
             a.field[i].fmt = (format)(uint32)b.@uint();
             a.field[i].@class = formToClass(a.field[i].fmt, a.field[i].attr, vers, Ꮡb);
@@ -405,7 +405,7 @@ public static any Val(this ref Entry e, Attr a) {
 // AttrField returns the [Field] associated with attribute [Attr] in
 // [Entry], or nil if there is no such attribute.
 public static ж<Field> AttrField(this ref Entry e, Attr a) {
-    foreach (var (i, f) in e.Field) {
+    foreach (var (i, f) in range(e.Field)) {
         if (f.Attr == a) {
             return Ꮡ(e.Field, i);
         }
@@ -540,7 +540,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> cu, ж<unit> Ꮡu) 
         return rnglistsBase + offΔ2;
     }
 
-    foreach (var i in range(e.Field)) {
+    foreach (var i in range(len(e.Field))) {
         e.Field[i].Attr = a.field[i].attr;
         e.Field[i].Class = a.field[i].@class;
         var fmt = a.field[i].fmt;
@@ -1073,7 +1073,7 @@ public static (ж<Entry>, error) SeekPC(this ж<ΔReader> Ꮡr, uint64 pc) {
         if (err != nil) {
             return (default, err);
         }
-        foreach (var (_, vᴛ1) in ranges) {
+        foreach (var (_, vᴛ1) in range(ranges)) {
             var pcs = vᴛ1.Clone();
 
             if (pcs[0] <= pc && pc < pcs[1]) {

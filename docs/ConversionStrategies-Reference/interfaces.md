@@ -19,7 +19,7 @@ func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
 	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
 	fmt.Println(n.String())
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 46-47 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-18, 44-45 -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -29,9 +29,7 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static @string String(this point p) {
-    return fmt.Sprintf("(%d,%d)"u8, p.x, p.y);
-}
+internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 …
     Named n = new point(3, 4);
     fmt.Println(n.String());
@@ -453,7 +451,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:97-103 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:94-100 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …
@@ -521,7 +519,7 @@ The `Ꮡ` prefix already de-keywords the composed name (the keyword + affix rule
 above rely on), so the field declaration strips the escape — matching every `&null` use site, which
 already composes `Ꮡnull` through `boxBaseName`. The var's own property keeps its escape (`@null`), and a
 use site reads the box:
-<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:11-12, 42 -->
+<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:9-10, 40 -->
 ```csharp
 internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;
@@ -1179,7 +1177,7 @@ beside the `public` method (go-cmp's
 `func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option`, CS0051 in production).
 `visitInterfaceType` consults `isPublicizedLiftedType` ahead of the function-local `internal` default:
 
-<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
+<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:14 -->
 ```csharp
 public partial interface Report_r /*dyn*/ {
 ```
@@ -1295,7 +1293,7 @@ result list — C# tuple conversions do not consult user conversions element-wis
 converter deconstructs into temps and converts each element through the usual interface
 machinery (which also records the `GoImplement` pairing):
 
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:151-152 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:120-121 -->
 ```csharp
 var (ᴛ1, ᴛ2) = makeRelay();
 return (new relayжReporter(ᴛ1), ᴛ2);
@@ -1538,7 +1536,7 @@ resolved after the file-visit barrier, so the lift named may live in any file of
 no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
 Emitted form:
 
-<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :39-41 -->
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :37-39 -->
 ```csharp
 partial interface constraints_permitted<T, V> /*dyn*/ {
     (T, bool) query(V _);
@@ -1657,14 +1655,14 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }
-[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
+[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = [
 ```
 
 The range and the heap box in `main.cs`:
 
 <!-- source: src/tests/Behavioral/AnonStructCrossFile/main.cs.target:8-10, 14 -->
 ```csharp
-foreach (var (_, vᴛ1) in compareTests) {
+foreach (var (_, vᴛ1) in range(compareTests)) {
     ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
     tt = vᴛ1;
 …

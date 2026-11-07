@@ -442,7 +442,6 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> info, @unsafe.Pointer ct
 // it tries to collect a traceback into sigprofCallers.
 // sigprofCallersUse is set to non-zero while sigprofCallers holds a traceback.
 internal static ΔcgoCallers sigprofCallers;
-
 internal static readonly ж<uint32> ᏑsigprofCallersUse = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 sigprofCallersUse => ref ((StaticBox<uint32>)ᏑsigprofCallersUse).ValueSlot;
 
@@ -562,7 +561,6 @@ internal static ref atomic.Int32 crashing => ref ((StaticBox<atomic.Int32>)Ꮡcr
 // non-nil, it is called on SIGTRAP/SIGUSR1. If it returns true, the
 // normal behavior on this signal is suppressed.
 internal static Func<ж<siginfo>, ж<sigctxt>, ж<g>, bool> testSigtrap;
-
 internal static Func<ж<g>, bool> testSigusr1;
 
 // sigsysIgnored is non-zero if we are currently ignoring SIGSYS. See issue #69065.
@@ -1053,7 +1051,7 @@ internal static partial void ensureSigM() {
             // sigenable/sigdisable in turn notify this thread to update its signal
             // mask accordingly.
             ref var sigBlocked = ref heap<sigset>(sigset_all, out var ᏑsigBlocked);
-            foreach (var i in range(sigtable)) {
+            foreach (var i in range(len(sigtable))) {
                 if (!blockableSig((uint32)i)) {
                     sigdelset(ref (ᏑsigBlocked).DerefOrNull(), i);
                 }
@@ -1353,7 +1351,7 @@ internal static void minitSignalStack() {
 // After this is called the thread can receive signals.
 internal static void minitSignalMask() {
     ref var nmask = ref heap<sigset>(getg().Value.m.Value.sigmask, out var Ꮡnmask);
-    foreach (var i in range(sigtable)) {
+    foreach (var i in range(len(sigtable))) {
         if (!blockableSig((uint32)i)) {
             sigdelset(ref nmask, i);
         }

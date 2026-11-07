@@ -45,12 +45,10 @@ partial struct TypeAssert {
     public ж<ΔInterfaceType> Inter;
     public bool CanFail;
 }
-
 partial struct TypeAssertCache {
     public uintptr Mask;
     public array<TypeAssertCacheEntry> Entries = new(1);
 }
-
 partial struct TypeAssertCacheEntry {
     public uintptr Typ;
     public uintptr Itab;

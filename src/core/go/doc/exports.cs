@@ -14,7 +14,7 @@ partial class doc_package {
 // and returns the resulting list.
 internal static slice<ж<ast.Ident>> filterIdentList(slice<ж<ast.Ident>> list) {
     nint j = 0;
-    foreach (var (_, x) in list) {
+    foreach (var (_, x) in range(list)) {
         if (token.IsExported(x.Name)) {
             list[j] = x;
             j++;
@@ -35,7 +35,7 @@ internal static void filterCompositeLit(ref ast.CompositeLit lit, Func<@string, 
 
 internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@string, bool> filter, bool export) {
     nint j = 0;
-    foreach (var (_, exp) in list) {
+    foreach (var (_, exp) in range(list)) {
         switch (exp.type()) {
         case ж<ast.CompositeLit> x: {
             filterCompositeLit(ref (x).DerefOrNull(), filter, export);
@@ -61,7 +61,7 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@strin
 internal static bool /*hasExported*/ updateIdentList(slice<ж<ast.Ident>> list) {
     bool hasExported = default;
 
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         if (token.IsExported(x.Name)) {
             hasExported = true;
         } else {
@@ -73,7 +73,7 @@ internal static bool /*hasExported*/ updateIdentList(slice<ж<ast.Ident>> list) 
 
 // hasExportedName reports whether list contains any exported names.
 internal static bool hasExportedName(slice<ж<ast.Ident>> list) {
-    foreach (var (_, x) in list) {
+    foreach (var (_, x) in range(list)) {
         if (x.IsExported()) {
             return true;
         }
@@ -85,7 +85,7 @@ internal static bool hasExportedName(slice<ж<ast.Ident>> list) {
 internal static void removeAnonymousField(@string name, ref ast.InterfaceType ityp) {
     var list = ityp.Methods.List; // we know that ityp.Methods != nil
     nint j = 0;
-    foreach (var (_, field) in list) {
+    foreach (var (_, field) in range(list)) {
         var keepField = true;
         nint n = len(field.Names); if (n == 0) {
             // anonymous field
@@ -117,7 +117,7 @@ internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<nam
     }
     var list = fields.List;
     nint j = 0;
-    foreach (var (_, field) in list) {
+    foreach (var (_, field) in range(list)) {
         var keepField = false;
         nint n = len(field.Names); if (n == 0) {
             // anonymous field or embedded type or union element
@@ -167,7 +167,7 @@ internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfie
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
-        foreach (var (_, f) in fields.List) {
+        foreach (var (_, f) in range(fields.List)) {
             r.filterType(nil, f.Type);
         }
     }
@@ -307,7 +307,7 @@ internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec
         // Propagate any type information that would get lost otherwise
         // when unexported constants are filtered.
         ast.Expr prevType = default;
-        foreach (var (_, spec) in list) {
+        foreach (var (_, spec) in range(list)) {
             var specΔ1 = spec._<ж<ast.ValueSpec>>();
             if (specΔ1.Type == nil && len(specΔ1.Values) == 0 && prevType != nil) {
                 // provide current spec with an explicit type
@@ -323,7 +323,7 @@ internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec
     }
 
     nint j = 0;
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         if (r.filterSpec(s)) {
             list[j] = s;
             j++;
@@ -353,7 +353,7 @@ internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     nint j = 0;
-    foreach (var (_, d) in src.Decls) {
+    foreach (var (_, d) in range(src.Decls)) {
         if (r.filterDecl(d)) {
             src.Decls[j] = d;
             j++;

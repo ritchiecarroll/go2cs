@@ -31,21 +31,12 @@ internal const bool cgoAvailable = true;
 // by convention.
 partial struct addrinfoErrno /*num:nint*/;
 
-internal static @string Error(this addrinfoErrno eai) {
-    return _C_gai_strerror((_C_int)eai);
-}
-
-internal static bool Temporary(this addrinfoErrno eai) {
-    return eai == _C_EAI_AGAIN;
-}
-
-internal static bool Timeout(this addrinfoErrno eai) {
-    return false;
-}
+internal static @string Error(this addrinfoErrno eai) { return _C_gai_strerror((_C_int)eai); }
+internal static bool Temporary(this addrinfoErrno eai) { return eai == _C_EAI_AGAIN; }
+internal static bool Timeout(this addrinfoErrno eai) { return false; }
 
 // isAddrinfoErrno is just for testing purposes.
-internal static void isAddrinfoErrno(this addrinfoErrno eai) {
-}
+internal static void isAddrinfoErrno(this addrinfoErrno eai) { }
 
 internal partial struct doBlockingWithCtx_result<T> /*dyn*/ {
     internal T res;
@@ -109,7 +100,7 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
     if (err != nil) {
         return (default, err);
     }
-    foreach (var (_, vᴛ1) in addrs) {
+    foreach (var (_, vᴛ1) in range(addrs)) {
         ref var addr = ref heap(new IPAddr(), out var Ꮡaddr);
         addr = vᴛ1;
 
@@ -162,7 +153,7 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             (port, err) = (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: network + "/"u8 + service)))); goto ᒐdone;
         }
         // Lowercase the C service name.
-        foreach (var (i, b) in cservice.slice(0, len(service))) {
+        foreach (var (i, b) in range(cservice.slice(0, len(service)))) {
             cservice[i] = lowerASCII(b);
         }
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);

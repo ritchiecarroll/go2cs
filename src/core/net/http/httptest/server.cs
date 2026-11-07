@@ -95,7 +95,7 @@ internal static ref @string serveFlag => ref ((StaticBox<@string>)ᏑserveFlag).
 }
 
 internal static bool strSliceContainsPrefix(slice<@string> v, @string pre) {
-    foreach (var (_, s) in v) {
+    foreach (var (_, s) in range(v)) {
         if (strings.HasPrefix(s, pre)) {
             return true;
         }
@@ -192,12 +192,12 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     if (s.TLS.NextProtos == nil) {
         var nextProtos = slice<@string>(["http/1.1"]);
         if (s.EnableHTTP2) {
-            nextProtos = slice<@string>(["h2"]);
+            nextProtos = ["h2"];
         }
         s.TLS.NextProtos = nextProtos;
     }
     if (len(s.TLS.Certificates) == 0) {
-        s.TLS.Certificates = slice<tls.Certificate>([cert]);
+        s.TLS.Certificates = [cert];
     }
     (s.certificate, err) = x509.ParseCertificate(s.TLS.Certificates[0].ΔCertificate[0]);
     if (err != nil) {
@@ -480,9 +480,7 @@ internal static void wrap(this ж<Server> Ꮡs) {
 
 // closeConn closes c.
 // s.mu must be held.
-internal static void closeConn(this ref Server s, net.Conn c) {
-    s.closeConnChan(c, default);
-}
+internal static void closeConn(this ref Server s, net.Conn c) { s.closeConnChan(c, default); }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.

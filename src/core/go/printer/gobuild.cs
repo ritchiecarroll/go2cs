@@ -62,7 +62,7 @@ internal static void fixGoBuildLines(this ref printer p) {
     switch (len(p.goBuild)) {
     case 0: {
         // Synthesize //go:build expression from // +build lines.
-        foreach (var (_, pos) in p.plusBuild) {
+        foreach (var (_, pos) in range(p.plusBuild)) {
             var (y, err) = constraint.Parse(p.commentTextAt(pos));
             if (err != nil) {
                 x = default;
@@ -87,10 +87,10 @@ internal static void fixGoBuildLines(this ref printer p) {
         // Don't have a valid //go:build expression to treat as truth.
         // Bring all the lines together but leave them alone.
         // Note that these are already tabwriter-escaped.
-        foreach (var (_, pos) in p.goBuild) {
+        foreach (var (_, pos) in range(p.goBuild)) {
             block = appendꓸꓸꓸ(block, p.lineAt(pos));
         }
-        foreach (var (_, pos) in p.plusBuild) {
+        foreach (var (_, pos) in range(p.plusBuild)) {
             block = appendꓸꓸꓸ(block, p.lineAt(pos));
         }
     } else {
@@ -103,7 +103,7 @@ internal static void fixGoBuildLines(this ref printer p) {
             if (err != nil) {
                 lines = slice<@string>(["// +build error: "u8 + err.Error()]);
             }
-            foreach (var (_, line) in lines) {
+            foreach (var (_, line) in range(lines)) {
                 block = append(block, (byte)(tabwriter.Escape));
                 block = append(block, line.ꓸꓸꓸ);
                 block = append(block, (byte)(tabwriter.Escape), (byte)'\n');
@@ -119,7 +119,7 @@ internal static void fixGoBuildLines(this ref printer p) {
     // Collect output after insertion point, with lines deleted, into after.
     slice<byte> after = default;
     nint start = insert;
-    foreach (var (_, end) in toDelete) {
+    foreach (var (_, end) in range(toDelete)) {
         if (end < start) {
             continue;
         }

@@ -28,7 +28,6 @@ public static ж<CTR> NewCTR(ж<Block> b, slice<byte> iv) {
     ref var c = ref heap<CTR>(newCTR(ref (b).DerefOrNull(), iv), out var Ꮡc);
     return Ꮡc;
 }
-
 internal static CTR newCTR(ref Block b, slice<byte> iv) {
     if (len(iv) != ΔBlockSize) {
         throw panic("bad IV length");

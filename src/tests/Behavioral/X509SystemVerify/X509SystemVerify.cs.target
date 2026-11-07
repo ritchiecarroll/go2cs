@@ -33,7 +33,7 @@ internal static void Main() {
         Subject: new pkix.Name(CommonName: "go2cs.example"),
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
-        DNSNames: slice<@string>(["go2cs.example"])
+        DNSNames: ["go2cs.example"]
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.ᏑPublicKey, key.OrTypedNil());
     if (err != nil) {
@@ -72,9 +72,9 @@ internal static void Main() {
         fmt.Printf("public chain: %T: %v\n"u8, err, err);
         return;
     }
-    foreach (var (_, chain) in chains) {
+    foreach (var (_, chain) in range(chains)) {
         slice<@string> names = default;
-        foreach (var (_, c) in chain) {
+        foreach (var (_, c) in range(chain)) {
             names = append(namesᴷ, names, c.Subject.CommonName);
         }
         fmt.Println("public chain:", strings.Join(names, " -> "));

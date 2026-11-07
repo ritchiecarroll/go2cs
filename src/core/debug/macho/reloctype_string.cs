@@ -28,7 +28,6 @@ public static @string String(this RelocTypeGeneric i) {
     }
     return _RelocTypeGeneric_name.slice(_RelocTypeGeneric_index[i], _RelocTypeGeneric_index[i + 1]);
 }
-
 internal static void _ᴛ2() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -56,7 +55,6 @@ public static @string String(this RelocTypeX86_64 i) {
     }
     return _RelocTypeX86_64_name.slice(_RelocTypeX86_64_index[i], _RelocTypeX86_64_index[i + 1]);
 }
-
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -84,7 +82,6 @@ public static @string String(this RelocTypeARM i) {
     }
     return _RelocTypeARM_name.slice(_RelocTypeARM_index[i], _RelocTypeARM_index[i + 1]);
 }
-
 internal static void _ᴛ4() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.

@@ -194,12 +194,10 @@ internal static int32 open(ref byte name, int32 mode, int32 perm) {
     @throw(unimplementedˢ);
     return -1;
 }
-
 internal static int32 closefd(int32 fd) {
     @throw(unimplementedˢ);
     return -1;
 }
-
 internal static int32 read(int32 fd, @unsafe.Pointer Δp, int32 n) {
     @throw(unimplementedˢ);
     return -1;
@@ -225,10 +223,8 @@ internal static stdFunction windowsFindfunc(uintptr lib, slice<byte> name) {
 }
 
 internal static UntypedInt _MAX_PATH => 260; // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-
 internal static readonly ж<array<byte>> ᏑsysDirectory = new StaticBox<array<byte>>(new array<byte>(261));
 internal static ref array<byte> sysDirectory => ref ((StaticBox<array<byte>>)ᏑsysDirectory).ValueSlot;
-
 internal static uintptr sysDirectoryLen;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -523,7 +519,7 @@ internal static void goenvs() {
     }
     envs = new slice<@string>(n);
 
-    foreach (var i in range(envs)) {
+    foreach (var i in range(len(envs))) {
         envs[i] = gostringw(Ꮡ(Δp, 0));
         while (Δp[0] != 0) {
             Δp = Δp[1..];
@@ -584,7 +580,7 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
     }}
     var isASCII = true;
     var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(n)));
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         if (x >= 0x80) {
             isASCII = false;
             break;
@@ -826,8 +822,7 @@ internal static void newosproc0(uintptr stacksize, uintptr fn) {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static void libpreinit() {
-}
+internal static void libpreinit() { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exitThreadˢ => ref exitThreadˢᵇ;

@@ -9,9 +9,7 @@ partial class main_package {
 
 partial struct Level /*global::go.ForeignDefinedConversion.levellib_package.Level*/;
 
-public static @string String(this Level l) {
-    return fmt.Sprintf("Level(%d)"u8, (uint32)((levellib.Level)l));
-}
+public static @string String(this Level l) { return fmt.Sprintf("Level(%d)"u8, (uint32)((levellib.Level)l)); }
 
 partial struct Dur /*global::go.time_package.Duration*/;
 

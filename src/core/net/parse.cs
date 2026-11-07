@@ -21,9 +21,7 @@ partial struct Δfile {
     internal bool atEOF;
 }
 
-internal static void close(this ref Δfile f) {
-    f.ΔΔfile.Close();
-}
+internal static void close(this ref Δfile f) { f.ΔΔfile.Close(); }
 
 internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
     @string s = default;
@@ -133,9 +131,7 @@ internal static slice<@string> splitAtBytes(@string s, @string t) {
     return a.slice(0, n);
 }
 
-internal static slice<@string> getFields(@string s) {
-    return splitAtBytes(s, " \r\t\n");
-}
+internal static slice<@string> getFields(@string s) { return splitAtBytes(s, " \r\t\n"); }
 
 // Bigger than we need, not too big to worry about overflow
 internal static UntypedInt big => 0xFFFFFF;
@@ -213,7 +209,7 @@ internal static bool hasUpperCase(@string s) {
 
 // lowerASCIIBytes makes x ASCII lowercase in-place.
 internal static void lowerASCIIBytes(slice<byte> x) {
-    foreach (var (i, b) in x) {
+    foreach (var (i, b) in range(x)) {
         if ('A' <= b && b <= 'Z') {
             x[i] += (byte)((rune)'a' - (rune)'A');
         }

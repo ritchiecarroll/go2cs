@@ -1,0 +1,52 @@
+package main
+
+import (
+	"fmt"
+	"testing"
+)
+
+// TT: the hand-owned testing.T methods, promoted through a pointer embed (the failing shape).
+type TT struct{ *testing.T }
+
+// LL: a local variadic method, promoted through a pointer embed.
+type L struct{}
+
+func (*L) Error(args ...any) {}
+
+type LL struct{ *L }
+
+// V: a local variadic value method, declared directly.
+type V struct{}
+
+func (V) Error(args ...any) {}
+
+// Errorer: a NAMED interface with the same method.
+type Errorer interface{ Error(...any) }
+
+func main() {
+	var tt any = TT{}
+	_, a1 := tt.(interface{ Error(...any) })
+	fmt.Println("1 TT    Error(...any)         :", a1)
+	_, a2 := tt.(interface{ Name() string })
+	fmt.Println("2 TT    Name() string         :", a2)
+	_, a3 := tt.(interface{ Logf(string, ...any) })
+	fmt.Println("3 TT    Logf(string, ...any)  :", a3)
+	_, a4 := tt.(interface{ Failed() bool })
+	fmt.Println("4 TT    Failed() bool         :", a4)
+	_, a5 := tt.(Errorer)
+	fmt.Println("5 TT    Errorer (named)       :", a5)
+	var pt any = &TT{}
+	_, a6 := pt.(interface{ Error(...any) })
+	fmt.Println("6 *TT   Error(...any)         :", a6)
+	var t any = &testing.T{}
+	_, a7 := t.(interface{ Error(...any) })
+	fmt.Println("7 *T    Error(...any)         :", a7)
+	_, a8 := t.(interface{ Name() string })
+	fmt.Println("8 *T    Name() string         :", a8)
+	var ll any = LL{}
+	_, a9 := ll.(interface{ Error(...any) })
+	fmt.Println("9 LL    Error(...any)         :", a9)
+	var v any = V{}
+	_, a10 := v.(interface{ Error(...any) })
+	fmt.Println("10 V    Error(...any)         :", a10)
+}

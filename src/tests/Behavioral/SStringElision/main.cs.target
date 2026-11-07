@@ -126,7 +126,6 @@ internal static nint switchLocal(slice<byte> b) {
 }
 
 internal static readonly @string zipMagic = "PK"u8;
-
 internal static readonly @string gzMagic = ((@string)(new byte[]{0x1f, 0x8b}));
 
 internal static nint switchMagic(slice<byte> b) {
@@ -152,9 +151,7 @@ internal static nint switchCall(slice<byte> b) {
     return 0;
 }
 
-internal static @string labelValue() {
-    return "q";
-}
+internal static @string labelValue() { return "q"; }
 
 partial struct config {
     internal @string name;

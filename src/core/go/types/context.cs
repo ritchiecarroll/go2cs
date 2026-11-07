@@ -94,7 +94,7 @@ internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
         ctxt.mu.Lock();
         ᒐd1 = true;
 
-        foreach (var (_, e) in ctxt.typeMap[h]) {
+        foreach (var (_, e) in range(ctxt.typeMap[h])) {
             if (identicalInstance(orig, targs, e.orig, e.targs)) {
                 return e.instance;
             }
@@ -125,7 +125,7 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
         ctxt.mu.Lock();
         ᒐd1 = true;
 
-        foreach (var (_, e) in ctxt.typeMap[h]) {
+        foreach (var (_, e) in range(ctxt.typeMap[h])) {
             if (inst == nil || Identical(inst, e.instance)) {
                 return e.instance;
             }

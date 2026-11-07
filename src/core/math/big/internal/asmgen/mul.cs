@@ -214,7 +214,7 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
     var unroll = slice<nint>([1, 4]);
     switch (a.Arch) {
     case var ᴛ when ᴛ == Arch386: {
-        unroll = slice<nint>([1]); // too few registers
+        unroll = [1]; // too few registers
         break;
     }
     case var ᴛ when ᴛ == ArchARM: {
@@ -222,7 +222,7 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         break;
     }
     case var ᴛ when ᴛ == ArchARM64: {
-        unroll = slice<nint>([1, 8]); // 5% speedup on c4as16
+        unroll = [1, 8]; // 5% speedup on c4as16
         break;
     }}
 
@@ -237,7 +237,7 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         aʗ1.Comment(multiplyˢ);
         var prev = cʗ1;
         ΔCarry flag = SetCarry;
-        foreach (var (i, x) in @in[mulIndex]) {
+        foreach (var (i, x) in range(@in[mulIndex])) {
             var hi = aʗ1.RegHint(HintMulHi);
             aʗ1.MulWide(mʗ1, x, x, hi);
             aʗ1.Add(prev, x, x, flag);
@@ -252,7 +252,7 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         if (addsrc != ""u8) {
             aʗ1.Comment(addˢ);
             ΔCarry flagΔ1 = SetCarry;
-            foreach (var (i, x) in @in[0]) {
+            foreach (var (i, x) in range(@in[0])) {
                 aʗ1.Add(x, @out[0][i], @out[0][i], flagΔ1);
                 flagΔ1 = (ΔCarry)(UseCarry | SetCarry);
             }
@@ -318,7 +318,7 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
     var mʗ1 = m;
     var pʗ1 = p;
     p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
-        foreach (var (i, y) in @in[1]) {
+        foreach (var (i, y) in range(@in[1])) {
             var x = @in[0][i];
             var lo = y;
             if (lo.IsMem()) {
@@ -360,7 +360,7 @@ internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
     p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
         aʗ1.Comment(syntheticCarryOneColumnˢ);
         var (lo, hi) = (aʗ1.Reg(), aʗ1.Reg());
-        foreach (var (i, x) in @in[mulIndex]) {
+        foreach (var (i, x) in range(@in[mulIndex])) {
             aʗ1.MulWide(mʗ1, x, lo, hi);
             if (mulIndex == 1) {
                 aʗ1.Add(@in[0][i], lo, lo, SetCarry);

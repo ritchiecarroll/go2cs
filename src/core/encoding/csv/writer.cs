@@ -52,7 +52,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
         return errInvalidDelim;
     }
 
-    foreach (var (n, vᴛ1) in record) {
+    foreach (var (n, vᴛ1) in range(record)) {
         var field = vᴛ1;
 
         if (n > 0) {
@@ -143,7 +143,7 @@ public static error Error(this ref Writer w) {
 // WriteAll writes multiple CSV records to w using [Writer.Write] and
 // then calls [Writer.Flush], returning any error from the Flush.
 public static error WriteAll(this ref Writer w, slice<slice<@string>> records) {
-    foreach (var (_, record) in records) {
+    foreach (var (_, record) in range(records)) {
         var err = w.Write(record);
         if (err != nil) {
             return err;

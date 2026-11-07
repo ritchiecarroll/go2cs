@@ -11,13 +11,9 @@ internal static (nint, bool) next() {
     return (n, n < 4);
 }
 
-internal static bool keep(nint v, bool ok) {
-    return ok;
-}
+internal static bool keep(nint v, bool ok) { return ok; }
 
-internal static nint must(nint v, bool ok) {
-    return v;
-}
+internal static nint must(nint v, bool ok) { return v; }
 
 internal static void Main() {
     var funcsᴷ = new stackAppend<Func<nint>>(moves: true);
@@ -94,7 +90,7 @@ break_outer:;
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
     funcs = move2heap(funcsᴷ, funcs);
-    foreach (var (_, f) in funcs) {
+    foreach (var (_, f) in range(funcs)) {
         fmt.Print(f(), " ");
     }
     fmt.Println();

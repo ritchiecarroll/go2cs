@@ -12,15 +12,11 @@ partial interface I {
     @string M();
 }
 
-public static @string M<T>(this G<T> g) {
-    return fmt.Sprint((g.v).OrTypedNilOf());
-}
+public static @string M<T>(this G<T> g) { return fmt.Sprint((g.v).OrTypedNilOf()); }
 
 partial struct T /*num:nint*/;
 
-public static @string M(this T t) {
-    return fmt.Sprint((nint)t);
-}
+public static @string M(this T t) { return fmt.Sprint((nint)t); }
 
 internal static void Main() {
     I a = new G<nint>(7);
@@ -34,7 +30,7 @@ internal static void Main() {
 
     fmt.Println(AreEqual(a, new G<nint>(7)), AreEqual(a, new G<nint>(8)), AreEqual(b, new G<@string>("x")), AreEqual(d, ((T)3)));
 
-    foreach (var (_, item) in slice<I>([a, b, c, d])) {
+    foreach (var (_, item) in range(slice<I>([a, b, c, d]))) {
         fmt.Print(item.M(), ";");
     }
     fmt.Println();

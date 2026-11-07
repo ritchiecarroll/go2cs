@@ -122,7 +122,7 @@ internal static @string makeCmdLine(slice<@string> args) {
     var bᴷ = new stackAppend<byte>();
 
     slice<byte> b = default;
-    foreach (var (_, v) in args) {
+    foreach (var (_, v) in range(args)) {
         if (len(b) > 0) {
             b = append(bᴷ, b, (byte)' ');
         }
@@ -147,7 +147,7 @@ internal static slice<@string> envSorted(slice<@string> envv) {
         var (v, ok) = lowerKeyCacheʗ1[k, ꟷ];
         if (!ok) {
             v = slice<byte>(k);
-            foreach (var (i, b) in v) {
+            foreach (var (i, b) in range(v)) {
                 // We only normalize ASCII for now.
                 // In practice, all environment variables are ASCII, and the
                 // syscall package can't import "unicode" anyway.
@@ -190,7 +190,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     envv = envSorted(envv);
 
     nint length = default;
-    foreach (var (_, s) in envv) {
+    foreach (var (_, s) in range(envv)) {
         if (bytealg.IndexByteString(s, 0) != -1) {
             return (default, EINVAL);
         }
@@ -199,7 +199,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     length += 1;
 
     var b = new slice<uint16>(0, length);
-    foreach (var (_, s) in envv) {
+    foreach (var (_, s) in range(envv)) {
         foreach (var (_, c) in s) {
             b = utf16.AppendRune(b, c);
         }
@@ -324,7 +324,6 @@ partial struct SysProcAttr {
 
 internal static readonly ж<ProcAttr> ᏑzeroProcAttr = new StaticBox<ProcAttr>(default(ProcAttr));
 internal static ref ProcAttr zeroProcAttr => ref ((StaticBox<ProcAttr>)ᏑzeroProcAttr).ValueSlot;
-
 internal static readonly ж<SysProcAttr> ᏑzeroSysProcAttr = new StaticBox<SysProcAttr>(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ((StaticBox<SysProcAttr>)ᏑzeroSysProcAttr).ValueSlot;
 
@@ -404,7 +403,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
             parentProcess = sys.Value.ParentProcess;
         }
         var fd = new slice<ΔHandle>(len(attr.Files));
-        foreach (var i in range(attr.Files)) {
+        foreach (var i in range(len(attr.Files))) {
             if (attr.Files[i] > 0) {
                 var errΔ2 = DuplicateHandle(p, (ΔHandle)attr.Files[i], parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
                 if (errΔ2 != nil) {
@@ -441,7 +440,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         // The presence of a NULL handle in the list is enough to cause PROC_THREAD_ATTRIBUTE_HANDLE_LIST
         // to treat the entire list as empty, so remove NULL handles.
         nint j = 0;
-        foreach (var i in range(fd)) {
+        foreach (var i in range(len(fd))) {
             if (fd[i] != 0) {
                 fd[j] = fd[i];
                 j++;

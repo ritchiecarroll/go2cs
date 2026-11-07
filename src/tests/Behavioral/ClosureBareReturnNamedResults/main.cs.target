@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static partial void forEach(slice<nint> items, Action<nint> f) {
-    foreach (var (_, x) in items) {
+    foreach (var (_, x) in range(items)) {
         f(x);
     }
 }

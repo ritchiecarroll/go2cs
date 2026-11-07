@@ -9,17 +9,11 @@ public delegate nint AssignA();
 
 public delegate nint Other();
 
-public static @string Name(this Other o) {
-    return "other";
-}
+public static @string Name(this Other o) { return "other"; }
 
-public static bool Equal(this AssignA x, Func<nint> y) {
-    return x() == y();
-}
+public static bool Equal(this AssignA x, Func<nint> y) { return x() == y(); }
 
-internal static nint apply(Func<nint> f) {
-    return f() * 10;
-}
+internal static nint apply(Func<nint> f) { return f() * 10; }
 
 internal static void Main() {
     var a = new AssignA(() => 7);

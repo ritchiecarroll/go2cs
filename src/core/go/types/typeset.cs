@@ -33,19 +33,13 @@ partial struct _TypeSet {
 }
 
 // IsEmpty reports whether s is the empty set.
-internal static bool IsEmpty(this ref _TypeSet s) {
-    return s.terms.isEmpty();
-}
+internal static bool IsEmpty(this ref _TypeSet s) { return s.terms.isEmpty(); }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-internal static bool IsAll(this ref _TypeSet s) {
-    return s.IsMethodSet() && len(s.methods) == 0;
-}
+internal static bool IsAll(this ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-internal static bool IsMethodSet(this ref _TypeSet s) {
-    return !s.comparable && s.terms.isAll();
-}
+internal static bool IsMethodSet(this ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
 internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
@@ -57,15 +51,11 @@ internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
 }
 
 // NumMethods returns the number of methods available.
-internal static nint NumMethods(this ref _TypeSet s) {
-    return len(s.methods);
-}
+internal static nint NumMethods(this ref _TypeSet s) { return len(s.methods); }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-internal static ж<Func> Method(this ref _TypeSet s, nint i) {
-    return s.methods[i];
-}
+internal static ж<Func> Method(this ref _TypeSet s, nint i) { return s.methods[i]; }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
 internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
@@ -96,7 +86,7 @@ internal static @string String(this ref _TypeSet s) {
             Ꮡbuf.WriteString("; ");
         }
     }
-    foreach (var (i, m) in s.methods) {
+    foreach (var (i, m) in range(s.methods)) {
         if (i > 0) {
             Ꮡbuf.WriteString("; ");
         }
@@ -116,9 +106,7 @@ internal static @string String(this ref _TypeSet s) {
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-internal static bool hasTerms(this ref _TypeSet s) {
-    return !s.terms.isEmpty() && !s.terms.isAll();
-}
+internal static bool hasTerms(this ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
 
 // subsetOf reports whether s1 ⊆ s2.
 internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
@@ -135,7 +123,7 @@ internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
         return f(default, default);
     }
 
-    foreach (var (_, t) in s.terms) {
+    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
         assert(t.typ != nil);
         // Unalias(x) == x.Underlying() for ~x terms
         var u = Unalias(t.typ);
@@ -159,7 +147,7 @@ internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }
-    foreach (var (_, t) in s.terms) {
+    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
         assert(t.typ != nil);
         if (!f(t)) {
             return false;
@@ -293,14 +281,14 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             }
         }
 
-        foreach (var (_, m) in ityp.methods) {
+        foreach (var (_, m) in range(ityp.methods)) {
             addMethod(m.pos, m, true);
         }
 
         // collect embedded elements
         var allTerms = allTermlist;
         var allComparable = false;
-        foreach (var (i, typ) in ityp.embeddeds) {
+        foreach (var (i, typ) in range(ityp.embeddeds)) {
             // The embedding position is nil for imported interfaces.
             // We don't need to do version checks in those cases.
             tokenꓸPos posΔ2 = default; // embedding position
@@ -320,7 +308,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                     continue;
                 }
                 comparable = tset.comparable;
-                foreach (var (_, m) in tset.methods) {
+                foreach (var (_, m) in range(tset.methods)) {
                     addMethod(posΔ2, m, false); // use embedding position pos rather than m.pos
                 }
                 terms = tset.terms;
@@ -384,7 +372,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
     if (comp && !terms.isAll()) {
         // only keep comparable terms
         nint i = 0;
-        foreach (var (_, t) in terms) {
+        foreach (var (_, t) in range<ж<Δterm>>(terms)) {
             assert(t.typ != nil);
             if (comparableType(t.typ, false, /* strictly comparable */ default) == nil) {
                 terms[i] = t;
@@ -436,7 +424,7 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union
     unionSets[Ꮡutyp] = @new<_TypeSet>();
 
     termlist allTerms = default;
-    foreach (var (_, vᴛ1) in utyp.terms) {
+    foreach (var (_, vᴛ1) in range(utyp.terms)) {
         var t = vᴛ1;
 
         termlist terms = default;

@@ -48,11 +48,11 @@ public static @string Synopsis(@string text) {
 // This helps to avoid misinterpreting the common mistake
 // of a copyright notice immediately before a package statement
 // as being a doc comment.
-public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<slice<@string>>(slice<@string>([
+public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<slice<@string>>([
     "copyright",
     "all rights",
     "author"
-]));
+]);
 public static ref slice<@string> IllegalPrefixes => ref ((StaticBox<slice<@string>>)ᏑIllegalPrefixes).ValueSlot;
 
 // Synopsis returns a cleaned version of the first sentence in text.
@@ -66,7 +66,7 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
 
     text = firstSentence(text);
     @string lower = strings.ToLower(text);
-    foreach (var (_, prefix) in IllegalPrefixes) {
+    foreach (var (_, prefix) in range(IllegalPrefixes)) {
         if (strings.HasPrefix(lower, prefix)) {
             return ""u8;
         }

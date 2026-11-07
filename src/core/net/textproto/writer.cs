@@ -22,9 +22,8 @@ public static ж<Writer> NewWriter(ж<bufio.Writer> w) {
     return Ꮡ(new Writer(W: w));
 }
 
-internal static slice<byte> crnl = slice<byte>([(byte)'\r', (byte)'\n']);
-
-internal static slice<byte> dotcrnl = slice<byte>([(byte)'.', (byte)'\r', (byte)'\n']);
+internal static slice<byte> crnl = [(byte)'\r', (byte)'\n'];
+internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
 
 // PrintfLine writes the formatted output followed by \r\n.
 public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {

@@ -135,7 +135,7 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
 
     // Hash stack.
     uintptr h = default!;
-    foreach (var (_, pc) in stk) {
+    foreach (var (_, pc) in range(stk)) {
         h += pc;
         h += (h << 10);
         h ^= (uintptr)(h >> 6);

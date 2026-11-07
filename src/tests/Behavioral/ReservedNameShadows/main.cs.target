@@ -57,9 +57,7 @@ partial struct box {
     internal slice<nint> items;
 }
 
-internal static nint len(this ref box b) {
-    return builtin.len(b.items) + 1;
-}
+internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);
@@ -113,7 +111,7 @@ internal static void Main() {
     var rq = new @required(c: 3);
     var sc = new @scoped(b: 2);
     var rc = new record(a: 1);
-    var bx = new box(items: slice<nint>([4, 5]));
+    var bx = new box(items: [4, 5]);
     fmt.Println(a.x, builtin.len(vals), vals[1], (nint)c, r.r, n.d, bi.z, sv.n, rq.c, sc.b, rc.a);
     var (pd, es) = predeclLocals();
     fmt.Println(freeLen(), bx.len(), nilShadow(), keywordLocals(), pd, es, viewLen(slice<byte>("xyz"u8)), deferInShadowedPackage());

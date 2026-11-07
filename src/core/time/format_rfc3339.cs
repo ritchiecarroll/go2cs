@@ -97,7 +97,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
     var ok = true;
     nint /*x*/ parseUint(bytes sΔ1, nint minΔ1, nint max) {
         nint x = default;
-        foreach (var (_, c) in sΔ1.ToSlice()) {
+        foreach (var (_, c) in range(sΔ1.ToSlice())) {
             if (c < '0' || '9' < c) {
                 ok = false;
                 return minΔ1;

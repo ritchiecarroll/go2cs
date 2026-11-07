@@ -19,31 +19,31 @@ internal static void Main() {
     var c32 = (int32)(2147483648L - 1);
     uintptr nptr = (uintptr)(1099511627776L + 1);
 
-    foreach (var (_, v) in i32) {
+    foreach (var (_, v) in range(i32)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in i64) {
+    foreach (var (_, v) in range(i64)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in i16) {
+    foreach (var (_, v) in range(i16)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in u32) {
+    foreach (var (_, v) in range(u32)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in u64) {
+    foreach (var (_, v) in range(u64)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in ptr) {
+    foreach (var (_, v) in range(ptr)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in ints) {
+    foreach (var (_, v) in range(ints)) {
         fmt.Println(v);
     }
 
@@ -57,19 +57,19 @@ internal static void Main() {
 
     var u64wide = slice<uint64>([9223372036854775809UL]);
 
-    foreach (var (_, v) in words) {
+    foreach (var (_, v) in range(words)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in wide) {
+    foreach (var (_, v) in range(wide)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in uns) {
+    foreach (var (_, v) in range(uns)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in u64wide) {
+    foreach (var (_, v) in range(u64wide)) {
         fmt.Println(v);
     }
 
@@ -85,23 +85,23 @@ internal static void Main() {
     var negConv = (int32)(-(2147483648L - 1));
     var rows = slice<row>([new("-2147483647", (int32)(-(2147483648L - 1)))]);
 
-    foreach (var (_, v) in negs) {
+    foreach (var (_, v) in range(negs)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in negInts) {
+    foreach (var (_, v) in range(negInts)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in neg16) {
+    foreach (var (_, v) in range(neg16)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in deep) {
+    foreach (var (_, v) in range(deep)) {
         fmt.Println(v);
     }
 
-    foreach (var (_, v) in deeper) {
+    foreach (var (_, v) in range(deeper)) {
         fmt.Println(v);
     }
 

@@ -40,7 +40,7 @@ internal static @string randKeyName(@string prefix) {
     @string numbers = "0123456789"u8;
     var buf = new slice<byte>(10);
     rand.Read(buf);
-    foreach (var (i, b) in buf) {
+    foreach (var (i, b) in range(buf)) {
         buf[i] = numbers[b % (byte)len(numbers)];
     }
     return prefix + ((sstring)buf);
@@ -63,7 +63,7 @@ public static void TestReadSubKeyNames(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         bool foundStdOle = default!;
-        foreach (var (_, name) in names) {
+        foreach (var (_, name) in range(names)) {
             // Every PC has "stdole 2.0 OLE Automation" library installed.
             if (name == "{00020430-0000-0000-C000-000000000046}"u8) {
                 foundStdOle = true;
@@ -135,7 +135,7 @@ internal static bool equalStringSlice(slice<@string> a, slice<@string> b) {
     if (a == default!) {
         return true;
     }
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         if (a[i] != b[i]) {
             return false;
         }
@@ -188,7 +188,7 @@ public static readonly ж<slice<ValueTest>> ᏑValueTests = new StaticBox<slice<
 public static ref slice<ValueTest> ValueTests => ref ((StaticBox<slice<ValueTest>>)ᏑValueTests).ValueSlot;
 
 internal static void setValues(ж<testing.T> Ꮡt, registry.Key k) {
-    foreach (var (_, test) in ValueTests) {
+    foreach (var (_, test) in range(ValueTests)) {
         error err = default!;
         var exprᴛ1 = test.Type;
         if (exprᴛ1 == registry.SZ) {
@@ -232,10 +232,10 @@ internal static void enumerateValues(ж<testing.T> Ꮡt, registry.Key k) {
         return;
     }
     var haveNames = new map<@string, bool>();
-    foreach (var (_, n) in names) {
+    foreach (var (_, n) in range(names)) {
         haveNames[n] = false;
     }
-    foreach (var (_, test) in ValueTests) {
+    foreach (var (_, test) in range(ValueTests)) {
         var wantFound = !test.WillFail;
         var (_, haveFound) = haveNames[test.Name, ꟷ];
         if (wantFound && !haveFound) {
@@ -413,7 +413,7 @@ internal static void testGetValue(ж<testing.T> Ꮡt, registry.Key k, ValueTest 
 }
 
 internal static void testValues(ж<testing.T> Ꮡt, registry.Key k) {
-    foreach (var (_, test) in ValueTests) {
+    foreach (var (_, test) in range(ValueTests)) {
         var exprᴛ1 = test.Type;
         if (exprᴛ1 == registry.SZ || exprᴛ1 == registry.EXPAND_SZ) {
             if (test.WillFail){
@@ -460,7 +460,7 @@ internal static void testValues(ж<testing.T> Ꮡt, registry.Key k) {
                 var (_, gottype, errΔ2) = k.GetStringValue(test.Name);
                 testErrUnexpectedType(Ꮡt, test, gottype, errΔ2);
                 nint size = 0;
-                foreach (var (_, s) in test.Value._<slice<@string>>()) {
+                foreach (var (_, s) in range(test.Value._<slice<@string>>())) {
                     size += len(s) + 1; // nil terminated
                 }
                 size += 1; // extra nil at the end
@@ -519,7 +519,7 @@ internal static void testStat(ж<testing.T> Ꮡt, registry.Key k) {
 }
 
 internal static void deleteValues(ж<testing.T> Ꮡt, registry.Key k) {
-    foreach (var (_, test) in ValueTests) {
+    foreach (var (_, test) in range(ValueTests)) {
         if (test.WillFail) {
             continue;
         }
@@ -624,13 +624,13 @@ public static void TestInvalidValues(ж<testing.T> Ꮡt) {
             new(registry.MULTI_SZ, "MultiString4"u8, new byte[]{(rune)'a', 0, 0, (rune)'b', 0}.slice()),
             new(registry.MULTI_SZ, "MultiString5"u8, new byte[]{(rune)'a', 0, 0}.slice())
         }.slice();
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var errΔ1 = k.SetValue(test.Name, test.Type, test.Data);
             if (errΔ1 != default!) {
                 Ꮡt.Fatalf("SetValue for %q failed: %v"u8, test.Name, errΔ1);
             }
         }
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var exprᴛ1 = test.Type;
             if (exprᴛ1 == registry.DWORD || exprᴛ1 == registry.QWORD) {
                 var (value, valType, errΔ3) = k.GetIntegerValue(test.Name);
@@ -686,7 +686,7 @@ public static void TestGetMUIStringValue(ж<testing.T> Ꮡt) {
         if (dtzi.DynamicDaylightTimeDisabled == 0) {
             tests = append(tests, new TestGetMUIStringValue_testType("MUI_Dlt"u8, syscall.UTF16ToString(dtzi.DaylightName[..])));
         }
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var (got, errΔ2) = timezoneK.GetMUIStringValue(test.name);
             if (errΔ2 != default!) {
                 Ꮡt.Error(getMUIStringValueˢ, errΔ2);

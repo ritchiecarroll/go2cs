@@ -8,17 +8,13 @@ partial struct pointerErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref pointerErr p) {
-    return p.msg;
-}
+internal static @string Error(this ref pointerErr p) { return p.msg; }
 
 partial struct valueErr {
     internal @string msg;
 }
 
-internal static @string Error(this valueErr v) {
-    return v.msg;
-}
+internal static @string Error(this valueErr v) { return v.msg; }
 
 internal partial struct main_cases /*dyn*/ {
     internal error err;
@@ -36,7 +32,7 @@ internal static void Main() {
         new(new valueErr("value-receiver"), "value-receiver")
     ]);
 
-    foreach (var (_, c) in cases) {
+    foreach (var (_, c) in range(cases)) {
         fmt.Printf("%s | %s\n"u8, c.err.Error(), c.want);
     }
 
@@ -45,7 +41,7 @@ internal static void Main() {
         Ꮡ(new main_ptrCases("embedded-value", new valueErr("embedded-value")))
     ]);
 
-    foreach (var (_, c) in ptrCases) {
+    foreach (var (_, c) in range(ptrCases)) {
         fmt.Printf("%s | %s\n"u8, (~c).error.Error(), (~c).want);
     }
 }

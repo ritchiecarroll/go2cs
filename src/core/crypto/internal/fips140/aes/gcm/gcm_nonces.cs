@@ -96,13 +96,9 @@ partial struct GCMWithCounterNonce {
     internal uint64 next;
 }
 
-public static nint NonceSize(this ref GCMWithCounterNonce g) {
-    return gcmStandardNonceSize;
-}
+public static nint NonceSize(this ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint Overhead(this ref GCMWithCounterNonce g) {
-    return gcmTagSize;
-}
+public static nint Overhead(this ref GCMWithCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.
@@ -253,13 +249,9 @@ public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, sli
     return default;
 }
 
-public static nint NonceSize(this ref GCMWithXORCounterNonce g) {
-    return gcmStandardNonceSize;
-}
+public static nint NonceSize(this ref GCMWithXORCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint Overhead(this ref GCMWithXORCounterNonce g) {
-    return gcmTagSize;
-}
+public static nint Overhead(this ref GCMWithXORCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.

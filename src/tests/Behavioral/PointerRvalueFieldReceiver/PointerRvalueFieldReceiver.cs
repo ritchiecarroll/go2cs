@@ -8,9 +8,7 @@ partial struct slot {
     internal nint v;
 }
 
-internal static void set(this ref slot s, nint x) {
-    s.v = x;
-}
+internal static void set(this ref slot s, nint x) { s.v = x; }
 
 partial struct node {
     internal slot s;
@@ -18,17 +16,13 @@ partial struct node {
 
 internal static ж<node> theNode = Ꮡ(new node());
 
-internal static ж<node> getNode() {
-    return theNode;
-}
+internal static ж<node> getNode() { return theNode; }
 
 partial struct queue {
     internal ж<node> last;
 }
 
-internal static ж<node> tail(this ref queue q) {
-    return q.last;
-}
+internal static ж<node> tail(this ref queue q) { return q.last; }
 
 internal static void Main() {
     getNode().Ꮡs.set(42);

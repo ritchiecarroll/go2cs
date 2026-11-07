@@ -24,7 +24,7 @@ internal static slice<byte> appendHTMLEscape(slice<byte> dst, slice<byte> src) {
     // The characters can only appear in string literals,
     // so just scan the string one byte at a time.
     nint start = 0;
-    foreach (var (i, c) in src) {
+    foreach (var (i, c) in range(src)) {
         if (c == '<' || c == '>' || c == '&') {
             dst = appendꓸꓸꓸ(dst, src.slice(start, i));
             dst = append(dst, (byte)'\\', (byte)'u', (byte)'0', (byte)'0', hex[(c >> 4)], hex[(byte)(c & 0xF)]);
@@ -59,7 +59,7 @@ internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> 
         var scan = newScanner();
         defer(freeScanner, scan, ref ᒐ);
         nint start = 0;
-        foreach (var (i, c) in src) {
+        foreach (var (i, c) in range(src)) {
             if (escape && (c == '<' || c == '>' || c == '&')) {
                 if (start < i) {
                     dst = appendꓸꓸꓸ(dst, src.slice(start, i));
@@ -144,7 +144,7 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
         defer(freeScanner, scan, ref ᒐ);
         var needIndent = false;
         nint depth = 0;
-        foreach (var (_, c) in src) {
+        foreach (var (_, c) in range(src)) {
             scan.bytes++;
             nint v = scan.step(scan, c);
             if (v == scanSkipSpace) {

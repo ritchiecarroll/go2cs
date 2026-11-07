@@ -202,13 +202,9 @@ internal static void free(this ж<pp> Ꮡp) {
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
 
-internal static (nint wid, bool ok) Width(this ref pp p) {
-    return (p.fmt.wid, p.fmt.widPresent);
-}
+internal static (nint wid, bool ok) Width(this ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
 
-internal static (nint prec, bool ok) Precision(this ref pp p) {
-    return (p.fmt.prec, p.fmt.precPresent);
-}
+internal static (nint prec, bool ok) Precision(this ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
 
 internal static bool Flag(this ref pp p, nint b) {
     switch (b) {
@@ -644,7 +640,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
                 return;
             }
             p.buf.writeByte((byte)'{');
-            foreach (var (i, c) in v) {
+            foreach (var (i, c) in range(v)) {
                 if (i > 0) {
                     p.buf.writeString(commaSpaceString);
                 }
@@ -653,7 +649,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
             p.buf.writeByte((byte)'}');
         } else {
             p.buf.writeByte((byte)'[');
-            foreach (var (i, c) in v) {
+            foreach (var (i, c) in range(v)) {
                 if (i > 0) {
                     p.buf.writeByte((byte)' ');
                 }
@@ -1066,7 +1062,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             p.buf.writeString(mapString);
         }
         var sorted = fmtsort.Sort(f);
-        foreach (var (i, m) in sorted) {
+        foreach (var (i, m) in range<fmtsort.KeyValue>(sorted)) {
             if (i > 0) {
                 if (p.fmt.sharpV) {
                     p.buf.writeString(commaSpaceString);
@@ -1134,7 +1130,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
                     // so we build a slice by hand. This is a rare case but it would be nice
                     // if reflection could help a little more.
                     bytes = new slice<byte>(f.Len());
-                    foreach (var i in range(bytes)) {
+                    foreach (var i in range(len(bytes))) {
                         bytes[i] = (byte)f.Index(i).Uint();
                     }
                 }
@@ -1472,7 +1468,7 @@ break_formatLoop:;
     if (!p.reordered && argNum < len(a)) {
         p.fmt.clearflags();
         p.buf.writeString(extraString);
-        foreach (var (i, arg) in a.slice(argNum)) {
+        foreach (var (i, arg) in range(a.slice(argNum))) {
             if (i > 0) {
                 p.buf.writeString(commaSpaceString);
             }
@@ -1492,7 +1488,7 @@ internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var prevString = false;
-    foreach (var (argNum, arg) in a) {
+    foreach (var (argNum, arg) in range(a)) {
         var isString = arg != nil && reflect.TypeOf(arg).Kind() == reflect.ΔString;
         // Add a space between two non-string arguments.
         if (argNum > 0 && !isString && !prevString) {
@@ -1508,7 +1504,7 @@ internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
 internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    foreach (var (argNum, arg) in a) {
+    foreach (var (argNum, arg) in range(a)) {
         if (argNum > 0) {
             p.buf.writeByte((byte)' ');
         }

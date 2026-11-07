@@ -8,17 +8,13 @@ partial struct AErr {
     internal nint n;
 }
 
-public static @string Error(this ref AErr e) {
-    return "a";
-}
+public static @string Error(this ref AErr e) { return "a"; }
 
 partial struct BErr {
     internal nint n;
 }
 
-public static @string Error(this ref BErr e) {
-    return "b";
-}
+public static @string Error(this ref BErr e) { return "b"; }
 
 internal partial struct main_type /*dyn*/ {
     internal nint r;
@@ -119,7 +115,7 @@ internal static void Main() {
         new(st.P.OrTypedNil(), true),
         new((nint)7, false)
     ]);
-    foreach (var (_, r) in rows) {
+    foreach (var (_, r) in range(rows)) {
         fmt.Printf("row %T %v %v\n"u8, r.value, r.value == nil, r.want);
     }
 
@@ -128,9 +124,7 @@ internal static void Main() {
     fmt.Println("delete", len(dm), dm[st.P.OrTypedNil()], dm[dp.OrTypedNil()]);
 }
 
-internal static any boxed(ж<BErr> p) {
-    return p.OrTypedNil();
-}
+internal static any boxed(ж<BErr> p) { return p.OrTypedNil(); }
 
 internal static @string /*msg*/ panicked() {
     @string msg = default;

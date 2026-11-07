@@ -206,7 +206,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
 
     if (useCheckmark) {
         // Slow path for checkmark mode.
-        foreach (var (_, ptr) in ptrs) {
+        foreach (var (_, ptr) in range(ptrs)) {
             shade(ptr);
         }
         pp.wbBuf.reset();
@@ -229,7 +229,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     // un-shaded stacks and flush after each stack scan.
     var gcw = Ꮡpp.of(runtime_package.Δp.Ꮡgcw);
     nint pos = 0;
-    foreach (var (_, ptr) in ptrs) {
+    foreach (var (_, ptr) in range(ptrs)) {
         if (ptr < minLegalPointer) {
             // nil pointers are very common, especially
             // for the "old" values. Filter out these and

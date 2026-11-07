@@ -10,9 +10,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void inc(this ref counter c) {
-    c.n++;
-}
+internal static void inc(this ref counter c) { c.n++; }
 
 partial struct hist {
     internal array<atomic.Uint64> counts = new(4);
@@ -28,12 +26,12 @@ partial struct wrap {
 internal static uint64 closureLocal() {
     uint64 record(slice<nint> samples) {
         ref var h = ref heap(new hist(), out var Ꮡh);
-        foreach (var (_, s) in samples) {
+        foreach (var (_, s) in range(samples)) {
             Ꮡh.at(hist.Ꮡcounts, s % 4).Add(1);
         }
         return Ꮡh.at(hist.Ꮡcounts, 1).Load();
     }
-    return record(slice<nint>([1, 5, 2, 9]));
+    return record([1, 5, 2, 9]);
 }
 
 internal static uint64 fieldArrayMethod() {

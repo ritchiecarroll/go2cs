@@ -42,7 +42,7 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     }
 
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
-    foreach (var (i, x) in d.Content) {
+    foreach (var (i, x) in range(d.Content)) {
         if (i > 0 && blankBefore(x)) {
             @out.WriteString(tp.prefix);
             writeNL(Ꮡout);
@@ -50,7 +50,7 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
         tp.block(Ꮡout, x);
     }
     var anyUsed = false;
-    foreach (var (_, def) in d.Links) {
+    foreach (var (_, def) in range(d.Links)) {
         if (def.Used) {
             anyUsed = true;
             break;
@@ -58,7 +58,7 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     }
     if (anyUsed) {
         writeNL(Ꮡout);
-        foreach (var (_, def) in d.Links) {
+        foreach (var (_, def) in range(d.Links)) {
             if (def.Used) {
                 fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "[%s]: %s\n"u8, def.Text, def.URL);
             }
@@ -125,7 +125,7 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
     }
     case ж<List> xΔ1: {
         var loose = xΔ1.BlankBetween();
-        foreach (var (i, item) in xΔ1.Items) {
+        foreach (var (i, item) in range(xΔ1.Items)) {
             if (i > 0 && loose) {
                 @out.WriteString(p.prefix);
                 writeNL(Ꮡout);
@@ -138,7 +138,7 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
                 @out.WriteString(item.Number);
                 @out.WriteString(". ");
             }
-            foreach (var (iΔ1, blk) in item.Content) {
+            foreach (var (iΔ1, blk) in range(item.Content)) {
                 @string fourSpace = fourSpaceᶜ2;
                 if (iΔ1 > 0) {
                     writeNL(Ꮡout);
@@ -172,7 +172,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
             @out.WriteString(p.prefix);
             @out.WriteString(indent);
         }
-        foreach (var (j, w) in words.slice(seq[i], seq[i + 1])) {
+        foreach (var (j, w) in range(words.slice(seq[i], seq[i + 1]))) {
             if (j > 0) {
                 @out.WriteString(" ");
             }
@@ -186,7 +186,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
 internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<ΔText> x) {
-    foreach (var (_, t) in x) {
+    foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
             @out.WriteString((@string)tΔ1);
@@ -284,7 +284,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     // (including separating spaces) in words[:j].
     var total = new slice<nint>(len(words) + 1);
     total[0] = 0;
-    foreach (var (i, s) in words) {
+    foreach (var (i, s) in range(words)) {
         total[1 + i] = total[i] + utf8.RuneCountInString(s) + 1;
     }
 

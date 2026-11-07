@@ -14,9 +14,7 @@ partial struct p224 {
     internal nint v;
 }
 
-internal static @string label(this ref p224 p) {
-    return "p224";
-}
+internal static @string label(this ref p224 p) { return "p224"; }
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -24,21 +22,15 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     return Ꮡ(new p224(v: p.v + o.v));
 }
 
-internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) {
-    return (Ꮡ(new p224(v: (nint)b[0])), default);
-}
+internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) { return (Ꮡ(new p224(v: (nint)b[0])), default); }
 
-internal static ж<p224> newP224() {
-    return Ꮡ(new p224(v: 1));
-}
+internal static ж<p224> newP224() { return Ꮡ(new p224(v: 1)); }
 
 partial struct p384 {
     internal nint v;
 }
 
-internal static @string label(this ref p384 p) {
-    return "p384";
-}
+internal static @string label(this ref p384 p) { return "p384"; }
 
 internal static ж<p384> combine(this ref p384 p, ж<p384> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -46,13 +38,9 @@ internal static ж<p384> combine(this ref p384 p, ж<p384> Ꮡo) {
     return Ꮡ(new p384(v: p.v * o.v));
 }
 
-internal static (ж<p384>, error) restore(this ref p384 p, slice<byte> b) {
-    return (Ꮡ(new p384(v: (nint)b[0])), default);
-}
+internal static (ж<p384>, error) restore(this ref p384 p, slice<byte> b) { return (Ꮡ(new p384(v: (nint)b[0])), default); }
 
-internal static ж<p384> newP384() {
-    return Ꮡ(new p384(v: 2));
-}
+internal static ж<p384> newP384() { return Ꮡ(new p384(v: 2)); }
 
 partial struct curve<Point>
     where Point : point<Point>
@@ -71,15 +59,11 @@ partial interface Curve {
 
 internal static @string Name<Point>(this ref curve<Point> c)
     where Point : point<Point>
-{
-    return c.name;
-}
+{ return c.name; }
 
 internal static @string BaseLabel<Point>(this ref curve<Point> c)
     where Point : point<Point>
-{
-    return c.@base.label();
-}
+{ return c.@base.label(); }
 
 internal static @string Combined<Point>(this ref curve<Point> c)
     where Point : point<Point>
@@ -119,7 +103,7 @@ internal static void Main() {
     fmt.Println(c1.Name(), c1.BaseLabel(), c1.Combined(), c1.Fresh());
     fmt.Println(c2.Name(), c2.BaseLabel(), c2.Combined(), c2.Fresh());
 
-    foreach (var (_, c) in slice<Curve>([c1, c2])) {
+    foreach (var (_, c) in range(slice<Curve>([c1, c2]))) {
         fmt.Println(c.Name(), "->", c.BaseLabel(), "->", c.Combined(), "->", c.Fresh());
     }
 }

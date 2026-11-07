@@ -746,6 +746,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
 	functionGoNamesMarker := fmt.Sprintf(FunctionGoNamesMarker, goFunctionName)
 
+	functionStart := v.outputBuilder.Len()
+
 	v.outputBuilder.WriteString(v.newline)
 	v.outputBuilder.WriteString(functionPrefixMarker)
 	v.outputBuilder.WriteString(functionGoNamesMarker)
@@ -1664,6 +1666,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	// The function's own text is complete: give each unaliased pointer parameter its Go name there.
 	v.renameUnaliasedPointerParams(functionGoNamesMarker, goNamedPointerParams)
+
+	// A function Go writes on one line is one line here too, when its body is one statement (class K2).
+	v.lastDeclShape = v.collapseOneLineFunc(funcDecl, functionStart)
 
 	// The phantom dims structs this declaration's call sites pass to its array-dims companions, each
 	// declared once per package, after the first function that needs it (arrayDimsCompanion.go).

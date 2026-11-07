@@ -88,7 +88,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 (_ᴛ1, ctxErr) = (default, errors.New(tooManyAuthenticationˢ)); goto ᒐdone;
             }
             b = append(b, (byte)builtin.len(ams));
-            foreach (var (_, amΔ1) in ams) {
+            foreach (var (_, amΔ1) in range(ams)) {
                 b = append(b, (byte)amΔ1);
             }
         }
@@ -318,9 +318,7 @@ partial struct socksAddr {
 internal static ref readonly @string socksˢ => ref socksˢᵇ;
 private static readonly @string socksˢᵇ = "socks"u8;
 
-internal static @string Network(this ref socksAddr a) {
-    return socksˢ;
-}
+internal static @string Network(this ref socksAddr a) { return socksˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
@@ -506,7 +504,7 @@ internal static (netꓸAddr proxy, netꓸAddr dst, error err) pathAddrs(this ref
     netꓸAddr dst = default;
     error err = default;
 
-    foreach (var (i, s) in slice<@string>([d.proxyAddress, address])) {
+    foreach (var (i, s) in range(slice<@string>([d.proxyAddress, address]))) {
         ref var port = ref heap<nint>(out var Ꮡport);
         (var host, port, var errΔ1) = sockssplitHostPort(s);
         if (errΔ1 != nil) {

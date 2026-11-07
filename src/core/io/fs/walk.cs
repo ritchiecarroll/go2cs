@@ -89,7 +89,7 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, D
         }
     }
 
-    foreach (var (_, d1) in dirs) {
+    foreach (var (_, d1) in range(dirs)) {
         @string name1 = path.Join(name, d1.Name());
         var errΔ2 = walkDir(fsys, name1, d1, walkDirFn); if (errΔ2 != nil) {
             if (AreEqual(errΔ2, SkipDir)) {

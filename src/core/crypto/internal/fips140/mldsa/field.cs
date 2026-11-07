@@ -125,7 +125,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         s[i] = fieldAdd(a[i], b[i]);
     }
     return s;
@@ -137,7 +137,7 @@ internal static T /*s*/ polySub<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         s[i] = fieldSub(a[i], b[i]);
     }
     return s;
@@ -295,7 +295,7 @@ internal static ringElement inverseNTT(nttElement f) {
         }
     }
 
-    foreach (var i in range(f)) {
+    foreach (var i in range(len(f))) {
         f[i] = fieldMontgomeryMul(f[i], 16382); // 16382 = 256⁻¹ * R mod q
     }
     return (ringElement)(array<fieldElement>)f;
@@ -307,7 +307,7 @@ internal static nttElement /*p*/ nttMul(nttElement a, nttElement b) {
     a = a.Clone();
     b = b.Clone();
 
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = fieldMontgomeryMul(a[i], b[i]);
     }
     return p.Clone();
@@ -319,7 +319,7 @@ internal static nttElement /*p*/ nttMul(nttElement a, nttElement b) {
 internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
     var G = sha3.NewShake128();
     G.Write(rho);
-    G.Write(slice<byte>([s, r]));
+    G.Write([s, r]);
 
     nttElement a = default;
     nint j = default;           // index into a
@@ -348,7 +348,7 @@ internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
 internal static ringElement sampleBoundedPoly(slice<byte> rho, byte r, parameters p) {
     var H = sha3.NewShake256();
     H.Write(rho);
-    H.Write(slice<byte>([r, 0])); // IntegerToBytes(r, 2)
+    H.Write([r, 0]); // IntegerToBytes(r, 2)
 
     ringElement a = default;
     nint j = default;

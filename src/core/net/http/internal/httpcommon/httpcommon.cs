@@ -138,7 +138,7 @@ internal static void buildCommonHeaderMaps() {
     ]);
     commonLowerHeader = new map<@string, @string>(len(common));
     commonCanonHeader = new map<@string, @string>(len(common));
-    foreach (var (_, v) in common) {
+    foreach (var (_, v) in range(common)) {
         @string chk = textproto.CanonicalMIMEHeaderKey(v);
         commonLowerHeader[chk] = v;
         commonCanonHeader[v] = chk;
@@ -380,7 +380,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
                 // Per 8.1.2.5 To allow for better compression efficiency, the
                 // Cookie header field MAY be split into separate header fields,
                 // each with one or more cookie-pairs.
-                foreach (var (_, vᴛ2) in vv) {
+                foreach (var (_, vᴛ2) in range(vv)) {
                     var v = vᴛ2;
 
                     for (;;) {
@@ -406,7 +406,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
                 continue;
             }
 
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 f(k, v);
             }
         }
@@ -452,7 +452,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
         headerf(name, value);
 
         if (traceʗ1 != nil && traceʗ1.WroteHeaderField != nil) {
-            traceʗ1.WroteHeaderField(name, slice<@string>([value]));
+            traceʗ1.WroteHeaderField(name, [value]);
         }
     });
 
@@ -569,7 +569,7 @@ internal static @string validateHeaders(map<@string, slice<@string>> hdrs) {
         if (!httpguts.ValidHeaderFieldName(k) && k != ":protocol"u8) {
             return fmt.Sprintf("name %q"u8, k);
         }
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             if (!httpguts.ValidHeaderFieldValue(v)) {
                 // Don't include the value in the error,
                 // because it may be sensitive.
@@ -648,8 +648,8 @@ public static ServerRequestResult NewServerRequest(ServerRequestParam rp) {
 
     // Setup Trailers
     map<@string, slice<@string>> trailer = default;
-    foreach (var (_, v) in rp.Header[trailerˢ2]) {
-        foreach (var (_, vᴛ1) in strings.Split(v, ",")) {
+    foreach (var (_, v) in range(rp.Header[trailerˢ2])) {
+        foreach (var (_, vᴛ1) in range(strings.Split(v, ","))) {
             var key = vᴛ1;
 
             key = textproto.CanonicalMIMEHeaderKey(textproto.TrimString(key));

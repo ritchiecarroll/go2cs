@@ -99,7 +99,7 @@ public static bool IsTokenRune(rune r) {
 // HeaderValuesContainsToken reports whether any string in values
 // contains the provided token, ASCII case-insensitively.
 public static bool HeaderValuesContainsToken(slice<@string> values, @string token) {
-    foreach (var (_, v) in values) {
+    foreach (var (_, v) in range(values)) {
         if (headerValueContainsToken(v, token)) {
             return true;
         }
@@ -109,9 +109,7 @@ public static bool HeaderValuesContainsToken(slice<@string> values, @string toke
 
 // isOWS reports whether b is an optional whitespace byte, as defined
 // by RFC 7230 section 3.2.3.
-internal static bool isOWS(byte b) {
-    return b == ' ' || b == '\t';
-}
+internal static bool isOWS(byte b) { return b == ' ' || b == '\t'; }
 
 // trimOWS returns x with all optional whitespace removes from the
 // beginning and end.
@@ -172,9 +170,7 @@ internal static bool tokenEqual(@string t1, @string t2) {
 // to http://www.w3.org/Protocols/rfc2616/rfc2616-sec2.html#sec2.2
 //
 //	LWS            = [CRLF] 1*( SP | HT )
-internal static bool isLWS(byte b) {
-    return b == ' ' || b == '\t';
-}
+internal static bool isLWS(byte b) { return b == ' ' || b == '\t'; }
 
 // isCTL reports whether b is a control byte, according
 // to http://www.w3.org/Protocols/rfc2616/rfc2616-sec2.html#sec2.2

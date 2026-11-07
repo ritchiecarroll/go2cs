@@ -112,49 +112,21 @@ partial struct complexVal {
     internal Value re, im;
 }
 
-internal static ΔKind Kind(this unknownVal _) {
-    return Unknown;
-}
-
-internal static ΔKind Kind(this boolVal _) {
-    return Bool;
-}
-
-internal static ΔKind Kind(this ref stringVal _) {
-    return ΔString;
-}
-
-internal static ΔKind Kind(this int64Val _) {
-    return Int;
-}
-
-internal static ΔKind Kind(this intVal _) {
-    return Int;
-}
-
-internal static ΔKind Kind(this ratVal _) {
-    return Float;
-}
-
-internal static ΔKind Kind(this floatVal _) {
-    return Float;
-}
-
-internal static ΔKind Kind(this complexVal _) {
-    return Complex;
-}
+internal static ΔKind Kind(this unknownVal _) { return Unknown; }
+internal static ΔKind Kind(this boolVal _) { return Bool; }
+internal static ΔKind Kind(this ref stringVal _) { return ΔString; }
+internal static ΔKind Kind(this int64Val _) { return Int; }
+internal static ΔKind Kind(this intVal _) { return Int; }
+internal static ΔKind Kind(this ratVal _) { return Float; }
+internal static ΔKind Kind(this floatVal _) { return Float; }
+internal static ΔKind Kind(this complexVal _) { return Complex; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
 private static readonly @string unknownˢᵇ = "unknown"u8;
 
-internal static @string String(this unknownVal _) {
-    return unknownˢ;
-}
-
-internal static @string String(this boolVal x) {
-    return strconv.FormatBool((bool)x);
-}
+internal static @string String(this unknownVal _) { return unknownˢ; }
+internal static @string String(this boolVal x) { return strconv.FormatBool((bool)x); }
 
 // String returns a possibly shortened quoted form of the String value.
 internal static @string String(this ж<stringVal> Ꮡx) {
@@ -230,17 +202,9 @@ internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@str
     return append(list, s);
 }
 
-internal static @string String(this int64Val x) {
-    return strconv.FormatInt((int64)x, 10);
-}
-
-internal static @string String(this intVal x) {
-    return x.val.String();
-}
-
-internal static @string String(this ratVal x) {
-    return rtof(x).String();
-}
+internal static @string String(this int64Val x) { return strconv.FormatInt((int64)x, 10); }
+internal static @string String(this intVal x) { return x.val.String(); }
+internal static @string String(this ratVal x) { return rtof(x).String(); }
 
 // String returns a decimal approximation of the Float value.
 internal static @string String(this floatVal x) {
@@ -299,29 +263,13 @@ internal static @string String(this floatVal x) {
     return fmt.Sprintf("%.6ge%+d"u8, m, e);
 }
 
-internal static @string String(this complexVal x) {
-    return fmt.Sprintf("(%s + %si)"u8, x.re, x.im);
-}
+internal static @string String(this complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
 
-internal static @string ExactString(this unknownVal x) {
-    return x.String();
-}
-
-internal static @string ExactString(this boolVal x) {
-    return x.String();
-}
-
-internal static @string ExactString(this ж<stringVal> Ꮡx) {
-    return strconv.Quote(Ꮡx.@string());
-}
-
-internal static @string ExactString(this int64Val x) {
-    return x.String();
-}
-
-internal static @string ExactString(this intVal x) {
-    return x.String();
-}
+internal static @string ExactString(this unknownVal x) { return x.String(); }
+internal static @string ExactString(this boolVal x) { return x.String(); }
+internal static @string ExactString(this ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
+internal static @string ExactString(this int64Val x) { return x.String(); }
+internal static @string ExactString(this intVal x) { return x.String(); }
 
 internal static @string ExactString(this ratVal x) {
     var r = x.val;
@@ -331,77 +279,32 @@ internal static @string ExactString(this ratVal x) {
     return r.String();
 }
 
-internal static @string ExactString(this floatVal x) {
-    return x.val.Text((byte)'p', 0);
-}
+internal static @string ExactString(this floatVal x) { return x.val.Text((byte)'p', 0); }
 
 internal static @string ExactString(this complexVal x) {
     return fmt.Sprintf("(%s + %si)"u8, x.re.ExactString(), x.im.ExactString());
 }
 
-internal static void implementsValue(this unknownVal _) {
-}
+internal static void implementsValue(this unknownVal _) { }
+internal static void implementsValue(this boolVal _) { }
+internal static void implementsValue(this ref stringVal _) { }
+internal static void implementsValue(this int64Val _) { }
+internal static void implementsValue(this ratVal _) { }
+internal static void implementsValue(this intVal _) { }
+internal static void implementsValue(this floatVal _) { }
+internal static void implementsValue(this complexVal _) { }
 
-internal static void implementsValue(this boolVal _) {
-}
+internal static ж<bigꓸInt> newInt() { return @new<bigꓸInt>(); }
+internal static ж<bigꓸRat> newRat() { return @new<bigꓸRat>(); }
+internal static ж<big.Float> newFloat() { return @new<big.Float>().SetPrec(prec); }
 
-internal static void implementsValue(this ref stringVal _) {
-}
-
-internal static void implementsValue(this int64Val _) {
-}
-
-internal static void implementsValue(this ratVal _) {
-}
-
-internal static void implementsValue(this intVal _) {
-}
-
-internal static void implementsValue(this floatVal _) {
-}
-
-internal static void implementsValue(this complexVal _) {
-}
-
-internal static ж<bigꓸInt> newInt() {
-    return @new<bigꓸInt>();
-}
-
-internal static ж<bigꓸRat> newRat() {
-    return @new<bigꓸRat>();
-}
-
-internal static ж<big.Float> newFloat() {
-    return @new<big.Float>().SetPrec(prec);
-}
-
-internal static intVal i64toi(int64Val x) {
-    return new intVal(newInt().SetInt64((int64)x));
-}
-
-internal static ratVal i64tor(int64Val x) {
-    return new ratVal(newRat().SetInt64((int64)x));
-}
-
-internal static floatVal i64tof(int64Val x) {
-    return new floatVal(newFloat().SetInt64((int64)x));
-}
-
-internal static ratVal itor(intVal x) {
-    return new ratVal(newRat().SetInt(x.val));
-}
-
-internal static floatVal itof(intVal x) {
-    return new floatVal(newFloat().SetInt(x.val));
-}
-
-internal static floatVal rtof(ratVal x) {
-    return new floatVal(newFloat().SetRat(x.val));
-}
-
-internal static complexVal vtoc(Value x) {
-    return new complexVal(x, (int64Val)0);
-}
+internal static intVal i64toi(int64Val x) { return new intVal(newInt().SetInt64((int64)x)); }
+internal static ratVal i64tor(int64Val x) { return new ratVal(newRat().SetInt64((int64)x)); }
+internal static floatVal i64tof(int64Val x) { return new floatVal(newFloat().SetInt64((int64)x)); }
+internal static ratVal itor(intVal x) { return new ratVal(newRat().SetInt(x.val)); }
+internal static floatVal itof(intVal x) { return new floatVal(newFloat().SetInt(x.val)); }
+internal static floatVal rtof(ratVal x) { return new floatVal(newFloat().SetRat(x.val)); }
+internal static complexVal vtoc(Value x) { return new complexVal(x, (int64Val)0); }
 
 internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -507,14 +410,10 @@ internal static bool smallFloat(ж<big.Float> Ꮡx) {
 // Factories
 
 // MakeUnknown returns the [Unknown] value.
-public static Value MakeUnknown() {
-    return new unknownVal();
-}
+public static Value MakeUnknown() { return new unknownVal(); }
 
 // MakeBool returns the [Bool] value for b.
-public static Value MakeBool(bool b) {
-    return ((boolVal)b);
-}
+public static Value MakeBool(bool b) { return ((boolVal)b); }
 
 // MakeString returns the [String] value for s.
 public static Value MakeString(@string s) {
@@ -528,9 +427,7 @@ internal static readonly ж<stringVal> ᏑemptyString = new StaticBox<stringVal>
 internal static ref stringVal emptyString => ref ((StaticBox<stringVal>)ᏑemptyString).ValueSlot;
 
 // MakeInt64 returns the [Int] value for x.
-public static Value MakeInt64(int64 x) {
-    return ((int64Val)x);
-}
+public static Value MakeInt64(int64 x) { return ((int64Val)x); }
 
 // MakeUint64 returns the [Int] value for x.
 public static Value MakeUint64(uint64 x) {
@@ -931,7 +828,7 @@ public static slice<byte> Bytes(Value x) {
     var bytes = new slice<byte>(len(words) * (nint)wordSize);
 
     nint i = 0;
-    foreach (var (_, vᴛ1) in words) {
+    foreach (var (_, vᴛ1) in range(words)) {
         var w = vᴛ1;
 
         for (nint j = 0; j < wordSize; j++) {
@@ -956,7 +853,7 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     nint i = 0;
     big.Word w = default;
     nuint s = default;
-    foreach (var (_, b) in bytes) {
+    foreach (var (_, b) in range(bytes)) {
         w |= (big.Word)((((big.Word)(nuint)b) << s));
         s += 8; if (s == (nuint)(wordSize * 8)) {
             words[i] = w;
@@ -1678,21 +1575,10 @@ Error:
     throw panic(fmt.Sprintf("invalid binary operation %v %s %v"u8, x_, op, y_));
 }
 
-internal static Value add(Value x, Value y) {
-    return BinaryOp(x, token.ADD, y);
-}
-
-internal static Value sub(Value x, Value y) {
-    return BinaryOp(x, token.SUB, y);
-}
-
-internal static Value mul(Value x, Value y) {
-    return BinaryOp(x, token.MUL, y);
-}
-
-internal static Value quo(Value x, Value y) {
-    return BinaryOp(x, token.QUO, y);
-}
+internal static Value add(Value x, Value y) { return BinaryOp(x, token.ADD, y); }
+internal static Value sub(Value x, Value y) { return BinaryOp(x, token.SUB, y); }
+internal static Value mul(Value x, Value y) { return BinaryOp(x, token.MUL, y); }
+internal static Value quo(Value x, Value y) { return BinaryOp(x, token.QUO, y); }
 
 // Shift returns the result of the shift expression x op s
 // with op == [token.SHL] or [token.SHR] (<< or >>). x must be

@@ -173,7 +173,6 @@ public partial struct typeId /*num:int32*/;
 
 internal static readonly ж<sync.Mutex> ᏑtypeLock = new StaticBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex typeLock => ref ((StaticBox<sync.Mutex>)ᏑtypeLock).ValueSlot; // set while building a type
-
 internal static UntypedInt firstUserId => 64;                                                // lowest id number granted to user
 
 partial interface ΔgobType {
@@ -248,25 +247,17 @@ partial struct CommonType {
     public typeId Id;
 }
 
-internal static typeId id(this ref CommonType t) {
-    return t.Id;
-}
+internal static typeId id(this ref CommonType t) { return t.Id; }
 
-internal static void setId(this ref CommonType t, typeId id) {
-    t.Id = id;
-}
+internal static void setId(this ref CommonType t, typeId id) { t.Id = id; }
 
-internal static @string @string(this ref CommonType t) {
-    return t.Name;
-}
+internal static @string @string(this ref CommonType t) { return t.Name; }
 
 internal static @string safeString(this ref CommonType t, map<typeId, bool> seen) {
     return t.Name;
 }
 
-internal static @string name(this ref CommonType t) {
-    return t.Name;
-}
+internal static @string name(this ref CommonType t) { return t.Name; }
 
 // Create and check predefined types
 // The string for tBytes is "bytes" not "[]byte" to signify its specialness.
@@ -315,7 +306,6 @@ internal static typeId tReserved1 = bootstrapType("_reserved1", (ж<eᴛ7>)nil);
 // Predefined because it's needed by the Decoder
 internal static typeId tWireType;
 internal static void initᴛtWireType() { tWireType = mustGetTypeInfo(wireTypeType).id; }
-
 internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 
 [GoInit] internal static void initΔ1() {
@@ -369,9 +359,7 @@ internal static @string safeString(this ref arrayType a, map<typeId, bool> seen)
     return fmt.Sprintf("[%d]%s"u8, a.Len, a.Elem.gobType().safeString(seen));
 }
 
-internal static @string @string(this ref arrayType a) {
-    return a.safeString(new map<typeId, bool>());
-}
+internal static @string @string(this ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
 
 // GobEncoder type (something that implements the GobEncoder interface)
 public partial struct gobEncoderType {
@@ -388,9 +376,7 @@ internal static @string safeString(this ref gobEncoderType g, map<typeId, bool> 
     return g.Name;
 }
 
-internal static @string @string(this ref gobEncoderType g) {
-    return g.Name;
-}
+internal static @string @string(this ref gobEncoderType g) { return g.Name; }
 
 // Map type
 public partial struct mapType {
@@ -423,9 +409,7 @@ internal static @string safeString(this ref mapType m, map<typeId, bool> seen) {
     return fmt.Sprintf("map[%s]%s"u8, key, elem);
 }
 
-internal static @string @string(this ref mapType m) {
-    return m.safeString(new map<typeId, bool>());
-}
+internal static @string @string(this ref mapType m) { return m.safeString(new map<typeId, bool>()); }
 
 // Slice type
 public partial struct sliceType {
@@ -459,9 +443,7 @@ internal static @string safeString(this ref sliceType s, map<typeId, bool> seen)
     return fmt.Sprintf("[]%s"u8, s.Elem.gobType().safeString(seen));
 }
 
-internal static @string @string(this ref sliceType s) {
-    return s.safeString(new map<typeId, bool>());
-}
+internal static @string @string(this ref sliceType s) { return s.safeString(new map<typeId, bool>()); }
 
 // Struct type
 public partial struct fieldType {
@@ -485,16 +467,14 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
     }
     seen[s.Id] = true;
     @string str = s.Name + " = struct { "u8;
-    foreach (var (_, f) in s.Field) {
+    foreach (var (_, f) in range(s.Field)) {
         str += fmt.Sprintf("%s %s; "u8, f.Name, f.Id.gobType().safeString(seen));
     }
     str += "}"u8;
     return str;
 }
 
-internal static @string @string(this ж<structType> Ꮡs) {
-    return Ꮡs.safeString(new map<typeId, bool>());
-}
+internal static @string @string(this ж<structType> Ꮡs) { return Ꮡs.safeString(new map<typeId, bool>()); }
 
 internal static ж<structType> newStructType(@string name) {
     var s = Ꮡ(new structType(new CommonType(Name: name), default));

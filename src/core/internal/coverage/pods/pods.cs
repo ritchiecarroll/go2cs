@@ -61,12 +61,12 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
 
     var files = slice<@string>([]);
     var dirIndices = slice<nint>([]);
-    foreach (var (k, dir) in dirs) {
+    foreach (var (k, dir) in range(dirs)) {
         var (dents, err) = os.ReadDir(dir);
         if (err != nil) {
             return (default, err);
         }
-        foreach (var (_, e) in dents) {
+        foreach (var (_, e) in range(dents)) {
             if (e.IsDir()) {
                 continue;
             }
@@ -136,7 +136,7 @@ private static readonly @string noCoverageDataFilesFoundˢᵇ = "no coverage dat
 internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dirIndices, bool warn) {
     var metaRE = regexp.MustCompile(fmt.Sprintf(@"^%s\.(\S+)$"u8, coverage.MetaFilePref));
     var mm = new map<@string, protoPod>();
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         @string @base = filepath.Base(f);
         var m = metaRE.FindStringSubmatch(@base); if (m != nil) {
             @string tag = m[1];
@@ -151,7 +151,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
         }
     }
     var counterRE = regexp.MustCompile(fmt.Sprintf(coverage.CounterFileRegexp, coverage.CounterFilePref));
-    foreach (var (k, f) in files) {
+    foreach (var (k, f) in range(files)) {
         @string @base = filepath.Base(f);
         var m = counterRE.FindStringSubmatch(@base); if (m != nil) {
             @string tag = m[1]; // meta hash
@@ -194,7 +194,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
             Origins: new slice<nint>(0, len(p.elements)),
             ProcessIDs: new slice<nint>(0, len(p.elements))
         );
-        foreach (var (_, e) in p.elements) {
+        foreach (var (_, e) in range(p.elements)) {
             pod.CounterDataFiles = append(pod.CounterDataFiles, e.@file);
             pod.Origins = append(pod.Origins, e.origin);
             pod.ProcessIDs = append(pod.ProcessIDs, e.pid);

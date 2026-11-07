@@ -10,9 +10,7 @@ partial struct box {
 
 internal static nint calls;
 
-internal static (ж<box>, error) makeBox(nint v) {
-    return (Ꮡ(new box(v: v)), default);
-}
+internal static (ж<box>, error) makeBox(nint v) { return (Ꮡ(new box(v: v)), default); }
 
 internal static (nint, @string) pair() {
     calls++;
@@ -46,9 +44,7 @@ partial struct sval {
     internal @string s;
 }
 
-internal static @string String(this sval v) {
-    return v.s;
-}
+internal static @string String(this sval v) { return v.s; }
 
 internal static (stringer, Func<nint>) ifaceAndFunc() {
     return (new sval(s: "iface"), () => 9);

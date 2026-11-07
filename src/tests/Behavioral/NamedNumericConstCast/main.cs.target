@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct Class /*num:nuint*/;
-
 partial struct Big /*num:uint64*/;
 
 internal static Class allClass => /* ^Class(0) */ unchecked((Class)18446744073709551615);

@@ -139,11 +139,11 @@ internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string>
     nint total = builtin.len(dows) * builtin.len(days) * builtin.len(years) * builtin.len(seconds) * builtin.len(zones);
     var layouts = new slice<@string>(0, total);
 
-    foreach (var (_, dow) in dows.ΔRangeSnapshot()) {
-        foreach (var (_, day) in days.ΔRangeSnapshot()) {
-            foreach (var (_, year) in years.ΔRangeSnapshot()) {
-                foreach (var (_, second) in seconds.ΔRangeSnapshot()) {
-                    foreach (var (_, zone) in zones.ΔRangeSnapshot()) {
+    foreach (var (_, dow) in range(dows.ΔRangeSnapshot())) {
+        foreach (var (_, day) in range(days.ΔRangeSnapshot())) {
+            foreach (var (_, year) in range(years.ΔRangeSnapshot())) {
+                foreach (var (_, second) in range(seconds.ΔRangeSnapshot())) {
+                    foreach (var (_, zone) in range(zones.ΔRangeSnapshot())) {
                         @string s = dow + day + " Jan "u8 + year + " 15:04"u8 + second + " "u8 + zone;
                         layouts = append(layouts, s);
                     }
@@ -202,7 +202,7 @@ public static (time.Time, error) ParseDate(@string date) {
     if (!p.skipCFWS()) {
         return (new time.Time(), errors.New(mailMisformattedˢ));
     }
-    foreach (var (_, layout) in dateLayouts()) {
+    foreach (var (_, layout) in range(dateLayouts())) {
         var (t, err) = time.Parse(layout, date);
         if (err == nil) {
             return (t, default);
@@ -901,7 +901,7 @@ internal static (@string, error) consumeDisplayNameComment(this ref addrParser p
 
     // TODO(stapelberg): parse quoted-string within comment
     var words = strings.FieldsFunc(comment, (rune r) => r == ' ' || r == '\t');
-    foreach (var (idx, word) in words) {
+    foreach (var (idx, word) in range(words)) {
         var (decoded, isEncoded, err) = p.decodeRFC2047Word(word);
         if (err != nil) {
             return ("", err);

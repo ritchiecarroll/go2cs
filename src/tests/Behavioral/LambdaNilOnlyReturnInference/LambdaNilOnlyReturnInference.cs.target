@@ -8,29 +8,17 @@ partial struct Value {
     public nint N;
 }
 
-internal static slice<Value> apply(Func<slice<Value>, slice<Value>> f) {
-    return f(default);
-}
+internal static slice<Value> apply(Func<slice<Value>, slice<Value>> f) { return f(default); }
 
-internal static ж<Value> applyPtr(Func<ж<Value>> f) {
-    return f();
-}
+internal static ж<Value> applyPtr(Func<ж<Value>> f) { return f(); }
 
-internal static map<@string, nint> applyMap(Func<@string, map<@string, nint>> f) {
-    return f("x");
-}
+internal static map<@string, nint> applyMap(Func<@string, map<@string, nint>> f) { return f("x"); }
 
-internal static channel<nint> applyChan(Func<channel<nint>> f) {
-    return f();
-}
+internal static channel<nint> applyChan(Func<channel<nint>> f) { return f(); }
 
-internal static Func<nint, nint> applyFunc(Func<Func<nint, nint>> f) {
-    return f();
-}
+internal static Func<nint, nint> applyFunc(Func<Func<nint, nint>> f) { return f(); }
 
-internal static error applyErr(Func<nint, error> f) {
-    return f(1);
-}
+internal static error applyErr(Func<nint, error> f) { return f(1); }
 
 internal static void Main() {
     var g = slice<Value> (slice<Value> @in) => default;

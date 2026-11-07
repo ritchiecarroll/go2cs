@@ -4,13 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static any store(any v) {
-    return v;
-}
+internal static any store(any v) { return v; }
 
-internal static any ret() {
-    return (nint)42;
-}
+internal static any ret() { return (nint)42; }
 
 partial struct holder {
     internal any v;

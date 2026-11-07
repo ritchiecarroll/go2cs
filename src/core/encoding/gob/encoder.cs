@@ -27,13 +27,12 @@ partial struct Encoder {
 // buffer in which to encode its length. This means we can use the
 // buffer to assemble the message without another allocation.
 internal static UntypedInt maxLength => 9; // Maximum size of an encoded length.
-
 internal static slice<byte> spaceForLength = new slice<byte>(maxLength);
 
 // NewEncoder returns a new encoder that will transmit on the [io.Writer].
 public static ж<Encoder> NewEncoder(io.Writer w) {
     var enc = @new<Encoder>();
-    enc.w = slice<io.Writer>([w]);
+    enc.w = [w];
     enc.sent = new map<reflectꓸType, typeId>();
     enc.countState = enc.newEncoderState(@new<encBuffer>());
     return enc;

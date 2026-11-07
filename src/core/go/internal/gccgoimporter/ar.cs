@@ -154,7 +154,7 @@ internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive)
         return (default, err);
     }
 
-    foreach (var (_, mem) in arch.Members) {
+    foreach (var (_, mem) in range(arch.Members)) {
         var (f, errΔ1) = arch.GetFile(mem.Name);
         if (errΔ1 != nil) {
             return (default, errΔ1);

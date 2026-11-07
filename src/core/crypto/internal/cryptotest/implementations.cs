@@ -41,7 +41,7 @@ public static void TestAllImplementations(Ð¶<testing.T> t, @string pkg, Action<Ð
         impl.Reset(pkg);
     });
 
-    foreach (var (_, name) in impls) {
+    foreach (var (_, name) in range(impls)) {
         {
             var available = impl.Select(pkg, name); if (available) {
                 t.Run(name, f);

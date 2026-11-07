@@ -2680,6 +2680,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]
+    public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
+
+    [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]

@@ -74,7 +74,7 @@ private static readonly @string failedToReservePageˢᵇ = "failed to reserve pa
 internal static void sysInit(this ref pageAlloc Δp, bool test) {
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
-    foreach (var (l, shift) in levelShift.ΔRangeSnapshot()) {
+    foreach (var (l, shift) in range(levelShift.ΔRangeSnapshot())) {
         nint entries = ((nint)1).Lsh(((nuint)heapAddrBits - shift));
 
         // Reserve b bytes of memory anywhere in the address space.
@@ -157,7 +157,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     nint inUseIndex = Δp.inUse.findSucc(@base);
 
     // Walk up the radix tree and map summaries in as needed.
-    foreach (var l in range(Δp.summary)) {
+    foreach (var l in range(len(Δp.summary))) {
         // Figure out what part of the summary array this new address space needs.
         var (needIdxBase, needIdxLimit) = addrRangeToSummaryRange(l, makeAddrRange(@base, limit));
 

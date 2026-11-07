@@ -19,9 +19,7 @@ partial struct request {
 
 internal static Func<ж<request>, @string> pathOf = (ж<request> r) => r.path;
 
-internal static @string label(this ref request r) {
-    return "["u8 + r.path + "]"u8;
-}
+internal static @string label(this ref request r) { return "["u8 + r.path + "]"u8; }
 
 internal static @string inside() {
     @string f(ж<request> r) => r.path + "!"u8;

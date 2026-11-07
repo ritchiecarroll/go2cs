@@ -9,17 +9,11 @@ partial struct grid {
     internal @string name;
 }
 
-internal static void bump(ref nint p) {
-    p++;
-}
+internal static void bump(ref nint p) { p++; }
 
-internal static void mark(ref grid g, nint i) {
-    g.cells[i] = 9;
-}
+internal static void mark(ref grid g, nint i) { g.cells[i] = 9; }
 
-internal static (nint, error) pair() {
-    return (7, default);
-}
+internal static (nint, error) pair() { return (7, default); }
 
 internal static slice<ж<nint>> keptInts;
 internal static slice<ж<grid>> keptGrids;

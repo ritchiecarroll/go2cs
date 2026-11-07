@@ -185,9 +185,7 @@ internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> �
 //
 // Multiple invocations of this function will return the same value, which can
 // be used for equality checks and switch statements.
-public static ΔCurve P256() {
-    return new nistCurveжΔCurve(p256);
-}
+public static ΔCurve P256() { return new nistCurveжΔCurve(p256); }
 
 [GoLazy] partial class lazyᴛp256 { internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
     name: "P-256",
@@ -204,9 +202,7 @@ public static ΔCurve P256() {
 //
 // Multiple invocations of this function will return the same value, which can
 // be used for equality checks and switch statements.
-public static ΔCurve P384() {
-    return new nistCurveжΔCurve(p384);
-}
+public static ΔCurve P384() { return new nistCurveжΔCurve(p384); }
 
 [GoLazy] partial class lazyᴛp384 { internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
     name: "P-384",
@@ -223,9 +219,7 @@ public static ΔCurve P384() {
 //
 // Multiple invocations of this function will return the same value, which can
 // be used for equality checks and switch statements.
-public static ΔCurve P521() {
-    return new nistCurveжΔCurve(p521);
-}
+public static ΔCurve P521() { return new nistCurveжΔCurve(p521); }
 
 [GoLazy] partial class lazyᴛp521 { internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
     name: "P-521",

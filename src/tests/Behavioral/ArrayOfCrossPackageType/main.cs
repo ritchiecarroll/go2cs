@@ -11,8 +11,7 @@ partial struct counters {
     internal array<atomic.Uint64> d = new(2);
 }
 
-internal static void touch(ref atomic.Int32 p) {
-}
+internal static void touch(ref atomic.Int32 p) { }
 
 internal static ж<atomic.Int32> last(any vals) {
     var ptrs = vals._<slice<ж<atomic.Int32>>>();
@@ -27,7 +26,7 @@ internal static void Main() {
     touch(ref x.c[2]);
 
     slice<ж<atomic.Int32>> ptrs = default;
-    foreach (var i in range(x.c)) {
+    foreach (var i in range(len(x.c))) {
         ptrs = append(ptrsᴷ, ptrs, Ꮡx.at(counters.Ꮡc, i));
     }
     last(ptrs).Store(7);

@@ -83,17 +83,17 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> fset, ж<
 
         r.of(reader.ᏑDecoder).Sync(pkgbits.SyncEOF);
 
-        foreach (var (_, fn) in pr.laterFns) {
+        foreach (var (_, fn) in range(pr.laterFns)) {
             fn();
         }
 
-        foreach (var (_, iface) in pr.ifaces) {
+        foreach (var (_, iface) in range(pr.ifaces)) {
             iface.Complete();
         }
 
         // Imports() of pkg are all of the transitive packages that were loaded.
         slice<ж<types.Package>> imps = default;
-        foreach (var (_, imp) in pr.pkgs) {
+        foreach (var (_, imp) in range(pr.pkgs)) {
             if (imp != nil && imp != pkg) {
                 imps = append(imps, imp);
             }
@@ -367,7 +367,7 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
 internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
     var fields = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     slice<@string> tags = default;
-    foreach (var i in range(fields)) {
+    foreach (var i in range(len(fields))) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
         var ftyp = Ꮡr.typ();
@@ -387,7 +387,7 @@ internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
 
 internal static ж<types.Union> unionType(this ж<reader> Ꮡr) {
     var terms = new slice<ж<typesꓸTerm>>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var i in range(terms)) {
+    foreach (var i in range(len(terms))) {
         terms[i] = types.NewTerm(Ꮡr.of(reader.ᏑDecoder).Bool(), Ꮡr.typ());
     }
     return types.NewUnion(terms);
@@ -400,14 +400,14 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
     var embeddeds = new slice<typesꓸType>(Ꮡr.of(reader.ᏑDecoder).Len());
     var @implicit = len(methods) == 0 && len(embeddeds) == 1 && Ꮡr.of(reader.ᏑDecoder).Bool();
 
-    foreach (var i in range(methods)) {
+    foreach (var i in range(len(methods))) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
         var mtyp = Ꮡr.signature(nil, default, default);
         methods[i] = types.NewFunc(pos, pkg, name, mtyp);
     }
 
-    foreach (var i in range(embeddeds)) {
+    foreach (var i in range(len(embeddeds))) {
         embeddeds[i] = Ꮡr.typ();
     }
 
@@ -442,7 +442,7 @@ internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParams);
 
     var @params = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var i in range(@params)) {
+    foreach (var i in range(len(@params))) {
         @params[i] = Ꮡr.param(kind);
     }
 
@@ -475,7 +475,7 @@ internal static (types.Object, slice<typesꓸType>) obj(this ж<reader> Ꮡr) {
     var obj = pkgScope(pkg).Lookup(name);
 
     var targs = new slice<typesꓸType>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var i in range(targs)) {
+    foreach (var i in range(len(targs))) {
         targs[i] = Ꮡr.typ();
     }
 
@@ -564,7 +564,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
             // parameter's type (#49906).
             var (iface, ok) = underlying._<ж<types.Interface>>(ᐧ); if (ok && iface.NumExplicitMethods() != 0) {
                 var methods = new slice<ж<types.Func>>(iface.NumExplicitMethods());
-                foreach (var i in range(methods)) {
+                foreach (var i in range(len(methods))) {
                     var fn = iface.ExplicitMethod(i);
                     var sig = fn.Signature();
 
@@ -574,7 +574,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
                 }
 
                 var embeds = new slice<typesꓸType>(iface.NumEmbeddeds());
-                foreach (var i in range(embeds)) {
+                foreach (var i in range(len(embeds))) {
                     embeds[i] = iface.EmbeddedType(i);
                 }
 
@@ -613,13 +613,13 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
         }
 
         dict.bounds = new slice<typeInfo>(r.of(reader.ᏑDecoder).Len());
-        foreach (var i in range(dict.bounds)) {
+        foreach (var i in range(len(dict.bounds))) {
             dict.bounds[i] = r.typInfo();
         }
 
         dict.derived = new slice<derivedInfo>(r.of(reader.ᏑDecoder).Len());
         dict.derivedTypes = new slice<typesꓸType>(len(dict.derived));
-        foreach (var i in range(dict.derived)) {
+        foreach (var i in range(len(dict.derived))) {
             dict.derived[i] = new derivedInfo(idx: r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionType));
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.DerivedInfoNeeded)) {
                 assert(!r.of(reader.ᏑDecoder).Bool());
@@ -653,7 +653,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     // set the bound type.
 
     r.dict.tparams = new slice<ж<types.TypeParam>>(len(r.dict.bounds));
-    foreach (var i in range(r.dict.bounds)) {
+    foreach (var i in range(len(r.dict.bounds))) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.localIdent();
 
@@ -662,7 +662,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     }
 
     var typs = new slice<typesꓸType>(len(r.dict.bounds));
-    foreach (var (i, bound) in r.dict.bounds) {
+    foreach (var (i, bound) in range(r.dict.bounds)) {
         typs[i] = r.p.typIdx(bound, r.dict);
     }
 
@@ -682,7 +682,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     var tparamsʗ1 = tparams;
     var typsʗ1 = typs;
     r.p.later(() => {
-        foreach (var (i, typ) in typsʗ1) {
+        foreach (var (i, typ) in range(typsʗ1)) {
             tparamsʗ1[i].SetConstraint(typ);
         }
     });
@@ -702,17 +702,9 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
     return types.NewFunc(pos, pkg, name, sig);
 }
 
-internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncSym);
-}
-
-internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncLocalIdent);
-}
-
-internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) {
-    return Ꮡr.ident(pkgbits.SyncSelector);
-}
+internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSym); }
+internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncLocalIdent); }
+internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSelector); }
 
 internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) {
     Ꮡr.of(reader.ᏑDecoder).Sync(marker);

@@ -1099,6 +1099,26 @@ was re-measured alone (below), and the window's 0.834 for Sieve is not read.
   software fallback's share (169 ms exclusive in §11.3).
 - **Open:** the remaining `get_Item` call is the next lever, and R holds that scout (an AOT indexer inline).
 
+**Amended 2026-11-07 (R): the AOT indexer inline, priced by G, and its prediction scored.** The change is
+AggressiveInlining on `slice<T>`'s int, nint and ulong getters (`claude/r-aot-indexer-inline`, `da3f68520d`): ILC
+sizes an inlinee on its IL before the zero-size gate folds, so the getter stayed a call. The prediction was posted to
+COORD at `e584ee6d1f` (2026-11-06 21:17Z), after R-LAPTOP's own 21-round A/B read Sieve 0.507 and MatMul 0.361. G
+priced it in a valid window (win-x64, every A/A under 3%, Fib held, all arms source-built, the AOT arms built by the
+i9), D/P:
+
+| row | predicted | G measured | score |
+|:--|:--|:--|:--|
+| AOT Sieve | 0.45-0.58 | 0.514 (296 -> 152 ms) | HIT |
+| AOT MatMul | 0.30-0.45 | 0.359 (601 -> 216 ms) | HIT |
+| AOT TlsHandshake | 0.86-0.93 | 0.751 (2185 -> 1640 ms, -545 ms) | **MISSED**, below the band |
+| JIT rows within 3% | flat | 0.993 / 0.982 / 1.005 | HIT |
+| ReadyToRun Startup | flat | 1.001 | HIT |
+
+Every falsifier held. The TLS band priced only what §11.7 left of `get_Item` inside the multiply loop (about 252 of
+item 7's 448 ms, at four calls per `addMulVVW` iteration). The measured saving is about twice that, so the getter was
+also a call on hot paths outside `addMulVVW` that the band did not count. Which paths is NOT measured; the miss stands
+as scored rather than re-scoped. Under Native AOT, Sieve and MatMul now match the JIT.
+
 ### 11.8 Amended 2026-11-06: the ReadyToRun composite lever in single-file publishes, and what the 3 s really is
 
 Raw files are in [`item7/r2r-lever/`](DATA-hop126-perf/item7/r2r-lever/). The question, from the i9's discriminator: does
@@ -1181,3 +1201,103 @@ compression is open.
   already the shipped profiles' shape.
 - **The fix is seated with C2:** `csproj-template.xml` sets `PublishReadyToRunComposite=false` for an Exe unless the
   project sets it, so a plain single-file publish gets N, not C.
+
+### 11.9 Amended 2026-11-06: R's AOT indexer inline, priced, and a Debug standard library behind source-reference builds
+
+Raw files are in [`item7/indexer/`](DATA-hop126-perf/item7/indexer/).
+
+**The change and the arms.** R's change is `AggressiveInlining` on `slice<T>`'s `int`, `nint` and `ulong` getters. ILC's inline
+budget counted the zero-size gate's IL before folding it, so after §11.7's option A the getter was still a call.
+- P is `53b3eb88d7` (base, which carries batch 209: option A plus the `Mul` inline), and D is R's `da3f68520d`.
+- Among the paths that reach a binary (`src/core`, `src/go2cs`), P and D differ only in `src/core/golib/slice.cs`; R's other
+  two files are docs.
+- Every arm is source-built, so all arms share one build shape:
+  - AOT: TlsHandshake, Sieve and MatMul, built by the i9 by source reference with the csproj named, and the native PDB
+    kept.
+  - JIT: the same three programs, built by G with `dotnet build`.
+  - R2R: Startup, built by G with `dotnet publish`.
+- Every file was sha256-checked against its builder's post and manifest before use. All timing is `win-x64` on G.
+
+**The gates, read before any timing** (`igates.sh`, by symbol extent): GATES PASS.
+- P's `main.sieve`, `main.matmul` and `bigmod.addMulVVW` make indexer calls (the control). D's make none; their remaining
+  calls are cold: the throw helpers, the bounds panic and `NativeElementRef`.
+- The gate counts a call as an indexer call by name, or as a one-instruction `jmp` stub to one (§11.7's folding hazard, read
+  from the caller's side). Folding appeared again: P's `matmul` reaches an indexer under a folded name,
+  `slice<StackRecord>.get_Item`, and the name check counted it.
+- Proven both ways first, on the baseline TlsHandshake image in both slots: P passed, and D failed as it must.
+
+**Window 1 (18:44-19:13): VALID as worded.**
+- Every arm's A/A is under 3% (worst 2.19%), and the Fib control held start to end (-2.34%, [-6.16%, +1.30%]).
+- Disclosed: Fib from start to middle -5.13% ([-6.57%, -0.49%]), and the Go Sieve control, reported only, stepped +90.6%.
+
+| column | program | D | P | D/P | floor | |
+|:--|:--|--:|--:|--:|--:|:--|
+| AOT | MatMul | 215.7 | 601.1 | 0.359 | 1.5% | **moved faster** |
+| AOT | Sieve | 152.3 | 296.2 | 0.514 | 12.2% | **moved faster** |
+| AOT | TlsHandshake | 1640.4 | 2185.1 | 0.751 | 1.0% | **moved faster** |
+| JIT | MatMul | 216.1 | 217.7 | 0.993 | 3.7% | within; superseded by window 2 |
+| JIT | Sieve | 156.9 | 159.8 | 0.982 | 11.9% | within; superseded by window 2 |
+| JIT | TlsHandshake | *(Debug stdlib)* | *(Debug stdlib)* | 1.005 | 2.3% | **SUPERSEDED**: the build was not a JIT build (below) |
+| R2R fd1 | Startup (wall) | 382.8 | 382.3 | 1.001 | 2.3% | within; superseded by window 2 |
+
+The window-1 JIT TlsHandshake medians, about 23 seconds, are deliberately not printed. They measure a Debug standard library
+and are not a JIT number.
+
+**The predictions, stated in the OPEN post and scored as worded: 4 of 5 HIT.**
+- AOT TlsHandshake in 0.88-0.95: **FAILED**, landing below the band at 0.751 (-545 ms). R's 0.86-0.93 misses too.
+- AOT Sieve 0.45-0.65 and AOT MatMul 0.30-0.50: **HIT**, within 0.01 of R's R-LAPTOP reads (0.507 and 0.361).
+- JIT within its floor, and R2R Startup within its floor: **HIT** as worded. The JIT TlsHandshake row is superseded below.
+
+**The anomaly and its root cause: a Debug standard library under source-reference builds.**
+- *The symptom.* The window-1 JIT TlsHandshake read about 21x the release record's ~1,070 ms, the same on both arms.
+- *The reading.* G's metadata reader (`asmflags`) reads each assembly's `DebuggableAttribute`. In that closure, 160 of 163
+  assemblies were Debug-compiled (`0x107`, optimizations disabled). Only the program, golib and go2cs-gen were optimized.
+  The Sieve and MatMul closures had 64 of 67 Debug.
+- *The cause.* The converter writes a per-project `.slnx` beside each converted csproj, listing only the program, golib and
+  go2cs-gen. A bare `dotnet build -c Release` in that folder builds the solution. MSBuild drops the parent Configuration on
+  references to projects outside the solution, so every other converted standard-library package builds in its default,
+  Debug. The behavior is verified; that MSBuild's `ShouldUnsetParentConfigurationAndPlatform` is the mechanism is G's
+  reading.
+- *The experiment.* One converted Sieve, three builds (`diag-debug-stdlib.txt`):
+  - bare `dotnet build -c Release`: 64 of 67 Debug;
+  - `dotnet build PerfSieve.slnx`: 64 of 67 Debug;
+  - `dotnet build PerfSieve.csproj`: 0 of 67 Debug.
+- *The fix-check.* P's TlsHandshake built via the csproj has 0 of 163 Debug and runs 1,071, 1,071 and 1,098 ms in-program
+  (three diagnostic runs, not a window), which matches the release record. The Debug standard library is the whole 21x.
+- *A CONSUMER finding, routed as H's seat.* A user who converts with plain `-recurse` (local core references) and runs the
+  natural `dotnet build -c Release` in the project folder ships a Debug standard library. `-recurse=nuget` is unaffected,
+  which is why release measurement never saw it.
+- *The same root cause, corrected.* The R2R template publish's IL1034 ("Root assembly 'golib' does not have entry point"),
+  first attributed to `golib.csproj`'s unconditional `PublishTrimmed`, comes from the same solution. A bare
+  `dotnet publish` publishes every project in the `.slnx`, golib included, as a project of its own. Named explicitly, golib
+  is only a reference, and the template publish succeeds. The guard on `golib.csproj` stays correct and harmless, but only
+  fixing the generated solution addresses both symptoms. H's proof covers both, each red first.
+- *The AOT arms are clean.* The i9 published every AOT image with the csproj named (`dotnet publish "<Prog>.csproj"`). On
+  the files each ILC response file names, 322 of 322 indexer assemblies read optimized, as did 875 of 875 for §11.7's
+  B0/A/AI. The i9's reader was controlled both ways. So window 1's AOT readings and §11.7's stand as recorded.
+
+**Window 2 (20:16-20:21), the JIT and R2R columns rebuilt via the csproj: VALID.**
+- An asmflags gate first: 0 Debug assemblies in all 10 closures (`asmgate.txt`).
+- The R2R arms in two named shapes:
+  - fd1 (framework-dependent, untrimmed), for continuity with window 1;
+  - the TEMPLATE shape, self-contained and trimmed, which is what a user ships and which builds once the csproj is named.
+- Every arm's A/A is under 3% (worst 2.35%). The Fib control held (+0.77%, [-3.37%, +4.85%]). The Go Sieve control, reported
+  only, read -4.82%.
+
+| column | program | D | P | D/P | floor | |
+|:--|:--|--:|--:|--:|--:|:--|
+| JIT | TlsHandshake | 1107.9 | 1099.4 | 1.008 | 2.3% | within |
+| JIT | Sieve | 159.9 | 158.6 | 1.008 | 18.2% | within |
+| JIT | MatMul | 220.9 | 221.4 | 0.998 | 12.5% | within |
+| R2R fd1 | Startup (wall) | 386.7 | 386.3 | 1.001 | 2.9% | within |
+| R2R template | Startup (wall) | 388.9 | 393.3 | 0.989 | 3.7% | within |
+
+The predictions, stated in its OPEN post and scored as worded: **3 of 3 HIT**.
+- JIT TlsHandshake back within 5% of ~1,070 ms (1,099.4, +2.7%).
+- JIT D/P within its floor for all three, now with optimized callers.
+- R2R Startup within its floor in both shapes.
+
+**The result.** R's indexer inline moves AOT only:
+- MatMul 0.359, Sieve 0.514 and TlsHandshake 0.751. With it, AOT runs Sieve and MatMul at their JIT's speed.
+- JIT and R2R start-up stay flat.
+- TlsHandshake under AOT now reads 1,640 ms, about 1.5x its JIT (1,099 ms in window 2), against §11's 2.4x.

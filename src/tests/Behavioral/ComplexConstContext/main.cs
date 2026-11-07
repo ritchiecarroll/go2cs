@@ -22,7 +22,7 @@ internal static void showComplex(@string name, complex128 c) {
 
 internal static void Main() {
     var huge = slice<complex128>([3.4359738368e+10D + 0D.i(), 1.7668470647783843e+72D + 0D.i(), -1.329227995784916e+36D + 0D.i(), 1.3574217516913025e+27D + 0D.i()]);
-    foreach (var (_, h) in huge) {
+    foreach (var (_, h) in range(huge)) {
         fmt.Println(real(h));
     }
 

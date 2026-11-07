@@ -703,7 +703,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             cgoCheckArg(st.Fields[0].Typ, Δp, !st.Fields[0].Typ.IsDirectIface(), top, msg);
             return;
         }
-        foreach (var (_, f) in st.Fields) {
+        foreach (var (_, f) in range(st.Fields)) {
             if (!f.Typ.Pointers()) {
                 continue;
             }
@@ -759,7 +759,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
         return (@base, i);
     }
 
-    foreach (var (_, datap) in activeModules()) {
+    foreach (var (_, datap) in range(activeModules())) {
         if (cgoInRange(Δp, datap.data, datap.edata) || cgoInRange(Δp, datap.bss, datap.ebss)) {
             // We have no way to know the size of the object.
             // We have to assume that it might contain a pointer.
@@ -787,7 +787,7 @@ internal static bool cgoIsGoPointer(@unsafe.Pointer Δp) {
         return true;
     }
 
-    foreach (var (_, datap) in activeModules()) {
+    foreach (var (_, datap) in range(activeModules())) {
         if (cgoInRange(Δp, datap.data, datap.edata) || cgoInRange(Δp, datap.bss, datap.ebss)) {
             return true;
         }

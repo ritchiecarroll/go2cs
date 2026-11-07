@@ -75,13 +75,8 @@ partial struct Comment {
     public @string Text;    // comment text (excluding '\n' for //-style comments)
 }
 
-public static tokenꓸPos Pos(this ref Comment c) {
-    return c.Slash;
-}
-
-public static tokenꓸPos End(this ref Comment c) {
-    return (tokenꓸPos)((nint)c.Slash + len(c.Text));
-}
+public static tokenꓸPos Pos(this ref Comment c) { return c.Slash; }
+public static tokenꓸPos End(this ref Comment c) { return (tokenꓸPos)((nint)c.Slash + len(c.Text)); }
 
 // A CommentGroup represents a sequence of comments
 // with no other tokens and no empty lines between.
@@ -89,17 +84,10 @@ partial struct CommentGroup {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-public static tokenꓸPos Pos(this ref CommentGroup g) {
-    return g.List[0].Pos();
-}
+public static tokenꓸPos Pos(this ref CommentGroup g) { return g.List[0].Pos(); }
+public static tokenꓸPos End(this ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
 
-public static tokenꓸPos End(this ref CommentGroup g) {
-    return g.List[len(g.List) - 1].End();
-}
-
-internal static bool isWhitespace(byte ch) {
-    return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
-}
+internal static bool isWhitespace(byte ch) { return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'; }
 
 internal static @string stripTrailingWhitespace(@string s) {
     nint i = len(s);
@@ -123,12 +111,12 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         return ""u8;
     }
     var comments = new slice<@string>(len(g.List));
-    foreach (var (i, c) in g.List) {
+    foreach (var (i, c) in range(g.List)) {
         comments[i] = c.Text;
     }
 
     var lines = new slice<@string>(0, 10); // most comments are less than 10 lines
-    foreach (var (_, vᴛ1) in comments) {
+    foreach (var (_, vᴛ1) in range(comments)) {
         var c = vᴛ1;
 
         // Remove comment markers.
@@ -170,7 +158,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
     // Remove leading blank lines; convert runs of
     // interior blank lines to a single blank line.
     nint n = 0;
-    foreach (var (_, line) in lines) {
+    foreach (var (_, line) in range(lines)) {
         if (line != ""u8 || n > 0 && lines[n - 1] != "") {
             lines[n] = line;
             n++;
@@ -300,7 +288,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 
     nint n = 0;
     if (Ꮡf != nil) {
-        foreach (var (_, g) in f.List) {
+        foreach (var (_, g) in range(f.List)) {
             nint m = len(g.Names);
             if (m == 0) {
                 m = 1;
@@ -520,119 +508,48 @@ partial struct ChanType {
 }
 
 // Pos and End implementations for expression/type nodes.
-public static tokenꓸPos Pos(this ref BadExpr x) {
-    return x.From;
-}
-
-public static tokenꓸPos Pos(this ref Ident x) {
-    return x.NamePos;
-}
-
-public static tokenꓸPos Pos(this ref Ellipsis x) {
-    return x.ΔEllipsis;
-}
-
-public static tokenꓸPos Pos(this ref BasicLit x) {
-    return x.ValuePos;
-}
-
-public static tokenꓸPos Pos(this ref FuncLit x) {
-    return x.Type.Pos();
-}
-
+public static tokenꓸPos Pos(this ref BadExpr x) { return x.From; }
+public static tokenꓸPos Pos(this ref Ident x) { return x.NamePos; }
+public static tokenꓸPos Pos(this ref Ellipsis x) { return x.ΔEllipsis; }
+public static tokenꓸPos Pos(this ref BasicLit x) { return x.ValuePos; }
+public static tokenꓸPos Pos(this ref FuncLit x) { return x.Type.Pos(); }
 public static tokenꓸPos Pos(this ref CompositeLit x) {
     if (x.Type != nil) {
         return x.Type.Pos();
     }
     return x.Lbrace;
 }
-
-public static tokenꓸPos Pos(this ref ParenExpr x) {
-    return x.Lparen;
-}
-
-public static tokenꓸPos Pos(this ref SelectorExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref IndexExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref IndexListExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref SliceExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref TypeAssertExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref CallExpr x) {
-    return x.Fun.Pos();
-}
-
-public static tokenꓸPos Pos(this ref StarExpr x) {
-    return x.Star;
-}
-
-public static tokenꓸPos Pos(this ref UnaryExpr x) {
-    return x.OpPos;
-}
-
-public static tokenꓸPos Pos(this ref BinaryExpr x) {
-    return x.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref KeyValueExpr x) {
-    return x.Key.Pos();
-}
-
-public static tokenꓸPos Pos(this ref ArrayType x) {
-    return x.Lbrack;
-}
-
-public static tokenꓸPos Pos(this ref StructType x) {
-    return x.Struct;
-}
-
+public static tokenꓸPos Pos(this ref ParenExpr x) { return x.Lparen; }
+public static tokenꓸPos Pos(this ref SelectorExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref IndexExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref IndexListExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref SliceExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref TypeAssertExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref CallExpr x) { return x.Fun.Pos(); }
+public static tokenꓸPos Pos(this ref StarExpr x) { return x.Star; }
+public static tokenꓸPos Pos(this ref UnaryExpr x) { return x.OpPos; }
+public static tokenꓸPos Pos(this ref BinaryExpr x) { return x.X.Pos(); }
+public static tokenꓸPos Pos(this ref KeyValueExpr x) { return x.Key.Pos(); }
+public static tokenꓸPos Pos(this ref ArrayType x) { return x.Lbrack; }
+public static tokenꓸPos Pos(this ref StructType x) { return x.Struct; }
 public static tokenꓸPos Pos(this ref FuncType x) {
     if (x.Func.IsValid() || x.Params == nil) { // see issue 3870
         return x.Func;
     }
     return x.Params.Pos(); // interface method declarations have no "func" keyword
 }
+public static tokenꓸPos Pos(this ref InterfaceType x) { return x.Interface; }
+public static tokenꓸPos Pos(this ref MapType x) { return x.Map; }
+public static tokenꓸPos Pos(this ref ChanType x) { return x.Begin; }
 
-public static tokenꓸPos Pos(this ref InterfaceType x) {
-    return x.Interface;
-}
-
-public static tokenꓸPos Pos(this ref MapType x) {
-    return x.Map;
-}
-
-public static tokenꓸPos Pos(this ref ChanType x) {
-    return x.Begin;
-}
-
-public static tokenꓸPos End(this ref BadExpr x) {
-    return x.To;
-}
-
-public static tokenꓸPos End(this ref Ident x) {
-    return (tokenꓸPos)((nint)x.NamePos + len(x.Name));
-}
-
+public static tokenꓸPos End(this ref BadExpr x) { return x.To; }
+public static tokenꓸPos End(this ref Ident x) { return (tokenꓸPos)((nint)x.NamePos + len(x.Name)); }
 public static tokenꓸPos End(this ref Ellipsis x) {
     if (x.Elt != nil) {
         return x.Elt.End();
     }
     return x.ΔEllipsis + 3; // len("...")
 }
-
 public static tokenꓸPos End(this ref BasicLit x) {
     if (!x.ValueEnd.IsValid()) {
         // Not from parser; use a heuristic.
@@ -642,175 +559,70 @@ public static tokenꓸPos End(this ref BasicLit x) {
     }
     return x.ValueEnd;
 }
-
-public static tokenꓸPos End(this ref FuncLit x) {
-    return x.Body.End();
-}
-
-public static tokenꓸPos End(this ref CompositeLit x) {
-    return x.Rbrace + 1;
-}
-
-public static tokenꓸPos End(this ref ParenExpr x) {
-    return x.Rparen + 1;
-}
-
-public static tokenꓸPos End(this ref SelectorExpr x) {
-    return x.Sel.End();
-}
-
-public static tokenꓸPos End(this ref IndexExpr x) {
-    return x.Rbrack + 1;
-}
-
-public static tokenꓸPos End(this ref IndexListExpr x) {
-    return x.Rbrack + 1;
-}
-
-public static tokenꓸPos End(this ref SliceExpr x) {
-    return x.Rbrack + 1;
-}
-
-public static tokenꓸPos End(this ref TypeAssertExpr x) {
-    return x.Rparen + 1;
-}
-
-public static tokenꓸPos End(this ref CallExpr x) {
-    return x.Rparen + 1;
-}
-
-public static tokenꓸPos End(this ref StarExpr x) {
-    return x.X.End();
-}
-
-public static tokenꓸPos End(this ref UnaryExpr x) {
-    return x.X.End();
-}
-
-public static tokenꓸPos End(this ref BinaryExpr x) {
-    return x.Y.End();
-}
-
-public static tokenꓸPos End(this ref KeyValueExpr x) {
-    return x.Value.End();
-}
-
-public static tokenꓸPos End(this ref ArrayType x) {
-    return x.Elt.End();
-}
-
-public static tokenꓸPos End(this ref StructType x) {
-    return x.Fields.End();
-}
-
+public static tokenꓸPos End(this ref FuncLit x) { return x.Body.End(); }
+public static tokenꓸPos End(this ref CompositeLit x) { return x.Rbrace + 1; }
+public static tokenꓸPos End(this ref ParenExpr x) { return x.Rparen + 1; }
+public static tokenꓸPos End(this ref SelectorExpr x) { return x.Sel.End(); }
+public static tokenꓸPos End(this ref IndexExpr x) { return x.Rbrack + 1; }
+public static tokenꓸPos End(this ref IndexListExpr x) { return x.Rbrack + 1; }
+public static tokenꓸPos End(this ref SliceExpr x) { return x.Rbrack + 1; }
+public static tokenꓸPos End(this ref TypeAssertExpr x) { return x.Rparen + 1; }
+public static tokenꓸPos End(this ref CallExpr x) { return x.Rparen + 1; }
+public static tokenꓸPos End(this ref StarExpr x) { return x.X.End(); }
+public static tokenꓸPos End(this ref UnaryExpr x) { return x.X.End(); }
+public static tokenꓸPos End(this ref BinaryExpr x) { return x.Y.End(); }
+public static tokenꓸPos End(this ref KeyValueExpr x) { return x.Value.End(); }
+public static tokenꓸPos End(this ref ArrayType x) { return x.Elt.End(); }
+public static tokenꓸPos End(this ref StructType x) { return x.Fields.End(); }
 public static tokenꓸPos End(this ref FuncType x) {
     if (x.Results != nil) {
         return x.Results.End();
     }
     return x.Params.End();
 }
-
-public static tokenꓸPos End(this ref InterfaceType x) {
-    return x.Methods.End();
-}
-
-public static tokenꓸPos End(this ref MapType x) {
-    return x.Value.End();
-}
-
-public static tokenꓸPos End(this ref ChanType x) {
-    return x.Value.End();
-}
+public static tokenꓸPos End(this ref InterfaceType x) { return x.Methods.End(); }
+public static tokenꓸPos End(this ref MapType x) { return x.Value.End(); }
+public static tokenꓸPos End(this ref ChanType x) { return x.Value.End(); }
 
 // exprNode() ensures that only expression/type nodes can be
 // assigned to an Expr.
-internal static void exprNode(this ref BadExpr _) {
-}
+internal static void exprNode(this ref BadExpr _) { }
+internal static void exprNode(this ref Ident _) { }
+internal static void exprNode(this ref Ellipsis _) { }
+internal static void exprNode(this ref BasicLit _) { }
+internal static void exprNode(this ref FuncLit _) { }
+internal static void exprNode(this ref CompositeLit _) { }
+internal static void exprNode(this ref ParenExpr _) { }
+internal static void exprNode(this ref SelectorExpr _) { }
+internal static void exprNode(this ref IndexExpr _) { }
+internal static void exprNode(this ref IndexListExpr _) { }
+internal static void exprNode(this ref SliceExpr _) { }
+internal static void exprNode(this ref TypeAssertExpr _) { }
+internal static void exprNode(this ref CallExpr _) { }
+internal static void exprNode(this ref StarExpr _) { }
+internal static void exprNode(this ref UnaryExpr _) { }
+internal static void exprNode(this ref BinaryExpr _) { }
+internal static void exprNode(this ref KeyValueExpr _) { }
 
-internal static void exprNode(this ref Ident _) {
-}
-
-internal static void exprNode(this ref Ellipsis _) {
-}
-
-internal static void exprNode(this ref BasicLit _) {
-}
-
-internal static void exprNode(this ref FuncLit _) {
-}
-
-internal static void exprNode(this ref CompositeLit _) {
-}
-
-internal static void exprNode(this ref ParenExpr _) {
-}
-
-internal static void exprNode(this ref SelectorExpr _) {
-}
-
-internal static void exprNode(this ref IndexExpr _) {
-}
-
-internal static void exprNode(this ref IndexListExpr _) {
-}
-
-internal static void exprNode(this ref SliceExpr _) {
-}
-
-internal static void exprNode(this ref TypeAssertExpr _) {
-}
-
-internal static void exprNode(this ref CallExpr _) {
-}
-
-internal static void exprNode(this ref StarExpr _) {
-}
-
-internal static void exprNode(this ref UnaryExpr _) {
-}
-
-internal static void exprNode(this ref BinaryExpr _) {
-}
-
-internal static void exprNode(this ref KeyValueExpr _) {
-}
-
-internal static void exprNode(this ref ArrayType _) {
-}
-
-internal static void exprNode(this ref StructType _) {
-}
-
-internal static void exprNode(this ref FuncType _) {
-}
-
-internal static void exprNode(this ref InterfaceType _) {
-}
-
-internal static void exprNode(this ref MapType _) {
-}
-
-internal static void exprNode(this ref ChanType _) {
-}
+internal static void exprNode(this ref ArrayType _) { }
+internal static void exprNode(this ref StructType _) { }
+internal static void exprNode(this ref FuncType _) { }
+internal static void exprNode(this ref InterfaceType _) { }
+internal static void exprNode(this ref MapType _) { }
+internal static void exprNode(this ref ChanType _) { }
 
 // ----------------------------------------------------------------------------
 // Convenience functions for Idents
 
 // NewIdent creates a new [Ident] without position.
 // Useful for ASTs generated by code other than the Go parser.
-public static ж<Ident> NewIdent(@string name) {
-    return Ꮡ(new Ident(token.NoPos, name, nil));
-}
+public static ж<Ident> NewIdent(@string name) { return Ꮡ(new Ident(token.NoPos, name, nil)); }
 
 // IsExported reports whether name starts with an upper-case letter.
-public static bool IsExported(@string name) {
-    return token.IsExported(name);
-}
+public static bool IsExported(@string name) { return token.IsExported(name); }
 
 // IsExported reports whether id starts with an upper-case letter.
-public static bool IsExported(this ref Ident id) {
-    return token.IsExported(id.Name);
-}
+public static bool IsExported(this ref Ident id) { return token.IsExported(id.Name); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
@@ -992,147 +804,57 @@ partial struct RangeStmt {
 }
 
 // Pos and End implementations for statement nodes.
-public static tokenꓸPos Pos(this ref BadStmt s) {
-    return s.From;
-}
+public static tokenꓸPos Pos(this ref BadStmt s) { return s.From; }
+public static tokenꓸPos Pos(this ref DeclStmt s) { return s.Decl.Pos(); }
+public static tokenꓸPos Pos(this ref EmptyStmt s) { return s.Semicolon; }
+public static tokenꓸPos Pos(this ref LabeledStmt s) { return s.Label.Pos(); }
+public static tokenꓸPos Pos(this ref ExprStmt s) { return s.X.Pos(); }
+public static tokenꓸPos Pos(this ref SendStmt s) { return s.Chan.Pos(); }
+public static tokenꓸPos Pos(this ref IncDecStmt s) { return s.X.Pos(); }
+public static tokenꓸPos Pos(this ref AssignStmt s) { return s.Lhs[0].Pos(); }
+public static tokenꓸPos Pos(this ref GoStmt s) { return s.Go; }
+public static tokenꓸPos Pos(this ref DeferStmt s) { return s.Defer; }
+public static tokenꓸPos Pos(this ref ReturnStmt s) { return s.Return; }
+public static tokenꓸPos Pos(this ref BranchStmt s) { return s.TokPos; }
+public static tokenꓸPos Pos(this ref BlockStmt s) { return s.Lbrace; }
+public static tokenꓸPos Pos(this ref IfStmt s) { return s.If; }
+public static tokenꓸPos Pos(this ref CaseClause s) { return s.Case; }
+public static tokenꓸPos Pos(this ref SwitchStmt s) { return s.Switch; }
+public static tokenꓸPos Pos(this ref TypeSwitchStmt s) { return s.Switch; }
+public static tokenꓸPos Pos(this ref CommClause s) { return s.Case; }
+public static tokenꓸPos Pos(this ref SelectStmt s) { return s.Select; }
+public static tokenꓸPos Pos(this ref ForStmt s) { return s.For; }
+public static tokenꓸPos Pos(this ref RangeStmt s) { return s.For; }
 
-public static tokenꓸPos Pos(this ref DeclStmt s) {
-    return s.Decl.Pos();
-}
-
-public static tokenꓸPos Pos(this ref EmptyStmt s) {
-    return s.Semicolon;
-}
-
-public static tokenꓸPos Pos(this ref LabeledStmt s) {
-    return s.Label.Pos();
-}
-
-public static tokenꓸPos Pos(this ref ExprStmt s) {
-    return s.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref SendStmt s) {
-    return s.Chan.Pos();
-}
-
-public static tokenꓸPos Pos(this ref IncDecStmt s) {
-    return s.X.Pos();
-}
-
-public static tokenꓸPos Pos(this ref AssignStmt s) {
-    return s.Lhs[0].Pos();
-}
-
-public static tokenꓸPos Pos(this ref GoStmt s) {
-    return s.Go;
-}
-
-public static tokenꓸPos Pos(this ref DeferStmt s) {
-    return s.Defer;
-}
-
-public static tokenꓸPos Pos(this ref ReturnStmt s) {
-    return s.Return;
-}
-
-public static tokenꓸPos Pos(this ref BranchStmt s) {
-    return s.TokPos;
-}
-
-public static tokenꓸPos Pos(this ref BlockStmt s) {
-    return s.Lbrace;
-}
-
-public static tokenꓸPos Pos(this ref IfStmt s) {
-    return s.If;
-}
-
-public static tokenꓸPos Pos(this ref CaseClause s) {
-    return s.Case;
-}
-
-public static tokenꓸPos Pos(this ref SwitchStmt s) {
-    return s.Switch;
-}
-
-public static tokenꓸPos Pos(this ref TypeSwitchStmt s) {
-    return s.Switch;
-}
-
-public static tokenꓸPos Pos(this ref CommClause s) {
-    return s.Case;
-}
-
-public static tokenꓸPos Pos(this ref SelectStmt s) {
-    return s.Select;
-}
-
-public static tokenꓸPos Pos(this ref ForStmt s) {
-    return s.For;
-}
-
-public static tokenꓸPos Pos(this ref RangeStmt s) {
-    return s.For;
-}
-
-public static tokenꓸPos End(this ref BadStmt s) {
-    return s.To;
-}
-
-public static tokenꓸPos End(this ref DeclStmt s) {
-    return s.Decl.End();
-}
-
+public static tokenꓸPos End(this ref BadStmt s) { return s.To; }
+public static tokenꓸPos End(this ref DeclStmt s) { return s.Decl.End(); }
 public static tokenꓸPos End(this ref EmptyStmt s) {
     if (s.Implicit) {
         return s.Semicolon;
     }
     return s.Semicolon + 1; /* len(";") */
 }
-
-public static tokenꓸPos End(this ref LabeledStmt s) {
-    return s.Stmt.End();
-}
-
-public static tokenꓸPos End(this ref ExprStmt s) {
-    return s.X.End();
-}
-
-public static tokenꓸPos End(this ref SendStmt s) {
-    return s.Value.End();
-}
-
+public static tokenꓸPos End(this ref LabeledStmt s) { return s.Stmt.End(); }
+public static tokenꓸPos End(this ref ExprStmt s) { return s.X.End(); }
+public static tokenꓸPos End(this ref SendStmt s) { return s.Value.End(); }
 public static tokenꓸPos End(this ref IncDecStmt s) {
     return s.TokPos + 2; /* len("++") */
 }
-
-public static tokenꓸPos End(this ref AssignStmt s) {
-    return s.Rhs[len(s.Rhs) - 1].End();
-}
-
-public static tokenꓸPos End(this ref GoStmt s) {
-    return s.Call.End();
-}
-
-public static tokenꓸPos End(this ref DeferStmt s) {
-    return s.Call.End();
-}
-
+public static tokenꓸPos End(this ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
+public static tokenꓸPos End(this ref GoStmt s) { return s.Call.End(); }
+public static tokenꓸPos End(this ref DeferStmt s) { return s.Call.End(); }
 public static tokenꓸPos End(this ref ReturnStmt s) {
     nint n = len(s.Results); if (n > 0) {
         return s.Results[n - 1].End();
     }
     return s.Return + 6; // len("return")
 }
-
 public static tokenꓸPos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
     return (tokenꓸPos)((nint)s.TokPos + len(s.Tok.String()));
 }
-
 public static tokenꓸPos End(this ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
@@ -1142,112 +864,53 @@ public static tokenꓸPos End(this ref BlockStmt s) {
     }
     return s.Lbrace + 1;
 }
-
 public static tokenꓸPos End(this ref IfStmt s) {
     if (s.Else != nil) {
         return s.Else.End();
     }
     return s.Body.End();
 }
-
 public static tokenꓸPos End(this ref CaseClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
-
-public static tokenꓸPos End(this ref SwitchStmt s) {
-    return s.Body.End();
-}
-
-public static tokenꓸPos End(this ref TypeSwitchStmt s) {
-    return s.Body.End();
-}
-
+public static tokenꓸPos End(this ref SwitchStmt s) { return s.Body.End(); }
+public static tokenꓸPos End(this ref TypeSwitchStmt s) { return s.Body.End(); }
 public static tokenꓸPos End(this ref CommClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
-
-public static tokenꓸPos End(this ref SelectStmt s) {
-    return s.Body.End();
-}
-
-public static tokenꓸPos End(this ref ForStmt s) {
-    return s.Body.End();
-}
-
-public static tokenꓸPos End(this ref RangeStmt s) {
-    return s.Body.End();
-}
+public static tokenꓸPos End(this ref SelectStmt s) { return s.Body.End(); }
+public static tokenꓸPos End(this ref ForStmt s) { return s.Body.End(); }
+public static tokenꓸPos End(this ref RangeStmt s) { return s.Body.End(); }
 
 // stmtNode() ensures that only statement nodes can be
 // assigned to a Stmt.
-internal static void stmtNode(this ref BadStmt _) {
-}
-
-internal static void stmtNode(this ref DeclStmt _) {
-}
-
-internal static void stmtNode(this ref EmptyStmt _) {
-}
-
-internal static void stmtNode(this ref LabeledStmt _) {
-}
-
-internal static void stmtNode(this ref ExprStmt _) {
-}
-
-internal static void stmtNode(this ref SendStmt _) {
-}
-
-internal static void stmtNode(this ref IncDecStmt _) {
-}
-
-internal static void stmtNode(this ref AssignStmt _) {
-}
-
-internal static void stmtNode(this ref GoStmt _) {
-}
-
-internal static void stmtNode(this ref DeferStmt _) {
-}
-
-internal static void stmtNode(this ref ReturnStmt _) {
-}
-
-internal static void stmtNode(this ref BranchStmt _) {
-}
-
-internal static void stmtNode(this ref BlockStmt _) {
-}
-
-internal static void stmtNode(this ref IfStmt _) {
-}
-
-internal static void stmtNode(this ref CaseClause _) {
-}
-
-internal static void stmtNode(this ref SwitchStmt _) {
-}
-
-internal static void stmtNode(this ref TypeSwitchStmt _) {
-}
-
-internal static void stmtNode(this ref CommClause _) {
-}
-
-internal static void stmtNode(this ref SelectStmt _) {
-}
-
-internal static void stmtNode(this ref ForStmt _) {
-}
-
-internal static void stmtNode(this ref RangeStmt _) {
-}
+internal static void stmtNode(this ref BadStmt _) { }
+internal static void stmtNode(this ref DeclStmt _) { }
+internal static void stmtNode(this ref EmptyStmt _) { }
+internal static void stmtNode(this ref LabeledStmt _) { }
+internal static void stmtNode(this ref ExprStmt _) { }
+internal static void stmtNode(this ref SendStmt _) { }
+internal static void stmtNode(this ref IncDecStmt _) { }
+internal static void stmtNode(this ref AssignStmt _) { }
+internal static void stmtNode(this ref GoStmt _) { }
+internal static void stmtNode(this ref DeferStmt _) { }
+internal static void stmtNode(this ref ReturnStmt _) { }
+internal static void stmtNode(this ref BranchStmt _) { }
+internal static void stmtNode(this ref BlockStmt _) { }
+internal static void stmtNode(this ref IfStmt _) { }
+internal static void stmtNode(this ref CaseClause _) { }
+internal static void stmtNode(this ref SwitchStmt _) { }
+internal static void stmtNode(this ref TypeSwitchStmt _) { }
+internal static void stmtNode(this ref CommClause _) { }
+internal static void stmtNode(this ref SelectStmt _) { }
+internal static void stmtNode(this ref ForStmt _) { }
+internal static void stmtNode(this ref RangeStmt _) { }
 
 // ----------------------------------------------------------------------------
 // Declarations
@@ -1298,14 +961,8 @@ public static tokenꓸPos Pos(this ref ImportSpec s) {
     }
     return s.Path.Pos();
 }
-
-public static tokenꓸPos Pos(this ref ValueSpec s) {
-    return s.Names[0].Pos();
-}
-
-public static tokenꓸPos Pos(this ref TypeSpec s) {
-    return s.Name.Pos();
-}
+public static tokenꓸPos Pos(this ref ValueSpec s) { return s.Names[0].Pos(); }
+public static tokenꓸPos Pos(this ref TypeSpec s) { return s.Name.Pos(); }
 
 public static tokenꓸPos End(this ref ImportSpec s) {
     if (s.EndPos != 0) {
@@ -1323,21 +980,13 @@ public static tokenꓸPos End(this ref ValueSpec s) {
     }
     return s.Names[len(s.Names) - 1].End();
 }
-
-public static tokenꓸPos End(this ref TypeSpec s) {
-    return s.Type.End();
-}
+public static tokenꓸPos End(this ref TypeSpec s) { return s.Type.End(); }
 
 // specNode() ensures that only spec nodes can be
 // assigned to a Spec.
-internal static void specNode(this ref ImportSpec _) {
-}
-
-internal static void specNode(this ref ValueSpec _) {
-}
-
-internal static void specNode(this ref TypeSpec _) {
-}
+internal static void specNode(this ref ImportSpec _) { }
+internal static void specNode(this ref ValueSpec _) { }
+internal static void specNode(this ref TypeSpec _) { }
 
 // A declaration is represented by one of the following declaration nodes.
 // A BadDecl node is a placeholder for a declaration containing
@@ -1378,29 +1027,17 @@ partial struct FuncDecl {
 }
 
 // Pos and End implementations for declaration nodes.
-public static tokenꓸPos Pos(this ref BadDecl d) {
-    return d.From;
-}
+public static tokenꓸPos Pos(this ref BadDecl d) { return d.From; }
+public static tokenꓸPos Pos(this ref GenDecl d) { return d.TokPos; }
+public static tokenꓸPos Pos(this ref FuncDecl d) { return d.Type.Pos(); }
 
-public static tokenꓸPos Pos(this ref GenDecl d) {
-    return d.TokPos;
-}
-
-public static tokenꓸPos Pos(this ref FuncDecl d) {
-    return d.Type.Pos();
-}
-
-public static tokenꓸPos End(this ref BadDecl d) {
-    return d.To;
-}
-
+public static tokenꓸPos End(this ref BadDecl d) { return d.To; }
 public static tokenꓸPos End(this ref GenDecl d) {
     if (d.Rparen.IsValid()) {
         return d.Rparen + 1;
     }
     return d.Specs[0].End();
 }
-
 public static tokenꓸPos End(this ref FuncDecl d) {
     if (d.Body != nil) {
         return d.Body.End();
@@ -1410,14 +1047,9 @@ public static tokenꓸPos End(this ref FuncDecl d) {
 
 // declNode() ensures that only declaration nodes can be
 // assigned to a Decl.
-internal static void declNode(this ref BadDecl _) {
-}
-
-internal static void declNode(this ref GenDecl _) {
-}
-
-internal static void declNode(this ref FuncDecl _) {
-}
+internal static void declNode(this ref BadDecl _) { }
+internal static void declNode(this ref GenDecl _) { }
+internal static void declNode(this ref FuncDecl _) { }
 
 // ----------------------------------------------------------------------------
 // Files and packages
@@ -1460,9 +1092,7 @@ partial struct File {
 // It may be invalid, for example in an empty file.
 //
 // (Use FileStart for the start of the entire file. It is always valid.)
-public static tokenꓸPos Pos(this ref File f) {
-    return f.Package;
-}
+public static tokenꓸPos Pos(this ref File f) { return f.Package; }
 
 // End returns the end of the last declaration in the file.
 // It may be invalid, for example in an empty file.
@@ -1486,13 +1116,8 @@ partial struct Package {
     public map<@string, ж<File>> Files;     // Go source files by filename
 }
 
-public static tokenꓸPos Pos(this ref Package p) {
-    return token.NoPos;
-}
-
-public static tokenꓸPos End(this ref Package p) {
-    return token.NoPos;
-}
+public static tokenꓸPos Pos(this ref Package p) { return token.NoPos; }
+public static tokenꓸPos End(this ref Package p) { return token.NoPos; }
 
 // IsGenerated reports whether the file was generated by a program,
 // not handwritten, by detecting the special comment described
@@ -1518,8 +1143,8 @@ internal static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
 private static readonly @string prefixᶜᵇ = "// Code generated "u8;
 
 internal static (@string, bool) generator(ref File @file) {
-    foreach (var (_, group) in @file.Comments) {
-        foreach (var (_, comment) in group.List) {
+    foreach (var (_, group) in range(@file.Comments)) {
+        foreach (var (_, comment) in range(group.List)) {
             if (comment.Pos() > @file.Package) {
                 break; // after package declaration
             }

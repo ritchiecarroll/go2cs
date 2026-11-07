@@ -426,7 +426,7 @@ internal static void traceAdvance(bool stopTrace) {
     // TODO(mknyszek): Consider explicitly emitting ProcCreate and ProcDestroy
     // events to indicate whether a P exists, rather than just making its
     // existence implicit.
-    foreach (var (_, pp) in allp.slice(len(allp), cap(allp))) {
+    foreach (var (_, pp) in range(allp.slice(len(allp), cap(allp)))) {
         pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).readyNextGen(gen);
     }
 
@@ -541,7 +541,7 @@ internal static void traceAdvance(bool stopTrace) {
                 // trace.lock needed for traceBufFlush, but also to synchronize
                 // with traceThreadDestroy, which flushes both buffers unconditionally.
                 @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-                foreach (var (exp, buf) in (~mpΔ3).trace.buf[gen % 2].ΔRangeSnapshot()) {
+                foreach (var (exp, buf) in range((~mpΔ3).trace.buf[gen % 2].ΔRangeSnapshot())) {
                     if (buf != nil) {
                         traceBufFlush(buf, gen);
                         (~mpΔ3).trace.buf[gen % 2][exp] = default;
@@ -580,7 +580,7 @@ internal static void traceAdvance(bool stopTrace) {
 
     // Check to see if any Gs still haven't had events written out for them.
     var statusWriter = unsafeTraceWriter(gen, nil);
-    foreach (var (_, ug) in untracedGs) {
+    foreach (var (_, ug) in range(untracedGs)) {
         if (ug.gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(gen)) {
             // It was traced, we don't need to do anything.
             continue;
@@ -678,7 +678,7 @@ internal static void traceAdvance(bool stopTrace) {
         // bad state on dead Ps too. Prevent a STW and a concurrent GOMAXPROCS that
         // might mutate allp by making ourselves briefly non-preemptible.
         var mpΔ5 = acquirem();
-        foreach (var (_, pp) in allp.slice(0, cap(allp))) {
+        foreach (var (_, pp) in range(allp.slice(0, cap(allp)))) {
             pp.Value.trace.inSweep = false;
             pp.Value.trace.maySweep = false;
             pp.Value.trace.swept = 0;
@@ -717,13 +717,13 @@ internal static uintptr traceNextGen(uintptr gen) {
 // goroutine stop/block reasons in the string table for the provided
 // generation. Note: the provided generation must not have started yet.
 internal static void traceRegisterLabelsAndReasons(uintptr gen) {
-    foreach (var (i, label) in gcMarkWorkerModeStrings[..]) {
+    foreach (var (i, label) in range(gcMarkWorkerModeStrings[..])) {
         Δtrace.markWorkerLabels[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label);
     }
-    foreach (var (i, str) in traceBlockReasonStrings[..]) {
+    foreach (var (i, str) in range(traceBlockReasonStrings[..])) {
         Δtrace.goBlockReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
-    foreach (var (i, str) in traceGoStopReasonStrings[..]) {
+    foreach (var (i, str) in range(traceGoStopReasonStrings[..])) {
         Δtrace.goStopReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
 }

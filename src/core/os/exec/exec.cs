@@ -126,9 +126,7 @@ public static @string Error(this ref ΔError e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref ΔError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref ΔError e) { return e.Err; }
 
 // ErrWaitDelay is returned by [Cmd.Wait] if the process exits with a
 // successful status code but its output pipes are not closed before the
@@ -366,7 +364,6 @@ partial struct ctxResult {
 }
 
 internal static ж<godebug.Setting> execwait = godebug.New("#execwait");
-
 internal static ж<godebug.Setting> execerrdot = godebug.New("execerrdot");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -506,7 +503,7 @@ public static @string String(this ref Cmd c) {
     // report the exact executable path (plus args)
     var b = @new<strings.Builder>();
     b.WriteString(c.Path);
-    foreach (var (_, a) in c.Args[1..]) {
+    foreach (var (_, a) in range(c.Args[1..])) {
         b.WriteByte((byte)' ');
         b.WriteString(a);
     }
@@ -531,7 +528,7 @@ internal static slice<@string> argv(this ref Cmd c) {
     if (len(c.Args) > 0) {
         return c.Args;
     }
-    return slice<@string>([c.Path]);
+    return [c.Path];
 }
 
 internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
@@ -621,7 +618,7 @@ internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer 
 }
 
 internal static void closeDescriptors(slice<io.Closer> closers) {
-    foreach (var (_, fd) in closers) {
+    foreach (var (_, fd) in range(closers)) {
         fd.Close();
     }
 }
@@ -781,7 +778,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             c.goroutineErr = goroutineErr.AsRecvOnly();
             var statusc = new channel<Start_goroutineStatus>(1);
             statusc.ᐸꟷ(new Start_goroutineStatus(running: len(c.goroutine)));
-            foreach (var (_, fn) in c.goroutine) {
+            foreach (var (_, fn) in range(c.goroutine)) {
                 var goroutineErrʗ1 = goroutineErr;
                 var statuscʗ1 = statusc;
                 goǃ((Func<error> fnΔ1) => {
@@ -1429,7 +1426,7 @@ internal static slice<@string> addCriticalEnv(slice<@string> env) {
     if (runtime.GOOS != "windows"u8) {
         return env;
     }
-    foreach (var (_, kv) in env) {
+    foreach (var (_, kv) in range(env)) {
         var (k, _, ok) = strings.Cut(kv, "=");
         if (!ok) {
             continue;

@@ -20,9 +20,7 @@ partial struct tag<T> {
     internal T label;
 }
 
-internal static T show<T>(this tag<T> t) {
-    return t.label;
-}
+internal static T show<T>(this tag<T> t) { return t.label; }
 
 partial struct wrapped<T> {
     /*embed*/ internal tag<T> tag;
@@ -39,10 +37,10 @@ internal static void Main() {
             Value: "success",
             Error: default
         ),
-        FloatValues: slice<Result<float64>>([
+        FloatValues: [
             new(Value: 3.14D, Error: default),
             new(Value: 2.71D, Error: default)
-        ]),
+        ],
         Mappings: new map<@string, Result<bool>>{
             ["completed"] = new(Value: true, Error: default),
             ["verified"] = new(Value: false, Error: fmt.Errorf("verification pending"u8))
@@ -80,8 +78,6 @@ internal static (T, bool) take<T>(this ref Δpool<T> p) {
 partial struct keeper {
 }
 
-internal static @string pool(this keeper k) {
-    return "kept";
-}
+internal static @string pool(this keeper k) { return "kept"; }
 
 } // end main_package

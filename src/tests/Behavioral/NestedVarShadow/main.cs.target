@@ -23,9 +23,7 @@ partial struct tagErr {
     internal @string tag;
 }
 
-internal static @string Error(this ref tagErr e) {
-    return "tag:"u8 + e.tag;
-}
+internal static @string Error(this ref tagErr e) { return "tag:"u8 + e.tag; }
 
 internal static (nint, error) check(@string s) {
     if (s == ""u8) {
@@ -53,7 +51,7 @@ internal static @string g(@string s) {
 }
 
 internal static @string pkgShadow(@string s) {
-    @string doubled = strings.Join(slice<@string>([s, s]), "-");
+    @string doubled = strings.Join([s, s], "-");
     nint stringsΔ1 = len(doubled);
     return fmt.Sprint(stringsΔ1);
 }

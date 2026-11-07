@@ -37,13 +37,8 @@ partial struct ΔError {
     public error Err;
 }
 
-public static error Unwrap(this ref ΔError e) {
-    return e.Err;
-}
-
-public static @string Error(this ref ΔError e) {
-    return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err);
-}
+public static error Unwrap(this ref ΔError e) { return e.Err; }
+public static @string Error(this ref ΔError e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
@@ -220,7 +215,7 @@ public static @string PathEscape(@string s) {
 internal static @string escape(@string s, encoding mode) {
     nint spaceCount = 0;
     nint hexCount = 0;
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         if (shouldEscape(c, mode)) {
             if (c == ' ' && mode == encodeQueryComponent) {
                 spaceCount++;
@@ -255,7 +250,7 @@ internal static @string escape(@string s, encoding mode) {
     }
 
     nint j = 0;
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         switch (ᐧ) {
         case {} when c == (byte)' ' && mode == encodeQueryComponent: {
             t[j] = (byte)'+';
@@ -979,7 +974,7 @@ public static @string Get(this Values v, @string key) {
 // Set sets the key to value. It replaces any existing
 // values.
 public static void Set(this Values v, @string key, @string value) {
-    v[key] = slice<@string>([value]);
+    v[key] = [value];
 }
 
 // Add adds the value to key. It appends to any existing
@@ -1092,10 +1087,10 @@ public static @string Encode(this Values v) {
         i++;
     }
     slices.Sort<slice<@string>, @string>(keys);
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         var vs = v[k];
         @string keyEscaped = QueryEscape(k);
-        foreach (var (_, vΔ1) in vs) {
+        foreach (var (_, vΔ1) in range(vs)) {
             if (buf.Len() > 0) {
                 Ꮡbuf.WriteByte((byte)'&');
             }

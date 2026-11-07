@@ -30,9 +30,7 @@ public static error ErrClosed = fs.ErrClosed;         // "file already closed"
 public static error ErrNoDeadline = errNoDeadline();             // "file type does not support deadline"
 public static error ErrDeadlineExceeded = errDeadlineExceeded(); // "i/o timeout"
 
-internal static error errNoDeadline() {
-    return poll.ErrNoDeadline;
-}
+internal static error errNoDeadline() { return poll.ErrNoDeadline; }
 
 // errDeadlineExceeded returns the value for os.ErrDeadlineExceeded.
 // This error comes from the internal/poll package, which is also
@@ -41,9 +39,7 @@ internal static error errNoDeadline() {
 // as documented by net.Conn.SetDeadline, without requiring any extra
 // work in the net package and without requiring the internal/poll
 // package to import os (which it can't, because that would be circular).
-internal static error errDeadlineExceeded() {
-    return poll.ErrDeadlineExceeded;
-}
+internal static error errDeadlineExceeded() { return poll.ErrDeadlineExceeded; }
 
 partial interface timeout {
     bool Timeout();
@@ -55,13 +51,9 @@ partial struct SyscallError {
     public error Err;
 }
 
-public static @string Error(this ref SyscallError e) {
-    return e.Syscall + ": "u8 + e.Err.Error();
-}
+public static @string Error(this ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
 
-public static error Unwrap(this ref SyscallError e) {
-    return e.Err;
-}
+public static error Unwrap(this ref SyscallError e) { return e.Err; }
 
 // Timeout reports whether this error represents a timeout.
 public static bool Timeout(this ref SyscallError e) {

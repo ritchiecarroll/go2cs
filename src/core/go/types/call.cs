@@ -109,7 +109,7 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
             // that makes sense when reported in error messages from infer, below.
             var expr = ast.NewIdent(T.desc);
             expr.NamePos = x.Pos(); // correct position
-            args = slice<ж<operand>>([Ꮡ(new operand(mode: value, expr: new ast.IdentжExpr(expr), typ: new ΔSignatureжΔType(T.sig)))]);
+            args = [Ꮡ(new operand(mode: value, expr: new ast.IdentжExpr(expr), typ: new ΔSignatureжΔType(T.sig)))];
             reverse = true;
         }
 
@@ -390,7 +390,7 @@ internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck,
     } else if (n > 1) {
         // multiple (possibly invalid) values
         xlist = new slice<ж<operand>>(n);
-        foreach (var (i, e) in elist) {
+        foreach (var (i, e) in range(elist)) {
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.expr(nil, Ꮡx, e);
             xlist[i] = Ꮡx;
@@ -416,7 +416,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
         if (debug) {
             defer(() => {
                 // type arguments must only exist for partially instantiated functions
-                foreach (var (i, x) in resList) {
+                foreach (var (i, x) in range(resList)) {
                     if (i < len(targsList)) {
                         nint nΔ1 = len(targsList[i]); if (nΔ1 > 0) {
                             // x must be a partially instantiated function
@@ -444,7 +444,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                 var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
                 if (targs != nil) {
                     // x was not instantiated: collect the (partial) type arguments.
-                    targsList = slice<slice<ΔType>>([targs]);
+                    targsList = [targs];
                     // Update x.expr so that we can record the partially instantiated function.
                     x.expr = ix.orig;
                 } else {
@@ -452,7 +452,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                     // use the usual expression evaluators.
                     check.record(Ꮡx);
                 }
-                resList = slice<ж<operand>>([Ꮡx]);
+                resList = [Ꮡx];
             } else {
                 // x is not a function instantiation (it may still be a generic function).
                 Ꮡcheck.rawExpr(nil, Ꮡx, e, default, true);
@@ -460,19 +460,19 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                 var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
                     // x is a function call returning multiple values; it cannot be generic.
                     resList = new slice<ж<operand>>(t.Len());
-                    foreach (var (i, v) in t.vars) {
+                    foreach (var (i, v) in range(t.vars)) {
                         resList[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
                     }
                 } else {
                     // x is exactly one value (possibly invalid or uninstantiated generic function).
-                    resList = slice<ж<operand>>([Ꮡx]);
+                    resList = [Ꮡx];
                 }
             }
         } else if (n > 1) {
             // multiple values
             resList = new slice<ж<operand>>(n);
             targsList = new slice<slice<ΔType>>(n);
-            foreach (var (i, e) in elist) {
+            foreach (var (i, e) in range(elist)) {
                 ref var x = ref heap(new operand(), out var Ꮡx);
                 var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
                     // x is a generic function.
@@ -630,7 +630,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     // collect type parameters from generic function arguments
     slice<nint> genericArgs = default; // indices of generic function arguments
     if (enableReverseTypeInference) {
-        foreach (var (i, arg) in args) {
+        foreach (var (i, arg) in range(args)) {
             // generic arguments cannot have a defined (*Named) type - no need for underlying type below
             var (asig, _) = arg.typ._<ж<ΔSignature>>(ᐧ); if (asig != nil && asig.TypeParams().Len() > 0) {
                 // The argument type is a generic function signature. This type is
@@ -701,7 +701,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
         // compute argument signatures: instantiate if needed
         nint j = n;
         genericArgs = move2heap(genericArgsᴷ, genericArgs);
-        foreach (var (_, i) in genericArgs) {
+        foreach (var (_, i) in range(genericArgs)) {
             var arg = args[i];
             var asig = arg.typ._<ж<ΔSignature>>();
             nint k = j + asig.TypeParams().Len();
@@ -715,7 +715,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     // check arguments
     if (len(args) > 0) {
         @string context = Ꮡcheck.sprintf("argument to %s", call.Fun);
-        foreach (var (i, a) in args) {
+        foreach (var (i, a) in range(args)) {
             Ꮡcheck.assignment(a, sigParams.vars[i].typ, context);
         }
     }
@@ -782,7 +782,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                 } else {
                     funcMode = cgofunc;
                 }
-                foreach (var (_, prefix) in cgoPrefixes.ΔRangeSnapshot()) {
+                foreach (var (_, prefix) in range(cgoPrefixes.ΔRangeSnapshot())) {
                     // cgo objects are part of the current package (in file
                     // _cgo_gotypes.go). Use regular lookup.
                     exp = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(prefix + sel);
@@ -1098,7 +1098,7 @@ internal static bool useLHS(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExp
 
 internal static bool useN(this ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
     var ok = true;
-    foreach (var (_, e) in args) {
+    foreach (var (_, e) in range(args)) {
         if (!Ꮡcheck.use1(e, lhs)) {
             ok = false;
         }

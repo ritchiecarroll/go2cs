@@ -40,39 +40,27 @@ internal static void arm(@string @class, Func<@string> f) {
 
 internal static T one<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(1);
-}
+{ return ConvertToType<T>(1); }
 
 internal static T named<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(five);
-}
+{ return ConvertToType<T>(five); }
 
 internal static T constShift<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(1 << 3);
-}
+{ return ConvertToType<T>(1 << 3); }
 
 internal static T bit<T>(nuint n)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(1).Lsh(n);
-}
+{ return ConvertToType<T>(1).Lsh(n); }
 
 internal static T bitSigned<T>(nint n)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(1).Lsh((int64)(n));
-}
+{ return ConvertToType<T>(1).Lsh((int64)(n)); }
 
 internal static T mask<T>(nuint n)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(1).Lsh(n) - ConvertToType<T>(1);
-}
+{ return ConvertToType<T>(1).Lsh(n) - ConvertToType<T>(1); }
 
 internal static T varBit<T>(nuint n)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -98,22 +86,18 @@ internal static T assign<T>()
 
 internal static T pair<T>(T a, T b)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return a + b;
-}
+{ return a + b; }
 
 internal static T passConst<T>(T x)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return pair(x, ConvertToType<T>(2));
-}
+{ return pair(x, ConvertToType<T>(2)); }
 
 internal static T sum<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     T total = GoZero<T>();
 
-    foreach (var (_, v) in slice<T>([ConvertToType<T>(1), ConvertToType<T>(2), ConvertToType<T>(3)])) {
+    foreach (var (_, v) in range(slice<T>([ConvertToType<T>(1), ConvertToType<T>(2), ConvertToType<T>(3)]))) {
         total += v;
     }
 
@@ -122,15 +106,11 @@ internal static T sum<T>()
 
 internal static bool isZero<T>(T x)
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return AreEqual(x, ConvertToType<T>(0));
-}
+{ return AreEqual(x, ConvertToType<T>(0)); }
 
 internal static T convert<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return ConvertToType<T>(4);
-}
+{ return ConvertToType<T>(4); }
 
 internal static void Main() {
     arm("return constant", () => fmt.Sprint(one<uint8>(), " ", one<int64>()));

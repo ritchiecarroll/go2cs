@@ -11,38 +11,16 @@ partial class runtime_package {
 
 internal const bool valgrindenabled = false;
 
-internal static uintptr valgrindRegisterStack(@unsafe.Pointer start, @unsafe.Pointer end) {
-    return 0;
-}
-
-internal static void valgrindDeregisterStack(uintptr id) {
-}
-
-internal static void valgrindChangeStack(uintptr id, @unsafe.Pointer start, @unsafe.Pointer end) {
-}
-
-internal static void valgrindMalloc(@unsafe.Pointer addr, uintptr size) {
-}
-
-internal static void valgrindFree(@unsafe.Pointer addr) {
-}
-
-internal static void valgrindCreateMempool(@unsafe.Pointer addr) {
-}
-
-internal static void valgrindMempoolMalloc(@unsafe.Pointer pool, @unsafe.Pointer addr, uintptr size) {
-}
-
-internal static void valgrindMempoolFree(@unsafe.Pointer pool, @unsafe.Pointer addr) {
-}
-
-internal static void valgrindMakeMemUndefined(@unsafe.Pointer addr, uintptr size) {
-}
-
-internal static void valgrindMakeMemDefined(@unsafe.Pointer addr, uintptr size) {
-}
-
-internal static void valgrindMakeMemNoAccess(@unsafe.Pointer addr, uintptr size) {
-}
+internal static uintptr valgrindRegisterStack(@unsafe.Pointer start, @unsafe.Pointer end) { return 0; }
+internal static void valgrindDeregisterStack(uintptr id) { }
+internal static void valgrindChangeStack(uintptr id, @unsafe.Pointer start, @unsafe.Pointer end) { }
+internal static void valgrindMalloc(@unsafe.Pointer addr, uintptr size) { }
+internal static void valgrindFree(@unsafe.Pointer addr) { }
+internal static void valgrindCreateMempool(@unsafe.Pointer addr) { }
+internal static void valgrindMempoolMalloc(@unsafe.Pointer pool, @unsafe.Pointer addr, uintptr size) { }
+internal static void valgrindMempoolFree(@unsafe.Pointer pool, @unsafe.Pointer addr) { }
+internal static void valgrindMakeMemUndefined(@unsafe.Pointer addr, uintptr size) { }
+internal static void valgrindMakeMemDefined(@unsafe.Pointer addr, uintptr size) { }
+internal static void valgrindMakeMemNoAccess(@unsafe.Pointer addr, uintptr size) { }
 
 } // end runtime_package

@@ -59,7 +59,7 @@ These are the go1.26.10 deferred entries that cite this record as their retireme
 NewInt and mldsa rows is C2's sizing census (mailbox, COORD inbox, 2026-10-21T13:07:46Z, go1.26.10, three amd64
 targets); the karatsuba rows are R's (COORD inbox, 2026-10-21T07:59:24Z, windows) and G's (math/big's disclosure
 plan, docs/phase4/DATA-hop126-deferred-allocs.md:150 (`INCREMENT 1 (queued post-publish, COORD 2026-10-25)`)). The
-TestReplace attribution is read at the emission, src/core/strings/strings.cs:1185
+TestReplace attribution is read at the emission, src/core/strings/strings.cs:1179
 (`ref var b = ref heap(new Builder(), out var Ꮡb);`). -->
 
 ## The shapes and their counts
@@ -110,7 +110,7 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
   TestMulUnbalanced's excess. Done in 1.26.10.2 seat #10: a compare of two element address-ofs takes golib's
   `Ꮡelem`, which allocates nothing.
 
-<!-- src/core/math/big/natmul.cs:229-238 (`var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm()))`…`var ty =
+<!-- src/core/math/big/natmul.cs:228-237 (`var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm()))`…`var ty =
 Ꮡ(new ΔInt(abs: z.slice(n2, 2 * n2)));`), :324-331 (`var z0 = Ꮡ(new ΔInt(abs: z.slice(0, 2 * n2)));`…`var tx =
 Ꮡ(new ΔInt(abs: z.slice(0, n2)));`). src/core/math/big/nat.cs:238
 (`Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:116 (`if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {`).
@@ -143,7 +143,7 @@ Three facts about C# decide the design:
 
 An `array<T>` value is a wrapper over its own `T[]`, so every `[N]T` value Go keeps inline needs a separate array on
 the managed heap. That is [REC-A, the array-value storage record](phase4/DESIGN-array-value-storage.md), and this
-record does not replace it. <!-- src/core/golib/array.cs:152 (`public readonly struct array<T>`), :161
+record does not replace it. <!-- src/core/golib/array.cs:144 (`public readonly struct array<T>`), :153
 (`internal readonly T[] m_array;`). -->
 
 ## The options
@@ -354,5 +354,5 @@ GOROOT/src/math/big/escape_test.go:43-50 (TestSqrAlloc's three sizes), GOROOT/sr
 GOROOT/src/crypto/internal/fips140/sha256/sha256.go:149-153 (New), GOROOT/src/crypto/internal/fips140/mldsa/mldsa.go:451-540
 (the signing loop's constant-cap makes), GOROOT/src/log/slog/logger_test.go:358-367, GOROOT/src/strings/strings.go:1151
 (`var b Builder`). The sha256 attribution of four (one Digest box, its two field arrays, one make) is an inference
-from the shapes and the 800 B reading; the per-site split is owed. src/core/crypto/internal/fips140/sha256/sha256.cs:156-157
+from the shapes and the 800 B reading; the per-site split is owed. src/core/crypto/internal/fips140/sha256/sha256.cs:155-156
 (`public static ж<Digest> New() {`…`var d = @new<Digest>();`). -->

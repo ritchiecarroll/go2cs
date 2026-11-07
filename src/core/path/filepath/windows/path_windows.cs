@@ -25,7 +25,7 @@ internal static slice<@string> splitList(@string path) {
     // consider changing os/exec when changing this.
 
     if (path == ""u8) {
-        return slice<@string>([]);
+        return [];
     }
 
     // Split path, respecting but preserving quotes.
@@ -48,7 +48,7 @@ internal static slice<@string> splitList(@string path) {
     list = append(list, path.slice(start));
 
     // Remove quotes.
-    foreach (var (i, s) in list) {
+    foreach (var (i, s) in range(list)) {
         list[i] = strings.ReplaceAll(s, @"""", @""u8);
     }
 
@@ -72,7 +72,7 @@ internal static (@string, error) abs(@string path) {
 internal static @string join(slice<@string> elem) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     byte lastChar = default;
-    foreach (var (_, vᴛ1) in elem) {
+    foreach (var (_, vᴛ1) in range(elem)) {
         var e = vᴛ1;
 
         switch (ᐧ) {

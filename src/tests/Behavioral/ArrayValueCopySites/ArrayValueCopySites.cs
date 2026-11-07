@@ -11,7 +11,6 @@ partial struct holder {
 }
 
 internal static ж<array<nint>> leaked;
-
 internal static ж<Row> leakedRow;
 
 internal static array<nint> leakLocal() {
@@ -59,7 +58,7 @@ internal static void mut(this Row r) {
 internal static void rangeValues() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
 
-    foreach (var (_, vᴛ1) in m.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(m.ΔRangeSnapshot())) {
         var row = vᴛ1.Clone();
 
         row[0] = 99;
@@ -69,7 +68,7 @@ internal static void rangeValues() {
 
     var s = GoReflect.WithElemDims(new array<nint>[]{new nint[]{7, 8, 9}.array()}.slice(), 3);
 
-    foreach (var (_, vᴛ2) in s) {
+    foreach (var (_, vᴛ2) in range(s)) {
         var row = vᴛ2.Clone();
 
         row[1] = 99;
@@ -79,7 +78,7 @@ internal static void rangeValues() {
 
     var deep = new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array(), new array<nint>[]{new nint[]{7, 8, 9}.array(), new nint[]{10, 11, 12}.array()}.array()}.array();
 
-    foreach (var (_, vᴛ3) in deep.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ3) in range(deep.ΔRangeSnapshot())) {
         var plane = vᴛ3.Clone();
 
         plane[0][0] = 99;
@@ -91,7 +90,7 @@ internal static void rangeValues() {
 internal static void rangeNamed() {
     var rows = GoReflect.WithElemDims(new Row[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.slice(), 3);
 
-    foreach (var (_, vᴛ1) in rows) {
+    foreach (var (_, vᴛ1) in range(rows)) {
         var r = vᴛ1.Clone();
 
         r[0] = 99;
@@ -103,7 +102,7 @@ internal static void rangeNamed() {
 internal static void rangeHeapBoxed() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
 
-    foreach (var (_, vᴛ1) in m.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(m.ΔRangeSnapshot())) {
         ref var row = ref heap(new array<nint>(3), out var Ꮡrow);
         row = vᴛ1.Clone();
 
@@ -119,7 +118,7 @@ internal static void rangeAssignExisting() {
     array<nint> row = new(3);
     nint i = default;
 
-    foreach (var (iᴛ1, vᴛ1) in m.ΔRangeSnapshot()) {
+    foreach (var (iᴛ1, vᴛ1) in range(m.ΔRangeSnapshot())) {
         i = iᴛ1;
         row = vᴛ1.Clone();
 

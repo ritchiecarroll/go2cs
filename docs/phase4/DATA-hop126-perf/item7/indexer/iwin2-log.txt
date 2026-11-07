@@ -1,0 +1,52 @@
+start 2026-11-06 20:16:06
+ibuild rc=0
+rbuild rc=0
+P/PerfTlsHandshake/jit assemblies=163 debug=0 r2r=0
+D/PerfTlsHandshake/jit assemblies=163 debug=0 r2r=0
+P/PerfSieve/jit assemblies=67 debug=0 r2r=0
+D/PerfSieve/jit assemblies=67 debug=0 r2r=0
+P/PerfMatMul/jit assemblies=67 debug=0 r2r=0
+D/PerfMatMul/jit assemblies=67 debug=0 r2r=0
+P/PerfStartup/r2r assemblies=66 debug=0 r2r=65
+D/PerfStartup/r2r assemblies=66 debug=0 r2r=65
+P/PerfStartup/r2r-tmpl assemblies=78 debug=0 r2r=65 files=179 selfcontained=yes
+D/PerfStartup/r2r-tmpl assemblies=78 debug=0 r2r=65 files=179 selfcontained=yes
+ASMGATE PASS
+JIT/R2R verified against manifest-P/D
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+== iwin2-warm-ctl.tsv 20:16:12
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin2-ctl-start.tsv 20:16:16
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin2-arms-1.tsv 20:16:19
+PerfTlsHandshake: verified 4 arms, output equal
+PerfTlsHandshake: 11 rounds done
+== iwin2-ctl-mid.tsv 20:18:49
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== iwin2-arms-2.tsv 20:18:53
+PerfSieve: verified 4 arms, output equal
+PerfSieve: 11 rounds done
+PerfMatMul: verified 4 arms, output equal
+PerfMatMul: 11 rounds done
+PerfStartup: verified 8 arms, output equal
+PerfStartup: 11 rounds done
+== iwin2-ctl-end.tsv 20:20:48
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+CPU=AMD Ryzen 5 PRO 6650U with Radeon Graphics     
+build/toolchain processes: 0
+admitted pwsh hosts: 0
+end 2026-11-06 20:20:53 rc=0

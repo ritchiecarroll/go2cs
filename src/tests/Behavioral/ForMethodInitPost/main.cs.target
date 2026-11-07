@@ -13,13 +13,8 @@ internal static void start(this ref iter it, nint n) {
     it.n = n;
 }
 
-internal static bool valid(this ref iter it) {
-    return it.i < it.n;
-}
-
-internal static void next(this ref iter it) {
-    it.i++;
-}
+internal static bool valid(this ref iter it) { return it.i < it.n; }
+internal static void next(this ref iter it) { it.i++; }
 
 internal static void Main() {
     iter u = default;

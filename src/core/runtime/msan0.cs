@@ -16,24 +16,10 @@ internal static ref readonly @string msanˢ => ref msanˢᵇ;
 private static readonly @string msanˢᵇ = "msan"u8;
 
 // Because msanenabled is false, none of these functions should be called.
-internal static void msanread(@unsafe.Pointer addr, uintptr sz) {
-    @throw(msanˢ);
-}
-
-internal static void msanwrite(@unsafe.Pointer addr, uintptr sz) {
-    @throw(msanˢ);
-}
-
-internal static void msanmalloc(@unsafe.Pointer addr, uintptr sz) {
-    @throw(msanˢ);
-}
-
-internal static void msanfree(@unsafe.Pointer addr, uintptr sz) {
-    @throw(msanˢ);
-}
-
-internal static void msanmove(@unsafe.Pointer dst, @unsafe.Pointer src, uintptr sz) {
-    @throw(msanˢ);
-}
+internal static void msanread(@unsafe.Pointer addr, uintptr sz) { @throw(msanˢ); }
+internal static void msanwrite(@unsafe.Pointer addr, uintptr sz) { @throw(msanˢ); }
+internal static void msanmalloc(@unsafe.Pointer addr, uintptr sz) { @throw(msanˢ); }
+internal static void msanfree(@unsafe.Pointer addr, uintptr sz) { @throw(msanˢ); }
+internal static void msanmove(@unsafe.Pointer dst, @unsafe.Pointer src, uintptr sz) { @throw(msanˢ); }
 
 } // end runtime_package

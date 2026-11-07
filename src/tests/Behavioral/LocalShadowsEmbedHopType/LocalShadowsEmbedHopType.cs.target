@@ -9,7 +9,7 @@ partial struct inner {
 }
 
 internal static void Add(this ref inner g, slice<byte> p) {
-    foreach (var (_, b) in p) {
+    foreach (var (_, b) in range(p)) {
         g.total += (nint)b;
     }
 }
@@ -56,7 +56,7 @@ public static bool Verify(this ref DeepHash d, slice<byte> expected) {
     {
         ref var deep = ref heap(new array<byte>(4), out var Ꮡdeep);
         d.deep.acc.inner.Store(Ꮡdeep);
-        foreach (var (i, b) in deep.ΔRangeSnapshot()) {
+        foreach (var (i, b) in range(deep.ΔRangeSnapshot())) {
             if (i < len(expected) && b == expected[i]) {
                 acc++;
             }
@@ -83,7 +83,7 @@ internal static void Main() {
     d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
     fmt.Println(@out);
     fmt.Println(d.Verify(@out[..]));
-    fmt.Println(d.Verify(slice<byte>([0, 0])));
+    fmt.Println(d.Verify([0, 0]));
     fmt.Println(resetVia(d));
 }
 

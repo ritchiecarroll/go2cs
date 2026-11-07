@@ -33,7 +33,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         }
         macos.CFArrayAppendValue(certs, leaf);
         if (opts.Intermediates != nil) {
-            foreach (var (_, lc) in opts.Intermediates.lazyCerts) {
+            foreach (var (_, lc) in range(opts.Intermediates.lazyCerts)) {
                 var (cΔ1, errΔ1) = lc.getCert();
                 if (errΔ1 != nil) {
                     (chains, err) = (default, errΔ1); goto ᒐdone;
@@ -89,7 +89,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             }}
         }
 
-        var chain = slice<slice<ж<Certificate>>>([slice<ж<Certificate>>([])]);
+        var chain = slice<slice<ж<Certificate>>>([[]]);
         (var chainRef, err) = macos.SecTrustCopyCertificateChain(trustObj);
         if (err != nil) {
             (chains, err) = (default, err); goto ᒐdone;
@@ -122,11 +122,11 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         var keyUsages = opts.KeyUsages;
         if (builtin.len(keyUsages) == 0) {
-            keyUsages = slice<ExtKeyUsage>([ExtKeyUsageServerAuth]);
+            keyUsages = [ExtKeyUsageServerAuth];
         }
 
         // If any key usage is acceptable then we're done.
-        foreach (var (_, usage) in keyUsages) {
+        foreach (var (_, usage) in range(keyUsages)) {
             if (usage == ExtKeyUsageAny) {
                 (chains, err) = (chain, default); goto ᒐdone;
             }

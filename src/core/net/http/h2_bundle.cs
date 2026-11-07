@@ -530,7 +530,7 @@ internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientCo
     }
     for (;;) {
         p.mu.Lock();
-        foreach (var (_, ccΔ1) in p.conns[addr]) {
+        foreach (var (_, ccΔ1) in range(p.conns[addr])) {
             if (ccΔ1.ReserveNewRequest()) {
                 // When a connection is presented to us by the net/http package,
                 // the GetConn hook has already been called.
@@ -621,7 +621,7 @@ internal static partial (bool used, error err) addConnIfNeeded(this ж<http2clie
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
-    foreach (var (_, cc) in p.conns[key]) {
+    foreach (var (_, cc) in range(p.conns[key])) {
         if (cc.CanTakeNewRequest()) {
             p.mu.Unlock();
             return (false, default);
@@ -674,7 +674,7 @@ internal static void run(this ref http2addConnCall c, ж<http2Transport> t, @str
 
 // p.mu must be held
 internal static void addConnLocked(this ref http2clientConnPool p, @string key, ж<http2ClientConn> cc) {
-    foreach (var (_, v) in p.conns[key]) {
+    foreach (var (_, v) in range(p.conns[key])) {
         if (v == cc) {
             return;
         }
@@ -697,7 +697,7 @@ internal static void MarkDead(this ж<http2clientConnPool> Ꮡp, ж<http2ClientC
 
         p.mu.Lock();
         ᒐd1 = true;
-        foreach (var (_, key) in p.keys[cc]) {
+        foreach (var (_, key) in range(p.keys[cc])) {
             var (vv, ok) = p.conns[key, ꟷ];
             if (!ok) {
                 continue;
@@ -730,7 +730,7 @@ internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) {
         // somebody else can concurrently call CloseIdleConns and
         // break some caller's RoundTrip.
         foreach (var (_, vv) in p.conns) {
-            foreach (var (_, cc) in vv) {
+            foreach (var (_, cc) in range(vv)) {
                 cc.closeIfIdle();
             }
         }
@@ -741,7 +741,7 @@ internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) {
 
 internal static slice<ж<http2ClientConn>> http2filterOutClientConn(slice<ж<http2ClientConn>> @in, ж<http2ClientConn> exclude) {
     var @out = @in[..0];
-    foreach (var (_, v) in @in) {
+    foreach (var (_, v) in range(@in)) {
         if (v != exclude) {
             @out = append(@out, v);
         }
@@ -1205,9 +1205,7 @@ partial struct http2goAwayFlowError {
 internal static ref readonly @string connectionExceededFlowˢ => ref connectionExceededFlowˢᵇ;
 private static readonly @string connectionExceededFlowˢᵇ = "connection exceeded flow control window size"u8;
 
-internal static @string Error(this http2goAwayFlowError _) {
-    return connectionExceededFlowˢ;
-}
+internal static @string Error(this http2goAwayFlowError _) { return connectionExceededFlowˢ; }
 
 // connError represents an HTTP/2 ConnectionError error code, along
 // with a string (for debugging) explaining why.
@@ -1557,9 +1555,7 @@ partial struct http2FrameHeader {
 
 // Header returns h. It exists so FrameHeaders can be embedded in other
 // specific frame types and implement the Frame interface.
-internal static http2FrameHeader Header(this http2FrameHeader h) {
-    return h;
-}
+internal static http2FrameHeader Header(this http2FrameHeader h) { return h; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string frameHeaderˢ => ref frameHeaderˢᵇ;
@@ -1612,9 +1608,7 @@ internal static void checkValid(this ref http2FrameHeader h) {
     }
 }
 
-internal static void invalidate(this ref http2FrameHeader h) {
-    h.valid = false;
-}
+internal static void invalidate(this ref http2FrameHeader h) { h.valid = false; }
 
 // frame header bytes.
 // Used only by ReadFrameHeader.
@@ -1799,17 +1793,11 @@ internal static void logWrite(this ж<http2Framer> Ꮡf) {
     f.debugWriteLoggerf("http2: Framer %p: wrote %v", Ꮡf.OrTypedNil(), http2summarizeFrame(fr));
 }
 
-internal static void writeByte(this ref http2Framer f, byte v) {
-    f.wbuf = append(f.wbuf, v);
-}
+internal static void writeByte(this ref http2Framer f, byte v) { f.wbuf = append(f.wbuf, v); }
 
-internal static void writeBytes(this ref http2Framer f, slice<byte> v) {
-    f.wbuf = appendꓸꓸꓸ(f.wbuf, v);
-}
+internal static void writeBytes(this ref http2Framer f, slice<byte> v) { f.wbuf = appendꓸꓸꓸ(f.wbuf, v); }
 
-internal static void writeUint16(this ref http2Framer f, uint16 v) {
-    f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v);
-}
+internal static void writeUint16(this ref http2Framer f, uint16 v) { f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v); }
 
 internal static void writeUint32(this ref http2Framer f, uint32 v) {
     f.wbuf = append(f.wbuf, (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
@@ -2142,7 +2130,7 @@ internal static error startWriteDataPadded(this ref http2Framer f, uint32 stream
             return http2errPadLength;
         }
         if (!f.AllowIllegalWrites) {
-            foreach (var (_, b) in pad) {
+            foreach (var (_, b) in range(pad)) {
                 if (b != 0) {
                     // "Padding octets MUST be set to zero when sending."
                     return http2errPadBytes;
@@ -2248,9 +2236,7 @@ internal static http2Setting Setting(this ref http2SettingsFrame f, nint i) {
     );
 }
 
-internal static nint NumSettings(this ref http2SettingsFrame f) {
-    return builtin.len(f.p) / 6;
-}
+internal static nint NumSettings(this ref http2SettingsFrame f) { return builtin.len(f.p) / 6; }
 
 // HasDuplicates reports whether f contains any duplicate setting IDs.
 internal static bool HasDuplicates(this ref http2SettingsFrame f) {
@@ -2305,7 +2291,7 @@ internal static error WriteSettings(this ж<http2Framer> Ꮡf, params ꓸꓸꓸh
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.startWrite(http2FrameSettings, 0, 0);
-    foreach (var (_, s) in settings) {
+    foreach (var (_, s) in range(settings)) {
         f.writeUint16((uint16)s.ID);
         f.writeUint32(s.Val);
     }
@@ -2332,9 +2318,7 @@ partial struct http2PingFrame {
     public array<byte> Data = new(8);
 }
 
-internal static bool IsAck(this ref http2PingFrame f) {
-    return f.Flags.Has(http2FlagPingAck);
-}
+internal static bool IsAck(this ref http2PingFrame f) { return f.Flags.Has(http2FlagPingAck); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string framePingLengthˢ => ref framePingLengthˢᵇ;
@@ -3024,7 +3008,7 @@ partial struct http2MetaHeadersFrame {
 // PseudoValue returns the given pseudo header field's value.
 // The provided pseudo field should not contain the leading colon.
 internal static @string PseudoValue(this ref http2MetaHeadersFrame mh, @string pseudo) {
-    foreach (var (_, hf) in mh.Fields) {
+    foreach (var (_, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return ""u8;
         }
@@ -3038,7 +3022,7 @@ internal static @string PseudoValue(this ref http2MetaHeadersFrame mh, @string p
 // RegularFields returns the regular (non-pseudo) header fields of mh.
 // The caller does not own the returned slice.
 internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeadersFrame mh) {
-    foreach (var (i, hf) in mh.Fields) {
+    foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(i);
         }
@@ -3049,7 +3033,7 @@ internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeaders
 // PseudoFields returns the pseudo header fields of mh.
 // The caller does not own the returned slice.
 internal static slice<hpack.HeaderField> PseudoFields(this ref http2MetaHeadersFrame mh) {
-    foreach (var (i, hf) in mh.Fields) {
+    foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(0, i);
         }
@@ -3061,7 +3045,7 @@ internal static error checkPseudos(this ref http2MetaHeadersFrame mh) {
     bool isRequest = default;
     bool isResponse = default;
     var pf = mh.PseudoFields();
-    foreach (var (i, hf) in pf) {
+    foreach (var (i, hf) in range(pf)) {
         var exprᴛ1 = hf.Name;
         switch (ᐧ) {
         case {} when exprᴛ1 == ":method"u8 || exprᴛ1 == ":path"u8 || exprᴛ1 == ":scheme"u8 || exprᴛ1 == ":authority"u8 || exprᴛ1 == ":protocol"u8: {
@@ -3078,7 +3062,7 @@ internal static error checkPseudos(this ref http2MetaHeadersFrame mh) {
         // Check for duplicates.
         // This would be a bad algorithm, but N is 5.
         // And this doesn't allocate.
-        foreach (var (_, hf2) in pf.slice(0, i)) {
+        foreach (var (_, hf2) in range(pf.slice(0, i))) {
             if (hf.Name == hf2.Name) {
                 return ((http2duplicatePseudoHeaderError)hf.Name);
             }
@@ -3851,17 +3835,11 @@ partial struct http2httpError {
     internal bool timeout;
 }
 
-internal static @string Error(this ref http2httpError e) {
-    return e.msg;
-}
+internal static @string Error(this ref http2httpError e) { return e.msg; }
 
-internal static bool Timeout(this ref http2httpError e) {
-    return e.timeout;
-}
+internal static bool Timeout(this ref http2httpError e) { return e.timeout; }
 
-internal static bool Temporary(this ref http2httpError e) {
-    return true;
-}
+internal static bool Temporary(this ref http2httpError e) { return true; }
 
 internal static error http2errTimeout = new http2httpErrorжerror(Ꮡ(new http2httpError(msg: "http2: timeout awaiting response headers", timeout: true)));
 
@@ -3876,17 +3854,11 @@ partial struct http2sorter {
     internal slice<@string> v; // owned by sorter
 }
 
-internal static nint Len(this ref http2sorter s) {
-    return builtin.len(s.v);
-}
+internal static nint Len(this ref http2sorter s) { return builtin.len(s.v); }
 
-internal static void Swap(this ref http2sorter s, nint i, nint j) {
-    (s.v[i], s.v[j]) = (s.v[j], s.v[i]);
-}
+internal static void Swap(this ref http2sorter s, nint i, nint j) { (s.v[i], s.v[j]) = (s.v[j], s.v[i]); }
 
-internal static bool Less(this ref http2sorter s, nint i, nint j) {
-    return s.v[i] < s.v[j];
-}
+internal static bool Less(this ref http2sorter s, nint i, nint j) { return s.v[i] < s.v[j]; }
 
 // Keys returns the sorted keys of h.
 //
@@ -4054,22 +4026,16 @@ internal static (nint n, error err) Write(this ж<http2pipe> Ꮡp, slice<byte> d
 // read.
 //
 // The error must be non-nil.
-internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) {
-    Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default);
-}
+internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default); }
 
 // BreakWithError causes the next Read (waking up a current blocked
 // Read if needed) to return the provided err immediately, without
 // waiting for unread data.
-internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) {
-    Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default);
-}
+internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default); }
 
 // closeWithErrorAndCode is like CloseWithError but also sets some code to run
 // in the caller's goroutine before returning the error.
-internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) {
-    Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn);
-}
+internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn); }
 
 internal static void closeWithError(this ж<http2pipe> Ꮡp, ж<error> Ꮡdst, error err, Action fn) {
     GoFrame ᒐ = default;
@@ -4379,7 +4345,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
         // error if it is missing ECDHE_RSA_WITH_AES_128_GCM_SHA256 or
         // ECDHE_ECDSA_WITH_AES_128_GCM_SHA256.
         var haveRequired = false;
-        foreach (var (_, cs) in s.TLSConfig.CipherSuites) {
+        foreach (var (_, cs) in range(s.TLSConfig.CipherSuites)) {
             switch (cs) {
             case tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 or tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256: {
                 // Alternative MTI cipher to not discourage ECDSA-only servers.
@@ -4825,17 +4791,11 @@ partial struct http2stream {
     internal ΔHeader reqTrailer; // handler's Request.Trailer
 }
 
-internal static ж<http2Framer> Framer(this ref http2serverConn sc) {
-    return sc.framer;
-}
+internal static ж<http2Framer> Framer(this ref http2serverConn sc) { return sc.framer; }
 
-internal static error CloseConn(this ref http2serverConn sc) {
-    return sc.conn.Close();
-}
+internal static error CloseConn(this ref http2serverConn sc) { return sc.conn.Close(); }
 
-internal static error Flush(this ref http2serverConn sc) {
-    return sc.bw.Flush();
-}
+internal static error Flush(this ref http2serverConn sc) { return sc.bw.Flush(); }
 
 internal static (ж<hpack.Encoder>, ж<bytes.Buffer>) HeaderEncoder(this ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5321,21 +5281,13 @@ internal static ж<http2serverMessage> http2shutdownTimerMsg = @new<http2serverM
 internal static ж<http2serverMessage> http2gracefulShutdownMsg = @new<http2serverMessage>();
 internal static ж<http2serverMessage> http2handlerDoneMsg = @new<http2serverMessage>();
 
-internal static void onSettingsTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil());
-}
+internal static void onSettingsTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil()); }
 
-internal static void onIdleTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2idleTimerMsg.OrTypedNil());
-}
+internal static void onIdleTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2idleTimerMsg.OrTypedNil()); }
 
-internal static void onReadIdleTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil());
-}
+internal static void onReadIdleTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil()); }
 
-internal static void onShutdownTimer(this ref http2serverConn sc) {
-    sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil());
-}
+internal static void onShutdownTimer(this ref http2serverConn sc) { sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil()); }
 
 internal static void sendServeMsg(this ref http2serverConn sc, any msg) {
     sc.serveG.checkNotOn(); // NOT
@@ -6600,7 +6552,7 @@ internal static error processTrailerHeaders(this ж<http2stream> Ꮡst, ж<http2
         return sc.countError(trailersPseudoˢ, http2streamError(st.id, http2ErrCodeProtocol));
     }
     if (st.trailer != nil) {
-        foreach (var (_, hf) in f.RegularFields()) {
+        foreach (var (_, hf) in range(f.RegularFields())) {
             @string key = sc.canonicalHeader(hf.Name);
             if (!httpguts.ValidTrailerHeader(key)) {
                 // TODO: send more details to the peer somehow. But http2 has
@@ -6739,7 +6691,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
 
     var header = new ΔHeader(0);
     rp.Header = header;
-    foreach (var (_, hf) in f.RegularFields()) {
+    foreach (var (_, hf) in range(f.RegularFields())) {
         header.Add(sc.canonicalHeader(hf.Name), hf.Value);
     }
     if (rp.Authority == ""u8) {
@@ -7163,12 +7115,10 @@ internal static (nint n, error err) Write(this http2chunkWriter cw, slice<byte> 
     return (n, err);
 }
 
-internal static bool hasTrailers(this ref http2responseWriterState rws) {
-    return builtin.len(rws.trailers) > 0;
-}
+internal static bool hasTrailers(this ref http2responseWriterState rws) { return builtin.len(rws.trailers) > 0; }
 
 internal static bool hasNonemptyTrailers(this ref http2responseWriterState rws) {
-    foreach (var (_, trailer) in rws.trailers) {
+    foreach (var (_, trailer) in range(rws.trailers)) {
         var (_, ok) = rws.handlerHeader[trailer, ꟷ]; if (ok) {
             return true;
         }
@@ -7248,7 +7198,7 @@ internal static (nint n, error err) writeChunk(this ж<http2responseWriterState>
             date = time.Now().UTC().Format(TimeFormat);
         }
 
-        foreach (var (_, v) in rws.snapHeader[trailerˢ]) {
+        foreach (var (_, v) in range(rws.snapHeader[trailerˢ])) {
             http2foreachHeaderElement(v, Ꮡrws.declareTrailer);
         }
 
@@ -7859,7 +7809,7 @@ internal static void http2foreachHeaderElement(@string v, Action<@string> fn) {
         fn(v);
         return;
     }
-    foreach (var (_, vᴛ1) in strings.Split(v, ",")) {
+    foreach (var (_, vᴛ1) in range(strings.Split(v, ","))) {
         var f = vᴛ1;
 
         f = textproto.TrimString(f); if (f != ""u8) {
@@ -7869,13 +7819,13 @@ internal static void http2foreachHeaderElement(@string v, Action<@string> fn) {
 }
 
 // From http://httpwg.org/specs/rfc7540.html#rfc.section.8.1.2.2
-internal static slice<@string> http2connHeaders = slice<@string>([
+internal static slice<@string> http2connHeaders = [
     "Connection",
     "Keep-Alive",
     "Proxy-Connection",
     "Transfer-Encoding",
     "Upgrade"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requestHeaderTeMayOnlyBeˢ => ref requestHeaderTeMayOnlyBeˢᵇ;
@@ -7885,7 +7835,7 @@ private static readonly @string requestHeaderTeMayOnlyBeˢᵇ = @"request header
 // per RFC 7540 Section 8.1.2.2.
 // The returned error is reported to users.
 internal static error http2checkValidHTTP2RequestHeaders(ΔHeader h) {
-    foreach (var (_, k) in http2connHeaders) {
+    foreach (var (_, k) in range(http2connHeaders)) {
         var (_, ok) = h[k, ꟷ]; if (ok) {
             return fmt.Errorf("request header %q is not valid in HTTP/2"u8, k);
         }
@@ -8450,16 +8400,13 @@ internal static (nint n, error err) Write(this http2stickyErrWriter sew, slice<b
 partial struct http2noCachedConnError {
 }
 
-internal static void IsHTTP2NoCachedConnError(this http2noCachedConnError _) {
-}
+internal static void IsHTTP2NoCachedConnError(this http2noCachedConnError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http2NoCachedConnectionˢ => ref http2NoCachedConnectionˢᵇ;
 private static readonly @string http2NoCachedConnectionˢᵇ = "http2: no cached connection was available"u8;
 
-internal static @string Error(this http2noCachedConnError _) {
-    return http2NoCachedConnectionˢ;
-}
+internal static @string Error(this http2noCachedConnError _) { return http2NoCachedConnectionˢ; }
 
 internal partial interface http2isNoCachedConnError_type /*dyn*/ {
     void IsHTTP2NoCachedConnError();
@@ -10296,7 +10243,7 @@ internal static (slice<byte>, error) encodeTrailers(this ref http2ClientConn cc,
 
     var hlSize = (uint64)0;
     foreach (var (k, vv) in trailer) {
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             var hf = new hpack.HeaderField(Name: k, Value: v);
             hlSize += (uint64)hf.Size();
         }
@@ -10314,7 +10261,7 @@ internal static (slice<byte>, error) encodeTrailers(this ref http2ClientConn cc,
         }
         // Transfer-Encoding, etc.. have already been filtered at the
         // start of RoundTrip
-        foreach (var (_, v) in vv) {
+        foreach (var (_, v) in range(vv)) {
             cc.writeHeader(lowKey, v);
         }
     }
@@ -10749,7 +10696,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
         StatusCode: statusCode,
         Status: status + " "u8 + StatusText(statusCode)
     ));
-    foreach (var (_, hf) in regularFields) {
+    foreach (var (_, hf) in range(regularFields)) {
         @string key = httpcommon.CanonicalHeader(hf.Name);
         if (key == "Trailer"u8) {
             ref var t = ref heap<ΔHeader>(res.Trailer, out var Ꮡt);
@@ -10799,7 +10746,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
             var t1 = cs.cc.t.t1; if (t1 != nil && t1.MaxResponseHeaderBytes > limit) {
                 limit = t1.MaxResponseHeaderBytes;
             }
-            foreach (var (_, h) in f.Fields) {
+            foreach (var (_, h) in range(f.Fields)) {
                 cs.totalHeaderSize += (int64)h.Size();
             }
             if (cs.totalHeaderSize > limit) {
@@ -10836,7 +10783,7 @@ internal static (ж<Response>, error) handleResponse(this ref http2clientConnRea
 
     // Connection-specific header fields must not appear in an HTTP/2 message,
     // and any message containing them is malformed. RFC 9113, Section 8.2.2.
-    foreach (var (_, k) in http2connHeaders) {
+    foreach (var (_, k) in range(http2connHeaders)) {
         delete(res.Header, k);
     }
     res.ContentLength = -1;
@@ -10913,7 +10860,7 @@ internal static error processTrailers(this ж<http2clientConnReadLoop> Ꮡrl, ж
     }
 
     var trailer = new ΔHeader(0);
-    foreach (var (_, hf) in f.RegularFields()) {
+    foreach (var (_, hf) in range(f.RegularFields())) {
         @string key = httpcommon.CanonicalHeader(hf.Name);
         trailer[key] = append(trailer[key], hf.Value);
     }
@@ -11605,27 +11552,19 @@ internal static io.ReadCloser http2noBody = new http2noBodyReader();
 partial struct http2noBodyReader {
 }
 
-internal static error Close(this http2noBodyReader _) {
-    return default;
-}
+internal static error Close(this http2noBodyReader _) { return default; }
 
-internal static (nint, error) Read(this http2noBodyReader _Δp0, slice<byte> _Δp1) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this http2noBodyReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
 partial struct http2missingBody {
 }
 
-internal static error Close(this http2missingBody _) {
-    return default;
-}
+internal static error Close(this http2missingBody _) { return default; }
 
-internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) {
-    return (0, io.ErrUnexpectedEOF);
-}
+internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) { return (0, io.ErrUnexpectedEOF); }
 
 internal static bool http2strSliceContains(slice<@string> ss, @string s) {
-    foreach (var (_, v) in ss) {
+    foreach (var (_, v) in range(ss)) {
         if (v == s) {
             return true;
         }
@@ -11637,13 +11576,9 @@ partial struct http2erringRoundTripper {
     internal error err;
 }
 
-internal static error RoundTripErr(this http2erringRoundTripper rt) {
-    return rt.err;
-}
+internal static error RoundTripErr(this http2erringRoundTripper rt) { return rt.err; }
 
-internal static (ж<Response>, error) RoundTrip(this http2erringRoundTripper rt, ж<Request> _) {
-    return (default, rt.err);
-}
+internal static (ж<Response>, error) RoundTrip(this http2erringRoundTripper rt, ж<Request> _) { return (default, rt.err); }
 
 internal static error http2errConcurrentReadOnResBody = errors.New("http2: concurrent read on response body");
 
@@ -11662,13 +11597,9 @@ partial struct http2gzipReader {
 partial struct http2eofReader {
 }
 
-internal static (nint, error) Read(this http2eofReader _Δp0, slice<byte> _Δp1) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this http2eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
-internal static (byte, error) ReadByte(this http2eofReader _) {
-    return (0, io.EOF);
-}
+internal static (byte, error) ReadByte(this http2eofReader _) { return (0, io.EOF); }
 
 internal static readonly ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
 internal static ref sync.Pool http2gzipPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2gzipPool).ValueSlot;
@@ -11791,9 +11722,7 @@ partial struct http2errorReader {
     internal error err;
 }
 
-internal static (nint, error) Read(this http2errorReader r, slice<byte> p) {
-    return (0, r.err);
-}
+internal static (nint, error) Read(this http2errorReader r, slice<byte> p) { return (0, r.err); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string closeˢ => ref closeˢᵇ;
@@ -12153,9 +12082,7 @@ internal static error writeFrame(this http2flushFrameWriter _, http2writeContext
     return ctx.Flush();
 }
 
-internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) {
-    return false;
-}
+internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) { return false; }
 
 partial struct http2writeSettings /*[]http2Setting*/;
 
@@ -12179,9 +12106,7 @@ internal static error writeFrame(this ref http2writeGoAway p, http2writeContext 
     return err;
 }
 
-internal static bool staysWithinBuffer(this ref http2writeGoAway _, nint max) {
-    return false; // flushes
-}
+internal static bool staysWithinBuffer(this ref http2writeGoAway _, nint max) { return false; } // flushes
 
 partial struct http2writeData {
     internal uint32 streamID;
@@ -12211,17 +12136,13 @@ internal static error writeFrame(this http2handlerPanicRST hp, http2writeContext
     return ctx.Framer().WriteRSTStream(hp.StreamID, http2ErrCodeInternal);
 }
 
-internal static bool staysWithinBuffer(this http2handlerPanicRST hp, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2handlerPanicRST hp, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 internal static error writeFrame(this http2StreamError se, http2writeContext ctx) {
     return ctx.Framer().WriteRSTStream(se.StreamID, se.Code);
 }
 
-internal static bool staysWithinBuffer(this http2StreamError se, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2StreamError se, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 partial struct http2writePing {
     internal array<byte> data = new(8);
@@ -12258,9 +12179,7 @@ internal static error writeFrame(this http2writeSettingsAck _, http2writeContext
     return ctx.Framer().WriteSettingsAck();
 }
 
-internal static bool staysWithinBuffer(this http2writeSettingsAck _, nint max) {
-    return http2frameHeaderLen <= max;
-}
+internal static bool staysWithinBuffer(this http2writeSettingsAck _, nint max) { return http2frameHeaderLen <= max; }
 
 // splitHeaderBlock splits headerBlock into fragments so that each fragment fits
 // in a single frame, then calls fn for each fragment. firstFrag/lastFrag are true
@@ -12457,9 +12376,7 @@ partial struct http2writeWindowUpdate {
     internal uint32 n;
 }
 
-internal static bool staysWithinBuffer(this http2writeWindowUpdate wu, nint max) {
-    return (nint)(http2frameHeaderLen + 4) <= max;
-}
+internal static bool staysWithinBuffer(this http2writeWindowUpdate wu, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 internal static error writeFrame(this http2writeWindowUpdate wu, http2writeContext ctx) {
     return ctx.Framer().WriteWindowUpdate(wu.streamID, wu.n);
@@ -12478,7 +12395,7 @@ internal static void http2encodeHeaders(ж<hpack.Encoder> enc, ΔHeader h, slice
             defer(Ꮡhttp2sorterPool.Put, sorter.OrTypedNil(), ref ᒐ);
             keys = sorter.Keys(h);
         }
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             var vv = h[k];
             var (kΔ1, ascii) = httpcommon.LowerHeader(k);
             if (!ascii) {
@@ -12493,7 +12410,7 @@ internal static void http2encodeHeaders(ж<hpack.Encoder> enc, ΔHeader h, slice
                 continue;
             }
             var isTE = kΔ1 == "transfer-encoding"u8;
-            foreach (var (_, v) in vv) {
+            foreach (var (_, v) in range(vv)) {
                 if (!httpguts.ValidHeaderFieldValue(v)) {
                     // TODO: return an error? golang.org/issue/14048
                     // For now just omit it.
@@ -12773,10 +12690,10 @@ partial struct http2writeQueuePool /*[]ж<http2writeQueue>*/;
 internal static void put(this ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
-    foreach (var i in range(q.currQueue)) {
+    foreach (var i in range(builtin.len(q.currQueue))) {
         q.currQueue[i] = new http2FrameWriteRequest();
     }
-    foreach (var i in range(q.nextQueue)) {
+    foreach (var i in range(builtin.len(q.nextQueue))) {
         q.nextQueue[i] = new http2FrameWriteRequest();
     }
     q.currQueue = q.currQueue[..0];
@@ -13003,13 +12920,9 @@ internal static bool walkReadyInOrder(this ж<http2priorityNodeRFC7540> Ꮡn, bo
 
 partial struct http2sortPriorityNodeSiblingsRFC7540 /*[]ж<http2priorityNodeRFC7540>*/;
 
-internal static nint Len(this http2sortPriorityNodeSiblingsRFC7540 z) {
-    return builtin.len(z);
-}
+internal static nint Len(this http2sortPriorityNodeSiblingsRFC7540 z) { return builtin.len(z); }
 
-internal static void Swap(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
-    (z[i], z[k]) = (z[k], z[i]);
-}
+internal static void Swap(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) { (z[i], z[k]) = (z[k], z[i]); }
 
 internal static bool Less(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
     // Prefer the subtree that has sent fewer bytes relative to its weight.
@@ -13411,8 +13324,8 @@ internal static (http2FrameWriteRequest, bool) Pop(this ref http2priorityWriteSc
     ws.prioritizeIncremental = !ws.prioritizeIncremental;
 
     // Always prioritize lowest u (i.e. highest urgency level).
-    foreach (var u in range(ws.heads)) {
-        foreach (var iᴛ1 in range(ws.heads[u])) {
+    foreach (var u in range(builtin.len(ws.heads))) {
+        foreach (var iᴛ1 in range(builtin.len(ws.heads[u]))) {
             var i = iᴛ1;
             // When we want to prioritize incremental, we try to pop i=true
             // first before i=false when u is the same.
@@ -13584,8 +13497,7 @@ internal static void CloseStream(this ref http2roundRobinWriteScheduler ws, uint
     ws.queuePool.put(q);
 }
 
-internal static void AdjustStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) {
-}
+internal static void AdjustStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) { }
 
 internal static void Push(this ref http2roundRobinWriteScheduler ws, http2FrameWriteRequest wr) {
     if (wr.isControl()) {

@@ -160,7 +160,7 @@ internal static (@string, error) readString(this ref Reader z) {
             // Strings are ISO 8859-1, Latin-1 (RFC 1952, section 2.3.1).
             if (needConv) {
                 var s = new slice<rune>(0, i);
-                foreach (var (_, v) in z.buf.slice(0, i)) {
+                foreach (var (_, v) in range(z.buf.slice(0, i))) {
                     s = append(sᴷ, s, (rune)v);
                 }
                 return ((@string)s, default);
@@ -293,8 +293,6 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
 // Close closes the [Reader]. It does not close the underlying reader.
 // In order for the GZIP checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-public static error Close(this ref Reader z) {
-    return z.decompressor.Close();
-}
+public static error Close(this ref Reader z) { return z.decompressor.Close(); }
 
 } // end gzip_package

@@ -73,7 +73,7 @@ internal static void attach(this ж<Func> Ꮡfn, ж<op> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // Make sure the arguments are attached to the function.
-    foreach (var (_, arg) in x.args) {
+    foreach (var (_, arg) in range(x.args)) {
         var argFn = arg.fn;
         if (argFn == nil) {
             Ꮡfn.attach(arg);
@@ -106,7 +106,7 @@ public static void Return(params ꓸꓸꓸValue resultsʗp) {
     var results = resultsʗp.sslice();
 
     var args = new slice<ж<op>>(len(results));
-    foreach (var (i, res) in results) {
+    foreach (var (i, res) in range(results)) {
         args[i] = res.getOp();
     }
     @void x = new(nil);
@@ -142,7 +142,7 @@ internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) {
     if (o.Δop != o2.Δop || !AreEqual(o.c, o2.c) || len(o.args) != len(o2.args)) {
         return false;
     }
-    foreach (var (i, arg) in o.args) {
+    foreach (var (i, arg) in range(o.args)) {
         if (o2.args[i] != arg) {
             return false;
         }
@@ -152,7 +152,7 @@ internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) {
 
 internal static void write(this ref op o, io.Writer w) {
     fmt.Fprintf(w, "v%02d = %s"u8, o.id, o.Δop);
-    foreach (var (_, arg) in o.args) {
+    foreach (var (_, arg) in range(o.args)) {
         fmt.Fprintf(w, " v%02d"u8, arg.id);
     }
     if (o.c != nil) {
@@ -169,7 +169,7 @@ internal static void write(this ref op o, io.Writer w) {
 
 internal static void write(this ref Func fn, io.Writer w) {
     fmt.Fprintf(w, "FUNC %s\n"u8, fn.name);
-    foreach (var (_, op) in fn.ops) {
+    foreach (var (_, op) in range(fn.ops)) {
         op.write(w);
     }
 }
@@ -198,7 +198,7 @@ public static void Compile(this ж<File> Ꮡf) {
 
 """u8.Raw());
 
-    foreach (var (_, c) in f.consts) {
+    foreach (var (_, c) in range(f.consts)) {
         f.emitConst(c.name, c.data);
     }
 
@@ -210,7 +210,7 @@ public static void Compile(this ж<File> Ꮡf) {
         fn.write(new os.FileжWriter(os.Stderr));
     }
 
-    foreach (var (_, fn) in f.funcs) {
+    foreach (var (_, fn) in range(f.funcs)) {
         trace(fn, initialˢ);
 
         for (;;) {
@@ -243,12 +243,12 @@ internal static bool cse(this ref Func fn) {
     var hashes = new map<ж<op>, uint64>();
     maphash.Hash h = new();
     array<byte> bbuf = new(8);
-    foreach (var (_, op) in fn.ops) {
+    foreach (var (_, op) in range(fn.ops)) {
         // We ignore the name for canonicalization.
         h.Reset();
         h.WriteString(op.Δop);
         // TODO: Ideally we would hash o1.c, but we don't have a good way to do that.
-        foreach (var (_, arg) in op.args) {
+        foreach (var (_, arg) in range(op.args)) {
             var (_, ok) = hashes[arg, ꟷ]; if (!ok) {
                 throw panic("ops not in dependency order");
             }
@@ -263,7 +263,7 @@ internal static bool cse(this ref Func fn) {
     var hashesʗ1 = hashes;
     ж<op> lookup(ж<op> o) {
         var hash = hashesʗ1[o];
-        foreach (var (_, o2) in canonʗ1[hash]) {
+        foreach (var (_, o2) in range(canonʗ1[hash])) {
             if (o.equalNoName(o2)) {
                 return o2;
             }
@@ -274,8 +274,8 @@ internal static bool cse(this ref Func fn) {
 
     // Canonicalize ops.
     var dirty = false;
-    foreach (var (_, op) in fn.ops) {
-        foreach (var (i, arg) in op.args) {
+    foreach (var (_, op) in range(fn.ops)) {
+        foreach (var (i, arg) in range(op.args)) {
             var newArg = lookup(arg);
             if (arg != newArg) {
                 dirty = true;
@@ -296,12 +296,12 @@ internal static bool deadcode(this ref Func fn) {
             return;
         }
         marksʗ1[o] = true;
-        foreach (var (_, arg) in o.args) {
+        foreach (var (_, arg) in range(o.args)) {
             Ꮡmark.ValueSlot(arg);
         }
     };
     // Mark operations that have a side-effect.
-    foreach (var (_, op) in fn.ops) {
+    foreach (var (_, op) in range(fn.ops)) {
         var exprᴛ1 = op.Δop;
         switch (ᐧ) {
         case {} when exprᴛ1 == "return"u8: {
@@ -314,7 +314,7 @@ internal static bool deadcode(this ref Func fn) {
         return false;
     }
     var newOps = new slice<ж<op>>(0, len(marks));
-    foreach (var (_, op) in fn.ops) {
+    foreach (var (_, op) in range(fn.ops)) {
         if (marks[op]) {
             newOps = append(newOps, op);
         }
@@ -345,9 +345,9 @@ internal static void addLoads(this ж<Func> Ꮡfn) {
     // leave the load so we can share the value in the register.
     var nRefs = fn.opRefs();
     var loads = new map<ж<op>, ж<op>>(); // deref -> load
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         var canMask = canMem[o.Δop];
-        foreach (var (i, arg) in o.args) {
+        foreach (var (i, arg) in range(o.args)) {
             // TODO: Many AVX-512 operations that support memory operands also
             // support a ".BCST" suffix that performs a broadcasting memory
             // load. If the const can be broadcast and all uses support
@@ -372,8 +372,8 @@ internal static void addLoads(this ж<Func> Ꮡfn) {
 
 internal static map<ж<op>, nint> opRefs(this ref Func fn) {
     var refs = new map<ж<op>, nint>();
-    foreach (var (_, o1) in fn.ops) {
-        foreach (var (_, arg) in o1.args) {
+    foreach (var (_, o1) in range(fn.ops)) {
+        foreach (var (_, arg) in range(o1.args)) {
             refs[arg]++;
         }
     }
@@ -407,19 +407,13 @@ internal static ж<op> makeLoad(ж<op> Ꮡderef) {
     // assign locations, the deref op gets the memory location to load from,
     // while its argument has some other location (like a register). Also, the
     // offset to deref is attached to the deref op.
-    return Ꮡ(new op(Δop: inst, kind: deref.kind, args: slice<ж<op>>([Ꮡderef])));
+    return Ꮡ(new op(Δop: inst, kind: deref.kind, args: [Ꮡderef]));
 }
 
 partial struct opHeap /*[]ж<op>*/;
 
-internal static nint Len(this opHeap h) {
-    return len(h);
-}
-
-internal static void Swap(this opHeap h, nint i, nint j) {
-    (h[i], h[j]) = (h[j], h[i]);
-}
-
+internal static nint Len(this opHeap h) { return len(h); }
+internal static void Swap(this opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
 internal static bool Less(this opHeap h, nint i, nint j) {
     nint priority(ж<op> o) {
         if (o.Δop == "deref"u8 || o.Δop == "const"u8) {
@@ -468,13 +462,13 @@ internal static void schedule(this ref Func fn) {
     var missing = new map<ж<op>, nint>();
     var uses = new map<ж<op>, slice<ж<op>>>();
     ref var h = ref heap<opHeap>(out var Ꮡh);
-    foreach (var (_, op) in fn.ops) {
+    foreach (var (_, op) in range(fn.ops)) {
         if (len(op.args) == 0) {
             h = append(h, op);
         } else {
             missing[op] = len(op.args);
         }
-        foreach (var (_, arg) in op.args) {
+        foreach (var (_, arg) in range(op.args)) {
             uses[arg] = append(uses[arg], op);
         }
     }
@@ -488,7 +482,7 @@ internal static void schedule(this ref Func fn) {
         var top = h[0];
         newOps = append(newOps, top);
         heap.Pop(new opHeapжInterface(Ꮡh));
-        foreach (var (_, o) in uses[top]) {
+        foreach (var (_, o) in range(uses[top])) {
             missing[o]--;
             if (missing[o] == 0) {
                 heap.Push(new opHeapжInterface(Ꮡh), o.OrTypedNil());
@@ -518,7 +512,7 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     var w = f.w;
 
     // Emit constants first
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         if (o.Δop == "const"u8) {
             @string name = locs[o]._<loc, locMem>().name;
             f.emitConst(name, o.c);
@@ -528,7 +522,7 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     fmt.Fprintf(w, "TEXT %s(SB), NOSPLIT, $0-0\n"u8, fn.name);
 
     // Emit body
-    foreach (var (_, o) in fn.ops) {
+    foreach (var (_, o) in range(fn.ops)) {
         var exprᴛ1 = o.Δop;
         switch (ᐧ) {
         case {} when exprᴛ1 == "const"u8 || exprᴛ1 == "arg"u8 || exprᴛ1 == "return"u8 || exprᴛ1 == "deref"u8 || exprᴛ1 == "imm"u8: {
@@ -555,7 +549,7 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
             // TODO: Replace this with an imm input.
             fmt.Fprintf(w, " $0,"u8);
         }
-        foreach (var (i, arg) in o.args) {
+        foreach (var (i, arg) in range(o.args)) {
             if (i == 0) {
                 fmt.Fprintf(w, " "u8);
             } else {
@@ -583,7 +577,7 @@ internal static void emitConst(this ref File f, @string name, any data) {
     switch (data.type()) {
     case slice<ж<Func>> dataΔ1: {
         fmt.Fprintf(f.w, "GLOBL %s(SB), RODATA, $%#x\n"u8, name, len(dataΔ1) * 8);
-        foreach (var (i, fn) in dataΔ1) {
+        foreach (var (i, fn) in range(dataΔ1)) {
             fmt.Fprintf(f.w, "DATA  %s+%#02x(SB)/8, "u8, name, 8 * i);
             if (fn == nil) {
                 fmt.Fprintf(f.w, "$0\n"u8);

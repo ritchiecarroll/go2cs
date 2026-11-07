@@ -373,10 +373,8 @@ partial struct CounterFileFooter {
 // followed by emit UnixNanoTime.
 public static ref readonly @string CounterFilePref => ref CounterFilePrefᵇ;
 private static readonly @string CounterFilePrefᵇ = "covcounters"u8;
-
 public static ref readonly @string CounterFileTempl => ref CounterFileTemplᵇ;
 private static readonly @string CounterFileTemplᵇ = "%s.%x.%d.%d"u8;
-
 public static ref readonly @string CounterFileRegexp => ref CounterFileRegexpᵇ;
 private static readonly @string CounterFileRegexpᵇ = @"^%s\.(\S+)\.(\d+)\.(\d+)+$"u8;
 
@@ -419,11 +417,8 @@ public static nint Round4(nint x) {
 // The counter variable itself is created not as a struct but as a flat
 // array of uint32's; we then use the offsets below to index into it.
 public static UntypedInt NumCtrsOffset => 0;
-
 public static UntypedInt PkgIdOffset => 1;
-
 public static UntypedInt FuncIdOffset => 2;
-
 public static UntypedInt FirstCtrOffset => 3;
 
 } // end coverage_package

@@ -12,9 +12,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object argˢ = (@string)"arg"u8;
 
-internal static @string apply(Funcꓸꓸꓸ<@string, any, @string> f, @string format) {
-    return f(format, argˢ);
-}
+internal static @string apply(Funcꓸꓸꓸ<@string, any, @string> f, @string format) { return f(format, argˢ); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hLloˢ = "héllo, 世界"u8;

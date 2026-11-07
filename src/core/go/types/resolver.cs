@@ -275,13 +275,13 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     // importKey value. Two different importKey values may map to the same package
     // which is why we cannot use the check.impMap here.
     map<ж<Package>, bool> pkgImports = new map<ж<Package>, bool>();
-    foreach (var (_, imp) in pkg.imports) {
+    foreach (var (_, imp) in range(pkg.imports)) {
         pkgImports[imp] = true;
     }
     ref var methods = ref heap<slice<collectObjects_methodInfo>>(out var Ꮡmethods); // collected methods with valid receivers and non-blank _ names
 
     var fileScopes = new slice<ж<ΔScope>>(len(check.files)); // fileScopes[i] corresponds to check.files[i]
-    foreach (var (fileNo, @file) in check.files) {
+    foreach (var (fileNo, @file) in range(check.files)) {
         check.version = asGoVersion(check.versions[@file]);
 
         // The package identifier denotes the current package,
@@ -403,7 +403,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
             }
             case ΔconstDecl dΔ1: {
                 // declare all constants
-                foreach (var (i, name) in dΔ1.spec.Names) {
+                foreach (var (i, name) in range(dΔ1.spec.Names)) {
                     var obj = NewConst(name.Pos(), pkgʗ1, name.Name, default, constant.MakeInt64((int64)dΔ1.iota));
 
                     ast.Expr init = default;
@@ -431,7 +431,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 }
 
                 // declare all variables
-                foreach (var (i, name) in dΔ1.spec.Names) {
+                foreach (var (i, name) in range(dΔ1.spec.Names)) {
                     var obj = newVar(PackageVar, name.Pos(), pkgʗ1, name.Name, default);
                     lhs[i] = obj;
 
@@ -519,7 +519,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     }
 
     // verify that objects in package and file scopes have different names
-    foreach (var (_, scope) in fileScopes) {
+    foreach (var (_, scope) in range(fileScopes)) {
         foreach (var (name, vᴛ1) in scope.elems) {
             var obj = vᴛ1;
 
@@ -548,7 +548,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     }
 
     check.methods = new map<ж<TypeName>, slice<ж<Func>>>();
-    foreach (var i in range(methods)) {
+    foreach (var i in range(len(methods))) {
         var m = Ꮡ(methods, i);
         // Determine the receiver base type and associate m with it.
         var (ptr, @base) = check.resolveBaseTypeName(m.ptr, m.recv);
@@ -603,7 +603,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
         var ix = unpackIndexedExpr(@base);
         @base = ix.x;
         if (unpackParams) {
-            foreach (var (_, arg) in ix.indices) {
+            foreach (var (_, arg) in range(ix.indices)) {
                 ж<ast.Ident> par = default;
                 switch (arg.type()) {
                 case ж<ast.Ident> argΔ1: {
@@ -719,7 +719,7 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
     var othersListᴷ = new stackAppend<Object>(moves: true);
 
     // add new methods to already type-checked types (from a prior Checker.Files call)
-    foreach (var (_, obj) in check.objList) {
+    foreach (var (_, obj) in range(check.objList)) {
         var (objΔ1, _) = obj._<ж<TypeName>>(ᐧ); if (objΔ1 != nil && objΔ1.typ != nil) {
             Ꮡcheck.collectMethods(objΔ1);
         }
@@ -742,7 +742,7 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         // its Type is Invalid.
         //
         // Investigate and reenable this branch.
-        foreach (var (_, obj) in check.objList) {
+        foreach (var (_, obj) in range(check.objList)) {
             Ꮡcheck.objDecl(obj);
         }
     } else {
@@ -754,7 +754,7 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         slice<ж<TypeName>> aliasList = default;
         slice<Object> othersList = default; // everything that's not a type
         // phase 1: non-alias type declarations
-        foreach (var (_, obj) in check.objList) {
+        foreach (var (_, obj) in range(check.objList)) {
             var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil) {
                 if (check.objMap[new TypeNameжObject(tname)].tdecl.Assign.IsValid()) {
                     aliasList = append(aliasListᴷ, aliasList, tname);
@@ -767,12 +767,12 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         }
         // phase 2: alias type declarations
         aliasList = move2heap(aliasListᴷ, aliasList);
-        foreach (var (_, obj) in aliasList) {
+        foreach (var (_, obj) in range(aliasList)) {
             Ꮡcheck.objDecl(new TypeNameжObject(obj));
         }
         // phase 3: all other declarations
         othersList = move2heap(othersListᴷ, othersList);
-        foreach (var (_, obj) in othersList) {
+        foreach (var (_, obj) in range(othersList)) {
             Ꮡcheck.objDecl(obj);
         }
     }
@@ -797,7 +797,7 @@ internal static void unusedImports(this ж<Checker> Ꮡcheck) {
     // any of its exported identifiers. To import a package solely for its side-effects
     // (initialization), use the blank identifier as explicit package name."
 
-    foreach (var (_, obj) in check.imports) {
+    foreach (var (_, obj) in range(check.imports)) {
         if (obj.name != "_"u8 && !check.usedPkgNames[obj]) {
             Ꮡcheck.errorUnusedPkg(obj);
         }

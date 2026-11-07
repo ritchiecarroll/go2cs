@@ -8,23 +8,17 @@ partial struct box {
     internal nint n;
 }
 
-internal static nint Len(this ref box b) {
-    return b.n;
-}
+internal static nint Len(this ref box b) { return b.n; }
 
 partial struct counter /*num:nint*/;
 
-internal static nint Len(this counter c) {
-    return (nint)c;
-}
+internal static nint Len(this counter c) { return (nint)c; }
 
 partial struct pair {
     internal nint x;
 }
 
-internal static nint Len(this pair p) {
-    return p.x;
-}
+internal static nint Len(this pair p) { return p.x; }
 
 internal partial interface main_type /*dyn*/ {
     nint Len();
@@ -85,7 +79,7 @@ internal static void Main() {
             p.n = 3;
         }
 
-        foreach (var (_, aΔ1) in values) {
+        foreach (var (_, aΔ1) in range(values)) {
             var (v, okΔ3) = aΔ1._<main_type>(ᐧ); if (okΔ3) {
                 sum += v.Len();
             }

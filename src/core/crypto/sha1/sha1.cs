@@ -126,13 +126,9 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-internal static nint Size(this ref digest d) {
-    return ΔSize;
-}
+internal static nint Size(this ref digest d) { return ΔSize; }
 
-internal static nint BlockSize(this ref digest d) {
-    return ΔBlockSize;
-}
+internal static nint BlockSize(this ref digest d) { return ΔBlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢ => ref cryptoSha1UseOfSha1IsNotˢᵇ;
@@ -260,7 +256,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
 
     array<byte> digest = new(20); /* ΔSize */
-    foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
+    foreach (var (i, s) in range(d.h.ΔRangeSnapshot())) {
         digest[i * 4] = (byte)(mask1b & (byte)(s >> 24));
         digest[i * 4 + 1] = (byte)(mask1b & (byte)(s >> 16));
         digest[i * 4 + 2] = (byte)(mask1b & (byte)(s >> 8));
@@ -280,7 +276,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     // compress, and only keep the digest if we actually needed the second block
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
 
-    foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
+    foreach (var (i, s) in range(d.h.ΔRangeSnapshot())) {
         digest[i * 4] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 24)));
         digest[i * 4 + 1] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 16)));
         digest[i * 4 + 2] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 8)));

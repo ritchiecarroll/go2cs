@@ -38,13 +38,8 @@ public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string 
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-public static tokenꓸPos Pos(this ref ΔScope s) {
-    return s.pos;
-}
-
-public static tokenꓸPos End(this ref ΔScope s) {
-    return s.end;
-}
+public static tokenꓸPos Pos(this ref ΔScope s) { return s.pos; }
+public static tokenꓸPos End(this ref ΔScope s) { return s.end; }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked
@@ -64,7 +59,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
     // Package scopes do not have extents since they may be
     // discontiguous, so iterate over the package's files.
     if (s.parent == Universe) {
-        foreach (var (_, sΔ1) in s.children) {
+        foreach (var (_, sΔ1) in range(s.children)) {
             var inner = sΔ1.Innermost(pos); if (inner != nil) {
                 return inner;
             }
@@ -72,7 +67,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
     }
 
     if (s.Contains(pos)) {
-        foreach (var (_, sΔ2) in s.children) {
+        foreach (var (_, sΔ2) in range(s.children)) {
             if (sΔ2.Contains(pos)) {
                 return sΔ2.Innermost(pos);
             }

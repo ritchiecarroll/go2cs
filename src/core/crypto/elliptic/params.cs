@@ -318,7 +318,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡ
     var Bz = @new<bigꓸInt>().SetInt64(1);
     var (x, y, z) = (@new<bigꓸInt>(), @new<bigꓸInt>(), @new<bigꓸInt>());
 
-    foreach (var (_, vᴛ1) in k) {
+    foreach (var (_, vᴛ1) in range(k)) {
         var b = vᴛ1;
 
         foreach (var _ᴛ1 in range(8)) {
@@ -352,7 +352,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
 }
 
 internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> @params) {
-    foreach (var (_, c) in slice<Curve>([new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)])) {
+    foreach (var (_, c) in range(slice<Curve>([new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)]))) {
         if (@params == c.Params()) {
             return (c, true);
         }

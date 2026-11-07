@@ -110,7 +110,7 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
         }
 
         uint64 x = default;
-        foreach (var (i, vᴛ1) in b) {
+        foreach (var (i, vᴛ1) in range(b)) {
             var c = vᴛ1;
 
             c ^= (byte)(inv); // Inverts c only if inv is 0xff, otherwise does nothing

@@ -15,13 +15,8 @@ private static readonly @string fileNetˢᵇ = "file+net"u8;
 
 // BUG(mikio): On JS, the FileConn, FileListener and
 // FilePacketConn functions are not implemented.
-internal static @string Network(this fileAddr _) {
-    return fileNetˢ;
-}
-
-internal static @string String(this fileAddr f) {
-    return (@string)f;
-}
+internal static @string Network(this fileAddr _) { return fileNetˢ; }
+internal static @string String(this fileAddr f) { return (@string)f; }
 
 // FileConn returns a copy of the network connection corresponding to
 // the open file f.

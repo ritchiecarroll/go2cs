@@ -29,7 +29,7 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
             goto ᒐdone;
         }
 
-        foreach (var (_, aa) in aas) {
+        foreach (var (_, aa) in range(aas)) {
             // Only take interfaces whose OperStatus is IfOperStatusUp(0x01) into DNS configs.
             if (aa.OperStatus != windows.IfOperStatusUp) {
                 continue;

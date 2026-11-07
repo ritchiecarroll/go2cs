@@ -5,7 +5,6 @@ namespace go.@internal;
 partial class goexperiment_package {
 
 public const bool RuntimeFreegc = false;
-
 public static UntypedInt RuntimeFreegcInt => 0;
 
 } // end goexperiment_package

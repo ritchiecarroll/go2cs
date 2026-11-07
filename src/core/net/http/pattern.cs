@@ -33,9 +33,7 @@ partial struct pattern {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
-internal static @string String(this ref pattern p) {
-    return p.str;
-}
+internal static @string String(this ref pattern p) { return p.str; }
 
 internal static segment lastSegment(this ref pattern p) {
     return p.segments[builtin.len(p.segments) - 1];
@@ -482,7 +480,7 @@ But neither is more specific than the other.
 
 // writeMatchingPath writes to b a path that matches the segments.
 internal static void writeMatchingPath(ж<strings.Builder> b, slice<segment> segs) {
-    foreach (var (_, s) in segs) {
+    foreach (var (_, s) in range(segs)) {
         writeSegment(b, s);
     }
 }

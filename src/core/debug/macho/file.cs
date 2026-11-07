@@ -51,9 +51,7 @@ partial interface Load {
 // A LoadBytes is the uninterpreted bytes of a Mach-O load command.
 partial struct LoadBytes /*[]byte*/;
 
-public static slice<byte> Raw(this LoadBytes b) {
-    return b;
-}
+public static slice<byte> Raw(this LoadBytes b) { return b; }
 
 // A SegmentHeader is the header for a Mach-O 32-bit or 64-bit load segment command.
 partial struct SegmentHeader {
@@ -90,9 +88,7 @@ public static (slice<byte>, error) Data(this ref ΔSegment s) {
 }
 
 // Open returns a new ReadSeeker reading the segment.
-public static io.ReadSeeker Open(this ref ΔSegment s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSegment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 partial struct SectionHeader {
     public @string Name;
@@ -139,9 +135,7 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-public static io.ReadSeeker Open(this ref ΔSection s) {
-    return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
-}
+public static io.ReadSeeker Open(this ref ΔSection s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Dylib represents a Mach-O load dynamic library command.
 partial struct Dylib {
@@ -557,7 +551,7 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
         var bo = f.ByteOrder;
 
         sh.Relocs = new slice<Reloc>((nint)(sh.Nreloc));
-        foreach (var i in range(sh.Relocs)) {
+        foreach (var i in range(len(sh.Relocs))) {
             var rel = Ꮡ(sh.Relocs, i);
 
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);
@@ -613,7 +607,7 @@ internal static @string cstring(slice<byte> b) {
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
 public static ж<ΔSegment> Segment(this ref File f, @string name) {
-    foreach (var (_, l) in f.Loads) {
+    foreach (var (_, l) in range(f.Loads)) {
         var (s, ok) = l._<ж<ΔSegment>>(ᐧ); if (ok && s.Name == name) {
             return s;
         }
@@ -624,7 +618,7 @@ public static ж<ΔSegment> Segment(this ref File f, @string name) {
 // Section returns the first section with the given name, or nil if no such
 // section exists.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
         }
@@ -667,7 +661,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         }}
         // Mach-O executables truncate section names to 16 characters, mangling some DWARF sections.
         // As of DWARFv5 these are the only problematic section names (see DWARFv5 Appendix G).
-        foreach (var (_, longname) in slice<@string>([
+        foreach (var (_, longname) in range(slice<@string>([
             "__debug_str_offsets",
             "__zdebug_line_str",
             "__zdebug_loclists",
@@ -675,7 +669,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             "__zdebug_pubtypes",
             "__zdebug_rnglists",
             "__zdebug_str_offsets"
-        ])) {
+        ]))) {
             if (sectname == longname[..16]) {
                 sectname = longname;
                 break;
@@ -711,7 +705,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
     map<@string, slice<byte>> dat = new map<@string, slice<byte>>{["abbrev"] = default, ["info"] = default, ["str"] = default, ["line"] = default, ["ranges"] = default};
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -732,7 +726,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     }
 
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
-    foreach (var (i, s) in f.Sections) {
+    foreach (var (i, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -772,7 +766,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     var dt = f.Dysymtab;
     slice<@string> all = default;
     if (dt != nil) {
-        foreach (var (_, s) in st.Syms.slice((nint)(dt.Iundefsym), (nint)(dt.Iundefsym + dt.Nundefsym))) {
+        foreach (var (_, s) in range(st.Syms.slice((nint)(dt.Iundefsym), (nint)(dt.Iundefsym + dt.Nundefsym)))) {
             all = append(all, s.Name);
         }
     } else {
@@ -780,7 +774,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
         const uint8 N_TYPE = 0x0e;
         const uint8 N_UNDF = 0x0;
         const uint8 N_EXT = 0x01;
-        foreach (var (_, s) in st.Syms) {
+        foreach (var (_, s) in range(st.Syms)) {
             if ((uint8)(s.Type & N_TYPE) == N_UNDF && (uint8)(s.Type & N_EXT) != 0) {
                 all = append(all, s.Name);
             }
@@ -796,7 +790,7 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
-    foreach (var (_, l) in f.Loads) {
+    foreach (var (_, l) in range(f.Loads)) {
         var (lib, ok) = l._<ж<Dylib>>(ᐧ); if (ok) {
             all = append(allᴷ, all, lib.Name);
         }

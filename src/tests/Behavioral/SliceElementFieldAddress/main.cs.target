@@ -22,13 +22,9 @@ partial struct cell {
     internal nint n, m;
 }
 
-internal static partial void setU32(ref uint32 p, uint32 v) {
-    p = v;
-}
+internal static partial void setU32(ref uint32 p, uint32 v) { p = v; }
 
-internal static partial void setInt(ref nint p, nint v) {
-    p = v;
-}
+internal static partial void setInt(ref nint p, nint v) { p = v; }
 
 internal static void Main() {
     var cells = new slice<cell>(3);
@@ -44,7 +40,7 @@ internal static void Main() {
     fmt.Println("local array:", arr[2].n, arr[0].m);
 
     var pr = Ꮡ(new prog(Inst: new slice<inst>(4, () => new(nil))));
-    foreach (var i in range(pr.Inst)) {
+    foreach (var i in range(len(pr.Inst))) {
         pr.Inst[i].Name = fmt.Sprintf("i%d"u8, i);
     }
     var a = Ꮡ(pr.Inst, 0).of(inst.ᏑOut);

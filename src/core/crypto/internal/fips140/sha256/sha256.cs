@@ -27,7 +27,6 @@ internal static UntypedInt blockSize => 64;
 // The maximum number of bytes that can be passed to block(). The limit exists
 // because implementations that rely on assembly routines are not preemptible.
 internal static UntypedInt maxAsmIters => 1024;
-
 internal static UntypedInt maxAsmSize => /* blockSize * maxAsmIters */ 65536; // 64KiB
 
 internal static UntypedInt chunk => 64;
@@ -174,9 +173,7 @@ public static nint Size(this ref Digest d) {
     return size224;
 }
 
-public static nint BlockSize(this ref Digest d) {
-    return blockSize;
-}
+public static nint BlockSize(this ref Digest d) { return blockSize; }
 
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default;

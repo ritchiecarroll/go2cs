@@ -123,8 +123,8 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "--%s\r\n"u8, w.boundary);
     }
 
-    foreach (var (_, k) in slices.Sorted(maps.Keys<textproto.MIMEHeader, @string, slice<@string>>(header))) {
-        foreach (var (_, v) in header[k]) {
+    foreach (var (_, k) in range(slices.Sorted(maps.Keys<textproto.MIMEHeader, @string, slice<@string>>(header)))) {
+        foreach (var (_, v) in range(header[k])) {
             fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "%s: %s\r\n"u8, k, v);
         }
     }

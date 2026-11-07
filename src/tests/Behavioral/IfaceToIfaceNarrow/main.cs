@@ -29,29 +29,15 @@ partial struct conn {
     internal @string data;
 }
 
-internal static @string Read(this ref conn c) {
-    return c.data;
-}
+internal static @string Read(this ref conn c) { return c.data; }
+internal static void Write(this ref conn c, @string s) { c.data = s; }
+internal static @string Close(this ref conn c) { return "closed:"u8 + c.data; }
 
-internal static void Write(this ref conn c, @string s) {
-    c.data = s;
-}
+internal static @string readFrom(Reader r) { return r.Read(); }
 
-internal static @string Close(this ref conn c) {
-    return "closed:"u8 + c.data;
-}
+internal static void writeTo(Writer w, @string s) { w.Write(s); }
 
-internal static @string readFrom(Reader r) {
-    return r.Read();
-}
-
-internal static void writeTo(Writer w, @string s) {
-    w.Write(s);
-}
-
-internal static Writer asWriter(Conn c) {
-    return new ConnᴠWriter(c);
-}
+internal static Writer asWriter(Conn c) { return new ConnᴠWriter(c); }
 
 internal static void Main() {
     Conn c = new connжConn(Ꮡ(new conn(data: "init")));

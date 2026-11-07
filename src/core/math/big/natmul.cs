@@ -77,7 +77,6 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
 // we use the Karatsuba algorithm optimized for x == y.
 internal static readonly ж<nint> ᏑbasicSqrThreshold = new StaticBox<nint>(12);
 internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrThreshold).ValueSlot;         // see calibrate_test.go
-
 internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
 internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
 
@@ -178,7 +177,7 @@ internal static Δnat mulAddWW(this Δnat z, Δnat x, Word y, Word r) {
 // The (non-normalized) result is placed in z[0 : len(x) + len(y)].
 internal static void basicMul(Δnat z, Δnat x, Δnat y) {
     clear(z.slice(0, len(x) + len(y))); // initialize z
-    foreach (var (i, d) in y) {
+    foreach (var (i, d) in range<Word>(y)) {
         if (d != 0) {
             z[len(x) + i] = addMulVVWW(z.slice(i, i + len(x)), z.slice(i, i + len(x)), x, d, 0);
         }

@@ -20,7 +20,7 @@ public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> 
     var buf = newUnsafeBuf<uintptr>(bufp);
     var objBytes = (uintptr)gc.SizeClassToSize[sizeClass];
     // TODO(austin): Trim objMarks to the number of objects in this size class?
-    foreach (var (markI, vᴛ1) in objMarks) {
+    foreach (var (markI, vᴛ1) in range(objMarks)) {
         var markWord = vᴛ1;
 
         foreach (var _ᴛ1 in range(sys.OnesCount64((uint64)markWord))) {

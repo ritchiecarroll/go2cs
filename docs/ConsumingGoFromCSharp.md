@@ -417,24 +417,38 @@ catch.
 
 ## Slices
 
-A Go slice is `slice<T>`. `foreach` over a slice gives `(index, value)` pairs, so it reads like Go's `range`; take
-`(_, v)` for the values alone:
+A Go slice is `slice<T>`. `foreach` over a slice gives its values, as over any C# collection. `range(s)` gives
+Go's `(index, value)` pairs, so the loop reads like Go's `range`:
 
 <!-- source: src/tests/CSharpConsumer/Program.cs:183-188, 190-191 -->
 ```csharp
 slice<@string> words = strings.Fields("  the quick  brown fox ");
 var lengths = new StringBuilder();
-foreach (var (i, w) in words)       // Go: for i, w := range words
+foreach (var (i, w) in range(words))    // Go: for i, w := range words
 {
     lengths.Append($"{i}:{len(w)} ");
 }
 …
 nint letters = 0;
-foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
+foreach (var w in words) letters += len(w);     // Go: for _, w := range words
 ```
 
-`foreach` gives a slice's `(index, value)` pairs, as Go's `range` does, and LINQ sees the slice as its values. The
-same holds for a Go array and for a named slice or array type:
+For the indices alone, range the length: `foreach (var i in range(len(words)))`, Go's `for i := range len(words)`.
+A Go array works the same way. A named slice type ranges with its element type named, `range<uint>(x)`, because C#
+cannot infer it through the type's conversion to `slice<T>`.
+
+A collection expression builds a slice where C# knows the target is a `slice<T>`, as Go's `[]int{2, 3, 5}` does:
+
+<!-- illustration: adapted, owed a real excerpt -->
+```csharp
+slice<nint> primes = [2, 3, 5];     // Go: primes := []int{2, 3, 5}
+slice<@string> none = [];           // an empty slice, not nil
+```
+
+`[]` is an empty slice, as Go's `[]string{}` is; a nil slice is `nil` or `default`. Where C# has no target type,
+as with `var`, name it: `var primes = slice<nint>([2, 3, 5]);`.
+
+LINQ sees the slice as its values. The same holds for a Go array and for a named slice or array type:
 
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
@@ -670,8 +684,8 @@ Each item is a first surprise, and what to write instead.
   projects, or with `GoConsumerUsings` set to `false`, add `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
-- **`foreach (var v in s)` gives a tuple, not a value.** `foreach` over a slice gives `(index, value)` pairs: write
-  `foreach (var (_, v) in s)` for the values, or use LINQ ([Slices](#slices)).
+- **`foreach (var (i, v) in s)` does not compile.** `foreach` over a slice or an array gives its values; Go's
+  `(index, value)` pairs are `range(s)`: `foreach (var (i, v) in range(s))` ([Slices](#slices)).
 - **`$"{f}"` on a Go func value prints the delegate's .NET type name.** Print it through `fmt` instead
   ([Printing Go values](#printing-go-values)).
 - **A copy of a Go array value shares its bytes.** `var b = a;` on a `uuid.UUID` copies the C# struct, not the

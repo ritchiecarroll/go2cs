@@ -32,9 +32,7 @@ partial struct Sym {
 }
 
 // Static reports whether this symbol is static (not visible outside its file).
-public static bool Static(this ref Sym s) {
-    return s.Type >= 'a';
-}
+public static bool Static(this ref Sym s) { return s.Type >= 'a'; }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
 // instantiated type, function, or method). If s.Name contains brackets, then it
@@ -190,9 +188,9 @@ partial struct sym {
     internal slice<byte> name;
 }
 
-internal static slice<byte> littleEndianSymtab = slice<byte>([0xFD, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00]);
-internal static slice<byte> bigEndianSymtab = slice<byte>([0xFF, 0xFF, 0xFF, 0xFD, 0x00, 0x00, 0x00]);
-internal static slice<byte> oldLittleEndianSymtab = slice<byte>([0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00]);
+internal static slice<byte> littleEndianSymtab = [0xFD, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00];
+internal static slice<byte> bigEndianSymtab = [0xFF, 0xFF, 0xFF, 0xFD, 0x00, 0x00, 0x00];
+internal static slice<byte> oldLittleEndianSymtab = [0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00];
 
 internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
     if (len(data) == 0) { // missing symtab is okay
@@ -470,7 +468,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
 
             // Record file names
             nint depth = 0;
-            foreach (var j in range(obj.Paths)) {
+            foreach (var j in range(len(obj.Paths))) {
                 var s = Ꮡ(obj.Paths, j);
                 if (s.Name == ""u8) {
                     depth--;
@@ -634,7 +632,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
     if (err != nil) {
         return (pc, fn, err);
     }
-    foreach (var i in range(obj.Funcs)) {
+    foreach (var i in range(len(obj.Funcs))) {
         var f = Ꮡ(obj.Funcs, i);
         var pcΔ2 = f.LineTable.LineToPC(abs, f.End);
         if (pcΔ2 != 0) {
@@ -648,7 +646,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
 // or nil if no such symbol is found.
 public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
-    foreach (var i in range(t.Syms)) {
+    foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
         switch (s.Type) {
         case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l' or (byte)'D' or (byte)'d' or (byte)'B' or (byte)'b': {
@@ -664,7 +662,7 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
 public static ж<Func> LookupFunc(this ref Table t, @string name) {
-    foreach (var i in range(t.Funcs)) {
+    foreach (var i in range(len(t.Funcs))) {
         var f = Ꮡ(t.Funcs, i);
         if (f.Sym.Name == name) {
             return f;
@@ -675,7 +673,7 @@ public static ж<Func> LookupFunc(this ref Table t, @string name) {
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
 public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
-    foreach (var i in range(t.Syms)) {
+    foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
         switch (s.Type) {
         case (byte)'T' or (byte)'t' or (byte)'L' or (byte)'l' or (byte)'D' or (byte)'d' or (byte)'B' or (byte)'b': {
@@ -713,7 +711,7 @@ internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
     var tos = noPath;
 
 pathloop:
-    foreach (var (_, s) in o.Paths) {
+    foreach (var (_, s) in range(o.Paths)) {
         ref var val = ref heap<nint>((nint)s.Value, out var Ꮡval);
         switch (ᐧ) {
         case {} when val > aline: {
@@ -754,7 +752,7 @@ internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint l
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
 
-    foreach (var (i, s) in o.Paths) {
+    foreach (var (i, s) in range(o.Paths)) {
         // Find this path
         if (s.Name != path) {
             continue;
@@ -765,7 +763,7 @@ internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint l
         nint incstart = default;
         line += (nint)s.Value;
 pathloop:
-        foreach (var (_, sΔ1) in o.Paths.slice(i)) {
+        foreach (var (_, sΔ1) in range(o.Paths.slice(i))) {
             nint val = (nint)sΔ1.Value;
             switch (ᐧ) {
             case {} when depth == 1 && val >= line: {
@@ -803,9 +801,7 @@ break_pathloop:;
 // the symbol table.
 partial struct UnknownFileError /*@string*/;
 
-public static @string Error(this UnknownFileError e) {
-    return "unknown file: "u8 + ((@string)e);
-}
+public static @string Error(this UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
 
 // UnknownLineError represents a failure to map a line to a program
 // counter, either because the line is beyond the bounds of the file

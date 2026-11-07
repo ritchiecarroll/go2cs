@@ -187,8 +187,7 @@ internal static error errnoErr(Errno e) {
 // It implements the [os.Signal] interface.
 partial struct ΔSignal /*num:nint*/;
 
-public static void Signal(this ΔSignal s) {
-}
+public static void Signal(this ΔSignal s) { }
 
 public static @string String(this ΔSignal s) {
     if (0 <= s && (nint)s < len(signals)) {

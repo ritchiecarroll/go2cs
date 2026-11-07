@@ -7,24 +7,19 @@ partial class main_package {
 partial struct item {
     internal nint n;
 }
-
 partial struct handle /*num:uintptr*/;
 
 internal static handle invalid => /* ^handle(0) */ unchecked((handle)18446744073709551615);
-
 internal static UntypedInt appErr => /* 1 << 29 */ 536870912;
-
 internal static handle big => /* appErr + 5 */ 536870917;
 
-internal static nint idx(this handle h) {
-    return (nint)(h - (handle)appErr);
-}
+internal static nint idx(this handle h) { return (nint)(h - (handle)appErr); }
 
 internal static (ж<item>, error) find(slice<item> xs, nint want) {
     GoFrame ᒐ = default;
     try {
         defer(() => fmt.Println("find done"), ref ᒐ);
-        foreach (var i in range(xs)) {
+        foreach (var i in range(len(xs))) {
             if (xs[i].n == want) {
                 return (Ꮡ(xs, i), default);
             }
@@ -49,9 +44,7 @@ internal static byte first(/*[4]*/ array<byte> valueʗp) {
 
 internal static error errNil;
 
-internal static uint32 width() {
-    return 9;
-}
+internal static uint32 width() { return 9; }
 
 internal static (uint32, error) mixedRet(bool ok) {
     GoFrame ᒐ = default;

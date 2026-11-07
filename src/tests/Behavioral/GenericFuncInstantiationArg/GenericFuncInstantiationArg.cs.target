@@ -5,13 +5,9 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static T pick<T>(slice<T> a) {
-    return a[0];
-}
+internal static T pick<T>(slice<T> a) { return a[0]; }
 
-internal static map<K, V> pair<K, V>(K k, V v) {
-    return new map<K, V>{[k] = v};
-}
+internal static map<K, V> pair<K, V>(K k, V v) { return new map<K, V>{[k] = v}; }
 
 internal static void show(any f) {
     fmt.Println("show:", reflect.TypeOf(f).String());
@@ -31,7 +27,7 @@ internal static any returned() {
 
 internal static void Main() {
     var pf = pick<@string>;
-    fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(slice<@string>(["a", "b", "c"])));
+    fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(["a", "b", "c"]));
 
     fmt.Println(reflect.TypeOf(pick<@string>).String());
     fmt.Println(reflect.TypeOf(pair<@string, nint>).String());

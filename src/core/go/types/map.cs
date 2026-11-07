@@ -18,21 +18,12 @@ public static ж<Map> NewMap(ΔType key, ΔType elem) {
 }
 
 // Key returns the key type of map m.
-public static ΔType Key(this ref Map m) {
-    return m.key;
-}
+public static ΔType Key(this ref Map m) { return m.key; }
 
 // Elem returns the element type of map m.
-public static ΔType Elem(this ref Map m) {
-    return m.elem;
-}
+public static ΔType Elem(this ref Map m) { return m.elem; }
 
-public static ΔType Underlying(this ж<Map> Ꮡt) {
-    return new MapжΔType(Ꮡt);
-}
-
-public static @string String(this ж<Map> Ꮡt) {
-    return TypeString(new MapжΔType(Ꮡt), default);
-}
+public static ΔType Underlying(this ж<Map> Ꮡt) { return new MapжΔType(Ꮡt); }
+public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжΔType(Ꮡt), default); }
 
 } // end types_package

@@ -27,7 +27,7 @@ partial struct Struct {
 // if no field has a tag, tags may be nil.
 public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
     objset fset = default;
-    foreach (var (_, f) in fields) {
+    foreach (var (_, f) in range(fields)) {
         if (f.name != "_"u8 && fset.insert(new VarжObject(f)) != nil) {
             throw panic("multiple fields with the same name");
         }
@@ -41,14 +41,10 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
 }
 
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
-public static nint NumFields(this ref Struct s) {
-    return len(s.fields);
-}
+public static nint NumFields(this ref Struct s) { return len(s.fields); }
 
 // Field returns the i'th field for 0 <= i < NumFields().
-public static ж<Var> Field(this ref Struct s, nint i) {
-    return s.fields[i];
-}
+public static ж<Var> Field(this ref Struct s, nint i) { return s.fields[i]; }
 
 // Tag returns the i'th field tag for 0 <= i < NumFields().
 public static @string Tag(this ref Struct s, nint i) {
@@ -58,13 +54,8 @@ public static @string Tag(this ref Struct s, nint i) {
     return ""u8;
 }
 
-public static ΔType Underlying(this ж<Struct> Ꮡt) {
-    return new StructжΔType(Ꮡt);
-}
-
-public static @string String(this ж<Struct> Ꮡt) {
-    return TypeString(new StructжΔType(Ꮡt), default);
-}
+public static ΔType Underlying(this ж<Struct> Ꮡt) { return new StructжΔType(Ꮡt); }
+public static @string String(this ж<Struct> Ꮡt) { return TypeString(new StructжΔType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -134,12 +125,12 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         addʗ1(ident, true);
     }
 
-    foreach (var (_, f) in list.List) {
+    foreach (var (_, f) in range(list.List)) {
         typ = Ꮡcheck.varType(f.Type);
         tag = Ꮡcheck.tag(f.Tag);
         if (len(f.Names) > 0) {
             // named fields
-            foreach (var (_, name) in f.Names) {
+            foreach (var (_, name) in range(f.Names)) {
                 add(name, false);
             }
         } else {

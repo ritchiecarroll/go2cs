@@ -14,7 +14,7 @@ public static iter.Seq2<nint, E> All<Slice, E>(Slice s)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
     return (Func<nint, E, bool> yield) => {
-        foreach (var (i, v) in s) {
+        foreach (var (i, v) in range(s)) {
             if (!yield(i, v)) {
                 return;
             }
@@ -41,7 +41,7 @@ public static iter.Seq<E> Values<Slice, E>(Slice s)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
     return (Func<E, bool> yield) => {
-        foreach (var (_, v) in s) {
+        foreach (var (_, v) in range(s)) {
             if (!yield(v)) {
                 return;
             }

@@ -304,7 +304,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
             throw panic("reflect: Call with too many input arguments");
         }
     }
-    foreach (var (_, x) in @in) {
+    foreach (var (_, x) in range(@in)) {
         if (x.Kind() == Invalid) {
             throw panic("reflect: " + op + " using zero Value argument");
         }
@@ -393,7 +393,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
     }
 
     // Handle arguments.
-    foreach (var (i, vᴛ1) in @in) {
+    foreach (var (i, vᴛ1) in range(@in)) {
         var vΔ1 = vᴛ1;
 
         vΔ1.mustBeExported();
@@ -403,7 +403,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
         // was possible to use space in the argument frame.
         vΔ1 = vΔ1.assignTo(reflectValueCallˢ, targ.Ꮡt, nil);
 stepsLoop:
-        foreach (var (_, st) in abid.call.stepsForValue(i + inStart)) {
+        foreach (var (_, st) in range(abid.call.stepsForValue(i + inStart))) {
             switch (st.kind) {
             case var ᴛ when ᴛ == abiStepStack: {
                 // Copy values to the "stack."
@@ -541,7 +541,7 @@ break_stepsLoop:;
             // register-allocated return values into the allocated stack frame and
             // referring there in the resulting Value.
             @unsafe.Pointer s = (uintptr)unsafe_New(tv);
-            foreach (var (_, st) in steps) {
+            foreach (var (_, st) in range(steps)) {
                 switch (st.kind) {
                 case var ᴛ when ᴛ == abiStepIntReg: {
                     @unsafe.Pointer offset = (uintptr)add(s, st.offset, precomputedValueOffsetˢ);
@@ -622,7 +622,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
     // Copy arguments into Values.
     @unsafe.Pointer ptr = frame;
     var @in = new slice<ΔValue>(0, () => new(nil), (nint)ftyp.InCount);
-    foreach (var (i, typ) in ftyp.InSlice()) {
+    foreach (var (i, typ) in range(ftyp.InSlice())) {
         if (typ.Size() == 0) {
             @in = builtin.append(@in, Zero(new rtypeжΔType(toRType(typ))));
             continue;
@@ -649,7 +649,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                 // create space for the values.
                 v.flag |= (flag)(flagIndir);
                 v.ptr = (uintptr)unsafe_New(typ);
-                foreach (var (_, stΔ1) in steps) {
+                foreach (var (_, stΔ1) in range(steps)) {
                     switch (stΔ1.kind) {
                     case var ᴛ when ᴛ == abiStepIntReg: {
                         @unsafe.Pointer offset = (uintptr)add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
@@ -697,7 +697,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
 
     // Copy results back into argument frame and register space.
     if (numOut > 0) {
-        foreach (var (i, typ) in ftyp.OutSlice()) {
+        foreach (var (i, typ) in range(ftyp.OutSlice())) {
             var v = @out[i];
             if (v.typ() == nil) {
                 throw panic("reflect: function created by MakeFunc using " + funcName(f) + " returned zero Value");
@@ -725,7 +725,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
             // target location used as scratch space. See issue 39541.
             v = v.assignTo(reflectMakeFuncˢ, typ, nil);
 stepsLoop:
-            foreach (var (_, st) in abid.ret.stepsForValue(i)) {
+            foreach (var (_, st) in range(abid.ret.stepsForValue(i))) {
                 switch (st.kind) {
                 case var ᴛ when ᴛ == abiStepStack: {
                     // Copy values to the "stack."
@@ -941,7 +941,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     }
 
     // Translate the rest of the arguments.
-    foreach (var (i, t) in valueFuncType.InSlice()) {
+    foreach (var (i, t) in range(valueFuncType.InSlice())) {
         var valueSteps = valueABI.call.stepsForValue(i);
         var methodSteps = methodABI.call.stepsForValue(i + 1);
 
@@ -977,7 +977,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     continue;
                 }
                 // Handle stack -> register translation.
-                foreach (var (_, mStepΔ1) in methodSteps) {
+                foreach (var (_, mStepΔ1) in range(methodSteps)) {
                     @unsafe.Pointer from = (uintptr)add(valueFrame, vStep.stkOff + mStepΔ1.offset, precomputedStackOffsetˢ);
                     var exprᴛ2 = mStepΔ1.kind;
                     var matchᴛ2 = false;
@@ -1002,7 +1002,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
         // Handle register -> stack translation.
         {
             var mStep = methodSteps[0]; if (mStep.kind == abiStepStack) {
-                foreach (var (_, vStep) in valueSteps) {
+                foreach (var (_, vStep) in range(valueSteps)) {
                     @unsafe.Pointer to = (uintptr)add(methodFrame, mStep.stkOff + vStep.offset, precomputedStackOffsetˢ);
                     switch (vStep.kind) {
                     case var ᴛ when ᴛ == abiStepPointer: {
@@ -1033,7 +1033,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
             // number of registers for each ABI.
             throw panic("method ABI and value ABI don't align");
         }
-        foreach (var (iΔ1, vStep) in valueSteps) {
+        foreach (var (iΔ1, vStep) in range(valueSteps)) {
             var mStep = methodSteps[iΔ1];
             if (mStep.kind != vStep.kind) {
                 throw panic("method ABI and value ABI don't align");
@@ -1173,7 +1173,7 @@ public static ΔValue FieldByIndex(this ΔValue v, slice<nint> index) {
         return v.Field(index[0]);
     }
     v.mustBe(Struct);
-    foreach (var (i, x) in index) {
+    foreach (var (i, x) in range(index)) {
         if (i > 0) {
             if (v.Kind() == ΔPointer && v.typ().Elem().Kind() == abi.Struct) {
                 if (v.IsNil()) {
@@ -1196,7 +1196,7 @@ public static (ΔValue, error) FieldByIndexErr(this ΔValue v, slice<nint> index
         return (v.Field(index[0]), default);
     }
     v.mustBe(Struct);
-    foreach (var (i, x) in index) {
+    foreach (var (i, x) in range(index)) {
         if (i > 0) {
             if (v.Kind() == Ptr && v.typ().Elem().Kind() == abi.Struct) {
                 if (v.IsNil()) {
@@ -2472,7 +2472,6 @@ internal static bool chansend(@unsafe.Pointer ch, @unsafe.Pointer val, bool nb) 
 }
 
 internal static partial @unsafe.Pointer /*ch*/ makechan(ж<abi.Type> typ, nint size);
-
 internal static partial @unsafe.Pointer /*m*/ makemap(ж<abi.Type> t, nint cap);
 
 //go:noescape

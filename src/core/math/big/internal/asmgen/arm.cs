@@ -11,14 +11,14 @@ partial class asmgen_package {
     WordBytes: 4,
     CarrySafeLoop: true,
 
-    regs: slice<@string>([
+    regs: [
         // R10 is g.
         // R11 is the assembler/linker temporary (but we use it as a regular register).
         // R13 is SP.
         // R14 is LR.
         // R15 is PC.
         "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R11", "R12"
-    ]),
+    ],
     regShift: true,
 
     mov: "MOVW",
@@ -55,7 +55,7 @@ internal static void armMulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, 
 internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    foreach (var (_, r) in regs) {
+    foreach (var (_, r) in range(regs)) {
         Ꮡa.Printf("\tMOVW.P %d(%s), %s\n", a.Arch.WordBytes, p, r);
     }
 }
@@ -63,7 +63,7 @@ internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
 internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    foreach (var (_, r) in regs) {
+    foreach (var (_, r) in range(regs)) {
         Ꮡa.Printf("\tMOVW.W %d(%s), %s\n", -a.Arch.WordBytes, p, r);
     }
 }
@@ -71,7 +71,7 @@ internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
 internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    foreach (var (_, r) in regs) {
+    foreach (var (_, r) in range(regs)) {
         Ꮡa.Printf("\tMOVW.P %s, %d(%s)\n", r, a.Arch.WordBytes, p);
     }
 }
@@ -79,7 +79,7 @@ internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
 internal static void armStoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    foreach (var (_, r) in regs) {
+    foreach (var (_, r) in range(regs)) {
         Ꮡa.Printf("\tMOVW.W %s, %d(%s)\n", r, -a.Arch.WordBytes, p);
     }
 }

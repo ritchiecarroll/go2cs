@@ -87,14 +87,10 @@ internal static class IArrayTypeTemplate
 
                 public global::System.Span<{{targetTypeName}}> ToSpan() => Value.ToSpan();
 
-                // Forwards the CONCRETE struct enumerator, not IEnumerator<(nint, T)>: `foreach` binds
-                // GetEnumerator by pattern, so a named array type ranges with zero heap traffic exactly
-                // like the array<T> it wraps. Returning the interface here would box on every loop entry.
-                // IArray<T> declares its own GetEnumerator() over (nint, T), so that member becomes explicit
-                // — the boxing path, taken only when a consumer asks for the interface.
+                // Forwards the CONCRETE struct enumerator over the VALUES, as array<T> enumerates them:
+                // `foreach` binds GetEnumerator by pattern, so a named array type enumerates with zero heap
+                // traffic exactly like the array<T> it wraps. Go's range pairs are builtin.range(x).
                 public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => Value.GetEnumerator();
-
-                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::go.IArray<{{targetTypeName}}>.GetEnumerator() => ((global::go.IArray<{{targetTypeName}}>)Value).GetEnumerator();
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)Value).GetEnumerator();
 

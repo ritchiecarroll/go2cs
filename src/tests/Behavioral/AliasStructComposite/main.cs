@@ -12,17 +12,9 @@ partial struct Inner {
     public nint W;
 }
 
-internal static alias keyed() {
-    return new alias(V: 7, W: 3);
-}
-
-internal static alias empty() {
-    return new alias();
-}
-
-internal static alias positional() {
-    return new alias(1, 2);
-}
+internal static alias keyed() { return new alias(V: 7, W: 3); }
+internal static alias empty() { return new alias(); }
+internal static alias positional() { return new alias(1, 2); }
 
 internal static uint64 sum(/*[4]*/ words w) {
     w = w.Clone();
@@ -38,7 +30,7 @@ internal static uint64 rangeSum(/*[4]*/ words w) {
     w = w.Clone();
 
     uint64 s = default;
-    foreach (var (_, e) in w.ΔRangeSnapshot()) {
+    foreach (var (_, e) in range(w.ΔRangeSnapshot())) {
         s += e;
     }
     return s;

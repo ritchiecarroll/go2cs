@@ -10,16 +10,16 @@ internal static void Main() {
     var s = Ꮡarr.slice(0, 4);
 
     nint sum = 0;
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         sum += i;
     }
 
     nint total = 0;
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         total += v;
     }
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         var ps = Ꮡ(s, i);
         ps.Value += 1;
     }

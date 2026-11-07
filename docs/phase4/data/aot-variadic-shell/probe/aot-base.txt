@@ -1,0 +1,10 @@
+1 TT    Error(...any)         : false
+2 TT    Name() string         : true
+3 TT    Logf(string, ...any)  : false
+4 TT    Failed() bool         : true
+5 TT    Errorer (named)       : false
+6 *TT   Error(...any)         : false
+7 *T    Error(...any)         : false
+8 *T    Name() string         : true
+9 LL    Error(...any)         : false
+10 V    Error(...any)         : false

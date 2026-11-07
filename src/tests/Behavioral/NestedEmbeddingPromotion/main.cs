@@ -9,9 +9,7 @@ partial struct inner {
     internal nint p;
 }
 
-internal static @string describe(this inner i) {
-    return fmt.Sprintf("n=%d p=%d"u8, i.n, i.p);
-}
+internal static @string describe(this inner i) { return fmt.Sprintf("n=%d p=%d"u8, i.n, i.p); }
 
 partial struct mid {
     /*embed*/ internal inner inner;

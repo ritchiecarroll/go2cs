@@ -49,7 +49,7 @@ using static go.ForeignPairNumericConv.convlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAgSgKSApIA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgSlJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignPairNumericConv;

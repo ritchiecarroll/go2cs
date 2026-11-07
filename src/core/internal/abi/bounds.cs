@@ -78,7 +78,6 @@ public static nint BoundsEncode(BoundsErrorCode code, bool signed, bool xIsReg, 
     }
     return c * (nint)numBoundsCodes + (nint)code;
 }
-
 public static (BoundsErrorCode code, bool signed, bool xIsReg, bool yIsReg, nint xVal, nint yVal) BoundsDecode(nint v) {
     BoundsErrorCode code = default;
     bool signed = default;

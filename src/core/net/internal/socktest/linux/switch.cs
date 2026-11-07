@@ -59,19 +59,13 @@ public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
 partial struct Cookie /*num:uint64*/;
 
 // Family returns an address family.
-public static nint Family(this Cookie c) {
-    return (nint)(c >> 48);
-}
+public static nint Family(this Cookie c) { return (nint)(c >> 48); }
 
 // Type returns a socket type.
-public static nint Type(this Cookie c) {
-    return (nint)((c << 16) >> 32);
-}
+public static nint Type(this Cookie c) { return (nint)((c << 16) >> 32); }
 
 // Protocol returns a protocol number.
-public static nint Protocol(this Cookie c) {
-    return (nint)((Cookie)(c & 0xff));
-}
+public static nint Protocol(this Cookie c) { return (nint)((Cookie)(c & 0xff)); }
 
 internal static Cookie cookie(nint family, nint sotype, nint proto) {
     return (Cookie)((Cookie)(((Cookie)(uint64)family) << 48 | (Cookie)(((Cookie)(uint64)sotype) & 0xffffffffU) << 16) | (Cookie)(((Cookie)(uint64)proto) & 0xff));

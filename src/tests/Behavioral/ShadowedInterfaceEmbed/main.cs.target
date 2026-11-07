@@ -8,9 +8,7 @@ partial struct Logger {
     internal @string name;
 }
 
-public static @string Handler(this Logger l) {
-    return "logger:"u8 + l.name;
-}
+public static @string Handler(this Logger l) { return "logger:"u8 + l.name; }
 
 partial interface ΔHandler {
     bool Enabled(nint level);
@@ -22,26 +20,16 @@ partial struct baseHandler {
     internal nint level;
 }
 
-internal static bool Enabled(this baseHandler b, nint level) {
-    return level >= b.level;
-}
-
-internal static @string Handle(this baseHandler b, @string msg) {
-    return "base:"u8 + msg;
-}
-
-internal static @string WithName(this baseHandler b, @string name) {
-    return "base-name:"u8 + name;
-}
+internal static bool Enabled(this baseHandler b, nint level) { return level >= b.level; }
+internal static @string Handle(this baseHandler b, @string msg) { return "base:"u8 + msg; }
+internal static @string WithName(this baseHandler b, @string name) { return "base-name:"u8 + name; }
 
 partial struct wrapper {
     /*embed*/ public ΔHandler Handler;
     internal @string prefix;
 }
 
-internal static @string Handle(this wrapper w, @string msg) {
-    return w.prefix + w.Handler.Handle(msg);
-}
+internal static @string Handle(this wrapper w, @string msg) { return w.prefix + w.Handler.Handle(msg); }
 
 internal static void Main() {
     var l = new Logger(name: "test");

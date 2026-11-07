@@ -60,9 +60,7 @@ public static ΔLevel /*oldLevel*/ SetLogLoggerLevel(ΔLevel level) {
 }
 
 // Default returns the default [Logger].
-public static ж<Logger> Default() {
-    return ᏑdefaultLogger.Load();
-}
+public static ж<Logger> Default() { return ᏑdefaultLogger.Load(); }
 
 // SetDefault makes l the default [Logger], which is used by
 // the top-level functions [Info], [Debug] and so on.
@@ -109,7 +107,7 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
 
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
-    buf = bytes.TrimSuffix(buf, slice<byte>([(byte)'\n']));
+    buf = bytes.TrimSuffix(buf, [(byte)'\n']);
     var r = NewRecord(time_package.Now(), level, (@string)buf, pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }
@@ -130,9 +128,7 @@ internal static ж<Logger> clone(this ref Logger l) {
 }
 
 // Handler returns l's Handler.
-public static ΔHandler Handler(this ref Logger l) {
-    return l.handler;
-}
+public static ΔHandler Handler(this ref Logger l) { return l.handler; }
 
 // With returns a Logger that includes the given attributes
 // in each output operation. Arguments are converted to

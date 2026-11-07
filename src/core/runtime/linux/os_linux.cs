@@ -109,7 +109,7 @@ internal static int32 getCPUCount() {
         return 1;
     }
     var n = (int32)0;
-    foreach (var (_, vᴛ1) in buf.slice(0, r)) {
+    foreach (var (_, vᴛ1) in range(buf.slice(0, r))) {
         var v = vᴛ1;
 
         while (v != 0) {
@@ -441,9 +441,7 @@ internal static void mdestroy(ref m mp) {
 // #define sa_handler k_sa_handler
 // #endif
 internal static partial void sigreturn__sigaction();
-
 internal static partial void sigtramp();
-
 // Called via C ABI
 internal static partial void cgoSigtramp();
 
@@ -469,12 +467,10 @@ internal static void sigprocmask(int32 how, ж<sigset> @new, ж<sigset> old) {
 }
 
 internal static partial void raise(uint32 sig);
-
 internal static partial void raiseproc(uint32 sig);
 
 //go:noescape
 internal static partial int32 sched_getaffinity(uintptr pid, uintptr len, ж<byte> buf);
-
 internal static partial void osyield();
 
 //go:nosplit
@@ -600,7 +596,6 @@ internal static void fixSigactionForCgo(ж<sigactiont> Ꮡnew) {
 }
 
 internal static partial nint getpid();
-
 internal static partial void tgkill(nint tgid, nint tid, nint sig);
 
 // signalM sends a signal to mp.

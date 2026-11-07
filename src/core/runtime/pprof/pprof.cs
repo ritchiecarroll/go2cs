@@ -478,17 +478,9 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
 
 partial struct stackProfile /*[]slice<uintptr>*/;
 
-internal static nint Len(this stackProfile x) {
-    return len(x);
-}
-
-internal static slice<uintptr> Stack(this stackProfile x, nint i) {
-    return x[i];
-}
-
-internal static ж<labelMap> Label(this stackProfile x, nint i) {
-    return default;
-}
+internal static nint Len(this stackProfile x) { return len(x); }
+internal static slice<uintptr> Stack(this stackProfile x, nint i) { return x[i]; }
+internal static ж<labelMap> Label(this stackProfile x, nint i) { return default; }
 
 // A countProfile is a set of stack traces to be printed as counts
 // grouped by stack trace. There are multiple implementations:
@@ -542,7 +534,7 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     var values = slice<int64>([0, 0]);
     slice<uint64> locs = default;
     var expandedStack = pprof_makeProfStack();
-    foreach (var (_, r) in records) {
+    foreach (var (_, r) in range(records)) {
         values[0] = r.Count;
         values[1] = (int64)((float64)r.Cycles / cpuGHz);
         // For count profiles, all stack addresses are
@@ -566,7 +558,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
     @string key(slice<uintptr> stk, ж<labelMap> lbls) {
         Ꮡbuf.Value.Reset();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "@"u8);
-        foreach (var (_, pc) in stk) {
+        foreach (var (_, pc) in range(stk)) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), " %#x"u8, pc);
         }
         if (lbls != nil) {
@@ -594,7 +586,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         // Print debug profile in legacy format
         var tw = tabwriter.NewWriter(w, 1, 8, 1, (byte)'\t', 0);
         fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%s profile: total %d\n"u8, name, p.Len());
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%d %s\n"u8, count[k], k);
             printStackRecord(new tabwriter_WriterжWriter(tw), p.Stack(index[k]), false);
         }
@@ -609,7 +601,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
 
     var values = slice<int64>([0]);
     slice<uint64> locs = default;
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         values[0] = (int64)count[k];
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
@@ -619,7 +611,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
             labels = () => {
-                foreach (var (_, lbl) in p.Label(idx).Set.List) {
+                foreach (var (_, lbl) in range(p.Label(idx).Set.List)) {
                     bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
@@ -635,14 +627,8 @@ partial struct keysByCount {
     internal map<@string, nint> count;
 }
 
-internal static nint Len(this ref keysByCount x) {
-    return len(x.keys);
-}
-
-internal static void Swap(this ref keysByCount x, nint i, nint j) {
-    (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]);
-}
-
+internal static nint Len(this ref keysByCount x) { return len(x.keys); }
+internal static void Swap(this ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
 internal static bool Less(this ref keysByCount x, nint i, nint j) {
     @string ki = x.keys[i];
     @string kj = x.keys[j];
@@ -761,7 +747,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     w = new tabwriter_WriterжWriter(tw);
 
     runtime.MemProfileRecord total = new();
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         total.AllocBytes += r.AllocBytes;
         total.AllocObjects += r.AllocObjects;
@@ -791,12 +777,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         total.AllocObjects, allocBytes,
         rate);
 
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
             r.InUseObjects(), r.InUseBytes(),
             r.AllocObjects, r.AllocBytes);
-        foreach (var (_, pc) in r.Stack) {
+        foreach (var (_, pc) in range(r.Stack)) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
         fmt.Fprintf(w, "\n"u8);
@@ -966,17 +952,9 @@ partial struct runtimeProfile {
     internal slice<@unsafe.Pointer> labels;
 }
 
-internal static nint Len(this ref runtimeProfile p) {
-    return len(p.stk);
-}
-
-internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) {
-    return p.stk[i].Stack;
-}
-
-internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
-    return (ж<labelMap>)(uintptr)(p.labels[i]);
-}
+internal static nint Len(this ref runtimeProfile p) { return len(p.stk); }
+internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
+internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return (ж<labelMap>)(uintptr)(p.labels[i]); }
 
 partial struct cpuᴛ1 /*dyn*/ {
     /*embed*/ public go.sync_package.Mutex Mutex;
@@ -1149,12 +1127,12 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         fmt.Fprintf(w, "sampling period=%d\n"u8, runtime.SetMutexProfileFraction(-1));
     }
     var expandedStack = pprof_makeProfStack();
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%v %v @"u8, r.Cycles, r.Count);
         nint nΔ1 = expandInlinedFrames(expandedStack, r.Stack);
         var stack = expandedStack.slice(0, nΔ1);
-        foreach (var (_, pc) in stack) {
+        foreach (var (_, pc) in range(stack)) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
         fmt.Fprint(w, "\n");

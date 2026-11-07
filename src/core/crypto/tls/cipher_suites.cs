@@ -42,9 +42,9 @@ partial struct CipherSuite {
     public bool Insecure;
 }
 
-internal static slice<uint16> supportedUpToTLS12 = slice<uint16>([VersionTLS10, VersionTLS11, VersionTLS12]);
-internal static slice<uint16> supportedOnlyTLS12 = slice<uint16>([VersionTLS12]);
-internal static slice<uint16> supportedOnlyTLS13 = slice<uint16>([VersionTLS13]);
+internal static slice<uint16> supportedUpToTLS12 = [VersionTLS10, VersionTLS11, VersionTLS12];
+internal static slice<uint16> supportedOnlyTLS12 = [VersionTLS12];
+internal static slice<uint16> supportedOnlyTLS13 = [VersionTLS13];
 
 // CipherSuites returns a list of cipher suites currently implemented by this
 // package, excluding those with security issues, which are returned by
@@ -54,7 +54,7 @@ internal static slice<uint16> supportedOnlyTLS13 = slice<uint16>([VersionTLS13])
 // this package might depend on logic that can't be captured by a static list,
 // and might not match those returned by this function.
 public static slice<ж<CipherSuite>> CipherSuites() {
-    return slice<ж<CipherSuite>>([
+    return [
         Ꮡ(new CipherSuite(TLS_AES_128_GCM_SHA256, "TLS_AES_128_GCM_SHA256", supportedOnlyTLS13, false)),
         Ꮡ(new CipherSuite(TLS_AES_256_GCM_SHA384, "TLS_AES_256_GCM_SHA384", supportedOnlyTLS13, false)),
         Ꮡ(new CipherSuite(TLS_CHACHA20_POLY1305_SHA256, "TLS_CHACHA20_POLY1305_SHA256", supportedOnlyTLS13, false)),
@@ -69,7 +69,7 @@ public static slice<ж<CipherSuite>> CipherSuites() {
         Ꮡ(new CipherSuite(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", supportedOnlyTLS12, false)),
         Ꮡ(new CipherSuite(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256", supportedOnlyTLS12, false)),
         Ꮡ(new CipherSuite(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256", supportedOnlyTLS12, false))
-    ]);
+    ];
 }
 
 // InsecureCipherSuites returns a list of cipher suites currently implemented by
@@ -80,7 +80,7 @@ public static slice<ж<CipherSuite>> CipherSuites() {
 public static slice<ж<CipherSuite>> InsecureCipherSuites() {
     // This list includes legacy RSA kex, RC4, CBC_SHA256, and 3DES cipher
     // suites. See cipherSuitesPreferenceOrder for details.
-    return slice<ж<CipherSuite>>([
+    return [
         Ꮡ(new CipherSuite(TLS_RSA_WITH_RC4_128_SHA, "TLS_RSA_WITH_RC4_128_SHA", supportedUpToTLS12, true)),
         Ꮡ(new CipherSuite(TLS_RSA_WITH_3DES_EDE_CBC_SHA, "TLS_RSA_WITH_3DES_EDE_CBC_SHA", supportedUpToTLS12, true)),
         Ꮡ(new CipherSuite(TLS_RSA_WITH_AES_128_CBC_SHA, "TLS_RSA_WITH_AES_128_CBC_SHA", supportedUpToTLS12, true)),
@@ -93,19 +93,19 @@ public static slice<ж<CipherSuite>> InsecureCipherSuites() {
         Ꮡ(new CipherSuite(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA", supportedUpToTLS12, true)),
         Ꮡ(new CipherSuite(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", supportedOnlyTLS12, true)),
         Ꮡ(new CipherSuite(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", supportedOnlyTLS12, true))
-    ]);
+    ];
 }
 
 // CipherSuiteName returns the standard name for the passed cipher suite ID
 // (e.g. "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"), or a fallback representation
 // of the ID value if the cipher suite is not implemented by this package.
 public static @string CipherSuiteName(uint16 id) {
-    foreach (var (_, c) in CipherSuites()) {
+    foreach (var (_, c) in range(CipherSuites())) {
         if (c.ID == id) {
             return c.Name;
         }
     }
-    foreach (var (_, c) in InsecureCipherSuites()) {
+    foreach (var (_, c) in range(InsecureCipherSuites())) {
         if (c.ID == id) {
             return c.Name;
         }
@@ -146,7 +146,7 @@ partial struct cipherSuite {
     internal Func<slice<byte>, slice<byte>, aead> aead;
 }
 
-[GoLazy] partial class lazyᴛΔcipherSuites { internal static slice<ж<cipherSuite>> ΔcipherSuites = slice<ж<cipherSuite>>([ // TODO: replace with a map, since the order doesn't matter.
+[GoLazy] partial class lazyᴛΔcipherSuites { internal static slice<ж<cipherSuite>> ΔcipherSuites = [ // TODO: replace with a map, since the order doesn't matter.
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default, default, aeadChaCha20Poly1305)),
     Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheECDSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteECSign) | (nint)suiteTLS12), default, default, aeadChaCha20Poly1305)),
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, 16, 0, 4, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default, default, aeadAESGCM)),
@@ -169,18 +169,18 @@ partial struct cipherSuite {
     Ꮡ(new cipherSuite(TLS_RSA_WITH_RC4_128_SHA, 16, 20, 0, rsaKA, 0, cipherRC4, macSHA1, default)),
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_RC4_128_SHA, 16, 20, 0, ecdheRSAKA, suiteECDHE, cipherRC4, macSHA1, default)),
     Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, 16, 20, 0, ecdheECDSAKA, (nint)((nint)suiteECDHE | (nint)suiteECSign), cipherRC4, macSHA1, default))
-]); }
+]; }
 
 // selectCipherSuite returns the first TLS 1.0–1.2 cipher suite from ids which
 // is also in supportedIDs and passes the ok filter.
 internal static ж<cipherSuite> selectCipherSuite(slice<uint16> ids, slice<uint16> supportedIDs, Func<ж<cipherSuite>, bool> ok) {
-    foreach (var (_, id) in ids) {
+    foreach (var (_, id) in range(ids)) {
         var candidate = cipherSuiteByID(id);
         if (candidate == nil || !ok(candidate)) {
             continue;
         }
 
-        foreach (var (_, suppID) in supportedIDs) {
+        foreach (var (_, suppID) in range(supportedIDs)) {
             if (id == suppID) {
                 return candidate;
             }
@@ -208,11 +208,11 @@ partial struct cipherSuiteTLS13 {
 // See go.dev/issue/67401.
 //
 //go:linkname cipherSuitesTLS13
-[GoLazy] partial class lazyᴛcipherSuitesTLS13 { internal static slice<ж<cipherSuiteTLS13>> cipherSuitesTLS13 = slice<ж<cipherSuiteTLS13>>([ // TODO: replace with a map.
+[GoLazy] partial class lazyᴛcipherSuitesTLS13 { internal static slice<ж<cipherSuiteTLS13>> cipherSuitesTLS13 = [ // TODO: replace with a map.
     Ꮡ(new cipherSuiteTLS13(TLS_AES_128_GCM_SHA256, 16, aeadAESGCMTLS13, crypto.SHA256)),
     Ꮡ(new cipherSuiteTLS13(TLS_CHACHA20_POLY1305_SHA256, 32, aeadChaCha20Poly1305, crypto.SHA256)),
     Ꮡ(new cipherSuiteTLS13(TLS_AES_256_GCM_SHA384, 32, aeadAESGCMTLS13, crypto.SHA384))
-]); }
+]; }
 
 // cipherSuitesPreferenceOrder is the order in which we'll select (on the
 // server) or advertise (on the client) TLS 1.0–1.2 cipher suites.
@@ -278,7 +278,7 @@ partial struct cipherSuiteTLS13 {
 //
 //     The relative order of ECDSA and RSA cipher suites doesn't matter,
 //     as they depend on the certificate. Pick one to get a stable order.
-[GoLazy] partial class lazyᴛcipherSuitesPreferenceOrder { internal static slice<uint16> cipherSuitesPreferenceOrder = slice<uint16>([
+[GoLazy] partial class lazyᴛcipherSuitesPreferenceOrder { internal static slice<uint16> cipherSuitesPreferenceOrder = [
     // AEADs w/ ECDHE
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -307,9 +307,9 @@ partial struct cipherSuiteTLS13 {
     // RC4
     TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA,
     TLS_RSA_WITH_RC4_128_SHA
-]); }
+]; }
 
-[GoLazy] partial class lazyᴛcipherSuitesPreferenceOrderNoAES { internal static slice<uint16> cipherSuitesPreferenceOrderNoAES = slice<uint16>([
+[GoLazy] partial class lazyᴛcipherSuitesPreferenceOrderNoAES { internal static slice<uint16> cipherSuitesPreferenceOrderNoAES = [
     // ChaCha20Poly1305
     TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 
@@ -330,7 +330,7 @@ partial struct cipherSuiteTLS13 {
     TLS_RSA_WITH_AES_128_CBC_SHA256,
     TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA,
     TLS_RSA_WITH_RC4_128_SHA
-]); }
+]; }
 
 // disabledCipherSuites are not used unless explicitly listed in Config.CipherSuites.
 [GoLazy] partial class lazyᴛdisabledCipherSuites { internal static map<uint16, bool> disabledCipherSuites = new map<uint16, bool>{
@@ -390,7 +390,7 @@ internal static bool isAESGCMPreferred(slice<uint16> ciphers) {
     if (!hasAESGCMHardwareSupport) {
         return false;
     }
-    foreach (var (_, cID) in ciphers) {
+    foreach (var (_, cID) in range(ciphers)) {
         {
             var c = cipherSuiteByID(cID); if (c != nil) {
                 return aesgcmCiphers[cID];
@@ -463,17 +463,9 @@ partial struct prefixNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize(this ref prefixNonceAEAD f) {
-    return aeadNonceLength - noncePrefixLength;
-}
-
-internal static nint Overhead(this ref prefixNonceAEAD f) {
-    return f.aead.Overhead();
-}
-
-internal static nint explicitNonceLen(this ref prefixNonceAEAD f) {
-    return f.NonceSize();
-}
+internal static nint NonceSize(this ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
+internal static nint Overhead(this ref prefixNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref prefixNonceAEAD f) { return f.NonceSize(); }
 
 internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
@@ -492,24 +484,16 @@ partial struct xorNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize(this ref xorNonceAEAD f) {
-    return 8; // 64-bit sequence number
-}
-
-internal static nint Overhead(this ref xorNonceAEAD f) {
-    return f.aead.Overhead();
-}
-
-internal static nint explicitNonceLen(this ref xorNonceAEAD f) {
-    return 0;
-}
+internal static nint NonceSize(this ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
+internal static nint Overhead(this ref xorNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref xorNonceAEAD f) { return 0; }
 
 internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
-    foreach (var (i, b) in nonce) {
+    foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
     var result = f.aead.Seal(@out, f.nonceMask[..], plaintext, additionalData);
-    foreach (var (i, b) in nonce) {
+    foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
 
@@ -517,11 +501,11 @@ internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slic
 }
 
 internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
-    foreach (var (i, b) in nonce) {
+    foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
     var (result, err) = f.aead.Open(@out, f.nonceMask[..], ciphertext, additionalData);
-    foreach (var (i, b) in nonce) {
+    foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
 
@@ -614,25 +598,11 @@ partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
-internal static nint Size(this ref cthWrapper c) {
-    return c.h.Size();
-}
-
-internal static nint BlockSize(this ref cthWrapper c) {
-    return c.h.BlockSize();
-}
-
-internal static void Reset(this ref cthWrapper c) {
-    c.h.Reset();
-}
-
-internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) {
-    return c.h.Write(p);
-}
-
-internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) {
-    return c.h.ConstantTimeSum(b);
-}
+internal static nint Size(this ref cthWrapper c) { return c.h.Size(); }
+internal static nint BlockSize(this ref cthWrapper c) { return c.h.BlockSize(); }
+internal static void Reset(this ref cthWrapper c) { c.h.Reset(); }
+internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
+internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
 
 internal static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
     boring.Unreachable();
@@ -673,7 +643,7 @@ internal static keyAgreement ecdheRSAKA(uint16 version) {
 // mutualCipherSuite returns a cipherSuite given a list of supported
 // ciphersuites and the id requested by the peer.
 internal static ж<cipherSuite> mutualCipherSuite(slice<uint16> have, uint16 want) {
-    foreach (var (_, id) in have) {
+    foreach (var (_, id) in range(have)) {
         if (id == want) {
             return cipherSuiteByID(id);
         }
@@ -682,7 +652,7 @@ internal static ж<cipherSuite> mutualCipherSuite(slice<uint16> have, uint16 wan
 }
 
 internal static ж<cipherSuite> cipherSuiteByID(uint16 id) {
-    foreach (var (_, cipherSuite) in ΔcipherSuites) {
+    foreach (var (_, cipherSuite) in range(ΔcipherSuites)) {
         if (cipherSuite.id == id) {
             return cipherSuite;
         }
@@ -691,7 +661,7 @@ internal static ж<cipherSuite> cipherSuiteByID(uint16 id) {
 }
 
 internal static ж<cipherSuiteTLS13> mutualCipherSuiteTLS13(slice<uint16> have, uint16 want) {
-    foreach (var (_, id) in have) {
+    foreach (var (_, id) in range(have)) {
         if (id == want) {
             return cipherSuiteTLS13ByID(id);
         }
@@ -700,7 +670,7 @@ internal static ж<cipherSuiteTLS13> mutualCipherSuiteTLS13(slice<uint16> have, 
 }
 
 internal static ж<cipherSuiteTLS13> cipherSuiteTLS13ByID(uint16 id) {
-    foreach (var (_, cipherSuite) in cipherSuitesTLS13) {
+    foreach (var (_, cipherSuite) in range(cipherSuitesTLS13)) {
         if (cipherSuite.id == id) {
             return cipherSuite;
         }

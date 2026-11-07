@@ -95,7 +95,7 @@ continue_outer:;
     }
 break_outer:;
 
-    foreach (var (idx, w) in slice<@string>(["go", "brk", "go", "end"])) {
+    foreach (var (idx, w) in range(slice<@string>(["go", "brk", "go", "end"]))) {
         var exprᴛ6 = w;
         switch (ᐧ) {
         case {} when exprᴛ6 == "go"u8 || exprᴛ6 == "brk"u8: {

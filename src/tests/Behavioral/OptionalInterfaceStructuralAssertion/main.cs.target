@@ -17,13 +17,8 @@ partial struct widget {
     internal @string name;
 }
 
-internal static @string Describe(this widget w) {
-    return "describe:"u8 + w.name;
-}
-
-internal static @string Tag(this widget w) {
-    return "tag:"u8 + w.name;
-}
+internal static @string Describe(this widget w) { return "describe:"u8 + w.name; }
+internal static @string Tag(this widget w) { return "tag:"u8 + w.name; }
 
 partial struct plain {
 }
@@ -38,7 +33,7 @@ internal static void Main() {
 
     var items = slice<any>([new widget(name: "beta"), new plain()]);
 
-    foreach (var (_, it) in items) {
+    foreach (var (_, it) in range(items)) {
         var (t, ok) = it._<Tagger>(ᐧ); if (ok) {
             fmt.Println(t.Describe(), t.Tag());
         } else {

@@ -68,7 +68,7 @@ internal static void Main() {
         new(9, "?")
     ]);
 
-    foreach (var (_, c) in cases) {
+    foreach (var (_, c) in range(cases)) {
         fmt.Printf("%d %q -> %s\n"u8, c.kind, c.s, zone(c.kind, c.s));
     }
 }

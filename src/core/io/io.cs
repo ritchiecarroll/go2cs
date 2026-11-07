@@ -475,9 +475,7 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
 // LimitReader returns a Reader that reads from r
 // but stops with EOF after n bytes.
 // The underlying implementation is a *LimitedReader.
-public static Reader LimitReader(Reader r, int64 n) {
-    return new LimitedReaderжReader(Ꮡ(new LimitedReader(r, n)));
-}
+public static Reader LimitReader(Reader r, int64 n) { return new LimitedReaderжReader(Ꮡ(new LimitedReader(r, n))); }
 
 // A LimitedReader reads from R but limits the amount of
 // data returned to just N bytes. Each call to Read
@@ -544,7 +542,6 @@ public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) 
 }
 
 internal static error errWhence = errors.New("Seek: invalid whence");
-
 internal static error errOffset = errors.New("Seek: invalid offset");
 
 public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
@@ -591,9 +588,7 @@ public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p
 }
 
 // Size returns the size of the section in bytes.
-public static int64 Size(this ref SectionReader s) {
-    return s.limit - s.@base;
-}
+public static int64 Size(this ref SectionReader s) { return s.limit - s.@base; }
 
 // Outer returns the underlying [ReaderAt] and offsets for the section.
 //
@@ -742,17 +737,13 @@ partial struct nopCloser {
     /*embed*/ public Reader Reader;
 }
 
-internal static error Close(this nopCloser _) {
-    return default;
-}
+internal static error Close(this nopCloser _) { return default; }
 
 partial struct nopCloserWriterTo {
     /*embed*/ public Reader Reader;
 }
 
-internal static error Close(this nopCloserWriterTo _) {
-    return default;
-}
+internal static error Close(this nopCloserWriterTo _) { return default; }
 
 internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w) {
     return c.Reader._<WriterTo>().WriteTo(w);
@@ -790,7 +781,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             // Build our final right-sized slice.
             finalSize += len(b);
             var final = appendꓸꓸꓸ(slice<byte>(default), makeꓸꓸꓸ<byte>(finalSize))[..0];
-            foreach (var (_, chunk) in chunks) {
+            foreach (var (_, chunk) in range(chunks)) {
                 final = appendꓸꓸꓸ(final, chunk);
             }
             final = appendꓸꓸꓸ(final, b);

@@ -154,43 +154,25 @@ partial struct headerFileInfo {
     internal ж<FileHeader> fh;
 }
 
-internal static @string Name(this headerFileInfo fi) {
-    return path.Base(fi.fh.Name);
-}
-
+internal static @string Name(this headerFileInfo fi) { return path.Base(fi.fh.Name); }
 internal static int64 Size(this headerFileInfo fi) {
     if (fi.fh.UncompressedSize64 > 0) {
         return (int64)fi.fh.UncompressedSize64;
     }
     return (int64)fi.fh.UncompressedSize;
 }
-
-internal static bool IsDir(this headerFileInfo fi) {
-    return fi.Mode().IsDir();
-}
-
+internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
 internal static time.Time ModTime(this headerFileInfo fi) {
     if (fi.fh.Modified.IsZero()) {
         return fi.fh.ModTime();
     }
     return fi.fh.Modified.UTC();
 }
+internal static fs.FileMode Mode(this headerFileInfo fi) { return fi.fh.Mode(); }
+internal static fs.FileMode Type(this headerFileInfo fi) { return fi.fh.Mode().Type(); }
+internal static any Sys(this headerFileInfo fi) { return fi.fh.OrTypedNil(); }
 
-internal static fs.FileMode Mode(this headerFileInfo fi) {
-    return fi.fh.Mode();
-}
-
-internal static fs.FileMode Type(this headerFileInfo fi) {
-    return fi.fh.Mode().Type();
-}
-
-internal static any Sys(this headerFileInfo fi) {
-    return fi.fh.OrTypedNil();
-}
-
-internal static (fs.FileInfo, error) Info(this headerFileInfo fi) {
-    return (fi, default);
-}
+internal static (fs.FileInfo, error) Info(this headerFileInfo fi) { return (fi, default); }
 
 internal static @string String(this headerFileInfo fi) {
     return fs.FormatFileInfo(fi);

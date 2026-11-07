@@ -9,9 +9,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void Inc(this ref counter c) {
-    c.n++;
-}
+internal static void Inc(this ref counter c) { c.n++; }
 
 internal static bool isNil(ж<counter> c) {
     return c == nil;

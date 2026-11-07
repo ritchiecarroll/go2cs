@@ -15,9 +15,7 @@ public static RelocTypeGeneric GENERIC_RELOC_PB_LA_PTR => 3;
 public static RelocTypeGeneric GENERIC_RELOC_LOCAL_SECTDIFF => 4;
 public static RelocTypeGeneric GENERIC_RELOC_TLV => 5;
 
-public static @string GoString(this RelocTypeGeneric r) {
-    return "macho."u8 + r.String();
-}
+public static @string GoString(this RelocTypeGeneric r) { return "macho."u8 + r.String(); }
 
 partial struct RelocTypeX86_64 /*num:nint*/;
 
@@ -32,9 +30,7 @@ public static RelocTypeX86_64 X86_64_RELOC_SIGNED_2 => 7;
 public static RelocTypeX86_64 X86_64_RELOC_SIGNED_4 => 8;
 public static RelocTypeX86_64 X86_64_RELOC_TLV => 9;
 
-public static @string GoString(this RelocTypeX86_64 r) {
-    return "macho."u8 + r.String();
-}
+public static @string GoString(this RelocTypeX86_64 r) { return "macho."u8 + r.String(); }
 
 partial struct RelocTypeARM /*num:nint*/;
 
@@ -49,9 +45,7 @@ public static RelocTypeARM ARM_THUMB_32BIT_BRANCH => 7;
 public static RelocTypeARM ARM_RELOC_HALF => 8;
 public static RelocTypeARM ARM_RELOC_HALF_SECTDIFF => 9;
 
-public static @string GoString(this RelocTypeARM r) {
-    return "macho."u8 + r.String();
-}
+public static @string GoString(this RelocTypeARM r) { return "macho."u8 + r.String(); }
 
 partial struct RelocTypeARM64 /*num:nint*/;
 
@@ -67,8 +61,6 @@ public static RelocTypeARM64 ARM64_RELOC_TLVP_LOAD_PAGE21 => 8;
 public static RelocTypeARM64 ARM64_RELOC_TLVP_LOAD_PAGEOFF12 => 9;
 public static RelocTypeARM64 ARM64_RELOC_ADDEND => 10;
 
-public static @string GoString(this RelocTypeARM64 r) {
-    return "macho."u8 + r.String();
-}
+public static @string GoString(this RelocTypeARM64 r) { return "macho."u8 + r.String(); }
 
 } // end macho_package

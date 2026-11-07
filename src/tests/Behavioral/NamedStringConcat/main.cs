@@ -6,13 +6,9 @@ partial class main_package {
 
 partial struct version /*@string*/;
 
-internal static @string tag(this version v) {
-    return ((@string)v) + "!"u8;
-}
+internal static @string tag(this version v) { return ((@string)v) + "!"u8; }
 
-internal static version bump(version v) {
-    return v + "-next"u8;
-}
+internal static version bump(version v) { return v + "-next"u8; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string go121ˢ = "go1.21"u8;
@@ -34,7 +30,7 @@ internal static void Main() {
     version joined = @short + ((version)(@string)"/x");
 
     var typed = slice<version>([@base + "-t1"u8, @base + "-t2"u8]);
-    var elided = slice<slice<version>>([slice<version>([@base + "-e1"u8])]);
+    var elided = slice<slice<version>>([[@base + "-e1"u8]]);
 
     var inMap = new map<@string, version>{["k"] = @base + "-m"u8};
     var inStruct = new main_rec(@base + "-s"u8);

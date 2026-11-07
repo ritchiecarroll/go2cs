@@ -15,9 +15,7 @@ partial struct kindsᴛ1 /*dyn*/ {
     [0x0002] = new(name: "beta", size: 32, scale: triple)
 }; }
 
-internal static nint triple(nint n) {
-    return n * 3;
-}
+internal static nint triple(nint n) { return n * 3; }
 
 internal static void Main() {
     var a = kinds[0x0001];

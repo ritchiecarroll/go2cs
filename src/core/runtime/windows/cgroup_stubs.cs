@@ -6,11 +6,8 @@ namespace go;
 
 partial class runtime_package {
 
-internal static void defaultGOMAXPROCSInit() {
-}
-
-internal static void defaultGOMAXPROCSUpdateGODEBUG() {
-}
+internal static void defaultGOMAXPROCSInit() { }
+internal static void defaultGOMAXPROCSUpdateGODEBUG() { }
 
 internal static int32 defaultGOMAXPROCS(int32 ncpu) {
     // Use the total number of logical CPUs available now, as CPU affinity

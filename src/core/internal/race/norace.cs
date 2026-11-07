@@ -51,8 +51,6 @@ public static void ReadRange(@unsafe.Pointer addr, nint len) {
 public static void WriteRange(@unsafe.Pointer addr, nint len) {
 }
 
-public static nint Errors() {
-    return 0;
-}
+public static nint Errors() { return 0; }
 
 } // end race_package

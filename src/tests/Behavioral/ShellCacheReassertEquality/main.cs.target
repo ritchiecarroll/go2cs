@@ -8,15 +8,11 @@ partial struct box {
     internal nint n;
 }
 
-internal static nint Len(this ref box b) {
-    return b.n;
-}
+internal static nint Len(this ref box b) { return b.n; }
 
 partial struct counter /*num:nint*/;
 
-internal static nint Len(this counter c) {
-    return (nint)c;
-}
+internal static nint Len(this counter c) { return (nint)c; }
 
 internal partial interface lener_R0 /*dyn*/ {
     nint Len();
@@ -48,8 +44,8 @@ internal static void Main() {
     nint different = 0;
 
     for (nint i = 0; i < 100; i++) {
-        foreach (var (j, a) in values) {
-            foreach (var (k, b) in values) {
+        foreach (var (j, a) in range(values)) {
+            foreach (var (k, b) in range(values)) {
                 if (AreEqual(lener(a), lener(b))) {
                     same++;
                 } else if (j != k) {

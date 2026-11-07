@@ -29,41 +29,21 @@ public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
     return Ꮡ(new Union(terms));
 }
 
-public static nint Len(this ref Union u) {
-    return len(u.terms);
-}
+public static nint Len(this ref Union u) { return len(u.terms); }
+public static ж<ΔTerm> Term(this ref Union u, nint i) { return u.terms[i]; }
 
-public static ж<ΔTerm> Term(this ref Union u, nint i) {
-    return u.terms[i];
-}
-
-public static ΔType Underlying(this ж<Union> Ꮡu) {
-    return new UnionжΔType(Ꮡu);
-}
-
-public static @string String(this ж<Union> Ꮡu) {
-    return TypeString(new UnionжΔType(Ꮡu), default);
-}
+public static ΔType Underlying(this ж<Union> Ꮡu) { return new UnionжΔType(Ꮡu); }
+public static @string String(this ж<Union> Ꮡu) { return TypeString(new UnionжΔType(Ꮡu), default); }
 
 // A Term represents a term in a [Union].
 partial struct ΔTerm /*Δterm*/;
 
 // NewTerm returns a new union term.
-public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) {
-    return Ꮡ(new ΔTerm(new Δterm(tilde, typ)));
-}
+public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) { return Ꮡ(new ΔTerm(new Δterm(tilde, typ))); }
 
-public static bool Tilde(this ref ΔTerm t) {
-    return t.tilde;
-}
-
-public static ΔType Type(this ref ΔTerm t) {
-    return t.typ;
-}
-
-public static @string String(this ж<ΔTerm> Ꮡt) {
-    return (Ꮡt.Reinterpret<ΔTerm, Δterm>()).String();
-}
+public static bool Tilde(this ref ΔTerm t) { return t.tilde; }
+public static ΔType Type(this ref ΔTerm t) { return t.typ; }
+public static @string String(this ж<ΔTerm> Ꮡt) { return (Ꮡt.Reinterpret<ΔTerm, Δterm>()).String(); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -86,7 +66,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     slice<ж<ΔTerm>> terms = default;
 
     ΔType u = default;
-    foreach (var (i, x) in tlist) {
+    foreach (var (i, x) in range(tlist)) {
         var Δterm = parseTilde(Ꮡcheck, x);
         if (len(tlist) == 1 && !(~Δterm).tilde) {
             // Single type. Ok to return early because all relevant
@@ -119,7 +99,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     var termsʗ1 = terms;
     var tlistʗ1 = tlist;
     check.later(() => {
-        foreach (var (i, t) in termsʗ1) {
+        foreach (var (i, t) in range(termsʗ1)) {
             if (!isValid((~t).typ)) {
                 continue;
             }
@@ -200,7 +180,7 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     }
     var Δterm = NewTerm(tilde, typ);
     if (tilde) {
-        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union(slice<ж<ΔTerm>>([Δterm])))), default);
+        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union([Δterm]))), default);
     }
     return Δterm;
 }
@@ -213,7 +193,7 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     assert(!IsInterface(y.typ));
-    foreach (var (i, x) in terms) {
+    foreach (var (i, x) in range(terms)) {
         if (IsInterface((~x).typ)) {
             continue;
         }

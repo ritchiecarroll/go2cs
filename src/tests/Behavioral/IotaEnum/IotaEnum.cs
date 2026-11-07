@@ -87,9 +87,7 @@ public static @string String(this ΔKind k) {
 }.slice(); }
 
 partial struct NameOff /*num:int32*/;
-
 partial struct TypeOff /*num:int32*/;
-
 partial struct TextOff /*num:int32*/;
 
 public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
@@ -129,9 +127,7 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-public static ΔKind Kind(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindMask);
-}
+public static ΔKind Kind(this ref Type t) { return (ΔKind)(t.Kind_ & KindMask); }
 
 public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;

@@ -25,7 +25,6 @@ internal static UntypedInt tracebackShift => /* iota */ 2;
 
 internal static readonly ж<uint32> Ꮡtraceback_cache = new StaticBox<uint32>(((uint32)2 << (int)(tracebackShift)));
 internal static ref uint32 traceback_cache => ref ((StaticBox<uint32>)Ꮡtraceback_cache).ValueSlot;
-
 internal static uint32 traceback_env;
 
 // gotraceback returns the current traceback settings.
@@ -452,7 +451,7 @@ partial struct debugᴛ1 /*dyn*/ {
 internal static readonly ж<debugᴛ1> Ꮡdebug = new StaticBox<debugᴛ1>(default(debugᴛ1));
 internal static ref debugᴛ1 debug => ref ((StaticBox<debugᴛ1>)Ꮡdebug).ValueSlot;
 
-internal static slice<ж<dbgVar>> dbgvars = slice<ж<dbgVar>>([
+internal static slice<ж<dbgVar>> dbgvars = [
     Ꮡ(new dbgVar(name: "adaptivestackstart", value: Ꮡdebug.of(debugᴛ1.Ꮡadaptivestackstart))),
     Ꮡ(new dbgVar(name: "asyncpreemptoff", value: Ꮡdebug.of(debugᴛ1.Ꮡasyncpreemptoff))),
     Ꮡ(new dbgVar(name: "asynctimerchan", atomic: Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan))),
@@ -487,7 +486,7 @@ internal static slice<ж<dbgVar>> dbgvars = slice<ж<dbgVar>>([
     Ꮡ(new dbgVar(name: "tracebacklabels", atomic: Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels), def: 0)),
     Ꮡ(new dbgVar(name: "tracefpunwindoff", value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff))),
     Ꮡ(new dbgVar(name: "updatemaxprocs", value: Ꮡdebug.of(debugᴛ1.Ꮡupdatemaxprocs), def: 1))
-]);
+];
 
 internal static void parseRuntimeDebugVars(@string godebug) {
     // defaults
@@ -508,7 +507,7 @@ internal static void parseRuntimeDebugVars(@string godebug) {
     debug.traceadvanceperiod = defaultTraceAdvancePeriod;
 
     // apply runtime defaults, if any
-    foreach (var (_, v) in dbgvars) {
+    foreach (var (_, v) in range(dbgvars)) {
         if (v.def != 0) {
             // Every var should have either v.value or v.atomic set.
             if (v.value != nil) {
@@ -567,7 +566,7 @@ internal static void reparsedebugvars(@string env) {
     // apply compile-time GODEBUG settings for as-yet-unseen variables
     parsegodebug(godebugDefault, seen);
     // apply defaults for as-yet-unseen variables
-    foreach (var (_, v) in dbgvars) {
+    foreach (var (_, v) in range(dbgvars)) {
         if (v.atomic != nil && !seen[v.name]) {
             v.atomic.Store(0);
         }
@@ -632,7 +631,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
                 MemProfileRate = n;
             }
         } else {
-            foreach (var (_, v) in dbgvars) {
+            foreach (var (_, v) in range(dbgvars)) {
                 if (v.name == key) {
                     var (n, err) = strconv.ParseInt(value, 10, 32); if (err == nil) {
                         if (seen == nil && v.value != nil) {
@@ -739,7 +738,7 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
     var modules = activeModules();
     var sections = slice<@unsafe.Pointer>([(@unsafe.Pointer)modules[0].types]);
     var ret = slice<slice<int32>>([modules[0].typelinks]);
-    foreach (var (_, md) in modules[1..]) {
+    foreach (var (_, md) in range(modules[1..])) {
         sections = append(sectionsᴷ, sections, (@unsafe.Pointer)md.types);
         ret = append(retᴷ, ret, md.typelinks);
     }

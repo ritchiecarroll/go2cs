@@ -25,18 +25,14 @@ partial struct point {
     public nint X, Y;
 }
 
-internal static slice<nint> withCap(slice<nint> s, nint n) {
-    return appendꓸꓸꓸ(s, new slice<nint>(n, n + 1));
-}
+internal static slice<nint> withCap(slice<nint> s, nint n) { return appendꓸꓸꓸ(s, new slice<nint>(n, n + 1)); }
 
 internal static slice<nint> named(slice<nint> s, nint n) {
     var m = new slice<nint>(n);
     return appendꓸꓸꓸ(s, m);
 }
 
-internal static slice<array<nint>> arrays(slice<array<nint>> s, nint n) {
-    return appendꓸꓸꓸ(s, GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(2)), 2));
-}
+internal static slice<array<nint>> arrays(slice<array<nint>> s, nint n) { return appendꓸꓸꓸ(s, GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(2)), 2)); }
 
 internal static void Main() {
     var s = new slice<nint>(2, 4);
@@ -55,7 +51,7 @@ internal static void Main() {
     fmt.Println("nil:", len(n), cap(n), n);
     fmt.Println("zero:", len(extend(s, 0)), extend(default, 0) == nil);
 
-    var g = Grow(slice<nint>([1, 2]), 5);
+    var g = Grow([1, 2], 5);
     fmt.Println("Grow:", len(g), cap(g) >= 7, g);
 
     var b = growGeneric<slice<byte>, byte>(slice<byte>("ab"u8), 2);
@@ -63,7 +59,7 @@ internal static void Main() {
     var p = growGeneric<slice<point>, point>(slice<point>([new(1, 2)]), 1);
     fmt.Println("generic struct:", p);
 
-    fmt.Println("refused:", withCap(slice<nint>([1]), 2), named(slice<nint>([1]), 1), arrays(default, 2));
+    fmt.Println("refused:", withCap([1], 2), named([1], 1), arrays(default, 2));
 
     var sʗ1 = s;
     func(() => {

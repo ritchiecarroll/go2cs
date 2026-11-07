@@ -1,0 +1,13 @@
+ibuild rc=0
+rbuild rc=0
+P/PerfTlsHandshake/jit assemblies=163 debug=0 r2r=0
+D/PerfTlsHandshake/jit assemblies=163 debug=0 r2r=0
+P/PerfSieve/jit assemblies=67 debug=0 r2r=0
+D/PerfSieve/jit assemblies=67 debug=0 r2r=0
+P/PerfMatMul/jit assemblies=67 debug=0 r2r=0
+D/PerfMatMul/jit assemblies=67 debug=0 r2r=0
+P/PerfStartup/r2r assemblies=66 debug=0 r2r=65
+D/PerfStartup/r2r assemblies=66 debug=0 r2r=65
+P/PerfStartup/r2r-tmpl assemblies=78 debug=0 r2r=65 files=179 selfcontained=yes
+D/PerfStartup/r2r-tmpl assemblies=78 debug=0 r2r=65 files=179 selfcontained=yes
+ASMGATE PASS

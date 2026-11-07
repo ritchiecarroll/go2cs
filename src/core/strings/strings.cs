@@ -340,9 +340,7 @@ internal static slice<@string> genSplit(@string s, @string sep, nint sepSave, ni
 // as described in the documentation for [Split].
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<@string> SplitN(@string s, @string sep, nint n) {
-    return genSplit(s, sep, 0, n);
-}
+public static slice<@string> SplitN(@string s, @string sep, nint n) { return genSplit(s, sep, 0, n); }
 
 // SplitAfterN slices s into substrings after each instance of sep and
 // returns a slice of those substrings.
@@ -370,9 +368,7 @@ public static slice<@string> SplitAfterN(@string s, @string sep, nint n) {
 // It is equivalent to [SplitN] with a count of -1.
 //
 // To split around the first instance of a separator, see [Cut].
-public static slice<@string> Split(@string s, @string sep) {
-    return genSplit(s, sep, 0, -1);
-}
+public static slice<@string> Split(@string s, @string sep) { return genSplit(s, sep, 0, -1); }
 
 // SplitAfter slices s into all substrings after each instance of sep and
 // returns a slice of those substrings.
@@ -492,7 +488,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
 
     // Create strings from recorded field indices.
     var a = new slice<@string>(len(spans));
-    foreach (var (i, span) in spans) {
+    foreach (var (i, span) in range(spans)) {
         a[i] = s.slice(span.start, span.end);
     }
 
@@ -517,7 +513,7 @@ public static @string Join(slice<@string> elems, @string sep) {
         }
         n += len(sep) * (len(elems) - 1);
     }
-    foreach (var (_, elem) in elems) {
+    foreach (var (_, elem) in range(elems)) {
         if (len(elem) > maxInt - n) {
             throw panic("strings: Join output length overflow");
         }
@@ -527,7 +523,7 @@ public static @string Join(slice<@string> elems, @string sep) {
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(n);
     Ꮡb.WriteString(elems[0]);
-    foreach (var (_, s) in elems[1..]) {
+    foreach (var (_, s) in range(elems[1..])) {
         Ꮡb.WriteString(sep);
         Ꮡb.WriteString(s);
     }
@@ -781,9 +777,7 @@ public static @string ToLower(@string s) {
 
 // ToTitle returns a copy of the string s with all Unicode letters mapped to
 // their Unicode title case.
-public static @string ToTitle(@string s) {
-    return Map(Δunicode.ToTitle, s);
-}
+public static @string ToTitle(@string s) { return Map(Δunicode.ToTitle, s); }
 
 // ToUpperSpecial returns a copy of the string s with all Unicode letters mapped to their
 // upper case using the case mapping specified by c.
@@ -1124,7 +1118,7 @@ internal static @string trimRightUnicode(@string s, @string cutset) {
 // as defined by Unicode.
 public static @string TrimSpace(@string s) {
     // Fast path for ASCII: look for the first ASCII non-space byte.
-    foreach (var (lo, c) in slice<byte>(s)) {
+    foreach (var (lo, c) in range(slice<byte>(s))) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
             // slower unicode-aware method on the remaining bytes.

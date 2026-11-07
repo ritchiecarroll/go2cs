@@ -41,8 +41,7 @@ partial struct TypeAssertionError {
     internal @string missingMethod; // one method needed by Interface, missing from Concrete
 }
 
-public static void RuntimeError(this ref TypeAssertionError _) {
-}
+public static void RuntimeError(this ref TypeAssertionError _) { }
 
 public static @string Error(this ref TypeAssertionError e) {
     @string inter = interfaceˢ;
@@ -88,8 +87,7 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
 // An errorString represents a runtime error described by a single string.
 partial struct errorString /*@string*/;
 
-internal static void RuntimeError(this errorString e) {
-}
+internal static void RuntimeError(this errorString e) { }
 
 internal static @string Error(this errorString e) {
     return "runtime error: "u8 + ((@string)e);
@@ -100,8 +98,7 @@ partial struct errorAddressString {
     internal uintptr addr; // memory address where the error occurred
 }
 
-internal static void RuntimeError(this errorAddressString e) {
-}
+internal static void RuntimeError(this errorAddressString e) { }
 
 internal static @string Error(this errorAddressString e) {
     return "runtime error: "u8 + e.msg;
@@ -121,8 +118,7 @@ internal static uintptr Addr(this errorAddressString e) {
 // See Issue #14965.
 partial struct plainError /*@string*/;
 
-internal static void RuntimeError(this plainError e) {
-}
+internal static void RuntimeError(this plainError e) { }
 
 internal static @string Error(this plainError e) {
     return (@string)e;
@@ -167,8 +163,7 @@ partial struct boundsError {
     [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"
 }.array(); }
 
-internal static void RuntimeError(this boundsError e) {
-}
+internal static void RuntimeError(this boundsError e) { }
 
 internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
     if (signed && v < 0) {

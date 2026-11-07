@@ -66,7 +66,7 @@ internal static (@string, error) lookPath(@string @file) {
         return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
     }
     @string path = os.Getenv(pathˢ);
-    foreach (var (_, vᴛ1) in filepath.SplitList(path)) {
+    foreach (var (_, vᴛ1) in range(filepath.SplitList(path))) {
         var dir = vᴛ1;
 
         if (dir == ""u8) {

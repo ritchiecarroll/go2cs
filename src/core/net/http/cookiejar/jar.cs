@@ -270,7 +270,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
             }
             return cmp.Compare(a.seqNum, b.seqNum);
         });
-        foreach (var (_, e) in selected) {
+        foreach (var (_, e) in range(selected)) {
             cookies = append(cookies, Ꮡ(new httpꓸCookie(Name: e.Name, Value: e.Value, Quoted: e.Quoted)));
         }
     }
@@ -313,7 +313,7 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
         var submap = j.entries[key];
 
         var modified = false;
-        foreach (var (_, cookie) in cookies) {
+        foreach (var (_, cookie) in range(cookies)) {
             var (e, remove, errΔ1) = j.newEntry(cookie, now, defPath, host);
             if (errΔ1 != nil) {
                 continue;

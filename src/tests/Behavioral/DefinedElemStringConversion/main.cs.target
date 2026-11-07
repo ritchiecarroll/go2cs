@@ -7,22 +7,16 @@ partial class main_package {
 partial struct namedString /*@string*/;
 
 partial struct namedByte /*num:byte*/;
-
 partial struct namedRune /*num:rune*/;
 
 partial struct namedByteSlice /*[]namedByte*/;
-
 partial struct namedRuneSlice /*[]namedRune*/;
 
 partial struct plainByteSlice /*[]byte*/;
 
-internal static nint takesBytes(slice<byte> b) {
-    return len(b);
-}
+internal static nint takesBytes(slice<byte> b) { return len(b); }
 
-internal static nint takesNamedBytes(slice<namedByte> b) {
-    return len(b);
-}
+internal static nint takesNamedBytes(slice<namedByte> b) { return len(b); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hLloˢ = "héllo"u8;

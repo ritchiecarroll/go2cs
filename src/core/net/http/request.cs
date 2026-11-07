@@ -51,9 +51,7 @@ partial struct ProtocolError {
     public @string ErrorString;
 }
 
-public static @string Error(this ref ProtocolError pe) {
-    return pe.ErrorString;
-}
+public static @string Error(this ref ProtocolError pe) { return pe.ErrorString; }
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
 public static bool Is(this ж<ProtocolError> Ꮡpe, error err) {
@@ -96,9 +94,7 @@ public static ж<ProtocolError> ErrShortBody = Ꮡ(new ProtocolError("entity bod
 // compare errors against this variable.
 public static ж<ProtocolError> ErrMissingContentLength = Ꮡ(new ProtocolError("missing ContentLength in HEAD response"));
 
-internal static error badStringError(@string what, @string val) {
-    return fmt.Errorf("%s %q"u8, what, val);
-}
+internal static error badStringError(@string what, @string val) { return fmt.Errorf("%s %q"u8, what, val); }
 
 // Headers that Request.Write handles itself and should be skipped.
 internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool>{
@@ -424,7 +420,7 @@ public static slice<ж<ΔCookie>> Cookies(this ref Request r) {
 // or an empty slice if none matched.
 public static slice<ж<ΔCookie>> CookiesNamed(this ref Request r, @string name) {
     if (name == ""u8) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
     return readCookies(r.Header, name);
 }
@@ -440,7 +436,7 @@ public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
     if (name == ""u8) {
         return (default, ErrNoCookie);
     }
-    foreach (var (_, c) in readCookies(r.Header, name)) {
+    foreach (var (_, c) in range(readCookies(r.Header, name))) {
         return (c, default);
     }
     return (default, ErrNoCookie);
@@ -700,7 +696,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
             goto ᒐdone;
         }
         if (trace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(hostˢ, slice<@string>([host]));
+            trace.WroteHeaderField(hostˢ, [host]);
         }
 
         // Use the defaultUserAgent unless the Header contains one, which
@@ -717,7 +713,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
                 goto ᒐdone;
             }
             if (trace != nil && trace.WroteHeaderField != nil) {
-                trace.WroteHeaderField(userAgentˢ, slice<@string>([userAgent]));
+                trace.WroteHeaderField(userAgentˢ, [userAgent]);
             }
         }
 
@@ -1609,7 +1605,7 @@ internal static nint patIndex(this ref Request r, @string name) {
         return -1;
     }
     nint i = 0;
-    foreach (var (_, seg) in r.pat.segments) {
+    foreach (var (_, seg) in range(r.pat.segments)) {
         if (seg.wild && seg.s != ""u8) {
             if (name == seg.s) {
                 return i;

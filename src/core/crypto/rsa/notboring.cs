@@ -12,7 +12,6 @@ partial class rsa_package {
 internal static (ж<boring.PublicKeyRSA>, error) boringPublicKey(ж<PublicKey> _) {
     throw panic("boringcrypto: not available");
 }
-
 internal static (ж<boring.PrivateKeyRSA>, error) boringPrivateKey(ж<PrivateKey> _) {
     throw panic("boringcrypto: not available");
 }

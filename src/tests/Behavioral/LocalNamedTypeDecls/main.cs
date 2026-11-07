@@ -29,7 +29,7 @@ internal partial struct main_recursiveMap /*map[@string, main_recursiveMap]*/;
 internal static void Main() {
     var pts = new main_Points(new main_Point[]{new(1, 2), new(3, 4), new(5, 6)}.slice());
 
-    foreach (var (_, p) in pts) {
+    foreach (var (_, p) in range<main_Point>(pts)) {
         fmt.Println(p.X, p.Y);
     }
 
@@ -42,7 +42,7 @@ internal static void Main() {
 
     var triple = new main_Triple(new nint[]{10, 20, 30}.array());
     nint sum = 0;
-    foreach (var (_, n) in triple.ΔRangeSnapshot()) {
+    foreach (var (_, n) in range(triple.ΔRangeSnapshot())) {
         sum += n;
     }
 

@@ -11,17 +11,11 @@ partial struct T {
     internal nint n;
 }
 
-internal static nint valueMethod(this T t) {
-    return t.n;
-}
+internal static nint valueMethod(this T t) { return t.n; }
 
-public static nint ValueMethod(this T t) {
-    return t.n + 1;
-}
+public static nint ValueMethod(this T t) { return t.n + 1; }
 
-internal static nint pointerMethod(this ref T t) {
-    return t.n;
-}
+internal static nint pointerMethod(this ref T t) { return t.n; }
 
 partial struct W {
     /*embed*/ public bytes_package.Buffer Buffer;
@@ -53,7 +47,7 @@ internal static partial void table() {
         new(nint () => 2, "second literal in the table")
     ]);
 
-    foreach (var (_, row) in rows) {
+    foreach (var (_, row) in range(rows)) {
         fmt.Printf("%-48s %s\n"u8, row.label + ":", nameOf(row.fn));
     }
 }

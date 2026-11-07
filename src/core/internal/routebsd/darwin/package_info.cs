@@ -72,9 +72,9 @@ using static go.@internal.routebsd_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6kKSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "127=AddrFrom4/1/1/1;157=AddrFrom16/1/1/1;208=AddrFrom16/1/1/1;220=AddrFrom16/1/1/1;226=AddrFrom4/1/1/1;238=AddrFrom4/1/1/1")]
+[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6gJSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "125=AddrFrom4/1/1/1;155=AddrFrom16/1/1/1;206=AddrFrom16/1/1/1;218=AddrFrom16/1/1/1;224=AddrFrom4/1/1/1;236=AddrFrom4/1/1/1")]
 [assembly: GoPositionMap("internal/routebsd/binary.go", "binary.cs", "ABw8gqaCpoLagqaCpoI=")]
-[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClesqI=")]
+[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClekoI=")]
 [assembly: GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "22=Uint32/1/1/4,Uint16/1/1/5;61=Uint32/1/1/3")]
 [assembly: GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
 [assembly: GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gwoKSgoKCgpSClIKClIKUgoKUgpSmuIKU")]

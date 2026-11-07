@@ -396,7 +396,7 @@ internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mute
         Ꮡmtype.of(methodType.ᏑMutex).Unlock();
         var function = mtype.method.Func;
         // Invoke the method, providing a new value for the reply.
-        var returnValues = function.Call(slice<reflectꓸValue>([s.rcvr, argv, replyv]));
+        var returnValues = function.Call([s.rcvr, argv, replyv]);
         // The return value for the method is an error.
         var errInter = returnValues[0].Interface();
         @string errmsg = ""u8;
@@ -699,9 +699,7 @@ public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
 }
 
 // Register publishes the receiver's methods in the [DefaultServer].
-public static error Register(any rcvr) {
-    return DefaultServer.Register(rcvr);
-}
+public static error Register(any rcvr) { return DefaultServer.Register(rcvr); }
 
 // RegisterName is like [Register] but uses the provided name for the type
 // instead of the receiver's concrete type.
@@ -752,9 +750,7 @@ public static error ServeRequest(ServerCodec codec) {
 // Accept accepts connections on the listener and serves requests
 // to [DefaultServer] for each incoming connection.
 // Accept blocks; the caller typically invokes it in a go statement.
-public static void Accept(net.Listener lis) {
-    DefaultServer.Accept(lis);
-}
+public static void Accept(net.Listener lis) { DefaultServer.Accept(lis); }
 
 // Can connect to RPC service using HTTP CONNECT to rpcPath.
 internal static @string connected = "200 Connected to Go RPC";

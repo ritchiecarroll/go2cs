@@ -176,18 +176,14 @@ public static @string String(this ΔKind k) {
 
 // go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static ΔKind Kind(this ref Type t) {
-    return t.Kind_;
-}
+public static ΔKind Kind(this ref Type t) { return t.Kind_; }
 
 public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-public static bool Pointers(this ref Type t) {
-    return t.PtrBytes != 0;
-}
+public static bool Pointers(this ref Type t) { return t.PtrBytes != 0; }
 
 // IsDirectIface reports whether t is stored directly in an interface value.
 public static bool IsDirectIface(this ref Type t) {
@@ -391,13 +387,9 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 // go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
-public static nint Align(this ref Type t) {
-    return (nint)t.Align_;
-}
+public static nint Align(this ref Type t) { return (nint)t.Align_; }
 
-public static nint FieldAlign(this ref Type t) {
-    return (nint)t.FieldAlign_;
-}
+public static nint FieldAlign(this ref Type t) { return (nint)t.FieldAlign_; }
 
 partial struct ΔInterfaceType {
     /*embed*/ public Type Type;
@@ -424,9 +416,7 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-public static nint NumMethod(this ref ΔInterfaceType t) {
-    return len(t.Methods);
-}
+public static nint NumMethod(this ref ΔInterfaceType t) { return len(t.Methods); }
 
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -469,7 +459,6 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 }
 
 // go2cs generated this placeholder — func InSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static bool IsVariadic(this ref ΔFuncType t) {

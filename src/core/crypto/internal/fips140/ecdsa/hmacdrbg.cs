@@ -33,16 +33,14 @@ internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 // plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
-internal static void isPersonalizationString(this plainPersonalizationString _) {
-}
+internal static void isPersonalizationString(this plainPersonalizationString _) { }
 
 // Each entry in blockAlignedPersonalizationString is written to the HMAC at a
 // block boundary, as specified in draft-irtf-cfrg-det-sigs-with-noise-04,
 // Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
-internal static void isPersonalizationString(this blockAlignedPersonalizationString _) {
-}
+internal static void isPersonalizationString(this blockAlignedPersonalizationString _) { }
 
 partial interface personalizationString {
     void isPersonalizationString();
@@ -63,13 +61,13 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     var K = new slice<byte>(size);
 
     // V = 0x01 0x01 0x01 ... 0x01
-    d.V = bytes.Repeat(slice<byte>([0x01]), size);
+    d.V = bytes.Repeat([0x01], size);
 
     // HMAC_DRBG_Update, per Section 10.1.2.2.
     // K = HMAC (K, V || 0x00 || provided_data)
     var h = hmac.New(hashΔ1, K);
     h.Write(d.V);
-    h.Write(slice<byte>([0x00]));
+    h.Write([0x00]);
     h.Write(entropy);
     h.Write(nonce);
     switch (s.type()) {
@@ -79,7 +77,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     }
     case blockAlignedPersonalizationString sΔ1: {
         nint l = len(d.V) + 1 + len(entropy) + len(nonce);
-        foreach (var (_, b) in sΔ1) {
+        foreach (var (_, b) in range<slice<byte>>(sΔ1)) {
             pad000(h, l);
             h.Write(b);
             l = len(b);
@@ -94,7 +92,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     // K = HMAC (K, V || 0x01 || provided_data).
     h.Reset();
     h.Write(d.V);
-    h.Write(slice<byte>([0x01]));
+    h.Write([0x01]);
     h.Write(entropy);
     h.Write(nonce);
     switch (s.type()) {
@@ -104,7 +102,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     }
     case blockAlignedPersonalizationString sΔ2: {
         nint l = len(d.V) + 1 + len(entropy) + len(nonce);
-        foreach (var (_, b) in sΔ2) {
+        foreach (var (_, b) in range<slice<byte>>(sΔ2)) {
             pad000(h, l);
             h.Write(b);
             l = len(b);
@@ -173,7 +171,7 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // K = HMAC (K, V || 0x00)
     d.hK.Reset();
     d.hK.Write(d.V);
-    d.hK.Write(slice<byte>([0x00]));
+    d.hK.Write([0x00]);
     var K = d.hK.Sum(default);
     // V = HMAC (K, V)
     d.hK = d.newHMAC(K);

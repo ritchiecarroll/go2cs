@@ -13,9 +13,7 @@ partial struct controller {
 internal static readonly ж<controller> Ꮡctrl = new StaticBox<controller>(default(controller));
 internal static ref controller ctrl => ref ((StaticBox<controller>)Ꮡctrl).ValueSlot;
 
-internal static partial void keep(ж<controller> c) {
-    _ = c;
-}
+internal static partial void keep(ж<controller> c) { _ = c; }
 
 internal static void bump() {
     Ꮡctrl.Ꮡtotal.Add(5);

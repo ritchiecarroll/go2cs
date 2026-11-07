@@ -83,12 +83,12 @@ public static ж<Curve<P224PointжPoint>> P224() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = slice<byte>([
+[GoLazy] partial class lazyᴛp224Order { internal static slice<byte> p224Order = [
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x16, 0xa2,
     0xe0, 0xb8, 0xf0, 0x3e, 0x13, 0xdd, 0x29, 0x45,
     0x5c, 0x5c, 0x2a, 0x3d
-]); }
+]; }
 
 public static ж<Curve<P256PointжPoint>> P256() {
     return Ꮡ(new Curve<P256PointжPoint>(
@@ -98,12 +98,12 @@ public static ж<Curve<P256PointжPoint>> P256() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = slice<byte>([
+[GoLazy] partial class lazyᴛp256Order { internal static slice<byte> p256Order = [
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
     0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51
-]); }
+]; }
 
 public static ж<Curve<P384PointжPoint>> P384() {
     return Ꮡ(new Curve<P384PointжPoint>(
@@ -113,14 +113,14 @@ public static ж<Curve<P384PointжPoint>> P384() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = slice<byte>([
+[GoLazy] partial class lazyᴛp384Order { internal static slice<byte> p384Order = [
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
     0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a,
     0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73
-]); }
+]; }
 
 public static ж<Curve<P521PointжPoint>> P521() {
     return Ꮡ(new Curve<P521PointжPoint>(
@@ -130,7 +130,7 @@ public static ж<Curve<P521PointжPoint>> P521() {
     ));
 }
 
-[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = slice<byte>([0x01, 0xff,
+[GoLazy] partial class lazyᴛp521Order { internal static slice<byte> p521Order = [0x01, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -139,7 +139,7 @@ public static ж<Curve<P521PointжPoint>> P521() {
     0x7f, 0xcc, 0x01, 0x48, 0xf7, 0x09, 0xa5, 0xd0,
     0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae,
     0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09
-]); }
+]; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ecdhPctˢ => ref ecdhPctˢᵇ;
@@ -317,7 +317,7 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
 // isZero reports whether x is all zeroes in constant time.
 internal static bool isZero(slice<byte> x) {
     byte acc = default;
-    foreach (var (_, b) in x) {
+    foreach (var (_, b) in range(x)) {
         acc |= (byte)(b);
     }
     return acc == 0;
@@ -337,7 +337,7 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
         throw panic("crypto/ecdh: internal error: isLess input too large");
     }
     var (bufA, bufB) = (new slice<byte>(72), new slice<byte>(72));
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         (bufA[i], bufB[i]) = (a[len(a) - i - 1], b[len(b) - i - 1]);
     }
 

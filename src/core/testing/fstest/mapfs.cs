@@ -41,9 +41,7 @@ partial struct MapFile {
 }
 
 internal static fs.FS _ᴛ1ʗ = ((MapFS)default);
-
 internal static fs.ReadLinkFS _ᴛ2ʗ = ((MapFS)default);
-
 internal static fs.File _ᴛ3ʗ = new openMapFileжFile(((ж<openMapFile>)nil));
 
 // Open opens the named file after following any symbolic links.
@@ -99,7 +97,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
             return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
         }
     }
-    foreach (var (_, fi) in list) {
+    foreach (var (_, fi) in range(list)) {
         delete(need, fi.name);
     }
     foreach (var (nameΔ1, _) in need) {
@@ -239,8 +237,7 @@ partial struct noSub {
     /*embed*/ public MapFS MapFS;
 }
 
-internal static void Sub(this noSub _) {
-}
+internal static void Sub(this noSub _) { }
 
 // not the fs.SubFS signature
 public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
@@ -253,37 +250,14 @@ partial struct mapFileInfo {
     internal ж<MapFile> f;
 }
 
-internal static @string Name(this ref mapFileInfo i) {
-    return path.Base(i.name);
-}
-
-internal static int64 Size(this ref mapFileInfo i) {
-    return (int64)len(i.f.Data);
-}
-
-internal static fs.FileMode Mode(this ref mapFileInfo i) {
-    return i.f.Mode;
-}
-
-internal static fs.FileMode Type(this ref mapFileInfo i) {
-    return i.f.Mode.Type();
-}
-
-internal static time.Time ModTime(this ref mapFileInfo i) {
-    return i.f.ModTime;
-}
-
-internal static bool IsDir(this ref mapFileInfo i) {
-    return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0;
-}
-
-internal static any Sys(this ref mapFileInfo i) {
-    return i.f.Sys;
-}
-
-internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) {
-    return (new mapFileInfoжFileInfo(Ꮡi), default);
-}
+internal static @string Name(this ref mapFileInfo i) { return path.Base(i.name); }
+internal static int64 Size(this ref mapFileInfo i) { return (int64)len(i.f.Data); }
+internal static fs.FileMode Mode(this ref mapFileInfo i) { return i.f.Mode; }
+internal static fs.FileMode Type(this ref mapFileInfo i) { return i.f.Mode.Type(); }
+internal static time.Time ModTime(this ref mapFileInfo i) { return i.f.ModTime; }
+internal static bool IsDir(this ref mapFileInfo i) { return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0; }
+internal static any Sys(this ref mapFileInfo i) { return i.f.Sys; }
+internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) { return (new mapFileInfoжFileInfo(Ꮡi), default); }
 
 internal static @string String(this ж<mapFileInfo> Ꮡi) {
     return fs.FormatFileInfo(new mapFileInfoжFileInfo(Ꮡi));
@@ -296,13 +270,9 @@ partial struct openMapFile {
     internal int64 offset;
 }
 
-internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
-    return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default);
-}
+internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) { return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default); }
 
-internal static error Close(this ref openMapFile f) {
-    return default;
-}
+internal static error Close(this ref openMapFile f) { return default; }
 
 internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.Data)) {
@@ -356,14 +326,8 @@ partial struct mapDir {
     internal nint offset;
 }
 
-internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) {
-    return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default);
-}
-
-internal static error Close(this ref mapDir d) {
-    return default;
-}
-
+internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) { return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default); }
+internal static error Close(this ref mapDir d) { return default; }
 internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.path, Err: fs.ErrInvalid))));
 }
@@ -377,7 +341,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
         n = count;
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var i in range(list)) {
+    foreach (var i in range(len(list))) {
         list[i] = new mapFileInfoжDirEntry(Ꮡ(d.entry, d.offset + i));
     }
     d.offset += n;

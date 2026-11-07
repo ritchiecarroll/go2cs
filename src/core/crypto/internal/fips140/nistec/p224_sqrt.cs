@@ -11,7 +11,6 @@ partial class nistec_package {
 
 internal static readonly ж<ж<array<fiat.P224Element>>> Ꮡp224GG = new StaticBox<ж<array<fiat.P224Element>>>(default(ж<array<fiat.P224Element>>));
 internal static ref ж<array<fiat.P224Element>> p224GG => ref ((StaticBox<ж<array<fiat.P224Element>>>)Ꮡp224GG).ValueSlot;
-
 internal static readonly ж<sync.Once> Ꮡp224GGOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p224GGOnce => ref ((StaticBox<sync.Once>)Ꮡp224GGOnce).ValueSlot;
 
@@ -31,10 +30,10 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> r, ж<fiat.P224Eleme
         p224GG = Ꮡ(new array<fiat.P224Element>(96, () => new()));
         foreach (var i in range(p224GG, 96)) {
             if (i == 0) {
-                p224GG.at<fiat.P224Element>(i).SetBytes(slice<byte>([0x6a, 0x0f, 0xec, 0x67,
+                p224GG.at<fiat.P224Element>(i).SetBytes([0x6a, 0x0f, 0xec, 0x67,
                     0x85, 0x98, 0xa7, 0x92, 0x0c, 0x55, 0xb2, 0xd4,
                     0x0b, 0x2d, 0x6f, 0xfb, 0xbe, 0xa3, 0xd8, 0xce,
-                    0xf3, 0xfb, 0x36, 0x32, 0xdc, 0x69, 0x1b, 0x74]));
+                    0xf3, 0xfb, 0x36, 0x32, 0xdc, 0x69, 0x1b, 0x74]);
             } else {
                 p224GG.at<fiat.P224Element>(i).Square(p224GG.at<fiat.P224Element>(i - 1));
             }

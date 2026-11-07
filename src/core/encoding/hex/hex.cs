@@ -20,9 +20,7 @@ private static readonly @string reverseHexTableᵇ = ((@string)(new byte[]{0xff,
 
 // EncodedLen returns the length of an encoding of n source bytes.
 // Specifically, it returns n * 2.
-public static nint EncodedLen(nint n) {
-    return n * 2;
-}
+public static nint EncodedLen(nint n) { return n * 2; }
 
 // Encode encodes src into [EncodedLen](len(src))
 // bytes of dst. As a convenience, it returns the number
@@ -30,7 +28,7 @@ public static nint EncodedLen(nint n) {
 // Encode implements hexadecimal encoding.
 public static nint Encode(slice<byte> dst, slice<byte> src) {
     nint j = 0;
-    foreach (var (_, v) in src) {
+    foreach (var (_, v) in range(src)) {
         dst[j] = hextable[(v >> 4)];
         dst[j + 1] = hextable[(byte)(v & 0x0f)];
         j += 2;
@@ -61,9 +59,7 @@ public static @string Error(this InvalidByteError e) {
 
 // DecodedLen returns the length of a decoding of x source bytes.
 // Specifically, it returns x / 2.
-public static nint DecodedLen(nint x) {
-    return x / 2;
-}
+public static nint DecodedLen(nint x) { return x / 2; }
 
 // Decode decodes src into [DecodedLen](len(src)) bytes,
 // returning the actual number of bytes written to dst.
@@ -267,7 +263,7 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
     // Output lines look like:
     // 00000010  2e 2f 30 31 32 33 34 35  36 37 38 39 3a 3b 3c 3d  |./0123456789:;<=|
     // ^ offset                          ^ extra space              ^ ASCII of line.
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         if (h.used == 0) {
             // At the beginning of a line we print the current
             // offset in hex.

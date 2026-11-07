@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void swap(ref array<uint64> buf) {
-    foreach (var (i, x) in buf) {
+    foreach (var (i, x) in range(buf)) {
         buf[i] = x >> 32 | x << 32;
     }
 }
@@ -29,9 +29,7 @@ internal static nint /*n*/ aliased(/*[6]*/ ж<array<nint>> p) {
     return n;
 }
 
-internal static void report(/*[6]*/ ж<array<nint>> p) {
-    fmt.Println("aliased nil:", p == nil);
-}
+internal static void report(/*[6]*/ ж<array<nint>> p) { fmt.Println("aliased nil:", p == nil); }
 
 partial struct words /*[5]uint64*/;
 

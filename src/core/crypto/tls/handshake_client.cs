@@ -74,7 +74,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
     }
 
     nint nextProtosLength = 0;
-    foreach (var (_, proto) in config.NextProtos) {
+    foreach (var (_, proto) in range(config.NextProtos)) {
         nint l = len(proto); if (l == 0 || l > 255) {
             return (default, default, default, errors.New(tlsInvalidNextProtosˢ));
         } else {
@@ -96,14 +96,14 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
 
     var hello = Ꮡ(new clientHelloMsg(
         vers: maxVersion,
-        compressionMethods: slice<uint8>([compressionNone]),
+        compressionMethods: [compressionNone],
         random: new slice<byte>(32),
         extendedMasterSecret: true,
         ocspStapling: true,
         scts: true,
         serverName: hostnameInSNI(config.ServerName),
         supportedCurves: config.curvePreferences(maxVersion),
-        supportedPoints: slice<uint8>([pointFormatUncompressed]),
+        supportedPoints: [pointFormatUncompressed],
         secureRenegotiationSupported: true,
         alpnProtocols: config.NextProtos,
         supportedVersions: ΔsupportedVersions
@@ -190,7 +190,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
             return (default, default, default, errΔ3);
         }
         if (p == nil) {
-            p = slice<byte>([]);
+            p = [];
         }
         hello.quicTransportParameters = p;
     }
@@ -212,7 +212,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
             return (default, default, default, errors.New(tlsˢ));
         }
         ech = Ꮡ(new echClientContext(config: echConfig, kdfID: kdf.ID(), aeadID: aead.ID()));
-        hello.encryptedClientHello = slice<byte>([1]); // indicate inner hello
+        hello.encryptedClientHello = [1]; // indicate inner hello
         // We need to explicitly set these 1.2 fields to nil, as we do not
         // marshal them when encoding the inner hello, otherwise transcripts
         // will later mismatch.
@@ -403,7 +403,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
         return (default, default, default, default);
     }
 
-    var echInner = bytes.Equal(hello.encryptedClientHello, slice<byte>([1]));
+    var echInner = bytes.Equal(hello.encryptedClientHello, [1]);
 
     // ticketSupported is a TLS 1.2 extension (as TLS 1.3 replaced tickets with PSK
     // identities) and ECH requires and forces TLS 1.3.
@@ -412,7 +412,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
     if (hello.supportedVersions[0] == VersionTLS13) {
         // Require DHE on resumption as it guarantees forward secrecy against
         // compromise of the session ticket key. See RFC 8446, Section 4.2.9.
-        hello.pskModes = slice<uint8>([pskModeDHE]);
+        hello.pskModes = [pskModeDHE];
     }
 
     // Session resumption is not allowed if renegotiating because
@@ -435,7 +435,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
 
     // Check that version used for the previous session is still valid.
     var versOk = false;
-    foreach (var (_, v) in hello.supportedVersions) {
+    foreach (var (_, v) in range(hello.supportedVersions)) {
         if (v == session.version) {
             versOk = true;
             break;
@@ -463,7 +463,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
         var opts = new Δx509.VerifyOptions(
             CurrentTime: c.config.time(),
             Roots: c.config.RootCAs,
-            KeyUsages: slice<Δx509.ExtKeyUsage>([Δx509.ExtKeyUsageServerAuth])
+            KeyUsages: [Δx509.ExtKeyUsageServerAuth]
         );
         if (!anyValidVerifiedChain(session.verifiedChains, opts)) {
             // No valid chains, delete the entry.
@@ -504,7 +504,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
         return (default, default, default, default);
     }
     var cipherSuiteOk = false;
-    foreach (var (_, offeredID) in hello.cipherSuites) {
+    foreach (var (_, offeredID) in range(hello.cipherSuites)) {
         var offeredSuite = cipherSuiteTLS13ByID(offeredID);
         if (offeredSuite != nil && offeredSuite.hash == cipherSuite.hash) {
             cipherSuiteOk = true;
@@ -523,7 +523,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
         // For 0-RTT, the cipher suite has to match exactly, and we need to be
         // offering the same ALPN.
         if (session.EarlyData && mutualCipherSuiteTLS13(hello.cipherSuites, session.cipherSuite) != nil) {
-            foreach (var (_, alpn) in hello.alpnProtocols) {
+            foreach (var (_, alpn) in range(hello.alpnProtocols)) {
                 if (alpn == session.alpnProtocol) {
                     hello.earlyData = true;
                     break;
@@ -538,7 +538,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
         label: session.ticket,
         obfuscatedTicketAge: (uint32)(ticketAge / time_package.Millisecond) + session.ageAdd
     );
-    hello.pskIdentities = slice<pskIdentity>([identity]);
+    hello.pskIdentities = [identity];
     hello.pskBinders = slice<slice<byte>>([new slice<byte>(cipherSuite.hash.Size())]);
 
     // Compute the PSK binders. See RFC 8446, Section 4.2.11.2.
@@ -563,7 +563,7 @@ internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> Ꮡs
         peerVersion = serverHello.supportedVersion;
     }
 
-    var (vers, ok) = c.config.mutualVersion(roleClient, slice<uint16>([peerVersion]));
+    var (vers, ok) = c.config.mutualVersion(roleClient, [peerVersion]);
     if (!ok) {
         Ꮡc.sendAlert(alertProtocolVersion);
         return fmt.Errorf("tls: server selected unsupported protocol version %x"u8, peerVersion);
@@ -986,7 +986,7 @@ internal static (bool, error) processServerHello(this ref clientHandshakeState h
 
     var supportsPointFormat = false;
     var offeredNonCompressedFormat = false;
-    foreach (var (_, format) in hs.serverHello.supportedPoints) {
+    foreach (var (_, format) in range(hs.serverHello.supportedPoints)) {
         if (format == pointFormatUncompressed) {
             supportsPointFormat = true;
         } else {
@@ -1082,7 +1082,7 @@ internal static error checkALPN(slice<@string> clientProtos, @string serverProto
     if (len(clientProtos) == 0) {
         return errors.New(tlsServerAdvertisedˢ);
     }
-    foreach (var (_, proto) in clientProtos) {
+    foreach (var (_, proto) in range(clientProtos)) {
         if (proto == serverProto) {
             return default;
         }
@@ -1227,7 +1227,7 @@ internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<by
     ref var c = ref Ꮡc.DerefOrNull();
 
     var certs = new slice<ж<Δx509.Certificate>>(len(certificates));
-    foreach (var (i, asn1Data) in certificates) {
+    foreach (var (i, asn1Data) in range(certificates)) {
         var (cert, err) = globalCertCache.newCert(asn1Data);
         if (err != nil) {
             Ꮡc.sendAlert(alertDecodeError);
@@ -1258,7 +1258,7 @@ internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<by
                 Intermediates: Δx509.NewCertPool()
             );
 
-            foreach (var (_, cert) in certs[1..]) {
+            foreach (var (_, cert) in range(certs[1..])) {
                 opts.Intermediates.AddCert(cert);
             }
             var (chains, err) = certs[0].Verify(opts);
@@ -1281,7 +1281,7 @@ internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<by
             Intermediates: Δx509.NewCertPool()
         );
 
-        foreach (var (_, cert) in certs[1..]) {
+        foreach (var (_, cert) in range(certs[1..])) {
             opts.Intermediates.AddCert(cert);
         }
         var (chains, err) = certs[0].Verify(opts);
@@ -1339,7 +1339,7 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
 
     bool rsaAvail = default;
     bool ecAvail = default;
-    foreach (var (_, certType) in certReq.certificateTypes) {
+    foreach (var (_, certType) in range(certReq.certificateTypes)) {
         switch (certType) {
         case var ᴛ when ᴛ == certTypeRSASign: {
             rsaAvail = true;
@@ -1359,22 +1359,22 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
         // TLS 1.0 and 1.1 always use MD5+SHA1 for RSA and SHA1 for ECDSA.
         switch (ᐧ) {
         case {} when rsaAvail && ecAvail: {
-            cri.SignatureSchemes = slice<SignatureScheme>([
+            cri.SignatureSchemes = [
                 ECDSAWithP256AndSHA256, ECDSAWithP384AndSHA384, ECDSAWithP521AndSHA512,
                 PKCS1WithSHA256, PKCS1WithSHA384, PKCS1WithSHA512, PKCS1WithSHA1
-            ]);
+            ];
             break;
         }
         case {} when rsaAvail: {
-            cri.SignatureSchemes = slice<SignatureScheme>([
+            cri.SignatureSchemes = [
                 PKCS1WithSHA256, PKCS1WithSHA384, PKCS1WithSHA512, PKCS1WithSHA1
-            ]);
+            ];
             break;
         }
         case {} when ecAvail: {
-            cri.SignatureSchemes = slice<SignatureScheme>([
+            cri.SignatureSchemes = [
                 ECDSAWithP256AndSHA256, ECDSAWithP384AndSHA384, ECDSAWithP521AndSHA512
-            ]);
+            ];
             break;
         }}
         return cri;
@@ -1383,7 +1383,7 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
     // Filter the signature schemes based on the certificate types.
     // See RFC 5246, Section 7.4.4 (where it calls this "somewhat complicated").
     cri.SignatureSchemes = new slice<SignatureScheme>(0, len(certReq.supportedSignatureAlgorithms));
-    foreach (var (_, sigScheme) in certReq.supportedSignatureAlgorithms) {
+    foreach (var (_, sigScheme) in range(certReq.supportedSignatureAlgorithms)) {
         var (sigType, _, err) = typeAndHashFromSignatureScheme(sigScheme);
         if (err != nil) {
             continue;
@@ -1413,7 +1413,7 @@ internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, �
         return c.config.GetClientCertificate(Ꮡcri);
     }
 
-    foreach (var (_, vᴛ1) in c.config.Certificates) {
+    foreach (var (_, vᴛ1) in range(c.config.Certificates)) {
         ref var chain = ref heap(new Certificate(), out var Ꮡchain);
         chain = vᴛ1;
 

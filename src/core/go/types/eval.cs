@@ -78,7 +78,7 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> fset, ж<Package> Ꮡpkg
             // incorrect (files spread across a wide range of fset
             // positions) - ignore it and just consider its children
             // (file scopes).
-            foreach (var (_, fscope) in pkg.scope.children) {
+            foreach (var (_, fscope) in range(pkg.scope.children)) {
                 scope = fscope.Innermost(pos); if (scope != nil) {
                     break;
                 }

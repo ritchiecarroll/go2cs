@@ -121,21 +121,10 @@ internal static UntypedInt pollFDSeq => 16; // 20 bit field, low 20 bits of fdse
 internal static UntypedInt pollFDSeqBits => 20;                                 // number of bits in pollFDSeq
 internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; // mask for pollFDSeq
 
-internal static bool closing(this pollInfo i) {
-    return (pollInfo)(i & (uint32)pollClosing) != 0;
-}
-
-internal static bool eventErr(this pollInfo i) {
-    return (pollInfo)(i & (uint32)pollEventErr) != 0;
-}
-
-internal static bool expiredReadDeadline(this pollInfo i) {
-    return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0;
-}
-
-internal static bool expiredWriteDeadline(this pollInfo i) {
-    return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0;
-}
+internal static bool closing(this pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
+internal static bool eventErr(this pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
+internal static bool expiredReadDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
+internal static bool expiredWriteDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
 
 // info returns the pollInfo corresponding to pd.
 internal static pollInfo info(this ж<pollDesc> Ꮡpd) {

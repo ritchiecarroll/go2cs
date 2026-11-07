@@ -14,13 +14,11 @@ internal static void push(this ж<profBuf> Ꮡb, nint v) {
     appendInt(ref nonnil(ref b).data, v);
 }
 
-internal static void appendInt(ref slice<nint> s, nint v) {
-    s = append(s, v);
-}
+internal static void appendInt(ref slice<nint> s, nint v) { s = append(s, v); }
 
 internal static nint sum(this ref profBuf b) {
     nint t = 0;
-    foreach (var (_, x) in b.data) {
+    foreach (var (_, x) in range(b.data)) {
         t += x;
     }
     return t;
@@ -34,9 +32,7 @@ partial struct cpuProfile {
 internal static readonly ж<cpuProfile> Ꮡcpuprof = new StaticBox<cpuProfile>(default(cpuProfile));
 internal static ref cpuProfile cpuprof => ref ((StaticBox<cpuProfile>)Ꮡcpuprof).ValueSlot;
 
-internal static void incr(ref nint p) {
-    p++;
-}
+internal static void incr(ref nint p) { p++; }
 
 internal static void run() {
     incr(ref cpuprof.count);

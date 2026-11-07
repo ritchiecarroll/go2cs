@@ -155,7 +155,7 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
     // Inlineable fast path for ASCII characters; see #48195.
     // This implementation is weird but effective at rendering the
     // function inlineable.
-    foreach (var (_, b) in p) {
+    foreach (var (_, b) in range(p)) {
         if (b < RuneSelf) {
             return ((rune)b, 1);
         }
@@ -475,12 +475,9 @@ public static nint /*n*/ RuneCountInString(sstring s) {
 // RuneStart reports whether the byte could be the first byte of an encoded,
 // possibly invalid rune. Second and subsequent bytes always have the top two
 // bits set to 10.
-public static bool RuneStart(byte b) {
-    return (byte)(b & 0xC0) != 0x80;
-}
+public static bool RuneStart(byte b) { return (byte)(b & 0xC0) != 0x80; }
 
 internal static UntypedInt ptrSize => /* 4 << (^uintptr(0) >> 63) */ 8;
-
 internal static UntypedInt hiBits => /* 0x8080808080808080 >> (64 - 8*ptrSize) */ 9259542123273814144;
 
 internal static uintptr word<T>(T s)

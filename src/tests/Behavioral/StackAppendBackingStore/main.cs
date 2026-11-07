@@ -31,9 +31,7 @@ internal static partial void resetCaps() {
     fmt.Println();
 }
 
-internal static partial nint keep(ref slice<int64> p) {
-    return len(p);
-}
+internal static partial nint keep(ref slice<int64> p) { return len(p); }
 
 internal static partial void addressTakenCap() {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
@@ -97,9 +95,7 @@ internal static partial void closureLocalCaps() {
     fmt.Println(run(f), run(f));
 }
 
-internal static partial nint run(Func<nint> f) {
-    return f();
-}
+internal static partial nint run(Func<nint> f) { return f(); }
 
 internal static partial void closureOuterCap() {
     ref var w = ref heap<slice<int64>>(out var Ꮡw);
@@ -170,7 +166,7 @@ internal static partial slice<byte> movedBytes(nint n) {
 }
 
 internal static void movedCaps() {
-    foreach (var (_, n) in slice<nint>([1, 3, 9, 17, 25, 33])) {
+    foreach (var (_, n) in range(slice<nint>([1, 3, 9, 17, 25, 33]))) {
         fmt.Print(cap(movedBytes(n)), " ");
     }
     fmt.Println();
@@ -189,7 +185,7 @@ internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
 
 internal static void movedPtrCaps() {
     ref var r = ref heap<slice<ж<nint>>>(out var Ꮡr);
-    foreach (var (_, n) in slice<nint>([1, 2, 3, 4, 5, 9])) {
+    foreach (var (_, n) in range(slice<nint>([1, 2, 3, 4, 5, 9]))) {
         movedPtrs(n, ref r);
         fmt.Print(cap(r), " ");
     }

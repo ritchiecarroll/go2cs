@@ -290,11 +290,9 @@ A lowered parameter forwarded into another lowered position is `ref p` — it al
 
 **Row 1 — the parameter *is* the alias, and it survives generic instantiation** (`GenericReceiverFieldAddress`; the callee's `ж<T> Ꮡp` box and its `DerefOrNull()` preamble are gone, and the caller's 128-byte-per-evaluation field box becomes free):
 
-<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11-13, 19-23 -->
+<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11, 14-18 -->
 ```csharp
-internal static void setT<T>(ref T p, T val) {
-    p = val;
-}
+internal static void setT<T>(ref T p, T val) { p = val; }
 …
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -321,11 +319,9 @@ internal static void f(ref nint y) {
 
 **Row 3 — the callee lowers, the call site unwraps** (`PointerFieldArrayElementAddress`; `c` comes from `.at(…)` indexing and so still carries a box — each function makes its own deal and the convention change composes across the boundary):
 
-<!-- source: src/tests/Behavioral/PointerFieldArrayElementAddress/main.cs:19-26 -->
+<!-- source: src/tests/Behavioral/PointerFieldArrayElementAddress/main.cs:19-24 -->
 ```csharp
-internal static void bump(ref cycle c) {
-    c.n++;
-}
+internal static void bump(ref cycle c) { c.n++; }
 
 internal static void viaParam(ж<rec> p, nint i) {
     var c = p.at(rec.Ꮡfuture, i);
@@ -337,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:126-130 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -458,7 +454,7 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
-<!-- source: src/core/regexp/onepass.cs:332, 340, 350, 482 -->
+<!-- source: src/core/regexp/onepass.cs:331, 339, 349, 481 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
@@ -474,9 +470,9 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:38-48 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-47 -->
 ```csharp
-ref var p = ref heap<payload>(new payload(vals: slice<nint>([1, 2, 3, 4])), out var Ꮡp);
+ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;
@@ -520,7 +516,7 @@ A **MAP** composite literal whose value or key type is a pointer boxes its eleme
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:787-790 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:785-788 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -770,7 +766,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:360, 364 -->
+<!-- source: src/core/debug/elf/file.cs:358, 362 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -1097,7 +1093,7 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 }
 ```
 
-<!-- source: src/core/runtime/alg.cs:406-412 -->
+<!-- source: src/core/runtime/alg.cs:392-398 -->
 ```csharp
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
@@ -1591,7 +1587,7 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
-<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:55, 58 -->
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:51, 54 -->
 ```csharp
     ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
 …
@@ -1686,7 +1682,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 
 ## Numeric-returning literals with untyped-constant arms state their return type
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
-<!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:38 -->
+<!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:24 -->
 ```csharp
 var maxFn = rune (rune _) => maxRune;
 ```
@@ -2348,7 +2344,7 @@ type record struct {
 	n := copy(rec.Path[2:], []uint16{0x0c0d})
 	rec.B = 0x1112
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9, 50-59 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9, 48-57 -->
 ```csharp
 partial class main_package {
 …
@@ -2482,7 +2478,7 @@ func readReparse(flags uint32, fail bool) (*reparse, error) {
 	runtime.GC()
 	fmt.Println("returned:", got.Flags, got.Path[0], err)
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:72-79 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:70-77 -->
 ```csharp
     var (got, err) = readReparse(0x0201, false);
 
@@ -2796,7 +2792,7 @@ call-argument pointer arm). The routing mirrors the struct-field pointer arm: th
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
 <!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
-list = slice<ж<CommentGroup>>([c]);
+list = [c];
 ```
 Gated to bare idents of pointer type — keyed elements (maps) and address-of/composite elements
 manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the
@@ -2815,7 +2811,7 @@ program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
 func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
 func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
 ```
-<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:33-42 -->
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:31-38 -->
 ```csharp
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -2824,9 +2820,7 @@ internal static void free(this ж<pp> Ꮡp) {
     poolPut(Ꮡp.OrTypedNil());
 }
 
-internal static void keep(ж<pp> q) {
-    poolPut(q.OrTypedNil());
-}
+internal static void keep(ж<pp> q) { poolPut(q.OrTypedNil()); }
 ```
 The call is `poolPut(Ꮡp.OrTypedNil())`, not `poolPut(p)`: a `pp` value would lose the pointer's identity.
 (The `OrTypedNil()` suffix is the other half of the same boundary — see

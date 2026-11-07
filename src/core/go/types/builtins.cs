@@ -86,7 +86,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // check all arguments
             args = Ꮡcheck.exprList(argList);
             nargs = len(args);
-            foreach (var (_, a) in args) {
+            foreach (var (_, a) in range(args)) {
                 if (a.mode == invalid) {
                     return default;
                 }
@@ -644,7 +644,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
 
             var types = slice<ΔType>([T]);
             slice<int64> sizes = default; // constant integer arguments, if any
-            foreach (var (_, arg) in argList[1..]) {
+            foreach (var (_, arg) in range(argList[1..])) {
                 var (typ, size) = Ꮡcheck.index(arg, -1); // ok to continue with typ == Typ[Invalid]
                 types = append(typesᴷ, types, typ);
                 if (size >= 0) {
@@ -672,7 +672,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 op = token.GTR;
             }
 
-            foreach (var (i, a) in args) {
+            foreach (var (i, a) in range(args)) {
                 if (a.mode == invalid) {
                     return default;
                 }
@@ -715,13 +715,13 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
 
             // Use the final type computed above for all arguments.
-            foreach (var (_, a) in args) {
+            foreach (var (_, a) in range(args)) {
                 Ꮡcheck.updateExprType(a.expr, x.typ, true);
             }
 
             if (check.recordTypes() && x.mode != constant_) {
                 var types = new slice<ΔType>(nargs);
-                foreach (var i in range(types)) {
+                foreach (var i in range(len(types))) {
                     types[i] = x.typ;
                 }
                 check.recordBuiltinType(call.Fun, makeSig(x.typ, types.ꓸꓸꓸ));
@@ -798,7 +798,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             slice<ΔType> @params = default;
             if (nargs > 0) {
                 @params = new slice<ΔType>(nargs);
-                foreach (var (i, a) in args) {
+                foreach (var (i, a) in range(args)) {
                     Ꮡcheck.assignment(a, default, "argument to built-in "u8 + predeclaredFuncs[id].name);
                     if (a.mode == invalid) {
                         return default;
@@ -1069,7 +1069,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
             ref var t = ref heap(new operand(), out var Ꮡt);
             var x1 = Ꮡx;
-            foreach (var (_, arg) in argList) {
+            foreach (var (_, arg) in range(argList)) {
                 Ꮡcheck.rawExpr(nil, x1, arg, default, false); // permit trace for types, e.g.: new(trace(T))
                 Ꮡcheck.dump("%v: %s", x1.Pos(), x1.OrTypedNil());
                 x1 = Ꮡt; // use incoming x only for first argument
@@ -1151,7 +1151,7 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
             varSized = hasVarSize(u.elem, seen); goto ᒐdone;
         }
         case ж<Struct> u: {
-            foreach (var (_, f) in u.fields) {
+            foreach (var (_, f) in range(u.fields)) {
                 if (hasVarSize(f.typ, seen)) {
                     varSized = true; goto ᒐdone;
                 }
@@ -1247,7 +1247,7 @@ internal static ж<ΔSignature> makeSig(ΔType res, params ꓸꓸꓸType argsʗp
     var args = argsʗp.sslice();
 
     var list = new slice<ж<Var>>(len(args));
-    foreach (var (i, param) in args) {
+    foreach (var (i, param) in range(args)) {
         list[i] = NewParam(nopos, nil, ""u8, Default(param));
     }
     var @params = NewTuple(list.ꓸꓸꓸ);

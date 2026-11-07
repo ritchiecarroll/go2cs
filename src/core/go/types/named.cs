@@ -277,7 +277,7 @@ internal static ж<Named> unpack(this ж<Named> Ꮡn) {
             n.methods = methods;
 
             Ꮡn.setState(lazyLoaded); // avoid deadlock calling delayed functions
-            foreach (var (_, f) in delayed) {
+            foreach (var (_, f) in range(delayed)) {
                 f();
             }
         }
@@ -403,9 +403,7 @@ public static ж<Named> Origin(this ж<Named> Ꮡt) {
 
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
-public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) {
-    return Ꮡt.unpack().tparams;
-}
+public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
 
 // SetTypeParams sets the type parameters of the named type t.
 // t must not have type arguments.
@@ -597,13 +595,13 @@ internal static nint methodIndex(this ref Named t, @string name, bool foldCase) 
         return -1;
     }
     if (foldCase) {
-        foreach (var (i, m) in t.methods) {
+        foreach (var (i, m) in range(t.methods)) {
             if (strings.EqualFold(m.name, name)) {
                 return i;
             }
         }
     } else {
-        foreach (var (i, m) in t.methods) {
+        foreach (var (i, m) in range(t.methods)) {
             if (m.name == name) {
                 return i;
             }
@@ -651,9 +649,7 @@ public static ΔType Underlying(this ж<Named> Ꮡn) {
     return n.underlying;
 }
 
-public static @string String(this ж<Named> Ꮡt) {
-    return TypeString(new NamedжΔType(Ꮡt), default);
-}
+public static @string String(this ж<Named> Ꮡt) { return TypeString(new NamedжΔType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -724,7 +720,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
     }
 
     path = move2heap(pathᴷ, path);
-    foreach (var (_, t) in path) {
+    foreach (var (_, t) in range(path)) {
         var tʗ1 = t;
         var uʗ1 = u;
         func(() => {

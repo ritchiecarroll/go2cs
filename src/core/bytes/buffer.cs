@@ -45,7 +45,6 @@ internal static readOp opReadRune4 => 4; // Read rune of size 4.
 
 // ErrTooLarge is passed to panic if memory cannot be allocated to store data in a buffer.
 public static error ErrTooLarge = errors.New("bytes.Buffer: too large");
-
 internal static error errNegativeRead = errors.New("bytes.Buffer: reader returned negative count from Read");
 
 internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
@@ -55,17 +54,13 @@ internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)92233720
 // only until the next call to a method like [Buffer.Read], [Buffer.Write], [Buffer.Reset], or [Buffer.Truncate]).
 // The slice aliases the buffer content at least until the next buffer modification,
 // so immediate changes to the slice will affect the result of future reads.
-public static slice<byte> Bytes(this ref Buffer b) {
-    return b.buf.slice(b.off);
-}
+public static slice<byte> Bytes(this ref Buffer b) { return b.buf.slice(b.off); }
 
 // AvailableBuffer returns an empty buffer with b.Available() capacity.
 // This buffer is intended to be appended to and
 // passed to an immediately succeeding [Buffer.Write] call.
 // The buffer is only valid until the next write operation on b.
-public static slice<byte> AvailableBuffer(this ref Buffer b) {
-    return b.buf.slice(len(b.buf));
-}
+public static slice<byte> AvailableBuffer(this ref Buffer b) { return b.buf.slice(len(b.buf)); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
@@ -98,26 +93,18 @@ public static (slice<byte>, error) Peek(this ref Buffer b, nint n) {
 }
 
 // empty reports whether the unread portion of the buffer is empty.
-internal static bool empty(this ref Buffer b) {
-    return len(b.buf) <= b.off;
-}
+internal static bool empty(this ref Buffer b) { return len(b.buf) <= b.off; }
 
 // Len returns the number of bytes of the unread portion of the buffer;
 // b.Len() == len(b.Bytes()).
-public static nint Len(this ref Buffer b) {
-    return len(b.buf) - b.off;
-}
+public static nint Len(this ref Buffer b) { return len(b.buf) - b.off; }
 
 // Cap returns the capacity of the buffer's underlying byte slice, that is, the
 // total space allocated for the buffer's data.
-public static nint Cap(this ref Buffer b) {
-    return cap(b.buf);
-}
+public static nint Cap(this ref Buffer b) { return cap(b.buf); }
 
 // Available returns how many bytes are unused in the buffer.
-public static nint Available(this ref Buffer b) {
-    return cap(b.buf) - len(b.buf);
-}
+public static nint Available(this ref Buffer b) { return cap(b.buf) - len(b.buf); }
 
 // Truncate discards all but the first n unread bytes from the buffer
 // but continues to use the same allocated storage.
@@ -528,9 +515,7 @@ public static (@string line, error err) ReadString(this ref Buffer b, byte delim
 //
 // In most cases, new([Buffer]) (or just declaring a [Buffer] variable) is
 // sufficient to initialize a [Buffer].
-public static ж<Buffer> NewBuffer(slice<byte> buf) {
-    return Ꮡ(new Buffer(buf: buf));
-}
+public static ж<Buffer> NewBuffer(slice<byte> buf) { return Ꮡ(new Buffer(buf: buf)); }
 
 // NewBufferString creates and initializes a new [Buffer] using string s as its
 // initial contents. It is intended to prepare a buffer to read an existing

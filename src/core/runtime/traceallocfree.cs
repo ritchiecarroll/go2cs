@@ -55,7 +55,7 @@ internal static void traceSnapshotMemory(uintptr gen) {
     }
 
     // Write out all the heap spans and heap objects.
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() == mSpanDead) {
             continue;
         }

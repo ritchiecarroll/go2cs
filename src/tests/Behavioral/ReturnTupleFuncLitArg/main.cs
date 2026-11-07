@@ -6,13 +6,9 @@ partial class main_package {
 
 internal delegate void handler(@string msg);
 
-internal static void invoke(this handler h, @string msg) {
-    h(msg);
-}
+internal static void invoke(this handler h, @string msg) { h(msg); }
 
-internal static handler wrap(handler h) {
-    return h;
-}
+internal static handler wrap(handler h) { return h; }
 
 internal static (handler, @string, error) makeHandlers(@string prefix) {
     var allowed = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);

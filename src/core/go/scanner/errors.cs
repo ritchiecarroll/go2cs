@@ -40,18 +40,11 @@ public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) 
 }
 
 // Reset resets an [ErrorList] to no errors.
-public static void Reset(this ref ErrorList p) {
-    p = (p)[0..0];
-}
+public static void Reset(this ref ErrorList p) { p = (p)[0..0]; }
 
 // [ErrorList] implements the sort Interface.
-public static nint Len(this ErrorList p) {
-    return len(p);
-}
-
-public static void Swap(this ErrorList p, nint i, nint j) {
-    (p[i], p[j]) = (p[j], p[i]);
-}
+public static nint Len(this ErrorList p) { return len(p); }
+public static void Swap(this ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
 
 public static bool Less(this ErrorList p, nint i, nint j) {
     var e = p[i].ᏑPos;
@@ -85,7 +78,7 @@ public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
     sort.Sort(new ErrorListжInterface(Ꮡp));
     tokenꓸPosition last = default; // initial last.Line is != any legal error line
     nint i = 0;
-    foreach (var (_, e) in p) {
+    foreach (var (_, e) in range<ж<ΔError>>(p)) {
         if (e.Pos.Filename != last.Filename || e.Pos.Line != last.Line) {
             last = e.Pos;
             (p)[i] = e;
@@ -125,7 +118,7 @@ public static error Err(this ErrorList p) {
 // it prints the err string.
 public static void PrintError(io.Writer w, error err) {
     var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
-        foreach (var (_, e) in list) {
+        foreach (var (_, e) in range<ж<ΔError>>(list)) {
             fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
         }
     } else if (err != nil) {

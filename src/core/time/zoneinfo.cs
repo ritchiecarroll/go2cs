@@ -85,7 +85,6 @@ internal static void initᴛΔLocal() { ΔLocal = ᏑlocalLoc; }
 // it even if a client has changed Local.
 internal static readonly ж<ΔLocation> ᏑlocalLoc = new StaticBox<ΔLocation>(default(ΔLocation));
 internal static ref ΔLocation localLoc => ref ((StaticBox<ΔLocation>)ᏑlocalLoc).ValueSlot;
-
 internal static readonly ж<Δsync.Once> ᏑlocalOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)ᏑlocalOnce).ValueSlot;
 
@@ -106,7 +105,6 @@ public static @string String(this ж<ΔLocation> Ꮡl) {
 }
 
 internal static slice<ж<ΔLocation>> unnamedFixedZones;
-
 internal static readonly ж<Δsync.Once> ᏑunnamedFixedZonesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once unnamedFixedZonesOnce => ref ((StaticBox<Δsync.Once>)ᏑunnamedFixedZonesOnce).ValueSlot;
 
@@ -133,8 +131,8 @@ public static ж<ΔLocation> FixedZone(@string name, nint offset) {
 internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     var l = Ꮡ(new ΔLocation(
         name: name,
-        zone: slice<zone>([new(name, offset, false)]),
-        tx: slice<zoneTrans>([new(alpha, 0, false, false)]),
+        zone: [new(name, offset, false)],
+        tx: [new(alpha, 0, false, false)],
         cacheStart: alpha,
         cacheEnd: omega
     ));
@@ -256,7 +254,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
     }
 
     // Case 3.
-    foreach (var zi in range(l.zone)) {
+    foreach (var zi in range(len(l.zone))) {
         if (!l.zone[zi].isDST) {
             return zi;
         }
@@ -269,7 +267,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
 // firstZoneUsed reports whether the first zone is used by some
 // transition.
 internal static bool firstZoneUsed(this ref ΔLocation l) {
-    foreach (var (_, tx) in l.tx) {
+    foreach (var (_, tx) in range(l.tx)) {
         if (tx.index == 0) {
             return true;
         }
@@ -642,7 +640,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     // offset helps us pick the right one for the given time.
     // It's not perfect: during the backward transition we might pick
     // either one.)
-    foreach (var i in range(l.zone)) {
+    foreach (var i in range(len(l.zone))) {
         var zone = Ꮡ(l.zone, i);
         if (zone.name == name) {
             var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)zone.offset);
@@ -653,7 +651,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     }
 
     // Otherwise fall back to an ordinary name match.
-    foreach (var i in range(l.zone)) {
+    foreach (var i in range(len(l.zone))) {
         var zone = Ꮡ(l.zone, i);
         if (zone.name == name) {
             return (zone.offset, true);
@@ -669,7 +667,6 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
 internal static error errLocation = errors.New("time: invalid location name");
 
 internal static ж<@string> zoneinfo;
-
 internal static readonly ж<Δsync.Once> ᏑzoneinfoOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once zoneinfoOnce => ref ((StaticBox<Δsync.Once>)ᏑzoneinfoOnce).ValueSlot;
 

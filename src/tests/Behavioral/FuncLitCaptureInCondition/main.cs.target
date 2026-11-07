@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static bool anyMatch(slice<nint> vals, Func<nint, bool> f) {
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         if (f(v)) {
             return true;
         }

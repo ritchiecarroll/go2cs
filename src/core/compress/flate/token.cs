@@ -67,9 +67,7 @@ internal static UntypedInt matchType => /* 1 << 30 */ 1073741824;
 partial struct token /*num:uint32*/;
 
 // Convert a literal into a literal token.
-internal static token literalToken(uint32 literal) {
-    return (token)((uint32)literalType + literal);
-}
+internal static token literalToken(uint32 literal) { return (token)((uint32)literalType + literal); }
 
 // Convert a < xlength, xoffset > pair into a match token.
 internal static token matchToken(uint32 xlength, uint32 xoffset) {
@@ -77,22 +75,14 @@ internal static token matchToken(uint32 xlength, uint32 xoffset) {
 }
 
 // Returns the literal of a literal token.
-internal static uint32 literal(this token t) {
-    return (uint32)(t - (uint32)literalType);
-}
+internal static uint32 literal(this token t) { return (uint32)(t - (uint32)literalType); }
 
 // Returns the extra offset of a match token.
-internal static uint32 offset(this token t) {
-    return (uint32)t & (uint32)offsetMask;
-}
+internal static uint32 offset(this token t) { return (uint32)t & (uint32)offsetMask; }
 
-internal static uint32 length(this token t) {
-    return (uint32)((t - (uint32)matchType) >> (int)(lengthShift));
-}
+internal static uint32 length(this token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
 
-internal static uint32 lengthCode(uint32 len) {
-    return lengthCodes[len];
-}
+internal static uint32 lengthCode(uint32 len) { return lengthCodes[len]; }
 
 // Returns the offset code corresponding to a specific offset.
 internal static uint32 offsetCode(uint32 off) {

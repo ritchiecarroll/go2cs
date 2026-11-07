@@ -587,7 +587,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         if (!ok) {
             return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header line: %q"u8, kv)));
         }
-        foreach (var (_, c) in v) {
+        foreach (var (_, c) in range(v)) {
             if (!validHeaderValueByte(c)) {
                 return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header line: %q"u8, kv)));
             }
@@ -634,9 +634,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
 // noValidation is a no-op validation func for readContinuedLineSlice
 // that permits any lines.
-internal static error noValidation(slice<byte> _) {
-    return default;
-}
+internal static error noValidation(slice<byte> _) { return default; }
 
 // mustHaveFieldNameColon ensures that, per RFC 7230, the
 // field-name is on a single line, so the first line must
@@ -798,7 +796,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
 
     // See if a looks like a header key. If not, return it unchanged.
     var noCanon = false;
-    foreach (var (_, c) in a) {
+    foreach (var (_, c) in range(a)) {
         if (validHeaderFieldByte(c)) {
             continue;
         }
@@ -817,7 +815,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
     }
 
     var upper = true;
-    foreach (var (i, vᴛ1) in a) {
+    foreach (var (i, vᴛ1) in range(a)) {
         var c = vᴛ1;
 
         // Canonicalize: first letter upper case
@@ -850,7 +848,7 @@ internal static ref sync.Once commonHeaderOnce => ref ((StaticBox<sync.Once>)Ꮡ
 
 internal static void initCommonHeader() {
     commonHeader = new map<@string, @string>();
-    foreach (var (_, v) in slice<@string>([
+    foreach (var (_, v) in range(slice<@string>([
         "Accept",
         "Accept-Charset",
         "Accept-Encoding",
@@ -890,7 +888,7 @@ internal static void initCommonHeader() {
         "X-Forwarded-For",
         "X-Imforwards",
         "X-Powered-By"
-    ])) {
+    ]))) {
         commonHeader[v] = v;
     }
 }

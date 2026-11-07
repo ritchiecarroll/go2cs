@@ -84,14 +84,14 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         // we just treat these strings as being encoded using Latin-1. This matches
         // what most of the world does, including BoringSSL.
         var buf = new slice<byte>(0, builtin.len(value));
-        foreach (var (_, v) in value) {
+        foreach (var (_, v) in range(value)) {
             // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
             buf = utf8.AppendRune(buf, (rune)v);
         }
         return ((@string)buf, default);
     }
     case var ᴛ when ᴛ == cryptobyte_asn1.PrintableString: {
-        foreach (var (_, b) in value) {
+        foreach (var (_, b) in range(value)) {
             if (!isPrintable(b)) {
                 return ("", errors.New(invalidPrintableStringˢ));
             }
@@ -145,7 +145,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         return (s, default);
     }
     case var ᴛ when ᴛ == ((cryptobyte_asn1.Tag)asn1.TagNumericString): {
-        foreach (var (_, b) in value) {
+        foreach (var (_, b) in range(value)) {
             if (!('0' <= b && b <= '9' || b == ' ')) {
                 return ("", errors.New(invalidNumericStringˢ));
             }
@@ -668,7 +668,7 @@ internal static (slice<ΔOID>, error) parseCertificatePoliciesExtension(cryptoby
 internal static bool isValidIPMask(slice<byte> mask) {
     var seenZero = false;
 
-    foreach (var (_, b) in mask) {
+    foreach (var (_, b) in range(mask)) {
         if (seenZero) {
             if (b != 0) {
                 return false;
@@ -886,7 +886,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     error err = default;
-    foreach (var (_, e) in @out.Extensions) {
+    foreach (var (_, e) in range(@out.Extensions)) {
         var unhandled = false;
 
         if (builtin.len(e.Id) == 4 && e.Id[0] == 2 && e.Id[1] == 5 && e.Id[2] == 29) {
@@ -1036,7 +1036,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     return err;
                 }
                 @out.PolicyIdentifiers = new slice<asn1.ObjectIdentifier>(0, builtin.len(@out.Policies));
-                foreach (var (_, oid) in @out.Policies) {
+                foreach (var (_, oid) in range(@out.Policies)) {
                     var (oidΔ1, ok) = oid.toASN1OID(); if (ok) {
                         @out.PolicyIdentifiers = append(@out.PolicyIdentifiers, oidΔ1);
                     }

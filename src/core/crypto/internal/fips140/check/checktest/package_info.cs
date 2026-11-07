@@ -56,8 +56,8 @@ using static go.crypto.@internal.fips140.check.checktest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/check/checktest/asm_none.go", "asm_none.cs", "AAoWgKKA")]
-[assembly: GoPositionMap("crypto/internal/fips140/check/checktest/test.go", "test.cs", "AB40AAcS3oKCgpSCgpSCpoKClII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/check/checktest/asm_none.go", "asm_none.cs", "AAoWgg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/check/checktest/test.go", "test.cs", "AB40AAcSzoKCgpSCgpSCpoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.check;

@@ -46,7 +46,7 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
         }
         expander.Write(buf);
         expander.Write(slice<byte>(info));
-        expander.Write(slice<byte>([counter]));
+        expander.Write([counter]);
         buf = expander.Sum(buf[..0]);
         nint remain = keyLen - len(@out);
         remain = min(remain, len(buf));

@@ -83,7 +83,7 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
         return (data, err);
     }
     n -= len(objapi);
-    foreach (var (_, h) in headers) {
+    foreach (var (_, h) in range(headers)) {
         n -= len(h);
     }
 
@@ -337,7 +337,7 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
     }
 
     // try extensions
-    foreach (var (_, ext) in pkgExts.ΔRangeSnapshot()) {
+    foreach (var (_, ext) in range(pkgExts.ΔRangeSnapshot())) {
         filename = noext + ext;
         var (f, statErr) = os.Stat(filename);
         if (statErr == nil && !f.IsDir()) {

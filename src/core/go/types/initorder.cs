@@ -55,7 +55,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
         fmt.Println();
 
         fmt.Println(transposedObjectˢ);
-        foreach (var (_, n) in pq) {
+        foreach (var (_, n) in range<ж<graphNode>>(pq)) {
             fmt.Printf("\t%s depends on %d nodes\n"u8, n.obj.Name(), n.ndeps);
             foreach (var (p, _) in n.pred) {
                 fmt.Printf("\t\t%s is dependent\n"u8, p.obj.Name());
@@ -126,7 +126,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
 
         var infoLhs = info.lhs; // possibly nil (see declInfo.lhs field comment)
         if (infoLhs == nil) {
-            infoLhs = slice<ж<Var>>([v]);
+            infoLhs = [v];
         }
         var init = Ꮡ(new Initializer(infoLhs, info.init));
         check.Info.InitOrder = append(check.Info.InitOrder, init);
@@ -135,7 +135,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
     if (debug) {
         fmt.Println();
         fmt.Println(initializationOrderˢ);
-        foreach (var (_, init) in check.Info.InitOrder) {
+        foreach (var (_, init) in range(check.Info.InitOrder)) {
             fmt.Printf("\t%s\n"u8, init.OrTypedNil());
         }
         fmt.Println();
@@ -159,9 +159,9 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
     var depsʗ1 = deps;
     sort.Slice(deps, (nint i, nint j) => depsʗ1[i].order() < depsʗ1[j].order());
 
-    foreach (var (_, d) in deps) {
+    foreach (var (_, d) in range(deps)) {
         if (AreEqual(d, to)) {
-            return slice<Object>([d]);
+            return [d];
         }
         var P = findPath(objMap, d, to, seen); if (P != nil) {
             return append(P, d);
@@ -282,7 +282,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     // position X is proportional to cost * (len(funcG)-X). Therefore, we should
     // remove high-cost functions last.
     slices.SortFunc(funcG, (ж<graphNode> a, ж<graphNode> b) => cmp_package.Compare(a.cost(), b.cost()));
-    foreach (var (_, n) in funcG) {
+    foreach (var (_, n) in range(funcG)) {
         // connect each predecessor p of n with each successor s
         // and drop the function node (don't collect it in G)
         foreach (var (p, _) in n.pred) {
@@ -306,7 +306,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     }
 
     // fill in index and ndeps fields
-    foreach (var (i, n) in G) {
+    foreach (var (i, n) in range(G)) {
         n.index = i;
         n.ndeps = len(n.succ);
     }
@@ -321,9 +321,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
 // a nodeQueue may be used as a priority queue.
 partial struct nodeQueue /*[]ж<graphNode>*/;
 
-internal static nint Len(this nodeQueue a) {
-    return len(a);
-}
+internal static nint Len(this nodeQueue a) { return len(a); }
 
 internal static void Swap(this nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);

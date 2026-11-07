@@ -34,7 +34,7 @@ internal static void Main() {
         os.Exit(1);
     }
 
-    foreach (var (_, s) in sentinels) {
+    foreach (var (_, s) in range(sentinels)) {
         var err = os.Setenv(s.name, s.value); if (err != nil) {
             fmt.Println("FATAL Setenv", s.name, err);
             os.Exit(1);
@@ -46,12 +46,12 @@ internal static void Main() {
     fmt.Printf("delta %d\n"u8, len(after) - len(before));
 
     fmt.Println("-- sentinels via syscall.Environ --");
-    foreach (var (_, e) in collect(after)) {
+    foreach (var (_, e) in range(collect(after))) {
         fmt.Println(ascii(e));
     }
 
     fmt.Println("-- sentinels via os.Environ --");
-    foreach (var (_, e) in collect(os.Environ())) {
+    foreach (var (_, e) in range(collect(os.Environ()))) {
         fmt.Println(ascii(e));
     }
 
@@ -83,7 +83,7 @@ internal static void Main() {
 
 internal static slice<@string> collect(slice<@string> env) {
     slice<@string> @out = default;
-    foreach (var (_, e) in env) {
+    foreach (var (_, e) in range(env)) {
         if (strings.HasPrefix(e, prefix)) {
             @out = append(@out, e);
         }
@@ -93,7 +93,7 @@ internal static slice<@string> collect(slice<@string> env) {
 }
 
 internal static bool getenvAgrees(slice<@string> env) {
-    foreach (var (_, e) in env) {
+    foreach (var (_, e) in range(env)) {
         nint i = strings.Index(e[1..], "=");
         if (i < 0) {
             return false;
@@ -110,7 +110,7 @@ internal static bool getenvAgrees(slice<@string> env) {
 }
 
 internal static bool hasHidden(slice<@string> env) {
-    foreach (var (_, e) in env) {
+    foreach (var (_, e) in range(env)) {
         if (strings.HasPrefix(e, "=")) {
             return true;
         }
@@ -119,7 +119,7 @@ internal static bool hasHidden(slice<@string> env) {
 }
 
 internal static (@string, @string) malformed(slice<@string> env) {
-    foreach (var (_, e) in env) {
+    foreach (var (_, e) in range(env)) {
         if (e == ""u8) {
             return (e, "empty");
         }
@@ -134,7 +134,7 @@ internal static (@string, @string) malformed(slice<@string> env) {
 }
 
 internal static bool contains(slice<@string> env, @string p) {
-    foreach (var (_, e) in env) {
+    foreach (var (_, e) in range(env)) {
         if (strings.HasPrefix(e, p)) {
             return true;
         }

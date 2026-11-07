@@ -5,26 +5,17 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt constLit => /* 'a' */ 97;
-
 internal static UntypedInt constDiff => /* 'a' - 'A' */ 32;
 
 partial struct letter /*num:rune*/;
 
-internal static bool isByte(byte b) {
-    return b == 'x';
-}
+internal static bool isByte(byte b) { return b == 'x'; }
 
-internal static rune takesRune(rune r) {
-    return r + 1;
-}
+internal static rune takesRune(rune r) { return r + 1; }
 
-internal static rune retRune() {
-    return 'Z';
-}
+internal static rune retRune() { return 'Z'; }
 
-internal static byte retByte() {
-    return (byte)'z';
-}
+internal static byte retByte() { return (byte)'z'; }
 
 internal static partial void Main() {
     var bsᴷ = new stackAppend<byte>();
@@ -133,7 +124,7 @@ internal static partial void Main() {
     }, (rune)'g');
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
 
-    foreach (var (_, c) in slice<byte>("a_7."u8)) {
+    foreach (var (_, c) in range(slice<byte>("a_7."u8))) {
         int8 i8Δ1 = (int8)c;
         switch (ᐧ) {
         case {} when c is (byte)'_': {
@@ -163,12 +154,8 @@ internal static partial void Main() {
     }
 }
 
-internal static T ident<T>(T v) {
-    return v;
-}
+internal static T ident<T>(T v) { return v; }
 
-internal static T apply<T>(Func<T> f) {
-    return f();
-}
+internal static T apply<T>(Func<T> f) { return f(); }
 
 } // end main_package

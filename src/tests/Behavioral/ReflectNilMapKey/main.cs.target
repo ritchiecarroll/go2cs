@@ -49,7 +49,7 @@ internal static void Main() {
 
     var keys = v.MapKeys();
     fmt.Println("MapKeys:", len(keys));
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         fmt.Println(" key kind:", k.Kind(), "elem:", k.Elem().Type(), "elem nil:", k.Elem().IsNil());
     }
 }

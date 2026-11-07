@@ -117,17 +117,13 @@ partial struct leftSide {
     internal @string tag;
 }
 
-internal static @string Ping(this leftSide l) {
-    return "L";
-}
+internal static @string Ping(this leftSide l) { return "L"; }
 
 partial struct rightSide {
     internal @string tag;
 }
 
-internal static @string Ping(this rightSide r) {
-    return "R";
-}
+internal static @string Ping(this rightSide r) { return "R"; }
 
 partial struct pair {
     /*embed*/ internal leftSide leftSide;
