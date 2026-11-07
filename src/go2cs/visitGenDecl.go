@@ -87,7 +87,7 @@ func (v *Visitor) writeSpecGap(prev ast.Spec, spec *ast.ValueSpec) int {
 		prevEnd = prevSpec.Comment.End()
 	}
 
-	if v.fset.Position(start).Line-v.fset.Position(prevEnd).Line <= 1 {
+	if v.goLine(start)-v.goLine(prevEnd) <= 1 {
 		return -1
 	}
 

@@ -1223,7 +1223,16 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// addressedLateReceiverBox).
 			skipRecv := v.captureModeMethodValueReceiver(node.Call)
 			addressedBox := v.addressedLateReceiverBox(node.Call)
+			_, calleeIsLit := ast.Unparen(node.Call.Fun).(*ast.FuncLit)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
+				// A literal in a callee that is NOT itself a literal (`defer lazy(func() int { return s.id })()`)
+				// is its own closure, whose captures are recorded when visitNode reaches it below. Taking
+				// them for the statement as well registered each twice, and the statement's copy, which
+				// only a callee literal declares, was never written (`var sʗ2 = sʗ1;`, gojq compiler.go).
+				// A literal inside a callee literal's body chains from that literal's copies, as before.
+				if _, ok := n.(*ast.FuncLit); ok && !calleeIsLit {
+					return false
+				}
 				if id, ok := n.(*ast.Ident); ok {
 					if id == skipRecv || id == addressedBox {
 						return true
@@ -1278,7 +1287,16 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// addressedLateReceiverBox).
 			skipRecv := v.captureModeMethodValueReceiver(node.Call)
 			addressedBox := v.addressedLateReceiverBox(node.Call)
+			_, calleeIsLit := ast.Unparen(node.Call.Fun).(*ast.FuncLit)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
+				// A literal in a callee that is NOT itself a literal (`defer lazy(func() int { return s.id })()`)
+				// is its own closure, whose captures are recorded when visitNode reaches it below. Taking
+				// them for the statement as well registered each twice, and the statement's copy, which
+				// only a callee literal declares, was never written (`var sʗ2 = sʗ1;`, gojq compiler.go).
+				// A literal inside a callee literal's body chains from that literal's copies, as before.
+				if _, ok := n.(*ast.FuncLit); ok && !calleeIsLit {
+					return false
+				}
 				if id, ok := n.(*ast.Ident); ok {
 					if id == skipRecv || id == addressedBox {
 						return true

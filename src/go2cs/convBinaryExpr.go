@@ -2690,7 +2690,7 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 		for _, pos := range trailing {
 			comment := v.standAloneComments[pos]
 
-			if !strings.HasPrefix(comment, "/*") || strings.Contains(comment, "\n") || v.file.Line(pos) != v.file.Line(binaryExpr.X.End()) {
+			if !strings.HasPrefix(comment, "/*") || strings.Contains(comment, "\n") || v.goLine(pos) != v.goLine(binaryExpr.X.End()) {
 				inline = false
 			}
 		}
@@ -2725,16 +2725,16 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 	}
 
 	last := leading[len(leading)-1]
-	breaks := strings.HasPrefix(v.standAloneComments[last], "//") || v.file.Line(binaryExpr.Y.Pos()) > v.file.Line(last)
+	breaks := strings.HasPrefix(v.standAloneComments[last], "//") || v.goLine(binaryExpr.Y.Pos()) > v.goLine(last)
 
 	builder.WriteString(strings.TrimRight(op, " "))
 
 	// A comment on the line where the operator (or the comment before it) ends trails it; one on a later
 	// line takes a line of its own, as in Go.
-	prevLine := v.file.Line(binaryExpr.OpPos)
+	prevLine := v.goLine(binaryExpr.OpPos)
 
 	for _, pos := range leading {
-		if v.file.Line(pos) == prevLine {
+		if v.goLine(pos) == prevLine {
 			builder.WriteString(" ")
 		} else {
 			builder.WriteString(v.newline)
@@ -2742,7 +2742,7 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 		}
 
 		builder.WriteString(v.standAloneComments[pos])
-		prevLine = v.file.Line(pos)
+		prevLine = v.goLine(pos)
 	}
 
 	if breaks {
