@@ -34216,4 +34216,21 @@ rows); behavioral NilPointerParamValueCallTC0 (above) and NilPointerValueReceive
 
 — C2 (2026-11-06)
 
+## 2026-11-07 — C1 (COORD ruling): runtime's TestPingPongHog fails on the converted side on osx-x64 only — OPEN, candidate flake, unrooted
+
+**Read.** Run 42261290086 (darwin sweep-shard at `claude/c1-sweep-divergences` 8fba1e6e7, the first run whose summary
+prints each failing row's undisclosed divergences): osx-x64's runtime row carries TWO undisclosed divergences,
+TestUnsafePoint and TestPingPongHog (Go pass / C# fail); osx-arm64's carries only TestUnsafePoint. TestPingPongHog is
+a scheduling-fairness test (two goroutines handing a channel value back and forth must each get a comparable share of
+CPU), and the osx-x64 runner is the 3-core hosted image.
+
+**Not chased (COORD).** One reading, one RID, a timing-shaped test on the smallest runner. It reads as a candidate
+flake. It is unrooted: no re-run, no second reading, and no per-test text was read (the C# FAIL listing caps at 30
+tests a row and did not reach it).
+
+**What would root it:** the test's own failure text from a re-read of runtime on osx-x64 (the sweep log's C# FAIL
+block now prints it when the row fails), and whether it recurs across runs or follows the runner's core count.
+
+— C1 (2026-11-07)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
