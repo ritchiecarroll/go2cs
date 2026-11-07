@@ -102,7 +102,9 @@ internal abstract class TemplateBase
     // within PackageNamespace, and returns the name. The header lists each one for golib's extension-method scan under
     // Native AOT (GeneratedSource.ExtensionHostDeclaration). A converter-declared class the template reopens, such as
     // the package class, needs no declaration: ExtensionHostListGenerator lists every static class the converter's own
-    // sources declare. GenTests' ExtensionHostListTests fails on a generated host that neither lists.
+    // sources declare. GenTests' ExtensionHostListTests fails on a generated host that neither lists. The declaration
+    // names no home beyond this assembly: a template's methods extend the struct or interface it writes, which this
+    // assembly declares (GolibTests' ExtensionHostListTests holds every listing's homes to the receivers').
     protected string DeclareExtensionHost(string className)
     {
         if (!m_extensionHosts.Contains(className))

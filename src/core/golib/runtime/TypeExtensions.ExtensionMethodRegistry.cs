@@ -573,9 +573,44 @@ public static partial class TypeExtensions
                 !CarriesExtensionAttribute(reader, definition.GetCustomAttributes()))
                 continue;
 
-            // RED: the homes are not read yet, so every host is read for every question.
-            bool anyHome = true;
+            bool anyHome = false;
             homes.Clear();
+
+            foreach (MethodDefinitionHandle methodHandle in definition.GetMethods())
+            {
+                MethodDefinition method = reader.GetMethodDefinition(methodHandle);
+
+                if ((method.Attributes & MethodAttributes.Static) == 0 || !CarriesExtensionAttribute(reader, method.GetCustomAttributes()))
+                    continue;
+
+                BlobReader signature = reader.GetBlobReader(method.Signature);
+
+                if (signature.ReadSignatureHeader().IsGeneric)
+                    signature.ReadCompressedInteger();
+
+                // No receiver: not a method C# writes. Reading the class for every question leaves it to fail there as
+                // it did before the walk read homes (GetExtensionTargetType).
+                if (signature.ReadCompressedInteger() == 0)
+                {
+                    anyHome = true;
+                    continue;
+                }
+
+                decoder.DecodeType(ref signature); // the return type
+
+                if (decoder.DecodeType(ref signature) == ReceiverShape.Defined)
+                {
+                    addHome(assembly);
+                    continue;
+                }
+
+                Type receiver = ((MethodInfo)module.ResolveMethod(MetadataTokens.GetToken(methodHandle))!).GetExtensionTargetType();
+
+                if (ExtensionHome(receiver) is { } home)
+                    addHome(home);
+                else
+                    anyHome = true;
+            }
 
             hosts.Add(new ExtensionHost(assembly, module, MetadataTokens.GetToken(handle), [.. homes], anyHome));
         }
@@ -743,8 +778,7 @@ public static partial class TypeExtensions
             if (!listed.Add(attribute.Host))
                 continue;
 
-            // RED: the listed homes are not read yet.
-            if (list.HomesListed && !attribute.AnyHome && attribute.Homes is null)
+            if (list.HomesListed && !attribute.AnyHome)
             {
                 Assembly[] homes = [assembly, .. attribute.Homes.Select(static type => type.Assembly).Where(home => home != assembly).Distinct()];
                 hosts.Add(new ExtensionHost(attribute.Host, homes, false));
