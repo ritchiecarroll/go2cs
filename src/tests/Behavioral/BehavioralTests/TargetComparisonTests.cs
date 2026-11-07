@@ -409,6 +409,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]
+    public void CheckDeferCallFuncLitArgCapture() => CheckTarget("DeferCallFuncLitArgCapture");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]
