@@ -871,11 +871,13 @@ if ($preflightProblems.Count) {
 # pin, and every committed suppression file reads as the guard's format. The guard itself runs after the merge, below.
 Import-Module (Join-Path $PSScriptRoot 'tools/pushnuget/GoApiCompat.psm1') -Force
 $apiCompatVersion = Initialize-GoApiCompatTool -RepoRoot $repoRoot
-$suppressionFiles = @(Get-ChildItem (Join-Path $src 'core') -Recurse -File -Filter 'CompatibilitySuppressions.xml')
+# Each suppression file keyed by the package id of its directory (Get-GoApiCompatSuppressionMap says why never the
+# reverse).
+$suppressionMap = Get-GoApiCompatSuppressionMap (Join-Path $src 'core')
 $suppressionEntries = 0
-foreach ($file in $suppressionFiles) { $suppressionEntries += @(Read-GoApiCompatSuppressions $file.FullName).Count }
+foreach ($file in $suppressionMap.Values) { $suppressionEntries += @(Read-GoApiCompatSuppressions $file).Count }
 Write-Step ("Binary-compatibility guard: apicompat $apiCompatVersion restored from .config\dotnet-tools.json; " +
-            "$($suppressionFiles.Count) suppression file(s), $suppressionEntries announced break(s)")
+            "$($suppressionMap.Count) suppression file(s), $suppressionEntries announced break(s)")
 
 if ($VerifyOnly) {
     Write-Step "Pre-flight clean. -VerifyOnly: nothing was bumped, tagged, frozen, packed or pushed."
@@ -2148,13 +2150,7 @@ try {
     $apiCompat = Invoke-GoApiCompatGuard -Packages $pkgs -RepoRoot $repoRoot -WorkDir $apiCompatWork `
         -FlatContainer $ApiCompatFlatContainer `
         -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
-        -SuppressionFor {
-            param($id)
-            # go.lib is src\core\golib; every other go.<a>.<b> is src\core\<a>\<b>.
-            $dir = if ($id -eq 'go.lib') { 'golib' } else { $id.Substring(3) -replace '\.', '\' }
-            $file = Join-Path (Join-Path (Join-Path $src 'core') $dir) 'CompatibilitySuppressions.xml'
-            if (Test-Path -LiteralPath $file) { $file } else { $null }
-        }
+        -SuppressionFor { param($id) $suppressionMap[$id] }
 }
 finally {
     if (Test-Path -LiteralPath $apiCompatWork) { Remove-Item -LiteralPath $apiCompatWork -Recurse -Force }
@@ -2162,9 +2158,13 @@ finally {
 if ($apiCompat.Compared -ne $apiCompat.Expected -and $apiCompat.Failures.Count -eq 0) {
     throw "Binary compatibility: compared $($apiCompat.Compared) of $($apiCompat.Expected) baseline asset(s) and named no failure -- the guard is broken"
 }
-if ($apiCompat.Failures.Count -gt 0) {
-    $apiCompat.Failures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
-    throw ("Binary compatibility: $($apiCompat.Failures.Count) failure(s) across $($apiCompat.Packages) package(s) -- an " +
+# A suppression file whose directory names no packed package is never read, so its entries would pass unexamined.
+$packedIds = @($pkgs | ForEach-Object { (Get-GoNuGetPackageIdentity $_.FullName).Id })
+$apiCompatFailures = @($apiCompat.Failures) + @($suppressionMap.Keys | Where-Object { $packedIds -notcontains $_ } | Sort-Object |
+    ForEach-Object { "${_}: $($suppressionMap[$_]) names no packed package, so the guard never reads it" })
+if ($apiCompatFailures.Count -gt 0) {
+    $apiCompatFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw ("Binary compatibility: $($apiCompatFailures.Count) failure(s) across $($apiCompat.Packages) package(s) -- an " +
            "unannounced break cannot ship. A deliberate break is listed in the package's CompatibilitySuppressions.xml, " +
            "announced in the release notes, and ships with the nugetgo rebuild wave (DESIGN-binary-compat-guard.md section 6)")
 }
@@ -2172,6 +2172,7 @@ Write-Step ("Binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) of $
             "with their baselines by apicompat $apiCompatVersion; $($apiCompat.NoBaseline.Count) package(s) with no " +
             "published version on this line (reported, not gated)")
 if ($apiCompat.NoBaseline.Count -gt 0) { Write-Host "  no baseline: $($apiCompat.NoBaseline -join ', ')" }
+if ($apiCompat.NoSurface.Count -gt 0) { Write-Host "  no lib/ or runtimes/ asset to compare (an analyzer): $($apiCompat.NoSurface -join ', ')" }
 
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {

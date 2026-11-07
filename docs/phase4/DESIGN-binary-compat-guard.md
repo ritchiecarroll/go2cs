@@ -219,3 +219,61 @@ revision before it, except for the breaks listed in that release's suppression f
 >   - the 38 platform-neutral packages among M4's 46, repacked from the `c6cddb6903` Release build: 38 of 38 compared,
 >     0 failures, about 1 s each. Batches 235-237 changed none of the 38 (only archive/tar, crypto/x509 and vendored
 >     cryptobyte in the converted stdlib).
+
+---
+
+> **TWO DEFECTS AND THE WHOLE-SURFACE CENSUS, 2026-11-07 (COORD ask, before the end regen).** Batch 239 was held off
+> master on the first defect and re-cut with the fix.
+>
+> **The census.** push-nuget.ps1's own pack-only Phase 1 ran on 237 + 238 (P-384) + 239, with the packages versioned
+> `1.26.10.3-gcensus.1` so that each baseline is the published 1.26.10.2. It built, packed and merged all three
+> GoTargetOS flavors (2,434 s): 362 packages, 41 of them L3 RID-specific.
+>
+> **Defect 1: a package with no lib/ or runtimes/ asset stopped the pack.** The guard threw at `go.gen`, an analyzer.
+> Nothing was extracted, so its scratch directory never existed, and the closing removal threw. A real release pack would
+> have stopped there too. The suite had never fed the driver that shape. Now the scratch directory is created first,
+> such a package compares 0 of 0, and it is listed as having no surface. The new arm read red 3 of 31 against the old
+> driver, with the same throw.
+>
+> **Defect 2: a suppression file in a directory with a dotted segment was never read.** push-nuget turned a package id
+> back into a path, `.` to `\`. `go.vendor.golang.org.x.crypto.cryptobyte` was looked up under
+> `vendor\golang\org\...`, so its file was invisible: 5 failures with the file in place.
+> `Get-GoApiCompatSuppressionMap` keys each file by its own directory's id instead: 0 failures. A file that maps to no
+> packed package is red.
+>
+> **The package shapes the census met, all now in the suite:**
+>
+> | shape | packages |
+> |:--|--:|
+> | lib/ plus build/ | 318 |
+> | lib/ plus four RIDs plus build/ | 41 |
+> | lib/ only | 1 |
+> | lib/ plus buildTransitive/ (go.lib) | 1 |
+> | analyzers/ only (go.gen) | 1 |
+>
+> Each assembly carries its `.pdb`, and the baselines have the same shapes in the same counts.
+>
+> **The reading** (fixed driver; push-nuget's own call; apicompat 10.0.403; 507 s):
+> - **362 of 362 packages compared with a baseline, 525 of 525 assets.** No package lacks a baseline. One package has
+>   no surface: go.gen.
+> - **Before suppression, 17 failures in two packages, each classified:**
+>   - **golib: 12, B3** (batch 231). Already suppressed and announced under *Upgrading*.
+>   - **vendored cryptobyte: 5, batch 235** (C2's this-ref box). Five exported pointer methods changed receiver, from
+>     `this ref String` to `this ж<String>`. **Not reachable by a consumer:** std-vendored packages are importable only
+>     by the standard library, and the one caller, crypto/x509, pins this package exactly (`[build]`), so a mixed
+>     restore is refused at restore, never bound at run time.
+>     - Suppressed in `src/core/vendor/golang.org/x/crypto/cryptobyte/CompatibilitySuppressions.xml`, each entry citing
+>       batch 235.
+>     - No release-notes line.
+>   - Nothing else. 238's P-384 hand-own moved no public member.
+> - **With both files: 0 failures.**
+> - **The 7 published nugetgo modules.** Each was built the way nugetgo-pack.ps1 builds its flavors, from master's
+>   converter and the census's go.* packages, and compared with its last published revision: **23 of 23 assets, 0
+>   failures.**
+>   - uuid 1, jwt 2, x/sync 4, hashset 1: neutral packages;
+>   - pflag, mousetrap and cobra: 5 assets each, every RID.
+>
+> **What this says about B4.** go.* packages pin each other EXACTLY, so a mixed go.* set fails at restore. Among go.*
+> packages, only a consumer's own code and nugetgo modules (B4's `[build, next minor)` range) can bind across
+> revisions, and that is where the guard's verdict matters. It still compares every package, because that is what a
+> C# consumer referencing go.* directly binds.

@@ -120,6 +120,37 @@ try {
         @($r.Failures | Where-Object { $_.Contains($lib) -and $_.Contains('verdict') }).Count -eq 1) "$($r.Failures -join '; ')"
     Check 'and is not counted as compared' ($r.Compared -eq 1) "compared $($r.Compared)"
 
+    # go.gen is an analyzer: its one assembly is under analyzers/, so it has no lib/ or runtimes/ asset. The first
+    # whole-surface census (2026-11-07) stopped push-nuget.ps1 there: nothing was extracted, so the scratch directory the
+    # guard removes at the end did not exist, and the removal threw.
+    # The shapes the 1.26.10.3 census packed (362 packages): lib/ only; lib/ plus build/ (318); lib/ plus buildTransitive/
+    # (go.lib); lib/ plus the four RID folders plus build/ (41, the L3 packages); analyzers/ only (go.gen). Each assembly
+    # has its .pdb beside it, and the two Mac RIDs carry the same darwin bytes.
+    Write-Host 'the release''s own package shapes: a .pdb beside each assembly, build/ and buildTransitive/, all four RID folders'
+    $pdb = [System.Text.Encoding]::ASCII.GetBytes('not compared')
+    $release = @{ 'lib/net10.0/Widget.dll' = 'widget-base.dll'; 'lib/net10.0/Widget.pdb' = $pdb; 'build/go.widget.props' = $pdb; 'buildTransitive/go.widget.targets' = $pdb }
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') { $release["runtimes/$rid/lib/net10.0/Widget.dll"] = 'widget-base.dll'; $release["runtimes/$rid/lib/net10.0/Widget.pdb"] = $pdb }
+    $releaseBase = New-Package 'release-base' $release
+    $darwinBreak = $release.Clone(); $darwinBreak['runtimes/osx-arm64/lib/net10.0/Widget.dll'] = 'widget-internal.dll'
+    $releaseRed = New-Package 'release-red' $darwinBreak
+    $r = Compare-Fixture $releaseBase $releaseBase $null
+    Check 'the release shape compares its five assemblies and nothing else (no .pdb, no build/)' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 5 -and $r.Assets.Count -eq 5) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
+    $r = Compare-Fixture $releaseBase $releaseRed $null
+    Check 'a break in one RID''s flavor alone reads red and names that RID' (
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('runtimes/osx-arm64/') -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Compared -eq 5) "compared $($r.Compared); $($r.Failures -join '; ')"
+
+    Write-Host 'a package with no lib/ or runtimes/ asset (go.gen, an analyzer) has no surface to compare, and does not stop the guard'
+    $analyzer = New-Package 'analyzer' @{ 'analyzers/dotnet/cs/Widget.dll' = 'widget-base.dll' }
+    $r = $null; $threw = $null
+    try { $r = Compare-Fixture $analyzer $analyzer $null } catch { $threw = $_.Exception.Message }
+    Check 'an analyzer-only package does not throw' ($null -eq $threw) "$threw"
+    Check 'it reads green with nothing compared' ($null -ne $r -and $r.Failures.Count -eq 0 -and $r.Compared -eq 0 -and $r.Assets.Count -eq 0) $(if ($r) { "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')" } else { 'no result' })
+    $r = $null; $threw = $null
+    try { $r = Compare-Fixture $analyzer $analyzer $suppressed } catch { $threw = $_.Exception.Message }
+    Check 'a suppression for an analyzer-only package names an asset it does not carry, and reads red' (
+        $null -eq $threw -and @($r.Failures | Where-Object { $_.Contains('does not carry') }).Count -eq 1) $(if ($threw) { $threw } else { "$($r.Failures -join '; ')" })
+
     Write-Host 'the suppression file format'
     $pkgMode = New-Suppressions 'pkgmode' @(Entry 'CP0002' 'F:Fixture.Widget.Instance' $lib '<IsBaselineSuppression>true</IsBaselineSuppression>')
     $threw = $false; try { Read-GoApiCompatSuppressions $pkgMode | Out-Null } catch { $threw = $_.Exception.Message.Contains('package-mode') }
@@ -144,10 +175,32 @@ try {
     $text = [System.IO.File]::ReadAllText($golib)
     Check 'the file cites B3 and batch 231' ($text.Contains('B3') -and $text.Contains('batch 231')) 'no citation'
 
+    # A package id cannot be turned back into its directory: go.vendor.golang.org.x.crypto.cryptobyte lives in
+    # vendor/golang.org/x/crypto/cryptobyte, and the reverse mapping looked in vendor/golang/org/... (the whole-surface
+    # census, 2026-11-07). The map is built from the directories.
+    Write-Host 'a suppression file is found by its directory''s package id, dotted path segments included'
+    $core = Join-Path $work 'core'
+    foreach ($dir in 'golib', 'fmt', 'vendor/golang.org/x/crypto/cryptobyte') {
+        New-Item -ItemType Directory -Force (Join-Path $core $dir) | Out-Null
+        Set-Content -LiteralPath (Join-Path (Join-Path $core $dir) 'CompatibilitySuppressions.xml') -Value '<Suppressions />'
+    }
+    $map = Get-GoApiCompatSuppressionMap $core
+    Check 'golib maps to go.lib' ("$($map['go.lib'])".EndsWith('golib' + [System.IO.Path]::DirectorySeparatorChar + 'CompatibilitySuppressions.xml')) "$($map['go.lib'])"
+    Check 'a directory with dotted segments maps to its package id' (
+        "$($map['go.vendor.golang.org.x.crypto.cryptobyte'])".Contains('golang.org')) "keys: $(@($map.Keys | Sort-Object) -join ', ')"
+    Check 'every file is mapped, and nothing else' ($map.Count -eq 3 -and $map.ContainsKey('go.fmt')) "keys: $(@($map.Keys | Sort-Object) -join ', ')"
+    $real = Get-GoApiCompatSuppressionMap (Join-Path $repoRoot 'src/core')
+    Check 'the tree''s own files map to golib and vendored cryptobyte' (
+        $real.ContainsKey('go.lib') -and $real.ContainsKey('go.vendor.golang.org.x.crypto.cryptobyte')) "keys: $(@($real.Keys | Sort-Object) -join ', ')"
+    $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte'])
+    Check 'vendored cryptobyte carries batch 235''s 5 entries' ($cb.Count -eq 5 -and [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235')) "$($cb.Count) entries"
+
     Write-Host 'the release path runs it'
     $push = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
     Check 'push-nuget.ps1 restores the pinned tool' ($push.Contains('Initialize-GoApiCompatTool')) 'no restore call'
     Check 'push-nuget.ps1 runs the guard over the merged packages' ($push.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
+    Check 'push-nuget.ps1 finds suppression files through the directory map' ($push.Contains('Get-GoApiCompatSuppressionMap')) 'no map call'
+    Check 'push-nuget.ps1 refuses a suppression file that names no packed package' ($push.Contains('names no packed package')) 'no orphan check'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
 }

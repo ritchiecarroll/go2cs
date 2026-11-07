@@ -105,6 +105,24 @@ function Expand-GoApiCompatAssets([string]$Package, [string[]]$Assets, [string]$
     finally { $zip.Dispose() }
 }
 
+<#
+    Every CompatibilitySuppressions.xml under the stdlib tree, keyed by the package id push-nuget.ps1 gives that
+    directory: its path below $CoreDir with each separator made a dot, after 'go.' (golib is go.lib). The map is built
+    from the directories, never by turning an id back into a path: an id cannot say which of its dots were separators.
+    go.vendor.golang.org.x.crypto.cryptobyte lives in vendor/golang.org/x/crypto/cryptobyte, and the reverse mapping
+    looked in vendor/golang/org/... and found nothing (the whole-surface census, 2026-11-07).
+#>
+function Get-GoApiCompatSuppressionMap([Parameter(Mandatory)][string]$CoreDir) {
+    $root = [System.IO.Path]::GetFullPath($CoreDir).TrimEnd('\', '/')
+    $map = @{}
+    foreach ($file in @(Get-ChildItem -LiteralPath $root -Recurse -File -Filter 'CompatibilitySuppressions.xml')) {
+        $rel = $file.Directory.FullName.Substring($root.Length).TrimStart('\', '/') -replace '[\\/]', '.'
+        $id = if ($rel -ceq 'golib') { 'go.lib' } else { "go.$rel" }
+        $map[$id] = $file.FullName
+    }
+    $map
+}
+
 # The entries of a suppression file, each with the XML node it came from. Refuses a file whose entry names no asset,
 # or names different assets on its two sides: this guard compares an asset only with its own baseline.
 function Read-GoApiCompatSuppressions([Parameter(Mandatory)][string]$Path) {
@@ -172,7 +190,8 @@ function Invoke-GoApiCompatAsset([string]$RepoRoot, [string]$Left, [string]$Righ
       Assets     the baseline's assets
       Failures   one line per reason the package is red, each naming the package and its asset
     Every baseline asset must exist in the current package (a missing one is a break the tool cannot see). An asset only
-    the current package has is new surface, which is compatible, and is not compared.
+    the current package has is new surface, which is compatible, and is not compared. A package with no lib/ or
+    runtimes/ asset (go.gen, an analyzer) compares nothing and reads green with Compared 0 of 0.
 #>
 function Test-GoApiCompatPackage {
     param(
@@ -196,6 +215,9 @@ function Test-GoApiCompatPackage {
 
     $work = Join-Path $WorkDir $Id
     if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force }
+    # Created here, not by the first extraction: a package with no asset extracts nothing, and the removal below must
+    # still find it (the first whole-surface census stopped on go.gen without it).
+    New-Item -ItemType Directory -Force $work | Out-Null
     $leftRoot = Join-Path $work $script:LeftDir
     $rightRoot = Join-Path $work $script:RightDir
     Expand-GoApiCompatAssets $Baseline $assets $leftRoot
@@ -277,6 +299,7 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
       Compared    the assets compared, over all packages
       NoBaseline  the ids whose line has no published version: new packages, or the first release of a Go minor.
                   They are reported, not gated (DESIGN-binary-compat-guard.md section 6).
+      NoSurface   the ids whose baseline has no lib/ or runtimes/ asset (go.gen, an analyzer): nothing to compare.
       Failures    every reason the guard is red
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
 #>
@@ -297,6 +320,7 @@ function Invoke-GoApiCompatGuard {
 
     $failures = New-Object System.Collections.Generic.List[string]
     $noBaseline = New-Object System.Collections.Generic.List[string]
+    $noSurface = New-Object System.Collections.Generic.List[string]
     $packagesCompared = 0
     $compared = 0
     $expected = 0
@@ -315,6 +339,7 @@ function Invoke-GoApiCompatGuard {
             $packagesCompared++
             $compared += $result.Compared
             $expected += $result.Assets.Count
+            if ($result.Assets.Count -eq 0) { $noSurface.Add($id.Id) }
             foreach ($line in $result.Failures) { $failures.Add("$line (baseline $baselineVersion)") }
         }
     }
@@ -327,9 +352,10 @@ function Invoke-GoApiCompatGuard {
         Compared   = $compared
         Expected   = $expected
         NoBaseline = @($noBaseline)
+        NoSurface  = @($noSurface)
         Failures   = @($failures)
     }
 }
 
-Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Read-GoApiCompatSuppressions,
-    Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard
+Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
+    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard
