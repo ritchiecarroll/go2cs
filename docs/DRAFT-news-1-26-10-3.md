@@ -42,7 +42,7 @@ already was under the JIT. On `win-x64`, on one development machine, against the
 matrix-multiply benchmark ran in about 36% of the time, a prime sieve in about 51%, and a TLS handshake in about 75%.
 The JIT and ReadyToRun times did not move.
 <!-- source: docs/phase4/DATA-hop126-perf.md §11.9 (AOT D/P MatMul 0.359, Sieve 0.514, TlsHandshake 0.751; JIT and R2R
-     flat in both the fd1 and the template shape). Batch 224 (R, AOT indexer inline) is PENDING landing: confirm. -->
+     flat in both the fd1 and the template shape). Batch 224 (R, AOT indexer inline, da3f68520d), landed. -->
 
 Two earlier changes in this release make the same programs faster under Native AOT. A slice element read no
 longer asks whether its element type takes no storage, so matrix-multiply, sieve and sort benchmarks take 13% to
@@ -60,9 +60,9 @@ machine. Native AOT now reads a list of extension-method hosts written at build 
 The JIT is unchanged.
 <!-- source: docs/phase4/DATA-extension-host-list.md §3 (AOT first assert 254.0 / 251.9 ms base, 119.7 / 114.4 ms with
      the list; linux lane box, 4 cores, ILC 10.0.14), DATA-aot-structural-assert.md (L1). Batches 210 and 219. -->
-- **PENDING (P1).** Under Native AOT, a type assertion that needs a variadic method promoted through an embedded
+- Under Native AOT, a type assertion that needs a variadic method promoted through an embedded
   pointer, such as `testing.T`'s `Error(...any)`, now matches Go.
-  <!-- source: DATA-extension-host-list.md §4 names the gap (line 38, TT value has Error). P1's fix, PENDING landing. -->
+  <!-- source: DATA-extension-host-list.md §4 names the gap (line 38, TT value has Error). P1's fix: batch 225 (variadic shell, 0094ed89a7), landed. -->
 
 **Single-file publishes start fast.** A plain `dotnet publish -p:PublishSingleFile=true` of a converted program now
 compiles ReadyToRun one assembly at a time, as the publish profiles go2cs writes already do. The SDK's default for a
