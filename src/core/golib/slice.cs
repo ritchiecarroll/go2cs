@@ -675,6 +675,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
     public ref T this[int index]
     {
+        // AggressiveInlining on all three getters is for Native AOT. ILC sizes an inlinee on its IL BEFORE the
+        // zero-size gate folds, so the gate's IL alone pushed this body past the inline budget, and every element
+        // read stayed a call: Sieve 491 -> 249 ms and MatMul 1108 -> 400 ms with it (R-LAPTOP, default ISA, 21 ABAB
+        // rounds), and bigmod's addMulVVW loses its 4 calls per iteration. The JIT already inlines the getters.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -727,6 +732,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public ref T this[nint index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] // see the int overload: the AOT inline budget
         get
         {
             if (index < 0 || index >= m_length)
@@ -753,6 +759,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // the nint overload, which would check twice on the hot path.
     public ref T this[ulong index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] // see the int overload: the AOT inline budget
         get
         {
             if (index >= (ulong)m_length)

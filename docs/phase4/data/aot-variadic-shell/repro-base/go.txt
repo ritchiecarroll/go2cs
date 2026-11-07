@@ -1,0 +1,22 @@
+TT    Error(...any)         : true
+TT    Name() string         : true
+TT    Logf(string, ...any)  : true
+TT    Failed() bool         : true
+TT    Errorer               : true
+*TT   Error(...any)         : true
+*T    Error(...any)         : true
+*T    Name() string         : true
+LL    Error(...any)         : true
+L.Error embedded 3 a1 true
+V     Error(...any)         : true
+V.Error 7 0 
+V.Error 7 2 xy
+V     Join(string, ...string): true
+7:a-b-c
+*V    Errorer               : true
+V.Error 8 2 throughpointer
+G     Error(...any)         : true
+G.Error 3 2
+u     logf(string, ...any)  : true
+u.logf 5 k=9
+V     Error(...string)      : false

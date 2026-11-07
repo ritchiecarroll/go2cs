@@ -1,0 +1,61 @@
+Direct     value 5 [Name Pair String Tok Where]
+Direct     ptr   6 [Name Pair Set String Tok Where]
+PtrDirect  value 6 [Name Pair Set String Tok Where]
+PtrDirect  ptr   6 [Name Pair Set String Tok Where]
+Outer      value 5 [Name Pair String Tok Where]
+Outer      ptr   6 [Name Pair Set String Tok Where]
+Five       value 5 [Name Pair String Tok Where]
+Five       ptr   6 [Name Pair Set String Tok Where]
+GCounter   value 0 []
+GCounter   ptr   0 []
+S6         value 5 [Name Pair String Tok Where]
+S6         ptr   6 [Name Pair Set String Tok Where]
+Within     value 4 [Name Pair String Where]
+Within     ptr   5 [Name Pair Set String Where]
+Shadow     value 4 [Name Pair String Where]
+Shadow     ptr   5 [Name Pair Set String Where]
+Mixed      value 5 [Name Pair String Tok Where]
+Mixed      ptr   6 [Name Pair Set String Tok Where]
+Broken     value 4 [Lock Read TryLock Unlock]
+Broken     ptr   4 [Lock Read TryLock Unlock]
+Stamp      value 43 [Add AddDate After AppendBinary AppendFormat AppendText Before Clock Compare Date Day Equal Format GoString GobEncode Hour ISOWeek In IsDST IsZero Local Location MarshalBinary MarshalJSON MarshalText Minute Month Nanosecond Round Second String Sub Truncate UTC Unix UnixMicro UnixMilli UnixNano Weekday Year YearDay Zone ZoneBounds]
+Stamp      ptr   47 [Add AddDate After AppendBinary AppendFormat AppendText Before Clock Compare Date Day Equal Format GoString GobDecode GobEncode Hour ISOWeek In IsDST IsZero Local Location MarshalBinary MarshalJSON MarshalText Minute Month Nanosecond Round Second String Sub Truncate UTC Unix UnixMicro UnixMilli UnixNano UnmarshalBinary UnmarshalJSON UnmarshalText Weekday Year YearDay Zone ZoneBounds]
+PtrStamp   value 47 [Add AddDate After AppendBinary AppendFormat AppendText Before Clock Compare Date Day Equal Format GoString GobDecode GobEncode Hour ISOWeek In IsDST IsZero Local Location MarshalBinary MarshalJSON MarshalText Minute Month Nanosecond Round Second String Sub Truncate UTC Unix UnixMicro UnixMilli UnixNano UnmarshalBinary UnmarshalJSON UnmarshalText Weekday Year YearDay Zone ZoneBounds]
+PtrStamp   ptr   47 [Add AddDate After AppendBinary AppendFormat AppendText Before Clock Compare Date Day Equal Format GoString GobDecode GobEncode Hour ISOWeek In IsDST IsZero Local Location MarshalBinary MarshalJSON MarshalText Minute Month Nanosecond Round Second String Sub Truncate UTC Unix UnixMicro UnixMilli UnixNano UnmarshalBinary UnmarshalJSON UnmarshalText Weekday Year YearDay Zone ZoneBounds]
+BufP       value 24 [Available AvailableBuffer Bytes Cap Grow Len Next Peek Read ReadByte ReadBytes ReadFrom ReadRune ReadString Reset String Truncate UnreadByte UnreadRune Write WriteByte WriteRune WriteString WriteTo]
+BufP       ptr   24 [Available AvailableBuffer Bytes Cap Grow Len Next Peek Read ReadByte ReadBytes ReadFrom ReadRune ReadString Reset String Truncate UnreadByte UnreadRune Write WriteByte WriteRune WriteString WriteTo]
+HideC      value 0 []
+HideC      ptr   23 [Available AvailableBuffer Bytes Cap Grow Len Next Peek Read ReadByte ReadBytes ReadFrom ReadRune ReadString Reset String Truncate UnreadByte UnreadRune Write WriteByte WriteRune WriteString]
+OuterS5    value 5 [Name Pair String Tok Where]
+OuterS5    ptr   6 [Name Pair Set String Tok Where]
+OuterFD    value 4 [Name Pair String Where]
+OuterFD    ptr   5 [Name Pair Set String Where]
+OuterFS    value 0 []
+OuterFS    ptr   0 []
+TT         value 26 [ArtifactDir Attr Chdir Cleanup Context Deadline Error Errorf Fail FailNow Failed Fatal Fatalf Helper Log Logf Name Output Parallel Run Setenv Skip SkipNow Skipf Skipped TempDir]
+TT         ptr   26 [ArtifactDir Attr Chdir Cleanup Context Deadline Error Errorf Fail FailNow Failed Fatal Fatalf Helper Log Logf Name Output Parallel Run Setenv Skip SkipNow Skipf Skipped TempDir]
+S5 dispatch Tok: 5
+TT value has Error: true
+Inner! Inner! Inner!
+Five Tok N: 7
+S6 Tok N: 7
+Stamp value is json.Unmarshaler: false
+*Stamp is json.Unmarshaler: true
+PtrStamp value is json.Unmarshaler: true
+Direct value MethodByName Set: false
+PtrDirect value MethodByName Set: true
+Broken value is sync.Locker: true
+Name var: 0
+Where direct call: true
+Where via assert Direct: true
+Where via assert Outer: true
+Direct after Set through *Direct: 4
+PtrDirect after Set through the value: 6
+SameP value methods: 1 [Ping]
+SameP ptr methods: 1 [Ping]
+SameV value methods: 0 []
+SameV ptr methods: 1 [Ping]
+SameP value Method(0) call: 1
+SameP value assert+call Ping: 1
+SameV value assert Ping: false
+*SameV assert+call Ping: 1

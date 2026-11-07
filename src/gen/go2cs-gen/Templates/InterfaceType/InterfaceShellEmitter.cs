@@ -91,9 +91,12 @@ internal sealed class InterfaceShellEmitter
             .ToArray();
 
         // The reflective shell forwards through `object`, so it can only exist when every member
-        // survives that round-trip. Omitting it is not a loss of capability: the binder belts a
-        // value-typed source to the delegate shell (see AdapterBinder.BuildFactory).
-        m_emitObjectShell = m_methods.All(method => method.IsInvokerForwardable);
+        // survives that round-trip, or is a variadic member it forwards through a bound delegate
+        // instead (MethodInfo.VariadicDelegate). It is the one tier Native AOT can always build over a
+        // struct: the binder's belt to the delegate shell closes it over the struct by MakeGenericType,
+        // which has no native code there, so before variadic members were carried every assertion of
+        // a struct to an interface with a variadic method read false under AOT.
+        m_emitObjectShell = m_methods.All(method => method.IsInvokerForwardable || method.VariadicDelegate is not null);
     }
 
     /// <summary>
@@ -105,8 +108,20 @@ internal sealed class InterfaceShellEmitter
         {
             string names = string.Join(", ", m_methods.Select(method => $"\"{GetUnsanitizedIdentifier(method.Name)}\""));
             string objectShell = m_emitObjectShell ? $"typeof({m_objectShellName})" : "null";
+            string variadic = "";
 
-            return $"[global::go.GoInterfaceShell(typeof({m_genericShellName}<>), {objectShell}, {names})]\r\n    ";
+            // The members the object shell forwards through a bound delegate, with the delegate type each is cast to.
+            MethodInfo[] bound = m_emitObjectShell ? m_methods.Where(IsBoundVariadic).ToArray() : [];
+
+            if (bound.Length > 0)
+            {
+                string variadicNames = string.Join(", ", bound.Select(method => $"\"{GetUnsanitizedIdentifier(method.Name)}\""));
+                string variadicTypes = string.Join(", ", bound.Select(method => $"typeof({method.VariadicDelegate})"));
+
+                variadic = $", VariadicMethods = new string[] {{ {variadicNames} }}, VariadicDelegates = new global::System.Type[] {{ {variadicTypes} }}";
+            }
+
+            return $"[global::go.GoInterfaceShell(typeof({m_genericShellName}<>), {objectShell}, {names}{variadic})]\r\n    ";
         }
     }
 
@@ -269,12 +284,12 @@ internal sealed class InterfaceShellEmitter
               {{m_scope}} sealed class {{m_objectShellName}} : {{m_interfaceName}}, IInterfaceAdapter
               {
                   private readonly object m_target{{TempVarMarker}};
-                  private readonly global::go.GoShellBinding m_binding{{TempVarMarker}};
+                  private readonly global::go.GoShellBinding m_binding{{TempVarMarker}};{{VariadicField}}
 
                   public {{m_objectShellName}}(object {{ReceiverLocal}}, global::go.GoShellBinding binding{{TempVarMarker}})
                   {
                       m_target{{TempVarMarker}} = {{ReceiverLocal}};
-                      m_binding{{TempVarMarker}} = binding{{TempVarMarker}};
+                      m_binding{{TempVarMarker}} = binding{{TempVarMarker}};{{VariadicBind}}
                   }
 
                   // The Go dynamic value, exactly as stored — the box when pointer-backed, the boxed value
@@ -301,6 +316,14 @@ internal sealed class InterfaceShellEmitter
                 string invocation = $"m_binding{TempVarMarker}.Invoke({index}, m_target{TempVarMarker}{callParameters})";
                 string body = method.ReturnType == "void" ? $"{invocation};" : $"({method.ReturnType}){invocation}!;";
 
+                // A variadic member: its Span tail cannot be boxed for the invoker, so it is called through the delegate
+                // the binder bound over this value when the shell was built.
+                if (IsBoundVariadic(method))
+                {
+                    invocation = $"(({method.VariadicDelegate})m_variadic{TempVarMarker}![{index}]!)({method.GetCallParameters(false)})";
+                    body = $"{invocation};";
+                }
+
                 results.Append(
                     $$"""
 
@@ -314,6 +337,19 @@ internal sealed class InterfaceShellEmitter
             return results.ToString();
         }
     }
+
+    // A member the object shell forwards through a bound delegate rather than the invoker.
+    private static bool IsBoundVariadic(MethodInfo method) => !method.IsInvokerForwardable && method.VariadicDelegate is not null;
+
+    private bool HasBoundVariadic => m_methods.Any(IsBoundVariadic);
+
+    private string VariadicField => HasBoundVariadic
+        ? $"\r\n        private readonly global::System.Delegate?[]? m_variadic{TempVarMarker};"
+        : "";
+
+    private string VariadicBind => HasBoundVariadic
+        ? $"\r\n            m_variadic{TempVarMarker} = binding{TempVarMarker}.BindVariadic({ReceiverLocal});"
+        : "";
 
     private static string Prefixed(string parameters)
     {

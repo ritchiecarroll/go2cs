@@ -1,0 +1,4 @@
+PerfTlsHandshake	JP	C:\go2cs\scratch\p1262\inl-src\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\inl-src\P\PerfTlsHandshake\jit
+PerfTlsHandshake	JP-AA	C:\go2cs\scratch\p1262\inl-src\P\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\inl-src\P\PerfTlsHandshake\jit
+PerfTlsHandshake	JD	C:\go2cs\scratch\p1262\inl-src\D\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\inl-src\D\PerfTlsHandshake\jit
+PerfTlsHandshake	JD-AA	C:\go2cs\scratch\p1262\inl-src\D\PerfTlsHandshake\jit\PerfTlsHandshake.exe	C:\go2cs\scratch\p1262\inl-src\D\PerfTlsHandshake\jit

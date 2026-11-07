@@ -1,0 +1,63 @@
+// Census: methods with a variadic tail, by receiver kind (generic or not), and interfaces with a variadic method.
+package main
+
+import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func main() {
+	root := os.Args[1]
+	fset := token.NewFileSet()
+	var gen, plain, ifaces int
+	filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil { return nil }
+		if d.IsDir() && (d.Name() == "testdata" || d.Name() == "vendor") { return filepath.SkipDir }
+		if d.IsDir() || !strings.HasSuffix(p, ".go") { return nil }
+		f, err := parser.ParseFile(fset, p, nil, parser.SkipObjectResolution)
+		if err != nil { return nil }
+		rel, _ := filepath.Rel(root, p)
+		test := strings.HasSuffix(p, "_test.go")
+		ast.Inspect(f, func(n ast.Node) bool {
+			switch x := n.(type) {
+			case *ast.FuncDecl:
+				if x.Recv == nil || x.Type.Params == nil || len(x.Type.Params.List) == 0 { return true }
+				if _, ok := x.Type.Params.List[len(x.Type.Params.List)-1].Type.(*ast.Ellipsis); !ok { return true }
+				rt := x.Recv.List[0].Type
+				if s, ok := rt.(*ast.StarExpr); ok { rt = s.X }
+				switch rt.(type) {
+				case *ast.IndexExpr, *ast.IndexListExpr:
+					gen++; fmt.Printf("GENERIC\t%s\t%v\t%s\n", rel, test, x.Name.Name)
+				default:
+					plain++
+				}
+			case *ast.TypeSpec:
+				if x.TypeParams != nil {
+					if st, ok := x.Type.(*ast.StructType); ok {
+						for _, fl := range st.Fields.List {
+							if len(fl.Names) == 0 { fmt.Printf("GEMBED\t%s\t%v\t%s\t%s\n", rel, test, x.Name.Name, types.ExprString(fl.Type)) }
+						}
+					}
+				}
+			case *ast.InterfaceType:
+				for _, m := range x.Methods.List {
+					if ft, ok := m.Type.(*ast.FuncType); ok && ft.Params != nil && len(ft.Params.List) > 0 {
+						if _, ok := ft.Params.List[len(ft.Params.List)-1].Type.(*ast.Ellipsis); ok {
+							ifaces++; fmt.Printf("IFACE\t%s\t%v\t%s\n", rel, test, m.Names[0].Name)
+						}
+					}
+				}
+			}
+			return true
+		})
+		return nil
+	})
+	fmt.Printf("TOTAL generic=%d plain=%d iface-variadic-members=%d\n", gen, plain, ifaces)
+}

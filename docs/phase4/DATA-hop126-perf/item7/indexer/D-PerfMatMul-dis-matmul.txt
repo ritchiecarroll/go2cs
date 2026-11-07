@@ -1,0 +1,489 @@
+  000000014001CA80: 57                 push        rdi
+  000000014001CA81: 56                 push        rsi
+  000000014001CA82: 55                 push        rbp
+  000000014001CA83: 53                 push        rbx
+  000000014001CA84: 48 81 EC 38 01 00  sub         rsp,138h
+  000000014001CA8B: 0F 29 B4 24 20 01  movaps      xmmword ptr [rsp+120h],xmm6
+  000000014001CA93: 0F 29 BC 24 10 01  movaps      xmmword ptr [rsp+110h],xmm7
+  000000014001CA9B: 0F 57 E4           xorps       xmm4,xmm4
+  000000014001CA9E: 48 B8 10 FF FF FF  mov         rax,0FFFFFFFFFFFFFF10h
+  000000014001CAA8: 0F 29 A4 04 10 01  movaps      xmmword ptr [rsp+rax+110h],xmm4
+  000000014001CAB0: 0F 29 A4 04 20 01  movaps      xmmword ptr [rsp+rax+120h],xmm4
+  000000014001CAB8: 0F 29 A4 04 30 01  movaps      xmmword ptr [rsp+rax+130h],xmm4
+  000000014001CAC0: 48 83 C0 30        add         rax,30h
+  000000014001CAC4: 75 E2              jne         000000014001CAA8
+  000000014001CAC6: 48 8B D9           mov         rbx,rcx
+  000000014001CAC9: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CAD1: 48 8B D3           mov         rdx,rbx
+  000000014001CAD4: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CADE: 45 33 C9           xor         r9d,r9d
+  000000014001CAE1: E8 CA F5 C2 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CAE6: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CAEE: 48 8B D3           mov         rdx,rbx
+  000000014001CAF1: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CAFB: 45 33 C9           xor         r9d,r9d
+  000000014001CAFE: E8 AD F5 C2 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CB03: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CB0B: 48 8B D3           mov         rdx,rbx
+  000000014001CB0E: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CB18: 45 33 C9           xor         r9d,r9d
+  000000014001CB1B: E8 90 F5 C2 01     call        golib_go_slice_1<golib_go_slice_1<Double>>___ctor_12
+  000000014001CB20: 33 ED              xor         ebp,ebp
+  000000014001CB22: 48 3B EB           cmp         rbp,rbx
+  000000014001CB25: 0F 8D 9E 03 00 00  jge         000000014001CEC9
+  000000014001CB2B: 48 85 ED           test        rbp,rbp
+  000000014001CB2E: 0F 8C A9 06 00 00  jl          000000014001D1DD
+  000000014001CB34: 48 3B AC 24 F8 00  cmp         rbp,qword ptr [rsp+0F8h]
+  000000014001CB3C: 0F 8D 9B 06 00 00  jge         000000014001D1DD
+  000000014001CB42: 48 83 BC 24 08 01  cmp         qword ptr [rsp+108h],0
+  000000014001CB4B: 74 15              je          000000014001CB62
+  000000014001CB4D: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CB55: 48 8B D5           mov         rdx,rbp
+  000000014001CB58: E8 A3 CF E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CB5D: 48 8B F8           mov         rdi,rax
+  000000014001CB60: EB 29              jmp         000000014001CB8B
+  000000014001CB62: 48 8B 8C 24 E8 00  mov         rcx,qword ptr [rsp+0E8h]
+  000000014001CB6A: 48 8B D5           mov         rdx,rbp
+  000000014001CB6D: 48 03 94 24 F0 00  add         rdx,qword ptr [rsp+0F0h]
+  000000014001CB75: 44 8B 41 08        mov         r8d,dword ptr [rcx+8]
+  000000014001CB79: 49 3B D0           cmp         rdx,r8
+  000000014001CB7C: 0F 83 6F 07 00 00  jae         000000014001D2F1
+  000000014001CB82: 48 8D 14 92        lea         rdx,[rdx+rdx*4]
+  000000014001CB86: 48 8D 7C D1 10     lea         rdi,[rcx+rdx*8+10h]
+  000000014001CB8B: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CB8E: 0F 11 44 24 70     movups      xmmword ptr [rsp+70h],xmm0
+  000000014001CB93: 0F 11 84 24 80 00  movups      xmmword ptr [rsp+80h],xmm0
+  000000014001CB9B: 0F 11 84 24 88 00  movups      xmmword ptr [rsp+88h],xmm0
+  000000014001CBA3: 48 8D 4C 24 70     lea         rcx,[rsp+70h]
+  000000014001CBA8: 48 8B D3           mov         rdx,rbx
+  000000014001CBAB: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CBB5: 45 33 C9           xor         r9d,r9d
+  000000014001CBB8: E8 B3 B5 A5 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CBBD: 48 8D 74 24 70     lea         rsi,[rsp+70h]
+  000000014001CBC2: E8 E9 26 89 03     call        RhpByRefAssignRef
+  000000014001CBC7: B9 04 00 00 00     mov         ecx,4
+  000000014001CBCC: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CBCF: 48 3B AC 24 D0 00  cmp         rbp,qword ptr [rsp+0D0h]
+  000000014001CBD7: 0F 8D 2E 06 00 00  jge         000000014001D20B
+  000000014001CBDD: 48 83 BC 24 E0 00  cmp         qword ptr [rsp+0E0h],0
+  000000014001CBE6: 74 15              je          000000014001CBFD
+  000000014001CBE8: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CBF0: 48 8B D5           mov         rdx,rbp
+  000000014001CBF3: E8 08 CF E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CBF8: 48 8B F8           mov         rdi,rax
+  000000014001CBFB: EB 29              jmp         000000014001CC26
+  000000014001CBFD: 48 8B 8C 24 C0 00  mov         rcx,qword ptr [rsp+0C0h]
+  000000014001CC05: 48 8B D5           mov         rdx,rbp
+  000000014001CC08: 48 03 94 24 C8 00  add         rdx,qword ptr [rsp+0C8h]
+  000000014001CC10: 44 8B 41 08        mov         r8d,dword ptr [rcx+8]
+  000000014001CC14: 49 3B D0           cmp         rdx,r8
+  000000014001CC17: 0F 83 D4 06 00 00  jae         000000014001D2F1
+  000000014001CC1D: 48 8D 14 92        lea         rdx,[rdx+rdx*4]
+  000000014001CC21: 48 8D 7C D1 10     lea         rdi,[rcx+rdx*8+10h]
+  000000014001CC26: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CC29: 0F 11 44 24 48     movups      xmmword ptr [rsp+48h],xmm0
+  000000014001CC2E: 0F 11 44 24 58     movups      xmmword ptr [rsp+58h],xmm0
+  000000014001CC33: 0F 11 44 24 60     movups      xmmword ptr [rsp+60h],xmm0
+  000000014001CC38: 48 8D 4C 24 48     lea         rcx,[rsp+48h]
+  000000014001CC3D: 48 8B D3           mov         rdx,rbx
+  000000014001CC40: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CC4A: 45 33 C9           xor         r9d,r9d
+  000000014001CC4D: E8 1E B5 A5 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CC52: 48 8D 74 24 48     lea         rsi,[rsp+48h]
+  000000014001CC57: E8 54 26 89 03     call        RhpByRefAssignRef
+  000000014001CC5C: B9 04 00 00 00     mov         ecx,4
+  000000014001CC61: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CC64: 48 3B AC 24 A8 00  cmp         rbp,qword ptr [rsp+0A8h]
+  000000014001CC6C: 0F 8D 52 05 00 00  jge         000000014001D1C4
+  000000014001CC72: 48 83 BC 24 B8 00  cmp         qword ptr [rsp+0B8h],0
+  000000014001CC7B: 74 15              je          000000014001CC92
+  000000014001CC7D: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001CC85: 48 8B D5           mov         rdx,rbp
+  000000014001CC88: E8 73 CE E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CC8D: 48 8B F8           mov         rdi,rax
+  000000014001CC90: EB 29              jmp         000000014001CCBB
+  000000014001CC92: 48 8B 8C 24 98 00  mov         rcx,qword ptr [rsp+98h]
+  000000014001CC9A: 48 8B D5           mov         rdx,rbp
+  000000014001CC9D: 48 03 94 24 A0 00  add         rdx,qword ptr [rsp+0A0h]
+  000000014001CCA5: 44 8B 41 08        mov         r8d,dword ptr [rcx+8]
+  000000014001CCA9: 49 3B D0           cmp         rdx,r8
+  000000014001CCAC: 0F 83 3F 06 00 00  jae         000000014001D2F1
+  000000014001CCB2: 48 8D 14 92        lea         rdx,[rdx+rdx*4]
+  000000014001CCB6: 48 8D 7C D1 10     lea         rdi,[rcx+rdx*8+10h]
+  000000014001CCBB: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CCBE: 0F 11 44 24 20     movups      xmmword ptr [rsp+20h],xmm0
+  000000014001CCC3: 0F 11 44 24 30     movups      xmmword ptr [rsp+30h],xmm0
+  000000014001CCC8: 0F 11 44 24 38     movups      xmmword ptr [rsp+38h],xmm0
+  000000014001CCCD: 48 8D 4C 24 20     lea         rcx,[rsp+20h]
+  000000014001CCD2: 48 8B D3           mov         rdx,rbx
+  000000014001CCD5: 49 B8 FF FF FF FF  mov         r8,0FFFFFFFFFFFFFFFFh
+  000000014001CCDF: 45 33 C9           xor         r9d,r9d
+  000000014001CCE2: E8 89 B4 A5 00     call        golib_go_slice_1<Double>___ctor_12
+  000000014001CCE7: 48 8D 74 24 20     lea         rsi,[rsp+20h]
+  000000014001CCEC: E8 BF 25 89 03     call        RhpByRefAssignRef
+  000000014001CCF1: B9 04 00 00 00     mov         ecx,4
+  000000014001CCF6: F3 48 A5           rep movs    qword ptr [rdi],qword ptr [rsi]
+  000000014001CCF9: 33 F6              xor         esi,esi
+  000000014001CCFB: 48 3B F3           cmp         rsi,rbx
+  000000014001CCFE: 0F 8D B9 01 00 00  jge         000000014001CEBD
+  000000014001CD04: 48 3B AC 24 F8 00  cmp         rbp,qword ptr [rsp+0F8h]
+  000000014001CD0C: 0F 8D CB 04 00 00  jge         000000014001D1DD
+  000000014001CD12: 48 83 BC 24 08 01  cmp         qword ptr [rsp+108h],0
+  000000014001CD1B: 74 12              je          000000014001CD2F
+  000000014001CD1D: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CD25: 48 8B D5           mov         rdx,rbp
+  000000014001CD28: E8 D3 CD E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CD2D: EB 28              jmp         000000014001CD57
+  000000014001CD2F: 48 8B 84 24 E8 00  mov         rax,qword ptr [rsp+0E8h]
+  000000014001CD37: 48 8B CD           mov         rcx,rbp
+  000000014001CD3A: 48 03 8C 24 F0 00  add         rcx,qword ptr [rsp+0F0h]
+  000000014001CD42: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CD45: 48 3B CA           cmp         rcx,rdx
+  000000014001CD48: 0F 83 A3 05 00 00  jae         000000014001D2F1
+  000000014001CD4E: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001CD52: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001CD57: 48 85 F6           test        rsi,rsi
+  000000014001CD5A: 0F 8C 96 04 00 00  jl          000000014001D1F6
+  000000014001CD60: 48 3B 70 10        cmp         rsi,qword ptr [rax+10h]
+  000000014001CD64: 0F 8D 8C 04 00 00  jge         000000014001D1F6
+  000000014001CD6A: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001CD6F: 74 10              je          000000014001CD81
+  000000014001CD71: 48 8B C8           mov         rcx,rax
+  000000014001CD74: 48 8B D6           mov         rdx,rsi
+  000000014001CD77: E8 84 B7 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001CD7C: 48 8B C8           mov         rcx,rax
+  000000014001CD7F: EB 1B              jmp         000000014001CD9C
+  000000014001CD81: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014001CD84: 48 8B D6           mov         rdx,rsi
+  000000014001CD87: 48 03 50 08        add         rdx,qword ptr [rax+8]
+  000000014001CD8B: 8B 41 08           mov         eax,dword ptr [rcx+8]
+  000000014001CD8E: 48 3B D0           cmp         rdx,rax
+  000000014001CD91: 0F 83 5A 05 00 00  jae         000000014001D2F1
+  000000014001CD97: 48 8D 4C D1 10     lea         rcx,[rcx+rdx*8+10h]
+  000000014001CD9C: 4C 8B C5           mov         r8,rbp
+  000000014001CD9F: 4C 0F AF C3        imul        r8,rbx
+  000000014001CDA3: 4C 03 C6           add         r8,rsi
+  000000014001CDA6: 48 BA 0B D7 A3 70  mov         rdx,0A3D70A3D70A3D70Bh
+  000000014001CDB0: 48 8B C2           mov         rax,rdx
+  000000014001CDB3: 49 F7 E8           imul        r8
+  000000014001CDB6: 49 03 D0           add         rdx,r8
+  000000014001CDB9: 48 8B C2           mov         rax,rdx
+  000000014001CDBC: 48 C1 E8 3F        shr         rax,3Fh
+  000000014001CDC0: 48 C1 FA 06        sar         rdx,6
+  000000014001CDC4: 48 03 D0           add         rdx,rax
+  000000014001CDC7: 48 6B D2 64        imul        rdx,rdx,64h
+  000000014001CDCB: 4C 2B C2           sub         r8,rdx
+  000000014001CDCE: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CDD1: F2 49 0F 2A C0     cvtsi2sd    xmm0,r8
+  000000014001CDD6: F2 0F 59 05 F2 ED  mulsd       xmm0,mmword ptr [__readonlydata_PerfMatMul_go_main_package__matmul]
+  000000014001CDDE: F2 0F 11 01        movsd       mmword ptr [rcx],xmm0
+  000000014001CDE2: 48 3B AC 24 D0 00  cmp         rbp,qword ptr [rsp+0D0h]
+  000000014001CDEA: 0F 8D 1B 04 00 00  jge         000000014001D20B
+  000000014001CDF0: 48 83 BC 24 E0 00  cmp         qword ptr [rsp+0E0h],0
+  000000014001CDF9: 74 12              je          000000014001CE0D
+  000000014001CDFB: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CE03: 48 8B D5           mov         rdx,rbp
+  000000014001CE06: E8 F5 CC E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CE0B: EB 28              jmp         000000014001CE35
+  000000014001CE0D: 48 8B 84 24 C0 00  mov         rax,qword ptr [rsp+0C0h]
+  000000014001CE15: 48 8B CD           mov         rcx,rbp
+  000000014001CE18: 48 03 8C 24 C8 00  add         rcx,qword ptr [rsp+0C8h]
+  000000014001CE20: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CE23: 48 3B CA           cmp         rcx,rdx
+  000000014001CE26: 0F 83 C5 04 00 00  jae         000000014001D2F1
+  000000014001CE2C: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001CE30: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001CE35: 48 3B 70 10        cmp         rsi,qword ptr [rax+10h]
+  000000014001CE39: 0F 8D E5 03 00 00  jge         000000014001D224
+  000000014001CE3F: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001CE44: 74 10              je          000000014001CE56
+  000000014001CE46: 48 8B C8           mov         rcx,rax
+  000000014001CE49: 48 8B D6           mov         rdx,rsi
+  000000014001CE4C: E8 AF B6 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001CE51: 48 8B C8           mov         rcx,rax
+  000000014001CE54: EB 1B              jmp         000000014001CE71
+  000000014001CE56: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014001CE59: 48 8B D6           mov         rdx,rsi
+  000000014001CE5C: 48 03 50 08        add         rdx,qword ptr [rax+8]
+  000000014001CE60: 8B 41 08           mov         eax,dword ptr [rcx+8]
+  000000014001CE63: 48 3B D0           cmp         rdx,rax
+  000000014001CE66: 0F 83 85 04 00 00  jae         000000014001D2F1
+  000000014001CE6C: 48 8D 4C D1 10     lea         rcx,[rcx+rdx*8+10h]
+  000000014001CE71: 4C 8D 04 2E        lea         r8,[rsi+rbp]
+  000000014001CE75: 48 BA 0B D7 A3 70  mov         rdx,0A3D70A3D70A3D70Bh
+  000000014001CE7F: 48 8B C2           mov         rax,rdx
+  000000014001CE82: 49 F7 E8           imul        r8
+  000000014001CE85: 49 03 D0           add         rdx,r8
+  000000014001CE88: 48 8B C2           mov         rax,rdx
+  000000014001CE8B: 48 C1 E8 3F        shr         rax,3Fh
+  000000014001CE8F: 48 C1 FA 06        sar         rdx,6
+  000000014001CE93: 48 03 D0           add         rdx,rax
+  000000014001CE96: 48 6B D2 64        imul        rdx,rdx,64h
+  000000014001CE9A: 4C 2B C2           sub         r8,rdx
+  000000014001CE9D: 0F 57 C0           xorps       xmm0,xmm0
+  000000014001CEA0: F2 49 0F 2A C0     cvtsi2sd    xmm0,r8
+  000000014001CEA5: F2 0F 59 05 2B ED  mulsd       xmm0,mmword ptr [148D7BBD8h]
+  000000014001CEAD: F2 0F 11 01        movsd       mmword ptr [rcx],xmm0
+  000000014001CEB1: 48 FF C6           inc         rsi
+  000000014001CEB4: 48 3B F3           cmp         rsi,rbx
+  000000014001CEB7: 0F 8C 47 FE FF FF  jl          000000014001CD04
+  000000014001CEBD: 48 FF C5           inc         rbp
+  000000014001CEC0: 48 3B EB           cmp         rbp,rbx
+  000000014001CEC3: 0F 8C 62 FC FF FF  jl          000000014001CB2B
+  000000014001CEC9: 33 F6              xor         esi,esi
+  000000014001CECB: 48 3B F3           cmp         rsi,rbx
+  000000014001CECE: 0F 8D 1E 02 00 00  jge         000000014001D0F2
+  000000014001CED4: 33 FF              xor         edi,edi
+  000000014001CED6: 48 3B FB           cmp         rdi,rbx
+  000000014001CED9: 0F 8D 07 02 00 00  jge         000000014001D0E6
+  000000014001CEDF: 0F 57 F6           xorps       xmm6,xmm6
+  000000014001CEE2: 33 ED              xor         ebp,ebp
+  000000014001CEE4: 48 3B EB           cmp         rbp,rbx
+  000000014001CEE7: 0F 8D 4B 01 00 00  jge         000000014001D038
+  000000014001CEED: 48 85 F6           test        rsi,rsi
+  000000014001CEF0: 0F 8C 43 03 00 00  jl          000000014001D239
+  000000014001CEF6: 48 3B B4 24 F8 00  cmp         rsi,qword ptr [rsp+0F8h]
+  000000014001CEFE: 0F 8D 35 03 00 00  jge         000000014001D239
+  000000014001CF04: 48 83 BC 24 08 01  cmp         qword ptr [rsp+108h],0
+  000000014001CF0D: 74 12              je          000000014001CF21
+  000000014001CF0F: 48 8D 8C 24 E8 00  lea         rcx,[rsp+0E8h]
+  000000014001CF17: 48 8B D6           mov         rdx,rsi
+  000000014001CF1A: E8 E1 CB E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CF1F: EB 28              jmp         000000014001CF49
+  000000014001CF21: 48 8B 84 24 E8 00  mov         rax,qword ptr [rsp+0E8h]
+  000000014001CF29: 48 8B CE           mov         rcx,rsi
+  000000014001CF2C: 48 03 8C 24 F0 00  add         rcx,qword ptr [rsp+0F0h]
+  000000014001CF34: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CF37: 48 3B CA           cmp         rcx,rdx
+  000000014001CF3A: 0F 83 B1 03 00 00  jae         000000014001D2F1
+  000000014001CF40: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001CF44: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001CF49: 48 85 ED           test        rbp,rbp
+  000000014001CF4C: 0F 8C 00 03 00 00  jl          000000014001D252
+  000000014001CF52: 48 3B 68 10        cmp         rbp,qword ptr [rax+10h]
+  000000014001CF56: 0F 8D F6 02 00 00  jge         000000014001D252
+  000000014001CF5C: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001CF61: 74 0D              je          000000014001CF70
+  000000014001CF63: 48 8B C8           mov         rcx,rax
+  000000014001CF66: 48 8B D5           mov         rdx,rbp
+  000000014001CF69: E8 92 B5 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001CF6E: EB 1B              jmp         000000014001CF8B
+  000000014001CF70: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014001CF73: 48 8B D5           mov         rdx,rbp
+  000000014001CF76: 48 03 50 08        add         rdx,qword ptr [rax+8]
+  000000014001CF7A: 8B 41 08           mov         eax,dword ptr [rcx+8]
+  000000014001CF7D: 48 3B D0           cmp         rdx,rax
+  000000014001CF80: 0F 83 6B 03 00 00  jae         000000014001D2F1
+  000000014001CF86: 48 8D 44 D1 10     lea         rax,[rcx+rdx*8+10h]
+  000000014001CF8B: F2 0F 10 38        movsd       xmm7,mmword ptr [rax]
+  000000014001CF8F: 48 3B AC 24 D0 00  cmp         rbp,qword ptr [rsp+0D0h]
+  000000014001CF97: 0F 8D CA 02 00 00  jge         000000014001D267
+  000000014001CF9D: 48 83 BC 24 E0 00  cmp         qword ptr [rsp+0E0h],0
+  000000014001CFA6: 74 12              je          000000014001CFBA
+  000000014001CFA8: 48 8D 8C 24 C0 00  lea         rcx,[rsp+0C0h]
+  000000014001CFB0: 48 8B D5           mov         rdx,rbp
+  000000014001CFB3: E8 48 CB E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001CFB8: EB 28              jmp         000000014001CFE2
+  000000014001CFBA: 48 8B 84 24 C0 00  mov         rax,qword ptr [rsp+0C0h]
+  000000014001CFC2: 48 8B CD           mov         rcx,rbp
+  000000014001CFC5: 48 03 8C 24 C8 00  add         rcx,qword ptr [rsp+0C8h]
+  000000014001CFCD: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001CFD0: 48 3B CA           cmp         rcx,rdx
+  000000014001CFD3: 0F 83 18 03 00 00  jae         000000014001D2F1
+  000000014001CFD9: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001CFDD: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001CFE2: 48 85 FF           test        rdi,rdi
+  000000014001CFE5: 0F 8C 95 02 00 00  jl          000000014001D280
+  000000014001CFEB: 48 3B 78 10        cmp         rdi,qword ptr [rax+10h]
+  000000014001CFEF: 0F 8D 8B 02 00 00  jge         000000014001D280
+  000000014001CFF5: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001CFFA: 74 0D              je          000000014001D009
+  000000014001CFFC: 48 8B C8           mov         rcx,rax
+  000000014001CFFF: 48 8B D7           mov         rdx,rdi
+  000000014001D002: E8 F9 B4 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001D007: EB 1B              jmp         000000014001D024
+  000000014001D009: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014001D00C: 48 8B D7           mov         rdx,rdi
+  000000014001D00F: 48 03 50 08        add         rdx,qword ptr [rax+8]
+  000000014001D013: 8B 41 08           mov         eax,dword ptr [rcx+8]
+  000000014001D016: 48 3B D0           cmp         rdx,rax
+  000000014001D019: 0F 83 D2 02 00 00  jae         000000014001D2F1
+  000000014001D01F: 48 8D 44 D1 10     lea         rax,[rcx+rdx*8+10h]
+  000000014001D024: F2 0F 59 38        mulsd       xmm7,mmword ptr [rax]
+  000000014001D028: F2 0F 58 F7        addsd       xmm6,xmm7
+  000000014001D02C: 48 FF C5           inc         rbp
+  000000014001D02F: 48 3B EB           cmp         rbp,rbx
+  000000014001D032: 0F 8C B5 FE FF FF  jl          000000014001CEED
+  000000014001D038: 48 85 F6           test        rsi,rsi
+  000000014001D03B: 0F 8C 54 02 00 00  jl          000000014001D295
+  000000014001D041: 48 3B B4 24 A8 00  cmp         rsi,qword ptr [rsp+0A8h]
+  000000014001D049: 0F 8D 46 02 00 00  jge         000000014001D295
+  000000014001D04F: 48 83 BC 24 B8 00  cmp         qword ptr [rsp+0B8h],0
+  000000014001D058: 74 12              je          000000014001D06C
+  000000014001D05A: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001D062: 48 8B D6           mov         rdx,rsi
+  000000014001D065: E8 96 CA E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001D06A: EB 28              jmp         000000014001D094
+  000000014001D06C: 48 8B 84 24 98 00  mov         rax,qword ptr [rsp+98h]
+  000000014001D074: 48 8B CE           mov         rcx,rsi
+  000000014001D077: 48 03 8C 24 A0 00  add         rcx,qword ptr [rsp+0A0h]
+  000000014001D07F: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001D082: 48 3B CA           cmp         rcx,rdx
+  000000014001D085: 0F 83 66 02 00 00  jae         000000014001D2F1
+  000000014001D08B: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001D08F: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001D094: 48 85 FF           test        rdi,rdi
+  000000014001D097: 0F 8C 11 02 00 00  jl          000000014001D2AE
+  000000014001D09D: 48 3B 78 10        cmp         rdi,qword ptr [rax+10h]
+  000000014001D0A1: 0F 8D 07 02 00 00  jge         000000014001D2AE
+  000000014001D0A7: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001D0AC: 74 0D              je          000000014001D0BB
+  000000014001D0AE: 48 8B C8           mov         rcx,rax
+  000000014001D0B1: 48 8B D7           mov         rdx,rdi
+  000000014001D0B4: E8 47 B4 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001D0B9: EB 1B              jmp         000000014001D0D6
+  000000014001D0BB: 48 8B 10           mov         rdx,qword ptr [rax]
+  000000014001D0BE: 48 8B CF           mov         rcx,rdi
+  000000014001D0C1: 48 03 48 08        add         rcx,qword ptr [rax+8]
+  000000014001D0C5: 8B 42 08           mov         eax,dword ptr [rdx+8]
+  000000014001D0C8: 48 3B C8           cmp         rcx,rax
+  000000014001D0CB: 0F 83 20 02 00 00  jae         000000014001D2F1
+  000000014001D0D1: 48 8D 44 CA 10     lea         rax,[rdx+rcx*8+10h]
+  000000014001D0D6: F2 0F 11 30        movsd       mmword ptr [rax],xmm6
+  000000014001D0DA: 48 FF C7           inc         rdi
+  000000014001D0DD: 48 3B FB           cmp         rdi,rbx
+  000000014001D0E0: 0F 8C F9 FD FF FF  jl          000000014001CEDF
+  000000014001D0E6: 48 FF C6           inc         rsi
+  000000014001D0E9: 48 3B F3           cmp         rsi,rbx
+  000000014001D0EC: 0F 8C E2 FD FF FF  jl          000000014001CED4
+  000000014001D0F2: 0F 57 F6           xorps       xmm6,xmm6
+  000000014001D0F5: 33 F6              xor         esi,esi
+  000000014001D0F7: 48 85 DB           test        rbx,rbx
+  000000014001D0FA: 0F 8E A5 00 00 00  jle         000000014001D1A5
+  000000014001D100: 48 85 F6           test        rsi,rsi
+  000000014001D103: 0F 8C BA 01 00 00  jl          000000014001D2C3
+  000000014001D109: 48 3B B4 24 A8 00  cmp         rsi,qword ptr [rsp+0A8h]
+  000000014001D111: 0F 8D AC 01 00 00  jge         000000014001D2C3
+  000000014001D117: 48 83 BC 24 B8 00  cmp         qword ptr [rsp+0B8h],0
+  000000014001D120: 74 12              je          000000014001D134
+  000000014001D122: 48 8D 8C 24 98 00  lea         rcx,[rsp+98h]
+  000000014001D12A: 48 8B D6           mov         rdx,rsi
+  000000014001D12D: E8 CE C9 E4 00     call        golib_go_slice_1<internal_profilerecord_go_internal_profilerecord_package_StackRecord>__NativeElementRef
+  000000014001D132: EB 28              jmp         000000014001D15C
+  000000014001D134: 48 8B 84 24 98 00  mov         rax,qword ptr [rsp+98h]
+  000000014001D13C: 48 8B CE           mov         rcx,rsi
+  000000014001D13F: 48 03 8C 24 A0 00  add         rcx,qword ptr [rsp+0A0h]
+  000000014001D147: 8B 50 08           mov         edx,dword ptr [rax+8]
+  000000014001D14A: 48 3B CA           cmp         rcx,rdx
+  000000014001D14D: 0F 83 9E 01 00 00  jae         000000014001D2F1
+  000000014001D153: 48 8D 0C 89        lea         rcx,[rcx+rcx*4]
+  000000014001D157: 48 8D 44 C8 10     lea         rax,[rax+rcx*8+10h]
+  000000014001D15C: 48 3B 70 10        cmp         rsi,qword ptr [rax+10h]
+  000000014001D160: 0F 8D 76 01 00 00  jge         000000014001D2DC
+  000000014001D166: 48 83 78 20 00     cmp         qword ptr [rax+20h],0
+  000000014001D16B: 74 0D              je          000000014001D17A
+  000000014001D16D: 48 8B C8           mov         rcx,rax
+  000000014001D170: 48 8B D6           mov         rdx,rsi
+  000000014001D173: E8 88 B3 A5 00     call        golib_go_slice_1<Double>__NativeElementRef
+  000000014001D178: EB 1B              jmp         000000014001D195
+  000000014001D17A: 48 8B 10           mov         rdx,qword ptr [rax]
+  000000014001D17D: 48 8B CE           mov         rcx,rsi
+  000000014001D180: 48 03 48 08        add         rcx,qword ptr [rax+8]
+  000000014001D184: 8B 42 08           mov         eax,dword ptr [rdx+8]
+  000000014001D187: 48 3B C8           cmp         rcx,rax
+  000000014001D18A: 0F 83 61 01 00 00  jae         000000014001D2F1
+  000000014001D190: 48 8D 44 CA 10     lea         rax,[rdx+rcx*8+10h]
+  000000014001D195: F2 0F 58 30        addsd       xmm6,mmword ptr [rax]
+  000000014001D199: 48 FF C6           inc         rsi
+  000000014001D19C: 48 3B F3           cmp         rsi,rbx
+  000000014001D19F: 0F 8C 5B FF FF FF  jl          000000014001D100
+  000000014001D1A5: 0F 28 C6           movaps      xmm0,xmm6
+  000000014001D1A8: 0F 28 B4 24 20 01  movaps      xmm6,xmmword ptr [rsp+120h]
+  000000014001D1B0: 0F 28 BC 24 10 01  movaps      xmm7,xmmword ptr [rsp+110h]
+  000000014001D1B8: 48 81 C4 38 01 00  add         rsp,138h
+  000000014001D1BF: 5B                 pop         rbx
+  000000014001D1C0: 5D                 pop         rbp
+  000000014001D1C1: 5E                 pop         rsi
+  000000014001D1C2: 5F                 pop         rdi
+  000000014001D1C3: C3                 ret
+  000000014001D1C4: 48 8B CD           mov         rcx,rbp
+  000000014001D1C7: 48 8B 94 24 A8 00  mov         rdx,qword ptr [rsp+0A8h]
+  000000014001D1CF: E8 5C 83 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D1D4: 48 8B C8           mov         rcx,rax
+  000000014001D1D7: E8 44 22 89 03     call        RhpThrowEx
+  000000014001D1DC: CC                 int         3
+  000000014001D1DD: 48 8B CD           mov         rcx,rbp
+  000000014001D1E0: 48 8B 94 24 F8 00  mov         rdx,qword ptr [rsp+0F8h]
+  000000014001D1E8: E8 43 83 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D1ED: 48 8B C8           mov         rcx,rax
+  000000014001D1F0: E8 2B 22 89 03     call        RhpThrowEx
+  000000014001D1F5: CC                 int         3
+  000000014001D1F6: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D1FA: 48 8B CE           mov         rcx,rsi
+  000000014001D1FD: E8 2E 83 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D202: 48 8B C8           mov         rcx,rax
+  000000014001D205: E8 16 22 89 03     call        RhpThrowEx
+  000000014001D20A: CC                 int         3
+  000000014001D20B: 48 8B CD           mov         rcx,rbp
+  000000014001D20E: 48 8B 94 24 D0 00  mov         rdx,qword ptr [rsp+0D0h]
+  000000014001D216: E8 15 83 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D21B: 48 8B C8           mov         rcx,rax
+  000000014001D21E: E8 FD 21 89 03     call        RhpThrowEx
+  000000014001D223: CC                 int         3
+  000000014001D224: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D228: 48 8B CE           mov         rcx,rsi
+  000000014001D22B: E8 00 83 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D230: 48 8B C8           mov         rcx,rax
+  000000014001D233: E8 E8 21 89 03     call        RhpThrowEx
+  000000014001D238: CC                 int         3
+  000000014001D239: 48 8B CE           mov         rcx,rsi
+  000000014001D23C: 48 8B 94 24 F8 00  mov         rdx,qword ptr [rsp+0F8h]
+  000000014001D244: E8 E7 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D249: 48 8B C8           mov         rcx,rax
+  000000014001D24C: E8 CF 21 89 03     call        RhpThrowEx
+  000000014001D251: CC                 int         3
+  000000014001D252: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D256: 48 8B CD           mov         rcx,rbp
+  000000014001D259: E8 D2 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D25E: 48 8B C8           mov         rcx,rax
+  000000014001D261: E8 BA 21 89 03     call        RhpThrowEx
+  000000014001D266: CC                 int         3
+  000000014001D267: 48 8B CD           mov         rcx,rbp
+  000000014001D26A: 48 8B 94 24 D0 00  mov         rdx,qword ptr [rsp+0D0h]
+  000000014001D272: E8 B9 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D277: 48 8B C8           mov         rcx,rax
+  000000014001D27A: E8 A1 21 89 03     call        RhpThrowEx
+  000000014001D27F: CC                 int         3
+  000000014001D280: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D284: 48 8B CF           mov         rcx,rdi
+  000000014001D287: E8 A4 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D28C: 48 8B C8           mov         rcx,rax
+  000000014001D28F: E8 8C 21 89 03     call        RhpThrowEx
+  000000014001D294: CC                 int         3
+  000000014001D295: 48 8B CE           mov         rcx,rsi
+  000000014001D298: 48 8B 94 24 A8 00  mov         rdx,qword ptr [rsp+0A8h]
+  000000014001D2A0: E8 8B 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D2A5: 48 8B C8           mov         rcx,rax
+  000000014001D2A8: E8 73 21 89 03     call        RhpThrowEx
+  000000014001D2AD: CC                 int         3
+  000000014001D2AE: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D2B2: 48 8B CF           mov         rcx,rdi
+  000000014001D2B5: E8 76 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D2BA: 48 8B C8           mov         rcx,rax
+  000000014001D2BD: E8 5E 21 89 03     call        RhpThrowEx
+  000000014001D2C2: CC                 int         3
+  000000014001D2C3: 48 8B CE           mov         rcx,rsi
+  000000014001D2C6: 48 8B 94 24 A8 00  mov         rdx,qword ptr [rsp+0A8h]
+  000000014001D2CE: E8 5D 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D2D3: 48 8B C8           mov         rcx,rax
+  000000014001D2D6: E8 45 21 89 03     call        RhpThrowEx
+  000000014001D2DB: CC                 int         3
+  000000014001D2DC: 48 8B 50 10        mov         rdx,qword ptr [rax+10h]
+  000000014001D2E0: 48 8B CE           mov         rcx,rsi
+  000000014001D2E3: E8 48 82 1A 00     call        golib_go_golib_RuntimeErrorPanic__IndexOutOfRange
+  000000014001D2E8: 48 8B C8           mov         rcx,rax
+  000000014001D2EB: E8 30 21 89 03     call        RhpThrowEx
+  000000014001D2F0: CC                 int         3
+  000000014001D2F1: E8 1A E1 0E 00     call        S_P_CoreLib_Internal_Runtime_CompilerHelpers_ThrowHelpers__ThrowIndexOutOfRangeException
+  000000014001D2F6: CC                 int         3
+  000000014001D2F7: 90                 nop
