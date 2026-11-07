@@ -1,0 +1,75 @@
+  000000014022E140: 41 57              push        r15
+  000000014022E142: 41 56              push        r14
+  000000014022E144: 41 55              push        r13
+  000000014022E146: 41 54              push        r12
+  000000014022E148: 57                 push        rdi
+  000000014022E149: 56                 push        rsi
+  000000014022E14A: 55                 push        rbp
+  000000014022E14B: 53                 push        rbx
+  000000014022E14C: 48 83 EC 38        sub         rsp,38h
+  000000014022E150: 33 C0              xor         eax,eax
+  000000014022E152: 48 89 44 24 30     mov         qword ptr [rsp+30h],rax
+  000000014022E157: 48 8B D9           mov         rbx,rcx
+  000000014022E15A: 48 8B F2           mov         rsi,rdx
+  000000014022E15D: 49 8B F8           mov         rdi,r8
+  000000014022E160: 33 ED              xor         ebp,ebp
+  000000014022E162: 48 8B 53 10        mov         rdx,qword ptr [rbx+10h]
+  000000014022E166: 48 FF CA           dec         rdx
+  000000014022E169: 48 8B CE           mov         rcx,rsi
+  000000014022E16C: E8 6F C7 EC 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014022E171: 4C 8B 73 10        mov         r14,qword ptr [rbx+10h]
+  000000014022E175: 45 33 FF           xor         r15d,r15d
+  000000014022E178: 45 33 ED           xor         r13d,r13d
+  000000014022E17B: EB 75              jmp         000000014022E1F2
+  000000014022E17D: 48 8B CE           mov         rcx,rsi
+  000000014022E180: 49 8B D7           mov         rdx,r15
+  000000014022E183: E8 58 C7 EC 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014022E188: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014022E18B: 45 33 C0           xor         r8d,r8d
+  000000014022E18E: 4C 89 44 24 30     mov         qword ptr [rsp+30h],r8
+  000000014022E193: 4C 8D 44 24 30     lea         r8,[rsp+30h]
+  000000014022E198: 48 8B D7           mov         rdx,rdi
+  000000014022E19B: E8 50 4D E4 FF     call        S_P_CoreLib_System_Math___BigMul_g__SoftwareFallback_48_0
+  000000014022E1A0: 4C 8B E0           mov         r12,rax
+  000000014022E1A3: 48 8B 44 24 30     mov         rax,qword ptr [rsp+30h]
+  000000014022E1A8: 48 89 44 24 28     mov         qword ptr [rsp+28h],rax
+  000000014022E1AD: 48 8B CB           mov         rcx,rbx
+  000000014022E1B0: 49 8B D7           mov         rdx,r15
+  000000014022E1B3: E8 28 C7 EC 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014022E1B8: 48 8B 08           mov         rcx,qword ptr [rax]
+  000000014022E1BB: 48 8B 54 24 28     mov         rdx,qword ptr [rsp+28h]
+  000000014022E1C0: 48 03 CA           add         rcx,rdx
+  000000014022E1C3: 48 3B CA           cmp         rcx,rdx
+  000000014022E1C6: 0F 92 C2           setb        dl
+  000000014022E1C9: 0F B6 D2           movzx       edx,dl
+  000000014022E1CC: 49 03 D4           add         rdx,r12
+  000000014022E1CF: 48 03 E9           add         rbp,rcx
+  000000014022E1D2: 48 3B E9           cmp         rbp,rcx
+  000000014022E1D5: 0F 92 C1           setb        cl
+  000000014022E1D8: 0F B6 C9           movzx       ecx,cl
+  000000014022E1DB: 48 03 CA           add         rcx,rdx
+  000000014022E1DE: 4C 8B E1           mov         r12,rcx
+  000000014022E1E1: 48 8B CB           mov         rcx,rbx
+  000000014022E1E4: 49 8B D7           mov         rdx,r15
+  000000014022E1E7: E8 F4 C6 EC 00     call        golib_go_slice_1<Double>__get_Item_0
+  000000014022E1EC: 48 89 28           mov         qword ptr [rax],rbp
+  000000014022E1EF: 49 8B EC           mov         rbp,r12
+  000000014022E1F2: 45 84 ED           test        r13b,r13b
+  000000014022E1F5: 75 08              jne         000000014022E1FF
+  000000014022E1F7: 41 BD 01 00 00 00  mov         r13d,1
+  000000014022E1FD: EB 03              jmp         000000014022E202
+  000000014022E1FF: 49 FF C7           inc         r15
+  000000014022E202: 4D 3B FE           cmp         r15,r14
+  000000014022E205: 0F 8C 72 FF FF FF  jl          000000014022E17D
+  000000014022E20B: 48 8B C5           mov         rax,rbp
+  000000014022E20E: 48 83 C4 38        add         rsp,38h
+  000000014022E212: 5B                 pop         rbx
+  000000014022E213: 5D                 pop         rbp
+  000000014022E214: 5E                 pop         rsi
+  000000014022E215: 5F                 pop         rdi
+  000000014022E216: 41 5C              pop         r12
+  000000014022E218: 41 5D              pop         r13
+  000000014022E21A: 41 5E              pop         r14
+  000000014022E21C: 41 5F              pop         r15
+  000000014022E21E: C3                 ret
+  000000014022E21F: 90                 nop

@@ -66,9 +66,7 @@ partial interface Errorer {
     void Error(params ꓸꓸꓸany ʗp);
 }
 
-internal static void check(@string label, bool ok) {
-    fmt.Printf("%-28s: %v\n"u8, label, ok);
-}
+internal static void check(@string label, bool ok) { fmt.Printf("%-28s: %v\n"u8, label, ok); }
 
 internal partial interface main_type /*dyn*/ {
     void Error(params ꓸꓸꓸany ʗp);

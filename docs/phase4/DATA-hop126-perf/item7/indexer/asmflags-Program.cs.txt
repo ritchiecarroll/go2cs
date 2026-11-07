@@ -1,0 +1,30 @@
+// asmflags <dll>... -- item 7 §11.9's anomaly diagnostic: per assembly, read WITHOUT loading it (System.Reflection.Metadata)
+// the DebuggableAttribute's DebuggingModes (DisableOptimizations = 0x100, Default = 0x1, IgnoreSymbolStoreSequencePoints = 0x2,
+// EnableEditAndContinue = 0x4) and whether the PE carries a ReadyToRun ManagedNativeHeader. One line per file:
+//   <name> modes=0x.. jitopt=<on|OFF> r2r=<yes|no>
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+
+foreach (string path in args)
+{
+    using var fs = File.OpenRead(path);
+    using var pe = new PEReader(fs);
+    if (!pe.HasMetadata) { Console.WriteLine($"{Path.GetFileName(path)} no-metadata"); continue; }
+    var md = pe.GetMetadataReader();
+    int modes = -1;
+    foreach (var h in md.GetAssemblyDefinition().GetCustomAttributes())
+    {
+        var ca = md.GetCustomAttribute(h);
+        if (ca.Constructor.Kind != HandleKind.MemberReference) continue;
+        var mr = md.GetMemberReference((MemberReferenceHandle)ca.Constructor);
+        if (mr.Parent.Kind != HandleKind.TypeReference) continue;
+        var tr = md.GetTypeReference((TypeReferenceHandle)mr.Parent);
+        if (md.GetString(tr.Name) != "DebuggableAttribute") continue;
+        var blob = md.GetBlobReader(ca.Value);
+        blob.ReadUInt16(); // prolog
+        modes = blob.Length - blob.Offset >= 4 ? blob.ReadInt32() : -1;
+    }
+    bool r2r = pe.PEHeaders.CorHeader?.ManagedNativeHeaderDirectory.Size > 0;
+    string jit = modes < 0 ? "unknown" : (modes & 0x100) != 0 ? "OFF" : "on";
+    Console.WriteLine($"{Path.GetFileName(path)} modes=0x{(modes < 0 ? 0 : modes):x} jitopt={jit} r2r={(r2r ? "yes" : "no")}");
+}
