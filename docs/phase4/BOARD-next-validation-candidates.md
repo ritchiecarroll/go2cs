@@ -33978,6 +33978,48 @@ Read while gating batches 202-203 (re-merged as 205-206) and 207 on the i7 and t
 - One earlier i7 Release failure at 386e95397a stays UNNAMED: it ran at -v q with no trx, so it is not attributed to either test.
 Both tests read clean in every other run: 13 Release and 3 Debug across the two boxes. **Open; owner to be assigned.** The fix shape is the owner's: a deterministic precondition (no GC inside the window, a private pool, or a bounded retry) without hiding a real regression.
 
+**Amended 2026-11-07 (H, COORD's flakes seat, claude/h-golib-flakes) — (2) CLOSED; (1) still OPEN, source unnamed.**
+
+**(2) TestSemaHandoffsRatio: CLOSED.** The mechanism was measured: the ratio reads the host OS scheduler, not
+the code. Instrumented, H's 12 idle full suites (12,000 trials) had 4 losses, all after the waiter had resumed.
+Under 8 busy loops on H's 8 logical CPUs the test read 868/902/875, and under 16 it read 14 of 1000, the class of
+the i9's 383 and linux's 25. Every loss was one of two kinds, and neither is reachable by code:
+- (A) the waiter's thread was not scheduled within the 10 ms bound (Go's forcePreemptNS), so the releaser went on;
+- (B) the waiter resumed and released the releaser, then lost the core before its CAS.
+In Go both goroutines share one P; here each is an OS thread. The ratio assert is replaced by what the yield
+guarantees, per trial, with zero tolerance: unless the bound fired, the waiter has left its park when Release
+returns (`RuntimeSemaphoreHandoffTests.cs:110`). The waiter's park scope writes its wait reason Zero before it sets
+the event the releaser waits on, so this holds on any scheduler. 27,000 trials (18,000 idle, 9,000 loaded) read 0
+violations, including two runs under 12 busy loops that read 303 and 412 of 1000, which fail the old ratio. A
+planted no-yield handoff (the wait elided in `RuntimeSemaphore.Release`) fails it in 1000 of 1000 trials, in Debug
+and in Release; restored byte-identical. yields == Trials stays, the ratio is still printed, and the bound is
+untouched. The disclosed limit is in the test's comment: a waiter that never sets the event rides the bound in
+every trial and passes both the old test and the new one.
+
+**(1) RangeSnapshotChargesNothingOnEitherMeter: still OPEN.** The 4,984 and 6,352 B source is unnamed: it did not
+reproduce on H. Every window read 0 B in 12 instrumented suites, 9 isolated Release windows and 5 under 8 busy
+loops. Each candidate was probed inside the window and falsified:
+- a GC (gen0, gen2, gen2 plus finalizers, 40 windows each): 0 B;
+- a high-pressure pool trim clearing the thread's slot: 40 B;
+- the measuring loop's own tier-up (OSR): 0 B;
+- the tiering worker idled out for 5 s and then re-created: 0 B;
+- a concurrent `GC.GetTotalAllocatedBytes(precise: true)`, 39k EE suspensions: 0 B.
+One non-steady activity was measured in the window: in Release it held the measuring method's own tier-up, on the
+test thread, at 13-17 ms. The same window reads 0.03 ms with tiering off, 0.07 ms under AggressiveOptimization,
+and 0.17 ms in Debug, which does not tier.
+
+COORD ruled the change on the seat branch:
+- AggressiveOptimization on the measuring method (`ArrayRangeAllocationTests.cs:72`), which removes that tier-up
+  from the window and is NOT named as the cause;
+- the per-loop byte trace in the failure message: each step's loop, GC counts per generation, window ms and
+  memory load;
+- the zero assert untouched.
+A planted heap copy (the enumerator's pool rent replaced by `new T[length]`) fails it in both configurations, at
+32,000 B with a step on every loop; restored byte-identical. Source unnamed; the in-window tier-up is removed; the
+next failure self-describes. The i7 reproduced it, and it is the box to read on if it recurs.
+
+— H (2026-11-07)
+
 ## 2026-11-06 — H (COORD ruling, claude/h-p521-table): P-384's fiat Mul has P-521's shape, off the start-up path — SIZED, not built
 
 **The shape.** fiat's converted p384Mul declares 460 named locals before the converter's tuple temporaries, against
