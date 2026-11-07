@@ -73,7 +73,7 @@ public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDes
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)len(f.Units));
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Funcname));
     b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Srcfile));
-    foreach (var (_, u) in f.Units) {
+    foreach (var (_, u) in range(f.Units)) {
         b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StLine);
         b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StCol);
         b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.EnLine);
@@ -173,7 +173,7 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     off += (int64)b.stab.Size();
 
     // Write functions
-    foreach (var (_, f) in b.funcs) {
+    foreach (var (_, f) in range(b.funcs)) {
         error err = default;
         (off, err) = b.emitFunc(w, off, f);
         if (err != nil) {
@@ -210,7 +210,7 @@ public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> f) {
 internal static void hashFuncDesc(hash.Hash h, ref coverage.FuncDesc f, slice<byte> tmp) {
     io.WriteString(h, f.Funcname);
     io.WriteString(h, f.Srcfile);
-    foreach (var (_, u) in f.Units) {
+    foreach (var (_, u) in range(f.Units)) {
         h32(u.StLine, h, tmp);
         h32(u.StCol, h, tmp);
         h32(u.EnLine, h, tmp);

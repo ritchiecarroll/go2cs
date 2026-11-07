@@ -10,11 +10,11 @@ partial class asmgen_package {
     WordBits: 64,
     WordBytes: 8,
 
-    regs: slice<@string>([
+    regs: [
         "BX", "SI", "DI",
         "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
         "AX", "DX", "CX" // last to leave available for hinted allocation
-    ]),
+    ],
     op3: x86Op3,
     hint: x86Hint,
     memOK: true,

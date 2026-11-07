@@ -65,7 +65,7 @@ partial struct multiEncoder /*[]encoder*/;
 
 internal static nint Len(this multiEncoder m) {
     nint size = default;
-    foreach (var (_, e) in m) {
+    foreach (var (_, e) in range<encoder>(m)) {
         size += e.Len();
     }
     return size;
@@ -73,7 +73,7 @@ internal static nint Len(this multiEncoder m) {
 
 internal static void Encode(this multiEncoder m, slice<byte> dst) {
     nint off = default;
-    foreach (var (_, e) in m) {
+    foreach (var (_, e) in range<encoder>(m)) {
         e.Encode(dst.slice(off));
         off += e.Len();
     }
@@ -83,7 +83,7 @@ partial struct setEncoder /*[]encoder*/;
 
 internal static nint Len(this setEncoder s) {
     nint size = default;
-    foreach (var (_, e) in s) {
+    foreach (var (_, e) in range<encoder>(s)) {
         size += e.Len();
     }
     return size;
@@ -99,7 +99,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     // octetSort to get the ordering expected by X690 DER rules before
     // writing the sorted encodings out to dst.
     var l = new slice<slice<byte>>(len(s));
-    foreach (var (i, e) in s) {
+    foreach (var (i, e) in range<encoder>(s)) {
         l[i] = new slice<byte>(e.Len());
         e.Encode(l[i]);
     }
@@ -113,7 +113,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     slices.SortFunc<slice<slice<byte>>, slice<byte>>(l, bytes.Compare);
 
     nint off = default;
-    foreach (var (_, b) in l) {
+    foreach (var (_, b) in range(l)) {
         copy(dst.slice(off), b);
         off += len(b);
     }
@@ -206,7 +206,7 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
         var nMinus1 = @new<bigꓸInt>().Neg(Ꮡn);
         nMinus1.Sub(nMinus1, bigOne);
         var bytes = nMinus1.Bytes();
-        foreach (var i in range(bytes)) {
+        foreach (var i in range(len(bytes))) {
             bytes[i] ^= (byte)(0xff);
         }
         if (len(bytes) == 0 || (byte)(bytes[0] & 0x80) == 0) {

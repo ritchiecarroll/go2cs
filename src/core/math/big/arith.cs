@@ -65,7 +65,7 @@ internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
         throw panic("addVV len");
     }
 
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)y[i], (nuint)c);
         z[i] = (Word)zi;
         c = (Word)cc;
@@ -81,7 +81,7 @@ internal static Word /*c*/ subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
         throw panic("subVV len");
     }
 
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)y[i], (nuint)c);
         z[i] = (Word)zi;
         c = (Word)cc;
@@ -137,7 +137,7 @@ internal static Word /*c*/ addVW_ref(slice<Word> z, slice<Word> x, Word y) {
     Word c = default;
 
     c = y;
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
         z[i] = (Word)zi;
         c = (Word)cc;
@@ -193,7 +193,7 @@ internal static Word /*c*/ subVW_ref(slice<Word> z, slice<Word> x, Word y) {
     Word c = default;
 
     c = y;
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
         z[i] = (Word)zi;
         c = (Word)cc;
@@ -258,7 +258,7 @@ internal static Word /*c*/ mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Wor
         throw panic("mulAddVWW len");
     }
     c = r;
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         (c, z[i]) = mulAddWWW_g(x[i], y, c);
     }
     return c;
@@ -272,7 +272,7 @@ internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word
     }
 
     c = a;
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (z1, z0) = mulAddWWW_g(y[i], m, x[i]);
         var (lo, cc) = bits.Add((nuint)z0, (nuint)c, 0);
         (c, z[i]) = ((Word)cc, (Word)lo);

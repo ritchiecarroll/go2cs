@@ -35,7 +35,7 @@ internal static void Main() {
     table = addItem(table, a);
     table = addItem(table, b);
 
-    foreach (var (_, e) in table) {
+    foreach (var (_, e) in range(table)) {
         var (it, err) = e.get();
         fmt.Println(it.name, err);
     }

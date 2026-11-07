@@ -54,7 +54,7 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
         }
     }
     sysattr.Files = new slice<uintptr>(0, len(attr.Files));
-    foreach (var (_, f) in attr.Files) {
+    foreach (var (_, f) in range(attr.Files)) {
         sysattr.Files = append(sysattr.Files, f.Fd());
     }
 

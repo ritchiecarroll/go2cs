@@ -100,7 +100,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     // First we sort the code length assignments by ascending code length,
     // using the symbol value to break ties.
     var pairs = new slice<huffmanSymbolLengthPair>(len(lengths));
-    foreach (var (i, lengthΔ1) in lengths) {
+    foreach (var (i, lengthΔ1) in range(lengths)) {
         pairs[i].value = (uint16)i;
         pairs[i].length = lengthΔ1;
     }
@@ -172,7 +172,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
 
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
-    foreach (var (i, code) in codes) {
+    foreach (var (i, code) in range(codes)) {
         if ((code.code & test) != 0) {
             firstRightIndex = i;
             break;

@@ -143,7 +143,7 @@ Three facts about C# decide the design:
 
 An `array<T>` value is a wrapper over its own `T[]`, so every `[N]T` value Go keeps inline needs a separate array on
 the managed heap. That is [REC-A, the array-value storage record](phase4/DESIGN-array-value-storage.md), and this
-record does not replace it. <!-- src/core/golib/array.cs:152 (`public readonly struct array<T>`), :161
+record does not replace it. <!-- src/core/golib/array.cs:144 (`public readonly struct array<T>`), :153
 (`internal readonly T[] m_array;`). -->
 
 ## The options

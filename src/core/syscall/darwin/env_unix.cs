@@ -29,7 +29,7 @@ internal static slice<@string> envs = runtime_envs();
 // in package runtime
 internal static Action copyenv = Δsync.OnceFunc(() => {
     env = new map<@string, nint>();
-    foreach (var (i, s) in envs) {
+    foreach (var (i, s) in range(envs)) {
         for (nint j = 0; j < len(s); j++) {
             if (s[j] == '=') {
                 @string key = s.slice(0, j);
@@ -148,7 +148,7 @@ public static void Clearenv() {
         runtimeClearenv(env);
 
         env = new map<@string, nint>();
-        envs = slice<@string>([]);
+        envs = [];
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -161,7 +161,7 @@ public static slice<@string> Environ() {
         ᏑenvLock.RLock();
         defer(ᏑenvLock.RUnlock, ref ᒐ);
         var a = new slice<@string>(0, len(envs));
-        foreach (var (_, env) in envs) {
+        foreach (var (_, env) in range(envs)) {
             if (env != ""u8) {
                 a = append(a, env);
             }

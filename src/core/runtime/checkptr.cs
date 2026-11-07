@@ -76,7 +76,7 @@ internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Point
         return;
     }
 
-    foreach (var (_, original) in originals) {
+    foreach (var (_, original) in range(originals)) {
         if (@base == checkptrBase(original)) {
             return;
         }
@@ -122,7 +122,7 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
     }
 
     // data or bss
-    foreach (var (_, datap) in activeModules()) {
+    foreach (var (_, datap) in range(activeModules())) {
         if (datap.data <= (uintptr)Δp && (uintptr)Δp < datap.edata) {
             return datap.data;
         }

@@ -10,10 +10,10 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     internal @string str;
     /*embed*/ internal error error;
 }
-[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = slice<ж<ptrElemsᴛ1>>([
+[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = [
     Ꮡ(new ptrElemsᴛ1(1, "one", default)),
     Ꮡ(new ptrElemsᴛ1(2, "two", default))
-]); }
+]; }
 
 
 partial struct mapPtrValuesᴛ1 /*dyn*/ {
@@ -28,12 +28,12 @@ internal static map<@string, ж<mapPtrValuesᴛ1>> mapPtrValues = new map<@strin
 partial struct nestedᴛ1 /*dyn*/ {
     internal @string tag;
 }
-internal static slice<slice<nestedᴛ1>> nested = slice<slice<nestedᴛ1>>([
-    slice<nestedᴛ1>([new("x"), new("y")])
-]);
+internal static slice<slice<nestedᴛ1>> nested = [
+    [new("x"), new("y")]
+];
 
 internal static void Main() {
-    foreach (var (_, e) in ptrElems) {
+    foreach (var (_, e) in range(ptrElems)) {
         fmt.Println((~e).@in, (~e).str, (~e).error == nil);
     }
 

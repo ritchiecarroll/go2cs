@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void swap(ref array<uint64> buf) {
-    foreach (var (i, x) in buf) {
+    foreach (var (i, x) in range(buf)) {
         buf[i] = x >> 32 | x << 32;
     }
 }

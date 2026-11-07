@@ -14,7 +14,7 @@ internal static void Main() {
         fmt.Println(s[i]);
     }
 
-    foreach (var (_, r) in rs) {
+    foreach (var (_, r) in range(rs)) {
         fmt.Println(len((@string)r));
     }
 }

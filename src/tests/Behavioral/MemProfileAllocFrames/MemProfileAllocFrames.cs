@@ -48,11 +48,11 @@ internal static partial void Main() {
 
     var seen = new map<@string, bool>{};
     slice<@string> lines = default;
-    foreach (var (_, vᴛ1) in records.slice(0, n)) {
+    foreach (var (_, vᴛ1) in range(records.slice(0, n))) {
         var r = vᴛ1.ΔClone();
 
         slice<@string> names = default;
-        foreach (var (_, pc) in r.Stack()) {
+        foreach (var (_, pc) in range(r.Stack())) {
             var f = runtime.FuncForPC(pc - 1);
             if (f == nil) {
                 names = append(namesᴷ, names, (@string)"?");
@@ -71,7 +71,7 @@ internal static partial void Main() {
         }
     }
     sort.Strings(lines);
-    foreach (var (_, l) in lines) {
+    foreach (var (_, l) in range(lines)) {
         fmt.Println(l);
     }
 }

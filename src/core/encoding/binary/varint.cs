@@ -64,7 +64,7 @@ public static nint PutUvarint(slice<byte> buf, uint64 x) {
 public static (uint64, nint) Uvarint(slice<byte> buf) {
     uint64 x = default;
     nuint s = default;
-    foreach (var (i, b) in buf) {
+    foreach (var (i, b) in range(buf)) {
         if (i == MaxVarintLen64) {
             // Catch byte reads past MaxVarintLen64.
             // See issue https://golang.org/issues/41185

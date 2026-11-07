@@ -22,7 +22,7 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
         return (default, err);
     }
     slice<Interface> ift = default;
-    foreach (var (_, aa) in aas) {
+    foreach (var (_, aa) in range(aas)) {
         var index = aa.IfIndex;
         if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Ipv6IfIndex;
@@ -90,7 +90,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
         return (default, err);
     }
     slice<ΔAddr> ifat = default;
-    foreach (var (_, aa) in aas) {
+    foreach (var (_, aa) in range(aas)) {
         var index = aa.IfIndex;
         if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Ipv6IfIndex;
@@ -145,7 +145,7 @@ internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface>
         return (default, err);
     }
     slice<ΔAddr> ifat = default;
-    foreach (var (_, aa) in aas) {
+    foreach (var (_, aa) in range(aas)) {
         var index = aa.IfIndex;
         if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Ipv6IfIndex;

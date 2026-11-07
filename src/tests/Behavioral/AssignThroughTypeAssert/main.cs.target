@@ -44,7 +44,7 @@ internal static nint renumber(Node root, nint i) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            foreach (var iΔ1 in range(nΔ1.Values)) {
+            foreach (var iΔ1 in range(len(nΔ1.Values))) {
                 nΔ1.Values[iΔ1]._<ж<Lit>>().Len = (iΔ1 + 1) * 10;
             }
             break;
@@ -99,8 +99,8 @@ internal static @string read(Node root) {
 
 internal static ж<ValueSpec> newSpec() {
     return Ꮡ(new ValueSpec(
-        Names: slice<@string>(["Typ"]),
-        Values: slice<Node>([new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a")))])
+        Names: ["Typ"],
+        Values: [new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a")))]
     ));
 }
 
@@ -110,13 +110,13 @@ internal static void Main() {
     fmt.Println("fixSpec:", spec.Values[0]._<ж<Lit>>().Len);
 
     var multi = Ꮡ(new ValueSpec(
-        Names: slice<@string>(["Typ", "Other"]),
-        Values: slice<Node>([new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a"))), new LitжNode(Ꮡ(new Lit(Len: 2, Name: "b"))), new LitжNode(Ꮡ(new Lit(Len: 3, Name: "c")))])
+        Names: ["Typ", "Other"],
+        Values: [new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a"))), new LitжNode(Ꮡ(new Lit(Len: 2, Name: "b"))), new LitжNode(Ꮡ(new Lit(Len: 3, Name: "c")))]
     ));
     nint outer = renumber(new ValueSpecжNode(multi), 7);
     fmt.Println("renumber outer:", outer);
 
-    foreach (var k in range(multi.Values)) {
+    foreach (var k in range(len(multi.Values))) {
         fmt.Println("renumber:", k, multi.Values[k]._<ж<Lit>>().Len);
     }
 

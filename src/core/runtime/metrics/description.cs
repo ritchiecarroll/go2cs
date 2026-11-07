@@ -51,7 +51,7 @@ partial struct Description {
 
 // The English language descriptions below must be kept in sync with the
 // descriptions of each metric in doc.go by running 'go generate'.
-[GoLazy] partial class lazyᴛallDesc { internal static slice<Description> allDesc = slice<Description>([
+[GoLazy] partial class lazyᴛallDesc { internal static slice<Description> allDesc = [
     new(
         Name: "/cgo/go-to-c-calls:calls",
         ΔDescription: "Count of calls made from Go to C by the current process.",
@@ -417,7 +417,7 @@ partial struct Description {
         Kind: KindFloat64,
         Cumulative: true
     )
-]); }
+]; }
 
 [GoInit] internal static void init() {
     // Insert all the non-default-reporting GODEBUGs into the table,
@@ -428,7 +428,7 @@ partial struct Description {
     }
     var more = new slice<Description>(i, len(allDesc) + len(godebugs.All));
     copy(more, allDesc);
-    foreach (var (_, info) in godebugs.All) {
+    foreach (var (_, info) in range(godebugs.All)) {
         if (!info.Opaque) {
             more = append(more, new Description(
                 Name: "/godebug/non-default-behavior/"u8 + info.Name + ":events"u8,

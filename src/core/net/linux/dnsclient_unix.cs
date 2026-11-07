@@ -191,11 +191,11 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
         }
         slice<@string> networks = default;
         if (useTCP) {
-            networks = slice<@string>(["tcp"]);
+            networks = ["tcp"];
         } else {
-            networks = slice<@string>(["udp", "tcp"]);
+            networks = ["udp", "tcp"];
         }
-        foreach (var (_, network) in networks) {
+        foreach (var (_, network) in range(networks)) {
             var (ctxΔ1, cancel) = context.WithDeadline(ctx, time.Now().Add(timeout));
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
@@ -504,7 +504,7 @@ internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡ
     dnsmessage.Parser p = default;
     @string server = default;
     error err = default;
-    foreach (var (_, fqdn) in conf.nameList(name)) {
+    foreach (var (_, fqdn) in range(conf.nameList(name))) {
         (p, server, err) = Ꮡr.tryOneName(ctx, Ꮡconf, fqdn, qtype);
         if (err == nil) {
             break;
@@ -557,7 +557,7 @@ internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
         if (avoidDNS(name)) {
             return default;
         }
-        return slice<@string>([name]);
+        return [name];
     }
 
     var hasNdots = bytealg.CountString(name, (byte)'.') >= conf.ndots;
@@ -571,7 +571,7 @@ internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
         names = append(names, name);
     }
     // Try suffixes that are not too long (see isDomainName).
-    foreach (var (_, suffix) in conf.search) {
+    foreach (var (_, suffix) in range(conf.search)) {
         @string fqdn = name + suffix;
         if (!avoidDNS(fqdn) && len(fqdn) <= 254) {
             names = append(names, fqdn);
@@ -631,7 +631,7 @@ internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Reso
         return (addrs, err);
     }
     addrs = new slice<@string>(0, len(ips));
-    foreach (var (_, vᴛ1) in ips) {
+    foreach (var (_, vᴛ1) in range(ips)) {
         ref var ip = ref heap(new IPAddr(), out var Ꮡip);
         ip = vᴛ1;
 
@@ -646,7 +646,7 @@ internal static (slice<IPAddr> addrs, @string canonical) goLookupIPFiles(@string
     @string canonical = default;
 
     (var addr, canonical) = lookupStaticHost(name);
-    foreach (var (_, haddr) in addr) {
+    foreach (var (_, haddr) in range(addr)) {
         var (haddrΔ1, zone) = splitHostZone(haddr);
         var ip = ParseIP(haddrΔ1); if (ip != nil) {
             var addrΔ1 = new IPAddr(IP: ip, Zone: zone);
@@ -713,11 +713,11 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     }
     switch (ipVersion(network)) {
     case (byte)'4': {
-        qtypes = slice<dnsmessage.Type>([dnsmessage.TypeA]);
+        qtypes = [dnsmessage.TypeA];
         break;
     }
     case (byte)'6': {
-        qtypes = slice<dnsmessage.Type>([dnsmessage.TypeAAAA]);
+        qtypes = [dnsmessage.TypeAAAA];
         break;
     }}
     Action<@string, dnsmessage.Type> queryFn = default;
@@ -752,12 +752,12 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         responseFn = (@string fqdn, dnsmessage.Type qtype) => ᐸꟷ(laneʗ3);
     }
     error lastErr = default;
-    foreach (var (_, fqdn) in conf.nameList(name)) {
-        foreach (var (_, qtype) in qtypes) {
+    foreach (var (_, fqdn) in range(conf.nameList(name))) {
+        foreach (var (_, qtype) in range(qtypes)) {
             queryFn(fqdn, qtype);
         }
         var hitStrictError = false;
-        foreach (var (_, qtype) in qtypes) {
+        foreach (var (_, qtype) in range(qtypes)) {
             var result = responseFn(fqdn, qtype);
             if (result.error != nil) {
                 var (nerr, ok) = result.error._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {

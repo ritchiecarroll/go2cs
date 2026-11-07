@@ -32,7 +32,7 @@ internal static void Main() {
 
     Δnet.Interface loopback = default;
 
-    foreach (var (_, ifi) in ifs) {
+    foreach (var (_, ifi) in range(ifs)) {
         if (ifi.Index <= 0) {
             indexesPositive = false;
         }
@@ -96,7 +96,7 @@ internal static void Main() {
     var byIndexAgrees = true;
     var byNameAgrees = true;
 
-    foreach (var (_, ifi) in ifs) {
+    foreach (var (_, ifi) in range(ifs)) {
         var (found, errΔ1) = Δnet.InterfaceByIndex(ifi.Index);
         if (errΔ1 != nil || found == nil || found.Index != ifi.Index || found.Name != ifi.Name) {
             byIndexAgrees = false;
@@ -132,7 +132,7 @@ internal static void Main() {
     var loopback6 = false;
     var nonLoopback = false;
 
-    foreach (var (_, addr) in addrs) {
+    foreach (var (_, addr) in range(addrs)) {
         switch (addr.type()) {
         case ж<Δnet.IPNet> a: {
             if (len(a.IP) != Δnet.IPv4len && len(a.IP) != Δnet.IPv6len) {
@@ -191,7 +191,7 @@ internal static void Main() {
     var multicastIsMulticast = true;
     var multicastIPsValid = true;
 
-    foreach (var (_, vᴛ1) in ifs) {
+    foreach (var (_, vᴛ1) in range(ifs)) {
         ref var ifi = ref heap(new Δnet.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -207,7 +207,7 @@ internal static void Main() {
         }
         multicast += len(ma);
 
-        foreach (var (_, addr) in ma) {
+        foreach (var (_, addr) in range(ma)) {
             var (a, ok) = addr._<ж<Δnet.IPAddr>>(ᐧ);
             if (!ok) {
                 multicastIPsValid = false;

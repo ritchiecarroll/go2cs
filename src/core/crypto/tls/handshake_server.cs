@@ -272,7 +272,7 @@ internal static error processClientHello(this ref serverHandshakeState hs) {
 
     var foundCompression = false;
     // We only support null compression, so check that the client offered it.
-    foreach (var (_, compression) in hs.clientHello.compressionMethods) {
+    foreach (var (_, compression) in range(hs.clientHello.compressionMethods)) {
         if (compression == compressionNone) {
             foundCompression = true;
             break;
@@ -347,7 +347,7 @@ internal static error processClientHello(this ref serverHandshakeState hs) {
         //
         // Per RFC 4492, section 5.1.2, implementations MUST support the
         // uncompressed point format. See golang.org/issue/31943.
-        hs.hello.supportedPoints = slice<uint8>([pointFormatUncompressed]);
+        hs.hello.supportedPoints = [pointFormatUncompressed];
     }
 
     {
@@ -400,8 +400,8 @@ internal static (@string, error) negotiateALPN(slice<@string> serverProtos, slic
         return ("", default);
     }
     bool http11fallback = default;
-    foreach (var (_, s) in serverProtos) {
-        foreach (var (_, c) in clientProtos) {
+    foreach (var (_, s) in range(serverProtos)) {
+        foreach (var (_, c) in range(clientProtos)) {
             if (s == c) {
                 return (s, default);
             }
@@ -428,7 +428,7 @@ private static readonly @string tlsClientOfferedOnlyˢᵇ = "tls: client offered
 // pre-TLS 1.3 client.
 internal static (bool, error) supportsECDHE(ж<Config> c, uint16 version, slice<CurveID> supportedCurves, slice<uint8> supportedPoints) {
     var supportsCurve = false;
-    foreach (var (_, curve) in supportedCurves) {
+    foreach (var (_, curve) in range(supportedCurves)) {
         if (c.supportsCurve(version, curve)) {
             supportsCurve = true;
             break;
@@ -437,7 +437,7 @@ internal static (bool, error) supportsECDHE(ж<Config> c, uint16 version, slice<
 
     var supportsPointFormat = false;
     var offeredNonCompressedFormat = false;
-    foreach (var (_, pointFormat) in supportedPoints) {
+    foreach (var (_, pointFormat) in range(supportedPoints)) {
         if (pointFormat == pointFormatUncompressed) {
             supportsPointFormat = true;
         } else {
@@ -485,7 +485,7 @@ internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
         tls3des.IncNonDefault();
     }
 
-    foreach (var (_, id) in hs.clientHello.cipherSuites) {
+    foreach (var (_, id) in range(hs.clientHello.cipherSuites)) {
         if (id == TLS_FALLBACK_SCSV) {
             // The client is doing a fallback connection. See RFC 7507.
             if (hs.clientHello.vers < c.config.maxSupportedVersion(roleServer)) {
@@ -573,7 +573,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
 
     var cipherSuiteOk = false;
     // Check that the client is still offering the ciphersuite in the session.
-    foreach (var (_, id) in hs.clientHello.cipherSuites) {
+    foreach (var (_, id) in range(hs.clientHello.cipherSuites)) {
         if (id == sessionState.cipherSuite) {
             cipherSuiteOk = true;
             break;
@@ -584,7 +584,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
     }
 
     // Check that we also support the ciphersuite from the session.
-    var suite = selectCipherSuite(slice<uint16>([sessionState.cipherSuite]),
+    var suite = selectCipherSuite([sessionState.cipherSuite],
         c.config.supportedCipherSuites(), Ꮡhs.cipherSuiteOk);
     if (suite == nil) {
         return default;
@@ -604,7 +604,7 @@ internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) {
     var opts = new Δx509.VerifyOptions(
         CurrentTime: c.config.time(),
         Roots: c.config.ClientCAs,
-        KeyUsages: slice<Δx509.ExtKeyUsage>([Δx509.ExtKeyUsageClientAuth])
+        KeyUsages: [Δx509.ExtKeyUsageClientAuth]
     );
     if (sessionHasClientCerts && c.config.ClientAuth >= VerifyClientCertIfGiven && !anyValidVerifiedChain(sessionState.verifiedChains, opts)) {
         return default;
@@ -745,10 +745,10 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
     if (c.config.ClientAuth >= RequestClientCert) {
         // Request a client certificate
         certReq = @new<certificateRequestMsg>();
-        certReq.certificateTypes = slice<byte>([
+        certReq.certificateTypes = [
             (byte)certTypeRSASign,
             (byte)certTypeECDSASign
-        ]);
+        ];
         if (c.vers >= VersionTLS12) {
             certReq.hasSignatureAlgorithm = true;
             certReq.supportedSignatureAlgorithms = supportedSignatureAlgorithms(c.vers);
@@ -1058,7 +1058,7 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
     var certificates = certificate.ΔCertificate;
     var certs = new slice<ж<Δx509.Certificate>>(len(certificates));
     error err = default;
-    foreach (var (i, asn1Data) in certificates) {
+    foreach (var (i, asn1Data) in range(certificates)) {
         (certs[i], err) = Δx509.ParseCertificate(asn1Data); if (err != nil) {
             Ꮡc.sendAlert(alertDecodeError);
             return errors.New("tls: failed to parse client certificate: "u8 + err.Error());
@@ -1086,10 +1086,10 @@ internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate cer
             Roots: c.config.ClientCAs,
             CurrentTime: c.config.time(),
             Intermediates: Δx509.NewCertPool(),
-            KeyUsages: slice<Δx509.ExtKeyUsage>([Δx509.ExtKeyUsageClientAuth])
+            KeyUsages: [Δx509.ExtKeyUsageClientAuth]
         );
 
-        foreach (var (_, cert) in certs[1..]) {
+        foreach (var (_, cert) in range(certs[1..])) {
             opts.Intermediates.AddCert(cert);
         }
 

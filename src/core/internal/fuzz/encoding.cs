@@ -34,7 +34,7 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
     var b = bytes.NewBuffer(slice<byte>(encVersion1 + "\n"));
     // TODO(katiehockman): keep uint8 and int32 encoding where applicable,
     // instead of changing to byte and rune respectively.
-    foreach (var (_, val) in vals) {
+    foreach (var (_, val) in range(vals)) {
         switch (val.type()) {
         case nint _:
         case int8 _:
@@ -145,7 +145,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
         return (default, fmt.Errorf("unknown encoding version: %s"u8, version));
     }
     slice<any> vals = default;
-    foreach (var (_, vᴛ1) in lines[1..]) {
+    foreach (var (_, vᴛ1) in range(lines[1..])) {
         var line = vᴛ1;
 
         line = bytes.TrimSpace(line);

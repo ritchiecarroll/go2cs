@@ -81,7 +81,7 @@ internal static bool @is(error err, error target, bool targetComparable) {
             break;
         }
         case {} Δx when Δx._<is_typeᴛ1>(out var x): {
-            foreach (var (_, errΔ1) in x.Unwrap()) {
+            foreach (var (_, errΔ1) in range(x.Unwrap())) {
                 if (@is(errΔ1, target, targetComparable)) {
                     return true;
                 }
@@ -159,7 +159,7 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
             break;
         }
         case {} Δx when Δx._<is_typeᴛ1>(out var x): {
-            foreach (var (_, errΔ1) in x.Unwrap()) {
+            foreach (var (_, errΔ1) in range(x.Unwrap())) {
                 if (errΔ1 == nil) {
                     continue;
                 }
@@ -224,7 +224,7 @@ internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
             break;
         }
         case {} Δx when Δx._<is_typeᴛ1>(out var x): {
-            foreach (var (_, errΔ1) in x.Unwrap()) {
+            foreach (var (_, errΔ1) in range(x.Unwrap())) {
                 if (errΔ1 == nil) {
                     continue;
                 }

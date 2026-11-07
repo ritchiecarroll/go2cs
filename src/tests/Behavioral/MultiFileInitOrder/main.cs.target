@@ -11,7 +11,7 @@ partial class main_package {
 internal static void Main() {
     fmt.Println(len(order));
 
-    foreach (var (_, name) in order) {
+    foreach (var (_, name) in range(order)) {
         fmt.Println(name);
     }
 }

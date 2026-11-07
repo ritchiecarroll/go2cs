@@ -173,7 +173,7 @@ internal static (@string, contentType) stringify(params ꓸꓸꓸany argsʗp) {
         }}
     }
     nint i = 0;
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         // We skip untyped nil arguments for backward compatibility.
         // Without this they would be output as <nil>, escaped.
         // See issue 25875.

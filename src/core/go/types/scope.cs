@@ -93,7 +93,7 @@ internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string nam
     var matchesᴷ = new stackAppend<Object>(moves: true);
 
     slice<Object> matches = default;
-    foreach (var (_, n) in s.Names()) {
+    foreach (var (_, n) in range(s.Names())) {
         if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
             matches = append(matchesᴷ, matches, s.Lookup(n));
         }
@@ -168,12 +168,12 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
     fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, Ꮡs.OrTypedNil());
 
     @string indn1 = indn + ind;
-    foreach (var (_, name) in s.Names()) {
+    foreach (var (_, name) in range(s.Names())) {
         fmt.Fprintf(w, "%s%s\n"u8, indn1, s.Lookup(name));
     }
 
     if (recurse) {
-        foreach (var (_, sΔ1) in s.children) {
+        foreach (var (_, sΔ1) in range(s.children)) {
             sΔ1.WriteTo(w, n + 1, recurse);
         }
     }

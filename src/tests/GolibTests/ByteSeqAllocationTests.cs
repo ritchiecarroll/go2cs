@@ -86,7 +86,7 @@ public class ByteSeqAllocationTests
     {
         nint x = 0;
 
-        foreach (var (_, c) in s.ToSlice())
+        foreach (var (_, c) in range(s.ToSlice()))
             x = x * 10 + c - '0';
 
         return x;
@@ -134,7 +134,7 @@ public class ByteSeqAllocationTests
         nint x = 0;
 
         // The old `new slice<byte>(seq)` constructor — an interface parameter, so the argument boxes.
-        foreach (var (_, c) in new slice<byte>((IByteSeq<byte>)s))
+        foreach (var (_, c) in range(new slice<byte>((IByteSeq<byte>)s)))
             x = x * 10 + c - '0';
 
         return x;

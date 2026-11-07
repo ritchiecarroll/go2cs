@@ -19,8 +19,8 @@ private static readonly @string unixSyslogDeliveryErrorˢᵇ = "Unix syslog deli
 internal static (serverConn conn, error err) unixSyslog() {
     var logTypes = slice<@string>(["unixgram", "unix"]);
     var logPaths = slice<@string>(["/dev/log", "/var/run/syslog", "/var/run/log"]);
-    foreach (var (_, network) in logTypes) {
-        foreach (var (_, path) in logPaths) {
+    foreach (var (_, network) in range(logTypes)) {
+        foreach (var (_, path) in range(logPaths)) {
             var (connΔ1, errΔ1) = net.Dial(network, path);
             if (errΔ1 == nil) {
                 return (new netConnжserverConn(Ꮡ(new netConn(conn: connΔ1, local: true))), default);

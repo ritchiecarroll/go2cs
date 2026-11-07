@@ -161,7 +161,7 @@ public static slice<byte> Bytes(this ref ΔNat x, ж<Modulus> Ꮡm) {
 
     nint i = m.Size();
     var bytes = new slice<byte>(i);
-    foreach (var (_, vᴛ1) in x.limbs) {
+    foreach (var (_, vᴛ1) in range(x.limbs)) {
         var limb = vᴛ1;
 
         for (nint j = 0; j < _S; j++) {
@@ -348,7 +348,7 @@ public static choice IsOdd(this ref ΔNat x) {
 public static nuint TrailingZeroBitsVarTime(this ref ΔNat x) {
     nuint t = default;
     var limbs = x.limbs;
-    foreach (var (_, l) in limbs) {
+    foreach (var (_, l) in range(limbs)) {
         if (l == 0) {
             t += _W;
             continue;
@@ -462,7 +462,7 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
         shiftedLimbs = xLimbs.slice(shiftLimbs);
     }
 
-    foreach (var i in range(xLimbs)) {
+    foreach (var i in range(len(xLimbs))) {
         if (i >= len(shiftedLimbs)) {
             xLimbs[i] = 0;
             continue;
@@ -610,7 +610,7 @@ public static (ж<Modulus>, error) NewModulusProduct(slice<byte> a, slice<byte> 
     var x = NewNat().resetToBytes(a);
     var y = NewNat().resetToBytes(b);
     var n = NewNat().reset(len(x.limbs) + len(y.limbs));
-    foreach (var i in range(y.limbs)) {
+    foreach (var i in range(len(y.limbs))) {
         n.limbs[i + len(x.limbs)] = addMulVVW(n.limbs.slice(i, i + len(x.limbs)), x.limbs, y.limbs[i]);
     }
     return newModulus(n.trim());
@@ -984,7 +984,7 @@ internal static nuint /*carry*/ addMulVVW(slice<nuint> z, slice<nuint> x, nuint 
     nuint carry = default;
 
     _ = x[len(z) - 1]; // bounds check elimination hint
-    foreach (var i in range(z)) {
+    foreach (var i in range(len(z))) {
         var (hi, lo) = bits.Mul(x[i], y);
         (lo, var c) = bits.Add(lo, z[i], 0);
         // We use bits.Add with zero to get an add-with-carry instruction that
@@ -1101,8 +1101,8 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> x, slice<byte> e, �
     @out.limbs[0] = 1;
     Ꮡout.montgomeryRepresentation(Ꮡm);
     var tmp = NewNat().ExpandFor(Ꮡm);
-    foreach (var (_, b) in e) {
-        foreach (var (_, j) in slice<nint>([4, 0])) {
+    foreach (var (_, b) in range(e)) {
+        foreach (var (_, j) in range(slice<nint>([4, 0]))) {
             // Square four times. Optimization note: this can be implemented
             // more efficiently than with generic Montgomery multiplication.
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
@@ -1112,7 +1112,7 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> x, slice<byte> e, �
 
             // Select x^k in constant time from the table.
             nuint k = (nuint)((byte)((b.Rsh((int64)(j))) & 0b1111));
-            foreach (var i in range(table)) {
+            foreach (var i in range(len(table))) {
                 tmp.assign(ctEq(k, (nuint)(i + 1)), table[i]);
             }
 

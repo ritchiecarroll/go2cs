@@ -49,7 +49,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
             // is the largest of the values unsafe.Alignof(x.f) for each
             // field f of x, but at least 1."
             var max = (int64)1;
-            foreach (var (_, f) in t.fields) {
+            foreach (var (_, f) in range(t.fields)) {
                 var aΔ1 = Ꮡs.Alignof(f.typ); if (aΔ1 > max) {
                     max = aΔ1;
                 }
@@ -101,7 +101,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
 internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
-    foreach (var (i, f) in fields) {
+    foreach (var (i, f) in range(fields)) {
         if (offs < 0) {
             // all remaining offsets are too large
             offsets[i] = -1;

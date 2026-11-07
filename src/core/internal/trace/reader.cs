@@ -306,7 +306,7 @@ internal static (ΔEvent, error) installGen(this ref Reader r, ж<generation> �
     r.cpuSamples = r.gen.cpuSamples;
 
     // Reset frontier.
-    foreach (var (_, vᴛ1) in r.gen.batchMs) {
+    foreach (var (_, vᴛ1) in range(r.gen.batchMs)) {
         ref var m = ref heap(new ThreadID(), out var Ꮡm);
         m = vᴛ1;
 
@@ -330,10 +330,10 @@ internal static (ΔEvent, error) installGen(this ref Reader r, ж<generation> �
 
 internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
-    foreach (var (_, bc) in frontier) {
+    foreach (var (_, bc) in range(frontier)) {
         var spec = tracev2.Specs()[bc.ev.typ];
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "M %d [%s time=%d"u8, bc.m, spec.Name, bc.ev.time);
-        foreach (var (i, arg) in spec.Args[1..]) {
+        foreach (var (i, arg) in range(spec.Args[1..])) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " %s=%d"u8, arg, bc.ev.args[i]);
         }
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "]\n"u8);

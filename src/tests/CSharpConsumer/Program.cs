@@ -182,14 +182,14 @@ static class Program
         // 8. Slices.
         slice<@string> words = strings.Fields("  the quick  brown fox ");
         var lengths = new StringBuilder();
-        foreach (var (i, w) in words)       // Go: for i, w := range words
+        foreach (var (i, w) in range(words))    // Go: for i, w := range words
         {
             lengths.Append($"{i}:{len(w)} ");
         }
-        Check("8 foreach gives (index, value) pairs", lengths.ToString() == "0:3 1:5 2:5 3:3 ");
+        Check("8 range(s) gives (index, value) pairs", lengths.ToString() == "0:3 1:5 2:5 3:3 ");
         nint letters = 0;
-        foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
-        Check("8 (_, v) takes the values", letters == 16);
+        foreach (var w in words) letters += len(w);     // Go: for _, w := range words
+        Check("8 foreach gives the values", letters == 16);
         Check("8 LINQ sees a slice as its values", words.Count(w => len(w) == 5) == 2);
         List<@string> list = new(words);
         @string[] array = words.ToArray();

@@ -68,7 +68,7 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
     ref var s = ref Ꮡs.DerefOrNull();
 
     var descendents = slice<ж<UserTaskSummary>>([Ꮡs]);
-    foreach (var (_, child) in s.Children) {
+    foreach (var (_, child) in range(s.Children)) {
         descendents = builtin.appendꓸꓸꓸ(descendents, child.Descendents());
     }
     return descendents;
@@ -227,7 +227,7 @@ internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔE
     // This may happen e.g. if the first GC is triggered within a region,
     // starting the GC worker goroutines.
     if (!IsSystemGoroutine(g.Name)) {
-        foreach (var (_, s) in g.activeRegions) {
+        foreach (var (_, s) in range(g.activeRegions)) {
             s.End = trigger;
             s.GoroutineExecStats = finalStat.sub(s.GoroutineExecStats);
             g.Regions = builtin.append(g.Regions, s);
@@ -379,7 +379,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
                 var creatorG = s.gs[ev.Goroutine()]; if (creatorG != nil && len(creatorG.activeRegions) > 0) {
                     var regions = creatorG.activeRegions;
                     var sΔ8 = regions[len(regions) - 1];
-                    g.activeRegions = slice<ж<UserRegionSummary>>([Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: ev))]);
+                    g.activeRegions = [Ꮡ(new UserRegionSummary(TaskID: sΔ8.TaskID, Start: ev))];
                 }
                 s.gs[g.ID] = g;
                 break;
@@ -687,7 +687,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
     var unblockEdgesᴷ = new stackAppend<RelatedGoroutinesV2_unblockEdge>();
 
     slice<RelatedGoroutinesV2_unblockEdge> unblockEdges = default;
-    foreach (var (_, vᴛ1) in events) {
+    foreach (var (_, vᴛ1) in range(events)) {
         var ev = vᴛ1.ΔClone();
 
         if (ev.Goroutine() == NoGoroutine) {
@@ -720,7 +720,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
         foreach (var (g, _) in gmap) {
             gmap1[g] = new EmptyStruct();
         }
-        foreach (var (_, edge) in unblockEdges) {
+        foreach (var (_, edge) in range(unblockEdges)) {
             var (_, ok) = gmap[edge.operand, ꟷ]; if (ok) {
                 gmap1[edge.@operator] = new EmptyStruct();
             }

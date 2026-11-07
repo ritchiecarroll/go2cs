@@ -31,7 +31,7 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     }
     slice<Interface> ift = default;
 loop:
-    foreach (var (_, vᴛ1) in msgs) {
+    foreach (var (_, vᴛ1) in range(msgs)) {
         ref var m = ref heap(new syscall.NetlinkMessage(), out var Ꮡm);
         m = vᴛ1;
 
@@ -70,7 +70,7 @@ internal static UntypedInt sysARPHardwareGREIPv6 => 823;  // any over GRE over I
 
 internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.NetlinkRouteAttr> attrs) {
     var ifi = Ꮡ(new Interface(Index: (nint)ifim.Index, Flags: linkFlags(ifim.Flags)));
-    foreach (var (_, a) in attrs) {
+    foreach (var (_, a) in range(attrs)) {
         switch (a.Attr.Type) {
         case var ᴛ when ᴛ == syscall.IFLA_ADDRESS: {
             // We never return any /32 or /128 IP address
@@ -94,7 +94,7 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
                 break;
             }}
             bool nonzero = default;
-            foreach (var (_, b) in a.Value) {
+            foreach (var (_, b) in range(a.Value)) {
                 if (b != 0) {
                     nonzero = true;
                     break;
@@ -165,7 +165,7 @@ internal static (slice<ΔAddr>, error) addrTable(ж<Interface> Ꮡifi, slice<sys
 
     slice<ΔAddr> ifat = default;
 loop:
-    foreach (var (_, vᴛ1) in msgs) {
+    foreach (var (_, vᴛ1) in range(msgs)) {
         ref var m = ref heap(new syscall.NetlinkMessage(), out var Ꮡm);
         m = vᴛ1;
 
@@ -200,13 +200,13 @@ internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.Netlink
     // Seems like we need to make sure whether the IP interface
     // stack consists of IP point-to-point numbered or unnumbered
     // addressing.
-    foreach (var (_, a) in attrs) {
+    foreach (var (_, a) in range(attrs)) {
         if (a.Attr.Type == syscall.IFA_LOCAL) {
             ipPointToPoint = true;
             break;
         }
     }
-    foreach (var (_, a) in attrs) {
+    foreach (var (_, a) in range(attrs)) {
         if (ipPointToPoint && a.Attr.Type == syscall.IFA_ADDRESS) {
             continue;
         }

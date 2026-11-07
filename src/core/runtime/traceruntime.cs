@@ -718,8 +718,8 @@ internal static void traceThreadDestroy(ж<m> mp) {
     mp.of(m.Ꮡtrace).Ꮡwriting.Store(true);
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        foreach (var i in range(mp.Value.trace.buf)) {
-            foreach (var (exp, buf) in mp.Value.trace.buf[i].ΔRangeSnapshot()) {
+        foreach (var i in range(len(mp.Value.trace.buf))) {
+            foreach (var (exp, buf) in range(mp.Value.trace.buf[i].ΔRangeSnapshot())) {
                 if (buf != nil) {
                     // N.B. traceBufFlush accepts a generation, but it
                     // really just cares about gen%2.

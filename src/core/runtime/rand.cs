@@ -53,7 +53,7 @@ internal static void randinit() {
         // Check that at least the first two words of startupRand weren't
         // cleared by any libc initialization.
         !allZero(startupRand[..8]) && !allZero(startupRand[8..16])) {
-        foreach (var (i, c) in startupRand) {
+        foreach (var (i, c) in range(startupRand)) {
             seed.Value[i % 32] ^= (byte)(c);
         }
     } else {
@@ -118,7 +118,7 @@ internal static void readTimeRandom(slice<byte> r) {
 
 internal static bool allZero(slice<byte> b) {
     byte acc = default;
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         acc |= (byte)(x);
     }
     return acc == 0;
@@ -200,7 +200,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var i in range(seed)) {
+    foreach (var i in range(len(seed))) {
         seed[i] = bootstrapRand();
     }
     bootstrapRandReseed(); // erase key we just extracted

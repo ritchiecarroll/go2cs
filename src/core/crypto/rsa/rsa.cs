@@ -140,7 +140,7 @@ public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     if (len(priv.Primes) != len(xx.Primes)) {
         return false;
     }
-    foreach (var i in range(priv.Primes)) {
+    foreach (var i in range(len(priv.Primes))) {
         if (!bigIntEqual(priv.Primes[i], xx.Primes[i])) {
             return false;
         }
@@ -364,7 +364,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
                 E: (nint)e64
             ),
             D: D,
-            Primes: slice<ж<bigꓸInt>>([P, Q]),
+            Primes: [P, Q],
             Precomputed: new PrecomputedValues(
                 Dp: Dp,
                 Dq: Dq,
@@ -520,7 +520,7 @@ NextSetOfPrimes:
         }
 
         // Make sure that primes is pairwise unequal.
-        foreach (var (i, prime) in primes) {
+        foreach (var (i, prime) in range(primes)) {
             for (nint j = 0; j < i; j++) {
                 if (prime.Cmp(primes[j]) == 0) {
                     goto continue_NextSetOfPrimes;
@@ -531,7 +531,7 @@ NextSetOfPrimes:
         var n = @new<bigꓸInt>().Set(bigOne);
         var totient = @new<bigꓸInt>().Set(bigOne);
         var pminus1 = @new<bigꓸInt>();
-        foreach (var (_, prime) in primes) {
+        foreach (var (_, prime) in range(primes)) {
             n.Mul(n, prime);
             pminus1.Sub(prime, bigOne);
             totient.Mul(totient, pminus1);
@@ -674,7 +674,7 @@ internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey 
     }
 
     // Ensure the Mod and ModInverse calls below don't panic.
-    foreach (var (_, prime) in priv.Primes) {
+    foreach (var (_, prime) in range(priv.Primes)) {
         if (prime == nil) {
             return (precomputed, errors.New(cryptoRsaPrimeFactorIsˢ));
         }

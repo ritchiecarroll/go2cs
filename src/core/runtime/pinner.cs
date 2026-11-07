@@ -54,7 +54,7 @@ internal static void unpin(this ж<pinner> Ꮡp) {
     if (Ꮡp == nil || Δp.refs == nil) {
         return;
     }
-    foreach (var i in range(Δp.refs)) {
+    foreach (var i in range(len(Δp.refs))) {
         setPinned(Δp.refs[i], false);
     }
     // The following two lines make all pointers to references
@@ -261,7 +261,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
     // newPinnerBits guarantees that pinnerBits will be 8-byte aligned, so we
     // don't have to worry about edge cases, irrelevant bits will simply be
     // zero.
-    foreach (var (_, x) in @unsafe.Slice(Δp.of(pinnerBits.Ꮡx).Reinterpret<uint8, uint64>(), bytes / 8)) {
+    foreach (var (_, x) in range(@unsafe.Slice(Δp.of(pinnerBits.Ꮡx).Reinterpret<uint8, uint64>(), bytes / 8))) {
         if (x != 0) {
             hasPins = true;
             break;

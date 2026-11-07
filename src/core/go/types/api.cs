@@ -451,7 +451,7 @@ partial struct Initializer {
 
 public static @string String(this ref Initializer init) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (i, lhs) in init.Lhs) {
+    foreach (var (i, lhs) in range(init.Lhs)) {
         if (i > 0) {
             buf.WriteString(", ");
         }

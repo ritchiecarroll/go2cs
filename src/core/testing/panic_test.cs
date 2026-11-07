@@ -186,7 +186,7 @@ ran outer cleanup
 """u8.Raw()
     )
     ]);
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestPanic_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -307,7 +307,7 @@ panic: die
         )
     ]);
 
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)), tc.flags.ꓸꓸꓸ);
         cmd.Env = append(Δos.Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
         var (b, _) = cmd.CombinedOutput();

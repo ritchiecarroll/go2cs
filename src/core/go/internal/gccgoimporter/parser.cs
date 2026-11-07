@@ -567,7 +567,7 @@ internal static void update(this ref parser p, typesꓸType t, slice<any> nlist)
     if (t == nil) {
         p.errorf("internal error: update(%v) invoked on nil", (any)(nlist));
     }
-    foreach (var (_, n) in nlist) {
+    foreach (var (_, n) in range(nlist)) {
         switch (n.type()) {
         case nint nΔ1: {
             if (AreEqual(p.typeList[nΔ1], t)) {
@@ -1232,9 +1232,9 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> pkg) {
         }
         @string allTypeData = sb.String();
 
-        p.typeData = slice<@string>([""]); // type 0, unused
+        p.typeData = [""]; // type 0, unused
         typeOffsets = move2heap(typeOffsetsᴷ, typeOffsets);
-        foreach (var (_, to) in typeOffsets) {
+        foreach (var (_, to) in range(typeOffsets)) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }
 
@@ -1482,14 +1482,14 @@ internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) {
     while (p.tok != scanner.EOF) {
         Ꮡp.parseDirective();
     }
-    foreach (var (_, f) in p.fixups) {
+    foreach (var (_, f) in range(p.fixups)) {
         if (f.target.Underlying() == nil) {
             p.errorf("internal error: fixup can't be applied, loop required");
         }
         f.toUpdate.SetUnderlying(f.target.Underlying());
     }
     p.fixups = default;
-    foreach (var (_, typ) in p.typeList) {
+    foreach (var (_, typ) in range(p.typeList)) {
         var (it, ok) = typ._<ж<types.Interface>>(ᐧ); if (ok) {
             it.Complete();
         }

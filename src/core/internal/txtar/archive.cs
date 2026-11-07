@@ -60,7 +60,7 @@ public static slice<byte> Format(ж<Archive> Ꮡa) {
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.Write(fixNL(a.Comment));
-    foreach (var (_, f) in a.Files) {
+    foreach (var (_, f) in range(a.Files)) {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "-- %s --\n"u8, f.Name);
         buf.Write(fixNL(f.Data));
     }

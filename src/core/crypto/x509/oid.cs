@@ -36,7 +36,7 @@ internal static (ΔOID, bool) newOIDFromDER(slice<byte> der) {
     }
 
     nint start = 0;
-    foreach (var (i, v) in der) {
+    foreach (var (i, v) in range(der)) {
         // ITU-T X.690, section 8.19.2:
         // The subidentifier shall be encoded in the fewest possible octets,
         // that is, the leading octet of the subidentifier shall not have the value 0x80.
@@ -58,13 +58,13 @@ public static (ΔOID, error) OIDFromInts(slice<uint64> oid) {
     }
 
     nint length = base128IntLength(oid[0] * 40 + oid[1]);
-    foreach (var (_, v) in oid[2..]) {
+    foreach (var (_, v) in range(oid[2..])) {
         length += base128IntLength(v);
     }
 
     var der = new slice<byte>(0, length);
     der = appendBase128Int(der, oid[0] * 40 + oid[1]);
-    foreach (var (_, v) in oid[2..]) {
+    foreach (var (_, v) in range(oid[2..])) {
         der = appendBase128Int(der, v);
     }
     return (new ΔOID(der), default);
@@ -306,7 +306,7 @@ public static @string String(this ΔOID oid) {
     slice<byte> numBuf = new slice<byte>(0, 21);
     ж<bigꓸInt> bigVal = default;
     bool overflow = default;
-    foreach (var (i, v) in oid.der) {
+    foreach (var (i, v) in range(oid.der)) {
         var curVal = (byte)(v & 0x7F);
         var valEnd = (byte)(v & 0x80) == 0;
         if (valEnd) {
@@ -368,7 +368,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
 
     nint val = 0;
 
-    foreach (var (_, v) in oid.der) {
+    foreach (var (_, v) in range(oid.der)) {
         if (val > maxValSafeShift) {
             return (default, false);
         }
@@ -405,7 +405,7 @@ public static (ΔOID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
     var uint64OIDᴷ = new stackAppend<uint64>();
 
     var uint64OID = new slice<uint64>(0, builtin.len(asn1OID));
-    foreach (var (_, component) in asn1OID) {
+    foreach (var (_, component) in range<nint>(asn1OID)) {
         if (component < 0) {
             return (new ΔOID(), errors.New(x509OidComponentsMustBeˢ));
         }

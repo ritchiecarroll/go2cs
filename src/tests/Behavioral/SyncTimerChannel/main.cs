@@ -90,14 +90,14 @@ internal static void Main() {
     (nint, nint) stopRound(bool reset) {
         var start = time.Now();
         var timers = new slice<ж<time.Timer>>(batch);
-        foreach (var n in range(timers)) {
+        foreach (var n in range(len(timers))) {
             timers[n] = time.NewTimer(armAt - time.Since(start));
         }
         time.Sleep(armAt - time.Since(start));
 
         nint pending = 0;
         nint stale = 0;
-        foreach (var (_, t) in timers) {
+        foreach (var (_, t) in range(timers)) {
             bool was = default;
             if (reset) {
                 was = t.Reset(time.ΔHour);
@@ -108,7 +108,7 @@ internal static void Main() {
                 pending++;
             }
         }
-        foreach (var (_, t) in timers) {
+        foreach (var (_, t) in range(timers)) {
             if (tryRecv(t.C)) {
                 stale++;
             }

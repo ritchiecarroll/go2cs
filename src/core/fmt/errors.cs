@@ -63,7 +63,7 @@ internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
             slices.Sort<slice<nint>, nint>(p.wrappedErrs);
         }
         slice<error> errs = default;
-        foreach (var (i, argNum) in p.wrappedErrs) {
+        foreach (var (i, argNum) in range(p.wrappedErrs)) {
             if (i > 0 && p.wrappedErrs[i - 1] == argNum) {
                 continue;
             }

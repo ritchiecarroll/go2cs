@@ -76,7 +76,7 @@ internal static partial void Main() {
     }), 60);
     fmt.Println(ᐸꟷ(@out));
 
-    makeHandler(slice<@string>(["g="]))(70);
+    makeHandler(["g="])(70);
     fmt.Println(ᐸꟷ(@out));
 
     var h = slice<@string>(["h="]);

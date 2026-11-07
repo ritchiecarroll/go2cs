@@ -209,7 +209,7 @@ internal static bool hasUpperCase(@string s) {
 
 // lowerASCIIBytes makes x ASCII lowercase in-place.
 internal static void lowerASCIIBytes(slice<byte> x) {
-    foreach (var (i, b) in x) {
+    foreach (var (i, b) in range(x)) {
         if ('A' <= b && b <= 'Z') {
             x[i] += (byte)((rune)'a' - (rune)'A');
         }

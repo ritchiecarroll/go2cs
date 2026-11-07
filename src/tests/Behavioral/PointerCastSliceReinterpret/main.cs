@@ -20,7 +20,7 @@ internal static unsafe void Main() {
     fmt.Println(len(b), b[0], b[3], b[4], b[7]);
 
     ref var rb = ref heap(new array<uint16>(8), out var Ꮡrb);
-    foreach (var i in range(rb)) {
+    foreach (var i in range(len(rb))) {
         rb[i] = (uint16)('a' + i);
     }
     nint n1 = 2;

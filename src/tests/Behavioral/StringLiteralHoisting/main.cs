@@ -22,7 +22,7 @@ internal static @string joinAll(params ꓸꓸꓸstring partsʗp) {
 
     @string @out = "";
 
-    foreach (var (_, p) in parts) {
+    foreach (var (_, p) in range(parts)) {
         @out = @out + p + "|"u8;
     }
 

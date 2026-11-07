@@ -467,7 +467,7 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
     }
     seen[s.Id] = true;
     @string str = s.Name + " = struct { "u8;
-    foreach (var (_, f) in s.Field) {
+    foreach (var (_, f) in range(s.Field)) {
         str += fmt.Sprintf("%s %s; "u8, f.Name, f.Id.gobType().safeString(seen));
     }
     str += "}"u8;

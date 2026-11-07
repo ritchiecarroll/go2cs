@@ -10,7 +10,7 @@ internal static void swap(this ref ints p, nint i, nint j) { ((p)[i], (p)[j]) = 
 internal static void set(this ref ints p, nint i, nint v) { (p)[i] = v; }
 
 internal static void show(ref ints p) {
-    foreach (var (i, x) in p) {
+    foreach (var (i, x) in range<nint>(p)) {
         if (i > 0) {
             fmt.Print(" ");
         }
@@ -30,7 +30,7 @@ internal static void swapAt(this ref cells c, nint i, nint j) { (c.at(i).Value, 
 internal static void setAt(this ref cells c, nint i, nint v) { c.at(i).Value = new cell(v); }
 
 internal static void showCells(ref cells c) {
-    foreach (var (i, x) in c) {
+    foreach (var (i, x) in range<cell>(c)) {
         if (i > 0) {
             fmt.Print(" ");
         }

@@ -36,7 +36,7 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
     ref var scan = ref Ꮡscan.DerefOrNull();
 
     scan.reset();
-    foreach (var (_, c) in data) {
+    foreach (var (_, c) in range(data)) {
         scan.bytes++;
         if (scan.step(Ꮡscan, c) == scanError) {
             return scan.err;

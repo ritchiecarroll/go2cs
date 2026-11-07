@@ -992,7 +992,7 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, pΔ1) in gcw.ptrBuf.slice(0, nptrs)) {
+    foreach (var (_, pΔ1) in range(gcw.ptrBuf.slice(0, nptrs))) {
         if (!tryDeferToSpanScan(pΔ1, Ꮡgcw)) {
             var (obj, span, objIndex) = findObject(pΔ1, 0, 0); if (obj != 0) {
                 greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
@@ -1076,7 +1076,7 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, vᴛ1) in gcw.ptrBuf.slice(0, nptrs)) {
+    foreach (var (_, vᴛ1) in range(gcw.ptrBuf.slice(0, nptrs))) {
         var Δp = vᴛ1;
 
         Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
@@ -1095,7 +1095,7 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
     ref var gcw = ref Ꮡgcw.DerefOrNull();
 
     nint nptrs = 0;
-    foreach (var (i, vᴛ1) in scans) {
+    foreach (var (i, vᴛ1) in range(scans)) {
         var bits = vᴛ1;
 
         if (i * (nint)(goarch.PtrSize * 8) > (nint)elems) {
@@ -1130,7 +1130,7 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, vᴛ2) in gcw.ptrBuf.slice(0, nptrs)) {
+    foreach (var (_, vᴛ2) in range(gcw.ptrBuf.slice(0, nptrs))) {
         var Δp = vᴛ2;
 
         Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
@@ -1203,7 +1203,7 @@ internal static void dumpScanStats() {
     uint64 spansSparseScanned = default;
     uint64 spanObjsSparseScanned = default;
     uint64 sparseObjsScanned = default;
-    foreach (var (_, stats) in memstats.lastScanStats.ΔRangeSnapshot()) {
+    foreach (var (_, stats) in range(memstats.lastScanStats.ΔRangeSnapshot())) {
         spansDenseScanned += stats.spansDenseScanned;
         spanObjsDenseScanned += stats.spanObjsDenseScanned;
         spansSparseScanned += stats.spansSparseScanned;
@@ -1214,7 +1214,7 @@ internal static void dumpScanStats() {
     var totalSpans = spansSparseScanned + spansDenseScanned;
     print((@string)"scan: total ", sparseObjsScanned, (@string)"+", spanObjsSparseScanned, (@string)"+", spanObjsDenseScanned, (@string)"=", totalObjs, (@string)" objs");
     print((@string)", ", spansSparseScanned, (@string)"+", spansDenseScanned, (@string)"=", totalSpans, (@string)" spans\n");
-    foreach (var (i, stats) in memstats.lastScanStats.ΔRangeSnapshot()) {
+    foreach (var (i, stats) in range(memstats.lastScanStats.ΔRangeSnapshot())) {
         if (stats == (new sizeClassScanStats())) {
             continue;
         }
@@ -1233,7 +1233,7 @@ internal static void dumpScanStats() {
 internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
-    foreach (var i in range(w.stats)) {
+    foreach (var i in range(len(w.stats))) {
         dst[i].spansDenseScanned += w.stats[i].spansDenseScanned;
         dst[i].spanObjsDenseScanned += w.stats[i].spanObjsDenseScanned;
         dst[i].spansSparseScanned += w.stats[i].spansSparseScanned;

@@ -104,7 +104,7 @@ internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗ
 internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Comment>> list) {
     // len(list) > 0
     nint line = p.lineFor(list[0].Pos());
-    foreach (var (i, c) in list) {
+    foreach (var (i, c) in range(list)) {
         if (i > 0 && p.lineFor(list[i].Pos()) != line) {
             // not all comments on the same line
             return true;
@@ -155,7 +155,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 
         nint size = 0;
         while (p.commentBefore(next)) {
-            foreach (var (_, c) in p.comment.List) {
+            foreach (var (_, c) in range(p.comment.List)) {
                 size += len(c.Text);
             }
             p.nextComment();
@@ -373,7 +373,7 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
         if (Ꮡprev == nil) {
             // first comment of a comment group
             nint j = 0;
-            foreach (var (i, ch) in p.wsbuf) {
+            foreach (var (i, ch) in range(p.wsbuf)) {
                 switch (ch) {
                 case var ᴛ when ᴛ == blank: {
                     // ignore any blanks before a comment
@@ -414,7 +414,7 @@ internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos
         // separate with at least one line break
         var droppedLinebreak = false;
         nint j = 0;
-        foreach (var (i, ch) in p.wsbuf) {
+        foreach (var (i, ch) in range(p.wsbuf)) {
             switch (ch) {
             case var ᴛ when ᴛ == blank || ᴛ == vtab: {
                 // ignore any horizontal whitespace before line breaks
@@ -546,7 +546,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     @string prefix = ""u8;
     var prefixSet = false;
     if (len(lines) > 2) {
-        foreach (var (i, line) in lines.slice(1, len(lines) - 1)) {
+        foreach (var (i, line) in range(lines.slice(1, len(lines) - 1))) {
             if (isBlank(line)) {
                 lines[1 + i] = ""u8; // range starts with lines[1]
             } else {
@@ -637,7 +637,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
     }
 
     // Remove the common prefix from all but the first and empty lines.
-    foreach (var (i, line) in lines) {
+    foreach (var (i, line) in range(lines)) {
         if (i > 0 && line != ""u8) {
             lines[i] = line.slice(len(prefix));
         }
@@ -689,7 +689,7 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
         // is the same independent of how many times formatting is
         // applied (was issue 1835).
         if (pos.IsValid() && pos.Column == 1 && p.indent > 0) {
-            foreach (var (i, line) in lines[1..]) {
+            foreach (var (i, line) in range(lines[1..])) {
                 lines[1 + i] = "   "u8 + line;
             }
         }
@@ -698,7 +698,7 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
 
         // write comment lines, separated by formfeed,
         // without a line break after the last line
-        foreach (var (i, line) in lines) {
+        foreach (var (i, line) in range(lines)) {
             if (i > 0) {
                 p.writeByte((byte)'\f', 1);
                 pos = p.pos;
@@ -722,7 +722,7 @@ internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref 
     bool wroteNewline = default;
     bool droppedFF = default;
 
-    foreach (var (i, ch) in p.wsbuf) {
+    foreach (var (i, ch) in range(p.wsbuf)) {
         switch (ch) {
         case var ᴛ when ᴛ == blank || ᴛ == vtab: {
             // ignore trailing whitespace
@@ -761,7 +761,7 @@ internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref 
 
 // containsLinebreak reports whether the whitespace buffer contains any line breaks.
 internal static bool containsLinebreak(this ref printer p) {
-    foreach (var (_, ch) in p.wsbuf) {
+    foreach (var (_, ch) in range(p.wsbuf)) {
         if (ch == newline || ch == formfeed) {
             return true;
         }
@@ -805,7 +805,7 @@ internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<
                 return p.writeCommentSuffix(false);
             }
         }
-        foreach (var (_, c) in list) {
+        foreach (var (_, c) in range(list)) {
             p.writeCommentPrefix(p.posFor(c.Pos()), next, last, tok);
             Ꮡp.writeComment(c);
             last = c;
@@ -967,7 +967,7 @@ internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var p = ref Ꮡp.DerefOrNull();
 
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         // information about the current arg
         @string data = default;
         bool isLit = default;
@@ -1268,7 +1268,7 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
     case slice<ast.Stmt> n: {
         // A labeled statement will un-indent to position the label.
         // Set p.indent to 1 so we don't get indent "underflow".
-        foreach (var (_, s) in n) {
+        foreach (var (_, s) in range(n)) {
             var (_, ok) = s._<ж<ast.LabeledStmt>>(ᐧ); if (ok) {
                 p.indent = 1;
             }
@@ -1339,7 +1339,7 @@ internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) 
     //	data[m:n] is unwritten
     nint m = 0;
     byte b = default;
-    foreach (var (iᴛ1, vᴛ1) in data) {
+    foreach (var (iᴛ1, vᴛ1) in range(data)) {
         nΔ1 = iᴛ1;
         b = vᴛ1;
 

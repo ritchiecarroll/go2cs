@@ -288,7 +288,7 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
     }
     nint j = 0;
     var p = new Δcolor.Palette(n);
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = new colorꓸRGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
         j += 3;
     }
@@ -467,7 +467,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
 
         // Check that the color indexes are inside the palette.
         if (len(m.Palette) < 256) {
-            foreach (var (_, pixel) in m.Pix) {
+            foreach (var (_, pixel) in range(m.Pix)) {
                 if ((nint)pixel >= len(m.Palette)) {
                     return errBadPixel;
                 }
@@ -551,12 +551,12 @@ partial struct interlaceScan {
 }
 
 // interlacing represents the set of scans in an interlaced GIF image.
-internal static slice<interlaceScan> interlacing = slice<interlaceScan>([
+internal static slice<interlaceScan> interlacing = [
     new(8, 0), // Group 1 : Every 8th. row, starting with row 0.
     new(8, 4), // Group 2 : Every 8th. row, starting with row 4.
     new(4, 2), // Group 3 : Every 4th. row, starting with row 2.
     new(2, 1)  // Group 4 : Every 2nd. row, starting with row 1.
-]);
+];
 
 // uninterlace rearranges the pixels in m to account for interlaced input.
 internal static void uninterlace(ж<image.Paletted> Ꮡm) {
@@ -567,7 +567,7 @@ internal static void uninterlace(ж<image.Paletted> Ꮡm) {
     nint dy = m.Bounds().Dy();
     nPix = new slice<uint8>(dx * dy);
     nint offset = 0; // steps through the input by sequential scan lines.
-    foreach (var (_, pass) in interlacing) {
+    foreach (var (_, pass) in range(interlacing)) {
         nint nOffset = pass.start * dx; // steps through the output as defined by pass.
         for (nint y = pass.start; y < dy; y += pass.skip) {
             copy(nPix.slice(nOffset, nOffset + dx), m.Pix.slice(offset, offset + dx));

@@ -140,7 +140,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
         return (x, width, err);
     }
     // Could check that the high byte is zero but it's not worth it.
-    foreach (var (_, bΔ1) in buf.slice(0, width)) {
+    foreach (var (_, bΔ1) in range(buf.slice(0, width))) {
         x = x << 8 | (uint64)bΔ1;
     }
     width++; // +1 for length byte
@@ -169,7 +169,7 @@ internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
     }
     // Don't need to check error; it's safe to loop regardless.
     // Could check that the high byte is zero but it's not worth it.
-    foreach (var (_, bΔ1) in buf.slice(0, n)) {
+    foreach (var (_, bΔ1) in range(buf.slice(0, n))) {
         x = x << 8 | (uint64)bΔ1;
     }
     state.b.Drop(n);

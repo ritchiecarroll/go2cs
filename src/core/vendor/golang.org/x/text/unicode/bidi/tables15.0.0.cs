@@ -10,9 +10,9 @@ private static readonly @string UnicodeVersionᵇ = "15.0.0"u8;
 
 // xorMasks contains masks to be xor-ed with brackets to get the reverse
 // version.
-internal static slice<int32> xorMasks = slice<int32>([ // 8 elements
+internal static slice<int32> xorMasks = [ // 8 elements
     0, 1, 6, 7, 3, 15, 29, 63
-]); // Size: 56 bytes
+]; // Size: 56 bytes
 
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not

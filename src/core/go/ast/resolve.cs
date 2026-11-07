@@ -126,7 +126,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
         // build file scope by processing all imports
         var importErrors = false;
         var fileScope = NewScope(pkgScope);
-        foreach (var (_, spec) in @file.Imports) {
+        foreach (var (_, spec) in range(@file.Imports)) {
             if (importer == nil) {
                 importErrors = true;
                 continue;
@@ -175,7 +175,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
             pkgScope.Outer = default;
         }
         nint i = 0;
-        foreach (var (_, ident) in @file.Unresolved) {
+        foreach (var (_, ident) in range(@file.Unresolved)) {
             if (!resolve(fileScope, ref (ident).DerefOrNull())) {
                 p.errorf(ident.Pos(), "undeclared name: %s", ident.Name);
                 @file.Unresolved[i] = ident;

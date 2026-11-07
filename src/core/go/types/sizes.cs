@@ -84,7 +84,7 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
             // is the largest of the values unsafe.Alignof(x.f) for each
             // field f of x, but at least 1."
             var max = (int64)1;
-            foreach (var (_, f) in t.fields) {
+            foreach (var (_, f) in range(t.fields)) {
                 var aΔ1 = Ꮡs.Alignof(f.typ); if (aΔ1 > max) {
                     max = aΔ1;
                 }
@@ -145,7 +145,7 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
 public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
-    foreach (var (i, f) in fields) {
+    foreach (var (i, f) in range(fields)) {
         if (offs < 0) {
             // all remaining offsets are too large
             offsets[i] = -1;
@@ -348,7 +348,7 @@ internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
 // the result is negative.
 internal static int64 offsetof(this ref Config conf, ΔType T, slice<nint> index) {
     int64 offs = default;
-    foreach (var (_, i) in index) {
+    foreach (var (_, i) in range(index)) {
         var s = T.Underlying()._<ж<Struct>>();
         var d = conf.offsetsof(s)[i];
         if (d < 0) {

@@ -155,10 +155,16 @@ func main() {
 		t.Errorf("adoption must not duplicate the package-level declaration, got %d:\n%s", got, mainCs)
 	}
 
-	// ...and the local composite literal builds the adopted package-level struct (the two
-	// package vars plus the local = three constructions, each `slice<implementsTestsᴛ1>([…])`).
-	if got := strings.Count(mainCs, "slice<implementsTests"+TempVarMarker+"1>(["); got != 3 {
+	// ...and the local composite literal builds the adopted package-level struct: the local's
+	// `slice<implementsTestsᴛ1>([…])`, beside the two package vars, whose typed fields take a bare `[…]`.
+	if got := strings.Count(mainCs, "slice<implementsTests"+TempVarMarker+"1>(["); got != 1 {
 		t.Errorf("the function-local composite must construct the adopted package-level struct, found %d constructions:\n%s", got, mainCs)
+	}
+
+	for _, field := range []string{"implementsTests", "assignableTests"} {
+		if want := "slice<implementsTests" + TempVarMarker + "1> " + field + " = ["; !strings.Contains(mainCs, want) {
+			t.Errorf("want %q: a package var of the lifted type builds its slice from a bare collection expression:\n%s", want, mainCs)
+		}
 	}
 }
 

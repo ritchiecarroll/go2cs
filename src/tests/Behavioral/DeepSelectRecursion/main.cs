@@ -28,7 +28,7 @@ internal static void Main() {
     f(100);
 
     nint sum = 0;
-    foreach (var (_, v) in sink.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(sink.ΔRangeSnapshot())) {
         sum += v;
     }
 

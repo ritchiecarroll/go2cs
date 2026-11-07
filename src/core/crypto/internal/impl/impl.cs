@@ -49,7 +49,7 @@ public static slice<@string> Packages() {
 
     slice<@string> pkgs = default;
     var seen = new map<@string, bool>();
-    foreach (var (_, i) in allImplementations) {
+    foreach (var (_, i) in range(allImplementations)) {
         if (!seen[i.Package]) {
             pkgs = append(pkgsᴷ, pkgs, i.Package);
             seen[i.Package] = true;
@@ -66,7 +66,7 @@ public static slice<@string> List(@string pkg) {
     var namesᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> names = default;
-    foreach (var (_, i) in allImplementations) {
+    foreach (var (_, i) in range(allImplementations)) {
         if (i.Package == pkg) {
             names = append(namesᴷ, names, i.Name);
         }
@@ -76,7 +76,7 @@ public static slice<@string> List(@string pkg) {
 }
 
 internal static bool available(@string pkg, @string name) {
-    foreach (var (_, i) in allImplementations) {
+    foreach (var (_, i) in range(allImplementations)) {
         if (i.Package == pkg && i.Name == name) {
             return i.Available;
         }
@@ -89,7 +89,7 @@ internal static bool available(@string pkg, @string name) {
 // It returns whether the selected implementation is available.
 public static bool Select(@string pkg, @string name) {
     if (name == ""u8) {
-        foreach (var (_, i) in allImplementations) {
+        foreach (var (_, i) in range(allImplementations)) {
             if (i.Package == pkg) {
                 i.Toggle.Value = false;
             }
@@ -99,7 +99,7 @@ public static bool Select(@string pkg, @string name) {
     if (!available(pkg, name)) {
         return false;
     }
-    foreach (var (_, i) in allImplementations) {
+    foreach (var (_, i) in range(allImplementations)) {
         if (i.Package == pkg) {
             i.Toggle.Value = i.Name == name;
         }
@@ -108,7 +108,7 @@ public static bool Select(@string pkg, @string name) {
 }
 
 public static void Reset(@string pkg) {
-    foreach (var (_, i) in allImplementations) {
+    foreach (var (_, i) in range(allImplementations)) {
         if (i.Package == pkg) {
             i.Toggle.Value = i.Available;
             return;

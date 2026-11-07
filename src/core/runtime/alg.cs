@@ -263,7 +263,7 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
     }
     case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var (_, f) in s.Fields) {
+        foreach (var (_, f) in range(s.Fields)) {
             if (f.Name.IsBlank()) {
                 continue;
             }
@@ -434,7 +434,7 @@ internal static void alginit() {
         initAlgAES();
         return;
     }
-    foreach (var i in range(hashkey)) {
+    foreach (var i in range(len(hashkey))) {
         hashkey[i] = (uintptr)bootstrapRand();
     }
 }

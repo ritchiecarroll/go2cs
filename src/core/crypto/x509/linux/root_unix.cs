@@ -34,11 +34,11 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
 
     var files = certFiles;
     @string f = os.Getenv(certFileEnv); if (f != ""u8) {
-        files = slice<@string>([f]);
+        files = [f];
     }
 
     error firstErr = default;
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         var (data, err) = os.ReadFile(@file);
         if (err == nil) {
             roots.AppendCertsFromPEM(data);
@@ -58,7 +58,7 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
         dirs = strings.Split(d, ":");
     }
 
-    foreach (var (_, directory) in dirs) {
+    foreach (var (_, directory) in range(dirs)) {
         var (fis, err) = readUniqueDirectoryEntries(directory);
         if (err != nil) {
             if (firstErr == nil && !os.IsNotExist(err)) {
@@ -66,7 +66,7 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
             }
             continue;
         }
-        foreach (var (_, fi) in fis) {
+        foreach (var (_, fi) in range(fis)) {
             var (data, errΔ1) = os.ReadFile(directory + "/"u8 + fi.Name());
             if (errΔ1 == nil) {
                 roots.AppendCertsFromPEM(data);
@@ -89,7 +89,7 @@ internal static (slice<fs.DirEntry>, error) readUniqueDirectoryEntries(@string d
         return (default, err);
     }
     var uniq = files[..0];
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         if (!isSameDirSymlink(f, dir)) {
             uniq = append(uniq, f);
         }

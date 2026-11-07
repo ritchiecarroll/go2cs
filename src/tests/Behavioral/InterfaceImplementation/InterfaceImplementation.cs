@@ -44,7 +44,7 @@ internal static void Main() {
     Animal a = default;
     fmt.Printf("%T\n"u8, a);
 
-    foreach (var (_, aΔ1) in zoo.ΔRangeSnapshot()) {
+    foreach (var (_, aΔ1) in range(zoo.ΔRangeSnapshot())) {
         fmt.Println(aΔ1.Type(), "can", aΔ1.Swim());
     }
 
@@ -117,7 +117,7 @@ public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
 
     Animal a = default;
 
-    foreach (var (_, vᴛ1) in zoo.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(zoo.ΔRangeSnapshot())) {
         a = vᴛ1;
 
         fmt.Println(a.Type(), "can", a.Swim());

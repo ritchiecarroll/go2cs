@@ -101,7 +101,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
     } else {
         b.cap = b.cap.slice(0, ncap);
     }
-    foreach (var i in range(b.cap)) {
+    foreach (var i in range(len(b.cap))) {
         b.cap[i] = -1;
     }
 
@@ -110,7 +110,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
     } else {
         b.matchcap = b.matchcap.slice(0, ncap);
     }
-    foreach (var i in range(b.matchcap)) {
+    foreach (var i in range(len(b.matchcap))) {
         b.matchcap[i] = -1;
     }
 }

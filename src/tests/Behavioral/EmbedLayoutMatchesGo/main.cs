@@ -41,7 +41,7 @@ internal static void Main() {
     var v = o.Value;
     fmt.Println("ordered read:  ", v.a, v.b, v.c, /* unsafe.Sizeof(v) */ (uintptr)12, /* unsafe.Offsetof(v.c) */ (uintptr)8);
 
-    foreach (var i in range(buf)) {
+    foreach (var i in range(len(buf))) {
         buf[i] = 0;
     }
 

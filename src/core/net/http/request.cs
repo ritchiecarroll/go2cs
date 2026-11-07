@@ -420,7 +420,7 @@ public static slice<ж<ΔCookie>> Cookies(this ref Request r) {
 // or an empty slice if none matched.
 public static slice<ж<ΔCookie>> CookiesNamed(this ref Request r, @string name) {
     if (name == ""u8) {
-        return slice<ж<ΔCookie>>([]);
+        return [];
     }
     return readCookies(r.Header, name);
 }
@@ -436,7 +436,7 @@ public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
     if (name == ""u8) {
         return (default, ErrNoCookie);
     }
-    foreach (var (_, c) in readCookies(r.Header, name)) {
+    foreach (var (_, c) in range(readCookies(r.Header, name))) {
         return (c, default);
     }
     return (default, ErrNoCookie);
@@ -696,7 +696,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
             goto ᒐdone;
         }
         if (trace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(hostˢ, slice<@string>([host]));
+            trace.WroteHeaderField(hostˢ, [host]);
         }
 
         // Use the defaultUserAgent unless the Header contains one, which
@@ -713,7 +713,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
                 goto ᒐdone;
             }
             if (trace != nil && trace.WroteHeaderField != nil) {
-                trace.WroteHeaderField(userAgentˢ, slice<@string>([userAgent]));
+                trace.WroteHeaderField(userAgentˢ, [userAgent]);
             }
         }
 
@@ -1605,7 +1605,7 @@ internal static nint patIndex(this ref Request r, @string name) {
         return -1;
     }
     nint i = 0;
-    foreach (var (_, seg) in r.pat.segments) {
+    foreach (var (_, seg) in range(r.pat.segments)) {
         if (seg.wild && seg.s != ""u8) {
             if (name == seg.s) {
                 return i;

@@ -125,7 +125,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     array<nint> count = new(16); /* maxCodeLen */
     nint min = default;
     nint max = default;
-    foreach (var (_, n) in lengths) {
+    foreach (var (_, n) in range(lengths)) {
         if (n == 0) {
             continue;
         }
@@ -186,7 +186,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         }
     }
 
-    foreach (var (i, n) in lengths) {
+    foreach (var (i, n) in range(lengths)) {
         if (n == 0) {
             continue;
         }
@@ -230,7 +230,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         // Above we've sanity checked that we never overwrote
         // an existing entry. Here we additionally check that
         // we filled the tables completely.
-        foreach (var (i, chunk) in h.chunks.ΔRangeSnapshot()) {
+        foreach (var (i, chunk) in range(h.chunks.ΔRangeSnapshot())) {
             if (chunk == 0) {
                 // As an exception, in the degenerate
                 // single-code case, we allow odd
@@ -241,8 +241,8 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
                 throw panic("impossible: missing chunk");
             }
         }
-        foreach (var (_, linktab) in h.links) {
-            foreach (var (_, chunk) in linktab) {
+        foreach (var (_, linktab) in range(h.links)) {
+            foreach (var (_, chunk) in range(linktab)) {
                 if (chunk == 0) {
                     throw panic("impossible: missing chunk");
                 }

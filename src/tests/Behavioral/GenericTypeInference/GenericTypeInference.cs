@@ -30,7 +30,7 @@ public static S Scale<S, E>(S s, E c)
     where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IIncrementOperators<E>, IDecrementOperators<E>, IUnaryNegationOperators<E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, int, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     var r = make<S>(len(s));
-    foreach (var (i, v) in s) {
+    foreach (var (i, v) in range(s)) {
         r[i] = v * c;
     }
     return r;

@@ -30,7 +30,7 @@ internal static uint64 rangeSum(/*[4]*/ words w) {
     w = w.Clone();
 
     uint64 s = default;
-    foreach (var (_, e) in w.ΔRangeSnapshot()) {
+    foreach (var (_, e) in range(w.ΔRangeSnapshot())) {
         s += e;
     }
     return s;

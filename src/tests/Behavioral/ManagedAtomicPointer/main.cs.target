@@ -38,7 +38,7 @@ internal static void identity() {
     var table = slice<@unsafe.Pointer>([default, pa, pb]);
     nint same = 0;
     nint diff = 0;
-    foreach (var (_, p) in table) {
+    foreach (var (_, p) in range(table)) {
         @unsafe.Pointer k = p;
         if (k == p) {
             same++;

@@ -14,7 +14,7 @@ internal static void Main() {
 
     var r = Ꮡ(new Reader(Name: "go2cs"));
 
-    foreach (var (_, read) in readers) {
+    foreach (var (_, read) in range(readers)) {
         var (s, _) = read(r, (byte)',');
         fmt.Println(s);
     }

@@ -69,7 +69,7 @@ internal static ж<TypeParamList> bindTParams(slice<ж<TypeParam>> list) {
     if (len(list) == 0) {
         return default;
     }
-    foreach (var (i, typ) in list) {
+    foreach (var (i, typ) in range(list)) {
         if (typ.index >= 0) {
             throw panic("type parameter bound more than once");
         }

@@ -189,7 +189,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
         break;
     }
     case ж<Struct> t: {
-        foreach (var (_, f) in t.fields) {
+        foreach (var (_, f) in range(t.fields)) {
             if (comparableType(f.typ, dynamic, seen) != nil) {
                 return typeErrorf("struct containing %s cannot be compared", f.typ);
             }
@@ -324,7 +324,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         // name. Lower-case field names from different packages are always different.
         if (y._<ж<Struct>>(out var yΔ4)) {
             if (xΔ1.NumFields() == yΔ4.NumFields()) {
-                foreach (var (i, f) in xΔ1.fields) {
+                foreach (var (i, f) in range(xΔ1.fields)) {
                     var g = yΔ4.fields[i];
                     if (f.embedded != g.embedded || !c.ignoreTags && xΔ1.Tag(i) != yΔ4.Tag(i) || !f.of(Var.Ꮡobject).sameId(g.pkg, g.name, false) || !c.identical(f.typ, g.typ, Ꮡp)) {
                         return false;
@@ -348,7 +348,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         if (y._<ж<Tuple>>(out var yΔ6)) {
             if (xΔ1.Len() == yΔ6.Len()) {
                 if (xΔ1 != nil) {
-                    foreach (var (i, v) in xΔ1.vars) {
+                    foreach (var (i, v) in range(xΔ1.vars)) {
                         var w = yΔ6.vars[i];
                         if (!c.identical(v.typ, w.typ, Ꮡp)) {
                             return false;
@@ -388,7 +388,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ytparams = yΔ7.TypeParams().list();
 
             slice<ΔType> targs = default;
-            foreach (var i in range(xtparams)) {
+            foreach (var i in range(len(xtparams))) {
                 targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
@@ -397,7 +397,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ctxt = NewContext();    // need a non-nil Context for the substitution below
 
             // Constraints must be pair-wise identical, after substitution.
-            foreach (var (i, xtparam) in xtparams) {
+            foreach (var (i, xtparam) in range(xtparams)) {
                 var ybound = check.subst(nopos, ytparams[i].bound, smap, nil, ctxt);
                 if (!c.identical(xtparam.bound, ybound, Ꮡp)) {
                     return false;
@@ -474,7 +474,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
                     assertSortedMethods(a);
                     assertSortedMethods(b);
                 }
-                foreach (var (i, f) in a) {
+                foreach (var (i, f) in range(a)) {
                     var g = b[i];
                     if (f.of(Func.Ꮡobject).Id() != g.of(Func.Ꮡobject).Id() || !c.identical(f.typ, g.typ, q)) {
                         return false;
@@ -513,7 +513,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             if (len(xargs) != len(yargs)) {
                 return false;
             }
-            foreach (var (i, xarg) in xargs) {
+            foreach (var (i, xarg) in range(xargs)) {
                 if (!Identical(xarg, yargs[i])) {
                     return false;
                 }

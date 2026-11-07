@@ -18,7 +18,7 @@ partial struct substMap /*map[ж<TypeParam>, ΔType]*/;
 internal static substMap makeSubstMap(slice<ж<TypeParam>> tpars, slice<ΔType> targs) {
     assert(len(tpars) == len(targs));
     var proj = new substMap(len(tpars));
-    foreach (var (i, tpar) in tpars) {
+    foreach (var (i, tpar) in range(tpars)) {
         proj[tpar] = targs[i];
     }
     return proj;
@@ -29,7 +29,7 @@ internal static substMap makeSubstMap(slice<ж<TypeParam>> tpars, slice<ΔType> 
 internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeParam>> to) {
     assert(len(from) == len(to));
     var proj = new substMap(len(from));
-    foreach (var (i, tpar) in from) {
+    foreach (var (i, tpar) in range(from)) {
         proj[tpar] = new TypeParamжΔType(to[i]);
     }
     return proj;
@@ -350,7 +350,7 @@ internal static ж<Tuple> tuple(this ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
 internal static slice<T> /*out*/ substList<T>(slice<T> @in, Func<T, T> subst) {
     slice<T> @out = default;
 
-    foreach (var (i, t) in @in) {
+    foreach (var (i, t) in range(@in)) {
         var u = subst(t); if (!AreEqual(u, t)) {
             if (@out == nil) {
                 // lazily allocate a new slice on first substitution
@@ -403,7 +403,7 @@ internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Fun
     bool copied = default;
 
     @out = @in;
-    foreach (var (i, method) in @in) {
+    foreach (var (i, method) in range(@in)) {
         var sig = method.Signature();
         if (sig.recv != nil && AreEqual(sig.recv.of(Var.Ꮡobject).Type(), old)) {
             if (!copied) {

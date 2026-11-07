@@ -503,7 +503,7 @@ public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var buf = new slice<byte>(n);
     n = 0;
     // Copy full pieces and fragment in.
-    foreach (var i in range(full)) {
+    foreach (var i in range(len(full))) {
         n += copy(buf.slice(n), full[i]);
     }
     copy(buf.slice(n), frag);
@@ -523,7 +523,7 @@ public static (@string, error) ReadString(this ref Reader b, byte delim) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.Grow(n);
     // Copy full pieces and fragment in.
-    foreach (var (_, fb) in full) {
+    foreach (var (_, fb) in range(full)) {
         Ꮡbuf.Write(fb);
     }
     Ꮡbuf.Write(frag);

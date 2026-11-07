@@ -172,7 +172,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
         x = new machoExeжexe(Ꮡ(new machoExe(f.Arches[0].File)));
         break;
     }
-    case {} when bytes.HasPrefix(ident, slice<byte>([0x01, 0xDF])) || bytes.HasPrefix(ident, slice<byte>([0x01, 0xF7])): {
+    case {} when bytes.HasPrefix(ident, [0x01, 0xDF]) || bytes.HasPrefix(ident, [0x01, 0xF7]): {
         var (f, errΔ7) = xcoff.NewFile(r);
         if (errΔ7 != nil) {
             return ("", "", errUnrecognizedFormat);
@@ -473,7 +473,7 @@ partial struct elfExe {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) {
-    foreach (var (_, prog) in x.f.Progs) {
+    foreach (var (_, prog) in range(x.f.Progs)) {
         if (prog.Vaddr <= addr && addr <= prog.Vaddr + prog.Filesz - 1) {
             var remaining = prog.Vaddr + prog.Filesz - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new elf_ProgжReaderAt(prog), (int64)(addr - prog.Vaddr), (int64)remaining)), default);
@@ -483,12 +483,12 @@ internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) 
 }
 
 internal static (uint64, uint64) DataStart(this ref elfExe x) {
-    foreach (var (_, s) in x.f.Sections) {
+    foreach (var (_, s) in range(x.f.Sections)) {
         if (s.Name == ".go.buildinfo"u8) {
             return (s.Addr, s.Size);
         }
     }
-    foreach (var (_, p) in x.f.Progs) {
+    foreach (var (_, p) in range(x.f.Progs)) {
         if (p.Type == elf.PT_LOAD && (elf.ProgFlag)(p.Flags & ((elf.ProgFlag)(elf.PF_X | elf.PF_W))) == elf.PF_W) {
             return (p.Vaddr, p.Memsz);
         }
@@ -514,7 +514,7 @@ internal static uint64 imageBase(this ref peExe x) {
 
 internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
     addr -= x.imageBase();
-    foreach (var (_, sect) in x.f.Sections) {
+    foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.VirtualAddress <= addr && addr <= (uint64)(sect.VirtualAddress + sect.Size - 1)) {
             var remaining = (uint64)(sect.VirtualAddress + sect.Size) - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new pe_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)sect.VirtualAddress), (int64)remaining)), default);
@@ -534,7 +534,7 @@ internal static (uint64, uint64) DataStart(this ref peExe x) {
     UntypedInt IMAGE_SCN_MEM_DISCARDABLE = 0x2000000;
     UntypedInt IMAGE_SCN_LNK_NRELOC_OVFL = 0x1000000;
     const uint32 IMAGE_SCN_ALIGN_32BYTES = 0x600000;
-    foreach (var (_, sect) in x.f.Sections) {
+    foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress != 0 && sect.Size != 0 && (uint32)(sect.Characteristics & ~IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {
             return ((uint64)sect.VirtualAddress + x.imageBase(), (uint64)sect.VirtualSize);
         }
@@ -548,7 +548,7 @@ partial struct machoExe {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) {
-    foreach (var (_, load) in x.f.Loads) {
+    foreach (var (_, load) in range(x.f.Loads)) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (!ok) {
             continue;
@@ -566,14 +566,14 @@ internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr
 
 internal static (uint64, uint64) DataStart(this ref machoExe x) {
     // Look for section named "__go_buildinfo".
-    foreach (var (_, sec) in x.f.Sections) {
+    foreach (var (_, sec) in range(x.f.Sections)) {
         if (sec.Name == "__go_buildinfo"u8) {
             return (sec.Addr, sec.Size);
         }
     }
     // Try the first non-empty writable segment.
     const uint32 RW = 3;
-    foreach (var (_, load) in x.f.Loads) {
+    foreach (var (_, load) in range(x.f.Loads)) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (ok && seg.Addr != 0 && seg.Filesz != 0 && seg.Prot == RW && seg.Maxprot == RW) {
             return (seg.Addr, seg.Memsz);
@@ -592,7 +592,7 @@ internal static ref readonly @string addressNotMappedˢ => ref addressNotMapped�
 private static readonly @string addressNotMappedˢᵇ = "address not mapped"u8;
 
 internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) {
-    foreach (var (_, sect) in x.f.Sections) {
+    foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress <= addr && addr <= sect.VirtualAddress + sect.Size - 1) {
             var remaining = sect.VirtualAddress + sect.Size - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_ΔSectionжReaderAt(sect), (int64)(addr - sect.VirtualAddress), (int64)remaining)), default);
@@ -625,7 +625,7 @@ internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
 }
 
 internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) {
-    foreach (var (_, sect) in x.f.Sections) {
+    foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.Offset <= addr && addr <= (uint64)(sect.Offset + sect.Size - 1)) {
             var remaining = (uint64)(sect.Offset + sect.Size) - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)sect.Offset), (int64)remaining)), default);

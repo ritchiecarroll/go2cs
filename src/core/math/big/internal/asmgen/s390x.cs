@@ -11,7 +11,7 @@ partial class asmgen_package {
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: slice<@string>([
+    regs: [
         // R0 is 0 by convention in this code (see setup).
         // R10 is the assembler/linker temporary.
         // R11 is a second assembler/linker temporary, for wide multiply.
@@ -22,7 +22,7 @@ partial class asmgen_package {
         // R15 is SP.
         "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9",
         "R10", "R11", "R12"
-    ]),
+    ],
     reg0: "R0",
     regTmp: "R10",
     setup: s390xSetup,

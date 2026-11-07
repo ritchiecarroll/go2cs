@@ -106,7 +106,7 @@ internal static void init(this ref hexdumper h) {
     }
 
     // Construct position mapping.
-    foreach (var i in range(h.toPos)) {
+    foreach (var i in range(len(h.toPos))) {
         // First, calculate the "field" within the line, applying byte swizzling.
         nint field = 0;
         if (goarch.BigEndian) {
@@ -155,7 +155,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
 
     ref var lineBuf = ref heap(new array<byte>(73), out var ᏑlineBuf);
     void clear() {
-        foreach (var i in range(ᏑlineBuf.Value)) {
+        foreach (var i in range(len(ᏑlineBuf.Value))) {
             ᏑlineBuf.Value[i] = (byte)' ';
         }
     }
@@ -163,7 +163,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
 
     if (h.ready == 1) {
         // Print column offsets header.
-        foreach (var (offset, pos) in h.toPos.ΔRangeSnapshot()) {
+        foreach (var (offset, pos) in range(h.toPos.ΔRangeSnapshot())) {
             h.fmtHex(lineBuf.slice(dataStart + (nint)((byte)(pos + 1)))[..1], (uint64)offset);
         }
         // Print ASCII offsets.
@@ -180,7 +180,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
     h.fmtHex(lineBuf.slice(0, (uint8)(2 * h.addrBytes)), (uint64)h.addr);
     copy(lineBuf.slice((uint8)(2 * h.addrBytes)), addrSep);
     // Format data in hex and ASCII.
-    foreach (var (offset, b) in data) {
+    foreach (var (offset, b) in range(data)) {
         if (offset < (nint)h.dataSkip) {
             continue;
         }
@@ -243,7 +243,7 @@ internal static void fmtHex(this ref hexdumper h, slice<byte> buf, uint64 v) {
 
 internal static void start(this hexdumpMarker m) {
     array<byte> spaces = new(64);
-    foreach (var i in range(spaces)) {
+    foreach (var i in range(len(spaces))) {
         spaces[i] = (byte)' ';
     }
     while (m.chars > len(spaces)) {

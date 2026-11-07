@@ -166,7 +166,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         s.ReaderAt = new io.SectionReaderжReaderAt(s.sr);
         f.Sections[i] = s;
     }
-    foreach (var i in range(f.Sections)) {
+    foreach (var i in range(len(f.Sections))) {
         error errΔ5 = default;
         (f.Sections[i].Relocs, errΔ5) = readRelocs(f.Sections[i].ᏑSectionHeader, new io.SectionReaderжReadSeeker(sr));
         if (errΔ5 != nil) {
@@ -205,7 +205,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 // Section returns the first section with the given name, or nil if no such
 // section exists.
 public static ж<ΔSection> Section(this ref File f, @string name) {
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
         }
@@ -276,7 +276,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
     map<@string, slice<byte>> dat = new map<@string, slice<byte>>{["abbrev"] = default, ["info"] = default, ["str"] = default, ["line"] = default, ["ranges"] = default};
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -298,7 +298,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     }
 
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
-    foreach (var (i, s) in f.Sections) {
+    foreach (var (i, s) in range(f.Sections)) {
         @string suffix = dwarfSuffix(s);
         if (suffix == ""u8) {
             continue;
@@ -382,7 +382,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     // figure out which section contains the import directory table
     ж<ΔSection> ds = default;
     ds = default;
-    foreach (var (_, s) in f.Sections) {
+    foreach (var (_, s) in range(f.Sections)) {
         if (s.Offset == 0) {
             continue;
         }
@@ -435,7 +435,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     //  Needs test before rewrite.
     var (names, _) = ds.Data();
     slice<@string> all = default;
-    foreach (var (_, vᴛ1) in ida) {
+    foreach (var (_, vᴛ1) in range(ida)) {
         var dt = vᴛ1;
 
         (dt.dll, _) = getString(names, (nint)(dt.Name - ds.VirtualAddress));

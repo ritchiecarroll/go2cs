@@ -33,7 +33,7 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
     // the corresponding goto statements. Either those labels were
     // never defined, or they are inside blocks and not reachable
     // for the respective gotos.
-    foreach (var (_, jmp) in fwdJumps) {
+    foreach (var (_, jmp) in range(fwdJumps)) {
         @string msg = default;
         errors.Code code = default;
         @string name = jmp.Label.Name;
@@ -164,7 +164,7 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                     }
                     // resolve matching forward jumps and remove them from fwdJumps
                     nint i = 0;
-                    foreach (var (_, jmp) in ᏑfwdJumps.ValueSlot) {
+                    foreach (var (_, jmp) in range(ᏑfwdJumps.ValueSlot)) {
                         if (jmp.Label.Name == name) {
                             // match
                             lbl.used = true;
@@ -309,7 +309,7 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
         }}
     };
 
-    foreach (var (_, s) in list) {
+    foreach (var (_, s) in range(list)) {
         stmtBranches(nil, s);
     }
 

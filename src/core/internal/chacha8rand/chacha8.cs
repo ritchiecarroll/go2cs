@@ -118,7 +118,7 @@ public static void Reseed(this ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var i in range(seed)) {
+    foreach (var i in range(len(seed))) {
         for (;;) {
             var (x, ok) = s.Next();
             if (ok) {
@@ -143,7 +143,7 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
     copy(data, "chacha8:"u8);
     var used = (s.c / (uint32)ctrInc) * (uint32)chunk + s.i;
     byteorder.BEPutUint64(data[(int)(1 * 8)..], (uint64)used);
-    foreach (var (i, seed) in s.seed.ΔRangeSnapshot()) {
+    foreach (var (i, seed) in range(s.seed.ΔRangeSnapshot())) {
         byteorder.LEPutUint64(data.slice((2 + i) * 8), seed);
     }
     return data;
@@ -171,7 +171,7 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
     if (used > (uint64)((ctrMax / ctrInc) * chunk - reseed)) {
         return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
-    foreach (var i in range(s.seed)) {
+    foreach (var i in range(len(s.seed))) {
         s.seed[i] = byteorder.LEUint64(data.slice((2 + i) * 8));
     }
     s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);

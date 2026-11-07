@@ -83,7 +83,7 @@ public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string 
         g.mu.Unlock();
         return ch.AsRecvOnly();
     }
-    var c = Ꮡ(new call(chans: slice<channel/*<-*/<Result>>([ch])));
+    var c = Ꮡ(new call(chans: [ch]));
     c.Ꮡwg.Add(1);
     g.m[key] = c;
     g.mu.Unlock();
@@ -105,7 +105,7 @@ internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Fun
     if (g.m[key] == Ꮡc) {
         delete(g.m, key);
     }
-    foreach (var (_, ch) in c.chans) {
+    foreach (var (_, ch) in range(c.chans)) {
         ch.ᐸꟷ(new Result(c.val, c.err, c.dups > 0));
     }
     g.mu.Unlock();

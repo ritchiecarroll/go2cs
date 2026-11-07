@@ -118,7 +118,7 @@ public static slice<ж<byte>> StringSlicePtr(slice<@string> ss) {
 // a NUL byte, it returns (nil, [EINVAL]).
 public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     nint n = 0;
-    foreach (var (_, s) in ss) {
+    foreach (var (_, s) in range(ss)) {
         if (bytealg.IndexByteString(s, 0) != -1) {
             return (default!, EINVAL);
         }
@@ -127,7 +127,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     var bb = new slice<ж<byte>>(len(ss) + 1);
     var b = new slice<byte>(n);
     n = 0;
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         bb[i] = Ꮡ(b, n);
         copy(b[(int)(n)..], s);
         n += len(s) + 1;

@@ -61,7 +61,7 @@ internal static replacer build(this ref Replacer b) {
 
     if (allNewBytes) {
         ref var rΔ1 = ref heap<byteReplacer>(new byteReplacer(new byte[256].array()), out var ᏑrΔ1);
-        foreach (var i in range(rΔ1)) {
+        foreach (var i in range(len(rΔ1))) {
             rΔ1[i] = (byte)i;
         }
         // The first occurrence of old->new map takes precedence
@@ -285,12 +285,12 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
         }
     }
 
-    foreach (var (_, b) in r.mapping.ΔRangeSnapshot()) {
+    foreach (var (_, b) in range(r.mapping.ΔRangeSnapshot())) {
         r.tableSize += (nint)b;
     }
 
     byte index = default;
-    foreach (var (i, b) in r.mapping.ΔRangeSnapshot()) {
+    foreach (var (i, b) in range(r.mapping.ΔRangeSnapshot())) {
         if (b == 0) {
             r.mapping[i] = (byte)r.tableSize;
         } else {
@@ -534,7 +534,7 @@ internal static @string Replace(this ref byteStringReplacer r, @string s) {
     var anyChanges = false;
     // Is it faster to use Count?
     if (len(r.toReplace) * (nint)countCutOff <= len(s)) {
-        foreach (var (_, x) in r.toReplace) {
+        foreach (var (_, x) in range(r.toReplace)) {
             nint c = Count(s, x); if (c != 0) {
                 // The -1 is because we are replacing 1 byte with len(replacements[b]) bytes.
                 newSize += c * (len(r.replacements[x[0]]) - 1);

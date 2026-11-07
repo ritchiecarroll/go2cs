@@ -22,7 +22,7 @@ internal static void Main() {
     q[1].v = 5;
 
     nint sum = 0;
-    foreach (var (_, it) in q) {
+    foreach (var (_, it) in range<ж<item>>(q)) {
         sum += it.v;
     }
 

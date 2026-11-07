@@ -175,7 +175,7 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     // TLS 1.2, because a TLS 1.3 server would abort here. The situation before
     // supported_versions was not better because there was just no way to do a
     // TLS 1.4 handshake without risking the server selecting TLS 1.3.
-    foreach (var (_, id) in hs.clientHello.cipherSuites) {
+    foreach (var (_, id) in range(hs.clientHello.cipherSuites)) {
         if (id == TLS_FALLBACK_SCSV) {
             // Use c.vers instead of max(supported_versions) because an attacker
             // could defeat this by adding an arbitrary high version otherwise.
@@ -229,7 +229,7 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     if (fips140tls.Required()) {
         preferenceList = allowedCipherSuitesTLS13FIPS;
     }
-    foreach (var (_, suiteID) in preferenceList) {
+    foreach (var (_, suiteID) in range(preferenceList)) {
         hs.suite = mutualCipherSuiteTLS13(hs.clientHello.cipherSuites, suiteID);
         if (hs.suite != nil) {
             break;
@@ -259,7 +259,7 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
         return errors.New(tlsNoKeyExchangesˢ);
     }
     bool hasKeyShare(CurveID group) {
-        foreach (var (_, ks) in Ꮡhs.Value.clientHello.keyShares) {
+        foreach (var (_, ks) in range(Ꮡhs.Value.clientHello.keyShares)) {
             if (ks.group == group) {
                 return true;
             }
@@ -274,7 +274,7 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     var selectedGroup = preferredGroups[0];
 
     ж<keyShare> clientKeyShare = default;
-    foreach (var (_, vᴛ1) in hs.clientHello.keyShares) {
+    foreach (var (_, vᴛ1) in range(hs.clientHello.keyShares)) {
         ref var ks = ref heap(new keyShare(), out var Ꮡks);
         ks = vᴛ1;
 
@@ -312,7 +312,7 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
 
     if (c.quic != nil) {
         // RFC 9001 Section 4.2: Clients MUST NOT offer TLS versions older than 1.3.
-        foreach (var (_, v) in hs.clientHello.supportedVersions) {
+        foreach (var (_, v) in range(hs.clientHello.supportedVersions)) {
             if (v < VersionTLS13) {
                 c.sendAlert(alertProtocolVersion);
                 return errors.New(tlsClientOfferedTlsˢ);
@@ -351,7 +351,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
     }
 
     var modeOK = false;
-    foreach (var (_, mode) in hs.clientHello.pskModes) {
+    foreach (var (_, mode) in range(hs.clientHello.pskModes)) {
         if (mode == pskModeDHE) {
             modeOK = true;
             break;
@@ -369,7 +369,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
         return default;
     }
 
-    foreach (var (i, identity) in hs.clientHello.pskIdentities) {
+    foreach (var (i, identity) in range(hs.clientHello.pskIdentities)) {
         if (i >= maxClientPSKIdentities) {
             break;
         }
@@ -427,7 +427,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
         var opts = new Δx509.VerifyOptions(
             CurrentTime: c.config.time(),
             Roots: c.config.ClientCAs,
-            KeyUsages: slice<Δx509.ExtKeyUsage>([Δx509.ExtKeyUsageClientAuth])
+            KeyUsages: [Δx509.ExtKeyUsageClientAuth]
         );
         if (sessionHasClientCerts && c.config.ClientAuth >= VerifyClientCertIfGiven && !anyValidVerifiedChain(sessionState.verifiedChains, opts)) {
             continue;
@@ -735,32 +735,32 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     if (len(ch.supportedVersions) != len(ch1.supportedVersions) || len(ch.cipherSuites) != len(ch1.cipherSuites) || len(ch.supportedCurves) != len(ch1.supportedCurves) || len(ch.supportedSignatureAlgorithms) != len(ch1.supportedSignatureAlgorithms) || len(ch.supportedSignatureAlgorithmsCert) != len(ch1.supportedSignatureAlgorithmsCert) || len(ch.alpnProtocols) != len(ch1.alpnProtocols)) {
         return true;
     }
-    foreach (var i in range(ch.supportedVersions)) {
+    foreach (var i in range(len(ch.supportedVersions))) {
         if (ch.supportedVersions[i] != ch1.supportedVersions[i]) {
             return true;
         }
     }
-    foreach (var i in range(ch.cipherSuites)) {
+    foreach (var i in range(len(ch.cipherSuites))) {
         if (ch.cipherSuites[i] != ch1.cipherSuites[i]) {
             return true;
         }
     }
-    foreach (var i in range(ch.supportedCurves)) {
+    foreach (var i in range(len(ch.supportedCurves))) {
         if (ch.supportedCurves[i] != ch1.supportedCurves[i]) {
             return true;
         }
     }
-    foreach (var i in range(ch.supportedSignatureAlgorithms)) {
+    foreach (var i in range(len(ch.supportedSignatureAlgorithms))) {
         if (ch.supportedSignatureAlgorithms[i] != ch1.supportedSignatureAlgorithms[i]) {
             return true;
         }
     }
-    foreach (var i in range(ch.supportedSignatureAlgorithmsCert)) {
+    foreach (var i in range(len(ch.supportedSignatureAlgorithmsCert))) {
         if (ch.supportedSignatureAlgorithmsCert[i] != ch1.supportedSignatureAlgorithmsCert[i]) {
             return true;
         }
     }
-    foreach (var i in range(ch.alpnProtocols)) {
+    foreach (var i in range(len(ch.alpnProtocols))) {
         if (ch.alpnProtocols[i] != ch1.alpnProtocols[i]) {
             return true;
         }

@@ -20,7 +20,7 @@ internal static any assign<E>(E e) {
     return x;
 }
 
-internal static slice<any> slot<E>(E e) { return slice<any>([(e).OrTypedNilOf()]); }
+internal static slice<any> slot<E>(E e) { return [(e).OrTypedNilOf()]; }
 
 internal static any send<E>(E e) {
     var c = new channel<any>(1);

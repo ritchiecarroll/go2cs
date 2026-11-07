@@ -100,7 +100,7 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
     if (err != nil) {
         return (default, err);
     }
-    foreach (var (_, vᴛ1) in addrs) {
+    foreach (var (_, vᴛ1) in range(addrs)) {
         ref var addr = ref heap(new IPAddr(), out var Ꮡaddr);
         addr = vᴛ1;
 
@@ -153,7 +153,7 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             (port, err) = (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: err.Error(), Name: network + "/"u8 + service)))); goto ᒐdone;
         }
         // Lowercase the C service name.
-        foreach (var (i, b) in cservice.slice(0, len(service))) {
+        foreach (var (i, b) in range(cservice.slice(0, len(service)))) {
             cservice[i] = lowerASCII(b);
         }
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);

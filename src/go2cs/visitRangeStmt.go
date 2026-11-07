@@ -437,8 +437,32 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// struct assignment already is. exprReadsValueNeedingClone narrows the rest: only a read out of
 	// EXISTING storage (ident, selector, index, deref) can alias — a composite literal, call result
 	// or conversion is freshly constructed and reachable by no other name.
+	snapshotted := false
+
 	if isArray && !rangedThroughPointer && rangeStmt.Value != nil && len(valExpr) > 0 && valExpr != "_" && v.exprReadsValueNeedingClone(rangeStmt.X) {
 		rangeExpr = appendRangeSnapshot(rangeExpr)
+		snapshotted = true
+	}
+
+	// A slice's or array's foreach enumerator yields its VALUES, as a C# collection does, so Go's
+	// (index, value) pair loop ranges golib's range(x): `foreach (var (i, v) in range(s))`, read as
+	// Go's `range s`. A map's enumerator already yields its (key, value) pairs and stays bare. A
+	// NAMED slice type names its element type, `range<Word>(x)`: inference cannot see through the
+	// wrapper's conversion to slice<T>, and the interface overload it would bind instead boxes the
+	// wrapper on every loop entry where the slice<T> overload allocates nothing. A named ARRAY type
+	// keeps the plain spelling: its conversion to array<T> is a COPY, and a range through a pointer
+	// to it must share the array, so it takes the interface overload, one box per loop; its value
+	// ranges take the snapshot above, whose own range overload allocates nothing.
+	pairExpr := rangeExpr + ptrDeref
+
+	if isSlice || isArray {
+		var typeArg string
+
+		if sliceType, ok := rangeType.(*types.Slice); ok && rangeIsNamedType && !snapshotted {
+			typeArg = fmt.Sprintf("<%s>", v.getCSharpTypeName(sliceType.Elem()))
+		}
+
+		pairExpr = fmt.Sprintf("range%s(%s)", typeArg, pairExpr)
 	}
 
 	// A newly-DEFINED range var that is reassigned in the body — or that receives a pointer-
@@ -744,10 +768,10 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		}
 	} else if (isSlice || isArray) && valExpr == "_" {
 		// INDEX-ONLY: `for i := range x`, `for i, _ := range x` and `for range x` over a slice, an array or a pointer
-		// to an array read no element in Go, so they range golib's index enumerator, `foreach (var i in range(x))`,
-		// which reads the length once and never an element. The (index, value) enumerator the other arm binds reads
-		// every element even with the value discarded, into a stack temp: crypto/internal/fips140cache's TestCache
-		// waited forever for an element that temp kept reachable. A pointer operand is passed as the pointer, with its
+		// to an array read no element in Go, so they range the length, `foreach (var i in range(len(x)))` -- Go 1.22's
+		// `for i := range len(x)` -- which reads the length once and never an element. The (index, value) enumerator
+		// the other arm binds reads every element even with the value discarded, into a stack temp:
+		// crypto/internal/fips140cache's TestCache waited forever for an element that temp kept reachable. A pointer operand is passed as the pointer, with its
 		// type's length (golib's range(ж<TArray>, nint)), so no `.Value` is spelled and a nil one ranges as Go's does.
 		iterExpr := keyExpr
 		decl := keyType
@@ -804,7 +828,15 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		default:
-			v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
+			// A package that declares its own `len` method shadows golib's using-static builtin (see Phase 7a in
+			// convCallExpr.go), so the length is qualified there, as every other `len(x)` in that package is.
+			lenName := "len"
+
+			if packageBuiltinShadows["len"] {
+				lenName = "builtin.len"
+			}
+
+			v.writeOutput("foreach (%s%s in range(%s(%s)))", decl, iterExpr, lenName, rangeExpr)
 		}
 	} else {
 		// Handle slice, array, and map types
@@ -843,7 +875,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr, valCloneSuffix)
 			}
 
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, pairExpr)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline
@@ -905,7 +937,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				vExpr = valExpr
 			}
 
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, kExpr, valType, vExpr, rangeExpr, ptrDeref)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, kExpr, valType, vExpr, pairExpr)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline
@@ -954,13 +986,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					innerPrefix += fmt.Sprintf("%s%s%s%s = %s%s;", v.newline, bodyIndent, decl, valExpr, tempValExpr, valCloneSuffix)
 				}
 
-				v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
+				v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, pairExpr)
 
 				if innerPrefix != "" {
 					context.innerPrefix = innerPrefix + v.newline
 				}
 			} else {
-				v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
+				v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, pairExpr)
 			}
 		}
 	}

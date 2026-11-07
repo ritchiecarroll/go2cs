@@ -240,7 +240,7 @@ internal static void initMetrics() {
                 hist.counts[len(hist.counts) - 1] = @in.heapStats.largeAllocCount;
                 // Cut off the first index which is ostensibly for size class 0,
                 // but large objects are tracked separately so it's actually unused.
-                foreach (var (i, count) in @in.heapStats.smallAllocCount[1..]) {
+                foreach (var (i, count) in range(@in.heapStats.smallAllocCount[1..])) {
                     hist.counts[i] = count;
                 }
             }
@@ -266,7 +266,7 @@ internal static void initMetrics() {
                 hist.counts[len(hist.counts) - 1] = @in.heapStats.largeFreeCount;
                 // Cut off the first index which is ostensibly for size class 0,
                 // but large objects are tracked separately so it's actually unused.
-                foreach (var (i, count) in @in.heapStats.smallFreeCount[1..]) {
+                foreach (var (i, count) in range(@in.heapStats.smallFreeCount[1..])) {
                     hist.counts[i] = count;
                 }
             }
@@ -529,7 +529,7 @@ internal static void initMetrics() {
         )
     };
 
-    foreach (var (_, info) in godebugs.All) {
+    foreach (var (_, info) in range(godebugs.All)) {
         if (!info.Opaque) {
             metrics["/godebug/non-default-behavior/"u8 + info.Name + ":events"u8] = new metricData(compute: compute0);
         }
@@ -590,7 +590,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
     var deps = depsʗp.sslice();
 
     statDepSet s = default;
-    foreach (var (_, d) in deps) {
+    foreach (var (_, d) in range(deps)) {
         s[d / 64] |= (uint64)(((uint64)1 << (int)(d % 64)));
     }
     return s.Clone();
@@ -602,7 +602,7 @@ internal static statDepSet difference(this statDepSet s, statDepSet b) {
     b = b.Clone();
 
     statDepSet c = default;
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         c[i] = s[i] & ~b[i];
     }
     return c.Clone();
@@ -614,7 +614,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
     b = b.Clone();
 
     statDepSet c = default;
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         c[i] = s[i] | b[i];
     }
     return c.Clone();
@@ -622,7 +622,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
 
 // empty returns true if there are no dependencies in the set.
 internal static bool empty(this ref statDepSet s) {
-    foreach (var (_, c) in s.Value) {
+    foreach (var (_, c) in range(s.Value)) {
         if (c != 0) {
             return false;
         }
@@ -673,7 +673,7 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
     a.totalFrees = a.largeFreeCount;
     a.totalAllocated = a.largeAlloc;
     a.totalFreed = a.largeFree;
-    foreach (var i in range(a.smallAllocCount)) {
+    foreach (var i in range(len(a.smallAllocCount))) {
         var na = a.smallAllocCount[i];
         var nf = a.smallFreeCount[i];
         a.totalAllocs += na;

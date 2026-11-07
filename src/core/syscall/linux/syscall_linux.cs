@@ -420,7 +420,7 @@ public static (slice<nint> gids, error err) Getgroups() {
         return (default, err);
     }
     gids = new slice<nint>(n);
-    foreach (var (i, v) in a.slice(0, n)) {
+    foreach (var (i, v) in range(a.slice(0, n))) {
         gids[i] = (nint)v;
     }
     return (gids, err);

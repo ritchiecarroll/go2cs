@@ -156,7 +156,7 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
 // characters and joining the arguments with spaces.
 internal static @string makeCmdLine(slice<@string> args) {
     slice<byte> b = default!;
-    foreach (var (_, v) in args) {
+    foreach (var (_, v) in range(args)) {
         if (len(b) > 0) {
             b = append(b, (byte)((rune)' '));
         }
@@ -181,7 +181,7 @@ internal static slice<@string> envSorted(slice<@string> envv) {
         var (v, ok) = lowerKeyCacheʗ1[k, ꟷ];
         if (!ok) {
             v = slice<byte>(k);
-            foreach (var (i, b) in v) {
+            foreach (var (i, b) in range(v)) {
                 // We only normalize ASCII for now.
                 // In practice, all environment variables are ASCII, and the
                 // syscall package can't import "unicode" anyway.
@@ -224,7 +224,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     envv = envSorted(envv);
 
     nint length = default!;
-    foreach (var (_, s) in envv) {
+    foreach (var (_, s) in range(envv)) {
         if (bytealg.IndexByteString(s, 0) != -1) {
             return (default!, EINVAL);
         }
@@ -232,7 +232,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     }
     length += 1;
     var b = new slice<uint16>(0, length);
-    foreach (var (_, s) in envv) {
+    foreach (var (_, s) in range(envv)) {
         foreach (var (_, c) in s) {
             b = utf16.AppendRune(b, c);
         }

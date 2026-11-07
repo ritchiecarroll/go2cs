@@ -15,7 +15,7 @@ internal static void Main() {
         }
 
         ж<Δnet.Interface> chosen = default;
-        foreach (var i in range(ifis)) {
+        foreach (var i in range(len(ifis))) {
             if ((Δnet.Flags)(ifis[i].Flags & Δnet.FlagUp) != 0 && (Δnet.Flags)(ifis[i].Flags & Δnet.FlagMulticast) != 0) {
                 chosen = Ꮡ(ifis, i);
                 break;

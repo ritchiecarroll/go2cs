@@ -891,7 +891,7 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
     var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
         return wv.writeBuffers(Ꮡv);
     }
-    foreach (var (_, b) in v) {
+    foreach (var (_, b) in range<slice<byte>>(v)) {
         var (nb, errΔ1) = w.Write(b);
         n += (int64)nb;
         if (errΔ1 != nil) {

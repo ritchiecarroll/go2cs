@@ -10,7 +10,7 @@ partial struct UUIDs /*[]UUID*/;
 
 public static slice<@string> Strings(this UUIDs us) {
     var @out = new slice<@string>(len(us));
-    foreach (var (i, vᴛ1) in us) {
+    foreach (var (i, vᴛ1) in range<UUID>(us)) {
         var u = vᴛ1.Clone();
 
         @out[i] = fmt.Sprintf("%x"u8, u[..2]);
@@ -22,10 +22,10 @@ partial struct Rows /*[]array<nint>*/;
 
 public static nint Sum(this Rows r) {
     nint total = 0;
-    foreach (var (_, vᴛ1) in r) {
+    foreach (var (_, vᴛ1) in range<array<nint>>(r)) {
         var row = vᴛ1.Clone();
 
-        foreach (var (_, v) in row.ΔRangeSnapshot()) {
+        foreach (var (_, v) in range(row.ΔRangeSnapshot())) {
             total += v;
         }
     }

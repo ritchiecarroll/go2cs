@@ -355,7 +355,7 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<b
     }
     uint8 counter = default;
     while (counter < 4) {
-        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, slice<byte>([counter]), kem.Nsk);
+        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, [counter], kem.Nsk);
         if (errΔ2 != nil) {
             return (default, errΔ2);
         }

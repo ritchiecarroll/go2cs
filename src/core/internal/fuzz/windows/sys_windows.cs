@@ -87,7 +87,7 @@ internal static error Close(this ref sharedMem m) {
     if (m.removeOnClose) {
         errs = append(errs, os.Remove(m.f.Name()));
     }
-    foreach (var (_, err) in errs) {
+    foreach (var (_, err) in range(errs)) {
         if (err != nil) {
             return err;
         }

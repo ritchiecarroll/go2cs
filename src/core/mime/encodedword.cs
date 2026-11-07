@@ -338,13 +338,13 @@ internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @
         break;
     }
     case {} when strings.EqualFold(iso88591ˢ, charset): {
-        foreach (var (_, c) in content) {
+        foreach (var (_, c) in range(content)) {
             buf.WriteRune((rune)c);
         }
         break;
     }
     case {} when strings.EqualFold(usAsciiˢ, charset): {
-        foreach (var (_, c) in content) {
+        foreach (var (_, c) in range(content)) {
             if (c >= utf8.RuneSelf) {
                 buf.WriteRune(Δunicode.ReplacementChar);
             } else {

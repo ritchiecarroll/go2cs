@@ -505,7 +505,7 @@ internal static slice<@string> experimentTags() {
     // used for compiling alternative files for the experiment. This allows
     // changes for the experiment, like extra struct fields in the runtime,
     // without affecting the base non-experiment code at all.
-    foreach (var (_, exp) in ᏑExperiment.Enabled()) {
+    foreach (var (_, exp) in range(ᏑExperiment.Enabled())) {
         list = append(listᴷ, list, "goexperiment."u8 + exp);
     }
     list = move2heap(listᴷ, list);
@@ -559,7 +559,7 @@ internal static slice<@string> gogoarchTags() {
     var exprᴛ1 = GOARCH;
     switch (ᐧ) {
     case {} when exprᴛ1 == "386"u8: {
-        return slice<@string>([GOARCH + "."u8 + GO386]);
+        return [GOARCH + "."u8 + GO386];
     }
     case {} when exprᴛ1 == "amd64"u8: {
         slice<@string> list = default;
@@ -593,10 +593,10 @@ internal static slice<@string> gogoarchTags() {
         return list;
     }
     case {} when exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8: {
-        return slice<@string>([GOARCH + "."u8 + GOMIPS]);
+        return [GOARCH + "."u8 + GOMIPS];
     }
     case {} when exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8: {
-        return slice<@string>([GOARCH + "."u8 + GOMIPS64]);
+        return [GOARCH + "."u8 + GOMIPS64];
     }
     case {} when exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8: {
         slice<@string> list = default;

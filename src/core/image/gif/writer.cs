@@ -94,7 +94,7 @@ internal static error WriteByte(this blockWriter b, byte c) {
 // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
 // actually called.
 internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
-    foreach (var (i, c) in data) {
+    foreach (var (i, c) in range(data)) {
         var err = b.WriteByte(c); if (err != nil) {
             return (i, err);
         }
@@ -207,7 +207,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     if ((nuint)size >= 8) {
         return (0, errors.New(gifCannotEncodeColorˢ));
     }
-    foreach (var (i, c) in p) {
+    foreach (var (i, c) in range<Δcolor.Color>(p)) {
         if (c == nil) {
             return (0, errors.New(gifCannotEncodeColorˢ2));
         }
@@ -275,7 +275,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     }
 
     nint transparentIndex = -1;
-    foreach (var (i, c) in pm.Palette) {
+    foreach (var (i, c) in range<Δcolor.Color>(pm.Palette)) {
         if (c == nil) {
             e.err = errors.New(gifCannotEncodeColorˢ2);
             return;
@@ -428,7 +428,7 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
     }
 
     e.writeHeader();
-    foreach (var (i, pm) in g.Image) {
+    foreach (var (i, pm) in range(g.Image)) {
         var disposal = (uint8)0;
         if (g.Disposal != nil) {
             disposal = g.Disposal[i];
@@ -498,8 +498,8 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     }
 
     return EncodeAll(w, Ꮡ(new GIF(
-        Image: slice<ж<image.Paletted>>([pm]),
-        Delay: slice<nint>([0]),
+        Image: [pm],
+        Delay: [0],
         Config: new image.Config(
             ColorModel: pm.Palette,
             Width: b.Dx(),

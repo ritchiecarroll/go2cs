@@ -111,12 +111,12 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         return ""u8;
     }
     var comments = new slice<@string>(len(g.List));
-    foreach (var (i, c) in g.List) {
+    foreach (var (i, c) in range(g.List)) {
         comments[i] = c.Text;
     }
 
     var lines = new slice<@string>(0, 10); // most comments are less than 10 lines
-    foreach (var (_, vᴛ1) in comments) {
+    foreach (var (_, vᴛ1) in range(comments)) {
         var c = vᴛ1;
 
         // Remove comment markers.
@@ -158,7 +158,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
     // Remove leading blank lines; convert runs of
     // interior blank lines to a single blank line.
     nint n = 0;
-    foreach (var (_, line) in lines) {
+    foreach (var (_, line) in range(lines)) {
         if (line != ""u8 || n > 0 && lines[n - 1] != "") {
             lines[n] = line;
             n++;
@@ -288,7 +288,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 
     nint n = 0;
     if (Ꮡf != nil) {
-        foreach (var (_, g) in f.List) {
+        foreach (var (_, g) in range(f.List)) {
             nint m = len(g.Names);
             if (m == 0) {
                 m = 1;
@@ -1143,8 +1143,8 @@ internal static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
 private static readonly @string prefixᶜᵇ = "// Code generated "u8;
 
 internal static (@string, bool) generator(ref File @file) {
-    foreach (var (_, group) in @file.Comments) {
-        foreach (var (_, comment) in group.List) {
+    foreach (var (_, group) in range(@file.Comments)) {
+        foreach (var (_, comment) in range(group.List)) {
             if (comment.Pos() > @file.Package) {
                 break; // after package declaration
             }

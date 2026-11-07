@@ -13,11 +13,12 @@ using static go.builtin;
 namespace GolibTests;
 
 /// <summary>
-/// golib's index-only <c>range(x)</c> over a slice or an array, the converter's emission of Go's <c>for i := range x</c>:
-/// it yields 0..len(x)-1, reads the length once, and never reads an element, as Go's index-only range does.
+/// The converter's emission of Go's index-only <c>for i := range x</c> over a slice or an array, <c>range(len(x))</c>
+/// (Go 1.22's <c>for i := range len(x)</c>): it yields 0..len(x)-1, reads the length once, and never reads an element,
+/// as Go's index-only range does. A pointer to an array ranges its type's length, <c>range(p, N)</c>.
 /// </summary>
 /// <remarks>
-/// The (index, value) enumerator the converter used before reads every element even when the value is discarded:
+/// The (index, value) enumerator, <c>range(x)</c>, reads every element even when the value is discarded:
 /// crypto/internal/fips140cache's TestCache never finished because that read kept the element it was waiting to see
 /// collected reachable from the loop's frame. The element read is observable here without a GC: a native-backed slice
 /// over memory that refuses a read panics on the first element. Red first: an overload that ranged through the pair
@@ -47,10 +48,10 @@ public class RangeIndexOnlyTests
         // The precondition: any element read of this slice is refused, as the pair enumerator's is.
         Assert.ThrowsException<PanicException>(() =>
         {
-            foreach (var (_, _) in refusing) { }
+            foreach (var (_, _) in range(refusing)) { }
         }, "the pair enumerator reads the element");
 
-        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(refusing)));
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(len(refusing))));
     }
 
     [TestMethod]
@@ -60,18 +61,19 @@ public class RangeIndexOnlyTests
         array<long> a = new long[] { 1, 2 };
         ж<array<long>> p = new StandardBox<array<long>>(new long[] { 1, 2, 3 });
 
-        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(range(s)), "a slice");
-        CollectionAssert.AreEqual(new List<nint> { 0, 1 }, Indices(range(a)), "an array");
-        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(p)), "a pointer to an array");
-        CollectionAssert.AreEqual(new List<nint> { 0, 1 }, Indices(range(s[2..])), "a window starts at its own 0");
-        CollectionAssert.AreEqual(new List<nint>(), Indices(range(default(slice<long>))), "a nil slice ranges no times");
-        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(range((IArray)s)), "a sequence through IArray");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(range(len(s))), "a slice");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1 }, Indices(range(len(a))), "an array");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(p, 3)), "a pointer to an array");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(default(ж<array<long>>), 3)), "a nil pointer to an array ranges its length");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1 }, Indices(range(len(s[2..]))), "a window starts at its own 0");
+        CollectionAssert.AreEqual(new List<nint>(), Indices(range(len(default(slice<long>)))), "a nil slice ranges no times");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(range(len((IArray)s))), "a sequence through IArray");
         CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(ThroughATypeParameter(s)), "a type parameter");
-        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(new sslice<long>(stackalloc long[] { 4, 5, 6 }))), "a variadic parameter's stack slice");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(len(new sslice<long>(stackalloc long[] { 4, 5, 6 })))), "a variadic parameter's stack slice");
     }
 
-    // A converted generic over a slice-shaped type parameter binds the constrained range(in TSeq), with no boxing.
-    private static RangeOverInt<nint> ThroughATypeParameter<S>(S s) where S : ISlice<long> => range(s);
+    // A converted generic over a slice-shaped type parameter ranges its length through the constrained len.
+    private static RangeOverInt<nint> ThroughATypeParameter<S>(S s) where S : ISlice<long> => range(len(s));
 
     [TestMethod]
     public void TheOperandIsEvaluatedOnceAndItsLengthReadAtTheStart()
@@ -87,7 +89,7 @@ public class RangeIndexOnlyTests
 
         int iterations = 0;
 
-        foreach (nint _ in range(Operand()))
+        foreach (nint _ in range(len(Operand())))
         {
             // Go fixes the iteration count when the loop starts: growing the variable in the body adds none.
             s = append(s, 4L);

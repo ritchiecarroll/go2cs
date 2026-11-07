@@ -15,7 +15,7 @@ internal static nint total(params ꓸꓸꓸжbox bsʗp) {
     var bs = bsʗp.sslice();
 
     nint sum = 0;
-    foreach (var (_, b) in bs) {
+    foreach (var (_, b) in range(bs)) {
         sum += b.v;
     }
     return sum;
@@ -31,7 +31,7 @@ internal static nint totalLens(params Span<slice<byte>> bssʗp) {
     var bss = bssʗp.sslice();
 
     nint sum = 0;
-    foreach (var (_, bs) in bss) {
+    foreach (var (_, bs) in range(bss)) {
         sum += len(bs);
     }
     return sum;

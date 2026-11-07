@@ -73,7 +73,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> argv0, slice<
     // that we can't run the risk of overwriting any of them.
     var fd = new slice<nint>(len(attr.Files));
     nextfd = len(attr.Files);
-    foreach (var (iΔ1, ufd) in attr.Files) {
+    foreach (var (iΔ1, ufd) in range(attr.Files)) {
         if (nextfd < (nint)ufd) {
             nextfd = (nint)ufd;
         }

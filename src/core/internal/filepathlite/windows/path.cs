@@ -209,7 +209,7 @@ internal static @string replaceStringByte(@string s, byte old, byte @new) {
         return s;
     }
     var n = slice<byte>(s);
-    foreach (var i in range(n)) {
+    foreach (var i in range(len(n))) {
         if (n[i] == old) {
             n[i] = @new;
         }

@@ -188,7 +188,7 @@ internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
 internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    foreach (var (id, value) in d.dense) {
+    foreach (var (id, value) in range(d.dense)) {
         if ((uint8)(d.present[id / 8] & (((uint8)1).Lsh((int64)(id % 8)))) == 0) {
             continue;
         }
@@ -271,7 +271,7 @@ partial struct stack {
 
 internal static @string String(this stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
-    foreach (var (_, frame) in s.pcs) {
+    foreach (var (_, frame) in range(s.pcs)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%#v\n"u8, frame);
     }
     return sb.String();

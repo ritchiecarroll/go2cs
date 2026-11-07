@@ -22,7 +22,7 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
     case var ᴛ when ᴛ == OpCapture || ᴛ == OpConcat || ᴛ == OpAlternate: {
         // Simplify children, building new Regexp if children change.
         var nre = Ꮡre;
-        foreach (var (i, sub) in re.Sub) {
+        foreach (var (i, sub) in range(re.Sub)) {
             var nsub = sub.Simplify();
             if (nre == Ꮡre && nsub != sub) {
                 // Start a copy.

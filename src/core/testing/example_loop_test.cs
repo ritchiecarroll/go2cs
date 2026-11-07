@@ -18,7 +18,7 @@ public static void ExBenchmark(ж<testing.B> b) {
     // Since this is done before the first call to b.Loop(),
     // it doesn't count toward the benchmark time.
     var input = new slice<nint>((128 << 10));
-    foreach (var i in range(input)) {
+    foreach (var i in range(len(input))) {
         input[i] = rand.Int();
     }
 
@@ -37,7 +37,7 @@ public static void ExBenchmark(ж<testing.B> b) {
 
 internal static nint sum(slice<nint> data) {
     nint total = 0;
-    foreach (var (_, value) in data) {
+    foreach (var (_, value) in range(data)) {
         total += value;
     }
     return total;

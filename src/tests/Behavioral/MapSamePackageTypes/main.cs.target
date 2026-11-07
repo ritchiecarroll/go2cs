@@ -22,10 +22,10 @@ partial struct Description {
     public @string ΔDescription;
 }
 
-internal static slice<Description> allDesc = slice<Description>([
+internal static slice<Description> allDesc = [
     new(Name: "a", ΔDescription: "first"),
     new(Name: "b", ΔDescription: "second")
-]);
+];
 
 internal static Description describe() {
     return new Description(Name: "c", ΔDescription: "third");
@@ -36,7 +36,7 @@ internal static void Main() {
     fmt.Println(table[new OSArch("windows", "386")].supported);
     fmt.Println(len(table));
 
-    foreach (var (_, d) in allDesc) {
+    foreach (var (_, d) in range(allDesc)) {
         fmt.Println(d.Name, d.ΔDescription);
     }
     var c = describe();

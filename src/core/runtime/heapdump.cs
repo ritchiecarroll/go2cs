@@ -463,7 +463,7 @@ internal static void dumproots() {
     dumpfields(firstmoduledata.gcbssmask);
 
     // mspan.types
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() == mSpanInUse) {
             // Finalizers
             for (var sp = s.specials; sp != nil; sp = sp.next) {
@@ -493,7 +493,7 @@ internal static void dumpobjs() {
     // To protect mheap_.allspans.
     assertWorldStopped();
 
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() != mSpanInUse) {
             continue;
         }
@@ -531,11 +531,11 @@ internal static void dumpparams() {
     dumpint(goarch.PtrSize);
     uintptr arenaStart = default;
     uintptr arenaEnd = default;
-    foreach (var i1 in range(mheap_.arenas)) {
+    foreach (var i1 in range(len(mheap_.arenas))) {
         if (mheap_.arenas[i1] == nil) {
             continue;
         }
-        foreach (var (i, ha) in mheap_.arenas[i1].Value) {
+        foreach (var (i, ha) in range(mheap_.arenas[i1].Value)) {
             if (ha == nil) {
                 continue;
             }
@@ -668,7 +668,7 @@ internal static void dumpmemprof() {
     assertWorldStopped();
 
     iterate_memprof(dumpmemprof_callback);
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() != mSpanInUse) {
             continue;
         }
@@ -692,7 +692,7 @@ internal static void mdump(ref MemStats m) {
     assertWorldStopped();
 
     // make sure we're done sweeping
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() == mSpanInUse) {
             s.ensureSwept();
         }

@@ -25,7 +25,7 @@ internal static (@string name, error err) hostname() {
         err = syscall.Uname(Ꮡun);
 
         array<byte> buf = new(512); // Enough for a DNS name.
-        foreach (var (i, b) in un.Nodename[..]) {
+        foreach (var (i, b) in range(un.Nodename[..])) {
             buf[i] = (uint8)b;
             if (b == 0) {
                 name = (@string)(buf.slice(0, i));

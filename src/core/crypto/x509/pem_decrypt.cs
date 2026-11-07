@@ -42,7 +42,7 @@ partial struct rfc1423Algo {
 
 // rfc1423Algos holds a slice of the possible ways to encrypt a PEM
 // block. The ivSize numbers were taken from the OpenSSL source.
-[GoLazy] partial class lazyᴛrfc1423Algos { internal static readonly ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StaticBox<slice<rfc1423Algo>>(slice<rfc1423Algo>([new(
+[GoLazy] partial class lazyᴛrfc1423Algos { internal static readonly ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StaticBox<slice<rfc1423Algo>>([new(
     cipher: PEMCipherDES,
     name: "DES-CBC",
     cipherFunc: des.NewCipher,
@@ -73,7 +73,7 @@ partial struct rfc1423Algo {
     keySize: 32,
     blockSize: aes.BlockSize
 )
-])); }
+]); }
 internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc1423Algo>>)Ꮡrfc1423Algos).ValueSlot;
 
 // deriveKey uses a key derivation function to stretch the password into a key
@@ -199,7 +199,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (last == 0 || last > ciph.blockSize) {
         return (default, IncorrectPasswordError);
     }
-    foreach (var (_, val) in data.slice(dlen - last)) {
+    foreach (var (_, val) in range(data.slice(dlen - last))) {
         if ((nint)val != last) {
             return (default, IncorrectPasswordError);
         }
@@ -254,7 +254,7 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
 }
 
 internal static ж<rfc1423Algo> cipherByName(@string name) {
-    foreach (var i in range(rfc1423Algos)) {
+    foreach (var i in range(builtin.len(rfc1423Algos))) {
         var alg = Ꮡ(rfc1423Algos, i);
         if (alg.name == name) {
             return alg;
@@ -264,7 +264,7 @@ internal static ж<rfc1423Algo> cipherByName(@string name) {
 }
 
 internal static ж<rfc1423Algo> cipherByKey(PEMCipher key) {
-    foreach (var i in range(rfc1423Algos)) {
+    foreach (var i in range(builtin.len(rfc1423Algos))) {
         var alg = Ꮡ(rfc1423Algos, i);
         if (alg.cipher == key) {
             return alg;

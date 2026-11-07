@@ -399,7 +399,7 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     }
 
     // Clear per-P state
-    foreach (var (_, Δp) in allp) {
+    foreach (var (_, Δp) in range(allp)) {
         Δp.Value.gcAssistTime = 0;
         Δp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Store(0);
     }
@@ -642,7 +642,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     // earlier).
     var oldConsMark = c.consMark;
     c.consMark = currentConsMark;
-    foreach (var i in range(c.lastConsMark)) {
+    foreach (var i in range(len(c.lastConsMark))) {
         if (c.lastConsMark[i] > c.consMark) {
             c.consMark = c.lastConsMark[i];
         }

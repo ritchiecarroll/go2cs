@@ -88,7 +88,7 @@ public static ref array<@string> EventArgTypes => ref ((StaticBox<array<@string>
 // EventNames is a helper that produces a mapping of event names to event types.
 public static map<@string, EventType> EventNames(slice<EventSpec> specs) {
     var nameToType = new map<@string, EventType>();
-    foreach (var (i, spec) in specs) {
+    foreach (var (i, spec) in range(specs)) {
         nameToType[spec.Name] = (EventType)(byte)i;
     }
     return nameToType;

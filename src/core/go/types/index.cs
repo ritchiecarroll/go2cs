@@ -362,7 +362,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
 
     // check indices
     array<int64> ind = new(3);
-    foreach (var (i, expr) in slice<ast.Expr>([e.Low, e.High, e.Max])) {
+    foreach (var (i, expr) in range(slice<ast.Expr>([e.Low, e.High, e.Max]))) {
         var xΔ1 = (int64)(-1);
         switch (ᐧ) {
         case {} when expr != nil: {
@@ -394,9 +394,9 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     // constant indices must be in range
     // (check.index already checks that existing indices >= 0)
 L:
-    foreach (var (i, xΔ2) in ind[..(int)(len(ind) - 1)]) {
+    foreach (var (i, xΔ2) in range(ind[..(int)(len(ind) - 1)])) {
         if (xΔ2 > 0) {
-            foreach (var (j, y) in ind.slice(i + 1)) {
+            foreach (var (j, y) in range(ind.slice(i + 1))) {
                 if (y >= 0 && y < xΔ2) {
                     // The value y corresponds to the expression e.Index[i+1+j].
                     // Because y >= 0, it must have been set from the expression
@@ -533,7 +533,7 @@ internal static ж<indexedExpr> unpackIndexedExpr(ast.Node n) {
             orig: new ast.IndexExprжExpr(e),
             x: e.X,
             lbrack: e.Lbrack,
-            indices: slice<ast.Expr>([e.Index]),
+            indices: [e.Index],
             rbrack: e.Rbrack
         ));
     }

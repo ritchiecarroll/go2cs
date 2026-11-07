@@ -12,12 +12,12 @@ internal static UntypedInt dumpSize => /* 1 << 18 */ 262144;
 
 internal static UntypedInt pollLimit => 2000;
 
-internal static slice<@string> parked = slice<@string>([
+internal static slice<@string> parked = [
     "sync.Mutex.Lock",
     "chan receive",
     "select",
     "semacquire"
-]);
+];
 
 internal static bool present(@string dump, @string state) {
     return strings.Contains(dump, "["u8 + state + "]:"u8);
@@ -34,7 +34,7 @@ internal static @string await(slice<byte> buf, slice<@string> want, bool sense) 
         d = dump(buf);
         var ok = true;
 
-        foreach (var (_, state) in want) {
+        foreach (var (_, state) in range(want)) {
             if (present(d, state) != sense) {
                 ok = false;
                 break;
@@ -106,7 +106,7 @@ internal static partial void Main() {
 
     @string blocked = await(buf, parked, true);
 
-    foreach (var (_, state) in parked) {
+    foreach (var (_, state) in range(parked)) {
         fmt.Printf("parked %s: %v\n"u8, state, present(blocked, state));
     }
 
@@ -119,13 +119,13 @@ internal static partial void Main() {
     close(selA);
     Ꮡwg.Done();
 
-    foreach (var _ᴛ1 in range(parked)) {
+    foreach (var _ᴛ1 in range(len(parked))) {
         ᐸꟷ(done);
     }
 
     @string released = await(buf, parked, false);
 
-    foreach (var (_, state) in parked) {
+    foreach (var (_, state) in range(parked)) {
         fmt.Printf("released %s: %v\n"u8, state, present(released, state));
     }
 

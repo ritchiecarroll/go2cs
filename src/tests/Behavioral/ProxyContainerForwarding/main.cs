@@ -24,7 +24,7 @@ public static nint Count<N>(N n)
 {
     nint total = 1;
 
-    foreach (var (_, kid) in n.Children()) {
+    foreach (var (_, kid) in range(n.Children())) {
         total += Count(kid);
     }
 
@@ -36,7 +36,7 @@ public static slice<@string> Labels<N>(N n)
 {
     var @out = slice<@string>([n.Label()]);
 
-    foreach (var (_, kid) in n.Children()) {
+    foreach (var (_, kid) in range(n.Children())) {
         @out = appendꓸꓸꓸ(@out, Labels(kid));
     }
 
@@ -48,7 +48,7 @@ public static void Rename<N>(N n, Func<N, N> rename)
 {
     var kids = n.Children();
 
-    foreach (var i in range(kids)) {
+    foreach (var i in range(len(kids))) {
         kids[i] = rename(kids[i]);
     }
 }
@@ -126,7 +126,7 @@ public static slice<@string> Names<N>(N n)
 }
 
 internal static void Main() {
-    var root = new Leaf(name: "root", kids: slice<Leaf>([new(name: "a"), new(name: "b", kids: slice<Leaf>([new(name: "c")]))]));
+    var root = new Leaf(name: "root", kids: [new(name: "a"), new(name: "b", kids: [new(name: "c")])]);
 
     fmt.Println(Count(root));
     fmt.Println(Labels(root));

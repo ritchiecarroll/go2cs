@@ -90,7 +90,7 @@ internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr,
     // header, zero-padded
     nint i = copy(data[2..(int)(2 + b.hdrsize)], hdr);
     builtin.clear(data[(int)(2 + i)..(int)(2 + b.hdrsize)]);
-    foreach (var (iΔ1, pc) in stk) {
+    foreach (var (iΔ1, pc) in range(stk)) {
         data[(nint)(2 + b.hdrsize + (uintptr)iΔ1)] = (uint64)pc;
     }
     while (ᐧ) {

@@ -1,0 +1,36 @@
+diff --git a/src/core/golib/array.cs b/src/core/golib/array.cs
+index a97149f702..4634573d4b 100644
+--- a/src/core/golib/array.cs
++++ b/src/core/golib/array.cs
+@@ -621,10 +621,9 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
+     /// <c>for i := range a</c>, where Go copies nothing.
+     /// </para>
+     /// </remarks>
+-    public Enumerator GetEnumerator()
+-    {
+-        return new Enumerator(this);
+-    }
++    public ValueEnumerator GetEnumerator() => new ValueEnumerator(new Enumerator(this));
++    public Enumerator Pairs() => new Enumerator(this);
++    public struct ValueEnumerator { private Enumerator m_e; internal ValueEnumerator(Enumerator e) { m_e = e; } public bool MoveNext() => m_e.MoveNext(); public T Current => m_e.Current.Item2; }
+ 
+     /// <summary>
+     /// Allocation-free (index, value) enumerator over an <see cref="array{T}"/>.
+diff --git a/src/core/golib/slice.cs b/src/core/golib/slice.cs
+index 9ec22a514e..7b5ceb5a7d 100644
+--- a/src/core/golib/slice.cs
++++ b/src/core/golib/slice.cs
+@@ -1007,10 +1007,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
+     /// implements the interface, so an explicit <c>IEnumerator&lt;(nint, T)&gt;</c> consumer keeps
+     /// working (it boxes, exactly as it did before); only the pattern path avoids the box.
+     /// </remarks>
+-    public Enumerator GetEnumerator()
+-    {
+-        return new Enumerator(this);
+-    }
++    public ValueEnumerator GetEnumerator() => new ValueEnumerator(new Enumerator(this));
++    public Enumerator Pairs() => new Enumerator(this);
++    public struct ValueEnumerator { private Enumerator m_e; internal ValueEnumerator(Enumerator e) { m_e = e; } public bool MoveNext() => m_e.MoveNext(); public T Current => m_e.Current.Item2; }
+ 
+     /// <summary>
+     /// Allocation-free (index, value) enumerator over a <see cref="slice{T}"/>.

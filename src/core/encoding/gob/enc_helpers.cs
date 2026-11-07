@@ -62,7 +62,7 @@ internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
         // It is kind bool but not type bool. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != false || state.sendZero) {
             if (x) {
                 state.encodeUint(1);
@@ -90,7 +90,7 @@ internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValu
         // It is kind complex64 but not type complex64. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0F.i() || state.sendZero) {
             var rpart = floatBits((float64)real(x));
             var ipart = floatBits((float64)imag(x));
@@ -117,7 +117,7 @@ internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸVal
         // It is kind complex128 but not type complex128. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0D.i() || state.sendZero) {
             var rpart = floatBits(real(x));
             var ipart = floatBits(imag(x));
@@ -144,7 +144,7 @@ internal static bool encFloat32Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
         // It is kind float32 but not type float32. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0F || state.sendZero) {
             var bits = floatBits((float64)x);
             state.encodeUint(bits);
@@ -169,7 +169,7 @@ internal static bool encFloat64Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
         // It is kind float64 but not type float64. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0D || state.sendZero) {
             var bits = floatBits(x);
             state.encodeUint(bits);
@@ -194,7 +194,7 @@ internal static bool encIntSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
         // It is kind int but not type int. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeInt((int64)x);
         }
@@ -218,7 +218,7 @@ internal static bool encInt16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
         // It is kind int16 but not type int16. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeInt((int64)x);
         }
@@ -242,7 +242,7 @@ internal static bool encInt32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
         // It is kind int32 but not type int32. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeInt((int64)x);
         }
@@ -266,7 +266,7 @@ internal static bool encInt64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
         // It is kind int64 but not type int64. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeInt(x);
         }
@@ -290,7 +290,7 @@ internal static bool encInt8Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
         // It is kind int8 but not type int8. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeInt((int64)x);
         }
@@ -314,7 +314,7 @@ internal static bool encStringSlice(ж<encoderState> Ꮡstate, reflectꓸValue v
         // It is kind string but not type string. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != ""u8 || state.sendZero) {
             state.encodeUint((uint64)len(x));
             state.b.WriteString(x);
@@ -339,7 +339,7 @@ internal static bool encUintSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
         // It is kind uint but not type uint. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeUint((uint64)x);
         }
@@ -363,7 +363,7 @@ internal static bool encUint16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
         // It is kind uint16 but not type uint16. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeUint((uint64)x);
         }
@@ -387,7 +387,7 @@ internal static bool encUint32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
         // It is kind uint32 but not type uint32. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeUint((uint64)x);
         }
@@ -411,7 +411,7 @@ internal static bool encUint64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
         // It is kind uint64 but not type uint64. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeUint(x);
         }
@@ -435,7 +435,7 @@ internal static bool encUintptrSlice(ж<encoderState> Ꮡstate, reflectꓸValue 
         // It is kind uintptr but not type uintptr. TODO: We can handle this unsafely.
         return false;
     }
-    foreach (var (_, x) in Δslice) {
+    foreach (var (_, x) in range(Δslice)) {
         if (x != 0 || state.sendZero) {
             state.encodeUint((uint64)x);
         }

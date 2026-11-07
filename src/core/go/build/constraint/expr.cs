@@ -527,11 +527,11 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
 
     // Split into AND of ORs of ANDs of literals (tag or NOT tag).
     slice<slice<slice<Expr>>> split = default;
-    foreach (var (_, or) in appendSplitAnd(default, x)) {
+    foreach (var (_, or) in range(appendSplitAnd(default, x))) {
         slice<slice<Expr>> ands = default;
-        foreach (var (_, and) in appendSplitOr(default, or)) {
+        foreach (var (_, and) in range(appendSplitOr(default, or))) {
             slice<Expr> lits = default;
-            foreach (var (_, lit) in appendSplitAnd(default, and)) {
+            foreach (var (_, lit) in range(appendSplitAnd(default, and))) {
                 switch (lit.type()) {
                 case ж<TagExpr> _:
                 case ж<NotExpr> _: {
@@ -551,27 +551,27 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     // push the top-level ANDs to the bottom level, so that we get
     // one // +build line instead of many.
     nint maxOr = 0;
-    foreach (var (_, or) in split) {
+    foreach (var (_, or) in range(split)) {
         if (maxOr < len(or)) {
             maxOr = len(or);
         }
     }
     if (maxOr == 1) {
         slice<Expr> lits = default;
-        foreach (var (_, or) in split) {
+        foreach (var (_, or) in range(split)) {
             lits = appendꓸꓸꓸ(lits, or[0]);
         }
-        split = slice<slice<slice<Expr>>>([slice<slice<Expr>>([lits])]);
+        split = [[lits]];
     }
 
     // Prepare the +build lines.
     slice<@string> lines = default;
-    foreach (var (_, or) in split) {
+    foreach (var (_, or) in range(split)) {
         ref var line = ref heap(new strings.Builder(), out var Ꮡline);
         Ꮡline.WriteString(buildˢ2);
-        foreach (var (_, and) in or) {
+        foreach (var (_, and) in range(or)) {
             Ꮡline.WriteString(" ");
-            foreach (var (i, lit) in and) {
+            foreach (var (i, lit) in range(and)) {
                 if (i > 0) {
                     Ꮡline.WriteString(",");
                 }

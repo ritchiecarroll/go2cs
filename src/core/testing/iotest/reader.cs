@@ -245,7 +245,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 
     if (r._<io.ReaderAt>(out var rΔ2)) {
         var dataΔ2 = new slice<byte>(len(content), len(content) + 1);
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
         var (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2, 0);
@@ -261,7 +261,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             return fmt.Errorf("ReadAt(1, %d) = %v, %v, want 0, EOF"u8, len(dataΔ2), nΔ2, errΔ11);
         }
 
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
         (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(0, cap(dataΔ2)), 0);
@@ -272,10 +272,10 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             return fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q"u8, len(dataΔ2), dataΔ2, content);
         }
 
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             dataΔ2[i] = 0xfe;
         }
-        foreach (var i in range(dataΔ2)) {
+        foreach (var i in range(len(dataΔ2))) {
             (nΔ2, errΔ11) = rΔ2.ReadAt(dataΔ2.slice(i, i + 1), (int64)i);
             if (nΔ2 != 1 || errΔ11 != nil && (i != len(dataΔ2) - 1 || !AreEqual(errΔ11, io.EOF))) {
                 @string want = nilˢ;

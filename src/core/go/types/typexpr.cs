@@ -627,7 +627,7 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
 // If an error occurred, the result is nil, but all list elements were type-checked.
 internal static slice<ΔType> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
     var res = new slice<ΔType>(len(list)); // res != nil even if len(list) == 0
-    foreach (var (i, x) in list) {
+    foreach (var (i, x) in range(list)) {
         var t = Ꮡcheck.varType(x);
         if (!isValid(t)) {
             res = default;

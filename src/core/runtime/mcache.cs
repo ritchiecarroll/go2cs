@@ -97,7 +97,7 @@ internal static ж<mcache> allocmcache() {
         Ꮡc.ValueSlot.ᏑflushGen.Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.Ꮡlock);
     });
-    foreach (var i in range(c.alloc)) {
+    foreach (var i in range(len(c.alloc))) {
         c.of(mcache.Ꮡalloc).ElementRef(i) = Ꮡemptymspan;
     }
     c.nextSample = nextSample();
@@ -299,7 +299,7 @@ internal static void releaseAll(this ref mcache c) {
 
     var sg = mheap_.sweepgen;
     var dHeapLive = (int64)0;
-    foreach (var i in range(c.alloc)) {
+    foreach (var i in range(len(c.alloc))) {
         var s = c.alloc[i];
         if (s != Ꮡemptymspan) {
             var slotsUsed = (int64)s.allocCount - (int64)s.allocCountBeforeCache;

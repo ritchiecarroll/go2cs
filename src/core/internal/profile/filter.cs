@@ -17,7 +17,7 @@ public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@st
     bool im = default;
 
     var samples = new slice<ж<Sample>>(0, len(p.Sample));
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         var (focused, ignored) = focusedSample(ref (s).DerefOrNull(), focus, ignore);
         fm = fm || focused;
         im = im || ignored;
@@ -37,7 +37,7 @@ internal static (bool fm, bool im) focusedSample(ref Sample s, Func<@string, @st
 
     fm = focus == nil;
     foreach (var (key, vals) in s.Label) {
-        foreach (var (_, val) in vals) {
+        foreach (var (_, val) in range(vals)) {
             if (ignore != nil && ignore(key, val, 0)) {
                 im = true;
             }
@@ -47,7 +47,7 @@ internal static (bool fm, bool im) focusedSample(ref Sample s, Func<@string, @st
         }
     }
     foreach (var (key, vals) in s.NumLabel) {
-        foreach (var (_, val) in vals) {
+        foreach (var (_, val) in range(vals)) {
             if (ignore != nil && ignore(key, ""u8, val)) {
                 im = true;
             }

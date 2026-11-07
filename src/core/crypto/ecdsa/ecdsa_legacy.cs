@@ -110,10 +110,10 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
     var (_, errΔ1) = io.ReadFull(csprng, seed[..]); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
-    foreach (var (i, b) in priv.D.Bytes()) {
+    foreach (var (i, b) in range(priv.D.Bytes())) {
         seed[i % 32] ^= (byte)(b);
     }
-    foreach (var (i, b) in hash) {
+    foreach (var (i, b) in range(hash)) {
         seed[i % 32] ^= (byte)(b);
     }
     csprng = new rand_ChaCha8жReader(rand.NewChaCha8(seed));

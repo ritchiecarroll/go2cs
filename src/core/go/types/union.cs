@@ -66,7 +66,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     slice<ж<ΔTerm>> terms = default;
 
     ΔType u = default;
-    foreach (var (i, x) in tlist) {
+    foreach (var (i, x) in range(tlist)) {
         var Δterm = parseTilde(Ꮡcheck, x);
         if (len(tlist) == 1 && !(~Δterm).tilde) {
             // Single type. Ok to return early because all relevant
@@ -99,7 +99,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     var termsʗ1 = terms;
     var tlistʗ1 = tlist;
     check.later(() => {
-        foreach (var (i, t) in termsʗ1) {
+        foreach (var (i, t) in range(termsʗ1)) {
             if (!isValid((~t).typ)) {
                 continue;
             }
@@ -180,7 +180,7 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     }
     var Δterm = NewTerm(tilde, typ);
     if (tilde) {
-        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union(slice<ж<ΔTerm>>([Δterm])))), default);
+        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union([Δterm]))), default);
     }
     return Δterm;
 }
@@ -193,7 +193,7 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     assert(!IsInterface(y.typ));
-    foreach (var (i, x) in terms) {
+    foreach (var (i, x) in range(terms)) {
         if (IsInterface((~x).typ)) {
             continue;
         }

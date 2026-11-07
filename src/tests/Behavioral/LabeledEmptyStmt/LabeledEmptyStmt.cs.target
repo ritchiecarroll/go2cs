@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static nint scan(slice<nint> vals) {
     nint best = -1;
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         if (v < 0) {
             goto keep;
         }
@@ -31,8 +31,8 @@ big:
 
 internal static nint nestedGotoEnd(slice<slice<nint>> rows) {
     nint total = 0;
-    foreach (var (_, row) in rows) {
-        foreach (var (_, v) in row) {
+    foreach (var (_, row) in range(rows)) {
+        foreach (var (_, v) in range(row)) {
             if (v == 0) {
                 goto skip;
             }
@@ -44,9 +44,9 @@ skip:;
 }
 
 internal static void Main() {
-    fmt.Println(scan(slice<nint>([3, -1, 7, 2, -5, 5])));
+    fmt.Println(scan([3, -1, 7, 2, -5, 5]));
     fmt.Println(gotoEndOfFunc(3), gotoEndOfFunc(20));
-    fmt.Println(nestedGotoEnd(slice<slice<nint>>([slice<nint>([1, 2, 3]), slice<nint>([4, 0, 6]), slice<nint>([7, 8])])));
+    fmt.Println(nestedGotoEnd([[1, 2, 3], [4, 0, 6], [7, 8]]));
 }
 
 } // end main_package

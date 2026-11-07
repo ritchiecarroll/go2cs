@@ -48,7 +48,7 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
         // Keep checking exts below, so that programs with weird names
         // like "foo.bat.exe" will resolve instead of failing.
     }
-    foreach (var (_, e) in exts) {
+    foreach (var (_, e) in range(exts)) {
         @string f = @file + e; if (chkStat(f) == nil) {
             return (f, default);
         }
@@ -86,7 +86,7 @@ internal static (@string, error) lookExtensions(@string path, @string dir) {
     }
     var exts = pathExt();
     @string extΔ1 = filepath.Ext(path); if (extΔ1 != ""u8) {
-        foreach (var (_, e) in exts) {
+        foreach (var (_, e) in range(exts)) {
             if (strings.EqualFold(extΔ1, e)) {
                 // Assume that path has already been resolved.
                 return (path, default);
@@ -131,7 +131,7 @@ internal static slice<@string> pathExt() {
             exts = append(exts, e);
         }
     } else {
-        exts = slice<@string>([".com", ".exe", ".bat", ".cmd"]);
+        exts = [".com", ".exe", ".bat", ".cmd"];
     }
     return exts;
 }
@@ -172,7 +172,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
     }
 
     @string path = os.Getenv(pathˢ);
-    foreach (var (_, dir) in filepath.SplitList(path)) {
+    foreach (var (_, dir) in range(filepath.SplitList(path))) {
         if (dir == ""u8) {
             // Skip empty entries, consistent with what PowerShell does.
             // (See https://go.dev/issue/61493#issuecomment-1649724826.)

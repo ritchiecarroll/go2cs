@@ -84,12 +84,12 @@ internal static void Main() {
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(slice<byte>([1, 2])));
     fmt.Println("copy nil dst:", n);
 
-    foreach (var (_, vΔ1) in slice<any>([new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record()])) {
+    foreach (var (_, vΔ1) in range(slice<any>([new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record()]))) {
         var rt = reflect.TypeOf(vΔ1);
         fmt.Printf("named %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }
 
-    foreach (var (_, vΔ2) in slice<any>([slice<nint>([]), new byte[]{}.array(4), new map<@string, nint>{}, new channel<nint>(0), Ꮡarr, (nint)0])) {
+    foreach (var (_, vΔ2) in range(slice<any>([slice<nint>([]), new byte[]{}.array(4), new map<@string, nint>{}, new channel<nint>(0), Ꮡarr, (nint)0]))) {
         var rt = reflect.TypeOf(vΔ2);
         fmt.Printf("plain %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }

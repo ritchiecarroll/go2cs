@@ -101,7 +101,7 @@ public static @string String(this ref ListNode l) {
 }
 
 internal static void writeTo(this ref ListNode l, ж<strings.Builder> sb) {
-    foreach (var (_, n) in l.Nodes) {
+    foreach (var (_, n) in range(l.Nodes)) {
         n.writeTo(sb);
     }
 }
@@ -113,7 +113,7 @@ public static ж<ListNode> CopyList(this ж<ListNode> Ꮡl) {
         return Ꮡl;
     }
     var n = l.tr.newList(l.Pos);
-    foreach (var (_, elem) in l.Nodes) {
+    foreach (var (_, elem) in range(l.Nodes)) {
         n.append(elem.Copy());
     }
     return n;
@@ -210,7 +210,7 @@ public static @string String(this ref PipeNode p) {
 
 internal static void writeTo(this ref PipeNode p, ж<strings.Builder> sb) {
     if (len(p.Decl) > 0) {
-        foreach (var (i, v) in p.Decl) {
+        foreach (var (i, v) in range(p.Decl)) {
             if (i > 0) {
                 sb.WriteString(", ");
             }
@@ -222,7 +222,7 @@ internal static void writeTo(this ref PipeNode p, ж<strings.Builder> sb) {
             sb.WriteString(" := ");
         }
     }
-    foreach (var (i, c) in p.Cmds) {
+    foreach (var (i, c) in range(p.Cmds)) {
         if (i > 0) {
             sb.WriteString(" | ");
         }
@@ -241,12 +241,12 @@ public static ж<PipeNode> CopyPipe(this ж<PipeNode> Ꮡp) {
         return Ꮡp;
     }
     var vars = new slice<ж<VariableNode>>(len(p.Decl));
-    foreach (var (i, d) in p.Decl) {
+    foreach (var (i, d) in range(p.Decl)) {
         vars[i] = d.Copy()._<ж<VariableNode>>();
     }
     var n = p.tr.newPipeline(p.Pos, p.Line, vars);
     n.IsAssign = p.IsAssign;
-    foreach (var (_, c) in p.Cmds) {
+    foreach (var (_, c) in range(p.Cmds)) {
         n.append(c.Copy()._<ж<CommandNode>>());
     }
     return n;
@@ -314,7 +314,7 @@ public static @string String(this ref CommandNode c) {
 }
 
 internal static void writeTo(this ref CommandNode c, ж<strings.Builder> sb) {
-    foreach (var (i, arg) in c.Args) {
+    foreach (var (i, arg) in range(c.Args)) {
         if (i > 0) {
             sb.WriteByte((byte)' ');
         }
@@ -339,7 +339,7 @@ public static Node Copy(this ж<CommandNode> Ꮡc) {
         return new CommandNodeжNode(Ꮡc);
     }
     var n = c.tr.newCommand(c.Pos);
-    foreach (var (_, cΔ1) in c.Args) {
+    foreach (var (_, cΔ1) in range(c.Args)) {
         n.append(cΔ1.Copy());
     }
     return new CommandNodeжNode(n);
@@ -414,7 +414,7 @@ public static @string String(this ref VariableNode v) {
 }
 
 internal static void writeTo(this ref VariableNode v, ж<strings.Builder> sb) {
-    foreach (var (i, id) in v.Ident) {
+    foreach (var (i, id) in range(v.Ident)) {
         if (i > 0) {
             sb.WriteByte((byte)'.');
         }
@@ -523,7 +523,7 @@ public static @string String(this ref FieldNode f) {
 }
 
 internal static void writeTo(this ref FieldNode f, ж<strings.Builder> sb) {
-    foreach (var (_, id) in f.Ident) {
+    foreach (var (_, id) in range(f.Ident)) {
         sb.WriteByte((byte)'.');
         sb.WriteString(id);
     }
@@ -578,7 +578,7 @@ internal static void writeTo(this ref ChainNode c, ж<strings.Builder> sb) {
     } else {
         c.Node.writeTo(sb);
     }
-    foreach (var (_, field) in c.Field) {
+    foreach (var (_, field) in range(c.Field)) {
         sb.WriteByte((byte)'.');
         sb.WriteString(field);
     }

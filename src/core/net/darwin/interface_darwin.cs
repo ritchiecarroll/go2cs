@@ -22,7 +22,7 @@ internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ref Interface
         return (default, err);
     }
     var ifmat = new slice<ΔAddr>(0, len(msgs));
-    foreach (var (_, m) in msgs) {
+    foreach (var (_, m) in range(msgs)) {
         switch (m.type()) {
         case ж<routebsd.InterfaceMulticastAddrMessage> mΔ1: {
             if (ifi.Index != mΔ1.Index) {

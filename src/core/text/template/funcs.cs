@@ -232,7 +232,7 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
     if (!item.IsValid()) {
         return (new reflectꓸValue(), fmt.Errorf("index of untyped nil"u8));
     }
-    foreach (var (_, vᴛ1) in indexes) {
+    foreach (var (_, vᴛ1) in range(indexes)) {
         var index = vᴛ1;
 
         index = indirectInterface(index);
@@ -313,7 +313,7 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
     }}
     // set default values for cases item[:], item[i:].
     var idx = new nint[]{0, item.Len()}.array(3);
-    foreach (var (i, index) in indexes) {
+    foreach (var (i, index) in range(indexes)) {
         var (x, err) = indexArg(index, cap);
         if (err != nil) {
             return (new reflectꓸValue(), err);
@@ -388,7 +388,7 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
         }
     }
     var argv = new slice<reflectꓸValue>(len(args), () => new(nil));
-    foreach (var (i, vᴛ1) in args) {
+    foreach (var (i, vᴛ1) in range(args)) {
         var arg = vᴛ1;
 
         arg = indirectInterface(arg);
@@ -531,7 +531,7 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
         return (false, errNoComparison);
     }
     var (k1, _) = basicKind(arg1);
-    foreach (var (_, vᴛ1) in arg2) {
+    foreach (var (_, vᴛ1) in range(arg2)) {
         var arg = vᴛ1;
 
         arg = indirectInterface(arg);
@@ -706,7 +706,7 @@ internal static slice<byte> htmlNull = slice<byte>("\uFFFD"u8);
 // HTMLEscape writes to w the escaped HTML equivalent of the plain text data b.
 public static void HTMLEscape(io.Writer w, slice<byte> b) {
     nint last = 0;
-    foreach (var (i, c) in b) {
+    foreach (var (i, c) in range(b)) {
         slice<byte> html = default;
         switch (c) {
         case (byte)'\u0000': {
@@ -891,7 +891,7 @@ internal static @string evalArgs(slice<any> args) {
         (s, ok) = args[0]._<@string>(ᐧ);
     }
     if (!ok) {
-        foreach (var (i, arg) in args) {
+        foreach (var (i, arg) in range(args)) {
             var (a, okΔ1) = printableValue(reflect.ValueOf(arg));
             if (okΔ1) {
                 args[i] = a;

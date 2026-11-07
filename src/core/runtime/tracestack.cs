@@ -207,7 +207,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     w.@byte((byte)tracev2.EvStack);
     w.varint(node.id);
     w.varint((uint64)len(frames));
-    foreach (var (_, frame) in frames) {
+    foreach (var (_, frame) in range(frames)) {
         w.varint((uint64)frame.PC);
         w.varint(frame.funcID);
         w.varint(frame.fileID);
@@ -215,7 +215,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     }
 
     // Recursively walk all child nodes.
-    foreach (var i in range(node.children)) {
+    foreach (var i in range(len(node.children))) {
         @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
@@ -329,7 +329,7 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
     };
 
 outer:
-    foreach (var (_, retPC) in pcBuf[1..]) {
+    foreach (var (_, retPC) in range(pcBuf[1..])) {
         var callPC = retPC - 1;
         var fi = findfunc(callPC);
         if (!fi.valid()) {

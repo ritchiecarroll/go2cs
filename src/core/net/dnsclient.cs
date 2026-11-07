@@ -188,13 +188,13 @@ partial struct byPriorityWeight /*[]ж<SRV>*/;
 // described in RFC 2782.
 internal static void shuffleByWeight(this byPriorityWeight addrs) {
     nint sum = 0;
-    foreach (var (_, addr) in addrs) {
+    foreach (var (_, addr) in range<ж<SRV>>(addrs)) {
         sum += (nint)addr.Weight;
     }
     while (sum > 0 && len(addrs) > 1) {
         nint s = 0;
         nint n = randIntn(sum);
-        foreach (var i in range(addrs)) {
+        foreach (var i in range(len(addrs))) {
             s += (nint)addrs[i].Weight;
             if (s > n) {
                 if (i > 0) {
@@ -237,7 +237,7 @@ partial struct byPref /*[]ж<MX>*/;
 
 // sort reorders MX records as specified in RFC 5321.
 internal static void sort(this byPref s) {
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }

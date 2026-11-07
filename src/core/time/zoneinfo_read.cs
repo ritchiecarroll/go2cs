@@ -245,7 +245,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         return (default, errBadData);
     }
     var zones = new slice<zone>(nzone);
-    foreach (var i in range(zones)) {
+    foreach (var i in range(len(zones))) {
         bool ok = default;
         uint32 nΔ1 = default;
         (nΔ1, ok) = zonedata.big4(); if (!ok) {
@@ -276,7 +276,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
 
     // Now the transition time info.
     var tx = new slice<zoneTrans>(n[NTime]);
-    foreach (var i in range(tx)) {
+    foreach (var i in range(len(tx))) {
         int64 nΔ2 = default;
         if (!is64) {
             var (n4, ok) = txtimes.big4(); if (!ok) {
@@ -316,7 +316,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     // Fill in the cache with information about right now,
     // since that will be the most common lookup.
     var (sec, _, _) = runtimeNow();
-    foreach (var i in range(tx)) {
+    foreach (var i in range(len(tx))) {
         if (tx[i].when <= sec && (i + 1 == len(tx) || sec < tx[i + 1].when)) {
             l.cacheStart = tx[i].when;
             l.cacheEnd = omega;
@@ -352,7 +352,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
 }
 
 internal static nint findZone(slice<zone> zones, @string name, nint offset, bool isDST) {
-    foreach (var (i, z) in zones) {
+    foreach (var (i, z) in range(zones)) {
         if (z.name == name && z.offset == offset && z.isDST == isDST) {
             return i;
         }
@@ -529,7 +529,7 @@ internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, sl
     ж<ΔLocation> z = default;
     error firstErr = default;
 
-    foreach (var (_, source) in sources) {
+    foreach (var (_, source) in range(sources)) {
         var (zoneData, err) = loadTzinfo(name, source);
         if (err == nil) {
             (z, err) = LoadLocationFromTZData(name, zoneData); if (err == nil) {

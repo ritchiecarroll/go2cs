@@ -23,7 +23,7 @@ public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 
     var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
-    foreach (var (_, x) in d.Content) {
+    foreach (var (_, x) in range(d.Content)) {
         hp.block(Ꮡout, x);
     }
     return @out.Bytes();
@@ -85,7 +85,7 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
         @out.WriteString("<");
         @out.WriteString(kind);
         @string next = "1";
-        foreach (var (_, item) in xΔ1.Items) {
+        foreach (var (_, item) in range(xΔ1.Items)) {
             @out.WriteString("<li");
             @string n = item.Number; if (n != ""u8) {
                 if (n != next) {
@@ -98,7 +98,7 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
             }
             @out.WriteString(">");
             p.tight = !xΔ1.BlankBetween();
-            foreach (var (_, blk) in item.Content) {
+            foreach (var (_, blk) in range(item.Content)) {
                 p.block(Ꮡout, blk);
             }
             p.tight = false;
@@ -131,7 +131,7 @@ private static readonly @string aHrefˢᵇ = @"<a href="""u8;
 internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    foreach (var (_, t) in x) {
+    foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
             p.escape(Ꮡout, (@string)tΔ1);

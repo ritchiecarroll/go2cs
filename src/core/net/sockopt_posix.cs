@@ -26,7 +26,7 @@ internal static (IP, error) interfaceToIPv4Addr(ж<Interface> ifi) {
     if (err != nil) {
         return (default, err);
     }
-    foreach (var (_, ifa) in ifat) {
+    foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {
         case ж<IPAddr> v: {
             if (v.IP.To4() != nil) {

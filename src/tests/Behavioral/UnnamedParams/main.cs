@@ -29,7 +29,7 @@ internal static nint total(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint sum = 0;
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         sum += v;
     }
     return sum;

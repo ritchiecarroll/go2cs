@@ -77,7 +77,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
                     if (tinfo.xmlname == nil) {
                         tinfo.xmlname = inner.xmlname;
                     }
-                    foreach (var (_, vᴛ1) in inner.fields) {
+                    foreach (var (_, vᴛ1) in range(inner.fields)) {
                         var finfoΔ1 = vᴛ1;
 
                         finfoΔ1.idx = appendꓸꓸꓸ(slice<nint>([i]), finfoΔ1.idx);
@@ -128,7 +128,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         finfo.flags = fElement;
     } else {
         tag = tokens[0];
-        foreach (var (_, flag) in tokens[1..]) {
+        foreach (var (_, flag) in range(tokens[1..])) {
             var exprᴛ1 = flag;
             switch (ᐧ) {
             case {} when exprᴛ1 == "attr"u8: {
@@ -287,7 +287,7 @@ internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, re
 
     slice<nint> conflicts = default;
 Loop:
-    foreach (var i in range(tinfo.fields)) {
+    foreach (var i in range(len(tinfo.fields))) {
         // First, figure all conflicts. Most working code will have none.
         var oldf = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)(oldf.flags & fMode) != (fieldFlags)(newf.flags & fMode)) {
@@ -326,14 +326,14 @@ break_Loop:;
 
     // If any conflict is shallower, ignore the new field.
     // This matches the Go field resolution on embedding.
-    foreach (var (_, i) in conflicts) {
+    foreach (var (_, i) in range(conflicts)) {
         if (len(tinfo.fields[i].idx) < len(newf.idx)) {
             return default;
         }
     }
 
     // Otherwise, if any of them is at the same depth level, it's an error.
-    foreach (var (_, i) in conflicts) {
+    foreach (var (_, i) in range(conflicts)) {
         var oldf = Ꮡ(tinfo.fields, i);
         if (len(oldf.idx) == len(newf.idx)) {
             var f1 = typ.FieldByIndex(oldf.idx);
@@ -374,7 +374,7 @@ internal const bool dontInitNilPointers = false;
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
 internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue v, bool shouldInitNilPointers) {
-    foreach (var (i, x) in finfo.idx) {
+    foreach (var (i, x) in range(finfo.idx)) {
         if (i > 0) {
             var t = v.Type();
             if (t.Kind() == reflect.ΔPointer && t.Elem().Kind() == reflect.Struct) {

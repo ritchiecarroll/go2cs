@@ -238,7 +238,7 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
 internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    foreach (var (_, head) in slice<ж<ж<stackWorkBuf>>>([Ꮡs.Ꮡbuf, Ꮡs.Ꮡcbuf])) {
+    foreach (var (_, head) in range(slice<ж<ж<stackWorkBuf>>>([Ꮡs.Ꮡbuf, Ꮡs.Ꮡcbuf]))) {
         var buf = head.ValueSlot;
         if (buf == nil) {
             // Never had any data.

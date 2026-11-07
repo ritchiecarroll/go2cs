@@ -79,7 +79,7 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
                 remove(n);
             }
         } else {
-            foreach (var (_, s) in sigs) {
+            foreach (var (_, s) in range(sigs)) {
                 remove(signum(s));
             }
         }
@@ -176,7 +176,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                 add(n);
             }
         } else {
-            foreach (var (_, s) in sig) {
+            foreach (var (_, s) in range(sig)) {
                 add(signum(s));
             }
         }
@@ -235,7 +235,7 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
 
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
 
-    foreach (var (i, s) in handlers.stopping) {
+    foreach (var (i, s) in range(handlers.stopping)) {
         if (s.c == c) {
             handlers.stopping = slices.Delete<slice<stopping>, stopping>(handlers.stopping, i, i + 1);
             break;
@@ -277,7 +277,7 @@ internal static void process(osꓸSignal sig) {
         }
 
         // Avoid the race mentioned in Stop.
-        foreach (var (_, d) in handlers.stopping) {
+        foreach (var (_, d) in range(handlers.stopping)) {
             if (d.h.want(n)) {
                 var selᴛ2 = d.c.ᐸꟷ(sig, ꓸꓸꓸ);
                 switch (trySelect(selᴛ2)) {
@@ -369,7 +369,7 @@ internal static @string String(this ref signalCtx c) {
     buf = append(buf, ((@string)("signal.NotifyContext("u8 + name)).ꓸꓸꓸ);
     if (len(c.signals) != 0) {
         buf = append(buf, ((@string)", [").ꓸꓸꓸ);
-        foreach (var (i, s) in c.signals) {
+        foreach (var (i, s) in range(c.signals)) {
             buf = append(buf, s.String().ꓸꓸꓸ);
             if (i != len(c.signals) - 1) {
                 buf = append(bufᴷ, buf, (byte)' ');

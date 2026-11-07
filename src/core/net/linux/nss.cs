@@ -121,7 +121,7 @@ partial struct nssSource {
 // standardCriteria reports all specified criteria have the default
 // status actions.
 internal static bool standardCriteria(this nssSource s) {
-    foreach (var (i, crit) in s.criteria) {
+    foreach (var (i, crit) in range(s.criteria)) {
         if (!crit.standardStatusAction(i == len(s.criteria) - 1)) {
             return false;
         }

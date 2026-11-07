@@ -137,7 +137,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
     nint total = 0;
-    foreach (var (_, val) in vals) {
+    foreach (var (_, val) in range(vals)) {
         total += val;
     }
 ```

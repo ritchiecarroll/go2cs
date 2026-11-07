@@ -338,7 +338,7 @@ internal static bool isSpace(rune r) {
         return false;
     }
     var rx = (uint16)r;
-    foreach (var (_, vᴛ1) in space) {
+    foreach (var (_, vᴛ1) in range(space)) {
         var rng = vᴛ1.Clone();
 
         if (rx < rng[0]) {
@@ -1310,7 +1310,7 @@ internal static (nint numProcessed, error err) doScan(this ж<ss> Ꮡs, slice<an
         ref var err = ref Ꮡerr.ValueSlot;
 
         defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
-        foreach (var (_, arg) in a) {
+        foreach (var (_, arg) in range(a)) {
             Ꮡs.scanOne('v', arg);
             numProcessed++;
         }

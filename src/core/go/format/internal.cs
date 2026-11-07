@@ -128,7 +128,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> fset, ж<ast.File>
     // in which case spaces count as one tab.
     nint indent = 0;
     var hasSpace = false;
-    foreach (var (_, b) in src.slice(i, j)) {
+    foreach (var (_, b) in range(src.slice(i, j))) {
         switch (b) {
         case (byte)' ': {
             hasSpace = true;

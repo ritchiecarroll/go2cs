@@ -6,22 +6,22 @@ namespace go.regexp;
 
 partial class syntax_package {
 
-internal static slice<rune> code1 = slice<rune>([ /* \d */
+internal static slice<rune> code1 = [ /* \d */
     0x30, 0x39
-]);
+];
 
-internal static slice<rune> code2 = slice<rune>([ /* \s */
+internal static slice<rune> code2 = [ /* \s */
     0x9, 0xa,
     0xc, 0xd,
     0x20, 0x20
-]);
+];
 
-internal static slice<rune> code3 = slice<rune>([ /* \w */
+internal static slice<rune> code3 = [ /* \w */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
     0x61, 0x7a
-]);
+];
 
 [GoLazy] partial class lazyᴛperlGroup { internal static map<@string, charGroup> perlGroup = new map<@string, charGroup>{
     [@"\d"] = new(+1, code1),
@@ -31,75 +31,75 @@ internal static slice<rune> code3 = slice<rune>([ /* \w */
     [@"\w"] = new(+1, code3),
     [@"\W"] = new(-1, code3)
 }; }
-internal static slice<rune> code4 = slice<rune>([ /* [:alnum:] */
+internal static slice<rune> code4 = [ /* [:alnum:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x61, 0x7a
-]);
+];
 
-internal static slice<rune> code5 = slice<rune>([ /* [:alpha:] */
+internal static slice<rune> code5 = [ /* [:alpha:] */
     0x41, 0x5a,
     0x61, 0x7a
-]);
+];
 
-internal static slice<rune> code6 = slice<rune>([ /* [:ascii:] */
+internal static slice<rune> code6 = [ /* [:ascii:] */
     0x0, 0x7f
-]);
+];
 
-internal static slice<rune> code7 = slice<rune>([ /* [:blank:] */
+internal static slice<rune> code7 = [ /* [:blank:] */
     0x9, 0x9,
     0x20, 0x20
-]);
+];
 
-internal static slice<rune> code8 = slice<rune>([ /* [:cntrl:] */
+internal static slice<rune> code8 = [ /* [:cntrl:] */
     0x0, 0x1f,
     0x7f, 0x7f
-]);
+];
 
-internal static slice<rune> code9 = slice<rune>([ /* [:digit:] */
+internal static slice<rune> code9 = [ /* [:digit:] */
     0x30, 0x39
-]);
+];
 
-internal static slice<rune> code10 = slice<rune>([ /* [:graph:] */
+internal static slice<rune> code10 = [ /* [:graph:] */
     0x21, 0x7e
-]);
+];
 
-internal static slice<rune> code11 = slice<rune>([ /* [:lower:] */
+internal static slice<rune> code11 = [ /* [:lower:] */
     0x61, 0x7a
-]);
+];
 
-internal static slice<rune> code12 = slice<rune>([ /* [:print:] */
+internal static slice<rune> code12 = [ /* [:print:] */
     0x20, 0x7e
-]);
+];
 
-internal static slice<rune> code13 = slice<rune>([ /* [:punct:] */
+internal static slice<rune> code13 = [ /* [:punct:] */
     0x21, 0x2f,
     0x3a, 0x40,
     0x5b, 0x60,
     0x7b, 0x7e
-]);
+];
 
-internal static slice<rune> code14 = slice<rune>([ /* [:space:] */
+internal static slice<rune> code14 = [ /* [:space:] */
     0x9, 0xd,
     0x20, 0x20
-]);
+];
 
-internal static slice<rune> code15 = slice<rune>([ /* [:upper:] */
+internal static slice<rune> code15 = [ /* [:upper:] */
     0x41, 0x5a
-]);
+];
 
-internal static slice<rune> code16 = slice<rune>([ /* [:word:] */
+internal static slice<rune> code16 = [ /* [:word:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
     0x61, 0x7a
-]);
+];
 
-internal static slice<rune> code17 = slice<rune>([ /* [:xdigit:] */
+internal static slice<rune> code17 = [ /* [:xdigit:] */
     0x30, 0x39,
     0x41, 0x46,
     0x61, 0x66
-]);
+];
 
 [GoLazy] partial class lazyᴛposixGroup { internal static map<@string, charGroup> posixGroup = new map<@string, charGroup>{
     [@"[:alnum:]"] = new(+1, code4),

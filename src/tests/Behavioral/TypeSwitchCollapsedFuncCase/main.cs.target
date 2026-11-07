@@ -52,7 +52,7 @@ internal static void Main() {
         nint (nint x) => x + 1,
         (nint)42
     ]);
-    foreach (var (_, h) in hooks) {
+    foreach (var (_, h) in range(hooks)) {
         var (@out, err) = exec(h, from, to);
         fmt.Println(@out, err, kind(h));
     }

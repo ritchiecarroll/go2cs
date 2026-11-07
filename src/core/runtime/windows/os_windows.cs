@@ -519,7 +519,7 @@ internal static void goenvs() {
     }
     envs = new slice<@string>(n);
 
-    foreach (var i in range(envs)) {
+    foreach (var i in range(len(envs))) {
         envs[i] = gostringw(Ꮡ(Δp, 0));
         while (Δp[0] != 0) {
             Δp = Δp[1..];
@@ -580,7 +580,7 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
     }}
     var isASCII = true;
     var b = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(buf), (int)(n)));
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         if (x >= 0x80) {
             isASCII = false;
             break;

@@ -50,7 +50,7 @@ public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
         // Readdir has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
-        infos = slice<FileInfo>([]);
+        infos = [];
     }
     return (infos, err);
 }
@@ -82,7 +82,7 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
         // Readdirnames has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
-        names = slice<@string>([]);
+        names = [];
     }
     return (names, err);
 }
@@ -104,7 +104,7 @@ public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
     var (_, dirents, _, err) = Ꮡf.readdir(n, readdirDirEntry);
     if (dirents == nil) {
         // Match Readdir and Readdirnames: don't return nil slices.
-        dirents = slice<DirEntry>([]);
+        dirents = [];
     }
     return (dirents, err);
 }

@@ -350,7 +350,7 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
         var ft = Ꮡt.funcTab();
         var funcs = new slice<Func>(ft.Count(), () => new(nil));
         var syms = new slice<Sym>(len(funcs));
-        foreach (var i in range(funcs)) {
+        foreach (var i in range(len(funcs))) {
             var f = Ꮡ(funcs, i);
             f.Entry = ft.pc(i);
             f.End = ft.pc(i + 1);

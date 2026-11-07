@@ -27,7 +27,7 @@ partial struct Struct {
 // if no field has a tag, tags may be nil.
 public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
     objset fset = default;
-    foreach (var (_, f) in fields) {
+    foreach (var (_, f) in range(fields)) {
         if (f.name != "_"u8 && fset.insert(new VarжObject(f)) != nil) {
             throw panic("multiple fields with the same name");
         }
@@ -125,12 +125,12 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         addʗ1(ident, true);
     }
 
-    foreach (var (_, f) in list.List) {
+    foreach (var (_, f) in range(list.List)) {
         typ = Ꮡcheck.varType(f.Type);
         tag = Ꮡcheck.tag(f.Tag);
         if (len(f.Names) > 0) {
             // named fields
-            foreach (var (_, name) in f.Names) {
+            foreach (var (_, name) in range(f.Names)) {
                 add(name, false);
             }
         } else {

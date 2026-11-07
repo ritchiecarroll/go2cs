@@ -41,7 +41,7 @@ internal static (bool single, bool multi) classify(any v) {
 
 internal static void Main() {
     var e1 = new simpleErr("boom");
-    var m = new multiWrap(errs: slice<error>([e1]));
+    var m = new multiWrap(errs: [e1]);
     var s = new singleWrap(err: e1);
 
     var (ms, mm) = classify(m);

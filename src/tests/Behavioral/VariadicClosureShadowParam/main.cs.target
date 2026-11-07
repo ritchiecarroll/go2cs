@@ -20,7 +20,7 @@ internal static void add(@string verb, slice<@string> args) {
 }
 
 internal static void Main() {
-    add("go", slice<@string>(["1.23.0"]));
+    add("go", ["1.23.0"]);
     add("go", default);
 }
 
