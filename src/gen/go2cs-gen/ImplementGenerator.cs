@@ -30,6 +30,9 @@ public class ImplementGenerator : ISourceGenerator
     private const string AttributeName = "GoImplement";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
 
+    // The open-generic form (`GoImplement(typeof(sliceIter<>), typeof(Iter))`), read through the same intake: see GetImplementTypeArguments.
+    private const string FullOpenGenericAttributeName = $"{Namespace}.{AttributeName}Attribute";
+
     // Renders a namespace for a `using` directive: no `global::`, keyword segments escaped
     // (`go.crypto.@internal`, not the invalid `go.crypto.internal`).
     private static readonly SymbolDisplayFormat s_namespaceUsingFormat = new(
@@ -45,7 +48,7 @@ public class ImplementGenerator : ISourceGenerator
     #endif
 
         // Register to find "GoImplementAttribute" on assembly attribute declarations
-        context.RegisterForSyntaxNotifications(() => new AssemblyAttributeFinder(FullAttributeName));
+        context.RegisterForSyntaxNotifications(() => new AssemblyAttributeFinder(FullAttributeName, FullOpenGenericAttributeName));
     }
 
     public void Execute(GeneratorExecutionContext context)
@@ -110,7 +113,7 @@ public class ImplementGenerator : ISourceGenerator
             if (!bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false"))
                 continue;
 
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.GetImplementTypeArguments(syntaxContext);
 
             if (structType is not null && interfaceType is not null)
                 promotedPairs.Add($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}");
@@ -146,7 +149,7 @@ public class ImplementGenerator : ISourceGenerator
             if (!bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Pointer")).value?.Trim() ?? "false"))
                 continue;
 
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.GetImplementTypeArguments(syntaxContext);
 
             if (structType is null || interfaceType is null)
                 continue;
@@ -245,7 +248,7 @@ public class ImplementGenerator : ISourceGenerator
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             // Extract generic type arguments from "GoImplementAttribute"
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.GetImplementTypeArguments(syntaxContext);
             
             // A malformed record costs exactly its own adapter. Thrown, it made the generator
             // contribute NOTHING, and every other adapter in the compilation went with it (go-cmp's

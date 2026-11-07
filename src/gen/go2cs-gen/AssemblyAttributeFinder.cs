@@ -12,7 +12,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-public sealed class AssemblyAttributeFinder(string attributeFullName) : ISyntaxContextReceiver
+// nonGenericAttributeFullName optionally names a NON-generic attribute of the same family that the generator also
+// reads: GoImplement's open-generic form, `[assembly: GoImplement(typeof(sliceIter<>), typeof(Iter))]`, whose type
+// definition only a typeof argument can carry.
+public sealed class AssemblyAttributeFinder(string attributeFullName, string? nonGenericAttributeFullName = null) : ISyntaxContextReceiver
 {
     public List<(AttributeSyntax attribute, GeneratorSyntaxContext context, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax)> TargetAttributes = [];
 
@@ -57,6 +60,8 @@ public sealed class AssemblyAttributeFinder(string attributeFullName) : ISyntaxC
             INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
 
             if (attributeContainingTypeSymbol.IsGenericType && string.Equals(attributeFullName, attributeContainingTypeSymbol.OriginalDefinition.ToDisplayString(), StringComparison.Ordinal))
+                attributes.Add(attributeSyntax);
+            else if (!attributeContainingTypeSymbol.IsGenericType && nonGenericAttributeFullName is not null && string.Equals(nonGenericAttributeFullName, attributeContainingTypeSymbol.ToDisplayString(), StringComparison.Ordinal))
                 attributes.Add(attributeSyntax);
         }
 
