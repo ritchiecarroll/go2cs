@@ -478,8 +478,13 @@ The follow-ups run off the critical path:
   <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
        right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
        Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
-       phase4/DESIGN-cooperative-scheduler.md, and keeps the owner's 2026-10-24 position (no async/await lowering)
-       unless he re-rules it. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled"). -->
+       phase4/DESIGN-cooperative-scheduler.md. Its scope, as the owner refined it on 2026-11-08 (relayed by COORD):
+       "Async is not a real option without completely overhauling 'everything', and the visual impact breaks a primary
+       project tenet. That said, if it helps in golib or generated code levels, I'd be open to it, so don't exclude it
+       at that level." So async/await stays out of the converted code a user reads (the visual-parity tenet; the
+       2026-10-24 position), and is in scope inside golib and go2cs-gen's generated code; the design names each
+       mechanism's level and confirms the visible emission does not change. Previously "unscheduled" (owner,
+       2026-11-07: "List as unscheduled"). -->
 
 - **Building against local standard-library sources** (planned for 1.26.10.3): a program converted against a
   local go2cs source tree and built in its folder gets a Release standard library and publishes. Until
