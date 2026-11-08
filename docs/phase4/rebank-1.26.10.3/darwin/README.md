@@ -1,4 +1,5 @@
 # 1.26.10.3 RE-BANK at 72043c1a66 -- the darwin leg (C1)
+<!-- {% raw %} — Jekyll/Liquid guard: this record quotes a `go list -f` template ({{if ...}}) that Liquid would publish as empty text. -->
 
 The darwin reading of the 1.26.10.3 re-bank, both mac RIDs (osx-arm64 on macos-15, osx-x64 on macos-15-intel), at
 master `72043c1a6639d460bf98a9cab270dac6ec743fd6`. Plan: `docs/PLAN-rebank-1-26-10-3.md` sections 4 and 4.1, as
@@ -173,3 +174,5 @@ re-dispatch stem rule lets a re-read named `SIG-1R` supersede `SIG-1`.
   - database/sql, internal/fuzz, net/http, os, os/exec, os/signal and go/internal/gccgoimporter at their segments;
   - runtime/pprof validated at 146;
   - syscall FAIL on exactly the `TestGetdirentries` residue.
+
+<!-- {% endraw %} -->
