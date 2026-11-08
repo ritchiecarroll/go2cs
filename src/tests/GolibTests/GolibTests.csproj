@@ -79,6 +79,12 @@
          there the arms would pass with the defect present and guard nothing. -->
     <Compile Remove="DeepTreeRemovalTests.cs" />
   </ItemGroup>
+  <!-- The inherited-SIG_IGN arms drive the linux AND darwin signal bridges (runtime/linux and runtime/darwin
+       signal_posix*_impl.cs), whose sigqueue entry points exist only on those flavours; the windows flavour
+       has no bridge to measure. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="InheritedIgnoredSignalTests.cs" />
+  </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface
        (NetUserGetInfo, NetApiBufferFree), so under any other $(GoTargetOS) it is excluded from
