@@ -1,0 +1,10 @@
+package main
+
+type Val []byte // a named []byte (TS dep: jsontext.Value)
+
+func prefix[Bytes ~[]byte | ~string](b Bytes, n int) string { return string(b[:n]) } // jsonwire.NewInvalidCharacterError's constraint
+
+func main() {
+	v := Val("abcdef")
+	println(prefix(v[1:], 2), prefix("xyz", 1))
+}

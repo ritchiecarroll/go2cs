@@ -113,7 +113,10 @@ own test fixtures rather than API a consumer imports; the instance plan names an
 exclusion that names no library of the module, and one that a packed package references. An INTERNAL package that
 no production code reaches (imported only from `_test.go` files, or by nothing) is left out without being named, and
 the pack log lists each one; one with Go tests of its own is packed and logged `kept: validated`.
-`-ExcludePackage` stays the tool for a public helper. The rehearsal label
+`-ExcludePackage` stays the tool for a public helper. **A package carries the module's libraries.** A converted
+module is most useful as Go code a .NET program calls, not as a stand-in for a command-line tool Go already runs well,
+so a module's command-line packages (a `cli` package, a `cmd/...` package) are left out with `-ExcludePackage` by
+default, as gojq's `cli` is (owner, 2026-11-07). The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
 
 **Flavors** (COORD ruling 2026-10-12). The pack adopts the `go.*`

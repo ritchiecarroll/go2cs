@@ -1,0 +1,4 @@
+package dbg
+
+// Fail takes an ANONYMOUS interface parameter (TS: debug.FailBadSyntaxKind).
+func Fail(n interface{ K() string }) string { return "fail:" + n.K() }

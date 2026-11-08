@@ -1,0 +1,15 @@
+package main
+
+type Pointer string // TS dep: go-json-experiment/json/jsontext.Pointer
+
+func main() {
+	b := []byte("/a/b")
+	p := Pointer(b) // named string from []byte
+	n := 0
+	for i, r := range p { // range over a named string
+		if r == '/' {
+			n += i
+		}
+	}
+	println(string(p), n)
+}

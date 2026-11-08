@@ -1,0 +1,3 @@
+module repro/c7typenamedvalue
+
+go 1.26

@@ -1,0 +1,11 @@
+package main
+
+import "slices"
+
+type P string // TS: tspath.Path
+
+func main() {
+	s := []P{"b", "c", "a"}
+	slices.Sort(s) // cmp.Ordered over a named string type
+	println(s[0], s[1], s[2])
+}

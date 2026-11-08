@@ -1,0 +1,17 @@
+package main
+
+import "repro/anonstructargbuiltin/coll"
+
+func main() {
+	var seen coll.Set[struct {
+		name string
+		kind int32
+	}]
+	for _, n := range []string{"a", "b", "a"} {
+		key := struct {
+			name string
+			kind int32
+		}{n, 1}
+		println(seen.AddIfAbsent(key))
+	}
+}

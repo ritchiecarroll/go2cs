@@ -1,0 +1,3 @@
+module repro/c9variadicclosurearg
+
+go 1.26

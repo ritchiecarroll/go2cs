@@ -1,0 +1,28 @@
+# passb_patch.py <tree> : hand-patch C1 (11 call lines in 7 files + 7 GoImplement attributes) and C2 (1 line) in a COPY of the
+# -recurse output, byte-exact (CRLF kept). Mirrors what the converter emits for the same shapes when they resolve:
+# same-package -> new NжFail_n(...) + [assembly: GoImplement<N, Fail_n>(Pointer = true)];
+# cross-package -> new <T>ж<Iface>(...) + fully qualified GoImplement.
+import os, sys
+T = os.path.join(sys.argv[1], r"src\github.com\microsoft\TypeScript\tsc\internal")
+D = "go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node"
+A = "go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node"
+def rw(rel, f):
+    p = os.path.join(T, rel); b = open(p, "rb").read(); n = f(b)
+    if n == b: sys.exit("no change in " + rel)
+    open(p, "wb").write(n)
+def addattr(pkg, attr):
+    def f(b):
+        i = b.index(b"\r\nusing static go.") + 2; j = b.index(b"\r\n", i) + 2
+        return b[:j] + attr.encode() + b"\r\n" + b[j:]
+    rw(pkg + r"\package_info.cs", f)
+rw(r"ast\utilities.cs", lambda b: b.replace("new Nodeжinterface{KindString() string}(".encode(), "new NodeжFailBadSyntaxKind_node(".encode()))
+addattr("ast", f"[assembly: GoImplement<Node, {D}>(Pointer = true)]")
+for rel in [r"ls\importTracker.cs", r"ls\inlay_hints.cs", r"pseudochecker\lookup.cs", r"scanner\utilities.cs",
+            r"transformers\estransforms\classfields.cs", r"transformers\tstransforms\typeserializer.cs"]:
+    rw(rel, lambda b: b.replace("new ast_Nodeжinterface{KindString() string}(".encode(), "new ast_NodeжFailBadSyntaxKind_node(".encode()))
+for pkg in ["ls", "pseudochecker", "scanner", r"transformers\estransforms", r"transformers\tstransforms"]:
+    addattr(pkg, f"[assembly: GoImplement<{A}, {D}>(Pointer = true)]")
+old = "new collections.Set<struct{name string; kind github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SymbolKind; rng github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.Range}>()"
+rw(r"ls\symbols.cs", lambda b: b.replace(old.encode(), b"new collections.Set<ProvideDocumentSymbols_key>()"))
+left = [os.path.join(d, f) for d, _, fs in os.walk(T) for f in fs if f.endswith(".cs") and (b"interface{KindString" in open(os.path.join(d, f), "rb").read() or b"struct{name string" in open(os.path.join(d, f), "rb").read())]
+print("raw-Go sites left:", len(left), left)

@@ -1,0 +1,74 @@
+# passc_patch.py <tree> : on top of pass B (C1, C2), hand-patch the seven pass-A first causes C5-C11 in a COPY of the
+# -recurse output. Byte-exact: each file keeps its own line endings. Each patch is the smallest emission change that
+# expresses what Go means, and none touches go2cs source. Every replacement asserts its expected match count.
+import os, re, sys
+
+ROOT = sys.argv[1]
+TS = os.path.join(ROOT, r"src\github.com\microsoft\TypeScript\tsc\internal")
+PKG = os.path.join(ROOT, "pkg")
+log = []
+
+def sub(path, pattern, repl, count, cid, regex=False):
+    b = open(path, "rb").read()
+    if regex:
+        n = len(re.findall(pattern, b))
+        nb = re.sub(pattern, repl, b)
+    else:
+        n = b.count(pattern)
+        nb = b.replace(pattern, repl)
+    if count is not None and n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    if n == 0:
+        sys.exit(f"{cid}: no match in {path}")
+    open(path, "wb").write(nb)
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+u = lambda s: s.encode("utf-8")
+
+# C5: std-vendored import path -> the converted third-party module's namespace (the csproj already references it).
+norm = os.path.join(PKG, r"golang.org\x\text\unicode\norm")
+for f in ("normalize.cs", "transform.cs", "package_info.cs"):
+    sub(os.path.join(norm, f), b"vendor.golang.org.x.text", b"go.golang.org.x.text", None, "C5")
+
+# C6: slices.Sort over the named string Path -> SortFunc with strings.Compare (same total order as cmp.Ordered on strings).
+sub(os.path.join(TS, r"tspath\path.cs"), b"slices.Sort<slice<Path>, Path>(orderedGroups);",
+    u("slices.SortFunc<slice<Path>, Path>(orderedGroups, (Path a, Path b) => strings.Compare(a, b));"), 1, "C6")
+
+# C7: rename the Go type jsontext.Value to ΔValue (the converter's own collision convention), so the generated
+# wrapper's `Value` property no longer clashes. In jsontext: every whole-word `Value` that is not a member access.
+jt = os.path.join(PKG, r"github.com\go-json-experiment\json\jsontext")
+for f in sorted(os.listdir(jt)):
+    if f.endswith(".cs"):
+        p = os.path.join(jt, f)
+        if re.search(rb"(?<![.\w])Value(?!\w)", open(p, "rb").read()):
+            sub(p, rb"(?<![.\w])Value(?!\w)", u("ΔValue"), None, "C7", regex=True)
+# Elsewhere: qualified references only.
+for d, _, fs in os.walk(ROOT):
+    if os.sep + ".artifacts" in d or d.startswith(jt):
+        continue
+    for f in fs:
+        if not f.endswith(".cs"):
+            continue
+        p = os.path.join(d, f)
+        b = open(p, "rb").read()
+        if re.search(rb"jsontext(?:_package)?\.Value(?!\w)", b):
+            sub(p, rb"(jsontext(?:_package)?\.)Value(?!\w)", u(r"\1ΔValue"), None, "C7", regex=True)
+
+# C8: box the value receiver before calling the boxed-receiver pointer method, then copy back (Go: t.RemakeString() on &t).
+sub(os.path.join(PKG, r"golang.org\x\text\internal\language\match.cs"), u("Ꮡt.RemakeString();"),
+    u("{ ref var tʗh = ref heap(t, out var Ꮡt); Ꮡt.RemakeString(); t = tʗh; }"), 1, "C8")
+
+# C9: give the := bound variadic closure its Go func type explicitly.
+sub(os.path.join(PKG, r"gotest.tools\v3\internal\format\diff.cs"), b"var writeFormat = (@string format,",
+    u("Actionꓸꓸꓸ<@string, object> writeFormat = (@string format,"), 1, "C9")
+
+# C10: a Features value IS the pointer: convert it, do not take its address.
+sub(os.path.join(PKG, r"github.com\klauspost\cpuid\v2\cpuid.cs"), u("c.featureSet.hasSetP(Ꮡf)"),
+    u("c.featureSet.hasSetP((ж<flagSet>)f)"), 1, "C10")
+
+# C11: construct the underlying windows.GUID with its fields, then wrap it.
+sk = os.path.join(PKG, r"github.com\Microsoft\go-winio\internal\socket\socket.cs")
+sub(sk, rb"new StaticBox<guid\.GUID>\(new guid\.GUID\((\r?\n    Data1:)", rb"new StaticBox<guid.GUID>(new guid.GUID(new windows.GUID(\1", 1, "C11", regex=True)
+sub(sk, rb"(0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e\}\.array\(\)\r?\n)\)\); \}", rb"\1))); }", 1, "C11", regex=True)
+
+print("\n".join(log))

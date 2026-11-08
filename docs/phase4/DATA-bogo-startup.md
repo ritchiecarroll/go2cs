@@ -82,6 +82,16 @@ not shown.
 - Against seat #9 at `e6b7f24f81`: (a) reached 1,950 launches at the wall against 1,695, and projects about
   1,085 s against about 1,260 s. The single-worker medians match within 2% in every arm.
 
+> **CHECKED 2026-11-08: the runner counters come from a complete source, not a truncated record.** COORD asked
+> after H found that the converted `testing` package caps one log record at 65,536 characters
+> (`src/core/testing/TestExecution.cs:97`), which cut H's `TestBogoSuite` reading. The counters in this table
+> (`0/889/1938/1942` for (a), `0/779/1806/1810` for (d)) do not pass through that package. `suite.sh` runs
+> BoringSSL's runner directly with Go's own `go test` in the runner's module directory, and takes the last
+> progress line from that run's stdout (`runner.out`). No converted `TestBogoSuite` record is involved. The
+> wrapper's log is an independent count. `suite-a.tsv` holds 1,942 handshake launches, equal to (a)'s started
+> count, spanning 600.8 s. `suite-d.tsv` holds 1,810, equal to (d)'s, spanning 600.9 s. So in both runs the
+> runner kept starting cases until its wall, and the (a) and (d) figures stand as measured at the wall.
+
 ## 5. Where today's 1.18 s goes
 
 - **The handshake costs 0.17 s; the probe, a launch that does no TLS work, costs 1.01 s.** So about 85% of a

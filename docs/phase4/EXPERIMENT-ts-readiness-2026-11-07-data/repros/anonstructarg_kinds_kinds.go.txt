@@ -1,0 +1,3 @@
+package kinds
+
+type Kind int32

@@ -1,0 +1,10 @@
+package main
+
+type Value []byte // TS dep: go-json-experiment/json/jsontext.Value
+
+func (v Value) Len() int { return len(v) }
+
+func main() {
+	v := Value("abc")
+	println(v.Len(), string(v))
+}

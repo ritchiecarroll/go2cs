@@ -1,0 +1,3 @@
+module repro/anonstructargbuiltin
+
+go 1.26

@@ -1,0 +1,3 @@
+DIFF crypto.internal.fips140.nistec.fiat.dll go.crypto.internal.fips140.nistec.fiat_package::p256Mul(go.crypto.internal.fips140.nistec.fiat_package/p256MontgomeryDomainFieldElement&,go.crypto.internal.fips140.nistec.fiat_package/p256MontgomeryDomainFieldElement&,go.crypto.internal.fips140.nistec.fiat_package/p256MontgomeryDomainFieldElement&):Void
+DIFF crypto.internal.fips140.nistec.fiat.dll go.crypto.internal.fips140.nistec.fiat_package::p256Square(go.crypto.internal.fips140.nistec.fiat_package/p256MontgomeryDomainFieldElement&,go.crypto.internal.fips140.nistec.fiat_package/p256MontgomeryDomainFieldElement&):Void
+ILDIFF assemblies=1 methods=1070 differing=2 only-in-base=0 only-in-seat=0 missing-in-seat=0

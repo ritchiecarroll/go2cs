@@ -1,0 +1,3 @@
+module repro/c13aliasunsafeptr
+
+go 1.26

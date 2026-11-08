@@ -1,0 +1,17 @@
+package main
+
+import "repro/c15recvshadowsimport/vfs"
+
+type Common struct{ root string }
+
+func (vfs *Common) Root(p string) string { return vfs.root + p }
+
+// The receiver shadows the import inside the body; the result type still names the package.
+func (vfs *Common) Stat(path string) vfs.FileInfo {
+	r := vfs.Root(path)
+	return fileInfo(r)
+}
+
+func main() { println((&Common{root: "/r"}).Stat("/x").Name) }
+
+func fileInfo(n string) vfs.FileInfo { return vfs.FileInfo{Name: n} }
