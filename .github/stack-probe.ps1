@@ -54,7 +54,7 @@ while (-not $probePid -and [DateTime]::UtcNow -lt $deadline) {
 }
 
 if (-not $probePid) {
-    return , @([PSCustomObject]@{ Offset = $null; Pid = $null; Path = $null; Lines = 0; Error = "no process matched '$Pattern' within $WaitForStartSeconds s" })
+    return [PSCustomObject]@{ Offset = $null; Pid = $null; Path = $null; Lines = 0; Error = "no process matched '$Pattern' within $WaitForStartSeconds s" }
 }
 
 $seen = [DateTime]::UtcNow
@@ -83,4 +83,5 @@ foreach ($offset in ($At | Sort-Object)) {
     })
 }
 
-return , $results.ToArray()
+# One object per attempt on the pipeline, never one array object: a thread job's caller collects them with @().
+return $results.ToArray()

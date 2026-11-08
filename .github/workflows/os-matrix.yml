@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite), stack-probe (OPT-IN diagnostic: one row, `filter`, swept with -TestFilter `probe_test`, while dotnet-stack dumps its converted test host at the `probe_at` offsets; proves the instrument on a deliberately hung program first; never banks)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks)'
         type: choice
         required: true
         default: census
@@ -62,7 +62,7 @@ on:
           - golib-tests
           - stack-probe
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -110,21 +110,6 @@ on:
         required: false
         default: ''
 
-      probe_test:
-        description: 'stack-probe only: the regex passed as -TestFilter (both sides of the compare), e.g. ^TestGoroutineSwitch$. Required for stack-probe; ignored elsewhere.'
-        required: false
-        default: ''
-        type: string
-      probe_at:
-        description: 'stack-probe only: comma-separated seconds after the converted test host starts at which dotnet-stack dumps it. The per-test deadline is 900 s, so the default takes one early dump and one just before the host abandons the test.'
-        required: false
-        default: '120,870'
-        type: string
-      jit_disasm:
-        description: 'golib-tests only: a DOTNET_JitDisasm method pattern (e.g. "p256Mul p384Mul"). With tiering off, the JIT listing of each matching method is printed to the job log. Blank does nothing.'
-        required: false
-        default: ''
-        type: string
 permissions:
   contents: read
 
@@ -172,6 +157,9 @@ jobs:
       nugetgo-package: ${{ steps.derive.outputs.nugetgo-package }}
       nugetgo-feed: ${{ steps.derive.outputs.nugetgo-feed }}
       nugetgo-feed-sha256: ${{ steps.derive.outputs.nugetgo-feed-sha256 }}
+      probe-test: ${{ steps.derive.outputs.probe-test }}
+      probe-at: ${{ steps.derive.outputs.probe-at }}
+      jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -215,6 +203,37 @@ jobs:
           if (-not $stage)  { $stage = 'census' }
           if (-not $dotnet) { $dotnet = '10.0.x' }
           if ($null -eq $filter) { $filter = '' }
+
+          # The diagnostic stages' options ride in `filter`, after the stage's own filter, as ;key=value pairs: the
+          # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
+          # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. An unknown or repeated key, an
+          # empty value, or any option on any other stage FAILS the plan by name rather than being ignored.
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } })
+          if ($optionKeys.Count) {
+              $parts = @($filter -split ';')
+              $filter = $parts[0].Trim()
+              $seen = @{}
+              foreach ($option in @($parts | Select-Object -Skip 1)) {
+                  if ($option -notmatch '^\s*(?<key>[a-z]+)\s*=(?<value>.*)$') { throw "filter: '$option' is not a key=value option (stage $stage takes $($optionKeys -join ', '))." }
+                  $key = $Matches['key']; $value = $Matches['value'].Trim()
+                  if ($key -notin $optionKeys) { throw "filter: stage $stage takes options $($optionKeys -join ', '); got '$key'." }
+                  if ($seen.ContainsKey($key)) { throw "filter: option '$key' is given twice." }
+                  if (-not $value) { throw "filter: option '$key' has no value." }
+                  $seen[$key] = $value
+              }
+              $jitDisasm = "$($seen['jit'])"
+              if ($stage -eq 'stack-probe') {
+                  if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
+                  $probeTest = "$($seen['test'])"
+                  if (-not $probeTest) { throw 'stack-probe needs filter option test=REGEX, the -TestFilter regex (e.g. runtime/pprof;test=^TestGoroutineSwitch$).' }
+                  $probeAt = if ($seen.ContainsKey('at')) { $seen['at'] -replace '\s', '' } else { '120,870' }
+                  if ($probeAt -notmatch '^[0-9]+(,[0-9]+)*$') { throw "stack-probe filter option at= must be comma-separated whole seconds; got '$probeAt'." }
+                  Write-Host "stack-probe: row $filter, -TestFilter $probeTest, dumps at $probeAt s"
+              }
+              if ($jitDisasm) { Write-Host "golib-tests: JIT listing for '$jitDisasm' (tiering off)" }
+          }
+          elseif ($filter -match '(^|;)\s*(jit|test|at)\s*=') { throw "filter options (;key=value) apply to stages golib-tests and stack-probe only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -419,6 +438,9 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-package=$nugetgoPackage" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed=$nugetgoFeed" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed-sha256=$nugetgoFeedSha256" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -900,7 +922,7 @@ jobs:
         shell: pwsh
         env:
           GOLIB_FILTER: ${{ needs.plan.outputs.filter }}
-          GOLIB_JIT_DISASM: ${{ inputs.jit_disasm }}
+          GOLIB_JIT_DISASM: ${{ needs.plan.outputs.jit-disasm }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -922,7 +944,7 @@ jobs:
 
                   if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_FILTER)) { $testArgs += @('--filter', $env:GOLIB_FILTER) }
 
-                  # jit_disasm (opt-in): the JIT's listing of each matching method, tiering off (FullOpts, as the corpus's
+                  # ;jit= (opt-in): the JIT's listing of each matching method, tiering off (FullOpts, as the corpus's
                   # Release default runs), written by the test host and printed below. Blank sets nothing.
                   $jitListing = Join-Path $art "jitdisasm-$goos-$rid.txt"
                   if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_JIT_DISASM)) {
@@ -973,7 +995,7 @@ jobs:
       # host abandons a test at its 900 s per-test deadline with one line and no stacks, so a hang (runtime/pprof's
       # TestGoroutineSwitch on osx-arm64) could not be rooted from a sweep's reading. This stage sweeps ONE row filtered to
       # ONE test (run-validated-sweep.ps1 -TestFilter) while .github/stack-probe.ps1 takes dotnet-stack reports of that
-      # row's converted test host at the probe_at offsets. It never banks: a filtered row reads COUNT or FAIL by design.
+      # row's converted test host at the at= offsets. It never banks: a filtered row reads COUNT or FAIL by design.
       # The instrument is proven first, every run, on a deliberately hung program: a dump without the planted frame fails
       # the step as BLIND, so an empty probe can never read as a clean one.
       # -------------------------------------------------------------------------------------
@@ -982,8 +1004,8 @@ jobs:
         shell: pwsh
         env:
           PROBE_ROW: ${{ needs.plan.outputs.filter }}
-          PROBE_TEST: ${{ inputs.probe_test }}
-          PROBE_AT: ${{ inputs.probe_at }}
+          PROBE_TEST: ${{ needs.plan.outputs.probe-test }}
+          PROBE_AT: ${{ needs.plan.outputs.probe-at }}
           SWEEP_TEST_TIMEOUT: '45m'
         run: |
           $ErrorActionPreference = 'Continue'
@@ -996,11 +1018,9 @@ jobs:
           $summary.Add("## Stack probe -- GOOS=$goos ($rid)")
           $summary.Add('')
 
+          # The row, the regex and the offsets were validated by the plan job (filter ROW;test=REGEX;at=S,S).
           $row = "$env:PROBE_ROW".Trim()
-          if (-not $row -or $row.Contains(',')) { throw "stack-probe takes exactly ONE roster row in filter; got '$row'." }
-          if ([string]::IsNullOrWhiteSpace($env:PROBE_TEST)) { throw 'stack-probe needs probe_test, the -TestFilter regex.' }
-          $atText = if ([string]::IsNullOrWhiteSpace($env:PROBE_AT)) { '120,870' } else { $env:PROBE_AT }
-          $offsets = @($atText -split ',' | ForEach-Object { [int]$_.Trim() } | Sort-Object)
+          $offsets = @("$env:PROBE_AT" -split ',' | ForEach-Object { [int]$_.Trim() } | Sort-Object)
 
           # The tool, pinned.
           $tools = Join-Path $env:RUNNER_TEMP 'stack-tools'
