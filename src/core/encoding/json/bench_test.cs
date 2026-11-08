@@ -44,7 +44,6 @@ public partial struct codeNode {
 }
 
 internal static slice<byte> codeJSON;
-
 internal static readonly ж<codeResponse> ᏑcodeStruct = new StaticBox<codeResponse>(default(codeResponse));
 internal static ref codeResponse codeStruct => ref ((StaticBox<codeResponse>)ᏑcodeStruct).ValueSlot;
 
@@ -69,16 +68,12 @@ internal static void codeInit() {
 
         codeJSON = data;
 
-        {
-            var errΔ1 = Unmarshal(codeJSON, ᏑcodeStruct); if (errΔ1 != nil) {
-                throw panic("unmarshal code.json: " + errΔ1.Error());
-            }
+        var errΔ1 = Unmarshal(codeJSON, ᏑcodeStruct); if (errΔ1 != nil) {
+            throw panic("unmarshal code.json: " + errΔ1.Error());
         }
 
-        {
-            (data, err) = Marshal(ᏑcodeStruct); if (err != nil) {
-                throw panic("marshal code.json: " + err.Error());
-            }
+        (data, err) = Marshal(ᏑcodeStruct); if (err != nil) {
+            throw panic("marshal code.json: " + err.Error());
         }
 
         if (!bytes.Equal(data, codeJSON)) {
@@ -110,10 +105,8 @@ public static void BenchmarkCodeEncoder(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var enc = NewEncoder(io.Discard);
         while (pb.Next()) {
-            {
-                var err = enc.Encode(ᏑcodeStruct); if (err != nil) {
-                    Ꮡb.Fatalf("Encode error: %v", err);
-                }
+            var err = enc.Encode(ᏑcodeStruct); if (err != nil) {
+                Ꮡb.Fatalf("Encode error: %v", err);
             }
         }
     });
@@ -170,10 +163,8 @@ public static void BenchmarkCodeMarshal(ж<testing.B> Ꮡb) {
     }
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            {
-                var (_, err) = Marshal(ᏑcodeStruct); if (err != nil) {
-                    Ꮡb.Fatalf("Marshal error: %v", err);
-                }
+            var (_, err) = Marshal(ᏑcodeStruct); if (err != nil) {
+                Ꮡb.Fatalf("Marshal error: %v", err);
             }
         }
     });
@@ -229,10 +220,8 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     var vʗ1 = v;
     return (ж<testing.B> b) => {
         for (nint i = 0; i < (~b).N; i++) {
-            {
-                var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != nil) {
-                    b.Fatalf("Marshal error: %v", err);
-                }
+            var (_, err) = Marshal(vʗ1.OrTypedNil()); if (err != nil) {
+                b.Fatalf("Marshal error: %v", err);
             }
         }
     };
@@ -316,10 +305,8 @@ public static void BenchmarkMarshalMap(ж<testing.B> Ꮡb) {
     var mʗ1 = m;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            {
-                var (_, err) = Marshal(mʗ1); if (err != nil) {
-                    Ꮡb.Fatal(marshalˢ, err);
-                }
+            var (_, err) = Marshal(mʗ1); if (err != nil) {
+                Ꮡb.Fatal(marshalˢ, err);
             }
         }
     });
@@ -344,10 +331,8 @@ public static void BenchmarkCodeDecoder(ж<testing.B> Ꮡb) {
             buf.WriteByte((byte)'\n');
             buf.WriteByte((byte)'\n');
             buf.WriteByte((byte)'\n');
-            {
-                var err = dec.Decode(Ꮡr); if (err != nil) {
-                    Ꮡb.Fatalf("Decode error: %v", err);
-                }
+            var err = dec.Decode(Ꮡr); if (err != nil) {
+                Ꮡb.Fatalf("Decode error: %v", err);
             }
         }
     });
@@ -365,10 +350,8 @@ public static void BenchmarkUnicodeDecoder(ж<testing.B> Ꮡb) {
     ref var @out = ref heap(new @string(), out var Ꮡout);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        {
-            var err = dec.Decode(Ꮡout); if (err != nil) {
-                Ꮡb.Fatalf("Decode error: %v", err);
-            }
+        var err = dec.Decode(Ꮡout); if (err != nil) {
+            Ꮡb.Fatalf("Decode error: %v", err);
         }
         r.Seek(0, 0);
     }
@@ -395,18 +378,16 @@ public static void BenchmarkDecoderStream(ж<testing.B> Ꮡb) {
             buf.WriteString(ones);
         }
         x = default;
-        {
-            var err = dec.Decode(Ꮡx);
-            switch (ᐧ) {
-            case {} when err != nil: {
-                Ꮡb.Fatalf("Decode error: %v", err);
-                break;
-            }
-            case {} when x is not 1.0D: {
-                Ꮡb.Fatalf("Decode: got %v want 1.0", i);
-                break;
-            }}
+        var err = dec.Decode(Ꮡx);
+        switch (ᐧ) {
+        case {} when err != nil: {
+            Ꮡb.Fatalf("Decode error: %v", err);
+            break;
         }
+        case {} when x is not 1.0D: {
+            Ꮡb.Fatalf("Decode: got %v want 1.0", i);
+            break;
+        }}
     }
 }
 
@@ -422,10 +403,8 @@ public static void BenchmarkCodeUnmarshal(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             ref var r = ref heap(new codeResponse(), out var Ꮡr);
-            {
-                var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -444,10 +423,8 @@ public static void BenchmarkCodeUnmarshalReuse(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var r = ref heap(new codeResponse(), out var Ꮡr);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(codeJSON, Ꮡr); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -463,10 +440,8 @@ public static void BenchmarkUnmarshalString(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var s = ref heap(new @string(), out var Ꮡs);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(dataʗ1, Ꮡs); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(dataʗ1, Ꮡs); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -481,10 +456,8 @@ public static void BenchmarkUnmarshalFloat64(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var f = ref heap(new float64(), out var Ꮡf);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(dataʗ1, Ꮡf); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(dataʗ1, Ꮡf); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -499,10 +472,8 @@ public static void BenchmarkUnmarshalInt64(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var x = ref heap(new int64(), out var Ꮡx);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -517,10 +488,8 @@ public static void BenchmarkUnmarshalMap(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var x = ref heap<map<@string, @string>>(new map<@string, @string>(3), out var Ꮡx);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(dataʗ1, Ꮡx); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -535,10 +504,8 @@ public static void BenchmarkIssue10335(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var s = ref heap(new EmptyStruct(), out var Ꮡs);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -557,10 +524,8 @@ public static void BenchmarkIssue34127(ж<testing.B> Ꮡb) {
     ), out var Ꮡj);
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            {
-                var (_, err) = Marshal(Ꮡj); if (err != nil) {
-                    Ꮡb.Fatalf("Marshal error: %v", err);
-                }
+            var (_, err) = Marshal(Ꮡj); if (err != nil) {
+                Ꮡb.Fatalf("Marshal error: %v", err);
             }
         }
     });
@@ -575,10 +540,8 @@ public static void BenchmarkUnmapped(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var s = ref heap(new EmptyStruct(), out var Ꮡs);
         while (pb.Next()) {
-            {
-                var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
-                    Ꮡb.Fatalf("Unmarshal error: %v", err);
-                }
+            var err = Unmarshal(jʗ1, Ꮡs); if (err != nil) {
+                Ꮡb.Fatalf("Unmarshal error: %v", err);
             }
         }
     });
@@ -597,10 +560,10 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     var types = new slice<reflectꓸType>(maxTypes);
     var fs = slice<reflect.StructField>([new(
         Type: reflect.TypeFor<@string>(),
-        Index: slice<nint>([0])
+        Index: [0]
     )
     ]);
-    foreach (var i in range(types)) {
+    foreach (var i in range(len(types))) {
         fs[0].Name = fmt.Sprintf("TypeFieldsCache%d"u8, i);
         types[i] = reflect.StructOf(fs);
     }
@@ -625,7 +588,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
                     Ꮡwg.Add(1);
                     var tsʗ2 = tsʗ1;
                     goǃ((nint jΔ1) => {
-                        foreach (var (_, t) in tsʗ2.slice(quo((jΔ1 * len(tsʗ2)), nc), quo(((jΔ1 + 1) * len(tsʗ2)), nc))) {
+                        foreach (var (_, t) in range(tsʗ2.slice(quo((jΔ1 * len(tsʗ2)), nc), quo(((jΔ1 + 1) * len(tsʗ2)), nc)))) {
                             cachedTypeFields(t);
                         }
                         Ꮡwg.Done();
@@ -641,7 +604,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     for (nint nt = 1; nt <= maxTypes; nt *= 10) {
         // Pre-warm a cache of size nt.
         clearCache();
-        foreach (var (_, t) in types.slice(0, nt)) {
+        foreach (var (_, t) in range(types.slice(0, nt))) {
             cachedTypeFields(t);
         }
         var typesʗ1 = types;
@@ -672,10 +635,8 @@ public static void BenchmarkEncodeMarshaler(ж<testing.B> Ꮡb) {
         var enc = NewEncoder(io.Discard);
 
         while (pb.Next()) {
-            {
-                var err = enc.Encode(Ꮡm); if (err != nil) {
-                    Ꮡb.Fatalf("Encode error: %v", err);
-                }
+            var err = enc.Encode(Ꮡm); if (err != nil) {
+                Ꮡb.Fatalf("Encode error: %v", err);
             }
         }
     });
@@ -693,10 +654,8 @@ public static void BenchmarkEncoderEncode(ж<testing.B> Ꮡb) {
     var vʗ1 = v;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            {
-                var err = NewEncoder(io.Discard).Encode(vʗ1.OrTypedNil()); if (err != nil) {
-                    Ꮡb.Fatalf("Encode error: %v", err);
-                }
+            var err = NewEncoder(io.Discard).Encode(vʗ1.OrTypedNil()); if (err != nil) {
+                Ꮡb.Fatalf("Encode error: %v", err);
             }
         }
     });
@@ -735,10 +694,8 @@ public static void BenchmarkUnmarshalNumber(ж<testing.B> Ꮡb) {
     var data = slice<byte>(@"""-61657.61667E+61673"""u8);
     ref var number = ref heap(new global::go.encoding.json_package.Number(), out var Ꮡnumber);
     for (nint i = 0; i < b.N; i++) {
-        {
-            var err = Unmarshal(data, Ꮡnumber); if (err != nil) {
-                Ꮡb.Fatal(unmarshalˢ, err);
-            }
+        var err = Unmarshal(data, Ꮡnumber); if (err != nil) {
+            Ꮡb.Fatal(unmarshalˢ, err);
         }
     }
 }

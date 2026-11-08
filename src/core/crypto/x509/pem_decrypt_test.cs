@@ -25,7 +25,7 @@ internal static readonly object cannotDecodeTestDerDataˢ = (@string)"cannot dec
 internal static readonly object dataMismatchˢ = (@string)"data mismatch"u8;
 
 public static void TestDecrypt(ж<testing.T> t) {
-    foreach (var (i, data) in testData) {
+    foreach (var (i, data) in range(testData)) {
         t.Logf("test %v. %v", i, data.kind);
         var (block, rest) = pem.Decode(data.pemData);
         if (builtin.len(rest) > 0) {
@@ -36,10 +36,8 @@ public static void TestDecrypt(ж<testing.T> t) {
             t.Error(decryptFailedˢ, err);
             continue;
         }
-        {
-            var (_, errΔ1) = ParsePKCS1PrivateKey(der); if (errΔ1 != nil) {
-                t.Error(invalidPrivateKeyˢ, errΔ1);
-            }
+        var (_, errΔ1) = ParsePKCS1PrivateKey(der); if (errΔ1 != nil) {
+            t.Error(invalidPrivateKeyˢ, errΔ1);
         }
         (var plainDER, err) = base64.StdEncoding.DecodeString(data.plainDER);
         if (err != nil) {
@@ -61,7 +59,7 @@ private static readonly @string procTypeˢᵇ = "Proc-Type"u8;
 internal static readonly object decryptˢ = (@string)"decrypt: "u8;
 
 public static void TestEncrypt(ж<testing.T> t) {
-    foreach (var (i, data) in testData) {
+    foreach (var (i, data) in range(testData)) {
         t.Logf("test %v. %v", i, data.kind);
         var (plainDER, err) = base64.StdEncoding.DecodeString(data.plainDER);
         if (err != nil) {
@@ -297,15 +295,11 @@ public static void TestIncompleteBlock(ж<testing.T> t) {
         t.Fatal(badPemDataDecryptedˢ);
     }
     @string expectedSubstr = expectedSubstrᶜ;
-    {
-        @string e = err.Error(); if (!strings.Contains(e, expectedSubstr)) {
-            t.Fatalf("Expected error containing %q but got: %q", expectedSubstr, e);
-        }
+    @string e = err.Error(); if (!strings.Contains(e, expectedSubstr)) {
+        t.Fatalf("Expected error containing %q but got: %q", expectedSubstr, e);
     }
 }
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY"); }
 
 } // end x509_internal_test_package

@@ -5,107 +5,43 @@ namespace go;
 
 using static fmt_package;
 using Δtesting = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
 
 partial struct TI /*num:nint*/;
-
 partial struct TI8 /*num:int8*/;
-
 partial struct TI16 /*num:int16*/;
-
 partial struct TI32 /*num:int32*/;
-
 partial struct TI64 /*num:int64*/;
-
 partial struct TU /*num:nuint*/;
-
 partial struct TU8 /*num:uint8*/;
-
 partial struct TU16 /*num:uint16*/;
-
 partial struct TU32 /*num:uint32*/;
-
 partial struct TU64 /*num:uint64*/;
-
 partial struct TUI /*num:uintptr*/;
-
 partial struct TF /*num:float64*/;
-
 partial struct TF32 /*num:float32*/;
-
 partial struct TF64 /*num:float64*/;
-
 partial struct TB /*bool*/;
-
 partial struct TS /*@string*/;
 
-public static @string String(this TI v) {
-    return Sprintf("I: %d"u8, (nint)v);
-}
-
-public static @string String(this TI8 v) {
-    return Sprintf("I8: %d"u8, (int8)v);
-}
-
-public static @string String(this TI16 v) {
-    return Sprintf("I16: %d"u8, (int16)v);
-}
-
-public static @string String(this TI32 v) {
-    return Sprintf("I32: %d"u8, (int32)v);
-}
-
-public static @string String(this TI64 v) {
-    return Sprintf("I64: %d"u8, (int64)v);
-}
-
-public static @string String(this TU v) {
-    return Sprintf("U: %d"u8, (nuint)v);
-}
-
-public static @string String(this TU8 v) {
-    return Sprintf("U8: %d"u8, (uint8)v);
-}
-
-public static @string String(this TU16 v) {
-    return Sprintf("U16: %d"u8, (uint16)v);
-}
-
-public static @string String(this TU32 v) {
-    return Sprintf("U32: %d"u8, (uint32)v);
-}
-
-public static @string String(this TU64 v) {
-    return Sprintf("U64: %d"u8, (uint64)v);
-}
-
-public static @string String(this TUI v) {
-    return Sprintf("UI: %d"u8, (uintptr)v);
-}
-
-public static @string String(this TF v) {
-    return Sprintf("F: %f"u8, (float64)v);
-}
-
-public static @string String(this TF32 v) {
-    return Sprintf("F32: %f"u8, (float32)v);
-}
-
-public static @string String(this TF64 v) {
-    return Sprintf("F64: %f"u8, (float64)v);
-}
-
-public static @string String(this TB v) {
-    return Sprintf("B: %t"u8, (bool)v);
-}
-
-public static @string String(this TS v) {
-    return Sprintf("S: %q"u8, (@string)v);
-}
+public static @string String(this TI v) { return Sprintf("I: %d"u8, (nint)v); }
+public static @string String(this TI8 v) { return Sprintf("I8: %d"u8, (int8)v); }
+public static @string String(this TI16 v) { return Sprintf("I16: %d"u8, (int16)v); }
+public static @string String(this TI32 v) { return Sprintf("I32: %d"u8, (int32)v); }
+public static @string String(this TI64 v) { return Sprintf("I64: %d"u8, (int64)v); }
+public static @string String(this TU v) { return Sprintf("U: %d"u8, (nuint)v); }
+public static @string String(this TU8 v) { return Sprintf("U8: %d"u8, (uint8)v); }
+public static @string String(this TU16 v) { return Sprintf("U16: %d"u8, (uint16)v); }
+public static @string String(this TU32 v) { return Sprintf("U32: %d"u8, (uint32)v); }
+public static @string String(this TU64 v) { return Sprintf("U64: %d"u8, (uint64)v); }
+public static @string String(this TUI v) { return Sprintf("UI: %d"u8, (uintptr)v); }
+public static @string String(this TF v) { return Sprintf("F: %f"u8, (float64)v); }
+public static @string String(this TF32 v) { return Sprintf("F32: %f"u8, (float32)v); }
+public static @string String(this TF64 v) { return Sprintf("F64: %f"u8, (float64)v); }
+public static @string String(this TB v) { return Sprintf("B: %t"u8, (bool)v); }
+public static @string String(this TS v) { return Sprintf("S: %q"u8, (@string)v); }
 
 internal static partial void check(ж<Δtesting.T> t, @string got, @string want) {
     if (got != want) {

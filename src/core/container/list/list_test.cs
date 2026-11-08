@@ -11,11 +11,9 @@ partial class list_internal_test_package {
 internal static bool checkListLen(ж<testing.T> t, ж<global::go.container.list_package.List> Ꮡl, nint len) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    {
-        nint n = l.Len(); if (n != len) {
-            t.Errorf("l.Len() = %d, want %d", n, len);
-            return false;
-        }
+    nint n = l.Len(); if (n != len) {
+        t.Errorf("l.Len() = %d, want %d", n, len);
+        return false;
     }
     return true;
 }
@@ -39,7 +37,7 @@ internal static void checkListPointers(ж<testing.T> t, ж<global::go.container.
     // len(es) > 0
 
     // check internal and external prev/next connections
-    foreach (var (i, e) in es) {
+    foreach (var (i, e) in range(es)) {
         var prev = root;
         var Prev = (ж<global::go.container.list_package.Element>)nil;
         if (i > 0) {
@@ -81,72 +79,70 @@ internal static readonly object bananaˢ = (@string)"banana"u8;
 
 public static void TestList(ж<testing.T> t) {
     var l = New();
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([]));
+    checkListPointers(t, l, []);
 
     // Single element list
     var e = l.PushFront((@string)"a");
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e]));
+    checkListPointers(t, l, [e]);
     l.MoveToFront(e);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e]));
+    checkListPointers(t, l, [e]);
     l.MoveToBack(e);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e]));
+    checkListPointers(t, l, [e]);
     l.Remove(e);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([]));
+    checkListPointers(t, l, []);
 
     // Bigger list
     var e2 = l.PushFront((nint)2);
     var e1 = l.PushFront((nint)1);
     var e3 = l.PushBack((nint)3);
     var e4 = l.PushBack(bananaˢ);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e3, e4]));
+    checkListPointers(t, l, [e1, e2, e3, e4]);
 
     l.Remove(e2);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e3, e4]));
+    checkListPointers(t, l, [e1, e3, e4]);
 
     l.MoveToFront(e3); // move from middle
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e3, e1, e4]));
+    checkListPointers(t, l, [e3, e1, e4]);
 
     l.MoveToFront(e1);
     l.MoveToBack(e3); // move from middle
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e3]));
+    checkListPointers(t, l, [e1, e4, e3]);
 
     l.MoveToFront(e3); // move from back
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e3, e1, e4]));
+    checkListPointers(t, l, [e3, e1, e4]);
     l.MoveToFront(e3); // should be no-op
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e3, e1, e4]));
+    checkListPointers(t, l, [e3, e1, e4]);
 
     l.MoveToBack(e3); // move from front
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e3]));
+    checkListPointers(t, l, [e1, e4, e3]);
     l.MoveToBack(e3); // should be no-op
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e3]));
+    checkListPointers(t, l, [e1, e4, e3]);
 
     e2 = l.InsertBefore((nint)2, e1); // insert before front
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e2, e1, e4, e3]));
+    checkListPointers(t, l, [e2, e1, e4, e3]);
     l.Remove(e2);
     e2 = l.InsertBefore((nint)2, e4); // insert before middle
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e4, e3]));
+    checkListPointers(t, l, [e1, e2, e4, e3]);
     l.Remove(e2);
     e2 = l.InsertBefore((nint)2, e3); // insert before back
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e2, e3]));
+    checkListPointers(t, l, [e1, e4, e2, e3]);
     l.Remove(e2);
 
     e2 = l.InsertAfter((nint)2, e1); // insert after front
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e4, e3]));
+    checkListPointers(t, l, [e1, e2, e4, e3]);
     l.Remove(e2);
     e2 = l.InsertAfter((nint)2, e4); // insert after middle
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e2, e3]));
+    checkListPointers(t, l, [e1, e4, e2, e3]);
     l.Remove(e2);
     e2 = l.InsertAfter((nint)2, e3); // insert after back
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e3, e2]));
+    checkListPointers(t, l, [e1, e4, e3, e2]);
     l.Remove(e2);
 
     // Check standard iteration.
     nint sum = 0;
     for (var eΔ1 = l.Front(); eΔ1 != nil; eΔ1 = eΔ1.Next()) {
-        {
-            var (i, ok) = (~eΔ1).Value._<nint>(ᐧ); if (ok) {
-                sum += i;
-            }
+        var (i, ok) = (~eΔ1).Value._<nint>(ᐧ); if (ok) {
+            sum += i;
         }
     }
     if (sum != 4) {
@@ -159,7 +155,7 @@ public static void TestList(ж<testing.T> t) {
         next = eΔ2.Next();
         l.Remove(eΔ2);
     }
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([]));
+    checkListPointers(t, l, []);
 }
 
 internal static void checkList(ж<testing.T> t, ж<global::go.container.list_package.List> Ꮡl, slice<any> es) {
@@ -192,48 +188,48 @@ public static void TestExtending(ж<testing.T> t) {
 
     var l3 = New();
     l3.PushBackList(l1);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3]);
     l3.PushBackList(l2);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3, (nint)4, (nint)5]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3, (nint)4, (nint)5]);
 
     l3 = New();
     l3.PushFrontList(l2);
-    checkList(t, l3, slice<any>([(nint)4, (nint)5]));
+    checkList(t, l3, [(nint)4, (nint)5]);
     l3.PushFrontList(l1);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3, (nint)4, (nint)5]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3, (nint)4, (nint)5]);
 
-    checkList(t, l1, slice<any>([(nint)1, (nint)2, (nint)3]));
-    checkList(t, l2, slice<any>([(nint)4, (nint)5]));
+    checkList(t, l1, [(nint)1, (nint)2, (nint)3]);
+    checkList(t, l2, [(nint)4, (nint)5]);
 
     l3 = New();
     l3.PushBackList(l1);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3]);
     l3.PushBackList(l3);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3, (nint)1, (nint)2, (nint)3]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3, (nint)1, (nint)2, (nint)3]);
 
     l3 = New();
     l3.PushFrontList(l1);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3]);
     l3.PushFrontList(l3);
-    checkList(t, l3, slice<any>([(nint)1, (nint)2, (nint)3, (nint)1, (nint)2, (nint)3]));
+    checkList(t, l3, [(nint)1, (nint)2, (nint)3, (nint)1, (nint)2, (nint)3]);
 
     l3 = New();
     l1.PushBackList(l3);
-    checkList(t, l1, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, l1, [(nint)1, (nint)2, (nint)3]);
     l1.PushFrontList(l3);
-    checkList(t, l1, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, l1, [(nint)1, (nint)2, (nint)3]);
 }
 
 public static void TestRemove(ж<testing.T> t) {
     var l = New();
     var e1 = l.PushBack((nint)1);
     var e2 = l.PushBack((nint)2);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2]));
+    checkListPointers(t, l, [e1, e2]);
     var e = l.Front();
     l.Remove(e);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e2]));
+    checkListPointers(t, l, [e2]);
     l.Remove(e);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e2]));
+    checkListPointers(t, l, [e2]);
 }
 
 public static void TestIssue4103(ж<testing.T> t) {
@@ -287,48 +283,48 @@ public static void TestMove(ж<testing.T> t) {
     var e4 = l.PushBack((nint)4);
 
     l.MoveAfter(e3, e3);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e3, e4]));
+    checkListPointers(t, l, [e1, e2, e3, e4]);
     l.MoveBefore(e2, e2);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e3, e4]));
+    checkListPointers(t, l, [e1, e2, e3, e4]);
 
     l.MoveAfter(e3, e2);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e3, e4]));
+    checkListPointers(t, l, [e1, e2, e3, e4]);
     l.MoveBefore(e2, e3);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e2, e3, e4]));
+    checkListPointers(t, l, [e1, e2, e3, e4]);
 
     l.MoveBefore(e2, e4);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e3, e2, e4]));
+    checkListPointers(t, l, [e1, e3, e2, e4]);
     (e2, e3) = (e3, e2);
 
     l.MoveBefore(e4, e1);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e4, e1, e2, e3]));
+    checkListPointers(t, l, [e4, e1, e2, e3]);
     (e1, e2, e3, e4) = (e4, e1, e2, e3);
 
     l.MoveAfter(e4, e1);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e4, e2, e3]));
+    checkListPointers(t, l, [e1, e4, e2, e3]);
     (e2, e3, e4) = (e4, e2, e3);
 
     l.MoveAfter(e2, e3);
-    checkListPointers(t, l, slice<ж<global::go.container.list_package.Element>>([e1, e3, e2, e4]));
+    checkListPointers(t, l, [e1, e3, e2, e4]);
 }
 
 // Test PushFront, PushBack, PushFrontList, PushBackList with uninitialized List
 public static void TestZeroList(ж<testing.T> t) {
     ж<global::go.container.list_package.List> l1 = @new<global::go.container.list_package.List>();
     l1.PushFront((nint)1);
-    checkList(t, l1, slice<any>([(nint)1]));
+    checkList(t, l1, [(nint)1]);
 
     ж<global::go.container.list_package.List> l2 = @new<global::go.container.list_package.List>();
     l2.PushBack((nint)1);
-    checkList(t, l2, slice<any>([(nint)1]));
+    checkList(t, l2, [(nint)1]);
 
     ж<global::go.container.list_package.List> l3 = @new<global::go.container.list_package.List>();
     l3.PushFrontList(l1);
-    checkList(t, l3, slice<any>([(nint)1]));
+    checkList(t, l3, [(nint)1]);
 
     ж<global::go.container.list_package.List> l4 = @new<global::go.container.list_package.List>();
     l4.PushBackList(l2);
-    checkList(t, l4, slice<any>([(nint)1]));
+    checkList(t, l4, [(nint)1]);
 }
 
 // Test that a list l is not modified when calling InsertBefore with a mark that is not an element of l.
@@ -338,7 +334,7 @@ public static void TestInsertBeforeUnknownMark(ж<testing.T> t) {
     Ꮡl.PushBack((nint)2);
     Ꮡl.PushBack((nint)3);
     Ꮡl.InsertBefore((nint)1, @new<global::go.container.list_package.Element>());
-    checkList(t, Ꮡl, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, Ꮡl, [(nint)1, (nint)2, (nint)3]);
 }
 
 // Test that a list l is not modified when calling InsertAfter with a mark that is not an element of l.
@@ -348,7 +344,7 @@ public static void TestInsertAfterUnknownMark(ж<testing.T> t) {
     Ꮡl.PushBack((nint)2);
     Ꮡl.PushBack((nint)3);
     Ꮡl.InsertAfter((nint)1, @new<global::go.container.list_package.Element>());
-    checkList(t, Ꮡl, slice<any>([(nint)1, (nint)2, (nint)3]));
+    checkList(t, Ꮡl, [(nint)1, (nint)2, (nint)3]);
 }
 
 // Test that a list l is not modified when calling MoveAfter or MoveBefore with a mark that is not an element of l.
@@ -360,12 +356,12 @@ public static void TestMoveUnknownMark(ж<testing.T> t) {
     var e2 = Ꮡl2.PushBack((nint)2);
 
     Ꮡl1.MoveAfter(e1, e2);
-    checkList(t, Ꮡl1, slice<any>([(nint)1]));
-    checkList(t, Ꮡl2, slice<any>([(nint)2]));
+    checkList(t, Ꮡl1, [(nint)1]);
+    checkList(t, Ꮡl2, [(nint)2]);
 
     Ꮡl1.MoveBefore(e1, e2);
-    checkList(t, Ꮡl1, slice<any>([(nint)1]));
-    checkList(t, Ꮡl2, slice<any>([(nint)2]));
+    checkList(t, Ꮡl1, [(nint)1]);
+    checkList(t, Ꮡl2, [(nint)2]);
 }
 
 } // end list_internal_test_package

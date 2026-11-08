@@ -7,8 +7,6 @@ using testenv = global::go.@internal.testenv_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.@internal;
 using global::go.os;
@@ -22,12 +20,12 @@ partial class build_internal_test_package {
 //
 // DO NOT ADD TO THIS LIST TO FIX BUILDS.
 // Vendoring a new package requires prior discussion.
-internal static slice<@string> allowedPackagePrefixes = slice<@string>([
+internal static slice<@string> allowedPackagePrefixes = [
     "golang.org/x",
     "github.com/google/pprof",
     "github.com/ianlancetaylor/demangle",
     "rsc.io/markdown"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stdˢ => ref stdˢᵇ;
@@ -46,7 +44,7 @@ public static partial void TestVendorPackages(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, fullPkg) in strings.Split((@string)@out, "\n")) {
+    foreach (var (_, fullPkg) in range(strings.Split((@string)@out, "\n"))) {
         var (pkg, found) = strings.CutPrefix(fullPkg, vendorˢ2);
         if (!found) {
             (_, pkg, found) = strings.Cut(fullPkg, vendorˢ3);
@@ -67,7 +65,7 @@ public static partial void TestVendorPackages(ж<testing.T> t) {
 }
 
 internal static bool isAllowed(@string pkg) {
-    foreach (var (_, pre) in allowedPackagePrefixes) {
+    foreach (var (_, pre) in range(allowedPackagePrefixes)) {
         if (pkg == pre || strings.HasPrefix(pkg, pre + "/"u8)) {
             return true;
         }
@@ -81,13 +79,13 @@ internal partial struct TestIsAllowed_type /*dyn*/ {
 }
 
 public static void TestIsAllowed(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestIsAllowed_type>([
+    foreach (var (_, test) in range(slice<TestIsAllowed_type>([
         new("evil.com/bad", false),
         new("golang.org/x/build", true),
         new("rsc.io/markdown", true),
         new("rsc.io/markdowntonabbey", false),
         new("rsc.io/markdown/sub", true)
-    ])) {
+    ]))) {
         var got = isAllowed(test.@in);
         if (got != test.want) {
             t.Errorf("%q: got %t, want %t", test.@in, got, test.want);

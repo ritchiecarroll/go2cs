@@ -9,8 +9,6 @@ using filepath = path.filepath_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using go.@internal.syscall;
 using path;
@@ -45,7 +43,7 @@ public static void TestOpen(ж<testing.T> t) {
         new(dir, syscall.O_WRONLY, syscall.EISDIR),
         new(dir, syscall.O_RDWR, syscall.EISDIR)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         @string dirΔ1 = filepath.Dir(tt.path);
         var (dirfd, errΔ1) = syscall.Open(dirΔ1, syscall.O_RDONLY, 0);
         if (errΔ1 != nil) {
@@ -77,7 +75,7 @@ public static void TestDeleteAt(ж<testing.T> t) {
         new("DeleteAt removes readonly file", makeFileReadonly)
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestDeleteAt_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -110,20 +108,16 @@ public static void TestDeleteAt(ж<testing.T> t) {
             }
 
             // Verify the file has been deleted.
-            {
-                var (_, errΔ1) = os.Stat(@file); if (!os.IsNotExist(errΔ1)) {
-                    tΔ2.Fatalf("file still exists after DeleteAt");
-                }
+            var (_, errΔ1) = os.Stat(@file); if (!os.IsNotExist(errΔ1)) {
+                tΔ2.Fatalf("file still exists after DeleteAt");
             }
         });
     }
 }
 
 internal static partial void makeFileReadonly(ж<testing.T> t, @string name) {
-    {
-        var err = os.Chmod(name, 0); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = os.Chmod(name, 0); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -169,28 +163,24 @@ internal static void makeFileNotReadable(ж<testing.T> t, @string name) {
 
         ж<Δwindows.ACL> oldAcl = default;
         ref var newAcl = ref heap<ж<Δwindows.ACL>>(out var ᏑnewAcl);
-        {
-            var errΔ1 = Δwindows.SetEntriesInAcl(
-                (uint32)len(entries),
-                Ꮡ(entries, 0),
-                oldAcl,
-                ᏑnewAcl); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δwindows.SetEntriesInAcl(
+            (uint32)len(entries),
+            Ꮡ(entries, 0),
+            oldAcl,
+            ᏑnewAcl); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         defer(syscall.LocalFree, (syscallꓸHandle)(uintptr)newAcl, ref ᒐ);
-        {
-            var errΔ2 = Δwindows.SetNamedSecurityInfo(
-                name,
-                Δwindows.SE_FILE_OBJECT,
-                (uint32)((uint32)Δwindows.DACL_SECURITY_INFORMATION | (uint32)Δwindows.PROTECTED_DACL_SECURITY_INFORMATION),
-                nil,
-                nil,
-                newAcl,
-                nil); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = Δwindows.SetNamedSecurityInfo(
+            name,
+            Δwindows.SE_FILE_OBJECT,
+            (uint32)((uint32)Δwindows.DACL_SECURITY_INFORMATION | (uint32)Δwindows.PROTECTED_DACL_SECURITY_INFORMATION),
+            nil,
+            nil,
+            newAcl,
+            nil); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

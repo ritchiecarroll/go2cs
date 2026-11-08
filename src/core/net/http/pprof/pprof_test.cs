@@ -19,8 +19,6 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using exec = go.os.exec_package;
 using go.@internal;
@@ -37,7 +35,7 @@ partial class pprof_internal_test_package {
 // TestDescriptions checks that the profile names under runtime/pprof package
 // have a key in the description map.
 public static void TestDescriptions(ж<testing.T> t) {
-    foreach (var (_, p) in pprof.Profiles()) {
+    foreach (var (_, p) in range(pprof.Profiles())) {
         var (_, ok) = profileDescriptions[p.Name(), ꟷ];
         if (ok != true) {
             t.Errorf("%s does not exist in profileDescriptions map\n", p.Name());
@@ -72,7 +70,7 @@ public static void TestHandlers(ж<testing.T> t) {
         new("/debug/pprof/goroutine?seconds=1", Index, http.StatusOK, "application/octet-stream", @"attachment; filename=""goroutine-delta""", default),
         new("/debug/pprof/", Index, http.StatusOK, "text/html; charset=utf-8", "", slice<byte>("Types of profiles available:"u8))
     ]);
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestHandlers_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -262,7 +260,7 @@ public static partial void TestDeltaProfile(ж<testing.T> t) {
             ᐸꟷ(doneʗ2); // wait for the goroutine to exit.
         }, ref ᒐ);
 
-        foreach (var (_, d) in slice<nint>([1, 4, 16, 32])) {
+        foreach (var (_, d) in range(slice<nint>([1, 4, 16, 32]))) {
             @string endpoint = fmt.Sprintf("/debug/pprof/mutex?seconds=%d"u8, d);
             var (pΔ1, errΔ1) = query(endpoint);
             if (errΔ1 != nil) {
@@ -313,16 +311,16 @@ internal static bool seen(ж<profile.Profile> Ꮡp, @string fname) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var locIDs = new map<ж<profile.Location>, bool>{};
-    foreach (var (_, loc) in p.Location) {
-        foreach (var (_, l) in loc.Line) {
+    foreach (var (_, loc) in range(p.Location)) {
+        foreach (var (_, l) in range(loc.Line)) {
             if (strings.Contains(l.Function.Name, fname)) {
                 locIDs[loc] = true;
                 break;
             }
         }
     }
-    foreach (var (_, sample) in p.Sample) {
-        foreach (var (_, loc) in sample.Location) {
+    foreach (var (_, sample) in range(p.Sample)) {
+        foreach (var (_, loc) in range(sample.Location)) {
             if (locIDs[loc]) {
                 return true;
             }

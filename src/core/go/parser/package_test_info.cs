@@ -9,6 +9,7 @@ global using static global::go.go.parser_internal_test_package;
 
 // <ImportedTypeAliases>
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;

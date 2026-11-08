@@ -103,8 +103,8 @@ public static void TestScopeLookupParent(ж<testing.T> t) {
     makePkg(mainˢ, f);
     var mainScope = imports[mainˢ].Scope();
     var rx = regexp.MustCompile(@"^/\*(\w*)=([\w:]*)\*/$");
-    foreach (var (_, group) in f.Comments) {
-        foreach (var (_, comment) in group.List) {
+    foreach (var (_, group) in range(f.Comments)) {
+        foreach (var (_, comment) in range(group.List)) {
             // Parse the assertion in the comment.
             var m = rx.FindStringSubmatch(comment.Text);
             if (m == nil) {
@@ -123,11 +123,9 @@ public static void TestScopeLookupParent(ж<testing.T> t) {
                 continue;
             }
             @string got = undefˢ;
-            {
-                var (_, obj) = inner.LookupParent(name, comment.Pos()); if (obj != nil) {
-                    @string kind = strings.ToLower(strings.TrimPrefix(reflect.TypeOf(obj).String(), typesˢ2));
-                    got = fmt.Sprintf("%s:%d"u8, kind, fset.Position(obj.Pos()).Line);
-                }
+            var (_, obj) = inner.LookupParent(name, comment.Pos()); if (obj != nil) {
+                @string kind = strings.ToLower(strings.TrimPrefix(reflect.TypeOf(obj).String(), typesˢ2));
+                got = fmt.Sprintf("%s:%d"u8, kind, fset.Position(obj.Pos()).Line);
             }
             if (got != want) {
                 t.Errorf("%s: at %s: %s resolved to %s, want %s",

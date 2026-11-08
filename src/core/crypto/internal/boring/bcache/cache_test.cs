@@ -8,8 +8,6 @@ using runtime = runtime_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.crypto.@internal.boring.bcache_package;
 
@@ -68,28 +66,22 @@ public static partial void TestCache(ж<testing.T> t) {
         var v = next<int32>();
         m[k] = v;
         c.Put(k, v);
-        {
-            n++; if (n >= 2000) {
-                break;
-            }
+        n++; if (n >= 2000) {
+            break;
         }
     }
 
     // Check results.
     foreach (var (k, v) in m) {
-        {
-            var cv = c.Get(k); if (cv != v) {
-                t.Fatalf("c.Get(%v) = %v, want %v", str(k), str(cv), str(v));
-            }
+        var cv = c.Get(k); if (cv != v) {
+            t.Fatalf("c.Get(%v) = %v, want %v", str(k), str(cv), str(v));
         }
     }
 
     c.Clear();
     foreach (var (k, _) in m) {
-        {
-            var cv = c.Get(k); if (cv != nil) {
-                t.Fatalf("after GC, c.Get(%v) = %v, want nil", str(k), str(cv));
-            }
+        var cv = c.Get(k); if (cv != nil) {
+            t.Fatalf("after GC, c.Get(%v) = %v, want nil", str(k), str(cv));
         }
     }
 
@@ -100,10 +92,8 @@ public static partial void TestCache(ж<testing.T> t) {
     }
     runtime.GC();
     foreach (var (k, _) in m) {
-        {
-            var cv = c.Get(k); if (cv != nil) {
-                t.Fatalf("after Clear, c.Get(%v) = %v, want nil", str(k), str(cv));
-            }
+        var cv = c.Get(k); if (cv != nil) {
+            t.Fatalf("after Clear, c.Get(%v) = %v, want nil", str(k), str(cv));
         }
     }
 
@@ -135,11 +125,9 @@ public static partial void TestCache(ж<testing.T> t) {
                 Ꮡbarrier.Wait();
 
                 foreach (var (k, v) in mΔ1) {
-                    {
-                        var cv = cʗ1.Get(k); if (cv != v) {
-                            t.Errorf("c.Get(%v) = %v, want %v", str(k), str(cv), str(v));
-                            atomic.AddInt32(Ꮡlost, +1);
-                        }
+                    var cv = cʗ1.Get(k); if (cv != v) {
+                        t.Errorf("c.Get(%v) = %v, want %v", str(k), str(cv), str(v));
+                        atomic.AddInt32(Ꮡlost, +1);
                     }
                 }
             }

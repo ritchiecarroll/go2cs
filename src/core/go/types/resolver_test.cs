@@ -139,7 +139,7 @@ public static void TestResolveIdents(ж<testing.T> t) {
     // parse package files
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default;
-    foreach (var (_, src) in sources) {
+    foreach (var (_, src) in range(sources)) {
         files = append(filesᴷ, files, mustParse(fset, src));
     }
 
@@ -154,37 +154,31 @@ public static void TestResolveIdents(ж<testing.T> t) {
     }
 
     // check that all packages were imported
-    foreach (var (_, name) in pkgnames) {
+    foreach (var (_, name) in range(pkgnames)) {
         if (!importer.imported[name]) {
             t.Errorf("package %s not imported", name);
         }
     }
 
     // check that qualified identifiers are resolved
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         var fsetʗ1 = fset;
         var usesʗ1 = uses;
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-            {
-                var (s, ok) = n._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
-                    {
-                        var (x, okΔ1) = s.X._<ж<ast.Ident>>(ᐧ); if (okΔ1) {
-                            var obj = usesʗ1[x];
-                            if (obj == nil) {
-                                t.Errorf("%s: unresolved qualified identifier %s", fsetʗ1.Position(x.Pos()), x.Name);
-                                return false;
-                            }
-                            {
-                                var (_, okΔ2) = obj._<ж<types.PkgName>>(ᐧ); if (okΔ2 && usesʗ1[s.Sel] == nil) {
-                                    t.Errorf("%s: unresolved selector %s", fsetʗ1.Position(s.Sel.Pos()), s.Sel.Name);
-                                    return false;
-                                }
-                            }
-                            return false;
-                        }
+            var (s, ok) = n._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
+                var (x, okΔ1) = s.X._<ж<ast.Ident>>(ᐧ); if (okΔ1) {
+                    var obj = usesʗ1[x];
+                    if (obj == nil) {
+                        t.Errorf("%s: unresolved qualified identifier %s", fsetʗ1.Position(x.Pos()), x.Name);
+                        return false;
                     }
-                    return true;
+                    var (_, okΔ2) = obj._<ж<types.PkgName>>(ᐧ); if (okΔ2 && usesʗ1[s.Sel] == nil) {
+                        t.Errorf("%s: unresolved selector %s", fsetʗ1.Position(s.Sel.Pos()), s.Sel.Name);
+                        return false;
+                    }
+                    return false;
                 }
+                return true;
             }
             return true;
         });
@@ -198,33 +192,27 @@ public static void TestResolveIdents(ж<testing.T> t) {
 
     // check that each identifier in the source is found in uses or defs or both
     ref var both = ref heap<slice<@string>>(out var Ꮡboth);
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         var defsʗ1 = defs;
         var fsetʗ2 = fset;
         var usesʗ2 = uses;
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-            {
-                var (x, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-                    nint objects = default;
-                    {
-                        var (_, found) = usesʗ2[x, ꟷ]; if (found) {
-                            objects |= (nint)(1);
-                            delete(usesʗ2, x);
-                        }
-                    }
-                    {
-                        var (_, found) = defsʗ1[x, ꟷ]; if (found) {
-                            objects |= (nint)(2);
-                            delete(defsʗ1, x);
-                        }
-                    }
-                    if (objects == 0) {
-                        t.Errorf("%s: unresolved identifier %s", fsetʗ2.Position(x.Pos()), x.Name);
-                    } else if (objects == 3) {
-                        Ꮡboth.ValueSlot = append(Ꮡboth.ValueSlot, x.Name);
-                    }
-                    return false;
+            var (x, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
+                nint objects = default;
+                if (usesʗ2[x, ꟷ] is (_, true)) {
+                    objects |= (nint)(1);
+                    delete(usesʗ2, x);
                 }
+                if (defsʗ1[x, ꟷ] is (_, true)) {
+                    objects |= (nint)(2);
+                    delete(defsʗ1, x);
+                }
+                if (objects == 0) {
+                    t.Errorf("%s: unresolved identifier %s", fsetʗ2.Position(x.Pos()), x.Name);
+                } else if (objects == 3) {
+                    Ꮡboth.ValueSlot = append(Ꮡboth.ValueSlot, x.Name);
+                }
+                return false;
             }
             return true;
         });
@@ -232,11 +220,9 @@ public static void TestResolveIdents(ж<testing.T> t) {
 
     // check the expected set of idents that are simultaneously uses and defs
     slices.Sort<slice<@string>, @string>(both);
-    {
-        @string got = fmt.Sprint(both);
-        @string want = mutexStringerErrorˢ; if (got != want) {
-            t.Errorf("simultaneous uses/defs = %s, want %s", got, want);
-        }
+    @string got = fmt.Sprint(both);
+    @string want = mutexStringerErrorˢ; if (got != want) {
+        t.Errorf("simultaneous uses/defs = %s, want %s", got, want);
     }
 
     // any left-over identifiers didn't exist in the source

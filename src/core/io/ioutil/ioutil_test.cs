@@ -59,10 +59,8 @@ public static void TestWriteFile(ж<testing.T> t) {
     @string filename = f.Name();
     @string data = "Programming today is a race between software engineers striving to "u8 + "build bigger and better idiot-proof programs, and the Universe trying "u8 + "to produce bigger and better idiots. So far, the Universe is winning."u8;
 
-    {
-        var errΔ1 = WriteFile(filename, slice<byte>(data), 420); if (errΔ1 != nil) {
-            t.Fatalf("WriteFile %s: %v", filename, errΔ1);
-        }
+    var errΔ1 = WriteFile(filename, slice<byte>(data), 420); if (errΔ1 != nil) {
+        t.Fatalf("WriteFile %s: %v", filename, errΔ1);
     }
 
     (var contents, err) = ReadFile(filename);
@@ -139,7 +137,7 @@ public static void TestReadDir(ж<testing.T> t) {
 
     var foundFile = false;
     var foundSubDir = false;
-    foreach (var (_, dir) in list) {
+    foreach (var (_, dir) in range(list)) {
         switch (ᐧ) {
         case {} when !dir.IsDir() && dir.Name() == "io_test.go"u8: {
             foundFile = true;

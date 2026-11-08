@@ -25,10 +25,8 @@ internal static ast.Decl declNode;
 internal static int64 declSize;
 
 internal static void testprint(io.Writer @out, ast.Node node) {
-    {
-        var err = (Ꮡ(new Config((global::go.go.printer_package.Mode)((global::go.go.printer_package.Mode)(TabIndent | UseSpaces) | normalizeNumbers), 8, 0))).Fprint(@out, fset, node); if (err != nil) {
-            log.Fatalf("print error: %s", err);
-        }
+    var err = (Ꮡ(new Config((global::go.go.printer_package.Mode)((global::go.go.printer_package.Mode)(TabIndent | UseSpaces) | normalizeNumbers), 8, 0))).Fprint(@out, fset, node); if (err != nil) {
+        log.Fatalf("print error: %s", err);
     }
 }
 
@@ -59,16 +57,14 @@ internal static void initialize() {
     fileNode = @file;
     fileSize = (int64)len(src);
 
-    foreach (var (_, decl) in @file.Decls) {
+    foreach (var (_, decl) in range(@file.Decls)) {
         // The first global variable, which is pretty short:
         //
         //	var unresolved = new(ast.Object)
-        {
-            var (declΔ1, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.VAR) {
-                declNode = new ast.GenDeclжDecl(declΔ1);
-                declSize = (int64)(fset.Position(declΔ1.End()).Offset - fset.Position(declΔ1.Pos()).Offset);
-                break;
-            }
+        var (declΔ1, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.VAR) {
+            declNode = new ast.GenDeclжDecl(declΔ1);
+            declSize = (int64)(fset.Position(declΔ1.End()).Offset - fset.Position(declΔ1.Pos()).Offset);
+            break;
         }
     }
 }

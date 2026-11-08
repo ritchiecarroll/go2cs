@@ -46,17 +46,13 @@ import _ "math/big"
 func main() {}
 
 """u8.Raw());
-    {
-        var errΔ1 = os.WriteFile(goFile, @file, 420); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(goFile, @file, 420); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var cmd = exec.Command(goBin, buildˢ, "-o", xExeˢ, xGoˢ);
     cmd.Dir = tmp;
-    {
-        var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
-            t.Fatalf("compile: %v, %s", errΔ2, @out);
-        }
+    var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+        t.Fatalf("compile: %v, %s", errΔ2, @out);
     }
 
     cmd = exec.Command(goBin, toolˢ, "nm", xExeˢ);
@@ -75,7 +71,7 @@ func main() {}
         "math/big.(*Rat)",
         "math/big.(*Int)"
     ]);
-    foreach (var (_, sym) in bad) {
+    foreach (var (_, sym) in range(bad)) {
         if (bytes_package.Contains(nm, slice<byte>(sym))) {
             t.Errorf("unexpected symbol %q found", sym);
         }

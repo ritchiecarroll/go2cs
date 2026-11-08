@@ -11,27 +11,27 @@ partial class zstd_internal_test_package {
 
 // literalPredefinedDistribution is the predefined distribution table
 // for literal lengths. RFC 3.1.1.3.2.2.1.
-internal static slice<int16> literalPredefinedDistribution = slice<int16>([
+internal static slice<int16> literalPredefinedDistribution = [
     4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 1, 1, 1, 1, 1,
     (int16)(-1), (int16)(-1), (int16)(-1), (int16)(-1)
-]);
+];
 
 // offsetPredefinedDistribution is the predefined distribution table
 // for offsets. RFC 3.1.1.3.2.2.3.
-internal static slice<int16> offsetPredefinedDistribution = slice<int16>([
+internal static slice<int16> offsetPredefinedDistribution = [
     1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, (int16)(-1), (int16)(-1), (int16)(-1), (int16)(-1), (int16)(-1)
-]);
+];
 
 // matchPredefinedDistribution is the predefined distribution table
 // for match lengths. RFC 3.1.1.3.2.2.2.
-internal static slice<int16> matchPredefinedDistribution = slice<int16>([
+internal static slice<int16> matchPredefinedDistribution = [
     1, 4, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, (int16)(-1), (int16)(-1),
     (int16)(-1), (int16)(-1), (int16)(-1), (int16)(-1), (int16)(-1)
-]);
+];
 
 internal partial struct TestPredefinedTables_tests /*dyn*/ {
     internal @string name;
@@ -69,7 +69,7 @@ public static void TestPredefinedTables(ж<testing.T> t) {
             predef: predefinedMatchTable[..]
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestPredefinedTables_tests(), out var Ꮡtest);
         test = vᴛ1;
 

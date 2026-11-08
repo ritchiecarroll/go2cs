@@ -40,14 +40,12 @@ internal partial struct TestEd25519Vectors_vectors /*dyn*/ {
 public static void TestEd25519Vectors(ж<testing.T> t) {
     var jsonVectors = downloadEd25519Vectors(t);
     ref var vectors = ref heap<slice<TestEd25519Vectors_vectors>>(out var Ꮡvectors);
-    {
-        var err = json.Unmarshal(jsonVectors, Ꮡvectors); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = json.Unmarshal(jsonVectors, Ꮡvectors); if (err != nil) {
+        t.Fatal(err);
     }
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var expectedToVerify = true;
-        foreach (var (_, f) in v.Flags) {
+        foreach (var (_, f) in range(v.Flags)) {
             var exprᴛ1 = f;
             switch (ᐧ) {
             // We use the simplified verification formula that doesn't multiply

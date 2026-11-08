@@ -30,10 +30,8 @@ internal static error oops() {
 }
 
 public static void Example() {
-    {
-        var err = oops(); if (err != nil) {
-            fmt.Println(err);
-        }
+    var err = oops(); if (err != nil) {
+        fmt.Println(err);
     }
     // Output: 1989-03-15 22:30:00 +0000 UTC: the file system has gone away
 }
@@ -145,13 +143,11 @@ private static readonly @string nonExistingˢᵇ = "non-existing"u8;
 private static readonly object fileDoesNotExistˢ = (@string)"file does not exist"u8;
 
 public static void ExampleIs() {
-    {
-        var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
-            if (errors.Is(err, fs.ErrNotExist)) {
-                fmt.Println(fileDoesNotExistˢ);
-            } else {
-                fmt.Println(err);
-            }
+    var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
+        if (errors.Is(err, fs.ErrNotExist)) {
+            fmt.Println(fileDoesNotExistˢ);
+        } else {
+            fmt.Println(err);
         }
     }
 
@@ -166,7 +162,6 @@ partial struct MyIsError {
 public static @string Error(this MyIsError e) {
     return e.err;
 }
-
 public static bool Is(this MyIsError e, error err) {
     return AreEqual(err, fs.ErrPermission);
 }
@@ -191,14 +186,12 @@ public static void ExampleIs_custom_match() {
 private static readonly object failedAtPathˢ = (@string)"Failed at path:"u8;
 
 public static void ExampleAs() {
-    {
-        var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
-            ref var pathError = ref heap<ж<fs.PathError>>(out var ᏑpathError);
-            if (errors.As(err, ᏑpathError)) {
-                fmt.Println(failedAtPathˢ, pathError.Path);
-            } else {
-                fmt.Println(err);
-            }
+    var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
+        ref var pathError = ref heap<ж<fs.PathError>>(out var ᏑpathError);
+        if (errors.As(err, ᏑpathError)) {
+            fmt.Println(failedAtPathˢ, pathError.Path);
+        } else {
+            fmt.Println(err);
         }
     }
 
@@ -207,15 +200,11 @@ public static void ExampleAs() {
 }
 
 public static void ExampleAsType() {
-    {
-        var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
-            {
-                var (pathError, ok) = errors.AsType<ж<fs.PathError>>(err); if (ok) {
-                    fmt.Println(failedAtPathˢ, pathError.Path);
-                } else {
-                    fmt.Println(err);
-                }
-            }
+    var (_, err) = os.Open(nonExistingˢ); if (err != nil) {
+        var (pathError, ok) = errors.AsType<ж<fs.PathError>>(err); if (ok) {
+            fmt.Println(failedAtPathˢ, pathError.Path);
+        } else {
+            fmt.Println(err);
         }
     }
     // Output:
@@ -229,7 +218,6 @@ partial struct MyAsError {
 public static @string Error(this MyAsError e) {
     return e.err;
 }
-
 public static bool As(this MyAsError e, any target) {
     var (pe, ok) = target._<ж<ж<fs.PathError>>>(ᐧ);
     if (!ok) {

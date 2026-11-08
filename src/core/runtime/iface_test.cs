@@ -19,58 +19,29 @@ partial interface I2 {
 }
 
 partial struct TS /*num:uint16*/;
-
 partial struct TM /*num:uintptr*/;
-
 partial struct TL /*[2]uintptr*/;
 
-public static void Method1(this TS _) {
-}
-
-public static void Method2(this TS _) {
-}
-
-public static void Method1(this TM _) {
-}
-
-public static void Method2(this TM _) {
-}
-
-public static void Method1(this TL _) {
-}
-
-public static void Method2(this TL _) {
-}
+public static void Method1(this TS _) { }
+public static void Method2(this TS _) { }
+public static void Method1(this TM _) { }
+public static void Method2(this TM _) { }
+public static void Method1(this TL _) { }
+public static void Method2(this TL _) { }
 
 partial struct T8 /*num:uint8*/;
-
 partial struct T16 /*num:uint16*/;
-
 partial struct T32 /*num:uint32*/;
-
 partial struct T64 /*num:uint64*/;
-
 partial struct Tstr /*@string*/;
-
 partial struct Tslice /*[]byte*/;
 
-public static void Method1(this T8 _) {
-}
-
-public static void Method1(this T16 _) {
-}
-
-public static void Method1(this T32 _) {
-}
-
-public static void Method1(this T64 _) {
-}
-
-public static void Method1(this Tstr _) {
-}
-
-public static void Method1(this Tslice _) {
-}
+public static void Method1(this T8 _) { }
+public static void Method1(this T16 _) { }
+public static void Method1(this T32 _) { }
+public static void Method1(this T64 _) { }
+public static void Method1(this Tstr _) { }
+public static void Method1(this Tslice _) { }
 
 internal static any e;
 internal static any e_;
@@ -431,7 +402,7 @@ public static void TestZeroConvT2x(ж<testing.T> t) {
         })
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestZeroConvT2x_tests(), out var Ꮡtest);
         test = vᴛ1;
 

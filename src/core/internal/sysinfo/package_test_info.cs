@@ -36,7 +36,7 @@ using static global::go.@internal.sysinfo_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/sysinfo/sysinfo_test.go", "sysinfo_test.cs", "AA0YgoI=")]
+[assembly: GoPositionMap("internal/sysinfo/sysinfo_test.go", "sysinfo_test.cs", "AAsYgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -15,10 +15,8 @@ public static void TestSupportUnixSocket(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref heap(new syscall.WSAData(), out var Ꮡd);
-        {
-            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡd); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡd); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
 

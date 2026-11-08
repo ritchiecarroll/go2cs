@@ -28,10 +28,8 @@ public static void TestMapFS(ж<testing.T> t) {
         ["hello"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("hello, world\n"u8))),
         ["fortune/k/ken.txt"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("If a program is too slow, it must have a loop.\n"u8)))
     });
-    {
-        var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), helloˢ, fortuneˢ, fortuneKˢ, fortuneKKenTxtˢ); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), helloˢ, fortuneˢ, fortuneKˢ, fortuneKKenTxtˢ); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -101,10 +99,8 @@ public static void TestMapFSSymlink(ж<testing.T> t) {
         ["linklink"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("dirlink"u8), Mode: fs.ModeSymlink)),
         ["ken.txt"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("dirlink/ken.txt"u8), Mode: fs.ModeSymlink))
     });
-    {
-        var errΔ1 = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), fortuneKKenTxtˢ, dirlinkˢ, kenTxtˢ, linklinkˢ); if (errΔ1 != nil) {
-            t.Error(errΔ1);
-        }
+    var errΔ1 = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), fortuneKKenTxtˢ, dirlinkˢ, kenTxtˢ, linklinkˢ); if (errΔ1 != nil) {
+        t.Error(errΔ1);
     }
 
     var (gotData, err) = fs.ReadFile(new fstest_internal_test_package.fstest_MapFSᴠFS(m), kenTxtˢ);

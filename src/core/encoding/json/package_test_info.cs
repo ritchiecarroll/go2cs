@@ -64,8 +64,8 @@ using static global::go.encoding.json_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABUwgoKAgqSktLS2AAoGgoKUtLS25oKCgoCCtoKCpg==")]
-[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABUwgqS0tKQACgaCgpS0tKTmgoKCgIK2goKm")]
+[assembly: GoPositionMap("encoding/json/example_marshaling_test.go", "example_marshaling_test.cs", "ABUwgoKClKS0tLYACgaCgpS0tLbmgoKCgqaCgqY=")]
+[assembly: GoPositionMap("encoding/json/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABUwgqS0tKQACgaCgpS0tKTmgoKCgqaCgqY=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

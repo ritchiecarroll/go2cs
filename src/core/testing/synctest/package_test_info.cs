@@ -54,8 +54,8 @@ using static global::go.testing.synctest_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("testing/synctest/example_test.go", "example_test.cs", "ABYskoKCkoKUgriCgoKCpoK4gpS4goK4goLKgoKCyoKkkoK2goKAgsiCgoCCxAAPBoLqgpKkAAkWgpKCgoKClMqCgqyygoKAktqCgoCSyNg=", "23-31:1;25-28:1.1;35-43:1;37-39:1.1;47-71:1;54-56:1.1;75-94:1;98-159:1;109-111:1.1;119-128:1.2", "", "", "85:25,132:25,134:25,169:29")]
-[assembly: GoPositionMap("testing/synctest/helper_test.go", "helper_test.cs", "AAsYsoI=")]
-[assembly: GoPositionMap("testing/synctest/synctest_test.go", "synctest_test.cs", "ABYoogANCIKCggAOEIKCggAOEIKCggAMEoKCggAODIKCggAEEoKCgoK2uJKCpoIACwiCgoKCgoKmgoCS2oCSAAgIgqKCovaCooKiAAkGgqKCtAAPBoKCggAEEsKAgoCCtsQACASCgoKUgoKCgoKCgoKCuIKCgII=", "21-22:1;26-30:1;27-29:1.1;37-41:1;38-40:1.1;48-52:1;49-51:1.1;60-64:1;61-63:1.1;69-73:1;70-72:1.1;82-95:1;84-88:1.1;91-94:1.2;103-114:1;104-108:1.1;123-126:1;130-133:1;137-141:1;139-140:1.1;145-149:1;146-148:1.1;185-189:1")]
+[assembly: GoPositionMap("testing/synctest/helper_test.go", "helper_test.cs", "AAkYsoI=")]
+[assembly: GoPositionMap("testing/synctest/synctest_test.go", "synctest_test.cs", "ABYoogANCIKCggAOEIKCggAOEIKCggAMEoKCggAODIKCggAEEoKCgoK2uJKCpoIACwiCgoKCgoKmgpLKgJIACAiCooKi9oKigqIACQaCooK0AA8GgoKCAAQSwoKCprQACASCgoKUgoKCgoKCgoKCuIKCgg==", "21-22:1;26-30:1;27-29:1.1;37-41:1;38-40:1.1;48-52:1;49-51:1.1;60-64:1;61-63:1.1;69-73:1;70-72:1.1;82-95:1;84-88:1.1;91-94:1.2;103-114:1;104-108:1.1;123-126:1;130-133:1;137-141:1;139-140:1.1;145-149:1;146-148:1.1;185-189:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

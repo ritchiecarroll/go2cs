@@ -27,7 +27,7 @@ private static readonly @string largeUnexpectedEOFˢᵇ = "large-UnexpectedEOF"u
 
 public static void TestReadData(ж<testing.T> t) {
     UntypedInt count = 100;
-    var input = bytes.Repeat(slice<byte>([(byte)'a']), count);
+    var input = bytes.Repeat([(byte)'a'], count);
 
     var inputʗ1 = input;
     t.Run(smallˢ, (ж<testing.T> tΔ1) => {
@@ -84,7 +84,7 @@ private static readonly @string sectionReaderˢᵇ = "SectionReader"u8;
 
 public static void TestReadDataAt(ж<testing.T> t) {
     UntypedInt count = 100;
-    var input = bytes.Repeat(slice<byte>([(byte)'a']), count);
+    var input = bytes.Repeat([(byte)'a'], count);
 
     var inputʗ1 = input;
     t.Run(smallˢ, (ж<testing.T> tΔ1) => {

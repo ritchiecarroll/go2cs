@@ -9,8 +9,6 @@ using static go.html.template_package;
 using strings = strings_package;
 using testing = testing_package;
 using parse = text.template.parse_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.html;
 using io = io_package;
@@ -47,10 +45,8 @@ public static void TestTemplateClone(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = buf.String(); if (got != want) {
-            t.Fatalf("got %q; want %q", got, want);
-        }
+    @string got = buf.String(); if (got != want) {
+        t.Fatalf("got %q; want %q", got, want);
     }
 }
 
@@ -236,7 +232,7 @@ public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж
     @string templ = templᶜ;
     var (ᴛ3, ᴛ4) = New(jsStringIsJsonStringˢ).Parse(templ);
     var tpl = Must(ᴛ3, ᴛ4);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

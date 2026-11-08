@@ -67,11 +67,9 @@ internal static void testCallers(ж<testing.T> t, slice<uintptr> pcs, bool pan) 
         new("f2", 19),
         new("f3", f3Line)
     ]);
-    foreach (var (_, w) in want) {
-        {
-            nint got = m["runtime_test."u8 + w.name]; if (got != w.line) {
-                t.Errorf("%s is line %d, want %d", w.name, got, w.line);
-            }
+    foreach (var (_, w) in range(want)) {
+        nint got = m["runtime_test."u8 + w.name]; if (got != w.line) {
+            t.Errorf("%s is line %d, want %d", w.name, got, w.line);
         }
     }
 }
@@ -112,10 +110,8 @@ public static partial void TestCallersPanic(ж<testing.T> t) {
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
@@ -291,10 +287,8 @@ public static partial void TestCallersNilPointerPanic(ж<testing.T> t) {
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
@@ -323,10 +317,8 @@ public static partial void TestCallersDivZeroPanic(ж<testing.T> t) {
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
@@ -357,10 +349,8 @@ public static partial void TestCallersDeferNilFuncPanic(ж<testing.T> t) {
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
@@ -391,10 +381,8 @@ public static partial void TestCallersDeferNilFuncPanicWithLoop(ж<testing.T> t)
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
@@ -444,10 +432,8 @@ internal static void testGenericEndlineno<_>(ж<testing.T> t) {
 }
 
 internal static partial void testCallerLine(ж<testing.T> t, nint want) {
-    {
-        nint have = callerLine(t, 1); if (have != want) {
-            t.Errorf("callerLine(1) returned %d, but want %d\n", have, want);
-        }
+    nint have = callerLine(t, 1); if (have != want) {
+        t.Errorf("callerLine(1) returned %d, but want %d\n", have, want);
     }
 }
 
@@ -511,22 +497,10 @@ internal static partial nint callersInlined(ж<testing.B> Ꮡb, nint n) {
     }
     return 1 + callersInlined1(Ꮡb, n - 1);
 }
-
-internal static partial nint callersInlined1(ж<testing.B> b, nint n) {
-    return callersInlined2(b, n);
-}
-
-internal static partial nint callersInlined2(ж<testing.B> b, nint n) {
-    return callersInlined3(b, n);
-}
-
-internal static partial nint callersInlined3(ж<testing.B> b, nint n) {
-    return callersInlined4(b, n);
-}
-
-internal static partial nint callersInlined4(ж<testing.B> b, nint n) {
-    return callersInlined(b, n);
-}
+internal static partial nint callersInlined1(ж<testing.B> b, nint n) { return callersInlined2(b, n); }
+internal static partial nint callersInlined2(ж<testing.B> b, nint n) { return callersInlined3(b, n); }
+internal static partial nint callersInlined3(ж<testing.B> b, nint n) { return callersInlined4(b, n); }
+internal static partial nint callersInlined4(ж<testing.B> b, nint n) { return callersInlined(b, n); }
 
 internal static partial nint callersNoCache(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -633,7 +607,7 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> t) {
         // call stack won't crash.
         defer(() => {
             var pcs = new slice<uintptr>(32);
-            foreach (var i in range(pcs)) {
+            foreach (var i in range(len(pcs))) {
                 // If runtime.recovery doesn't properly restore the
                 // frame pointer before returning control to this
                 // function, it will point somewhere lower in the stack

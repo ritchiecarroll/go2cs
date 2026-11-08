@@ -17,13 +17,9 @@ partial struct buffer {
     internal slice<byte> a;
 }
 
-internal static void init(this ref buffer b, nint n) {
-    b.a = new slice<byte>(0, n);
-}
+internal static void init(this ref buffer b, nint n) { b.a = new slice<byte>(0, n); }
 
-internal static void clear(this ref buffer b) {
-    b.a = b.a[0..0];
-}
+internal static void clear(this ref buffer b) { b.a = b.a[0..0]; }
 
 internal static (nint written, error err) Write(this ref buffer b, slice<byte> buf) {
     nint n = len(b.a);
@@ -39,9 +35,7 @@ internal static (nint written, error err) Write(this ref buffer b, slice<byte> b
     return (len(buf), default);
 }
 
-internal static @string String(this ref buffer b) {
-    return (@string)b.a;
-}
+internal static @string String(this ref buffer b) { return (@string)b.a; }
 
 internal static void write(ж<testing.T> t, @string testname, ж<tabwriter.Writer> w, @string src) {
     var (written, err) = io.WriteString(new tabwriter.WriterжWriter(w), src);
@@ -108,7 +102,7 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nuint flags;
     internal @string src, expected;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new(
         "1a",
         8, 0, 1, (byte)'.', 0,
@@ -502,10 +496,10 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
 
         "a\t|b\t|\t|d\n"u8 + "a\t|b\t|\t|d\t|e\n"u8 + "a\n"u8 + "a\t|b\t|c\t|d\n"u8 + "a\t|b\t|c\t|d\t|e\n"u8
     )
-]);
+];
 
 public static void Test(ж<testing.T> t) {
-    foreach (var (_, e) in tests) {
+    foreach (var (_, e) in range(tests)) {
         check(t, e.testname, e.minwidth, e.tabwidth, e.padding, e.padchar, e.flags, e.src, e.expected);
     }
 }
@@ -522,19 +516,17 @@ internal static void wantPanicString(ж<testing.T> t, @string want) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                var (got, ok) = e._<@string>(ᐧ);
-                switch (ᐧ) {
-                case {} when !ok: {
-                    t.Errorf("got %v (%T), want panic string", e, e);
-                    break;
-                }
-                case {} when got != want: {
-                    t.Errorf("wrong panic message: got %q, want %q", got, want);
-                    break;
-                }}
+        var e = recover(calledByDefer); if (e != nil) {
+            var (got, ok) = e._<@string>(ᐧ);
+            switch (ᐧ) {
+            case {} when !ok: {
+                t.Errorf("got %v (%T), want panic string", e, e);
+                break;
             }
+            case {} when got != want: {
+                t.Errorf("wrong panic message: got %q, want %q", got, want);
+                break;
+            }}
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -585,11 +577,11 @@ private static ref readonly @string reuseˢ => ref reuseˢᵇ;
 private static readonly @string reuseˢᵇ = "reuse"u8;
 
 public static void BenchmarkTable(ж<testing.B> b) {
-    foreach (var (_, w) in new nint[]{1, 10, 100}.array()) {
+    foreach (var (_, w) in range(new nint[]{1, 10, 100}.array())) {
         // Build a line with w cells.
         ref var line = ref heap<slice<byte>>(bytes.Repeat(slice<byte>("a\t"u8), w), out var Ꮡline);
         line = append(line, (byte)'\n');
-        foreach (var (_, h) in new nint[]{10, 1000, 100000}.array()) {
+        foreach (var (_, h) in range(new nint[]{10, 1000, 100000}.array())) {
             b.Run(fmt.Sprintf("%dx%d"u8, w, h), (ж<testing.B> bΔ1) => {
                 bΔ1.Run(newˢ, (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
@@ -620,7 +612,7 @@ public static void BenchmarkTable(ж<testing.B> b) {
 }
 
 public static void BenchmarkPyramid(ж<testing.B> b) {
-    foreach (var (_, x) in new nint[]{10, 100, 1000}.array()) {
+    foreach (var (_, x) in range(new nint[]{10, 100, 1000}.array())) {
         // Build a line with x cells.
         var line = bytes.Repeat(slice<byte>("a\t"u8), x);
         var lineʗ1 = line;
@@ -631,7 +623,7 @@ public static void BenchmarkPyramid(ж<testing.B> b) {
                 // Write increasing prefixes of that line.
                 for (nint j = 0; j < x; j++) {
                     w.Write(lineʗ1.slice(0, j * 2));
-                    w.Write(slice<byte>([(byte)'\n']));
+                    w.Write([(byte)'\n']);
                 }
                 w.Flush();
             }
@@ -641,11 +633,11 @@ public static void BenchmarkPyramid(ж<testing.B> b) {
 
 public static void BenchmarkRagged(ж<testing.B> b) {
     ref var lines = ref heap(new array<slice<byte>>(8), out var Ꮡlines);
-    foreach (var (i, w) in new nint[]{6, 2, 9, 5, 5, 7, 3, 8}.array()) {
+    foreach (var (i, w) in range(new nint[]{6, 2, 9, 5, 5, 7, 3, 8}.array())) {
         // Build a line with w cells.
         lines[i] = bytes.Repeat(slice<byte>("a\t"u8), w);
     }
-    foreach (var (_, h) in new nint[]{10, 100, 1000}.array()) {
+    foreach (var (_, h) in range(new nint[]{10, 100, 1000}.array())) {
         var linesʗ1 = lines;
         b.Run(fmt.Sprintf("%d"u8, h), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -654,7 +646,7 @@ public static void BenchmarkRagged(ж<testing.B> b) {
                 // Write the lines in turn h times.
                 for (nint j = 0; j < h; j++) {
                     w.Write(linesʗ1[j % len(linesʗ1)]);
-                    w.Write(slice<byte>([(byte)'\n']));
+                    w.Write([(byte)'\n']);
                 }
                 w.Flush();
             }

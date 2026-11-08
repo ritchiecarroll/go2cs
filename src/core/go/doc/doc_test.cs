@@ -27,7 +27,6 @@ using text;
 partial class doc_internal_test_package {
 
 internal static ж<bool> update = flag.Bool("update", false, "update golden (.out) files");
-
 internal static ж<@string> files = flag.String("files", "", "consider only Go test files matching this regular expression");
 
 internal static ref readonly @string dataDir => ref dataDirᵇ;
@@ -57,10 +56,8 @@ internal static @string synopsisFmt(@string s) {
     if (len(s) > n) {
         // cut off excess text and go back to a word boundary
         s = s[0..(int)(n)];
-        {
-            nint i = strings.LastIndexAny(s, "\t\n "); if (i >= 0) {
-                s = s.slice(0, i);
-            }
+        nint i = strings.LastIndexAny(s, "\t\n "); if (i >= 0) {
+            s = s.slice(0, i);
         }
         s = strings.TrimSpace(s) + " ..."u8;
     }
@@ -123,16 +120,14 @@ internal static void test(ж<testing.T> t, global::go.go.doc_package.Mode mode) 
             }
 
             // golden files always use / in filenames - canonicalize them
-            foreach (var (i, filename) in doc.Filenames) {
+            foreach (var (i, filename) in range(doc.Filenames)) {
                 doc.Filenames[i] = filepath.ToSlash(filename);
             }
 
             // print documentation
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var errΔ3 = templateTxt.Execute(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), new bundle(doc, fsetʗ1)); if (errΔ3 != nil) {
-                    tΔ1.Fatal(errΔ3);
-                }
+            var errΔ3 = templateTxt.Execute(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), new bundle(doc, fsetʗ1)); if (errΔ3 != nil) {
+                tΔ1.Fatal(errΔ3);
             }
             var got = buf.Bytes();
 
@@ -195,19 +190,19 @@ public static void TestFuncs(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    (var doc, err) = NewFromFiles(fset, slice<ж<ast.File>>([@file]), importPathˢ, (global::go.go.doc_package.Mode)0);
+    (var doc, err) = NewFromFiles(fset, [@file], importPathˢ, (global::go.go.doc_package.Mode)0);
     if (err != nil) {
         t.Fatal(err);
     }
 
-    foreach (var (_, f) in doc.Funcs) {
+    foreach (var (_, f) in range(doc.Funcs)) {
         f.Decl = default;
     }
-    foreach (var (_, ty) in doc.Types) {
-        foreach (var (_, f) in ty.Funcs) {
+    foreach (var (_, ty) in range(doc.Types)) {
+        foreach (var (_, f) in range(ty.Funcs)) {
             f.Decl = default;
         }
-        foreach (var (_, m) in ty.Methods) {
+        foreach (var (_, m) in range(ty.Methods)) {
             m.Decl = default;
         }
     }
@@ -289,8 +284,8 @@ func (*G2[A, B]) MG4() {}
 """u8.Raw();
 
 internal static ж<global::go.go.doc_package.Package> funcsPackage = Ꮡ(new Package(
-    Funcs: slice<ж<global::go.go.doc_package.Func>>([Ꮡ(new global::go.go.doc_package.Func(Name: "F"))]),
-    Types: slice<ж<global::go.go.doc_package.Type>>([
+    Funcs: [Ꮡ(new global::go.go.doc_package.Func(Name: "F"))],
+    Types: [
         Ꮡ(new global::go.go.doc_package.Type(
             Name: "G1",
             Funcs: slice<ж<global::go.go.doc_package.Func>>([Ꮡ(new global::go.go.doc_package.Func(Name: "NewG1"))]),
@@ -321,7 +316,7 @@ internal static ж<global::go.go.doc_package.Package> funcsPackage = Ꮡ(new Pac
             Methods: slice<ж<global::go.go.doc_package.Func>>([
                 Ꮡ(new global::go.go.doc_package.Func(Name: "M3", Recv: "S2", Orig: "S2", Level: 0))
             ])))
-    ])
+    ]
 ));
 
 } // end doc_internal_test_package

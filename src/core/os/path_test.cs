@@ -106,10 +106,8 @@ public static void TestMkdirAllAbsPath(ж<Δtesting.T> t) {
     t.Parallel();
     @string tmpDir = t.TempDir();
     @string path = filepath.Join(tmpDir, aBCˢ);
-    {
-        var errΔ1 = MkdirAll(path, 511); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = MkdirAll(path, 511); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var (st, err) = Stat(path);
     if (err != nil) {

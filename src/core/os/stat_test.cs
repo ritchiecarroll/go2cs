@@ -104,7 +104,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> t, @string path, testStatA
             return;
         }
         fs.FileInfo lsfi2 = default;
-        foreach (var (_, fi2) in fis) {
+        foreach (var (_, fi2) in range(fis)) {
             if (fi2.Name() == @base) {
                 lsfi2 = fi2;
                 break;
@@ -324,16 +324,12 @@ public static void TestSymlinkWithTrailingSlash(ж<Δtesting.T> t) {
 
     @string tmpdir = t.TempDir();
     @string dir = filepath.Join(tmpdir, dirˢ);
-    {
-        var errΔ1 = Δos.Mkdir(dir, 511); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Δos.Mkdir(dir, 511); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     @string dirlink = filepath.Join(tmpdir, linkˢ);
-    {
-        var errΔ2 = Δos.Symlink(dir, dirlink); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = Δos.Symlink(dir, dirlink); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
     @string dirlinkWithSlash = dirlink + ((@string)(rune)Δos.PathSeparator);
 
@@ -367,7 +363,7 @@ public static void TestStatConsole(ж<Δtesting.T> t) {
         "CONOUT$",
         "CON"
     ]);
-    foreach (var (_, name) in consoleNames) {
+    foreach (var (_, name) in range(consoleNames)) {
         var @params = new testStatAndLstatParams(
             isLink: false,
             statCheck: testIsFile,
@@ -397,10 +393,8 @@ public static void TestClosedStat(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = f.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = f.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     (_, err) = f.Stat();
     if (err == nil) {

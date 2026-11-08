@@ -19,7 +19,7 @@ public static void TestReset(ж<testing.T> t) {
     ]);
 
     var deflated = new slice<bytes.Buffer>(2);
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         var (w, _) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡ(deflated, i)), 1);
         w.Write(slice<byte>(s));
         w.Close();
@@ -33,7 +33,7 @@ public static void TestReset(ж<testing.T> t) {
     io.Copy(new flate_test_package.bytes_BufferжWriter(Ꮡ(inflated, 1)), f);
     f.Close();
 
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         if (s != Ꮡ(inflated, i).String()) {
             t.Errorf("inflated[%d]:\ngot  %q\nwant %q", i, Ꮡ(inflated, i), s);
         }
@@ -58,7 +58,7 @@ public static void TestReaderTruncated(ж<testing.T> t) {
         new(((@string)(new byte[]{0xf2, 0x48, 0xcd, 0x99, 0x30, 0x61, 0xc2, 0x84, 0x09, 0x00})), ((@string)(new byte[]{0x48, 0x65, 0x6c, 0x90, 0x90, 0x90, 0x90, 0x90})))
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var r = strings.NewReader(v.input);
         var zr = NewReader(new flate_test_package.strings_ReaderжReader(r));
         var (b, err) = io.ReadAll(zr);
@@ -79,7 +79,7 @@ public static void TestResetDict(ж<testing.T> t) {
     ]);
 
     var deflated = new slice<bytes.Buffer>(len(ss));
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         var (w, _) = NewWriterDict(new flate_test_package.bytes_BufferжWriter(Ꮡ(deflated, i)), DefaultCompression, dict);
         w.Write(slice<byte>(s));
         w.Close();
@@ -88,13 +88,13 @@ public static void TestResetDict(ж<testing.T> t) {
     var inflated = new slice<bytes.Buffer>(len(ss));
 
     var f = NewReader(default);
-    foreach (var i in range(inflated)) {
+    foreach (var i in range(len(inflated))) {
         f._<Resetter>().Reset(new flate_test_package.bytes_BufferжReader(Ꮡ(deflated, i)), dict);
         io.Copy(new flate_test_package.bytes_BufferжWriter(Ꮡ(inflated, i)), f);
     }
     f.Close();
 
-    foreach (var (i, s) in ss) {
+    foreach (var (i, s) in range(ss)) {
         if (s != Ꮡ(inflated, i).String()) {
             t.Errorf("inflated[%d]:\ngot  %q\nwant %q", i, Ꮡ(inflated, i), s);
         }
@@ -110,7 +110,7 @@ internal partial struct TestReaderReusesReaderBuffer_encodedNotByteReader /*dyn*
 }
 
 public static void TestReaderReusesReaderBuffer(ж<testing.T> t) {
-    var encodedReader = bytes.NewReader(slice<byte>([]));
+    var encodedReader = bytes.NewReader([]);
     ref var encodedNotByteReader = ref heap<TestReaderReusesReaderBuffer_encodedNotByteReader>(new TestReaderReusesReaderBuffer_encodedNotByteReader(new flate_test_package.bytes_Readerжio_Reader(encodedReader)), out var ᏑencodedNotByteReader);
 
     var encodedNotByteReaderʗ1 = encodedNotByteReader;
@@ -129,10 +129,8 @@ public static void TestReaderReusesReaderBuffer(ж<testing.T> t) {
     var encodedReaderʗ1 = encodedReader;
     t.Run("BufferIsNotReusedWhenGotByteReader", (ж<testing.T> tΔ2) => {
         var f = NewReader(encodedNotByteReaderʗ2)._<ж<global::go.compress.flate_package.decompressor>>();
-        {
-            var (_, ok) = f.r._<ж<bufio.Reader>>(ᐧ); if (!ok) {
-                tΔ2.Fatalf("bufio.Reader should be created");
-            }
+        var (_, ok) = f.r._<ж<bufio.Reader>>(ᐧ); if (!ok) {
+            tΔ2.Fatalf("bufio.Reader should be created");
         }
         f.Reset(new flate_test_package.bytes_Readerжio_Reader(encodedReaderʗ1), default);
         if (!AreEqual(f.r, encodedReaderʗ1)) {
@@ -142,16 +140,14 @@ public static void TestReaderReusesReaderBuffer(ж<testing.T> t) {
     var encodedNotByteReaderʗ3 = encodedNotByteReader;
     var encodedReaderʗ2 = encodedReader;
     t.Run("BufferIsCreatedAfterByteReader", (ж<testing.T> tΔ3) => {
-        foreach (var (i, r) in slice<io.Reader>([new flate_test_package.bytes_Readerжio_Reader(encodedReaderʗ2), new flate_test_package.bufio_ReaderжReader(bufio.NewReader(new flate_test_package.bytes_Readerжio_Reader(encodedReaderʗ2)))])) {
+        foreach (var (i, r) in range(slice<io.Reader>([new flate_test_package.bytes_Readerжio_Reader(encodedReaderʗ2), new flate_test_package.bufio_ReaderжReader(bufio.NewReader(new flate_test_package.bytes_Readerжio_Reader(encodedReaderʗ2)))]))) {
             var f = NewReader(r)._<ж<global::go.compress.flate_package.decompressor>>();
             if (!AreEqual(f.r, r)) {
                 tΔ3.Fatalf("provided io.ByteReader should be used directly, i=%d", i);
             }
             f.Reset(encodedNotByteReaderʗ3, default);
-            {
-                var (_, ok) = f.r._<ж<bufio.Reader>>(ᐧ); if (!ok) {
-                    tΔ3.Fatalf("bufio.Reader should be created, i=%d", i);
-                }
+            var (_, ok) = f.r._<ж<bufio.Reader>>(ᐧ); if (!ok) {
+                tΔ3.Fatalf("bufio.Reader should be created, i=%d", i);
             }
         }
     });

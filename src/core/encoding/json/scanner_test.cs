@@ -43,16 +43,14 @@ public static void TestValid(ж<testing.T> t) {
         new(Name(""u8), @"{""foo"":""bar""}", true),
         new(Name(""u8), @"{""foo"":""bar"",""bar"":{""baz"":[""qux""]}}", true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestValid_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
-            {
-                var ok = Valid(slice<byte>(ttʗ1.data)); if (ok != ttʗ1.ok) {
-                    tΔ1.Errorf("%s: Valid(`%s`) = %v, want %v", ttʗ1.Where, ttʗ1.data, ok, ttʗ1.ok);
-                }
+            var ok = Valid(slice<byte>(ttʗ1.data)); if (ok != ttʗ1.ok) {
+                tΔ1.Errorf("%s: Valid(`%s`) = %v, want %v", ttʗ1.Where, ttʗ1.data, ok, ttʗ1.ok);
             }
         });
     }
@@ -89,7 +87,7 @@ public static void TestCompactAndIndent(ж<testing.T> t) {
         new(Name(""u8), @"null", "null \n\r\t")                                             // See golang.org/issue/13520 and golang.org/issue/74806
     ]);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCompactAndIndent_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -154,20 +152,18 @@ public static void TestCompactSeparators(ж<testing.T> t) {
         new(Name(""u8), "{\"\u2028\": 1}", "{\"\u2028\":1}"),
         new(Name(""u8), "{\"\u2029\" :2}", "{\"\u2029\":2}")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCompactSeparators_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var err = Compact(Ꮡbuf, slice<byte>(ttʗ1.@in)); if (err != nil) {
-                    tΔ1.Errorf("%s: Compact error: %v", ttʗ1.Where, err);
-                } else {
-                    @string got = Ꮡbuf.String(); if (got != ttʗ1.compact) {
-                        tΔ1.Errorf("%s: Compact:\n\tgot:  %s\n\twant: %s", ttʗ1.Where, indentNewlines(got), indentNewlines(ttʗ1.compact));
-                    }
+            var err = Compact(Ꮡbuf, slice<byte>(ttʗ1.@in)); if (err != nil) {
+                tΔ1.Errorf("%s: Compact error: %v", ttʗ1.Where, err);
+            } else {
+                @string got = Ꮡbuf.String(); if (got != ttʗ1.compact) {
+                    tΔ1.Errorf("%s: Compact:\n\tgot:  %s\n\twant: %s", ttʗ1.Where, indentNewlines(got), indentNewlines(ttʗ1.compact));
                 }
             }
         });
@@ -181,10 +177,8 @@ internal static readonly object compactˢ = (@string)"Compact:"u8;
 public static void TestCompactBig(ж<testing.T> t) {
     initBig();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = Compact(Ꮡbuf, jsonBig); if (err != nil) {
-            t.Fatalf("Compact error: %v", err);
-        }
+    var err = Compact(Ꮡbuf, jsonBig); if (err != nil) {
+        t.Fatalf("Compact error: %v", err);
     }
     var b = buf.Bytes();
     if (!bytes.Equal(b, jsonBig)) {
@@ -254,7 +248,7 @@ public static void TestIndentErrors(ж<testing.T> t) {
         new(Name(""u8), @"{""X"": ""foo"", ""Y""}", new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key", 17)))),
         new(Name(""u8), @"{""X"": ""foo"" ""Y"": ""bar""}", new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\"' after object key:value pair", 13))))
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIndentErrors_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -262,11 +256,9 @@ public static void TestIndentErrors(ж<testing.T> t) {
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var Δslice = new slice<uint8>(0);
             var buf = bytes.NewBuffer(Δslice);
-            {
-                var err = Indent(buf, slice<uint8>(ttʗ1.@in), ""u8, ""u8); if (err != nil) {
-                    if (!reflect.DeepEqual(err, ttʗ1.err)) {
-                        tΔ1.Fatalf("%s: Indent error:\n\tgot:  %v\n\twant: %v", ttʗ1.Where, err, ttʗ1.err);
-                    }
+            var err = Indent(buf, slice<uint8>(ttʗ1.@in), ""u8, ""u8); if (err != nil) {
+                if (!reflect.DeepEqual(err, ttʗ1.err)) {
+                    tΔ1.Fatalf("%s: Indent error:\n\tgot:  %v\n\twant: %v", ttʗ1.Where, err, ttʗ1.err);
                 }
             }
         });
@@ -332,7 +324,7 @@ internal static any genValue(nint n) {
 internal static @string genString(float64 stddev) {
     nint n = (nint)math.Abs(rand.NormFloat64() * stddev + stddev / 2D);
     var c = new slice<rune>(n);
-    foreach (var i in range(c)) {
+    foreach (var i in range(len(c))) {
         var f = math.Abs(rand.NormFloat64() * 64D + 32D);
         if (f > 1114111D) {
             f = 1114111D;
@@ -351,7 +343,7 @@ internal static slice<any> genArray(nint n) {
         f = 1;
     }
     var x = new slice<any>(f);
-    foreach (var i in range(x)) {
+    foreach (var i in range(len(x))) {
         x[i] = genValue(quo(((i + 1) * n), f) - quo((i * n), f));
     }
     return x;

@@ -56,17 +56,13 @@ public static void TestReadForm(ж<testing.T> t) {
             }
         }
         var fd = testFile(t, f.File[fileaˢ][0], fileaTxtˢ, fileaContents);
-        {
-            var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
-                t.Error(fileIsOsFileShouldNotBeˢ);
-            }
+        if (fd._<ж<os.File>>(out _)) {
+            t.Error(fileIsOsFileShouldNotBeˢ);
         }
         fd.Close();
         fd = testFile(t, f.File[filebˢ][0], filebTxtˢ, filebContents);
-        {
-            var (_, ok) = fd._<ж<os.File>>(ᐧ); if (!ok) {
-                t.Errorf("file has unexpected underlying type %T", fd);
-            }
+        if (!fd._<ж<os.File>>(out _)) {
+            t.Errorf("file has unexpected underlying type %T", fd);
         }
         fd.Close();
     }
@@ -90,11 +86,9 @@ public static void TestReadFormWithNamelessFile(ж<testing.T> t) {
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
 
-        {
-            @string g = (~f).Value[hiddenfileˢ][0];
-            @string e = filebContents; if (g != e) {
-                t.Errorf("hiddenfile value = %q, want %q", g, e);
-            }
+        @string g = (~f).Value[hiddenfileˢ][0];
+        @string e = filebContents; if (g != e) {
+            t.Errorf("hiddenfile value = %q, want %q", g, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -115,10 +109,8 @@ public static void TestReadFormWitFileNameMaxMemoryOverflow(ж<testing.T> t) {
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
 
         var fd = testFile(t, f.File[fileaˢ][0], fileaTxtˢ, fileaContents);
-        {
-            var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
-                t.Error(fileIsOsFileShouldNotBeˢ);
-            }
+        var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
+            t.Error(fileIsOsFileShouldNotBeˢ);
         }
         fd.Close();
     }
@@ -145,11 +137,9 @@ public static void TestReadFormMaxMemoryOverflow(ж<testing.T> t) {
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
 
-        {
-            @string g = (~f).Value[textaˢ][0];
-            @string e = textaValue; if (g != e) {
-                t.Errorf("texta value = %q, want %q", g, e);
-            }
+        @string g = (~f).Value[textaˢ][0];
+        @string e = textaValue; if (g != e) {
+            t.Errorf("texta value = %q, want %q", g, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -169,11 +159,9 @@ public static void TestReadFormWithTextContentType(ж<testing.T> t) {
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
 
-        {
-            @string g = (~f).Value[textaˢ][0];
-            @string e = textaValue; if (g != e) {
-                t.Errorf("texta value = %q, want %q", g, e);
-            }
+        @string g = (~f).Value[textaˢ][0];
+        @string e = textaValue; if (g != e) {
+            t.Errorf("texta value = %q, want %q", g, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -202,10 +190,8 @@ internal static global::go.mime.multipart_package.File testFile(ж<testing.T> t,
     if (err != nil) {
         t.Fatal(copyingContentsˢ, err);
     }
-    {
-        @string g = b.String(); if (g != econtent) {
-            t.Errorf("contents = %q, want %q", g, econtent);
-        }
+    @string g = b.String(); if (g != econtent) {
+        t.Errorf("contents = %q, want %q", g, econtent);
     }
     return f;
 }
@@ -314,10 +300,8 @@ Content-Disposition: form-data; name="largetext"
         if (err != nil) {
             continue;
         }
-        {
-            @string g = (~f).Value[largetextˢ][0]; if (g != largeTextValue) {
-                t.Errorf("largetext mismatch: got size: %v, expected size: %v", len(g), len(largeTextValue));
-            }
+        @string g = (~f).Value[largetextˢ][0]; if (g != largeTextValue) {
+            t.Errorf("largetext mismatch: got size: %v, expected size: %v", len(g), len(largeTextValue));
         }
         f.RemoveAll();
         if (maxMemory < failWhenMaxMemoryLessThan) {
@@ -342,7 +326,7 @@ internal partial struct TestReadForm_MetadataTooLarge_type /*dyn*/ {
 // TestReadForm_MetadataTooLarge verifies that we account for the size of field names,
 // MIME headers, and map entry overhead while limiting the memory consumption of parsed forms.
 public static void TestReadForm_MetadataTooLarge(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestReadForm_MetadataTooLarge_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestReadForm_MetadataTooLarge_type>([new(
         name: "large name",
         f: (ж<global::go.mime.multipart_package.Writer> fw) => {
             @string name = strings.Repeat("a", 10 << 20);
@@ -367,7 +351,7 @@ public static void TestReadForm_MetadataTooLarge(ж<testing.T> t) {
             }
         }
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestReadForm_MetadataTooLarge_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -376,10 +360,8 @@ public static void TestReadForm_MetadataTooLarge(ж<testing.T> t) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var fw = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡbuf));
             testʗ1.f(fw);
-            {
-                var errΔ1 = fw.Close(); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = fw.Close(); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
             var fr = NewReader(new multipart_test_package.bytes_BufferжReader(Ꮡbuf), fw.Boundary());
             var (_, err) = fr.ReadForm(0);
@@ -425,10 +407,8 @@ internal static void testReadFormManyFiles(ж<testing.T> t, bool distinct) {
             }
             w.Write(slice<byte>(name));
         }
-        {
-            var errΔ2 = fw.Close(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = fw.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         var fr = NewReader(new multipart_test_package.bytes_BufferжReader(Ꮡbuf), fw.Boundary());
         fr.tempDir = t.TempDir();
@@ -438,10 +418,8 @@ internal static void testReadFormManyFiles(ж<testing.T> t, bool distinct) {
         }
         for (nint i = 0; i < numFiles; i++) {
             @string name = fmt.Sprint(i);
-            {
-                nint gotΔ1 = len(form.File[name]); if (gotΔ1 != 1) {
-                    t.Fatalf("form.File[%q] has %v entries, want 1", name, gotΔ1);
-                }
+            nint gotΔ1 = len(form.File[name]); if (gotΔ1 != 1) {
+                t.Fatalf("form.File[%q] has %v entries, want 1", name, gotΔ1);
             }
             var fh = form.File[name][0];
             var (@file, errΔ3) = fh.Open();
@@ -449,10 +427,8 @@ internal static void testReadFormManyFiles(ж<testing.T> t, bool distinct) {
                 t.Fatalf("form.File[%q].Open() = %v", name, errΔ3);
             }
             if (distinct) {
-                {
-                    var (_, ok) = @file._<ж<os.File>>(ᐧ); if (!ok) {
-                        t.Fatalf("form.File[%q].Open: %T, want *os.File", name, @file);
-                    }
+                var (_, ok) = @file._<ж<os.File>>(ᐧ); if (!ok) {
+                    t.Fatalf("form.File[%q].Open: %T, want *os.File", name, @file);
                 }
             }
             (var got, errΔ3) = io.ReadAll(@file);
@@ -478,10 +454,8 @@ internal static void testReadFormManyFiles(ж<testing.T> t, bool distinct) {
         if (len(names) != wantNames) {
             t.Fatalf("temp dir contains %v files; want 1", len(names));
         }
-        {
-            var errΔ4 = form.RemoveAll(); if (errΔ4 != nil) {
-                t.Fatalf("form.RemoveAll() = %v", errΔ4);
-            }
+        var errΔ4 = form.RemoveAll(); if (errΔ4 != nil) {
+            t.Fatalf("form.RemoveAll() = %v", errΔ4);
         }
         (names, err) = dir.Readdirnames(0);
         if (err != nil) {
@@ -504,7 +478,7 @@ internal partial struct TestReadFormLimits_type /*dyn*/ {
 }
 
 public static void TestReadFormLimits(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestReadFormLimits_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestReadFormLimits_type>([
         new(values: 1000),
         new(values: 1001, wantErr: ErrMessageTooLarge),
         new(values: 500, files: 500),
@@ -517,7 +491,7 @@ public static void TestReadFormLimits(ж<testing.T> t) {
         new(godebug: "multipartmaxparts=100", values: 101, wantErr: ErrMessageTooLarge),
         new(godebug: "multipartmaxheaders=100", files: 2, extraKeysPerFile: 48),
         new(godebug: "multipartmaxheaders=100", files: 2, extraKeysPerFile: 50, wantErr: ErrMessageTooLarge)
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestReadFormLimits_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -549,10 +523,8 @@ public static void TestReadFormLimits(ж<testing.T> t) {
                     var (w, _) = fw.CreatePart(h);
                     fmt.Fprintf(w, "value %v"u8, i);
                 }
-                {
-                    var errΔ1 = fw.Close(); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = fw.Close(); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
                 var fr = NewReader(new multipart_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes())), fw.Boundary());
                 var (form, err) = fr.ReadForm((int64)1 << 10);
@@ -584,7 +556,7 @@ internal static ref readonly @string eolᶜ => ref eolᶜᵇ;
 private static readonly @string eolᶜᵇ = "\r\n"u8;
 
 public static void TestReadFormEndlessHeaderLine(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestReadFormEndlessHeaderLine_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestReadFormEndlessHeaderLine_type>([new(
         name: "name",
         prefix: "X-"
     ), new(
@@ -594,7 +566,7 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> t) {
         name: "continuation",
         prefix: "X-Header: foo\r\n  "
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestReadFormEndlessHeaderLine_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -620,7 +592,7 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> t) {
 internal partial struct neverendingReader /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverendingReader r, slice<byte> p) {
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = (byte)r;
     }
     return (len(p), default);
@@ -632,7 +604,7 @@ internal partial struct BenchmarkReadForm_type /*dyn*/ {
 }
 
 public static void BenchmarkReadForm(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in slice<BenchmarkReadForm_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<BenchmarkReadForm_type>([new(
         name: "fields",
         form: (ж<global::go.mime.multipart_package.Writer> fw, nint count) => {
             for (nint i = 0; i < count; i++) {
@@ -649,16 +621,16 @@ public static void BenchmarkReadForm(ж<testing.B> b) {
             }
         }
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new BenchmarkReadForm_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
-            foreach (var (_, maxMemory) in slice<int64>([
+            foreach (var (_, maxMemory) in range(slice<int64>([
                 0,
                 (int64)1 << 20
-            ])) {
+            ]))) {
                 ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                 var fw = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡbuf));
                 testʗ1.form(fw, 10);

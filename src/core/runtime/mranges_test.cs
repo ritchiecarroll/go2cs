@@ -26,7 +26,7 @@ internal static void validateAddrRanges(ж<testing.T> t, ж<global::go.runtime_i
     }
     var gotTotalBytes = (uintptr)0;
     var wantTotalBytes = (uintptr)0;
-    foreach (var i in range(ranges)) {
+    foreach (var i in range(len(ranges))) {
         gotTotalBytes += ranges[i].Size();
         wantTotalBytes += want[i].Size();
         if (ranges[i].Base() >= ranges[i].Limit()) {
@@ -57,10 +57,8 @@ internal static void validateAddrRanges(ж<testing.T> t, ж<global::go.runtime_i
     if (wantTotalBytes != gotTotalBytes) {
         t.Errorf("expected %d total bytes, got %d", wantTotalBytes, gotTotalBytes);
     }
-    {
-        var b = a.TotalBytes(); if (b != gotTotalBytes) {
-            t.Errorf("inconsistent total bytes: want %d, got %d", gotTotalBytes, b);
-        }
+    var b = a.TotalBytes(); if (b != gotTotalBytes) {
+        t.Errorf("inconsistent total bytes: want %d, got %d", gotTotalBytes, b);
     }
     if (t.Failed()) {
         t.Errorf("addrRanges: %v", ranges);
@@ -134,7 +132,7 @@ public static void TestAddrRangesFindSucc(ж<testing.T> t) {
             name: "Empty",
             @base: 12,
             expect: 0,
-            ranges: slice<global::go.runtime_internal_test_package.AddrRange>([])
+            ranges: []
         ),
         new(
             name: "OneBefore",
@@ -268,7 +266,7 @@ public static void TestAddrRangesFindSucc(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestAddrRangesFindSucc_testt(), out var Ꮡtest);
         test = vᴛ1;
 

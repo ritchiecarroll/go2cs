@@ -25,7 +25,7 @@ internal partial struct test {
     internal @string halfStateECMA; // ECMA marshaled hash state after first half of in written, used by TestGoldenMarshal
 }
 
-internal static slice<test> golden = slice<test>([
+internal static slice<test> golden = [
     new(0x0, 0x0, "", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}))),
     new(0x3420000000000000UL, 0x330284772e652b05UL, "a", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}))),
     new(0x36c4200000000000UL, 0xbc6573200e84b046UL, "ab", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x34, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0x33, 0x02, 0x84, 0x77, 0x2e, 0x65, 0x2b, 0x05}))),
@@ -58,7 +58,7 @@ internal static slice<test> golden = slice<test>([
     new(0xd402559dfe9b70cUL, 0x73cef1666185c13fUL, "The fugacity of a constituent in a mixture of gases at a given temperature is proportional to its mole fraction.  Lewis-Randall Rule", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x7f, 0xae, 0xb9, 0xba, 0x58, 0x3d, 0x19, 0x76})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0xb2, 0xcb, 0xa6, 0x59, 0xc5, 0xd0, 0x47, 0x03}))),
     new(0xdb6efff26aa94946UL, 0xb41858f73c389602UL, "How can you write a big system without C++?  -Paul Glick", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x61, 0xed, 0x24, 0x6a, 0x73, 0xb9, 0xa5, 0x41})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0x5a, 0x6d, 0x96, 0x8a, 0xe2, 0xaf, 0x13, 0x70}))),
     new(0xe7fcf1006b503b61UL, 0x27db187fc15bbc72UL, "This is a test of the emergency broadcast system.", ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x73, 0xba, 0x84, 0x84, 0xbb, 0xcd, 0x5d, 0xef, 0x7d, 0xee, 0x5b, 0x71, 0x16, 0xcb, 0xe4, 0x8d})), ((@string)(new byte[]{0x63, 0x72, 0x63, 0x02, 0x60, 0x26, 0x9a, 0x52, 0xe1, 0xb7, 0xfe, 0x65, 0xb1, 0x93, 0x5d, 0x20, 0xeb, 0xa9, 0x61, 0x6d})))
-]);
+];
 
 public static void TestGolden(ж<testing.T> t) {
     var tabISO = MakeTable(ISO);
@@ -89,7 +89,7 @@ private static readonly @string ecmaˢᵇ = "ECMA"u8;
 public static void TestGoldenMarshal(ж<testing.T> t) {
     t.Run(isoˢ, (ж<testing.T> tΔ1) => {
         var table = MakeTable(ISO);
-        foreach (var (_, g) in golden) {
+        foreach (var (_, g) in range(golden)) {
             var h = New(table);
             var h2 = New(table);
 
@@ -118,11 +118,9 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
                 continue;
             }
 
-            {
-                var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
-                    tΔ1.Errorf("could not unmarshal: %v", errΔ1);
-                    continue;
-                }
+            var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
+                tΔ1.Errorf("could not unmarshal: %v", errΔ1);
+                continue;
             }
 
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
@@ -135,7 +133,7 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
     });
     t.Run(ecmaˢ, (ж<testing.T> tΔ2) => {
         var table = MakeTable(ECMA);
-        foreach (var (_, g) in golden) {
+        foreach (var (_, g) in range(golden)) {
             var h = New(table);
             var h2 = New(table);
 
@@ -164,11 +162,9 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
                 continue;
             }
 
-            {
-                var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
-                    tΔ2.Errorf("could not unmarshal: %v", errΔ1);
-                    continue;
-                }
+            var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
+                tΔ2.Errorf("could not unmarshal: %v", errΔ1);
+                continue;
             }
 
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
@@ -190,10 +186,8 @@ public static void TestMarshalTableMismatch(ж<testing.T> t) {
         t.Errorf("could not marshal: %v", err);
     }
 
-    {
-        var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == nil) {
-            t.Errorf("no error when one was expected");
-        }
+    var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == nil) {
+        t.Errorf("no error when one was expected");
     }
 }
 
@@ -202,7 +196,7 @@ internal static void bench(ж<testing.B> Ꮡb, uint64 poly, int64 size) {
 
     b.SetBytes(size);
     var data = new slice<byte>((nint)(size));
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = (byte)i;
     }
     var h = New(MakeTable(poly));

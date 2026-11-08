@@ -74,7 +74,7 @@ $
 """u8.Raw();
 
 public static void TestVerboseError(ж<testing.T> t) {
-    runTest(t, slice<@string>(["-test.v"]), () => {
+    runTest(t, ["-test.v"], () => {
         synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Error(errorˢ);
         });
@@ -108,7 +108,7 @@ $
 """u8.Raw();
 
 public static void TestVerboseSkip(ж<testing.T> t) {
-    runTest(t, slice<@string>(["-test.v"]), () => {
+    runTest(t, ["-test.v"], () => {
         synctest.Test(t, (ж<testing.T> tΔ1) => {
             tΔ1.Skip(skipˢ);
         });
@@ -156,11 +156,9 @@ public static void TestContext(ж<testing.T> t) {
         });
         // Wait blocks until the goroutine above is blocked on t.Context().Done().
         synctest.Wait();
-        {
-            @string got = state;
-            @string want = waitingOnContextˢ; if (got != want) {
-                tΔ1.Fatalf("state = %q, want %q", got, want);
-            }
+        @string got = state;
+        @string want = waitingOnContextˢ; if (got != want) {
+            tΔ1.Fatalf("state = %q, want %q", got, want);
         }
     });
     // t.Context() is canceled before the test completes,
@@ -237,7 +235,7 @@ $
 """u8.Raw();
 
 public static void TestHelper(ж<testing.T> t) {
-    runTest(t, slice<@string>(["-test.v"]), () => {
+    runTest(t, ["-test.v"], () => {
         synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             helperLog(tΔ1, logInHelperˢ);
         });
@@ -249,16 +247,12 @@ internal static void wantPanic(ж<testing.T> t, @string want) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                {
-                    @string got = fmt.Sprint(e); if (got != want) {
-                        t.Errorf("got panic message %q, want %q", got, want);
-                    }
-                }
-            } else {
-                t.Errorf("got no panic, want one");
+        var e = recover(calledByDefer); if (e != nil) {
+            @string got = fmt.Sprint(e); if (got != want) {
+                t.Errorf("got panic message %q, want %q", got, want);
             }
+        } else {
+            t.Errorf("got no panic, want one");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -291,10 +285,8 @@ internal static void runTest(ж<testing.T> t, slice<@string> args, Action f, @st
 
 public static void TestNow(ж<testing.T> t) {
     synctest.Test(t, (ж<testing.T> tΔ1) => {
-        {
-            var (got, want) = (time.Now(), time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC)); if (!got.Equal(want)) {
-                tΔ1.Errorf("time.Now() = %v, want %v", got, want);
-            }
+        var (got, want) = (time.Now(), time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC)); if (!got.Equal(want)) {
+            tΔ1.Errorf("time.Now() = %v, want %v", got, want);
         }
     });
 }

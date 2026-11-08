@@ -113,7 +113,7 @@ internal static void testOncePanicWith(ж<Δtesting.T> t, ж<nint> Ꮡcalls, Act
 
     // Check that the each call to f panics with the same value, but the
     // underlying function is only called once.
-    foreach (var (_, label) in slice<@string>(["first time", "second time"])) {
+    foreach (var (_, label) in range(slice<@string>(["first time", "second time"]))) {
         ref var p = ref heap<any>(out var Ꮡp);
         var panicked = true;
         func(() => {
@@ -230,10 +230,8 @@ public static void TestOnceFuncPanicTraceback(ж<Δtesting.T> t) {
         var f = Δsync.OnceFunc(onceFuncPanic);
 
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var p = recover(); if (!AreEqual(p, (@string)("x"))) {
-                    t.Fatalf("want panic %v, got %v", (@string)"x", p);
-                }
+            var p = recover(); if (!AreEqual(p, (@string)("x"))) {
+                t.Fatalf("want panic %v, got %v", (@string)"x", p);
             }
             var stack = debug.Stack();
             @string want = syncTestOnceFuncPanicˢ;
@@ -457,22 +455,18 @@ public static void BenchmarkOnceValue(ж<Δtesting.B> b) {
     b.Run(vOnceˢ, (ж<Δtesting.B> bΔ1) => {
         bΔ1.ReportAllocs();
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            {
-                nint want = 42;
-                nint got = doOnceValue(); if (want != got) {
-                    bΔ1.Fatalf("want %d, got %d", want, got);
-                }
+            nint want = 42;
+            nint got = doOnceValue(); if (want != got) {
+                bΔ1.Fatalf("want %d, got %d", want, got);
             }
         }
     });
     b.Run(vGlobalˢ, (ж<Δtesting.B> bΔ2) => {
         bΔ2.ReportAllocs();
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            {
-                nint want = 42;
-                nint got = onceValue(); if (want != got) {
-                    bΔ2.Fatalf("want %d, got %d", want, got);
-                }
+            nint want = 42;
+            nint got = onceValue(); if (want != got) {
+                bΔ2.Fatalf("want %d, got %d", want, got);
             }
         }
     });
@@ -480,11 +474,9 @@ public static void BenchmarkOnceValue(ж<Δtesting.B> b) {
         bΔ3.ReportAllocs();
         var onceValueΔ1 = Δsync.OnceValue(nint () => 42);
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            {
-                nint want = 42;
-                nint got = onceValueΔ1(); if (want != got) {
-                    bΔ3.Fatalf("want %d, got %d", want, got);
-                }
+            nint want = 42;
+            nint got = onceValueΔ1(); if (want != got) {
+                bΔ3.Fatalf("want %d, got %d", want, got);
             }
         }
     });
@@ -521,24 +513,20 @@ public static void BenchmarkOnceValues(ж<Δtesting.B> b) {
     b.Run(vOnceˢ, (ж<Δtesting.B> bΔ1) => {
         bΔ1.ReportAllocs();
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            {
-                var (got1, got2) = doOnceValues(); if (got1 != onceValuesWant1) {
-                    bΔ1.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
-                } else if (got2 != onceValuesWant2) {
-                    bΔ1.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
-                }
+            var (got1, got2) = doOnceValues(); if (got1 != onceValuesWant1) {
+                bΔ1.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
+            } else if (got2 != onceValuesWant2) {
+                bΔ1.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
             }
         }
     });
     b.Run(vGlobalˢ, (ж<Δtesting.B> bΔ2) => {
         bΔ2.ReportAllocs();
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            {
-                var (got1, got2) = onceValues(); if (got1 != onceValuesWant1) {
-                    bΔ2.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
-                } else if (got2 != onceValuesWant2) {
-                    bΔ2.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
-                }
+            var (got1, got2) = onceValues(); if (got1 != onceValuesWant1) {
+                bΔ2.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
+            } else if (got2 != onceValuesWant2) {
+                bΔ2.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
             }
         }
     });
@@ -546,12 +534,10 @@ public static void BenchmarkOnceValues(ж<Δtesting.B> b) {
         bΔ3.ReportAllocs();
         var onceValuesΔ1 = Δsync.OnceValues((nint, bool) () => (onceValuesWant1, onceValuesWant2));
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            {
-                var (got1, got2) = onceValuesΔ1(); if (got1 != onceValuesWant1) {
-                    bΔ3.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
-                } else if (got2 != onceValuesWant2) {
-                    bΔ3.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
-                }
+            var (got1, got2) = onceValuesΔ1(); if (got1 != onceValuesWant1) {
+                bΔ3.Fatalf("value 1: got %d, want %d", got1, (nint)(onceValuesWant1));
+            } else if (got2 != onceValuesWant2) {
+                bΔ3.Fatalf("value 2: got %v, want %v", got2, onceValuesWant2);
             }
         }
     });

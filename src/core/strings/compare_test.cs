@@ -18,7 +18,7 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal @string a, b;
     internal nint i;
 }
-internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
+internal static slice<compareTestsᴛ1> compareTests = [
     new("", "", 0),
     new("a", "", 1),
     new("", "a", -1),
@@ -33,10 +33,10 @@ internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
     new("abcdefgh", "abcdefgh", 0),
     new("abcdefghi", "abcdefghi", 0),
     new("abcdefghi", "abcdefghj", -1)
-]);
+];
 
 public static void TestCompare(ж<testing.T> t) {
-    foreach (var (_, tt) in compareTests) {
+    foreach (var (_, tt) in range(compareTests)) {
         nint numShifts = 16;
         for (nint offset = 0; offset <= numShifts; offset++) {
             @string shiftedB = (Repeat("*", offset) + tt.b).slice(offset);
@@ -84,7 +84,7 @@ public static void TestCompareStrings(ж<testing.T> t) {
     var a = new slice<byte>(n + 1);
     var b = new slice<byte>(n + 1);
     nint lastLen = 0;
-    foreach (var (_, lenΔ1) in lengths) {
+    foreach (var (_, lenΔ1) in range(lengths)) {
         // randomish but deterministic data. No 0 or 255.
         for (nint i = 0; i < lenΔ1; i++) {
             a[i] = (byte)(1 + 31 * i % 254);

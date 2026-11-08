@@ -11,9 +11,7 @@ partial class sort_test_package {
 
 partial struct Grams /*num:nint*/;
 
-public static @string String(this Grams g) {
-    return fmt.Sprintf("%dg"u8, (nint)g);
-}
+public static @string String(this Grams g) { return fmt.Sprintf("%dg"u8, (nint)g); }
 
 partial struct Organ {
     public @string Name;
@@ -22,13 +20,8 @@ partial struct Organ {
 
 partial struct Organs /*[]ж<Organ>*/;
 
-public static nint Len(this Organs s) {
-    return len(s);
-}
-
-public static void Swap(this Organs s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
+public static nint Len(this Organs s) { return len(s); }
+public static void Swap(this Organs s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 // ByName implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
@@ -36,9 +29,7 @@ partial struct ByName {
     /*embed*/ public Organs Organs;
 }
 
-public static bool Less(this ByName s, nint i, nint j) {
-    return s.Organs[i].Name < s.Organs[j].Name;
-}
+public static bool Less(this ByName s, nint i, nint j) { return s.Organs[i].Name < s.Organs[j].Name; }
 
 // ByWeight implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
@@ -46,9 +37,7 @@ partial struct ByWeight {
     /*embed*/ public Organs Organs;
 }
 
-public static bool Less(this ByWeight s, nint i, nint j) {
-    return s.Organs[i].Weight < s.Organs[j].Weight;
-}
+public static bool Less(this ByWeight s, nint i, nint j) { return s.Organs[i].Weight < s.Organs[j].Weight; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object organsByWeightˢ = (@string)"Organs by weight:"u8;
@@ -90,7 +79,7 @@ public static void Example_sortWrapper() {
 }
 
 internal static void printOrgans(slice<ж<Organ>> s) {
-    foreach (var (_, o) in s) {
+    foreach (var (_, o) in range(s)) {
         fmt.Printf("%-8s (%v)\n"u8, o.Name, o.Weight);
     }
 }

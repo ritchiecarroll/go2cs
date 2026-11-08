@@ -13,8 +13,6 @@ using slices = slices_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using static global::go.net.http_package;
@@ -67,10 +65,8 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
 
     testHookClientDoResult = (ж<global::go.net.http_package.Response> res, error err) => {
         if (err != nil) {
-            {
-                var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
-                    throw panic(fmt.Sprintf("unexpected Client.Do error of type %T; want *url.Error"u8, err));
-                }
+            var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
+                throw panic(fmt.Sprintf("unexpected Client.Do error of type %T; want *url.Error"u8, err));
             }
         } else {
             if (res == nil) {
@@ -117,9 +113,7 @@ public static void SetPendingDialHooks(Action beforeʗp, Action afterʗp) {
     (testHookPrePendingDial, testHookPostPendingDial) = (before, after);
 }
 
-public static void SetTestHookServerServe(Action<ж<global::go.net.http_package.Server>, net.Listener> fn) {
-    testHookServerServe = fn;
-}
+public static void SetTestHookServerServe(Action<ж<global::go.net.http_package.Server>, net.Listener> fn) { testHookServerServe = fn; }
 
 public static void SetTestHookProxyConnectTimeout(ж<testing.T> t, Func<context.Context, time.Duration, (context.Context, Action)> f) {
     var orig = testHookProxyConnectTimeout;
@@ -199,7 +193,7 @@ internal static slice<@string> IdleConnStrsForTesting(this ж<global::go.net.htt
         t.idleMu.Lock();
         ᒐd1 = true;
         foreach (var (_, conns) in t.idleConn) {
-            foreach (var (_, pc) in conns) {
+            foreach (var (_, pc) in range(conns)) {
                 ret = append(ret, pc.conn.LocalAddr().String() + "/"u8 + pc.conn.RemoteAddr().String());
             }
         }
@@ -224,7 +218,7 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
         defer(poolʗ1.Ꮡmu.Unlock, ref ᒐ);
 
         foreach (var (k, ccs) in pool.conns) {
-            foreach (var (_, cc) in ccs) {
+            foreach (var (_, cc) in range(ccs)) {
                 if (cc.idleState().canTakeNewRequest) {
                     ret = append(ret, k);
                 }
@@ -425,9 +419,7 @@ public static Action /*restore*/ ExportSetH2GoawayTimeout(time.Duration d) {
     };
 }
 
-internal static bool ExportIsReplayable(this ref global::go.net.http_package.Request r) {
-    return r.isReplayable();
-}
+internal static bool ExportIsReplayable(this ref global::go.net.http_package.Request r) { return r.isReplayable(); }
 
 // ExportCloseTransportConnsAbruptly closes all idle connections from
 // tr in an abrupt way, just reaching into the underlying Conns and
@@ -439,7 +431,7 @@ public static void ExportCloseTransportConnsAbruptly(ж<global::go.net.http_pack
 
     tr.idleMu.Lock();
     foreach (var (_, pcs) in tr.idleConn) {
-        foreach (var (_, pc) in pcs) {
+        foreach (var (_, pc) in range(pcs)) {
             pc.conn.Close();
         }
     }
@@ -449,10 +441,8 @@ public static void ExportCloseTransportConnsAbruptly(ж<global::go.net.http_pack
 // ResponseWriterConnForTesting returns w's underlying connection, if w
 // is a regular *response ResponseWriter.
 public static (net.Conn c, bool ok) ResponseWriterConnForTesting(global::go.net.http_package.ResponseWriter w) {
-    {
-        var (r, okΔ1) = w._<ж<global::go.net.http_package.response>>(ᐧ); if (okΔ1) {
-            return (r.conn.rwc, true);
-        }
+    var (r, okΔ1) = w._<ж<global::go.net.http_package.response>>(ᐧ); if (okΔ1) {
+        return (r.conn.rwc, true);
     }
     return (default, false);
 }

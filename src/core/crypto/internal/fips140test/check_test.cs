@@ -74,10 +74,8 @@ public static void TestIntegrityCheckFailure(ж<testing.T> t) {
     bin = bytes.ReplaceAll(bin, Linkinfo.Sum[..], bytes.Repeat(slice<byte>("X"u8), len(Linkinfo.Sum)));
 
     @string binPath = filepath.Join(t.TempDir(), fips140testExeˢ);
-    {
-        var errΔ1 = os.WriteFile(binPath, bin, 493); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(binPath, bin, 493); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     if (runtime.GOOS == "darwin"u8) {
@@ -186,7 +184,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> t) {
     // Check that some symbols are not in FIPS sections.
     void no(@string name, @unsafe.Pointer p, params ꓸꓸꓸnint ixʗp) {
         var ix = ixʗp.sslice();
-        foreach (var (_, i) in ix) {
+        foreach (var (_, i) in range(ix)) {
             var s = Linkinfo.Sects[i];
             if ((uintptr)s.Start <= (uintptr)p && (uintptr)p < (uintptr)s.End) {
                 t.Errorf("%s (%#x) unexpectedly in section #%d (%#x..%#x)", name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
@@ -208,7 +206,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> t) {
     // Check that we have enough data in total.
     // On arm64 the fips sections in this test currently total 23 kB.
     var n = (uintptr)0;
-    foreach (var (_, s) in Linkinfo.Sects.ΔRangeSnapshot()) {
+    foreach (var (_, s) in range(Linkinfo.Sects.ΔRangeSnapshot())) {
         n += (uintptr)s.End - (uintptr)s.Start;
     }
     if (n < 16 * 1024) {

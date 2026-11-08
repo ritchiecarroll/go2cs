@@ -48,11 +48,11 @@ using static global::go.@internal.poll_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/poll/error_stub_test.go", "error_stub_test.cs", "AA0egqaC")]
-[assembly: GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABQggqKCgpTIlIKCgILEtoKCgIKkgIKkgIKkgIKk", "17-33:1", "", "", "30:25")]
-[assembly: GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABcggpSClIKmgpSCpoKUgriCgoKmgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKkgoCSgJKApICAgJKAgICSgICAtoKCgoKCAAkGooKCgpSCgpSCuIKCtKSigoKCgpSCgoKCgoKykpSCgpSCgpSCgsaCgqaCgpSCgoKCxoKCpoKClIKCgoLopIKCpoKUgrQ=", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
+[assembly: GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABQggqKCgpTIlIKCgrS2goKAgqSAgqSAgqSAgqQ=", "17-33:1", "", "", "30:25")]
+[assembly: GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABUggpSClIKmgpSCpoKUgriCgoKmgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKkgoCSgJKApICAgJKAgICSgICAtoKCgoKCAAkGooKCgpSCgpSCuIKCtKSigoKCgpSCgoKCgoKykpSCgpSCgpSCgsaCgqaCgpSCgoKCxoKCpoKClIKCgoLopIKCpoKUgrQ=", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1", "", "", "", "120:25,121:17,177:21,178:13,220:33,221:25")]
 [assembly: GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABUeAA8qgoKCgg==")]
-[assembly: GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "ABYmguaigoKClIKAgoKklIKCgpSmgoKUlIAACBS2poCC1gAYMILKgpSClIKUAAgGgoKClIKClLiClIKCgpSCgpSmgqaCAAoGgoKCgoKUgoKCgoKUgII=", "106-108:1", "", "", "46:21")]
-[assembly: GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABUegoKCgoKCooKCgIKCpLS2uIKCpNjsgoKCgpSClA==", "16-34:1;21-30:1.1")]
+[assembly: GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "ABYmguaigoKClIKCgpSUgoKClKaCgpSUAAgUpqaCxgAYMILKgpSClIKUAAgGgoKClIKClLiClIKCgpSCgpSmgqaCAAoGgoKCgoKUgoKCgoKUgg==", "106-108:1", "", "", "44:21")]
+[assembly: GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABUegoKCgoKCooKCgoKUtLa4goKk2OyCgoKClIKU", "16-34:1;21-30:1.1")]
 [assembly: GoPositionMap("internal/poll/writev_test.go", "writev_test.cs", "ABMaggAkUoKCgoI=")]
 // </GoSourcePositionMaps>
 

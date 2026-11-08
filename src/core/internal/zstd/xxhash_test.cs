@@ -18,7 +18,7 @@ partial struct xxHashTestsᴛ1 /*dyn*/ {
     internal @string data;
     internal uint64 hash;
 }
-internal static slice<xxHashTestsᴛ1> xxHashTests = slice<xxHashTestsᴛ1>([
+internal static slice<xxHashTestsᴛ1> xxHashTests = [
     new(
         "hello, world",
         0xb33a384e6d1b1242UL
@@ -27,17 +27,15 @@ internal static slice<xxHashTestsᴛ1> xxHashTests = slice<xxHashTestsᴛ1>([
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$",
         0x1032d841e824f998UL
     )
-]);
+];
 
 public static void TestXXHash(ж<testing.T> t) {
     global::go.@internal.zstd_package.xxhash64 xh = new();
-    foreach (var (i, test) in xxHashTests) {
+    foreach (var (i, test) in range(xxHashTests)) {
         xh.reset();
         xh.update(slice<byte>(test.data));
-        {
-            var got = xh.digest(); if (got != test.hash) {
-                t.Errorf("#%d: got %#x want %#x", i, got, test.hash);
-            }
+        var got = xh.digest(); if (got != test.hash) {
+            t.Errorf("#%d: got %#x want %#x", i, got, test.hash);
         }
     }
 }
@@ -99,7 +97,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
 
     @string xxhsum = findXxhsum(new zstd_internal_test_package.testing_FжTB(Ꮡf));
 
-    foreach (var (_, test) in xxHashTests) {
+    foreach (var (_, test) in range(xxHashTests)) {
         f.Add(slice<byte>(test.data));
     }
     f.Add(bytes.Repeat(slice<byte>("abcdefghijklmnop"u8), 256));
@@ -115,10 +113,8 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
         cmd.Stdin = new zstd_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b));
         ref var hhsumHash = ref heap(new bytes.Buffer(), out var ᏑhhsumHash);
         cmd.Stdout = new zstd_internal_test_package.bytes_BufferжWriter(ᏑhhsumHash);
-        {
-            var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
-                t.Fatalf("running hhsum failed: %v", errΔ1);
-            }
+        var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+            t.Fatalf("running hhsum failed: %v", errΔ1);
         }
         var hhHashBytes = bytes.Fields(bytes.TrimSpace(hhsumHash.Bytes()))[0];
         var (hhHash, err) = strconv.ParseUint((@string)hhHashBytes, 16, 64);

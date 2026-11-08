@@ -16,8 +16,6 @@ using pprof = go.runtime.pprof_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.runtime;
 using math;
@@ -28,13 +26,9 @@ partial class httputil_internal_test_package {
 internal partial struct eofReader {
 }
 
-internal static error Close(this eofReader n) {
-    return default;
-}
+internal static error Close(this eofReader n) { return default; }
 
-internal static (nint, error) Read(this eofReader n, slice<byte> _) {
-    return (0, io.EOF);
-}
+internal static (nint, error) Read(this eofReader n, slice<byte> _) { return (0, io.EOF); }
 
 internal partial struct dumpTest {
     // Either Req or GetReq can be set/nil but not both.
@@ -59,7 +53,7 @@ internal static slice<dumpTest> dumpTests = slice<dumpTest>([
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            TransferEncoding: slice<@string>(["chunked"])
+            TransferEncoding: ["chunked"]
         )),
 
         Body: slice<byte>("abcdef"u8),
@@ -76,7 +70,7 @@ internal static slice<dumpTest> dumpTests = slice<dumpTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["X-Foo"] = slice<@string>(["X-Bar"])
+                ["X-Foo"] = ["X-Bar"]
             })
         )),
 
@@ -128,7 +122,7 @@ internal static slice<dumpTest> dumpTests = slice<dumpTest>([
                 Path: "/"
             )),
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["8193"])
+                ["Content-Length"] = ["8193"]
             }),
 
             ContentLength: 8193,
@@ -211,7 +205,7 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
         ));
     }
     nint numg0 = runtime.NumGoroutine();
-    foreach (var (i, tt) in dumpTestsΔ1) {
+    foreach (var (i, tt) in range(dumpTestsΔ1)) {
         if (tt.Req != nil && tt.GetReq != nil || tt.Req == nil && tt.GetReq == nil) {
             t.Errorf("#%d: either .Req(%p) or .GetReq(%p) can be set/nil but not both", i, tt.Req.OrTypedNil(), (tt.GetReq).OrTypedNilFunc());
             continue;
@@ -287,11 +281,9 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
     nint dg = default;
     var dl = deadline(t, (time.Duration)(5000000000L), time.ΔSecond);
     while (time.Now().Before(dl)) {
-        {
-            dg = runtime.NumGoroutine() - numg0; if (dg <= 4) {
-                // No unexpected goroutines.
-                return;
-            }
+        dg = runtime.NumGoroutine() - numg0; if (dg <= 4) {
+            // No unexpected goroutines.
+            return;
         }
 
         // Allow goroutines to schedule and die off.
@@ -309,14 +301,10 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
 internal static time.Time deadline(ж<testing.T> Ꮡt, time.Duration defaultDelay, time.Duration needed) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var (dl, ok) = t.Deadline(); if (ok) {
-            {
-                dl = dl.Add(-needed); if (dl.After(time.Now())) {
-                    // Allow an arbitrarily long delay.
-                    return dl;
-                }
-            }
+    var (dl, ok) = t.Deadline(); if (ok) {
+        dl = dl.Add(-needed); if (dl.After(time.Now())) {
+            // Allow an arbitrarily long delay.
+            return dl;
         }
     }
 
@@ -368,7 +356,7 @@ internal static slice<dumpResTestsᴛ1> dumpResTests = slice<dumpResTestsᴛ1>([
             ProtoMinor: 1,
             ContentLength: 50,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["Foo"] = slice<@string>(["Bar"])
+                ["Foo"] = ["Bar"]
             }),
             Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"))) // shouldn't be used
         )),
@@ -408,7 +396,7 @@ foo
             ProtoMinor: 1,
             ContentLength: -1,
             Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"))),
-            TransferEncoding: slice<@string>(["chunked"])
+            TransferEncoding: ["chunked"]
         )),
         body: true,
         want: """
@@ -430,8 +418,8 @@ foo
             ContentLength: 0,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
                 // To verify if headers are not filtered out.
-                ["Foo1"] = slice<@string>(["Bar1"]),
-                ["Foo2"] = slice<@string>(["Bar2"])
+                ["Foo1"] = ["Bar1"],
+                ["Foo2"] = ["Bar2"]
             }),
             Body: default
         )),
@@ -446,7 +434,7 @@ Content-Length: 0
 ]);
 
 public static void TestDumpResponse(ж<testing.T> t) {
-    foreach (var (i, tt) in dumpResTests) {
+    foreach (var (i, tt) in range(dumpResTests)) {
         var (gotb, err) = DumpResponse(tt.res, tt.body);
         if (err != nil) {
             t.Errorf("%d. DumpResponse = %v", i, err);
@@ -480,11 +468,9 @@ public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
         Ꮡt.Parallel();
 
         var timeout = (time.Duration)(10000000000L);
-        {
-            var (deadline, ok) = t.Deadline(); if (ok) {
-                timeout = time.Until(deadline);
-                timeout -= time.ΔSecond * 2; // Leave 2 seconds to report failures.
-            }
+        var (deadline, ok) = t.Deadline(); if (ok) {
+            timeout = time.Until(deadline);
+            timeout -= time.ΔSecond * 2; // Leave 2 seconds to report failures.
         }
         for (nint i = 0; i < 1000; i++) {
             var delay = ((time.Duration)(int64)rand.Intn(5)) * time.Millisecond;

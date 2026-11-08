@@ -11,8 +11,6 @@ using static runtime_package;
 using Δdebug = global::go.runtime.debug_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;

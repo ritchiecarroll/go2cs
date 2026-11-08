@@ -56,22 +56,22 @@ partial struct ServeFileRangeTestsᴛ1 /*dyn*/ {
     internal nint code;
     internal slice<wantRange> ranges;
 }
-public static readonly ж<slice<ServeFileRangeTestsᴛ1>> ᏑServeFileRangeTests = new StaticBox<slice<ServeFileRangeTestsᴛ1>>(slice<ServeFileRangeTestsᴛ1>([
+public static readonly ж<slice<ServeFileRangeTestsᴛ1>> ᏑServeFileRangeTests = new StaticBox<slice<ServeFileRangeTestsᴛ1>>([
     new(r: "", code: StatusOK),
-    new(r: "bytes=0-4", code: StatusPartialContent, ranges: slice<wantRange>([new(0, 5)])),
-    new(r: "bytes=2-", code: StatusPartialContent, ranges: slice<wantRange>([new(2, testFileLen)])),
-    new(r: "bytes=-5", code: StatusPartialContent, ranges: slice<wantRange>([new(testFileLen - 5, testFileLen)])),
-    new(r: "bytes=3-7", code: StatusPartialContent, ranges: slice<wantRange>([new(3, 8)])),
-    new(r: "bytes=0-0,-2", code: StatusPartialContent, ranges: slice<wantRange>([new(0, 1), new(testFileLen - 2, testFileLen)])),
-    new(r: "bytes=0-1,5-8", code: StatusPartialContent, ranges: slice<wantRange>([new(0, 2), new(5, 9)])),
-    new(r: "bytes=0-1,5-", code: StatusPartialContent, ranges: slice<wantRange>([new(0, 2), new(5, testFileLen)])),
-    new(r: "bytes=5-1000", code: StatusPartialContent, ranges: slice<wantRange>([new(5, testFileLen)])),
+    new(r: "bytes=0-4", code: StatusPartialContent, ranges: [new(0, 5)]),
+    new(r: "bytes=2-", code: StatusPartialContent, ranges: [new(2, testFileLen)]),
+    new(r: "bytes=-5", code: StatusPartialContent, ranges: [new(testFileLen - 5, testFileLen)]),
+    new(r: "bytes=3-7", code: StatusPartialContent, ranges: [new(3, 8)]),
+    new(r: "bytes=0-0,-2", code: StatusPartialContent, ranges: [new(0, 1), new(testFileLen - 2, testFileLen)]),
+    new(r: "bytes=0-1,5-8", code: StatusPartialContent, ranges: [new(0, 2), new(5, 9)]),
+    new(r: "bytes=0-1,5-", code: StatusPartialContent, ranges: [new(0, 2), new(5, testFileLen)]),
+    new(r: "bytes=5-1000", code: StatusPartialContent, ranges: [new(5, testFileLen)]),
     new(r: "bytes=0-,1-,2-,3-,4-", code: StatusOK), // ignore wasteful range request
-    new(r: "bytes=0-9", code: StatusPartialContent, ranges: slice<wantRange>([new(0, testFileLen - 1)])),
-    new(r: "bytes=0-10", code: StatusPartialContent, ranges: slice<wantRange>([new(0, testFileLen)])),
-    new(r: "bytes=0-11", code: StatusPartialContent, ranges: slice<wantRange>([new(0, testFileLen)])),
-    new(r: "bytes=10-11", code: StatusPartialContent, ranges: slice<wantRange>([new(testFileLen - 1, testFileLen)])),
-    new(r: "bytes=10-", code: StatusPartialContent, ranges: slice<wantRange>([new(testFileLen - 1, testFileLen)])),
+    new(r: "bytes=0-9", code: StatusPartialContent, ranges: [new(0, testFileLen - 1)]),
+    new(r: "bytes=0-10", code: StatusPartialContent, ranges: [new(0, testFileLen)]),
+    new(r: "bytes=0-11", code: StatusPartialContent, ranges: [new(0, testFileLen)]),
+    new(r: "bytes=10-11", code: StatusPartialContent, ranges: [new(testFileLen - 1, testFileLen)]),
+    new(r: "bytes=10-", code: StatusPartialContent, ranges: [new(testFileLen - 1, testFileLen)]),
     new(r: "bytes=11-", code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=11-12", code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=12-12", code: StatusRequestedRangeNotSatisfiable),
@@ -79,13 +79,10 @@ public static readonly ж<slice<ServeFileRangeTestsᴛ1>> ᏑServeFileRangeTests
     new(r: "bytes=12-100", code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=100-", code: StatusRequestedRangeNotSatisfiable),
     new(r: "bytes=100-1000", code: StatusRequestedRangeNotSatisfiable)
-]));
+]);
 public static ref slice<ServeFileRangeTestsᴛ1> ServeFileRangeTests => ref ((StaticBox<slice<ServeFileRangeTestsᴛ1>>)ᏑServeFileRangeTests).ValueSlot;
 
-public static void TestServeFile(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFile(Δp0, Δp1));
-}
-
+public static void TestServeFile(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFile(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataFileˢ => ref testdataFileˢᵇ;
 private static readonly @string testdataFileˢᵇ = "testdata/file"u8;
@@ -116,17 +113,15 @@ internal static void testServeFile(ж<testing.T> t, testMode mode) {
     // set up the Request (re-used for all tests)
     Δhttp.Request req = default;
     req.Header = new httpꓸHeader(0);
-    {
-        (req.URL, err) = url.Parse(ts.URL); if (err != nil) {
-            t.Fatal(parseURLˢ, err);
-        }
+    (req.URL, err) = url.Parse(ts.URL); if (err != nil) {
+        t.Fatal(parseURLˢ, err);
     }
 
     // Get contents via various methods.
     //
     // See https://go.dev/issue/59471 for a proposal to limit the set of methods handled.
     // For now, test the historical behavior.
-    foreach (var (_, method) in slice<@string>([
+    foreach (var (_, method) in range(slice<@string>([
         MethodGet,
         MethodPost,
         MethodPut,
@@ -134,7 +129,7 @@ internal static void testServeFile(ж<testing.T> t, testMode mode) {
         MethodDelete,
         MethodOptions,
         MethodTrace
-    ])) {
+    ]))) {
         req.Method = method;
         var (_, bodyΔ1) = getBody(t, method, req, c);
         if (!bytes.Equal(bodyΔ1, @file)) {
@@ -148,17 +143,15 @@ internal static void testServeFile(ж<testing.T> t, testMode mode) {
     if (len(body) != 0) {
         t.Fatalf("body mismatch for HEAD request: got %q, want empty", body);
     }
-    {
-        @string got = resp.Header.Get(contentLengthˢ);
-        @string want = fmt.Sprint(len(@file)); if (got != want) {
-            t.Fatalf("Content-Length mismatch for HEAD request: got %v, want %v", got, want);
-        }
+    @string got = resp.Header.Get(contentLengthˢ);
+    @string want = fmt.Sprint(len(@file)); if (got != want) {
+        t.Fatalf("Content-Length mismatch for HEAD request: got %v, want %v", got, want);
     }
 
     // Range tests
     req.Method = MethodGet;
 Cases:
-    foreach (var (_, rt) in ServeFileRangeTests) {
+    foreach (var (_, rt) in range(ServeFileRangeTests)) {
         if (rt.r != ""u8) {
             req.Header.Set(rangeˢ, rt.r);
         }
@@ -210,18 +203,16 @@ Cases:
                 }
             }
             var mr = multipart.NewReader(new http_test_package.bytes_ReaderжReader(bytes.NewReader(bodyΔ2)), @params[boundaryˢ]);
-            foreach (var (ri, rng) in rt.ranges) {
+            foreach (var (ri, rng) in range(rt.ranges)) {
                 var (part, errΔ2) = mr.NextPart();
                 if (errΔ2 != nil) {
                     t.Errorf("range=%q, reading part index %d: %v", rt.r, ri, errΔ2);
                     goto continue_Cases;
                 }
                 wantContentRange = fmt.Sprintf("bytes %d-%d/%d"u8, rng.start, rng.end - 1, (nint)(testFileLen));
-                {
-                    @string g = part.Header.Get(contentRangeˢ);
-                    @string w = wantContentRange; if (g != w) {
-                        t.Errorf("range=%q: part Content-Range = %q; want %q", rt.r, g, w);
-                    }
+                @string g = part.Header.Get(contentRangeˢ);
+                @string w = wantContentRange; if (g != w) {
+                    t.Errorf("range=%q: part Content-Range = %q; want %q", rt.r, g, w);
                 }
                 (var bodyΔ3, errΔ2) = io.ReadAll(new multipart.PartжReader(part));
                 if (errΔ2 != nil) {
@@ -261,7 +252,7 @@ public static void TestServeFile_DotDot(ж<testing.T> t) {
         new("/file/a/..", 400),
         new("/file/a\\..", 400)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (req, err) = ReadRequest(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader("GET "u8 + tt.req + " HTTP/1.1\r\nHost: foo\r\n\r\n"u8))));
         if (err != nil) {
             t.Errorf("bad request %q: %v", tt.req, err);
@@ -297,10 +288,10 @@ private static readonly @string nothingˢᵇ = "nothing"u8;
 
 // Tests that ranges are ignored with serving empty content. (Issue 54794)
 public static void TestServeContentWithEmptyContentIgnoreRanges(ж<testing.T> t) {
-    foreach (var (_, r) in slice<@string>([
+    foreach (var (_, r) in range(slice<@string>([
         "bytes=0-128",
         "bytes=1-"
-    ])) {
+    ]))) {
         var rec = httptest.NewRecorder();
         var req = httptest.NewRequest(getˢ2, "/", default);
         req.Header.Set(rangeˢ, r);
@@ -319,16 +310,13 @@ public static void TestServeContentWithEmptyContentIgnoreRanges(ж<testing.T> t)
 partial struct fsRedirectTestDataᴛ1 /*dyn*/ {
     internal @string original, redirect;
 }
-internal static slice<fsRedirectTestDataᴛ1> fsRedirectTestData = slice<fsRedirectTestDataᴛ1>([
+internal static slice<fsRedirectTestDataᴛ1> fsRedirectTestData = [
     new("/test/index.html", "/test/"),
     new("/test/testdata", "/test/testdata/"),
     new("/test/testdata/file/", "/test/testdata/file")
-]);
+];
 
-public static void TestFSRedirect(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFSRedirect(Δp0, Δp1));
-}
-
+public static void TestFSRedirect(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFSRedirect(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testˢ => ref testˢᵇ;
 private static readonly @string testˢᵇ = "/test"u8;
@@ -336,17 +324,15 @@ private static readonly @string testˢᵇ = "/test"u8;
 internal static void testFSRedirect(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, StripPrefix(testˢ, FileServer((Δhttp.Dir)(@string)"."))).ts;
 
-    foreach (var (_, data) in fsRedirectTestData) {
+    foreach (var (_, data) in range(fsRedirectTestData)) {
         var (res, err) = ts.Client().Get(ts.URL + data.original);
         if (err != nil) {
             t.Fatal(err);
         }
         res.Body.Close();
-        {
-            @string g = res.Request.URL.Path;
-            @string e = data.redirect; if (g != e) {
-                t.Errorf("redirect from %s: got %s, want %s", data.original, g, e);
-            }
+        @string g = res.Request.URL.Path;
+        @string e = data.redirect; if (g != e) {
+            t.Errorf("redirect from %s: got %s, want %s", data.original, g, e);
         }
     }
 }
@@ -386,14 +372,12 @@ public static void TestFileServerCleans(ж<testing.T> t) {
             new("/../foo.txt", "/foo.txt")
         ]);
         var (req, _) = NewRequest(getˢ2, httpExampleComˢ, default);
-        foreach (var (n, test) in tests) {
+        foreach (var (n, test) in range(tests)) {
             var rec = httptest.NewRecorder();
             req.URL.Path = test.reqPath;
             fs.ServeHTTP(new http_test_package.httptest_ResponseRecorderжResponseWriter(rec), req);
-            {
-                @string got = ᐸꟷ(ch); if (got != test.openArg) {
-                    t.Errorf("test %d: got %q, want %q", n, got, test.openArg);
-                }
+            @string got = ᐸꟷ(ch); if (got != test.openArg) {
+                t.Errorf("test %d: got %q, want %q", n, got, test.openArg);
             }
         }
     }
@@ -401,10 +385,7 @@ public static void TestFileServerCleans(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestFileServerEscapesNames(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerEscapesNames(Δp0, Δp1));
-}
-
+public static void TestFileServerEscapesNames(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerEscapesNames(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string dirListPrefixᶜ => ref dirListPrefixᶜᵇ;
 private static readonly @string dirListPrefixᶜᵇ = "<!doctype html>\n<meta name=\"viewport\" content=\"width=device-width\">\n<pre>\n"u8;
@@ -430,18 +411,18 @@ internal static void testFileServerEscapesNames(ж<testing.T> t, testMode mode) 
 
     // We put each test file in its own directory in the fakeFS so we can look at it in isolation.
     ref var fs = ref heap<fakeFS>(new fakeFS(0), out var Ꮡfs);
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var testFile = Ꮡ(new fakeFileInfo(basename: test.name));
         fs[fmt.Sprintf("/%d"u8, i)] = Ꮡ(new fakeFileInfo(
             dir: true,
             modtime: time.Unix(1000000000, 0).UTC(),
-            ents: slice<ж<fakeFileInfo>>([testFile])
+            ents: [testFile]
         ));
         fs[fmt.Sprintf("/%d/%s"u8, i, test.name)] = testFile;
     }
 
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, FileServer(new http_test_package.fakeFSжFileSystem(Ꮡfs))).ts;
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         @string url = fmt.Sprintf("%s/%d"u8, ts.URL, i);
         var (res, err) = ts.Client().Get(url);
         if (err != nil) {
@@ -455,19 +436,14 @@ internal static void testFileServerEscapesNames(ж<testing.T> t, testMode mode) 
         if (!strings.HasPrefix(s, dirListPrefix) || !strings.HasSuffix(s, dirListSuffix)) {
             t.Errorf("test %q: listing dir, full output is %q, want prefix %q and suffix %q", test.name, s, dirListPrefix, dirListSuffix);
         }
-        {
-            @string trimmed = strings.TrimSuffix(strings.TrimPrefix(s, dirListPrefix), dirListSuffix); if (trimmed != test.escaped) {
-                t.Errorf("test %q: listing dir, filename escaped to %q, want %q", test.name, trimmed, test.escaped);
-            }
+        @string trimmed = strings.TrimSuffix(strings.TrimPrefix(s, dirListPrefix), dirListSuffix); if (trimmed != test.escaped) {
+            t.Errorf("test %q: listing dir, filename escaped to %q, want %q", test.name, trimmed, test.escaped);
         }
         res.Body.Close();
     }
 }
 
-public static void TestFileServerSortsNames(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerSortsNames(Δp0, Δp1));
-}
-
+public static void TestFileServerSortsNames(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerSortsNames(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aHrefAAAAHrefBBAˢ => ref aHrefAAAAHrefBBAˢᵇ;
 private static readonly @string aHrefAAAAHrefBBAˢᵇ = "<a href=\"a\">a</a>\n<a href=\"b\">b</a>"u8;
@@ -486,7 +462,7 @@ internal static void testFileServerSortsNames(ж<testing.T> t, testMode mode) {
             ["/"] = Ꮡ(new fakeFileInfo(
                 dir: true,
                 modtime: dirMod,
-                ents: slice<ж<fakeFileInfo>>([
+                ents: [
                     Ꮡ(new fakeFileInfo(
                         basename: "b",
                         modtime: fileMod,
@@ -495,7 +471,7 @@ internal static void testFileServerSortsNames(ж<testing.T> t, testMode mode) {
                         basename: "a",
                         modtime: fileMod,
                         contents: contents))
-                ])
+                ]
             ))
         }), out var Ꮡfs);
 
@@ -528,10 +504,7 @@ internal static void mustRemoveAll(@string dir) {
     }
 }
 
-public static void TestFileServerImplicitLeadingSlash(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerImplicitLeadingSlash(Δp0, Δp1));
-}
-
+public static void TestFileServerImplicitLeadingSlash(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerImplicitLeadingSlash(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooTxtˢ => ref fooTxtˢᵇ;
 private static readonly @string fooTxtˢᵇ = "foo.txt"u8;
@@ -659,10 +632,7 @@ public static void TestEmptyDirOpenCWD(ж<testing.T> t) {
     test((Δhttp.Dir)(@string)"./");
 }
 
-public static void TestServeFileContentType(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFileContentType(Δp0, Δp1));
-}
-
+public static void TestServeFileContentType(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileContentType(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string overrideˢ => ref overrideˢᵇ;
 private static readonly @string overrideˢᵇ = "override"u8;
@@ -682,7 +652,7 @@ internal static void testServeFileContentType(ж<testing.T> t, testMode mode) {
         }
         case {} when exprᴛ1 == "2"u8: {
             // Explicitly inhibit sniffing.
-            w.Header()[contentTypeˢ] = slice<@string>([]);
+            w.Header()[contentTypeˢ] = [];
             break;
         }}
         ServeFile(w, r, testdataFileˢ);
@@ -693,22 +663,17 @@ internal static void testServeFileContentType(ж<testing.T> t, testMode mode) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var h = resp.Header[contentTypeˢ]; if (!slices.Equal<slice<@string>, @string>(h, want)) {
-                t.Errorf("Content-Type mismatch: got %v, want %v", h, want);
-            }
+        var h = resp.Header[contentTypeˢ]; if (!slices.Equal<slice<@string>, @string>(h, want)) {
+            t.Errorf("Content-Type mismatch: got %v, want %v", h, want);
         }
         resp.Body.Close();
     }
-    get("0", slice<@string>(["text/plain; charset=utf-8"]));
-    get("1", slice<@string>([ctype]));
+    get("0", ["text/plain; charset=utf-8"]);
+    get("1", [ctype]);
     get("2", default);
 }
 
-public static void TestServeFileMimeType(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFileMimeType(Δp0, Δp1));
-}
-
+public static void TestServeFileMimeType(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileMimeType(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataStyleCssˢ => ref testdataStyleCssˢᵇ;
 private static readonly @string testdataStyleCssˢᵇ = "testdata/style.css"u8;
@@ -725,17 +690,12 @@ internal static void testServeFileMimeType(ж<testing.T> t, testMode mode) {
     }
     resp.Body.Close();
     @string want = textCssCharsetUtf8ˢ;
-    {
-        @string h = resp.Header.Get(contentTypeˢ); if (h != want) {
-            t.Errorf("Content-Type mismatch: got %q, want %q", h, want);
-        }
+    @string h = resp.Header.Get(contentTypeˢ); if (h != want) {
+        t.Errorf("Content-Type mismatch: got %q, want %q", h, want);
     }
 }
 
-public static void TestServeFileFromCWD(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFileFromCWD(Δp0, Δp1));
-}
-
+public static void TestServeFileFromCWD(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileFromCWD(Δp0, Δp1)); }
 internal static void testServeFileFromCWD(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
         ServeFile(w, rΔ1, fsTestGoˢ);
@@ -751,10 +711,7 @@ internal static void testServeFileFromCWD(ж<testing.T> t, testMode mode) {
 }
 
 // Issue 13996
-public static void TestServeDirWithoutTrailingSlash(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeDirWithoutTrailingSlash(Δp0, Δp1));
-}
-
+public static void TestServeDirWithoutTrailingSlash(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeDirWithoutTrailingSlash(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataˢ2 => ref testdataˢ2ᵇ;
 private static readonly @string testdataˢ2ᵇ = "/testdata/"u8;
@@ -769,19 +726,14 @@ internal static void testServeDirWithoutTrailingSlash(ж<testing.T> t, testMode 
         t.Fatal(err);
     }
     r.Body.Close();
-    {
-        @string g = r.Request.URL.Path; if (g != e) {
-            t.Errorf("got %s, want %s", g, e);
-        }
+    @string g = r.Request.URL.Path; if (g != e) {
+        t.Errorf("got %s, want %s", g, e);
     }
 }
 
 // Tests that ServeFile doesn't add a Content-Length if a Content-Encoding is
 // specified.
-public static void TestServeFileWithContentEncoding(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFileWithContentEncoding(Δp0, Δp1));
-}
-
+public static void TestServeFileWithContentEncoding(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileWithContentEncoding(Δp0, Δp1)); }
 internal static void testServeFileWithContentEncoding(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(contentEncodingˢ, fooˢ);
@@ -801,19 +753,14 @@ internal static void testServeFileWithContentEncoding(ж<testing.T> t, testMode 
         t.Fatal(err);
     }
     resp.Body.Close();
-    {
-        var (g, e) = (resp.ContentLength, (int64)(-1)); if (g != e) {
-            t.Errorf("Content-Length mismatch: got %d, want %d", g, e);
-        }
+    var (g, e) = (resp.ContentLength, (int64)(-1)); if (g != e) {
+        t.Errorf("Content-Length mismatch: got %d, want %d", g, e);
     }
 }
 
 // Tests that ServeFile does not generate representation metadata when
 // file has not been modified, as per RFC 7232 section 4.1.
-public static void TestServeFileNotModified(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeFileNotModified(Δp0, Δp1));
-}
-
+public static void TestServeFileNotModified(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileNotModified(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string etagˢ => ref etagˢᵇ;
 private static readonly @string etagˢᵇ = "Etag"u8;
@@ -874,10 +821,7 @@ internal static void testServeFileNotModified(ж<testing.T> t, testMode mode) {
     }
 }
 
-public static void TestServeIndexHtml(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeIndexHtml(Δp0, Δp1));
-}
-
+public static void TestServeIndexHtml(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeIndexHtml(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dirˢ => ref dirˢᵇ;
 private static readonly @string dirˢᵇ = "Dir"u8;
@@ -907,7 +851,7 @@ internal static void testServeIndexHtml(ж<testing.T> t, testMode mode) {
             @string want = wantᶜ;
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, Ꮡh.ValueSlot).ts;
 
-            foreach (var (_, path) in slice<@string>(["/testdata/", "/testdata/index.html"])) {
+            foreach (var (_, path) in range(slice<@string>(["/testdata/", "/testdata/index.html"]))) {
                 var (res, err) = ts.Client().Get(ts.URL + path);
                 if (err != nil) {
                     tΔ1.Fatal(err);
@@ -916,10 +860,8 @@ internal static void testServeIndexHtml(ж<testing.T> t, testMode mode) {
                 if (err != nil) {
                     tΔ1.Fatal(readingBodyˢ, err);
                 }
-                {
-                    @string s = (@string)b; if (s != want) {
-                        tΔ1.Errorf("for path %q got %q, want %q", path, s, want);
-                    }
+                @string s = (@string)b; if (s != want) {
+                    tΔ1.Errorf("for path %q got %q, want %q", path, s, want);
                 }
                 res.Body.Close();
             }
@@ -927,10 +869,7 @@ internal static void testServeIndexHtml(ж<testing.T> t, testMode mode) {
     }
 }
 
-public static void TestServeIndexHtmlFS(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeIndexHtmlFS(Δp0, Δp1));
-}
-
+public static void TestServeIndexHtmlFS(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeIndexHtmlFS(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string wantᶜ1 => ref wantᶜ1ᵇ;
 private static readonly @string wantᶜ1ᵇ = "index.html says hello\n"u8;
@@ -943,7 +882,7 @@ internal static void testServeIndexHtmlFS(ж<testing.T> t, testMode mode) {
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
 
-        foreach (var (_, path) in slice<@string>(["/testdata/", "/testdata/index.html"])) {
+        foreach (var (_, path) in range(slice<@string>(["/testdata/", "/testdata/index.html"]))) {
             var (res, err) = ts.Client().Get(ts.URL + path);
             if (err != nil) {
                 t.Fatal(err);
@@ -952,10 +891,8 @@ internal static void testServeIndexHtmlFS(ж<testing.T> t, testMode mode) {
             if (err != nil) {
                 t.Fatal(readingBodyˢ, err);
             }
-            {
-                @string s = (@string)b; if (s != want) {
-                    t.Errorf("for path %q got %q, want %q", path, s, want);
-                }
+            @string s = (@string)b; if (s != want) {
+                t.Errorf("for path %q got %q, want %q", path, s, want);
             }
             res.Body.Close();
         }
@@ -964,10 +901,7 @@ internal static void testServeIndexHtmlFS(ж<testing.T> t, testMode mode) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestFileServerZeroByte(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerZeroByte(Δp0, Δp1));
-}
-
+public static void TestFileServerZeroByte(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerZeroByte(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readResponseˢ = (@string)"ReadResponse: "u8;
 
@@ -1000,18 +934,15 @@ internal static void testFileServerZeroByte(ж<testing.T> t, testMode mode) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestFileServerNullByte(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerNullByte(Δp0, Δp1));
-}
-
+public static void TestFileServerNullByte(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerNullByte(Δp0, Δp1)); }
 internal static void testFileServerNullByte(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).ts;
 
-    foreach (var (_, path) in slice<@string>([
+    foreach (var (_, path) in range(slice<@string>([
         "/file%00",
         "/%00",
         "/file/qwe/%00"
-    ])) {
+    ]))) {
         var (res, err) = ts.Client().Get(ts.URL + path);
         if (err != nil) {
             t.Fatal(err);
@@ -1023,16 +954,13 @@ internal static void testFileServerNullByte(ж<testing.T> t, testMode mode) {
     }
 }
 
-public static void TestFileServerNamesEscape(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerNamesEscape(Δp0, Δp1));
-}
-
+public static void TestFileServerNamesEscape(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerNamesEscape(Δp0, Δp1)); }
 internal static void testFileServerNamesEscape(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).ts;
-    foreach (var (_, path) in slice<@string>([
+    foreach (var (_, path) in range(slice<@string>([
         "/../testdata/file",
         "/NUL" // don't read from device files on Windows
-    ])) {
+    ]))) {
         var (res, err) = ts.Client().Get(ts.URL + path);
         if (err != nil) {
             t.Fatal(err);
@@ -1053,26 +981,11 @@ partial struct fakeFileInfo {
     internal error err;
 }
 
-internal static @string Name(this ref fakeFileInfo f) {
-    return f.basename;
-}
-
-internal static any Sys(this ref fakeFileInfo f) {
-    return default;
-}
-
-internal static time.Time ModTime(this ref fakeFileInfo f) {
-    return f.modtime;
-}
-
-internal static bool IsDir(this ref fakeFileInfo f) {
-    return f.dir;
-}
-
-internal static int64 Size(this ref fakeFileInfo f) {
-    return (int64)len(f.contents);
-}
-
+internal static @string Name(this ref fakeFileInfo f) { return f.basename; }
+internal static any Sys(this ref fakeFileInfo f) { return default; }
+internal static time.Time ModTime(this ref fakeFileInfo f) { return f.modtime; }
+internal static bool IsDir(this ref fakeFileInfo f) { return f.dir; }
+internal static int64 Size(this ref fakeFileInfo f) { return (int64)len(f.contents); }
 internal static fs.FileMode Mode(this ref fakeFileInfo f) {
     if (f.dir) {
         return (fs.FileMode)(493 | fs.ModeDir);
@@ -1091,14 +1004,8 @@ partial struct fakeFile {
     internal nint entpos;
 }
 
-internal static error Close(this ref fakeFile f) {
-    return default;
-}
-
-internal static (fs.FileInfo, error) Stat(this ref fakeFile f) {
-    return (new http_test_package.fakeFileInfoжFileInfo(f.fi), default);
-}
-
+internal static error Close(this ref fakeFile f) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref fakeFile f) { return (new http_test_package.fakeFileInfoжFileInfo(f.fi), default); }
 internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint count) {
     if (!f.fi.dir) {
         return (default, fs.ErrInvalid);
@@ -1134,10 +1041,7 @@ internal static (Δhttp.File, error) Open(this fakeFS fsys, @string name) {
     return (new http_test_package.fakeFileжFile(Ꮡ(new fakeFile(ReadSeeker: new http_test_package.strings_ReaderжReadSeeker(strings.NewReader(f.contents)), fi: f, path: name))), default);
 }
 
-public static void TestDirectoryIfNotModified(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testDirectoryIfNotModified(Δp0, Δp1));
-}
-
+public static void TestDirectoryIfNotModified(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testDirectoryIfNotModified(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ifModifiedSinceˢ => ref ifModifiedSinceˢᵇ;
 private static readonly @string ifModifiedSinceˢᵇ = "If-Modified-Since"u8;
@@ -1160,7 +1064,7 @@ internal static void testDirectoryIfNotModified(ж<testing.T> t, testMode mode) 
         ["/"] = Ꮡ(new fakeFileInfo(
             dir: true,
             modtime: dirMod,
-            ents: slice<ж<fakeFileInfo>>([indexFile])
+            ents: [indexFile]
         )),
         ["/index.html"] = indexFile
     });
@@ -1219,10 +1123,7 @@ internal static fs.FileInfo mustStat(ж<testing.T> t, @string fileName) {
     return fi;
 }
 
-public static void TestServeContent(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServeContent(Δp0, Δp1));
-}
-
+public static void TestServeContent(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeContent(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string eTagˢ => ref eTagˢᵇ;
 private static readonly @string eTagˢᵇ = "ETag"u8;
@@ -1496,12 +1397,10 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
             } else {
                 content = tt.content;
             }
-            foreach (var (_, method) in slice<@string>(["GET", "HEAD"])) {
+            foreach (var (_, method) in range(slice<@string>(["GET", "HEAD"]))) {
                 //restore content in case it is consumed by previous method
-                {
-                    var (contentΔ1, ok) = content._<ж<strings.Reader>>(ᐧ); if (ok) {
-                        contentΔ1.Seek(0, io.SeekStart);
-                    }
+                var (contentΔ1, ok) = content._<ж<strings.Reader>>(ᐧ); if (ok) {
+                    contentΔ1.Seek(0, io.SeekStart);
                 }
 
                 servec.ᐸꟷ(new testServeContent_serveParam(
@@ -1570,31 +1469,22 @@ public static void TestServerFileStatError(ж<testing.T> t) {
     @string name = fileTxtˢ;
     var fs = new issue12991FS();
     http_internal_test_package.ExportServeFile(new http_test_package.httptest_ResponseRecorderжResponseWriter(rec), r, fs, name, redirect);
-    {
-        @string body = rec.Body.String(); if (!strings.Contains(body, "403") || !strings.Contains(body, forbiddenˢ)) {
-            t.Errorf("wanted 403 forbidden message; got: %s", body);
-        }
+    @string body = rec.Body.String(); if (!strings.Contains(body, "403") || !strings.Contains(body, forbiddenˢ)) {
+        t.Errorf("wanted 403 forbidden message; got: %s", body);
     }
 }
 
 partial struct issue12991FS {
 }
 
-internal static (Δhttp.File, error) Open(this issue12991FS _Δp0, @string _Δp1) {
-    return (new issue12991File(), default);
-}
+internal static (Δhttp.File, error) Open(this issue12991FS _Δp0, @string _Δp1) { return (new issue12991File(), default); }
 
 partial struct issue12991File {
     /*embed*/ public global::go.net.http_package.File File;
 }
 
-internal static (fs.FileInfo, error) Stat(this issue12991File _) {
-    return (default, fs.ErrPermission);
-}
-
-internal static error Close(this issue12991File _) {
-    return default;
-}
+internal static (fs.FileInfo, error) Stat(this issue12991File _) { return (default, fs.ErrPermission); }
+internal static error Close(this issue12991File _) { return default; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string keepheaders0ˢ => ref keepheaders0ˢᵇ;
@@ -1613,7 +1503,6 @@ public static void TestFileServerErrorMessages(ж<testing.T> t) {
         });
     }, testNotParallel);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string randomErrorˢ => ref randomErrorˢᵇ;
 private static readonly @string randomErrorˢᵇ = "random error"u8;
@@ -1655,7 +1544,7 @@ internal static void testFileServerErrorMessages(ж<testing.T> t, testMode mode,
     };
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(h))).ts;
     var c = ts.Client();
-    foreach (var (_, code) in slice<nint>([403, 404, 500])) {
+    foreach (var (_, code) in range(slice<nint>([403, 404, 500]))) {
         var (res, err) = c.Get(fmt.Sprintf("%s/%d"u8, ts.URL, code));
         if (err != nil) {
             t.Errorf("Error fetching /%d: %v", code, err);
@@ -1665,15 +1554,13 @@ internal static void testFileServerErrorMessages(ж<testing.T> t, testMode mode,
         if (res.StatusCode != code) {
             t.Errorf("GET /%d: StatusCode = %d; want %d", code, res.StatusCode, code);
         }
-        foreach (var (_, hdr) in slice<@string>(["Etag", "Last-Modified", "Cache-Control"])) {
-            {
-                var (v, got) = res.Header[hdr, ꟷ]; if (got != keepHeaders) {
-                    @string want = notPresentˢ;
-                    if (keepHeaders) {
-                        want = presentˢ;
-                    }
-                    t.Errorf("GET /%d: Header[%q] = %q, want %v", code, hdr, v, want);
+        foreach (var (_, hdr) in range(slice<@string>(["Etag", "Last-Modified", "Cache-Control"]))) {
+            var (v, got) = res.Header[hdr, ꟷ]; if (got != keepHeaders) {
+                @string want = notPresentˢ;
+                if (keepHeaders) {
+                    want = presentˢ;
                 }
+                t.Errorf("GET /%d: Header[%q] = %q, want %v", code, hdr, v, want);
             }
         }
     }
@@ -1700,10 +1587,8 @@ public static void TestLinuxSendfile(ж<testing.T> t) {
         if (runtime.GOOS != "linux"u8) {
             t.Skip(skippingLinuxOnlyTestˢ);
         }
-        {
-            var (_, errΔ1) = exec.LookPath(straceˢ); if (errΔ1 != nil) {
-                t.Skip(skippingStraceNotFoundInˢ);
-            }
+        var (_, errΔ1) = exec.LookPath(straceˢ); if (errΔ1 != nil) {
+            t.Skip(skippingStraceNotFoundInˢ);
         }
 
         var (ln, err) = net.Listen(tcpˢ, "127.0.0.1:0");
@@ -1718,19 +1603,15 @@ public static void TestLinuxSendfile(ж<testing.T> t) {
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         // Attempt to run strace, and skip on failure - this test requires SYS_PTRACE.
-        {
-            var errΔ2 = testenv.Command(new http_test_package.testing_TжTB(t), straceˢ, "-f", "-q", os.Args[0], testRunˢ).Run(); if (errΔ2 != nil) {
-                t.Skipf("skipping; failed to run strace: %v", errΔ2);
-            }
+        var errΔ2 = testenv.Command(new http_test_package.testing_TжTB(t), straceˢ, "-f", "-q", os.Args[0], testRunˢ).Run(); if (errΔ2 != nil) {
+            t.Skipf("skipping; failed to run strace: %v", errΔ2);
         }
 
         @string filename = fmt.Sprintf("1kb-%d"u8, os.Getpid());
         @string filepath = path.Join(os.TempDir(), filename);
 
-        {
-            var errΔ3 = os.WriteFile(filepath, bytes.Repeat(slice<byte>([(byte)'a']), 1 << 10), 493); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = os.WriteFile(filepath, bytes.Repeat([(byte)'a'], 1 << 10), 493); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
         defer(os.Remove, filepath, ref ᒐ);
 
@@ -1740,10 +1621,8 @@ public static void TestLinuxSendfile(ж<testing.T> t) {
         child.Env = appendꓸꓸꓸ(slice<@string>(["GO_WANT_HELPER_PROCESS=1"]), os.Environ());
         child.Stdout = new http_test_package.strings_BuilderжWriter(Ꮡbuf);
         child.Stderr = new http_test_package.strings_BuilderжWriter(Ꮡbuf);
-        {
-            var errΔ4 = child.Start(); if (errΔ4 != nil) {
-                t.Skipf("skipping; failed to start straced child: %v", errΔ4);
-            }
+        var errΔ4 = child.Start(); if (errΔ4 != nil) {
+            t.Skipf("skipping; failed to start straced child: %v", errΔ4);
         }
 
         (var res, err) = Get(fmt.Sprintf("http://%s/%s"u8, ln.Addr(), filename));
@@ -1898,11 +1777,11 @@ internal partial struct TestFileServerCleanPath_tests /*dyn*/ {
 
 public static void TestFileServerCleanPath(ж<testing.T> t) {
     var tests = slice<TestFileServerCleanPath_tests>([
-        new("/", 200, slice<@string>(["/", "/index.html"])),
-        new("/dir", 301, slice<@string>(["/dir"])),
-        new("/dir/", 200, slice<@string>(["/dir", "/dir/index.html"]))
+        new("/", 200, ["/", "/index.html"]),
+        new("/dir", 301, ["/dir"]),
+        new("/dir/", 200, ["/dir", "/dir/index.html"])
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var log = ref heap<slice<@string>>(out var Ꮡlog);
         var rr = httptest.NewRecorder();
         var (req, _) = NewRequest(getˢ2, "http://foo.localhost"u8 + tt.path, default);
@@ -1950,7 +1829,7 @@ public static void TestScanETag(ж<testing.T> t) {
         new(@"w/""case-sensitive""", "", ""),
         new(@"""spaced etag""", "", "")
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (etag, remain) = http_internal_test_package.ExportScanETag(test.@in);
         if (etag != test.wantETag || remain != test.wantRemain) {
             t.Errorf("scanETag(%q)=%q %q, want %q %q", test.@in, etag, remain, test.wantETag, test.wantRemain);
@@ -1963,7 +1842,6 @@ public static void TestScanETag(ж<testing.T> t) {
 public static void TestServeFileRejectsInvalidSuffixLengths(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testServeFileRejectsInvalidSuffixLengths(Δp0, Δp1), slice<testMode>([http1Mode, https1Mode, http2Mode]));
 }
-
 internal partial struct testServeFileRejectsInvalidSuffixLengths_tests /*dyn*/ {
     internal @string r;
     internal nint wantCode;
@@ -1984,7 +1862,7 @@ internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> t, t
         new("bytes=", 200, "index.html says hello\n")
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new testServeFileRejectsInvalidSuffixLengths_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2024,7 +1902,6 @@ internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> t, t
 public static void TestFileServerMethods(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testFileServerMethods(Δp0, Δp1));
 }
-
 internal static void testFileServerMethods(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).ts;
 
@@ -2037,7 +1914,7 @@ internal static void testFileServerMethods(ж<testing.T> t, testMode mode) {
     //
     // See https://go.dev/issue/59471 for a proposal to limit the set of methods handled.
     // For now, test the historical behavior.
-    foreach (var (_, method) in slice<@string>([
+    foreach (var (_, method) in range(slice<@string>([
         MethodGet,
         MethodHead,
         MethodPost,
@@ -2046,7 +1923,7 @@ internal static void testFileServerMethods(ж<testing.T> t, testMode mode) {
         MethodDelete,
         MethodOptions,
         MethodTrace
-    ])) {
+    ]))) {
         var (req, _) = NewRequest(method, ts.URL + "/file"u8, default);
         t.Log(req.URL.OrTypedNil());
         var (res, errΔ1) = ts.Client().Do(req);
@@ -2065,11 +1942,9 @@ internal static void testFileServerMethods(ж<testing.T> t, testMode mode) {
         if (!bytes.Equal(body, wantBody)) {
             t.Fatalf("%v: got body %q, want %q", method, body, wantBody);
         }
-        {
-            @string got = res.Header.Get(contentLengthˢ);
-            @string want = fmt.Sprint(len(@file)); if (got != want) {
-                t.Fatalf("%v: got Content-Length %q, want %q", method, got, want);
-            }
+        @string got = res.Header.Get(contentLengthˢ);
+        @string want = fmt.Sprint(len(@file)); if (got != want) {
+            t.Fatalf("%v: got Content-Length %q, want %q", method, got, want);
         }
     }
 }
@@ -2098,10 +1973,8 @@ public static void TestFileServerFS(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(readingBodyˢ, err);
         }
-        {
-            @string s = (@string)b; if (s != ((sstring)contents)) {
-                t.Errorf("for path %q got %q, want %q", filename, s, contents);
-            }
+        @string s = (@string)b; if (s != ((sstring)contents)) {
+            t.Errorf("for path %q got %q, want %q", filename, s, contents);
         }
         res.Body.Close();
     }
@@ -2132,10 +2005,8 @@ public static void TestServeFileFS(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(readingBodyˢ, err);
         }
-        {
-            @string s = (@string)b; if (s != ((sstring)contents)) {
-                t.Errorf("for path %q got %q, want %q", filename, s, contents);
-            }
+        @string s = (@string)b; if (s != ((sstring)contents)) {
+            t.Errorf("for path %q got %q, want %q", filename, s, contents);
         }
         res.Body.Close();
     }
@@ -2188,10 +2059,8 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(readingBodyˢ, err);
         }
-        {
-            @string s = (@string)b; if (s != ((sstring)contents)) {
-                t.Errorf("for path %q got %q, want %q", filename, s, contents);
-            }
+        @string s = (@string)b; if (s != ((sstring)contents)) {
+            t.Errorf("for path %q got %q, want %q", filename, s, contents);
         }
         res.Body.Close();
     }
@@ -2210,18 +2079,13 @@ internal static (nint, error) Write(this gzipResponseWriter grw, slice<byte> b) 
 
 internal static void Flush(this gzipResponseWriter grw) {
     grw.w.Flush();
-    {
-        var (fw, ok) = grw.ResponseWriter._<Δhttp.Flusher>(ᐧ); if (ok) {
-            fw.Flush();
-        }
+    var (fw, ok) = grw.ResponseWriter._<Δhttp.Flusher>(ᐧ); if (ok) {
+        fw.Flush();
     }
 }
 
 // Issue 63769
-public static void TestFileServerDirWithRootFile(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testFileServerDirWithRootFile(Δp0, Δp1));
-}
-
+public static void TestFileServerDirWithRootFile(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerDirWithRootFile(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fileServerˢ => ref fileServerˢᵇ;
 private static readonly @string fileServerˢᵇ = "FileServer"u8;
@@ -2240,11 +2104,9 @@ internal static void testFileServerDirWithRootFile(ж<testing.T> t, testMode mod
             if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            {
-                nint g = res.StatusCode;
-                nint w = StatusInternalServerError; if (g != w) {
-                    tΔ1.Errorf("StatusCode mismatch: got %d, want: %d", g, w);
-                }
+            nint g = res.StatusCode;
+            nint w = StatusInternalServerError; if (g != w) {
+                tΔ1.Errorf("StatusCode mismatch: got %d, want: %d", g, w);
             }
             res.Body.Close();
         }
@@ -2271,7 +2133,6 @@ public static void TestServeContentHeadersWithError(ж<testing.T> t) {
         testServeContentHeadersWithError(tΔ2, true);
     });
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
 private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;

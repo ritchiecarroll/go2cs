@@ -8,16 +8,16 @@ using static go.os.exec_package;
 
 partial class exec_internal_test_package {
 
-internal static slice<@string> nonExistentPaths = slice<@string>([
+internal static slice<@string> nonExistentPaths = [
     "some-non-existent-path",
     "non-existent-path/slashed"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object lookPathErrorIsNotAnExecˢ = (@string)"LookPath error is not an exec.Error"u8;
 
 public static void TestLookPathNotFound(ж<testing.T> t) {
-    foreach (var (_, name) in nonExistentPaths) {
+    foreach (var (_, name) in range(nonExistentPaths)) {
         var (path, err) = LookPath(name);
         if (err == nil) {
             t.Fatalf("LookPath found %q in $PATH", name);

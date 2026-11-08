@@ -6,8 +6,6 @@ namespace go.net;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.net.http_package;
 
 partial class http_internal_test_package {
@@ -43,7 +41,7 @@ public static void TestParsePattern(ж<testing.T> t) {
         return s;
     }
 
-    foreach (var (_, vᴛ1) in slice<TestParsePattern_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestParsePattern_type>([
         new("/", new pattern(segments: slice<global::go.net.http_package.segment>([multi(""u8)]))),
         new("/a", new pattern(segments: slice<global::go.net.http_package.segment>([lit("a")]))),
         new(
@@ -131,7 +129,7 @@ public static void TestParsePattern(ж<testing.T> t) {
             "DELETE    \texample.com/a/{foo12}/{$}",
             new pattern(method: "DELETE", host: "example.com", segments: slice<global::go.net.http_package.segment>([lit("a"), wild(foo12ˢ), lit("/")]))
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestParsePattern_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -148,7 +146,7 @@ internal partial struct TestParsePatternError_type /*dyn*/ {
 }
 
 public static void TestParsePatternError(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestParsePatternError_type>([
+    foreach (var (_, test) in range(slice<TestParsePatternError_type>([
         new("", "empty pattern"),
         new("A=B /", "at offset 0: invalid method"),
         new(" ", "at offset 1: host/path missing /"),
@@ -170,7 +168,7 @@ public static void TestParsePatternError(ж<testing.T> t) {
         new("{a}/b", "at offset 0: host contains '{' (missing initial '/'?)"),
         new("/a/{x}/b/{x...}", "at offset 9: duplicate wildcard name"),
         new("GET //", "at offset 4: non-CONNECT pattern with unclean path")
-    ])) {
+    ]))) {
         var (_, err) = parsePattern(test.@in);
         if (err == nil || !strings.Contains(err.Error(), test.contains)) {
             t.Errorf("%q:\ngot %v, want error containing %q", test.@in, err, test.contains);
@@ -199,7 +197,7 @@ internal partial struct TestCompareMethods_type /*dyn*/ {
 }
 
 public static void TestCompareMethods(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestCompareMethods_type>([
+    foreach (var (_, test) in range(slice<TestCompareMethods_type>([
         new("/", "/", equivalent),
         new("GET /", "GET /", equivalent),
         new("HEAD /", "HEAD /", equivalent),
@@ -208,7 +206,7 @@ public static void TestCompareMethods(ж<testing.T> t) {
         new("GET /", "/", moreSpecific),
         new("HEAD /", "/", moreSpecific),
         new("GET /", "HEAD /", moreGeneral)
-    ])) {
+    ]))) {
         var pat1 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p1);
         var pat2 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p2);
         global::go.net.http_package.relationship got = pat1.compareMethods(pat2);
@@ -229,7 +227,7 @@ internal partial struct TestComparePaths_type /*dyn*/ {
 }
 
 public static void TestComparePaths(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestComparePaths_type>([
+    foreach (var (_, test) in range(slice<TestComparePaths_type>([
         // A non-final pattern segment can have one of two values: literal or
         // single wildcard. A final pattern segment can have one of 5: empty
         // (trailing slash), literal, dollar, single wildcard, or multi
@@ -358,7 +356,7 @@ public static void TestComparePaths(ж<testing.T> t) {
         new("/{z}/{$}", "/a/{x...}", overlaps),
         new("/{z}/{$}", "/{z}/{x...}", moreSpecific),
         new("/a/{z}/{$}", "/{z}/a/", overlaps)
-    ])) {
+    ]))) {
         var pat1 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p1);
         var pat2 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p2);
         {
@@ -391,7 +389,7 @@ internal partial struct TestConflictsWith_type /*dyn*/ {
 }
 
 public static void TestConflictsWith(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestConflictsWith_type>([
+    foreach (var (_, test) in range(slice<TestConflictsWith_type>([
         new("/a", "/a", true),
         new("/a", "/ab", false),
         new("/a/b/cd", "/a/b/cd", true),
@@ -413,7 +411,7 @@ public static void TestConflictsWith(ж<testing.T> t) {
         new("GET /", "GET /foo", false),
         new("GET /", "/foo", true),
         new("GET /foo", "HEAD /", true)
-    ])) {
+    ]))) {
         var pat1 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p1);
         var pat2 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p2);
         var got = pat1.conflictsWith(pat2);
@@ -439,10 +437,8 @@ private static readonly @string matchesTheSameRequestsAsˢᵇ = "matches the sam
 public static partial void TestRegisterConflict(ж<testing.T> t) {
     var mux = NewServeMux();
     @string pat1 = "/a/{x}/";
-    {
-        var errΔ1 = mux.registerErr(pat1, NotFoundHandler()); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = mux.registerErr(pat1, NotFoundHandler()); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     @string pat2 = aYZˢ;
     var err = mux.registerErr(pat2, NotFoundHandler());
@@ -464,14 +460,14 @@ internal partial struct TestDescribeConflict_type /*dyn*/ {
 }
 
 public static void TestDescribeConflict(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestDescribeConflict_type>([
+    foreach (var (_, test) in range(slice<TestDescribeConflict_type>([
         new("/a/{x}", "/a/{y}", "the same requests"),
         new("/", "/{m...}", "the same requests"),
         new("/a/{x}", "/{y}/b", "both match some paths"),
         new("/a", "GET /{x}", "matches more methods than GET /{x}, but has a more specific path pattern"),
         new("GET /a", "HEAD /", "matches more methods than HEAD /, but has a more specific path pattern"),
         new("POST /", "/a", "matches fewer methods than /a, but has a more general path pattern")
-    ])) {
+    ]))) {
         @string got = describeConflict(mustParsePattern(new http_test_package.testing_TжTB(t), test.p1), mustParsePattern(new http_test_package.testing_TжTB(t), test.p2));
         if (!strings.Contains(got, test.want)) {
             t.Errorf("%s vs. %s:\ngot:\n%s\nwhich does not contain %q",
@@ -486,7 +482,7 @@ internal partial struct TestCommonPath_type /*dyn*/ {
 }
 
 public static void TestCommonPath(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestCommonPath_type>([
+    foreach (var (_, test) in range(slice<TestCommonPath_type>([
         new("/a/{x}", "/{x}/a", "/a/a"),
         new("/a/{z}/", "/{z}/a/", "/a/a/"),
         new("/a/{z}/{m...}", "/{z}/a/", "/a/a/"),
@@ -497,7 +493,7 @@ public static void TestCommonPath(ж<testing.T> t) {
         new("/a/{x}/b/", "/{x}/c/{y...}", "/a/c/b/"),
         new("/a/{x}/b/{$}", "/{x}/c/{y...}", "/a/c/b/"),
         new("/a/{z}/{x...}", "/{z}/b/{y...}", "/a/b/")
-    ])) {
+    ]))) {
         var pat1 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p1);
         var pat2 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p2);
         if (pat1.comparePaths(pat2) != overlaps) {
@@ -516,7 +512,7 @@ internal partial struct TestDifferencePath_type /*dyn*/ {
 }
 
 public static void TestDifferencePath(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestDifferencePath_type>([
+    foreach (var (_, test) in range(slice<TestDifferencePath_type>([
         new("/a/{x}", "/{x}/a", "/a/x"),
         new("/{x}/a", "/a/{x}", "/x/a"),
         new("/a/{z}/", "/{z}/a/", "/a/z/"),
@@ -542,7 +538,7 @@ public static void TestDifferencePath(ж<testing.T> t) {
         new("/{x}/c/{y...}", "/a/{c}/b/", "/x/c/"),
         new("/a/{x}/b/{$}", "/{x}/c/{y...}", "/a/x/b/"),
         new("/{x}/c/{y...}", "/a/{x}/b/{$}", "/x/c/")
-    ])) {
+    ]))) {
         var pat1 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p1);
         var pat2 = mustParsePattern(new http_test_package.testing_TжTB(t), test.p2);
         global::go.net.http_package.relationship rel = pat1.comparePaths(pat2);

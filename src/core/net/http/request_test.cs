@@ -24,8 +24,6 @@ using regexp = regexp_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using global::go.mime;
@@ -42,10 +40,8 @@ private static readonly @string httpWwwGoogleComSearchQˢᵇ = "http://www.googl
 public static void TestQuery(ж<testing.T> t) {
     var req = Ꮡ(new Request(Method: "GET"));
     (req.URL, _) = url.Parse(httpWwwGoogleComSearchQˢ);
-    {
-        @string q = req.FormValue("q"); if (q != "foo"u8) {
-            t.Errorf(@"req.FormValue(""q"") = %q, want ""foo""", q);
-        }
+    @string q = req.FormValue("q"); if (q != "foo"u8) {
+        t.Errorf(@"req.FormValue(""q"") = %q, want ""foo""", q);
     }
 }
 
@@ -56,14 +52,14 @@ private static readonly @string httpWwwGoogleComSearchQˢ2ᵇ = "http://www.goog
 // Issue #25192: Test that ParseForm fails but still parses the form when a URL
 // containing a semicolon is provided.
 public static void TestParseFormSemicolonSeparator(ж<testing.T> t) {
-    foreach (var (_, method) in slice<@string>(["POST", "PATCH", "PUT", "GET"])) {
+    foreach (var (_, method) in range(slice<@string>(["POST", "PATCH", "PUT", "GET"]))) {
         var (req, _) = NewRequest(method, httpWwwGoogleComSearchQˢ2,
             new http_test_package.strings_ReaderжReader(strings.NewReader("q")));
         var err = req.ParseForm();
         if (err == nil) {
             t.Fatalf(@"for method %s, ParseForm expected an error, got success", method);
         }
-        var wantForm = new url.Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])});
+        var wantForm = new url.Values(new map<@string, slice<@string>>{["a"] = ["1"]});
         if (!reflect.DeepEqual(req.Form, wantForm)) {
             t.Fatalf("for method %s, ParseForm expected req.Form = %v, want %v", method, req.Form, wantForm);
         }
@@ -91,55 +87,35 @@ public static void TestParseFormQuery(ж<testing.T> t) {
         new http_test_package.strings_ReaderжReader(strings.NewReader(zPostBothYPrio2Nokeyˢ)));
     req.Header.Set(contentTypeˢ, applicationXWwwFormˢ2);
 
-    {
-        @string q = req.FormValue("q"); if (q != "foo"u8) {
-            t.Errorf(@"req.FormValue(""q"") = %q, want ""foo""", q);
-        }
+    @string q = req.FormValue("q"); if (q != "foo"u8) {
+        t.Errorf(@"req.FormValue(""q"") = %q, want ""foo""", q);
     }
-    {
-        @string z = req.FormValue("z"); if (z != "post"u8) {
-            t.Errorf(@"req.FormValue(""z"") = %q, want ""post""", z);
-        }
+    @string z = req.FormValue("z"); if (z != "post"u8) {
+        t.Errorf(@"req.FormValue(""z"") = %q, want ""post""", z);
     }
-    {
-        var (bq, found) = req.PostForm["q", ꟷ]; if (found) {
-            t.Errorf(@"req.PostForm[""q""] = %q, want no entry in map", bq);
-        }
+    var (bq, found) = req.PostForm["q", ꟷ]; if (found) {
+        t.Errorf(@"req.PostForm[""q""] = %q, want no entry in map", bq);
     }
-    {
-        @string bz = req.PostFormValue("z"); if (bz != "post"u8) {
-            t.Errorf(@"req.PostFormValue(""z"") = %q, want ""post""", bz);
-        }
+    @string bz = req.PostFormValue("z"); if (bz != "post"u8) {
+        t.Errorf(@"req.PostFormValue(""z"") = %q, want ""post""", bz);
     }
-    {
-        var qs = req.Form["q"]; if (!slices.Equal<slice<@string>, @string>(qs, slice<@string>(["foo", "bar"]))) {
-            t.Errorf(@"req.Form[""q""] = %q, want [""foo"", ""bar""]", qs);
-        }
+    var qs = req.Form["q"]; if (!slices.Equal<slice<@string>, @string>(qs, slice<@string>(["foo", "bar"]))) {
+        t.Errorf(@"req.Form[""q""] = %q, want [""foo"", ""bar""]", qs);
     }
-    {
-        var both = req.Form[bothˢ]; if (!slices.Equal<slice<@string>, @string>(both, slice<@string>(["y", "x"]))) {
-            t.Errorf(@"req.Form[""both""] = %q, want [""y"", ""x""]", both);
-        }
+    var both = req.Form[bothˢ]; if (!slices.Equal<slice<@string>, @string>(both, slice<@string>(["y", "x"]))) {
+        t.Errorf(@"req.Form[""both""] = %q, want [""y"", ""x""]", both);
     }
-    {
-        @string prio = req.FormValue(prioˢ); if (prio != "2"u8) {
-            t.Errorf(@"req.FormValue(""prio"") = %q, want ""2"" (from body)", prio);
-        }
+    @string prio = req.FormValue(prioˢ); if (prio != "2"u8) {
+        t.Errorf(@"req.FormValue(""prio"") = %q, want ""2"" (from body)", prio);
     }
-    {
-        var orphan = req.Form[orphanˢ]; if (!slices.Equal<slice<@string>, @string>(orphan, slice<@string>(["", "nope"]))) {
-            t.Errorf(@"req.FormValue(""orphan"") = %q, want """" (from body)", orphan);
-        }
+    var orphan = req.Form[orphanˢ]; if (!slices.Equal<slice<@string>, @string>(orphan, slice<@string>(["", "nope"]))) {
+        t.Errorf(@"req.FormValue(""orphan"") = %q, want """" (from body)", orphan);
     }
-    {
-        var empty = req.Form[emptyˢ]; if (!slices.Equal<slice<@string>, @string>(empty, slice<@string>(["", "not"]))) {
-            t.Errorf(@"req.FormValue(""empty"") = %q, want """" (from body)", empty);
-        }
+    var empty = req.Form[emptyˢ]; if (!slices.Equal<slice<@string>, @string>(empty, slice<@string>(["", "not"]))) {
+        t.Errorf(@"req.FormValue(""empty"") = %q, want """" (from body)", empty);
     }
-    {
-        var nokey = req.Form[""u8]; if (!slices.Equal<slice<@string>, @string>(nokey, slice<@string>(["nokey"]))) {
-            t.Errorf(@"req.FormValue(""nokey"") = %q, want ""nokey"" (from body)", nokey);
-        }
+    var nokey = req.Form[""u8]; if (!slices.Equal<slice<@string>, @string>(nokey, slice<@string>(["nokey"]))) {
+        t.Errorf(@"req.FormValue(""nokey"") = %q, want ""nokey"" (from body)", nokey);
     }
 }
 
@@ -149,7 +125,7 @@ private static readonly @string httpWwwGoogleComSearchˢᵇ = "http://www.google
 
 // Tests that we only parse the form automatically for certain methods.
 public static void TestParseFormQueryMethods(ж<testing.T> t) {
-    foreach (var (_, method) in slice<@string>(["POST", "PATCH", "PUT", "FOO"])) {
+    foreach (var (_, method) in range(slice<@string>(["POST", "PATCH", "PUT", "FOO"]))) {
         var (req, _) = NewRequest(method, httpWwwGoogleComSearchˢ,
             new http_test_package.strings_ReaderжReader(strings.NewReader(fooBarˢ)));
         req.Header.Set(contentTypeˢ, applicationXWwwFormˢ2);
@@ -157,10 +133,8 @@ public static void TestParseFormQueryMethods(ж<testing.T> t) {
         if (method == "FOO"u8) {
             want = ""u8;
         }
-        {
-            @string got = req.FormValue(fooˢ); if (got != want) {
-                t.Errorf(@"for method %s, FormValue(""foo"") = %q; want %q", method, got, want);
-            }
+        @string got = req.FormValue(fooˢ); if (got != want) {
+            t.Errorf(@"for method %s, FormValue(""foo"") = %q; want %q", method, got, want);
         }
     }
 }
@@ -172,14 +146,14 @@ internal partial struct TestParseFormUnknownContentType_type /*dyn*/ {
 }
 
 public static void TestParseFormUnknownContentType(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestParseFormUnknownContentType_type>([
-        new("text", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>(["text/plain"])})),
+    foreach (var (_, vᴛ1) in range(slice<TestParseFormUnknownContentType_type>([
+        new("text", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]})),
         // Empty content type is legal - may be treated as
         // application/octet-stream (RFC 7231, section 3.1.1.5)
         new("empty", "", new httpꓸHeader(new map<@string, slice<@string>>{})),
-        new("boundary", "mime: invalid media parameter", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>(["text/plain; boundary="])})),
-        new("unknown", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>(["application/unknown"])}))
-    ])) {
+        new("boundary", "mime: invalid media parameter", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain; boundary="]})),
+        new("unknown", "", new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["application/unknown"]}))
+    ]))) {
         ref var test = ref heap(new TestParseFormUnknownContentType_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -219,7 +193,7 @@ public static void TestParseFormInitializeOnError(ж<testing.T> t) {
         nilBody,
         Ꮡ(new Δhttp.Request(Method: "GET", URL: nil))
     ]);
-    foreach (var (i, req) in tests) {
+    foreach (var (i, req) in range(tests)) {
         var err = req.ParseForm();
         if (req.Form == nil) {
             t.Errorf("%d. Form not initialized, error %v", i, err);
@@ -242,10 +216,10 @@ public static void TestMultipartReader(ж<testing.T> t) {
         new(true, @"text/plain")
     ]);
 
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var req = Ꮡ(new Request(
             Method: "POST",
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([test.contentType])}),
+            Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [test.contentType]}),
             Body: io.NopCloser(new http_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))
         ));
         var (multipart, err) = req.MultipartReader();
@@ -287,7 +261,7 @@ public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> t) {
     @string postData = xxxContentDispositionˢ;
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/form-data; boundary=xxx"])}),
+        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(postData)))
     ));
 
@@ -309,19 +283,19 @@ public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> t) {
     }
 
     var wantForm = new url.Values(new map<@string, slice<@string>>{
-        ["language"] = slice<@string>(["Go"]),
-        ["name"] = slice<@string>(["gopher"]),
-        ["skill"] = slice<@string>(["go-ing"]),
-        ["field1"] = slice<@string>(["value1"]),
-        ["field2"] = slice<@string>(["initial-value2", "value2"])
+        ["language"] = ["Go"],
+        ["name"] = ["gopher"],
+        ["skill"] = ["go-ing"],
+        ["field1"] = ["value1"],
+        ["field2"] = ["initial-value2", "value2"]
     });
     if (!reflect.DeepEqual(req.Form, wantForm)) {
         t.Fatalf("req.Form = %v, want %v", req.Form, wantForm);
     }
 
     var wantPostForm = new url.Values(new map<@string, slice<@string>>{
-        ["field1"] = slice<@string>(["value1"]),
-        ["field2"] = slice<@string>(["value2"])
+        ["field1"] = ["value1"],
+        ["field2"] = ["value2"]
     });
     if (!reflect.DeepEqual(req.PostForm, wantPostForm)) {
         t.Fatalf("req.PostForm = %v, want %v", req.PostForm, wantPostForm);
@@ -335,7 +309,7 @@ internal static readonly object expectedErrNotMultipartˢ = (@string)"expected E
 public static void TestParseMultipartForm(ж<testing.T> t) {
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/form-data; boundary=""foo123"""])}),
+        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=""foo123"""]}),
         Body: io.NopCloser(new http_test_package.bytes_BufferжReader(@new<bytes.Buffer>()))
     ));
     var err = req.ParseMultipartForm(25);
@@ -343,7 +317,7 @@ public static void TestParseMultipartForm(ж<testing.T> t) {
         t.Error(expectedMultipartEofGotˢ);
     }
 
-    req.Header = new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>(["text/plain"])});
+    req.Header = new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = ["text/plain"]});
     err = req.ParseMultipartForm(25);
     if (!AreEqual(err, ErrNotMultipart)) {
         t.Error(expectedErrNotMultipartˢ);
@@ -368,7 +342,7 @@ public static void TestParseMultipartFormFilename(ж<testing.T> t) {
     @string postData = xxxContentDispositionˢ2;
     var req = Ꮡ(new Request(
         Method: "POST",
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/form-data; boundary=xxx"])}),
+        Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/form-data; boundary=xxx"]}),
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(postData)))
     ));
     var (_, hdr, err) = req.FormFile(fileˢ);
@@ -386,7 +360,6 @@ public static void TestParseMultipartFormFilename(ж<testing.T> t) {
 public static void TestMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testMaxInt64ForMultipartFormMaxMemoryOverflow(Δp0, Δp1));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string myfileTxtˢ => ref myfileTxtˢᵇ;
 private static readonly @string myfileTxtˢᵇ = "myfile.txt"u8;
@@ -397,11 +370,9 @@ internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T>
         // The combination of:
         //      MaxInt64 + payloadSize + (internal spare of 10MiB)
         // triggers the overflow. See issue https://golang.org/issue/40430/
-        {
-            var errΔ1 = reqΔ1.ParseMultipartForm(math.MaxInt64); if (errΔ1 != nil) {
-                Error(rw, errΔ1.Error(), StatusBadRequest);
-                return;
-            }
+        var errΔ1 = reqΔ1.ParseMultipartForm(math.MaxInt64); if (errΔ1 != nil) {
+            Error(rw, errΔ1.Error(), StatusBadRequest);
+            return;
         }
     }))).ts;
     var fBuf = @new<bytes.Buffer>();
@@ -410,15 +381,11 @@ internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T>
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (_, errΔ2) = mf.Write(bytes.Repeat(slice<byte>("abc"u8), payloadSize)); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var (_, errΔ2) = mf.Write(bytes.Repeat(slice<byte>("abc"u8), payloadSize)); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
-    {
-        var errΔ3 = mw.Close(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = mw.Close(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
     (var req, err) = NewRequest(postˢ, cst.URL, new http_test_package.bytes_BufferжReader(fBuf));
     if (err != nil) {
@@ -430,18 +397,13 @@ internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T>
         t.Fatal(err);
     }
     res.Body.Close();
-    {
-        nint g = res.StatusCode;
-        nint w = StatusOK; if (g != w) {
-            t.Fatalf("Status code mismatch: got %d, want %d", g, w);
-        }
+    nint g = res.StatusCode;
+    nint w = StatusOK; if (g != w) {
+        t.Fatalf("Status code mismatch: got %d, want %d", g, w);
     }
 }
 
-public static void TestRequestRedirect(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testRequestRedirect(Δp0, Δp1));
-}
-
+public static void TestRequestRedirect(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testRequestRedirect(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ6 => ref fooˢ6ᵇ;
 private static readonly @string fooˢ6ᵇ = "/foo/$"u8;
@@ -490,11 +452,9 @@ private static readonly @string basicˢ2ᵇ = "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=
 public static void TestSetBasicAuth(ж<testing.T> t) {
     var (r, _) = NewRequest(getˢ2, httpExampleComˢ2, default);
     r.SetBasicAuth(aladdinˢ, openSesameˢ);
-    {
-        @string g = r.Header.Get(authorizationˢ);
-        @string e = basicˢ2; if (g != e) {
-            t.Errorf("got header %q, want %q", g, e);
-        }
+    @string g = r.Header.Get(authorizationˢ);
+    @string e = basicˢ2; if (g != e) {
+        t.Errorf("got header %q, want %q", g, e);
     }
 }
 
@@ -538,10 +498,8 @@ public static void TestParseMultipartFormSemicolonSeparator(ж<testing.T> t) {
     try {
         var req = newTestMultipartRequest(t);
         req.URL = Ꮡ(new url.URL(RawQuery: "q=foo;q=bar"));
-        {
-            var err = req.ParseMultipartForm(25); if (err == nil) {
-                t.Fatal(parseMultipartFormˢ);
-            }
+        var err = req.ParseMultipartForm(25); if (err == nil) {
+            t.Fatal(parseMultipartFormˢ);
         }
         var reqʗ1 = req;
         defer(ᴛ0 => ᴛ0.RemoveAll(), reqʗ1.MultipartForm, ref ᒐ);
@@ -682,7 +640,7 @@ partial struct readRequestErrorTestsᴛ1 /*dyn*/ {
     internal httpꓸHeader header;
 }
 internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new slice<readRequestErrorTestsᴛ1>(11){
-    [0] = new("GET / HTTP/1.1\r\nheader:foo\r\n\r\n", "", new httpꓸHeader(new map<@string, slice<@string>>{["Header"] = slice<@string>(["foo"])})),
+    [0] = new("GET / HTTP/1.1\r\nheader:foo\r\n\r\n", "", new httpꓸHeader(new map<@string, slice<@string>>{["Header"] = ["foo"]})),
     [1] = new("GET / HTTP/1.1\r\nheader:foo\r\n", io.ErrUnexpectedEOF.Error(), default),
     [2] = new("", io.EOF.Error(), default),
     [3] = new(
@@ -704,7 +662,7 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
     [6] = new(
         @in: "PUT / HTTP/1.1\r\nContent-Length: 6 \r\nContent-Length: 6\r\nContent-Length:6\r\n\r\nGopher\r\n",
         err: "",
-        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = slice<@string>(["6"])})
+        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = ["6"]})
     ),
     [7] = new(
         @in: "PUT / HTTP/1.1\r\nContent-Length: 1\r\nContent-Length: 6 \r\n\r\n",
@@ -716,7 +674,7 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
     ),
     [9] = new(
         @in: "HEAD / HTTP/1.1\r\nContent-Length:0\r\nContent-Length: 0\r\n\r\n",
-        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = slice<@string>(["0"])})
+        header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Length"] = ["0"]})
     ),
     [10] = new(
         @in: "HEAD / HTTP/1.1\r\nHost: foo\r\nHost: bar\r\n\r\n\r\n\r\n",
@@ -725,7 +683,7 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
 };
 
 public static void TestReadRequestErrors(ж<testing.T> t) {
-    foreach (var (i, tt) in readRequestErrorTests) {
+    foreach (var (i, tt) in range(readRequestErrorTests)) {
         var (req, err) = ReadRequest(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.@in))));
         if (err == nil) {
             if (tt.err != ""u8) {
@@ -747,7 +705,7 @@ public static void TestReadRequestErrors(ж<testing.T> t) {
 partial struct newRequestHostTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<newRequestHostTestsᴛ1> newRequestHostTests = slice<newRequestHostTestsᴛ1>([
+internal static slice<newRequestHostTestsᴛ1> newRequestHostTests = [
     new("http://www.example.com/", "www.example.com"),
     new("http://www.example.com:8080/", "www.example.com:8080"),
 
@@ -760,10 +718,10 @@ internal static slice<newRequestHostTestsᴛ1> newRequestHostTests = slice<newRe
     new("http://[fe80::1%25en0]/", "[fe80::1%en0]"),
     new("http://[fe80::1%25en0]:8080/", "[fe80::1%en0]:8080"),
     new("http://[fe80::1%25en0]:/", "[fe80::1%en0]")
-]);
+];
 
 public static void TestNewRequestHost(ж<testing.T> t) {
-    foreach (var (i, tt) in newRequestHostTests) {
+    foreach (var (i, tt) in range(newRequestHostTests)) {
         var (req, err) = NewRequest(getˢ2, tt.@in, default);
         if (err != nil) {
             t.Errorf("#%v: %v", i, err);
@@ -844,7 +802,7 @@ public static void TestNewRequestContentLength(ж<testing.T> t) {
         new(new io.SectionReaderжReader(io.NewSectionReader(new http_test_package.strings_ReaderжReaderAt(strings.NewReader("x")), 0, 6)), 0),
         new(readByte(new io.SectionReaderжReader(io.NewSectionReader(new http_test_package.strings_ReaderжReaderAt(strings.NewReader("xy")), 0, 6))), 0)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (req, err) = NewRequest(postˢ, httpLocalhostˢ, tt.r);
         if (err != nil) {
             t.Fatal(err);
@@ -860,7 +818,7 @@ partial struct parseHTTPVersionTestsᴛ1 /*dyn*/ {
     internal nint major, minor;
     internal bool ok;
 }
-internal static slice<parseHTTPVersionTestsᴛ1> parseHTTPVersionTests = slice<parseHTTPVersionTestsᴛ1>([
+internal static slice<parseHTTPVersionTestsᴛ1> parseHTTPVersionTests = [
     new("HTTP/0.0", 0, 0, true),
     new("HTTP/0.9", 0, 9, true),
     new("HTTP/1.0", 1, 0, true),
@@ -879,7 +837,7 @@ internal static slice<parseHTTPVersionTestsᴛ1> parseHTTPVersionTests = slice<p
     new("HTTP/1.0000000001", 0, 0, false),
     new("HTTP/3.14", 0, 0, false),
     new("HTTP/12.3", 0, 0, false)
-]);
+];
 
 internal partial struct TestParseHTTPVersion_version /*dyn*/ {
     internal nint major, minor;
@@ -887,7 +845,7 @@ internal partial struct TestParseHTTPVersion_version /*dyn*/ {
 }
 
 public static void TestParseHTTPVersion(ж<testing.T> t) {
-    foreach (var (_, tt) in parseHTTPVersionTests) {
+    foreach (var (_, tt) in range(parseHTTPVersionTests)) {
         var (major, minor, ok) = ParseHTTPVersion(tt.vers);
         if (ok != tt.ok || major != tt.major || minor != tt.minor) {
             t.Errorf("failed to parse %q, expected: %#v, got %#v", tt.vers, new TestParseHTTPVersion_version(tt.major, tt.minor, tt.ok), new TestParseHTTPVersion_version(major, minor, ok));
@@ -908,14 +866,14 @@ partial struct getBasicAuthTestsᴛ1 /*dyn*/ {
     internal @string username, password;
     internal bool ok;
 }
-internal static slice<getBasicAuthTestsᴛ1> getBasicAuthTests = slice<getBasicAuthTestsᴛ1>([
+internal static slice<getBasicAuthTestsᴛ1> getBasicAuthTests = [
     new("Aladdin", "open sesame", true),
     new("Aladdin", "open:sesame", true),
     new("", "", true)
-]);
+];
 
 public static void TestGetBasicAuth(ж<testing.T> t) {
-    foreach (var (_, tt) in getBasicAuthTests) {
+    foreach (var (_, tt) in range(getBasicAuthTests)) {
         var (rΔ1, _) = NewRequest(getˢ2, httpExampleComˢ2, default);
         rΔ1.SetBasicAuth(tt.username, tt.password);
         var (usernameΔ1, passwordΔ1, okΔ1) = rΔ1.BasicAuth();
@@ -958,7 +916,7 @@ internal static slice<parseBasicAuthTestsᴛ1> parseBasicAuthTests = slice<parse
 ]);
 
 public static void TestParseBasicAuth(ж<testing.T> t) {
-    foreach (var (_, tt) in parseBasicAuthTests) {
+    foreach (var (_, tt) in range(parseBasicAuthTests)) {
         var (r, _) = NewRequest(getˢ2, httpExampleComˢ2, default);
         r.Header.Set(authorizationˢ, tt.header);
         var (username, password, ok) = r.BasicAuth();
@@ -1077,10 +1035,8 @@ public static void TestStarRequest(ж<testing.T> t) {
     clientReq.Body = default;
 
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
-    {
-        var errΔ1 = ᏑclientReq.Write(new http_test_package.strings_BuilderжWriter(Ꮡout)); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = ᏑclientReq.Write(new http_test_package.strings_BuilderжWriter(Ꮡout)); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     if (strings.Contains(@out.String(), chunkedˢ)) {
@@ -1107,13 +1063,8 @@ partial struct responseWriterJustWriter {
     /*embed*/ public io_package.Writer Writer;
 }
 
-internal static httpꓸHeader Header(this responseWriterJustWriter _) {
-    throw panic("should not be called");
-}
-
-internal static void WriteHeader(this responseWriterJustWriter _Δp0, nint _Δp1) {
-    throw panic("should not be called");
-}
+internal static httpꓸHeader Header(this responseWriterJustWriter _) { throw panic("should not be called"); }
+internal static void WriteHeader(this responseWriterJustWriter _Δp0, nint _Δp1) { throw panic("should not be called"); }
 
 // delayedEOFReader never returns (n > 0, io.EOF), instead putting
 // off the io.EOF until a subsequent Read call.
@@ -1177,12 +1128,10 @@ public static void TestMaxBytesReaderStickyError(ж<testing.T> t) {
         [1] = new(100, 100),
         [2] = new(101, 100)
     };
-    foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
+    foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {
         var rc = MaxBytesReader(default, io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(new slice<byte>(tt.readable)))), tt.limit);
-        {
-            var err = isSticky(rc); if (err != nil) {
-                t.Errorf("%d. error: %v", i, err);
-            }
+        var err = isSticky(rc); if (err != nil) {
+            t.Errorf("%d. error: %v", i, err);
         }
     }
 }
@@ -1271,7 +1220,7 @@ public static void TestMaxBytesReaderDifferentLimits(ж<testing.T> t) {
             wantErr: false
         )
     };
-    foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
+    foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {
         var rc = MaxBytesReader(default, io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(testStr))), tt.limit);
 
         var (n, err) = rc.Read(new slice<byte>(tt.lenP));
@@ -1318,9 +1267,9 @@ internal static readonly object expectedClonedReqˢ = (@string)"expected clonedR
 public static void TestRequestCloneTransferEncoding(ж<testing.T> t) {
     var body = strings.NewReader(bodyˢ);
     var (req, _) = NewRequest(postˢ, httpsExampleOrgˢ, new http_test_package.strings_ReaderжReader(body));
-    req.TransferEncoding = slice<@string>([
+    req.TransferEncoding = [
         "encoding1"
-    ]);
+    ];
 
     var clonedReq = req.Clone(context_package.Background());
     // modify original after deep copy
@@ -1380,10 +1329,7 @@ public static void TestRequestClonePathValue(ж<testing.T> t) {
 }
 
 // Issue 34878: verify we don't panic when including basic auth (Go 1.13 regression)
-public static void TestNoPanicOnRoundTripWithBasicAuth(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testNoPanicWithBasicAuth(Δp0, Δp1));
-}
-
+public static void TestNoPanicOnRoundTripWithBasicAuth(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testNoPanicWithBasicAuth(Δp0, Δp1)); }
 internal static void testNoPanicWithBasicAuth(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })));
@@ -1397,10 +1343,8 @@ internal static void testNoPanicWithBasicAuth(ж<testing.T> t, testMode mode) {
         URL: u,
         Method: "GET"
     ));
-    {
-        var (_, errΔ1) = cst.c.Do(req); if (errΔ1 != nil) {
-            t.Fatalf("Unexpected error: %v", errΔ1);
-        }
+    var (_, errΔ1) = cst.c.Do(req); if (errΔ1 != nil) {
+        t.Fatalf("Unexpected error: %v", errΔ1);
     }
 }
 
@@ -1419,7 +1363,7 @@ public static void TestNewRequestGetBody(ж<testing.T> t) {
         new(r: new http_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>("hello"u8)))),
         new(r: new http_test_package.bytes_BufferжReader(bytes.NewBuffer(slice<byte>("hello"u8))))
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (req, err) = NewRequest(postˢ, httpFooTldˢ, tt.r);
         if (err != nil) {
             t.Errorf("test[%d]: %v", i, err);
@@ -1521,10 +1465,8 @@ internal static void validateTestMultipartContents(ж<testing.T> t, ж<Δhttp.Re
         }
 
         void assertMem(@string n, multipart.File fd) {
-            {
-                var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
-                    t.Error(n, isOsFileShouldNotBeˢ);
-                }
+            var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
+                t.Error(n, isOsFileShouldNotBeˢ);
             }
         }
         var fda = testMultipartFile(t, req, fileaˢ, fileaTxtˢ, fileaContents);
@@ -1537,10 +1479,8 @@ internal static void validateTestMultipartContents(ж<testing.T> t, ж<Δhttp.Re
         if (allMem) {
             assertMem(filebˢ, fdb);
         } else {
-            {
-                var (_, ok) = fdb._<ж<os.File>>(ᐧ); if (!ok) {
-                    t.Errorf("fileb has unexpected underlying type %T", fdb);
-                }
+            var (_, ok) = fdb._<ж<os.File>>(ᐧ); if (!ok) {
+                t.Errorf("fileb has unexpected underlying type %T", fdb);
             }
         }
 
@@ -1566,10 +1506,8 @@ internal static multipart.File testMultipartFile(ж<testing.T> t, ж<Δhttp.Requ
     if (err != nil) {
         t.Fatal(copyingContentsˢ, err);
     }
-    {
-        @string g = b.String(); if (g != expectContent) {
-            t.Errorf("contents = %q, want %q", g, expectContent);
-        }
+    @string g = b.String(); if (g != expectContent) {
+        t.Errorf("contents = %q, want %q", g, expectContent);
     }
     return f;
 }
@@ -1583,7 +1521,7 @@ internal partial struct TestRequestCookie_type /*dyn*/ {
 // Issue 53181: verify Request.Cookie return the correct Cookie.
 // Return ErrNoCookie instead of the first cookie when name is "".
 public static void TestRequestCookie(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestRequestCookie_type>([
+    foreach (var (_, tt) in range(slice<TestRequestCookie_type>([
         new(
             name: "foo",
             value: "bar",
@@ -1593,7 +1531,7 @@ public static void TestRequestCookie(ж<testing.T> t) {
             name: "",
             expectedErr: ErrNoCookie
         )
-    ])) {
+    ]))) {
         var (req, err) = NewRequest(getˢ2, httpExampleComˢ2, default);
         if (err != nil) {
             t.Fatal(err);
@@ -1626,47 +1564,47 @@ internal partial struct TestRequestCookiesByName_tests /*dyn*/ {
 public static void TestRequestCookiesByName(ж<testing.T> t) {
     var tests = slice<TestRequestCookiesByName_tests>([
         new(
-            @in: slice<ж<httpꓸCookie>>([
+            @in: [
                 Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
                 Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
-            ]),
+            ],
             filter: "foo",
-            want: slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1"))])
+            want: [Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1"))]
         ),
         new(
-            @in: slice<ж<httpꓸCookie>>([
+            @in: [
                 Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
                 Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-2")),
                 Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
-            ]),
+            ],
             filter: "foo",
-            want: slice<ж<httpꓸCookie>>([
+            want: [
                 Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-1")),
                 Ꮡ(new httpꓸCookie(Name: "foo", Value: "foo-2"))
-            ])
+            ]
         ),
         new(
-            @in: slice<ж<httpꓸCookie>>([
+            @in: [
                 Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
-            ]),
+            ],
             filter: "foo",
-            want: slice<ж<httpꓸCookie>>([])
+            want: []
         ),
         new(
-            @in: slice<ж<httpꓸCookie>>([
+            @in: [
                 Ꮡ(new httpꓸCookie(Name: "bar", Value: "bar"))
-            ]),
+            ],
             filter: "",
-            want: slice<ж<httpꓸCookie>>([])
+            want: []
         ),
         new(
-            @in: slice<ж<httpꓸCookie>>([]),
+            @in: [],
             filter: "foo",
-            want: slice<ж<httpꓸCookie>>([])
+            want: []
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestRequestCookiesByName_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1676,7 +1614,7 @@ public static void TestRequestCookiesByName(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            foreach (var (_, c) in ttʗ1.@in) {
+            foreach (var (_, c) in range(ttʗ1.@in)) {
                 req.AddCookie(c);
             }
 
@@ -1847,10 +1785,8 @@ internal static void benchmarkFileAndServer(ж<testing.B> b, int64 n) {
             os.RemoveAll(fʗ1.Name());
         }, ref ᒐ);
 
-        {
-            var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, n); if (errΔ1 != nil) {
-                b.Fatalf("Failed to copy %d bytes: %v", n, errΔ1);
-            }
+        var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, n); if (errΔ1 != nil) {
+            b.Fatalf("Failed to copy %d bytes: %v", n, errΔ1);
         }
 
         var fʗ2 = f;
@@ -1889,10 +1825,8 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
     for (nint i = 0; i < b.N; i++) {
         // Perform some setup.
         b.StopTimer();
-        {
-            var (_, errΔ1) = f.Seek(0, 0); if (errΔ1 != nil) {
-                Ꮡb.Fatalf("Failed to seek back to file: %v", errΔ1);
-            }
+        var (_, errΔ1) = f.Seek(0, 0); if (errΔ1 != nil) {
+            Ꮡb.Fatalf("Failed to seek back to file: %v", errΔ1);
         }
 
         b.StartTimer();
@@ -1950,7 +1884,7 @@ internal partial struct TestPathValueAndPattern_type /*dyn*/ {
 public static void TestPathValueAndPattern(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, vᴛ1) in slice<TestPathValueAndPattern_type>([
+        foreach (var (_, vᴛ1) in range(slice<TestPathValueAndPattern_type>([
             new(
                 "/{a}/is/{b}/{c...}",
                 "/now/is/the/time/for/all",
@@ -1985,7 +1919,7 @@ public static void TestPathValueAndPattern(ж<testing.T> t) {
                     ["other"] = "*"
                 }
             )
-        ])) {
+        ]))) {
             ref var test = ref heap(new TestPathValueAndPattern_type(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -2034,10 +1968,8 @@ public static void TestSetPathValue(ж<testing.T> t) {
                 r.SetPathValue(k, v);
             }
             foreach (var (k, w) in kvs) {
-                {
-                    @string g = r.PathValue(k); if (g != w) {
-                        t.Errorf("got %q, want %q", g, w);
-                    }
+                @string g = r.PathValue(k); if (g != w) {
+                    t.Errorf("got %q, want %q", g, w);
                 }
             }
         });
@@ -2090,7 +2022,7 @@ public static void TestStatus(ж<testing.T> t) {
         var serverʗ1 = server;
         defer(serverʗ1.Close, ref ᒐ);
 
-        foreach (var (_, test) in slice<TestStatus_type>([
+        foreach (var (_, test) in range(slice<TestStatus_type>([
             new("GET", "/g", 200, ""),
             new("HEAD", "/g", 200, ""),
             new("POST", "/g", 405, "GET, HEAD"),
@@ -2103,7 +2035,7 @@ public static void TestStatus(ж<testing.T> t) {
             new("HEAD", "/r", 200, ""), // redirected
             new("PUT", "/r/", 405, "GET, HEAD"),
             new("PUT", "/r", 200, "")
-        ])) {
+        ]))) {
             var (req, err) = Δhttp.NewRequest(test.method, server.URL + test.path, default);
             if (err != nil) {
                 t.Fatal(err);

@@ -12,8 +12,6 @@ using strconv = strconv_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bytes = bytes_package;
 using go.math;
 using go.unicode;
@@ -22,17 +20,13 @@ using static go.bytes_internal_test_package;
 partial class bytes_test_package {
 
 public static UntypedInt N => 10000;   // make this bigger for a larger (and slower) test
-
 internal static @string testString;    // test data for write tests
-
 internal static slice<byte> testBytes; // test data; same as testString but as a slice.
 
 partial struct negativeReader {
 }
 
-internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
-    return (-1, default);
-}
+internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) { return (-1, default); }
 
 [GoInit] internal static void init() {
     testBytes = new slice<byte>(N);
@@ -563,10 +557,8 @@ public static void TestRuneIO(ж<testing.T> t) {
     buf.Write(b);
     for (var r = (rune)0; r < NRune; r++) {
         var (r1, size, _) = buf.ReadRune();
-        {
-            var errΔ1 = buf.UnreadRune(); if (errΔ1 != nil) {
-                t.Fatalf("UnreadRune(%U) got error %q", r, errΔ1);
-            }
+        var errΔ1 = buf.UnreadRune(); if (errΔ1 != nil) {
+            t.Fatalf("UnreadRune(%U) got error %q", r, errΔ1);
         }
         var (r2, nbytes, err) = buf.ReadRune();
         if (r1 != r2 || r1 != r || nbytes != size || err != nil) {
@@ -578,7 +570,7 @@ public static void TestRuneIO(ж<testing.T> t) {
 public static void TestWriteInvalidRune(ж<testing.T> t) {
     // Invalid runes, including negative ones, should be written as
     // utf8.RuneError.
-    foreach (var (_, r) in slice<rune>([-1, utf8.MaxRune + 1])) {
+    foreach (var (_, r) in range(slice<rune>([-1, utf8.MaxRune + 1]))) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         buf.WriteRune(r);
         check(t, fmt.Sprintf("TestWriteInvalidRune (%d)"u8, r), Ꮡbuf, "\uFFFD");
@@ -608,7 +600,7 @@ public static void TestNext(ж<testing.T> t) {
                 if (len(bb) != want) {
                     t.Fatalf("in %d,%d: len(Next(%d)) == %d", i, j, k, len(bb));
                 }
-                foreach (var (l, v) in bb) {
+                foreach (var (l, v) in range(bb)) {
                     if (v != (byte)(l + i)) {
                         t.Fatalf("in %d,%d: Next(%d)[%d] = %d, want %d", i, j, k, l, v, l + i);
                     }
@@ -624,21 +616,21 @@ partial struct readBytesTestsᴛ1 /*dyn*/ {
     internal slice<@string> expected;
     internal error err;
 }
-internal static slice<readBytesTestsᴛ1> readBytesTests = slice<readBytesTestsᴛ1>([
-    new("", 0, slice<@string>([""]), Δio.EOF),
-    new("a\x00", 0, slice<@string>(["a\x00"]), default),
-    new("abbbaaaba", (byte)'b', slice<@string>(["ab", "b", "b", "aaab"]), default),
-    new("hello\x01world", 1, slice<@string>(["hello\x01"]), default),
-    new("foo\nbar", 0, slice<@string>(["foo\nbar"]), Δio.EOF),
-    new("alpha\nbeta\ngamma\n", (byte)'\n', slice<@string>(["alpha\n", "beta\n", "gamma\n"]), default),
-    new("alpha\nbeta\ngamma", (byte)'\n', slice<@string>(["alpha\n", "beta\n", "gamma"]), Δio.EOF)
-]);
+internal static slice<readBytesTestsᴛ1> readBytesTests = [
+    new("", 0, [""], Δio.EOF),
+    new("a\x00", 0, ["a\x00"], default),
+    new("abbbaaaba", (byte)'b', ["ab", "b", "b", "aaab"], default),
+    new("hello\x01world", 1, ["hello\x01"], default),
+    new("foo\nbar", 0, ["foo\nbar"], Δio.EOF),
+    new("alpha\nbeta\ngamma\n", (byte)'\n', ["alpha\n", "beta\n", "gamma\n"], default),
+    new("alpha\nbeta\ngamma", (byte)'\n', ["alpha\n", "beta\n", "gamma"], Δio.EOF)
+];
 
 public static void TestReadBytes(ж<testing.T> t) {
-    foreach (var (_, test) in readBytesTests) {
+    foreach (var (_, test) in range(readBytesTests)) {
         var buf = NewBufferString(test.buffer);
         error err = default;
-        foreach (var (_, expected) in test.expected) {
+        foreach (var (_, expected) in range(test.expected)) {
             slice<byte> bytes = default;
             (bytes, err) = buf.ReadBytes(test.delim);
             if (((sstring)bytes) != expected) {
@@ -655,10 +647,10 @@ public static void TestReadBytes(ж<testing.T> t) {
 }
 
 public static void TestReadString(ж<testing.T> t) {
-    foreach (var (_, test) in readBytesTests) {
+    foreach (var (_, test) in range(readBytesTests)) {
         var buf = NewBufferString(test.buffer);
         error err = default;
-        foreach (var (_, expected) in test.expected) {
+        foreach (var (_, expected) in range(test.expected)) {
             @string s = default;
             (s, err) = buf.ReadString(test.delim);
             if (s != expected) {
@@ -681,7 +673,7 @@ partial struct peekTestsᴛ1 /*dyn*/ {
     internal @string expected;
     internal error err;
 }
-internal static slice<peekTestsᴛ1> peekTests = slice<peekTestsᴛ1>([
+internal static slice<peekTestsᴛ1> peekTests = [
     new("", 0, 0, "", default),
     new("aaa", 0, 3, "aaa", default),
     new("foobar", 0, 2, "fo", default),
@@ -690,10 +682,10 @@ internal static slice<peekTestsᴛ1> peekTests = slice<peekTestsᴛ1>([
     new("helloworld", 5, 5, "world", default),
     new("helloworld", 5, 6, "world", Δio.EOF),
     new("helloworld", 10, 1, "", Δio.EOF)
-]);
+];
 
 public static void TestPeek(ж<testing.T> t) {
-    foreach (var (_, test) in peekTests) {
+    foreach (var (_, test) in range(peekTests)) {
         var buf = NewBufferString(test.buffer);
         buf.Next(test.skip);
         var (bytes, err) = buf.Peek(test.n);
@@ -730,8 +722,8 @@ public static void TestGrow(ж<testing.T> t) {
     var x = slice<byte>([(byte)'x']);
     var y = slice<byte>([(byte)'y']);
     var tmp = new slice<byte>(72);
-    foreach (var (_, growLen) in slice<nint>([0, 100, 1000, 10000, 100000])) {
-        foreach (var (_, startLen) in slice<nint>([0, 100, 1000, 10000, 100000])) {
+    foreach (var (_, growLen) in range(slice<nint>([0, 100, 1000, 10000, 100000]))) {
+        foreach (var (_, startLen) in range(slice<nint>([0, 100, 1000, 10000, 100000]))) {
             var xBytes = Repeat(x, startLen);
 
             var buf = NewBuffer(xBytes);
@@ -763,10 +755,8 @@ public static void TestGrowOverflow(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var err = recover(); if (!AreEqual(err, ErrTooLarge)) {
-                    t.Errorf("after too-large Grow, recover() = %v; want %v", err, ErrTooLarge);
-                }
+            var err = recover(); if (!AreEqual(err, ErrTooLarge)) {
+                t.Errorf("after too-large Grow, recover() = %v; want %v", err, ErrTooLarge);
             }
         }, ref ᒐ);
 
@@ -801,47 +791,33 @@ public static void TestUnreadByte(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
 
     // check at EOF
-    {
-        var errΔ1 = b.UnreadByte(); if (errΔ1 == nil) {
-            t.Fatal(unreadByteAtEofGotNoˢ);
-        }
+    var errΔ1 = b.UnreadByte(); if (errΔ1 == nil) {
+        t.Fatal(unreadByteAtEofGotNoˢ);
     }
-    {
-        var (_, errΔ2) = b.ReadByte(); if (errΔ2 == nil) {
-            t.Fatal(readByteAtEofGotNoErrorˢ);
-        }
+    var (_, errΔ2) = b.ReadByte(); if (errΔ2 == nil) {
+        t.Fatal(readByteAtEofGotNoErrorˢ);
     }
-    {
-        var errΔ3 = b.UnreadByte(); if (errΔ3 == nil) {
-            t.Fatal(unreadByteAfterReadByteˢ);
-        }
+    var errΔ3 = b.UnreadByte(); if (errΔ3 == nil) {
+        t.Fatal(unreadByteAfterReadByteˢ);
     }
 
     // check not at EOF
     b.WriteString("abcdefghijklmnopqrstuvwxyz");
 
     // after unsuccessful read
-    {
-        var (n, errΔ4) = b.Read(default); if (n != 0 || errΔ4 != nil) {
-            t.Fatalf("Read(nil) = %d,%v; want 0,nil", n, errΔ4);
-        }
+    var (n, errΔ4) = b.Read(default); if (n != 0 || errΔ4 != nil) {
+        t.Fatalf("Read(nil) = %d,%v; want 0,nil", n, errΔ4);
     }
-    {
-        var errΔ5 = b.UnreadByte(); if (errΔ5 == nil) {
-            t.Fatal(unreadByteAfterReadNilˢ);
-        }
+    var errΔ5 = b.UnreadByte(); if (errΔ5 == nil) {
+        t.Fatal(unreadByteAfterReadNilˢ);
     }
 
     // after successful read
-    {
-        var (_, errΔ6) = b.ReadBytes((byte)'m'); if (errΔ6 != nil) {
-            t.Fatalf("ReadBytes: %v", errΔ6);
-        }
+    var (_, errΔ6) = b.ReadBytes((byte)'m'); if (errΔ6 != nil) {
+        t.Fatalf("ReadBytes: %v", errΔ6);
     }
-    {
-        var errΔ7 = b.UnreadByte(); if (errΔ7 != nil) {
-            t.Fatalf("UnreadByte: %v", errΔ7);
-        }
+    var errΔ7 = b.UnreadByte(); if (errΔ7 != nil) {
+        t.Fatalf("UnreadByte: %v", errΔ7);
     }
     var (c, err) = b.ReadByte();
     if (err != nil) {
@@ -937,7 +913,7 @@ public static void BenchmarkBufferFullSmallReads(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkBufferWriteBlock(ж<testing.B> b) {
     var block = new slice<byte>(1024);
-    foreach (var (_, n) in slice<nint>([1 << 12, 1 << 16, 1 << 20])) {
+    foreach (var (_, n) in range(slice<nint>([1 << 12, 1 << 16, 1 << 20]))) {
         var blockʗ1 = block;
         b.Run(fmt.Sprintf("N%d"u8, n), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();

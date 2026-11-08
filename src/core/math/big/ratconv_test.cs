@@ -25,7 +25,7 @@ partial struct exponentTestsᴛ1 /*dyn*/ {
     internal rune next;    // next character (or 0, if at EOF)
 }
 internal static slice<exponentTestsᴛ1> exponentTests;
-internal static void initᴛexponentTests() { exponentTests = slice<exponentTestsᴛ1>([
+internal static void initᴛexponentTests() { exponentTests = [
     // valid, without separators
     new("", false, false, 0, 10, default, 0),
     new("1", false, false, 0, 10, default, '1'),
@@ -62,10 +62,10 @@ internal static void initᴛexponentTests() { exponentTests = slice<exponentTest
     new("e0_", false, true, 0, 10, errInvalSep, 0),
     new("e_0", false, true, 0, 10, errInvalSep, 0),
     new("e-1_2__3", false, true, -123, 10, errInvalSep, 0)
-]); }
+]; }
 
 public static void TestScanExponent(ж<testing.T> t) {
-    foreach (var (_, a) in exponentTests) {
+    foreach (var (_, a) in range(exponentTests)) {
         var r = strings.NewReader(a.s);
         var (x, b, err) = scanExponent(new big_test_package.strings_ReaderжByteScanner(r), a.base2ok, a.sepOk);
         if (!AreEqual(err, a.err)) {
@@ -93,7 +93,7 @@ public partial struct StringTest {
     internal bool ok;
 }
 
-internal static slice<StringTest> setStringTests = slice<StringTest>([
+internal static slice<StringTest> setStringTests = [
     // invalid
     new(@in: "1e"),
     new(@in: "1.e"),
@@ -133,10 +133,10 @@ internal static slice<StringTest> setStringTests = slice<StringTest>([
     new("106/141787961317645621392", "53/70893980658822810696", true),
     new("204211327800791583.81095", "4084226556015831676219/20000", true),
     new("0e9999999999", "0", true) // issue #16176
-]);
+];
 
 // These are not supported by fmt.Fscanf.
-internal static slice<StringTest> setStringTests2 = slice<StringTest>([
+internal static slice<StringTest> setStringTests2 = [
     // invalid
     new(@in: "4/3x"),
     new(@in: "0/-1"),
@@ -182,14 +182,14 @@ internal static slice<StringTest> setStringTests2 = slice<StringTest>([
     new("0b1.1_0E2", "150", true),
     new("0o1_0e-2", "2/25", true),
     new("0O_10p-3", "1", true)
-]);
+];
 
 public static void TestRatSetString(ж<testing.T> t) {
     slice<StringTest> tests = default;
     tests = appendꓸꓸꓸ(tests, setStringTests);
     tests = appendꓸꓸꓸ(tests, setStringTests2);
 
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
 
         if (ok) {
@@ -218,7 +218,7 @@ public static void TestRatSetStringZero(ж<testing.T> t) {
 
 public static void TestRatScan(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (i, test) in setStringTests) {
+    foreach (var (i, test) in range(setStringTests)) {
         var x = @new<global::go.math.big_package.ΔRat>();
         buf.Reset();
         buf.WriteString(test.@in);
@@ -243,7 +243,7 @@ partial struct floatStringTestsᴛ1 /*dyn*/ {
     internal nint prec;
     internal @string @out;
 }
-internal static slice<floatStringTestsᴛ1> floatStringTests = slice<floatStringTestsᴛ1>([
+internal static slice<floatStringTestsᴛ1> floatStringTests = [
     new("0", 0, "0"),
     new("0", 4, "0.0000"),
     new("1", 0, "1"),
@@ -261,10 +261,10 @@ internal static slice<floatStringTestsᴛ1> floatStringTests = slice<floatString
     new("0.9", 0, "1"),
     new(".25", -1, "0"),
     new(".55", -1, "1")
-]);
+];
 
 public static void TestFloatString(ж<testing.T> t) {
-    foreach (var (i, test) in floatStringTests) {
+    foreach (var (i, test) in range(floatStringTests)) {
         var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
 
         if (x.FloatString(test.prec) != test.@out) {
@@ -482,7 +482,7 @@ internal static ref readonly @string longˢ => ref longˢᵇ;
 private static readonly @string longˢᵇ = "long:"u8;
 
 public static void TestFloat32SpecialCases(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in float64inputs) {
+    foreach (var (_, vᴛ1) in range(float64inputs)) {
         var input = vᴛ1;
 
         if (strings.HasPrefix(input, longˢ)) {
@@ -538,16 +538,14 @@ public static void TestFloat32SpecialCases(ж<testing.T> t) {
         checkNonLossyRoundtrip32(t, f);
 
         // 4. Check exactness using slow algorithm.
-        {
-            var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64((float64)f).Cmp(r) == 0; if (wasExact != exact) {
-                t.Errorf("Rat.SetString(%q).Float32().exact = %t, want %t", input, exact, wasExact);
-            }
+        var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64((float64)f).Cmp(r) == 0; if (wasExact != exact) {
+            t.Errorf("Rat.SetString(%q).Float32().exact = %t, want %t", input, exact, wasExact);
         }
     }
 }
 
 public static void TestFloat64SpecialCases(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in float64inputs) {
+    foreach (var (_, vᴛ1) in range(float64inputs)) {
         var input = vᴛ1;
 
         if (strings.HasPrefix(input, longˢ)) {
@@ -602,21 +600,19 @@ public static void TestFloat64SpecialCases(ж<testing.T> t) {
         checkNonLossyRoundtrip64(t, f);
 
         // 4. Check exactness using slow algorithm.
-        {
-            var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64(f).Cmp(r) == 0; if (wasExact != exact) {
-                t.Errorf("Rat.SetString(%q).Float64().exact = %t, want %t", input, exact, wasExact);
-            }
+        var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64(f).Cmp(r) == 0; if (wasExact != exact) {
+            t.Errorf("Rat.SetString(%q).Float64().exact = %t, want %t", input, exact, wasExact);
         }
     }
 }
 
 public static void TestIssue31184(ж<testing.T> t) {
     ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "-213.090",
         "8.192",
         "16.000"
-    ])) {
+    ]))) {
         Ꮡx.SetString(want);
         @string got = Ꮡx.FloatString(3);
         if (got != want) {
@@ -632,7 +628,7 @@ internal partial struct TestIssue45910_type /*dyn*/ {
 
 public static void TestIssue45910(ж<testing.T> t) {
     ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
-    foreach (var (_, test) in slice<TestIssue45910_type>([
+    foreach (var (_, test) in range(slice<TestIssue45910_type>([
         new("1e-1000001", false),
         new("1e-1000000", true),
         new("1e+1000000", true),
@@ -644,14 +640,13 @@ public static void TestIssue45910(ж<testing.T> t) {
         new("1p+10000000", true),
         new("1p+10000001", false),
         new("1.770p02041010010011001001", false) // test case from issue
-    ])) {
+    ]))) {
         var (_, got) = Ꮡx.SetString(test.input);
         if (got != test.want) {
             t.Errorf("SetString(%s) got ok = %v; want %v", test.input, got, test.want);
         }
     }
 }
-
 internal partial struct TestFloatPrec_type /*dyn*/ {
     internal @string f;
     internal nint prec;
@@ -696,7 +691,7 @@ public static void TestFloatPrec(ж<testing.T> t) {
         new("1/48828125", 11, true, "0.00000002048") // 0.00000002048
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var f = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡf);
 
         // check uninitialized zero value
@@ -728,7 +723,7 @@ public static void TestFloatPrec(ж<testing.T> t) {
 }
 
 public static void BenchmarkFloatPrecExact(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000])) {
+    foreach (var (_, n) in range(slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000]))) {
         // d := 5^n
         var d = NewInt(5);
         var p = NewInt((int64)n);
@@ -750,7 +745,7 @@ public static void BenchmarkFloatPrecExact(ж<testing.B> b) {
 }
 
 public static void BenchmarkFloatPrecMixed(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000])) {
+    foreach (var (_, n) in range(slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000]))) {
         // d := (3·5·7·11)^n
         var d = NewInt(3 * 5 * 7 * 11);
         var p = NewInt((int64)n);
@@ -772,7 +767,7 @@ public static void BenchmarkFloatPrecMixed(ж<testing.B> b) {
 }
 
 public static void BenchmarkFloatPrecInexact(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000])) {
+    foreach (var (_, n) in range(slice<nint>([1, 10, 100, 1000, 10000, 100000, 1000000]))) {
         // d := 5^n + 1
         var d = NewInt(5);
         var p = NewInt((int64)n);

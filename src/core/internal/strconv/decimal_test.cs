@@ -17,7 +17,7 @@ partial struct shiftTest {
     internal @string @out;
 }
 
-internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>(slice<shiftTest>([
+internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slice<shiftTest>>([
     new(0, -100, "0"),
     new(0, 100, "0"),
     new(1, 100, "1267650600228229401496703205376"),
@@ -28,7 +28,7 @@ internal static readonly ж<slice<shiftTest>> Ꮡshifttests = new StaticBox<slic
     new(12345678, -8, "48225.3046875"),
     new(195312, 9, "99999744"),
     new(1953125, 9, "1000000000")
-]));
+]);
 internal static ref slice<shiftTest> shifttests => ref ((StaticBox<slice<shiftTest>>)Ꮡshifttests).ValueSlot;
 
 public static void TestDecimalShift(ж<testing.T> t) {
@@ -51,7 +51,7 @@ partial struct roundTest {
     internal uint64 @int;
 }
 
-internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>(slice<roundTest>([
+internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slice<roundTest>>([
     new(0, 4, "0", "0", "0", 0),
     new(12344999, 4, "12340000", "12340000", "12350000", 12340000),
     new(12345000, 4, "12340000", "12340000", "12350000", 12340000),
@@ -67,7 +67,7 @@ internal static readonly ж<slice<roundTest>> Ꮡroundtests = new StaticBox<slic
     new(12994999, 4, "12990000", "12990000", "13000000", 12990000),
     new(12995000, 4, "12990000", "13000000", "13000000", 13000000),
     new(12999999, 4, "12990000", "13000000", "13000000", 13000000)
-]));
+]);
 internal static ref slice<roundTest> roundtests => ref ((StaticBox<slice<roundTest>>)Ꮡroundtests).ValueSlot;
 
 public static void TestDecimalRound(ж<testing.T> t) {
@@ -103,7 +103,7 @@ partial struct roundIntTest {
     internal uint64 @int;
 }
 
-internal static slice<roundIntTest> roundinttests = slice<roundIntTest>([
+internal static slice<roundIntTest> roundinttests = [
     new(0, 100, 0),
     new(512, -8, 2),
     new(513, -8, 2),
@@ -114,7 +114,7 @@ internal static slice<roundIntTest> roundinttests = slice<roundIntTest>([
     new(383, -8, 1),
     new(1, 100, 18446744073709551615UL),
     new(1000, 0, 1000)
-]);
+];
 
 public static void TestDecimalRoundedInteger(ж<testing.T> t) {
     for (nint i = 0; i < len(roundinttests); i++) {

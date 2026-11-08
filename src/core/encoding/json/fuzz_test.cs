@@ -33,11 +33,11 @@ public static void FuzzUnmarshalJSON(ж<testing.F> Ꮡf) {
 """u8.Raw()));
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
-        foreach (var (_, typ) in slice<Func<any>>([
+        foreach (var (_, typ) in range(slice<Func<any>>([
             () => @new<any>(),
             () => @new<map<@string, any>>(),
             () => @new<slice<any>>()
-        ])) {
+        ]))) {
             var i = typ();
             {
                 var errΔ1 = Unmarshal(b, i); if (errΔ1 != nil) {

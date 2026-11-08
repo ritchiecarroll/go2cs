@@ -40,7 +40,7 @@ partial struct DecryptPKCS1v15Test {
 }
 
 // These test vectors were generated with `openssl rsautl -pkcs -encrypt`
-internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15Tests = slice<DecryptPKCS1v15Test>([
+internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15Tests = [
     new(
         "gIcUIoVkD6ATMBk/u/nlCZCCWRKdkfjCgFdo35VpRXLduiKXhNz1XupLLzTXAybEq15juc+EgY5o0DHv/nt3yg==",
         "x"
@@ -57,7 +57,7 @@ internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15Tests = slice<DecryptP
         "WtaBXIoGC54+vH0NH0CHHE+dRDOsMc/6BrfFu2lEqcKL9+uDuWaf+Xj9mrbQCjjZcpQuX733zyok/jsnqe/Ftw==",
         "01234567890123456789012345678901234567890123456789012"
     )
-]);
+];
 
 public static void TestDecryptPKCS1v15(ж<testing.T> t) {
     t.Setenv(godebugˢ, rsa1024min0ˢ);
@@ -71,8 +71,8 @@ public static void TestDecryptPKCS1v15(ж<testing.T> t) {
         }
     ]);
 
-    foreach (var (_, decryptFunc) in decryptionFuncs) {
-        foreach (var (i, test) in decryptPKCS1v15Tests) {
+    foreach (var (_, decryptFunc) in range(decryptionFuncs)) {
+        foreach (var (i, test) in range(decryptPKCS1v15Tests)) {
             var (@out, err) = decryptFunc(decodeBase64(test.@in));
             if (err != nil) {
                 t.Errorf("#%d error decrypting: %v", i, err);
@@ -128,7 +128,7 @@ public static void TestEncryptPKCS1v15(ж<testing.T> t) {
 }
 
 // These test vectors were generated with `openssl rsautl -pkcs -encrypt`
-internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15SessionKeyTests = slice<DecryptPKCS1v15Test>([
+internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15SessionKeyTests = [
     new(
         "e6ukkae6Gykq0fKzYwULpZehX+UPXYzMoB5mHQUDEiclRbOTqas4Y0E6nwns1BBpdvEJcilhl5zsox/6DtGsYg==",
         "1234"
@@ -145,11 +145,11 @@ internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15SessionKeyTests = slic
         "bafnobel46bKy76JzqU/RIVOH0uAYvzUtauKmIidKgM0sMlvobYVAVQPeUQ/oTGjbIZ1v/6Gyi5AO4DtHruGdw==",
         "FAIL"
     )
-]);
+];
 
 public static void TestEncryptPKCS1v15SessionKey(ж<testing.T> t) {
     t.Setenv(godebugˢ, rsa1024min0ˢ);
-    foreach (var (i, test) in decryptPKCS1v15SessionKeyTests) {
+    foreach (var (i, test) in range(decryptPKCS1v15SessionKeyTests)) {
         var key = slice<byte>("FAIL"u8);
         var err = DecryptPKCS1v15SessionKey(default, test512Key, decodeBase64(test.@in), key);
         if (err != nil) {
@@ -164,7 +164,7 @@ public static void TestEncryptPKCS1v15SessionKey(ж<testing.T> t) {
 
 public static void TestEncryptPKCS1v15DecrypterSessionKey(ж<testing.T> t) {
     t.Setenv(godebugˢ, rsa1024min0ˢ);
-    foreach (var (i, test) in decryptPKCS1v15SessionKeyTests) {
+    foreach (var (i, test) in range(decryptPKCS1v15SessionKeyTests)) {
         var (plaintext, err) = test512Key.Decrypt(rand.Reader, decodeBase64(test.@in), Ꮡ(new PKCS1v15DecryptOptions(SessionKeyLen: 4)));
         if (err != nil) {
             t.Fatalf("#%d: error decrypting: %s", i, err);
@@ -187,7 +187,7 @@ public static void TestNonZeroRandomBytes(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("returned error: %s", err);
     }
-    foreach (var (_, bΔ1) in b) {
+    foreach (var (_, bΔ1) in range(b)) {
         if (bΔ1 == 0) {
             t.Errorf("Zero octet found");
             return;
@@ -202,13 +202,13 @@ partial struct signPKCS1v15Test {
 // These vectors have been tested with
 //
 //	`openssl rsautl -verify -inkey pk -in signature | hexdump -C`
-internal static slice<signPKCS1v15Test> signPKCS1v15Tests = slice<signPKCS1v15Test>([
+internal static slice<signPKCS1v15Test> signPKCS1v15Tests = [
     new("Test.\n", "a4f3fa6ea93bcdd0c57be020c1193ecbfd6f200a3d95c409769b029578fa0e336ad9a347600e40d3ae823b8c7e6bad88cc07c1d54c3a1523cbbb6d58efc362ae")
-]);
+];
 
 public static void TestSignPKCS1v15(ж<testing.T> t) {
     t.Setenv(godebugˢ, rsa1024min0ˢ);
-    foreach (var (i, test) in signPKCS1v15Tests) {
+    foreach (var (i, test) in range(signPKCS1v15Tests)) {
         var h = sha1.New();
         h.Write(slice<byte>(test.@in));
         var digest = h.Sum(default);
@@ -227,7 +227,7 @@ public static void TestSignPKCS1v15(ж<testing.T> t) {
 
 public static void TestVerifyPKCS1v15(ж<testing.T> t) {
     t.Setenv(godebugˢ, rsa1024min0ˢ);
-    foreach (var (i, test) in signPKCS1v15Tests) {
+    foreach (var (i, test) in range(signPKCS1v15Tests)) {
         var h = sha1.New();
         h.Write(slice<byte>(test.@in));
         var digest = h.Sum(default);
@@ -272,10 +272,8 @@ public static void TestUnpaddedSignature(ж<testing.T> t) {
     if (!bytes.Equal(sig, expectedSig)) {
         t.Fatalf("signature is not expected value: got %x, want %x", sig, expectedSig);
     }
-    {
-        var errΔ1 = VerifyPKCS1v15(test512Key.ᏑPublicKey, (crypto.Hash)0, msg, sig); if (errΔ1 != nil) {
-            t.Fatalf("signature failed to verify: %s", errΔ1);
-        }
+    var errΔ1 = VerifyPKCS1v15(test512Key.ᏑPublicKey, (crypto.Hash)0, msg, sig); if (errΔ1 != nil) {
+        t.Fatalf("signature failed to verify: %s", errΔ1);
     }
 }
 
@@ -285,19 +283,17 @@ internal static readonly object keyWasModifiedWhenˢ = (@string)"key was modifie
 public static void TestShortSessionKey(ж<testing.T> t) {
     // This tests that attempting to decrypt a session key where the
     // ciphertext is too small doesn't run outside the array bounds.
-    var (ciphertext, err) = EncryptPKCS1v15(rand.Reader, rsaPrivateKey.ᏑPublicKey, slice<byte>([1]));
+    var (ciphertext, err) = EncryptPKCS1v15(rand.Reader, rsaPrivateKey.ᏑPublicKey, [1]);
     if (err != nil) {
         t.Fatalf("Failed to encrypt short message: %s", err);
     }
 
     array<byte> key = new(32);
-    {
-        var errΔ1 = DecryptPKCS1v15SessionKey(default, rsaPrivateKey, ciphertext, key[..]); if (errΔ1 != nil) {
-            t.Fatalf("Failed to decrypt short message: %s", errΔ1);
-        }
+    var errΔ1 = DecryptPKCS1v15SessionKey(default, rsaPrivateKey, ciphertext, key[..]); if (errΔ1 != nil) {
+        t.Fatalf("Failed to decrypt short message: %s", errΔ1);
     }
 
-    foreach (var (_, v) in key.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(key.ΔRangeSnapshot())) {
         if (v != 0) {
             t.Fatal(keyWasModifiedWhenˢ);
         }

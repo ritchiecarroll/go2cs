@@ -84,7 +84,7 @@ public static void TestUnscaledQuant(ж<testing.T> t) {
     if (bad) {
         var names = new @string[]{"Luminance", "Chrominance"}.array();
         var buf = Ꮡ(new strings.Builder());
-        foreach (var (i, name) in names.ΔRangeSnapshot()) {
+        foreach (var (i, name) in range(names.ΔRangeSnapshot())) {
             fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(buf), "// %s.\n{\n"u8, name);
             for (nint zig = 0; zig < blockSize; zig++) {
                 fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(buf), "%d, "u8, unscaledQuantInNaturalOrder[i][unzig[zig]]);
@@ -103,14 +103,14 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal nint quality;
     internal int64 tolerance;
 }
-internal static slice<testCaseᴛ1> testCase = slice<testCaseᴛ1>([
+internal static slice<testCaseᴛ1> testCase = [
     new("../testdata/video-001.png", 1, (int64)24 << 8),
     new("../testdata/video-001.png", 20, (int64)12 << 8),
     new("../testdata/video-001.png", 60, (int64)8 << 8),
     new("../testdata/video-001.png", 80, (int64)6 << 8),
     new("../testdata/video-001.png", 90, (int64)4 << 8),
     new("../testdata/video-001.png", 100, (int64)2 << 8)
-]);
+];
 
 internal static int64 delta(uint32 u0, uint32 u1) {
     var d = (int64)u0 - (int64)u1;
@@ -136,7 +136,7 @@ internal static (image.Image, error) readPng(@string filename) {
 }
 
 public static void TestWriter(ж<testing.T> t) {
-    foreach (var (_, tc) in testCase) {
+    foreach (var (_, tc) in range(testCase)) {
         // Read the image.
         var (m0, err) = readPng(tc.filename);
         if (err != nil) {
@@ -161,11 +161,9 @@ public static void TestWriter(ж<testing.T> t) {
             continue;
         }
         // Compare the average delta to the tolerance level.
-        {
-            var d = averageDelta(m0, m1); if (d > tc.tolerance) {
-                t.Errorf("%s, quality=%d: average delta is too high (%d > %d)", tc.filename, tc.quality, d, tc.tolerance);
-                continue;
-            }
+        var d = averageDelta(m0, m1); if (d > tc.tolerance) {
+            t.Errorf("%s, quality=%d: average delta is too high (%d > %d)", tc.filename, tc.quality, d, tc.tolerance);
+            continue;
         }
     }
 }
@@ -174,14 +172,12 @@ public static void TestWriter(ж<testing.T> t) {
 // through encode/decode cycle.
 public static void TestWriteGrayscale(ж<testing.T> t) {
     var m0 = image.NewGray(image.Rect(0, 0, 32, 32));
-    foreach (var i in range(m0.Pix)) {
+    foreach (var i in range(len(m0.Pix))) {
         m0.Pix[i] = (uint8)i;
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.GrayжImage(m0), nil); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.GrayжImage(m0), nil); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var (m1, err) = Decode(new jpeg_internal_test_package.bytes_BufferжReader(Ꮡbuf));
     if (err != nil) {
@@ -190,17 +186,13 @@ public static void TestWriteGrayscale(ж<testing.T> t) {
     if (m0.Bounds() != m1.Bounds()) {
         t.Fatalf("bounds differ: %v and %v", m0.Bounds(), m1.Bounds());
     }
-    {
-        var (_, ok) = m1._<ж<image.Gray>>(ᐧ); if (!ok) {
-            t.Errorf("got %T, want *image.Gray", m1);
-        }
+    var (_, ok) = m1._<ж<image.Gray>>(ᐧ); if (!ok) {
+        t.Errorf("got %T, want *image.Gray", m1);
     }
     // Compare the average delta to the tolerance level.
     var want = (int64)((int64)2 << 8);
-    {
-        var got = averageDelta(new image.GrayжImage(m0), m1); if (got > want) {
-            t.Errorf("average delta too high; got %d, want <= %d", got, want);
-        }
+    var got = averageDelta(new image.GrayжImage(m0), m1); if (got > want) {
+        t.Errorf("average delta too high; got %d, want <= %d", got, want);
     }
 }
 

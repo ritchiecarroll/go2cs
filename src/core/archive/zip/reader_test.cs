@@ -212,7 +212,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             ),
             new(
                 Name: "dir/empty/",
-                Content: slice<byte>([]),
+                Content: [],
                 Modified: time.Date(2011, 12, 8, 10, 8, 6, 0, time.ΔUTC),
                 Mode: (fs.FileMode)(fs.ModeDir | 511)
             ),
@@ -242,7 +242,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             ),
             new(
                 Name: "dir/empty/",
-                Content: slice<byte>([]),
+                Content: [],
                 Modified: time.Date(2011, 12, 8, 10, 8, 6, 0, timeZone(0)),
                 Mode: (fs.FileMode)(fs.ModeDir | 511)
             ),
@@ -397,7 +397,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "世界",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(2017, 11, 6, 13, 9, 27, 867862500, timeZone((time.Duration)(-28800000000000L)))
             )
@@ -408,7 +408,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "世界",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 420,
                 // Name is valid UTF-8, but format does not have UTF-8 flag set.
                 // We don't do UTF-8 detection for multi-byte runes due to
@@ -424,7 +424,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "世界",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 420,
                 // Name is valid UTF-8, but format does not have UTF-8 set.
                 NonUTF8: true,
@@ -437,7 +437,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "世界",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(2017, 11, 6, 13, 9, 27, 867862500, timeZone((time.Duration)(-28800000000000L)))
             )
@@ -448,7 +448,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "世界",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(2017, 11, 6, 13, 9, 27, 867000000, timeZone((time.Duration)(-28800000000000L)))
             )
@@ -459,7 +459,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 244817900, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 438
@@ -471,7 +471,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 0, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 420
@@ -483,7 +483,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 0, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 420
@@ -495,7 +495,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 58, 0, time.ΔUTC),
                 Mode: 438
@@ -507,7 +507,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 244817900, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 438
@@ -519,7 +519,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 244000000, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 438
@@ -531,7 +531,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "test.txt",
-                Content: slice<byte>([]),
+                Content: [],
                 Size: (uint64)(4294967296L - 1),
                 Modified: time.Date(2017, 10, 31, 21, 11, 57, 0, timeZone((time.Duration)(-25200000000000L))),
                 Mode: 438
@@ -543,7 +543,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "file",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(1999, 12, 31, 19, 0, 0, 0, timeZone((time.Duration)(-18000000000000L))),
                 ModTime: time.Date(1999, 12, 31, 19, 0, 0, 0, time.ΔUTC)
@@ -555,25 +555,25 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
         File: slice<ZipTestFile>([
             new(
                 Name: "a/",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: (fs.FileMode)(fs.ModeDir | 438),
                 Modified: time.Date(2021, 12, 29, 0, 0, 0, 0, timeZone(0))
             ),
             new(
                 Name: "a/b",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(2021, 12, 29, 0, 0, 0, 0, timeZone(0))
             ),
             new(
                 Name: "a/b/",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: (fs.FileMode)(fs.ModeDir | 438),
                 Modified: time.Date(2021, 12, 29, 0, 0, 0, 0, timeZone(0))
             ),
             new(
                 Name: "a/b/c",
-                Content: slice<byte>([]),
+                Content: [],
                 Mode: 438,
                 Modified: time.Date(2021, 12, 29, 0, 0, 0, 0, timeZone(0))
             )
@@ -590,7 +590,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
 ]); }
 
 public static void TestReader(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var zt = ref heap(new ZipTest(), out var Ꮡzt);
         zt = vᴛ1;
 
@@ -611,11 +611,9 @@ internal static partial void readTestZip(ж<testing.T> t, ZipTest zt) {
             var (rat, size) = zt.Source();
             (z, err) = NewReader(rat, size);
             raw = new slice<byte>((nint)(size));
-            {
-                var (_, errΔ1) = rat.ReadAt(raw, 0); if (errΔ1 != nil) {
-                    t.Errorf("ReadAt error=%v", errΔ1);
-                    return;
-                }
+            var (_, errΔ1) = rat.ReadAt(raw, 0); if (errΔ1 != nil) {
+                t.Errorf("ReadAt error=%v", errΔ1);
+                return;
             }
         } else {
             @string path = filepath.Join(testdataˢ, zt.Name);
@@ -666,7 +664,7 @@ internal static partial void readTestZip(ж<testing.T> t, ZipTest zt) {
         }
 
         // test read of each file
-        foreach (var (i, ft) in zt.File) {
+        foreach (var (i, ft) in range(zt.File)) {
             readTestFile(t, zt, ft, z.File[i], raw);
         }
         if (t.Failed()) {
@@ -677,7 +675,7 @@ internal static partial void readTestZip(ж<testing.T> t, ZipTest zt) {
         nint n = 0;
         var done = new channel<bool>(0);
         for (nint i = 0; i < 5; i++) {
-            foreach (var (j, vᴛ1) in zt.File) {
+            foreach (var (j, vᴛ1) in range(zt.File)) {
                 ref var ft = ref heap(new ZipTestFile(), out var Ꮡft);
                 ft = vᴛ1;
 
@@ -780,10 +778,8 @@ internal static void readTestFile(ж<testing.T> t, ZipTest zt, ZipTestFile ft, �
     }
     r.Close();
 
-    {
-        var g = (uint64)b.Len(); if (g != size) {
-            t.Errorf("%v: read %v bytes but f.UncompressedSize == %v", f.Name, g, size);
-        }
+    var g = (uint64)b.Len(); if (g != size) {
+        t.Errorf("%v: read %v bytes but f.UncompressedSize == %v", f.Name, g, size);
     }
 
     slice<byte> c = default;
@@ -801,7 +797,7 @@ internal static void readTestFile(ж<testing.T> t, ZipTest zt, ZipTestFile ft, �
         return;
     }
 
-    foreach (var (i, bΔ1) in b.Bytes()) {
+    foreach (var (i, bΔ1) in range(b.Bytes())) {
         if (bΔ1 != c[i]) {
             t.Errorf("%s: content[%d]=%q want %q", f.Name, i, bΔ1, c[i]);
             return;
@@ -1116,7 +1112,7 @@ public static void TestIssue8186(ж<testing.T> t) {
         ((@string)(new byte[]{0x50, 0x4b, 0x01, 0x02, 0x14, 0x00, 0x14, 0x00, 0x08, 0x08, 0x08, 0x00, 0x34, 0x9d, 0x33, 0x3f, 0xe6, 0x98, 0xd0, 0xac, 0x6f, 0x01, 0x00, 0x00, 0x84, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x48, 0x02, 0x00, 0x4d, 0x45, 0x54, 0x41, 0x2d, 0x49, 0x4e, 0x46, 0x2f, 0x43, 0x45, 0x52, 0x54, 0x2e, 0x53, 0x46})),
         ((@string)(new byte[]{0x50, 0x4b, 0x01, 0x02, 0x14, 0x00, 0x14, 0x00, 0x08, 0x08, 0x08, 0x00, 0x34, 0x9d, 0x33, 0x3f, 0xbf, 0x50, 0x96, 0x62, 0x86, 0x04, 0x00, 0x00, 0xb2, 0x06, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa9, 0x4a, 0x02, 0x00, 0x4d, 0x45, 0x54, 0x41, 0x2d, 0x49, 0x4e, 0x46, 0x2f, 0x43, 0x45, 0x52, 0x54, 0x2e, 0x52, 0x53, 0x41}))
     ]);
-    foreach (var (i, s) in dirEnts) {
+    foreach (var (i, s) in range(dirEnts)) {
         ref var f = ref heap(new global::go.archive.zip_package.File(), out var Ꮡf);
         var err = readDirectoryHeader(ref f, new zip_test_package.strings_ReaderжReader(strings.NewReader(s)));
         if (err != nil) {
@@ -1132,7 +1128,7 @@ public static void TestIssue10957(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, f) in z.File) {
+    foreach (var (i, f) in range(z.File)) {
         var (r, errΔ1) = f.Open();
         if (errΔ1 != nil) {
             continue;
@@ -1223,16 +1219,16 @@ internal partial struct TestFS_type /*dyn*/ {
 }
 
 public static void TestFS(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestFS_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestFS_type>([
         new(
             "testdata/unix.zip",
-            slice<@string>(["hello", "dir/bar", "readonly"])
+            ["hello", "dir/bar", "readonly"]
         ),
         new(
             "testdata/subdir.zip",
-            slice<@string>(["a/b/c"])
+            ["a/b/c"]
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestFS_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1247,10 +1243,8 @@ public static void TestFS(ж<testing.T> t) {
                 }
                 var zʗ1 = z;
                 defer(() => zʗ1.Close(), ref ᒐ);
-                {
-                    var errΔ1 = fstest.TestFS(new zip_test_package.zip_ReadCloserжFS(z), testʗ1.want.ꓸꓸꓸ); if (errΔ1 != nil) {
-                        tΔ1.Error(errΔ1);
-                    }
+                var errΔ1 = fstest.TestFS(new zip_test_package.zip_ReadCloserжFS(z), testʗ1.want.ꓸꓸꓸ); if (errΔ1 != nil) {
+                    tΔ1.Error(errΔ1);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1270,20 +1264,20 @@ internal partial struct TestFSWalk_type /*dyn*/ {
 }
 
 public static void TestFSWalk(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestFSWalk_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestFSWalk_type>([
         new(
             @file: "testdata/unix.zip",
-            want: slice<@string>([".", "dir", "dir/bar", "dir/empty", "hello", "readonly"])
+            want: [".", "dir", "dir/bar", "dir/empty", "hello", "readonly"]
         ),
         new(
             @file: "testdata/subdir.zip",
-            want: slice<@string>([".", "a", "a/b", "a/b/c"])
+            want: [".", "a", "a/b", "a/b/c"]
         ),
         new(
             @file: "testdata/dupdir.zip",
             wantErr: true
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestFSWalk_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1388,7 +1382,7 @@ public static void TestFSModTime(ж<testing.T> t) {
         var zʗ1 = z;
         defer(() => zʗ1.Close(), ref ᒐ);
 
-        foreach (var (_, test) in slice<TestFSModTime_type>([
+        foreach (var (_, test) in range(slice<TestFSModTime_type>([
             new(
                 "a",
                 time.Date(2021, 4, 19, 12, 29, 56, 0, timeZone((time.Duration)(-25200000000000L))).UTC()
@@ -1397,16 +1391,14 @@ public static void TestFSModTime(ж<testing.T> t) {
                 "a/b/c",
                 time.Date(2021, 4, 19, 12, 29, 59, 0, timeZone((time.Duration)(-25200000000000L))).UTC()
             )
-        ])) {
+        ]))) {
             var (fi, errΔ1) = fs.Stat(new zip_test_package.zip_ReadCloserжFS(z), test.name);
             if (errΔ1 != nil) {
                 t.Errorf("%s: %v", test.name, errΔ1);
                 continue;
             }
-            {
-                var got = fi.ModTime(); if (!got.Equal(test.want)) {
-                    t.Errorf("%s: got modtime %v, want %v", test.name, got, test.want);
-                }
+            var got = fi.ModTime(); if (!got.Equal(test.want)) {
+                t.Errorf("%s: got modtime %v, want %v", test.name, got, test.want);
             }
         }
     }
@@ -1462,10 +1454,8 @@ public static void TestCVE202127919(ж<testing.T> t) {
     if (r.File[0].Name != "../test.txt"u8) {
         t.Errorf("Unexpected entry name: %s", r.File[0].Name);
     }
-    {
-        var (_, errΔ1) = r.File[0].Open(); if (errΔ1 != nil) {
-            t.Errorf("Error opening file: %v", errΔ1);
-        }
+    var (_, errΔ1) = r.File[0].Open(); if (errΔ1 != nil) {
+        t.Errorf("Error opening file: %v", errΔ1);
     }
 }
 
@@ -1527,10 +1517,8 @@ public static void TestOpenReaderInsecurePath(ж<testing.T> t) {
         if (r.File[0].Name != "../test.txt"u8) {
             t.Errorf("Unexpected entry name: %s", r.File[0].Name);
         }
-        {
-            var (_, errΔ1) = r.File[0].Open(); if (errΔ1 != nil) {
-                t.Errorf("Error opening file: %v", errΔ1);
-            }
+        var (_, errΔ1) = r.File[0].Open(); if (errΔ1 != nil) {
+            t.Errorf("Error opening file: %v", errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1584,10 +1572,8 @@ public static void TestCVE202133196(ж<testing.T> t) {
             t.Fatalf("Writer.Create failed: %s", errΔ1);
         }
     }
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Writer.Close failed: %s", errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Writer.Close failed: %s", errΔ2);
     }
     (var r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b.Bytes())), (int64)b.Len());
     if (err != nil) {
@@ -1696,31 +1682,23 @@ public static void TestCVE202141772(ж<testing.T> t) {
     }
     var entryNames = slice<@string>([@"/", @"//", @"\", @"/test.txt"]);
     slice<@string> names = default;
-    foreach (var (_, f) in r.File) {
+    foreach (var (_, f) in range(r.File)) {
         names = append(names, f.Name);
-        {
-            var (_, errΔ1) = f.Open(); if (errΔ1 != nil) {
-                t.Errorf("Error opening %q: %v", f.Name, errΔ1);
-            }
+        var (_, errΔ1) = f.Open(); if (errΔ1 != nil) {
+            t.Errorf("Error opening %q: %v", f.Name, errΔ1);
         }
-        {
-            var (_, errΔ2) = r.Open(f.Name); if (errΔ2 == nil) {
-                t.Errorf("Opening %q with fs.FS API succeeded", f.Name);
-            }
+        var (_, errΔ2) = r.Open(f.Name); if (errΔ2 == nil) {
+            t.Errorf("Opening %q with fs.FS API succeeded", f.Name);
         }
     }
     if (!slices.Equal<slice<@string>, @string>(names, entryNames)) {
         t.Errorf("Unexpected file entries: %q", names);
     }
-    {
-        var (_, errΔ3) = r.Open(""u8); if (errΔ3 == nil) {
-            t.Errorf("Opening %q with fs.FS API succeeded", (@string)""u8);
-        }
+    var (_, errΔ3) = r.Open(""u8); if (errΔ3 == nil) {
+        t.Errorf("Opening %q with fs.FS API succeeded", (@string)""u8);
     }
-    {
-        var (_, errΔ4) = r.Open(testTxtˢ); if (errΔ4 != nil) {
-            t.Errorf("Error opening %q with fs.FS API: %v", testTxtˢ, errΔ4);
-        }
+    var (_, errΔ4) = r.Open(testTxtˢ); if (errΔ4 != nil) {
+        t.Errorf("Error opening %q with fs.FS API: %v", testTxtˢ, errΔ4);
     }
     (var dirEntries, err) = fs.ReadDir(new zip_test_package.zip_ReaderжFS(r), ".");
     if (err != nil) {
@@ -1728,7 +1706,7 @@ public static void TestCVE202141772(ж<testing.T> t) {
     }
     if (len(dirEntries) != 1 || dirEntries[0].Name() != "test.txt"u8) {
         t.Errorf("Unexpected directory entries");
-        foreach (var (_, dirEntry) in dirEntries) {
+        foreach (var (_, dirEntry) in range(dirEntries)) {
             var (_, errΔ5) = r.Open(dirEntry.Name());
             t.Logf("%q (Open error: %v)", dirEntry.Name(), errΔ5);
         }
@@ -1738,10 +1716,8 @@ public static void TestCVE202141772(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("Error reading info entry: %v", err);
     }
-    {
-        @string name = info.Name(); if (name != "test.txt"u8) {
-            t.Errorf("Inconsistent name in info entry: %v", name);
-        }
+    @string name = info.Name(); if (name != "test.txt"u8) {
+        t.Errorf("Inconsistent name in info entry: %v", name);
     }
 }
 
@@ -1759,11 +1735,11 @@ public static void TestUnderSize(ж<testing.T> t) {
         var zʗ1 = z;
         defer(() => zʗ1.Close(), ref ᒐ);
 
-        foreach (var (_, f) in z.File) {
+        foreach (var (_, f) in range(z.File)) {
             f.UncompressedSize64 = 1;
         }
 
-        foreach (var (_, f) in z.File) {
+        foreach (var (_, f) in range(z.File)) {
             var fʗ1 = f;
             t.Run(f.Name, (ж<testing.T> tΔ1) => {
                 GoFrame ᒐ = default;
@@ -1792,7 +1768,7 @@ public static void TestUnderSize(ж<testing.T> t) {
 public static void TestIssue54801(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, input) in slice<@string>(["testdata/readme.zip", "testdata/dd.zip"])) {
+        foreach (var (_, input) in range(slice<@string>(["testdata/readme.zip", "testdata/dd.zip"]))) {
             var (z, err) = OpenReader(input);
             if (err != nil) {
                 t.Fatal(err);
@@ -1800,7 +1776,7 @@ public static void TestIssue54801(ж<testing.T> t) {
             var zʗ1 = z;
             defer(() => zʗ1.Close(), ref ᒐ);
 
-            foreach (var (_, f) in z.File) {
+            foreach (var (_, f) in range(z.File)) {
                 // Make file a directory
                 f.Name += "/"u8;
 
@@ -1834,12 +1810,12 @@ public static void TestIssue54801(ж<testing.T> t) {
 
 public static void TestInsecurePaths(ж<testing.T> t) {
     t.Setenv(godebugˢ, zipinsecurepath0ˢ);
-    foreach (var (_, path) in slice<@string>([
+    foreach (var (_, path) in range(slice<@string>([
         "../foo",
         "/foo",
         "a/b/../../../c",
         @"a\b"
-    ])) {
+    ]))) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
         var (_, err) = zw.Create(path);
@@ -1855,7 +1831,7 @@ public static void TestInsecurePaths(ж<testing.T> t) {
             continue;
         }
         slice<@string> gotPaths = default;
-        foreach (var (_, f) in zr.File) {
+        foreach (var (_, f) in range(zr.File)) {
             gotPaths = append(gotPaths, f.Name);
         }
         if (!slices.Equal<slice<@string>, @string>(gotPaths, slice<@string>([path]))) {
@@ -1888,13 +1864,11 @@ public static void TestDisableInsecurePathCheck(ж<testing.T> t) {
         t.Fatalf("NewReader with zipinsecurepath=1: got err %v, want nil", err);
     }
     slice<@string> gotPaths = default;
-    foreach (var (_, f) in zr.File) {
+    foreach (var (_, f) in range(zr.File)) {
         gotPaths = append(gotPaths, f.Name);
     }
-    {
-        var want = slice<@string>([name]); if (!slices.Equal<slice<@string>, @string>(gotPaths, want)) {
-            t.Errorf("NewReader with zipinsecurepath=1: got files %q, want %q", gotPaths, want);
-        }
+    var want = slice<@string>([name]); if (!slices.Equal<slice<@string>, @string>(gotPaths, want)) {
+        t.Errorf("NewReader with zipinsecurepath=1: got files %q, want %q", gotPaths, want);
     }
 }
 
@@ -1956,15 +1930,13 @@ public static void TestCompressedDirectory(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("unexpected error: %v", err);
     }
-    foreach (var (_, f) in r.File) {
+    foreach (var (_, f) in range(r.File)) {
         var (rΔ1, errΔ1) = f.Open();
         if (errΔ1 != nil) {
             t.Fatalf("unexpected error: %v", errΔ1);
         }
-        {
-            var (_, errΔ2) = io.Copy(io.Discard, rΔ1); if (errΔ2 != nil) {
-                t.Fatalf("unexpected error: %v", errΔ2);
-            }
+        var (_, errΔ2) = io.Copy(io.Discard, rΔ1); if (errΔ2 != nil) {
+            t.Fatalf("unexpected error: %v", errΔ2);
         }
     }
 }
@@ -2002,10 +1974,8 @@ public static void TestBaseOffsetPlusOverflow(ж<testing.T> t) {
             0xff, 0xff, 0xff, 0x20, 0x00
         ]);
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    t.Fatalf("NewReader panicked: %s", r);
-                }
+            var r = recover(); if (r != nil) {
+                t.Fatalf("NewReader panicked: %s", r);
             }
         }, ref ᒐ);
         // Previously, this would trigger a panic as we attempt to read from

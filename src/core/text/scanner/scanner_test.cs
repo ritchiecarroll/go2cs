@@ -9,8 +9,6 @@ using io = io_package;
 using strings = strings_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.unicode;
 using static go.text.scanner_package;
 
@@ -52,19 +50,19 @@ internal static void readRuneSegments(ж<testing.T> t, slice<@string> segments) 
     }
 }
 
-internal static slice<slice<@string>> segmentList = slice<slice<@string>>([
-    slice<@string>([]),
-    slice<@string>([""]),
-    slice<@string>(["日", "本語"]),
-    slice<@string>(["\u65e5", "\u672c", "\u8a9e"]),
-    slice<@string>(["\U000065e5", " ", "\U0000672c", "\U00008a9e"]),
-    slice<@string>([((@string)(new byte[]{0xe6})), ((@string)(new byte[]{0x97, 0xa5, 0xe6})), ((@string)(new byte[]{0x9c, 0xac, 0xe8, 0xaa, 0x9e}))]),
-    slice<@string>(["Hello", ", ", "World", "!"]),
-    slice<@string>(["Hello", ", ", "", "World", "!"])
-]);
+internal static slice<slice<@string>> segmentList = [
+    [],
+    [""],
+    ["日", "本語"],
+    ["\u65e5", "\u672c", "\u8a9e"],
+    ["\U000065e5", " ", "\U0000672c", "\U00008a9e"],
+    [((@string)(new byte[]{0xe6})), ((@string)(new byte[]{0x97, 0xa5, 0xe6})), ((@string)(new byte[]{0x9c, 0xac, 0xe8, 0xaa, 0x9e}))],
+    ["Hello", ", ", "World", "!"],
+    ["Hello", ", ", "", "World", "!"]
+];
 
 public static void TestNext(ж<testing.T> t) {
-    foreach (var (_, s) in segmentList) {
+    foreach (var (_, s) in range(segmentList)) {
         readRuneSegments(t, s);
     }
 }
@@ -76,7 +74,7 @@ internal partial struct token {
 
 internal static @string f100 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-internal static slice<token> tokenList = slice<token>([
+internal static slice<token> tokenList = [
     new(Comment, "// line comments"),
     new(Comment, "//"),
     new(Comment, "////"),
@@ -229,11 +227,11 @@ internal static slice<token> tokenList = slice<token>([
     new('.', "."),
     new('~', "~"),
     new('(', "(")
-]);
+];
 
 internal static ж<bytes.Buffer> makeSource(@string pattern) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (_, k) in tokenList) {
+    foreach (var (_, k) in range(tokenList)) {
         fmt.Fprintf(new scanner_test_package.bytes_BufferжWriter(Ꮡbuf), pattern, k.text);
     }
     return Ꮡbuf;
@@ -285,7 +283,7 @@ internal static void testScan(ж<testing.T> t, nuint mode) {
     s.Mode = mode;
     var tok = s.Scan();
     nint line = 1;
-    foreach (var (_, k) in tokenList) {
+    foreach (var (_, k) in range(tokenList)) {
         if ((mode & (nuint)SkipComments) == 0 || k.tok != Comment) {
             checkTok(t, s, line, tok, k.tok, k.text);
             tok = s.Scan();
@@ -335,7 +333,7 @@ public static void TestPosition(ж<testing.T> t) {
     s.Mode = (nuint)((nuint)GoTokens & ~(nuint)(nuint)SkipComments);
     s.Scan();
     var pos = new Position("", 4, 1, 5);
-    foreach (var (_, k) in tokenList) {
+    foreach (var (_, k) in range(tokenList)) {
         if (s.Offset != pos.Offset) {
             t.Errorf("offset = %d, want %d for %q", s.Offset, pos.Offset, k.text);
         }
@@ -484,10 +482,8 @@ internal static void testError(ж<testing.T> t, @string src, @string pos, @strin
     s.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string m) => {
         if (!errorCalled) {
             // only look at first error
-            {
-                @string p = sΔ1.Pos().String(); if (p != pos) {
-                    t.Errorf("pos = %q, want %q for %q", p, pos, src);
-                }
+            @string p = sΔ1.Pos().String(); if (p != pos) {
+                t.Errorf("pos = %q, want %q for %q", p, pos, src);
             }
             if (m != msg) {
                 t.Errorf("msg = %q, want %q for %q", m, msg, src);
@@ -584,10 +580,8 @@ public static void TestIOError(ж<testing.T> t) {
     var errorCalled = false;
     s.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string msg) => {
         if (!errorCalled) {
-            {
-                @string want = io.ErrNoProgress.Error(); if (msg != want) {
-                    t.Errorf("msg = %q, want %q", msg, want);
-                }
+            @string want = io.ErrNoProgress.Error(); if (msg != want) {
+                t.Errorf("msg = %q, want %q", msg, want);
             }
             errorCalled = true;
         }
@@ -611,10 +605,8 @@ internal static partial void checkPos(ж<testing.T> t, global::go.text.scanner_p
 internal static void checkNextPos(ж<testing.T> t, ж<global::go.text.scanner_package.Scanner> Ꮡs, nint offset, nint line, nint column, rune @char) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    {
-        var ch = Ꮡs.Next(); if (ch != @char) {
-            t.Errorf("ch = %s, want %s", TokenString(ch), TokenString(@char));
-        }
+    var ch = Ꮡs.Next(); if (ch != @char) {
+        t.Errorf("ch = %s, want %s", TokenString(ch), TokenString(@char));
     }
     var want = new Position(Offset: offset, Line: line, Column: column);
     checkPos(t, s.Pos(), want);
@@ -625,12 +617,10 @@ internal static void checkScanPos(ж<testing.T> t, ж<global::go.text.scanner_pa
 
     var want = new Position(Offset: offset, Line: line, Column: column);
     checkPos(t, s.Pos(), want);
-    {
-        var ch = Ꮡs.Scan(); if (ch != @char) {
-            t.Errorf("ch = %s, want %s", TokenString(ch), TokenString(@char));
-            if (((@string)ch) != Ꮡs.TokenText()) {
-                t.Errorf("tok = %q, want %q", Ꮡs.TokenText(), (@string)ch);
-            }
+    var ch = Ꮡs.Scan(); if (ch != @char) {
+        t.Errorf("ch = %s, want %s", TokenString(ch), TokenString(@char));
+        if (((@string)ch) != Ꮡs.TokenText()) {
+            t.Errorf("tok = %q, want %q", Ꮡs.TokenText(), (@string)ch);
         }
     }
     checkPos(t, s.Position, want);
@@ -797,7 +787,7 @@ internal partial struct TestNumbers_type /*dyn*/ {
 }
 
 public static void TestNumbers(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestNumbers_type>([
+    foreach (var (_, test) in range(slice<TestNumbers_type>([
         // binaries
         new(Int, "0b0", "0b0", ""),
         new(Int, "0b1010", "0b1010", ""),
@@ -926,7 +916,7 @@ public static void TestNumbers(ж<testing.T> t) {
         new(Float, "2.7_e0", "2.7_e0", "'_' must separate successive digits"),
         new(Int, "0x___0", "0x___0", "'_' must separate successive digits"),
         new(Float, "0x1.0_p0", "0x1.0_p0", "'_' must separate successive digits")
-    ])) {
+    ]))) {
         var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(test.src)));
         @string err = default;
         s.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string msg) => {
@@ -935,7 +925,7 @@ public static void TestNumbers(ж<testing.T> t) {
             }
         };
 
-        foreach (var (i, want) in strings.Split(test.tokens, " ")) {
+        foreach (var (i, want) in range(strings.Split(test.tokens, " "))) {
             err = ""u8;
             var tok = s.Scan();
             @string lit = s.TokenText();
@@ -967,14 +957,14 @@ internal partial struct TestIssue30320_type /*dyn*/ {
 }
 
 public static void TestIssue30320(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestIssue30320_type>([
+    foreach (var (_, test) in range(slice<TestIssue30320_type>([
         new("foo01.bar31.xx-0-1-1-0", "01 31 0 1 1 0", ScanInts),
         new("foo0/12/0/5.67", "0 12 0 5 67", ScanInts),
         new("xxx1e0yyy", "1 0", ScanInts),
         new("1_2", "1_2", ScanInts),
         new("xxx1.0yyy2e3ee", "1 0 2 3", ScanInts),
         new("xxx1.0yyy2e3ee", "1.0 2e3", ScanFloats)
-    ])) {
+    ]))) {
         @string got = extractInts(test.@in, test.mode);
         if (got != test.want) {
             t.Errorf("%q: got %q; want %q", test.@in, got, test.want);
@@ -989,20 +979,18 @@ internal static @string /*res*/ extractInts(@string t, nuint mode) {
     Ꮡs.Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(t)));
     s.Mode = mode;
     for (;;) {
-        {
-            var tok = Ꮡs.Scan();
-            switch (tok) {
-            case var ᴛ when ᴛ == Int || ᴛ == Float: {
-                if (len(res) > 0) {
-                    res += " "u8;
-                }
-                res += Ꮡs.TokenText();
-                break;
+        var tok = Ꮡs.Scan();
+        switch (tok) {
+        case var ᴛ when ᴛ == Int || ᴛ == Float: {
+            if (len(res) > 0) {
+                res += " "u8;
             }
-            case var ᴛ when ᴛ == EOF: {
-                return res;
-            }}
+            res += Ꮡs.TokenText();
+            break;
         }
+        case var ᴛ when ᴛ == EOF: {
+            return res;
+        }}
     }
 }
 

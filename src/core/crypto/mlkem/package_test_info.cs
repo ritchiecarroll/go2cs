@@ -40,7 +40,7 @@ using static global::go.crypto.mlkem_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAsYlIKClLimgoK4prSCgpSmpg==")]
-[assembly: GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "ACE8goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoCCtoKCgoCCyIKAgraCgoKAgsiCgIK2goKCgILamKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSClIKClIKmgoKClKaCgtyikoKCgoKCuKKCgoKClIKCgoKClIK4ooKClIKCgoKCAAkIgoKClIKCgoKUooKCgpSClIKClKaSgoKClIKClMySgqaCpoKmgqaCpoI=", "31-33:1;34-36:2;101-103:1;104-106:2;280-295:1;296-308:2")]
+[assembly: GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "ACE8goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoKmgoKCgriCgqaCgoKCuIKCpoKCgoLKmKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSClIKClIKmgoKClKaCgtyikoKCgoKCuKKCgoKClIKCgoKClIK4ooKClIKCgoKCAAkIgoKClIKCgoKUooKCgpSClIKClKaSgoKClIKClMySgqaCpoKmgqaCpoI=", "31-33:1;34-36:2;101-103:1;104-106:2;280-295:1;296-308:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

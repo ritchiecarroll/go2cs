@@ -169,14 +169,14 @@ public static void TestInstallationImporter(ж<testing.T> t) {
     // Ensure we don't regress the number of packages we can parse. First import
     // all packages into the same map and then each individually.
     var pkgMap = new map<@string, ж<types.Package>>();
-    foreach (var (_, pkg) in importablePackages.ΔRangeSnapshot()) {
+    foreach (var (_, pkg) in range(importablePackages.ΔRangeSnapshot())) {
         (_, err) = imp(pkgMap, pkg, ".", default);
         if (err != nil) {
             t.Error(err);
         }
     }
 
-    foreach (var (_, pkg) in importablePackages.ΔRangeSnapshot()) {
+    foreach (var (_, pkg) in range(importablePackages.ΔRangeSnapshot())) {
         (_, err) = imp(new map<@string, ж<types.Package>>(), pkg, ".", default);
         if (err != nil) {
             t.Error(err);
@@ -184,14 +184,14 @@ public static void TestInstallationImporter(ж<testing.T> t) {
     }
 
     // Test for certain specific entities in the imported data.
-    foreach (var (_, vᴛ1) in new importerTest[]{
+    foreach (var (_, vᴛ1) in range(new importerTest[]{
         new(pkgpath: "io", name: "Reader", want: "type Reader interface{Read(p []byte) (n int, err error)}"),
         new(pkgpath: "io", name: "ReadWriter", want: "type ReadWriter interface{Reader; Writer}"),
         new(pkgpath: "math", name: "Pi", want: "const Pi untyped float"),
         new(pkgpath: "math", name: "Sin", want: "func Sin(x float64) float64"),
         new(pkgpath: "sort", name: "Search", want: "func Search(n int, f func(int) bool) int"),
         new(pkgpath: "unsafe", name: "Pointer", want: "type Pointer")
-    }.array()) {
+    }.array())) {
         ref var test = ref heap(new importerTest(), out var Ꮡtest);
         test = vᴛ1;
 

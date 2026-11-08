@@ -25,7 +25,7 @@ internal partial struct numberTest {
     /*embed*/ internal complex128 complex128;
 }
 
-internal static slice<numberTest> numberTests = slice<numberTest>([
+internal static slice<numberTest> numberTests = [
     // basics
     new("0", true, true, true, false, 0, 0, 0D, 0D),
     new("-0", true, true, true, false, 0, 0, 0D, 0D), // check that -0 is a uint.
@@ -84,7 +84,7 @@ internal static slice<numberTest> numberTests = slice<numberTest>([
     new(text: "'433937734937734969526500969526500'"), // Integer too large - issue 10634.
     // Issue 8622 - 0xe parsed as floating point. Very embarrassing.
     new("0xef", true, true, true, false, 0xef, 0xef, 239D, 0D)
-]);
+];
 
 [GoInit] internal static void init() {
     // Use a small stack limit for testing to avoid creating huge expressions.
@@ -92,7 +92,7 @@ internal static slice<numberTest> numberTests = slice<numberTest>([
 }
 
 public static void TestNumberParse(ж<testing.T> t) {
-    foreach (var (_, test) in numberTests) {
+    foreach (var (_, test) in range(numberTests)) {
         // If fmt.Sscan thinks it's complex, it's complex. We can't trust the output
         // because imaginary comes out as a number.
         ref var c = ref heap(new complex128(), out var Ꮡc);
@@ -178,7 +178,7 @@ internal partial struct parseTest {
 internal const bool noError = true;
 internal const bool hasError = false;
 
-internal static slice<parseTest> parseTests = slice<parseTest>([
+internal static slice<parseTest> parseTests = [
     new("empty", "", noError,
         @""),
     new("comment", "{{/*\n\n\n*/}}", noError,
@@ -339,7 +339,7 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
     new("paren nesting in pipeline exceeds limit", "{{ (((( 1 )))) | printf }}", hasError, "template: test:1: max expression depth exceeded"),
     new("paren nesting with other constructs", "{{ if ((( true ))) }}YES{{ end }}", noError, "{{if (((true)))}}\"YES\"{{end}}"),
     new("paren nesting with other constructs exceeds limit", "{{ if (((( true )))) }}YES{{ end }}", hasError, "template: test:1: max expression depth exceeded")
-]);
+];
 
 internal static map<@string, any> builtins = new map<@string, any>{
     ["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ)),
@@ -353,7 +353,7 @@ internal static void testParse(bool doCopy, ж<testing.T> t) {
         defer(() => {
             textFormat = "%s";
         }, ref ᒐ);
-        foreach (var (_, test) in parseTests) {
+        foreach (var (_, test) in range(parseTests)) {
             var (tmpl, err) = New(test.name).Parse(test.input, ""u8, ""u8, new map<@string, ж<global::go.text.template.parse_package.Tree>>(), builtins);
             switch (ᐧ) {
             case {} when err == nil && !test.ok: {
@@ -411,7 +411,7 @@ public static void TestParseWithComments(ж<testing.T> t) {
             new("comment trim right", "{{/* hi */ -}}\n\n\ty", noError, @"{{/* hi */}}""y"""),
             new("comment trim left and right", "x \r\n\t{{- /* */ -}}\n\n\ty", noError, @"""x""{{/* */}}""y""")
         }.array();
-        foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+        foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
             ref var test = ref heap(new parseTest(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -423,10 +423,8 @@ public static void TestParseWithComments(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Errorf("%q: expected error; got none", testʗ1.name);
                 }
-                {
-                    @string result = tmpl.Root.String(); if (result != testʗ1.result) {
-                        tΔ1.Errorf("%s=(%q): got\n\t%v\nexpected\n\t%v", testʗ1.name, testʗ1.input, result, testʗ1.result);
-                    }
+                @string result = tmpl.Root.String(); if (result != testʗ1.result) {
+                    tΔ1.Errorf("%s=(%q): got\n\t%v\nexpected\n\t%v", testʗ1.name, testʗ1.input, result, testʗ1.result);
                 }
             });
         }
@@ -497,10 +495,8 @@ public static void TestSkipFuncCheck(ж<testing.T> t) {
             t.Fatalf("unexpected error: %v", err);
         }
         @string expected = fn12ˢ;
-        {
-            @string result = tmpl.Root.String(); if (result != expected) {
-                t.Errorf("got\n\t%v\nexpected\n\t%v", result, expected);
-            }
+        @string result = tmpl.Root.String(); if (result != expected) {
+            t.Errorf("got\n\t%v\nexpected\n\t%v", result, expected);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -513,7 +509,7 @@ internal partial struct isEmptyTest {
     internal bool empty;
 }
 
-internal static slice<isEmptyTest> isEmptyTests = slice<isEmptyTest>([
+internal static slice<isEmptyTest> isEmptyTests = [
     new("empty", @"", true),
     new("nonempty", @"hello", false),
     new("spaces only", " \t\n \t\n", true),
@@ -522,7 +518,7 @@ internal static slice<isEmptyTest> isEmptyTests = slice<isEmptyTest>([
     new("definitions and space", "{{define `x`}}something{{end}}\n\n{{define `y`}}something{{end}}\n\n", true),
     new("definitions and text", "{{define `x`}}something{{end}}\nx\n{{define `y`}}something{{end}}\ny\n", false),
     new("definition and action", "{{define `x`}}something{{end}}{{if 3}}foo{{end}}", false)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rootˢ => ref rootˢᵇ;
@@ -532,16 +528,14 @@ public static void TestIsEmpty(ж<testing.T> t) {
     if (!IsEmptyTree(default)) {
         t.Errorf("nil tree is not empty");
     }
-    foreach (var (_, test) in isEmptyTests) {
+    foreach (var (_, test) in range(isEmptyTests)) {
         var (tree, err) = New(rootˢ).Parse(test.input, ""u8, ""u8, new map<@string, ж<global::go.text.template.parse_package.Tree>>(), (map<@string, any>)(default));
         if (err != nil) {
             t.Errorf("%q: unexpected error: %v", test.name, err);
             continue;
         }
-        {
-            var empty = IsEmptyTree(new global::go.text.template.parse_package.ListNodeжNode(tree.Root)); if (empty != test.empty) {
-                t.Errorf("%q: expected %t got %t", test.name, test.empty, empty);
-            }
+        var empty = IsEmptyTree(new global::go.text.template.parse_package.ListNodeжNode(tree.Root)); if (empty != test.empty) {
+            t.Errorf("%q: expected %t got %t", test.name, test.empty, empty);
         }
     }
 }
@@ -567,7 +561,7 @@ public static void TestErrorContextWithTreeCopy(ж<testing.T> t) {
 }
 
 // All failures, and the result is a string that must appear in the error message.
-internal static slice<parseTest> errorTests = slice<parseTest>([
+internal static slice<parseTest> errorTests = [
     // Check line numbers are accurate.
     new("unclosed1",
         "line1\n{{",
@@ -667,10 +661,10 @@ internal static slice<parseTest> errorTests = slice<parseTest>([
     new("rangenotvariable2",
         "{{range $k, 123 := .}}{{end}}",
         hasError, @"range can only initialize variables")
-]);
+];
 
 public static void TestErrors(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in errorTests) {
+    foreach (var (_, vᴛ1) in range(errorTests)) {
         ref var test = ref heap(new parseTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -786,7 +780,7 @@ public static void BenchmarkVariableString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var v = Ꮡ(new VariableNode(
-        Ident: slice<@string>(["$", "A", "BB", "CCC", "THIS_IS_THE_VARIABLE_BEING_PROCESSED"])
+        Ident: ["$", "A", "BB", "CCC", "THIS_IS_THE_VARIABLE_BEING_PROCESSED"]
     ));
     b.ResetTimer();
     b.ReportAllocs();

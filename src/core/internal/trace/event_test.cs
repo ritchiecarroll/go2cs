@@ -160,14 +160,14 @@ public static void TestMakeEvent(ж<testing.T> t) {
             tΔ3.Errorf("unexpected %s: %s", which, diffΔ1);
         }
     }
-    ref var stk1 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack(slice<global::go.@internal.trace_package.StackFrame>([
+    ref var stk1 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack([
         new(PC: 1, Func: "foo", File: "foo.go", Line: 10),
         new(PC: 2, Func: "bar", File: "bar.go", Line: 20)
-    ])), out var Ꮡstk1);
-    ref var stk2 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack(slice<global::go.@internal.trace_package.StackFrame>([
+    ]), out var Ꮡstk1);
+    ref var stk2 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack([
         new(PC: 1, Func: "foo", File: "foo.go", Line: 10),
         new(PC: 2, Func: "bar", File: "bar.go", Line: 20)
-    ])), out var Ꮡstk2);
+    ]), out var Ꮡstk2);
 
     var checkStackʗ1 = checkStack;
     var checkTimeʗ1 = checkTime;
@@ -181,7 +181,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "heap goal", metric: "/gc/heap/goal:bytes", valid: true, val: 3, stack: NoStack),
             new(name: "invalid metric", metric: "/test", valid: false, val: 4, stack: NoStack)
         ]);
-        foreach (var (i, vᴛ1) in tests) {
+        foreach (var (i, vᴛ1) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_tests(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -265,7 +265,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(kind: EventRangeBegin, name: "stop-the-world (for a good reason) - INVALID", scope: MakeResourceID((global::go.@internal.trace_package.GoID)5), valid: false)
         ]);
 
-        foreach (var (i, vᴛ2) in tests) {
+        foreach (var (i, vᴛ2) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ1(), out var Ꮡtest);
             test = vᴛ2;
 
@@ -531,7 +531,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             )
         ]);
 
-        foreach (var (i, vᴛ3) in tests) {
+        foreach (var (i, vᴛ3) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ2(), out var Ꮡtest);
             test = vᴛ3;
 
@@ -587,7 +587,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "ProcSteal lost info", proc: 4, schedProc: 99, from: ProcIdle, to: ProcIdle, valid: true),
             new(name: "ProcStatus", proc: 5, schedProc: 99, from: ProcUndetermined, to: ProcRunning, valid: true)
         ]);
-        foreach (var (i, vᴛ4) in tests) {
+        foreach (var (i, vᴛ4) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ3(), out var Ꮡtest);
             test = vᴛ4;
 
@@ -657,7 +657,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
                 kind: EventSync,
                 n: 1,
                 batches: new map<@string, slice<global::go.@internal.trace_package.ExperimentalBatch>>{
-                    ["AllocFree"] = slice<global::go.@internal.trace_package.ExperimentalBatch>([new(Thread: 1, Data: slice<byte>([1, 2, 3]))])
+                    ["AllocFree"] = [new(Thread: 1, Data: [1, 2, 3])]
                 },
                 valid: true
             ),
@@ -666,12 +666,12 @@ public static void TestMakeEvent(ж<testing.T> t) {
                 kind: EventSync,
                 n: 1,
                 batches: new map<@string, slice<global::go.@internal.trace_package.ExperimentalBatch>>{
-                    ["does-not-exist"] = slice<global::go.@internal.trace_package.ExperimentalBatch>([new(Thread: 1, Data: slice<byte>([1, 2, 3]))])
+                    ["does-not-exist"] = [new(Thread: 1, Data: [1, 2, 3])]
                 },
                 valid: false
             )
         ]);
-        foreach (var (i, vᴛ5) in tests) {
+        foreach (var (i, vᴛ5) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ4(), out var Ꮡtest);
             test = vᴛ5;
 
@@ -725,7 +725,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "no parent", kind: EventTaskBegin, id: 4, parent: NoTask, typ: "type-4", valid: true)
         ]);
 
-        foreach (var (i, vᴛ6) in tests) {
+        foreach (var (i, vᴛ6) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ5(), out var Ꮡtest);
             test = vᴛ6;
 
@@ -765,7 +765,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "EvUserRegionEnd", kind: EventRegionEnd, task: 3, typ: "type-3", valid: true)
         ]);
 
-        foreach (var (i, vᴛ7) in tests) {
+        foreach (var (i, vᴛ7) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ6(), out var Ꮡtest);
             test = vᴛ7;
 
@@ -801,7 +801,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "basic", kind: EventLog, task: 2, category: "category-2", message: "message-2", valid: true)
         ]);
 
-        foreach (var (i, vᴛ8) in tests) {
+        foreach (var (i, vᴛ8) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ7(), out var Ꮡtest);
             test = vᴛ8;
 
@@ -842,7 +842,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             new(name: "basic", kind: EventStackSample, stack: stk1ʗ3, valid: true)
         ]);
 
-        foreach (var (i, vᴛ9) in tests) {
+        foreach (var (i, vᴛ9) in range(tests)) {
             ref var test = ref heap(new TestMakeEvent_testsᴛ8(), out var Ꮡtest);
             test = vᴛ9;
 
@@ -878,7 +878,7 @@ public static void TestMakeStack(ж<testing.T> t) {
     if (len(got) != len(frames)) {
         t.Errorf("got=%d want=%d", len(got), len(frames));
     }
-    foreach (var i in range(got)) {
+    foreach (var i in range(len(got))) {
         if (got[i] != frames[i]) {
             t.Errorf("got=%v want=%v", got[i], frames[i]);
         }
@@ -926,10 +926,8 @@ internal static void mustPanic(ж<testing.T> t, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(failedToPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(failedToPanicˢ);
             }
         }, ref ᒐ);
         f();

@@ -28,7 +28,7 @@ public static void TestMUD(ж<testing.T> t) {
 
         // Check total histogram weight.
         var hmass = 0.0D;
-        foreach (var (_, val) in mud.hist.ΔRangeSnapshot()) {
+        foreach (var (_, val) in range(mud.hist.ΔRangeSnapshot())) {
             hmass += val;
         }
         if (!aeq(mass, hmass)) {

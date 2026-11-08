@@ -13,11 +13,11 @@ partial class edwards25519_internal_test_package {
 // a random scalar generated using dalek.
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> dalekScalar;
 internal static error _ᴛ2ʗ;
-internal static void initᴛdalekScalar() { dalekScalar = (Ꮡ(new Scalar())).SetCanonicalBytes(slice<byte>([219, 106, 114, 9, 174, 249, 155, 89, 69, 203, 201, 93, 92, 116, 234, 187, 78, 115, 103, 172, 182, 98, 62, 103, 187, 136, 13, 100, 248, 110, 12, 4])).Item1; }
+internal static void initᴛdalekScalar() { dalekScalar = (Ꮡ(new Scalar())).SetCanonicalBytes([219, 106, 114, 9, 174, 249, 155, 89, 69, 203, 201, 93, 92, 116, 234, 187, 78, 115, 103, 172, 182, 98, 62, 103, 187, 136, 13, 100, 248, 110, 12, 4]).Item1; }
 // the above, times the edwards25519 basepoint.
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Point> dalekScalarBasepoint;
 internal static error _ᴛ3ʗ;
-internal static void initᴛdalekScalarBasepoint() { dalekScalarBasepoint = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().SetBytes(slice<byte>([0xf4, 0xef, 0x7c, 0xa, 0x34, 0x55, 0x7b, 0x9f, 0x72, 0x3b, 0xb6, 0x1e, 0xf9, 0x46, 0x9, 0x91, 0x1c, 0xb9, 0xc0, 0x6c, 0x17, 0x28, 0x2d, 0x8b, 0x43, 0x2b, 0x5, 0x18, 0x6a, 0x54, 0x3e, 0x48])).Item1; }
+internal static void initᴛdalekScalarBasepoint() { dalekScalarBasepoint = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().SetBytes([0xf4, 0xef, 0x7c, 0xa, 0x34, 0x55, 0x7b, 0x9f, 0x72, 0x3b, 0xb6, 0x1e, 0xf9, 0x46, 0x9, 0x91, 0x1c, 0xb9, 0xc0, 0x6c, 0x17, 0x28, 0x2d, 0x8b, 0x43, 0x2b, 0x5, 0x18, 0x6a, 0x54, 0x3e, 0x48]).Item1; }
 
 public static void TestScalarMultSmallScalars(ж<testing.T> t) {
     ref var z = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡz);
@@ -28,7 +28,7 @@ public static void TestScalarMultSmallScalars(ж<testing.T> t) {
     }
     checkOnCurve(t, Ꮡp);
 
-    var (scEight, _) = (Ꮡ(new Scalar())).SetCanonicalBytes(slice<byte>([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+    var (scEight, _) = (Ꮡ(new Scalar())).SetCanonicalBytes([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     Ꮡp.ScalarMult(scEight, B);
     if (B.Equal(Ꮡp) != 1) {
         t.Error((@string)"1*B != 1");
@@ -90,10 +90,8 @@ public static void TestScalarMultDistributesOverAdd(ж<testing.T> t) {
         return Ꮡcheck.Equal(Ꮡr) == 1;
     };
 
-    {
-        var err = quick.Check((scalarMultDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((scalarMultDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -116,10 +114,8 @@ public static void TestScalarMultNonIdentityPoint(ж<testing.T> t) {
         return Ꮡp.Equal(Ꮡq) == 1;
     };
 
-    {
-        var err = quick.Check((scalarMultNonIdentityPoint).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((scalarMultNonIdentityPoint).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -164,10 +160,8 @@ public static void TestScalarMultMatchesBaseMult(ж<testing.T> t) {
         return Ꮡp.Equal(Ꮡq) == 1;
     };
 
-    {
-        var err = quick.Check((scalarMultMatchesBaseMult).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((scalarMultMatchesBaseMult).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -202,10 +196,8 @@ public static void TestVarTimeDoubleBaseMultMatchesBaseMult(ж<testing.T> t) {
         return Ꮡp.Equal(Ꮡcheck) == 1;
     };
 
-    {
-        var err = quick.Check((varTimeDoubleBaseMultMatchesBaseMult).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((varTimeDoubleBaseMultMatchesBaseMult).OrTypedNilFunc(), quickCheckConfig(32)); if (err != nil) {
+        t.Error(err);
     }
 }
 

@@ -19,8 +19,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.@internal;
 using go.net;
@@ -116,7 +114,7 @@ break_readlines:;
             t.Errorf("for key %q got %q; expected %q", key, got, expected);
         }
     }
-    foreach (var (_, check) in checks) {
+    foreach (var (_, check) in range(checks)) {
         check(m);
     }
 }
@@ -300,10 +298,8 @@ public static void TestDropProxyHeader(ж<testing.T> t) {
     runCgiTest(t, h, "GET /myscript/bar?a=b HTTP/1.0\n"u8 + "X-Foo: a\n"u8 + "Proxy: should_be_stripped\n"u8 + "Host: example.com\n\n"u8,
         expectedMap,
         (map<@string, @string> reqInfo) => {
-            {
-                var (v, ok) = reqInfo[envHttpProxyˢ, ꟷ]; if (ok) {
-                    t.Errorf("HTTP_PROXY = %q; should be absent", v);
-                }
+            var (v, ok) = reqInfo[envHttpProxyˢ, ꟷ]; if (ok) {
+                t.Errorf("HTTP_PROXY = %q; should be absent", v);
             }
         });
 }
@@ -384,12 +380,10 @@ Transfer-Encoding: chunked
     ));
     var expectedMap = new map<@string, @string>{};
     var resp = runCgiTest(t, h, postReq, expectedMap);
-    {
-        nint got = resp.Code;
-        nint expected = http.StatusBadRequest; if (got != expected) {
-            t.Fatalf("Expected %v response code from chunked request body; got %d",
-                expected, got);
-        }
+    nint got = resp.Code;
+    nint expected = http.StatusBadRequest; if (got != expected) {
+        t.Fatalf("Expected %v response code from chunked request body; got %d",
+            expected, got);
     }
 }
 
@@ -571,10 +565,10 @@ public static void TestEnvOverride(ж<testing.T> t) {
         Path: os.Args[0],
         Root: "/test.cgi",
         Dir: cwd,
-        Env: slice<@string>([
+        Env: [
             "SCRIPT_FILENAME="u8 + cgifile,
             "REQUEST_URI=/foo/bar",
-            "PATH=/wibble"])
+            "PATH=/wibble"]
     ));
     var expectedMap = new map<@string, @string>{
         ["cwd"] = cwd,
@@ -603,11 +597,9 @@ public static void TestHandlerStderr(ж<testing.T> t) {
     var rw = httptest.NewRecorder();
     var req = newRequest(getTestCgiWritestderr1ˢ);
     h.ServeHTTP(new cgi_internal_test_package.httptest_ResponseRecorderжResponseWriter(rw), req);
-    {
-        @string got = stderr.String();
-        @string want = helloStderrˢ; if (got != want) {
-            t.Errorf("Stderr = %q; want %q", got, want);
-        }
+    @string got = stderr.String();
+    @string want = helloStderrˢ; if (got != want) {
+        t.Errorf("Stderr = %q; want %q", got, want);
     }
 }
 
@@ -619,15 +611,15 @@ internal partial struct TestRemoveLeadingDuplicates_tests /*dyn*/ {
 public static void TestRemoveLeadingDuplicates(ж<testing.T> t) {
     var tests = slice<TestRemoveLeadingDuplicates_tests>([
         new(
-            env: slice<@string>(["a=b", "b=c", "a=b2"]),
-            want: slice<@string>(["b=c", "a=b2"])
+            env: ["a=b", "b=c", "a=b2"],
+            want: ["b=c", "a=b2"]
         ),
         new(
-            env: slice<@string>(["a=b", "b=c", "d", "e=f"]),
-            want: slice<@string>(["a=b", "b=c", "d", "e=f"])
+            env: ["a=b", "b=c", "d", "e=f"],
+            want: ["a=b", "b=c", "d", "e=f"]
         )
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = removeLeadingDuplicates(tt.env);
         if (!slices.Equal<slice<@string>, @string>(got, tt.want)) {
             t.Errorf("removeLeadingDuplicates(%q) = %q; want %q", tt.env, got, tt.want);

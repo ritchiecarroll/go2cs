@@ -63,7 +63,7 @@ internal static @string testGetenv(@string s) {
 partial struct expandTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<expandTestsᴛ1> expandTests = slice<expandTestsᴛ1>([
+internal static slice<expandTestsᴛ1> expandTests = [
     new("", ""),
     new("$*", "all the args"),
     new("$$", "PID"),
@@ -82,10 +82,10 @@ internal static slice<expandTestsᴛ1> expandTests = slice<expandTestsᴛ1>([
     new("$}", "$}"),
     new("${", ""), // invalid syntax; eat up the characters
     new("${}", "") // invalid syntax; eat up the characters
-]);
+];
 
 public static void TestExpand(ж<Δtesting.T> t) {
-    foreach (var (_, test) in expandTests) {
+    foreach (var (_, test) in range(expandTests)) {
         @string result = Expand(test.@in, testGetenv);
         if (result != test.@out) {
             t.Errorf("Expand(%q)=%q; expected %q", test.@in, result, test.@out);
@@ -148,7 +148,7 @@ public static void TestUnsetenv(ж<Δtesting.T> t) {
     @string testKey = testKeyᶜ;
     bool set() {
         @string prefix = testKey + "=";
-        foreach (var (_, key) in Environ()) {
+        foreach (var (_, key) in range(Environ())) {
             if (strings.HasPrefix(key, prefix)) {
                 return true;
             }
@@ -189,14 +189,12 @@ public static void TestClearenv(ж<Δtesting.T> t) {
 
         // reset env
         defer((slice<@string> origEnv) => {
-            foreach (var (_, pair) in origEnv) {
+            foreach (var (_, pair) in range(origEnv)) {
                 // Environment variables on Windows can begin with =
                 // https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133
                 nint i = strings.Index(pair[1..], "=") + 1;
-                {
-                    var err = Setenv(pair.slice(0, i), pair.slice(i + 1)); if (err != nil) {
-                        t.Errorf("Setenv(%q, %q) failed during reset: %v", pair.slice(0, i), pair.slice(i + 1), err);
-                    }
+                var err = Setenv(pair.slice(0, i), pair.slice(i + 1)); if (err != nil) {
+                    t.Errorf("Setenv(%q, %q) failed during reset: %v", pair.slice(0, i), pair.slice(i + 1), err);
                 }
             }
         }, Environ(), ref ᒐ);
@@ -258,7 +256,7 @@ public static void TestLookupEnv(ж<Δtesting.T> t) {
 public static void TestEnvironConsistency(ж<Δtesting.T> t) {
     t.Parallel();
 
-    foreach (var (_, kv) in Environ()) {
+    foreach (var (_, kv) in range(Environ())) {
         nint i = strings.Index(kv, "=");
         if (i == 0) {
             // We observe in practice keys with a single leading "=" on Windows.
@@ -280,10 +278,8 @@ public static void TestEnvironConsistency(ж<Δtesting.T> t) {
 
         // Since k=v is already present in the environment,
         // setting it should be a no-op.
-        {
-            var err = Setenv(k, v); if (err != nil) {
-                t.Errorf("Environ contains %q, but SetEnv(%q, %q) = %q", kv, k, v, err);
-            }
+        var err = Setenv(k, v); if (err != nil) {
+            t.Errorf("Environ contains %q, but SetEnv(%q, %q) = %q", kv, k, v, err);
         }
     }
 }

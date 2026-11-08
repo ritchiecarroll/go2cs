@@ -42,13 +42,11 @@ public static void TestNow(ж<testing.T> t) {
         var startʗ2 = startʗ1;
         goǃ(() => {
             // New goroutines see the same fake clock.
-            {
-                ref var got = ref heap<time.Time>(out var Ꮡgot);
-                got = time.Now();
-                ref var want = ref heap<time.Time>(out var Ꮡwant);
-                want = startʗ2; if (!got.Equal(want)) {
-                    t.Errorf("time.Now = %v, want %v", got, want);
-                }
+            ref var got = ref heap<time.Time>(out var Ꮡgot);
+            got = time.Now();
+            ref var want = ref heap<time.Time>(out var Ꮡwant);
+            want = startʗ2; if (!got.Equal(want)) {
+                t.Errorf("time.Now = %v, want %v", got, want);
             }
         });
         // Time advances after a sleep.
@@ -165,10 +163,8 @@ public static void TestTimerReadBeforeDeadline(ж<testing.T> t) {
         var start = time.Now();
         var tm = time.NewTimer((time.Duration)(5000000000L));
         ᐸꟷ(tm.C);
-        {
-            var (got, want) = (time.Since(start), (time.Duration)(5000000000L)); if (got != want) {
-                t.Errorf("after sleep: time.Since(start) = %v, want %v", got, want);
-            }
+        var (got, want) = (time.Since(start), (time.Duration)(5000000000L)); if (got != want) {
+            t.Errorf("after sleep: time.Since(start) = %v, want %v", got, want);
         }
     });
 }
@@ -227,11 +223,9 @@ public static void TestTimeAfter(ж<testing.T> t) {
         });
         time.Sleep((time.Duration)(3000000000L));
         synctest.Wait();
-        {
-            nint got = i;
-            nint want = 2; if (got != want) {
-                t.Errorf("after sleep and wait: i = %v, want %v", got, want);
-            }
+        nint got = i;
+        nint want = 2; if (got != want) {
+            t.Errorf("after sleep and wait: i = %v, want %v", got, want);
         }
     });
 }
@@ -308,22 +302,20 @@ public static void TestSleepNondeterminism(ж<testing.T> t) {
             });
             time.Sleep(1);
             synctest.Wait();
-            {
-                var v = Ꮡfirst.Load();
-                switch (v) {
-                case 1: {
-                    seen1 = true;
-                    break;
-                }
-                case 2: {
-                    seen2 = true;
-                    break;
-                }
-                default: {
-                    t.Fatalf("first = %v, want 1 or 2", v);
-                    break;
-                }}
+            var v = Ꮡfirst.Load();
+            switch (v) {
+            case 1: {
+                seen1 = true;
+                break;
             }
+            case 2: {
+                seen2 = true;
+                break;
+            }
+            default: {
+                t.Fatalf("first = %v, want 1 or 2", v);
+                break;
+            }}
             if (seen1 && seen2) {
                 return;
             }
@@ -434,7 +426,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> t) {
         var choutsideʗ1 = choutside;
 
 
-    foreach (var (_, vᴛ1) in slice<TestChannelFromOutsideBubble_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestChannelFromOutsideBubble_type>([new(
         desc: "read closed",
         outside: (channel<nint> ch) => {
             close(ch);
@@ -492,7 +484,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> t) {
             }}
         }
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestChannelFromOutsideBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -526,7 +518,7 @@ internal partial struct TestChannelMovedOutOfBubble_type /*dyn*/ {
 }
 
 public static void TestChannelMovedOutOfBubble(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestChannelMovedOutOfBubble_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestChannelMovedOutOfBubble_type>([new(
         desc: "receive",
         f: (channel<EmptyStruct> ch) => {
             ᐸꟷ(ch);
@@ -545,7 +537,7 @@ public static void TestChannelMovedOutOfBubble(ж<testing.T> t) {
         },
         wantFatal: "close of synctest channel from outside bubble"
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestChannelMovedOutOfBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -619,7 +611,7 @@ internal partial struct TestTimerFromInsideBubble_type /*dyn*/ {
 }
 
 public static void TestTimerFromInsideBubble(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestTimerFromInsideBubble_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestTimerFromInsideBubble_type>([new(
         desc: "read channel",
         f: (ж<time.Timer> tm) => {
             ᐸꟷ(tm.C);
@@ -638,7 +630,7 @@ public static void TestTimerFromInsideBubble(ж<testing.T> t) {
         },
         wantFatal: "stop of synctest timer from outside bubble"
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestTimerFromInsideBubble_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -882,10 +874,8 @@ public static void TestWaitGroupInBubble(ж<testing.T> t) {
         });
         var start = time.Now();
         Ꮡwg.Wait();
-        {
-            var got = time.Since(start); if (got != delay) {
-                t.Fatalf("WaitGroup.Wait() took %v, want %v", got, delay);
-            }
+        var got = time.Since(start); if (got != delay) {
+            t.Fatalf("WaitGroup.Wait() took %v, want %v", got, delay);
         }
     });
 }
@@ -1165,16 +1155,12 @@ internal static void wantPanic(ж<testing.T> t, @string want) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                {
-                    @string got = fmt.Sprint(e); if (got != want) {
-                        t.Errorf("got panic message %q, want %q", got, want);
-                    }
-                }
-            } else {
-                t.Errorf("got no panic, want one");
+        var e = recover(calledByDefer); if (e != nil) {
+            @string got = fmt.Sprint(e); if (got != want) {
+                t.Errorf("got panic message %q, want %q", got, want);
             }
+        } else {
+            t.Errorf("got no panic, want one");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

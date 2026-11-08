@@ -33,12 +33,12 @@ internal static void wantEdges(ж<testing.T> t, ж<global::go.@internal.dag_pack
 
     var wantEdges = strings.Fields(edges);
     var wantEdgeMap = new map<@string, bool>();
-    foreach (var (_, e) in wantEdges) {
+    foreach (var (_, e) in range(wantEdges)) {
         wantEdgeMap[e] = true;
     }
 
-    foreach (var (_, n1) in g.Nodes) {
-        foreach (var (_, n2) in g.Nodes) {
+    foreach (var (_, n1) in range(g.Nodes)) {
+        foreach (var (_, n2) in range(g.Nodes)) {
             var got = g.HasEdge(n1, n2);
             var want = wantEdgeMap[n1 + "->"u8 + n2];
             if (got && want) {

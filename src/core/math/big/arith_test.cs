@@ -23,79 +23,52 @@ partial class big_internal_test_package {
 
 internal static bool isRaceBuilder = strings.HasSuffix(testenv.Builder(), "-race");
 
-internal static slice<global::go.math.big_package.Word> words4 = slice<global::go.math.big_package.Word>([0, 1, _M - 1, _M]);
-
-internal static slice<global::go.math.big_package.Word> words2 = slice<global::go.math.big_package.Word>([0, _M]);
-
-internal static slice<global::go.math.big_package.Word> muls = slice<global::go.math.big_package.Word>([0, 1, 2, 3, 4, 5, unchecked((nuint)(/* _M / 4 */ 4611686018427387903UL)), unchecked((nuint)(/* _M / 2 */ 9223372036854775807UL)), _M - 3, _M - 2, _M - 1, _M]);
-
-internal static slice<global::go.math.big_package.Word> adds = slice<global::go.math.big_package.Word>([0, 1, _M - 1, _M]);
-
-internal static slice<nuint> shifts = slice<nuint>([1, 2, 3, _W / 4 - 1, _W / 4, _W / 4 + 1, _W / 2 - 1, _W / 2, _W / 2 + 1, _W - 3, _W - 2, _W - 1]);
+internal static slice<global::go.math.big_package.Word> words4 = [0, 1, _M - 1, _M];
+internal static slice<global::go.math.big_package.Word> words2 = [0, _M];
+internal static slice<global::go.math.big_package.Word> muls = [0, 1, 2, 3, 4, 5, unchecked((nuint)(/* _M / 4 */ 4611686018427387903UL)), unchecked((nuint)(/* _M / 2 */ 9223372036854775807UL)), _M - 3, _M - 2, _M - 1, _M];
+internal static slice<global::go.math.big_package.Word> adds = [0, 1, _M - 1, _M];
+internal static slice<nuint> shifts = [1, 2, 3, _W / 4 - 1, _W / 4, _W / 4 + 1, _W / 2 - 1, _W / 2, _W / 2 + 1, _W - 3, _W - 2, _W - 1];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addVVˢ => ref addVVˢᵇ;
 private static readonly @string addVVˢᵇ = "addVV"u8;
 
-public static void TestAddVV(ж<testing.T> t) {
-    testVV(t, addVVˢ, addVV, addVV_g);
-}
-
+public static void TestAddVV(ж<testing.T> t) { testVV(t, addVVˢ, addVV, addVV_g); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string subVVˢ => ref subVVˢᵇ;
 private static readonly @string subVVˢᵇ = "subVV"u8;
 
-public static void TestSubVV(ж<testing.T> t) {
-    testVV(t, subVVˢ, subVV, subVV_g);
-}
-
+public static void TestSubVV(ж<testing.T> t) { testVV(t, subVVˢ, subVV, subVV_g); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addVWˢ => ref addVWˢᵇ;
 private static readonly @string addVWˢᵇ = "addVW"u8;
 
-public static void TestAddVW(ж<testing.T> t) {
-    testVW(t, addVWˢ, addVW, addVW_ref, words4);
-}
-
+public static void TestAddVW(ж<testing.T> t) { testVW(t, addVWˢ, addVW, addVW_ref, words4); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string subVWˢ => ref subVWˢᵇ;
 private static readonly @string subVWˢᵇ = "subVW"u8;
 
-public static void TestSubVW(ж<testing.T> t) {
-    testVW(t, subVWˢ, subVW, subVW_ref, words4);
-}
-
+public static void TestSubVW(ж<testing.T> t) { testVW(t, subVWˢ, subVW, subVW_ref, words4); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lshVUˢ => ref lshVUˢᵇ;
 private static readonly @string lshVUˢᵇ = "lshVU"u8;
 
-public static void TestLshVU(ж<testing.T> t) {
-    testVU(t, lshVUˢ, lshVU, lshVU_g, shifts);
-}
-
+public static void TestLshVU(ж<testing.T> t) { testVU(t, lshVUˢ, lshVU, lshVU_g, shifts); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rshVUˢ => ref rshVUˢᵇ;
 private static readonly @string rshVUˢᵇ = "rshVU"u8;
 
-public static void TestRshVU(ж<testing.T> t) {
-    testVU(t, rshVUˢ, rshVU, rshVU_g, shifts);
-}
-
+public static void TestRshVU(ж<testing.T> t) { testVU(t, rshVUˢ, rshVU, rshVU_g, shifts); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mulAddVWWˢ => ref mulAddVWWˢᵇ;
 private static readonly @string mulAddVWWˢᵇ = "mulAddVWW"u8;
 
-public static void TestMulAddVWW(ж<testing.T> t) {
-    testVWW(t, mulAddVWWˢ, mulAddVWW, mulAddVWW_g, muls);
-}
-
+public static void TestMulAddVWW(ж<testing.T> t) { testVWW(t, mulAddVWWˢ, mulAddVWW, mulAddVWW_g, muls); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addMulVVWWˢ => ref addMulVVWWˢᵇ;
 private static readonly @string addMulVVWWˢᵇ = "addMulVVWW"u8;
 
-public static void TestAddMulVVWW(ж<testing.T> t) {
-    testVVWW(t, addMulVVWWˢ, addMulVVWW, addMulVVWW_g, muls, adds);
-}
+public static void TestAddMulVVWW(ж<testing.T> t) { testVVWW(t, addMulVVWWˢ, addMulVVWW, addMulVVWW_g, muls, adds); }
 
 // Note: It would be nice to avoid all the duplication of these test variants,
 // but the only obvious way is to use reflection. These tests are already
@@ -119,7 +92,7 @@ internal static void testVV(ж<testing.T> t, @string name, Func<slice<global::go
                 var wantZ = new slice<global::go.math.big_package.Word>(size);
                 global::go.math.big_package.Word wantC = @ref(wantZ, x, y);
 
-                foreach (var (_, inplace) in slice<bool>([false, true])) {
+                foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                     @string nameΔ1 = name;
                     if (inplace) {
                         nameΔ1 = "in-place "u8 + nameΔ1;
@@ -130,7 +103,7 @@ internal static void testVV(ж<testing.T> t, @string name, Func<slice<global::go
                     if (inplace) {
                         zzΔ1 = xx;
                     } else {
-                        foreach (var i in range(zzΔ1)) {
+                        foreach (var i in range(len(zzΔ1))) {
                             zzΔ1[i] = 0x9876;
                         }
                     }
@@ -172,7 +145,7 @@ internal static void testVV2(ж<testing.T> t, @string name, Func<slice<global::g
                 var wantZ2 = new slice<global::go.math.big_package.Word>(size);
                 var (wantC1, wantC2) = @ref(wantZ1, wantZ2, x, y);
 
-                foreach (var (_, inplace) in slice<bool>([false, true])) {
+                foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                     @string nameΔ1 = name;
                     if (inplace) {
                         nameΔ1 = "in-place "u8 + nameΔ1;
@@ -185,10 +158,10 @@ internal static void testVV2(ж<testing.T> t, @string name, Func<slice<global::g
                         zz1Δ1 = xx;
                         zz2Δ1 = yy;
                     } else {
-                        foreach (var i in range(zz1Δ1)) {
+                        foreach (var i in range(len(zz1Δ1))) {
                             zz1Δ1[i] = 0x9876;
                         }
-                        foreach (var i in range(zz2Δ1)) {
+                        foreach (var i in range(len(zz2Δ1))) {
                             zz2Δ1[i] = 0x8765;
                         }
                     }
@@ -228,12 +201,12 @@ internal static void testVW(ж<testing.T> t, @string name, Func<slice<global::go
             words = default; // random
         }
         foreach (var x in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
-            foreach (var (_, w) in ws) {
+            foreach (var (_, w) in range(ws)) {
                 var wantZ = new slice<global::go.math.big_package.Word>(size);
                 global::go.math.big_package.Word wantC = @ref(wantZ, x, w);
 
                 copy(xx[1..], x);
-                foreach (var (_, inplace) in slice<bool>([false, true])) {
+                foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                     @string nameΔ1 = name;
                     if (inplace) {
                         nameΔ1 = "in-place "u8 + nameΔ1;
@@ -243,7 +216,7 @@ internal static void testVW(ж<testing.T> t, @string name, Func<slice<global::go
                     if (inplace) {
                         zzΔ1 = xx;
                     } else {
-                        foreach (var i in range(zzΔ1)) {
+                        foreach (var i in range(len(zzΔ1))) {
                             zzΔ1[i] = 0x9876;
                         }
                     }
@@ -267,7 +240,7 @@ internal static void testVW(ж<testing.T> t, @string name, Func<slice<global::go
 
 internal static void testVU(ж<testing.T> t, @string name, Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, nuint, global::go.math.big_package.Word> fn, Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, nuint, global::go.math.big_package.Word> @ref, slice<nuint> ys) {
     var wys = new slice<global::go.math.big_package.Word>(len(ys));
-    foreach (var (i, y) in ys) {
+    foreach (var (i, y) in range(ys)) {
         wys[i] = (global::go.math.big_package.Word)y;
     }
     testVW(t, name,
@@ -291,13 +264,13 @@ internal static void testVWW(ж<testing.T> t, @string name, Func<slice<global::g
             words = default; // random
         }
         foreach (var x in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
-            foreach (var (_, y) in ys) {
-                foreach (var (_, r) in ys) {
+            foreach (var (_, y) in range(ys)) {
+                foreach (var (_, r) in range(ys)) {
                     var wantZ = new slice<global::go.math.big_package.Word>(size);
                     global::go.math.big_package.Word wantC = @ref(wantZ, x, y, r);
 
                     copy(xx[1..], x);
-                    foreach (var (_, inplace) in slice<bool>([false, true])) {
+                    foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                         @string nameΔ1 = name;
                         if (inplace) {
                             nameΔ1 = "in-place "u8 + nameΔ1;
@@ -307,7 +280,7 @@ internal static void testVWW(ж<testing.T> t, @string name, Func<slice<global::g
                         if (inplace) {
                             zzΔ1 = xx;
                         } else {
-                            foreach (var i in range(zzΔ1)) {
+                            foreach (var i in range(len(zzΔ1))) {
                                 zzΔ1[i] = 0x9876;
                             }
                         }
@@ -344,11 +317,11 @@ internal static void testVVU(ж<testing.T> t, @string name, Func<slice<global::g
         }
         foreach (var x in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
             foreach (var y in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
-                foreach (var (_, s) in shifts) {
+                foreach (var (_, s) in range(shifts)) {
                     var wantZ = new slice<global::go.math.big_package.Word>(size);
                     global::go.math.big_package.Word wantC = @ref(wantZ, x, y, s);
 
-                    foreach (var (_, inplace) in slice<bool>([false, true])) {
+                    foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                         @string nameΔ1 = name;
                         if (inplace) {
                             nameΔ1 = "in-place "u8 + nameΔ1;
@@ -359,7 +332,7 @@ internal static void testVVU(ж<testing.T> t, @string name, Func<slice<global::g
                         if (inplace) {
                             zzΔ1 = xx;
                         } else {
-                            foreach (var i in range(zzΔ1)) {
+                            foreach (var i in range(len(zzΔ1))) {
                                 zzΔ1[i] = 0x9876;
                             }
                         }
@@ -397,12 +370,12 @@ internal static void testVVWW(ж<testing.T> t, @string name, Func<slice<global::
         }
         foreach (var x in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
             foreach (var y in range<slice<global::go.math.big_package.Word>>(nats(words, size).Invoke)) {
-                foreach (var (_, m) in ms) {
-                    foreach (var (_, a) in @as) {
+                foreach (var (_, m) in range(ms)) {
+                    foreach (var (_, a) in range(@as)) {
                         var wantZ = new slice<global::go.math.big_package.Word>(size);
                         global::go.math.big_package.Word wantC = @ref(wantZ, x, y, m, a);
 
-                        foreach (var (_, inplace) in slice<bool>([false, true])) {
+                        foreach (var (_, inplace) in range(slice<bool>([false, true]))) {
                             @string nameΔ1 = name;
                             if (inplace) {
                                 nameΔ1 = "in-place "u8 + nameΔ1;
@@ -413,7 +386,7 @@ internal static void testVVWW(ж<testing.T> t, @string name, Func<slice<global::
                             if (inplace) {
                                 zzΔ1 = xx;
                             } else {
-                                foreach (var i in range(zzΔ1)) {
+                                foreach (var i in range(len(zzΔ1))) {
                                     zzΔ1[i] = 0x9876;
                                 }
                             }
@@ -479,7 +452,7 @@ internal static iter.Seq<slice<global::go.math.big_package.Word>> nats(slice<glo
         var w = new slice<global::go.math.big_package.Word>(size);
 
         // all 0
-        foreach (var i in range(w)) {
+        foreach (var i in range(len(w))) {
             w[i] = 0;
         }
         if (!yield(w)) {
@@ -487,7 +460,7 @@ internal static iter.Seq<slice<global::go.math.big_package.Word>> nats(slice<glo
         }
 
         // all ^0
-        foreach (var i in range(w)) {
+        foreach (var i in range(len(w))) {
             w[i] = _M;
         }
         if (!yield(w)) {
@@ -502,7 +475,7 @@ internal static iter.Seq<slice<global::go.math.big_package.Word>> nats(slice<glo
             if (i >= len(wʗ1)) {
                 return yield(wʗ1);
             }
-            foreach (var (_, vᴛ1) in wordsʗ2) {
+            foreach (var (_, vᴛ1) in range(wordsʗ2)) {
                 wʗ1[i] = vᴛ1;
 
                 if (!Ꮡgenerate.ValueSlot(i + 1)) {
@@ -517,7 +490,7 @@ internal static iter.Seq<slice<global::go.math.big_package.Word>> nats(slice<glo
 
         // ten random values
         foreach (var _ᴛ1 in range(10)) {
-            foreach (var i in range(w)) {
+            foreach (var i in range(len(w))) {
                 w[i] = (global::go.math.big_package.Word)rnd.Uint();
             }
             if (!yield(w)) {
@@ -536,7 +509,7 @@ internal static global::go.math.big_package.Word rndW() {
 
 internal static slice<global::go.math.big_package.Word> rndV(nint n) {
     var v = new slice<global::go.math.big_package.Word>(n);
-    foreach (var i in range(v)) {
+    foreach (var i in range(len(v))) {
         v[i] = rndW();
     }
     return v;
@@ -545,7 +518,7 @@ internal static slice<global::go.math.big_package.Word> rndV(nint n) {
 // Construct a vector comprising the same word, usually '0' or 'maximum uint'
 internal static slice<global::go.math.big_package.Word> makeWordVec(global::go.math.big_package.Word e, nint n) {
     var v = new slice<global::go.math.big_package.Word>(n);
-    foreach (var i in range(v)) {
+    foreach (var i in range(len(v))) {
         v[i] = e;
     }
     return v;
@@ -562,20 +535,17 @@ internal partial struct argVU {
     internal @string m;                                 // message.
 }
 
-internal static slice<global::go.math.big_package.Word> arglshVUIn = slice<global::go.math.big_package.Word>([1, 2, 4, 8, 16, 32, 64, 0, 0, 0]);
+internal static slice<global::go.math.big_package.Word> arglshVUIn = [1, 2, 4, 8, 16, 32, 64, 0, 0, 0];
+internal static slice<global::go.math.big_package.Word> arglshVUr0 = [1, 2, 4, 8, 16, 32, 64];
+internal static slice<global::go.math.big_package.Word> arglshVUr1 = [2, 4, 8, 16, 32, 64, 128];
+internal static slice<global::go.math.big_package.Word> arglshVUrWm1 = [(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), 0, 1, 2, 4, 8, 16];
 
-internal static slice<global::go.math.big_package.Word> arglshVUr0 = slice<global::go.math.big_package.Word>([1, 2, 4, 8, 16, 32, 64]);
-
-internal static slice<global::go.math.big_package.Word> arglshVUr1 = slice<global::go.math.big_package.Word>([2, 4, 8, 16, 32, 64, 128]);
-
-internal static slice<global::go.math.big_package.Word> arglshVUrWm1 = slice<global::go.math.big_package.Word>([(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), 0, 1, 2, 4, 8, 16]);
-
-internal static slice<argVU> arglshVU = slice<argVU>([
+internal static slice<argVU> arglshVU = [
     // test cases for lshVU
-    new(slice<global::go.math.big_package.Word>([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0]), 7, 0, 0, 1, slice<global::go.math.big_package.Word>([2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))]), 1, "complete overlap of lshVU"),
-    new(slice<global::go.math.big_package.Word>([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0]), 7, 0, 3, 1, slice<global::go.math.big_package.Word>([2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))]), 1, "partial overlap by half of lshVU"),
-    new(slice<global::go.math.big_package.Word>([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0, 0, 0, 0]), 7, 0, 6, 1, slice<global::go.math.big_package.Word>([2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))]), 1, "partial overlap by 1 Word of lshVU"),
-    new(slice<global::go.math.big_package.Word>([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0, 0, 0, 0, 0]), 7, 0, 7, 1, slice<global::go.math.big_package.Word>([2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))]), 1, "no overlap of lshVU"),
+    new([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0], 7, 0, 0, 1, [2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))], 1, "complete overlap of lshVU"),
+    new([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0], 7, 0, 3, 1, [2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))], 1, "partial overlap by half of lshVU"),
+    new([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0, 0, 0, 0], 7, 0, 6, 1, [2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))], 1, "partial overlap by 1 Word of lshVU"),
+    new([1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), 0, 0, 0, 0, 0, 0, 0, 0], 7, 0, 7, 1, [2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))], 1, "no overlap of lshVU"),
     // additional test cases with shift values of 1 and (_W-1)
     new(arglshVUIn, 7, 0, 0, 1, arglshVUr1, 0, "complete overlap of lshVU and shift of 1"),
     new(arglshVUIn, 7, 0, 0, _W - 1, arglshVUrWm1, 32, "complete overlap of lshVU and shift of _W - 1"),
@@ -585,22 +555,19 @@ internal static slice<argVU> arglshVU = slice<argVU>([
     new(arglshVUIn, 7, 0, 2, _W - 1, arglshVUrWm1, 32, "partial overlap by 5 Words of lshVU abd shift of _W - 1"),
     new(arglshVUIn, 7, 0, 3, 1, arglshVUr1, 0, "partial overlap by 4 Words of lshVU and shift of 1"),
     new(arglshVUIn, 7, 0, 3, _W - 1, arglshVUrWm1, 32, "partial overlap by 4 Words of lshVU and shift of _W - 1")
-]);
+];
 
-internal static slice<global::go.math.big_package.Word> argrshVUIn = slice<global::go.math.big_package.Word>([0, 0, 0, 1, 2, 4, 8, 16, 32, 64]);
+internal static slice<global::go.math.big_package.Word> argrshVUIn = [0, 0, 0, 1, 2, 4, 8, 16, 32, 64];
+internal static slice<global::go.math.big_package.Word> argrshVUr0 = [1, 2, 4, 8, 16, 32, 64];
+internal static slice<global::go.math.big_package.Word> argrshVUr1 = [0, 1, 2, 4, 8, 16, 32];
+internal static slice<global::go.math.big_package.Word> argrshVUrWm1 = [4, 8, 16, 32, 64, 128, 0];
 
-internal static slice<global::go.math.big_package.Word> argrshVUr0 = slice<global::go.math.big_package.Word>([1, 2, 4, 8, 16, 32, 64]);
-
-internal static slice<global::go.math.big_package.Word> argrshVUr1 = slice<global::go.math.big_package.Word>([0, 1, 2, 4, 8, 16, 32]);
-
-internal static slice<global::go.math.big_package.Word> argrshVUrWm1 = slice<global::go.math.big_package.Word>([4, 8, 16, 32, 64, 128, 0]);
-
-internal static slice<argVU> argrshVU = slice<argVU>([
+internal static slice<argVU> argrshVU = [
     // test cases for rshVU
-    new(slice<global::go.math.big_package.Word>([0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))]), 7, 1, 1, 1, slice<global::go.math.big_package.Word>([unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))]), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "complete overlap of rshVU"),
-    new(slice<global::go.math.big_package.Word>([0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))]), 7, 4, 1, 1, slice<global::go.math.big_package.Word>([unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))]), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "partial overlap by half of rshVU"),
-    new(slice<global::go.math.big_package.Word>([0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))]), 7, 7, 1, 1, slice<global::go.math.big_package.Word>([unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))]), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "partial overlap by 1 Word of rshVU"),
-    new(slice<global::go.math.big_package.Word>([0, 0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))]), 7, 8, 1, 1, slice<global::go.math.big_package.Word>([unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))]), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "no overlap of rshVU"),
+    new([0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))], 7, 1, 1, 1, [unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))], (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "complete overlap of rshVU"),
+    new([0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))], 7, 4, 1, 1, [unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))], (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "partial overlap by half of rshVU"),
+    new([0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))], 7, 7, 1, 1, [unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))], (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "partial overlap by 1 Word of rshVU"),
+    new([0, 0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))], 7, 8, 1, 1, [unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 2))], (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "no overlap of rshVU"),
     // additional test cases with shift values of 0, 1 and (_W-1)
     new(argrshVUIn, 7, 3, 3, 1, argrshVUr1, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "complete overlap of rshVU and shift of 1"),
     new(argrshVUIn, 7, 3, 3, _W - 1, argrshVUrWm1, 2, "complete overlap of rshVU and shift of _W - 1"),
@@ -610,7 +577,7 @@ internal static slice<argVU> argrshVU = slice<argVU>([
     new(argrshVUIn, 7, 3, 1, _W - 1, argrshVUrWm1, 2, "partial overlap by 5 Words of rshVU and shift of _W - 1"),
     new(argrshVUIn, 7, 3, 0, 1, argrshVUr1, (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), "partial overlap by 4 Words of rshVU and shift of 1"),
     new(argrshVUIn, 7, 3, 0, _W - 1, argrshVUrWm1, 2, "partial overlap by 4 Words of rshVU and shift of _W - 1")
-]);
+];
 
 internal static void testShiftFunc(ж<testing.T> t, Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, nuint, global::go.math.big_package.Word> f, argVU a) {
     // work on copy of a.d to preserve the original data.
@@ -619,7 +586,7 @@ internal static void testShiftFunc(ж<testing.T> t, Func<slice<global::go.math.b
     var z = b.slice((nint)(a.zp), (nint)(a.zp + a.l));
     var x = b.slice((nint)(a.xp), (nint)(a.xp + a.l));
     global::go.math.big_package.Word c = f(z, x, a.s);
-    foreach (var (i, zi) in z) {
+    foreach (var (i, zi) in range(z)) {
         if (zi != a.r[i]) {
             t.Errorf("d := %v, %s (d[%d:%d], d[%d:%d], %d)\n\tgot z[%d] = %#x; want %#x", a.d, a.m, a.zp, a.zp + a.l, a.xp, a.xp + a.l, a.s, i, zi, a.r[i]);
             break;
@@ -631,12 +598,12 @@ internal static void testShiftFunc(ж<testing.T> t, Func<slice<global::go.math.b
 }
 
 public static void TestShiftOverlap(ж<testing.T> t) {
-    foreach (var (_, a) in arglshVU) {
+    foreach (var (_, a) in range(arglshVU)) {
         var arg = a;
         testShiftFunc(t, lshVU, arg);
     }
 
-    foreach (var (_, a) in argrshVU) {
+    foreach (var (_, a) in range(argrshVU)) {
         var arg = a;
         testShiftFunc(t, rshVU, arg);
     }
@@ -678,14 +645,13 @@ public static void TestIssue42838(ж<testing.T> t) {
 }
 
 // type funVWW is a methodless func type — rendered inline as its base delegate
-
 internal partial struct argVWW {
     internal global::go.math.big_package.Δnat z, x;
     internal global::go.math.big_package.Word y, r;
     internal global::go.math.big_package.Word c;
 }
 
-internal static slice<argVWW> prodVWW = slice<argVWW>([
+internal static slice<argVWW> prodVWW = [
     new(),
     new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 0, 0, 0),
     new(new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 0, 991, 0),
@@ -709,12 +675,12 @@ internal static slice<argVWW> prodVWW = slice<argVWW>([
     new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL))}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL)),
     new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551488UL)), _M, _M, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), 0, (nuint)(/* _M >> (_W - 7) */ 127UL)),
     new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL)), _M, _M, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL))
-]);
+];
 
 internal static void testFunVWW(ж<testing.T> t, @string msg, Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word> f, argVWW a) {
     var z = new global::go.math.big_package.Δnat(len(a.z));
     global::go.math.big_package.Word c = f(z, a.x, a.y, a.r);
-    foreach (var (i, zi) in z) {
+    foreach (var (i, zi) in range<global::go.math.big_package.Word>(z)) {
         if (zi != a.z[i]) {
             t.Errorf("%s%+v\n\tgot z[%d] = %#x; want %#x", msg, a, i, zi, a.z[i]);
             break;
@@ -726,7 +692,6 @@ internal static void testFunVWW(ж<testing.T> t, @string msg, Func<slice<global:
 }
 
 // type funWVW is a methodless func type — rendered inline as its base delegate
-
 // TODO(gri) mulAddVWW and divWVW are symmetric operations but
 // their signature is not symmetric. Try to unify.
 internal partial struct argWVW {
@@ -754,7 +719,7 @@ internal static ref readonly @string divWVWˢ => ref divWVWˢᵇ;
 private static readonly @string divWVWˢᵇ = "divWVW"u8;
 
 public static void TestFunVWW(ж<testing.T> t) {
-    foreach (var (_, a) in prodVWW) {
+    foreach (var (_, a) in range(prodVWW)) {
         var arg = a;
         testFunVWW(t, mulAddVWWGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word>(mulAddVWW_g), arg);
         testFunVWW(t, mulAddVWWˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word>(mulAddVWW), arg);
@@ -770,13 +735,13 @@ partial struct mulWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y;
     internal global::go.math.big_package.Word q, r;
 }
-internal static slice<mulWWTestsᴛ1> mulWWTests = slice<mulWWTestsᴛ1>([
+internal static slice<mulWWTestsᴛ1> mulWWTests = [
     new(_M, _M, _M - 1, 1)
     // 32 bit only: {0xc47dfa8c, 50911, 0x98a4, 0x998587f4},
-]);
+];
 
 public static void TestMulWW(ж<testing.T> t) {
-    foreach (var (i, test) in mulWWTests) {
+    foreach (var (i, test) in range(mulWWTests)) {
         var (q, r) = mulWW(test.x, test.y);
         if (q != test.q || r != test.r) {
             t.Errorf("#%d got (%x, %x) want (%x, %x)", i, q, r, test.q, test.r);
@@ -788,16 +753,16 @@ partial struct mulAddWWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y, c;
     internal global::go.math.big_package.Word q, r;
 }
-internal static slice<mulAddWWWTestsᴛ1> mulAddWWWTests = slice<mulAddWWWTestsᴛ1>([
+internal static slice<mulAddWWWTestsᴛ1> mulAddWWWTests = [
     // TODO(agl): These will only work on 64-bit platforms.
     // {15064310297182388543, 0xe7df04d2d35d5d80, 13537600649892366549, 13644450054494335067, 10832252001440893781},
     // {15064310297182388543, 0xdab2f18048baa68d, 13644450054494335067, 12869334219691522700, 14233854684711418382},
     new(_M, _M, 0, _M - 1, 1),
     new(_M, _M, _M, _M, 0)
-]);
+];
 
 public static void TestMulAddWWW(ж<testing.T> t) {
-    foreach (var (i, test) in mulAddWWWTests) {
+    foreach (var (i, test) in range(mulAddWWWTests)) {
         var (q, r) = mulAddWWW_g(test.x, test.y, test.c);
         if (q != test.q || r != test.r) {
             t.Errorf("#%d got (%x, %x) want (%x, %x)", i, q, r, test.q, test.r);
@@ -809,16 +774,16 @@ partial struct divWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x1, x0, y;
     internal global::go.math.big_package.Word q, r;
 }
-internal static slice<divWWTestsᴛ1> divWWTests = slice<divWWTestsᴛ1>([
+internal static slice<divWWTestsᴛ1> divWWTests = [
     new(unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), 0, _M, unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL)), unchecked((nuint)(/* _M >> 1 */ 9223372036854775807UL))),
     new(_M - (4611686018427387904L), _M, (global::go.math.big_package.Word)((nuint)3 << (int)(_W - 2)), _M, _M - (4611686018427387904L))
-]);
+];
 
 internal static UntypedInt testsNumber => /* 1 << 16 */ 65536;
 
 public static void TestDivWW(ж<testing.T> t) {
     nint i = 0;
-    foreach (var (iΔ1, test) in divWWTests) {
+    foreach (var (iΔ1, test) in range(divWWTests)) {
         global::go.math.big_package.Word rec = reciprocalWord(test.y);
         var (q, r) = divWW(test.x1, test.x0, test.y, rec);
         if (q != test.q || r != test.r) {
@@ -843,7 +808,7 @@ public static void TestDivWW(ж<testing.T> t) {
 }
 
 // benchSizes are the benchmark word sizes.
-internal static slice<nint> benchSizes = slice<nint>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32, 64, 100, 1000, 10_000, 100_000]);
+internal static slice<nint> benchSizes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32, 64, 100, 1000, 10_000, 100_000];
 
 // A benchFunc is a function to be benchmarked.
 // It takes one output buffer and two input buffers,
@@ -857,7 +822,7 @@ internal static slice<nint> benchSizes = slice<nint>([1, 2, 3, 4, 5, 6, 7, 8, 9,
 // (go test -run=NONE '-bench=V/words=100$')
 // even if different benchmarks have different numbers of other parameters.
 internal static void bench(ж<testing.B> b, @string suffix, Action<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>> fn) {
-    foreach (var (_, n) in benchSizes) {
+    foreach (var (_, n) in range(benchSizes)) {
         if (isRaceBuilder && n > 1000) {
             continue;
         }
@@ -880,9 +845,7 @@ internal static void bench(ж<testing.B> b, @string suffix, Action<slice<global:
 
 // Benchmark basic I/O and arithmetic processing speed,
 // to help estimate the upper bounds on other operations.
-public static void BenchmarkCopyVV(ж<testing.B> b) {
-    bench(b, ""u8, benchVV(copyVV));
-}
+public static void BenchmarkCopyVV(ж<testing.B> b) { bench(b, ""u8, benchVV(copyVV)); }
 
 internal static global::go.math.big_package.Word copyVV(slice<global::go.math.big_package.Word> z, slice<global::go.math.big_package.Word> x, slice<global::go.math.big_package.Word> y) {
     copy(z, x);
@@ -903,9 +866,7 @@ internal static global::go.math.big_package.Word copyVV(slice<global::go.math.bi
 // of, say, BenchmarkAddVV for that same word size, we actually want the
 // dependency chain-length variation in BenchmarkArithVV too.
 // It's just mysterious to see until you understand what is causing it.
-public static void BenchmarkArithVV(ж<testing.B> b) {
-    bench(b, ""u8, benchVV(arithVV));
-}
+public static void BenchmarkArithVV(ж<testing.B> b) { bench(b, ""u8, benchVV(arithVV)); }
 
 internal static global::go.math.big_package.Word arithVV(slice<global::go.math.big_package.Word> z, slice<global::go.math.big_package.Word> x, slice<global::go.math.big_package.Word> y) {
     global::go.math.big_package.Word a = default;
@@ -925,7 +886,7 @@ internal static global::go.math.big_package.Word arithVV(slice<global::go.math.b
         // We don't really care about the speed here, but
         // do something so that the small word counts aren't all the same.
         global::go.math.big_package.Word sΔ1 = (global::go.math.big_package.Word)0;
-        foreach (var (_, zi) in z) {
+        foreach (var (_, zi) in range(z)) {
             sΔ1 += zi;
         }
         return sΔ1;
@@ -1000,7 +961,7 @@ internal static Action<slice<global::go.math.big_package.Word>, slice<global::go
         // Otherwise x is random, so checking the first two elements is good enough.
         // Assume this is the warmup, so we don't need to worry about it taking longer.
         if (x[0] != w || len(x) >= 2 && x[1] != w) {
-            foreach (var i in range(x)) {
+            foreach (var i in range(len(x))) {
                 x[i] = xi;
             }
         }

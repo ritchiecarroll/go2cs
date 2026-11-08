@@ -39,16 +39,16 @@ partial struct LinesTest {
     internal slice<@string> b;
 }
 
-internal static slice<LinesTest> linesTests = slice<LinesTest>([
-    new(a: "abc\nabc\n", b: slice<@string>(["abc\n", "abc\n"])),
-    new(a: "abc\r\nabc", b: slice<@string>(["abc\r\n", "abc"])),
-    new(a: "abc\r\n", b: slice<@string>(["abc\r\n"])),
-    new(a: "\nabc", b: slice<@string>(["\n", "abc"])),
-    new(a: "\nabc\n\n", b: slice<@string>(["\n", "abc\n", "\n"]))
-]);
+internal static slice<LinesTest> linesTests = [
+    new(a: "abc\nabc\n", b: ["abc\n", "abc\n"]),
+    new(a: "abc\r\nabc", b: ["abc\r\n", "abc"]),
+    new(a: "abc\r\n", b: ["abc\r\n"]),
+    new(a: "\nabc", b: ["\n", "abc"]),
+    new(a: "\nabc\n\n", b: ["\n", "abc\n", "\n"])
+];
 
 public static void TestLines(ж<testing.T> t) {
-    foreach (var (_, s) in linesTests) {
+    foreach (var (_, s) in range(linesTests)) {
         var result = slices.Collect(Lines(s.a));
         if (!slices.Equal<slice<@string>, @string>(result, s.b)) {
             t.Errorf(@"slices.Collect(Lines(%q)) = %q; want %q", s.a, result, s.b);
@@ -57,11 +57,8 @@ public static void TestLines(ж<testing.T> t) {
 }
 
 internal static @string abcd = "abcd";
-
 internal static @string faces = "☺☻☹";
-
 internal static @string commas = "1,2,3,4";
-
 internal static @string dots = "1....2....3....4";
 
 partial struct IndexTest {
@@ -70,7 +67,7 @@ partial struct IndexTest {
     internal nint @out;
 }
 
-internal static slice<IndexTest> indexTests = slice<IndexTest>([
+internal static slice<IndexTest> indexTests = [
     new("", "", 0),
     new("", "a", -1),
     new("", "foo", -1),
@@ -168,9 +165,9 @@ internal static slice<IndexTest> indexTests = slice<IndexTest>([
     // invalid UTF-8 byte sequence (must be longer than bytealg.MaxBruteForce to
     // test that we don't use IndexRune)
     new(((@string)(new byte[]{0x78, 0x78, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x78, 0x78, 0x78, 0xed, 0x9f, 0xc0})), ((@string)(new byte[]{0xed, 0x9f, 0xc0})), 105)
-]);
+];
 
-internal static slice<IndexTest> lastIndexTests = slice<IndexTest>([
+internal static slice<IndexTest> lastIndexTests = [
     new("", "", 0),
     new("", "a", -1),
     new("", "foo", -1),
@@ -184,7 +181,7 @@ internal static slice<IndexTest> lastIndexTests = slice<IndexTest>([
     new("foo", "o", 2),
     new("abcABCabc", "A", 3),
     new("abcABCabc", "a", 6)
-]);
+];
 
 internal static slice<IndexTest> indexAnyTests = slice<IndexTest>([
     new("", "", -1),
@@ -229,7 +226,7 @@ internal static slice<IndexTest> lastIndexAnyTests = slice<IndexTest>([
 // Execute f on each test case.  funcName should be the name of f; it's used
 // in failure reports.
 internal static void runIndexTests(ж<testing.T> t, Func<@string, @string, nint> f, @string funcName, slice<IndexTest> testCases) {
-    foreach (var (_, test) in testCases) {
+    foreach (var (_, test) in range(testCases)) {
         nint actual = f(test.s, test.sep);
         if (actual != test.@out) {
             t.Errorf("%s(%q,%q) = %v; want %v", funcName, test.s, test.sep, actual, test.@out);
@@ -241,26 +238,17 @@ internal static void runIndexTests(ж<testing.T> t, Func<@string, @string, nint>
 internal static ref readonly @string indexˢ => ref indexˢᵇ;
 private static readonly @string indexˢᵇ = "Index"u8;
 
-public static void TestIndex(ж<testing.T> t) {
-    runIndexTests(t, Index, indexˢ, indexTests);
-}
-
+public static void TestIndex(ж<testing.T> t) { runIndexTests(t, Index, indexˢ, indexTests); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lastIndexˢ => ref lastIndexˢᵇ;
 private static readonly @string lastIndexˢᵇ = "LastIndex"u8;
 
-public static void TestLastIndex(ж<testing.T> t) {
-    runIndexTests(t, LastIndex, lastIndexˢ, lastIndexTests);
-}
-
+public static void TestLastIndex(ж<testing.T> t) { runIndexTests(t, LastIndex, lastIndexˢ, lastIndexTests); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string indexAnyˢ => ref indexAnyˢᵇ;
 private static readonly @string indexAnyˢᵇ = "IndexAny"u8;
 
-public static void TestIndexAny(ж<testing.T> t) {
-    runIndexTests(t, IndexAny, indexAnyˢ, indexAnyTests);
-}
-
+public static void TestIndexAny(ж<testing.T> t) { runIndexTests(t, IndexAny, indexAnyˢ, indexAnyTests); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lastIndexAnyˢ => ref lastIndexAnyˢᵇ;
 private static readonly @string lastIndexAnyˢᵇ = "LastIndexAny"u8;
@@ -270,7 +258,7 @@ public static void TestLastIndexAny(ж<testing.T> t) {
 }
 
 public static void TestIndexByte(ж<testing.T> t) {
-    foreach (var (_, tt) in indexTests) {
+    foreach (var (_, tt) in range(indexTests)) {
         if (len(tt.sep) != 1) {
             continue;
         }
@@ -290,7 +278,7 @@ public static void TestLastIndexByte(ж<testing.T> t) {
         new("zabcdefabcdef", "z", 0),                 // first byte
         new("a☺b☻c☹d", "b", len("a☺"))                // non-ascii
     ]);
-    foreach (var (_, test) in testCases) {
+    foreach (var (_, test) in range(testCases)) {
         nint actual = LastIndexByte(test.s, test.sep[0]);
         if (actual != test.@out) {
             t.Errorf("LastIndexByte(%q,%c) = %v; want %v", test.s, test.sep[0], actual, test.@out);
@@ -317,7 +305,7 @@ public static void TestIndexRandom(ж<testing.T> t) {
     for (nint times = 0; times < 10; times++) {
         for (nint strLen = 5 + rand.Intn(5); strLen < 140; strLen += 10) { // Arbitrary
             var s1 = new slice<byte>(strLen);
-            foreach (var i in range(s1)) {
+            foreach (var i in range(len(s1))) {
                 s1[i] = chars[rand.Intn(len(chars))];
             }
             @string s = (@string)s1;
@@ -402,11 +390,9 @@ public static void TestIndexRune(ж<testing.T> t) {
         new("aaKKKKKa\U000bc104", (rune)0xBC104, 18), // cutover: 4 + n>>4
         new("aaKKKKKa鄄", '鄄', 18)
     ]);
-    foreach (var (_, tt) in tests) {
-        {
-            nint got = IndexRune(tt.@in, tt.rune); if (got != tt.want) {
-                t.Errorf("IndexRune(%q, %d) = %v; want %v", tt.@in, tt.rune, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        nint got = IndexRune(tt.@in, tt.rune); if (got != tt.want) {
+            t.Errorf("IndexRune(%q, %d) = %v; want %v", tt.@in, tt.rune, got, tt.want);
         }
     }
 
@@ -435,10 +421,8 @@ private static readonly @string benchmarkStringᵇ = "some_text=some☺value"u8;
 public static void BenchmarkIndexRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = IndexRune(benchmarkString, '☺'); if (got != 14) {
-            Ꮡb.Fatalf("wrong index: expected 14, got=%d", got);
-        }
+    nint got = IndexRune(benchmarkString, '☺'); if (got != 14) {
+        Ꮡb.Fatalf("wrong index: expected 14, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         IndexRune(benchmarkString, '☺');
@@ -450,10 +434,8 @@ internal static @string benchmarkLongString = Repeat(" ", 100) + benchmarkString
 public static void BenchmarkIndexRuneLongString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = IndexRune(benchmarkLongString, '☺'); if (got != 114) {
-            Ꮡb.Fatalf("wrong index: expected 114, got=%d", got);
-        }
+    nint got = IndexRune(benchmarkLongString, '☺'); if (got != 114) {
+        Ꮡb.Fatalf("wrong index: expected 114, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         IndexRune(benchmarkLongString, '☺');
@@ -463,10 +445,8 @@ public static void BenchmarkIndexRuneLongString(ж<testing.B> Ꮡb) {
 public static void BenchmarkIndexRuneFastPath(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = IndexRune(benchmarkString, 'v'); if (got != 17) {
-            Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
-        }
+    nint got = IndexRune(benchmarkString, 'v'); if (got != 17) {
+        Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         IndexRune(benchmarkString, 'v');
@@ -476,10 +456,8 @@ public static void BenchmarkIndexRuneFastPath(ж<testing.B> Ꮡb) {
 public static void BenchmarkIndex(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = Index(benchmarkString, "v"); if (got != 17) {
-            Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
-        }
+    nint got = Index(benchmarkString, "v"); if (got != 17) {
+        Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         Index(benchmarkString, "v");
@@ -489,10 +467,8 @@ public static void BenchmarkIndex(ж<testing.B> Ꮡb) {
 public static void BenchmarkLastIndex(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = Index(benchmarkString, "v"); if (got != 17) {
-            Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
-        }
+    nint got = Index(benchmarkString, "v"); if (got != 17) {
+        Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         LastIndex(benchmarkString, "v");
@@ -502,10 +478,8 @@ public static void BenchmarkLastIndex(ж<testing.B> Ꮡb) {
 public static void BenchmarkIndexByte(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        nint got = IndexByte(benchmarkString, (byte)'v'); if (got != 17) {
-            Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
-        }
+    nint got = IndexByte(benchmarkString, (byte)'v'); if (got != 17) {
+        Ꮡb.Fatalf("wrong index: expected 17, got=%d", got);
     }
     for (nint i = 0; i < b.N; i++) {
         IndexByte(benchmarkString, (byte)'v');
@@ -519,31 +493,31 @@ partial struct SplitTest {
     internal slice<@string> a;
 }
 
-internal static slice<SplitTest> splittests = slice<SplitTest>([
-    new("", "", -1, slice<@string>([])),
-    new(abcd, "", 2, slice<@string>(["a", "bcd"])),
-    new(abcd, "", 4, slice<@string>(["a", "b", "c", "d"])),
-    new(abcd, "", -1, slice<@string>(["a", "b", "c", "d"])),
-    new(faces, "", -1, slice<@string>(["☺", "☻", "☹"])),
-    new(faces, "", 3, slice<@string>(["☺", "☻", "☹"])),
-    new(faces, "", 17, slice<@string>(["☺", "☻", "☹"])),
-    new("☺�☹", "", -1, slice<@string>(["☺", "�", "☹"])),
+internal static slice<SplitTest> splittests = [
+    new("", "", -1, []),
+    new(abcd, "", 2, ["a", "bcd"]),
+    new(abcd, "", 4, ["a", "b", "c", "d"]),
+    new(abcd, "", -1, ["a", "b", "c", "d"]),
+    new(faces, "", -1, ["☺", "☻", "☹"]),
+    new(faces, "", 3, ["☺", "☻", "☹"]),
+    new(faces, "", 17, ["☺", "☻", "☹"]),
+    new("☺�☹", "", -1, ["☺", "�", "☹"]),
     new(abcd, "a", 0, default),
-    new(abcd, "a", -1, slice<@string>(["", "bcd"])),
-    new(abcd, "z", -1, slice<@string>(["abcd"])),
-    new(commas, ",", -1, slice<@string>(["1", "2", "3", "4"])),
-    new(dots, "...", -1, slice<@string>(["1", ".2", ".3", ".4"])),
-    new(faces, "☹", -1, slice<@string>(["☺☻", ""])),
-    new(faces, "~", -1, slice<@string>([faces])),
-    new("1 2 3 4", " ", 3, slice<@string>(["1", "2", "3 4"])),
-    new("1 2", " ", 3, slice<@string>(["1", "2"])),
-    new("", "T", unchecked((nint)(2305843009213693951L)), slice<@string>([""])),
-    new(((@string)(new byte[]{0xff, 0x2d, 0xff})), "", -1, slice<@string>([((@string)(new byte[]{0xff})), "-", ((@string)(new byte[]{0xff}))])),
-    new(((@string)(new byte[]{0xff, 0x2d, 0xff})), "-", -1, slice<@string>([((@string)(new byte[]{0xff})), ((@string)(new byte[]{0xff}))]))
-]);
+    new(abcd, "a", -1, ["", "bcd"]),
+    new(abcd, "z", -1, ["abcd"]),
+    new(commas, ",", -1, ["1", "2", "3", "4"]),
+    new(dots, "...", -1, ["1", ".2", ".3", ".4"]),
+    new(faces, "☹", -1, ["☺☻", ""]),
+    new(faces, "~", -1, [faces]),
+    new("1 2 3 4", " ", 3, ["1", "2", "3 4"]),
+    new("1 2", " ", 3, ["1", "2"]),
+    new("", "T", unchecked((nint)(2305843009213693951L)), [""]),
+    new(((@string)(new byte[]{0xff, 0x2d, 0xff})), "", -1, [((@string)(new byte[]{0xff})), "-", ((@string)(new byte[]{0xff}))]),
+    new(((@string)(new byte[]{0xff, 0x2d, 0xff})), "-", -1, [((@string)(new byte[]{0xff})), ((@string)(new byte[]{0xff}))])
+];
 
 public static void TestSplit(ж<testing.T> t) {
-    foreach (var (_, tt) in splittests) {
+    foreach (var (_, tt) in range(splittests)) {
         var a = SplitN(tt.s, tt.sep, tt.n);
         if (!slices.Equal<slice<@string>, @string>(a, tt.a)) {
             t.Errorf("Split(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, a, tt.a);
@@ -571,24 +545,24 @@ public static void TestSplit(ж<testing.T> t) {
     }
 }
 
-internal static slice<SplitTest> splitaftertests = slice<SplitTest>([
-    new(abcd, "a", -1, slice<@string>(["a", "bcd"])),
-    new(abcd, "z", -1, slice<@string>(["abcd"])),
-    new(abcd, "", -1, slice<@string>(["a", "b", "c", "d"])),
-    new(commas, ",", -1, slice<@string>(["1,", "2,", "3,", "4"])),
-    new(dots, "...", -1, slice<@string>(["1...", ".2...", ".3...", ".4"])),
-    new(faces, "☹", -1, slice<@string>(["☺☻☹", ""])),
-    new(faces, "~", -1, slice<@string>([faces])),
-    new(faces, "", -1, slice<@string>(["☺", "☻", "☹"])),
-    new("1 2 3 4", " ", 3, slice<@string>(["1 ", "2 ", "3 4"])),
-    new("1 2 3", " ", 3, slice<@string>(["1 ", "2 ", "3"])),
-    new("1 2", " ", 3, slice<@string>(["1 ", "2"])),
-    new("123", "", 2, slice<@string>(["1", "23"])),
-    new("123", "", 17, slice<@string>(["1", "2", "3"]))
-]);
+internal static slice<SplitTest> splitaftertests = [
+    new(abcd, "a", -1, ["a", "bcd"]),
+    new(abcd, "z", -1, ["abcd"]),
+    new(abcd, "", -1, ["a", "b", "c", "d"]),
+    new(commas, ",", -1, ["1,", "2,", "3,", "4"]),
+    new(dots, "...", -1, ["1...", ".2...", ".3...", ".4"]),
+    new(faces, "☹", -1, ["☺☻☹", ""]),
+    new(faces, "~", -1, [faces]),
+    new(faces, "", -1, ["☺", "☻", "☹"]),
+    new("1 2 3 4", " ", 3, ["1 ", "2 ", "3 4"]),
+    new("1 2 3", " ", 3, ["1 ", "2 ", "3"]),
+    new("1 2", " ", 3, ["1 ", "2"]),
+    new("123", "", 2, ["1", "23"]),
+    new("123", "", 17, ["1", "2", "3"])
+];
 
 public static void TestSplitAfter(ж<testing.T> t) {
-    foreach (var (_, tt) in splitaftertests) {
+    foreach (var (_, tt) in range(splitaftertests)) {
         var a = SplitAfterN(tt.s, tt.sep, tt.n);
         if (!slices.Equal<slice<@string>, @string>(a, tt.a)) {
             t.Errorf(@"Split(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, a, tt.a);
@@ -618,26 +592,26 @@ partial struct FieldsTest {
     internal slice<@string> a;
 }
 
-internal static slice<FieldsTest> fieldstests = slice<FieldsTest>([
-    new("", slice<@string>([])),
-    new(" ", slice<@string>([])),
-    new(" \t ", slice<@string>([])),
-    new("\u2000", slice<@string>([])),
-    new("  abc  ", slice<@string>(["abc"])),
-    new("1 2 3 4", slice<@string>(["1", "2", "3", "4"])),
-    new("1  2  3  4", slice<@string>(["1", "2", "3", "4"])),
-    new("1\t\t2\t\t3\t4", slice<@string>(["1", "2", "3", "4"])),
-    new("1\u20002\u20013\u20024", slice<@string>(["1", "2", "3", "4"])),
-    new("\u2000\u2001\u2002", slice<@string>([])),
-    new("\n™\t™\n", slice<@string>(["™", "™"])),
-    new("\n\u20001™2\u2000 \u2001 ™", slice<@string>(["1™2", "™"])),
-    new("\n1\uFFFD \uFFFD2\u20003\uFFFD4", slice<@string>(["1\uFFFD", "\uFFFD2", "3\uFFFD4"])),
-    new(((@string)(new byte[]{0x31, 0xff, 0xe2, 0x80, 0x80, 0xff, 0x32, 0xff, 0x20, 0xff})), slice<@string>([((@string)(new byte[]{0x31, 0xff})), ((@string)(new byte[]{0xff, 0x32, 0xff})), ((@string)(new byte[]{0xff}))])),
-    new(faces, slice<@string>([faces]))
-]);
+internal static slice<FieldsTest> fieldstests = [
+    new("", []),
+    new(" ", []),
+    new(" \t ", []),
+    new("\u2000", []),
+    new("  abc  ", ["abc"]),
+    new("1 2 3 4", ["1", "2", "3", "4"]),
+    new("1  2  3  4", ["1", "2", "3", "4"]),
+    new("1\t\t2\t\t3\t4", ["1", "2", "3", "4"]),
+    new("1\u20002\u20013\u20024", ["1", "2", "3", "4"]),
+    new("\u2000\u2001\u2002", []),
+    new("\n™\t™\n", ["™", "™"]),
+    new("\n\u20001™2\u2000 \u2001 ™", ["1™2", "™"]),
+    new("\n1\uFFFD \uFFFD2\u20003\uFFFD4", ["1\uFFFD", "\uFFFD2", "3\uFFFD4"]),
+    new(((@string)(new byte[]{0x31, 0xff, 0xe2, 0x80, 0x80, 0xff, 0x32, 0xff, 0x20, 0xff})), [((@string)(new byte[]{0x31, 0xff})), ((@string)(new byte[]{0xff, 0x32, 0xff})), ((@string)(new byte[]{0xff}))]),
+    new(faces, [faces])
+];
 
 public static void TestFields(ж<testing.T> t) {
-    foreach (var (_, tt) in fieldstests) {
+    foreach (var (_, tt) in range(fieldstests)) {
         var a = Fields(tt.s);
         if (!slices.Equal<slice<@string>, @string>(a, tt.a)) {
             t.Errorf("Fields(%q) = %v; want %v", tt.s, a, tt.a);
@@ -650,16 +624,16 @@ public static void TestFields(ж<testing.T> t) {
     }
 }
 
-public static readonly ж<slice<FieldsTest>> ᏑFieldsFuncTests = new StaticBox<slice<FieldsTest>>(slice<FieldsTest>([
-    new("", slice<@string>([])),
-    new("XX", slice<@string>([])),
-    new("XXhiXXX", slice<@string>(["hi"])),
-    new("aXXbXXXcX", slice<@string>(["a", "b", "c"]))
-]));
+public static readonly ж<slice<FieldsTest>> ᏑFieldsFuncTests = new StaticBox<slice<FieldsTest>>([
+    new("", []),
+    new("XX", []),
+    new("XXhiXXX", ["hi"]),
+    new("aXXbXXXcX", ["a", "b", "c"])
+]);
 public static ref slice<FieldsTest> FieldsFuncTests => ref ((StaticBox<slice<FieldsTest>>)ᏑFieldsFuncTests).ValueSlot;
 
 public static void TestFieldsFunc(ж<testing.T> t) {
-    foreach (var (_, tt) in fieldstests) {
+    foreach (var (_, tt) in range(fieldstests)) {
         var a = FieldsFunc(tt.s, Δunicode.IsSpace);
         if (!slices.Equal<slice<@string>, @string>(a, tt.a)) {
             t.Errorf("FieldsFunc(%q, unicode.IsSpace) = %v; want %v", tt.s, a, tt.a);
@@ -667,7 +641,7 @@ public static void TestFieldsFunc(ж<testing.T> t) {
         }
     }
     var pred = (rune c) => c == 'X';
-    foreach (var (_, tt) in FieldsFuncTests) {
+    foreach (var (_, tt) in range(FieldsFuncTests)) {
         var a = FieldsFunc(tt.s, pred);
         if (!slices.Equal<slice<@string>, @string>(a, tt.a)) {
             t.Errorf("FieldsFunc(%q) = %v, want %v", tt.s, a, tt.a);
@@ -687,7 +661,7 @@ partial struct StringTest {
 // Execute f on each test case.  funcName should be the name of f; it's used
 // in failure reports.
 internal static void runStringTests(ж<testing.T> t, Func<@string, @string> f, @string funcName, slice<StringTest> testCases) {
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         @string actual = f(tc.@in);
         if (actual != tc.@out) {
             t.Errorf("%s(%q) = %q; want %q", funcName, tc.@in, actual, tc.@out);
@@ -695,7 +669,7 @@ internal static void runStringTests(ж<testing.T> t, Func<@string, @string> f, @
     }
 }
 
-internal static slice<StringTest> upperTests = slice<StringTest>([
+internal static slice<StringTest> upperTests = [
     new("", ""),
     new("ONLYUPPER", "ONLYUPPER"),
     new("abc", "ABC"),
@@ -706,9 +680,9 @@ internal static slice<StringTest> upperTests = slice<StringTest>([
     new("long\u0250string\u0250with\u0250nonascii\u2C6Fchars", "LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS"),
     new("\u0250\u0250\u0250\u0250\u0250", "\u2C6F\u2C6F\u2C6F\u2C6F\u2C6F"), // grows one byte per char
     new("a\u0080\U0010FFFF", "A\u0080\U0010FFFF")                            // test utf8.RuneSelf and utf8.MaxRune
-]);
+];
 
-internal static slice<StringTest> lowerTests = slice<StringTest>([
+internal static slice<StringTest> lowerTests = [
     new("", ""),
     new("abc", "abc"),
     new("AbC123", "abc123"),
@@ -718,12 +692,12 @@ internal static slice<StringTest> lowerTests = slice<StringTest>([
     new("LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS", "long\u0250string\u0250with\u0250nonascii\u0250chars"),
     new("\u2C6D\u2C6D\u2C6D\u2C6D\u2C6D", "\u0251\u0251\u0251\u0251\u0251"), // shrinks one byte per char
     new("A\u0080\U0010FFFF", "a\u0080\U0010FFFF")                            // test utf8.RuneSelf and utf8.MaxRune
-]);
+];
 
 internal static ref readonly @string space => ref spaceᵇ;
 private static readonly @string spaceᵇ = "\t\v\r\f\n\u0085\u00a0\u2000\u3000"u8;
 
-internal static slice<StringTest> trimSpaceTests = slice<StringTest>([
+internal static slice<StringTest> trimSpaceTests = [
     new("", ""),
     new("abc", "abc"),
     new(space + "abc" + space, "abc"),
@@ -740,11 +714,11 @@ internal static slice<StringTest> trimSpaceTests = slice<StringTest>([
     new(((@string)(new byte[]{0x78, 0x20, 0xc0, 0xc0, 0x20})), ((@string)(new byte[]{0x78, 0x20, 0xc0, 0xc0}))),
     new(((@string)(new byte[]{0x78, 0x20, 0xe2, 0x98, 0xba, 0xc0, 0xc0, 0x20})), ((@string)(new byte[]{0x78, 0x20, 0xe2, 0x98, 0xba, 0xc0, 0xc0}))),
     new("x ☺ ", "x ☺")
-]);
+];
 
 internal static @string tenRunes(rune ch) {
     var r = new slice<rune>(10);
-    foreach (var i in range(r)) {
+    foreach (var i in range(len(r))) {
         r[i] = ch;
     }
     return (@string)r;
@@ -886,24 +860,20 @@ public static void TestMap(ж<testing.T> t) {
 internal static ref readonly @string toUpperˢ => ref toUpperˢᵇ;
 private static readonly @string toUpperˢᵇ = "ToUpper"u8;
 
-public static void TestToUpper(ж<testing.T> t) {
-    runStringTests(t, ToUpper, toUpperˢ, upperTests);
-}
+public static void TestToUpper(ж<testing.T> t) { runStringTests(t, ToUpper, toUpperˢ, upperTests); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string toLowerˢ => ref toLowerˢᵇ;
 private static readonly @string toLowerˢᵇ = "ToLower"u8;
 
-public static void TestToLower(ж<testing.T> t) {
-    runStringTests(t, ToLower, toLowerˢ, lowerTests);
-}
+public static void TestToLower(ж<testing.T> t) { runStringTests(t, ToLower, toLowerˢ, lowerTests); }
 
 partial struct toValidUTF8Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string repl;
     internal @string @out;
 }
-internal static slice<toValidUTF8Testsᴛ1> toValidUTF8Tests = slice<toValidUTF8Testsᴛ1>([
+internal static slice<toValidUTF8Testsᴛ1> toValidUTF8Tests = [
     new("", "\uFFFD", ""),
     new("abc", "\uFFFD", "abc"),
     new("\uFDDD", "\uFFFD", "\uFDDD"),
@@ -918,10 +888,10 @@ internal static slice<toValidUTF8Testsᴛ1> toValidUTF8Tests = slice<toValidUTF8
     new(((@string)(new byte[]{0xf0, 0x80, 0x80, 0xaf})), "☺", "☺"),
     new(((@string)(new byte[]{0xf8, 0x80, 0x80, 0x80, 0xaf})), "\uFFFD", "\uFFFD"),
     new(((@string)(new byte[]{0xfc, 0x80, 0x80, 0x80, 0x80, 0xaf})), "\uFFFD", "\uFFFD")
-]);
+];
 
 public static void TestToValidUTF8(ж<testing.T> t) {
-    foreach (var (_, tc) in toValidUTF8Tests) {
+    foreach (var (_, tc) in range(toValidUTF8Tests)) {
         @string got = ToValidUTF8(tc.@in, tc.repl);
         if (got != tc.@out) {
             t.Errorf("ToValidUTF8(%q, %q) = %q; want %q", tc.@in, tc.repl, got, tc.@out);
@@ -930,7 +900,7 @@ public static void TestToValidUTF8(ж<testing.T> t) {
 }
 
 public static void BenchmarkToUpper(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in upperTests) {
+    foreach (var (_, vᴛ1) in range(upperTests)) {
         ref var tc = ref heap(new StringTest(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -947,7 +917,7 @@ public static void BenchmarkToUpper(ж<testing.B> b) {
 }
 
 public static void BenchmarkToLower(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in lowerTests) {
+    foreach (var (_, vᴛ1) in range(lowerTests)) {
         ref var tc = ref heap(new StringTest(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -1007,15 +977,13 @@ public static void TestSpecialCase(ж<testing.T> t) {
 internal static ref readonly @string trimSpaceˢ => ref trimSpaceˢᵇ;
 private static readonly @string trimSpaceˢᵇ = "TrimSpace"u8;
 
-public static void TestTrimSpace(ж<testing.T> t) {
-    runStringTests(t, TrimSpace, trimSpaceˢ, trimSpaceTests);
-}
+public static void TestTrimSpace(ж<testing.T> t) { runStringTests(t, TrimSpace, trimSpaceˢ, trimSpaceTests); }
 
 partial struct trimTestsᴛ1 /*dyn*/ {
     internal @string f;
     internal @string @in, arg, @out;
 }
-internal static slice<trimTestsᴛ1> trimTests = slice<trimTestsᴛ1>([
+internal static slice<trimTestsᴛ1> trimTests = [
     new("Trim", "abba", "a", "bb"),
     new("Trim", "abba", "ab", ""),
     new("TrimLeft", "abba", "ab", ""),
@@ -1046,10 +1014,10 @@ internal static slice<trimTestsᴛ1> trimTests = slice<trimTestsᴛ1>([
     new("TrimPrefix", "aabb", "b", "aabb"),
     new("TrimSuffix", "aabb", "a", "aabb"),
     new("TrimSuffix", "aabb", "b", "aab")
-]);
+];
 
 public static void TestTrim(ж<testing.T> t) {
-    foreach (var (_, tc) in trimTests) {
+    foreach (var (_, tc) in range(trimTests)) {
         @string name = tc.f;
         Func<@string, @string, @string> f = default;
         var exprᴛ1 = name;
@@ -1091,7 +1059,7 @@ public static void BenchmarkTrim(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, tc) in trimTests) {
+        foreach (var (_, tc) in range(trimTests)) {
             @string name = tc.f;
             Func<@string, @string, @string> f = default;
             var exprᴛ1 = name;
@@ -1143,7 +1111,7 @@ public static void BenchmarkToValidUTF8(ж<testing.B> Ꮡb) {
     ]);
     @string replacement = "\uFFFD";
     b.ResetTimer();
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new BenchmarkToValidUTF8_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1162,11 +1130,8 @@ partial struct predicate {
 }
 
 internal static predicate isSpace = new predicate(Δunicode.IsSpace, "IsSpace");
-
 internal static predicate isDigit = new predicate(Δunicode.IsDigit, "IsDigit");
-
 internal static predicate isUpper = new predicate(Δunicode.IsUpper, "IsUpper");
-
 internal static predicate isValidRune = new predicate(
     (rune r) => r != utf8.RuneError,
     "IsValidRune"
@@ -1233,13 +1198,13 @@ internal partial struct TestTrimFunc_trimmers /*dyn*/ {
 }
 
 public static void TestTrimFunc(ж<testing.T> t) {
-    foreach (var (_, tc) in trimFuncTests) {
+    foreach (var (_, tc) in range(trimFuncTests)) {
         var trimmers = slice<TestTrimFunc_trimmers>([
             new("TrimFunc", TrimFunc, tc.trimOut),
             new("TrimLeftFunc", TrimLeftFunc, tc.leftOut),
             new("TrimRightFunc", TrimRightFunc, tc.rightOut)
         ]);
-        foreach (var (_, trimmer) in trimmers) {
+        foreach (var (_, trimmer) in range(trimmers)) {
             @string actual = trimmer.trim(tc.@in, tc.f.f);
             if (actual != trimmer.@out) {
                 t.Errorf("%s(%q, %q) = %q; want %q", trimmer.name, tc.@in, tc.f.name, actual, trimmer.@out);
@@ -1276,7 +1241,7 @@ internal static slice<indexFuncTestsᴛ1> indexFuncTests = slice<indexFuncTests�
 ]);
 
 public static void TestIndexFunc(ж<testing.T> t) {
-    foreach (var (_, tc) in indexFuncTests) {
+    foreach (var (_, tc) in range(indexFuncTests)) {
         nint first = IndexFunc(tc.@in, tc.f.f);
         if (first != tc.first) {
             t.Errorf("IndexFunc(%q, %s) = %d; want %d", tc.@in, tc.f.name, first, tc.first);
@@ -1294,7 +1259,7 @@ internal static bool equal(@string m, @string s1, @string s2, ж<testing.T> t) {
     }
     var e1 = Split(s1, ""u8);
     var e2 = Split(s2, ""u8);
-    foreach (var (i, c1) in e1) {
+    foreach (var (i, c1) in range(e1)) {
         if (i >= len(e2)) {
             break;
         }
@@ -1324,7 +1289,7 @@ public static void TestCaseConsistency(ж<testing.T> t) {
         numRunes = 1000;
     }
     var a = new slice<rune>(numRunes);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = (rune)i;
     }
     @string s = (@string)a;
@@ -1366,10 +1331,9 @@ public static void TestCaseConsistency(ж<testing.T> t) {
 }
 
 internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << 16))) + "z"u8;
-
 internal static @string longSpaces = func(@string () => {
     var b = new slice<byte>(200);
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = (byte)' ';
     }
     return (@string)b;
@@ -1404,7 +1368,7 @@ internal static ref readonly @string repeatSˢ => ref repeatSˢᵇ;
 private static readonly @string repeatSˢᵇ = "Repeat(s)"u8;
 
 public static void TestRepeat(ж<testing.T> t) {
-    foreach (var (_, tt) in RepeatTests) {
+    foreach (var (_, tt) in range(RepeatTests)) {
         @string a = Repeat(tt.@in, tt.count);
         if (!equal(repeatSˢ, a, tt.@out, t)) {
             t.Errorf("Repeat(%v, %d) = %v; want %v", tt.@in, tt.count, a, tt.@out);
@@ -1418,19 +1382,17 @@ internal static error /*err*/ repeat(@string s, nint count) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    switch (r.type()) {
-                    case {} Δv when Δv._<error>(out var v): {
-                        err = v;
-                        break;
-                    }
-                    default: {
-                        var v = r;
-                        err = fmt.Errorf("%s"u8, v);
-                        break;
-                    }}
+            var r = recover(); if (r != nil) {
+                switch (r.type()) {
+                case {} Δv when Δv._<error>(out var v): {
+                    err = v;
+                    break;
                 }
+                default: {
+                    var v = r;
+                    err = fmt.Errorf("%s"u8, v);
+                    break;
+                }}
             }
         }, ref ᒐ);
 
@@ -1454,7 +1416,7 @@ internal partial struct TestRepeatCatchesOverflow_testCase /*dyn*/ {
 // See Issue golang.org/issue/16237
 public static void TestRepeatCatchesOverflow(ж<testing.T> t) {
     void runTestCases(@string prefix, slice<TestRepeatCatchesOverflow_testCase> tests) {
-        foreach (var (i, tt) in tests) {
+        foreach (var (i, tt) in range(tests)) {
             var err = repeat(tt.s, tt.count);
             if (tt.errStr == ""u8) {
                 if (err != nil) {
@@ -1495,7 +1457,7 @@ internal static bool runesEqual(slice<rune> a, slice<rune> b) {
     if (len(a) != len(b)) {
         return false;
     }
-    foreach (var (i, r) in a) {
+    foreach (var (i, r) in range(a)) {
         if (r != b[i]) {
             return false;
         }
@@ -1508,19 +1470,19 @@ partial struct RunesTestsᴛ1 /*dyn*/ {
     internal slice<rune> @out;
     internal bool lossy;
 }
-public static readonly ж<slice<RunesTestsᴛ1>> ᏑRunesTests = new StaticBox<slice<RunesTestsᴛ1>>(slice<RunesTestsᴛ1>([
-    new("", slice<rune>([]), false),
-    new(" ", slice<rune>([32]), false),
-    new("ABC", slice<rune>([65, 66, 67]), false),
-    new("abc", slice<rune>([97, 98, 99]), false),
-    new("\u65e5\u672c\u8a9e", slice<rune>([26085, 26412, 35486]), false),
-    new(((@string)(new byte[]{0x61, 0x62, 0x80, 0x63})), slice<rune>([97, 98, 0xFFFD, 99]), true),
-    new(((@string)(new byte[]{0x61, 0x62, 0xc0, 0x63})), slice<rune>([97, 98, 0xFFFD, 99]), true)
-]));
+public static readonly ж<slice<RunesTestsᴛ1>> ᏑRunesTests = new StaticBox<slice<RunesTestsᴛ1>>([
+    new("", [], false),
+    new(" ", [32], false),
+    new("ABC", [65, 66, 67], false),
+    new("abc", [97, 98, 99], false),
+    new("\u65e5\u672c\u8a9e", [26085, 26412, 35486], false),
+    new(((@string)(new byte[]{0x61, 0x62, 0x80, 0x63})), [97, 98, 0xFFFD, 99], true),
+    new(((@string)(new byte[]{0x61, 0x62, 0xc0, 0x63})), [97, 98, 0xFFFD, 99], true)
+]);
 public static ref slice<RunesTestsᴛ1> RunesTests => ref ((StaticBox<slice<RunesTestsᴛ1>>)ᏑRunesTests).ValueSlot;
 
 public static void TestRunes(ж<testing.T> t) {
-    foreach (var (_, tt) in RunesTests) {
+    foreach (var (_, tt) in range(RunesTests)) {
         var a = slice<rune>(tt.@in);
         if (!runesEqual(a, tt.@out)) {
             t.Errorf("[]rune(%q) = %v; want %v", tt.@in, a, tt.@out);
@@ -1538,7 +1500,7 @@ public static void TestRunes(ж<testing.T> t) {
 
 public static void TestReadByte(ж<testing.T> t) {
     var testStrings = slice<@string>(["", abcd, faces, commas]);
-    foreach (var (_, s) in testStrings) {
+    foreach (var (_, s) in range(testStrings)) {
         var reader = NewReader(s);
         {
             var e = reader.UnreadByte(); if (e == nil) {
@@ -1580,7 +1542,7 @@ public static void TestReadByte(ж<testing.T> t) {
 
 public static void TestReadRune(ж<testing.T> t) {
     var testStrings = slice<@string>(["", abcd, faces, commas]);
-    foreach (var (_, s) in testStrings) {
+    foreach (var (_, s) in range(testStrings)) {
         var reader = NewReader(s);
         {
             var e = reader.UnreadRune(); if (e == nil) {
@@ -1628,9 +1590,9 @@ partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<strings.Reader>> f;
 }
-public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTests = new StaticBox<slice<UnreadRuneErrorTestsᴛ1>>(slice<UnreadRuneErrorTestsᴛ1>([
+public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTests = new StaticBox<slice<UnreadRuneErrorTestsᴛ1>>([
     new("Read", (ж<strings.Reader> r) => {
-        r.Read(slice<byte>([0]));
+        r.Read([0]);
     }),
     new("ReadByte", (ж<strings.Reader> r) => {
         r.ReadByte();
@@ -1644,17 +1606,15 @@ public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTes
     new("WriteTo", (ж<strings.Reader> r) => {
         r.WriteTo(new strings_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())));
     })
-]));
+]);
 public static ref slice<UnreadRuneErrorTestsᴛ1> UnreadRuneErrorTests => ref ((StaticBox<slice<UnreadRuneErrorTestsᴛ1>>)ᏑUnreadRuneErrorTests).ValueSlot;
 
 public static void TestUnreadRuneError(ж<testing.T> t) {
-    foreach (var (_, tt) in UnreadRuneErrorTests) {
+    foreach (var (_, tt) in range(UnreadRuneErrorTests)) {
         var reader = NewReader("0123456789");
-        {
-            var (_, _, errΔ1) = reader.ReadRune(); if (errΔ1 != nil) {
-                // should not happen
-                t.Fatal(errΔ1);
-            }
+        var (_, _, errΔ1) = reader.ReadRune(); if (errΔ1 != nil) {
+            // should not happen
+            t.Fatal(errΔ1);
         }
         tt.f(reader);
         var err = reader.UnreadRune();
@@ -1670,7 +1630,7 @@ partial struct ReplaceTestsᴛ1 /*dyn*/ {
     internal nint n;
     internal @string @out;
 }
-public static readonly ж<slice<ReplaceTestsᴛ1>> ᏑReplaceTests = new StaticBox<slice<ReplaceTestsᴛ1>>(slice<ReplaceTestsᴛ1>([
+public static readonly ж<slice<ReplaceTestsᴛ1>> ᏑReplaceTests = new StaticBox<slice<ReplaceTestsᴛ1>>([
     new("hello", "l", "L", 0, "hello"),
     new("hello", "l", "L", -1, "heLLo"),
     new("hello", "x", "X", -1, "hello"),
@@ -1690,11 +1650,11 @@ public static readonly ж<slice<ReplaceTestsᴛ1>> ᏑReplaceTests = new StaticB
     new("banana", "a", "a", -1, "banana"),
     new("banana", "a", "a", 1, "banana"),
     new("☺☻☹", "", "<>", -1, "<>☺<>☻<>☹<>")
-]));
+]);
 public static ref slice<ReplaceTestsᴛ1> ReplaceTests => ref ((StaticBox<slice<ReplaceTestsᴛ1>>)ᏑReplaceTests).ValueSlot;
 
 public static void TestReplace(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in ReplaceTests) {
+    foreach (var (_, vᴛ1) in range(ReplaceTests)) {
         ref var tt = ref heap(new ReplaceTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1724,7 +1684,7 @@ public static void TestReplace(ж<testing.T> t) {
 public static void FuzzReplace(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, tt) in ReplaceTests) {
+    foreach (var (_, tt) in range(ReplaceTests)) {
         f.Add(tt.@in, tt.old, tt.@new, tt.n);
     }
     Ꮡf.Fuzz((ж<testing.T> t, @string @in, @string old, @string @new, nint n) => {
@@ -1763,17 +1723,15 @@ public static void FuzzReplace(ж<testing.F> Ꮡf) {
             }
             return @out.String();
         }
-        {
-            @string simple = differentImpl(@in, old, @new, n);
-            @string replace = Replace(@in, old, @new, n); if (simple != replace) {
-                t.Errorf("The two implementations do not match %q != %q for Replace(%q, %q, %q, %d)", simple, replace, @in, old, @new, n);
-            }
+        @string simple = differentImpl(@in, old, @new, n);
+        @string replace = Replace(@in, old, @new, n); if (simple != replace) {
+            t.Errorf("The two implementations do not match %q != %q for Replace(%q, %q, %q, %d)", simple, replace, @in, old, @new, n);
         }
     });
 }
 
 public static void BenchmarkReplace(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in ReplaceTests) {
+    foreach (var (_, vᴛ1) in range(ReplaceTests)) {
         ref var tt = ref heap(new ReplaceTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1791,7 +1749,7 @@ public static void BenchmarkReplace(ж<testing.B> b) {
 partial struct TitleTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-public static readonly ж<slice<TitleTestsᴛ1>> ᏑTitleTests = new StaticBox<slice<TitleTestsᴛ1>>(slice<TitleTestsᴛ1>([
+public static readonly ж<slice<TitleTestsᴛ1>> ᏑTitleTests = new StaticBox<slice<TitleTestsᴛ1>>([
     new("", ""),
     new("a", "A"),
     new(" aaa aaa aaa ", " Aaa Aaa Aaa "),
@@ -1801,15 +1759,13 @@ public static readonly ж<slice<TitleTestsᴛ1>> ᏑTitleTests = new StaticBox<s
     new("ÿøû", "Ÿøû"),
     new("with_underscore", "With_underscore"),
     new(((@string)(new byte[]{0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x20, 0xe2, 0x80, 0xa8, 0x20, 0x6c, 0x69, 0x6e, 0x65, 0x20, 0x73, 0x65, 0x70, 0x61, 0x72, 0x61, 0x74, 0x6f, 0x72})), ((@string)(new byte[]{0x55, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x20, 0xe2, 0x80, 0xa8, 0x20, 0x4c, 0x69, 0x6e, 0x65, 0x20, 0x53, 0x65, 0x70, 0x61, 0x72, 0x61, 0x74, 0x6f, 0x72})))
-]));
+]);
 public static ref slice<TitleTestsᴛ1> TitleTests => ref ((StaticBox<slice<TitleTestsᴛ1>>)ᏑTitleTests).ValueSlot;
 
 public static void TestTitle(ж<testing.T> t) {
-    foreach (var (_, tt) in TitleTests) {
-        {
-            @string s = Title(tt.@in); if (s != tt.@out) {
-                t.Errorf("Title(%q) = %q, want %q", tt.@in, s, tt.@out);
-            }
+    foreach (var (_, tt) in range(TitleTests)) {
+        @string s = Title(tt.@in); if (s != tt.@out) {
+            t.Errorf("Title(%q) = %q, want %q", tt.@in, s, tt.@out);
         }
     }
 }
@@ -1818,7 +1774,7 @@ partial struct ContainsTestsᴛ1 /*dyn*/ {
     internal @string str, substr;
     internal bool expected;
 }
-public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsTests = new StaticBox<slice<ContainsTestsᴛ1>>(slice<ContainsTestsᴛ1>([
+public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsTests = new StaticBox<slice<ContainsTestsᴛ1>>([
     new("abc", "bc", true),
     new("abc", "bcd", false),
     new("abc", "", true),
@@ -1887,11 +1843,11 @@ public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsTests = new Stati
     new("xx0123x", "01234", false),                        // 5-7
     new("xx01234567x", "012345678", false),                // 9-15
     new("xx0123456789ABCDEFx", "0123456789ABCDEFG", false) // 17-31, issue 15679
-]));
+]);
 public static ref slice<ContainsTestsᴛ1> ContainsTests => ref ((StaticBox<slice<ContainsTestsᴛ1>>)ᏑContainsTests).ValueSlot;
 
 public static void TestContains(ж<testing.T> t) {
-    foreach (var (_, ct) in ContainsTests) {
+    foreach (var (_, ct) in range(ContainsTests)) {
         if (Contains(ct.str, ct.substr) != ct.expected) {
             t.Errorf("Contains(%s, %s) = %v, want %v",
                 ct.str, ct.substr, !ct.expected, ct.expected);
@@ -1899,7 +1855,7 @@ public static void TestContains(ж<testing.T> t) {
     }
 }
 
-public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsAnyTests = new StaticBox<slice<ContainsTestsᴛ1>>(slice<ContainsTestsᴛ1>([
+public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsAnyTests = new StaticBox<slice<ContainsTestsᴛ1>>([
     new("", "", false),
     new("", "a", false),
     new("", "abc", false),
@@ -1911,11 +1867,11 @@ public static readonly ж<slice<ContainsTestsᴛ1>> ᏑContainsAnyTests = new St
     new("a☺b☻c☹d", "uvw☻xyz", true),
     new("aRegExp*", ".(|)*+?^$[]", true),
     new(dots + dots + dots, " ", false)
-]));
+]);
 public static ref slice<ContainsTestsᴛ1> ContainsAnyTests => ref ((StaticBox<slice<ContainsTestsᴛ1>>)ᏑContainsAnyTests).ValueSlot;
 
 public static void TestContainsAny(ж<testing.T> t) {
-    foreach (var (_, ct) in ContainsAnyTests) {
+    foreach (var (_, ct) in range(ContainsAnyTests)) {
         if (ContainsAny(ct.str, ct.substr) != ct.expected) {
             t.Errorf("ContainsAny(%s, %s) = %v, want %v",
                 ct.str, ct.substr, !ct.expected, ct.expected);
@@ -1928,7 +1884,7 @@ partial struct ContainsRuneTestsᴛ1 /*dyn*/ {
     internal rune r;
     internal bool expected;
 }
-public static readonly ж<slice<ContainsRuneTestsᴛ1>> ᏑContainsRuneTests = new StaticBox<slice<ContainsRuneTestsᴛ1>>(slice<ContainsRuneTestsᴛ1>([
+public static readonly ж<slice<ContainsRuneTestsᴛ1>> ᏑContainsRuneTests = new StaticBox<slice<ContainsRuneTestsᴛ1>>([
     new("", 'a', false),
     new("a", 'a', true),
     new("aaa", 'a', true),
@@ -1937,11 +1893,11 @@ public static readonly ж<slice<ContainsRuneTestsᴛ1>> ᏑContainsRuneTests = n
     new("a☺b☻c☹d", 'x', false),
     new("a☺b☻c☹d", '☻', true),
     new("aRegExp*", '*', true)
-]));
+]);
 public static ref slice<ContainsRuneTestsᴛ1> ContainsRuneTests => ref ((StaticBox<slice<ContainsRuneTestsᴛ1>>)ᏑContainsRuneTests).ValueSlot;
 
 public static void TestContainsRune(ж<testing.T> t) {
-    foreach (var (_, ct) in ContainsRuneTests) {
+    foreach (var (_, ct) in range(ContainsRuneTests)) {
         if (ContainsRune(ct.str, ct.r) != ct.expected) {
             t.Errorf("ContainsRune(%q, %q) = %v, want %v",
                 ct.str, ct.r, !ct.expected, ct.expected);
@@ -1950,7 +1906,7 @@ public static void TestContainsRune(ж<testing.T> t) {
 }
 
 public static void TestContainsFunc(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in ContainsRuneTests) {
+    foreach (var (_, vᴛ1) in range(ContainsRuneTests)) {
         ref var ct = ref heap(new ContainsRuneTestsᴛ1(), out var Ꮡct);
         ct = vᴛ1;
 
@@ -1966,7 +1922,7 @@ partial struct EqualFoldTestsᴛ1 /*dyn*/ {
     internal @string s, t;
     internal bool @out;
 }
-public static readonly ж<slice<EqualFoldTestsᴛ1>> ᏑEqualFoldTests = new StaticBox<slice<EqualFoldTestsᴛ1>>(slice<EqualFoldTestsᴛ1>([
+public static readonly ж<slice<EqualFoldTestsᴛ1>> ᏑEqualFoldTests = new StaticBox<slice<EqualFoldTestsᴛ1>>([
     new("abc", "abc", true),
     new("ABcd", "ABcd", true),
     new("123abc", "123ABC", true),
@@ -1980,13 +1936,13 @@ public static readonly ж<slice<EqualFoldTestsᴛ1>> ᏑEqualFoldTests = new Sta
     new("abcdefghijKz", "abcdefghij\u212Ay", false),
     new("1", "2", false),
     new("utf-8", "US-ASCII", false)
-]));
+]);
 public static ref slice<EqualFoldTestsᴛ1> EqualFoldTests => ref ((StaticBox<slice<EqualFoldTestsᴛ1>>)ᏑEqualFoldTests).ValueSlot;
 
 public static void TestEqualFold(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, tt) in EqualFoldTests) {
+    foreach (var (_, tt) in range(EqualFoldTests)) {
         {
             var @out = EqualFold(tt.s, tt.t); if (@out != tt.@out) {
                 Ꮡt.Errorf("EqualFold(%#q, %#q) = %v, want %v", tt.s, tt.t, @out, tt.@out);
@@ -2022,11 +1978,9 @@ private static readonly @string s2ᶜᵇ = "abcDefGhijKz"u8;
 public static void BenchmarkEqualFold(ж<testing.B> b) {
     b.Run(testsˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            foreach (var (_, tt) in EqualFoldTests) {
-                {
-                    var @out = EqualFold(tt.s, tt.t); if (@out != tt.@out) {
-                        bΔ1.Fatal(wrongResultˢ);
-                    }
+            foreach (var (_, tt) in range(EqualFoldTests)) {
+                var @out = EqualFold(tt.s, tt.t); if (@out != tt.@out) {
+                    bΔ1.Fatal(wrongResultˢ);
                 }
             }
         }
@@ -2058,7 +2012,7 @@ partial struct CountTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal nint num;
 }
-public static readonly ж<slice<CountTestsᴛ1>> ᏑCountTests = new StaticBox<slice<CountTestsᴛ1>>(slice<CountTestsᴛ1>([
+public static readonly ж<slice<CountTestsᴛ1>> ᏑCountTests = new StaticBox<slice<CountTestsᴛ1>>([
     new("", "", 1),
     new("", "notempty", 0),
     new("notempty", "", 9),
@@ -2069,15 +2023,13 @@ public static readonly ж<slice<CountTestsᴛ1>> ᏑCountTests = new StaticBox<s
     new("equal", "equal", 1),
     new("abc1231231123q", "123", 3),
     new("11111", "11", 2)
-]));
+]);
 public static ref slice<CountTestsᴛ1> CountTests => ref ((StaticBox<slice<CountTestsᴛ1>>)ᏑCountTests).ValueSlot;
 
 public static void TestCount(ж<testing.T> t) {
-    foreach (var (_, tt) in CountTests) {
-        {
-            nint num = Count(tt.s, tt.sep); if (num != tt.num) {
-                t.Errorf("Count(%q, %q) = %d, want %d", tt.s, tt.sep, num, tt.num);
-            }
+    foreach (var (_, tt) in range(CountTests)) {
+        nint num = Count(tt.s, tt.sep); if (num != tt.num) {
+            t.Errorf("Count(%q, %q) = %d, want %d", tt.s, tt.sep, num, tt.num);
         }
     }
 }
@@ -2087,7 +2039,7 @@ partial struct cutTestsᴛ1 /*dyn*/ {
     internal @string before, after;
     internal bool found;
 }
-internal static slice<cutTestsᴛ1> cutTests = slice<cutTestsᴛ1>([
+internal static slice<cutTestsᴛ1> cutTests = [
     new("abc", "b", "a", "c", true),
     new("abc", "a", "", "bc", true),
     new("abc", "c", "ab", "", true),
@@ -2096,14 +2048,12 @@ internal static slice<cutTestsᴛ1> cutTests = slice<cutTestsᴛ1>([
     new("abc", "d", "abc", "", false),
     new("", "d", "", "", false),
     new("", "", "", "", true)
-]);
+];
 
 public static void TestCut(ж<testing.T> t) {
-    foreach (var (_, tt) in cutTests) {
-        {
-            var (before, after, found) = Cut(tt.s, tt.sep); if (before != tt.before || after != tt.after || found != tt.found) {
-                t.Errorf("Cut(%q, %q) = %q, %q, %v, want %q, %q, %v", tt.s, tt.sep, before, after, found, tt.before, tt.after, tt.found);
-            }
+    foreach (var (_, tt) in range(cutTests)) {
+        var (before, after, found) = Cut(tt.s, tt.sep); if (before != tt.before || after != tt.after || found != tt.found) {
+            t.Errorf("Cut(%q, %q) = %q, %q, %v, want %q, %q, %v", tt.s, tt.sep, before, after, found, tt.before, tt.after, tt.found);
         }
     }
 }
@@ -2113,21 +2063,19 @@ partial struct cutPrefixTestsᴛ1 /*dyn*/ {
     internal @string after;
     internal bool found;
 }
-internal static slice<cutPrefixTestsᴛ1> cutPrefixTests = slice<cutPrefixTestsᴛ1>([
+internal static slice<cutPrefixTestsᴛ1> cutPrefixTests = [
     new("abc", "a", "bc", true),
     new("abc", "abc", "", true),
     new("abc", "", "abc", true),
     new("abc", "d", "abc", false),
     new("", "d", "", false),
     new("", "", "", true)
-]);
+];
 
 public static void TestCutPrefix(ж<testing.T> t) {
-    foreach (var (_, tt) in cutPrefixTests) {
-        {
-            var (after, found) = CutPrefix(tt.s, tt.sep); if (after != tt.after || found != tt.found) {
-                t.Errorf("CutPrefix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, after, found, tt.after, tt.found);
-            }
+    foreach (var (_, tt) in range(cutPrefixTests)) {
+        var (after, found) = CutPrefix(tt.s, tt.sep); if (after != tt.after || found != tt.found) {
+            t.Errorf("CutPrefix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, after, found, tt.after, tt.found);
         }
     }
 }
@@ -2137,21 +2085,19 @@ partial struct cutSuffixTestsᴛ1 /*dyn*/ {
     internal @string before;
     internal bool found;
 }
-internal static slice<cutSuffixTestsᴛ1> cutSuffixTests = slice<cutSuffixTestsᴛ1>([
+internal static slice<cutSuffixTestsᴛ1> cutSuffixTests = [
     new("abc", "bc", "a", true),
     new("abc", "abc", "", true),
     new("abc", "", "abc", true),
     new("abc", "d", "abc", false),
     new("", "d", "", false),
     new("", "", "", true)
-]);
+];
 
 public static void TestCutSuffix(ж<testing.T> t) {
-    foreach (var (_, tt) in cutSuffixTests) {
-        {
-            var (before, found) = CutSuffix(tt.s, tt.sep); if (before != tt.before || found != tt.found) {
-                t.Errorf("CutSuffix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, before, found, tt.before, tt.found);
-            }
+    foreach (var (_, tt) in range(cutSuffixTests)) {
+        var (before, found) = CutSuffix(tt.s, tt.sep); if (before != tt.before || found != tt.found) {
+            t.Errorf("CutSuffix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, before, found, tt.before, tt.found);
         }
     }
 }
@@ -2200,26 +2146,17 @@ internal static void benchmarkCountHard(ж<testing.B> Ꮡb, @string sep) {
     }
 }
 
-public static void BenchmarkIndexHard1(ж<testing.B> b) {
-    benchmarkIndexHard(b, "<>");
-}
-
+public static void BenchmarkIndexHard1(ж<testing.B> b) { benchmarkIndexHard(b, "<>"); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string preˢ => ref preˢᵇ;
 private static readonly @string preˢᵇ = "</pre>"u8;
 
-public static void BenchmarkIndexHard2(ж<testing.B> b) {
-    benchmarkIndexHard(b, preˢ);
-}
-
+public static void BenchmarkIndexHard2(ж<testing.B> b) { benchmarkIndexHard(b, preˢ); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string bHelloWorldBˢ => ref bHelloWorldBˢᵇ;
 private static readonly @string bHelloWorldBˢᵇ = "<b>hello world</b>"u8;
 
-public static void BenchmarkIndexHard3(ж<testing.B> b) {
-    benchmarkIndexHard(b, bHelloWorldBˢ);
-}
-
+public static void BenchmarkIndexHard3(ж<testing.B> b) { benchmarkIndexHard(b, bHelloWorldBˢ); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string preBHelloBStrongWorldˢ => ref preBHelloBStrongWorldˢᵇ;
 private static readonly @string preBHelloBStrongWorldˢᵇ = "<pre><b>hello</b><strong>world</strong></pre>"u8;
@@ -2228,32 +2165,15 @@ public static void BenchmarkIndexHard4(ж<testing.B> b) {
     benchmarkIndexHard(b, preBHelloBStrongWorldˢ);
 }
 
-public static void BenchmarkLastIndexHard1(ж<testing.B> b) {
-    benchmarkLastIndexHard(b, "<>");
-}
+public static void BenchmarkLastIndexHard1(ж<testing.B> b) { benchmarkLastIndexHard(b, "<>"); }
+public static void BenchmarkLastIndexHard2(ж<testing.B> b) { benchmarkLastIndexHard(b, preˢ); }
+public static void BenchmarkLastIndexHard3(ж<testing.B> b) { benchmarkLastIndexHard(b, bHelloWorldBˢ); }
 
-public static void BenchmarkLastIndexHard2(ж<testing.B> b) {
-    benchmarkLastIndexHard(b, preˢ);
-}
-
-public static void BenchmarkLastIndexHard3(ж<testing.B> b) {
-    benchmarkLastIndexHard(b, bHelloWorldBˢ);
-}
-
-public static void BenchmarkCountHard1(ж<testing.B> b) {
-    benchmarkCountHard(b, "<>");
-}
-
-public static void BenchmarkCountHard2(ж<testing.B> b) {
-    benchmarkCountHard(b, preˢ);
-}
-
-public static void BenchmarkCountHard3(ж<testing.B> b) {
-    benchmarkCountHard(b, bHelloWorldBˢ);
-}
+public static void BenchmarkCountHard1(ж<testing.B> b) { benchmarkCountHard(b, "<>"); }
+public static void BenchmarkCountHard2(ж<testing.B> b) { benchmarkCountHard(b, preˢ); }
+public static void BenchmarkCountHard3(ж<testing.B> b) { benchmarkCountHard(b, bHelloWorldBˢ); }
 
 internal static @string benchInputTorture = Repeat("ABC", 1 << 10) + "123"u8 + Repeat("ABC", 1 << 10);
-
 internal static @string benchNeedleTorture = Repeat("ABC", (1 << 10) + 1);
 
 public static void BenchmarkIndexTorture(ж<testing.B> Ꮡb) {
@@ -2296,7 +2216,7 @@ public static void BenchmarkCountByte(ж<testing.B> b) {
             Count(benchStrΔ1, "=");
         }
     }
-    foreach (var (_, size) in indexSizes) {
+    foreach (var (_, size) in range(indexSizes)) {
         var benchFuncʗ1 = benchFunc;
         b.Run(fmt.Sprintf("%d"u8, size), (ж<testing.B> bΔ2) => {
             benchFuncʗ1(bΔ2, benchStr.slice(0, size));
@@ -2308,7 +2228,7 @@ internal static Func<@string> makeFieldsInput = () => {
     var x = new slice<byte>((1 << 20));
     // Input is ~10% space, ~10% 2-byte UTF-8, rest ASCII non-space.
     var r = rand.New(rand.NewSource(99));
-    foreach (var i in range(x)) {
+    foreach (var i in range(len(x))) {
         var exprᴛ1 = r.Intn(10);
         var matchᴛ1 = false;
         if (exprᴛ1 is 0) { matchᴛ1 = true;
@@ -2334,7 +2254,7 @@ internal static Func<@string> makeFieldsInputASCII = () => {
     var x = new slice<byte>((1 << 20));
     // Input is ~10% space, rest ASCII non-space.
     var r = rand.New(rand.NewSource(99));
-    foreach (var i in range(x)) {
+    foreach (var i in range(len(x))) {
         if (r.Intn(10) == 0) {
             x[i] = (byte)' ';
         } else {
@@ -2350,7 +2270,7 @@ internal static slice<mapdataᴛ1> stringdata = slice<mapdataᴛ1>([
 ]);
 
 public static void BenchmarkFields(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in stringdata) {
+    foreach (var (_, vᴛ1) in range(stringdata)) {
         ref var sd = ref heap(new mapdataᴛ1(), out var Ꮡsd);
         sd = vᴛ1;
 
@@ -2373,7 +2293,7 @@ public static void BenchmarkFields(ж<testing.B> b) {
 }
 
 public static void BenchmarkFieldsFunc(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in stringdata) {
+    foreach (var (_, vᴛ1) in range(stringdata)) {
         ref var sd = ref heap(new mapdataᴛ1(), out var Ꮡsd);
         sd = vᴛ1;
 
@@ -2437,8 +2357,8 @@ public static void BenchmarkSplitNMultiByteSeparator(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkRepeat(ж<testing.B> b) {
     @string s = "0123456789";
-    foreach (var (_, n) in slice<nint>([5, 10])) {
-        foreach (var (_, c) in slice<nint>([0, 1, 2, 6])) {
+    foreach (var (_, n) in range(slice<nint>([5, 10]))) {
+        foreach (var (_, c) in range(slice<nint>([0, 1, 2, 6]))) {
             b.Run(fmt.Sprintf("%dx%d"u8, n, c), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     Repeat(s.slice(0, n), c);
@@ -2451,7 +2371,7 @@ public static void BenchmarkRepeat(ж<testing.B> b) {
 public static void BenchmarkRepeatLarge(ж<testing.B> b) {
     @string s = Repeat("@", 8 * 1024);
     for (nint j = 8; j <= 30; j++) {
-        foreach (var (_, k) in slice<nint>([1, 16, 4097])) {
+        foreach (var (_, k) in range(slice<nint>([1, 16, 4097]))) {
             @string sΔ1 = s.slice(0, k);
             nint n = quo((((nint)1).Lsh((int64)(j))), k);
             if (n == 0) {
@@ -2575,7 +2495,7 @@ public static void BenchmarkTrimByte(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkIndexPeriodic(ж<testing.B> b) {
     @string key = "aa";
-    foreach (var (_, skip) in new nint[]{2, 4, 8, 16, 32, 64}.array()) {
+    foreach (var (_, skip) in range(new nint[]{2, 4, 8, 16, 32, 64}.array())) {
         b.Run(fmt.Sprintf("IndexPeriodic%d"u8, skip), (ж<testing.B> bΔ1) => {
             @string s = Repeat("a"u8 + Repeat(" ", skip - 1), (1 << 16) / skip);
             for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -2615,7 +2535,7 @@ public static void BenchmarkTrimSpace(ж<testing.B> b) {
         new("SomeNonASCII", "    \u2000\t\r\n x\t\t\r\r\ny\n \u3000    "),
         new("JustNonASCII", "\u2000\u2000\u2000☺☺☺☺\u3000\u3000\u3000")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new BenchmarkTrimSpace_tests(), out var Ꮡtest);
         test = vᴛ1;
 

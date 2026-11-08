@@ -62,12 +62,10 @@ public static void TestTCPListenerSpecificMethods(ж<testing.T> t) {
             }
         }
 
-        {
-            var (f, errΔ3) = ln.File(); if (errΔ3 != nil) {
-                condFatalf(t, fileNetˢ, "%v", errΔ3);
-            } else {
-                f.Close();
-            }
+        var (f, errΔ3) = ln.File(); if (errΔ3 != nil) {
+            condFatalf(t, fileNetˢ, "%v", errΔ3);
+        } else {
+            f.Close();
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -93,10 +91,8 @@ public static void TestTCPConnSpecificMethods(ж<testing.T> t) {
         var ls = (Ꮡ(new streamListener(Listener: new global::go.net_package.TCPListenerжListener(ln)))).newLocalServer();
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         (var ra, err) = ResolveTCPAddr(tcp4ˢ, ls.Listener.Addr().String());
@@ -119,16 +115,12 @@ public static void TestTCPConnSpecificMethods(ж<testing.T> t) {
         c.of(global::go.net_package.TCPConn.Ꮡconn).SetReadDeadline(time.Now().Add(someTimeout));
         c.of(global::go.net_package.TCPConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
 
-        {
-            var (_, errΔ2) = c.of(global::go.net_package.TCPConn.Ꮡconn).Write(slice<byte>("TCPCONN TEST"u8)); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = c.of(global::go.net_package.TCPConn.Ꮡconn).Write(slice<byte>("TCPCONN TEST"u8)); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         var rb = new slice<byte>(128);
-        {
-            var (_, errΔ3) = c.of(global::go.net_package.TCPConn.Ꮡconn).Read(rb); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var (_, errΔ3) = c.of(global::go.net_package.TCPConn.Ꮡconn).Read(rb); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
 
         foreach (var errΔ4 in ch) {
@@ -162,40 +154,28 @@ public static void TestUDPConnSpecificMethods(ж<testing.T> t) {
 
         var wb = slice<byte>("UDPCONN TEST"u8);
         var rb = new slice<byte>(128);
-        {
-            var (_, errΔ1) = c.WriteToUDP(wb, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>()); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = c.WriteToUDP(wb, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>()); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, _, errΔ2) = c.ReadFromUDP(rb); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, _, errΔ2) = c.ReadFromUDP(rb); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            var (_, _, errΔ3) = c.WriteMsgUDP(wb, default, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>()); if (errΔ3 != nil) {
-                condFatalf(t, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().Network(), "%v", errΔ3);
-            }
+        var (_, _, errΔ3) = c.WriteMsgUDP(wb, default, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr()._<ж<global::go.net_package.UDPAddr>>()); if (errΔ3 != nil) {
+            condFatalf(t, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().Network(), "%v", errΔ3);
         }
-        {
-            var (_, _, _, _, errΔ4) = c.ReadMsgUDP(rb, default); if (errΔ4 != nil) {
-                condFatalf(t, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().Network(), "%v", errΔ4);
-            }
+        var (_, _, _, _, errΔ4) = c.ReadMsgUDP(rb, default); if (errΔ4 != nil) {
+            condFatalf(t, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().Network(), "%v", errΔ4);
         }
 
-        {
-            var (f, errΔ5) = c.of(global::go.net_package.UDPConn.Ꮡconn).File(); if (errΔ5 != nil) {
-                condFatalf(t, fileNetˢ, "%v", errΔ5);
-            } else {
-                f.Close();
-            }
+        var (f, errΔ5) = c.of(global::go.net_package.UDPConn.Ꮡconn).File(); if (errΔ5 != nil) {
+            condFatalf(t, fileNetˢ, "%v", errΔ5);
+        } else {
+            f.Close();
         }
 
         defer(() => {
-            {
-                var p = recover(); if (p != nil) {
-                    t.Fatalf("panicked: %v", p);
-                }
+            var p = recover(); if (p != nil) {
+                t.Fatalf("panicked: %v", p);
             }
         }, ref ᒐ);
 
@@ -242,19 +222,15 @@ public static void TestIPConnSpecificMethods(ж<testing.T> t) {
         c.of(global::go.net_package.IPConn.Ꮡconn).SetReadBuffer(2048);
         c.of(global::go.net_package.IPConn.Ꮡconn).SetWriteBuffer(2048);
 
-        {
-            var (f, errΔ1) = c.of(global::go.net_package.IPConn.Ꮡconn).File(); if (errΔ1 != nil) {
-                condFatalf(t, fileNetˢ, "%v", errΔ1);
-            } else {
-                f.Close();
-            }
+        var (f, errΔ1) = c.of(global::go.net_package.IPConn.Ꮡconn).File(); if (errΔ1 != nil) {
+            condFatalf(t, fileNetˢ, "%v", errΔ1);
+        } else {
+            f.Close();
         }
 
         defer(() => {
-            {
-                var p = recover(); if (p != nil) {
-                    t.Fatalf("panicked: %v", p);
-                }
+            var p = recover(); if (p != nil) {
+                t.Fatalf("panicked: %v", p);
             }
         }, ref ᒐ);
 
@@ -310,12 +286,10 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> t) {
             }
         }
 
-        {
-            var (f, errΔ3) = ln.File(); if (errΔ3 != nil) {
-                condFatalf(t, fileNetˢ, "%v", errΔ3);
-            } else {
-                f.Close();
-            }
+        var (f, errΔ3) = ln.File(); if (errΔ3 != nil) {
+            condFatalf(t, fileNetˢ, "%v", errΔ3);
+        } else {
+            f.Close();
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -397,60 +371,40 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> t) {
         var rb1 = new slice<byte>(128);
         var rb2 = new slice<byte>(128);
         var rb3 = new slice<byte>(128);
-        {
-            var (_, _, errΔ1) = c1.WriteMsgUnix(wb, default, a2); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, _, errΔ1) = c1.WriteMsgUnix(wb, default, a2); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, _, _, _, errΔ2) = c2.ReadMsgUnix(rb2, default); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, _, _, _, errΔ2) = c2.ReadMsgUnix(rb2, default); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            var (_, errΔ3) = c2.WriteToUnix(wb, a1); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var (_, errΔ3) = c2.WriteToUnix(wb, a1); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
-        {
-            var (_, _, errΔ4) = c1.ReadFromUnix(rb1); if (errΔ4 != nil) {
-                t.Fatal(errΔ4);
-            }
+        var (_, _, errΔ4) = c1.ReadFromUnix(rb1); if (errΔ4 != nil) {
+            t.Fatal(errΔ4);
         }
-        {
-            var (_, errΔ5) = c3.WriteToUnix(wb, a1); if (errΔ5 != nil) {
-                t.Fatal(errΔ5);
-            }
+        var (_, errΔ5) = c3.WriteToUnix(wb, a1); if (errΔ5 != nil) {
+            t.Fatal(errΔ5);
         }
-        {
-            var (_, _, errΔ6) = c1.ReadFromUnix(rb1); if (errΔ6 != nil) {
-                t.Fatal(errΔ6);
-            }
+        var (_, _, errΔ6) = c1.ReadFromUnix(rb1); if (errΔ6 != nil) {
+            t.Fatal(errΔ6);
         }
-        {
-            var (_, errΔ7) = c2.WriteToUnix(wb, a3); if (errΔ7 != nil) {
-                t.Fatal(errΔ7);
-            }
+        var (_, errΔ7) = c2.WriteToUnix(wb, a3); if (errΔ7 != nil) {
+            t.Fatal(errΔ7);
         }
-        {
-            var (_, _, errΔ8) = c3.ReadFromUnix(rb3); if (errΔ8 != nil) {
-                t.Fatal(errΔ8);
-            }
+        var (_, _, errΔ8) = c3.ReadFromUnix(rb3); if (errΔ8 != nil) {
+            t.Fatal(errΔ8);
         }
 
-        {
-            var (f, errΔ9) = c1.of(global::go.net_package.UnixConn.Ꮡconn).File(); if (errΔ9 != nil) {
-                condFatalf(t, fileNetˢ, "%v", errΔ9);
-            } else {
-                f.Close();
-            }
+        var (f, errΔ9) = c1.of(global::go.net_package.UnixConn.Ꮡconn).File(); if (errΔ9 != nil) {
+            condFatalf(t, fileNetˢ, "%v", errΔ9);
+        } else {
+            f.Close();
         }
 
         defer(() => {
-            {
-                var p = recover(); if (p != nil) {
-                    t.Fatalf("panicked: %v", p);
-                }
+            var p = recover(); if (p != nil) {
+                t.Fatalf("panicked: %v", p);
             }
         }, ref ᒐ);
 

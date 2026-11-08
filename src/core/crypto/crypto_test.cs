@@ -102,20 +102,16 @@ public static void TestSignMessage(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("SignMessage failed with Signer: %s", err);
     }
-    {
-        var errΔ1 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ1 != nil) {
-            t.Errorf("VerifyPSS failed for Signer signature: %s", errΔ1);
-        }
+    var errΔ1 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ1 != nil) {
+        t.Errorf("VerifyPSS failed for Signer signature: %s", errΔ1);
     }
 
     (sig, err) = Δcrypto.SignMessage(new messageSignerOnlyжSigner(Ꮡ(new messageSignerOnly(k))), rand.Reader, msg, new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(Hash: Δcrypto.SHA256))));
     if (err != nil) {
         t.Fatalf("SignMessage failed with MessageSigner: %s", err);
     }
-    {
-        var errΔ2 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ2 != nil) {
-            t.Errorf("VerifyPSS failed for MessageSigner signature: %s", errΔ2);
-        }
+    var errΔ2 = rsa.VerifyPSS(k.ᏑPublicKey, Δcrypto.SHA256, digest, sig, nil); if (errΔ2 != nil) {
+        t.Errorf("VerifyPSS failed for MessageSigner signature: %s", errΔ2);
     }
 }
 

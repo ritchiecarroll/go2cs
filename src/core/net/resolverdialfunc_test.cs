@@ -77,10 +77,8 @@ public static void TestResolverDialFunc(ж<testing.T> t) {
         if (err != nil) {
             tΔ1.Fatal(err);
         }
-        {
-            var (got, want) = (sortedIPStrings(ips), slice<@string>(["0:200::e00", "1.2.3.4", "1::f", "5.6.7.8"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-                tΔ1.Errorf("LookupIP wrong.\n got: %q\nwant: %q\n", got, want);
-            }
+        var (got, want) = (sortedIPStrings(ips), slice<@string>(["0:200::e00", "1.2.3.4", "1::f", "5.6.7.8"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            tΔ1.Errorf("LookupIP wrong.\n got: %q\nwant: %q\n", got, want);
         }
     });
 
@@ -105,7 +103,7 @@ public static void TestResolverDialFunc(ж<testing.T> t) {
         ]);
         if (!reflect.DeepEqual(got, want)) {
             tΔ2.Errorf("wrong result. got:");
-            foreach (var (_, rΔ1) in got) {
+            foreach (var (_, rΔ1) in range(got)) {
                 tΔ2.Logf("  - %+v", rΔ1.OrTypedNil());
             }
         }
@@ -114,7 +112,7 @@ public static void TestResolverDialFunc(ж<testing.T> t) {
 
 internal static slice<@string> sortedIPStrings(slice<global::go.net_package.IP> ips) {
     var ret = new slice<@string>(len(ips));
-    foreach (var (i, ip) in ips) {
+    foreach (var (i, ip) in range(ips)) {
         ret[i] = ip.String();
     }
     slices.Sort<slice<@string>, @string>(ret);
@@ -130,10 +128,8 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
             ttl: 10 // 10 second default if unset
         ));
         if (h.Value.StartDial != nil) {
-            {
-                var err = h.Value.StartDial(network, address); if (err != nil) {
-                    return (default, err);
-                }
+            var err = h.Value.StartDial(network, address); if (err != nil) {
+                return (default, err);
             }
         }
         return (new net_internal_test_package.resolverFuncConnжConn(a), default);
@@ -249,29 +245,12 @@ internal partial struct resolverFuncConn {
     internal bytes.Buffer rbuf;
 }
 
-internal static error Close(this ref resolverFuncConn _) {
-    return default;
-}
-
-internal static global::go.net_package.ΔAddr LocalAddr(this ref resolverFuncConn _) {
-    return new someaddr();
-}
-
-internal static global::go.net_package.ΔAddr RemoteAddr(this ref resolverFuncConn _) {
-    return new someaddr();
-}
-
-internal static error SetDeadline(this ref resolverFuncConn _, time.Time t) {
-    return default;
-}
-
-internal static error SetReadDeadline(this ref resolverFuncConn _, time.Time t) {
-    return default;
-}
-
-internal static error SetWriteDeadline(this ref resolverFuncConn _, time.Time t) {
-    return default;
-}
+internal static error Close(this ref resolverFuncConn _) { return default; }
+internal static global::go.net_package.ΔAddr LocalAddr(this ref resolverFuncConn _) { return new someaddr(); }
+internal static global::go.net_package.ΔAddr RemoteAddr(this ref resolverFuncConn _) { return new someaddr(); }
+internal static error SetDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
+internal static error SetReadDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
+internal static error SetWriteDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
 
 internal static (nint n, error err) Read(this ref resolverFuncConn a, slice<byte> p) {
     return a.rbuf.Read(p);
@@ -367,17 +346,12 @@ internal partial struct someaddr {
 internal static ref readonly @string unusedˢ => ref unusedˢᵇ;
 private static readonly @string unusedˢᵇ = "unused"u8;
 
-internal static @string Network(this someaddr _) {
-    return unusedˢ;
-}
-
+internal static @string Network(this someaddr _) { return unusedˢ; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unusedSomeaddrˢ => ref unusedSomeaddrˢᵇ;
 private static readonly @string unusedSomeaddrˢᵇ = "unused-someaddr"u8;
 
-internal static @string String(this someaddr _) {
-    return unusedSomeaddrˢ;
-}
+internal static @string String(this someaddr _) { return unusedSomeaddrˢ; }
 
 internal static dnsmessage.RCode mapRCode(error err) {
     switch (err) {

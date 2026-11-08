@@ -8,7 +8,6 @@ using static go.crypto.tls_package;
 partial class tls_internal_test_package {
 
 internal static ж<global::go.crypto.tls_package.Config> _ᴛ17ʗ = Ꮡ(new Config(WrapSession: (Ꮡ(new Config())).EncryptTicket));
-
 internal static ж<global::go.crypto.tls_package.Config> _ᴛ18ʗ = Ꮡ(new Config(UnwrapSession: (Ꮡ(new Config())).DecryptTicket));
 
 } // end tls_internal_test_package

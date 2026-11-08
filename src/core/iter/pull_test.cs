@@ -39,11 +39,9 @@ public static void TestPull(ж<testing.T> t) {
         t.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
-                {
-                    nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
-                        tΔ1.Helper();
-                        tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
-                    }
+                nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
+                    tΔ1.Helper();
+                    tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
                 }
             }
             wantNG(0);
@@ -84,11 +82,9 @@ public static void TestPull2(ж<testing.T> t) {
         t.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
-                {
-                    nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
-                        tΔ1.Helper();
-                        tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
-                    }
+                nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
+                    tΔ1.Helper();
+                    tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
                 }
             }
             wantNG(0);
@@ -312,10 +308,8 @@ public static void TestPullPanic(ж<testing.T> t) {
             tΔ1.Fatal(failedToPropagatePanicOnˢ);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (_, ok) = next(); if (ok) {
-                tΔ1.Fatal(nextReturnedTrueAfterˢ);
-            }
+        var (_, ok) = next(); if (ok) {
+            tΔ1.Fatal(nextReturnedTrueAfterˢ);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -333,10 +327,8 @@ public static void TestPullPanic(ж<testing.T> t) {
             tΔ2.Fatal(failedToPropagatePanicOnˢ2);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (_, okΔ1) = next(); if (okΔ1) {
-                tΔ2.Fatal(nextReturnedTrueAfterˢ);
-            }
+        var (_, okΔ1) = next(); if (okΔ1) {
+            tΔ2.Fatal(nextReturnedTrueAfterˢ);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -369,10 +361,8 @@ public static void TestPull2Panic(ж<testing.T> t) {
             tΔ1.Fatal(failedToPropagatePanicOnˢ);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (_, _, ok) = next(); if (ok) {
-                tΔ1.Fatal(nextReturnedTrueAfterˢ);
-            }
+        var (_, _, ok) = next(); if (ok) {
+            tΔ1.Fatal(nextReturnedTrueAfterˢ);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -390,10 +380,8 @@ public static void TestPull2Panic(ж<testing.T> t) {
             tΔ2.Fatal(failedToPropagatePanicOnˢ2);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (_, _, okΔ1) = next(); if (okΔ1) {
-                tΔ2.Fatal(nextReturnedTrueAfterˢ);
-            }
+        var (_, _, okΔ1) = next(); if (okΔ1) {
+            tΔ2.Fatal(nextReturnedTrueAfterˢ);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -421,13 +409,11 @@ internal static bool /*panicked*/ panicsWith(any v, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    if (!AreEqual(r, v)) {
-                        throw panic(r);
-                    }
-                    panicked = true;
+            var r = recover(); if (r != nil) {
+                if (!AreEqual(r, v)) {
+                    throw panic(r);
                 }
+                panicked = true;
             }
         }, ref ᒐ);
         f();
@@ -453,10 +439,8 @@ public static void TestPullGoexit(ж<testing.T> t) {
         })) {
             tΔ1.Fatal(failedToGoexitFromNextˢ);
         }
-        {
-            var (x, ok) = Ꮡnext.ValueSlot(); if (x != 0 || ok) {
-                tΔ1.Fatal(iteratorReturnedValidˢ);
-            }
+        var (x, ok) = Ꮡnext.ValueSlot(); if (x != 0 || ok) {
+            tΔ1.Fatal(iteratorReturnedValidˢ);
         }
         Ꮡstop.ValueSlot();
     });
@@ -473,10 +457,8 @@ public static void TestPullGoexit(ж<testing.T> t) {
             tΔ2.Fatal(failedToGoexitFromStopˢ);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (xΔ1, okΔ1) = next(); if (xΔ1 != 0 || okΔ1) {
-                tΔ2.Fatal(nextReturnedTrueOrNonˢ);
-            }
+        var (xΔ1, okΔ1) = next(); if (xΔ1 != 0 || okΔ1) {
+            tΔ2.Fatal(nextReturnedTrueOrNonˢ);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -512,10 +494,8 @@ public static void TestPull2Goexit(ж<testing.T> t) {
         })) {
             tΔ1.Fatal(failedToGoexitFromNextˢ);
         }
-        {
-            var (x, y, ok) = Ꮡnext.ValueSlot(); if (x != 0 || y != 0 || ok) {
-                tΔ1.Fatal(iteratorReturnedValidˢ);
-            }
+        var (x, y, ok) = Ꮡnext.ValueSlot(); if (x != 0 || y != 0 || ok) {
+            tΔ1.Fatal(iteratorReturnedValidˢ);
         }
         Ꮡstop.ValueSlot();
     });
@@ -532,10 +512,8 @@ public static void TestPull2Goexit(ж<testing.T> t) {
             tΔ2.Fatal(failedToGoexitFromStopˢ);
         }
         // Make sure we don't panic again if we try to call next or stop.
-        {
-            var (xΔ1, yΔ1, okΔ1) = next(); if (xΔ1 != 0 || yΔ1 != 0 || okΔ1) {
-                tΔ2.Fatal(nextReturnedTrueOrNonˢ2);
-            }
+        var (xΔ1, yΔ1, okΔ1) = next(); if (xΔ1 != 0 || yΔ1 != 0 || okΔ1) {
+            tΔ2.Fatal(nextReturnedTrueOrNonˢ2);
         }
         // Calling stop again should be a no-op.
         stop();
@@ -587,10 +565,8 @@ public static void TestPullImmediateStop(ж<testing.T> t) {
     var (next, stop) = Pull(panicSeq());
     stop();
     // Make sure we don't panic if we try to call next or stop.
-    {
-        var (_, ok) = next(); if (ok) {
-            t.Fatal(nextReturnedTrueAfterˢ2);
-        }
+    var (_, ok) = next(); if (ok) {
+        t.Fatal(nextReturnedTrueAfterˢ2);
     }
 }
 
@@ -598,10 +574,8 @@ public static void TestPull2ImmediateStop(ж<testing.T> t) {
     var (next, stop) = Pull2(panicSeq2());
     stop();
     // Make sure we don't panic if we try to call next or stop.
-    {
-        var (_, _, ok) = next(); if (ok) {
-            t.Fatal(nextReturnedTrueAfterˢ2);
-        }
+    var (_, _, ok) = next(); if (ok) {
+        t.Fatal(nextReturnedTrueAfterˢ2);
     }
 }
 

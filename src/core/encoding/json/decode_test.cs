@@ -69,10 +69,8 @@ public partial struct TAlias /*T*/;
 
 public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
     ref var t = ref heap<T>(new T(), out var Ꮡt);
-    {
-        var err = Unmarshal(data, Ꮡt); if (err != nil) {
-            return err;
-        }
+    var err = Unmarshal(data, Ꮡt); if (err != nil) {
+        return err;
     }
     tt = (TAlias)t;
     return default;
@@ -156,7 +154,7 @@ internal static (slice<byte>, error) MarshalText(this u8marshal u8) {
 internal static error errMissingU8Prefix = errors.New("missing 'u' prefix");
 
 internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
-    if (!bytes.HasPrefix(b, slice<byte>([(byte)'u']))) {
+    if (!bytes.HasPrefix(b, [(byte)'u'])) {
         return errMissingU8Prefix;
     }
     var (n, err) = strconv.Atoi((@string)(b[1..]));
@@ -171,13 +169,13 @@ internal static encoding.TextUnmarshaler _ᴛ2ʗ = new json_internal_test_packag
 
 internal static readonly ж<unmarshaler> Ꮡumtrue = new StaticBox<unmarshaler>(new unmarshaler(true));
 internal static ref unmarshaler umtrue => ref ((StaticBox<unmarshaler>)Ꮡumtrue).ValueSlot;
-internal static readonly ж<slice<unmarshaler>> Ꮡumslice = new StaticBox<slice<unmarshaler>>(slice<unmarshaler>([new(true)]));
+internal static readonly ж<slice<unmarshaler>> Ꮡumslice = new StaticBox<slice<unmarshaler>>([new(true)]);
 internal static ref slice<unmarshaler> umslice => ref ((StaticBox<slice<unmarshaler>>)Ꮡumslice).ValueSlot;
 internal static ustruct umstruct = new ustruct(new unmarshaler(true));
 
 internal static readonly ж<unmarshalerText> ᏑumtrueXY = new StaticBox<unmarshalerText>(new unmarshalerText("x", "y"));
 internal static ref unmarshalerText umtrueXY => ref ((StaticBox<unmarshalerText>)ᏑumtrueXY).ValueSlot;
-internal static readonly ж<slice<unmarshalerText>> ᏑumsliceXY = new StaticBox<slice<unmarshalerText>>(slice<unmarshalerText>([new("x", "y")]));
+internal static readonly ж<slice<unmarshalerText>> ᏑumsliceXY = new StaticBox<slice<unmarshalerText>>([new("x", "y")]);
 internal static ref slice<unmarshalerText> umsliceXY => ref ((StaticBox<slice<unmarshalerText>>)ᏑumsliceXY).ValueSlot;
 internal static ustructText umstructXY = new ustructText(new unmarshalerText("x", "y"));
 
@@ -296,8 +294,7 @@ public partial struct XYZ {
 internal partial struct unexportedWithMethods {
 }
 
-internal static void F(this unexportedWithMethods _) {
-}
+internal static void F(this unexportedWithMethods _) { }
 
 internal partial struct byteWithMarshalJSON /*num:byte*/;
 
@@ -1137,7 +1134,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = slice<unmarshalT
         CaseName: Name(""),
         @in: @"{""Ts"": [{""Y"": 1}, {""Y"": 2}, {""Y"": ""bad-type""}]}",
         ptr: @new<PP>(),
-        @out: new PP(Ts: slice<T>([new(Y: 1), new(Y: 2), new(Y: 0)])),
+        @out: new PP(Ts: [new(Y: 1), new(Y: 2), new(Y: 0)]),
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(
             Value: "string",
             Struct: "T",
@@ -1347,7 +1344,7 @@ public static void TestMarshalInvalidUTF8(ж<testing.T> t) {
         new(Name(""u8), ((@string)(new byte[]{0x61, 0xff, 0x62})), @"""a\ufffdb"""),
         new(Name(""u8), ((@string)(new byte[]{0xe6, 0x97, 0xa5, 0xe6, 0x9c, 0xac, 0xff, 0xaa, 0x9e})), @"""日本\ufffd\ufffd\ufffd""")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalInvalidUTF8_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1449,7 +1446,7 @@ internal static ref readonly @string unexpectedEndOfJsonInputˢ => ref unexpecte
 private static readonly @string unexpectedEndOfJsonInputˢᵇ = "unexpected end of JSON input"u8;
 
 public static void TestUnmarshal(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in unmarshalTests) {
+    foreach (var (_, vᴛ1) in range(unmarshalTests)) {
         ref var tt = ref heap(new unmarshalTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1511,12 +1508,10 @@ public static void TestUnmarshal(ж<testing.T> t) {
                     ttʗ1.@out = reflect.Zero(v.Elem().Type()).Interface();
                 }
             }
-            {
-                var got = v.Elem().Interface(); if (!reflect.DeepEqual(got, ttʗ1.@out)) {
-                    var (gotJSON, _) = Marshal(got);
-                    var (wantJSON, _) = Marshal(ttʗ1.@out);
-                    tΔ1.Fatalf("%s: Decode:\n\tgot:  %#+v\n\twant: %#+v\n\n\tgotJSON:  %s\n\twantJSON: %s", ttʗ1.Where, got, ttʗ1.@out, gotJSON, wantJSON);
-                }
+            var got = v.Elem().Interface(); if (!reflect.DeepEqual(got, ttʗ1.@out)) {
+                var (gotJSON, _) = Marshal(got);
+                var (wantJSON, _) = Marshal(ttʗ1.@out);
+                tΔ1.Fatalf("%s: Decode:\n\tgot:  %#+v\n\twant: %#+v\n\n\tgotJSON:  %s\n\twantJSON: %s", ttʗ1.Where, got, ttʗ1.@out, gotJSON, wantJSON);
             }
 
             // Check round trip also decodes correctly.
@@ -1533,10 +1528,8 @@ public static void TestUnmarshal(ж<testing.T> t) {
                 if (ttʗ1.useNumber) {
                     dec.UseNumber();
                 }
-                {
-                    var errΔ1 = dec.Decode(vv.Interface()); if (errΔ1 != nil) {
-                        tΔ1.Fatalf("%s: Decode(%#q) error after roundtrip: %v", ttʗ1.Where, enc, errΔ1);
-                    }
+                var errΔ1 = dec.Decode(vv.Interface()); if (errΔ1 != nil) {
+                    tΔ1.Fatalf("%s: Decode(%#q) error after roundtrip: %v", ttʗ1.Where, enc, errΔ1);
                 }
                 if (!reflect.DeepEqual(v.Elem().Interface(), vv.Elem().Interface())) {
                     tΔ1.Fatalf("%s: Decode:\n\tgot:  %#+v\n\twant: %#+v\n\n\tgotJSON:  %s\n\twantJSON: %s",
@@ -1551,10 +1544,8 @@ public static void TestUnmarshal(ж<testing.T> t) {
 public static void TestUnmarshalMarshal(ж<testing.T> t) {
     initBig();
     ref var v = ref heap<any>(out var Ꮡv);
-    {
-        var errΔ1 = Unmarshal(jsonBig, Ꮡv); if (errΔ1 != nil) {
-            t.Fatalf("Unmarshal error: %v", errΔ1);
-        }
+    var errΔ1 = Unmarshal(jsonBig, Ꮡv); if (errΔ1 != nil) {
+        t.Fatalf("Unmarshal error: %v", errΔ1);
     }
     var (b, err) = Marshal(v);
     if (err != nil) {
@@ -1583,17 +1574,15 @@ public static void TestNumberAccessors(ж<testing.T> t) {
         new(CaseName: Name(""u8), @in: "-12", i: -12, f: -12.0D),
         new(CaseName: Name(""u8), @in: "1e1000", intErr: "strconv.ParseInt: parsing \"1e1000\": invalid syntax", floatErr: "strconv.ParseFloat: parsing \"1e1000\": value out of range")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNumberAccessors_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             global::go.encoding.json_package.Number n = (global::go.encoding.json_package.Number)ttʗ1.@in;
-            {
-                @string got = n.String(); if (got != ttʗ1.@in) {
-                    tΔ1.Errorf("%s: Number(%q).String() = %s, want %s", ttʗ1.Where, ttʗ1.@in, got, ttʗ1.@in);
-                }
+            @string got = n.String(); if (got != ttʗ1.@in) {
+                tΔ1.Errorf("%s: Number(%q).String() = %s, want %s", ttʗ1.Where, ttʗ1.@in, got, ttʗ1.@in);
             }
             {
                 var (i, err) = n.Int64(); if (err == nil && ttʗ1.intErr == ""u8 && i != ttʗ1.i) {
@@ -1615,7 +1604,7 @@ public static void TestNumberAccessors(ж<testing.T> t) {
 
 public static void TestLargeByteSlice(ж<testing.T> t) {
     var s0 = new slice<byte>(2000);
-    foreach (var i in range(s0)) {
+    foreach (var i in range(len(s0))) {
         s0[i] = (byte)i;
     }
     var (b, err) = Marshal(s0);
@@ -1623,10 +1612,8 @@ public static void TestLargeByteSlice(ж<testing.T> t) {
         t.Fatalf("Marshal error: %v", err);
     }
     ref var s1 = ref heap<slice<byte>>(out var Ꮡs1);
-    {
-        var errΔ1 = Unmarshal(b, Ꮡs1); if (errΔ1 != nil) {
-            t.Fatalf("Unmarshal error: %v", errΔ1);
-        }
+    var errΔ1 = Unmarshal(b, Ꮡs1); if (errΔ1 != nil) {
+        t.Fatalf("Unmarshal error: %v", errΔ1);
     }
     if (!bytes.Equal(s0, s1)) {
         t.Errorf("Marshal:");
@@ -1643,10 +1630,8 @@ public static void TestUnmarshalInterface(ж<testing.T> t) {
     ref var i = ref heap<any>(out var Ꮡi);
 
     i = Ꮡxint;
-    {
-        var err = Unmarshal(slice<byte>(@"{""X"":1}"u8), Ꮡi); if (err != nil) {
-            t.Fatalf("Unmarshal error: %v", err);
-        }
+    var err = Unmarshal(slice<byte>(@"{""X"":1}"u8), Ꮡi); if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
     if (xint.X != 1) {
         t.Fatalf("xint.X = %d, want 1", xint.X);
@@ -1656,10 +1641,8 @@ public static void TestUnmarshalInterface(ж<testing.T> t) {
 public static void TestUnmarshalPtrPtr(ж<testing.T> t) {
     ref var xint = ref heap(new Xint(), out var Ꮡxint);
     ref var pxint = ref heap<ж<Xint>>(Ꮡxint, out var Ꮡpxint);
-    {
-        var err = Unmarshal(slice<byte>(@"{""X"":1}"u8), Ꮡpxint); if (err != nil) {
-            t.Fatalf("Unmarshal: %v", err);
-        }
+    var err = Unmarshal(slice<byte>(@"{""X"":1}"u8), Ꮡpxint); if (err != nil) {
+        t.Fatalf("Unmarshal: %v", err);
     }
     if (xint.X != 1) {
         t.Fatalf("xint.X = %d, want 1", xint.X);
@@ -1707,7 +1690,7 @@ public static void TestErrorMessageFromMisusedString(ж<testing.T> t) {
         new(Name(""u8), @"{""result"":""\""""}", @"json: invalid use of ,string struct tag, trying to unmarshal ""\"""" into string"),
         new(Name(""u8), @"{""result"":""\""foo""}", @"json: invalid use of ,string struct tag, trying to unmarshal ""\""foo"" into string")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestErrorMessageFromMisusedString_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1814,11 +1797,11 @@ internal static readonly ж<All> ᏑallValue = new StaticBox<All>(new All(
         ["20"] = default
     },
     EmptyMap: new map<@string, Small>{},
-    Slice: slice<Small>([new(Tag: "tag20"), new(Tag: "tag21")]),
-    SliceP: slice<ж<Small>>([Ꮡ(new Small(Tag: "tag22")), default, Ꮡ(new Small(Tag: "tag23"))]),
-    EmptySlice: slice<Small>([]),
-    StringSlice: slice<@string>(["str24", "str25", "str26"]),
-    ByteSlice: slice<byte>([27, 28, 29]),
+    Slice: [new(Tag: "tag20"), new(Tag: "tag21")],
+    SliceP: [Ꮡ(new Small(Tag: "tag22")), default, Ꮡ(new Small(Tag: "tag23"))],
+    EmptySlice: [],
+    StringSlice: ["str24", "str25", "str26"],
+    ByteSlice: [27, 28, 29],
     Small: new Small(Tag: "tag30"),
     PSmall: Ꮡ(new Small(Tag: "tag31")),
     Interface: 5.2D
@@ -2055,10 +2038,8 @@ public static void TestRefUnmarshal(ж<testing.T> t) {
     want.R3.Value = 13;
 
     ref var got = ref heap(new TestRefUnmarshal_S(), out var Ꮡgot);
-    {
-        var err = Unmarshal(slice<byte>(@"{""R0"":""ref"",""R1"":""ref"",""R2"":""ref"",""R3"":""ref""}"u8), Ꮡgot); if (err != nil) {
-            t.Fatalf("Unmarshal error: %v", err);
-        }
+    var err = Unmarshal(slice<byte>(@"{""R0"":""ref"",""R1"":""ref"",""R2"":""ref"",""R3"":""ref""}"u8), Ꮡgot); if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
     if (!reflect.DeepEqual(got, want)) {
         t.Errorf("Unmarsha:\n\tgot:  %+v\n\twant: %+v", got, want);
@@ -2080,18 +2061,16 @@ public static void TestEmptyString(ж<testing.T> t) {
     @string data = number11Number2ˢ;
     var dec = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(data)));
     ref var got = ref heap(new TestEmptyString_T2(), out var Ꮡgot);
-    {
-        var err = dec.Decode(Ꮡgot);
-        switch (ᐧ) {
-        case {} when err == nil: {
-            t.Fatalf("Decode error: got nil, want non-nil");
-            break;
-        }
-        case {} when got.Number1 is not 1: {
-            t.Fatalf("Decode: got.Number1 = %d, want 1", got.Number1);
-            break;
-        }}
+    var err = dec.Decode(Ꮡgot);
+    switch (ᐧ) {
+    case {} when err == nil: {
+        t.Fatalf("Decode error: got nil, want non-nil");
+        break;
     }
+    case {} when got.Number1 is not 1: {
+        t.Fatalf("Decode: got.Number1 = %d, want 1", got.Number1);
+        break;
+    }}
 }
 
 internal partial struct TestNullString_T /*dyn*/ {
@@ -2108,22 +2087,20 @@ public static void TestNullString(ж<testing.T> t) {
     s.B = 1;
     s.C = @new<nint>();
     s.C.Value = 2;
-    {
-        var err = Unmarshal(data, Ꮡs);
-        switch (ᐧ) {
-        case {} when err != nil: {
-            t.Fatalf("Unmarshal error: %v", err);
-            break;
-        }
-        case {} when s.B is not 1: {
-            t.Fatalf("Unmarshal: s.B = %d, want 1", s.B);
-            break;
-        }
-        case {} when s.C != nil: {
-            t.Fatalf("Unmarshal: s.C = %d, want non-nil", s.C.OrTypedNil());
-            break;
-        }}
+    var err = Unmarshal(data, Ꮡs);
+    switch (ᐧ) {
+    case {} when err != nil: {
+        t.Fatalf("Unmarshal error: %v", err);
+        break;
     }
+    case {} when s.B is not 1: {
+        t.Fatalf("Unmarshal: s.B = %d, want 1", s.B);
+        break;
+    }
+    case {} when s.C != nil: {
+        t.Fatalf("Unmarshal: s.C = %d, want non-nil", s.C.OrTypedNil());
+        break;
+    }}
 }
 
 internal static ж<T> addr<T>(T vʗp) {
@@ -2196,7 +2173,7 @@ public static void TestInterfaceSet(ж<testing.T> t) {
         new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"{}", errUnmarshal.OrTypedNil()),
         new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"{}", errUnmarshal.OrTypedNil())
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestInterfaceSet_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2204,15 +2181,11 @@ public static void TestInterfaceSet(ж<testing.T> t) {
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             ref var b = ref heap<TestInterfaceSet_b>(new TestInterfaceSet_b(ttʗ1.pre), out var Ꮡb);
             @string blob = @"{""X"":"u8 + ttʗ1.json + @"}"u8;
-            {
-                var err = Unmarshal(slice<byte>(blob), Ꮡb); if (err != nil) {
-                    {
-                        var (wantErr, _) = ttʗ1.post._<error>(ᐧ); if (equalError(err, wantErr)) {
-                            return;
-                        }
-                    }
-                    tΔ1.Fatalf("%s: Unmarshal(%#q) error: %v", ttʗ1.Where, blob, err);
+            var err = Unmarshal(slice<byte>(blob), Ꮡb); if (err != nil) {
+                var (wantErr, _) = ttʗ1.post._<error>(ᐧ); if (equalError(err, wantErr)) {
+                    return;
                 }
+                tΔ1.Fatalf("%s: Unmarshal(%#q) error: %v", ttʗ1.Where, blob, err);
             }
             if (!reflect.DeepEqual(b.X, ttʗ1.post)) {
                 tΔ1.Errorf("%s: Unmarshal(%#q):\n\tpre.X:  %#v\n\tgot.X:  %#v\n\twant.X: %#v", ttʗ1.Where, blob, ttʗ1.pre, b.X, ttʗ1.post);
@@ -2314,7 +2287,7 @@ public static void TestUnmarshalNulls(ж<testing.T> t) {
         String: "14",
         PBool: @new<bool>(),
         Map: new map<@string, @string>{},
-        Slice: slice<@string>([]),
+        Slice: [],
         Interface: @new<MustNotUnmarshalJSON>(),
         PRaw: @new<global::go.encoding.json_package.RawMessage>(),
         PTime: @new<time.Time>(),
@@ -2475,18 +2448,16 @@ public static void TestUnmarshalTypeError(ж<testing.T> t) {
         new(Name(""u8), @new<error>(), @"123"),
         new(Name(""u8), @new<error>(), @"true")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalTypeError_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var err = Unmarshal(slice<byte>(ttʗ1.@in), ttʗ1.dest);
-            {
-                var (_, ok) = err._<ж<global::go.encoding.json_package.UnmarshalTypeError>>(ᐧ); if (!ok) {
-                    tΔ1.Errorf("%s: Unmarshal(%#q, %T):\n\tgot:  %T\n\twant: %T",
-                        ttʗ1.Where, ttʗ1.@in, ttʗ1.dest, err, @new<global::go.encoding.json_package.UnmarshalTypeError>());
-                }
+            var (_, ok) = err._<ж<global::go.encoding.json_package.UnmarshalTypeError>>(ᐧ); if (!ok) {
+                tΔ1.Errorf("%s: Unmarshal(%#q, %T):\n\tgot:  %T\n\twant: %T",
+                    ttʗ1.Where, ttʗ1.@in, ttʗ1.dest, err, @new<global::go.encoding.json_package.UnmarshalTypeError>());
             }
         });
     }
@@ -2509,18 +2480,16 @@ public static void TestUnmarshalSyntax(ж<testing.T> t) {
         new(Name(""u8), @"{""key"":1"),
         new(Name(""u8), @"{""key"":1,")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalSyntax_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var err = Unmarshal(slice<byte>(ttʗ1.@in), Ꮡx);
-            {
-                var (_, ok) = err._<ж<global::go.encoding.json_package.SyntaxError>>(ᐧ); if (!ok) {
-                    tΔ1.Errorf("%s: Unmarshal(%#q, any):\n\tgot:  %T\n\twant: %T",
-                        ttʗ1.Where, ttʗ1.@in, err, @new<global::go.encoding.json_package.SyntaxError>());
-                }
+            var (_, ok) = err._<ж<global::go.encoding.json_package.SyntaxError>>(ᐧ); if (!ok) {
+                tΔ1.Errorf("%s: Unmarshal(%#q, any):\n\tgot:  %T\n\twant: %T",
+                    ttʗ1.Where, ttʗ1.@in, err, @new<global::go.encoding.json_package.SyntaxError>());
             }
         });
     }
@@ -2575,18 +2544,16 @@ private static readonly @string rangeˢᵇ = "range"u8;
 
 public static void TestUnmarshalJSONLiteralError(ж<testing.T> t) {
     ref var t3 = ref heap(new Time3339(), out var Ꮡt3);
-    {
-        var err = Unmarshal(slice<byte>(@"""0000-00-00T00:00:00Z"""u8), Ꮡt3);
-        switch (ᐧ) {
-        case {} when err == nil: {
-            t.Fatalf("Unmarshal error: got nil, want non-nil");
-            break;
-        }
-        case {} when !strings.Contains(err.Error(), rangeˢ): {
-            t.Errorf("Unmarshal error:\n\tgot:  %v\n\twant: out of range", err);
-            break;
-        }}
+    var err = Unmarshal(slice<byte>(@"""0000-00-00T00:00:00Z"""u8), Ꮡt3);
+    switch (ᐧ) {
+    case {} when err == nil: {
+        t.Fatalf("Unmarshal error: got nil, want non-nil");
+        break;
     }
+    case {} when !strings.Contains(err.Error(), rangeˢ): {
+        t.Errorf("Unmarshal error:\n\tgot:  %v\n\twant: out of range", err);
+        break;
+    }}
 }
 
 // Test that extra object elements in an array do not result in a
@@ -2646,7 +2613,7 @@ public static void TestPrefilled(ж<testing.T> t) {
         @out: Ꮡ(new nint[]{3, 0}.array())
     )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestPrefilled_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2681,24 +2648,22 @@ public static void TestInvalidUnmarshal(ж<testing.T> t) {
         new(Name(""u8), @"123", (ж<nint>)nil, new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<ж<nint>>())))),
         new(Name(""u8), @"123", @new<net.IP>(), new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: reflect.TypeFor<ж<net.IP>>(), Offset: 3))))
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestInvalidUnmarshal_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
-            {
-                var gotErr = Unmarshal(slice<byte>(ttʗ1.@in), ttʗ1.v);
-                switch (ᐧ) {
-                case {} when gotErr == nil: {
-                    tΔ1.Fatalf("%s: Unmarshal error: got nil, want non-nil", ttʗ1.Where);
-                    break;
-                }
-                case {} when !reflect.DeepEqual(gotErr, ttʗ1.wantErr): {
-                    tΔ1.Errorf("%s: Unmarshal error:\n\tgot:  %#v\n\twant: %#v", ttʗ1.Where, gotErr, ttʗ1.wantErr);
-                    break;
-                }}
+            var gotErr = Unmarshal(slice<byte>(ttʗ1.@in), ttʗ1.v);
+            switch (ᐧ) {
+            case {} when gotErr == nil: {
+                tΔ1.Fatalf("%s: Unmarshal error: got nil, want non-nil", ttʗ1.Where);
+                break;
             }
+            case {} when !reflect.DeepEqual(gotErr, ttʗ1.wantErr): {
+                tΔ1.Errorf("%s: Unmarshal error:\n\tgot:  %#v\n\twant: %#v", ttʗ1.Where, gotErr, ttʗ1.wantErr);
+                break;
+            }}
         });
     }
 }
@@ -2874,7 +2839,7 @@ public static void TestUnmarshalEmbeddedUnexported(ж<testing.T> t) {
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S9())
     )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalEmbeddedUnexported_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2920,7 +2885,7 @@ public static void TestUnmarshalErrorAfterMultipleJSON(ж<testing.T> t) {
         err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '#' in literal null (expecting 'l')", 13)))
     )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalErrorAfterMultipleJSON_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2942,18 +2907,14 @@ public static void TestUnmarshalErrorAfterMultipleJSON(ж<testing.T> t) {
 internal partial struct unmarshalPanic {
 }
 
-internal static error UnmarshalJSON(this unmarshalPanic _Δp0, slice<byte> _Δp1) {
-    throw panic((nint)0xdead);
-}
+internal static error UnmarshalJSON(this unmarshalPanic _Δp0, slice<byte> _Δp1) { throw panic((nint)0xdead); }
 
 public static void TestUnmarshalPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
-                    t.Errorf("panic() = (%T)(%v), want 0xdead", got, got);
-                }
+            var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
+                t.Errorf("panic() = (%T)(%v), want 0xdead", got, got);
             }
         }, ref ᒐ);
         Unmarshal(slice<byte>("{}"u8), Ꮡ(new unmarshalPanic()));
@@ -2970,10 +2931,8 @@ public static void TestUnmarshalRecursivePointer(ж<testing.T> t) {
     v = Ꮡv;
     var data = slice<byte>(@"{""a"": ""b""}"u8);
 
-    {
-        var err = Unmarshal(data, v); if (err != nil) {
-            t.Fatalf("Unmarshal error: %v", err);
-        }
+    var err = Unmarshal(data, v); if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
 }
 
@@ -2988,16 +2947,12 @@ internal static error UnmarshalText(this ref textUnmarshalerString m, slice<byte
 // See golang.org/issues/34437.
 public static void TestUnmarshalMapWithTextUnmarshalerStringKey(ж<testing.T> t) {
     ref var p = ref heap<map<textUnmarshalerString, @string>>(out var Ꮡp);
-    {
-        var err = Unmarshal(slice<byte>(@"{""FOO"": ""1""}"u8), Ꮡp); if (err != nil) {
-            t.Fatalf("Unmarshal error: %v", err);
-        }
+    var err = Unmarshal(slice<byte>(@"{""FOO"": ""1""}"u8), Ꮡp); if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
 
-    {
-        var (_, ok) = p[fooˢ, ꟷ]; if (!ok) {
-            t.Errorf(@"key ""foo"" missing in map: %v", p);
-        }
+    var (_, ok) = p[fooˢ, ꟷ]; if (!ok) {
+        t.Errorf(@"key ""foo"" missing in map: %v", p);
     }
 }
 
@@ -3009,15 +2964,11 @@ internal partial struct TestUnmarshalRescanLiteralMangledUnquote_T /*dyn*/ {
 public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> t) {
     // See golang.org/issues/38105.
     ref var p = ref heap<map<textUnmarshalerString, @string>>(out var Ꮡp);
-    {
-        var errΔ1 = Unmarshal(slice<byte>(@"{""开源"":""12345开源""}"u8), Ꮡp); if (errΔ1 != nil) {
-            t.Fatalf("Unmarshal error: %v", errΔ1);
-        }
+    var errΔ1 = Unmarshal(slice<byte>(@"{""开源"":""12345开源""}"u8), Ꮡp); if (errΔ1 != nil) {
+        t.Fatalf("Unmarshal error: %v", errΔ1);
     }
-    {
-        var (_, ok) = p[(@string)"开源", ꟷ]; if (!ok) {
-            t.Errorf(@"key ""开源"" missing in map: %v", p);
-        }
+    var (_, ok) = p[(@string)"开源", ꟷ]; if (!ok) {
+        t.Errorf(@"key ""开源"" missing in map: %v", p);
     }
     var wantT = new TestUnmarshalRescanLiteralMangledUnquote_T("aaa\tbbb");
 
@@ -3026,10 +2977,8 @@ public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> t) {
         t.Fatalf("Marshal error: %v", err);
     }
     ref var gotT = ref heap(new TestUnmarshalRescanLiteralMangledUnquote_T(), out var ᏑgotT);
-    {
-        var errΔ2 = Unmarshal(b, ᏑgotT); if (errΔ2 != nil) {
-            t.Fatalf("Unmarshal error: %v", errΔ2);
-        }
+    var errΔ2 = Unmarshal(b, ᏑgotT); if (errΔ2 != nil) {
+        t.Fatalf("Unmarshal error: %v", errΔ2);
     }
     if (gotT != wantT) {
         t.Errorf("Marshal/Unmarshal roundtrip:\n\tgot:  %q\n\twant: %q", gotT, wantT);
@@ -3043,10 +2992,8 @@ public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> t) {
         t.Fatalf("Marshal error: %v", err);
     }
     ref var got = ref heap<map<textUnmarshalerString, @string>>(out var Ꮡgot);
-    {
-        var errΔ3 = Unmarshal(encoded, Ꮡgot); if (errΔ3 != nil) {
-            t.Fatalf("Unmarshal error: %v", errΔ3);
-        }
+    var errΔ3 = Unmarshal(encoded, Ꮡgot); if (errΔ3 != nil) {
+        t.Fatalf("Unmarshal error: %v", errΔ3);
     }
     var want = new map<textUnmarshalerString, @string>{[(@string)"foo"] = "", [(@string)@""""] = ""};
     if (!maps.Equal<map<textUnmarshalerString, @string>, map<textUnmarshalerString, @string>, textUnmarshalerString, @string>(got, want)) {
@@ -3144,11 +3091,11 @@ public static void TestUnmarshalMaxDepth(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalMaxDepth_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
-        foreach (var (_, vᴛ2) in targets) {
+        foreach (var (_, vᴛ2) in range(targets)) {
             ref var target = ref heap(new TestUnmarshalMaxDepth_targets(), out var Ꮡtarget);
             target = vᴛ2;
 

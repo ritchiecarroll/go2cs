@@ -12,7 +12,7 @@ partial struct isValidPathTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal bool ok;
 }
-internal static slice<isValidPathTestsᴛ1> isValidPathTests = slice<isValidPathTestsᴛ1>([
+internal static slice<isValidPathTestsᴛ1> isValidPathTests = [
     new(".", true),
     new("x", true),
     new("x/y", true),
@@ -37,10 +37,10 @@ internal static slice<isValidPathTestsᴛ1> isValidPathTests = slice<isValidPath
     new(@"x\y", true),
     new(@"x:y", true),
     new(@"\x", true)
-]);
+];
 
 public static void TestValidPath(ж<testing.T> t) {
-    foreach (var (_, tt) in isValidPathTests) {
+    foreach (var (_, tt) in range(isValidPathTests)) {
         var ok = ValidPath(tt.name);
         if (ok != tt.ok) {
             t.Errorf("ValidPath(%q) = %v, want %v", tt.name, ok, tt.ok);

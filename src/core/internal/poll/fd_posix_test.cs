@@ -19,7 +19,7 @@ partial struct eofErrorTestsᴛ1 /*dyn*/ {
     internal ж<poll.FD> fd;
     internal error expected;
 }
-internal static slice<eofErrorTestsᴛ1> eofErrorTests = slice<eofErrorTestsᴛ1>([
+internal static slice<eofErrorTestsᴛ1> eofErrorTests = [
     new(100, default, Ꮡ(new FD(ZeroReadIsEOF: true)), default),
     new(100, io.EOF, Ꮡ(new FD(ZeroReadIsEOF: true)), io.EOF),
     new(100, ErrNetClosing, Ꮡ(new FD(ZeroReadIsEOF: true)), ErrNetClosing),
@@ -33,10 +33,10 @@ internal static slice<eofErrorTestsᴛ1> eofErrorTests = slice<eofErrorTestsᴛ1
     new(0, default, Ꮡ(new FD(ZeroReadIsEOF: false)), default),
     new(0, io.EOF, Ꮡ(new FD(ZeroReadIsEOF: false)), io.EOF),
     new(0, ErrNetClosing, Ꮡ(new FD(ZeroReadIsEOF: false)), ErrNetClosing)
-]);
+];
 
 public static void TestEOFError(ж<testing.T> t) {
-    foreach (var (_, tt) in eofErrorTests) {
+    foreach (var (_, tt) in range(eofErrorTests)) {
         var actual = tt.fd.EOFError(tt.n, tt.err);
         if (!AreEqual(actual, tt.expected)) {
             t.Errorf("eofError(%v, %v, %v): expected %v, actual %v", tt.n, tt.err, tt.fd.ZeroReadIsEOF, tt.expected, actual);

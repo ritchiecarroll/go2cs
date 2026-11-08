@@ -44,7 +44,7 @@ internal static void testAllCurves(ж<testing.T> t, Action<ж<testing.T>, global
     if (testing.Short()) {
         tests = tests[..1];
     }
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var curve = test.curve;
         var curveʗ1 = curve;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
@@ -107,16 +107,16 @@ internal static void testInfinity(ж<testing.T> t, global::go.crypto.elliptic_pa
     if (!isInfinity(ᴛ1, ᴛ2)) {
         t.Errorf("x^q != ∞");
     }
-    var (ᴛ3, ᴛ4) = curve.ScalarMult(xG, yG, slice<byte>([0]));
+    var (ᴛ3, ᴛ4) = curve.ScalarMult(xG, yG, [0]);
     if (!isInfinity(ᴛ3, ᴛ4)) {
         t.Errorf("x^0 != ∞");
     }
 
-    var (ᴛ5, ᴛ6) = curve.ScalarMult(x0, y0, slice<byte>([1, 2, 3]));
+    var (ᴛ5, ᴛ6) = curve.ScalarMult(x0, y0, [1, 2, 3]);
     if (!isInfinity(ᴛ5, ᴛ6)) {
         t.Errorf("∞^k != ∞");
     }
-    var (ᴛ7, ᴛ8) = curve.ScalarMult(x0, y0, slice<byte>([0]));
+    var (ᴛ7, ᴛ8) = curve.ScalarMult(x0, y0, [0]);
     if (!isInfinity(ᴛ7, ᴛ8)) {
         t.Errorf("∞^0 != ∞");
     }
@@ -125,7 +125,7 @@ internal static void testInfinity(ж<testing.T> t, global::go.crypto.elliptic_pa
     if (!isInfinity(ᴛ9, ᴛ10)) {
         t.Errorf("b^q != ∞");
     }
-    var (ᴛ11, ᴛ12) = curve.ScalarBaseMult(slice<byte>([0]));
+    var (ᴛ11, ᴛ12) = curve.ScalarBaseMult([0]);
     if (!isInfinity(ᴛ11, ᴛ12)) {
         t.Errorf("b^0 != ∞");
     }
@@ -164,7 +164,7 @@ internal static void testInfinity(ж<testing.T> t, global::go.crypto.elliptic_pa
     // We don't test UnmarshalCompressed(MarshalCompressed(∞)) because there are
     // two valid points with x = 0.
     {
-        var (xx, yy) = Unmarshal(curve, slice<byte>([0x00])); if (xx != nil || yy != nil) {
+        var (xx, yy) = Unmarshal(curve, [0x00]); if (xx != nil || yy != nil) {
             t.Errorf("Unmarshal(∞) did not return an error");
         }
     }
@@ -246,10 +246,8 @@ internal static void testUnmarshalToLargeCoordinates(ж<testing.T> t, global::go
         x.FillBytes(invalid.slice(1, 1 + byteLen));
         y.FillBytes(invalid.slice(1 + byteLen));
 
-        {
-            var (X, Y) = Unmarshal(curve, invalid); if (X != nil || Y != nil) {
-                t.Errorf("Unmarshal accepts invalid Y coordinate");
-            }
+        var (X, Y) = Unmarshal(curve, invalid); if (X != nil || Y != nil) {
+            t.Errorf("Unmarshal accepts invalid Y coordinate");
         }
     }
 }
@@ -317,13 +315,11 @@ internal static void testInvalidCoordinates(ж<testing.T> t, global::go.crypto.e
     // y = mod_sqrt(x^3 - 3x + B)
     // y = mod_sqrt(B) if x = 0
     // If there is no modsqrt, there is no point with x = 0, can't test x = P.
-    {
-        var yyΔ1 = @new<bigꓸInt>().ModSqrt(curve.Params().B, p); if (yyΔ1 != nil) {
-            if (!curve.IsOnCurve(big.NewInt(0), yyΔ1)) {
-                t.Fatal(modSqrtBIsNotOnTheCurveˢ);
-            }
-            checkIsOnCurveFalse("P, y", p, yyΔ1);
+    var yyΔ1 = @new<bigꓸInt>().ModSqrt(curve.Params().B, p); if (yyΔ1 != nil) {
+        if (!curve.IsOnCurve(big.NewInt(0), yyΔ1)) {
+            t.Fatal(modSqrtBIsNotOnTheCurveˢ);
         }
+        checkIsOnCurveFalse("P, y", p, yyΔ1);
     }
 }
 
@@ -422,7 +418,7 @@ internal static void benchmarkAllCurves(ж<testing.B> b, Action<ж<testing.B>, g
         new("P384", P384()),
         new("P521", P521())
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var curve = test.curve;
         var curveʗ1 = curve;
         b.Run(test.name, (ж<testing.B> bΔ1) => {

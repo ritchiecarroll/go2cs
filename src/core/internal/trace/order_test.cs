@@ -23,16 +23,14 @@ private static readonly @string twoElementsAgainˢᵇ = "two elements again"u8;
 public static void TestQueue(ж<testing.T> t) {
     ref var q = ref heap(new global::go.@internal.trace_package.queue<nint>(), out var Ꮡq);
     void check(@string name, slice<nint> exp) {
-        foreach (var (_, v) in exp) {
+        foreach (var (_, v) in range(exp)) {
             Ꮡq.Value.push(v);
         }
-        foreach (var (i, want) in exp) {
-            {
-                var (got, ok) = Ꮡq.Value.pop(); if (!ok) {
-                    t.Fatalf("check %q: expected to be able to pop after %d pops", name, i + 1);
-                } else if (got != want) {
-                    t.Fatalf("check %q: expected value %d after on pop %d, got %d", name, want, i + 1, got);
-                }
+        foreach (var (i, want) in range(exp)) {
+            var (got, ok) = Ꮡq.Value.pop(); if (!ok) {
+                t.Fatalf("check %q: expected to be able to pop after %d pops", name, i + 1);
+            } else if (got != want) {
+                t.Fatalf("check %q: expected value %d after on pop %d, got %d", name, want, i + 1, got);
             }
         }
         {
@@ -46,11 +44,11 @@ public static void TestQueue(ж<testing.T> t) {
             }
         }
     }
-    check(oneElementˢ, slice<nint>([4]));
-    check(twoElementsˢ, slice<nint>([64, 12]));
-    check(sixElementsˢ, slice<nint>([55, 16423, 2352, 644, 12874, 9372]));
-    check(oneElementAgainˢ, slice<nint>([7]));
-    check(twoElementsAgainˢ, slice<nint>([77, 6336]));
+    check(oneElementˢ, [4]);
+    check(twoElementsˢ, [64, 12]);
+    check(sixElementsˢ, [55, 16423, 2352, 644, 12874, 9372]);
+    check(oneElementAgainˢ, [7]);
+    check(twoElementsAgainˢ, [77, 6336]);
 }
 
 } // end trace_internal_test_package

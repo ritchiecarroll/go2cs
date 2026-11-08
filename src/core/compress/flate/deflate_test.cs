@@ -15,8 +15,6 @@ using debug = go.runtime.debug_package;
 using sync = sync_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.runtime;
 using static go.compress.flate_package;
@@ -39,7 +37,7 @@ internal partial struct reverseBitsTest {
     internal uint16 @out;
 }
 
-internal static slice<ж<deflateTest>> deflateTests = slice<ж<deflateTest>>([
+internal static slice<ж<deflateTest>> deflateTests = [
     Ꮡ(new deflateTest(slice<byte>([]), 0, slice<byte>([1, 0, 0, 255, 255]))),
     Ꮡ(new deflateTest(slice<byte>([0x11]), -1, slice<byte>([18, 4, 4, 0, 0, 255, 255]))),
     Ꮡ(new deflateTest(slice<byte>([0x11]), DefaultCompression, slice<byte>([18, 4, 4, 0, 0, 255, 255]))),
@@ -57,7 +55,7 @@ internal static slice<ж<deflateTest>> deflateTests = slice<ж<deflateTest>>([
     Ꮡ(new deflateTest(slice<byte>([0x11]), 9, slice<byte>([18, 4, 4, 0, 0, 255, 255]))),
     Ꮡ(new deflateTest(slice<byte>([0x11, 0x12]), 9, slice<byte>([18, 20, 2, 4, 0, 0, 255, 255]))),
     Ꮡ(new deflateTest(slice<byte>([0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]), 9, slice<byte>([18, 132, 2, 64, 0, 0, 0, 255, 255])))
-]);
+];
 
 internal static slice<ж<deflateInflateTest>> deflateInflateTests = slice<ж<deflateInflateTest>>([
     Ꮡ(new deflateInflateTest(slice<byte>([]))),
@@ -68,7 +66,7 @@ internal static slice<ж<deflateInflateTest>> deflateInflateTests = slice<ж<def
     Ꮡ(new deflateInflateTest(largeDataChunk()))
 ]);
 
-internal static slice<ж<reverseBitsTest>> reverseBitsTests = slice<ж<reverseBitsTest>>([
+internal static slice<ж<reverseBitsTest>> reverseBitsTests = [
     Ꮡ(new reverseBitsTest(1, 1, 1)),
     Ꮡ(new reverseBitsTest(1, 2, 2)),
     Ꮡ(new reverseBitsTest(1, 3, 4)),
@@ -77,18 +75,18 @@ internal static slice<ж<reverseBitsTest>> reverseBitsTests = slice<ж<reverseBi
     Ꮡ(new reverseBitsTest(17, 5, 17)),
     Ꮡ(new reverseBitsTest(257, 9, 257)),
     Ꮡ(new reverseBitsTest(29, 5, 23))
-]);
+];
 
 internal static slice<byte> largeDataChunk() {
     var result = new slice<byte>(100000);
-    foreach (var i in range(result)) {
+    foreach (var i in range(len(result))) {
         result[i] = (byte)(i * i & 0xFF);
     }
     return result;
 }
 
 public static void TestBulkHash4(ж<testing.T> t) {
-    foreach (var (_, x) in deflateTests) {
+    foreach (var (_, x) in range(deflateTests)) {
         var y = x.@out;
         if (len(y) < minMatchLength) {
             continue;
@@ -97,11 +95,11 @@ public static void TestBulkHash4(ж<testing.T> t) {
         for (nint j = 4; j < len(y); j++) {
             var yΔ1 = y.slice(0, j);
             var dst = new slice<uint32>(len(yΔ1) - (nint)minMatchLength + 1);
-            foreach (var i in range(dst)) {
+            foreach (var i in range(len(dst))) {
                 dst[i] = (uint32)(i + 100);
             }
             bulkHash4(yΔ1, dst);
-            foreach (var (i, got) in dst) {
+            foreach (var (i, got) in range(dst)) {
                 var want = hash4(yΔ1.slice(i));
                 if (got != want && got == (uint32)i + 100) {
                     t.Errorf("Len:%d Index:%d, want 0x%08x but not modified", len(yΔ1), i, want);
@@ -114,7 +112,7 @@ public static void TestBulkHash4(ж<testing.T> t) {
 }
 
 public static void TestDeflate(ж<testing.T> t) {
-    foreach (var (_, h) in deflateTests) {
+    foreach (var (_, h) in range(deflateTests)) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡbuf), h.level);
         if (err != nil) {
@@ -142,10 +140,8 @@ public static void TestWriterClose(ж<testing.T> t) {
         }
     }
 
-    {
-        var errΔ2 = zw.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Close: %v", errΔ2);
-        }
+    var errΔ2 = zw.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Close: %v", errΔ2);
     }
 
     nint afterClose = b.Len();
@@ -156,16 +152,12 @@ public static void TestWriterClose(ж<testing.T> t) {
         }
     }
 
-    {
-        var errΔ4 = zw.Flush(); if (errΔ4 == nil) {
-            t.Fatalf("Flush to closed writer: %s", errΔ4);
-        }
+    var errΔ4 = zw.Flush(); if (errΔ4 == nil) {
+        t.Fatalf("Flush to closed writer: %s", errΔ4);
     }
 
-    {
-        var errΔ5 = zw.Close(); if (errΔ5 != nil) {
-            t.Fatalf("Close: %v", errΔ5);
-        }
+    var errΔ5 = zw.Close(); if (errΔ5 != nil) {
+        t.Fatalf("Close: %v", errΔ5);
     }
 
     if (afterClose != b.Len()) {
@@ -193,7 +185,7 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
         n -= (nint)(cur - r.l);
         cur = r.l;
     }
-    foreach (var i in range(b.slice(0, n))) {
+    foreach (var i in range(len(b.slice(0, n)))) {
         if (r.cur + (int64)i >= r.l - ((int64)1 << 16)) {
             b[i] = 1;
         } else {
@@ -216,11 +208,9 @@ public static void TestVeryLongSparseChunk(ж<testing.T> t) {
         t.Errorf("NewWriter: %v", err);
         return;
     }
-    {
-        (_, err) = io.Copy(new flate_test_package.flate_WriterжWriter(w), new flate_internal_test_package.sparseReaderжReader(Ꮡ(new sparseReader(l: 2300000000)))); if (err != nil) {
-            t.Errorf("Compress failed: %v", err);
-            return;
-        }
+    (_, err) = io.Copy(new flate_test_package.flate_WriterжWriter(w), new flate_internal_test_package.sparseReaderжReader(Ꮡ(new sparseReader(l: 2300000000)))); if (err != nil) {
+        t.Errorf("Compress failed: %v", err);
+        return;
     }
 }
 
@@ -314,24 +304,18 @@ internal static void testSync(ж<testing.T> t, nint level, slice<byte> input, @s
             (lo, hi) = ((len(input) + 1) / 2, len(input));
         }
         t.Logf("#%d: write %d-%d", i, lo, hi);
-        {
-            var (_, errΔ1) = w.Write(input.slice(lo, hi)); if (errΔ1 != nil) {
-                t.Errorf("testSync: write: %v", errΔ1);
-                return;
-            }
+        var (_, errΔ1) = w.Write(input.slice(lo, hi)); if (errΔ1 != nil) {
+            t.Errorf("testSync: write: %v", errΔ1);
+            return;
         }
         if (i == 0) {
-            {
-                var errΔ2 = w.Flush(); if (errΔ2 != nil) {
-                    t.Errorf("testSync: flush: %v", errΔ2);
-                    return;
-                }
+            var errΔ2 = w.Flush(); if (errΔ2 != nil) {
+                t.Errorf("testSync: flush: %v", errΔ2);
+                return;
             }
         } else {
-            {
-                var errΔ3 = w.Close(); if (errΔ3 != nil) {
-                    t.Errorf("testSync: close: %v", errΔ3);
-                }
+            var errΔ3 = w.Close(); if (errΔ3 != nil) {
+                t.Errorf("testSync: close: %v", errΔ3);
             }
         }
         buf.ReadMode();
@@ -360,10 +344,8 @@ internal static void testSync(ж<testing.T> t, nint level, slice<byte> input, @s
     }
     buf.ReadMode();
     var @out = new slice<byte>(10);
-    {
-        var (n, errΔ5) = r.Read(@out); if (n > 0 || !AreEqual(errΔ5, io.EOF)) {
-            t.Errorf("testSync (%d, %d, %s): final Read: %d, %v (hex: %x)", level, len(input), name, n, errΔ5, @out.slice(0, n));
-        }
+    var (n, errΔ5) = r.Read(@out); if (n > 0 || !AreEqual(errΔ5, io.EOF)) {
+        t.Errorf("testSync (%d, %d, %s): final Read: %d, %v (hex: %x)", level, len(input), name, n, errΔ5, @out.slice(0, n));
     }
     if (buf.Ꮡbuf.Len() != 0) {
         t.Errorf("testSync (%d, %d, %s): extra data at end", level, len(input), name);
@@ -425,7 +407,7 @@ internal static void testToFromWithLimit(ж<testing.T> t, slice<byte> input, @st
 
 public static void TestDeflateInflate(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (i, h) in deflateInflateTests) {
+    foreach (var (i, h) in range(deflateInflateTests)) {
         if (testing.Short() && len(h.@in) > 10000) {
             continue;
         }
@@ -434,12 +416,10 @@ public static void TestDeflateInflate(ж<testing.T> t) {
 }
 
 public static void TestReverseBits(ж<testing.T> t) {
-    foreach (var (_, h) in reverseBitsTests) {
-        {
-            var v = reverseBits(h.@in, h.bitCount); if (v != h.@out) {
-                t.Errorf("reverseBits(%v,%v) = %v, want %v",
-                    h.@in, h.bitCount, v, h.@out);
-            }
+    foreach (var (_, h) in range(reverseBitsTests)) {
+        var v = reverseBits(h.@in, h.bitCount); if (v != h.@out) {
+            t.Errorf("reverseBits(%v,%v) = %v, want %v",
+                h.@in, h.bitCount, v, h.@out);
         }
     }
 }
@@ -450,7 +430,7 @@ internal partial struct deflateInflateStringTest {
     internal array<nint> limit = new(11);
 }
 
-internal static slice<deflateInflateStringTest> deflateInflateStringTests = slice<deflateInflateStringTest>([
+internal static slice<deflateInflateStringTest> deflateInflateStringTests = [
     new(
         "../testdata/e.txt",
         "2.718281828...",
@@ -461,7 +441,7 @@ internal static slice<deflateInflateStringTest> deflateInflateStringTests = slic
         "Isaac.Newton-Opticks",
         new nint[]{567248, 218338, 198211, 193152, 181100, 175427, 175427, 173597, 173422, 173422, 325240}.array()
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
@@ -471,7 +451,7 @@ public static void TestDeflateInflateString(ж<testing.T> t) {
     if (testing.Short() && testenv.Builder() == ""u8) {
         t.Skip(skippingInShortModeˢ);
     }
-    foreach (var (_, vᴛ1) in deflateInflateStringTests) {
+    foreach (var (_, vᴛ1) in range(deflateInflateStringTests)) {
         var test = vᴛ1.ΔClone();
 
         var (gold, err) = os.ReadFile(test.filename);
@@ -561,10 +541,8 @@ public static void TestRegression2508(ж<testing.T> t) {
     }
     var buf = new slice<byte>(1024);
     for (nint i = 0; i < 131072; i++) {
-        {
-            var (_, errΔ1) = w.Write(buf); if (errΔ1 != nil) {
-                t.Fatalf("writer failed: %v", errΔ1);
-            }
+        var (_, errΔ1) = w.Write(buf); if (errΔ1 != nil) {
+            t.Fatalf("writer failed: %v", errΔ1);
         }
     }
     w.Close();
@@ -620,7 +598,7 @@ public static void TestWriterReset(ж<testing.T> t) {
     }
 
     var levels = slice<nint>([0, 1, 2, 5, 9]);
-    foreach (var (_, level) in levels) {
+    foreach (var (_, level) in range(levels)) {
         t.Run(fmt.Sprint(level), (ж<testing.T> tΔ1) => {
             testResetOutput(tΔ1, level, default);
         });
@@ -628,7 +606,7 @@ public static void TestWriterReset(ж<testing.T> t) {
 
     var levelsʗ1 = levels;
     t.Run(dictˢ, (ж<testing.T> tΔ2) => {
-        foreach (var (_, level) in levelsʗ1) {
+        foreach (var (_, level) in range(levelsʗ1)) {
             tΔ2.Run(fmt.Sprint(level), (ж<testing.T> tΔ3) => {
                 testResetOutput(tΔ3, level, default);
             });
@@ -682,7 +660,7 @@ internal static void testResetOutput(ж<testing.T> t, nint level, slice<byte> di
     }
     if (!bytes.Equal(out1, out2)) {
         nint mm = 0;
-        foreach (var (i, b) in out1.slice(0, len(out2))) {
+        foreach (var (i, b) in range(out1.slice(0, len(out2)))) {
             if (b != out2[i]) {
                 t.Errorf("mismatch index %d: %#02x, expected %#02x", i, out2[i], b);
             }
@@ -702,39 +680,39 @@ internal static void testResetOutput(ж<testing.T> t, nint level, slice<byte> di
 public static void TestBestSpeed(ж<testing.T> t) {
     t.Parallel();
     var abc = new slice<byte>(128);
-    foreach (var i in range(abc)) {
+    foreach (var i in range(len(abc))) {
         abc[i] = (byte)i;
     }
     var abcabc = bytes.Repeat(abc, 131072 / len(abc));
     slice<byte> want = default;
 
     var testCases = slice<slice<nint>>([
-        slice<nint>([65536, 0]),
-        slice<nint>([65536, 1]),
-        slice<nint>([65536, 1, 256]),
-        slice<nint>([65536, 1, 65536]),
-        slice<nint>([65536, 14]),
-        slice<nint>([65536, 15]),
-        slice<nint>([65536, 16]),
-        slice<nint>([65536, 16, 256]),
-        slice<nint>([65536, 16, 65536]),
-        slice<nint>([65536, 127]),
-        slice<nint>([65536, 128]),
-        slice<nint>([65536, 128, 256]),
-        slice<nint>([65536, 128, 65536]),
-        slice<nint>([65536, 129]),
-        slice<nint>([65536, 65536, 256]),
-        slice<nint>([65536, 65536, 65536])
+        [65536, 0],
+        [65536, 1],
+        [65536, 1, 256],
+        [65536, 1, 65536],
+        [65536, 14],
+        [65536, 15],
+        [65536, 16],
+        [65536, 16, 256],
+        [65536, 16, 65536],
+        [65536, 127],
+        [65536, 128],
+        [65536, 128, 256],
+        [65536, 128, 65536],
+        [65536, 129],
+        [65536, 65536, 256],
+        [65536, 65536, 65536]
     ]);
 
-    foreach (var (i, tc) in testCases) {
+    foreach (var (i, tc) in range(testCases)) {
         if (i >= 3 && testing.Short()) {
             break;
         }
-        foreach (var (_, firstN) in slice<nint>([1, 65534, 65535, 65536, 65537, 131072])) {
+        foreach (var (_, firstN) in range(slice<nint>([1, 65534, 65535, 65536, 65537, 131072]))) {
             tc[0] = firstN;
 outer:
-            foreach (var (_, flush) in slice<bool>([false, true])) {
+            foreach (var (_, flush) in range(slice<bool>([false, true]))) {
                 var buf = @new<bytes.Buffer>();
                 want = want[..0];
 
@@ -743,29 +721,23 @@ outer:
                     t.Errorf("i=%d, firstN=%d, flush=%t: NewWriter: %v", i, firstN, flush, err);
                     continue;
                 }
-                foreach (var (_, n) in tc) {
+                foreach (var (_, n) in range(tc)) {
                     want = appendꓸꓸꓸ(want, abcabc.slice(0, n));
-                    {
-                        var (_, errΔ1) = w.Write(abcabc.slice(0, n)); if (errΔ1 != nil) {
-                            t.Errorf("i=%d, firstN=%d, flush=%t: Write: %v", i, firstN, flush, errΔ1);
-                            goto continue_outer;
-                        }
+                    var (_, errΔ1) = w.Write(abcabc.slice(0, n)); if (errΔ1 != nil) {
+                        t.Errorf("i=%d, firstN=%d, flush=%t: Write: %v", i, firstN, flush, errΔ1);
+                        goto continue_outer;
                     }
                     if (!flush) {
                         continue;
                     }
-                    {
-                        var errΔ2 = w.Flush(); if (errΔ2 != nil) {
-                            t.Errorf("i=%d, firstN=%d, flush=%t: Flush: %v", i, firstN, flush, errΔ2);
-                            goto continue_outer;
-                        }
+                    var errΔ2 = w.Flush(); if (errΔ2 != nil) {
+                        t.Errorf("i=%d, firstN=%d, flush=%t: Flush: %v", i, firstN, flush, errΔ2);
+                        goto continue_outer;
                     }
                 }
-                {
-                    var errΔ3 = w.Close(); if (errΔ3 != nil) {
-                        t.Errorf("i=%d, firstN=%d, flush=%t: Close: %v", i, firstN, flush, errΔ3);
-                        continue;
-                    }
+                var errΔ3 = w.Close(); if (errΔ3 != nil) {
+                    t.Errorf("i=%d, firstN=%d, flush=%t: Close: %v", i, firstN, flush, errΔ3);
+                    continue;
                 }
 
                 var r = NewReader(new flate_test_package.bytes_BufferжReader(buf));
@@ -849,7 +821,6 @@ public static void TestWriterPersistentWriteError(ж<testing.T> t) {
         iᴛ1 = i;
     }
 }
-
 public static void TestWriterPersistentFlushError(ж<testing.T> t) {
     var (zw, err) = NewWriter(new flate_internal_test_package.failWriterжWriter(Ꮡ(new failWriter(0))), DefaultCompression);
     if (err != nil) {
@@ -858,7 +829,7 @@ public static void TestWriterPersistentFlushError(ж<testing.T> t) {
     var flushErr = zw.Flush();
     var closeErr = zw.Close();
     var (_, writeErr) = zw.Write(slice<byte>("Test"u8));
-    checkErrors(slice<error>([closeErr, flushErr, writeErr]), errIO, t);
+    checkErrors([closeErr, flushErr, writeErr], errIO, t);
 }
 
 public static void TestWriterPersistentCloseError(ж<testing.T> t) {
@@ -870,7 +841,7 @@ public static void TestWriterPersistentCloseError(ж<testing.T> t) {
     var closeErr = zw.Close();
     var flushErr = zw.Flush();
     var (_, writeErr) = zw.Write(slice<byte>("Test"u8));
-    checkErrors(slice<error>([closeErr, flushErr, writeErr]), errIO, t);
+    checkErrors([closeErr, flushErr, writeErr], errIO, t);
 
     // After closing writer we should persistent "write after close" error across Flush and Write calls, but return nil
     // on next Close calls.
@@ -887,12 +858,12 @@ public static void TestWriterPersistentCloseError(ж<testing.T> t) {
 
     flushErr = zw.Flush();
     (_, writeErr) = zw.Write(slice<byte>("Test"u8));
-    checkErrors(slice<error>([flushErr, writeErr]), errWriterClosed, t);
+    checkErrors([flushErr, writeErr], errWriterClosed, t);
 }
 
 internal static void checkErrors(slice<error> got, error want, ж<testing.T> t) {
     t.Helper();
-    foreach (var (_, err) in got) {
+    foreach (var (_, err) in range(got)) {
         if (!AreEqual(err, want)) {
             t.Errorf("Error doesn't match\nWant: %s\nGot: %s", want, got);
         }
@@ -909,68 +880,68 @@ public static void TestBestSpeedMatch(ж<testing.T> Ꮡt) {
 
     Ꮡt.Parallel();
     var cases = slice<TestBestSpeedMatch_cases>([new(
-        previous: slice<byte>([0, 0, 0, 1, 2]),
-        current: slice<byte>([3, 4, 5, 0, 1, 2, 3, 4, 5]),
+        previous: [0, 0, 0, 1, 2],
+        current: [3, 4, 5, 0, 1, 2, 3, 4, 5],
         t: -3,
         s: 3,
         want: 6
     ), new(
-        previous: slice<byte>([0, 0, 0, 1, 2]),
-        current: slice<byte>([2, 4, 5, 0, 1, 2, 3, 4, 5]),
+        previous: [0, 0, 0, 1, 2],
+        current: [2, 4, 5, 0, 1, 2, 3, 4, 5],
         t: -3,
         s: 3,
         want: 3
     ), new(
-        previous: slice<byte>([0, 0, 0, 1, 1]),
-        current: slice<byte>([3, 4, 5, 0, 1, 2, 3, 4, 5]),
+        previous: [0, 0, 0, 1, 1],
+        current: [3, 4, 5, 0, 1, 2, 3, 4, 5],
         t: -3,
         s: 3,
         want: 2
     ), new(
-        previous: slice<byte>([0, 0, 0, 1, 2]),
-        current: slice<byte>([2, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [0, 0, 0, 1, 2],
+        current: [2, 2, 2, 2, 1, 2, 3, 4, 5],
         t: -1,
         s: 0,
         want: 4
     ), new(
-        previous: slice<byte>([0, 0, 0, 1, 2, 3, 4, 5, 2, 2]),
-        current: slice<byte>([2, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [0, 0, 0, 1, 2, 3, 4, 5, 2, 2],
+        current: [2, 2, 2, 2, 1, 2, 3, 4, 5],
         t: -7,
         s: 4,
         want: 5
     ), new(
-        previous: slice<byte>([9, 9, 9, 9, 9]),
-        current: slice<byte>([2, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [9, 9, 9, 9, 9],
+        current: [2, 2, 2, 2, 1, 2, 3, 4, 5],
         t: -1,
         s: 0,
         want: 0
     ), new(
-        previous: slice<byte>([9, 9, 9, 9, 9]),
-        current: slice<byte>([9, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [9, 9, 9, 9, 9],
+        current: [9, 2, 2, 2, 1, 2, 3, 4, 5],
         t: 0,
         s: 1,
         want: 0
     ), new(
-        previous: slice<byte>([]),
-        current: slice<byte>([9, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [],
+        current: [9, 2, 2, 2, 1, 2, 3, 4, 5],
         t: -5,
         s: 1,
         want: 0
     ), new(
-        previous: slice<byte>([]),
-        current: slice<byte>([9, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [],
+        current: [9, 2, 2, 2, 1, 2, 3, 4, 5],
         t: -1,
         s: 1,
         want: 0
     ), new(
-        previous: slice<byte>([]),
-        current: slice<byte>([2, 2, 2, 2, 1, 2, 3, 4, 5]),
+        previous: [],
+        current: [2, 2, 2, 2, 1, 2, 3, 4, 5],
         t: 0,
         s: 1,
         want: 3
     ), new(
-        previous: slice<byte>([3, 4, 5]),
-        current: slice<byte>([3, 4, 5]),
+        previous: [3, 4, 5],
+        current: [3, 4, 5],
         t: -3,
         s: 0,
         want: 3
@@ -1012,7 +983,7 @@ public static void TestBestSpeedMatch(ж<testing.T> Ꮡt) {
         want: 100
     )
     ]);
-    foreach (var (i, c) in cases) {
+    foreach (var (i, c) in range(cases)) {
         var e = new deflateFast(prev: c.previous);
         var got = e.matchLen(c.s, c.t, c.current);
         if (got != c.want) {
@@ -1043,8 +1014,8 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> t) {
     t.Parallel();
     @string abc = abcᶜ;
     @string xyz = xyzᶜ;
-    foreach (var (_, matchBefore) in slice<bool>([false, true])) {
-        foreach (var (_, extra) in slice<nint>([0, inputMargin - 1, inputMargin, inputMargin + 1, 2 * inputMargin])) {
+    foreach (var (_, matchBefore) in range(slice<bool>([false, true]))) {
+        foreach (var (_, extra) in range(slice<nint>([0, inputMargin - 1, inputMargin, inputMargin + 1, 2 * inputMargin]))) {
             for (nint offsetAdjᴛ1 = -5; offsetAdjᴛ1 <= +5; offsetAdjᴛ1++) {
                 var offsetAdj = offsetAdjᴛ1;
                 void report(@string desc, error errΔ1) {
@@ -1081,11 +1052,9 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> t) {
                         continue;
                     }
                 }
-                {
-                    var errΔ2 = w.Close(); if (errΔ2 != nil) {
-                        report(writerCloseˢ, errΔ2);
-                        continue;
-                    }
+                var errΔ2 = w.Close(); if (errΔ2 != nil) {
+                    report(writerCloseˢ, errΔ2);
+                    continue;
                 }
 
                 var r = NewReader(new flate_test_package.bytes_BufferжReader(buf));
@@ -1113,7 +1082,7 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> t) {
     // testData may not generate internal matches.
     var testData = new slice<byte>(32);
     var rng = rand.New(rand.NewSource(0));
-    foreach (var i in range(testData)) {
+    foreach (var i in range(len(testData))) {
         testData[i] = (byte)rng.Uint32();
     }
 
@@ -1185,15 +1154,11 @@ public static partial void TestMaxStackSize(ж<testing.T> t) {
                     if (err != nil) {
                         t.Errorf("level %d, NewWriter() = %v, want nil", levelΔ1, err);
                     }
-                    {
-                        var (nΔ1, errΔ1) = zw.Write(bʗ1); if (nΔ1 != len(bʗ1) || errΔ1 != nil) {
-                            t.Errorf("level %d, Write() = (%d, %v), want (%d, nil)", levelΔ1, nΔ1, errΔ1, len(bʗ1));
-                        }
+                    var (nΔ1, errΔ1) = zw.Write(bʗ1); if (nΔ1 != len(bʗ1) || errΔ1 != nil) {
+                        t.Errorf("level %d, Write() = (%d, %v), want (%d, nil)", levelΔ1, nΔ1, errΔ1, len(bʗ1));
                     }
-                    {
-                        var errΔ2 = zw.Close(); if (errΔ2 != nil) {
-                            t.Errorf("level %d, Close() = %v, want nil", levelΔ1, errΔ2);
-                        }
+                    var errΔ2 = zw.Close(); if (errΔ2 != nil) {
+                        t.Errorf("level %d, Close() = %v, want nil", levelΔ1, errΔ2);
                     }
                     zw.Reset(io.Discard);
                 }

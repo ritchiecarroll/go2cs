@@ -39,7 +39,7 @@ public static void TestAll(ж<testing.T> t) {
     var incs = incNonDefaults(t);
 
     @string last = ""u8;
-    foreach (var (_, info) in godebugs.All) {
+    foreach (var (_, info) in range(godebugs.All)) {
         if (info.Name <= last) {
             t.Errorf("All not sorted: %s then %s", last, info.Name);
         }
@@ -88,7 +88,7 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> t) {
     }
 
     var seen = new map<@string, bool>{};
-    foreach (var (_, dir) in strings.Split((@string)@out, "\n")) {
+    foreach (var (_, dir) in range(strings.Split((@string)@out, "\n"))) {
         if (dir == ""u8) {
             continue;
         }
@@ -96,7 +96,7 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> t) {
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
-        foreach (var (_, @file) in files) {
+        foreach (var (_, @file) in range(files)) {
             @string name = @file.Name();
             if (!strings.HasSuffix(name, ".go") || strings.HasSuffix(name, testGoˢ)) {
                 continue;
@@ -105,7 +105,7 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> t) {
             if (errΔ2 != nil) {
                 t.Fatal(errΔ2);
             }
-            foreach (var (_, m) in incNonDefaultRE.FindAllSubmatch(data, -1)) {
+            foreach (var (_, m) in range(incNonDefaultRE.FindAllSubmatch(data, -1))) {
                 seen[((@string)m[1])] = true;
             }
         }
@@ -114,7 +114,7 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> t) {
 }
 
 public static void TestRemoved(ж<testing.T> t) {
-    foreach (var (_, info) in godebugs.Removed) {
+    foreach (var (_, info) in range(godebugs.Removed)) {
         if (godebugs.Lookup(info.Name) != nil) {
             t.Fatalf("GODEBUG: %v exists in both Removed and All", info.Name);
         }

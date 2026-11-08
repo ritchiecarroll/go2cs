@@ -58,7 +58,7 @@ public static @string String(this CasePos pos) {
 
 // Test values for the stream test.
 // One of each JSON kind.
-internal static slice<any> streamTest = slice<any>([
+internal static slice<any> streamTest = [
     0.1D,
     (@string)"hello",
     default,
@@ -67,7 +67,7 @@ internal static slice<any> streamTest = slice<any>([
     slice<any>([(@string)"a", (@string)"b", (@string)"c"]),
     new map<@string, any>{["K"] = (@string)"Kelvin", ["ß"] = (@string)"long s"},
     3.14D // another value to make sure something can follow map
-]);
+];
 
 internal static @string streamEncoded = """
 0.1
@@ -88,20 +88,16 @@ public static void TestEncoder(ж<testing.T> t) {
         // Check that enc.SetIndent("", "") turns off indentation.
         enc.SetIndent(">", ".");
         enc.SetIndent(""u8, ""u8);
-        foreach (var (j, v) in streamTest.slice(0, i)) {
-            {
-                var err = enc.Encode(v); if (err != nil) {
-                    t.Fatalf("#%d.%d Encode error: %v", i, j, err);
-                }
+        foreach (var (j, v) in range(streamTest.slice(0, i))) {
+            var err = enc.Encode(v); if (err != nil) {
+                t.Fatalf("#%d.%d Encode error: %v", i, j, err);
             }
         }
-        {
-            @string got = buf.String();
-            @string want = nlines(streamEncoded, i); if (got != want) {
-                t.Errorf("encoding %d items: mismatch:", i);
-                diff(t, slice<byte>(got), slice<byte>(want));
-                break;
-            }
+        @string got = buf.String();
+        @string want = nlines(streamEncoded, i); if (got != want) {
+            t.Errorf("encoding %d items: mismatch:", i);
+            diff(t, slice<byte>(got), slice<byte>(want));
+            break;
         }
     }
 }
@@ -177,15 +173,13 @@ public static void TestEncoderIndent(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new json_test_package.strings_BuilderжWriter(Ꮡbuf));
     enc.SetIndent(">", ".");
-    foreach (var (_, v) in streamTest) {
+    foreach (var (_, v) in range(streamTest)) {
         enc.Encode(v);
     }
-    {
-        @string got = buf.String();
-        @string want = streamEncodedIndent; if (got != want) {
-            t.Errorf("Encode mismatch:\ngot:\n%s\n\nwant:\n%s", got, want);
-            diff(t, slice<byte>(got), slice<byte>(want));
-        }
+    @string got = buf.String();
+    @string want = streamEncodedIndent; if (got != want) {
+        t.Errorf("Encode mismatch:\ngot:\n%s\n\nwant:\n%s", got, want);
+        diff(t, slice<byte>(got), slice<byte>(want));
     }
 }
 
@@ -263,7 +257,7 @@ public static void TestEncoderSetEscapeHTML(ж<testing.T> t) {
             @"{""bar"":""\""<html>foobar</html>\""""}"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestEncoderSetEscapeHTML_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -313,16 +307,14 @@ public static void TestDecoder(ж<testing.T> t) {
         }
         var @out = new slice<any>(i);
         var dec = NewDecoder(new json_test_package.bytes_BufferжReader(Ꮡbuf));
-        foreach (var j in range(@out)) {
-            {
-                var err = dec.Decode(Ꮡ(@out, j)); if (err != nil) {
-                    t.Fatalf("decode #%d/%d error: %v", j, i, err);
-                }
+        foreach (var j in range(len(@out))) {
+            var err = dec.Decode(Ꮡ(@out, j)); if (err != nil) {
+                t.Fatalf("decode #%d/%d error: %v", j, i, err);
             }
         }
         if (!reflect.DeepEqual(@out, streamTest.slice(0, i))) {
             t.Errorf("decoding %d items: mismatch:", i);
-            foreach (var j in range(@out)) {
+            foreach (var j in range(len(@out))) {
                 if (!reflect.DeepEqual(@out[j], streamTest[j])) {
                     t.Errorf("#%d:\n\tgot:  %v\n\twant: %v", j, @out[j], streamTest[j]);
                 }
@@ -357,11 +349,9 @@ public static void TestDecoderBuffered(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = (@string)rest;
-        @string want = extraˢ; if (got != want) {
-            t.Errorf("Remaining = %s, want %s", got, want);
-        }
+    @string got = (@string)rest;
+    @string want = extraˢ; if (got != want) {
+        t.Errorf("Remaining = %s, want %s", got, want);
     }
 }
 
@@ -371,10 +361,8 @@ internal static @string nlines(@string s, nint n) {
     }
     foreach (var (i, c) in s) {
         if (c == '\n') {
-            {
-                n--; if (n == 0) {
-                    return s.slice(0, i + 1);
-                }
+            n--; if (n == 0) {
+                return s.slice(0, i + 1);
             }
         }
     }
@@ -433,11 +421,9 @@ public static void TestNullRawMessage(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("Unmarshal error: %v", err);
     }
-    {
-        @string wantΔ1 = nullˢ;
-        @string gotΔ1 = (@string)(slice<byte>)data.Id; if (wantΔ1 != gotΔ1) {
-            t.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s", gotΔ1, wantΔ1);
-        }
+    @string wantΔ1 = nullˢ;
+    @string gotΔ1 = (@string)(slice<byte>)data.Id; if (wantΔ1 != gotΔ1) {
+        t.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s", gotΔ1, wantΔ1);
     }
     if (data.IdPtr != nil) {
         t.Fatalf("pointer mismatch: got non-nil, want nil");
@@ -461,7 +447,7 @@ public static void TestBlocking(ж<testing.T> t) {
         new(Name(""u8), @"{""x"": 1}"),
         new(Name(""u8), @"[1, 2, 3]")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBlocking_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -474,10 +460,8 @@ public static void TestBlocking(ж<testing.T> t) {
 
             // If Decode reads beyond what w.Write writes above,
             // it will block, and the test will deadlock.
-            {
-                var err = NewDecoder(new json_test_package.net_ConnᴠReader(r)).Decode(Ꮡval); if (err != nil) {
-                    tΔ1.Errorf("%s: NewDecoder(%s).Decode error: %v", ttʗ1.Where, ttʗ1.@in, err);
-                }
+            var err = NewDecoder(new json_test_package.net_ConnᴠReader(r)).Decode(Ꮡval); if (err != nil) {
+                tΔ1.Errorf("%s: NewDecoder(%s).Decode error: %v", ttʗ1.Where, ttʗ1.@in, err);
             }
             r.Close();
             w.Close();
@@ -501,86 +485,86 @@ internal partial struct TestDecodeInStream_tests /*dyn*/ {
 public static void TestDecodeInStream(ж<testing.T> t) {
     var tests = slice<TestDecodeInStream_tests>([
         // streaming token cases
-        new(CaseName: Name(""u8), json: @"10", expTokens: slice<any>([(float64)10D])),
-        new(CaseName: Name(""u8), json: @" [10] ", expTokens: slice<any>([
-            (global::go.encoding.json_package.Delim)(rune)'[', (float64)10D, (global::go.encoding.json_package.Delim)(rune)']'])),
-        new(CaseName: Name(""u8), json: @" [false,10,""b""] ", expTokens: slice<any>([
-            (global::go.encoding.json_package.Delim)(rune)'[', false, (float64)10D, (@string)"b", (global::go.encoding.json_package.Delim)(rune)']'])),
-        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: slice<any>([
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @"{""a"": 1, ""b"":""3""}", expTokens: slice<any>([
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (@string)"b", (@string)"3", (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: slice<any>([
+        new(CaseName: Name(""u8), json: @"10", expTokens: [(float64)10D]),
+        new(CaseName: Name(""u8), json: @" [10] ", expTokens: [
+            (global::go.encoding.json_package.Delim)(rune)'[', (float64)10D, (global::go.encoding.json_package.Delim)(rune)']']),
+        new(CaseName: Name(""u8), json: @" [false,10,""b""] ", expTokens: [
+            (global::go.encoding.json_package.Delim)(rune)'[', false, (float64)10D, (@string)"b", (global::go.encoding.json_package.Delim)(rune)']']),
+        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: [
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @"{""a"": 1, ""b"":""3""}", expTokens: [
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (@string)"b", (@string)"3", (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'[',
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)2D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)']'])),
-        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)']']),
+        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'[',
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'])),
+            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}']),
 
         // streaming tokens with intermittent Decode()
-        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: slice<any>([
+        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a",
             new decodeThis((float64)1D),
-            (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @" [ { ""a"" : 1 } ] ", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @" [ { ""a"" : 1 } ] ", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'[',
             new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)']'])),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)']']),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'[',
             new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
             new decodeThis(new map<@string, any>{["a"] = (float64)2D}),
-            (global::go.encoding.json_package.Delim)(rune)']'])),
-        new(CaseName: Name(""u8), json: @"{ ""obj"" : [ { ""a"" : 1 } ] }", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)']']),
+        new(CaseName: Name(""u8), json: @"{ ""obj"" : [ { ""a"" : 1 } ] }", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'[',
             new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'])),
+            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}']),
 
-        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: slice<any>([
+        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', objˢ,
             new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{', objˢ,
             new decodeThis(slice<any>([
                 new map<@string, any>{["a"] = (float64)1D}
             ])
             ),
-            (global::go.encoding.json_package.Delim)(rune)'}'])),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1} {""a"": 2}] ", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'}']),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1} {""a"": 2}] ", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'[',
             new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
             new decodeThis(Ꮡ(new SyntaxError("expected comma after array element", 11)))
-        ])),
+        ]),
         new(CaseName: Name(""u8), json: @"{ """u8 + strings.Repeat("a", 513) + @""" 1 }"u8, expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'{', strings.Repeat("a", 513),
             new decodeThis(Ꮡ(new SyntaxError("expected colon after object key", 518)))
         ])),
-        new(CaseName: Name(""u8), json: @"{ ""\a"" }", expTokens: slice<any>([
+        new(CaseName: Name(""u8), json: @"{ ""\a"" }", expTokens: [
             (global::go.encoding.json_package.Delim)(rune)'{',
             Ꮡ(new SyntaxError("invalid character 'a' in string escape code", 3))
-        ])),
-        new(CaseName: Name(""u8), json: @" \a", expTokens: slice<any>([
+        ]),
+        new(CaseName: Name(""u8), json: @" \a", expTokens: [
             Ꮡ(new SyntaxError("invalid character '\\\\' looking for beginning of value", 1))
-        ])),
-        new(CaseName: Name(""u8), json: @",", expTokens: slice<any>([
+        ]),
+        new(CaseName: Name(""u8), json: @",", expTokens: [
             Ꮡ(new SyntaxError("invalid character ',' looking for beginning of value", 0))
-        ]))
+        ])
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestDecodeInStream_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var dec = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(ttʗ1.json)));
-            foreach (var (i, vᴛ2) in ttʗ1.expTokens) {
+            foreach (var (i, vᴛ2) in range(ttʗ1.expTokens)) {
                 var want = vᴛ2;
 
                 ref var got = ref heap<any>(out var Ꮡgot);
@@ -592,29 +576,23 @@ public static void TestDecodeInStream(ж<testing.T> t) {
                     wantMore = false;
                     break;
                 }}
-                {
-                    var gotΔ1 = dec.More(); if (gotΔ1 != wantMore) {
-                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tdec.More() = %v, want %v (next token: %T(%v))", ttʗ1.Where, ttʗ1.json, gotΔ1, wantMore, want, want);
-                    }
+                var gotΔ1 = dec.More(); if (gotΔ1 != wantMore) {
+                    tΔ1.Fatalf("%s:\n\tinput: %s\n\tdec.More() = %v, want %v (next token: %T(%v))", ttʗ1.Where, ttʗ1.json, gotΔ1, wantMore, want, want);
                 }
 
-                {
-                    var (dt, ok) = want._<decodeThis>(ᐧ); if (ok) {
-                        want = dt.v;
-                        err = dec.Decode(Ꮡgot);
-                    } else {
-                        (got, err) = dec.Token();
-                    }
+                if (want._<decodeThis>(out var dt)) {
+                    want = dt.v;
+                    err = dec.Decode(Ꮡgot);
+                } else {
+                    (got, err) = dec.Token();
                 }
-                {
-                    var (errWant, ok) = want._<error>(ᐧ); if (ok) {
-                        if (err == nil || !reflect.DeepEqual(err, errWant)) {
-                            tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: %v", ttʗ1.Where, ttʗ1.json, err, errWant);
-                        }
-                        break;
-                    } else if (err != nil) {
-                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: nil", ttʗ1.Where, ttʗ1.json, err);
+                if (want._<error>(out var errWant)) {
+                    if (err == nil || !reflect.DeepEqual(err, errWant)) {
+                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: %v", ttʗ1.Where, ttʗ1.json, err, errWant);
                     }
+                    break;
+                } else if (err != nil) {
+                    tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: nil", ttʗ1.Where, ttʗ1.json, err);
                 }
                 if (!reflect.DeepEqual(got, want)) {
                     tΔ1.Fatalf("%s: token %d:\n\tinput: %s\n\tgot:  %T(%v)\n\twant: %T(%v)", ttʗ1.Where, i, ttʗ1.json, got, got, want, want);
@@ -695,16 +673,14 @@ public static void TestTokenTruncation(ж<testing.T> t) {
         new(@in: @"fal ", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' in literal false (expecting 's')", (int64)len(@"fal "))))),
         new(@in: @"false", err: io.EOF)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var d = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         for (nint i = 0; true; i++) {
-            {
-                var (_, err) = d.Token(); if (err != nil) {
-                    if (!reflect.DeepEqual(err, tt.err)) {
-                        t.Errorf("`%s`: %d.Token error = %#v, want %v", tt.@in, i, err, tt.err);
-                    }
-                    break;
+            var (_, err) = d.Token(); if (err != nil) {
+                if (!reflect.DeepEqual(err, tt.err)) {
+                    t.Errorf("`%s`: %d.Token error = %#v, want %v", tt.@in, i, err, tt.err);
                 }
+                break;
             }
         }
     }
@@ -767,12 +743,10 @@ public static void TestDecoderInputOffset(ж<testing.T> t) {
     checkMore();
     checkOffset();
     for (;;) {
-        {
-            var (_, err) = d.Token(); if (AreEqual(err, io.EOF)) {
-                break;
-            } else if (err != nil) {
-                t.Fatalf("Token error: %v", err);
-            }
+        var (_, err) = d.Token(); if (AreEqual(err, io.EOF)) {
+            break;
+        } else if (err != nil) {
+            t.Fatalf("Token error: %v", err);
         }
         checkOffset();
         checkMore();

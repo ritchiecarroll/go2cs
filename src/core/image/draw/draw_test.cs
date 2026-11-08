@@ -26,13 +26,9 @@ internal partial struct slowestRGBA {
     public image.Rectangle Rect;
 }
 
-internal static color.Model ColorModel(this ref slowestRGBA p) {
-    return color.RGBAModel;
-}
+internal static color.Model ColorModel(this ref slowestRGBA p) { return color.RGBAModel; }
 
-internal static image.Rectangle Bounds(this ref slowestRGBA p) {
-    return p.Rect;
-}
+internal static image.Rectangle Bounds(this ref slowestRGBA p) { return p.Rect; }
 
 internal static color.Color At(this ref slowestRGBA p, nint x, nint y) {
     return p.RGBA64At(x, y);
@@ -74,14 +70,12 @@ internal static nint PixOffset(this ref slowestRGBA p, nint x, nint y) {
 }
 
 internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
-    {
-        var (rgbaΔ1, ok) = m._<ж<imageꓸRGBA>>(ᐧ); if (ok) {
-            return Ꮡ(new slowestRGBA(
-                Pix: appendꓸꓸꓸ(slice<byte>(default), rgbaΔ1.Pix),
-                Stride: rgbaΔ1.Stride,
-                Rect: rgbaΔ1.Rect
-            ));
-        }
+    var (rgbaΔ1, ok) = m._<ж<imageꓸRGBA>>(ᐧ); if (ok) {
+        return Ꮡ(new slowestRGBA(
+            Pix: appendꓸꓸꓸ(slice<byte>(default), rgbaΔ1.Pix),
+            Stride: rgbaΔ1.Stride,
+            Rect: rgbaΔ1.Rect
+        ));
     }
     var rgba = image.NewRGBA(m.Bounds());
     Draw(new draw_test_package.image_ΔRGBAжImage(rgba), rgba.Bounds(), m, m.Bounds().Min, Src);
@@ -94,10 +88,8 @@ internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
 
 [GoInit] internal static void init() {
     any p = ((ж<slowestRGBA>)nil);
-    {
-        var (_, ok) = p._<RGBA64Image>(ᐧ); if (ok) {
-            throw panic("slowestRGBA should not be an RGBA64Image");
-        }
+    var (_, ok) = p._<RGBA64Image>(ᐧ); if (ok) {
+        throw panic("slowestRGBA should not be an RGBA64Image");
     }
 }
 
@@ -111,13 +103,9 @@ internal partial struct slowerRGBA {
     public image.Rectangle Rect;
 }
 
-internal static color.Model ColorModel(this ref slowerRGBA p) {
-    return color.RGBAModel;
-}
+internal static color.Model ColorModel(this ref slowerRGBA p) { return color.RGBAModel; }
 
-internal static image.Rectangle Bounds(this ref slowerRGBA p) {
-    return p.Rect;
-}
+internal static image.Rectangle Bounds(this ref slowerRGBA p) { return p.Rect; }
 
 internal static color.Color At(this ref slowerRGBA p, nint x, nint y) {
     return p.RGBA64At(x, y);
@@ -171,14 +159,12 @@ internal static nint PixOffset(this ref slowerRGBA p, nint x, nint y) {
 }
 
 internal static ж<slowerRGBA> convertToSlowerRGBA(image.Image m) {
-    {
-        var (rgbaΔ1, ok) = m._<ж<imageꓸRGBA>>(ᐧ); if (ok) {
-            return Ꮡ(new slowerRGBA(
-                Pix: appendꓸꓸꓸ(slice<byte>(default), rgbaΔ1.Pix),
-                Stride: rgbaΔ1.Stride,
-                Rect: rgbaΔ1.Rect
-            ));
-        }
+    var (rgbaΔ1, ok) = m._<ж<imageꓸRGBA>>(ᐧ); if (ok) {
+        return Ꮡ(new slowerRGBA(
+            Pix: appendꓸꓸꓸ(slice<byte>(default), rgbaΔ1.Pix),
+            Stride: rgbaΔ1.Stride,
+            Rect: rgbaΔ1.Rect
+        ));
     }
     var rgba = image.NewRGBA(m.Bounds());
     Draw(new draw_test_package.image_ΔRGBAжImage(rgba), rgba.Bounds(), m, m.Bounds().Min, Src);
@@ -191,10 +177,8 @@ internal static ж<slowerRGBA> convertToSlowerRGBA(image.Image m) {
 
 [GoInit] internal static void initΔ1() {
     any p = ((ж<slowerRGBA>)nil);
-    {
-        var (_, ok) = p._<RGBA64Image>(ᐧ); if (!ok) {
-            throw panic("slowerRGBA should be an RGBA64Image");
-        }
+    var (_, ok) = p._<RGBA64Image>(ᐧ); if (!ok) {
+        throw panic("slowerRGBA should be an RGBA64Image");
     }
 }
 
@@ -490,9 +474,9 @@ public static void TestDraw(ж<testing.T> t) {
         image.Rect(8, 8, 9, 9),
         image.Rect(8, 8, 8, 8)
     ]);
-    foreach (var (_, r) in rr) {
+    foreach (var (_, r) in range(rr)) {
 loop:
-        foreach (var (_, test) in drawTests) {
+        foreach (var (_, test) in range(drawTests)) {
             for (nint i = 0; i < 3; i++) {
                 var dst = hgradRed(255)._<ж<imageꓸRGBA>>().SubImage(r)._<Image>();
                 // For i != 0, substitute a different-typed dst that will take
@@ -545,7 +529,7 @@ break_loop:;
 }
 
 public static void TestDrawOverlap(ж<testing.T> t) {
-    foreach (var (_, op) in slice<global::go.image.draw_package.Op>([Over, Src])) {
+    foreach (var (_, op) in range(slice<global::go.image.draw_package.Op>([Over, Src]))) {
         for (nint yoff = -2; yoff <= 2; yoff++) {
 loop:
             for (nint xoff = -2; xoff <= 2; xoff++) {
@@ -617,7 +601,7 @@ public static void TestFill(ж<testing.T> t) {
         image.Rect(21, 21, 28, 28),
         image.Rect(20, 20, 29, 29)
     ]);
-    foreach (var (_, vᴛ1) in rr) {
+    foreach (var (_, vᴛ1) in range(rr)) {
         ref var r = ref heap(new image.Rectangle(), out var Ꮡr);
         r = vᴛ1;
 
@@ -729,10 +713,8 @@ public static void TestDrawSrcNonpremultiplied(ж<testing.T> t) {
         var src = image.NewNRGBA64(image.Rect(0, 0, 1, 1));
         src.SetNRGBA64(0, 0, transparentPurple64);
         Draw(new draw_test_package.image_NRGBA64жImage(dst), dst.Bounds(), new image.NRGBA64жImage(src), new image.Point(0, 0), Src);
-        {
-            var (got, want) = (dst.At(0, 0), transparentPurple64); if (!AreEqual(got, want)) {
-                t.Errorf("At(0, 0):\ngot  %#v\nwant %#v", got, want);
-            }
+        var (got, want) = (dst.At(0, 0), transparentPurple64); if (!AreEqual(got, want)) {
+            t.Errorf("At(0, 0):\ngot  %#v\nwant %#v", got, want);
         }
     }
 }
@@ -756,10 +738,8 @@ public static void TestFloydSteinbergCheckerboard(ж<testing.T> t) {
             var want = (uint8)((uint8)(x + y) % 2);
             if (got != want) {
                 t.Errorf("at (%d, %d): got %d, want %d", x, y, got, want);
-                {
-                    nErr++; if (nErr == 10) {
-                        t.Fatal(thereMayBeMoreErrorsˢ);
-                    }
+                nErr++; if (nErr == 10) {
+                    t.Fatal(thereMayBeMoreErrorsˢ);
                 }
             }
         }
@@ -857,19 +837,15 @@ public static void TestSqDiff(ж<testing.T> t) {
         -0x7ffffffe,
         -2147483648
     ]);
-    foreach (var (_, x) in testCases) {
-        foreach (var (_, y) in testCases) {
-            {
-                var (got, want) = (sqDiff(x, y), orig(x, y)); if (got != want) {
-                    t.Fatalf("sqDiff(%#x, %#x): got %d, want %d", x, y, got, want);
-                }
+    foreach (var (_, x) in range(testCases)) {
+        foreach (var (_, y) in range(testCases)) {
+            var (got, want) = (sqDiff(x, y), orig(x, y)); if (got != want) {
+                t.Fatalf("sqDiff(%#x, %#x): got %d, want %d", x, y, got, want);
             }
         }
     }
-    {
-        var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != nil) {
+        t.Fatal(err);
     }
 }
 

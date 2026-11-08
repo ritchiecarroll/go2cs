@@ -5,8 +5,6 @@ namespace go;
 
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -16,7 +14,7 @@ internal partial struct dnsNameTest {
     internal bool result;
 }
 
-internal static slice<dnsNameTest> dnsNameTests = slice<dnsNameTest>([
+internal static slice<dnsNameTest> dnsNameTests = [
     // RFC 2181, section 11.
     new("_xmpp-server._tcp.google.com", true),
     new("foo.com", true),
@@ -31,7 +29,7 @@ internal static slice<dnsNameTest> dnsNameTests = slice<dnsNameTest>([
     new("a.b.com-", false),
     new("a.b..", false),
     new("b.com.", true)
-]);
+];
 
 internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
     GoFrame ᒐ = default;
@@ -44,7 +42,7 @@ internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
         @string char64 = char63 + "a"u8;
         @string longDomain = strings.Repeat(char63 + "."u8, 5) + "example"u8;
 
-        foreach (var (_, tc) in dnsNameTests) {
+        foreach (var (_, tc) in range(dnsNameTests)) {
             ch.ᐸꟷ(tc);
         }
 
@@ -84,7 +82,7 @@ public static void BenchmarkDNSName(ж<testing.B> Ꮡb) {
         new(strings.Repeat("a", 64), false)
     ]));
     for (nint n = 0; n < b.N; n++) {
-        foreach (var (_, tc) in benchmarks) {
+        foreach (var (_, tc) in range(benchmarks)) {
             if (isDomainName(tc.name) != tc.result) {
                 Ꮡb.Errorf("isDomainName(%q) = %v; want %v", tc.name, !tc.result, tc.result);
             }

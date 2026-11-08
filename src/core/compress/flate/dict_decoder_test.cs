@@ -89,7 +89,7 @@ public static void TestDictDecoder(ж<testing.T> t) {
     want.WriteByte((byte)'.');
 
     @string str = poem;
-    foreach (var (_, @ref) in poemRefs) {
+    foreach (var (_, @ref) in range(poemRefs)) {
         if (@ref.dist == 0) {
             writeString(str.slice(0, @ref.length));
         } else {

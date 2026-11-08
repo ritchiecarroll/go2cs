@@ -76,32 +76,32 @@ public static void TestFallback(ж<testing.T> t) {
             new(
                 name: "filled systemRoots system pool",
                 systemRoots: NewCertPool(),
-                poolContent: slice<ж<global::go.crypto.x509_package.Certificate>>([Ꮡ(new global::go.crypto.x509_package.Certificate())]),
+                poolContent: [Ꮡ(new global::go.crypto.x509_package.Certificate())],
                 systemPool: true
             ),
             new(
                 name: "filled systemRoots",
                 systemRoots: NewCertPool(),
-                poolContent: slice<ж<global::go.crypto.x509_package.Certificate>>([Ꮡ(new global::go.crypto.x509_package.Certificate())])
+                poolContent: [Ꮡ(new global::go.crypto.x509_package.Certificate())]
             ),
             new(
                 name: "filled systemRoots, force fallback",
                 systemRoots: NewCertPool(),
-                poolContent: slice<ж<global::go.crypto.x509_package.Certificate>>([Ꮡ(new global::go.crypto.x509_package.Certificate())]),
+                poolContent: [Ꮡ(new global::go.crypto.x509_package.Certificate())],
                 forceFallback: true,
                 returnsFallback: true
             ),
             new(
                 name: "filled systemRoot system pool, force fallback",
                 systemRoots: NewCertPool(),
-                poolContent: slice<ж<global::go.crypto.x509_package.Certificate>>([Ꮡ(new global::go.crypto.x509_package.Certificate())]),
+                poolContent: [Ꮡ(new global::go.crypto.x509_package.Certificate())],
                 systemPool: true,
                 forceFallback: true,
                 returnsFallback: true
             )
         ]);
 
-        foreach (var (_, vᴛ1) in tests) {
+        foreach (var (_, vᴛ1) in range(tests)) {
             ref var tc = ref heap(new TestFallback_tests(), out var Ꮡtc);
             tc = vᴛ1;
 
@@ -114,7 +114,7 @@ public static void TestFallback(ж<testing.T> t) {
                 if (systemRoots != nil) {
                     systemRoots.systemPool = tcʗ1.systemPool;
                 }
-                foreach (var (_, c) in tcʗ1.poolContent) {
+                foreach (var (_, c) in range(tcʗ1.poolContent)) {
                     systemRoots.AddCert(c);
                 }
                 if (tcʗ1.forceFallback) {

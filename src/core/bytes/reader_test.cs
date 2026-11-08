@@ -8,8 +8,6 @@ using fmt = fmt_package;
 using Δio = io_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bytes = bytes_package;
 using static go.bytes_internal_test_package;
 
@@ -39,7 +37,7 @@ public static void TestReader(ж<testing.T> t) {
         new(seek: Δio.SeekEnd, off: -1, n: 1, wantpos: 9, want: "9")
     ]);
 
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (pos, err) = r.Seek(tt.off, tt.seek);
         if (err == nil && tt.seekerr != ""u8) {
             t.Errorf("%d. want seek error %q", i, tt.seekerr);
@@ -99,7 +97,7 @@ public static void TestReaderAt(ж<testing.T> t) {
         new(0, 0, "", default),
         new(-1, 0, "", bytesReaderReadAtˢ)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var b = new slice<byte>(tt.n);
         var (rn, err) = r.ReadAt(b, tt.off);
         @string got = (@string)(b.slice(0, rn));
@@ -138,7 +136,7 @@ public static partial void TestEmptyReaderConcurrent(ж<testing.T> t) {
     // Test for the race detector, to verify a Read that doesn't yield any bytes
     // is okay to use from multiple goroutines. This was our historic behavior.
     // See golang.org/issue/7856
-    var r = NewReader(slice<byte>([]));
+    var r = NewReader([]);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 5; i++) {
         Ꮡwg.Add(2);
@@ -177,10 +175,8 @@ public static void TestReaderWriteTo(ж<testing.T> t) {
         var r = NewReader(testBytes.slice(0, l));
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var (n, err) = r.WriteTo(new bytes_test_package.bytes_BufferжWriter(Ꮡb));
-        {
-            var expect = (int64)len(s); if (n != expect) {
-                t.Errorf("got %v; want %v", n, expect);
-            }
+        var expect = (int64)len(s); if (n != expect) {
+            t.Errorf("got %v; want %v", n, expect);
         }
         if (err != nil) {
             t.Errorf("for length %d: got error = %v; want nil", l, err);
@@ -235,9 +231,9 @@ partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<bytes.Reader>> f;
 }
-public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTests = new StaticBox<slice<UnreadRuneErrorTestsᴛ1>>(slice<UnreadRuneErrorTestsᴛ1>([
+public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTests = new StaticBox<slice<UnreadRuneErrorTestsᴛ1>>([
     new("Read", (ж<bytes.Reader> r) => {
-        r.Read(slice<byte>([0]));
+        r.Read([0]);
     }),
     new("ReadByte", (ж<bytes.Reader> r) => {
         r.ReadByte();
@@ -251,17 +247,15 @@ public static readonly ж<slice<UnreadRuneErrorTestsᴛ1>> ᏑUnreadRuneErrorTes
     new("WriteTo", (ж<bytes.Reader> r) => {
         r.WriteTo(new bytes_test_package.bytes_BufferжWriter(Ꮡ(new Buffer())));
     })
-]));
+]);
 public static ref slice<UnreadRuneErrorTestsᴛ1> UnreadRuneErrorTests => ref ((StaticBox<slice<UnreadRuneErrorTestsᴛ1>>)ᏑUnreadRuneErrorTests).ValueSlot;
 
 public static void TestUnreadRuneError(ж<testing.T> t) {
-    foreach (var (_, tt) in UnreadRuneErrorTests) {
+    foreach (var (_, tt) in range(UnreadRuneErrorTests)) {
         var reader = NewReader(slice<byte>("0123456789"u8));
-        {
-            var (_, _, errΔ1) = reader.ReadRune(); if (errΔ1 != nil) {
-                // should not happen
-                t.Fatal(errΔ1);
-            }
+        var (_, _, errΔ1) = reader.ReadRune(); if (errΔ1 != nil) {
+            // should not happen
+            t.Fatal(errΔ1);
         }
         tt.f(reader);
         var err = reader.UnreadRune();
@@ -340,35 +334,27 @@ private static readonly @string wantᶜᵇ = "abcdef"u8;
 
 public static void TestReaderReset(ж<testing.T> t) {
     var r = NewReader(slice<byte>("世界"u8));
-    {
-        var (_, _, errΔ1) = r.ReadRune(); if (errΔ1 != nil) {
-            t.Errorf("ReadRune: unexpected error: %v", errΔ1);
-        }
+    var (_, _, errΔ1) = r.ReadRune(); if (errΔ1 != nil) {
+        t.Errorf("ReadRune: unexpected error: %v", errΔ1);
     }
 
     @string want = wantᶜ;
     r.Reset(slice<byte>(want));
-    {
-        var errΔ2 = r.UnreadRune(); if (errΔ2 == nil) {
-            t.Errorf("UnreadRune: expected error, got nil");
-        }
+    var errΔ2 = r.UnreadRune(); if (errΔ2 == nil) {
+        t.Errorf("UnreadRune: expected error, got nil");
     }
     var (buf, err) = Δio.ReadAll(new bytes_test_package.bytes_ReaderжReader(r));
     if (err != nil) {
         t.Errorf("ReadAll: unexpected error: %v", err);
     }
-    {
-        @string got = (@string)buf; if (got != want) {
-            t.Errorf("ReadAll: got %q, want %q", got, want);
-        }
+    @string got = (@string)buf; if (got != want) {
+        t.Errorf("ReadAll: got %q, want %q", got, want);
     }
 }
 
 public static void TestReaderZero(ж<testing.T> t) {
-    {
-        nint l = (Ꮡ(new Reader())).Len(); if (l != 0) {
-            t.Errorf("Len: got %d, want 0", l);
-        }
+    nint l = (Ꮡ(new Reader())).Len(); if (l != 0) {
+        t.Errorf("Len: got %d, want 0", l);
     }
 
     {
@@ -401,10 +387,8 @@ public static void TestReaderZero(ж<testing.T> t) {
         }
     }
 
-    {
-        var s = (Ꮡ(new Reader())).Size(); if (s != 0) {
-            t.Errorf("Size: got %d, want 0", s);
-        }
+    var s = (Ꮡ(new Reader())).Size(); if (s != 0) {
+        t.Errorf("Size: got %d, want 0", s);
     }
 
     if ((Ꮡ(new Reader())).UnreadByte() == nil) {

@@ -17,8 +17,6 @@ using sync = sync_package;
 using testing = testing_package;
 using iotest = go.testing.iotest_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.testing;
 using rand = go.math.rand_package;
@@ -33,7 +31,6 @@ internal static float64 rn = tupleᴛ1ʗ.Item1;
 internal static array<uint32> kn = tupleᴛ1ʗ.Item2;
 internal static array<float32> wn = tupleᴛ1ʗ.Item3;
 internal static array<float32> fn = tupleᴛ1ʗ.Item4;
-
 internal static (float64, array<uint32>, array<float32>, array<float32>) tupleᴛ2ʗ = rand_internal_test_package.GetExponentialDistributionParameters();
 internal static float64 re = tupleᴛ2ʗ.Item1;
 internal static array<uint32> ke = tupleᴛ2ʗ.Item2;
@@ -55,7 +52,7 @@ internal static bool nearEqual(float64 a, float64 b, float64 closeEnough, float6
     return absDiff / max(math.Abs(a), math.Abs(b)) < maxError;
 }
 
-internal static slice<int64> testSeeds = slice<int64>([1, 1754801282, 1698661970, 1550503961]);
+internal static slice<int64> testSeeds = [1, 1754801282, 1698661970, 1550503961];
 
 // checkSimilarDistribution returns success if the mean and stddev of the
 // two statsResults are similar.
@@ -79,7 +76,7 @@ internal static ж<statsResults> getStatsResults(slice<float64> samples) {
     var res = @new<statsResults>();
     float64 sum = default;
     float64 squaresum = default;
-    foreach (var (_, s) in samples) {
+    foreach (var (_, s) in range(samples)) {
         sum += s;
         squaresum += s * s;
     }
@@ -118,7 +115,7 @@ internal static void checkSampleSliceDistributions(ж<testing.T> t, slice<float6
 internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean, float64 stddev, int64 seed) {
     var r = New(NewSource(seed));
     var samples = new slice<float64>(nsamples);
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         samples[i] = r.NormFloat64() * stddev + mean;
     }
     return samples;
@@ -143,7 +140,7 @@ internal static void testNormalDistribution(ж<testing.T> t, nint nsamples, floa
 
 // Actual tests
 public static void TestStandardNormalValues(ж<testing.T> t) {
-    foreach (var (_, seed) in testSeeds) {
+    foreach (var (_, seed) in range(testSeeds)) {
         testNormalDistribution(t, numTestSamples, 0D, 1D, seed);
     }
 }
@@ -157,7 +154,7 @@ public static void TestNonStandardNormalValues(ж<testing.T> t) {
     }
     for (var sd = 0.5D; sd < sdmax; sd *= 2D) {
         for (var m = 0.5D; m < mmax; m *= 2D) {
-            foreach (var (_, seed) in testSeeds) {
+            foreach (var (_, seed) in range(testSeeds)) {
                 testNormalDistribution(t, numTestSamples, m, sd, seed);
                 if (testing.Short()) {
                     break;
@@ -173,7 +170,7 @@ public static void TestNonStandardNormalValues(ж<testing.T> t) {
 internal static slice<float64> generateExponentialSamples(nint nsamples, float64 rate, int64 seed) {
     var r = New(NewSource(seed));
     var samples = new slice<float64>(nsamples);
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         samples[i] = r.ExpFloat64() / rate;
     }
     return samples;
@@ -201,14 +198,14 @@ internal static void testExponentialDistribution(ж<testing.T> t, nint nsamples,
 
 // Actual tests
 public static void TestStandardExponentialValues(ж<testing.T> t) {
-    foreach (var (_, seed) in testSeeds) {
+    foreach (var (_, seed) in range(testSeeds)) {
         testExponentialDistribution(t, numTestSamples, 1D, seed);
     }
 }
 
 public static void TestNonStandardExponentialValues(ж<testing.T> t) {
     for (var rate = 0.05D; rate < 10D; rate *= 2D) {
-        foreach (var (_, seed) in testSeeds) {
+        foreach (var (_, seed) in range(testSeeds)) {
             testExponentialDistribution(t, numTestSamples, rate, seed);
             if (testing.Short()) {
                 break;
@@ -292,7 +289,7 @@ internal static nint compareUint32Slices(slice<uint32> s1, slice<uint32> s2) {
         }
         return len(s1) + 1;
     }
-    foreach (var i in range(s1)) {
+    foreach (var i in range(len(s1))) {
         if (s1[i] != s2[i]) {
             return i;
         }
@@ -310,7 +307,7 @@ internal static nint compareFloat32Slices(slice<float32> s1, slice<float32> s2) 
         }
         return len(s1) + 1;
     }
-    foreach (var i in range(s1)) {
+    foreach (var i in range(len(s1))) {
         if (!nearEqual((float64)s1[i], (float64)s2[i], 0D, 1e-7D)) {
             return i;
         }
@@ -422,7 +419,7 @@ internal static void testReadUniformity(ж<testing.T> t, nint n, int64 seed) {
 
     // Cast bytes as floats to use the common distribution-validity checks.
     var samples = new slice<float64>(n);
-    foreach (var (i, val) in buf) {
+    foreach (var (i, val) in range(buf)) {
         samples[i] = (float64)val;
     }
     // Make sure that the entire set matches the expected distribution.
@@ -433,8 +430,8 @@ public static void TestReadUniformity(ж<testing.T> t) {
     var testBufferSizes = slice<nint>([
         2, 4, 7, 64, 1024, 1 << 16, 1 << 20
     ]);
-    foreach (var (_, seed) in testSeeds) {
-        foreach (var (_, n) in testBufferSizes) {
+    foreach (var (_, seed) in range(testSeeds)) {
+        foreach (var (_, n) in range(testBufferSizes)) {
             testReadUniformity(t, n, seed);
         }
     }
@@ -504,9 +501,9 @@ public static void TestShuffleSmall(ж<testing.T> t) {
 // encodePerm modifies the input slice.
 internal static nint encodePerm(slice<nint> s) {
     // Convert to Lehmer code.
-    foreach (var (i, x) in s) {
+    foreach (var (i, x) in range(s)) {
         var r = s.slice(i + 1);
-        foreach (var (j, y) in r) {
+        foreach (var (j, y) in range(r)) {
             if (y > x) {
                 r[j]--;
             }
@@ -560,7 +557,7 @@ public static void TestUniformFactorial(ж<testing.T> t) {
                 new(name: "Perm", fn: () => encodePerm(rʗ4.Perm(n))),
                 new(name: "Shuffle", fn: () => {
                     // Generate permutation using Shuffle.
-                    foreach (var i in range(pʗ1)) {
+                    foreach (var i in range(len(pʗ1))) {
                         pʗ1[i] = i;
                     }
                     var pʗ2 = pʗ1;
@@ -571,7 +568,7 @@ public static void TestUniformFactorial(ж<testing.T> t) {
                 })
             }.array();
 
-            foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+            foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
                 ref var test = ref heap(new TestUniformFactorial_tests(), out var Ꮡtest);
                 test = vᴛ1;
 
@@ -586,7 +583,7 @@ public static void TestUniformFactorial(ж<testing.T> t) {
                         nsamples = 200;
                     }
                     var samples = new slice<float64>(nsamples);
-                    foreach (var i in range(samples)) {
+                    foreach (var i in range(len(samples))) {
                         // Generate some uniformly distributed values and count their occurrences.
                         UntypedInt iters = 1000;
                         var counts = new slice<nint>(nfact);
@@ -596,7 +593,7 @@ public static void TestUniformFactorial(ж<testing.T> t) {
                         // Calculate chi-squared and add to samples.
                         var want = (float64)iters / (float64)nfact;
                         float64 χ2 = default;
-                        foreach (var (_, have) in counts) {
+                        foreach (var (_, have) in range(counts)) {
                             var err = (float64)have - want;
                             χ2 += err * err;
                         }
@@ -761,7 +758,7 @@ public static void BenchmarkPerm30ViaShuffle(ж<testing.B> Ꮡb) {
     var r = New(NewSource(1));
     for (nint n = b.N; n > 0; n--) {
         var p = new slice<nint>(30);
-        foreach (var i in range(p)) {
+        foreach (var i in range(len(p))) {
             p[i] = i;
         }
         var pʗ1 = p;

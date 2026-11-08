@@ -114,7 +114,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
     if (builtin.len(children) != 32) {
         throw panic("bad len");
     }
-    foreach (var (_, n) in slice<nint>([2, 4, 8, 16, 32])) {
+    foreach (var (_, n) in range(slice<nint>([2, 4, 8, 16, 32]))) {
         var list = children.slice(0, n);
         var listʗ1 = list;
         b.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
@@ -122,7 +122,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
             bΔ1.Run(repLinearˢ, (ж<testing.B> bΔ2) => {
                 var entriesᴷ = new stackAppend<global::go.net.http_package.entry<@string, any>>();
                 slice<global::go.net.http_package.entry<@string, any>> entries = default;
-                foreach (var (_, c) in listʗ2) {
+                foreach (var (_, c) in range(listʗ2)) {
                     entries = append(entriesᴷ, entries, new entry<@string, any>(c, default));
                 }
                 bΔ2.ResetTimer();
@@ -133,7 +133,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
             var listʗ3 = listʗ1;
             bΔ1.Run(repMapˢ, (ж<testing.B> bΔ3) => {
                 var m = new map<@string, any>{};
-                foreach (var (_, c) in listʗ3) {
+                foreach (var (_, c) in range(listʗ3)) {
                     m[c] = default;
                 }
                 any x = default;
@@ -146,7 +146,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
             var listʗ4 = listʗ1;
             bΔ1.Run(fmt.Sprintf("rep=hybrid%d"u8, maxSlice), (ж<testing.B> bΔ4) => {
                 ref var h = ref heap(new global::go.net.http_package.mapping<@string, any>(), out var Ꮡh);
-                foreach (var (_, c) in listʗ4) {
+                foreach (var (_, c) in range(listʗ4)) {
                     h.add(c, default);
                 }
                 any x = default;
@@ -161,7 +161,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
 }
 
 internal static any findChildLinear(@string key, slice<global::go.net.http_package.entry<@string, any>> entries) {
-    foreach (var (_, e) in entries) {
+    foreach (var (_, e) in range(entries)) {
         if (key == e.key) {
             return e.value;
         }

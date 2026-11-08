@@ -44,12 +44,10 @@ internal static Action /*undo*/ disablePlatformSources() {
 
 public static readonly ж<Action> ᏑInterrupt = new StaticBox<Action>(interrupt);
 public static ref Action Interrupt => ref ((StaticBox<Action>)ᏑInterrupt).ValueSlot;
-
 public static readonly ж<Func<global::go.time_package.ΔMonth, nint, nint>> ᏑDaysIn = new StaticBox<Func<global::go.time_package.ΔMonth, nint, nint>>(daysIn);
 public static ref Func<global::go.time_package.ΔMonth, nint, nint> DaysIn => ref ((StaticBox<Func<global::go.time_package.ΔMonth, nint, nint>>)ᏑDaysIn).ValueSlot;
 
-internal static void empty(any arg, uintptr seq, int64 delta) {
-}
+internal static void empty(any arg, uintptr seq, int64 delta) { }
 
 // Test that a runtimeTimer with a period that would overflow when on
 // expiration does not throw or cause other timers to hang.

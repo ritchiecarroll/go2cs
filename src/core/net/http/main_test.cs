@@ -13,8 +13,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net;
 using iter = iter_package;
 using static global::go.net.http_internal_test_package;
@@ -86,7 +84,7 @@ internal static bool goroutineLeaked() {
         nint n = 0;
         stackCount = new map<@string, nint>();
         var gs = interestingGoroutines();
-        foreach (var (_, g) in gs) {
+        foreach (var (_, g) in range(gs)) {
             stackCount[g]++;
             n++;
         }
@@ -124,7 +122,7 @@ internal static ref readonly @string testBenchˢ => ref testBenchˢᵇ;
 private static readonly @string testBenchˢᵇ = "-test.bench="u8;
 
 internal static bool runningBenchmarks() {
-    foreach (var (i, arg) in os.Args) {
+    foreach (var (i, arg) in range(os.Args)) {
         if (strings.HasPrefix(arg, testBenchˢ) && !strings.HasSuffix(arg, "=")) {
             return true;
         }

@@ -54,7 +54,7 @@ public static void TestParseV1Number(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseV1Number_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -139,7 +139,7 @@ public static void TestParseV2Limit(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseV2Limit_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -237,7 +237,7 @@ public static void TestParseCPUCgroup(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseCPUCgroup_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -262,13 +262,13 @@ public static void TestParseCPUCgroup(ж<testing.T> t) {
 }
 
 public static void TestParseCPUCgroupMalformed(ж<testing.T> t) {
-    foreach (var (_, contents) in slice<@string>([
+    foreach (var (_, contents) in range(slice<@string>([
         "\n",
         "0\n",
         "0:\n",
         "0::\n",
         "0::a\n"
-    ])) {
+    ]))) {
         t.Run(""u8, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
@@ -317,7 +317,7 @@ public static void TestContainsCPU(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestContainsCPU_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -355,7 +355,7 @@ public static void TestParseCPUMount(ж<testing.T> t) {
     }
 
     array<byte> longPath = new(4090);
-    foreach (var i in range(longPath)) {
+    foreach (var i in range(len(longPath))) {
         longPath[i] = (byte)i;
     }
     @string escapedLongPath = escapePath((@string)(longPath[..]));
@@ -608,7 +608,7 @@ public static void TestParseCPUMount(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseCPUMount_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -631,7 +631,7 @@ public static void TestParseCPUMount(ж<testing.T> t) {
 }
 
 public static void TestParseCPUMountMalformed(ж<testing.T> t) {
-    foreach (var (_, contents) in slice<@string>([
+    foreach (var (_, contents) in range(slice<@string>([
         "\n",
         "22\n",
         "22 1 8:1\n",
@@ -643,7 +643,7 @@ public static void TestParseCPUMountMalformed(ж<testing.T> t) {
         "22 1 8:1 / /cgroup rw - cgroup\n",
         "22 1 8:1 / /cgroup rw - cgroup cgroup\n",
         "22 1 8:1 a /cgroup rw - cgroup cgroup cpu\n"
-    ])) {
+    ]))) {
         t.Run(""u8, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
@@ -663,7 +663,7 @@ internal static @string escapePath(@string s) {
     var outᴷ = new stackAppend<byte>();
 
     var @out = new slice<byte>(0, len(s));
-    foreach (var (_, c) in slice<byte>(s)) {
+    foreach (var (_, c) in range(slice<byte>(s))) {
         switch (c) {
         case (byte)'\\' or (byte)' ' or (byte)'\t' or (byte)'\n': {
             @out = fmt.Appendf(@out, "\\%03o"u8, c);
@@ -738,7 +738,7 @@ b/c
 
     var testsʗ1 = tests;
     t.Run(escapePathˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, vᴛ1) in testsʗ1) {
+        foreach (var (_, vᴛ1) in range(testsʗ1)) {
             ref var tc = ref heap(new TestEscapePath_tests(), out var Ꮡtc);
             tc = vᴛ1;
 
@@ -754,7 +754,7 @@ b/c
 
     var testsʗ2 = tests;
     t.Run(unescapePathˢ, (ж<testing.T> tΔ3) => {
-        foreach (var (_, vᴛ2) in testsʗ2) {
+        foreach (var (_, vᴛ2) in range(testsʗ2)) {
             ref var tc = ref heap(new TestEscapePath_tests(), out var Ꮡtc);
             tc = vᴛ2;
 
@@ -787,7 +787,7 @@ b/c
 }
 
 public static void TestUnescapeInvalidPath(ж<testing.T> t) {
-    foreach (var (_, @in) in slice<@string>([
+    foreach (var (_, @in) in range(slice<@string>([
         @"/a/b\c",
         @"/a/b\01",
         @"/a/b\018",
@@ -795,7 +795,7 @@ public static void TestUnescapeInvalidPath(ж<testing.T> t) {
         @"/a/b\777",
         @"01234567890123456789",                // too long
         @"\001\002\003\004\005\006\007\010\011" // too long
-    ])) {
+    ]))) {
         var @out = new slice<byte>(8);
         var outʗ1 = @out;
         t.Run(@in, (ж<testing.T> tΔ1) => {

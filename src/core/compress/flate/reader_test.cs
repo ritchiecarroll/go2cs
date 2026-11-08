@@ -23,14 +23,14 @@ public static void TestNlitOutOfRange(ж<testing.T> t) {
 partial struct suitesᴛ1 /*dyn*/ {
     internal @string name, @file;
 }
-internal static slice<suitesᴛ1> suites = slice<suitesᴛ1>([
+internal static slice<suitesᴛ1> suites = [
     // Digits is the digits of the irrational number e. Its decimal representation
     // does not repeat, but there are only 10 possible digits, so it should be
     // reasonably compressible.
     new("Digits", "../testdata/e.txt"),
     // Newton is Isaac Newtons's educational text on Opticks.
     new("Newton", "../../testdata/Isaac.Newton-Opticks.txt")
-]);
+];
 
 public static void BenchmarkDecode(ж<testing.B> b) {
     doBench(b, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
@@ -64,25 +64,25 @@ partial struct levelTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint level;
 }
-internal static slice<levelTestsᴛ1> levelTests = slice<levelTestsᴛ1>([
+internal static slice<levelTestsᴛ1> levelTests = [
     new("Huffman", HuffmanOnly),
     new("Speed", BestSpeed),
     new("Default", DefaultCompression),
     new("Compression", BestCompression)
-]);
+];
 
 partial struct sizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static slice<sizesᴛ1> sizes = slice<sizesᴛ1>([
+internal static slice<sizesᴛ1> sizes = [
     new("1e4", 10000),
     new("1e5", 100000),
     new("1e6", 1000000)
-]);
+];
 
 internal static void doBench(ж<testing.B> b, Action<ж<testing.B>, slice<byte>, nint, nint> f) {
-    foreach (var (_, suite) in suites) {
+    foreach (var (_, suite) in range(suites)) {
         var (buf, err) = os.ReadFile(suite.@file);
         if (err != nil) {
             b.Fatal(err);
@@ -90,11 +90,11 @@ internal static void doBench(ж<testing.B> b, Action<ж<testing.B>, slice<byte>,
         if (len(buf) == 0) {
             b.Fatalf("test file %q has no data", suite.@file);
         }
-        foreach (var (_, vᴛ1) in levelTests) {
+        foreach (var (_, vᴛ1) in range(levelTests)) {
             ref var l = ref heap(new levelTestsᴛ1(), out var Ꮡl);
             l = vᴛ1;
 
-            foreach (var (_, vᴛ2) in sizes) {
+            foreach (var (_, vᴛ2) in range(sizes)) {
                 ref var s = ref heap(new sizesᴛ1(), out var Ꮡs);
                 s = vᴛ2;
 

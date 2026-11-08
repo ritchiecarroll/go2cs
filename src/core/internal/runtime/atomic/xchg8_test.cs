@@ -11,7 +11,7 @@ partial class atomic_test_package {
 
 public static void TestXchg8(ж<testing.T> t) {
     ref var a = ref heap(new array<uint8>(16), out var Ꮡa);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         var next = (uint8)(i + 50);
         a[i] = next;
     }
@@ -19,7 +19,7 @@ public static void TestXchg8(ж<testing.T> t) {
 
     // Compare behavior against non-atomic implementation. Expect the operation
     // to work at any byte offset and to not clobber neighboring values.
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         var next = (uint8)(i + 100);
         var pa = atomic.Xchg8(Ꮡa.at<uint8>(i), next);
         var pb = b[i];

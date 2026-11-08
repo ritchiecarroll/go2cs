@@ -7,8 +7,6 @@ using pem = encoding.pem_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using static go.crypto.tls_package;
 using Δx509 = go.crypto.x509_package;

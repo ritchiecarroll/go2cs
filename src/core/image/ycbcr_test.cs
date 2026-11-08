@@ -47,9 +47,9 @@ public static void TestYCbCr(ж<testing.T> t) {
         Pt(5001, -400),
         Pt(-701, -801)
     ]);
-    foreach (var (_, r) in rects) {
-        foreach (var (_, subsampleRatio) in subsampleRatios) {
-            foreach (var (_, delta) in deltas) {
+    foreach (var (_, r) in range(rects)) {
+        foreach (var (_, subsampleRatio) in range(subsampleRatios)) {
+            foreach (var (_, delta) in range(deltas)) {
                 testYCbCr(t, r, subsampleRatio, delta);
             }
         }
@@ -117,15 +117,15 @@ public static void TestYCbCrSlicesDontOverlap(ж<testing.T> t) {
         m.Cb.slice(0, cap(m.Cb)),
         m.Cr.slice(0, cap(m.Cr))
     ]);
-    foreach (var (i, Δslice) in slices) {
+    foreach (var (i, Δslice) in range(slices)) {
         var want = (uint8)(10 + i);
-        foreach (var j in range(Δslice)) {
+        foreach (var j in range(len(Δslice))) {
             Δslice[j] = want;
         }
     }
-    foreach (var (i, Δslice) in slices) {
+    foreach (var (i, Δslice) in range(slices)) {
         var want = (uint8)(10 + i);
-        foreach (var (j, got) in Δslice) {
+        foreach (var (j, got) in range(Δslice)) {
             if (got != want) {
                 t.Fatalf("m.%s[%d]: got %d, want %d", names[i], j, got, want);
             }

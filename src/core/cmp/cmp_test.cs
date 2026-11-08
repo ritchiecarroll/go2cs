@@ -16,9 +16,7 @@ partial class cmp_test_package {
 
 internal static readonly ж<float64> Ꮡnegzero = new StaticBox<float64>(Δmath.Copysign(0D, -1D));
 internal static ref float64 negzero => ref ((StaticBox<float64>)Ꮡnegzero).ValueSlot;
-
 internal static uintptr nonnilptr = (uintptr)Ꮡnegzero;
-
 internal static uintptr nilptr = (uintptr)(@unsafe.Pointer)default;
 
 partial struct testsᴛ1 /*dyn*/ {
@@ -58,7 +56,7 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
 ]);
 
 public static void TestLess(ж<testing.T> t) {
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         bool b = default;
         switch (test.x.type()) {
         case nint: {
@@ -84,7 +82,7 @@ public static void TestLess(ж<testing.T> t) {
 }
 
 public static void TestCompare(ж<testing.T> t) {
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         nint c = default;
         switch (test.x.type()) {
         case nint: {
@@ -132,18 +130,16 @@ internal partial struct TestOr_cases /*dyn*/ {
 public static void TestOr(ж<testing.T> t) {
     var cases = slice<TestOr_cases>([
         new(default, 0),
-        new(slice<nint>([0]), 0),
-        new(slice<nint>([1]), 1),
-        new(slice<nint>([0, 2]), 2),
-        new(slice<nint>([3, 0]), 3),
-        new(slice<nint>([4, 5]), 4),
-        new(slice<nint>([0, 6, 7]), 6)
+        new([0], 0),
+        new([1], 1),
+        new([0, 2], 2),
+        new([3, 0], 3),
+        new([4, 5], 4),
+        new([0, 6, 7], 6)
     ]);
-    foreach (var (_, tc) in cases) {
-        {
-            nint got = cmp.Or(tc.@in.ꓸꓸꓸ); if (got != tc.want) {
-                t.Errorf("cmp.Or(%v) = %v; want %v", tc.@in, got, tc.want);
-            }
+    foreach (var (_, tc) in range(cases)) {
+        nint got = cmp.Or(tc.@in.ꓸꓸꓸ); if (got != tc.want) {
+            t.Errorf("cmp.Or(%v) = %v; want %v", tc.@in, got, tc.want);
         }
     }
 }
@@ -189,7 +185,7 @@ public static void ExampleOr_sort() {
             strings.Compare(a.Customer, b.Customer),
             strings.Compare(a.Product, b.Product),
             cmp.Compare(b.Price, a.Price)));
-    foreach (var (_, order) in orders) {
+    foreach (var (_, order) in range(orders)) {
         fmt.Printf("%s %s %.2f\n"u8, order.Product, order.Customer, order.Price);
     }
 

@@ -6,14 +6,11 @@ namespace go;
 using fmt = fmt_package;
 using Δmath = math_package;
 using Δtime = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.time_internal_test_package;
 
 partial class time_test_package {
 
-internal static void expensiveCall() {
-}
+internal static void expensiveCall() { }
 
 public static void ExampleDuration() {
     var t0 = Δtime.Now();
@@ -39,7 +36,7 @@ public static void ExampleDuration_Round() {
         Δtime.ΔHour
     ]);
 
-    foreach (var (_, r) in round) {
+    foreach (var (_, r) in range(round)) {
         fmt.Printf("d.Round(%6s) = %s\n"u8, r, d.Round(r).String());
     }
     // Output:
@@ -78,7 +75,7 @@ public static void ExampleDuration_Truncate() {
         Δtime.ΔHour
     ]);
 
-    foreach (var (_, t) in trunc) {
+    foreach (var (_, t) in range(trunc)) {
         fmt.Printf("d.Truncate(%6s) = %s\n"u8, t, d.Truncate(t).String());
     }
     // Output:
@@ -186,8 +183,7 @@ public static void ExampleDuration_Seconds() {
 
 internal static channel<nint> c;
 
-internal static void handle(nint _) {
-}
+internal static void handle(nint _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object timedOutˢ = (@string)"timed out"u8;
@@ -210,9 +206,7 @@ public static void ExampleSleep() {
     Δtime.Sleep(100 * Δtime.Millisecond);
 }
 
-internal static @string statusUpdate() {
-    return ""u8;
-}
+internal static @string statusUpdate() { return ""u8; }
 
 public static void ExampleTick() {
     var c = Δtime.Tick((Δtime.Duration)(5000000000L));
@@ -640,7 +634,7 @@ public static void ExampleTime_Round() {
         Δtime.ΔHour
     ]);
 
-    foreach (var (_, d) in round) {
+    foreach (var (_, d) in range(round)) {
         fmt.Printf("t.Round(%6s) = %s\n"u8, d, t.Round(d).Format("15:04:05.999999999"));
     }
     // Output:
@@ -672,7 +666,7 @@ public static void ExampleTime_Truncate() {
         (Δtime.Duration)(600000000000L)
     ]);
 
-    foreach (var (_, d) in trunc) {
+    foreach (var (_, d) in range(trunc)) {
         fmt.Printf("t.Truncate(%5s) = %s\n"u8, d, t.Truncate(d).Format("15:04:05.999999999"));
     }
     // To round to the last midnight in the local timezone, create a new Date.
@@ -936,7 +930,6 @@ public static void ExampleTime_AppendText() {
     // Output:
     // t: 2025-04-01T15:30:45.123456789Z
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string utc8ˢ => ref utc8ˢᵇ;
 private static readonly @string utc8ˢᵇ = "UTC-8"u8;

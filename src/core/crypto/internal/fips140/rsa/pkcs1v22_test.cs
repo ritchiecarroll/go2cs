@@ -60,10 +60,8 @@ public static void TestEMSAPSS(ж<testing.T> t) {
         t.Errorf("Bad encoding. got %x, want %x", encoded, expected);
     }
 
-    {
-        err = emsaPSSVerify(hashed, encoded, 1023, len(salt), sha1.New()); if (err != nil) {
-            t.Errorf("Bad verification: %s", err);
-        }
+    err = emsaPSSVerify(hashed, encoded, 1023, len(salt), sha1.New()); if (err != nil) {
+        t.Errorf("Bad verification: %s", err);
     }
 }
 

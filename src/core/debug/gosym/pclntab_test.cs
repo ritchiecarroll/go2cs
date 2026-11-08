@@ -55,10 +55,8 @@ internal static void dotest(ж<testing.T> t) {
     cmd.Env = append(os.Environ(), (@string)"GOOS=linux");
     cmd.Stdout = new os.FileжWriter(os.Stdout);
     cmd.Stderr = new os.FileжWriter(os.Stderr);
-    {
-        var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 }
 
@@ -216,12 +214,10 @@ public static void TestLineAline(ж<testing.T> t) {
                 continue;
             }
 
-            {
-                var (minline, ok) = found[path, ꟷ]; if (path != ""u8 && ok) {
-                    if (minline >= line) {
-                        // We've already covered this file
-                        continue;
-                    }
+            var (minline, ok) = found[path, ꟷ]; if (path != ""u8 && ok) {
+                if (minline >= line) {
+                    // We've already covered this file
+                    continue;
                 }
             }
             found[path] = line;
@@ -327,7 +323,7 @@ public static void TestSymVersion(ж<testing.T> t) {
     if (table.go12line == nil) {
         t.Skip(notRelevantToGo12Symbolˢ2);
     }
-    foreach (var (_, fn) in table.Funcs) {
+    foreach (var (_, fn) in range(table.Funcs)) {
         if (fn.goVersion == verUnknown) {
             t.Fatalf("unexpected symbol version: %v", fn);
         }

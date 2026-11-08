@@ -13,8 +13,6 @@ using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
 using quick = go.testing.quick_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.sync;
 using go.testing;
@@ -93,10 +91,8 @@ internal static (any, bool) apply(this mapCall c, mapInterface m) {
     }
     case {} when exprᴛ1 == opCompareAndDelete: {
         if (m.CompareAndDelete(c.k, c.v)) {
-            {
-                var (_, ok) = m.Load(c.k); if (!ok) {
-                    return (default, true);
-                }
+            var (_, ok) = m.Load(c.k); if (!ok) {
+                return (default, true);
             }
         }
         return (default, false);
@@ -120,7 +116,7 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var b = new slice<byte>(r.Intn(4));
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = (byte)('a' + (byte)rand.Intn(26));
     }
     return (@string)b;
@@ -142,7 +138,7 @@ internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapIn
     map<any, any> final = default;
     var resultsᴷ = new stackAppend<mapResult>(moves: true);
 
-    foreach (var (_, c) in calls) {
+    foreach (var (_, c) in range(calls)) {
         var (v, ok) = c.apply(m);
         results = append(resultsᴷ, results, new mapResult(v, ok));
     }
@@ -175,26 +171,20 @@ internal static (slice<mapResult>, map<any, any>) applyHashTrieMap(slice<mapCall
 }
 
 public static partial void TestMapMatchesRWMutex(ж<Δtesting.T> t) {
-    {
-        var err = quick.CheckEqual(applyMap, applyRWMutexMap, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.CheckEqual(applyMap, applyRWMutexMap, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
 public static partial void TestMapMatchesDeepCopy(ж<Δtesting.T> t) {
-    {
-        var err = quick.CheckEqual(applyMap, applyDeepCopyMap, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.CheckEqual(applyMap, applyDeepCopyMap, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
 public static partial void TestMapMatchesHashTrieMap(ж<Δtesting.T> t) {
-    {
-        var err = quick.CheckEqual(applyMap, applyHashTrieMap, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.CheckEqual(applyMap, applyHashTrieMap, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -308,7 +298,7 @@ private static readonly @string syncMapˢᵇ = "sync.Map"u8;
 public static void TestMapRangeNestedCall(ж<Δtesting.T> t) {
     // Issue 46399
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
-    foreach (var (i, v) in new @string[]{"hello", "world", "Go"}.array()) {
+    foreach (var (i, v) in range(new @string[]{"hello", "world", "Go"}.array())) {
         Ꮡm.Store(i, v);
     }
     Ꮡm.Range((any key, any value) => {
@@ -409,12 +399,10 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> t) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                {
-                    var (value, ok) = Ꮡm.Load(k); if (ok) {
-                        t.Logf("Key: %v, Value: %v\n", k, value);
-                    } else {
-                        t.Logf("Key: %v not found\n", k);
-                    }
+                var (value, ok) = Ꮡm.Load(k); if (ok) {
+                    t.Logf("Key: %v, Value: %v\n", k, value);
+                } else {
+                    t.Logf("Key: %v not found\n", k);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

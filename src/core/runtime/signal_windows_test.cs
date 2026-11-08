@@ -14,8 +14,6 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.os;
 using path;
 using static global::go.runtime_internal_test_package;
@@ -80,14 +78,12 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> t) {
         if (err == nil) {
             t.Fatal(errorExpectedˢ);
         }
-        {
-            var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(@out) > 0) {
-                if (!bytes.Contains(@out, slice<byte>("Exception 0x2a"u8))) {
-                    t.Fatalf("unexpected failure while running executable: %s\n%s", err, @out);
-                }
-            } else {
-                t.Fatalf("unexpected error while running executable: %s\n%s", err, @out);
+        var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(@out) > 0) {
+            if (!bytes.Contains(@out, slice<byte>("Exception 0x2a"u8))) {
+                t.Fatalf("unexpected failure while running executable: %s\n%s", err, @out);
             }
+        } else {
+            t.Fatalf("unexpected error while running executable: %s\n%s", err, @out);
         }
         // run test program in a new thread
         cmd = exec.Command(exe, threadˢ);
@@ -95,14 +91,12 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> t) {
         if (err == nil) {
             t.Fatal(errorExpectedˢ);
         }
-        {
-            var (errΔ1, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
-                if (errΔ1.Value.ProcessState.ExitCode() != 42) {
-                    t.Fatalf("unexpected failure while running executable: %s\n%s", errΔ1.OrTypedNil(), @out);
-                }
-            } else {
-                t.Fatalf("unexpected error while running executable: %s\n%s", errΔ1.OrTypedNil(), @out);
+        if (err._<ж<exec.ExitError>>(out var errΔ1)) {
+            if (errΔ1.Value.ProcessState.ExitCode() != 42) {
+                t.Fatalf("unexpected failure while running executable: %s\n%s", errΔ1.OrTypedNil(), @out);
             }
+        } else {
+            t.Fatalf("unexpected error while running executable: %s\n%s", errΔ1.OrTypedNil(), @out);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -242,10 +236,8 @@ public static void TestCtrlHandler(ж<testing.T> t) {
             CreationFlags: _CREATE_NEW_CONSOLE,
             HideWindow: true
         ));
-        {
-            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                t.Fatalf("Start failed: %v", errΔ1);
-            }
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            t.Fatalf("Start failed: %v", errΔ1);
         }
         var cmdʗ1 = cmd;
         defer(() => {
@@ -254,18 +246,14 @@ public static void TestCtrlHandler(ж<testing.T> t) {
         }, ref ᒐ);
 
         // check child exited gracefully, did not timeout
-        {
-            var errΔ2 = cmd.Wait(); if (errΔ2 != nil) {
-                t.Fatalf("Program exited with error: %v\n%s", errΔ2, Ꮡstderr);
-            }
+        var errΔ2 = cmd.Wait(); if (errΔ2 != nil) {
+            t.Fatalf("Program exited with error: %v\n%s", errΔ2, Ꮡstderr);
         }
 
         // check child received, handled SIGTERM
-        {
-            @string expected = syscall.SIGTERM.String();
-            @string got = strings.TrimSpace(stdout.String()); if (expected != got) {
-                t.Fatalf("Expected '%s' got: %s", expected, got);
-            }
+        @string expected = syscall.SIGTERM.String();
+        @string got = strings.TrimSpace(stdout.String()); if (expected != got) {
+            t.Fatalf("Expected '%s' got: %s", expected, got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -328,10 +316,8 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> t) {
         cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr(
             CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP
         ));
-        {
-            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                t.Fatalf("Start failed: %v", errΔ1);
-            }
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            t.Fatalf("Start failed: %v", errΔ1);
         }
 
         var errCh = new channel<error>(1);
@@ -339,26 +325,20 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> t) {
         var errChʗ1 = errCh;
         var outReaderʗ1 = outReader;
         goǃ(() => {
-            {
-                var (line, errΔ2) = outReaderʗ1.ReadString((byte)'\n'); if (errΔ2 != nil) {
-                    errChʗ1.ᐸꟷ(fmt.Errorf("could not read stdout: %v"u8, errΔ2));
-                } else if (strings.TrimSpace(line) != "ready"u8) {
-                    errChʗ1.ᐸꟷ(fmt.Errorf("unexpected message: %v"u8, line));
-                } else {
-                    errChʗ1.ᐸꟷ(sendCtrlBreak(cmdʗ1.Process.Pid));
-                }
+            var (line, errΔ2) = outReaderʗ1.ReadString((byte)'\n'); if (errΔ2 != nil) {
+                errChʗ1.ᐸꟷ(fmt.Errorf("could not read stdout: %v"u8, errΔ2));
+            } else if (strings.TrimSpace(line) != "ready"u8) {
+                errChʗ1.ᐸꟷ(fmt.Errorf("unexpected message: %v"u8, line));
+            } else {
+                errChʗ1.ᐸꟷ(sendCtrlBreak(cmdʗ1.Process.Pid));
             }
         });
 
-        {
-            var errΔ3 = ᐸꟷ(errCh); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = ᐸꟷ(errCh); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
-        {
-            var errΔ4 = cmd.Wait(); if (errΔ4 != nil) {
-                t.Fatalf("Program exited with error: %v\n%s", errΔ4, Ꮡstderr);
-            }
+        var errΔ4 = cmd.Wait(); if (errΔ4 != nil) {
+            t.Fatalf("Program exited with error: %v\n%s", errΔ4, Ꮡstderr);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -146,7 +146,7 @@ internal static slice<slice<nint>> build(nint n, params ꓸꓸꓸnint xʗp) {
     var ret = new slice<slice<nint>>(n);
     nint runLength = len(x) / n;
     nint j = 0;
-    foreach (var i in range(ret)) {
+    foreach (var i in range(len(ret))) {
         ret[i] = new slice<nint>(runLength);
         copy(ret[i], x.slice(j));
         j += runLength;
@@ -159,7 +159,7 @@ internal static slice<slice<nint>> build(nint n, params ꓸꓸꓸnint xʗp) {
 
 // First the simple cases.
 public static void TestFind(ж<testing.T> t) {
-    foreach (var (_, test) in findTests) {
+    foreach (var (_, test) in range(findTests)) {
         var re = MustCompile(test.pat);
         if (re.String() != test.pat) {
             t.Errorf("re.String() = %q, want %q", re.String(), test.pat);
@@ -192,7 +192,7 @@ public static void TestFind(ж<testing.T> t) {
 }
 
 public static void TestFindString(ж<testing.T> t) {
-    foreach (var (_, test) in findTests) {
+    foreach (var (_, test) in range(findTests)) {
         @string result = MustCompile(test.pat).FindString(test.text);
         switch (ᐧ) {
         case {} when len(test.matches) == 0 && len(result) == 0: {
@@ -246,7 +246,7 @@ internal static void testFindIndex(ж<FindTest> Ꮡtest, slice<nint> result, ж<
 }
 
 public static void TestFindIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -255,7 +255,7 @@ public static void TestFindIndex(ж<testing.T> t) {
 }
 
 public static void TestFindStringIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -264,7 +264,7 @@ public static void TestFindStringIndex(ж<testing.T> t) {
 }
 
 public static void TestFindReaderIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -274,7 +274,7 @@ public static void TestFindReaderIndex(ж<testing.T> t) {
 
 // Now come the simple All cases.
 public static void TestFindAll(ж<testing.T> t) {
-    foreach (var (_, test) in findTests) {
+    foreach (var (_, test) in range(findTests)) {
         var result = MustCompile(test.pat).FindAll(slice<byte>(test.text), -1);
         switch (ᐧ) {
         case {} when test.matches == nil && result == nil: {
@@ -294,7 +294,7 @@ public static void TestFindAll(ж<testing.T> t) {
                 t.Errorf("got %d matches, want %d: %s", len(result), len(test.matches), test);
                 continue;
             }
-            foreach (var (k, e) in test.matches) {
+            foreach (var (k, e) in range(test.matches)) {
                 var got = result[k];
                 if (len(got) != cap(got)) {
                     t.Errorf("match %d: got capacity %d, want %d: %s", k, cap(got), len(got), test);
@@ -310,7 +310,7 @@ public static void TestFindAll(ж<testing.T> t) {
 }
 
 public static void TestFindAllString(ж<testing.T> t) {
-    foreach (var (_, test) in findTests) {
+    foreach (var (_, test) in range(findTests)) {
         var result = MustCompile(test.pat).FindAllString(test.text, -1);
         switch (ᐧ) {
         case {} when test.matches == nil && result == nil: {
@@ -330,7 +330,7 @@ public static void TestFindAllString(ж<testing.T> t) {
                 t.Errorf("got %d matches, want %d: %s", len(result), len(test.matches), test);
                 continue;
             }
-            foreach (var (k, e) in test.matches) {
+            foreach (var (k, e) in range(test.matches)) {
                 @string want = test.text.slice(e[0], e[1]);
                 if (want != result[k]) {
                     t.Errorf("got %q, want %q: %s", result[k], want, test);
@@ -362,7 +362,7 @@ internal static void testFindAllIndex(ж<FindTest> Ꮡtest, slice<slice<nint>> r
             t.Errorf("got %d matches, want %d: %s", len(result), len(test.matches), Ꮡtest.OrTypedNil());
             return;
         }
-        foreach (var (k, e) in test.matches) {
+        foreach (var (k, e) in range(test.matches)) {
             if (e[0] != result[k][0] || e[1] != result[k][1]) {
                 t.Errorf("match %d: got %v, want %v: %s", k, result[k], e, Ꮡtest.OrTypedNil());
             }
@@ -372,7 +372,7 @@ internal static void testFindAllIndex(ж<FindTest> Ꮡtest, slice<slice<nint>> r
 }
 
 public static void TestFindAllIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -381,7 +381,7 @@ public static void TestFindAllIndex(ж<testing.T> t) {
 }
 
 public static void TestFindAllStringIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -418,7 +418,7 @@ internal static void testSubmatchBytes(ж<FindTest> Ꮡtest, nint n, slice<nint>
 }
 
 public static void TestFindSubmatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -466,7 +466,7 @@ internal static void testSubmatchString(ж<FindTest> Ꮡtest, nint n, slice<nint
 }
 
 public static void TestFindStringSubmatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -496,7 +496,7 @@ internal static void testSubmatchIndices(ж<FindTest> test, nint n, slice<nint> 
         t.Errorf("match %d: got %d matches, want %d: %s", n, len(result) / 2, len(want) / 2, test.OrTypedNil());
         return;
     }
-    foreach (var (k, e) in want) {
+    foreach (var (k, e) in range(want)) {
         if (e != result[k]) {
             t.Errorf("match %d: submatch error: got %v, want %v: %s", n, result, want, test.OrTypedNil());
         }
@@ -526,7 +526,7 @@ internal static void testFindSubmatchIndex(ж<FindTest> Ꮡtest, slice<nint> res
 }
 
 public static void TestFindSubmatchIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -535,7 +535,7 @@ public static void TestFindSubmatchIndex(ж<testing.T> t) {
 }
 
 public static void TestFindStringSubmatchIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -544,7 +544,7 @@ public static void TestFindStringSubmatchIndex(ж<testing.T> t) {
 }
 
 public static void TestFindReaderSubmatchIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -554,7 +554,7 @@ public static void TestFindReaderSubmatchIndex(ж<testing.T> t) {
 
 // Now come the monster AllSubmatch cases.
 public static void TestFindAllSubmatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -577,7 +577,7 @@ public static void TestFindAllSubmatch(ж<testing.T> t) {
             break;
         }
         case {} when test.matches != nil && result != nil: {
-            foreach (var (k, Δmatch) in test.matches) {
+            foreach (var (k, Δmatch) in range(test.matches)) {
                 testSubmatchBytes(Ꮡtest, k, Δmatch, result[k], t);
             }
             break;
@@ -586,7 +586,7 @@ public static void TestFindAllSubmatch(ж<testing.T> t) {
 }
 
 public static void TestFindAllStringSubmatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -609,7 +609,7 @@ public static void TestFindAllStringSubmatch(ж<testing.T> t) {
             break;
         }
         case {} when test.matches != nil && result != nil: {
-            foreach (var (k, Δmatch) in test.matches) {
+            foreach (var (k, Δmatch) in range(test.matches)) {
                 testSubmatchString(Ꮡtest, k, Δmatch, result[k], t);
             }
             break;
@@ -638,7 +638,7 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
         break;
     }
     case {} when test.matches != nil && result != nil: {
-        foreach (var (k, Δmatch) in test.matches) {
+        foreach (var (k, Δmatch) in range(test.matches)) {
             testSubmatchIndices(Ꮡtest, k, Δmatch, result[k], t);
         }
         break;
@@ -646,7 +646,7 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
 }
 
 public static void TestFindAllSubmatchIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -655,7 +655,7 @@ public static void TestFindAllSubmatchIndex(ж<testing.T> t) {
 }
 
 public static void TestFindAllStringSubmatchIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 

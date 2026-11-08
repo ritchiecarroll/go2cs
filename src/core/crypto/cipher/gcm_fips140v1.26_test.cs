@@ -90,17 +90,17 @@ public static void TestGCMNoncesFIPSV126(ж<testing.T> t) {
             var nonceΔ1 = new slice<byte>(12);
             copy(nonceΔ1, mask);
             var n = binary.BigEndian.AppendUint64(default, counter);
-            foreach (var (i, b) in n) {
+            foreach (var (i, b) in range(n)) {
                 nonceΔ1[4 + i] ^= (byte)(b);
             }
             return nonceΔ1;
         }
 
-        foreach (var (_, mask) in slice<slice<byte>>([
+        foreach (var (_, mask) in range(slice<slice<byte>>([
             decodeHex(tΔ3, ffffffffffffffffffffffffˢ),
             decodeHex(tΔ3, aabbccddeeff001122334455ˢ),
             decodeHex(tΔ3, "000000000000000000000000")
-        ])) {
+        ]))) {
             var g = newGCM();
             // Mask is derived from first invocation with zero nonce.
             expectOKʗ1(tΔ3, new gcm_GCMWithXORCounterNonceжAEAD(g), nonce(mask, 0));

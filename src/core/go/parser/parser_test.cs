@@ -17,15 +17,15 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-internal static slice<@string> validFiles = slice<@string>([
+internal static slice<@string> validFiles = [
     "parser.go",
     "parser_test.go",
     "error_test.go",
     "short_test.go"
-]);
+];
 
 public static void TestParse(ж<testing.T> t) {
-    foreach (var (_, filename) in validFiles) {
+    foreach (var (_, filename) in range(validFiles)) {
         var (_, err) = ParseFile(token.NewFileSet(), filename, default, DeclarationErrors);
         if (err != nil) {
             t.Fatalf("ParseFile(%s): %v", filename, err);
@@ -45,9 +45,7 @@ internal static bool nameFilter(@string filename) {
     return false;
 }
 
-internal static bool dirFilter(fs.FileInfo f) {
-    return nameFilter(f.Name());
-}
+internal static bool dirFilter(fs.FileInfo f) { return nameFilter(f.Name()); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string packagePVarSSSSSSSSSSSSˢ => ref packagePVarSSSSSSSSSSSSˢᵇ;
@@ -140,10 +138,8 @@ public static void TestParseExpr(ж<testing.T> t) {
         t.Errorf("ParseExpr(%q): %v", src, err);
     }
     // sanity check
-    {
-        var (_, ok) = x._<ж<ast.BinaryExpr>>(ᐧ); if (!ok) {
-            t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
-        }
+    if (!x._<ж<ast.BinaryExpr>>(out _)) {
+        t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
     }
 
     // a valid type expression
@@ -153,10 +149,8 @@ public static void TestParseExpr(ж<testing.T> t) {
         t.Errorf("ParseExpr(%q): %v", src, err);
     }
     // sanity check
-    {
-        var (_, ok) = x._<ж<ast.StructType>>(ᐧ); if (!ok) {
-            t.Errorf("ParseExpr(%q): got %T, want *ast.StructType", src, x);
-        }
+    if (!x._<ж<ast.StructType>>(out _)) {
+        t.Errorf("ParseExpr(%q): got %T, want *ast.StructType", src, x);
     }
 
     // an invalid expression
@@ -168,32 +162,24 @@ public static void TestParseExpr(ж<testing.T> t) {
     if (x == nil) {
         t.Errorf("ParseExpr(%q): got no (partial) result", src);
     }
-    {
-        var (_, ok) = x._<ж<ast.BinaryExpr>>(ᐧ); if (!ok) {
-            t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
-        }
+    if (!x._<ж<ast.BinaryExpr>>(out _)) {
+        t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x);
     }
 
     // a valid expression followed by extra tokens is invalid
     src = aIXˢ;
-    {
-        var (_, errΔ1) = ParseExpr(src); if (errΔ1 == nil) {
-            t.Errorf("ParseExpr(%q): got no error", src);
-        }
+    var (_, errΔ1) = ParseExpr(src); if (errΔ1 == nil) {
+        t.Errorf("ParseExpr(%q): got no error", src);
     }
 
     // a semicolon is not permitted unless automatically inserted
     src = "a + b\n";
-    {
-        var (_, errΔ2) = ParseExpr(src); if (errΔ2 != nil) {
-            t.Errorf("ParseExpr(%q): got error %s", src, errΔ2);
-        }
+    var (_, errΔ2) = ParseExpr(src); if (errΔ2 != nil) {
+        t.Errorf("ParseExpr(%q): got error %s", src, errΔ2);
     }
     src = "a + b;";
-    {
-        var (_, errΔ3) = ParseExpr(src); if (errΔ3 == nil) {
-            t.Errorf("ParseExpr(%q): got no error", src);
-        }
+    var (_, errΔ3) = ParseExpr(src); if (errΔ3 == nil) {
+        t.Errorf("ParseExpr(%q): got no error", src);
     }
 
     // various other stuff following a valid expression
@@ -201,15 +187,13 @@ public static void TestParseExpr(ж<testing.T> t) {
     @string anything = anythingᶜ;
     foreach (var (_, c) in (@string)"!)]};,") {
         @string srcΔ1 = validExpr + ((@string)c) + anything;
-        {
-            var (_, errΔ4) = ParseExpr(srcΔ1); if (errΔ4 == nil) {
-                t.Errorf("ParseExpr(%q): got no error", srcΔ1);
-            }
+        var (_, errΔ4) = ParseExpr(srcΔ1); if (errΔ4 == nil) {
+            t.Errorf("ParseExpr(%q): got no error", srcΔ1);
         }
     }
 
     // ParseExpr must not crash
-    foreach (var (_, srcΔ2) in valids) {
+    foreach (var (_, srcΔ2) in range(valids)) {
         ParseExpr(srcΔ2);
     }
 }
@@ -225,13 +209,13 @@ public static void TestColonEqualsScope(ж<testing.T> t) {
 
     // RHS refers to undefined globals; LHS does not.
     var @as = f.Decls[0]._<ж<ast.FuncDecl>>().Body.List[0]._<ж<ast.AssignStmt>>();
-    foreach (var (_, v) in @as.Rhs) {
+    foreach (var (_, v) in range(@as.Rhs)) {
         var id = v._<ж<ast.Ident>>();
         if (id.Obj != nil) {
             t.Errorf("rhs %s has Obj, should not", id.Name);
         }
     }
-    foreach (var (_, v) in @as.Lhs) {
+    foreach (var (_, v) in range(@as.Lhs)) {
         var id = v._<ж<ast.Ident>>();
         if (id.Obj == nil) {
             t.Errorf("lhs %s does not have Obj, should", id.Name);
@@ -250,13 +234,13 @@ public static void TestVarScope(ж<testing.T> t) {
 
     // RHS refers to undefined globals; LHS does not.
     var @as = f.Decls[0]._<ж<ast.FuncDecl>>().Body.List[0]._<ж<ast.DeclStmt>>().Decl._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>();
-    foreach (var (_, v) in @as.Values) {
+    foreach (var (_, v) in range(@as.Values)) {
         var id = v._<ж<ast.Ident>>();
         if (id.Obj != nil) {
             t.Errorf("rhs %s has Obj, should not", id.Name);
         }
     }
-    foreach (var (_, id) in @as.Names) {
+    foreach (var (_, id) in range(@as.Names)) {
         if (id.Obj == nil) {
             t.Errorf("lhs %s does not have Obj, should", id.Name);
         }
@@ -297,22 +281,20 @@ public static void TestObjects(ж<testing.T> t) {
 
     var objectsʗ1 = objects;
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-        {
-            var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-                var obj = ident.Obj;
-                if (obj == nil) {
-                    if (objectsʗ1[ident.Name] != ast.Bad) {
-                        t.Errorf("no object for %s", ident.Name);
-                    }
-                    return true;
+        var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
+            var obj = ident.Obj;
+            if (obj == nil) {
+                if (objectsʗ1[ident.Name] != ast.Bad) {
+                    t.Errorf("no object for %s", ident.Name);
                 }
-                if (obj.Name != ident.Name) {
-                    t.Errorf("names don't match: obj.Name = %s, ident.Name = %s", obj.Name, ident.Name);
-                }
-                ast.ObjKind kind = objectsʗ1[ident.Name];
-                if (obj.Kind != kind) {
-                    t.Errorf("%s: obj.Kind = %s; want %s", ident.Name, obj.Kind, kind);
-                }
+                return true;
+            }
+            if (obj.Name != ident.Name) {
+                t.Errorf("names don't match: obj.Name = %s, ident.Name = %s", obj.Name, ident.Name);
+            }
+            ast.ObjKind kind = objectsʗ1[ident.Name];
+            if (obj.Kind != kind) {
+                t.Errorf("%s: obj.Kind = %s; want %s", ident.Name, obj.Kind, kind);
             }
         }
         return true;
@@ -374,7 +356,7 @@ public static void TestUnresolved(ж<testing.T> t) {
 
     // collect unresolved identifiers
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (_, u) in f.Unresolved) {
+    foreach (var (_, u) in range(f.Unresolved)) {
         Ꮡbuf.WriteString(u.Name);
         Ꮡbuf.WriteByte((byte)' ');
     }
@@ -413,23 +395,23 @@ public static void TestCommentGroups(ж<testing.T> t) {
         t.Fatal(err);
     }
     var expected = slice<slice<@string>>([
-        slice<@string>(["/* 1a */", "/* 1b */", "/* 1c */", "// 1d"]),
-        slice<@string>(["/* 2a\n*/", "// 2b"]),
-        slice<@string>(["/* 3a */", "// 3b", "/* 3c */"]),
-        slice<@string>(["// Example from go.dev/issue/3139"]),
-        slice<@string>(["// before & after each rune"]),
-        slice<@string>(["// Output:", "// 3", "// 5"])
+        ["/* 1a */", "/* 1b */", "/* 1c */", "// 1d"],
+        ["/* 2a\n*/", "// 2b"],
+        ["/* 3a */", "// 3b", "/* 3c */"],
+        ["// Example from go.dev/issue/3139"],
+        ["// before & after each rune"],
+        ["// Output:", "// 3", "// 5"]
     ]);
     if (len(f.Comments) != len(expected)) {
         t.Fatalf("got %d comment groups; expected %d", len(f.Comments), len(expected));
     }
-    foreach (var (i, exp) in expected) {
+    foreach (var (i, exp) in range(expected)) {
         var got = f.Comments[i].List;
         if (len(got) != len(exp)) {
             t.Errorf("got %d comments in group %d; expected %d", len(got), i, len(exp));
             continue;
         }
-        foreach (var (j, expΔ1) in exp) {
+        foreach (var (j, expΔ1) in range(exp)) {
             @string gotΔ1 = got[j].Text;
             if (gotΔ1 != expΔ1) {
                 t.Errorf("got %q in group %d; expected %q", gotΔ1, i, expΔ1);
@@ -442,21 +424,15 @@ internal static ж<ast.Field> getField(ж<ast.File> Ꮡfile, @string fieldname) 
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     var parts = strings.Split(fieldname, ".");
-    foreach (var (_, d) in @file.Decls) {
-        {
-            var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ); if (ok && dΔ1.Tok == token.TYPE) {
-                foreach (var (_, s) in dΔ1.Specs) {
-                    {
-                        var (sΔ1, okΔ1) = s._<ж<ast.TypeSpec>>(ᐧ); if (okΔ1 && sΔ1.Name.Name == parts[0]) {
-                            {
-                                var (sΔ2, okΔ2) = sΔ1.Type._<ж<ast.StructType>>(ᐧ); if (okΔ2) {
-                                    foreach (var (_, f) in sΔ2.Fields.List) {
-                                        foreach (var (_, name) in f.Names) {
-                                            if (name.Name == parts[1]) {
-                                                return f;
-                                            }
-                                        }
-                                    }
+    foreach (var (_, d) in range(@file.Decls)) {
+        var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ); if (ok && dΔ1.Tok == token.TYPE) {
+            foreach (var (_, s) in range(dΔ1.Specs)) {
+                var (sΔ1, okΔ1) = s._<ж<ast.TypeSpec>>(ᐧ); if (okΔ1 && sΔ1.Name.Name == parts[0]) {
+                    var (sΔ2, okΔ2) = sΔ1.Type._<ж<ast.StructType>>(ᐧ); if (okΔ2) {
+                        foreach (var (_, f) in range(sΔ2.Fields.List)) {
+                            foreach (var (_, name) in range(f.Names)) {
+                                if (name.Name == parts[1]) {
+                                    return f;
                                 }
                             }
                         }
@@ -474,7 +450,7 @@ internal static @string commentText(ж<ast.CommentGroup> Ꮡc) {
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     if (Ꮡc != nil) {
-        foreach (var (_, cΔ1) in c.List) {
+        foreach (var (_, cΔ1) in range(c.List)) {
             Ꮡbuf.WriteString(cΔ1.Text);
         }
     }
@@ -582,7 +558,7 @@ private static readonly @string butIsImplicitˢᵇ = "but ';' is implicit"u8;
 
 // TestIssue9979 verifies that empty statements are contained within their enclosing blocks.
 public static void TestIssue9979(ж<testing.T> t) {
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         "package p; func f() {;}",
         "package p; func f() {L:}",
         "package p; func f() {L:;}",
@@ -593,7 +569,7 @@ public static void TestIssue9979(ж<testing.T> t) {
         "package p; func f() { L: ; }",
         "package p; func f() { L: \n}",
         "package p; func f() { L: \n; }"
-    ])) {
+    ]))) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, ""u8, src, 0);
         if (err != nil) {
@@ -620,14 +596,12 @@ public static void TestIssue9979(ж<testing.T> t) {
                 }
                 // check semicolon
                 nint offs = fsetʗ1.Position(s.Pos()).Offset;
-                {
-                    var ch = src[offs]; if (ch != ';' != s.Implicit) {
-                        @string want = wantˢ;
-                        if (s.Implicit) {
-                            want = butIsImplicitˢ;
-                        }
-                        t.Errorf("%s: found %q at offset %d; %s", src, ch, offs, want);
+                var ch = src[offs]; if (ch != ';' != s.Implicit) {
+                    @string want = wantˢ;
+                    if (s.Implicit) {
+                        want = butIsImplicitˢ;
                     }
+                    t.Errorf("%s: found %q at offset %d; %s", src, ch, offs, want);
                 }
                 break;
             }}
@@ -699,10 +673,10 @@ private static readonly @string wantSelᶜᵇ = "&{fmt _}"u8;
 // expression is parsed as a (blank) *ast.SelectorExpr, not a
 // *ast.BadExpr.
 public static void TestIncompleteSelection(ж<testing.T> t) {
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         "package p; var _ = fmt.",            // at EOF
         "package p; var _ = fmt.\ntype X int" // not at EOF
-    ])) {
+    ]))) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, ""u8, src, 0);
         if (err == nil) {
@@ -717,10 +691,8 @@ public static void TestIncompleteSelection(ж<testing.T> t) {
 
         ref var sel = ref heap<ж<ast.SelectorExpr>>(out var Ꮡsel);
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-            {
-                var (nΔ1, ok) = n._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
-                    Ꮡsel.ValueSlot = nΔ1;
-                }
+            var (nΔ1, ok) = n._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
+                Ꮡsel.ValueSlot = nΔ1;
             }
             return true;
         });
@@ -776,7 +748,7 @@ partial struct parseDepthTestsᴛ1 /*dyn*/ {
     // depths.
     internal nint scopeMultiplier;
 }
-internal static slice<parseDepthTestsᴛ1> parseDepthTests = slice<parseDepthTestsᴛ1>([
+internal static slice<parseDepthTestsᴛ1> parseDepthTests = [
     // The format expands the part inside « » many times.
     // A second set of brackets nested inside the first stops the repetition,
     // so that for example «(«1»)» expands to (((...((((1))))...))).
@@ -824,7 +796,7 @@ internal static slice<parseDepthTestsᴛ1> parseDepthTests = slice<parseDepthTes
     new(name: "defer", format: "package main; func main() { «defer func() { «» }()» }", parseMultiplier: 2, scope: true),                // Parser nodes: DeferStmt, FuncLit
     new(name: "select", format: "package main; func main() { «select { default: «» }» }", scope: true),
     new(name: "block", format: "package main; func main() { «{«»}» }", scope: true)
-]);
+];
 
 // split splits pre«mid»post into pre, mid, post.
 // If the string does not have that form, split returns x, "", "".
@@ -844,11 +816,11 @@ public static void TestParseDepthLimit(ж<testing.T> t) {
     if (testing.Short()) {
         t.Skip(testRequiresSignificantˢ);
     }
-    foreach (var (_, vᴛ1) in parseDepthTests) {
+    foreach (var (_, vᴛ1) in range(parseDepthTests)) {
         ref var tt = ref heap(new parseDepthTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
-        foreach (var (_, size) in slice<@string>(["small", "big"])) {
+        foreach (var (_, size) in range(slice<@string>(["small", "big"]))) {
             var ttʗ1 = tt;
             t.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxNestLev + 1;
@@ -895,14 +867,14 @@ internal static ref readonly @string exceededMaxScopeDepthˢ => ref exceededMaxS
 private static readonly @string exceededMaxScopeDepthˢᵇ = "exceeded max scope depth during object resolution"u8;
 
 public static void TestScopeDepthLimit(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in parseDepthTests) {
+    foreach (var (_, vᴛ1) in range(parseDepthTests)) {
         ref var tt = ref heap(new parseDepthTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         if (!tt.scope) {
             continue;
         }
-        foreach (var (_, size) in slice<@string>(["small", "big"])) {
+        foreach (var (_, size) in range(slice<@string>(["small", "big"]))) {
             var ttʗ1 = tt;
             t.Run(tt.name + "/"u8 + size, (ж<testing.T> tΔ1) => {
                 nint n = maxScopeDepth + 1;
@@ -958,7 +930,7 @@ public static void TestRangePos(ж<testing.T> t) {
         "package p; func _() { for k, v := range x {} }"
     ]);
 
-    foreach (var (_, src) in testcases) {
+    foreach (var (_, src) in range(testcases)) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, src, src, 0);
         if (err != nil) {
@@ -988,7 +960,7 @@ public static void TestIssue59180(ж<testing.T> t) {
         "package p\n//line file:9223372036854775806\n\n//"
     ]);
 
-    foreach (var (_, src) in testcases) {
+    foreach (var (_, src) in range(testcases)) {
         var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments);
         if (err == nil) {
             t.Errorf("ParseFile(%s) succeeded unexpectedly", src);
@@ -1080,12 +1052,12 @@ internal partial struct TestEmptyFileHasValidStartEnd_type /*dyn*/ {
 
 // TestEmptyFileHasValidStartEnd is a regression test for #70162.
 public static void TestEmptyFileHasValidStartEnd(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestEmptyFileHasValidStartEnd_type>([
+    foreach (var (_, test) in range(slice<TestEmptyFileHasValidStartEnd_type>([
         new(src: "", want: "0 1 1"),
         new(src: "package ", want: "0 1 9"),
         new(src: "package p", want: "1 1 10"),
         new(src: "type T int", want: "0 1 11")
-    ])) {
+    ]))) {
         var fset = token.NewFileSet();
         var (f, _) = ParseFile(fset, aGoˢ, test.src, 0);
         @string got = fmt.Sprintf("%d %d %d"u8, f.Pos(), f.FileStart, f.FileEnd);
@@ -1228,25 +1200,19 @@ public static void TestBasicLit_End(ж<testing.T> t) {
     var fsetʗ1 = fset;
     var tokFileʗ1 = tokFile;
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-        {
-            var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok) {
-                count++;
-                nint start = tokFileʗ1.Offset(lit.Pos());
-                nint end = tokFileʗ1.Offset(lit.End());
+        var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok) {
+            count++;
+            nint start = tokFileʗ1.Offset(lit.Pos());
+            nint end = tokFileʗ1.Offset(lit.End());
 
-                // Check BasicLit.Value.
-                {
-                    @string want = abcˢ; if ((~lit).Value != want) {
-                        t.Errorf("%s: BasicLit.Value = %q, want %q", fsetʗ1.Position(lit.Pos()), (~lit).Value, want);
-                    }
-                }
+            // Check BasicLit.Value.
+            @string want = abcˢ; if ((~lit).Value != want) {
+                t.Errorf("%s: BasicLit.Value = %q, want %q", fsetʗ1.Position(lit.Pos()), (~lit).Value, want);
+            }
 
-                // Check source extent.
-                {
-                    @string got = src.slice(start, end); if (got != stringlit) {
-                        t.Errorf("%s: src[BasicLit.Pos:End] = %q, want %q", fsetʗ1.Position(lit.Pos()), got, stringlit);
-                    }
-                }
+            // Check source extent.
+            @string got = src.slice(start, end); if (got != stringlit) {
+                t.Errorf("%s: src[BasicLit.Pos:End] = %q, want %q", fsetʗ1.Position(lit.Pos()), got, stringlit);
             }
         }
         return true;

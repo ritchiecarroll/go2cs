@@ -87,7 +87,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1,
-                TransferEncoding: slice<@string>(["chunked"]),
+                TransferEncoding: ["chunked"],
                 Close: false
             ),
             "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + "6\r\nabcdef\r\n0\r\n\r\n"u8
@@ -144,7 +144,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: 6,
-                TransferEncoding: slice<@string>(["chunked"]),
+                TransferEncoding: ["chunked"],
                 Close: true
             ),
 
@@ -160,11 +160,11 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMinor: 1,
                 Request: dummyReq(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{
-                    ["Foo"] = slice<@string>([" Bar\nBaz "])
+                    ["Foo"] = [" Bar\nBaz "]
                 }),
                 Body: default,
                 ContentLength: 0,
-                TransferEncoding: slice<@string>(["chunked"]),
+                TransferEncoding: ["chunked"],
                 Close: true
             ),
 
@@ -253,7 +253,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var i in range(respWriteTests)) {
+    foreach (var i in range(builtin.len(respWriteTests))) {
         var tt = Ꮡ(respWriteTests, i);
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
         var err = tt.ᏑResp.Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));

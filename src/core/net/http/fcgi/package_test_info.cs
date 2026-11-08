@@ -56,7 +56,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("fcgi_test.cs", 472, 9, 0)]
+[assembly: GoBoundedGoroutine("fcgi_test.cs", 460, 9, 0)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,7 +66,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABciAAcWgoKCgoKUgoKUggALCgAXPICkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLmgqaC5oKClIKCgoKmhoCCyIIACBSKgpSCgoIACRQAERoAGDiCpoKssrKCgoKCuoKCppSUAAgSgqiSAAcQgoK4ABckAA4usrKCgoKCqIKAgpSCpJSCAA0IggAUMrKSgoKCgoKogoKUgoKAggAPFoKmgoLawpSCoriClJSigqaClJiClJSCgqI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "56=Join/1/1/12;205=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;223=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;310=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;391=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABUiAAcWgoKCgoKUgoKUggALCgAXPJSCgoKCgoKCgoKUlIKClIKClIKClIKCgoCCgqSAgoKkggAKEoKC5oKmguaCgpSCgoKCpoaCuIIACBSKgpSCgoIACRQAERoAGDiCpoKssrKCgoKCuoKCppSUAAgSgqiSAAcQgoK4ABckAA4usrKCgoKCqIKClIKUlIIADQiCABQyspKCgoKCgqiCgpSCgoIADhaCpoKC2sKUgqK4gpSUooKmgpSYgpSUgoKi", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "54=Join/1/1/12;197=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;215=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;302=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;381=Repeat/1/2/16,Repeat/2/2/21", "", "472:21,473:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

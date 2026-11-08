@@ -6,8 +6,6 @@ namespace go.crypto;
 using rand = go.crypto.rand_package;
 using big = math.big_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using io = io_package;
 using math;
@@ -133,7 +131,7 @@ public static void TestSigningWithDegenerateKeys(ж<testing.T> t) {
         new("01", "ff", "00", "00", "00")
     ]);
 
-    foreach (var (i, test) in badKeys) {
+    foreach (var (i, test) in range(badKeys)) {
         ref var priv = ref heap<global::go.crypto.dsa_package.PrivateKey>(new PrivateKey(
             PublicKey: new PublicKey(
                 Parameters: new Parameters(
@@ -147,10 +145,8 @@ public static void TestSigningWithDegenerateKeys(ж<testing.T> t) {
         ), out var Ꮡpriv);
 
         var hashed = slice<byte>("testing"u8);
-        {
-            var (_, _, err) = Sign(rand.Reader, Ꮡpriv, hashed); if (err == nil) {
-                t.Errorf("#%d: unexpected success", i);
-            }
+        var (_, _, err) = Sign(rand.Reader, Ꮡpriv, hashed); if (err == nil) {
+            t.Errorf("#%d: unexpected success", i);
         }
     }
 }

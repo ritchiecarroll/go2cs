@@ -9,8 +9,6 @@ using mime = mime_package;
 using textproto = net.textproto_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using net;
 using static go.mime.multipart_package;
 
@@ -127,7 +125,7 @@ public static void TestWriterSetBoundary(ж<testing.T> t) {
         new("badspace ", false),
         new("(boundary)", true)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         var w = NewWriter(new multipart_test_package.strings_BuilderжWriter(Ꮡb));
         var err = w.SetBoundary(tt.b);
@@ -154,10 +152,8 @@ public static void TestWriterSetBoundary(ж<testing.T> t) {
 
             w.Close();
             @string wantSub = "\r\n--"u8 + tt.b + "--\r\n"u8;
-            {
-                @string gotΔ2 = b.String(); if (!strings.Contains(gotΔ2, wantSub)) {
-                    t.Errorf("expected %q in output. got: %q", wantSub, gotΔ2);
-                }
+            @string gotΔ2 = b.String(); if (!strings.Contains(gotΔ2, wantSub)) {
+                t.Errorf("expected %q in output. got: %q", wantSub, gotΔ2);
             }
         }
     }
@@ -193,18 +189,16 @@ private static readonly @string mimeboundaryA2B5B7B6C4M3ˢᵇ = "--MIMEBOUNDARY\
 public static void TestSortedHeader(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf));
-    {
-        var errΔ1 = w.SetBoundary(mimeboundaryˢ); if (errΔ1 != nil) {
-            t.Fatalf("Error setting mime boundary: %v", errΔ1);
-        }
+    var errΔ1 = w.SetBoundary(mimeboundaryˢ); if (errΔ1 != nil) {
+        t.Fatalf("Error setting mime boundary: %v", errΔ1);
     }
 
     var header = new textproto.MIMEHeader(new map<@string, slice<@string>>{
-        ["A"] = slice<@string>(["2"]),
-        ["B"] = slice<@string>(["5", "7", "6"]),
-        ["C"] = slice<@string>(["4"]),
-        ["M"] = slice<@string>(["3"]),
-        ["Z"] = slice<@string>(["1"])
+        ["A"] = ["2"],
+        ["B"] = ["5", "7", "6"],
+        ["C"] = ["4"],
+        ["M"] = ["3"],
+        ["Z"] = ["1"]
     });
 
     var (part, err) = w.CreatePart(header);
@@ -236,11 +230,9 @@ public static void TestFileContentDisposition(ж<testing.T> t) {
         new("somefield", @"somefile\withbackslash.txt", @"form-data; name=""somefield""; filename=""somefile\\withbackslash.txt"""),
         new("a\rb\nc", "e\rf\ng", @"form-data; name=""a%0Db%0Ac""; filename=""e%0Df%0Ag""")
     ]);
-    foreach (var (i, tt) in tests) {
-        {
-            @string found = FileContentDisposition(tt.fieldname, tt.filename); if (found != tt.want) {
-                t.Errorf(@"%d. found: ""%s""; want: ""%s""", i, found, tt.want);
-            }
+    foreach (var (i, tt) in range(tests)) {
+        @string found = FileContentDisposition(tt.fieldname, tt.filename); if (found != tt.want) {
+            t.Errorf(@"%d. found: ""%s""; want: ""%s""", i, found, tt.want);
         }
     }
 }

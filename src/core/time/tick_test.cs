@@ -9,8 +9,6 @@ using Δsync = sync_package;
 using Δtesting = testing_package;
 using static time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.time_internal_test_package;
 using Δtime = time_package;
 
@@ -48,19 +46,19 @@ public static void TestTicker(ж<Δtesting.T> t) {
 
     ref var errs = ref heap<slice<@string>>(out var Ꮡerrs);
     void logErrs() {
-        foreach (var (_, e) in Ꮡerrs.ValueSlot) {
+        foreach (var (_, e) in range(Ꮡerrs.ValueSlot)) {
             t.Log(e);
         }
     }
 
-    foreach (var (_, test) in slice<TestTicker_type>([new(
+    foreach (var (_, test) in range(slice<TestTicker_type>([new(
         count: baseCount,
         delta: baseDelta
     ), new(
         count: 8,
         delta: 1 * ΔSecond
     )
-    ])) {
+    ]))) {
         nint count = test.count;
         var delta = test.delta;
         var ticker = NewTicker(delta);
@@ -138,10 +136,8 @@ public static void TestTeardown(ж<Δtesting.T> t) {
 // Test the Tick convenience wrapper.
 public static partial void TestTick(ж<Δtesting.T> t) {
     // Test that giving a negative duration returns nil.
-    {
-        var got = Tick(-1); if (got != nil) {
-            t.Errorf("Tick(-1) = %v; want nil", got);
-        }
+    var got = Tick(-1); if (got != nil) {
+        t.Errorf("Tick(-1) = %v; want nil", got);
     }
 }
 
@@ -150,10 +146,8 @@ public static void TestNewTickerLtZeroDuration(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Errorf("NewTicker(-1) should have panicked");
-                }
+            var err = recover(); if (err == nil) {
+                t.Errorf("NewTicker(-1) should have panicked");
             }
         }, ref ᒐ);
         NewTicker(-1);
@@ -167,10 +161,8 @@ public static void TestTickerResetLtZeroDuration(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Errorf("Ticker.Reset(0) should have panicked");
-                }
+            var err = recover(); if (err == nil) {
+                t.Errorf("Ticker.Reset(0) should have panicked");
             }
         }, ref ᒐ);
         var tk = NewTicker(ΔSecond);
@@ -306,7 +298,6 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> t) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 public static void BenchmarkTicker(ж<Δtesting.B> b) {
     benchmark(b, (ж<Δtesting.PB> pb) => {
         var ticker = NewTicker(ΔNanosecond);
@@ -421,7 +412,7 @@ internal static ref readonly @string tickerˢ => ref tickerˢᵇ;
 private static readonly @string tickerˢᵇ = "Ticker"u8;
 
 public static void TestChan(ж<Δtesting.T> t) {
-    foreach (var (_, name) in slice<@string>(["0", "1", "2"])) {
+    foreach (var (_, name) in range(slice<@string>(["0", "1", "2"]))) {
         t.Run("asynctimerchan="u8 + name, (ж<Δtesting.T> tΔ1) => {
             tΔ1.Setenv(godebugˢ, "asynctimerchan="u8 + name);
             tΔ1.Run(timerˢ, (ж<Δtesting.T> tΔ2) => {
@@ -561,25 +552,19 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
     void assertLen() {
         t.Helper();
         if (synctimerchan) {
-            {
-                nint nΔ1 = len(Cʗ4); if (nΔ1 != 0) {
-                    t.Errorf("synctimer has len(C) = %d, want 0 (always)", nΔ1);
-                }
+            nint nΔ1 = len(Cʗ4); if (nΔ1 != 0) {
+                t.Errorf("synctimer has len(C) = %d, want 0 (always)", nΔ1);
             }
             return;
         }
         nint n = default;
-        {
-            n = len(Cʗ4); if (n == 1) {
-                return;
-            }
+        n = len(Cʗ4); if (n == 1) {
+            return;
         }
         foreach (var _ᴛ3 in range(tries)) {
             Sleep(sched);
-            {
-                n = len(Cʗ4); if (n == 1) {
-                    return;
-                }
+            n = len(Cʗ4); if (n == 1) {
+                return;
             }
         }
         t.Errorf("len(C) = %d, want 1", n);
@@ -597,11 +582,9 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
         // Test modify of timer in heap.
         tim.Reset(1);
         Sleep(sched);
-        {
-            nint l = len(C);
-            nint c = cap(C); if (l != 0 || c != 0) {
-                // t.Fatalf("len(C), cap(C) = %d, %d, want 0, 0", l, c)
-            }
+        nint l = len(C);
+        nint c = cap(C); if (l != 0 || c != 0) {
+            // t.Fatalf("len(C), cap(C) = %d, %d, want 0, 0", l, c)
         }
         assertTick();
     } else {

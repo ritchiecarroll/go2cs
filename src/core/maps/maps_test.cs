@@ -11,7 +11,6 @@ using static go.maps_package;
 partial class maps_internal_test_package {
 
 internal static map<nint, nint> m1 = new map<nint, nint>{[1] = 2, [2] = 4, [4] = 8, [8] = 16};
-
 internal static map<nint, @string> m2 = new map<nint, @string>{[1] = "2", [2] = "4", [4] = "8", [8] = "16"};
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -30,10 +29,8 @@ public static void TestEqual(ж<testing.T> t) {
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(default, default)) {
         t.Error(equalNilNilFalseWantTrueˢ);
     }
-    {
-        var ms = new map<nint, nint>{[1] = 2}; if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, ms)) {
-            t.Errorf("Equal(%v, %v) = true, want false", m1, ms);
-        }
+    var ms = new map<nint, nint>{[1] = 2}; if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, ms)) {
+        t.Errorf("Equal(%v, %v) = true, want false", m1, ms);
     }
 
     // Comparing NaN for equality is expected to fail.
@@ -75,10 +72,8 @@ public static void TestEqualFunc(ж<testing.T> t) {
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(default, default, equal<nint>)) {
         t.Error(equalFuncNilNilEqualˢ);
     }
-    {
-        var ms = new map<nint, nint>{[1] = 2}; if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, ms, equal<nint>)) {
-            t.Errorf("EqualFunc(%v, %v, equal) = true, want false", m1, ms);
-        }
+    var ms = new map<nint, nint>{[1] = 2}; if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, ms, equal<nint>)) {
+        t.Errorf("EqualFunc(%v, %v, equal) = true, want false", m1, ms);
     }
 
     // Comparing NaN for equality is expected to fail.

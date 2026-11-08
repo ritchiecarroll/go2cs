@@ -5,8 +5,6 @@ namespace go;
 
 using errors = errors_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class errors_test_package {
 

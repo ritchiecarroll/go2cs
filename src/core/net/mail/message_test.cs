@@ -21,7 +21,7 @@ partial struct parseTestsᴛ1 /*dyn*/ {
     internal global::go.net.mail_package.Header header;
     internal @string body;
 }
-internal static slice<parseTestsᴛ1> parseTests = slice<parseTestsᴛ1>([
+internal static slice<parseTestsᴛ1> parseTests = [
     new(
         // RFC 5322, Appendix A.1.1
         @in: """
@@ -36,11 +36,11 @@ So, "Hello".
 
 """u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
-            ["From"] = slice<@string>(["John Doe <jdoe@machine.example>"]),
-            ["To"] = slice<@string>(["Mary Smith <mary@example.net>"]),
-            ["Subject"] = slice<@string>(["Saying Hello"]),
-            ["Date"] = slice<@string>(["Fri, 21 Nov 1997 09:55:06 -0600"]),
-            ["Message-Id"] = slice<@string>(["<1234@local.machine.example>"])
+            ["From"] = ["John Doe <jdoe@machine.example>"],
+            ["To"] = ["Mary Smith <mary@example.net>"],
+            ["Subject"] = ["Saying Hello"],
+            ["Date"] = ["Fri, 21 Nov 1997 09:55:06 -0600"],
+            ["Message-Id"] = ["<1234@local.machine.example>"]
         }),
         body: "This is a message just to say hello.\nSo, \"Hello\".\n"
     ),
@@ -53,9 +53,9 @@ Version: 1
 
 """u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
-            ["Feedback-Type"] = slice<@string>(["abuse"]),
-            ["User-Agent"] = slice<@string>(["SomeGenerator/1.0"]),
-            ["Version"] = slice<@string>(["1"])
+            ["Feedback-Type"] = ["abuse"],
+            ["User-Agent"] = ["SomeGenerator/1.0"],
+            ["Version"] = ["1"]
         }),
         body: ""
     ),
@@ -70,8 +70,8 @@ Body
 
 """u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
-            ["From"] = slice<@string>(["iant@golang.org"]),
-            ["Custom/Header"] = slice<@string>(["v"])
+            ["From"] = ["iant@golang.org"],
+            ["Custom/Header"] = ["v"]
         }),
         body: "Body\n"
     ),
@@ -86,15 +86,15 @@ Hello, gophers!
 
 """u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
-            ["From"] = slice<@string>(["iant@golang.org"]),
-            ["From iant@golang.org Mon Jun 19 00"] = slice<@string>(["00:00 2023"])
+            ["From"] = ["iant@golang.org"],
+            ["From iant@golang.org Mon Jun 19 00"] = ["00:00 2023"]
         }),
         body: "Hello, gophers!\n"
     )
-]);
+];
 
 public static void TestParsing(ж<testing.T> t) {
-    foreach (var (i, test) in parseTests) {
+    foreach (var (i, test) in range(parseTests)) {
         var (msg, err) = ReadMessage(new mail_test_package.bytes_BufferжReader(bytes.NewBuffer(slice<byte>(test.@in))));
         if (err != nil) {
             t.Errorf("test #%d: Failed parsing message: %v", i, err);
@@ -173,9 +173,9 @@ public static void TestDateParsing(ж<testing.T> t) {
             time.Date(1997, 11, 21, 9, 55, 6, 0, time.FixedZone(""u8, +13 * 60 * 60))
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var hdr = new Header(new map<@string, slice<@string>>{
-            ["Date"] = slice<@string>([test.dateStr])
+            ["Date"] = [test.dateStr]
         });
         var (date, err) = hdr.Date();
         if (err != nil) {
@@ -355,9 +355,9 @@ public static void TestDateParsingCFWS(ж<testing.T> t) {
             true
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var hdr = new Header(new map<@string, slice<@string>>{
-            ["Date"] = slice<@string>([test.dateStr])
+            ["Date"] = [test.dateStr]
         });
         var (date, err) = hdr.Date();
         if (err != nil && test.valid) {
@@ -423,7 +423,7 @@ public static void TestAddressParsingError(ж<testing.T> t) {
         [24] = new("<jdoe@[256.0.0.1]>", "invalid IP address in domain-literal")
     }, out var ᏑmustErrTestCases);
 
-    foreach (var (i, tc) in mustErrTestCases.ΔRangeSnapshot()) {
+    foreach (var (i, tc) in range(mustErrTestCases.ΔRangeSnapshot())) {
         var (_, err) = ParseAddress(tc.text);
         if (err == nil || !strings.Contains(err.Error(), tc.wantErrText)) {
             t.Errorf(@"mail.ParseAddress(%q) #%d want %q, got %v", tc.text, i, tc.wantErrText, err);
@@ -433,7 +433,7 @@ public static void TestAddressParsingError(ж<testing.T> t) {
     var mustErrTestCasesʗ1 = mustErrTestCases;
     t.Run(customWordDecoderˢ, (ж<testing.T> tΔ1) => {
         var p = Ꮡ(new AddressParser(WordDecoder: Ꮡ(new mime.WordDecoder())));
-        foreach (var (i, tc) in mustErrTestCasesʗ1.ΔRangeSnapshot()) {
+        foreach (var (i, tc) in range(mustErrTestCasesʗ1.ΔRangeSnapshot())) {
             var (_, err) = p.Parse(tc.text);
             if (err == nil || !strings.Contains(err.Error(), tc.wantErrText)) {
                 tΔ1.Errorf(@"p.Parse(%q) #%d want %q, got %v", tc.text, i, tc.wantErrText, err);
@@ -452,52 +452,52 @@ public static void TestAddressParsing(ж<testing.T> t) {
         // Bare address
         new(
             @"jdoe@machine.example",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.1.1
         new(
             @"John Doe <jdoe@machine.example>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John Doe",
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.1.2
         new(
             @"""Joe Q. Public"" <john.q.public@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "Joe Q. Public",
                 ΔAddress: "john.q.public@example.com"))
-            ])
+            ]
         ),
         // Comment in display name
         new(
             @"John (middle) Doe <jdoe@machine.example>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John Doe",
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         // Display name is quoted string, so comment is not a comment
         new(
             @"""John (middle) Doe"" <jdoe@machine.example>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John (middle) Doe",
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         new(
             @"""John <middle> Doe"" <jdoe@machine.example>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John <middle> Doe",
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         new(
             @"Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Mary Smith",
                     ΔAddress: "mary@x.test")),
@@ -506,34 +506,34 @@ public static void TestAddressParsing(ж<testing.T> t) {
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Who?",
                     ΔAddress: "one@y.test"))
-            ])
+            ]
         ),
         new(
             @"<boss@nil.test>, ""Giant; \""Big\"" Box"" <sysservices@example.net>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     ΔAddress: "boss@nil.test")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Giant; ""Big"" Box",
                     ΔAddress: "sysservices@example.net"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.6.1
         new(
             @"Joe Q. Public <john.q.public@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "Joe Q. Public",
                 ΔAddress: "john.q.public@example.com"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.1.3
         new(
             @"group1: groupaddr1@example.com;",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "groupaddr1@example.com"))
-            ])
+            ]
         ),
         new(
             @"empty group: ;",
@@ -541,7 +541,7 @@ public static void TestAddressParsing(ж<testing.T> t) {
         ),
         new(
             @"A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Ed Jones",
                     ΔAddress: "c@a.test")),
@@ -551,34 +551,34 @@ public static void TestAddressParsing(ж<testing.T> t) {
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John",
                     ΔAddress: "jdoe@one.test"))
-            ])
+            ]
         ),
         // RFC5322 4.4 obs-addr-list
         new(
             @" , joe@where.test,,John <jdoe@one.test>,",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "joe@where.test")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John",
                     ΔAddress: "jdoe@one.test"))
-            ])
+            ]
         ),
         new(
             @" , joe@where.test,,John <jdoe@one.test>,,",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "joe@where.test")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John",
                     ΔAddress: "jdoe@one.test"))
-            ])
+            ]
         ),
         new(
             @"Group1: <addr1@example.com>;, Group 2: addr2@example.com;, John <addr3@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "addr1@example.com")),
@@ -588,232 +588,232 @@ public static void TestAddressParsing(ж<testing.T> t) {
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John",
                     ΔAddress: "addr3@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded ISO-8859-1 address.
         new(
             @"=?iso-8859-1?q?J=F6rg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded US-ASCII address. Dumb but legal.
         new(
             @"=?us-ascii?q?J=6Frg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jorg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded UTF-8 address.
         new(
             @"=?utf-8?q?J=C3=B6rg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded UTF-8 address with multiple encoded-words.
         new(
             @"=?utf-8?q?J=C3=B6rg?=  =?utf-8?q?Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"JörgDoe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047, Section 8.
         new(
             @"=?ISO-8859-1?Q?Andr=E9?= Pirard <PIRARD@vm1.ulg.ac.be>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"André Pirard",
                     ΔAddress: "PIRARD@vm1.ulg.ac.be"))
-            ])
+            ]
         ),
         // Custom example of RFC 2047 "B"-encoded ISO-8859-1 address.
         new(
             @"=?ISO-8859-1?B?SvZyZw==?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // Custom example of RFC 2047 "B"-encoded UTF-8 address.
         new(
             @"=?UTF-8?B?SsO2cmc=?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // Custom example with "." in name. For issue 4938
         new(
             @"Asem H. <noreply@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Asem H.",
                     ΔAddress: "noreply@example.com"))
-            ])
+            ]
         ),
         // RFC 6532 3.2.3, qtext /= UTF8-non-ascii
         new(
             @"""Gø Pher"" <gopher@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Gø Pher",
                     ΔAddress: "gopher@example.com"))
-            ])
+            ]
         ),
         // RFC 6532 3.2, atext /= UTF8-non-ascii
         new(
             @"µ <micro@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"µ",
                     ΔAddress: "micro@example.com"))
-            ])
+            ]
         ),
         // RFC 6532 3.2.2, local address parts allow UTF-8
         new(
             @"Micro <µ@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Micro",
                     ΔAddress: "µ@example.com"))
-            ])
+            ]
         ),
         // RFC 6532 3.2.4, domains parts allow UTF-8
         new(
             @"Micro <micro@µ.example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Micro",
                     ΔAddress: "micro@µ.example.com"))
-            ])
+            ]
         ),
         // Issue 14866
         new(
             @""""" <emptystring@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "emptystring@example.com"))
-            ])
+            ]
         ),
         // CFWS
         new(
             @"<cfws@example.com> (CFWS (cfws))  (another comment)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "cfws@example.com"))
-            ])
+            ]
         ),
         new(
             @"<cfws@example.com> ()  (another comment), <cfws2@example.com> (another)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "cfws@example.com")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "",
                     ΔAddress: "cfws2@example.com"))
-            ])
+            ]
         ),
         // Comment as display name
         new(
             @"john@example.com (John Doe)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John Doe",
                     ΔAddress: "john@example.com"))
-            ])
+            ]
         ),
         // Comment and display name
         new(
             @"John Doe <john@example.com> (Joey)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John Doe",
                     ΔAddress: "john@example.com"))
-            ])
+            ]
         ),
         // Comment as display name, no space
         new(
             @"john@example.com(John Doe)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "John Doe",
                     ΔAddress: "john@example.com"))
-            ])
+            ]
         ),
         // Comment as display name, Q-encoded
         new(
             @"asjo@example.com (Adam =?utf-8?Q?Sj=C3=B8gren?=)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Adam Sjøgren",
                     ΔAddress: "asjo@example.com"))
-            ])
+            ]
         ),
         // Comment as display name, Q-encoded and tab-separated
         new(
             @"asjo@example.com (Adam	=?utf-8?Q?Sj=C3=B8gren?=)",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Adam Sjøgren",
                     ΔAddress: "asjo@example.com"))
-            ])
+            ]
         ),
         // Nested comment as display name, Q-encoded
         new(
             @"asjo@example.com (Adam =?utf-8?Q?Sj=C3=B8gren?= (Debian))",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Adam Sjøgren (Debian)",
                     ΔAddress: "asjo@example.com"))
-            ])
+            ]
         ),
         // Comment in group display name
         new(
             @"group (comment:): a@example.com, b@example.com;",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     ΔAddress: "a@example.com")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     ΔAddress: "b@example.com"))
-            ])
+            ]
         ),
         new(
             @"x(:""):""@a.example;(""@b.example;",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     ΔAddress: @"@a.example;(@b.example"))
-            ])
+            ]
         ),
         // Domain-literal
         new(
             @"jdoe@[192.168.0.1]",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 ΔAddress: "jdoe@[192.168.0.1]"))
-            ])
+            ]
         ),
         new(
             @"John Doe <jdoe@[192.168.0.1]>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John Doe",
                 ΔAddress: "jdoe@[192.168.0.1]"))
-            ])
+            ]
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         if (builtin.len(test.exp) == 1) {
             var (addr, errΔ1) = ParseAddress(test.addrsStr);
             if (errΔ1 != nil) {
@@ -846,29 +846,29 @@ public static void TestAddressParser(ж<testing.T> t) {
         // Bare address
         new(
             @"jdoe@machine.example",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.1.1
         new(
             @"John Doe <jdoe@machine.example>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John Doe",
                 ΔAddress: "jdoe@machine.example"))
-            ])
+            ]
         ),
         // RFC 5322, Appendix A.1.2
         new(
             @"""Joe Q. Public"" <john.q.public@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "Joe Q. Public",
                 ΔAddress: "john.q.public@example.com"))
-            ])
+            ]
         ),
         new(
             @"Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Mary Smith",
                     ΔAddress: "mary@x.test")),
@@ -877,94 +877,94 @@ public static void TestAddressParser(ж<testing.T> t) {
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: "Who?",
                     ΔAddress: "one@y.test"))
-            ])
+            ]
         ),
         new(
             @"<boss@nil.test>, ""Giant; \""Big\"" Box"" <sysservices@example.net>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     ΔAddress: "boss@nil.test")),
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Giant; ""Big"" Box",
                     ΔAddress: "sysservices@example.net"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded ISO-8859-1 address.
         new(
             @"=?iso-8859-1?q?J=F6rg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded US-ASCII address. Dumb but legal.
         new(
             @"=?us-ascii?q?J=6Frg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jorg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "Q"-encoded ISO-8859-15 address.
         new(
             @"=?ISO-8859-15?Q?J=F6rg_Doe?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg Doe",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // RFC 2047 "B"-encoded windows-1252 address.
         new(
             @"=?windows-1252?q?Andr=E9?= Pirard <PIRARD@vm1.ulg.ac.be>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"André Pirard",
                     ΔAddress: "PIRARD@vm1.ulg.ac.be"))
-            ])
+            ]
         ),
         // Custom example of RFC 2047 "B"-encoded ISO-8859-15 address.
         new(
             @"=?ISO-8859-15?B?SvZyZw==?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // Custom example of RFC 2047 "B"-encoded UTF-8 address.
         new(
             @"=?UTF-8?B?SsO2cmc=?= <joerg@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Jörg",
                     ΔAddress: "joerg@example.com"))
-            ])
+            ]
         ),
         // Custom example with "." in name. For issue 4938
         new(
             @"Asem H. <noreply@example.com>",
-            slice<ж<global::go.net.mail_package.Address>>([
+            [
                 Ꮡ(new global::go.net.mail_package.Address(
                     Name: @"Asem H.",
                     ΔAddress: "noreply@example.com"))
-            ])
+            ]
         ),
         // Domain-literal
         new(
             @"jdoe@[192.168.0.1]",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 ΔAddress: "jdoe@[192.168.0.1]"))
-            ])
+            ]
         ),
         new(
             @"John Doe <jdoe@[192.168.0.1]>",
-            slice<ж<global::go.net.mail_package.Address>>([Ꮡ(new global::go.net.mail_package.Address(
+            [Ꮡ(new global::go.net.mail_package.Address(
                 Name: "John Doe",
                 ΔAddress: "jdoe@[192.168.0.1]"))
-            ])
+            ]
         )
     ]);
 
@@ -991,7 +991,7 @@ public static void TestAddressParser(ж<testing.T> t) {
     ))
     );
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         if (builtin.len(test.exp) == 1) {
             var (addr, errΔ1) = ap.Parse(test.addrsStr);
             if (errΔ1 != nil) {
@@ -1089,7 +1089,7 @@ public static void TestAddressString(ж<testing.T> t) {
             @"""Bob"" <bob@[192.168.0.1]>"
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string s = test.addr.String();
         if (s != test.exp) {
             t.Errorf("Address%+v.String() = %v, want %v", test.addr.Value, s, test.exp);
@@ -1143,7 +1143,7 @@ public static void TestAddressParsingAndFormatting(ж<testing.T> t) {
         @"<Bob@[192.168.0.1]>"
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (addr, err) = ParseAddress(test);
         if (err != nil) {
             t.Errorf("Couldn't parse address %s: %s", test, err.Error());
@@ -1184,7 +1184,7 @@ public static void TestAddressParsingAndFormatting(ж<testing.T> t) {
         @"<""""@0>"
     ]);
 
-    foreach (var (_, test) in badTests) {
+    foreach (var (_, test) in range(badTests)) {
         var (_, err) = ParseAddress(test);
         if (err == nil) {
             t.Errorf("Should have failed to parse address: %s", test);
@@ -1207,7 +1207,7 @@ public static void TestAddressFormattingAndParsing(ж<testing.T> t) {
         Ꮡ(new global::go.net.mail_package.Address(Name: "naé, mée", ΔAddress: "test.mail@gmail.com"))
     ]);
 
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (parsed, err) = ParseAddress(test.String());
         if (err != nil) {
             t.Errorf("test #%d: ParseAddr(%q) error: %v", i, test.String(), err);
@@ -1250,7 +1250,7 @@ internal static ref readonly @string utf8QHelloˢ => ref utf8QHelloˢᵇ;
 private static readonly @string utf8QHelloˢᵇ = "=?utf-8?q?hello?= "u8;
 
 public static void BenchmarkConsumePhrase(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([10, 100, 1000, 10000])) {
+    foreach (var (_, n) in range(slice<nint>([10, 100, 1000, 10000]))) {
         b.Run(fmt.Sprintf("words-%d"u8, n), (ж<testing.B> bΔ1) => {
             ref var input = ref heap<@string>(strings.Repeat(utf8QHelloˢ, n) + "<user@example.com>"u8, out var Ꮡinput);
             while (bΔ1.Loop()) {
@@ -1261,7 +1261,7 @@ public static void BenchmarkConsumePhrase(ж<testing.B> b) {
 }
 
 public static void BenchmarkConsumeComment(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([10, 100, 1000, 10000])) {
+    foreach (var (_, n) in range(slice<nint>([10, 100, 1000, 10000]))) {
         b.Run(fmt.Sprintf("depth-%d"u8, n), (ж<testing.B> bΔ1) => {
             // Build a deeply nested comment: (((...a...)))
             @string open = strings.Repeat("(", n);

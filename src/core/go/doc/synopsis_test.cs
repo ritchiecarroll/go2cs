@@ -13,7 +13,7 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nint fsl;
     internal @string syn;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new("", 0, ""),
     new("foo", 3, "foo"),
     new("foo.", 4, "foo."),
@@ -39,10 +39,10 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     new("All rights reserved. Package foo does bar.", 20, ""),
     new("Authors: foo@bar.com. Package foo does bar.", 21, ""),
     new("typically invoked as ``go tool asm'',", 37, "typically invoked as “go tool asm”,")
-]);
+];
 
 public static void TestSynopsis(ж<testing.T> t) {
-    foreach (var (_, e) in tests) {
+    foreach (var (_, e) in range(tests)) {
         @string fs = firstSentence(e.txt);
         if (fs != e.txt.slice(0, e.fsl)) {
             t.Errorf("firstSentence(%q) = %q, want %q", e.txt, fs, e.txt.slice(0, e.fsl));

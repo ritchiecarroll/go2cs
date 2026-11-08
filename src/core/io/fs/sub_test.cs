@@ -15,9 +15,7 @@ partial struct subOnly {
     /*embed*/ public go.io.fs_package.SubFS SubFS;
 }
 
-internal static (fs.File, error) Open(this subOnly _, @string name) {
-    return (default, ErrNotExist);
-}
+internal static (fs.File, error) Open(this subOnly _, @string name) { return (default, ErrNotExist); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string goodbyeTxtˢ => ref goodbyeTxtˢᵇ;
@@ -46,7 +44,7 @@ public static void TestSub(ж<testing.T> t) {
         (var dirs, errΔ1) = ReadDir(subΔ1, ".");
         if (errΔ1 != nil || len(dirs) != 1 || dirs[0].Name() != "goodbye.txt"u8) {
             slice<@string> names = default;
-            foreach (var (_, d) in dirs) {
+            foreach (var (_, d) in range(dirs)) {
                 names = append(names, d.Name());
             }
             t.Errorf(@"ReadDir(%s, ""."") = %v, %v, want %v, nil", desc, names, errΔ1, slice<@string>(["goodbye.txt"]));

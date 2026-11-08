@@ -151,10 +151,8 @@ partial struct IntString {
 public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    {
-        var (_, errΔ1) = Fscan(new fmt_test_package.fmt_ScanStateᴠReader(state), Ꮡs.Ꮡi); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = Fscan(new fmt_test_package.fmt_ScanStateᴠReader(state), Ꮡs.Ꮡi); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     var (tok, err) = state.Token(true, default);
@@ -168,7 +166,7 @@ public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb
 internal static readonly ж<IntString> ᏑintStringVal = new StaticBox<IntString>(default(IntString));
 internal static ref IntString intStringVal => ref ((StaticBox<IntString>)ᏑintStringVal).ValueSlot;
 
-internal static slice<ScanTest> scanTests = slice<ScanTest>([
+internal static slice<ScanTest> scanTests = [
     // Basic types
     new("T\n", ᏑboolVal, true),  // boolean test vals toggle to be sure they are written
     new("F\n", ᏑboolVal, false), // restored to zero value
@@ -264,9 +262,9 @@ internal static slice<ScanTest> scanTests = slice<ScanTest>([
 
     // Fixed bugs
     new("2147483648\n", Ꮡint64Val, (int64)2147483648L) // was: integer overflow
-]);
+];
 
-internal static slice<ScanfTest> scanfTests = slice<ScanfTest>([
+internal static slice<ScanfTest> scanfTests = [
     new("%v", "TRUE\n", ᏑboolVal, true),
     new("%t", "false\n", ᏑboolVal, false),
     new("%v", "-71\n", ᏑintVal, (nint)(-71)),
@@ -469,9 +467,9 @@ internal static slice<ScanfTest> scanfTests = slice<ScanfTest>([
 
     new("%d\nX", "27\nX", ᏑintVal, (nint)27),
     new("%dX\n X", "27X\n X", ᏑintVal, (nint)27)
-]);
+];
 
-internal static slice<ScanTest> overflowTests = slice<ScanTest>([
+internal static slice<ScanTest> overflowTests = [
     new("128", Ꮡint8Val, (nint)0),
     new("32768", Ꮡint16Val, (nint)0),
     new("-129", Ꮡint8Val, (nint)0),
@@ -483,37 +481,30 @@ internal static slice<ScanTest> overflowTests = slice<ScanTest>([
     new("(1e100+0i)", Ꮡcomplex64Val, (nint)0),
     new("(1+1e100i)", Ꮡcomplex64Val, (nint)0),
     new("(1-1e500i)", Ꮡcomplex128Val, (nint)0)
-]);
+];
 
 internal static readonly ж<bool> Ꮡtruth = new StaticBox<bool>(default(bool));
 internal static ref bool truth => ref ((StaticBox<bool>)Ꮡtruth).ValueSlot;
-
 internal static readonly ж<nint> Ꮡi = new StaticBox<nint>(default(nint));
 internal static ref nint i => ref ((StaticBox<nint>)Ꮡi).ValueSlot;
 internal static readonly ж<nint> Ꮡj = new StaticBox<nint>(default(nint));
 internal static ref nint j => ref ((StaticBox<nint>)Ꮡj).ValueSlot;
 internal static readonly ж<nint> Ꮡk = new StaticBox<nint>(default(nint));
 internal static ref nint k => ref ((StaticBox<nint>)Ꮡk).ValueSlot;
-
 internal static readonly ж<float64> Ꮡf = new StaticBox<float64>(default(float64));
 internal static ref float64 f => ref ((StaticBox<float64>)Ꮡf).ValueSlot;
-
 internal static readonly ж<@string> Ꮡs = new StaticBox<@string>(default(@string));
 internal static ref @string s => ref ((StaticBox<@string>)Ꮡs).ValueSlot;
 internal static readonly ж<@string> Ꮡt = new StaticBox<@string>(default(@string));
 internal static ref @string t => ref ((StaticBox<@string>)Ꮡt).ValueSlot;
-
 internal static readonly ж<complex128> Ꮡc = new StaticBox<complex128>(default(complex128));
 internal static ref complex128 c => ref ((StaticBox<complex128>)Ꮡc).ValueSlot;
-
 internal static readonly ж<Xs> Ꮡx = new StaticBox<Xs>(default(Xs));
 internal static ref Xs x => ref ((StaticBox<Xs>)Ꮡx).ValueSlot;
 internal static readonly ж<Xs> Ꮡy = new StaticBox<Xs>(default(Xs));
 internal static ref Xs y => ref ((StaticBox<Xs>)Ꮡy).ValueSlot;
-
 internal static readonly ж<IntString> Ꮡz = new StaticBox<IntString>(default(IntString));
 internal static ref IntString z => ref ((StaticBox<IntString>)Ꮡz).ValueSlot;
-
 internal static readonly ж<rune> Ꮡr1 = new StaticBox<rune>(default(rune));
 internal static ref rune r1 => ref ((StaticBox<rune>)Ꮡr1).ValueSlot;
 internal static readonly ж<rune> Ꮡr2 = new StaticBox<rune>(default(rune));
@@ -522,7 +513,7 @@ internal static readonly ж<rune> Ꮡr3 = new StaticBox<rune>(default(rune));
 internal static ref rune r3 => ref ((StaticBox<rune>)Ꮡr3).ValueSlot;
 
 internal static slice<ScanfMultiTest> multiTests = slice<ScanfMultiTest>([
-    new("", "", slice<any>([]), slice<any>([]), ""),
+    new("", "", [], [], ""),
     new("%d", "23", args(Ꮡi), args((nint)23), ""),
     new("%2s%3s", "22333", args(Ꮡs, Ꮡt), args("22", "333"), ""),
     new("%2d%3d", "44555", args(Ꮡi, Ꮡj), args((nint)44, (nint)555), ""),
@@ -566,15 +557,15 @@ partial struct readersᴛ1 /*dyn*/ {
 internal partial struct readers_type /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
 }
-internal static slice<readersᴛ1> readers = slice<readersᴛ1>([
+internal static slice<readersᴛ1> readers = [
     new("StringReader", (@string s) => new fmt_test_package.strings_ReaderжReader(strings.NewReader(s))),
     new("ReaderOnly", (@string s) => new readers_type(new fmt_test_package.strings_ReaderжReader(strings.NewReader(s)))),
     new("OneByteReader", (@string s) => iotest.OneByteReader(new fmt_test_package.strings_ReaderжReader(strings.NewReader(s)))),
     new("DataErrReader", (@string s) => iotest.DataErrReader(new fmt_test_package.strings_ReaderжReader(strings.NewReader(s))))
-]);
+];
 
 internal static void testScan(ж<Δtesting.T> t, Func<@string, Δio.Reader> f, Funcꓸꓸꓸ<Δio.Reader, any, (nint, error)> scan) {
-    foreach (var (_, test) in scanTests) {
+    foreach (var (_, test) in range(scanTests)) {
         var r = f(test.text);
         var (n, err) = scan(r, test.@in);
         if (err != nil) {
@@ -591,10 +582,8 @@ internal static void testScan(ж<Δtesting.T> t, Func<@string, Δio.Reader> f, F
         }
         // The incoming value may be a pointer
         var v = reflect.ValueOf(test.@in);
-        {
-            var p = v; if (p.Kind() == reflect.ΔPointer) {
-                v = p.Elem();
-            }
+        var p = v; if (p.Kind() == reflect.ΔPointer) {
+            v = p.Elem();
         }
         var val = v.Interface();
         if (!reflect.DeepEqual(val, test.@out)) {
@@ -604,7 +593,7 @@ internal static void testScan(ж<Δtesting.T> t, Func<@string, Δio.Reader> f, F
 }
 
 public static void TestScan(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in readers) {
+    foreach (var (_, vᴛ1) in range(readers)) {
         ref var r = ref heap(new readersᴛ1(), out var Ꮡr);
         r = vᴛ1;
 
@@ -616,7 +605,7 @@ public static void TestScan(ж<Δtesting.T> t) {
 }
 
 public static void TestScanln(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in readers) {
+    foreach (var (_, vᴛ1) in range(readers)) {
         ref var r = ref heap(new readersᴛ1(), out var Ꮡr);
         r = vᴛ1;
 
@@ -628,7 +617,7 @@ public static void TestScanln(ж<Δtesting.T> t) {
 }
 
 public static void TestScanf(ж<Δtesting.T> t) {
-    foreach (var (_, test) in scanfTests) {
+    foreach (var (_, test) in range(scanfTests)) {
         var (n, err) = Sscanf(test.text, test.format, test.@in);
         if (err != nil) {
             if (test.@out != nil) {
@@ -646,10 +635,8 @@ public static void TestScanf(ж<Δtesting.T> t) {
         }
         // The incoming value may be a pointer
         var v = reflect.ValueOf(test.@in);
-        {
-            var p = v; if (p.Kind() == reflect.ΔPointer) {
-                v = p.Elem();
-            }
+        var p = v; if (p.Kind() == reflect.ΔPointer) {
+            v = p.Elem();
         }
         var val = v.Interface();
         if (!reflect.DeepEqual(val, test.@out)) {
@@ -665,7 +652,7 @@ private static readonly @string overflowTooLargeOutOfˢᵇ = "overflow|too large
 public static void TestScanOverflow(ж<Δtesting.T> t) {
     // different machines and different types report errors with different strings.
     var re = Δregexp.MustCompile(overflowTooLargeOutOfˢ);
-    foreach (var (_, test) in overflowTests) {
+    foreach (var (_, test) in range(overflowTests)) {
         var (_, err) = Sscan(test.text, test.@in);
         if (err == nil) {
             t.Errorf("expected overflow scanning %q", test.text);
@@ -695,7 +682,7 @@ internal static void verifyNaN(@string str, ж<Δtesting.T> t) {
 }
 
 public static void TestNaN(ж<Δtesting.T> t) {
-    foreach (var (_, s) in slice<@string>(["nan", "NAN", "NaN"])) {
+    foreach (var (_, s) in range(slice<@string>(["nan", "NAN", "NaN"]))) {
         verifyNaN(s, t);
     }
 }
@@ -722,14 +709,14 @@ internal static void verifyInf(@string str, ж<Δtesting.T> t) {
 }
 
 public static void TestInf(ж<Δtesting.T> t) {
-    foreach (var (_, s) in slice<@string>(["inf", "+inf", "-inf", "INF", "-INF", "+INF", "Inf", "-Inf", "+Inf"])) {
+    foreach (var (_, s) in range(slice<@string>(["inf", "+inf", "-inf", "INF", "-INF", "+INF", "Inf", "-Inf", "+Inf"]))) {
         verifyInf(s, t);
     }
 }
 
 internal static void testScanfMulti(ж<Δtesting.T> t, Func<@string, Δio.Reader> f) {
     var sliceType = reflect.TypeOf(new slice<any>(1));
-    foreach (var (_, test) in multiTests) {
+    foreach (var (_, test) in range(multiTests)) {
         var r = f(test.text);
         var (n, err) = Fscanf(r, test.format, test.@in.ꓸꓸꓸ);
         if (err != nil) {
@@ -761,7 +748,7 @@ internal static void testScanfMulti(ж<Δtesting.T> t, Func<@string, Δio.Reader
 }
 
 public static void TestScanfMulti(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in readers) {
+    foreach (var (_, vᴛ1) in range(readers)) {
         ref var r = ref heap(new readersᴛ1(), out var Ꮡr);
         r = vᴛ1;
 
@@ -968,7 +955,7 @@ partial struct eofTestsᴛ1 /*dyn*/ {
     internal @string format;
     internal any v;
 }
-internal static slice<eofTestsᴛ1> eofTests = slice<eofTestsᴛ1>([
+internal static slice<eofTestsᴛ1> eofTests = [
     new("%s", ᏑstringVal),
     new("%q", ᏑstringVal),
     new("%x", ᏑstringVal),
@@ -986,10 +973,10 @@ internal static slice<eofTestsᴛ1> eofTests = slice<eofTestsᴛ1>([
     new("%v", ᏑrenamedBoolVal),
     new("%v", ᏑrenamedFloat32Val),
     new("%v", ᏑrenamedComplex64Val)
-]);
+];
 
 public static void TestEOFAllTypes(ж<Δtesting.T> t) {
-    foreach (var (i, test) in eofTests) {
+    foreach (var (i, test) in range(eofTests)) {
         {
             var (_, err) = Sscanf(""u8, test.format, test.v); if (!AreEqual(err, Δio.EOF)) {
                 t.Errorf("#%d: %s %T not eof on empty string: %s", i, test.format, test.v, err);
@@ -1322,7 +1309,7 @@ public static void TestHexBytes(ж<Δtesting.T> t) {
         if (len(x) != 4) {
             t.Errorf("%s: bad length %d", msg, len(x));
         }
-        foreach (var (i, bΔ1) in x) {
+        foreach (var (i, bΔ1) in range(x)) {
             if ((nint)bΔ1 != i) {
                 t.Errorf("%s: bad x[%d] = %x", msg, i, x[i]);
             }
@@ -1379,7 +1366,7 @@ public static void TestScanNewlinesAreSpaces(ж<Δtesting.T> t) {
         new("newlines with spaces ", "1  \n  2  \n", 2),
         new("no final newline with spaces", "1  \n  2", 2)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (n, err) = Sscan(test.text, Ꮡa, Ꮡb);
         if (n != test.count) {
             t.Errorf("%s: expected to scan %d item(s), scanned %d", test.name, test.count, n);
@@ -1406,7 +1393,7 @@ public static void TestScanlnNewlinesTerminate(ж<Δtesting.T> t) {
         new("one line two items no newline", "   1 2", 2, true),
         new("two lines two items", "1\n2\n", 1, false)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (n, err) = Sscanln(test.text, Ꮡa, Ꮡb);
         if (n != test.count) {
             t.Errorf("%s: expected to scan %d item(s), scanned %d", test.name, test.count, n);
@@ -1473,7 +1460,7 @@ public static void TestScanfNewlineMatchFormat(ж<Δtesting.T> t) {
         new("space vs newline no-percent 1110", "1 \n 2", "1 \n2", 0, false), // fails: space after nl in input but not pattern
         new("space vs newline no-percent 1111", "1 \n 2", "1 \n 2", 0, true)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         nint n = default;
         error err = default;
         if (strings.Contains(test.format, "%")) {

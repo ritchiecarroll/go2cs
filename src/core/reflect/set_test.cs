@@ -31,10 +31,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != 2) {
             t.Errorf("#1 after SetMapIndex(1,2): %d, %t (map=%v)", x, ok, m);
         }
-        {
-            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
-                t.Errorf("#1 MapIndex(1) = %d", n);
-            }
+        nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
+            t.Errorf("#1 MapIndex(1) = %d", n);
         }
     }
     {
@@ -46,10 +44,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != 2) {
             t.Errorf("#2 after SetMapIndex(1,2): %d, %t (map=%v)", x, ok, m);
         }
-        {
-            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
-                t.Errorf("#2 MapIndex(1) = %d", n);
-            }
+        nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
+            t.Errorf("#2 MapIndex(1) = %d", n);
         }
     }
     {
@@ -61,10 +57,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (!AreEqual(x, (nint)2)) {
             t.Errorf("#3 after SetMapIndex(1,2): %d, %t (map=%v)", x, ok, m);
         }
-        {
-            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
-                t.Errorf("#3 MapIndex(1) = %d", n);
-            }
+        nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
+            t.Errorf("#3 MapIndex(1) = %d", n);
         }
     }
     {
@@ -76,10 +70,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (!AreEqual(x, (nint)2)) {
             t.Errorf("#4 after SetMapIndex(1,2): %d, %t (map=%v)", x, ok, m);
         }
-        {
-            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
-                t.Errorf("#4 MapIndex(1) = %d", n);
-            }
+        nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
+            t.Errorf("#4 MapIndex(1) = %d", n);
         }
     }
     {
@@ -93,10 +85,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (!AreEqual(x, b2)) {
             t.Errorf("#5 after SetMapIndex(b1, b2): %p (!= %p), %t (map=%v)", x, b2.OrTypedNil(), ok, m);
         }
-        {
-            @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).Elem().UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
-                t.Errorf("#5 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
-            }
+        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).Elem().UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
+            t.Errorf("#5 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
         }
     }
     {
@@ -110,10 +100,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != c2) {
             t.Errorf("#6 after SetMapIndex(c1, c2): %p (!= %p), %t (map=%v)", x, c2, ok, m);
         }
-        {
-            @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(c1)).UnsafePointer(); if (p != (uintptr)ValueOf(c2).UnsafePointer()) {
-                t.Errorf("#6 MapIndex(c1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), c2);
-            }
+        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(c1)).UnsafePointer(); if (p != (uintptr)ValueOf(c2).UnsafePointer()) {
+            t.Errorf("#6 MapIndex(c1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), c2);
         }
     }
     {
@@ -126,10 +114,8 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != b2) {
             t.Errorf("#7 after SetMapIndex(b1, b2): %p (!= %p), %t (map=%v)", x.OrTypedNil(), b2.OrTypedNil(), ok, m);
         }
-        {
-            @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
-                t.Errorf("#7 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
-            }
+        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
+            t.Errorf("#7 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
         }
     }
 }
@@ -150,10 +136,8 @@ public static void TestImplicitSendConversion(ж<Δtesting.T> t) {
     var c = new channel<Δio.Reader>(10);
     var b = @new<bytes.Buffer>();
     ValueOf(c).Send(ValueOf(b.OrTypedNil()));
-    {
-        var bb = ᐸꟷ(c); if (!AreEqual(bb, b)) {
-            t.Errorf("Received %p != %p", bb, b.OrTypedNil());
-        }
+    var bb = ᐸꟷ(c); if (!AreEqual(bb, b)) {
+        t.Errorf("Received %p != %p", bb, b.OrTypedNil());
     }
 }
 
@@ -198,16 +182,9 @@ internal static slice<implementsTestsᴛ1> implementsTests = slice<implementsTes
 partial struct notAnExpr {
 }
 
-internal static tokenꓸPos Pos(this notAnExpr _) {
-    return token.NoPos;
-}
-
-internal static tokenꓸPos End(this notAnExpr _) {
-    return token.NoPos;
-}
-
-internal static void exprNode(this notAnExpr _) {
-}
+internal static tokenꓸPos Pos(this notAnExpr _) { return token.NoPos; }
+internal static tokenꓸPos End(this notAnExpr _) { return token.NoPos; }
+internal static void exprNode(this notAnExpr _) { }
 
 partial interface notASTExpr :
     ast.Node
@@ -218,13 +195,11 @@ partial interface notASTExpr :
 public static void TestImplements(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, tt) in implementsTests) {
+    foreach (var (_, tt) in range(implementsTests)) {
         var xv = TypeOf(tt.x).Elem();
         var xt = TypeOf(tt.t).Elem();
-        {
-            var b = xv.Implements(xt); if (b != tt.b) {
-                Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v", xv.String(), xt.String(), b, tt.b);
-            }
+        var b = xv.Implements(xt); if (b != tt.b) {
+            Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v", xv.String(), xt.String(), b, tt.b);
         }
     }
 }
@@ -240,21 +215,17 @@ internal static slice<implementsTestsᴛ1> assignableTests = slice<implementsTes
 ]);
 
 partial class IntPtr /*ж<nint>*/;
-
 partial class IntPtr1 /*ж<nint>*/;
-
 partial struct Ch /*<-chan any*/;
 
 public static void TestAssignableTo(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, tt) in appendꓸꓸꓸ(assignableTests, implementsTests)) {
+    foreach (var (_, tt) in range(appendꓸꓸꓸ(assignableTests, implementsTests))) {
         var xv = TypeOf(tt.x).Elem();
         var xt = TypeOf(tt.t).Elem();
-        {
-            var b = xv.AssignableTo(xt); if (b != tt.b) {
-                Ꮡt.Errorf("(%s).AssignableTo(%s) = %v, want %v", xv.String(), xt.String(), b, tt.b);
-            }
+        var b = xv.AssignableTo(xt); if (b != tt.b) {
+            Ꮡt.Errorf("(%s).AssignableTo(%s) = %v, want %v", xv.String(), xt.String(), b, tt.b);
         }
     }
 }

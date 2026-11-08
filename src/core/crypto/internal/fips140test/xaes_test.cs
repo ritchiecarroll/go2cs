@@ -35,10 +35,8 @@ public static void TestXAESAllocations(ж<testing.T> t) {
             var aad = new slice<byte>(16);
             var ciphertext = new slice<byte>(0, 16 + 16);
             ciphertext = xaesSeal(ciphertext, key, nonce, plaintext, aad);
-            {
-                var (_, err) = xaesOpen(plaintext[..0], key, nonce, ciphertext, aad); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var (_, err) = xaesOpen(plaintext[..0], key, nonce, ciphertext, aad); if (err != nil) {
+                t.Fatal(err);
             }
         }); if (allocs > 0D) {
             t.Errorf("expected zero allocations, got %0.1f", allocs);
@@ -47,7 +45,7 @@ public static void TestXAESAllocations(ж<testing.T> t) {
 }
 
 public static void TestXAES(ж<testing.T> t) {
-    var key = bytes.Repeat(slice<byte>([0x01]), 32);
+    var key = bytes.Repeat([0x01], 32);
     var plaintext = slice<byte>("XAES-256-GCM"u8);
     var additionalData = slice<byte>("c2sp.org/XAES-256-GCM"u8);
 
@@ -95,7 +93,7 @@ internal static (slice<byte>, error) xaesOpen(slice<byte> dst, slice<byte> key, 
 }
 
 public static void TestXAESVectors(ж<testing.T> t) {
-    var key = bytes.Repeat(slice<byte>([0x01]), 32);
+    var key = bytes.Repeat([0x01], 32);
     var nonce = slice<byte>("ABCDEFGHIJKLMNOPQRSTUVWX"u8);
     var plaintext = slice<byte>("XAES-256-GCM"u8);
     var ciphertext = xaesSeal(default, key, nonce, plaintext, default);
@@ -113,7 +111,7 @@ public static void TestXAESVectors(ж<testing.T> t) {
         }
     }
 
-    key = bytes.Repeat(slice<byte>([0x03]), 32);
+    key = bytes.Repeat([0x03], 32);
     var aad = slice<byte>("c2sp.org/XAES-256-GCM"u8);
     ciphertext = xaesSeal(default, key, nonce, plaintext, aad);
     expected = "986ec1832593df5443a179437fd083bf3fdb41abd740a21f71eb769d";
@@ -160,10 +158,8 @@ public static void TestXAESAccumulated(ж<testing.T> t) {
 
         d.Write(ciphertext);
     }
-    {
-        @string got = hex.EncodeToString(d.Sum(default)); if (got != expected) {
-            t.Errorf("got: %s", got);
-        }
+    @string got = hex.EncodeToString(d.Sum(default)); if (got != expected) {
+        t.Errorf("got: %s", got);
     }
 }
 

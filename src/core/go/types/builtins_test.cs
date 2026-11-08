@@ -18,7 +18,7 @@ partial class types_test_package {
 partial struct builtinCallsᴛ1 /*dyn*/ {
     internal @string name, src, sig;
 }
-internal static slice<builtinCallsᴛ1> builtinCalls = slice<builtinCallsᴛ1>([
+internal static slice<builtinCallsᴛ1> builtinCalls = [
     new("append", @"var s []int; _ = append(s)", @"func([]int, ...int) []int"),
     new("append", @"var s []int; _ = append(s, 0)", @"func([]int, ...int) []int"),
     new("append", @"var s []int; _ = (append)(s, 0)", @"func([]int, ...int) []int"),
@@ -161,30 +161,26 @@ internal static slice<builtinCallsᴛ1> builtinCalls = slice<builtinCallsᴛ1>([
     new("assert", @"type B bool; const pred B = 1 < 2; assert(pred)", @"invalid type") // constant
 
     // no tests for trace since it produces output as a side-effect
-]);
+];
 
 public static void TestBuiltinSignatures(ж<testing.T> t) {
     DefPredeclaredTestFuncs();
 
     var seen = new map<@string, bool>{["trace"] = true}; // no test for trace built-in; add it manually
-    foreach (var (_, call) in builtinCalls) {
+    foreach (var (_, call) in range(builtinCalls)) {
         testBuiltinSignature(t, call.name, call.src, call.sig);
         seen[call.name] = true;
     }
 
     // make sure we didn't miss one
-    foreach (var (_, name) in Universe.Names()) {
-        {
-            var (_, ok) = Universe.Lookup(name)._<ж<types.Builtin>>(ᐧ); if (ok && !seen[name]) {
-                t.Errorf("missing test for %s", name);
-            }
+    foreach (var (_, name) in range(Universe.Names())) {
+        var (_, ok) = Universe.Lookup(name)._<ж<types.Builtin>>(ᐧ); if (ok && !seen[name]) {
+            t.Errorf("missing test for %s", name);
         }
     }
-    foreach (var (_, name) in Unsafe.Scope().Names()) {
-        {
-            var (_, ok) = Unsafe.Scope().Lookup(name)._<ж<types.Builtin>>(ᐧ); if (ok && !seen[name]) {
-                t.Errorf("missing test for unsafe.%s", name);
-            }
+    foreach (var (_, name) in range(Unsafe.Scope().Names())) {
+        var (_, ok) = Unsafe.Scope().Lookup(name)._<ж<types.Builtin>>(ᐧ); if (ok && !seen[name]) {
+            t.Errorf("missing test for unsafe.%s", name);
         }
     }
 }
@@ -200,11 +196,9 @@ internal static void testBuiltinSignature(ж<testing.T> t, @string name, @string
     nint n = 0;
     ast.Expr fun = default;
     foreach (var (x, _) in types) {
-        {
-            var (call, _) = x._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
-                fun = call.Fun;
-                n++;
-            }
+        var (call, _) = x._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
+            fun = call.Fun;
+            n++;
         }
     }
     if (n != 1) {
@@ -220,11 +214,9 @@ internal static void testBuiltinSignature(ж<testing.T> t, @string name, @string
             t.Errorf("%s: no type recorded for %s", src0, ExprString(fun));
             return;
         }
-        {
-            @string got = typ.String(); if (got != want) {
-                t.Errorf("%s: got type %s; want %s", src0, got, want);
-                return;
-            }
+        @string got = typ.String(); if (got != want) {
+            t.Errorf("%s: got type %s; want %s", src0, got, want);
+            return;
         }
 
         // called function must be a (possibly parenthesized, qualified)

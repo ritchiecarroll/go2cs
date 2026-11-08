@@ -17,10 +17,10 @@ partial class x509_internal_test_package {
 internal static map<@string, global::go.crypto.x509_package.ΔOID> nistTestPolicies;
 internal static void initᴛnistTestPolicies() { nistTestPolicies = new map<@string, global::go.crypto.x509_package.ΔOID>{
     ["anyPolicy"] = anyPolicyOID,
-    ["NIST-test-policy-1"] = mustNewOIDFromInts(slice<uint64>([2, 16, 840, 1, 101, 3, 2, 1, 48, 1])),
-    ["NIST-test-policy-2"] = mustNewOIDFromInts(slice<uint64>([2, 16, 840, 1, 101, 3, 2, 1, 48, 2])),
-    ["NIST-test-policy-3"] = mustNewOIDFromInts(slice<uint64>([2, 16, 840, 1, 101, 3, 2, 1, 48, 3])),
-    ["NIST-test-policy-6"] = mustNewOIDFromInts(slice<uint64>([2, 16, 840, 1, 101, 3, 2, 1, 48, 6]))
+    ["NIST-test-policy-1"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 1]),
+    ["NIST-test-policy-2"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 2]),
+    ["NIST-test-policy-3"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 3]),
+    ["NIST-test-policy-6"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 6])
 }; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -55,10 +55,8 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = json.Unmarshal(b, Ꮡtestcases); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = json.Unmarshal(b, Ꮡtestcases); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     var policyTests = new map<@string, bool>{
@@ -152,7 +150,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
         ["4.12.10 Invalid Self-Issued inhibitAnyPolicy Test10"] = true
     };
 
-    foreach (var (_, vᴛ1) in testcases) {
+    foreach (var (_, vᴛ1) in range(testcases)) {
         ref var tc = ref heap(new TestNISTPKITSPolicy_testcases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -165,7 +163,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
             var chainᴷ = new stackAppend<ж<global::go.crypto.x509_package.Certificate>>();
             var initialPoliciesᴷ = new stackAppend<global::go.crypto.x509_package.ΔOID>();
             slice<ж<global::go.crypto.x509_package.Certificate>> chain = default;
-            foreach (var (_, c) in tcʗ1.CertPath) {
+            foreach (var (_, c) in range(tcʗ1.CertPath)) {
                 var (certDER, errΔ2) = os.ReadFile(filepath.Join(certDir, c));
                 if (errΔ2 != nil) {
                     tΔ1.Fatal(errΔ2);
@@ -179,7 +177,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
             slices.Reverse<slice<ж<global::go.crypto.x509_package.Certificate>>, ж<global::go.crypto.x509_package.Certificate>>(chain);
 
             slice<global::go.crypto.x509_package.ΔOID> initialPolicies = default;
-            foreach (var (_, pstr) in tcʗ1.InitialPolicySet) {
+            foreach (var (_, pstr) in range(tcʗ1.InitialPolicySet)) {
                 var (policy, ok) = nistTestPolicies[pstr, ꟷ];
                 if (!ok) {
                     tΔ1.Fatalf("unknown test policy: %s", pstr);

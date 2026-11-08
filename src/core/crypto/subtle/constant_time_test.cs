@@ -5,8 +5,6 @@ namespace go.crypto;
 
 using testing = testing_package;
 using quick = go.testing.quick_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.testing;
 using static go.crypto.subtle_package;
 
@@ -17,20 +15,18 @@ public partial struct TestConstantTimeCompareStruct {
     internal nint @out;
 }
 
-internal static slice<TestConstantTimeCompareStruct> testConstantTimeCompareData = slice<TestConstantTimeCompareStruct>([
-    new(slice<byte>([]), slice<byte>([]), 1),
-    new(slice<byte>([0x11]), slice<byte>([0x11]), 1),
-    new(slice<byte>([0x12]), slice<byte>([0x11]), 0),
-    new(slice<byte>([0x11]), slice<byte>([0x11, 0x12]), 0),
-    new(slice<byte>([0x11, 0x12]), slice<byte>([0x11]), 0)
-]);
+internal static slice<TestConstantTimeCompareStruct> testConstantTimeCompareData = [
+    new([], [], 1),
+    new([0x11], [0x11], 1),
+    new([0x12], [0x11], 0),
+    new([0x11], [0x11, 0x12], 0),
+    new([0x11, 0x12], [0x11], 0)
+];
 
 public static void TestConstantTimeCompare(ж<testing.T> t) {
-    foreach (var (i, test) in testConstantTimeCompareData) {
-        {
-            nint r = ConstantTimeCompare(test.a, test.b); if (r != test.@out) {
-                t.Errorf("#%d bad result (got %x, want %x)", i, r, test.@out);
-            }
+    foreach (var (i, test) in range(testConstantTimeCompareData)) {
+        nint r = ConstantTimeCompare(test.a, test.b); if (r != test.@out) {
+            t.Errorf("#%d bad result (got %x, want %x)", i, r, test.@out);
         }
     }
 }
@@ -40,13 +36,13 @@ public partial struct TestConstantTimeByteEqStruct {
     internal nint @out;
 }
 
-internal static slice<TestConstantTimeByteEqStruct> testConstandTimeByteEqData = slice<TestConstantTimeByteEqStruct>([
+internal static slice<TestConstantTimeByteEqStruct> testConstandTimeByteEqData = [
     new(0, 0, 1),
     new(0, 1, 0),
     new(1, 0, 0),
     new(0xff, 0xff, 1),
     new(0xff, 0xfe, 0)
-]);
+];
 
 internal static nint byteEq(uint8 a, uint8 b) {
     if (a == b) {
@@ -56,11 +52,9 @@ internal static nint byteEq(uint8 a, uint8 b) {
 }
 
 public static void TestConstantTimeByteEq(ж<testing.T> t) {
-    foreach (var (i, test) in testConstandTimeByteEqData) {
-        {
-            nint r = ConstantTimeByteEq(test.a, test.b); if (r != test.@out) {
-                t.Errorf("#%d bad result (got %x, want %x)", i, r, test.@out);
-            }
+    foreach (var (i, test) in range(testConstandTimeByteEqData)) {
+        nint r = ConstantTimeByteEq(test.a, test.b); if (r != test.@out) {
+            t.Errorf("#%d bad result (got %x, want %x)", i, r, test.@out);
         }
     }
     var err = quick.CheckEqual(ConstantTimeByteEq, byteEq, nil);
@@ -116,17 +110,17 @@ public static partial void TestConstantTimeCopy(ж<testing.T> t) {
 partial struct lessOrEqTestsᴛ1 /*dyn*/ {
     internal nint x, y, result;
 }
-internal static slice<lessOrEqTestsᴛ1> lessOrEqTests = slice<lessOrEqTestsᴛ1>([
+internal static slice<lessOrEqTestsᴛ1> lessOrEqTests = [
     new(0, 0, 1),
     new(1, 0, 0),
     new(0, 1, 1),
     new(10, 20, 1),
     new(20, 10, 0),
     new(10, 10, 1)
-]);
+];
 
 public static void TestConstantTimeLessOrEq(ж<testing.T> t) {
-    foreach (var (i, test) in lessOrEqTests) {
+    foreach (var (i, test) in range(lessOrEqTests)) {
         nint result = ConstantTimeLessOrEq(test.x, test.y);
         if (result != test.result) {
             t.Errorf("#%d: %d <= %d gave %d, expected %d", i, test.x, test.y, result, test.result);

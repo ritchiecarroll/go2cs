@@ -19,122 +19,122 @@ partial struct wtf8testsᴛ1 /*dyn*/ {
     internal @string str;
     internal slice<uint16> wstr;
 }
-internal static slice<wtf8testsᴛ1> wtf8tests = slice<wtf8testsᴛ1>([
+internal static slice<wtf8testsᴛ1> wtf8tests = [
     new(
         str: "\x00",
-        wstr: slice<uint16>([0x00])
+        wstr: [0x00]
     ),
     new(
         str: "\x5C",
-        wstr: slice<uint16>([0x5C])
+        wstr: [0x5C]
     ),
     new(
         str: "\x7F",
-        wstr: slice<uint16>([0x7F])
+        wstr: [0x7F]
     ),
 
     // 2-byte
     new(
         str: ((@string)(new byte[]{0xc2, 0x80})),
-        wstr: slice<uint16>([0x80])
+        wstr: [0x80]
     ),
     new(
         str: ((@string)(new byte[]{0xd7, 0x8a})),
-        wstr: slice<uint16>([0x05CA])
+        wstr: [0x05CA]
     ),
     new(
         str: ((@string)(new byte[]{0xdf, 0xbf})),
-        wstr: slice<uint16>([0x07FF])
+        wstr: [0x07FF]
     ),
 
     // 3-byte
     new(
         str: ((@string)(new byte[]{0xe0, 0xa0, 0x80})),
-        wstr: slice<uint16>([0x0800])
+        wstr: [0x0800]
     ),
     new(
         str: ((@string)(new byte[]{0xe2, 0xb0, 0xbc})),
-        wstr: slice<uint16>([0x2C3C])
+        wstr: [0x2C3C]
     ),
     new(
         str: ((@string)(new byte[]{0xef, 0xbf, 0xbf})),
-        wstr: slice<uint16>([0xFFFF])
+        wstr: [0xFFFF]
     ),
     // unmatched surrogate halves
     // high surrogates: 0xD800 to 0xDBFF
     new(
         str: ((@string)(new byte[]{0xed, 0xa0, 0x80})),
-        wstr: slice<uint16>([0xD800])
+        wstr: [0xD800]
     ),
     new(
         // "High surrogate followed by another high surrogate"
         str: ((@string)(new byte[]{0xed, 0xa0, 0x80, 0xed, 0xa0, 0x80})),
-        wstr: slice<uint16>([0xD800, 0xD800])
+        wstr: [0xD800, 0xD800]
     ),
     new(
         // "High surrogate followed by a symbol that is not a surrogate"
         str: ((@string)slice<byte>([0xED, 0xA0, 0x80, 0xA])),
-        wstr: slice<uint16>([0xD800, 0xA])
+        wstr: [0xD800, 0xA]
     ),
     new(
         // "Unmatched high surrogate, followed by a surrogate pair, followed by an unmatched high surrogate"
         str: ((@string)slice<byte>([0xED, 0xA0, 0x80, 0xF0, 0x9D, 0x8C, 0x86, 0xED, 0xA0, 0x80])),
-        wstr: slice<uint16>([0xD800, 0xD834, 0xDF06, 0xD800])
+        wstr: [0xD800, 0xD834, 0xDF06, 0xD800]
     ),
     new(
         str: ((@string)(new byte[]{0xed, 0xa6, 0xaf})),
-        wstr: slice<uint16>([0xD9AF])
+        wstr: [0xD9AF]
     ),
     new(
         str: ((@string)(new byte[]{0xed, 0xaf, 0xbf})),
-        wstr: slice<uint16>([0xDBFF])
+        wstr: [0xDBFF]
     ),
     // low surrogates: 0xDC00 to 0xDFFF
     new(
         str: ((@string)(new byte[]{0xed, 0xb0, 0x80})),
-        wstr: slice<uint16>([0xDC00])
+        wstr: [0xDC00]
     ),
     new(
         // "Low surrogate followed by another low surrogate"
         str: ((@string)(new byte[]{0xed, 0xb0, 0x80, 0xed, 0xb0, 0x80})),
-        wstr: slice<uint16>([0xDC00, 0xDC00])
+        wstr: [0xDC00, 0xDC00]
     ),
     new(
         // "Low surrogate followed by a symbol that is not a surrogate"
         str: ((@string)slice<byte>([0xED, 0xB0, 0x80, 0xA])),
-        wstr: slice<uint16>([0xDC00, 0xA])
+        wstr: [0xDC00, 0xA]
     ),
     new(
         // "Unmatched low surrogate, followed by a surrogate pair, followed by an unmatched low surrogate"
         str: ((@string)slice<byte>([0xED, 0xB0, 0x80, 0xF0, 0x9D, 0x8C, 0x86, 0xED, 0xB0, 0x80])),
-        wstr: slice<uint16>([0xDC00, 0xD834, 0xDF06, 0xDC00])
+        wstr: [0xDC00, 0xD834, 0xDF06, 0xDC00]
     ),
     new(
         str: ((@string)(new byte[]{0xed, 0xbb, 0xae})),
-        wstr: slice<uint16>([0xDEEE])
+        wstr: [0xDEEE]
     ),
     new(
         str: ((@string)(new byte[]{0xed, 0xbf, 0xbf})),
-        wstr: slice<uint16>([0xDFFF])
+        wstr: [0xDFFF]
     ),
 
     // 4-byte
     new(
         str: ((@string)(new byte[]{0xf0, 0x90, 0x80, 0x80})),
-        wstr: slice<uint16>([0xD800, 0xDC00])
+        wstr: [0xD800, 0xDC00]
     ),
     new(
         str: ((@string)(new byte[]{0xf0, 0x9d, 0x8c, 0x86})),
-        wstr: slice<uint16>([0xD834, 0xDF06])
+        wstr: [0xD834, 0xDF06]
     ),
     new(
         str: ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf})),
-        wstr: slice<uint16>([0xDBFF, 0xDFFF])
+        wstr: [0xDBFF, 0xDFFF]
     )
-]);
+];
 
 public static void TestWTF16Rountrip(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in wtf8tests) {
+    foreach (var (_, vᴛ1) in range(wtf8tests)) {
         ref var tt = ref heap(new wtf8testsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -150,7 +150,7 @@ public static void TestWTF16Rountrip(ж<testing.T> t) {
 }
 
 public static void TestWTF16Golden(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in wtf8tests) {
+    foreach (var (_, vᴛ1) in range(wtf8tests)) {
         ref var tt = ref heap(new wtf8testsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -167,7 +167,7 @@ public static void TestWTF16Golden(ж<testing.T> t) {
 public static void FuzzEncodeWTF16(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, tt) in wtf8tests) {
+    foreach (var (_, tt) in range(wtf8tests)) {
         f.Add(tt.str);
     }
     Ꮡf.Fuzz((ж<testing.T> t, @string b) => {
@@ -189,7 +189,7 @@ public static void FuzzEncodeWTF16(ж<testing.F> Ꮡf) {
 public static void FuzzDecodeWTF16(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, tt) in wtf8tests) {
+    foreach (var (_, tt) in range(wtf8tests)) {
         var b = @unsafe.Slice(@unsafe.SliceData(tt.wstr).Reinterpret<uint16, uint8>(), len(tt.wstr) * 2);
         f.Add(b);
     }

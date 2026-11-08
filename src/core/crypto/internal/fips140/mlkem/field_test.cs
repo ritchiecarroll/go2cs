@@ -62,7 +62,7 @@ public static void TestFieldMul(ж<testing.T> t) {
 }
 
 public static void TestDecompressCompress(ж<testing.T> t) {
-    foreach (var (_, bits) in slice<uint8>([1, 4, 10])) {
+    foreach (var (_, bits) in range(slice<uint8>([1, 4, 10]))) {
         for (var a = (uint16)0; a < (uint16)(((uint16)1).Lsh((uint64)(bits))); a++) {
             var f = decompress(a, bits);
             if (f >= q) {
@@ -158,7 +158,7 @@ public static void TestDecompress(ж<testing.T> t) {
 
 internal static global::go.crypto.@internal.fips140.mlkem_package.ringElement randomRingElement() {
     global::go.crypto.@internal.fips140.mlkem_package.ringElement r = default;
-    foreach (var i in range(r)) {
+    foreach (var i in range(len(r))) {
         r[i] = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)mathrand.IntN(q);
     }
     return r.Clone();
@@ -249,7 +249,7 @@ public static uint8 BitRev7(uint8 n) {
 public static void TestZetas(ж<testing.T> t) {
     var ζ = big.NewInt(17);
     var q = big.NewInt(mlkem_package.q);
-    foreach (var (k, zeta) in zetas.ΔRangeSnapshot()) {
+    foreach (var (k, zeta) in range(zetas.ΔRangeSnapshot())) {
         // ζ^BitRev7(k) mod q
         var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k)), q);
         if (big.NewInt((int64)zeta).Cmp(exp) != 0) {
@@ -261,7 +261,7 @@ public static void TestZetas(ж<testing.T> t) {
 public static void TestGammas(ж<testing.T> t) {
     var ζ = big.NewInt(17);
     var q = big.NewInt(mlkem_package.q);
-    foreach (var (k, gamma) in gammas.ΔRangeSnapshot()) {
+    foreach (var (k, gamma) in range(gammas.ΔRangeSnapshot())) {
         // ζ^2BitRev7(i)+1
         var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k) * 2 + 1), q);
         if (big.NewInt((int64)gamma).Cmp(exp) != 0) {

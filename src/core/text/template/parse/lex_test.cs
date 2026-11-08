@@ -86,7 +86,7 @@ internal static global::go.text.template.parse_package.item tRawQuote = mkItem(i
 internal static global::go.text.template.parse_package.item tRawQuoteNL = mkItem(itemRawString, rawNL);
 
 internal static slice<lexTest> lexTests = slice<lexTest>([
-    new("empty", "", slice<global::go.text.template.parse_package.item>([tEOF])),
+    new("empty", "", [tEOF]),
     new("spaces", " \t\n", slice<global::go.text.template.parse_package.item>([mkItem(itemText, " \t\n"), tEOF])),
     new("text", @"now is the time", slice<global::go.text.template.parse_package.item>([mkItem(itemText, "now is the time"), tEOF])),
     new("text with comment", "hello-{{/* this is a comment */}}-world", slice<global::go.text.template.parse_package.item>([
@@ -114,14 +114,14 @@ internal static slice<lexTest> lexTests = slice<lexTest>([
         tRight,
         tEOF
     ])),
-    new("empty action", @"{{}}", slice<global::go.text.template.parse_package.item>([tLeft, tRight, tEOF])),
-    new("for", @"{{for}}", slice<global::go.text.template.parse_package.item>([tLeft, tFor, tRight, tEOF])),
+    new("empty action", @"{{}}", [tLeft, tRight, tEOF]),
+    new("for", @"{{for}}", [tLeft, tFor, tRight, tEOF]),
     new("block", @"{{block ""foo"" .}}", slice<global::go.text.template.parse_package.item>([
         tLeft, tBlock, tSpace, mkItem(itemString, @"""foo"""), tSpace, tDot, tRight, tEOF
     ])),
-    new("quote", @"{{""abc \n\t\"" ""}}", slice<global::go.text.template.parse_package.item>([tLeft, tQuote, tRight, tEOF])),
-    new("raw quote", "{{"u8 + raw + "}}"u8, slice<global::go.text.template.parse_package.item>([tLeft, tRawQuote, tRight, tEOF])),
-    new("raw quote with newline", "{{"u8 + rawNL + "}}"u8, slice<global::go.text.template.parse_package.item>([tLeft, tRawQuoteNL, tRight, tEOF])),
+    new("quote", @"{{""abc \n\t\"" ""}}", [tLeft, tQuote, tRight, tEOF]),
+    new("raw quote", "{{"u8 + raw + "}}"u8, [tLeft, tRawQuote, tRight, tEOF]),
+    new("raw quote with newline", "{{"u8 + rawNL + "}}"u8, [tLeft, tRawQuoteNL, tRight, tEOF]),
     new("numbers", "{{1 02 0x14 0X14 -7.2i 1e3 1E3 +1.2e-4 4.2i 1+2i 1_2 0x1.e_fp4 0X1.E_FP4}}", slice<global::go.text.template.parse_package.item>([
         tLeft,
         mkItem(itemNumber, "1"),
@@ -178,12 +178,12 @@ internal static slice<lexTest> lexTests = slice<lexTest>([
         tRight,
         tEOF
     ])),
-    new("dot", "{{.}}", slice<global::go.text.template.parse_package.item>([
+    new("dot", "{{.}}", [
         tLeft,
         tDot,
         tRight,
         tEOF
-    ])),
+    ]),
     new("nil", "{{nil}}", slice<global::go.text.template.parse_package.item>([
         tLeft,
         mkItem(itemNil, "nil"),
@@ -363,7 +363,7 @@ internal static slice<lexTest> lexTests = slice<lexTest>([
     // Fixed bugs
     // Many elements in an action blew the lookahead until
     // we made lexInsideAction not loop.
-    new("long pipeline deadlock", "{{|||||}}", slice<global::go.text.template.parse_package.item>([
+    new("long pipeline deadlock", "{{|||||}}", [
         tLeft,
         tPipe,
         tPipe,
@@ -372,7 +372,7 @@ internal static slice<lexTest> lexTests = slice<lexTest>([
         tPipe,
         tRight,
         tEOF
-    ])),
+    ]),
     new("text with bad comment", "hello-{{/*/}}-world", slice<global::go.text.template.parse_package.item>([
         mkItem(itemText, "hello-"),
         mkItem(itemError, @"unclosed comment")
@@ -414,7 +414,7 @@ internal static bool equal(slice<global::go.text.template.parse_package.item> i1
     if (len(i1) != len(i2)) {
         return false;
     }
-    foreach (var k in range(i1)) {
+    foreach (var k in range(len(i1))) {
         if (i1[k].typ != i2[k].typ) {
             return false;
         }
@@ -432,7 +432,7 @@ internal static bool equal(slice<global::go.text.template.parse_package.item> i1
 }
 
 public static void TestLex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in lexTests) {
+    foreach (var (_, vᴛ1) in range(lexTests)) {
         ref var test = ref heap(new lexTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -460,17 +460,17 @@ internal static void initᴛlexDelimTests() { lexDelimTests = slice<lexTest>([
         tRightDelim,
         tEOF
     ])),
-    new("empty action", @"$$@@", slice<global::go.text.template.parse_package.item>([tLeftDelim, tRightDelim, tEOF])),
-    new("for", @"$$for@@", slice<global::go.text.template.parse_package.item>([tLeftDelim, tFor, tRightDelim, tEOF])),
-    new("quote", @"$$""abc \n\t\"" ""@@", slice<global::go.text.template.parse_package.item>([tLeftDelim, tQuote, tRightDelim, tEOF])),
-    new("raw quote", "$$"u8 + raw + "@@"u8, slice<global::go.text.template.parse_package.item>([tLeftDelim, tRawQuote, tRightDelim, tEOF]))
+    new("empty action", @"$$@@", [tLeftDelim, tRightDelim, tEOF]),
+    new("for", @"$$for@@", [tLeftDelim, tFor, tRightDelim, tEOF]),
+    new("quote", @"$$""abc \n\t\"" ""@@", [tLeftDelim, tQuote, tRightDelim, tEOF]),
+    new("raw quote", "$$"u8 + raw + "@@"u8, [tLeftDelim, tRawQuote, tRightDelim, tEOF])
 ]); }
 
 internal static global::go.text.template.parse_package.item tLeftDelim = mkItem(itemLeftDelim, "$$");
 internal static global::go.text.template.parse_package.item tRightDelim = mkItem(itemRightDelim, "@@");
 
 public static void TestDelims(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in lexDelimTests) {
+    foreach (var (_, vᴛ1) in range(lexDelimTests)) {
         ref var test = ref heap(new lexTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -524,9 +524,9 @@ public static void TestDelimsAndMarkers(ж<testing.T> t) {
     }
 }
 
-internal static slice<lexTest> lexPosTests = slice<lexTest>([
-    new("empty", "", slice<global::go.text.template.parse_package.item>([new(itemEOF, 0, "", 1)])),
-    new("punctuation", "{{,@%#}}", slice<global::go.text.template.parse_package.item>([
+internal static slice<lexTest> lexPosTests = [
+    new("empty", "", [new(itemEOF, 0, "", 1)]),
+    new("punctuation", "{{,@%#}}", [
         new(itemLeftDelim, 0, "{{", 1),
         new(itemChar, 2, ",", 1),
         new(itemChar, 3, "@", 1),
@@ -534,16 +534,16 @@ internal static slice<lexTest> lexPosTests = slice<lexTest>([
         new(itemChar, 5, "#", 1),
         new(itemRightDelim, 6, "}}", 1),
         new(itemEOF, 8, "", 1)
-    ])),
-    new("sample", "0123{{hello}}xyz", slice<global::go.text.template.parse_package.item>([
+    ]),
+    new("sample", "0123{{hello}}xyz", [
         new(itemText, 0, "0123", 1),
         new(itemLeftDelim, 4, "{{", 1),
         new(itemIdentifier, 6, "hello", 1),
         new(itemRightDelim, 11, "}}", 1),
         new(itemText, 13, "xyz", 1),
         new(itemEOF, 16, "", 1)
-    ])),
-    new("trimafter", "{{x -}}\n{{y}}", slice<global::go.text.template.parse_package.item>([
+    ]),
+    new("trimafter", "{{x -}}\n{{y}}", [
         new(itemLeftDelim, 0, "{{", 1),
         new(itemIdentifier, 2, "x", 1),
         new(itemRightDelim, 5, "}}", 1),
@@ -551,8 +551,8 @@ internal static slice<lexTest> lexPosTests = slice<lexTest>([
         new(itemIdentifier, 10, "y", 2),
         new(itemRightDelim, 11, "}}", 2),
         new(itemEOF, 13, "", 2)
-    ])),
-    new("trimbefore", "{{x}}\n{{- y}}", slice<global::go.text.template.parse_package.item>([
+    ]),
+    new("trimbefore", "{{x}}\n{{- y}}", [
         new(itemLeftDelim, 0, "{{", 1),
         new(itemIdentifier, 2, "x", 1),
         new(itemRightDelim, 3, "}}", 1),
@@ -560,8 +560,8 @@ internal static slice<lexTest> lexPosTests = slice<lexTest>([
         new(itemIdentifier, 10, "y", 2),
         new(itemRightDelim, 11, "}}", 2),
         new(itemEOF, 13, "", 2)
-    ])),
-    new("longcomment", "{{/*\n*/}}\n{{undefinedFunction \"test\"}}", slice<global::go.text.template.parse_package.item>([
+    ]),
+    new("longcomment", "{{/*\n*/}}\n{{undefinedFunction \"test\"}}", [
         new(itemComment, 2, "/*\n*/", 1),
         new(itemText, 9, "\n", 2),
         new(itemLeftDelim, 10, "{{", 3),
@@ -570,13 +570,13 @@ internal static slice<lexTest> lexPosTests = slice<lexTest>([
         new(itemString, 30, "\"test\"", 3),
         new(itemRightDelim, 36, "}}", 3),
         new(itemEOF, 38, "", 3)
-    ]))
-]);
+    ])
+];
 
 // The other tests don't check position, to make the test cases easier to construct.
 // This one does.
 public static void TestPos(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in lexPosTests) {
+    foreach (var (_, vᴛ1) in range(lexPosTests)) {
         ref var test = ref heap(new lexTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -585,7 +585,7 @@ public static void TestPos(ж<testing.T> t) {
             t.Errorf("%s: got\n\t%v\nexpected\n\t%v", test.name, items, test.items);
             if (len(items) == len(test.items)) {
                 // Detailed print; avoid item.String() to expose the position value.
-                foreach (var i in range(items)) {
+                foreach (var i in range(len(items))) {
                     if (!equal(items.slice(i, i + 1), test.items.slice(i, i + 1), true)) {
                         var i1 = items[i];
                         var i2 = test.items[i];

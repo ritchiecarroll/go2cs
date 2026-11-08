@@ -177,13 +177,13 @@ internal static slice<byte> trimDead(slice<byte> mask) {
     return mask;
 }
 
-internal static slice<byte> infoPtr = slice<byte>([typePointer]);
+internal static slice<byte> infoPtr = [typePointer];
 
 partial struct Ptr {
     /*embed*/ internal ж<byte> @byte;
 }
 
-internal static slice<byte> infoPtr10 = slice<byte>([typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer]);
+internal static slice<byte> infoPtr10 = [typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer];
 
 partial struct ScalarPtr {
     internal nint q;
@@ -194,7 +194,7 @@ partial struct ScalarPtr {
     internal ж<nint> y;
 }
 
-internal static slice<byte> infoScalarPtr = slice<byte>([typeScalar, typePointer, typeScalar, typePointer, typeScalar, typePointer]);
+internal static slice<byte> infoScalarPtr = [typeScalar, typePointer, typeScalar, typePointer, typeScalar, typePointer];
 
 internal static slice<byte> infoScalarPtr4 = appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(slice<byte>(default), infoScalarPtr), infoScalarPtr), infoScalarPtr), infoScalarPtr);
 
@@ -207,7 +207,7 @@ partial struct PtrScalar {
     internal nint y;
 }
 
-internal static slice<byte> infoPtrScalar = slice<byte>([typePointer, typeScalar, typePointer, typeScalar, typePointer, typeScalar]);
+internal static slice<byte> infoPtrScalar = [typePointer, typeScalar, typePointer, typeScalar, typePointer, typeScalar];
 
 partial struct BigStruct {
     internal ж<nint> q;
@@ -224,22 +224,22 @@ internal static slice<byte> infoBigStruct() {
     var exprᴛ1 = Δruntime.GOARCH;
     switch (ᐧ) {
     case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8: {
-        return slice<byte>([
+        return [
             typePointer,                                                // q *int
             typeScalar, typeScalar, typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
             typePointer, typeScalar, typeScalar, // r []byte
             typeScalar, typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
             typePointer, typeScalar // i string
-        ]);
+        ];
     }
     case {} when exprᴛ1 == "arm64"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "wasm"u8: {
-        return slice<byte>([
+        return [
             typePointer,                        // q *int
             typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
             typePointer, typeScalar, typeScalar, // r []byte
             typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
             typePointer, typeScalar // i string
-        ]);
+        ];
     }
     default: {
         throw panic("unknown arch");
@@ -285,16 +285,16 @@ internal static readonly ж<BigStruct> ᏑdataBigStruct = new StaticBox<BigStruc
 internal static ref BigStruct dataBigStruct => ref ((StaticBox<BigStruct>)ᏑdataBigStruct).ValueSlot;
 internal static readonly ж<@string> ᏑdataString = new StaticBox<@string>("foo");
 internal static ref @string dataString => ref ((StaticBox<@string>)ᏑdataString).ValueSlot;
-internal static readonly ж<slice<@string>> ᏑdataSlice = new StaticBox<slice<@string>>(slice<@string>(["foo"]));
+internal static readonly ж<slice<@string>> ᏑdataSlice = new StaticBox<slice<@string>>(["foo"]);
 internal static ref slice<@string> dataSlice => ref ((StaticBox<slice<@string>>)ᏑdataSlice).ValueSlot;
 internal static readonly ж<any> ᏑdataEface = new StaticBox<any>((nint)42);
 internal static ref any dataEface => ref ((StaticBox<any>)ᏑdataEface).ValueSlot;
 internal static readonly ж<Iface> ᏑdataIface = new StaticBox<Iface>(((IfaceImpl)42));
 internal static ref Iface dataIface => ref ((StaticBox<Iface>)ᏑdataIface).ValueSlot;
 
-internal static slice<byte> infoString = slice<byte>([typePointer, typeScalar]);
-internal static slice<byte> infoSlice = slice<byte>([typePointer, typeScalar, typeScalar]);
-internal static slice<byte> infoEface = slice<byte>([typeScalar, typePointer]);
-internal static slice<byte> infoIface = slice<byte>([typeScalar, typePointer]);
+internal static slice<byte> infoString = [typePointer, typeScalar];
+internal static slice<byte> infoSlice = [typePointer, typeScalar, typeScalar];
+internal static slice<byte> infoEface = [typeScalar, typePointer];
+internal static slice<byte> infoIface = [typeScalar, typePointer];
 
 } // end runtime_test_package

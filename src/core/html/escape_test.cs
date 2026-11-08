@@ -18,7 +18,7 @@ internal partial struct unescapeTest {
     internal @string unescaped;
 }
 
-internal static slice<unescapeTest> unescapeTests = slice<unescapeTest>([
+internal static slice<unescapeTest> unescapeTests = [
     // Handle no entities.
     new(
         "copy",
@@ -85,10 +85,10 @@ internal static slice<unescapeTest> unescapeTests = slice<unescapeTest>([
         "text &#",
         "text &#"
     )
-]);
+];
 
 public static void TestUnescape(ж<testing.T> t) {
-    foreach (var (_, tt) in unescapeTests) {
+    foreach (var (_, tt) in range(unescapeTests)) {
         @string unescaped = UnescapeString(tt.html);
         if (unescaped != tt.unescaped) {
             t.Errorf("TestUnescape %s: want %q, got %q", tt.desc, tt.unescaped, unescaped);
@@ -110,11 +110,9 @@ public static void TestUnescapeEscape(ж<testing.T> t) {
         @"3&5==1 && 0<1, ""0&lt;1"", a+acute=&aacute;",
         @"The special characters are: <, >, &, ' and """
     ]);
-    foreach (var (_, s) in ss) {
-        {
-            @string got = UnescapeString(EscapeString(s)); if (got != s) {
-                t.Errorf("got %q want %q", got, s);
-            }
+    foreach (var (_, s) in range(ss)) {
+        @string got = UnescapeString(EscapeString(s)); if (got != s) {
+            t.Errorf("got %q want %q", got, s);
         }
     }
 }

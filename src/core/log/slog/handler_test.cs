@@ -52,7 +52,7 @@ public static void TestDefaultHandle(ж<testing.T> t) {
             var preAttrsʗ2 = preAttrs;
 
 
-    foreach (var (_, vᴛ1) in slice<TestDefaultHandle_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestDefaultHandle_type>([
         new(
             name: "no attrs",
             want: "INFO message"
@@ -98,7 +98,7 @@ public static void TestDefaultHandle(ж<testing.T> t) {
             attrs: attrs,
             want: "INFO message p1=1 s1.s2.a=1 s1.s2.b=two"
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestDefaultHandle_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -116,10 +116,8 @@ public static void TestDefaultHandle(ж<testing.T> t) {
             }
             var r = NewRecord(new time_package.Time(), LevelInfo, messageˢ, 0);
             r.AddAttrs(testʗ1.attrs.ꓸꓸꓸ);
-            {
-                var err = h.Handle(ctxʗ1, r); if (err != nil) {
-                    tΔ1.Fatal(err);
-                }
+            var err = h.Handle(ctxʗ1, r); if (err != nil) {
+                tΔ1.Fatal(err);
             }
             if (got != testʗ1.want) {
                 tΔ1.Errorf("\ngot  %s\nwant %s", got, testʗ1.want);
@@ -141,7 +139,7 @@ private static readonly @string helloFromSub2ˢᵇ = "hello from sub2"u8;
 public static void TestConcurrentWrites(ж<testing.T> t) {
     var ctx = context.Background();
     nint count = 1000;
-    foreach (var (_, handlerType) in slice<@string>(["text", "json"])) {
+    foreach (var (_, handlerType) in range(slice<@string>(["text", "json"]))) {
         var ctxʗ1 = ctx;
         t.Run(handlerType, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -281,7 +279,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> t) {
 
 
 
-    foreach (var (_, vᴛ1) in slice<TestJSONAndTextHandlers_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestJSONAndTextHandlers_type>([
         new(
             name: "basic",
             attrs: attrs,
@@ -618,7 +616,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> t) {
             wantText: @"msg=message ""prefix. needs quoting ""=v prefix.NotNeedsQuoting=v ""prefix needs quoting. needs quoting ""=v ""prefix needs quoting.NotNeedsQuoting""=v",
             wantJSON: @"{""msg"":""message"",""prefix"":{"" needs quoting "":""v"",""NotNeedsQuoting"":""v""},""prefix needs quoting"":{"" needs quoting "":""v"",""NotNeedsQuoting"":""v""}}"
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestJSONAndTextHandlers_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -633,10 +631,10 @@ public static void TestJSONAndTextHandlers(ж<testing.T> t) {
         ref var opts = ref heap<global::go.log.slog_package.HandlerOptions>(new HandlerOptions(ReplaceAttr: test.replace, AddSource: test.addSource), out var Ꮡopts);
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            foreach (var (_, vᴛ2) in slice<TestJSONAndTextHandlers_typeᴛ1>([
+            foreach (var (_, vᴛ2) in range(slice<TestJSONAndTextHandlers_typeᴛ1>([
                 new("text", new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡopts)), testʗ1.wantText),
                 new("json", new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡopts)), testʗ1.wantJSON)
-            ])) {
+            ]))) {
                 ref var handler = ref heap(new TestJSONAndTextHandlers_typeᴛ1(), out var Ꮡhandler);
                 handler = vᴛ2;
 
@@ -648,10 +646,8 @@ public static void TestJSONAndTextHandlers(ж<testing.T> t) {
                         h = testʗ2.with(h);
                     }
                     Ꮡbuf.Value.Reset();
-                    {
-                        var err = h.Handle(default, Ꮡr.Value); if (err != nil) {
-                            tΔ2.Fatal(err);
-                        }
+                    var err = h.Handle(default, Ꮡr.Value); if (err != nil) {
+                        tΔ2.Fatal(err);
                     }
                     @string want = strings.ReplaceAll(handlerʗ1.want, lineˢ2, line);
                     @string got = strings.TrimSuffix(Ꮡbuf.String(), "\n");
@@ -671,7 +667,7 @@ internal static Func<slice<@string>, global::go.log.slog_package.Attr, global::g
 
     var keysʗ1 = keys;
     return (slice<@string> _, global::go.log.slog_package.Attr a) => {
-        foreach (var (_, k) in keysʗ1) {
+        foreach (var (_, k) in range(keysʗ1)) {
             if (a.Key == k) {
                 return new Attr();
             }
@@ -713,14 +709,14 @@ public static void TestHandlerEnabled(ж<testing.T> t) {
         return Ꮡal;
     }
 
-    foreach (var (_, test) in slice<TestHandlerEnabled_type>([
+    foreach (var (_, test) in range(slice<TestHandlerEnabled_type>([
         new(default, true),
         new(LevelWarn, false),
         new(new global::go.log.slog_package.LevelVarжLeveler(Ꮡ(new LevelVar())), true), // defaults to Info
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelWarn)), false),
         new(LevelDebug, true),
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelDebug)), true)
-    ])) {
+    ]))) {
         var h = Ꮡ(new commonHandler(opts: new HandlerOptions(Level: test.leveler)));
         var got = h.enabled(LevelInfo);
         if (got != test.want) {
@@ -744,10 +740,10 @@ public static void TestJSONAndTextHandlersWithUnavailableSource(ж<testing.T> t)
         AddSource: true
     ));
 
-    foreach (var (_, vᴛ1) in slice<TestJSONAndTextHandlersWithUnavailableSource_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestJSONAndTextHandlersWithUnavailableSource_type>([
         new("text", new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), opts)), "msg=message"),
         new("json", new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), opts)), @"{""msg"":""message""}")
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestJSONAndTextHandlersWithUnavailableSource_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -858,11 +854,11 @@ internal static ref readonly @string rfc3339Millis => ref rfc3339Millisᵇ;
 private static readonly @string rfc3339Millisᵇ = "2006-01-02T15:04:05.000Z07:00"u8;
 
 public static void TestWriteTimeRFC3339(ж<testing.T> t) {
-    foreach (var (_, tm) in slice<time.Time>([
+    foreach (var (_, tm) in range(slice<time.Time>([
         time_package.Date(2000, 1, 2, 3, 4, 5, 0, time_package.ΔUTC),
         time_package.Date(2000, 1, 2, 3, 4, 5, 400, time_package.ΔLocal),
         time_package.Date(2000, 11, 12, 3, 4, 500, 50000000, time_package.ΔUTC)
-    ])) {
+    ]))) {
         @string got = (@string)appendRFC3339Millis(default, tm);
         @string want = tm.Format(rfc3339Millis);
         if (got != want) {
@@ -917,8 +913,8 @@ public static void TestDiscardHandler(ж<testing.T> t) {
 }
 
 public static void BenchmarkAppendKey(ж<testing.B> b) {
-    foreach (var (_, size) in slice<nint>([5, 10, 30, 50, 100])) {
-        foreach (var (_, quoting) in slice<@string>(["no_quoting", "pre_quoting", "key_quoting", "both_quoting"])) {
+    foreach (var (_, size) in range(slice<nint>([5, 10, 30, 50, 100]))) {
+        foreach (var (_, quoting) in range(slice<@string>(["no_quoting", "pre_quoting", "key_quoting", "both_quoting"]))) {
             b.Run(fmt.Sprintf("%s_prefix_size_%d"u8, quoting, size), (ж<testing.B> bΔ1) => {
                 global::go.log.slog_package.handleState hs = NewJSONHandler(io.Discard, nil).newHandleState(buffer.New(), false, ""u8);
                 ref var prefix = ref heap<slice<byte>>(out var Ꮡprefix);

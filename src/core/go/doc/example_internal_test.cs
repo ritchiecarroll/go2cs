@@ -26,7 +26,7 @@ internal partial struct TestImportGroupStarts_type /*dyn*/ {
 }
 
 public static void TestImportGroupStarts(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestImportGroupStarts_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestImportGroupStarts_type>([
         new(
             name: "one group",
             @in: """
@@ -39,7 +39,7 @@ import (
 )
 
 """u8.Raw(),
-            want: slice<@string>(["a"])
+            want: ["a"]
         ),
         new(
             name: "several groups",
@@ -55,7 +55,7 @@ import (
 )
 
 """u8.Raw(),
-            want: slice<@string>(["a", "b", "d"])
+            want: ["a", "b", "d"]
         ),
         new(
             name: "extra space",
@@ -73,7 +73,7 @@ import (
 )
 
 """u8.Raw(),
-            want: slice<@string>(["a", "b", "d"])
+            want: ["a", "b", "d"]
         ),
         new(
             name: "line comment",
@@ -86,7 +86,7 @@ import (
 	"c"
 )
 """u8.Raw(),
-            want: slice<@string>(["a", "c"])
+            want: ["a", "c"]
         ),
         new(
             name: "named import",
@@ -100,7 +100,7 @@ import (
 	"d"
 )
 """u8.Raw(),
-            want: slice<@string>(["a", "c"])
+            want: ["a", "c"]
         ),
         new(
             name: "blank import",
@@ -115,9 +115,9 @@ import (
 	"d"
 )
 """u8.Raw(),
-            want: slice<@string>(["a", "b", "c"])
+            want: ["a", "b", "c"]
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestImportGroupStarts_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -130,7 +130,7 @@ import (
             }
             var imps = findImportGroupStarts1(@file.Imports);
             var got = new slice<@string>(len(imps));
-            foreach (var (i, imp) in imps) {
+            foreach (var (i, imp) in range(imps)) {
                 (got[i], err) = strconv.Unquote((~imp.Path).Value);
                 if (err != nil) {
                     tΔ1.Fatal(err);

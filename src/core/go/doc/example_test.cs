@@ -40,7 +40,7 @@ public static void TestExamples(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, filename) in filenames) {
+    foreach (var (_, filename) in range(filenames)) {
         t.Run(strings.TrimSuffix(filepath.Base(filename), ".go"), (ж<testing.T> tΔ1) => {
             var fset = token.NewFileSet();
             var (astFile, errΔ1) = parser.ParseFile(fset, filename, default, parser.ParseComments);
@@ -53,21 +53,19 @@ public static void TestExamples(ж<testing.T> t) {
                 tΔ1.Fatal(errΔ1);
             }
             var golden = new map<@string, @string>{};
-            foreach (var (_, f) in archive.Files) {
+            foreach (var (_, f) in range(archive.Files)) {
                 golden[f.Name] = strings.TrimSpace((@string)f.Data);
             }
 
             // Collect the results of doc.Examples in a map keyed by example name.
             var examples = new map<@string, ж<Δdoc.Example>>{};
-            foreach (var (_, e) in Δdoc.Examples(astFile)) {
+            foreach (var (_, e) in range(Δdoc.Examples(astFile))) {
                 examples[e.Name] = e;
                 // Treat missing sections in the golden as empty.
-                foreach (var (_, kind) in slice<@string>(["Play", "Output"])) {
+                foreach (var (_, kind) in range(slice<@string>(["Play", "Output"]))) {
                     @string key = e.Name + "."u8 + kind;
-                    {
-                        var (_, ok) = golden[key, ꟷ]; if (!ok) {
-                            golden[key] = ""u8;
-                        }
+                    var (_, ok) = golden[key, ꟷ]; if (!ok) {
+                        golden[key] = ""u8;
                     }
                 }
             }
@@ -119,10 +117,8 @@ internal static @string formatFile(ж<testing.T> t, ж<token.FileSet> fset, ж<a
         return nilˢ;
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = format.Node(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), fset, n.OrTypedNil()); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = format.Node(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), fset, n.OrTypedNil()); if (err != nil) {
+        t.Fatal(err);
     }
     return Ꮡbuf.String();
 }
@@ -332,42 +328,42 @@ public static void TestClassifyExamples(ж<testing.T> t) {
     // Collect the association of examples to top-level identifiers.
     var got = new map<@string, slice<@string>>{};
     got[""u8] = exampleNames(p.Examples);
-    foreach (var (_, f) in p.Funcs) {
+    foreach (var (_, f) in range(p.Funcs)) {
         got[f.Name] = exampleNames(f.Examples);
     }
-    foreach (var (_, tΔ1) in p.Types) {
+    foreach (var (_, tΔ1) in range(p.Types)) {
         got[tΔ1.Name] = exampleNames(tΔ1.Examples);
-        foreach (var (_, f) in tΔ1.Funcs) {
+        foreach (var (_, f) in range(tΔ1.Funcs)) {
             got[f.Name] = exampleNames(f.Examples);
         }
-        foreach (var (_, m) in tΔ1.Methods) {
+        foreach (var (_, m) in range(tΔ1.Methods)) {
             got[tΔ1.Name + "."u8 + m.Name] = exampleNames(m.Examples);
         }
     }
 
     var want = new map<@string, slice<@string>>{
-        [""] = slice<@string>(["", "suffix", "suffix_xX_X_x"]), // Package-level examples.
+        [""] = ["", "suffix", "suffix_xX_X_x"], // Package-level examples.
 
-        ["Type1"] = slice<@string>(["", "foo_Suffix", "func2", "suffix"]),
-        ["Type1_Foo"] = slice<@string>(["", "suffix"]),
-        ["Type1_foo"] = slice<@string>(["", "suffix"]),
+        ["Type1"] = ["", "foo_Suffix", "func2", "suffix"],
+        ["Type1_Foo"] = ["", "suffix"],
+        ["Type1_foo"] = ["", "suffix"],
 
-        ["Func1"] = slice<@string>(["", "foo_Suffix", "suffix"]),
-        ["Func1_Foo"] = slice<@string>(["", "suffix"]),
-        ["Func1_foo"] = slice<@string>(["", "suffix"]),
+        ["Func1"] = ["", "foo_Suffix", "suffix"],
+        ["Func1_Foo"] = ["", "suffix"],
+        ["Func1_foo"] = ["", "suffix"],
 
-        ["Type1.Func1"] = slice<@string>(["", "foo_Suffix", "suffix"]),
-        ["Type1.Func1_Foo"] = slice<@string>(["", "suffix"]),
-        ["Type1.Func1_foo"] = slice<@string>(["", "suffix"]),
+        ["Type1.Func1"] = ["", "foo_Suffix", "suffix"],
+        ["Type1.Func1_Foo"] = ["", "suffix"],
+        ["Type1.Func1_foo"] = ["", "suffix"],
 
-        ["Uembed.Func1"] = slice<@string>(["", "suffix"]),
+        ["Uembed.Func1"] = ["", "suffix"],
 
         // These are implementation dependent due to the ambiguous parsing.
-        ["Conflict_Conflict"] = slice<@string>(["", "suffix"]),
-        ["Conflict_conflict"] = slice<@string>(["", "suffix"]),
+        ["Conflict_Conflict"] = ["", "suffix"],
+        ["Conflict_conflict"] = ["", "suffix"],
 
-        ["GFunc"] = slice<@string>(["", "suffix"]),
-        ["GType.M"] = slice<@string>(["", "suffix"])
+        ["GFunc"] = ["", "suffix"],
+        ["GType.M"] = ["", "suffix"]
     };
 
     foreach (var (id, _) in got) {
@@ -384,7 +380,7 @@ public static void TestClassifyExamples(ж<testing.T> t) {
 internal static slice<@string> /*out*/ exampleNames(slice<ж<Δdoc.Example>> exs) {
     slice<@string> @out = default;
 
-    foreach (var (_, ex) in exs) {
+    foreach (var (_, ex) in range(exs)) {
         @out = append(@out, ex.Suffix);
     }
     return @out;

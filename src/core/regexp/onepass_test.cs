@@ -17,115 +17,115 @@ partial struct runeMergeTestsᴛ1 /*dyn*/ {
     internal slice<uint32> next;
     internal uint32 leftPC, rightPC;
 }
-internal static slice<runeMergeTestsᴛ1> runeMergeTests = slice<runeMergeTestsᴛ1>([
+internal static slice<runeMergeTestsᴛ1> runeMergeTests = [
     new(
         // empty rhs
-        slice<rune>([69, 69]),
-        slice<rune>([]),
-        slice<rune>([69, 69]),
-        slice<uint32>([1]),
+        [69, 69],
+        [],
+        [69, 69],
+        [1],
         1, 2
     ),
     new(
         // identical runes, identical targets
-        slice<rune>([69, 69]),
-        slice<rune>([69, 69]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 69],
+        [69, 69],
+        [],
+        [mergeFailed],
         1, 1
     ),
     new(
         // identical runes, different targets
-        slice<rune>([69, 69]),
-        slice<rune>([69, 69]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 69],
+        [69, 69],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // append right-first
-        slice<rune>([69, 69]),
-        slice<rune>([71, 71]),
-        slice<rune>([69, 69, 71, 71]),
-        slice<uint32>([1, 2]),
+        [69, 69],
+        [71, 71],
+        [69, 69, 71, 71],
+        [1, 2],
         1, 2
     ),
     new(
         // append, left-first
-        slice<rune>([71, 71]),
-        slice<rune>([69, 69]),
-        slice<rune>([69, 69, 71, 71]),
-        slice<uint32>([2, 1]),
+        [71, 71],
+        [69, 69],
+        [69, 69, 71, 71],
+        [2, 1],
         1, 2
     ),
     new(
         // successful interleave
-        slice<rune>([60, 60, 71, 71, 101, 101]),
-        slice<rune>([69, 69, 88, 88]),
-        slice<rune>([60, 60, 69, 69, 71, 71, 88, 88, 101, 101]),
-        slice<uint32>([1, 2, 1, 2, 1]),
+        [60, 60, 71, 71, 101, 101],
+        [69, 69, 88, 88],
+        [60, 60, 69, 69, 71, 71, 88, 88, 101, 101],
+        [1, 2, 1, 2, 1],
         1, 2
     ),
     new(
         // left surrounds right
-        slice<rune>([69, 74]),
-        slice<rune>([71, 71]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [71, 71],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // right surrounds left
-        slice<rune>([69, 74]),
-        slice<rune>([68, 75]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [68, 75],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // overlap at interval begin
-        slice<rune>([69, 74]),
-        slice<rune>([74, 75]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [74, 75],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // overlap ar interval end
-        slice<rune>([69, 74]),
-        slice<rune>([65, 69]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [65, 69],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // overlap from above
-        slice<rune>([69, 74]),
-        slice<rune>([71, 74]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [71, 74],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // overlap from below
-        slice<rune>([69, 74]),
-        slice<rune>([65, 71]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74],
+        [65, 71],
+        [],
+        [mergeFailed],
         1, 2
     ),
     new(
         // out of order []rune
-        slice<rune>([69, 74, 60, 65]),
-        slice<rune>([66, 67]),
-        slice<rune>([]),
-        slice<uint32>([mergeFailed]),
+        [69, 74, 60, 65],
+        [66, 67],
+        [],
+        [mergeFailed],
         1, 2
     )
-]);
+];
 
 public static void TestMergeRuneSet(ж<testing.T> t) {
-    foreach (var (ix, vᴛ1) in runeMergeTests) {
+    foreach (var (ix, vᴛ1) in range(runeMergeTests)) {
         ref var test = ref heap(new runeMergeTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -187,20 +187,16 @@ public static void TestCompileOnePass(ж<testing.T> t) {
     ж<syntax.Prog> p = default;
     ж<syntax.Regexp> re = default;
     error err = default;
-    foreach (var (_, test) in onePassTests) {
-        {
-            (re, err) = syntax.Parse(test.re, syntax.Perl); if (err != nil) {
-                t.Errorf("Parse(%q) got err:%s, want success", test.re, err);
-                continue;
-            }
+    foreach (var (_, test) in range(onePassTests)) {
+        (re, err) = syntax.Parse(test.re, syntax.Perl); if (err != nil) {
+            t.Errorf("Parse(%q) got err:%s, want success", test.re, err);
+            continue;
         }
         // needs to be done before compile...
         re = re.Simplify();
-        {
-            (p, err) = syntax.Compile(re); if (err != nil) {
-                t.Errorf("Compile(%q) got err:%s, want success", test.re, err);
-                continue;
-            }
+        (p, err) = syntax.Compile(re); if (err != nil) {
+            t.Errorf("Compile(%q) got err:%s, want success", test.re, err);
+            continue;
         }
         var isOnePass = compileOnePass(ref (p).DerefOrNull()) != nil;
         if (isOnePass != test.isOnePass) {
@@ -214,12 +210,12 @@ partial struct onePassTests1ᴛ1 /*dyn*/ {
     internal @string re;
     internal @string match;
 }
-internal static slice<onePassTests1ᴛ1> onePassTests1 = slice<onePassTests1ᴛ1>([
+internal static slice<onePassTests1ᴛ1> onePassTests1 = [
     new(@"^a(/b+(#c+)*)*$", "a/b#c") // golang.org/issue/11905
-]);
+];
 
 public static void TestRunOnePass(ж<testing.T> t) {
-    foreach (var (_, test) in onePassTests1) {
+    foreach (var (_, test) in range(onePassTests1)) {
         var (re, err) = Compile(test.re);
         if (err != nil) {
             t.Errorf("Compile(%q): got err: %s", test.re, err);

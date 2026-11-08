@@ -29,7 +29,7 @@ using static go.go.format_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/format/format_test.go", "format_test.cs", "ABUmgoKCgoKCgoKClIKCpoLogoKCpoKCgqaUgIK2AAoKoqqCgoLKgpSCgIKkpoKUgpSC6IKCgqaCgqbKAC1cgoKClOaCopSCgoK4goKCgg==")]
+[assembly: GoPositionMap("go/format/format_test.go", "format_test.cs", "ABUmgoKCgoKCgoKClIKCpoLogoKCpoKCgqaUgqYACgqiqoKCgsqClIKClKaClIKUguiCgoKmgoKmygAtXIKCgpTmgqKUgoKCuIKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

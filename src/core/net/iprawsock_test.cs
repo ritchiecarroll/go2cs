@@ -74,7 +74,7 @@ public static void TestResolveIPAddr(ж<testing.T> t) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
 
-        foreach (var (_, tt) in resolveIPAddrTests) {
+        foreach (var (_, tt) in range(resolveIPAddrTests)) {
             var (addr, err) = ResolveIPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
                 t.Errorf("ResolveIPAddr(%q, %q) = %#v, %v, want %#v, %v", tt.network, tt.litAddrOrName, addr.OrTypedNil(), err, tt.addr.OrTypedNil(), tt.err);
@@ -109,7 +109,7 @@ internal static readonly object shouldNotFailˢ = (@string)"should not fail"u8;
 public static void TestIPConnLocalName(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, tt) in ipConnLocalNameTests) {
+        foreach (var (_, tt) in range(ipConnLocalNameTests)) {
             if (!testableNetwork(tt.net)) {
                 t.Logf("skipping %s test", tt.net);
                 continue;
@@ -124,10 +124,8 @@ public static void TestIPConnLocalName(ж<testing.T> t) {
             }
             var cʗ1 = c;
             defer(() => cʗ1.of(global::go.net_package.IPConn.Ꮡconn).Close(), ref ᒐ);
-            {
-                var la = c.of(global::go.net_package.IPConn.Ꮡconn).LocalAddr(); if (la == nil) {
-                    t.Fatal(shouldNotFailˢ);
-                }
+            var la = c.of(global::go.net_package.IPConn.Ꮡconn).LocalAddr(); if (la == nil) {
+                t.Fatal(shouldNotFailˢ);
             }
         }
     }
@@ -199,10 +197,10 @@ public static void TestDialListenIPArgs(ж<testing.T> t) {
     ]);
     if (testableNetwork("ip")) {
         var priv = new TestDialListenIPArgs_test(shouldFail: false);
-        foreach (var (_, vᴛ1) in slice<TestDialListenIPArgs_type>([
+        foreach (var (_, vᴛ1) in range(slice<TestDialListenIPArgs_type>([
             new("ip4:47", "127.0.0.1", new @string[]{"ip4:47", "127.0.0.1"}.array()),
             new("ip6:47", "::1", new @string[]{"ip6:47", "::1"}.array())
-        ])) {
+        ]))) {
             var tt = vᴛ1.ΔClone();
 
             var (c, err) = ListenPacket(tt.network, tt.address);
@@ -217,8 +215,8 @@ public static void TestDialListenIPArgs(ж<testing.T> t) {
         }
     }
 
-    foreach (var (_, tt) in tests) {
-        foreach (var (_, vᴛ2) in tt.argLists) {
+    foreach (var (_, tt) in range(tests)) {
+        foreach (var (_, vᴛ2) in range(tt.argLists)) {
             var args = vᴛ2.Clone();
 
             var (_, err) = Dial(args[0], args[1]);

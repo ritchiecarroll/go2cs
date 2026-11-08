@@ -29,20 +29,20 @@ internal partial struct TestForeachHeaderElement_tests /*dyn*/ {
 
 public static void TestForeachHeaderElement(ж<testing.T> t) {
     var tests = slice<TestForeachHeaderElement_tests>([
-        new("Foo", slice<@string>(["Foo"])),
-        new(" Foo", slice<@string>(["Foo"])),
-        new("Foo ", slice<@string>(["Foo"])),
-        new(" Foo ", slice<@string>(["Foo"])),
+        new("Foo", ["Foo"]),
+        new(" Foo", ["Foo"]),
+        new("Foo ", ["Foo"]),
+        new(" Foo ", ["Foo"]),
 
-        new("foo", slice<@string>(["foo"])),
-        new("anY-cAsE", slice<@string>(["anY-cAsE"])),
+        new("foo", ["foo"]),
+        new("anY-cAsE", ["anY-cAsE"]),
 
         new("", default),
         new(",,,,  ,  ,,   ,,, ,", default),
 
-        new(" Foo,Bar, Baz,lower,,Quux ", slice<@string>(["Foo", "Bar", "Baz", "lower", "Quux"]))
+        new(" Foo,Bar, Baz,lower,,Quux ", ["Foo", "Bar", "Baz", "lower", "Quux"])
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var got = ref heap<slice<@string>>(out var Ꮡgot);
         foreachHeaderElement(tt.@in, (@string v) => {
             Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, v);
@@ -141,21 +141,19 @@ public static void BenchmarkCopyValues(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     var src = new url.Values(new map<@string, slice<@string>>{
-        ["a"] = slice<@string>(["1", "2", "3", "4", "5"]),
-        ["b"] = slice<@string>(["2", "2", "3", "4", "5"]),
-        ["c"] = slice<@string>(["3", "2", "3", "4", "5"]),
-        ["d"] = slice<@string>(["4", "2", "3", "4", "5"]),
-        ["e"] = slice<@string>(["1", "1", "2", "3", "4", "5", "6", "7", "abcdef", "l", "a", "b", "c", "d", "z"]),
-        ["j"] = slice<@string>(["1", "2"]),
+        ["a"] = ["1", "2", "3", "4", "5"],
+        ["b"] = ["2", "2", "3", "4", "5"],
+        ["c"] = ["3", "2", "3", "4", "5"],
+        ["d"] = ["4", "2", "3", "4", "5"],
+        ["e"] = ["1", "1", "2", "3", "4", "5", "6", "7", "abcdef", "l", "a", "b", "c", "d", "z"],
+        ["j"] = ["1", "2"],
         ["m"] = default
     });
     for (nint i = 0; i < b.N; i++) {
-        var dst = new url.Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["b"]), ["b"] = slice<@string>(["2"]), ["c"] = slice<@string>(["3"]), ["d"] = slice<@string>(["4"]), ["j"] = default, ["m"] = slice<@string>(["x"])});
+        var dst = new url.Values(new map<@string, slice<@string>>{["a"] = ["b"], ["b"] = ["2"], ["c"] = ["3"], ["d"] = ["4"], ["j"] = default, ["m"] = ["x"]});
         copyValues(dst, src);
-        {
-            http_internal_test_package.valuesCount = builtin.len(dst["a"]); if (http_internal_test_package.valuesCount != 6) {
-                Ꮡb.Fatalf(@"%d items in dst[""a""] but expected 6", http_internal_test_package.valuesCount);
-            }
+        http_internal_test_package.valuesCount = builtin.len(dst["a"]); if (http_internal_test_package.valuesCount != 6) {
+            Ꮡb.Fatalf(@"%d items in dst[""a""] but expected 6", http_internal_test_package.valuesCount);
         }
     }
     if (http_internal_test_package.valuesCount == 0) {
@@ -210,8 +208,8 @@ public static void TestNoUnicodeStrings(ж<testing.T> t) {
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);
             }
-            foreach (var (lineNum, line) in strings.Split((@string)contents, "\n")) {
-                foreach (var (_, match) in reʗ1.FindAllStringSubmatch(line, -1)) {
+            foreach (var (lineNum, line) in range(strings.Split((@string)contents, "\n"))) {
+                foreach (var (_, match) in range(reʗ1.FindAllStringSubmatch(line, -1))) {
                     if (!forbiddenStringsFunctions[match[2]]) {
                         continue;
                     }

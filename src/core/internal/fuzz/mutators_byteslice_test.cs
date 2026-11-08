@@ -57,123 +57,123 @@ internal partial struct TestByteSliceMutators_type /*dyn*/ {
 }
 
 public static void TestByteSliceMutators(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestByteSliceMutators_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestByteSliceMutators_type>([
         new(
             name: "byteSliceRemoveBytes",
             mutator: byteSliceRemoveBytes,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([4])
+            input: [1, 2, 3, 4],
+            expected: [4]
         ),
         new(
             name: "byteSliceInsertRandomBytes",
             mutator: byteSliceInsertRandomBytes,
             input: new slice<byte>(4, 8),
-            expected: slice<byte>([3, 4, 5, 0, 0, 0, 0])
+            expected: [3, 4, 5, 0, 0, 0, 0]
         ),
         new(
             name: "byteSliceDuplicateBytes",
             mutator: byteSliceDuplicateBytes,
             input: appendꓸꓸꓸ(new slice<byte>(0, 13), slice<byte>([1, 2, 3, 4])),
-            expected: slice<byte>([1, 1, 2, 3, 4, 2, 3, 4])
+            expected: [1, 1, 2, 3, 4, 2, 3, 4]
         ),
         new(
             name: "byteSliceOverwriteBytes",
             mutator: byteSliceOverwriteBytes,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([1, 1, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [1, 1, 3, 4]
         ),
         new(
             name: "byteSliceBitFlip",
             mutator: byteSliceBitFlip,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([3, 2, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [3, 2, 3, 4]
         ),
         new(
             name: "byteSliceXORByte",
             mutator: byteSliceXORByte,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([3, 2, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [3, 2, 3, 4]
         ),
         new(
             name: "byteSliceSwapByte",
             mutator: byteSliceSwapByte,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([2, 1, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [2, 1, 3, 4]
         ),
         new(
             name: "byteSliceArithmeticUint8",
             mutator: byteSliceArithmeticUint8,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([255, 2, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [255, 2, 3, 4]
         ),
         new(
             name: "byteSliceArithmeticUint16",
             mutator: byteSliceArithmeticUint16,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([1, 3, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [1, 3, 3, 4]
         ),
         new(
             name: "byteSliceArithmeticUint32",
             mutator: byteSliceArithmeticUint32,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([2, 2, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [2, 2, 3, 4]
         ),
         new(
             name: "byteSliceArithmeticUint64",
             mutator: byteSliceArithmeticUint64,
-            input: slice<byte>([1, 2, 3, 4, 5, 6, 7, 8]),
-            expected: slice<byte>([2, 2, 3, 4, 5, 6, 7, 8])
+            input: [1, 2, 3, 4, 5, 6, 7, 8],
+            expected: [2, 2, 3, 4, 5, 6, 7, 8]
         ),
         new(
             name: "byteSliceOverwriteInterestingUint8",
             mutator: byteSliceOverwriteInterestingUint8,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([255, 2, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [255, 2, 3, 4]
         ),
         new(
             name: "byteSliceOverwriteInterestingUint16",
             mutator: byteSliceOverwriteInterestingUint16,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([255, 127, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [255, 127, 3, 4]
         ),
         new(
             name: "byteSliceOverwriteInterestingUint32",
             mutator: byteSliceOverwriteInterestingUint32,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([250, 0, 0, 250])
+            input: [1, 2, 3, 4],
+            expected: [250, 0, 0, 250]
         ),
         new(
             name: "byteSliceInsertConstantBytes",
             mutator: byteSliceInsertConstantBytes,
             input: appendꓸꓸꓸ(new slice<byte>(0, 8), slice<byte>([1, 2, 3, 4])),
-            expected: slice<byte>([3, 3, 3, 1, 2, 3, 4])
+            expected: [3, 3, 3, 1, 2, 3, 4]
         ),
         new(
             name: "byteSliceOverwriteConstantBytes",
             mutator: byteSliceOverwriteConstantBytes,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([3, 3, 3, 4])
+            input: [1, 2, 3, 4],
+            expected: [3, 3, 3, 4]
         ),
         new(
             name: "byteSliceShuffleBytes",
             mutator: byteSliceShuffleBytes,
-            input: slice<byte>([1, 2, 3, 4]),
-            expected: slice<byte>([2, 3, 1, 4])
+            input: [1, 2, 3, 4],
+            expected: [2, 3, 1, 4]
         ),
         new(
             name: "byteSliceSwapBytes",
             mutator: byteSliceSwapBytes,
-            randVals: slice<nint>([0, 2, 0, 2]),
+            randVals: [0, 2, 0, 2],
             input: appendꓸꓸꓸ(new slice<byte>(0, 9), slice<byte>([1, 2, 3, 4])),
-            expected: slice<byte>([3, 2, 1, 4])
+            expected: [3, 2, 1, 4]
         )
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestByteSliceMutators_type(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
         t.Run(tc.name, (ж<testing.T> tΔ1) => {
-            var r = Ꮡ(new mockRand(values: slice<nint>([0, 1, 2, 3, 4, 5])));
+            var r = Ꮡ(new mockRand(values: [0, 1, 2, 3, 4, 5]));
             if (tcʗ1.randVals != nil) {
                 r.values = tcʗ1.randVals;
             }
@@ -213,7 +213,7 @@ public static void BenchmarkByteSliceMutators(ж<testing.B> b) {
         new("SwapBytes", byteSliceSwapBytes)
     }.array();
 
-    foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         ref var tc = ref heap(new BenchmarkByteSliceMutators_tests(), out var Ꮡtc);
         tc = vᴛ1;
 

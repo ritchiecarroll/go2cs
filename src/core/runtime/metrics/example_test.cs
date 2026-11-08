@@ -46,7 +46,7 @@ public static void ExampleRead_readingAllMetrics() {
 
     // Create a sample for each metric.
     var samples = new slice<metrics.Sample>(len(descs));
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         samples[i].Name = descs[i].Name;
     }
 
@@ -54,7 +54,7 @@ public static void ExampleRead_readingAllMetrics() {
     metrics.Read(samples);
 
     // Iterate over all results.
-    foreach (var (_, sample) in samples) {
+    foreach (var (_, sample) in range(samples)) {
         // Pull out the name and value.
         @string name = sample.Name;
         var value = sample.Value;
@@ -97,12 +97,12 @@ internal static float64 medianBucket(ж<metricsꓸFloat64Histogram> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var total = (uint64)0;
-    foreach (var (_, count) in h.Counts) {
+    foreach (var (_, count) in range(h.Counts)) {
         total += count;
     }
     var thresh = total / 2;
     total = 0;
-    foreach (var (i, count) in h.Counts) {
+    foreach (var (i, count) in range(h.Counts)) {
         total += count;
         if (total >= thresh) {
             return h.Buckets[i];

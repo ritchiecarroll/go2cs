@@ -12,8 +12,6 @@ using io = io_package;
 using os = os_package;
 using sync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using exec = go.os.exec_package;
 using go.@internal;
@@ -91,12 +89,10 @@ public static void TestLargeRead(ж<testing.T> t) {
 internal static void testLargeRead(ж<testing.T> t, Func<slice<byte>, (nint, error)> Read) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
     var b = new slice<byte>((40 << 20));
-    {
-        var (n, err) = Read(b); if (err != nil) {
-            t.Fatal(err);
-        } else if (n != len(b)) {
-            t.Fatalf("Read(b) = %d, want %d", n, len(b));
-        }
+    var (n, err) = Read(b); if (err != nil) {
+        t.Fatal(err);
+    } else if (n != len(b)) {
+        t.Fatalf("Read(b) = %d, want %d", n, len(b));
     }
 }
 
@@ -262,10 +258,8 @@ internal static void benchmarkRead(ж<testing.B> Ꮡb, nint size) {
     b.SetBytes((int64)size);
     var buf = new slice<byte>(size);
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = go.crypto.rand_package.Read(buf); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = go.crypto.rand_package.Read(buf); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }

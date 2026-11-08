@@ -26,16 +26,16 @@ internal partial struct boolTest {
     internal bool @out;
 }
 
-internal static slice<boolTest> boolTestData = slice<boolTest>([
-    new(slice<byte>([0x00]), true, false),
-    new(slice<byte>([0xff]), true, true),
-    new(slice<byte>([0x00, 0x00]), false, false),
-    new(slice<byte>([0xff, 0xff]), false, false),
-    new(slice<byte>([0x01]), false, false)
-]);
+internal static slice<boolTest> boolTestData = [
+    new([0x00], true, false),
+    new([0xff], true, true),
+    new([0x00, 0x00], false, false),
+    new([0xff, 0xff], false, false),
+    new([0x01], false, false)
+];
 
 public static void TestParseBool(ж<testing.T> t) {
-    foreach (var (i, test) in boolTestData) {
+    foreach (var (i, test) in range(boolTestData)) {
         var (ret, err) = parseBool(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -52,23 +52,23 @@ internal partial struct int64Test {
     internal int64 @out;
 }
 
-internal static slice<int64Test> int64TestData = slice<int64Test>([
-    new(slice<byte>([0x00]), true, 0),
-    new(slice<byte>([0x7f]), true, 127),
-    new(slice<byte>([0x00, 0x80]), true, 128),
-    new(slice<byte>([0x01, 0x00]), true, 256),
-    new(slice<byte>([0x80]), true, -128),
-    new(slice<byte>([0xff, 0x7f]), true, -129),
-    new(slice<byte>([0xff]), true, -1),
-    new(slice<byte>([0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), true, -9223372036854775808L),
-    new(slice<byte>([0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), false, 0),
-    new(slice<byte>([]), false, 0),
-    new(slice<byte>([0x00, 0x7f]), false, 0),
-    new(slice<byte>([0xff, 0xf0]), false, 0)
-]);
+internal static slice<int64Test> int64TestData = [
+    new([0x00], true, 0),
+    new([0x7f], true, 127),
+    new([0x00, 0x80], true, 128),
+    new([0x01, 0x00], true, 256),
+    new([0x80], true, -128),
+    new([0xff, 0x7f], true, -129),
+    new([0xff], true, -1),
+    new([0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], true, -9223372036854775808L),
+    new([0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], false, 0),
+    new([], false, 0),
+    new([0x00, 0x7f], false, 0),
+    new([0xff, 0xf0], false, 0)
+];
 
 public static void TestParseInt64(ж<testing.T> t) {
-    foreach (var (i, test) in int64TestData) {
+    foreach (var (i, test) in range(int64TestData)) {
         var (ret, err) = parseInt64(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -85,23 +85,23 @@ internal partial struct int32Test {
     internal int32 @out;
 }
 
-internal static slice<int32Test> int32TestData = slice<int32Test>([
-    new(slice<byte>([0x00]), true, 0),
-    new(slice<byte>([0x7f]), true, 127),
-    new(slice<byte>([0x00, 0x80]), true, 128),
-    new(slice<byte>([0x01, 0x00]), true, 256),
-    new(slice<byte>([0x80]), true, -128),
-    new(slice<byte>([0xff, 0x7f]), true, -129),
-    new(slice<byte>([0xff]), true, -1),
-    new(slice<byte>([0x80, 0x00, 0x00, 0x00]), true, -2147483648),
-    new(slice<byte>([0x80, 0x00, 0x00, 0x00, 0x00]), false, 0),
-    new(slice<byte>([]), false, 0),
-    new(slice<byte>([0x00, 0x7f]), false, 0),
-    new(slice<byte>([0xff, 0xf0]), false, 0)
-]);
+internal static slice<int32Test> int32TestData = [
+    new([0x00], true, 0),
+    new([0x7f], true, 127),
+    new([0x00, 0x80], true, 128),
+    new([0x01, 0x00], true, 256),
+    new([0x80], true, -128),
+    new([0xff, 0x7f], true, -129),
+    new([0xff], true, -1),
+    new([0x80, 0x00, 0x00, 0x00], true, -2147483648),
+    new([0x80, 0x00, 0x00, 0x00, 0x00], false, 0),
+    new([], false, 0),
+    new([0x00, 0x7f], false, 0),
+    new([0xff, 0xf0], false, 0)
+];
 
 public static void TestParseInt32(ж<testing.T> t) {
-    foreach (var (i, test) in int32TestData) {
+    foreach (var (i, test) in range(int32TestData)) {
         var (ret, err) = parseInt32(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -117,20 +117,20 @@ partial struct bigIntTestsᴛ1 /*dyn*/ {
     internal bool ok;
     internal @string base10;
 }
-internal static slice<bigIntTestsᴛ1> bigIntTests = slice<bigIntTestsᴛ1>([
-    new(slice<byte>([0xff]), true, "-1"),
-    new(slice<byte>([0x00]), true, "0"),
-    new(slice<byte>([0x01]), true, "1"),
-    new(slice<byte>([0x00, 0xff]), true, "255"),
-    new(slice<byte>([0xff, 0x00]), true, "-256"),
-    new(slice<byte>([0x01, 0x00]), true, "256"),
-    new(slice<byte>([]), false, ""),
-    new(slice<byte>([0x00, 0x7f]), false, ""),
-    new(slice<byte>([0xff, 0xf0]), false, "")
-]);
+internal static slice<bigIntTestsᴛ1> bigIntTests = [
+    new([0xff], true, "-1"),
+    new([0x00], true, "0"),
+    new([0x01], true, "1"),
+    new([0x00, 0xff], true, "255"),
+    new([0xff, 0x00], true, "-256"),
+    new([0x01, 0x00], true, "256"),
+    new([], false, ""),
+    new([0x00, 0x7f], false, ""),
+    new([0xff, 0xf0], false, "")
+];
 
 public static void TestParseBigInt(ж<testing.T> t) {
-    foreach (var (i, test) in bigIntTests) {
+    foreach (var (i, test) in range(bigIntTests)) {
         var (ret, err) = parseBigInt(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -160,17 +160,17 @@ internal partial struct bitStringTest {
     internal nint bitLength;
 }
 
-internal static slice<bitStringTest> bitStringTestData = slice<bitStringTest>([
-    new(slice<byte>([]), false, slice<byte>([]), 0),
-    new(slice<byte>([0x00]), true, slice<byte>([]), 0),
-    new(slice<byte>([0x07, 0x00]), true, slice<byte>([0x00]), 1),
-    new(slice<byte>([0x07, 0x01]), false, slice<byte>([]), 0),
-    new(slice<byte>([0x07, 0x40]), false, slice<byte>([]), 0),
-    new(slice<byte>([0x08, 0x00]), false, slice<byte>([]), 0)
-]);
+internal static slice<bitStringTest> bitStringTestData = [
+    new([], false, [], 0),
+    new([0x00], true, [], 0),
+    new([0x07, 0x00], true, [0x00], 1),
+    new([0x07, 0x01], false, [], 0),
+    new([0x07, 0x40], false, [], 0),
+    new([0x08, 0x00], false, [], 0)
+];
 
 public static void TestBitString(ж<testing.T> t) {
-    foreach (var (i, test) in bitStringTestData) {
+    foreach (var (i, test) in range(bitStringTestData)) {
         var (ret, err) = parseBitString(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -192,7 +192,7 @@ internal static readonly object failedˢ5 = (@string)"#5: Failed"u8;
 internal static readonly object failedˢ6 = (@string)"#6: Failed"u8;
 
 public static void TestBitStringAt(ж<testing.T> t) {
-    var bs = new BitString(slice<byte>([0x82, 0x40]), 16);
+    var bs = new BitString([0x82, 0x40], 16);
     if (bs.At(0) != 1) {
         t.Error(failedˢ);
     }
@@ -219,17 +219,17 @@ internal partial struct bitStringRightAlignTest {
     internal slice<byte> @out;
 }
 
-internal static slice<bitStringRightAlignTest> bitStringRightAlignTests = slice<bitStringRightAlignTest>([
-    new(slice<byte>([0x80]), 1, slice<byte>([0x01])),
-    new(slice<byte>([0x80, 0x80]), 9, slice<byte>([0x01, 0x01])),
-    new(slice<byte>([]), 0, slice<byte>([])),
-    new(slice<byte>([0xce]), 8, slice<byte>([0xce])),
-    new(slice<byte>([0xce, 0x47]), 16, slice<byte>([0xce, 0x47])),
-    new(slice<byte>([0x34, 0x50]), 12, slice<byte>([0x03, 0x45]))
-]);
+internal static slice<bitStringRightAlignTest> bitStringRightAlignTests = [
+    new([0x80], 1, [0x01]),
+    new([0x80, 0x80], 9, [0x01, 0x01]),
+    new([], 0, []),
+    new([0xce], 8, [0xce]),
+    new([0xce, 0x47], 16, [0xce, 0x47]),
+    new([0x34, 0x50], 12, [0x03, 0x45])
+];
 
 public static void TestBitStringRightAlign(ж<testing.T> t) {
-    foreach (var (i, test) in bitStringRightAlignTests) {
+    foreach (var (i, test) in range(bitStringRightAlignTests)) {
         var bs = new BitString(test.@in, test.inlen);
         var @out = bs.RightAlign();
         if (!bytes.Equal(@out, test.@out)) {
@@ -244,17 +244,17 @@ internal partial struct objectIdentifierTest {
     internal global::go.encoding.asn1_package.ObjectIdentifier @out; // has base type[]int
 }
 
-internal static slice<objectIdentifierTest> objectIdentifierTestData = slice<objectIdentifierTest>([
-    new(slice<byte>([]), false, slice<nint>([])),
-    new(slice<byte>([85]), true, slice<nint>([2, 5])),
-    new(slice<byte>([85, 0x02]), true, slice<nint>([2, 5, 2])),
-    new(slice<byte>([85, 0x02, 0xc0, 0x00]), true, slice<nint>([2, 5, 2, 0x2000])),
-    new(slice<byte>([0x81, 0x34, 0x03]), true, slice<nint>([2, 100, 3])),
-    new(slice<byte>([85, 0x02, 0xc0, 0x80, 0x80, 0x80, 0x80]), false, slice<nint>([]))
-]);
+internal static slice<objectIdentifierTest> objectIdentifierTestData = [
+    new([], false, slice<nint>([])),
+    new([85], true, slice<nint>([2, 5])),
+    new([85, 0x02], true, slice<nint>([2, 5, 2])),
+    new([85, 0x02, 0xc0, 0x00], true, slice<nint>([2, 5, 2, 0x2000])),
+    new([0x81, 0x34, 0x03], true, slice<nint>([2, 100, 3])),
+    new([85, 0x02, 0xc0, 0x80, 0x80, 0x80, 0x80], false, slice<nint>([]))
+];
 
 public static void TestObjectIdentifier(ж<testing.T> t) {
-    foreach (var (i, test) in objectIdentifierTestData) {
+    foreach (var (i, test) in range(objectIdentifierTestData)) {
         var (ret, err) = parseObjectIdentifier(test.@in);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -266,10 +266,8 @@ public static void TestObjectIdentifier(ж<testing.T> t) {
         }
     }
 
-    {
-        @string s = ((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([1, 2, 3, 4])).String(); if (s != "1.2.3.4"u8) {
-            t.Errorf("bad ObjectIdentifier.String(). Got %s, want 1.2.3.4", s);
-        }
+    @string s = ((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([1, 2, 3, 4])).String(); if (s != "1.2.3.4"u8) {
+        t.Errorf("bad ObjectIdentifier.String(). Got %s, want 1.2.3.4", s);
     }
 }
 
@@ -318,7 +316,7 @@ internal static ref readonly @string formatᶜ => ref formatᶜᵇ;
 private static readonly @string formatᶜᵇ = "Jan _2 15:04:05 -0700 2006"u8;
 
 public static void TestUTCTime(ж<testing.T> t) {
-    foreach (var (i, test) in utcTestData) {
+    foreach (var (i, test) in range(utcTestData)) {
         var (ret, err) = parseUTCTime(slice<byte>(test.@in));
         if (err != nil) {
             if (test.ok) {
@@ -369,7 +367,7 @@ internal static slice<timeTest> generalizedTimeTestData = slice<timeTest>([
 ]);
 
 public static void TestGeneralizedTime(ж<testing.T> t) {
-    foreach (var (i, test) in generalizedTimeTestData) {
+    foreach (var (i, test) in range(generalizedTimeTestData)) {
         var (ret, err) = parseGeneralizedTime(slice<byte>(test.@in));
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok);
@@ -388,37 +386,37 @@ internal partial struct tagAndLengthTest {
     internal global::go.encoding.asn1_package.tagAndLength @out;
 }
 
-internal static slice<tagAndLengthTest> tagAndLengthData = slice<tagAndLengthTest>([
-    new(slice<byte>([0x80, 0x01]), true, new tagAndLength(2, 0, 1, false)),
-    new(slice<byte>([0xa0, 0x01]), true, new tagAndLength(2, 0, 1, true)),
-    new(slice<byte>([0x02, 0x00]), true, new tagAndLength(0, 2, 0, false)),
-    new(slice<byte>([0xfe, 0x00]), true, new tagAndLength(3, 30, 0, true)),
-    new(slice<byte>([0x1f, 0x1f, 0x00]), true, new tagAndLength(0, 31, 0, false)),
-    new(slice<byte>([0x1f, 0x81, 0x00, 0x00]), true, new tagAndLength(0, 128, 0, false)),
-    new(slice<byte>([0x1f, 0x81, 0x80, 0x01, 0x00]), true, new tagAndLength(0, 0x4001, 0, false)),
-    new(slice<byte>([0x00, 0x81, 0x80]), true, new tagAndLength(0, 0, 128, false)),
-    new(slice<byte>([0x00, 0x82, 0x01, 0x00]), true, new tagAndLength(0, 0, 256, false)),
-    new(slice<byte>([0x00, 0x83, 0x01, 0x00]), false, new tagAndLength()),
-    new(slice<byte>([0x1f, 0x85]), false, new tagAndLength()),
-    new(slice<byte>([0x30, 0x80]), false, new tagAndLength()),
+internal static slice<tagAndLengthTest> tagAndLengthData = [
+    new([0x80, 0x01], true, new tagAndLength(2, 0, 1, false)),
+    new([0xa0, 0x01], true, new tagAndLength(2, 0, 1, true)),
+    new([0x02, 0x00], true, new tagAndLength(0, 2, 0, false)),
+    new([0xfe, 0x00], true, new tagAndLength(3, 30, 0, true)),
+    new([0x1f, 0x1f, 0x00], true, new tagAndLength(0, 31, 0, false)),
+    new([0x1f, 0x81, 0x00, 0x00], true, new tagAndLength(0, 128, 0, false)),
+    new([0x1f, 0x81, 0x80, 0x01, 0x00], true, new tagAndLength(0, 0x4001, 0, false)),
+    new([0x00, 0x81, 0x80], true, new tagAndLength(0, 0, 128, false)),
+    new([0x00, 0x82, 0x01, 0x00], true, new tagAndLength(0, 0, 256, false)),
+    new([0x00, 0x83, 0x01, 0x00], false, new tagAndLength()),
+    new([0x1f, 0x85], false, new tagAndLength()),
+    new([0x30, 0x80], false, new tagAndLength()),
     // Superfluous zeros in the length should be an error.
-    new(slice<byte>([0xa0, 0x82, 0x00, 0xff]), false, new tagAndLength()),
+    new([0xa0, 0x82, 0x00, 0xff], false, new tagAndLength()),
     // Lengths up to the maximum size of an int should work.
-    new(slice<byte>([0xa0, 0x84, 0x7f, 0xff, 0xff, 0xff]), true, new tagAndLength(2, 0, 0x7fffffff, true)),
+    new([0xa0, 0x84, 0x7f, 0xff, 0xff, 0xff], true, new tagAndLength(2, 0, 0x7fffffff, true)),
     // Lengths that would overflow an int should be rejected.
-    new(slice<byte>([0xa0, 0x84, 0x80, 0x00, 0x00, 0x00]), false, new tagAndLength()),
+    new([0xa0, 0x84, 0x80, 0x00, 0x00, 0x00], false, new tagAndLength()),
     // Long length form may not be used for lengths that fit in short form.
-    new(slice<byte>([0xa0, 0x81, 0x7f]), false, new tagAndLength()),
+    new([0xa0, 0x81, 0x7f], false, new tagAndLength()),
     // Tag numbers which would overflow int32 are rejected. (The value below is 2^31.)
-    new(slice<byte>([0x1f, 0x88, 0x80, 0x80, 0x80, 0x00, 0x00]), false, new tagAndLength()),
+    new([0x1f, 0x88, 0x80, 0x80, 0x80, 0x00, 0x00], false, new tagAndLength()),
     // Tag numbers that fit in an int32 are valid. (The value below is 2^31 - 1.)
-    new(slice<byte>([0x1f, 0x87, 0xFF, 0xFF, 0xFF, 0x7F, 0x00]), true, new tagAndLength(tag: math.MaxInt32)),
+    new([0x1f, 0x87, 0xFF, 0xFF, 0xFF, 0x7F, 0x00], true, new tagAndLength(tag: math.MaxInt32)),
     // Long tag number form may not be used for tags that fit in short form.
-    new(slice<byte>([0x1f, 0x1e, 0x00]), false, new tagAndLength())
-]);
+    new([0x1f, 0x1e, 0x00], false, new tagAndLength())
+];
 
 public static void TestParseTagAndLength(ж<testing.T> t) {
-    foreach (var (i, test) in tagAndLengthData) {
+    foreach (var (i, test) in range(tagAndLengthData)) {
         var (tagAndLength, _, err) = parseTagAndLength(test.@in, 0);
         if ((err == nil) != test.ok) {
             t.Errorf("#%d: Incorrect error result (did pass? %v, expected: %v)", i, err == nil, test.ok);
@@ -478,7 +476,7 @@ internal static slice<parseFieldParametersTest> parseFieldParametersTestData = s
 ]);
 
 public static void TestParseFieldParameters(ж<testing.T> t) {
-    foreach (var (i, test) in parseFieldParametersTestData) {
+    foreach (var (i, test) in range(parseFieldParametersTestData)) {
         var f = parseFieldParameters(test.@in);
         if (!reflect.DeepEqual(f, test.@out)) {
             t.Errorf("#%d: Bad result: %v (expected %v)", i, f, test.@out);
@@ -521,32 +519,32 @@ partial struct unmarshalTestDataᴛ1 /*dyn*/ {
     internal any @out;
 }
 internal static slice<unmarshalTestDataᴛ1> unmarshalTestData = slice<unmarshalTestDataᴛ1>([
-    new(slice<byte>([0x02, 0x01, 0x42]), newInt(0x42).OrTypedNil()),
-    new(slice<byte>([0x05, 0x00]), Ꮡ(new RawValue(0, 5, false, slice<byte>([]), slice<byte>([0x05, 0x00])))),
-    new(slice<byte>([0x30, 0x08, 0x06, 0x06, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d]), Ꮡ(new TestObjectIdentifierStruct(slice<nint>([1, 2, 840, 113549])))),
-    new(slice<byte>([0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0]), Ꮡ(new BitString(slice<byte>([110, 93, 192]), 18))),
-    new(slice<byte>([0x30, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03]), Ꮡ(slice<nint>([1, 2, 3]))),
-    new(slice<byte>([0x02, 0x01, 0x10]), newInt(16).OrTypedNil()),
-    new(slice<byte>([0x13, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t']), newString("test").OrTypedNil()),
-    new(slice<byte>([0x16, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t']), newString("test").OrTypedNil()),
+    new([0x02, 0x01, 0x42], newInt(0x42).OrTypedNil()),
+    new([0x05, 0x00], Ꮡ(new RawValue(0, 5, false, [], [0x05, 0x00]))),
+    new([0x30, 0x08, 0x06, 0x06, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d], Ꮡ(new TestObjectIdentifierStruct(slice<nint>([1, 2, 840, 113549])))),
+    new([0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0], Ꮡ(new BitString([110, 93, 192], 18))),
+    new([0x30, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03], Ꮡ(slice<nint>([1, 2, 3]))),
+    new([0x02, 0x01, 0x10], newInt(16).OrTypedNil()),
+    new([0x13, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t'], newString("test").OrTypedNil()),
+    new([0x16, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t'], newString("test").OrTypedNil()),
     // Ampersand is allowed in PrintableString due to mistakes by major CAs.
-    new(slice<byte>([0x13, 0x05, (byte)'t', (byte)'e', (byte)'s', (byte)'t', (byte)'&']), newString("test&").OrTypedNil()),
-    new(slice<byte>([0x16, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t']), Ꮡ(new RawValue(0, 22, false, slice<byte>("test"u8), slice<byte>("\x16\x04test"u8)))),
-    new(slice<byte>([0x04, 0x04, 1, 2, 3, 4]), Ꮡ(new RawValue(0, 4, false, slice<byte>([1, 2, 3, 4]), slice<byte>([4, 4, 1, 2, 3, 4])))),
-    new(slice<byte>([0x30, 0x03, 0x81, 0x01, 0x01]), Ꮡ(new TestContextSpecificTags(1))),
-    new(slice<byte>([0x30, 0x08, 0xa1, 0x03, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02]), Ꮡ(new TestContextSpecificTags2(1, 2))),
-    new(slice<byte>([0x30, 0x03, 0x81, 0x01, (byte)'@']), Ꮡ(new TestContextSpecificTags3("@"))),
-    new(slice<byte>([0x01, 0x01, 0x00]), newBool(false).OrTypedNil()),
-    new(slice<byte>([0x01, 0x01, 0xff]), newBool(true).OrTypedNil()),
-    new(slice<byte>([0x30, 0x0b, 0x13, 0x03, 0x66, 0x6f, 0x6f, 0x02, 0x01, 0x22, 0x02, 0x01, 0x33]), Ꮡ(new TestElementsAfterString("foo", 0x22, 0x33))),
-    new(slice<byte>([0x30, 0x05, 0x02, 0x03, 0x12, 0x34, 0x56]), Ꮡ(new TestBigInt(big.NewInt(0x123456)))),
-    new(slice<byte>([0x30, 0x0b, 0x31, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03]), Ꮡ(new TestSet(Ints: slice<nint>([1, 2, 3])))),
-    new(slice<byte>([0x12, 0x0b, (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9', (byte)' ']), newString("0123456789 ").OrTypedNil()),
-    new(slice<byte>([0x14, 0x03, 0xbf, 0x61, 0x3f]), newString("¿a?").OrTypedNil())
+    new([0x13, 0x05, (byte)'t', (byte)'e', (byte)'s', (byte)'t', (byte)'&'], newString("test&").OrTypedNil()),
+    new([0x16, 0x04, (byte)'t', (byte)'e', (byte)'s', (byte)'t'], Ꮡ(new RawValue(0, 22, false, slice<byte>("test"u8), slice<byte>("\x16\x04test"u8)))),
+    new([0x04, 0x04, 1, 2, 3, 4], Ꮡ(new RawValue(0, 4, false, [1, 2, 3, 4], [4, 4, 1, 2, 3, 4]))),
+    new([0x30, 0x03, 0x81, 0x01, 0x01], Ꮡ(new TestContextSpecificTags(1))),
+    new([0x30, 0x08, 0xa1, 0x03, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02], Ꮡ(new TestContextSpecificTags2(1, 2))),
+    new([0x30, 0x03, 0x81, 0x01, (byte)'@'], Ꮡ(new TestContextSpecificTags3("@"))),
+    new([0x01, 0x01, 0x00], newBool(false).OrTypedNil()),
+    new([0x01, 0x01, 0xff], newBool(true).OrTypedNil()),
+    new([0x30, 0x0b, 0x13, 0x03, 0x66, 0x6f, 0x6f, 0x02, 0x01, 0x22, 0x02, 0x01, 0x33], Ꮡ(new TestElementsAfterString("foo", 0x22, 0x33))),
+    new([0x30, 0x05, 0x02, 0x03, 0x12, 0x34, 0x56], Ꮡ(new TestBigInt(big.NewInt(0x123456)))),
+    new([0x30, 0x0b, 0x31, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03], Ꮡ(new TestSet(Ints: [1, 2, 3]))),
+    new([0x12, 0x0b, (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9', (byte)' '], newString("0123456789 ").OrTypedNil()),
+    new([0x14, 0x03, 0xbf, 0x61, 0x3f], newString("¿a?").OrTypedNil())
 ]);
 
 public static void TestUnmarshal(ж<testing.T> t) {
-    foreach (var (i, test) in unmarshalTestData) {
+    foreach (var (i, test) in range(unmarshalTestData)) {
         var pv = reflect.New(reflect.TypeOf(test.@out).Elem());
         var val = pv.Interface();
         var (_, err) = Unmarshal(test.@in, val);
@@ -567,22 +565,20 @@ internal partial struct TestUnmarshalWithNilOrNonPointer_tests /*dyn*/ {
 
 public static void TestUnmarshalWithNilOrNonPointer(ж<testing.T> t) {
     var tests = slice<TestUnmarshalWithNilOrNonPointer_tests>([
-        new(b: slice<byte>([0x05, 0x00]), v: default, want: "asn1: Unmarshal recipient value is nil"),
-        new(b: slice<byte>([0x05, 0x00]), v: new RawValue(), want: "asn1: Unmarshal recipient value is non-pointer asn1.RawValue"),
-        new(b: slice<byte>([0x05, 0x00]), v: ((ж<global::go.encoding.asn1_package.RawValue>)nil), want: "asn1: Unmarshal recipient value is nil *asn1.RawValue")
+        new(b: [0x05, 0x00], v: default, want: "asn1: Unmarshal recipient value is nil"),
+        new(b: [0x05, 0x00], v: new RawValue(), want: "asn1: Unmarshal recipient value is non-pointer asn1.RawValue"),
+        new(b: [0x05, 0x00], v: ((ж<global::go.encoding.asn1_package.RawValue>)nil), want: "asn1: Unmarshal recipient value is nil *asn1.RawValue")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (_, err) = Unmarshal(test.b, test.v);
         if (err == nil) {
             t.Errorf("Unmarshal expecting error, got nil");
             continue;
         }
-        {
-            @string g = err.Error();
-            @string w = test.want; if (g != w) {
-                t.Errorf("InvalidUnmarshalError mismatch\nGot:  %q\nWant: %q", g, w);
-            }
+        @string g = err.Error();
+        @string w = test.want; if (g != w) {
+            t.Errorf("InvalidUnmarshalError mismatch\nGot:  %q\nWant: %q", g, w);
         }
     }
 }
@@ -628,10 +624,8 @@ public partial struct PublicKeyInfo {
 public static void TestCertificate(ж<testing.T> t) {
     // This is a minimal, self-signed certificate that should parse correctly.
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
-    {
-        var (_, err) = Unmarshal(derEncodedSelfSignedCertBytes, Ꮡcert); if (err != nil) {
-            t.Errorf("Unmarshal failed: %v", err);
-        }
+    var (_, err) = Unmarshal(derEncodedSelfSignedCertBytes, Ꮡcert); if (err != nil) {
+        t.Errorf("Unmarshal failed: %v", err);
     }
     if (!reflect.DeepEqual(cert, derEncodedSelfSignedCert)) {
         t.Errorf("Bad result:\ngot: %+v\nwant: %+v", cert, derEncodedSelfSignedCert);
@@ -646,10 +640,8 @@ public static void TestCertificateWithNUL(ж<testing.T> t) {
     // NUL isn't a permitted character in a PrintableString.
 
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
-    {
-        var (_, err) = Unmarshal(derEncodedPaypalNULCertBytes, Ꮡcert); if (err == nil) {
-            t.Error(unmarshalSucceededShouldˢ);
-        }
+    var (_, err) = Unmarshal(derEncodedPaypalNULCertBytes, Ꮡcert); if (err == nil) {
+        t.Error(unmarshalSucceededShouldˢ);
     }
 }
 
@@ -685,7 +677,7 @@ internal partial struct oiEqualTest {
     internal bool same;
 }
 
-internal static slice<oiEqualTest> oiEqualTests = slice<oiEqualTest>([
+internal static slice<oiEqualTest> oiEqualTests = [
     new(
         new ObjectIdentifier(new nint[]{1, 2, 3}.slice()),
         new ObjectIdentifier(new nint[]{1, 2, 3}.slice()),
@@ -701,14 +693,12 @@ internal static slice<oiEqualTest> oiEqualTests = slice<oiEqualTest>([
         new ObjectIdentifier(new nint[]{10, 11, 12}.slice()),
         false
     )
-]);
+];
 
 public static void TestObjectIdentifierEqual(ж<testing.T> t) {
-    foreach (var (_, o) in oiEqualTests) {
-        {
-            var s = o.first.Equal(o.second); if (s != o.same) {
-                t.Errorf("ObjectIdentifier.Equal: got: %t want: %t", s, o.same);
-            }
+    foreach (var (_, o) in range(oiEqualTests)) {
+        var s = o.first.Equal(o.second); if (s != o.same) {
+            t.Errorf("ObjectIdentifier.Equal: got: %t want: %t", s, o.same);
         }
     }
 }
@@ -716,7 +706,7 @@ public static void TestObjectIdentifierEqual(ж<testing.T> t) {
 internal static Certificate derEncodedSelfSignedCert = new Certificate(
     TBSCertificate: new TBSCertificate(
         Version: 0,
-        SerialNumber: new RawValue(Class: 0, Tag: 2, IsCompound: false, Bytes: slice<uint8>([0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98]), FullBytes: slice<byte>([2, 9, 0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98])),
+        SerialNumber: new RawValue(Class: 0, Tag: 2, IsCompound: false, Bytes: [0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98], FullBytes: [2, 9, 0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98]),
         SignatureAlgorithm: new AlgorithmIdentifier(Algorithm: new ObjectIdentifier(new nint[]{1, 2, 840, 113549, 1, 1, 5}.slice())),
         Issuer: new RDNSequence(new RelativeDistinguishedNameSET[]{
             new RelativeDistinguishedNameSET(new AttributeTypeAndValue[]{new AttributeTypeAndValue(Type: new ObjectIdentifier(new nint[]{2, 5, 4, 6}.slice()), Value: (@string)"XX")}.slice()),
@@ -741,7 +731,7 @@ internal static Certificate derEncodedSelfSignedCert = new Certificate(
         PublicKey: new PublicKeyInfo(
             Algorithm: new AlgorithmIdentifier(Algorithm: new ObjectIdentifier(new nint[]{1, 2, 840, 113549, 1, 1, 1}.slice())),
             PublicKey: new BitString(
-                Bytes: slice<uint8>([
+                Bytes: [
                     0x30, 0x48, 0x2, 0x41, 0x0, 0xcd, 0xb7,
                     0x63, 0x9c, 0x32, 0x78, 0xf0, 0x6, 0xaa, 0x27, 0x7f, 0x6e, 0xaf, 0x42,
                     0x90, 0x2b, 0x59, 0x2d, 0x8c, 0xbc, 0xbe, 0x38, 0xa1, 0xc9, 0x2b, 0xa4,
@@ -749,26 +739,26 @@ internal static Certificate derEncodedSelfSignedCert = new Certificate(
                     0x7e, 0x8c, 0x4c, 0x2f, 0xd0, 0xa8, 0x88, 0x96, 0x57, 0x72, 0x2a, 0x4f,
                     0x2a, 0xf7, 0x58, 0x9c, 0xf2, 0xc7, 0x70, 0x45, 0xdc, 0x8f, 0xde, 0xec,
                     0x35, 0x7d, 0x2, 0x3, 0x1, 0x0, 0x1
-                ]),
+                ],
                 BitLength: 592
             )
         )
     ),
     SignatureAlgorithm: new AlgorithmIdentifier(Algorithm: new ObjectIdentifier(new nint[]{1, 2, 840, 113549, 1, 1, 5}.slice())),
     SignatureValue: new BitString(
-        Bytes: slice<uint8>([
+        Bytes: [
             0xa6, 0x7b, 0x6, 0xec, 0x5e, 0xce,
             0x92, 0x77, 0x2c, 0xa4, 0x13, 0xcb, 0xa3, 0xca, 0x12, 0x56, 0x8f, 0xdc, 0x6c,
             0x7b, 0x45, 0x11, 0xcd, 0x40, 0xa7, 0xf6, 0x59, 0x98, 0x4, 0x2, 0xdf, 0x2b,
             0x99, 0x8b, 0xb9, 0xa4, 0xa8, 0xcb, 0xeb, 0x34, 0xc0, 0xf0, 0xa7, 0x8c, 0xf8,
             0xd9, 0x1e, 0xde, 0x14, 0xa5, 0xed, 0x76, 0xbf, 0x11, 0x6f, 0xe3, 0x60, 0xaa,
             0xfa, 0x88, 0x21, 0x49, 0x4, 0x35
-        ]),
+        ],
         BitLength: 512
     )
 );
 
-internal static slice<byte> derEncodedSelfSignedCertBytes = slice<byte>([
+internal static slice<byte> derEncodedSelfSignedCertBytes = [
     0x30, 0x82, 0x02, 0x18, 0x30,
     0x82, 0x01, 0xc2, 0x02, 0x09, 0x00, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c,
     0x98, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -812,9 +802,9 @@ internal static slice<byte> derEncodedSelfSignedCertBytes = slice<byte>([
     0xa8, 0xcb, 0xeb, 0x34, 0xc0, 0xf0, 0xa7, 0x8c, 0xf8, 0xd9, 0x1e, 0xde, 0x14,
     0xa5, 0xed, 0x76, 0xbf, 0x11, 0x6f, 0xe3, 0x60, 0xaa, 0xfa, 0x88, 0x21, 0x49,
     0x04, 0x35
-]);
+];
 
-internal static slice<byte> derEncodedPaypalNULCertBytes = slice<byte>([
+internal static slice<byte> derEncodedPaypalNULCertBytes = [
     0x30, 0x82, 0x06, 0x44, 0x30,
     0x82, 0x05, 0xad, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x03, 0x00, 0xf0, 0x9b,
     0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x05,
@@ -940,17 +930,17 @@ internal static slice<byte> derEncodedPaypalNULCertBytes = slice<byte>([
     0x63, 0x21, 0xab, 0x46, 0x9b, 0x9c, 0x78, 0xd5, 0x54, 0x5b, 0x3d, 0x0c, 0x1e,
     0xc8, 0x64, 0x8c, 0xb5, 0x50, 0x23, 0x82, 0x6f, 0xdb, 0xb8, 0x22, 0x1c, 0x43,
     0x96, 0x07, 0xa8, 0xbb
-]);
+];
 
-internal static slice<slice<@string>> stringSliceTestData = slice<slice<@string>>([
-    slice<@string>(["foo", "bar"]),
-    slice<@string>(["foo", "\\bar"]),
-    slice<@string>(["foo", "\"bar\""]),
-    slice<@string>(["foo", "åäö"])
-]);
+internal static slice<slice<@string>> stringSliceTestData = [
+    ["foo", "bar"],
+    ["foo", "\\bar"],
+    ["foo", "\"bar\""],
+    ["foo", "åäö"]
+];
 
 public static void TestStringSlice(ж<testing.T> t) {
-    foreach (var (_, test) in stringSliceTestData) {
+    foreach (var (_, test) in range(stringSliceTestData)) {
         var (bs, err) = Marshal(test);
         if (err != nil) {
             t.Error(err);
@@ -977,16 +967,16 @@ partial struct explicitTaggedTimeTestDataᴛ1 /*dyn*/ {
     internal explicitTaggedTimeTest @out;
 }
 internal static slice<explicitTaggedTimeTestDataᴛ1> explicitTaggedTimeTestData = slice<explicitTaggedTimeTestDataᴛ1>([
-    new(slice<byte>([0x30, 0x11, 0xa0, 0xf, 0x17, 0xd, (byte)'9', (byte)'1', (byte)'0', (byte)'5', (byte)'0', (byte)'6', (byte)'1', (byte)'6', (byte)'4', (byte)'5', (byte)'4', (byte)'0', (byte)'Z']),
+    new([0x30, 0x11, 0xa0, 0xf, 0x17, 0xd, (byte)'9', (byte)'1', (byte)'0', (byte)'5', (byte)'0', (byte)'6', (byte)'1', (byte)'6', (byte)'4', (byte)'5', (byte)'4', (byte)'0', (byte)'Z'],
         new explicitTaggedTimeTest(time.Date(1991, 5, 6, 16, 45, 40, 0, time.ΔUTC))),
-    new(slice<byte>([0x30, 0x17, 0xa0, 0xf, 0x18, 0x13, (byte)'2', (byte)'0', (byte)'1', (byte)'0', (byte)'0', (byte)'1', (byte)'0', (byte)'2', (byte)'0', (byte)'3', (byte)'0', (byte)'4', (byte)'0', (byte)'5', (byte)'+', (byte)'0', (byte)'6', (byte)'0', (byte)'7']),
+    new([0x30, 0x17, 0xa0, 0xf, 0x18, 0x13, (byte)'2', (byte)'0', (byte)'1', (byte)'0', (byte)'0', (byte)'1', (byte)'0', (byte)'2', (byte)'0', (byte)'3', (byte)'0', (byte)'4', (byte)'0', (byte)'5', (byte)'+', (byte)'0', (byte)'6', (byte)'0', (byte)'7'],
         new explicitTaggedTimeTest(time.Date(2010, 1, 2, 3, 4, 5, 0, time.FixedZone("", 6 * 60 * 60 + 7 * 60))))
 ]);
 
 public static void TestExplicitTaggedTime(ж<testing.T> t) {
     // Test that a time.Time will match either tagUTCTime or
     // tagGeneralizedTime.
-    foreach (var (i, test) in explicitTaggedTimeTestData) {
+    foreach (var (i, test) in range(explicitTaggedTimeTestData)) {
         ref var got = ref heap(new explicitTaggedTimeTest(), out var Ꮡgot);
         var (_, err) = Unmarshal(test.@in, Ꮡgot);
         if (err != nil) {
@@ -1009,15 +999,11 @@ public static void TestImplicitTaggedTime(ж<testing.T> t) {
     // time should be expected when implicitly tagged.)
     var der = slice<byte>([0x30, 0x0f, (byte)(0x80 | 24), 0xd, (byte)'9', (byte)'1', (byte)'0', (byte)'5', (byte)'0', (byte)'6', (byte)'1', (byte)'6', (byte)'4', (byte)'5', (byte)'4', (byte)'0', (byte)'Z']);
     ref var result = ref heap(new implicitTaggedTimeTest(), out var Ꮡresult);
-    {
-        var (_, err) = Unmarshal(der, Ꮡresult); if (err != nil) {
-            t.Fatalf("Error while parsing: %s", err);
-        }
+    var (_, err) = Unmarshal(der, Ꮡresult); if (err != nil) {
+        t.Fatalf("Error while parsing: %s", err);
     }
-    {
-        var expected = time.Date(1991, 5, 6, 16, 45, 40, 0, time.ΔUTC); if (!result.Time.Equal(expected)) {
-            t.Errorf("Wrong result. Got %v, want %v", result.Time, expected);
-        }
+    var expected = time.Date(1991, 5, 6, 16, 45, 40, 0, time.ΔUTC); if (!result.Time.Equal(expected)) {
+        t.Errorf("Wrong result. Got %v, want %v", result.Time, expected);
     }
 }
 
@@ -1038,10 +1024,8 @@ public static void TestTruncatedExplicitTag(ж<testing.T> t) {
     ]);
 
     ref var result = ref heap(new truncatedExplicitTagTest(), out var Ꮡresult);
-    {
-        var (_, err) = Unmarshal(der, Ꮡresult); if (err == nil) {
-            t.Error(unmarshalReturnedWithoutˢ);
-        }
+    var (_, err) = Unmarshal(der, Ꮡresult); if (err == nil) {
+        t.Error(unmarshalReturnedWithoutˢ);
     }
 }
 
@@ -1078,11 +1062,9 @@ public static void TestMarshalNilValue(ж<testing.T> t) {
         default,
         new TestMarshalNilValue_nilValueTestData()
     ]);
-    foreach (var (i, test) in nilValueTestData) {
-        {
-            var (_, err) = Marshal(test); if (err == nil) {
-                t.Fatalf("#%d: successfully marshaled nil value", i);
-            }
+    foreach (var (i, test) in range(nilValueTestData)) {
+        var (_, err) = Marshal(test); if (err == nil) {
+            t.Fatalf("#%d: successfully marshaled nil value", i);
         }
     }
 }
@@ -1126,10 +1108,8 @@ public static void TestNull(ж<testing.T> t) {
     }
 
     ref var unmarshaled = ref heap<global::go.encoding.asn1_package.RawValue>(new RawValue(), out var Ꮡunmarshaled);
-    {
-        var (_, errΔ1) = Unmarshal(NullBytes, Ꮡunmarshaled); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var (_, errΔ1) = Unmarshal(NullBytes, Ꮡunmarshaled); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     unmarshaled.FullBytes = NullRawValue.FullBytes;
@@ -1149,17 +1129,15 @@ internal partial struct TestExplicitTagRawValueStruct_foo /*dyn*/ {
 }
 
 public static void TestExplicitTagRawValueStruct(ж<testing.T> t) {
-    var before = new TestExplicitTagRawValueStruct_foo(B: slice<byte>([1, 2, 3]));
+    var before = new TestExplicitTagRawValueStruct_foo(B: [1, 2, 3]);
     var (derBytes, err) = Marshal(before);
     if (err != nil) {
         t.Fatal(err);
     }
 
     ref var after = ref heap(new TestExplicitTagRawValueStruct_foo(), out var Ꮡafter);
-    {
-        var (rest, errΔ1) = Unmarshal(derBytes, Ꮡafter); if (errΔ1 != nil || len(rest) != 0) {
-            t.Fatal(errΔ1);
-        }
+    var (rest, errΔ1) = Unmarshal(derBytes, Ꮡafter); if (errΔ1 != nil || len(rest) != 0) {
+        t.Fatal(errΔ1);
     }
 
     @string got = fmt.Sprintf("%#v"u8, after);
@@ -1187,14 +1165,14 @@ public static void TestTaggedRawValue(ж<testing.T> t) {
     UntypedInt tag = 5;
 
     var tests = slice<TestTaggedRawValue_tests>([
-        new(false, slice<byte>([0x30, 3, TagInteger, 1, 1])),
-        new(true, slice<byte>([0x30, 3, (byte)((byte)(ClassContextSpecific << 6) | (byte)tag), 1, 1])),
-        new(true, slice<byte>([0x30, 3, (byte)((UntypedInt)((ClassContextSpecific << 6) | tag) | (byte)isCompound), 1, 1])),
-        new(false, slice<byte>([0x30, 3, (byte)((UntypedInt)((ClassApplication << 6) | tag) | (byte)isCompound), 1, 1])),
-        new(false, slice<byte>([0x30, 3, (byte)((UntypedInt)((ClassPrivate << 6) | tag) | (byte)isCompound), 1, 1]))
+        new(false, [0x30, 3, TagInteger, 1, 1]),
+        new(true, [0x30, 3, (byte)((byte)(ClassContextSpecific << 6) | (byte)tag), 1, 1]),
+        new(true, [0x30, 3, (byte)((UntypedInt)((ClassContextSpecific << 6) | tag) | (byte)isCompound), 1, 1]),
+        new(false, [0x30, 3, (byte)((UntypedInt)((ClassApplication << 6) | tag) | (byte)isCompound), 1, 1]),
+        new(false, [0x30, 3, (byte)((UntypedInt)((ClassPrivate << 6) | tag) | (byte)isCompound), 1, 1])
     ]);
 
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         ref var tagged = ref heap(new TestTaggedRawValue_taggedRawValue(), out var Ꮡtagged);
         {
             var (_, err) = Unmarshal(test.derBytes, Ꮡtagged); if ((err == nil) != test.shouldMatch) {
@@ -1218,7 +1196,7 @@ partial struct bmpStringTestsᴛ1 /*dyn*/ {
     internal @string encodedHex;
     internal bool invalid;
 }
-internal static slice<bmpStringTestsᴛ1> bmpStringTests = slice<bmpStringTestsᴛ1>([
+internal static slice<bmpStringTestsᴛ1> bmpStringTests = [
     new("empty string", "", "0000", false),
     // Example from https://tools.ietf.org/html/rfc7292#appendix-B.
     new("rfc7292 example", "Beavis", "0042006500610076006900730000", false),
@@ -1229,13 +1207,13 @@ internal static slice<bmpStringTestsᴛ1> bmpStringTests = slice<bmpStringTests�
     new("invalid noncharacter 0xfdd1", "", "5051fdd1", true),
     new("invalid noncharacter 0xffff", "", "5051ffff", true),
     new("invalid noncharacter 0xfffe", "", "5051fffe", true)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseBMPStringDidnTFailˢ = (@string)"parseBMPString didn't fail as expected"u8;
 
 public static void TestBMPString(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in bmpStringTests) {
+    foreach (var (_, vᴛ1) in range(bmpStringTests)) {
         ref var test = ref heap(new bmpStringTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1305,10 +1283,8 @@ public static void TestImplicitTypeRoundtrip(ж<testing.T> t) {
         t.Fatalf("Marshal failed: %s", err);
     }
     ref var b = ref heap(new TestImplicitTypeRoundtrip_tagged(), out var Ꮡb);
-    {
-        var (_, errΔ1) = Unmarshal(enc, Ꮡb); if (errΔ1 != nil) {
-            t.Fatalf("Unmarshal failed: %s", errΔ1);
-        }
+    var (_, errΔ1) = Unmarshal(enc, Ꮡb); if (errΔ1 != nil) {
+        t.Fatalf("Unmarshal failed: %s", errΔ1);
     }
 
     if (!reflect.DeepEqual(a, b)) {
@@ -1328,7 +1304,7 @@ public static void TestParsingMemoryConsumption(ж<testing.T> t) {
     // fail due to the empty content; and, in such cases, we want to make sure
     // that we do not unnecessarily allocate memories.
     var derBomb = new slice<byte>(10_000_000);
-    foreach (var i in range(derBomb)) {
+    foreach (var i in range(len(derBomb))) {
         derBomb[i] = 0x30;
     }
     derBomb = appendꓸꓸꓸ(slice<byte>([0x30, 0x83, 0x98, 0x96, 0x80]), derBomb);
@@ -1386,10 +1362,8 @@ public static void TestUnmarshalNestingLimitSlice(ж<testing.T> t) {
     t.Run(belowLimitˢ, (ж<testing.T> tΔ2) => {
         var data = makeDataʗ1(tΔ2, limit);
         ref var r = ref heap<TestUnmarshalNestingLimitSlice_Recursive>(out var Ꮡr);
-        {
-            var (_, err) = Unmarshal(data, Ꮡr); if (err != nil) {
-                tΔ2.Errorf("Unmarshal failed at depth %d: %v", limit, err);
-            }
+        var (_, err) = Unmarshal(data, Ꮡr); if (err != nil) {
+            tΔ2.Errorf("Unmarshal failed at depth %d: %v", limit, err);
         }
     });
 
@@ -1401,11 +1375,9 @@ public static void TestUnmarshalNestingLimitSlice(ж<testing.T> t) {
         if (err == nil) {
             tΔ3.Fatalf("Unmarshal succeeded at depth %d, want error", limit + 1);
         }
-        {
-            @string got = err.Error();
-            @string want = asn1StructureErrorˢ; if (got != want) {
-                tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q", got, want);
-            }
+        @string got = err.Error();
+        @string want = asn1StructureErrorˢ; if (got != want) {
+            tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q", got, want);
         }
     });
 }
@@ -1426,7 +1398,7 @@ public static void TestUnmarshalNestingLimitStruct(ж<testing.T> t) {
     slice<byte> makeData(ж<testing.T> tΔ1, nint depth) {
         TestUnmarshalNestingLimitStruct_Recursive r = default;
         foreach (var _ᴛ1 in range(depth - 1)) {
-            r = new TestUnmarshalNestingLimitStruct_Recursive(Next: slice<TestUnmarshalNestingLimitStruct_Recursive>([r]));
+            r = new TestUnmarshalNestingLimitStruct_Recursive(Next: [r]);
         }
         var (data, err) = Marshal(r);
         if (err != nil) {
@@ -1439,10 +1411,8 @@ public static void TestUnmarshalNestingLimitStruct(ж<testing.T> t) {
     t.Run(belowLimitˢ, (ж<testing.T> tΔ2) => {
         var data = makeDataʗ1(tΔ2, limit);
         ref var r = ref heap(new TestUnmarshalNestingLimitStruct_Recursive(), out var Ꮡr);
-        {
-            var (_, err) = Unmarshal(data, Ꮡr); if (err != nil) {
-                tΔ2.Errorf("Unmarshal failed at depth %d: %v", limit, err);
-            }
+        var (_, err) = Unmarshal(data, Ꮡr); if (err != nil) {
+            tΔ2.Errorf("Unmarshal failed at depth %d: %v", limit, err);
         }
     });
 
@@ -1454,11 +1424,9 @@ public static void TestUnmarshalNestingLimitStruct(ж<testing.T> t) {
         if (err == nil) {
             tΔ3.Fatalf("Unmarshal succeeded at depth %d, want error", limit + 1);
         }
-        {
-            @string got = err.Error();
-            @string want = asn1StructureErrorˢ; if (got != want) {
-                tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q", got, want);
-            }
+        @string got = err.Error();
+        @string want = asn1StructureErrorˢ; if (got != want) {
+            tΔ3.Errorf("Unmarshal error mismatch\ngot:  %q\nwant: %q", got, want);
         }
     });
 }

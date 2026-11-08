@@ -143,10 +143,8 @@ public static void TestValueSeq(ж<Δtesting.T> t) {
         new("map[string]int", ValueOf(m), (ж<Δtesting.T> tΔ9, iter.Seq<reflectꓸValue> s) => {
             var copy = maps.Clone<map<@string, nint>, @string, nint>(mʗ1);
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
-                {
-                    var (_, ok) = copy[v.String(), ꟷ]; if (!ok) {
-                        tΔ9.Fatalf("unexpected %v", v.Interface());
-                    }
+                var (_, ok) = copy[v.String(), ꟷ]; if (!ok) {
+                    tΔ9.Fatalf("unexpected %v", v.Interface());
                 }
                 delete(copy, v.String());
             }
@@ -162,10 +160,8 @@ public static void TestValueSeq(ж<Δtesting.T> t) {
                 [2] = false
             };
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
-                {
-                    var (b, ok) = mΔ1[v.Int(), ꟷ]; if (!ok || b) {
-                        tΔ10.Fatalf("unexpected %v", v.Interface());
-                    }
+                var (b, ok) = mΔ1[v.Int(), ꟷ]; if (!ok || b) {
+                    tΔ10.Fatalf("unexpected %v", v.Interface());
                 }
                 mΔ1[v.Int()] = true;
                 i++;
@@ -220,7 +216,7 @@ public static void TestValueSeq(ж<Δtesting.T> t) {
             }
         })
     ]);
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         var seq = tc.val.Seq();
         tc.check(t, seq);
     }
@@ -409,7 +405,7 @@ public static void TestValueSeq2(ж<Δtesting.T> t) {
             }
         })
     ]);
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         var seq = tc.val.Seq2();
         tc.check(t, seq);
     }
@@ -429,8 +425,7 @@ internal static void Seq(this methodIter _, Func<nint, bool> yield) {
 }
 
 // For Type.CanSeq test.
-internal static void NonSeq(this methodIter _, Action<nint> yield) {
-}
+internal static void NonSeq(this methodIter _, Action<nint> yield) { }
 
 // methodIter2 is a type from which we can derive a method
 // value that is an iter.Seq2.
@@ -446,7 +441,6 @@ internal static void Seq2(this methodIter2 _, Func<nint, nint, bool> yield) {
 }
 
 // For Type.CanSeq2 test.
-internal static void NonSeq2(this methodIter2 _, Action<nint, nint> yield) {
-}
+internal static void NonSeq2(this methodIter2 _, Action<nint, nint> yield) { }
 
 } // end reflect_test_package

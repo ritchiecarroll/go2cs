@@ -24,10 +24,8 @@ internal static ж<types.Struct> findStructTypeConfig(ж<testing.T> t, @string s
     var types_ = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types_)));
     foreach (var (_, tv) in types_) {
-        {
-            var (ts, ok) = tv.Type._<ж<types.Struct>>(ᐧ); if (ok) {
-                return ts;
-            }
+        var (ts, ok) = tv.Type._<ж<types.Struct>>(ᐧ); if (ok) {
+            return ts;
         }
     }
     t.Fatalf("failed to find a struct type in src:\n%s\n", src);
@@ -148,7 +146,7 @@ public static void TestAtomicAlign(ж<testing.T> t) {
     @string src = srcᶜ40;
 
     var want = slice<int64>([0, 8, 16]);
-    foreach (var (_, arch) in slice<@string>(["386", "amd64"])) {
+    foreach (var (_, arch) in range(slice<@string>(["386", "amd64"]))) {
         var wantʗ1 = want;
         t.Run(arch, (ж<testing.T> tΔ1) => {
             ref var conf = ref heap<types.Config>(new types.Config(
@@ -176,7 +174,7 @@ partial struct gcSizeTest {
     internal @string src;
 }
 
-internal static slice<gcSizeTest> gcSizesTests = slice<gcSizeTest>([
+internal static slice<gcSizeTest> gcSizesTests = [
     new(
         "issue60431",
         """
@@ -220,7 +218,7 @@ func main() {
 
 """u8.Raw()
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string amd64ˢ => ref amd64ˢᵇ;
@@ -228,7 +226,7 @@ private static readonly @string amd64ˢᵇ = "amd64"u8;
 
 public static void TestGCSizes(ж<testing.T> t) {
     types.DefPredeclaredTestFuncs();
-    foreach (var (_, vᴛ1) in gcSizesTests) {
+    foreach (var (_, vᴛ1) in range(gcSizesTests)) {
         ref var tc = ref heap(new gcSizeTest(), out var Ꮡtc);
         tc = vᴛ1;
 

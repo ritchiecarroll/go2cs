@@ -279,7 +279,7 @@ uint(0xffffffffffffffff)
             want: "go test fuzz v1\nint(0)"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestUnmarshalMarshal_type(), out var Ꮡtest);
         test = vᴛ1;
 

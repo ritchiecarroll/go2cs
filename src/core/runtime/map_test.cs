@@ -20,8 +20,6 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
@@ -131,10 +129,8 @@ public static void TestMapOperatorAssignment(ж<testing.T> t) {
     m[0] %= 456;
 
     const nint want = /* (12345 + 67890) / 123 % 456 */ 196;
-    {
-        nint got = m[0]; if (got != want) {
-            t.Errorf("got %d, want %d", got, (nint)(want));
-        }
+    nint got = m[0]; if (got != want) {
+        t.Errorf("got %d, want %d", got, (nint)(want));
     }
 }
 
@@ -151,10 +147,8 @@ public static void TestMapAppendAssignment(ж<testing.T> t) {
     m[0] = appendꓸꓸꓸ(m[0], a);
 
     var want = slice<nint>([12345, 67890, 123, 456, 7, 8, 9, 0]);
-    {
-        var got = m[0]; if (!slices.Equal<slice<nint>, nint>(got, want)) {
-            t.Errorf("got %v, want %v", got, want);
-        }
+    var got = m[0]; if (!slices.Equal<slice<nint>, nint>(got, want)) {
+        t.Errorf("got %v, want %v", got, want);
     }
 }
 
@@ -398,7 +392,7 @@ internal static partial void testConcurrentReadsAfterGrowth(ж<testing.T> t, boo
                                 defer(Ꮡwg.Done, ref ᒐ);
                                 ref var mv = ref heap<reflectꓸValue>(reflect.ValueOf(mʗ3), out var Ꮡmv);
                                 var keys = mv.MapKeys();
-                                foreach (var (_, vᴛ1) in keys) {
+                                foreach (var (_, vᴛ1) in range(keys)) {
                                     ref var k = ref heap(new reflectꓸValue(), out var Ꮡk);
                                     k = vᴛ1;
 
@@ -558,10 +552,8 @@ public static void TestMapNanGrowIterator(ж<testing.T> t) {
     var found = new map<nint, EmptyStruct>();
     foreach (var (_, v) in m) {
         if (v != -1) {
-            {
-                var (_, repeat) = found[v, ꟷ]; if (repeat) {
-                    t.Fatalf("repeat of value %d", v);
-                }
+            var (_, repeat) = found[v, ꟷ]; if (repeat) {
+                t.Fatalf("repeat of value %d", v);
             }
             found[v] = new EmptyStruct();
         }
@@ -655,16 +647,12 @@ public static void TestMapStringBytesLookup(ж<testing.T> t) {
         ["2000000000000000000000000000000000000000000000000"] = 2
     };
     var buf = slice<byte>("1000000000000000000000000000000000000000000000000"u8);
-    {
-        nint xΔ1 = m[tmpstring(buf)]; if (xΔ1 != 1) {
-            t.Errorf(@"m[string([]byte(""1""))] = %d, want 1", xΔ1);
-        }
+    nint xΔ1 = m[tmpstring(buf)]; if (xΔ1 != 1) {
+        t.Errorf(@"m[string([]byte(""1""))] = %d, want 1", xΔ1);
     }
     buf[0] = (byte)'2';
-    {
-        nint xΔ2 = m[tmpstring(buf)]; if (xΔ2 != 2) {
-            t.Errorf(@"m[string([]byte(""2""))] = %d, want 2", xΔ2);
-        }
+    nint xΔ2 = m[tmpstring(buf)]; if (xΔ2 != 2) {
+        t.Errorf(@"m[string([]byte(""2""))] = %d, want 2", xΔ2);
     }
 
     nint x = default;
@@ -750,7 +738,7 @@ public static void TestMapLargeValNoPointer(ж<testing.T> t) {
 // Test that making a map with a large or invalid hint
 // doesn't panic. (Issue 19926).
 public static void TestIgnoreBogusMapHint(ж<testing.T> t) {
-    foreach (var (_, hint) in slice<int64>([-1, 4611686018427387904L])) {
+    foreach (var (_, hint) in range(slice<int64>([-1, 4611686018427387904L]))) {
         _ = new map<nint, nint>((nint)(hint));
     }
 }
@@ -792,7 +780,7 @@ public static void TestDeferDeleteSlow(ж<testing.T> t) {
     var ks = slice<complex128>([0D, 1D, 2D, 3D]);
 
     var m = new map<any, nint>();
-    foreach (var (i, k) in ks) {
+    foreach (var (i, k) in range(ks)) {
         m[k] = i;
     }
     if (len(m) != len(ks)) {
@@ -804,7 +792,7 @@ public static void TestDeferDeleteSlow(ж<testing.T> t) {
     func(() => {
         GoFrame ᒐ = default;
         try {
-            foreach (var (_, k) in ksʗ1) {
+            foreach (var (_, k) in range(ksʗ1)) {
                 defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), mʗ1, k, ref ᒐ);
             }
         }
@@ -827,10 +815,8 @@ public static void TestIncrementAfterDeleteValueInt(ж<testing.T> t) {
     m[key1] = 99;
     delete(m, key1);
     m[key2]++;
-    {
-        nint n2 = m[key2]; if (n2 != 1) {
-            t.Errorf("incremented 0 to %d", n2);
-        }
+    nint n2 = m[key2]; if (n2 != 1) {
+        t.Errorf("incremented 0 to %d", n2);
     }
 }
 
@@ -842,10 +828,8 @@ public static void TestIncrementAfterDeleteValueInt32(ж<testing.T> t) {
     m[key1] = 99;
     delete(m, key1);
     m[key2]++;
-    {
-        var n2 = m[key2]; if (n2 != 1) {
-            t.Errorf("incremented 0 to %d", n2);
-        }
+    var n2 = m[key2]; if (n2 != 1) {
+        t.Errorf("incremented 0 to %d", n2);
     }
 }
 
@@ -857,10 +841,8 @@ public static void TestIncrementAfterDeleteValueInt64(ж<testing.T> t) {
     m[key1] = 99;
     delete(m, key1);
     m[key2]++;
-    {
-        var n2 = m[key2]; if (n2 != 1) {
-            t.Errorf("incremented 0 to %d", n2);
-        }
+    var n2 = m[key2]; if (n2 != 1) {
+        t.Errorf("incremented 0 to %d", n2);
     }
 }
 
@@ -876,10 +858,8 @@ public static void TestIncrementAfterDeleteKeyStringValueInt(ж<testing.T> t) {
     m[key1] = 99;
     delete(m, key1);
     m[key2] += 1;
-    {
-        nint n2 = m[key2]; if (n2 != 1) {
-            t.Errorf("incremented 0 to %d", n2);
-        }
+    nint n2 = m[key2]; if (n2 != 1) {
+        t.Errorf("incremented 0 to %d", n2);
     }
 }
 
@@ -895,10 +875,8 @@ public static void TestIncrementAfterDeleteKeyValueString(ж<testing.T> t) {
     m[key1] = "99";
     delete(m, key1);
     m[key2] += "1"u8;
-    {
-        @string n2 = m[key2]; if (n2 != "1"u8) {
-            t.Errorf("appended '1' to empty (nil) string, got %s", n2);
-        }
+    @string n2 = m[key2]; if (n2 != "1"u8) {
+        t.Errorf("appended '1' to empty (nil) string, got %s", n2);
     }
 }
 
@@ -919,10 +897,8 @@ public static void TestIncrementAfterBulkClearKeyStringValueInt(ж<testing.T> t)
         delete(m, k);
     }
     m[key2]++;
-    {
-        nint n2 = m[key2]; if (n2 != 1) {
-            t.Errorf("incremented 0 to %d", n2);
-        }
+    nint n2 = m[key2]; if (n2 != 1) {
+        t.Errorf("incremented 0 to %d", n2);
     }
 }
 
@@ -1350,7 +1326,7 @@ public static void TestGroupSizeZero(ж<testing.T> t) {
 
 public static void TestMapIterOrder(ж<testing.T> t) {
     var sizes = slice<nint>([3, 7, 9, 15]);
-    foreach (var (_, n) in sizes) {
+    foreach (var (_, n) in range(sizes)) {
         for (nint i = 0; i < 1000; i++) {
             // Make m be {0: true, 1: true, ..., n-1: true}.
             var m = new map<nint, bool>();

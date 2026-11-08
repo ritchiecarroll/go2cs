@@ -34,7 +34,6 @@ public static ref Func<slice<byte>, bool> ContainsCPU => ref ((StaticBox<Func<sl
 public static readonly ж<Func<slice<byte>, (int64, error)>> ᏑParseV1Number = new StaticBox<Func<slice<byte>, (int64, error)>>(default(Func<slice<byte>, (int64, error)>));
 public static ref Func<slice<byte>, (int64, error)> ParseV1Number => ref ((StaticBox<Func<slice<byte>, (int64, error)>>)ᏑParseV1Number).ValueSlot;
 internal static void initᴛParseV1Number() { ParseV1Number = parseV1Number; }
-
 public static readonly ж<Func<slice<byte>, (float64, bool, error)>> ᏑParseV2Limit = new StaticBox<Func<slice<byte>, (float64, bool, error)>>(default(Func<slice<byte>, (float64, bool, error)>));
 public static ref Func<slice<byte>, (float64, bool, error)> ParseV2Limit => ref ((StaticBox<Func<slice<byte>, (float64, bool, error)>>)ᏑParseV2Limit).ValueSlot;
 internal static void initᴛParseV2Limit() { ParseV2Limit = parseV2Limit; }
@@ -42,7 +41,6 @@ internal static void initᴛParseV2Limit() { ParseV2Limit = parseV2Limit; }
 public static readonly ж<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, (nint, global::go.@internal.runtime.cgroup_package.Version, error)>> ᏑParseCPUCgroup = new StaticBox<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, (nint, global::go.@internal.runtime.cgroup_package.Version, error)>>(default(Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, (nint, global::go.@internal.runtime.cgroup_package.Version, error)>));
 public static ref Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, (nint, global::go.@internal.runtime.cgroup_package.Version, error)> ParseCPUCgroup => ref ((StaticBox<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, (nint, global::go.@internal.runtime.cgroup_package.Version, error)>>)ᏑParseCPUCgroup).ValueSlot;
 internal static void initᴛParseCPUCgroup() { ParseCPUCgroup = parseCPUCgroup; }
-
 public static readonly ж<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, global::go.@internal.runtime.cgroup_package.Version, slice<byte>, (nint, error)>> ᏑParseCPUMount = new StaticBox<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, global::go.@internal.runtime.cgroup_package.Version, slice<byte>, (nint, error)>>(default(Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, global::go.@internal.runtime.cgroup_package.Version, slice<byte>, (nint, error)>));
 public static ref Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, global::go.@internal.runtime.cgroup_package.Version, slice<byte>, (nint, error)> ParseCPUMount => ref ((StaticBox<Func<nint, Func<nint, slice<byte>, (nint, uintptr)>, slice<byte>, slice<byte>, global::go.@internal.runtime.cgroup_package.Version, slice<byte>, (nint, error)>>)ᏑParseCPUMount).ValueSlot;
 internal static void initᴛParseCPUMount() { ParseCPUMount = parseCPUMount; }

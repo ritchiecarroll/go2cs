@@ -58,9 +58,9 @@ using static global::go.net.http.cgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ACMkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICSAAgIggAJFIKClICSpIL4gu6CgpSClICSAAgIggAIEoKClIKUgJLIggAHEIKClICSzKK4goKUgIKkgIKkggANCIIAFDKykoLKgoKUgIKkgoKAgqSC", "206-228:1", "", "262=Repeat/1/2/16,Repeat/2/2/21;290=NewRequest/1/1/1,NewWriter/1/1/3")]
-[assembly: GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACQ6tIKCpqaCgoKClIKmpoKCgoLmxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoIACQiCgrgAEiaUgJKkgJIACAiCgrgAEyiCgoKCpoKSgpSCuMrmgoK4AAcQ5oKCuO6mgoKm3AAHGLKCpsqsgIIACQqCgrjuAA0GgoKMuO6mggAICJKCAAgOuIKCgJIACwqCgriCgJKkgJIACAiCgoKClMq4AAgQ8pS4gqSCgpSCgoKUgoKUkoKCgqaClIKUgoKCgoKUtOiigoKCgoK4+IKCksqmlIKCuKbmgoKUkgAIEtwACAaCgoLcgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1", "", "372=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5", "483:21")]
-[assembly: GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "ACA2opS4ABImlICSpICSAAkSggALELKClIKClIKU6qKUuIKCgoKUgoL8opS4poKAkgAKDKKUuKaCAAgGgpS4ABQysqKCgoKAggAKDpDigOKApIK4poKC", "179-186:1", "", "197=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ACMkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICSAAgIggAJFIKClJKUgviC7oKClIKUkviCAAgSgoKUgpSSuIIABxCCgpSSvKK4goKUgpSClIIADQiCABQyspKCyoKClIKUgoKClII=", "206-228:1", "", "250=Repeat/1/2/16,Repeat/2/2/21;278=NewRequest/1/1/1,NewWriter/1/1/3")]
+[assembly: GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACI6tIKCpqaCgoKClIKmpoKCgoLmxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoIACQiCgrgAEiaUgJKkgJIACAiCgrgAEyiCgoKCpoKSgpSCuMrmgoK4AAcQ5oKCuO6mgoKm3AAHGLKCpsqsggAICoKCuO4ADQaCgoy47qaCAAgIkoIACA64goKSAAoKgoK4goCSpICSAAgIgoKCgpTKuAAIEPKUuIKkgoKUgoKClIKClJKCgoKmgpSClIKCgoKClLToooKCgoKCuPiCgpLKppSCgrim5oKClJIACBLcAAgGgoKC3IKCgpIACAiCAAkagoKC", "260-264:1;348-351:1", "", "368=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5", "477:21")]
+[assembly: GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "ACA2opS4ABImlICSpICSAAkSggALELKClIKClIKU6qKUuIKCgoKUgoL8opS4poKSAAkMopS4poIACAaClLgAFDKyooKCgoIACQ6AwsKUgrimgoI=", "179-186:1", "", "195=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

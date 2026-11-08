@@ -75,10 +75,10 @@ public static void TestReader(ж<testing.T> t) {
             Gname: "eng",
             Format: FormatGNU))
         ]),
-        chksums: slice<@string>([
+        chksums: [
             "6cbd88fc",
             "ddac04b3"
-        ])
+        ]
     ), new(
         @file: "testdata/sparse-formats.tar",
         headers: slice<ж<global::go.archive.tar_package.Header>>([Ꮡ(new global::go.archive.tar_package.Header(
@@ -165,13 +165,13 @@ public static void TestReader(ж<testing.T> t) {
             Devminor: 0,
             Format: FormatGNU))
         ]),
-        chksums: slice<@string>([
+        chksums: [
             "5375e1d2",
             "5375e1d2",
             "5375e1d2",
             "5375e1d2",
             "8eb179ba"
-        ])
+        ]
     ), new(
         @file: "testdata/star.tar",
         headers: slice<ж<global::go.archive.tar_package.Header>>([Ꮡ(new global::go.archive.tar_package.Header(
@@ -283,9 +283,9 @@ public static void TestReader(ж<testing.T> t) {
             },
             Format: FormatPAX))
         ]),
-        chksums: slice<@string>([
+        chksums: [
             "5fd7e86a"
-        ])
+        ]
     ), new(
         @file: "testdata/pax-records.tar",
         headers: slice<ж<global::go.archive.tar_package.Header>>([Ꮡ(new global::go.archive.tar_package.Header(
@@ -636,7 +636,7 @@ public static void TestReader(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (_, vᴛ1) in vectors) {
+    foreach (var (_, vᴛ1) in range(vectors)) {
         ref var v = ref heap(new TestReader_vectors(), out var Ꮡv);
         v = vᴛ1;
 
@@ -695,7 +695,7 @@ public static void TestReader(ж<testing.T> t) {
                 }
 
                 hdrs = move2heap(hdrsᴷ, hdrs);
-                foreach (var (i, hdr) in hdrs) {
+                foreach (var (i, hdr) in range(hdrs)) {
                     if (i >= len(vʗ1.headers)) {
                         tΔ1.Fatalf("entry %d: unexpected header:\ngot %+v", i, hdr.Value);
                     }
@@ -708,7 +708,7 @@ public static void TestReader(ж<testing.T> t) {
                 }
 
                 chksums = move2heap(chksumsᴷ, chksums);
-                foreach (var (i, sum) in chksums) {
+                foreach (var (i, sum) in range(chksums)) {
                     if (i >= len(vʗ1.chksums)) {
                         tΔ1.Fatalf("entry %d: unexpected sum: got %s", i, sum);
                     }
@@ -741,23 +741,23 @@ internal partial struct TestPartialRead_vectors /*dyn*/ {
 public static void TestPartialRead(ж<testing.T> t) {
     var vectors = slice<TestPartialRead_vectors>([new(
         @file: "testdata/gnu.tar",
-        cases: slice<TestPartialRead_testCase>([
+        cases: [
             new(4, "Kilt"),
             new(6, "Google")
-        ])
+        ]
     ), new(
         @file: "testdata/sparse-formats.tar",
-        cases: slice<TestPartialRead_testCase>([
+        cases: [
             new(2, "\x00G"),
             new(4, "\x00G\x00o"),
             new(6, "\x00G\x00o\x00G"),
             new(8, "\x00G\x00o\x00G\x00o"),
             new(4, "end\n")
-        ])
+        ]
     )
     ]);
 
-    foreach (var (_, vᴛ1) in vectors) {
+    foreach (var (_, vᴛ1) in range(vectors)) {
         ref var v = ref heap(new TestPartialRead_vectors(), out var Ꮡv);
         v = vᴛ1;
 
@@ -773,26 +773,22 @@ public static void TestPartialRead(ж<testing.T> t) {
                 defer(() => fʗ1.Close(), ref ᒐ);
 
                 var tr = NewReader(new tar_test_package.os_FileжReader(f));
-                foreach (var (i, tc) in vʗ1.cases) {
+                foreach (var (i, tc) in range(vʗ1.cases)) {
                     var (hdr, errΔ1) = tr.Next();
                     if (errΔ1 != nil || hdr == nil) {
                         tΔ1.Fatalf("entry %d, Next(): got %v, want %v", i, errΔ1, (any)(default));
                     }
                     var buf = new slice<byte>(tc.cnt);
-                    {
-                        var (_, errΔ2) = io.ReadFull(new global::go.archive.tar_package.ReaderжReader(tr), buf); if (errΔ2 != nil) {
-                            tΔ1.Fatalf("entry %d, ReadFull(): got %v, want %v", i, errΔ2, (any)(default));
-                        }
+                    var (_, errΔ2) = io.ReadFull(new global::go.archive.tar_package.ReaderжReader(tr), buf); if (errΔ2 != nil) {
+                        tΔ1.Fatalf("entry %d, ReadFull(): got %v, want %v", i, errΔ2, (any)(default));
                     }
                     if (((sstring)buf) != tc.output) {
                         tΔ1.Fatalf("entry %d, ReadFull(): got %q, want %q", i, (@string)buf, tc.output);
                     }
                 }
 
-                {
-                    var (_, errΔ3) = tr.Next(); if (!AreEqual(errΔ3, io.EOF)) {
-                        tΔ1.Fatalf("Next(): got %v, want EOF", errΔ3);
-                    }
+                var (_, errΔ3) = tr.Next(); if (!AreEqual(errΔ3, io.EOF)) {
+                    tΔ1.Fatalf("Next(): got %v, want EOF", errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -816,7 +812,7 @@ public static void TestUninitializedRead(ж<testing.T> t) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         var tr = NewReader(new tar_test_package.os_FileжReader(f));
-        (_, err) = tr.Read(slice<byte>([]));
+        (_, err) = tr.Read([]);
         if (err == nil || !AreEqual(err, io.EOF)) {
             t.Errorf("Unexpected error: %v, wanted %v", err, io.EOF);
         }
@@ -828,11 +824,9 @@ public static void TestUninitializedRead(ж<testing.T> t) {
 internal partial struct reader {
     /*embed*/ public io_package.Reader Reader;
 }
-
 internal partial struct readSeeker {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
-
 internal partial struct readBadSeeker {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
@@ -841,9 +835,7 @@ internal partial struct readBadSeeker {
 // interface field in *readBadSeeker's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Read(this readBadSeeker recvᴛ, slice<byte> p) => recvᴛ.ReadSeeker.Read(p);
 
-internal static (int64, error) Seek(this ref readBadSeeker rbs, int64 _Δp1, nint _Δp2) {
-    return (0, fmt.Errorf("illegal seek"u8));
-}
+internal static (int64, error) Seek(this ref readBadSeeker rbs, int64 _Δp1, nint _Δp2) { return (0, fmt.Errorf("illegal seek"u8)); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string garbageˢ => ref garbageˢᵇ;
@@ -872,12 +864,12 @@ public static void TestReadTruncation(ж<testing.T> t) {
     var ssᴷ = new stackAppend<@string>();
 
     slice<@string> ss = default;
-    foreach (var (_, p) in slice<@string>([
+    foreach (var (_, p) in range(slice<@string>([
         "testdata/gnu.tar",
         "testdata/ustar-file-reg.tar",
         "testdata/pax-path-hdr.tar",
         "testdata/sparse-formats.tar"
-    ])) {
+    ]))) {
         var (buf, err) = os.ReadFile(p);
         if (err != nil) {
             t.Fatalf("unexpected error: %v", err);
@@ -935,7 +927,7 @@ public static void TestReadTruncation(ж<testing.T> t) {
         new(sparse + trash, 5, io.EOF)
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         for (nint j = 0; j < 6; j++) {
             ж<global::go.archive.tar_package.Reader> tr = default;
             @string s1 = default;
@@ -976,17 +968,13 @@ public static void TestReadTruncation(ж<testing.T> t) {
             nint cnt = default;
             error err = default;
             for (;;) {
-                {
-                    (_, err) = tr.Next(); if (err != nil) {
-                        break;
-                    }
+                (_, err) = tr.Next(); if (err != nil) {
+                    break;
                 }
                 cnt++;
                 if (s2 == "manual"u8) {
-                    {
-                        (_, err) = tr.writeTo(io.Discard); if (err != nil) {
-                            break;
-                        }
+                    (_, err) = tr.writeTo(io.Discard); if (err != nil) {
+                        break;
                     }
                 }
             }
@@ -1034,7 +1022,7 @@ public static void TestReadHeaderOnly(ж<testing.T> t) {
             hdrs = append(hdrsᴷ, hdrs, hdr);
 
             // If a special flag, we should read nothing.
-            var (cnt, _) = io.ReadFull(new global::go.archive.tar_package.ReaderжReader(tr), slice<byte>([0]));
+            var (cnt, _) = io.ReadFull(new global::go.archive.tar_package.ReaderжReader(tr), [0]);
             if (cnt > 0 && hdr.Typeflag != TypeReg) {
                 t.Errorf("ReadFull(...): got %d bytes, want 0 bytes", cnt);
             }
@@ -1102,16 +1090,14 @@ public static void TestMergePAX(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var got = @new<global::go.archive.tar_package.Header>();
         var err = mergePAX(ref (got).DerefOrNull(), v.@in);
         if (v.ok && !reflect.DeepEqual(got.Value, v.want.Value)) {
             t.Errorf("test %d, mergePAX(...):\ngot  %+v\nwant %+v", i, got.Value, v.want.Value);
         }
-        {
-            var ok = err == nil; if (ok != v.ok) {
-                t.Errorf("test %d, mergePAX(...): got %v, want %v", i, ok, v.ok);
-            }
+        var ok = err == nil; if (ok != v.ok) {
+            t.Errorf("test %d, mergePAX(...): got %v, want %v", i, ok, v.ok);
         }
     }
 }
@@ -1143,16 +1129,14 @@ public static void TestParsePAX(ж<testing.T> t) {
             default, false)
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var r = strings.NewReader(v.@in);
         var (got, err) = parsePAX(new tar_test_package.strings_ReaderжReader(r));
         if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(got, v.want) && !(len(got) == 0 && len(v.want) == 0)) {
             t.Errorf("test %d, parsePAX():\ngot  %v\nwant %v", i, got, v.want);
         }
-        {
-            var ok = err == nil; if (ok != v.ok) {
-                t.Errorf("test %d, parsePAX(): got %v, want %v", i, ok, v.ok);
-            }
+        var ok = err == nil; if (ok != v.ok) {
+            t.Errorf("test %d, parsePAX(): got %v, want %v", i, ok, v.ok);
         }
     }
 }
@@ -1207,7 +1191,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> t) {
     slice<@string> /*out*/ makeSparseStrings(slice<global::go.archive.tar_package.sparseEntry> sp) {
         slice<@string> @out = default;
         global::go.archive.tar_package.formatter f = default;
-        foreach (var (_, s) in sp) {
+        foreach (var (_, s) in range(sp)) {
             array<byte> b = new(24);
             f.formatNumeric(b[..12], s.Offset);
             f.formatNumeric(b[12..], s.Length);
@@ -1281,7 +1265,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, vᴛ1) in vectors) {
+    foreach (var (i, vᴛ1) in range(vectors)) {
         var v = vᴛ1;
 
         ref var blk = ref heap(new global::go.archive.tar_package.block(), out var Ꮡblk);
@@ -1476,7 +1460,7 @@ public static void TestReadGNUSparsePAXHeaders(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         ref var hdr = ref heap(new global::go.archive.tar_package.Header(), out var Ꮡhdr);
         hdr.PAXRecords = v.inputHdrs;
         var r = strings.NewReader(v.inputData + "#"u8); // Add canary byte
@@ -1561,31 +1545,31 @@ internal partial struct TestFileReader_vectors /*dyn*/ {
 public static void TestFileReader(ж<testing.T> t) {
     var vectors = slice<TestFileReader_vectors>([new(
         maker: new TestFileReader_makeReg("", 0),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(0, 0),
             new TestFileReader_testRead(0, "", io.EOF),
             new TestFileReader_testRead(1, "", io.EOF),
             new TestFileReader_testWriteTo(default, 0, default),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeReg("", 1),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(1, 1),
             new TestFileReader_testRead(5, "", io.ErrUnexpectedEOF),
             new TestFileReader_testWriteTo(default, 0, io.ErrUnexpectedEOF),
             new TestFileReader_testRemaining(1, 1)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeReg("hello", 5),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(5, 5),
             new TestFileReader_testRead(5, "hello", io.EOF),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeReg("hello, world", 50),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(50, 50),
             new TestFileReader_testRead(7, "hello, ", default),
             new TestFileReader_testRemaining(43, 43),
@@ -1594,10 +1578,10 @@ public static void TestFileReader(ж<testing.T> t) {
             new TestFileReader_testWriteTo(default, 0, io.ErrUnexpectedEOF),
             new TestFileReader_testRead(1, "", io.ErrUnexpectedEOF),
             new TestFileReader_testRemaining(38, 38)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeReg("hello, world", 5),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(5, 5),
             new TestFileReader_testRead(0, "", default),
             new TestFileReader_testRead(4, "hell", default),
@@ -1606,137 +1590,137 @@ public static void TestFileReader(ж<testing.T> t) {
             new TestFileReader_testRemaining(0, 0),
             new TestFileReader_testWriteTo(default, 0, default),
             new TestFileReader_testRead(0, "", io.EOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 3)}.slice()), 8),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(8, 5),
             new TestFileReader_testRead(3, "ab\x00", default),
             new TestFileReader_testRead(10, ((@string)(new byte[]{0x00, 0x00, 0x63, 0x64, 0x65})), io.EOF),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 3)}.slice()), 8),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(8, 5),
             new TestFileReader_testWriteTo(new fileOps(new any[]{(@string)"ab", (int64)3, cdeˢ}.slice()), 8, default),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 3)}.slice()), 10),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(10, 5),
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x61, 0x62, 0x00, 0x00, 0x00, 0x63, 0x64, 0x65, 0x00, 0x00})), io.EOF),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abc", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 3)}.slice()), 10),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(10, 5),
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x61, 0x62, 0x00, 0x00, 0x00, 0x63})), io.ErrUnexpectedEOF),
             new TestFileReader_testRemaining(4, 2)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 2)}.slice()), 8),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(8, 5),
             new TestFileReader_testRead(8, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65})), io.EOF),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 0), new(6, 0), new(6, 2)}.slice()), 8),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(8, 5),
             new TestFileReader_testRead(8, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65})), io.EOF),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 0), new(6, 0), new(6, 2)}.slice()), 8),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(8, 5),
             new TestFileReader_testWriteTo(new fileOps(new any[]{(int64)1, abcˢ, (int64)2, (@string)"de"}.slice()), 8, default),
             new TestFileReader_testRemaining(0, 0)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 2)}.slice()), 10),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65, 0x00, 0x00})), io.EOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 2)}.slice()), 10),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testWriteTo(new fileOps(new any[]{(int64)1, abcˢ, (int64)2, (@string)"de", (int64)1, (@string)"\x00"}.slice()), 10, default)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 2), new(8, 0), new(8, 0), new(8, 0), new(8, 0)}.slice()), 10),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65, 0x00, 0x00})), io.EOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("", 0), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{}.slice()), 2),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, "\x00\x00", io.EOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("", 8), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, "\x00", io.ErrUnexpectedEOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("ab", 2), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62})), errMissData)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("ab", 8), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62})), io.ErrUnexpectedEOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abc", 3), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00})), errMissData)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abc", 8), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00})), io.ErrUnexpectedEOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65})), errMissData)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 5), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testWriteTo(new fileOps(new any[]{(int64)1, abcˢ, (int64)2, (@string)"de"}.slice()), 8, errMissData)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcde", 8), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65})), io.ErrUnexpectedEOF)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcdefghEXTRA", 13), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(15, 13),
             new TestFileReader_testRead(100, ((@string)(new byte[]{0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x64, 0x65, 0x66, 0x67, 0x68, 0x00, 0x00, 0x00, 0x00})), errUnrefData),
             new TestFileReader_testWriteTo(default, 0, errUnrefData),
             new TestFileReader_testRemaining(0, 5)
-        ])
+        ]
     ), new(
         maker: new TestFileReader_makeSparse(new TestFileReader_makeReg("abcdefghEXTRA", 13), new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, 5)}.slice()), 15),
-        tests: slice<TestFileReader_testFnc>([
+        tests: [
             new TestFileReader_testRemaining(15, 13),
             new TestFileReader_testWriteTo(new fileOps(new any[]{(int64)1, abcˢ, (int64)2, defghˢ, (int64)4}.slice()), 15, errUnrefData),
             new TestFileReader_testRead(100, "", errUnrefData),
             new TestFileReader_testRemaining(0, 5)
-        ])
+        ]
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         global::go.archive.tar_package.fileReader fr = default;
         switch (v.maker.type()) {
         case TestFileReader_makeReg maker: {
@@ -1760,7 +1744,7 @@ public static void TestFileReader(ж<testing.T> t) {
             break;
         }}
 
-        foreach (var (j, tf) in v.tests) {
+        foreach (var (j, tf) in range(v.tests)) {
             switch (tf.type()) {
             case TestFileReader_testRead tfΔ1: {
                 var b = new slice<byte>(tfΔ1.cnt);
@@ -1775,12 +1759,10 @@ public static void TestFileReader(ж<testing.T> t) {
             case TestFileReader_testWriteTo tfΔ1: {
                 var f = Ꮡ(new testFile(ops: tfΔ1.ops));
                 var (got, err) = fr.WriteTo(new tar_internal_test_package.testFileжWriter(f));
-                {
-                    var (_, ok) = err._<testError>(ᐧ); if (ok) {
-                        t.Errorf("test %d.%d, WriteTo(): %v", i, j, err);
-                    } else if (got != tfΔ1.wantCnt || !AreEqual(err, tfΔ1.wantErr)) {
-                        t.Errorf("test %d.%d, WriteTo() = (%d, %v), want (%d, %v)", i, j, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
-                    }
+                var (_, ok) = err._<testError>(ᐧ); if (ok) {
+                    t.Errorf("test %d.%d, WriteTo(): %v", i, j, err);
+                } else if (got != tfΔ1.wantCnt || !AreEqual(err, tfΔ1.wantErr)) {
+                    t.Errorf("test %d.%d, WriteTo() = (%d, %v), want (%d, %v)", i, j, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
                 }
                 if (len(f.ops) > 0) {
                     t.Errorf("test %d.%d, expected %d more operations", i, j, len(f.ops));
@@ -1821,11 +1803,11 @@ private static readonly @string securePathᶜᵇ = "secure"u8;
 
 public static void TestInsecurePaths(ж<testing.T> t) {
     t.Setenv(godebugˢ, tarinsecurepath0ˢ);
-    foreach (var (_, vᴛ1) in slice<@string>([
+    foreach (var (_, vᴛ1) in range(slice<@string>([
         "../foo",
         "/foo",
         "a/b/../../../c"
-    ])) {
+    ]))) {
         ref var path = ref heap(new @string(), out var Ꮡpath);
         path = vᴛ1;
 

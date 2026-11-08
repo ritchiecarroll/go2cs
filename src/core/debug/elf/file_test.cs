@@ -37,11 +37,11 @@ internal partial struct fileTest {
     internal slice<global::go.debug.elf_package.Symbol> symbols;
 }
 
-internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(slice<fileTest>([
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>([
     new(
         "testdata/gcc-386-freebsd-exec",
         new FileHeader(ELFCLASS32, ELFDATA2LSB, EV_CURRENT, ELFOSABI_FREEBSD, 0, binary.LittleEndian, ET_EXEC, EM_386, 0x80483cc),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".interp", SHT_PROGBITS, SHF_ALLOC, 0x80480d4, 0xd4, 0x15, 0x0, 0x0, 0x1, 0x0, 0x15),
             new(".hash", SHT_HASH, SHF_ALLOC, 0x80480ec, 0xec, 0x90, 0x3, 0x0, 0x4, 0x4, 0x90),
@@ -72,16 +72,16 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0xa0d, 0xf8, 0x0, 0x0, 0x1, 0x0, 0xf8),
             new(".symtab", SHT_SYMTAB, 0x0, 0x0, 0xfb8, 0x4b0, 0x1d, 0x38, 0x4, 0x10, 0x4b0),
             new(".strtab", SHT_STRTAB, 0x0, 0x0, 0x1468, 0x206, 0x0, 0x0, 0x1, 0x0, 0x206)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([
+        ],
+        [
             new(PT_PHDR, PF_R + PF_X, 0x34, 0x8048034, 0x8048034, 0xa0, 0xa0, 0x4),
             new(PT_INTERP, PF_R, 0xd4, 0x80480d4, 0x80480d4, 0x15, 0x15, 0x1),
             new(PT_LOAD, PF_R + PF_X, 0x0, 0x8048000, 0x8048000, 0x5fb, 0x5fb, 0x1000),
             new(PT_LOAD, PF_R + PF_W, 0x5fc, 0x80495fc, 0x80495fc, 0xd8, 0xf8, 0x1000),
             new(PT_DYNAMIC, PF_R + PF_W, 0x60c, 0x804960c, 0x804960c, 0x98, 0x98, 0x4)
-        ]),
-        slice<@string>(["libc.so.6"]),
-        slice<global::go.debug.elf_package.Symbol>([
+        ],
+        ["libc.so.6"],
+        [
             new("", 3, 0, false, 0, 1, 134512852, 0, "", ""),
             new("", 3, 0, false, 0, 2, 134512876, 0, "", ""),
             new("", 3, 0, false, 0, 3, 134513020, 0, "", ""),
@@ -156,12 +156,12 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new("exit", 18, 0, false, 0, 0, 0, 68, "", ""),
             new("_Jv_RegisterClasses", 32, 0, false, 0, 0, 0, 0, "", ""),
             new("__register_frame_info", 32, 0, false, 0, 0, 0, 0, "", "")
-        ])
+        ]
     ),
     new(
         "testdata/gcc-amd64-linux-exec",
         new FileHeader(ELFCLASS64, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0, binary.LittleEndian, ET_EXEC, EM_X86_64, 0x4003e0),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".interp", SHT_PROGBITS, SHF_ALLOC, 0x400200, 0x200, 0x1c, 0x0, 0x0, 0x1, 0x0, 0x1c),
             new(".note.ABI-tag", SHT_NOTE, SHF_ALLOC, 0x40021c, 0x21c, 0x20, 0x0, 0x0, 0x4, 0x0, 0x20),
@@ -199,8 +199,8 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0xf10, 0x149, 0x0, 0x0, 0x1, 0x0, 0x149),
             new(".symtab", SHT_SYMTAB, 0x0, 0x0, 0x19a0, 0x6f0, 0x24, 0x39, 0x8, 0x18, 0x6f0),
             new(".strtab", SHT_STRTAB, 0x0, 0x0, 0x2090, 0x1fc, 0x0, 0x0, 0x1, 0x0, 0x1fc)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([
+        ],
+        [
             new(PT_PHDR, PF_R + PF_X, 0x40, 0x400040, 0x400040, 0x1c0, 0x1c0, 0x8),
             new(PT_INTERP, PF_R, 0x200, 0x400200, 0x400200, 0x1c, 0x1c, 1),
             new(PT_LOAD, PF_R + PF_X, 0x0, 0x400000, 0x400000, 0x684, 0x684, 0x200000),
@@ -209,9 +209,9 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(PT_NOTE, PF_R, 0x21c, 0x40021c, 0x40021c, 0x20, 0x20, 0x4),
             new(PT_LOOS + 0x474E550, PF_R, 0x5b8, 0x4005b8, 0x4005b8, 0x24, 0x24, 0x4),
             new(PT_LOOS + 0x474E551, PF_R + PF_W, 0x0, 0x0, 0x0, 0x0, 0x0, 0x8)
-        ]),
-        slice<@string>(["libc.so.6"]),
-        slice<global::go.debug.elf_package.Symbol>([
+        ],
+        ["libc.so.6"],
+        [
             new("", 3, 0, false, 0, 1, 4194816, 0, "", ""),
             new("", 3, 0, false, 0, 2, 4194844, 0, "", ""),
             new("", 3, 0, false, 0, 3, 4194880, 0, "", ""),
@@ -285,13 +285,13 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new("_edata", 16, 0, false, 0, 65521, 6293656, 0, "", ""),
             new("main", 18, 0, false, 0, 13, 4195480, 27, "", ""),
             new("_init", 18, 0, false, 0, 11, 4195224, 0, "", "")
-        ])
+        ]
     ),
     new(
         "testdata/hello-world-core.gz",
         new FileHeader(ELFCLASS64, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0x0, binary.LittleEndian, ET_CORE, EM_X86_64, 0x0),
-        slice<global::go.debug.elf_package.SectionHeader>([]),
-        slice<global::go.debug.elf_package.ProgHeader>([
+        [],
+        [
             new(Type: PT_NOTE, Flags: 0x0, Off: 0x3f8, Vaddr: 0x0, Paddr: 0x0, Filesz: 0x8ac, Memsz: 0x0, Align: 0x0),
             new(Type: PT_LOAD, Flags: PF_X + PF_R, Off: 0x1000, Vaddr: 0x400000, Paddr: 0x0, Filesz: 0x0, Memsz: 0x1000, Align: 0x1000),
             new(Type: PT_LOAD, Flags: PF_R, Off: 0x1000, Vaddr: 0x401000, Paddr: 0x0, Filesz: 0x1000, Memsz: 0x1000, Align: 0x1000),
@@ -309,14 +309,14 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(Type: PT_LOAD, Flags: PF_W + PF_R, Off: 0x17000, Vaddr: 0x7fff79972000UL, Paddr: 0x0, Filesz: 0x23000, Memsz: 0x23000, Align: 0x1000),
             new(Type: PT_LOAD, Flags: PF_X + PF_R, Off: 0x3a000, Vaddr: 0x7fff799f8000UL, Paddr: 0x0, Filesz: 0x1000, Memsz: 0x1000, Align: 0x1000),
             new(Type: PT_LOAD, Flags: PF_X + PF_R, Off: 0x3b000, Vaddr: 0xffffffffff600000UL, Paddr: 0x0, Filesz: 0x1000, Memsz: 0x1000, Align: 0x1000)
-        ]),
+        ],
         default,
         default
     ),
     new(
         "testdata/compressed-32.obj",
         new FileHeader(ELFCLASS32, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0x0, binary.LittleEndian, ET_REL, EM_386, 0x0),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".text", SHT_PROGBITS, (global::go.debug.elf_package.SectionFlag)(SHF_ALLOC | SHF_EXECINSTR), 0x0, 0x34, 0x17, 0x0, 0x0, 0x1, 0x0, 0x17),
             new(".rel.text", SHT_REL, SHF_INFO_LINK, 0x0, 0x3dc, 0x10, 0x13, 0x1, 0x4, 0x8, 0x10),
@@ -338,10 +338,10 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0x4ac, 0xab, 0x0, 0x0, 0x1, 0x0, 0xab),
             new(".symtab", SHT_SYMTAB, 0x0, 0x0, 0x2c8, 0x100, 0x14, 0xe, 0x4, 0x10, 0x100),
             new(".strtab", SHT_STRTAB, 0x0, 0x0, 0x3c8, 0x13, 0x0, 0x0, 0x1, 0x0, 0x13)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([]),
+        ],
+        [],
         default,
-        slice<global::go.debug.elf_package.Symbol>([
+        [
             new("hello.c", 4, 0, false, 0, 65521, 0, 0, "", ""),
             new("", 3, 0, false, 0, 1, 0, 0, "", ""),
             new("", 3, 0, false, 0, 3, 0, 0, "", ""),
@@ -357,12 +357,12 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new("", 3, 0, false, 0, 14, 0, 0, "", ""),
             new("main", 18, 0, false, 0, 1, 0, 23, "", ""),
             new("puts", 16, 0, false, 0, 0, 0, 0, "", "")
-        ])
+        ]
     ),
     new(
         "testdata/compressed-64.obj",
         new FileHeader(ELFCLASS64, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0x0, binary.LittleEndian, ET_REL, EM_X86_64, 0x0),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".text", SHT_PROGBITS, (global::go.debug.elf_package.SectionFlag)(SHF_ALLOC | SHF_EXECINSTR), 0x0, 0x40, 0x1b, 0x0, 0x0, 0x1, 0x0, 0x1b),
             new(".rela.text", SHT_RELA, SHF_INFO_LINK, 0x0, 0x488, 0x30, 0x13, 0x1, 0x8, 0x18, 0x30),
@@ -384,10 +384,10 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0x6e0, 0xb0, 0x0, 0x0, 0x1, 0x0, 0xb0),
             new(".symtab", SHT_SYMTAB, 0x0, 0x0, 0x2f0, 0x180, 0x14, 0xe, 0x8, 0x18, 0x180),
             new(".strtab", SHT_STRTAB, 0x0, 0x0, 0x470, 0x13, 0x0, 0x0, 0x1, 0x0, 0x13)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([]),
+        ],
+        [],
         default,
-        slice<global::go.debug.elf_package.Symbol>([
+        [
             new("hello.c", 4, 0, false, 0, 65521, 0, 0, "", ""),
             new("", 3, 0, false, 0, 1, 0, 0, "", ""),
             new("", 3, 0, false, 0, 3, 0, 0, "", ""),
@@ -403,12 +403,12 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new("", 3, 0, false, 0, 14, 0, 0, "", ""),
             new("main", 18, 0, false, 0, 1, 0, 27, "", ""),
             new("puts", 16, 0, false, 0, 0, 0, 0, "", "")
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc620-sparc64.obj",
         new FileHeader(Class: ELFCLASS64, Data: ELFDATA2MSB, Version: EV_CURRENT, OSABI: ELFOSABI_NONE, ABIVersion: 0x0, ByteOrder: binary.BigEndian, Type: ET_REL, Machine: EM_SPARCV9, Entry: 0x0),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".text", SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR, 0x0, 0x40, 0x2c, 0x0, 0x0, 0x4, 0x0, 0x2c),
             new(".rela.text", SHT_RELA, SHF_INFO_LINK, 0x0, 0xa58, 0x48, 0x13, 0x1, 0x8, 0x18, 0x48),
@@ -430,10 +430,10 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0x1148, 0xb3, 0x0, 0x0, 0x1, 0x0, 0xb3),
             new(".symtab", SHT_SYMTAB, 0x0, 0x0, 0x8c0, 0x180, 0x14, 0xe, 0x8, 0x18, 0x180),
             new(".strtab", SHT_STRTAB, 0x0, 0x0, 0xa40, 0x13, 0x0, 0x0, 0x1, 0x0, 0x13)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([]),
+        ],
+        [],
         default,
-        slice<global::go.debug.elf_package.Symbol>([
+        [
             new("hello.c", 4, 0, false, 0, 65521, 0, 0, "", ""),
             new("", 3, 0, false, 0, 1, 0, 0, "", ""),
             new("", 3, 0, false, 0, 3, 0, 0, "", ""),
@@ -449,12 +449,12 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new("", 3, 0, false, 0, 14, 0, 0, "", ""),
             new("main", 18, 0, false, 0, 1, 0, 44, "", ""),
             new("puts", 16, 0, false, 0, 0, 0, 0, "", "")
-        ])
+        ]
     ),
     new(
         "testdata/gcc-riscv64-linux-exec",
         new FileHeader(ELFCLASS64, ELFDATA2LSB, EV_CURRENT, ELFOSABI_NONE, 0, binary.LittleEndian, ET_EXEC, EM_RISCV, 0x10460),
-        slice<global::go.debug.elf_package.SectionHeader>([
+        [
             new("", SHT_NULL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0),
             new(".interp", SHT_PROGBITS, SHF_ALLOC, 0x10270, 0x270, 0x21, 0x0, 0x0, 0x1, 0x0, 0x21),
             new(".note.gnu.build-id", SHT_NOTE, SHF_ALLOC, 0x10294, 0x294, 0x24, 0x0, 0x0, 0x4, 0x0, 0x24),
@@ -481,8 +481,8 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(".comment", SHT_PROGBITS, SHF_MERGE + SHF_STRINGS, 0x0, 0x1018, 0x26, 0x0, 0x0, 0x1, 0x1, 0x26),
             new(".riscv.attributes", SHT_RISCV_ATTRIBUTES, 0x0, 0x0, 0x103e, 0x66, 0x0, 0x0, 0x1, 0x0, 0x66),
             new(".shstrtab", SHT_STRTAB, 0x0, 0x0, 0x10a4, 0xff, 0x0, 0x0, 0x1, 0x0, 0xff)
-        ]),
-        slice<global::go.debug.elf_package.ProgHeader>([
+        ],
+        [
             new(PT_PHDR, PF_R, 0x40, 0x10040, 0x10040, 0x230, 0x230, 0x8),
             new(PT_INTERP, PF_R, 0x270, 0x10270, 0x10270, 0x21, 0x21, 0x1),
             new(PT_RISCV_ATTRIBUTES, PF_R, 0x103e, 0x0, 0x0, 0x66, 0x0, 0x1),
@@ -493,27 +493,25 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             new(PT_GNU_EH_FRAME, PF_R, 0x550, 0x10550, 0x10550, 0x24, 0x24, 0x4),
             new(PT_GNU_STACK, PF_W + PF_R, 0x0, 0x0, 0x0, 0x0, 0x0, 0x10),
             new(PT_GNU_RELRO, PF_R, 0xe00, 0x11e00, 0x11e00, 0x200, 0x200, 0x1)
-        ]),
-        slice<@string>(["libc.so.6"]),
+        ],
+        ["libc.so.6"],
         default
     )
-]));
+]);
 internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 public static void TestOpen(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var i in range(fileTests)) {
+        foreach (var i in range(len(fileTests))) {
             var tt = Ꮡ(fileTests, i);
 
             ж<global::go.debug.elf_package.File> f = default;
             error err = default;
             if (path.Ext(tt.@file) == ".gz"u8) {
                 io.ReaderAt r = default;
-                {
-                    (r, err) = decompress(tt.@file); if (err == nil) {
-                        (f, err) = NewFile(r);
-                    }
+                (r, err) = decompress(tt.@file); if (err == nil) {
+                    (f, err) = NewFile(r);
                 }
             } else {
                 (f, err) = Open(tt.@file);
@@ -528,7 +526,7 @@ public static void TestOpen(ж<testing.T> t) {
                 t.Errorf("open %s:\n\thave %#v\n\twant %#v\n", tt.@file, f.FileHeader, tt.hdr);
                 continue;
             }
-            foreach (var (iΔ1, s) in f.Sections) {
+            foreach (var (iΔ1, s) in range(f.Sections)) {
                 if (iΔ1 >= len(tt.sections)) {
                     break;
                 }
@@ -537,7 +535,7 @@ public static void TestOpen(ж<testing.T> t) {
                     t.Errorf("open %s, section %d:\n\thave %#v\n\twant %#v\n", tt.@file, iΔ1, s.SectionHeader, sh);
                 }
             }
-            foreach (var (iΔ2, p) in f.Progs) {
+            foreach (var (iΔ2, p) in range(f.Progs)) {
                 if (iΔ2 >= len(tt.progs)) {
                     break;
                 }
@@ -620,16 +618,16 @@ internal partial struct relocationTest {
     internal slice<relocationTestEntry> entries;
 }
 
-internal static slice<relocationTest> relocationTests = slice<relocationTest>([
+internal static slice<relocationTest> relocationTests = [
     new(
         "testdata/go-relocation-test-gcc441-x86-64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.4.1", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test.c", Class: dwarf.ClassString),
@@ -637,21 +635,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x6, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x6}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc441-x86.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.4.1", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"t.c", Class: dwarf.ClassString),
@@ -659,21 +657,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x5, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x5}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc424-x86-64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.2.4 (Ubuntu 4.2.4-1ubuntu4)", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-gcc424.c", Class: dwarf.ClassString),
@@ -681,21 +679,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x6, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x6}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc482-aarch64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.8.2 -g -fstack-protector", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-gcc482.c", Class: dwarf.ClassString),
@@ -703,21 +701,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x24, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x24}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc492-arm.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.9.2 20141224 (prerelease) -march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -mtls-dialect=gnu -g", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-gcc492.c", Class: dwarf.ClassString),
@@ -725,21 +723,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x28, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x28}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-clang-arm.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"Debian clang version 3.5.0-10 (tags/RELEASE_350/final) (based on LLVM 3.5.0)", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -747,21 +745,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrCompDir, Val: (@string)"/tmp", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x30, Class: dwarf.ClassConstant)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x30}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc5-ppc.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C11 5.0.0 20150116 (experimental) -Asystem=linux -Asystem=unix -Asystem=posix -g", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-gcc5-ppc.c", Class: dwarf.ClassString),
@@ -769,21 +767,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x44, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x44}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc482-ppc64le.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.8.2 -Asystem=linux -Asystem=unix -Asystem=posix -msecure-plt -mtune=power8 -mcpu=power7 -gdwarf-2 -fstack-protector", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-gcc482-ppc64le.c", Class: dwarf.ClassString),
@@ -791,21 +789,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x24, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x24}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc492-mips64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.9.2 -meb -mabi=64 -march=mips3 -mtune=mips64 -mllsc -mno-shared -g", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -813,21 +811,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x64, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x64}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc531-s390x.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C11 5.3.1 20160316 -march=zEC12 -m64 -mzarch -g -fstack-protector-strong", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -835,21 +833,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x3a, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x3a}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc620-sparc64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C11 6.2.0 20160914 -mcpu=v9 -g -fstack-protector-strong", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -857,21 +855,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x2c, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x2c}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc492-mipsle.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.9.2 -mel -march=mips2 -mtune=mips32 -mllsc -mno-shared -mabi=32 -g", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -879,21 +877,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x58, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x58}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc540-mips.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C11 5.4.0 20160609 -meb -mips32 -mtune=mips32r2 -mfpxx -mllsc -mno-shared -mabi=32 -g -gdwarf-2", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -901,21 +899,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x5c, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x5c}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc493-mips64le.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C 4.9.3 -mel -mabi=64 -mllsc -mno-shared -g -fstack-protector-strong", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)1, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -923,21 +921,21 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)0x64, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x64}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc720-riscv64.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C11 7.2.0 -march=rv64imafdc -mabi=lp64d -g -gdwarf-2", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -945,47 +943,47 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (uint64)0x2c, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x0, 0x2c}.array()}.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-clang-x86.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"clang version google3-trunk (trunk r209387)", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"go-relocation-test-clang.c", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr),
                         new(Attr: dwarf.AttrCompDir, Val: (@string)"/tmp", Class: dwarf.ClassString)
-                    ])
+                    ]
                 ))
             )
-        ])
+        ]
     ),
     new(
         "testdata/gcc-amd64-openbsd-debug-with-rela.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entryNumber: 203,
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xc62,
                     Tag: dwarf.TagMember,
                     Children: false,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrName, Val: (@string)"it_interval", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrDeclFile, Val: (int64)7, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrDeclLine, Val: (int64)236, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrType, Val: ((dwarf.Offset)0xb7f), Class: dwarf.ClassReference),
                         new(Attr: dwarf.AttrDataMemberLoc, Val: slice<byte>([0x23, 0x0]), Class: dwarf.ClassExprLoc)
-                    ])
+                    ]
                 ))
             ),
             new(
@@ -994,26 +992,26 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                     Offset: 0xc70,
                     Tag: dwarf.TagMember,
                     Children: false,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrName, Val: (@string)"it_value", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrDeclFile, Val: (int64)7, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrDeclLine, Val: (int64)237, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrType, Val: ((dwarf.Offset)0xb7f), Class: dwarf.ClassReference),
                         new(Attr: dwarf.AttrDataMemberLoc, Val: slice<byte>([0x23, 0x10]), Class: dwarf.ClassExprLoc)
-                    ])
+                    ]
                 ))
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc930-ranges-no-rela-x86-64",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C17 9.3.0 -mtune=generic -march=x86-64 -g -fno-asynchronous-unwind-tables", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"multiple-code-sections.c", Class: dwarf.ClassString),
@@ -1021,24 +1019,24 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrRanges, Val: (int64)0, Class: dwarf.ClassRangeListPtr),
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{
                     new uint64[]{0x765, 0x777}.array(),
                     new uint64[]{0x7e1, 0x7ec}.array()
                 }.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc930-ranges-with-rela-x86-64",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xb,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C17 9.3.0 -mtune=generic -march=x86-64 -g -fno-asynchronous-unwind-tables", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)12, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"multiple-code-sections.c", Class: dwarf.ClassString),
@@ -1046,24 +1044,24 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrRanges, Val: (int64)0, Class: dwarf.ClassRangeListPtr),
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{
                     new uint64[]{0x765, 0x777}.array(),
                     new uint64[]{0x7e1, 0x7ec}.array()
                 }.slice(), 2)
             )
-        ])
+        ]
     ),
     new(
         "testdata/go-relocation-test-gcc133-ppc.obj",
-        slice<relocationTestEntry>([
+        [
             new(
                 entry: Ꮡ(new dwarf.Entry(
                     Offset: 0xc,
                     Tag: dwarf.TagCompileUnit,
                     Children: true,
-                    Field: slice<dwarf.Field>([
+                    Field: [
                         new(Attr: dwarf.AttrProducer, Val: (@string)"GNU C17 13.3.0 -msecure-plt -g2 -fstack-protector-strong", Class: dwarf.ClassString),
                         new(Attr: dwarf.AttrLanguage, Val: (int64)29, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrName, Val: (@string)"hello.c", Class: dwarf.ClassString),
@@ -1071,18 +1069,18 @@ internal static slice<relocationTest> relocationTests = slice<relocationTest>([
                         new(Attr: dwarf.AttrLowpc, Val: (uint64)0x0, Class: dwarf.ClassAddress),
                         new(Attr: dwarf.AttrHighpc, Val: (int64)68, Class: dwarf.ClassConstant),
                         new(Attr: dwarf.AttrStmtList, Val: (int64)0, Class: dwarf.ClassLinePtr)
-                    ])
+                    ]
                 )),
                 pcRanges: GoReflect.WithElemDims(new array<uint64>[]{
                     new uint64[]{0, 0x44}.array()
                 }.slice(), 2)
             )
-        ])
+        ]
     )
-]);
+];
 
 public static void TestDWARFRelocations(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in relocationTests) {
+    foreach (var (_, vᴛ1) in range(relocationTests)) {
         ref var test = ref heap(new relocationTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1099,7 +1097,7 @@ public static void TestDWARFRelocations(ж<testing.T> t) {
             }
             var reader = dwarf.Reader();
             nint idx = 0;
-            foreach (var (_, testEntry) in testʗ1.entries) {
+            foreach (var (_, testEntry) in range(testʗ1.entries)) {
                 if (testEntry.entryNumber < idx) {
                     tΔ1.Fatalf("internal test error: %d < %d", testEntry.entryNumber, idx);
                 }
@@ -1204,10 +1202,8 @@ public static void TestCompressedSection(ж<testing.T> t) {
     var have = new slice<bool>(len(b));
     nint count = 0;
     var sf = sec.Open();
-    {
-        var (got, errΔ1) = sf.Seek(0, io.SeekEnd); if (got != (int64)len(b) || errΔ1 != nil) {
-            t.Fatalf("want seek end %d, got %d error %v", len(b), got, errΔ1);
-        }
+    var (got, errΔ1) = sf.Seek(0, io.SeekEnd); if (got != (int64)len(b) || errΔ1 != nil) {
+        t.Fatalf("want seek end %d, got %d error %v", len(b), got, errΔ1);
     }
     {
         var (n, errΔ2) = sf.Read(buf); if (n != 0 || !AreEqual(errΔ2, io.EOF)) {
@@ -1277,13 +1273,13 @@ public static void TestNoSectionOverlaps(ж<testing.T> t) {
         t.Error(err);
         return;
     }
-    foreach (var (i, si) in f.Sections) {
+    foreach (var (i, si) in range(f.Sections)) {
         var sih = si.SectionHeader;
         if (sih.Type == SHT_NOBITS) {
             continue;
         }
         // checking for overlap in file
-        foreach (var (j, sj) in f.Sections) {
+        foreach (var (j, sj) in range(f.Sections)) {
             var sjh = sj.SectionHeader;
             if (i == j || sjh.Type == SHT_NOBITS || sih.Offset == sjh.Offset && sih.FileSize == 0) {
                 continue;
@@ -1299,7 +1295,7 @@ public static void TestNoSectionOverlaps(ж<testing.T> t) {
         }
 
         // checking for overlap in address space
-        foreach (var (j, sj) in f.Sections) {
+        foreach (var (j, sj) in range(f.Sections)) {
             var sjh = sj.SectionHeader;
             if (i == j || (global::go.debug.elf_package.SectionFlag)(sjh.Flags & SHF_ALLOC) == 0 || sjh.Type == SHT_NOBITS || sih.Addr == sjh.Addr && sih.Size == 0) {
                 continue;
@@ -1425,27 +1421,27 @@ public static void TestLargeNumberOfSections(ж<testing.T> t) {
             binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, h);
 
             // Zero out sections [1]~[65294].
-            buf.Write(bytes.Repeat(slice<byte>([0]), 0x13ED1C - binary.Size(h)));
+            buf.Write(bytes.Repeat([0], 0x13ED1C - binary.Size(h)));
 
             // Write section [65295]. Section [65295] are all zeros except for the
             // last 48 bytes.
-            buf.Write(bytes.Repeat(slice<byte>([0]), 0x03FC28 - 12 * 4));
+            buf.Write(bytes.Repeat([0], 0x03FC28 - 12 * 4));
             for (nint i = 0; i < 12; i++) {
                 binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)(0xFF00 | i));
             }
 
             // Write section [65296].
-            buf.Write(slice<byte>([0]));
+            buf.Write([0]);
             buf.Write(slice<byte>("y.c\x00"u8));
             for (nint i = 1; i <= 65288; i++) {
                 // var_0001 ~ var_ff08
                 @string name = fmt.Sprintf("var_%04x"u8, i);
                 buf.Write(slice<byte>(name));
-                buf.Write(slice<byte>([0]));
+                buf.Write([0]);
             }
 
             // Write section [65297].
-            buf.Write(slice<byte>([0]));
+            buf.Write([0]);
             buf.Write(slice<byte>(".symtab\x00"u8));
             buf.Write(slice<byte>(".strtab\x00"u8));
             buf.Write(slice<byte>(".shstrtab\x00"u8));
@@ -1456,7 +1452,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> t) {
                 // s_0001 ~ s_ff08
                 @string name = fmt.Sprintf("section_%04x"u8, i);
                 buf.Write(slice<byte>(name));
-                buf.Write(slice<byte>([0]));
+                buf.Write([0]);
             }
             buf.Write(slice<byte>(".comment\x00"u8));
             buf.Write(slice<byte>(".note.GNU-stack\x00"u8));

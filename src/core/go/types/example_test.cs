@@ -43,7 +43,7 @@ public static void ExampleScope() {
     // Parse the source files for a package.
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default;
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         """
 package main
 import "fmt"
@@ -62,7 +62,7 @@ const Boiling Celsius = 100
 func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get printed
 
 """u8.Raw()
-    ])) {
+    ]))) {
         files = append(filesᴷ, files, mustParse(fset, src));
     }
 
@@ -151,14 +151,14 @@ public static void ExampleMethodSet() {
     // Type information for the imported packages
     // comes from $GOROOT/pkg/$GOOS_$GOOARCH/fmt.a.
     ref var conf = ref heap<types.Config>(new types.Config(Importer: defaultImporter(fset)), out var Ꮡconf);
-    (var pkg, err) = Ꮡconf.Check(temperatureˢ, fset, slice<ж<ast.File>>([f]), nil);
+    (var pkg, err) = Ꮡconf.Check(temperatureˢ, fset, [f], nil);
     if (err != nil) {
         log.Fatal(err);
     }
 
     // Print the method sets of Celsius and *Celsius.
     var celsius = pkg.Scope().Lookup(celsiusˢ).Type();
-    foreach (var (_, t) in slice<typesꓸType>([celsius, new types.PointerжΔType(types.NewPointer(celsius))])) {
+    foreach (var (_, t) in range(slice<typesꓸType>([celsius, new types.PointerжΔType(types.NewPointer(celsius))]))) {
         fmt.Printf("Method set of %s:\n"u8, t);
         foreach (var m in range<ж<types.Selection>>(types.NewMethodSet(t).Methods().Invoke)) {
             fmt.Println(m.OrTypedNil());
@@ -229,7 +229,7 @@ public static void ExampleInfo() {
         Uses: new map<ж<ast.Ident>, types.Object>()
     ), out var Ꮡinfo);
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check(fibˢ, fset, slice<ж<ast.File>>([f]), Ꮡinfo);
+    var (pkg, err) = Ꮡconf.Check(fibˢ, fset, [f], Ꮡinfo);
     if (err != nil) {
         log.Fatal(err);
     }

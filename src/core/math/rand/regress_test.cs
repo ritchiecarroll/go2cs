@@ -132,7 +132,7 @@ public static void TestRegress(ж<testing.T> t) {
     }
 }
 
-internal static slice<any> regressGolden = slice<any>([
+internal static slice<any> regressGolden = [
     (float64)4.668112973579268D,                 // ExpFloat64()
     (float64)0.1601593871172866D,                // ExpFloat64()
     (float64)3.0465834105636D,                   // ExpFloat64()
@@ -413,6 +413,6 @@ internal static slice<any> regressGolden = slice<any>([
     (uint64)161231572858529631UL,   // Uint64()
     (uint64)16482847956365694147UL, // Uint64()
     (uint64)16596477517051940556UL  // Uint64()
-]);
+];
 
 } // end rand_test_package

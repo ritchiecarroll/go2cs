@@ -47,11 +47,9 @@ public static void TestStripTags(ж<testing.T> t) {
         new(@"<script>foo()</script>", @"")
     ]);
 
-    foreach (var (_, test) in tests) {
-        {
-            @string got = stripTags(test.input); if (got != test.want) {
-                t.Errorf("%q: want %q, got %q", test.input, test.want, got);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string got = stripTags(test.input); if (got != test.want) {
+            t.Errorf("%q: want %q, got %q", test.input, test.want, got);
         }
     }
 }

@@ -13,8 +13,6 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
 using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
@@ -404,7 +402,6 @@ internal static ж<@string> stringptr(@string xʗp) {
 
 public partial struct T1 {
 }
-
 public partial struct T2 {
 }
 
@@ -633,14 +630,14 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
         UnmarshalOnly: true
     ),
     new(
-        Value: Ꮡ(new Data(Bytes: slice<byte>([]), Custom: new MyBytes(new byte[]{}.slice()), Attr: slice<byte>([]))),
+        Value: Ꮡ(new Data(Bytes: [], Custom: new MyBytes(new byte[]{}.slice()), Attr: [])),
         ExpectXML: @"<Data Attr=""""><Bytes></Bytes><Custom></Custom></Data>",
         UnmarshalOnly: true
     ),
 
     // Check that []byte works, including named []byte types.
     new(
-        Value: Ꮡ(new Data(Bytes: slice<byte>("ab"u8), Custom: ((MyBytes)slice<byte>((@string)"cd"u8)), Attr: slice<byte>([(byte)'v']))),
+        Value: Ꮡ(new Data(Bytes: slice<byte>("ab"u8), Custom: ((MyBytes)slice<byte>((@string)"cd"u8)), Attr: [(byte)'v'])),
         ExpectXML: @"<Data Attr=""v""><Bytes>ab</Bytes><Custom>cd</Custom></Data>"
     ),
 
@@ -687,7 +684,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
             Pilot: "Computer",
             Age: 1,
             Drive: ImprobabilityDrive,
-            Passenger: slice<ж<Passenger>>([
+            Passenger: [
                 Ꮡ(new Passenger(
                     Name: slice<@string>(["Zaphod", "Beeblebrox"]),
                     Weight: 7.25F)),
@@ -700,7 +697,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
                 Ꮡ(new Passenger(
                     Name: slice<@string>(["Arthur", "Dent"]),
                     Weight: 6.75F))
-            ])
+            ]
         )),
         ExpectXML: @"<spaceship name=""Heart of Gold"" pilot=""Computer"">"u8 + @"<drive>"u8 + strconv.Itoa((nint)ImprobabilityDrive) + @"</drive>"u8 + @"<age>1</age>"u8 + @"<passenger>"u8 + @"<name>Zaphod</name>"u8 + @"<name>Beeblebrox</name>"u8 + @"<weight>7.25</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Trisha</name>"u8 + @"<name>McMillen</name>"u8 + @"<weight>5.5</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Ford</name>"u8 + @"<name>Prefect</name>"u8 + @"<weight>7</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Arthur</name>"u8 + @"<name>Dent</name>"u8 + @"<weight>6.75</weight>"u8 + @"</passenger>"u8 + @"</spaceship>"u8
     ),
@@ -711,20 +708,20 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: slice<@string>([]), Item1: slice<@string>([]))),
+        Value: Ꮡ(new NestedItems(Items: [], Item1: [])),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"</Items>"u8 + @"</result>"u8,
         MarshalOnly: true
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: default, Item1: slice<@string>(["A"]))),
+        Value: Ꮡ(new NestedItems(Items: default, Item1: ["A"])),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item1>A</item1>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: slice<@string>(["A", "B"]), Item1: default)),
+        Value: Ꮡ(new NestedItems(Items: ["A", "B"], Item1: default)),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item>A</item>"u8 + @"<item>B</item>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: slice<@string>(["A", "B"]), Item1: slice<@string>(["C"]))),
+        Value: Ꮡ(new NestedItems(Items: ["A", "B"], Item1: ["C"])),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item>A</item>"u8 + @"<item>B</item>"u8 + @"<item1>C</item1>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
@@ -890,12 +887,12 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
         ExpectXML: @"<AttrTest Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"""u8 + @" Bool=""true"" Str=""str"" Bytes=""byt""></AttrTest>"u8
     ),
     new(
-        Value: Ꮡ(new AttrTest(Bytes: slice<byte>([]))),
+        Value: Ꮡ(new AttrTest(Bytes: [])),
         ExpectXML: @"<AttrTest Int=""0"" int=""0"" Float=""0"" Uint8=""0"""u8 + @" Bool=""false"" Str="""" Bytes=""""></AttrTest>"u8
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: slice<global::go.encoding.xml_package.Attr>([
+            Attrs: [
                 new(Name: new Name(Local: "Answer"), Value: "42"),
                 new(Name: new Name(Local: "Int"), Value: "8"),
                 new(Name: new Name(Local: "int"), Value: "9"),
@@ -904,16 +901,16 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
                 new(Name: new Name(Local: "Bool"), Value: "true"),
                 new(Name: new Name(Local: "Str"), Value: "str"),
                 new(Name: new Name(Local: "Bytes"), Value: "byt")
-            ])
+            ]
         )),
         ExpectXML: @"<AttrsTest Answer=""42"" Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"" Bool=""true"" Str=""str"" Bytes=""byt"" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>",
         MarshalOnly: true
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: slice<global::go.encoding.xml_package.Attr>([
+            Attrs: [
                 new(Name: new Name(Local: "Answer"), Value: "42")
-            ]),
+            ],
             Int: 8,
             Named: 9,
             Float: 23.5D,
@@ -926,7 +923,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: slice<global::go.encoding.xml_package.Attr>([
+            Attrs: [
                 new(Name: new Name(Local: "Int"), Value: "0"),
                 new(Name: new Name(Local: "int"), Value: "0"),
                 new(Name: new Name(Local: "Float"), Value: "0"),
@@ -934,8 +931,8 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
                 new(Name: new Name(Local: "Bool"), Value: "false"),
                 new(Name: new Name(Local: "Str")),
                 new(Name: new Name(Local: "Bytes"))
-            ]),
-            Bytes: slice<byte>([])
+            ],
+            Bytes: []
         )),
         ExpectXML: @"<AttrsTest Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes="""" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>",
         MarshalOnly: true
@@ -1022,7 +1019,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
         ExpectXML: @"<a><nested><value>b</value></nested><c><d>e</d></c><g xmlns=""f""><h>i</h></g></a>",
         Value: Ꮡ(new AnySliceTest(
             Nested: "b",
-            AnyField: slice<AnyHolder>([
+            AnyField: [
                 new(
                     XMLName: new Name(Local: "c"),
                     XML: "<d>e</d>"
@@ -1031,7 +1028,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
                     XMLName: new Name(Space: "f", Local: "g"),
                     XML: "<h>i</h>"
                 )
-            ])
+            ]
         ))
     ),
     new(
@@ -1560,7 +1557,7 @@ internal static void initᴛmarshalTests() { marshalTests = slice<marshalTests�
 ]); }
 
 public static void TestMarshal(ж<testing.T> t) {
-    foreach (var (idx, vᴛ1) in marshalTests) {
+    foreach (var (idx, vᴛ1) in range(marshalTests)) {
         ref var test = ref heap(new marshalTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1585,14 +1582,12 @@ public static void TestMarshal(ж<testing.T> t) {
                 tΔ1.Errorf("Marshal succeeded, want error %q", testʗ1.MarshalError);
                 return;
             }
-            {
-                @string got = (@string)data;
-                @string want = testʗ1.ExpectXML; if (got != want) {
-                    if (strings.Contains(want, "\n")) {
-                        tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s", testʗ1.Value, got, want);
-                    } else {
-                        tΔ1.Errorf("marshal(%#v):\nhave %#q\nwant %#q", testʗ1.Value, got, want);
-                    }
+            @string got = (@string)data;
+            @string want = testʗ1.ExpectXML; if (got != want) {
+                if (strings.Contains(want, "\n")) {
+                    tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s", testʗ1.Value, got, want);
+                } else {
+                    tΔ1.Errorf("marshal(%#v):\nhave %#q\nwant %#q", testʗ1.Value, got, want);
                 }
             }
         });
@@ -1652,7 +1647,7 @@ partial struct marshalIndentTestsᴛ1 /*dyn*/ {
     public @string Indent;
     public @string ExpectXML;
 }
-internal static slice<marshalIndentTestsᴛ1> marshalIndentTests = slice<marshalIndentTestsᴛ1>([
+internal static slice<marshalIndentTestsᴛ1> marshalIndentTests = [
     new(
         Value: Ꮡ(new SecretAgent(
             Handle: "007",
@@ -1663,10 +1658,10 @@ internal static slice<marshalIndentTestsᴛ1> marshalIndentTests = slice<marshal
         Indent: "\t",
         ExpectXML: "<agent handle=\"007\">\n\t<Identity>James Bond</Identity><redacted/>\n</agent>"
     )
-]);
+];
 
 public static void TestMarshalErrors(ж<testing.T> t) {
-    foreach (var (idx, test) in marshalErrorTests) {
+    foreach (var (idx, test) in range(marshalErrorTests)) {
         var (data, err) = Marshal(test.Value);
         if (err == nil) {
             t.Errorf("#%d: marshal(%#v) = [success] %q, want error %v", idx, test.Value, data, test.Err);
@@ -1676,10 +1671,8 @@ public static void TestMarshalErrors(ж<testing.T> t) {
             t.Errorf("#%d: marshal(%#v) = [error] %v, want %v", idx, test.Value, err, test.Err);
         }
         if (test.Kind != reflect.Invalid) {
-            {
-                reflectꓸKind kind = err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>().Type.Kind(); if (kind != test.Kind) {
-                    t.Errorf("#%d: marshal(%#v) = [error kind] %s, want %s", idx, test.Value, kind, test.Kind);
-                }
+            reflectꓸKind kind = err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>().Type.Kind(); if (kind != test.Kind) {
+                t.Errorf("#%d: marshal(%#v) = [error kind] %s, want %s", idx, test.Value, kind, test.Kind);
             }
         }
     }
@@ -1687,17 +1680,15 @@ public static void TestMarshalErrors(ж<testing.T> t) {
 
 // Do invertibility testing on the various structures that we test
 public static void TestUnmarshal(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in marshalTests) {
+    foreach (var (i, vᴛ1) in range(marshalTests)) {
         ref var test = ref heap(new marshalTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
         if (test.MarshalOnly) {
             continue;
         }
-        {
-            var (_, ok) = test.Value._<ж<Plain>>(ᐧ); if (ok) {
-                continue;
-            }
+        var (_, ok) = test.Value._<ж<Plain>>(ᐧ); if (ok) {
+            continue;
         }
         if (test.ExpectXML == @"<top>"u8 + @"<x><b xmlns=""space"">b</b>"u8 + @"<b xmlns=""space1"">b1</b></x>"u8 + @"</top>"u8) {
             // TODO(rogpeppe): re-enable this test in
@@ -1716,7 +1707,7 @@ public static void TestUnmarshal(ж<testing.T> t) {
             switch (destʗ1.type()) {
             case ж<Feed> fix: {
                 fix.Author.InnerXML = ""u8;
-                foreach (var iΔ1 in range(fix.Entry)) {
+                foreach (var iΔ1 in range(len(fix.Entry))) {
                     fix.Entry[iΔ1].Author.InnerXML = ""u8;
                 }
                 break;
@@ -1732,27 +1723,23 @@ public static void TestUnmarshal(ж<testing.T> t) {
                 }
                 return;
             }
-            {
-                var (got, want) = (destʗ1, testʗ1.Value); if (!reflect.DeepEqual(got, want)) {
-                    tΔ1.Errorf("unmarshal(%q):\nhave %#v\nwant %#v", testʗ1.ExpectXML, got, want);
-                }
+            var (got, want) = (destʗ1, testʗ1.Value); if (!reflect.DeepEqual(got, want)) {
+                tΔ1.Errorf("unmarshal(%q):\nhave %#v\nwant %#v", testʗ1.ExpectXML, got, want);
             }
         });
     }
 }
 
 public static void TestMarshalIndent(ж<testing.T> t) {
-    foreach (var (i, test) in marshalIndentTests) {
+    foreach (var (i, test) in range(marshalIndentTests)) {
         var (data, err) = MarshalIndent(test.Value, test.Prefix, test.Indent);
         if (err != nil) {
             t.Errorf("#%d: Error: %s", i, err);
             continue;
         }
-        {
-            @string got = (@string)data;
-            @string want = test.ExpectXML; if (got != want) {
-                t.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s", i, got, want);
-            }
+        @string got = (@string)data;
+        @string want = test.ExpectXML; if (got != want) {
+            t.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s", i, got, want);
         }
     }
 }
@@ -1798,7 +1785,7 @@ public static void TestMarshalWriteErrors(ж<testing.T> t) {
     const nint n = 4000;
     for (i = 1; i <= n; i++) {
         err = enc.Encode(Ꮡ(new Passenger(
-            Name: slice<@string>(["Alice", "Bob"]),
+            Name: ["Alice", "Bob"],
             Weight: 5F
         )));
         if (err != nil) {
@@ -1900,10 +1887,8 @@ public static void TestStructPointerMarshal(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string x = (@string)b; if (x != "<a><c><value>x</value></c></a>"u8) {
-            t.Fatal(x);
-        }
+    @string x = (@string)b; if (x != "<a><c><value>x</value></c></a>"u8) {
+        t.Fatal(x);
     }
     ref var v = ref heap(new TestStructPointerMarshal_A(), out var Ꮡv);
     err = Unmarshal(b, Ꮡv);
@@ -1919,400 +1904,400 @@ partial struct encodeTokenTestsᴛ1 /*dyn*/ {
     internal @string err;
 }
 internal static slice<encodeTokenTestsᴛ1> encodeTokenTests;
-internal static void initᴛencodeTokenTests() { encodeTokenTests = slice<encodeTokenTestsᴛ1>([new(
+internal static void initᴛencodeTokenTests() { encodeTokenTests = [new(
     desc: "start element with name space",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("space", "local"), default)
-    ]),
+    ],
     want: @"<local xmlns=""space"">"
 ), new(
     desc: "start element with no name",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("space", ""), default)
-    ]),
+    ],
     err: "xml: start tag with no name"
 ), new(
     desc: "end element with no name",
-    toks: slice<ΔToken>([
+    toks: [
         new EndElement(new Name("space", ""))
-    ]),
+    ],
     err: "xml: end tag with no name"
 ), new(
     desc: "char data",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8)
-    ]),
+    ],
     want: @"foo"
 ), new(
     desc: "char data with escaped chars",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8)
-    ]),
+    ],
     want: " &#x9;\n"
 ), new(
     desc: "comment",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8)
-    ]),
+    ],
     want: @"<!--foo-->"
 ), new(
     desc: "comment with invalid content",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8)
-    ]),
+    ],
     err: "xml: EncodeToken of Comment containing --> marker"
 ), new(
     desc: "proc instruction",
-    toks: slice<ΔToken>([
+    toks: [
         new ProcInst("Target", slice<byte>("Instruction"u8))
-    ]),
+    ],
     want: @"<?Target Instruction?>"
 ), new(
     desc: "proc instruction with empty target",
-    toks: slice<ΔToken>([
+    toks: [
         new ProcInst("", slice<byte>("Instruction"u8))
-    ]),
+    ],
     err: "xml: EncodeToken of ProcInst with invalid Target"
 ), new(
     desc: "proc instruction with bad content",
-    toks: slice<ΔToken>([
+    toks: [
         new ProcInst("", slice<byte>("Instruction?>"u8))
-    ]),
+    ],
     err: "xml: EncodeToken of ProcInst with invalid Target"
 ), new(
     desc: "directive",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
-    ]),
+    ],
     want: @"<!foo>"
 ), new(
     desc: "more complex directive",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8)
-    ]),
+    ],
     want: @"<!DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]>"
 ), new(
     desc: "directive instruction with bad name",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8)
-    ]),
+    ],
     err: "xml: EncodeToken of Directive containing wrong < or > markers"
 ), new(
     desc: "end tag without start tag",
-    toks: slice<ΔToken>([
+    toks: [
         new EndElement(new Name("foo", "bar"))
-    ]),
+    ],
     err: "xml: end tag </bar> without start tag"
 ), new(
     desc: "mismatching end tag local name",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("", "foo"), default),
         new EndElement(new Name("", "bar"))
-    ]),
+    ],
     err: "xml: end tag </bar> does not match start tag <foo>",
     want: @"<foo>"
 ), new(
     desc: "mismatching end tag namespace",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("space", "foo"), default),
         new EndElement(new Name("another", "foo"))
-    ]),
+    ],
     err: "xml: end tag </foo> in namespace another does not match start tag <foo> in namespace space",
     want: @"<foo xmlns=""space"">"
 ), new(
     desc: "start element with explicit namespace",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "local"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "local"), [
             new(new Name("xmlns", "x"), "space"),
             new(new Name("space", "foo"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"">"
 ), new(
     desc: "start element with explicit namespace and colliding prefix",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "local"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "local"), [
             new(new Name("xmlns", "x"), "space"),
             new(new Name("space", "foo"), "value"),
             new(new Name("x", "bar"), "other")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"" xmlns:x=""x"" x:bar=""other"">"
 ), new(
     desc: "start element using previously defined namespace",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "local"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "local"), [
             new(new Name("xmlns", "x"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "foo"), [
             new(new Name("space", "x"), "y")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<local xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns:space=""space"" space:x=""y"">"
 ), new(
     desc: "nested name space with same prefix",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("xmlns", "x"), "space1")
-        ])
+        ]
         ),
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("", "foo"), [
             new(new Name("xmlns", "x"), "space2")
-        ])
+        ]
         ),
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("", "foo"), [
             new(new Name("space1", "a"), "space1 value"),
             new(new Name("space2", "b"), "space2 value")
-        ])
+        ]
         ),
         new EndElement(new Name("", "foo")),
         new EndElement(new Name("", "foo")),
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("", "foo"), [
             new(new Name("space1", "a"), "space1 value"),
             new(new Name("space2", "b"), "space2 value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space1""><foo _xmlns:x=""space2""><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value""></foo></foo><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value"">"
 ), new(
     desc: "start element defining several prefixes for the same name space",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("xmlns", "a"), "space"),
             new(new Name("xmlns", "b"), "space"),
             new(new Name("space", "x"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:a=""space"" _xmlns:b=""space"" xmlns:space=""space"" space:x=""value"">"
 ), new(
     desc: "nested element redefines name space",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("xmlns", "x"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "foo"), [
             new(new Name("xmlns", "y"), "space"),
             new(new Name("space", "a"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
     desc: "nested element creates alias for default name space",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "foo"), [
             new(new Name("xmlns", "y"), "space"),
             new(new Name("space", "a"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
     desc: "nested element defines default name space with existing prefix",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("xmlns", "x"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space"),
             new(new Name("space", "a"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
     desc: "nested element uses empty attribute name space when default ns defined",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "attr"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" attr=""value"">"
 ), new(
     desc: "redefine xmlns",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("foo", "xmlns"), "space")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:foo=""foo"" foo:xmlns=""space"">"
 ), new(
     desc: "xmlns with explicit name space #1",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("xml", "xmlns"), "space")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns:_xml=""xml"" _xml:xmlns=""space"">"
 ), new(
     desc: "xmlns with explicit name space #2",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name(xmlURL, "xmlns"), "space")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xml:xmlns=""space"">"
 ), new(
     desc: "empty name space declaration is ignored",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("xmlns", "foo"), "")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:foo="""">"
 ), new(
     desc: "attribute with no name is ignored",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("", ""), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo>"
 ), new(
     desc: "namespace URL with non-valid name",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("/34", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("/34", "foo"), [
             new(new Name("/34", "x"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""/34"" xmlns:_=""/34"" _:x=""value"">"
 ), new(
     desc: "nested element resets default namespace to empty",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("", "foo"), [
             new(new Name("", "xmlns"), ""),
             new(new Name("", "x"), "value"),
             new(new Name("space", "x"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns="""" x=""value"" xmlns:space=""space"" space:x=""value"">"
 ), new(
     desc: "nested element requires empty default name space",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space")
-        ])
+        ]
         ),
         new StartElement(new Name("", "foo"), default)
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space""><foo>"
 ), new(
     desc: "attribute uses name space from xmlns",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("some/space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("some/space", "foo"), [
             new(new Name("", "attr"), "value"),
             new(new Name("some/space", "other"), "other value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""some/space"" attr=""value"" xmlns:space=""some/space"" space:other=""other value"">"
 ), new(
     desc: "default name space should not be used by attributes",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space"),
             new(new Name("xmlns", "bar"), "space"),
             new(new Name("space", "baz"), "foo")
-        ])
+        ]
         ),
         new StartElement(new Name("space", "baz"), default),
         new EndElement(new Name("space", "baz")),
         new EndElement(new Name("space", "foo"))
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:bar=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"
 ), new(
     desc: "default name space not used by attributes, not explicitly defined",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("space", "foo"), [
             new(new Name("", "xmlns"), "space"),
             new(new Name("space", "baz"), "foo")
-        ])
+        ]
         ),
         new StartElement(new Name("space", "baz"), default),
         new EndElement(new Name("space", "baz")),
         new EndElement(new Name("space", "foo"))
-    ]),
+    ],
     want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"
 ), new(
     desc: "impossible xmlns declaration",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("", "xmlns"), "space")
-        ])
+        ]
         ),
-        new StartElement(new Name("space", "bar"), slice<global::go.encoding.xml_package.Attr>([
+        new StartElement(new Name("space", "bar"), [
             new(new Name("space", "attr"), "value")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns=""space""><bar xmlns=""space"" xmlns:space=""space"" space:attr=""value"">"
 ), new(
     desc: "reserved namespace prefix -- all lower case",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("http://www.w3.org/2001/xmlSchema-instance", "nil"), "true")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_xmlSchema-instance=""http://www.w3.org/2001/xmlSchema-instance"" _xmlSchema-instance:nil=""true"">"
 ), new(
     desc: "reserved namespace prefix -- all upper case",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("http://www.w3.org/2001/XMLSchema-instance", "nil"), "true")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_XMLSchema-instance=""http://www.w3.org/2001/XMLSchema-instance"" _XMLSchema-instance:nil=""true"">"
 ), new(
     desc: "reserved namespace prefix -- all mixed case",
-    toks: slice<ΔToken>([
-        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+    toks: [
+        new StartElement(new Name("", "foo"), [
             new(new Name("http://www.w3.org/2001/XmLSchema-instance", "nil"), "true")
-        ])
+        ]
         )
-    ]),
+    ],
     want: @"<foo xmlns:_XmLSchema-instance=""http://www.w3.org/2001/XmLSchema-instance"" _XmLSchema-instance:nil=""true"">"
 )
-]); }
+]; }
 
 public static void TestEncodeToken(ж<testing.T> t) {
 loop:
-    foreach (var (i, vᴛ1) in encodeTokenTests) {
+    foreach (var (i, vᴛ1) in range(encodeTokenTests)) {
         ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
         error err = default;
-        foreach (var (j, tok) in tt.toks) {
+        foreach (var (j, tok) in range(tt.toks)) {
             err = enc.EncodeToken(tok);
             if (err != nil && j < len(tt.toks) - 1) {
                 t.Errorf("#%d %s token #%d: %v", i, tt.desc, j, err);
@@ -2340,17 +2325,13 @@ loop:
             continue;
             break;
         }}
-        {
-            var errΔ1 = enc.Flush(); if (errΔ1 != nil) {
-                errorf(" %v", errΔ1);
-                continue;
-            }
+        var errΔ1 = enc.Flush(); if (errΔ1 != nil) {
+            errorf(" %v", errΔ1);
+            continue;
         }
-        {
-            @string got = buf.String(); if (got != tt.want) {
-                errorf("\ngot  %v\nwant %v", got, tt.want);
-                continue;
-            }
+        @string got = buf.String(); if (got != tt.want) {
+            errorf("\ngot  %v\nwant %v", got, tt.want);
+            continue;
         }
 continue_loop:;
     }
@@ -2417,7 +2398,7 @@ public static partial void TestRace9796(ж<testing.T> t) {
     for (nint i = 0; i < 2; i++) {
         Ꮡwg.Add(1);
         goǃ(() => {
-            Marshal(new TestRace9796_B(slice<TestRace9796_A>([new()])));
+            Marshal(new TestRace9796_B([new()]));
             Ꮡwg.Done();
         });
     }
@@ -2444,12 +2425,12 @@ public static void TestIsValidDirective(ж<testing.T> t) {
         "<!DOCTYPE doc '>'",
         "<!DOCTYPE doc <!--comment>"
     ]);
-    foreach (var (_, s) in testOK) {
+    foreach (var (_, s) in range(testOK)) {
         if (!isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             t.Errorf("Directive %q is expected to be valid", s);
         }
     }
-    foreach (var (_, s) in testKO) {
+    foreach (var (_, s) in range(testKO)) {
         if (isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             t.Errorf("Directive %q is expected to be invalid", s);
         }
@@ -2538,13 +2519,11 @@ private static readonly @string invalidTagˢᵇ = "invalid tag"u8;
 public static void TestInvalidXMLName(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡbuf));
-    {
-        var err = enc.Encode(new InvalidXMLName()); if (err == nil) {
-            t.Error(unexpectedSuccessˢ);
-        } else {
-            @string want = invalidTagˢ; if (!strings.Contains(err.Error(), want)) {
-                t.Errorf("error %q does not contain %q", err, want);
-            }
+    var err = enc.Encode(new InvalidXMLName()); if (err == nil) {
+        t.Error(unexpectedSuccessˢ);
+    } else {
+        @string want = invalidTagˢ; if (!strings.Contains(err.Error(), want)) {
+            t.Errorf("error %q does not contain %q", err, want);
         }
     }
 }
@@ -2588,34 +2567,34 @@ public static void TestMarshalZeroValue(ж<testing.T> t) {
     }
 }
 
-internal static slice<encodeTokenTestsᴛ1> closeTests = slice<encodeTokenTestsᴛ1>([new(
+internal static slice<encodeTokenTestsᴛ1> closeTests = [new(
     desc: "unclosed start element",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("", "foo"), default)
-    ]),
+    ],
     want: @"<foo>",
     err: "unclosed tag <foo>"
 ), new(
     desc: "closed element",
-    toks: slice<ΔToken>([
+    toks: [
         new StartElement(new Name("", "foo"), default),
         new EndElement(new Name("", "foo"))
-    ]),
+    ],
     want: @"<foo></foo>"
 ), new(
     desc: "directive",
-    toks: slice<ΔToken>([
+    toks: [
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
-    ]),
+    ],
     want: @"<!foo>"
 )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorGotNoneˢ = (@string)" expected error; got none"u8;
 
 public static void TestClose(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in closeTests) {
+    foreach (var (_, vᴛ1) in range(closeTests)) {
         ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2623,11 +2602,9 @@ public static void TestClose(ж<testing.T> t) {
         t.Run(tt.desc, (ж<testing.T> tΔ1) => {
             ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
             var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡout));
-            foreach (var (j, tok) in ttʗ1.toks) {
-                {
-                    var errΔ1 = enc.EncodeToken(tok); if (errΔ1 != nil) {
-                        tΔ1.Fatalf("token #%d: %v", j, errΔ1);
-                    }
+            foreach (var (j, tok) in range(ttʗ1.toks)) {
+                var errΔ1 = enc.EncodeToken(tok); if (errΔ1 != nil) {
+                    tΔ1.Fatalf("token #%d: %v", j, errΔ1);
                 }
             }
             var err = enc.Close();
@@ -2644,10 +2621,8 @@ public static void TestClose(ж<testing.T> t) {
                 tΔ1.Errorf(" error mismatch; got %v, want %v", err, ttʗ1.err);
                 break;
             }}
-            {
-                @string got = @out.String(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("\ngot  %v\nwant %v", got, ttʗ1.want);
-                }
+            @string got = @out.String(); if (got != ttʗ1.want) {
+                tΔ1.Errorf("\ngot  %v\nwant %v", got, ttʗ1.want);
             }
             tΔ1.Log(enc.p.closed);
             {

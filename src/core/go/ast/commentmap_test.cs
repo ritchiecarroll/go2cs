@@ -99,7 +99,7 @@ internal static map<@string, @string> res = new map<@string, @string>{
 
 internal static @string ctext(slice<ж<ast.CommentGroup>> list) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (_, g) in list) {
+    foreach (var (_, g) in range(list)) {
         Ꮡbuf.WriteString(g.Text());
     }
     return buf.String();
@@ -139,7 +139,7 @@ public static void TestCommentMap(ж<testing.T> t) {
             @out = append(@out, fmt.Sprintf("\t\"%2d: %T\":\t%q,"u8, fset.Position(n.Pos()).Line, n, ctext(list)));
         }
         sort.Strings(@out);
-        foreach (var (_, s) in @out) {
+        foreach (var (_, s) in range(@out)) {
             fmt.Println(s);
         }
     }
@@ -154,13 +154,11 @@ public static void TestFilter(ж<testing.T> t) {
     var cmap = NewCommentMap(fset, new ast.FileжNode(f), f.Comments);
 
     // delete variable declaration
-    foreach (var (i, decl) in f.Decls) {
-        {
-            var (gen, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && gen.Tok == token.VAR) {
-                copy(f.Decls.slice(i), f.Decls.slice(i + 1));
-                f.Decls = f.Decls.slice(0, len(f.Decls) - 1);
-                break;
-            }
+    foreach (var (i, decl) in range(f.Decls)) {
+        var (gen, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && gen.Tok == token.VAR) {
+            copy(f.Decls.slice(i), f.Decls.slice(i + 1));
+            f.Decls = f.Decls.slice(0, len(f.Decls) - 1);
+            break;
         }
     }
 

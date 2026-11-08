@@ -9,8 +9,6 @@ using os = os_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -21,9 +19,7 @@ partial struct readDirOnly {
     /*embed*/ public go.io.fs_package.ReadDirFS ReadDirFS;
 }
 
-internal static (fs.File, error) Open(this readDirOnly _, @string name) {
-    return (default, ErrNotExist);
-}
+internal static (fs.File, error) Open(this readDirOnly _, @string name) { return (default, ErrNotExist); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string subˢ => ref subˢᵇ;
@@ -34,7 +30,7 @@ public static partial void TestReadDir(ж<testing.T> t) {
         t.Helper();
         if (errΔ1 != nil || len(dirsΔ1) != 2 || dirsΔ1[0].Name() != "hello.txt"u8 || dirsΔ1[1].Name() != "sub"u8) {
             slice<@string> names = default;
-            foreach (var (_, d) in dirsΔ1) {
+            foreach (var (_, d) in range(dirsΔ1)) {
                 names = append(names, d.Name());
             }
             t.Errorf("ReadDir(%s) = %v, %v, want %v, nil", desc, names, errΔ1, slice<@string>(["hello.txt", "sub"]));
@@ -83,7 +79,7 @@ public static void TestFileInfoToDirEntry(ж<testing.T> t) {
         new(path: "adir", wantMode: os.ModeDir, wantDir: true)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestFileInfoToDirEntry_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -136,11 +132,9 @@ public static void TestReadDirPath(ж<testing.T> t) {
     var fsys = os.DirFS(t.TempDir());
     var (_, err1) = ReadDir(fsys, nonExistentˢ);
     var (_, err2) = ReadDir(new TestReadDirPath_fsys(fsys), nonExistentˢ);
-    {
-        @string s1 = errorPath(err1);
-        @string s2 = errorPath(err2); if (s1 != s2) {
-            t.Fatalf("s1: %s != s2: %s", s1, s2);
-        }
+    @string s1 = errorPath(err1);
+    @string s2 = errorPath(err2); if (s1 != s2) {
+        t.Fatalf("s1: %s != s2: %s", s1, s2);
     }
 }
 

@@ -21,7 +21,7 @@ internal static ref readonly @string regeneratedˢ => ref regeneratedˢᵇ;
 private static readonly @string regeneratedˢᵇ = "regenerated"u8;
 
 public static void Test(ж<testing.T> t) {
-    foreach (var (_, arch) in arches) {
+    foreach (var (_, arch) in range(arches)) {
         var archʗ1 = arch;
         t.Run(arch.Name, (ж<testing.T> tΔ1) => {
             var (@file, data) = generate(archʗ1);
@@ -30,10 +30,8 @@ public static void Test(ж<testing.T> t) {
                 return;
             }
             if (generateFlag.Value) {
-                {
-                    var errΔ1 = os.WriteFile("../../"u8 + @file, data, 438); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = os.WriteFile("../../"u8 + @file, data, 438); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
                 return;
             }

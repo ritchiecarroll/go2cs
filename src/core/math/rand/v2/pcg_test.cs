@@ -49,10 +49,8 @@ public static void TestPCGMarshal(ж<testing.T> t) {
     }
 
     var q = new PCG();
-    {
-        var errΔ1 = q.UnmarshalBinary(slice<byte>(want)); if (errΔ1 != nil) {
-            t.Fatalf("UnmarshalBinary(): %v", errΔ1);
-        }
+    var errΔ1 = q.UnmarshalBinary(slice<byte>(want)); if (errΔ1 != nil) {
+        t.Fatalf("UnmarshalBinary(): %v", errΔ1);
     }
     if (q != p) {
         t.Fatalf("after round trip, q = %#x, but p = %#x", q, p);
@@ -90,11 +88,9 @@ public static void TestPCG(ж<testing.T> t) {
         0x54908a48e8e4736eUL
     ]);
 
-    foreach (var (i, x) in want) {
-        {
-            var u = p.Uint64(); if (u != x) {
-                t.Errorf("PCG #%d = %#x, want %#x", i, u, x);
-            }
+    foreach (var (i, x) in range(want)) {
+        var u = p.Uint64(); if (u != x) {
+            t.Errorf("PCG #%d = %#x, want %#x", i, u, x);
         }
     }
 }

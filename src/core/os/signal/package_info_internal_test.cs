@@ -28,7 +28,7 @@ using static go.os.signal_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/signal/signal_windows_test.go", "signal_windows_test.cs", "ABwigoKClIKClIKCACYIpAABMKaCgoKClJKmgoKCgriCgoKCpoKClJKClIKCtA==", "90-93:1", "", "", "94:21")]
+[assembly: GoPositionMap("os/signal/signal_windows_test.go", "signal_windows_test.cs", "ABoigoKClIKClIKCACYIpAABMKaCgoKClJKmgoKCgriCgoKCpoKClJKClIKCtA==", "90-93:1", "", "", "92:21")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

@@ -23,7 +23,7 @@ internal partial struct lzwTest {
     internal error err;
 }
 
-internal static slice<lzwTest> lzwTests = slice<lzwTest>([
+internal static slice<lzwTest> lzwTests = [
     new(
         "empty;LSB;8",
         "",
@@ -80,13 +80,13 @@ internal static slice<lzwTest> lzwTests = slice<lzwTest>([
         ((@string)(new byte[]{0x80, 0x0b, 0x60, 0x50, 0x22, 0x0c, 0x0c, 0x85, 0x01})),
         default
     )
-]);
+];
 
 public static void TestReader(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-        foreach (var (_, tt) in lzwTests) {
+        foreach (var (_, tt) in range(lzwTests)) {
             var d = strings.Split(tt.desc, ";");
             global::go.compress.lzw_package.Order order = default;
             var exprᴛ1 = d[1];
@@ -136,7 +136,7 @@ public static void TestReaderReset(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-        foreach (var (_, tt) in lzwTests) {
+        foreach (var (_, tt) in range(lzwTests)) {
             var d = strings.Split(tt.desc, ";");
             global::go.compress.lzw_package.Order order = default;
             var exprᴛ1 = d[1];
@@ -205,10 +205,8 @@ public static void TestHiCodeDoesNotOverflow(ж<testing.T> t) {
     var buf = new slice<byte>(1024);
     var oldHi = (uint16)0;
     for (nint i = 0; i < 100; i++) {
-        {
-            var (_, err) = io.ReadFull(r, buf); if (err != nil) {
-                t.Fatalf("i=%d: %v", i, err);
-            }
+        var (_, err) = io.ReadFull(r, buf); if (err != nil) {
+            t.Fatalf("i=%d: %v", i, err);
         }
         // The hi code should never decrease.
         if (d.hi < oldHi) {
@@ -239,7 +237,7 @@ public static void TestNoLongerSavingPriorExpansions(ж<testing.T> t) {
     ]);
     nint nCodes = 0;
     nint nBits = 0;
-    foreach (var (_, e) in iterations) {
+    foreach (var (_, e) in range(iterations)) {
         nCodes += e.n;
         nBits += e.n * e.width;
     }

@@ -17,7 +17,7 @@ internal partial struct TestSpuriousENOTAVAIL_type /*dyn*/ {
 }
 
 public static void TestSpuriousENOTAVAIL(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestSpuriousENOTAVAIL_type>([
+    foreach (var (_, tt) in range(slice<TestSpuriousENOTAVAIL_type>([
         new(syscall.EADDRNOTAVAIL, true),
         new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall", Err: syscall.EADDRNOTAVAIL))), true),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op", Err: syscall.EADDRNOTAVAIL))), true),
@@ -27,11 +27,9 @@ public static void TestSpuriousENOTAVAIL(ж<testing.T> t) {
         new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall", Err: syscall.EINVAL))), false),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op", Err: syscall.EINVAL))), false),
         new(new global::go.net_package.OpErrorжerror(Ꮡ(new OpError(Op: "op", Err: new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Syscall: "syscall", Err: syscall.EINVAL)))))), false)
-    ])) {
-        {
-            var ok = spuriousENOTAVAIL(tt.error); if (ok != tt.ok) {
-                t.Errorf("spuriousENOTAVAIL(%v) = %v; want %v", tt.error, ok, tt.ok);
-            }
+    ]))) {
+        var ok = spuriousENOTAVAIL(tt.error); if (ok != tt.ok) {
+            t.Errorf("spuriousENOTAVAIL(%v) = %v; want %v", tt.error, ok, tt.ok);
         }
     }
 }

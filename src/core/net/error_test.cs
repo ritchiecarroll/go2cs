@@ -31,7 +31,7 @@ internal static error isValid(this ж<global::go.net_package.OpError> Ꮡe) {
     if (e.Net == ""u8) {
         return fmt.Errorf("OpError.Net is empty: %v"u8, Ꮡe.OrTypedNil());
     }
-    foreach (var (_, addr) in slice<global::go.net_package.ΔAddr>([e.Source, e.Addr])) {
+    foreach (var (_, addr) in range(slice<global::go.net_package.ΔAddr>([e.Source, e.Addr]))) {
         switch (addr.type()) {
         case null: {
             break;
@@ -103,10 +103,8 @@ internal static error parseDialError(error nestedErr) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -195,7 +193,7 @@ public static void TestDialError(ж<testing.T> t) {
         defer(Ꮡsw.Set, socktest.FilterConnect, (socktest.Filter)(default), ref ᒐ);
 
         ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout), out var Ꮡd);
-        foreach (var (i, vᴛ1) in dialErrorTests) {
+        foreach (var (i, vᴛ1) in range(dialErrorTests)) {
             ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -209,15 +207,11 @@ public static void TestDialError(ж<testing.T> t) {
                 }
                 if (ttʗ1.network == "tcp"u8 || ttʗ1.network == "udp"u8) {
                     var nerr = err;
-                    {
-                        var (op, ok) = nerr._<ж<global::go.net_package.OpError>>(ᐧ); if (ok) {
-                            nerr = op.Err;
-                        }
+                    if (nerr._<ж<global::go.net_package.OpError>>(out var op)) {
+                        nerr = op.Err;
                     }
-                    {
-                        var (sys, ok) = nerr._<ж<Δos.SyscallError>>(ᐧ); if (ok) {
-                            nerr = sys.Err;
-                        }
+                    if (nerr._<ж<Δos.SyscallError>>(out var sys)) {
+                        nerr = sys.Err;
                     }
                     if (AreEqual(nerr, errOpNotSupported)) {
                         tΔ1.Fatalf("should fail without %v; %s:%s->", nerr, ttʗ1.network, ttʗ1.address);
@@ -226,10 +220,8 @@ public static void TestDialError(ж<testing.T> t) {
                 if (c != nil) {
                     tΔ1.Errorf("Dial returned non-nil interface %T(%v) with err != nil", c, c);
                 }
-                {
-                    err = parseDialError(err); if (err != nil) {
-                        tΔ1.Error(err);
-                    }
+                err = parseDialError(err); if (err != nil) {
+                    tΔ1.Error(err);
                 }
             });
         }
@@ -246,7 +238,7 @@ public static void TestProtocolDialError(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, network) in slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"]))) {
         error err = default;
         var exprᴛ2 = network;
         switch (ᐧ) {
@@ -270,11 +262,9 @@ public static void TestProtocolDialError(ж<testing.T> t) {
             t.Errorf("%s: should fail", network);
             continue;
         }
-        {
-            var errΔ1 = parseDialError(err); if (errΔ1 != nil) {
-                t.Errorf("%s: %v", network, errΔ1);
-                continue;
-            }
+        var errΔ1 = parseDialError(err); if (errΔ1 != nil) {
+            t.Errorf("%s: %v", network, errΔ1);
+            continue;
         }
         t.Logf("%s: error as expected: %v", network, err);
     }
@@ -298,14 +288,14 @@ public static void TestDialAddrError(ж<testing.T> t) {
         t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (_, vᴛ1) in slice<TestDialAddrError_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestDialAddrError_type>([
         new("tcp4", "::1", nil),
         new("tcp4", "", Ꮡ(new TCPAddr(IP: IPv6loopback))),
         // We don't test the {"tcp6", "byte sequence", nil}
         // case for now because there is no easy way to
         // control name resolution.
         new("tcp6", "", Ꮡ(new TCPAddr(IP: new IP(new byte[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}.slice()))))
-    ])) {
+    ]))) {
         ref var tt = ref heap(new TestDialAddrError_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -331,10 +321,8 @@ public static void TestDialAddrError(ж<testing.T> t) {
                 c.Close();
                 tΔ1.Fatalf("%s succeeded, want error", op);
             }
-            {
-                var perr = parseDialError(err); if (perr != nil) {
-                    tΔ1.Fatal(perr);
-                }
+            var perr = parseDialError(err); if (perr != nil) {
+                tΔ1.Fatal(perr);
             }
             var operr = err._<ж<global::go.net_package.OpError>>().Err;
             var (aerr, ok) = operr._<ж<global::go.net_package.AddrError>>(ᐧ);
@@ -386,7 +374,7 @@ public static void TestListenError(ж<testing.T> t) {
         Ꮡsw.Set(socktest.FilterListen, (ж<socktest.Status> so) => (default, errOpNotSupported));
         defer(Ꮡsw.Set, socktest.FilterListen, (socktest.Filter)(default), ref ᒐ);
 
-        foreach (var (i, vᴛ1) in listenErrorTests) {
+        foreach (var (i, vᴛ1) in range(listenErrorTests)) {
             ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -400,15 +388,11 @@ public static void TestListenError(ж<testing.T> t) {
                 }
                 if (ttʗ1.network == "tcp"u8) {
                     var nerr = err;
-                    {
-                        var (op, ok) = nerr._<ж<global::go.net_package.OpError>>(ᐧ); if (ok) {
-                            nerr = op.Err;
-                        }
+                    if (nerr._<ж<global::go.net_package.OpError>>(out var op)) {
+                        nerr = op.Err;
                     }
-                    {
-                        var (sys, ok) = nerr._<ж<Δos.SyscallError>>(ᐧ); if (ok) {
-                            nerr = sys.Err;
-                        }
+                    if (nerr._<ж<Δos.SyscallError>>(out var sys)) {
+                        nerr = sys.Err;
                     }
                     if (AreEqual(nerr, errOpNotSupported)) {
                         tΔ1.Fatalf("#%d: should fail without %v; %s:%s->", i, nerr, ttʗ1.network, ttʗ1.address);
@@ -417,10 +401,8 @@ public static void TestListenError(ж<testing.T> t) {
                 if (ln != nil) {
                     tΔ1.Errorf("Listen returned non-nil interface %T(%v) with err != nil", ln, ln);
                 }
-                {
-                    err = parseDialError(err); if (err != nil) {
-                        tΔ1.Errorf("#%d: %v", i, err);
-                    }
+                err = parseDialError(err); if (err != nil) {
+                    tΔ1.Errorf("#%d: %v", i, err);
                 }
             });
         }
@@ -458,7 +440,7 @@ public static void TestListenPacketError(ж<testing.T> t) {
         }, ref ᒐ);
         testHookLookupIP = (slice<global::go.net_package.IPAddr>, error) (context.Context _, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => (default, new global::go.net_package.DNSErrorжerror(Ꮡ(new DNSError(Err: "listen error test", Name: "name", Server: "server", IsTimeout: true))));
 
-        foreach (var (i, vᴛ1) in listenPacketErrorTests) {
+        foreach (var (i, vᴛ1) in range(listenPacketErrorTests)) {
             ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -473,10 +455,8 @@ public static void TestListenPacketError(ж<testing.T> t) {
                 if (c != nil) {
                     tΔ1.Errorf("ListenPacket returned non-nil interface %T(%v) with err != nil", c, c);
                 }
-                {
-                    err = parseDialError(err); if (err != nil) {
-                        tΔ1.Errorf("#%d: %v", i, err);
-                    }
+                err = parseDialError(err); if (err != nil) {
+                    tΔ1.Errorf("#%d: %v", i, err);
                 }
             });
         }
@@ -493,7 +473,7 @@ public static void TestProtocolListenError(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, network) in slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"]))) {
         error err = default;
         var exprᴛ2 = network;
         switch (ᐧ) {
@@ -521,11 +501,9 @@ public static void TestProtocolListenError(ж<testing.T> t) {
             t.Errorf("%s: should fail", network);
             continue;
         }
-        {
-            err = parseDialError(err); if (err != nil) {
-                t.Errorf("%s: %v", network, err);
-                continue;
-            }
+        err = parseDialError(err); if (err != nil) {
+            t.Errorf("%s: %v", network, err);
+            continue;
         }
     }
 }
@@ -540,10 +518,8 @@ internal static error parseReadError(error nestedErr) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -587,10 +563,8 @@ internal static error parseWriteError(error nestedErr) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -662,10 +636,8 @@ internal static error parseCloseError(error nestedErr, bool isShutdown) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -721,18 +693,14 @@ public static void TestCloseError(ж<testing.T> t) {
 
             for (nint i = 0; i < 3; i++) {
                 err = c._<ж<global::go.net_package.TCPConn>>().CloseRead();
-                {
-                    var perr = parseCloseError(err, true); if (perr != nil) {
-                        tΔ1.Errorf("#%d: %v", i, perr);
-                    }
+                var perr = parseCloseError(err, true); if (perr != nil) {
+                    tΔ1.Errorf("#%d: %v", i, perr);
                 }
             }
             for (nint i = 0; i < 3; i++) {
                 err = c._<ж<global::go.net_package.TCPConn>>().CloseWrite();
-                {
-                    var perr = parseCloseError(err, true); if (perr != nil) {
-                        tΔ1.Errorf("#%d: %v", i, perr);
-                    }
+                var perr = parseCloseError(err, true); if (perr != nil) {
+                    tΔ1.Errorf("#%d: %v", i, perr);
                 }
             }
             for (nint i = 0; i < 3; i++) {
@@ -770,10 +738,8 @@ public static void TestCloseError(ж<testing.T> t) {
 
             for (nint i = 0; i < 3; i++) {
                 err = pc.Close();
-                {
-                    var perr = parseCloseError(err, false); if (perr != nil) {
-                        tΔ2.Errorf("#%d: %v", i, perr);
-                    }
+                var perr = parseCloseError(err, false); if (perr != nil) {
+                    tΔ2.Errorf("#%d: %v", i, perr);
                 }
             }
         }
@@ -792,10 +758,8 @@ internal static error parseAcceptError(error nestedErr) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -836,19 +800,15 @@ public static void TestAcceptError(ж<testing.T> t) {
         for (;;) {
             ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(5 * time.Millisecond));
             var (c, err) = ln.Accept();
-            {
-                var perr = parseAcceptError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseAcceptError(err); if (perr != nil) {
+                t.Error(perr);
             }
             if (err != nil) {
                 if (c != nil) {
                     t.Errorf("Accept returned non-nil interface %T(%v) with err != nil", c, c);
                 }
-                {
-                    var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || (!nerr.Timeout() && !nerr.Temporary())) {
-                        return;
-                    }
+                var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || (!nerr.Timeout() && !nerr.Temporary())) {
+                    return;
                 }
                 continue;
             }
@@ -877,10 +837,8 @@ internal static error parseCommonError(error nestedErr) {
 
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
-        {
-            var errΔ1 = err.isValid(); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = err.isValid(); if (errΔ1 != nil) {
+            return errΔ1;
         }
         nestedErr = err.Err;
         goto second;
@@ -942,10 +900,8 @@ public static void TestFileError(ж<testing.T> t) {
             if (c != nil) {
                 t.Errorf("FileConn returned non-nil interface %T(%v) with err != nil", c, c);
             }
-            {
-                var perr = parseCommonError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseCommonError(err); if (perr != nil) {
+                t.Error(perr);
             }
         } else {
             c.Close();
@@ -956,10 +912,8 @@ public static void TestFileError(ж<testing.T> t) {
             if (ln != nil) {
                 t.Errorf("FileListener returned non-nil interface %T(%v) with err != nil", ln, ln);
             }
-            {
-                var perr = parseCommonError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseCommonError(err); if (perr != nil) {
+                t.Error(perr);
             }
         } else {
             ln.Close();
@@ -970,10 +924,8 @@ public static void TestFileError(ж<testing.T> t) {
             if (pc != nil) {
                 t.Errorf("FilePacketConn returned non-nil interface %T(%v) with err != nil", pc, pc);
             }
-            {
-                var perr = parseCommonError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseCommonError(err); if (perr != nil) {
+                t.Error(perr);
             }
         } else {
             pc.Close();
@@ -985,10 +937,8 @@ public static void TestFileError(ж<testing.T> t) {
         for (nint i = 0; i < 3; i++) {
             var (fΔ1, errΔ1) = ln._<ж<global::go.net_package.TCPListener>>().File();
             if (errΔ1 != nil) {
-                {
-                    var perr = parseCommonError(errΔ1); if (perr != nil) {
-                        t.Error(perr);
-                    }
+                var perr = parseCommonError(errΔ1); if (perr != nil) {
+                    t.Error(perr);
                 }
             } else {
                 fΔ1.Close();

@@ -25,10 +25,8 @@ public static void TestTraceStartStop(ж<testing.T> t) {
         t.Skip(skippingBecauseTestTraceˢ);
     }
     var buf = @new<bytes.Buffer>();
-    {
-        var err = Start(new bytes_BufferжWriter(buf)); if (err != nil) {
-            t.Fatalf("failed to start tracing: %v", err);
-        }
+    var err = Start(new bytes_BufferжWriter(buf)); if (err != nil) {
+        t.Fatalf("failed to start tracing: %v", err);
     }
     Stop();
     nint size = buf.Len();

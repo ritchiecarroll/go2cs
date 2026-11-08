@@ -11,8 +11,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using go.math;
 using static go.encoding.asn1_package;
@@ -134,8 +132,8 @@ internal static slice<marshalTest> marshalTests = slice<marshalTest>([
     new(time.Unix(1258325776, 0).In(PST), "17113039313131353134353631362d30383030"),
     new(farFuture(), "180f32313030303430353132303130315a"),
     new(new generalizedTimeTest(time.Unix(1258325776, 0).UTC()), "3011180f32303039313131353232353631365a"),
-    new(new BitString(slice<byte>([0x80]), 1), "03020780"),
-    new(new BitString(slice<byte>([0x81, 0xf0]), 12), "03030481f0"),
+    new(new BitString([0x80], 1), "03020780"),
+    new(new BitString([0x81, 0xf0], 12), "03030481f0"),
     new((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([1, 2, 3, 4]), "06032a0304"),
     new((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([1, 2, 840, 133549, 1, 1, 5]), "06092a864888932d010105"),
     new((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([2, 100, 3]), "0603813403"),
@@ -157,10 +155,10 @@ internal static slice<marshalTest> marshalTests = slice<marshalTest>([
     new(new genericStringTest("test&"), "30070c057465737426"),
     new(new rawContentsStruct(default, 64), "3003020140"),
     new(new rawContentsStruct(slice<byte>([0x30, 3, 1, 2, 3]), 64), "3003010203"),
-    new(new RawValue(Tag: 1, Class: 2, IsCompound: false, Bytes: slice<byte>([1, 2, 3])), "8103010203"),
+    new(new RawValue(Tag: 1, Class: 2, IsCompound: false, Bytes: [1, 2, 3]), "8103010203"),
     new((testSET)slice<nint>([10]), "310302010a"),
-    new(new omitEmptyTest(slice<@string>([])), "3000"),
-    new(new omitEmptyTest(slice<@string>(["1"])), "30053003130131"),
+    new(new omitEmptyTest([]), "3000"),
+    new(new omitEmptyTest(["1"]), "30053003130131"),
     new((@string)"Σ", "0c02cea3"),
     new(new defaultTest(0), "3003020100"),
     new(new defaultTest(1), "3000"),
@@ -171,7 +169,7 @@ internal static slice<marshalTest> marshalTests = slice<marshalTest>([
 ]);
 
 public static void TestMarshal(ж<testing.T> t) {
-    foreach (var (i, test) in marshalTests) {
+    foreach (var (i, test) in range(marshalTests)) {
         var (data, err) = Marshal(test.@in);
         if (err != nil) {
             t.Errorf("#%d failed: %s", i, err);
@@ -189,14 +187,14 @@ internal partial struct marshalWithParamsTest {
     internal @string @out; // hex encoded
 }
 
-internal static slice<marshalWithParamsTest> marshalWithParamsTests = slice<marshalWithParamsTest>([
+internal static slice<marshalWithParamsTest> marshalWithParamsTests = [
     new(new intStruct(10), "set", "310302010a"),
     new(new intStruct(10), "application", "600302010a"),
     new(new intStruct(10), "private", "e00302010a")
-]);
+];
 
 public static void TestMarshalWithParams(ж<testing.T> t) {
-    foreach (var (i, test) in marshalWithParamsTests) {
+    foreach (var (i, test) in range(marshalWithParamsTests)) {
         var (data, err) = MarshalWithParams(test.@in, test.@params);
         if (err != nil) {
             t.Errorf("#%d failed: %s", i, err);
@@ -213,15 +211,15 @@ internal partial struct marshalErrTest {
     internal @string err;
 }
 
-internal static slice<marshalErrTest> marshalErrTests = slice<marshalErrTest>([
+internal static slice<marshalErrTest> marshalErrTests = [
     new(new bigIntStruct(nil), "empty integer"),
     new(new numericStringTest("a"), "invalid character"),
     new(new ia5StringTest(((@string)(new byte[]{0xb0}))), "invalid character"),
     new(new printableStringTest("!"), "invalid character")
-]);
+];
 
 public static void TestMarshalError(ж<testing.T> t) {
-    foreach (var (i, test) in marshalErrTests) {
+    foreach (var (i, test) in range(marshalErrTests)) {
         var (_, err) = Marshal(test.@in);
         if (err == nil) {
             t.Errorf("#%d should fail, but success", i);
@@ -249,7 +247,7 @@ public static void TestMarshalOID(ж<testing.T> t) {
         new((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([2, 999, 3]), "0603883703"), // Example of ITU-T X.690
         new((global::go.encoding.asn1_package.ObjectIdentifier)slice<nint>([0, 0]), "060100")           // zero OID
     ]);
-    foreach (var (i, test) in marshalTestsOID) {
+    foreach (var (i, test) in range(marshalTestsOID)) {
         var (data, err) = Marshal(test.@in);
         if (err != nil) {
             t.Errorf("#%d failed: %s", i, err);
@@ -298,7 +296,7 @@ public static void TestIssue11130(ж<testing.T> t) {
 }
 
 public static void TestIssue68241(ж<testing.T> t) {
-    foreach (var (i, want) in slice<any>([false, true])) {
+    foreach (var (i, want) in range(slice<any>([false, true]))) {
         var (data, err) = Marshal(want);
         if (err != nil) {
             t.Errorf("cannot Marshal: %v", err);
@@ -323,7 +321,7 @@ public static void BenchmarkMarshal(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, test) in marshalTests) {
+        foreach (var (_, test) in range(marshalTests)) {
             Marshal(test.@in);
         }
     }
@@ -338,7 +336,7 @@ internal partial struct TestSetEncoder_testStruct /*dyn*/ {
 
 public static void TestSetEncoder(ж<testing.T> t) {
     var testStruct = new TestSetEncoder_testStruct(
-        Strings: slice<@string>(["a", "aa", "b", "bb", "c", "cc"])
+        Strings: ["a", "aa", "b", "bb", "c", "cc"]
     );
 
     // Expected ordering of the SET should be:
@@ -400,7 +398,7 @@ public static void BenchmarkUnmarshal(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     slice<BenchmarkUnmarshal_testCase> testData = default;
-    foreach (var (_, test) in unmarshalTestData) {
+    foreach (var (_, test) in range(unmarshalTestData)) {
         var pv = reflect.New(reflect.TypeOf(test.@out).Elem());
         var inCopy = new slice<byte>(len(test.@in));
         copy(inCopy, test.@in);
@@ -414,7 +412,7 @@ public static void BenchmarkUnmarshal(ж<testing.B> Ꮡb) {
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, testCase) in testData) {
+        foreach (var (_, testCase) in range(testData)) {
             (_, _) = Unmarshal(testCase.@in, testCase.@out);
         }
     }

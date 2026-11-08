@@ -25,28 +25,28 @@ partial struct equalIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
     internal bool want;
 }
-internal static slice<equalIntTestsᴛ1> equalIntTests = slice<equalIntTestsᴛ1>([
+internal static slice<equalIntTestsᴛ1> equalIntTests = [
     new(
-        slice<nint>([1]),
+        [1],
         default,
         false
     ),
     new(
-        slice<nint>([]),
+        [],
         default,
         true
     ),
     new(
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
+        [1, 2, 3],
         true
     ),
     new(
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 2, 3, 4]),
+        [1, 2, 3],
+        [1, 2, 3, 4],
         false
     )
-]);
+];
 
 partial struct equalFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
@@ -55,8 +55,8 @@ partial struct equalFloatTestsᴛ1 /*dyn*/ {
 }
 internal static slice<equalFloatTestsᴛ1> equalFloatTests = slice<equalFloatTestsᴛ1>([
     new(
-        slice<float64>([1D, 2D]),
-        slice<float64>([1D, 2D]),
+        [1D, 2D],
+        [1D, 2D],
         true,
         true
     ),
@@ -69,18 +69,14 @@ internal static slice<equalFloatTestsᴛ1> equalFloatTests = slice<equalFloatTes
 ]);
 
 public static void TestEqual(ж<testing.T> t) {
-    foreach (var (_, test) in equalIntTests) {
-        {
-            var got = Equal<slice<nint>, nint>(test.s1, test.s2); if (got != test.want) {
-                t.Errorf("Equal(%v, %v) = %t, want %t", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(equalIntTests)) {
+        var got = Equal<slice<nint>, nint>(test.s1, test.s2); if (got != test.want) {
+            t.Errorf("Equal(%v, %v) = %t, want %t", test.s1, test.s2, got, test.want);
         }
     }
-    foreach (var (_, test) in equalFloatTests) {
-        {
-            var got = Equal<slice<float64>, float64>(test.s1, test.s2); if (got != test.wantEqual) {
-                t.Errorf("Equal(%v, %v) = %t, want %t", test.s1, test.s2, got, test.wantEqual);
-            }
+    foreach (var (_, test) in range(equalFloatTests)) {
+        var got = Equal<slice<float64>, float64>(test.s1, test.s2); if (got != test.wantEqual) {
+            t.Errorf("Equal(%v, %v) = %t, want %t", test.s1, test.s2, got, test.wantEqual);
         }
     }
 }
@@ -102,14 +98,12 @@ internal static bool offByOne(nint v1, nint v2) {
 }
 
 public static void TestEqualFunc(ж<testing.T> t) {
-    foreach (var (_, test) in equalIntTests) {
-        {
-            var got = EqualFunc<slice<nint>, slice<nint>, nint, nint>(test.s1, test.s2, equal<nint>); if (got != test.want) {
-                t.Errorf("EqualFunc(%v, %v, equal[int]) = %t, want %t", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(equalIntTests)) {
+        var got = EqualFunc<slice<nint>, slice<nint>, nint, nint>(test.s1, test.s2, equal<nint>); if (got != test.want) {
+            t.Errorf("EqualFunc(%v, %v, equal[int]) = %t, want %t", test.s1, test.s2, got, test.want);
         }
     }
-    foreach (var (_, test) in equalFloatTests) {
+    foreach (var (_, test) in range(equalFloatTests)) {
         {
             var got = EqualFunc<slice<float64>, slice<float64>, float64, float64>(test.s1, test.s2, equal<float64>); if (got != test.wantEqual) {
                 t.Errorf("Equal(%v, %v, equal[float64]) = %t, want %t", test.s1, test.s2, got, test.wantEqual);
@@ -164,58 +158,58 @@ partial struct compareIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
     internal nint want;
 }
-internal static slice<compareIntTestsᴛ1> compareIntTests = slice<compareIntTestsᴛ1>([
+internal static slice<compareIntTestsᴛ1> compareIntTests = [
     new(
-        slice<nint>([1]),
-        slice<nint>([1]),
+        [1],
+        [1],
         0
     ),
     new(
-        slice<nint>([1]),
-        slice<nint>([]),
+        [1],
+        [],
         1
     ),
     new(
-        slice<nint>([]),
-        slice<nint>([1]),
+        [],
+        [1],
         -1
     ),
     new(
-        slice<nint>([]),
-        slice<nint>([]),
+        [],
+        [],
         0
     ),
     new(
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
+        [1, 2, 3],
         0
     ),
     new(
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 2, 3, 4]),
+        [1, 2, 3],
+        [1, 2, 3, 4],
         -1
     ),
     new(
-        slice<nint>([1, 2, 3, 4]),
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3, 4],
+        [1, 2, 3],
         +1
     ),
     new(
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 4, 3]),
+        [1, 2, 3],
+        [1, 4, 3],
         -1
     ),
     new(
-        slice<nint>([1, 4, 3]),
-        slice<nint>([1, 2, 3]),
+        [1, 4, 3],
+        [1, 2, 3],
         +1
     ),
     new(
-        slice<nint>([1, 4, 3]),
-        slice<nint>([1, 2, 3, 8, 9]),
+        [1, 4, 3],
+        [1, 2, 3, 8, 9],
         +1
     )
-]);
+];
 
 partial struct compareFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
@@ -223,13 +217,13 @@ partial struct compareFloatTestsᴛ1 /*dyn*/ {
 }
 internal static slice<compareFloatTestsᴛ1> compareFloatTests = slice<compareFloatTestsᴛ1>([
     new(
-        slice<float64>([]),
-        slice<float64>([]),
+        [],
+        [],
         0
     ),
     new(
-        slice<float64>([1D]),
-        slice<float64>([1D]),
+        [1D],
+        [1D],
         0
     ),
     new(
@@ -249,7 +243,7 @@ internal static slice<compareFloatTestsᴛ1> compareFloatTests = slice<compareFl
     ),
     new(
         slice<float64>([1D, Δmath.NaN(), 3D]),
-        slice<float64>([1D, 2D, 4D]),
+        [1D, 2D, 4D],
         -1
     ),
     new(
@@ -258,12 +252,12 @@ internal static slice<compareFloatTestsᴛ1> compareFloatTests = slice<compareFl
         -1
     ),
     new(
-        slice<float64>([1D, 2D, 3D]),
+        [1D, 2D, 3D],
         slice<float64>([1D, 2D, Δmath.NaN()]),
         +1
     ),
     new(
-        slice<float64>([1D, 2D, 3D]),
+        [1D, 2D, 3D],
         slice<float64>([1D, Δmath.NaN(), 3D]),
         +1
     ),
@@ -281,33 +275,25 @@ public static void TestCompare(ж<testing.T> t) {
         }
         return "!= 0";
     }
-    foreach (var (_, test) in equalIntTests) {
-        {
-            nint got = Compare<slice<nint>, nint>(test.s1, test.s2); if ((got == 0) != test.want) {
-                t.Errorf("Compare(%v, %v) = %d, want %s", test.s1, test.s2, got, intWant(test.want));
-            }
+    foreach (var (_, test) in range(equalIntTests)) {
+        nint got = Compare<slice<nint>, nint>(test.s1, test.s2); if ((got == 0) != test.want) {
+            t.Errorf("Compare(%v, %v) = %d, want %s", test.s1, test.s2, got, intWant(test.want));
         }
     }
-    foreach (var (_, test) in equalFloatTests) {
-        {
-            nint got = Compare<slice<float64>, float64>(test.s1, test.s2); if ((got == 0) != test.wantEqualNaN) {
-                t.Errorf("Compare(%v, %v) = %d, want %s", test.s1, test.s2, got, intWant(test.wantEqualNaN));
-            }
+    foreach (var (_, test) in range(equalFloatTests)) {
+        nint got = Compare<slice<float64>, float64>(test.s1, test.s2); if ((got == 0) != test.wantEqualNaN) {
+            t.Errorf("Compare(%v, %v) = %d, want %s", test.s1, test.s2, got, intWant(test.wantEqualNaN));
         }
     }
 
-    foreach (var (_, test) in compareIntTests) {
-        {
-            nint got = Compare<slice<nint>, nint>(test.s1, test.s2); if (got != test.want) {
-                t.Errorf("Compare(%v, %v) = %d, want %d", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(compareIntTests)) {
+        nint got = Compare<slice<nint>, nint>(test.s1, test.s2); if (got != test.want) {
+            t.Errorf("Compare(%v, %v) = %d, want %d", test.s1, test.s2, got, test.want);
         }
     }
-    foreach (var (_, test) in compareFloatTests) {
-        {
-            nint got = Compare<slice<float64>, float64>(test.s1, test.s2); if (got != test.want) {
-                t.Errorf("Compare(%v, %v) = %d, want %d", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(compareFloatTests)) {
+        nint got = Compare<slice<float64>, float64>(test.s1, test.s2); if (got != test.want) {
+            t.Errorf("Compare(%v, %v) = %d, want %d", test.s1, test.s2, got, test.want);
         }
     }
 }
@@ -328,33 +314,25 @@ public static void TestCompareFunc(ж<testing.T> t) {
         }
         return "!= 0";
     }
-    foreach (var (_, test) in equalIntTests) {
-        {
-            nint got = CompareFunc(test.s1, test.s2, equalToCmp<nint>(equal<nint>)); if ((got == 0) != test.want) {
-                t.Errorf("CompareFunc(%v, %v, equalToCmp(equal[int])) = %d, want %s", test.s1, test.s2, got, intWant(test.want));
-            }
+    foreach (var (_, test) in range(equalIntTests)) {
+        nint got = CompareFunc(test.s1, test.s2, equalToCmp<nint>(equal<nint>)); if ((got == 0) != test.want) {
+            t.Errorf("CompareFunc(%v, %v, equalToCmp(equal[int])) = %d, want %s", test.s1, test.s2, got, intWant(test.want));
         }
     }
-    foreach (var (_, test) in equalFloatTests) {
-        {
-            nint got = CompareFunc(test.s1, test.s2, equalToCmp<float64>(equal<float64>)); if ((got == 0) != test.wantEqual) {
-                t.Errorf("CompareFunc(%v, %v, equalToCmp(equal[float64])) = %d, want %s", test.s1, test.s2, got, intWant(test.wantEqual));
-            }
+    foreach (var (_, test) in range(equalFloatTests)) {
+        nint got = CompareFunc(test.s1, test.s2, equalToCmp<float64>(equal<float64>)); if ((got == 0) != test.wantEqual) {
+            t.Errorf("CompareFunc(%v, %v, equalToCmp(equal[float64])) = %d, want %s", test.s1, test.s2, got, intWant(test.wantEqual));
         }
     }
 
-    foreach (var (_, test) in compareIntTests) {
-        {
-            nint got = CompareFunc<slice<nint>, slice<nint>, nint, nint>(test.s1, test.s2, cmp.Compare<nint>); if (got != test.want) {
-                t.Errorf("CompareFunc(%v, %v, cmp[int]) = %d, want %d", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(compareIntTests)) {
+        nint got = CompareFunc<slice<nint>, slice<nint>, nint, nint>(test.s1, test.s2, cmp.Compare<nint>); if (got != test.want) {
+            t.Errorf("CompareFunc(%v, %v, cmp[int]) = %d, want %d", test.s1, test.s2, got, test.want);
         }
     }
-    foreach (var (_, test) in compareFloatTests) {
-        {
-            nint got = CompareFunc<slice<float64>, slice<float64>, float64, float64>(test.s1, test.s2, cmp.Compare<float64>); if (got != test.want) {
-                t.Errorf("CompareFunc(%v, %v, cmp[float64]) = %d, want %d", test.s1, test.s2, got, test.want);
-            }
+    foreach (var (_, test) in range(compareFloatTests)) {
+        nint got = CompareFunc<slice<float64>, slice<float64>, float64, float64>(test.s1, test.s2, cmp.Compare<float64>); if (got != test.want) {
+            t.Errorf("CompareFunc(%v, %v, cmp[float64]) = %d, want %d", test.s1, test.s2, got, test.want);
         }
     }
 
@@ -394,40 +372,38 @@ partial struct indexTestsᴛ1 /*dyn*/ {
     internal nint v;
     internal nint want;
 }
-internal static slice<indexTestsᴛ1> indexTests = slice<indexTestsᴛ1>([
+internal static slice<indexTestsᴛ1> indexTests = [
     new(
         default,
         0,
         -1
     ),
     new(
-        slice<nint>([]),
+        [],
         0,
         -1
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         2,
         1
     ),
     new(
-        slice<nint>([1, 2, 2, 3]),
+        [1, 2, 2, 3],
         2,
         1
     ),
     new(
-        slice<nint>([1, 2, 3, 2]),
+        [1, 2, 3, 2],
         2,
         1
     )
-]);
+];
 
 public static void TestIndex(ж<testing.T> t) {
-    foreach (var (_, test) in indexTests) {
-        {
-            nint got = Index(test.s, test.v); if (got != test.want) {
-                t.Errorf("Index(%v, %v) = %d, want %d", test.s, test.v, got, test.want);
-            }
+    foreach (var (_, test) in range(indexTests)) {
+        nint got = Index(test.s, test.v); if (got != test.want) {
+            t.Errorf("Index(%v, %v) = %d, want %d", test.s, test.v, got, test.want);
         }
     }
 }
@@ -449,11 +425,9 @@ public static void BenchmarkIndex_Large(ж<testing.B> Ꮡb) {
 }
 
 public static void TestIndexFunc(ж<testing.T> t) {
-    foreach (var (_, test) in indexTests) {
-        {
-            nint got = IndexFunc(test.s, equalToIndex<nint>(equal<nint>, test.v)); if (got != test.want) {
-                t.Errorf("IndexFunc(%v, equalToIndex(equal[int], %v)) = %d, want %d", test.s, test.v, got, test.want);
-            }
+    foreach (var (_, test) in range(indexTests)) {
+        nint got = IndexFunc(test.s, equalToIndex<nint>(equal<nint>, test.v)); if (got != test.want) {
+            t.Errorf("IndexFunc(%v, equalToIndex(equal[int], %v)) = %d, want %d", test.s, test.v, got, test.want);
         }
     }
 
@@ -486,21 +460,17 @@ public static void BenchmarkIndexFunc_Large(ж<testing.B> Ꮡb) {
 }
 
 public static void TestContains(ж<testing.T> t) {
-    foreach (var (_, test) in indexTests) {
-        {
-            var got = Contains(test.s, test.v); if (got != (test.want != -1)) {
-                t.Errorf("Contains(%v, %v) = %t, want %t", test.s, test.v, got, test.want != -1);
-            }
+    foreach (var (_, test) in range(indexTests)) {
+        var got = Contains(test.s, test.v); if (got != (test.want != -1)) {
+            t.Errorf("Contains(%v, %v) = %t, want %t", test.s, test.v, got, test.want != -1);
         }
     }
 }
 
 public static void TestContainsFunc(ж<testing.T> t) {
-    foreach (var (_, test) in indexTests) {
-        {
-            var got = ContainsFunc(test.s, equalToIndex<nint>(equal<nint>, test.v)); if (got != (test.want != -1)) {
-                t.Errorf("ContainsFunc(%v, equalToIndex(equal[int], %v)) = %t, want %t", test.s, test.v, got, test.want != -1);
-            }
+    foreach (var (_, test) in range(indexTests)) {
+        var got = ContainsFunc(test.s, equalToIndex<nint>(equal<nint>, test.v)); if (got != (test.want != -1)) {
+            t.Errorf("ContainsFunc(%v, equalToIndex(equal[int], %v)) = %t, want %t", test.s, test.v, got, test.want != -1);
         }
     }
 
@@ -528,32 +498,32 @@ partial struct insertTestsᴛ1 /*dyn*/ {
     internal slice<nint> add;
     internal slice<nint> want;
 }
-internal static slice<insertTestsᴛ1> insertTests = slice<insertTestsᴛ1>([
+internal static slice<insertTestsᴛ1> insertTests = [
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         0,
-        slice<nint>([4]),
-        slice<nint>([4, 1, 2, 3])
+        [4],
+        [4, 1, 2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         1,
-        slice<nint>([4]),
-        slice<nint>([1, 4, 2, 3])
+        [4],
+        [1, 4, 2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         3,
-        slice<nint>([4]),
-        slice<nint>([1, 2, 3, 4])
+        [4],
+        [1, 2, 3, 4]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         2,
-        slice<nint>([4, 5]),
-        slice<nint>([1, 2, 4, 5, 3])
+        [4, 5],
+        [1, 2, 4, 5, 3]
     )
-]);
+];
 
 public static void TestInsert(ж<testing.T> t) {
     var s = slice<nint>([1, 2, 3]);
@@ -562,12 +532,10 @@ public static void TestInsert(ж<testing.T> t) {
             t.Errorf("Insert(%v, 0) = %v, want %v", s, got, s);
         }
     }
-    foreach (var (_, test) in insertTests) {
+    foreach (var (_, test) in range(insertTests)) {
         var copy = Clone<slice<nint>, nint>(test.s);
-        {
-            var got = Insert(copy, test.i, test.add.ꓸꓸꓸ); if (!Equal<slice<nint>, nint>(got, test.want)) {
-                t.Errorf("Insert(%v, %d, %v...) = %v, want %v", test.s, test.i, test.add, got, test.want);
-            }
+        var got = Insert(copy, test.i, test.add.ꓸꓸꓸ); if (!Equal<slice<nint>, nint>(got, test.want)) {
+            t.Errorf("Insert(%v, %d, %v...) = %v, want %v", test.s, test.i, test.add, got, test.want);
         }
     }
 
@@ -621,7 +589,7 @@ internal partial struct TestInsertPanics_type /*dyn*/ {
 public static void TestInsertPanics(ж<testing.T> t) {
     var a = new nint[]{}.array(3);
     var b = new nint[]{}.array(1);
-    foreach (var (_, vᴛ1) in slice<TestInsertPanics_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestInsertPanics_type>([
         // There are no values.
         new("with negative index", a.slice(0, 1, 1), -1, default),
         new("with out-of-bounds index and > cap", a.slice(0, 1, 1), 2, default),
@@ -633,7 +601,7 @@ public static void TestInsertPanics(ж<testing.T> t) {
         new("with out-of-bounds index and > cap", a.slice(0, 1, 1), 2, b[..]),
         new("with out-of-bounds index and = cap", a.slice(0, 1, 2), 2, b[..]),
         new("with out-of-bounds index and < cap", a.slice(0, 1, 3), 2, b[..])
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestInsertPanics_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -651,46 +619,44 @@ partial struct deleteTestsᴛ1 /*dyn*/ {
     internal nint i, j;
     internal slice<nint> want;
 }
-internal static slice<deleteTestsᴛ1> deleteTests = slice<deleteTestsᴛ1>([
+internal static slice<deleteTestsᴛ1> deleteTests = [
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         0,
         0,
-        slice<nint>([1, 2, 3])
+        [1, 2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         0,
         1,
-        slice<nint>([2, 3])
+        [2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         3,
         3,
-        slice<nint>([1, 2, 3])
+        [1, 2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         0,
         2,
-        slice<nint>([3])
+        [3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         0,
         3,
-        slice<nint>([])
+        []
     )
-]);
+];
 
 public static void TestDelete(ж<testing.T> t) {
-    foreach (var (_, test) in deleteTests) {
+    foreach (var (_, test) in range(deleteTests)) {
         var copy = Clone<slice<nint>, nint>(test.s);
-        {
-            var got = Delete<slice<nint>, nint>(copy, test.i, test.j); if (!Equal<slice<nint>, nint>(got, test.want)) {
-                t.Errorf("Delete(%v, %d, %d) = %v, want %v", test.s, test.i, test.j, got, test.want);
-            }
+        var got = Delete<slice<nint>, nint>(copy, test.i, test.j); if (!Equal<slice<nint>, nint>(got, test.want)) {
+            t.Errorf("Delete(%v, %d, %d) = %v, want %v", test.s, test.i, test.j, got, test.want);
         }
     }
 }
@@ -700,46 +666,44 @@ partial struct deleteFuncTestsᴛ1 /*dyn*/ {
     internal Func<nint, bool> fn;
     internal slice<nint> want;
 }
-internal static slice<deleteFuncTestsᴛ1> deleteFuncTests = slice<deleteFuncTestsᴛ1>([
+internal static slice<deleteFuncTestsᴛ1> deleteFuncTests = [
     new(
         default,
         (nint _) => true,
         default
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         (nint _) => true,
         default
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         (nint _) => false,
-        slice<nint>([1, 2, 3])
+        [1, 2, 3]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         (nint i) => i > 2,
-        slice<nint>([1, 2])
+        [1, 2]
     ),
     new(
-        slice<nint>([1, 2, 3]),
+        [1, 2, 3],
         (nint i) => i < 2,
-        slice<nint>([2, 3])
+        [2, 3]
     ),
     new(
-        slice<nint>([10, 2, 30]),
+        [10, 2, 30],
         (nint i) => i >= 10,
-        slice<nint>([2])
+        [2]
     )
-]);
+];
 
 public static void TestDeleteFunc(ж<testing.T> t) {
-    foreach (var (i, test) in deleteFuncTests) {
+    foreach (var (i, test) in range(deleteFuncTests)) {
         var copy = Clone<slice<nint>, nint>(test.s);
-        {
-            var got = DeleteFunc(copy, test.fn); if (!Equal<slice<nint>, nint>(got, test.want)) {
-                t.Errorf("DeleteFunc case %d: got %v, want %v", i, got, test.want);
-            }
+        var got = DeleteFunc(copy, test.fn); if (!Equal<slice<nint>, nint>(got, test.want)) {
+            t.Errorf("DeleteFunc case %d: got %v, want %v", i, got, test.want);
         }
     }
 }
@@ -749,10 +713,8 @@ internal static bool /*b*/ panics(Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var x = recover(); if (x != nil) {
-                    b = true;
-                }
+            var x = recover(); if (x != nil) {
+                b = true;
             }
         }, ref ᒐ);
         f();
@@ -774,16 +736,16 @@ public static void TestDeletePanics(ж<testing.T> t) {
     s = s[0..2];
     _ = s[0..4]; // this is a valid slice of s
 
-    foreach (var (_, vᴛ1) in slice<TestDeletePanics_type>([
-        new("with negative first index", slice<nint>([42]), -2, 1),
-        new("with negative second index", slice<nint>([42]), 1, -1),
-        new("with out-of-bounds first index", slice<nint>([42]), 2, 3),
-        new("with out-of-bounds second index", slice<nint>([42]), 0, 2),
-        new("with out-of-bounds both indexes", slice<nint>([42]), 2, 2),
-        new("with invalid i>j", slice<nint>([42]), 1, 0),
+    foreach (var (_, vᴛ1) in range(slice<TestDeletePanics_type>([
+        new("with negative first index", [42], -2, 1),
+        new("with negative second index", [42], 1, -1),
+        new("with out-of-bounds first index", [42], 2, 3),
+        new("with out-of-bounds second index", [42], 0, 2),
+        new("with out-of-bounds both indexes", [42], 2, 2),
+        new("with invalid i>j", [42], 1, 0),
         new("s[i:j] is valid and j > len(s)", s, 0, 4),
         new("s[i:j] is valid and i == j > len(s)", s, 3, 3)
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestDeletePanics_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -855,7 +817,7 @@ partial struct compactTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
     internal slice<nint> want;
 }
-internal static slice<compactTestsᴛ1> compactTests = slice<compactTestsᴛ1>([
+internal static slice<compactTestsᴛ1> compactTests = [
     new(
         "nil",
         default,
@@ -863,44 +825,42 @@ internal static slice<compactTestsᴛ1> compactTests = slice<compactTestsᴛ1>([
     ),
     new(
         "one",
-        slice<nint>([1]),
-        slice<nint>([1])
+        [1],
+        [1]
     ),
     new(
         "sorted",
-        slice<nint>([1, 2, 3]),
-        slice<nint>([1, 2, 3])
+        [1, 2, 3],
+        [1, 2, 3]
     ),
     new(
         "2 items",
-        slice<nint>([1, 1, 2]),
-        slice<nint>([1, 2])
+        [1, 1, 2],
+        [1, 2]
     ),
     new(
         "unsorted",
-        slice<nint>([1, 2, 1]),
-        slice<nint>([1, 2, 1])
+        [1, 2, 1],
+        [1, 2, 1]
     ),
     new(
         "many",
-        slice<nint>([1, 2, 2, 3, 3, 4]),
-        slice<nint>([1, 2, 3, 4])
+        [1, 2, 2, 3, 3, 4],
+        [1, 2, 3, 4]
     )
-]);
+];
 
 public static void TestCompact(ж<testing.T> t) {
-    foreach (var (_, test) in compactTests) {
+    foreach (var (_, test) in range(compactTests)) {
         var copy = Clone<slice<nint>, nint>(test.s);
-        {
-            var got = Compact<slice<nint>, nint>(copy); if (!Equal<slice<nint>, nint>(got, test.want)) {
-                t.Errorf("Compact(%v) = %v, want %v", test.s, got, test.want);
-            }
+        var got = Compact<slice<nint>, nint>(copy); if (!Equal<slice<nint>, nint>(got, test.want)) {
+            t.Errorf("Compact(%v) = %v, want %v", test.s, got, test.want);
         }
     }
 }
 
 public static void BenchmarkCompact(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in compactTests) {
+    foreach (var (_, vᴛ1) in range(compactTests)) {
         ref var c = ref heap(new compactTestsᴛ1(), out var Ꮡc);
         c = vᴛ1;
 
@@ -936,7 +896,7 @@ public static void BenchmarkCompact_Large(ж<testing.B> b) {
     });
     b.Run(noDupˢ, (ж<testing.B> bΔ2) => {
         var ss = GoReflect.WithElemDims(new slice<BenchmarkCompact_Large_Large>(N), 16);
-        foreach (var i in range(ss)) {
+        foreach (var i in range(len(ss))) {
             ss[i][0] = i;
         }
         bΔ2.ResetTimer();
@@ -947,12 +907,10 @@ public static void BenchmarkCompact_Large(ж<testing.B> b) {
 }
 
 public static void TestCompactFunc(ж<testing.T> t) {
-    foreach (var (_, test) in compactTests) {
+    foreach (var (_, test) in range(compactTests)) {
         var copyΔ1 = Clone<slice<nint>, nint>(test.s);
-        {
-            var got = CompactFunc<slice<nint>, nint>(copyΔ1, equal<nint>); if (!Equal<slice<nint>, nint>(got, test.want)) {
-                t.Errorf("CompactFunc(%v, equal[int]) = %v, want %v", test.s, got, test.want);
-            }
+        var got = CompactFunc<slice<nint>, nint>(copyΔ1, equal<nint>); if (!Equal<slice<nint>, nint>(got, test.want)) {
+            t.Errorf("CompactFunc(%v, equal[int]) = %v, want %v", test.s, got, test.want);
         }
     }
 
@@ -981,10 +939,8 @@ public static void TestCompactClearTail(ж<testing.T> t) {
 
     s = Compact<slice<ж<nint>>, ж<nint>>(s);
 
-    {
-        var want = slice<ж<nint>>([Ꮡone, Ꮡtwo, Ꮡthree]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
-            t.Errorf("Compact(%v) = %v, want %v", copy, s, want);
-        }
+    var want = slice<ж<nint>>([Ꮡone, Ꮡtwo, Ꮡthree]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
+        t.Errorf("Compact(%v) = %v, want %v", copy, s, want);
     }
 
     if (mem[3] != nil || mem[4] != nil) {
@@ -1020,10 +976,8 @@ public static void TestCompactFuncClearTail(ж<testing.T> t) {
         return x.Value == y.Value;
     });
 
-    {
-        var want = slice<ж<nint>>([Ꮡa, Ꮡc, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
-            t.Errorf("CompactFunc(%v) = %v, want %v", copy, s, want);
-        }
+    var want = slice<ж<nint>>([Ꮡa, Ꮡc, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
+        t.Errorf("CompactFunc(%v) = %v, want %v", copy, s, want);
     }
 
     if (mem[3] != nil || mem[4] != nil) {
@@ -1036,7 +990,7 @@ public static void TestCompactFuncClearTail(ж<testing.T> t) {
 }
 
 public static void BenchmarkCompactFunc(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in compactTests) {
+    foreach (var (_, vᴛ1) in range(compactTests)) {
         ref var c = ref heap(new compactTestsᴛ1(), out var Ꮡc);
         c = vᴛ1;
 
@@ -1064,7 +1018,7 @@ public static void BenchmarkCompactFunc_Large(ж<testing.B> b) {
     });
     b.Run(noDupˢ, (ж<testing.B> bΔ3) => {
         var ss = new slice<BenchmarkCompactFunc_Large_Element>(N);
-        foreach (var i in range(ss)) {
+        foreach (var i in range(len(ss))) {
             ss[i] = i;
         }
         bΔ3.ResetTimer();
@@ -1216,17 +1170,17 @@ internal partial struct TestReplace_type /*dyn*/ {
 }
 
 public static void TestReplace(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestReplace_type>([
+    foreach (var (_, test) in range(slice<TestReplace_type>([
         new(), // all zero value
         new(
-            s: slice<nint>([1, 2, 3, 4]),
-            v: slice<nint>([5]),
+            s: [1, 2, 3, 4],
+            v: [5],
             i: 1,
             j: 2
         ),
         new(
-            s: slice<nint>([1, 2, 3, 4]),
-            v: slice<nint>([5, 6, 7, 8]),
+            s: [1, 2, 3, 4],
+            v: [5, 6, 7, 8],
             i: 1,
             j: 2
         ),
@@ -1238,11 +1192,11 @@ public static void TestReplace(ж<testing.T> t) {
                 s[2] = 2;
                 return s;
             })(),
-            v: slice<nint>([3, 4, 5, 6, 7]),
+            v: [3, 4, 5, 6, 7],
             i: 0,
             j: 1
         )
-    ])) {
+    ]))) {
         var (ss, vv) = (Clone<slice<nint>, nint>(test.s), Clone<slice<nint>, nint>(test.v));
         var want = naiveReplace(ss, test.i, test.j, vv.ꓸꓸꓸ);
         var got = Replace(test.s, test.i, test.j, test.v.ꓸꓸꓸ);
@@ -1263,12 +1217,12 @@ public static void TestReplacePanics(ж<testing.T> t) {
     s = s[0..2];
     _ = s[0..4]; // this is a valid slice of s
 
-    foreach (var (_, vᴛ1) in slice<TestReplacePanics_type>([
-        new("indexes out of order", slice<nint>([1, 2]), slice<nint>([3]), 2, 1),
-        new("large index", slice<nint>([1, 2]), slice<nint>([3]), 1, 10),
-        new("negative index", slice<nint>([1, 2]), slice<nint>([3]), -1, 2),
+    foreach (var (_, vᴛ1) in range(slice<TestReplacePanics_type>([
+        new("indexes out of order", [1, 2], [3], 2, 1),
+        new("large index", [1, 2], [3], 1, 10),
+        new("negative index", [1, 2], [3], -1, 2),
         new("s[i:j] is valid and j > len(s)", s, default, 0, 4)
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestReplacePanics_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1309,10 +1263,8 @@ public static void TestReplaceGrow(ж<testing.T> t) {
     ref var z = ref heap<nint>(99, out var Ꮡz);
     s = Replace(s, 1, 3, Ꮡz, Ꮡz, Ꮡz, Ꮡz);
 
-    {
-        var want = slice<ж<nint>>([Ꮡa, Ꮡz, Ꮡz, Ꮡz, Ꮡz, Ꮡd, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
-            t.Errorf("Replace(%v, 1, 3, %v, %v, %v, %v) = %v, want %v", copy, Ꮡz, Ꮡz, Ꮡz, Ꮡz, s, want);
-        }
+    var want = slice<ж<nint>>([Ꮡa, Ꮡz, Ꮡz, Ꮡz, Ꮡz, Ꮡd, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
+        t.Errorf("Replace(%v, 1, 3, %v, %v, %v, %v) = %v, want %v", copy, Ꮡz, Ꮡz, Ꮡz, Ꮡz, s, want);
     }
 
     if (!Equal<slice<ж<nint>>, ж<nint>>(original, copy)) {
@@ -1348,10 +1300,8 @@ public static void TestReplaceClearTail(ж<testing.T> t) {
     z = 9;
     s = Replace(s, 1, 4, Ꮡy, Ꮡz);
 
-    {
-        var want = slice<ж<nint>>([Ꮡa, Ꮡy, Ꮡz, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
-            t.Errorf("Replace(%v) = %v, want %v", copy, s, want);
-        }
+    var want = slice<ж<nint>>([Ꮡa, Ꮡy, Ꮡz, Ꮡe]); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
+        t.Errorf("Replace(%v) = %v, want %v", copy, s, want);
     }
 
     if (mem[4] != nil) {
@@ -1399,10 +1349,8 @@ public static void TestReplaceEndClearTail(ж<testing.T> t) {
     s = Replace(s, i, j, v.ꓸꓸꓸ);
 
     nint x = s[..3][2];
-    {
-        nint want = 0; if (x != want) {
-            t.Errorf("TestReplaceEndClearTail: obsolete element is %d, want %d", x, want);
-        }
+    nint want = 0; if (x != want) {
+        t.Errorf("TestReplaceEndClearTail: obsolete element is %d, want %d", x, want);
     }
 }
 
@@ -1430,7 +1378,7 @@ public static void BenchmarkReplace(ж<testing.B> b) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var c = ref heap(new BenchmarkReplace_cases(), out var Ꮡc);
         c = vᴛ1;
 
@@ -1521,23 +1469,23 @@ internal partial struct TestConcat_cases /*dyn*/ {
 public static void TestConcat(ж<testing.T> t) {
     var cases = slice<TestConcat_cases>([
         new(
-            s: slice<slice<nint>>([default]),
+            s: [default],
             want: default
         ),
         new(
-            s: slice<slice<nint>>([slice<nint>([1])]),
-            want: slice<nint>([1])
+            s: [[1]],
+            want: [1]
         ),
         new(
-            s: slice<slice<nint>>([slice<nint>([1]), slice<nint>([2])]),
-            want: slice<nint>([1, 2])
+            s: [[1], [2]],
+            want: [1, 2]
         ),
         new(
-            s: slice<slice<nint>>([slice<nint>([1]), default, slice<nint>([2])]),
-            want: slice<nint>([1, 2])
+            s: [[1], default, [2]],
+            want: [1, 2]
         )
     ]);
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tc = ref heap(new TestConcat_cases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -1576,38 +1524,38 @@ public static void TestConcat_too_large(ж<testing.T> t) {
 
     var cases = slice<TestConcat_too_large_cases>([
         new(
-            lengths: slice<nint>([0, 0]),
+            lengths: [0, 0],
             shouldPanic: false
         ),
         new(
-            lengths: slice<nint>([Δmath.MaxInt, 0]),
+            lengths: [Δmath.MaxInt, 0],
             shouldPanic: false
         ),
         new(
-            lengths: slice<nint>([0, Δmath.MaxInt]),
+            lengths: [0, Δmath.MaxInt],
             shouldPanic: false
         ),
         new(
-            lengths: slice<nint>([unchecked((nint)(9223372036854775806L)), 1]),
+            lengths: [unchecked((nint)(9223372036854775806L)), 1],
             shouldPanic: false
         ),
         new(
-            lengths: slice<nint>([unchecked((nint)(9223372036854775806L)), 1, 1]),
+            lengths: [unchecked((nint)(9223372036854775806L)), 1, 1],
             shouldPanic: true
         ),
         new(
-            lengths: slice<nint>([Δmath.MaxInt, 1]),
+            lengths: [Δmath.MaxInt, 1],
             shouldPanic: true
         ),
         new(
-            lengths: slice<nint>([Δmath.MaxInt, Δmath.MaxInt]),
+            lengths: [Δmath.MaxInt, Δmath.MaxInt],
             shouldPanic: true
         )
     ]);
-    foreach (var (_, tc) in cases) {
+    foreach (var (_, tc) in range(cases)) {
         ref var r = ref heap<any>(out var Ꮡr);
         ref var ss = ref heap<slice<slice<TestConcat_too_large_void>>>(new slice<slice<TestConcat_too_large_void>>(0, len(tc.lengths)), out var Ꮡss);
-        foreach (var (_, l) in tc.lengths) {
+        foreach (var (_, l) in range(tc.lengths)) {
             var s = new slice<TestConcat_too_large_void>(l);
             ss = append(ssᴷ, ss, s);
         }
@@ -1622,11 +1570,9 @@ public static void TestConcat_too_large(ж<testing.T> t) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         })();
-        {
-            var didPanic = r != nil; if (didPanic != tc.shouldPanic) {
-                t.Errorf("slices.Concat(lens(%v)) got panic == %v",
-                    tc.lengths, didPanic);
-            }
+        var didPanic = r != nil; if (didPanic != tc.shouldPanic) {
+            t.Errorf("slices.Concat(lens(%v)) got panic == %v",
+                tc.lengths, didPanic);
         }
     }
 }
@@ -1645,39 +1591,37 @@ internal partial struct TestRepeat_typeᴛ1 /*dyn*/ {
 
 public static void TestRepeat(ж<testing.T> t) {
     // normal cases
-    foreach (var (_, tc) in slice<TestRepeat_type>([
-        new(x: slice<nint>(default), count: 0, want: slice<nint>([])),
-        new(x: slice<nint>(default), count: 1, want: slice<nint>([])),
-        new(x: slice<nint>(default), count: Δmath.MaxInt, want: slice<nint>([])),
-        new(x: slice<nint>([]), count: 0, want: slice<nint>([])),
-        new(x: slice<nint>([]), count: 1, want: slice<nint>([])),
-        new(x: slice<nint>([]), count: Δmath.MaxInt, want: slice<nint>([])),
-        new(x: slice<nint>([0]), count: 0, want: slice<nint>([])),
-        new(x: slice<nint>([0]), count: 1, want: slice<nint>([0])),
-        new(x: slice<nint>([0]), count: 2, want: slice<nint>([0, 0])),
-        new(x: slice<nint>([0]), count: 3, want: slice<nint>([0, 0, 0])),
-        new(x: slice<nint>([0]), count: 4, want: slice<nint>([0, 0, 0, 0])),
-        new(x: slice<nint>([0, 1]), count: 0, want: slice<nint>([])),
-        new(x: slice<nint>([0, 1]), count: 1, want: slice<nint>([0, 1])),
-        new(x: slice<nint>([0, 1]), count: 2, want: slice<nint>([0, 1, 0, 1])),
-        new(x: slice<nint>([0, 1]), count: 3, want: slice<nint>([0, 1, 0, 1, 0, 1])),
-        new(x: slice<nint>([0, 1]), count: 4, want: slice<nint>([0, 1, 0, 1, 0, 1, 0, 1])),
-        new(x: slice<nint>([0, 1, 2]), count: 0, want: slice<nint>([])),
-        new(x: slice<nint>([0, 1, 2]), count: 1, want: slice<nint>([0, 1, 2])),
-        new(x: slice<nint>([0, 1, 2]), count: 2, want: slice<nint>([0, 1, 2, 0, 1, 2])),
-        new(x: slice<nint>([0, 1, 2]), count: 3, want: slice<nint>([0, 1, 2, 0, 1, 2, 0, 1, 2])),
-        new(x: slice<nint>([0, 1, 2]), count: 4, want: slice<nint>([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]))
-    ])) {
-        {
-            var got = Repeat<slice<nint>, nint>(tc.x, tc.count); if (got == nil || cap(got) != cap(tc.want) || !Equal<slice<nint>, nint>(got, tc.want)) {
-                t.Errorf("Repeat(%v, %v): got: %v, want: %v, (got == nil): %v, cap(got): %v, cap(want): %v",
-                    tc.x, tc.count, got, tc.want, got == nil, cap(got), cap(tc.want));
-            }
+    foreach (var (_, tc) in range(slice<TestRepeat_type>([
+        new(x: slice<nint>(default), count: 0, want: []),
+        new(x: slice<nint>(default), count: 1, want: []),
+        new(x: slice<nint>(default), count: Δmath.MaxInt, want: []),
+        new(x: [], count: 0, want: []),
+        new(x: [], count: 1, want: []),
+        new(x: [], count: Δmath.MaxInt, want: []),
+        new(x: [0], count: 0, want: []),
+        new(x: [0], count: 1, want: [0]),
+        new(x: [0], count: 2, want: [0, 0]),
+        new(x: [0], count: 3, want: [0, 0, 0]),
+        new(x: [0], count: 4, want: [0, 0, 0, 0]),
+        new(x: [0, 1], count: 0, want: []),
+        new(x: [0, 1], count: 1, want: [0, 1]),
+        new(x: [0, 1], count: 2, want: [0, 1, 0, 1]),
+        new(x: [0, 1], count: 3, want: [0, 1, 0, 1, 0, 1]),
+        new(x: [0, 1], count: 4, want: [0, 1, 0, 1, 0, 1, 0, 1]),
+        new(x: [0, 1, 2], count: 0, want: []),
+        new(x: [0, 1, 2], count: 1, want: [0, 1, 2]),
+        new(x: [0, 1, 2], count: 2, want: [0, 1, 2, 0, 1, 2]),
+        new(x: [0, 1, 2], count: 3, want: [0, 1, 2, 0, 1, 2, 0, 1, 2]),
+        new(x: [0, 1, 2], count: 4, want: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2])
+    ]))) {
+        var got = Repeat<slice<nint>, nint>(tc.x, tc.count); if (got == nil || cap(got) != cap(tc.want) || !Equal<slice<nint>, nint>(got, tc.want)) {
+            t.Errorf("Repeat(%v, %v): got: %v, want: %v, (got == nil): %v, cap(got): %v, cap(want): %v",
+                tc.x, tc.count, got, tc.want, got == nil, cap(got), cap(tc.want));
         }
     }
 
     // big slices
-    foreach (var (_, tc) in slice<TestRepeat_typeᴛ1>([
+    foreach (var (_, tc) in range(slice<TestRepeat_typeᴛ1>([
         new(x: new slice<EmptyStruct>(unchecked((nint)(9223372036854775807L))), count: 1, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775807L)))),
         new(x: new slice<EmptyStruct>(unchecked((nint)(4611686018427387902L))), count: 2, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775804L)))),
         new(x: new slice<EmptyStruct>(unchecked((nint)(3074457345618258600L))), count: 3, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775800L)))),
@@ -1687,12 +1631,10 @@ public static void TestRepeat(ж<testing.T> t) {
         new(x: new slice<EmptyStruct>(unchecked((nint)(1317624576693539395L))), count: 7, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775765L)))),
         new(x: new slice<EmptyStruct>(unchecked((nint)(1152921504606846968L))), count: 8, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775744L)))),
         new(x: new slice<EmptyStruct>(unchecked((nint)(1024819115206086192L))), count: 9, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775728L))))
-    ])) {
-        {
-            var got = Repeat<slice<EmptyStruct>, EmptyStruct>(tc.x, tc.count); if (got == nil || len(got) != len(tc.want) || cap(got) != cap(tc.want)) {
-                t.Errorf("Repeat(make([]struct{}, %v), %v): (got == nil): %v, len(got): %v, len(want): %v, cap(got): %v, cap(want): %v",
-                    len(tc.x), tc.count, got == nil, len(got), len(tc.want), cap(got), cap(tc.want));
-            }
+    ]))) {
+        var got = Repeat<slice<EmptyStruct>, EmptyStruct>(tc.x, tc.count); if (got == nil || len(got) != len(tc.want) || cap(got) != cap(tc.want)) {
+            t.Errorf("Repeat(make([]struct{}, %v), %v): (got == nil): %v, len(got): %v, len(want): %v, cap(got): %v, cap(want): %v",
+                len(tc.x), tc.count, got == nil, len(got), len(tc.want), cap(got), cap(tc.want));
         }
     }
 }
@@ -1704,11 +1646,11 @@ internal partial struct TestRepeatPanics_type /*dyn*/ {
 }
 
 public static void TestRepeatPanics(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestRepeatPanics_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestRepeatPanics_type>([
         new(name: "cannot be negative", x: new slice<EmptyStruct>(0), count: -1),
         new(name: "the result of (len(x) * count) overflows, hi > 0", x: new slice<EmptyStruct>(3), count: Δmath.MaxInt),
         new(name: "the result of (len(x) * count) overflows, lo > maxInt", x: new slice<EmptyStruct>(2), count: unchecked((nint)(4611686018427387904L)))
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestRepeatPanics_type(), out var Ꮡtest);
         test = vᴛ1;
 

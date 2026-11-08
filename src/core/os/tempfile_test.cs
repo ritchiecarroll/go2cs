@@ -45,7 +45,7 @@ public static void TestCreateTempPattern(ж<Δtesting.T> t) {
             new("tempfile_test*", "tempfile_test", ""),
             new("tempfile_test*xyz", "tempfile_test", "xyz")
         ]);
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var (f, err) = CreateTemp(""u8, test.pattern);
             if (err != nil) {
                 t.Errorf("CreateTemp(..., %q) error: %v", test.pattern, err);
@@ -88,7 +88,7 @@ public static void TestCreateTempBadPattern(ж<Δtesting.T> t) {
         new(sep + "tempfile_test"u8 + sep + "*foo"u8, true),
         new("tempfile_test*foo"u8 + sep, true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCreateTempBadPattern_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -163,7 +163,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> t) {
         finally { ᒐ.Run(); }
     }
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMkdirTemp_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -199,10 +199,8 @@ public static void TestMkdirTempBadDir(ж<Δtesting.T> t) {
 
     @string badDir = filepath.Join(t.TempDir(), notExistˢ);
     var (_, err) = MkdirTemp(badDir, fooˢ);
-    {
-        var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !IsNotExist(err) || pe.Path != badDir) {
-            t.Errorf("TempDir error = %#v; want PathError for path %q satisfying IsNotExist", err, badDir);
-        }
+    var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !IsNotExist(err) || pe.Path != badDir) {
+        t.Errorf("TempDir error = %#v; want PathError for path %q satisfying IsNotExist", err, badDir);
     }
 }
 
@@ -230,7 +228,7 @@ public static void TestMkdirTempBadPattern(ж<Δtesting.T> t) {
         new(sep + "tempfile_test"u8 + sep + "*foo"u8, true),
         new("tempfile_test*foo"u8 + sep, true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMkdirTempBadPattern_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

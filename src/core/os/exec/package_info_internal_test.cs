@@ -30,7 +30,7 @@ using static go.os.exec_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/exec/env_test.go", "env_test.cs", "ABMYgpQAJ1yCgoI=")]
-[assembly: GoPositionMap("os/exec/internal_test.go", "internal_test.cs", "ABEYggAfSIKCgoKCpoCC")]
+[assembly: GoPositionMap("os/exec/internal_test.go", "internal_test.cs", "ABEYggAfSIKCgoKCpoI=")]
 [assembly: GoPositionMap("os/exec/lp_test.go", "lp_test.cs", "AAoW+oKCgoKUgpSCgpSC")]
 // </GoSourcePositionMaps>
 

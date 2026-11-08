@@ -20,8 +20,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_package;
 using ꓸꓸꓸAddrRange = Span<runtime_internal_test_package.AddrRange>;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
@@ -30,42 +28,31 @@ partial class runtime_internal_test_package {
 
 public static readonly ж<Func<uint64, uint64, uint64>> ᏑFadd64 = new StaticBox<Func<uint64, uint64, uint64>>(fadd64);
 public static ref Func<uint64, uint64, uint64> Fadd64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFadd64).ValueSlot;
-
 public static readonly ж<Func<uint64, uint64, uint64>> ᏑFsub64 = new StaticBox<Func<uint64, uint64, uint64>>(fsub64);
 public static ref Func<uint64, uint64, uint64> Fsub64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFsub64).ValueSlot;
-
 public static readonly ж<Func<uint64, uint64, uint64>> ᏑFmul64 = new StaticBox<Func<uint64, uint64, uint64>>(fmul64);
 public static ref Func<uint64, uint64, uint64> Fmul64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFmul64).ValueSlot;
-
 public static readonly ж<Func<uint64, uint64, uint64>> ᏑFdiv64 = new StaticBox<Func<uint64, uint64, uint64>>(fdiv64);
 public static ref Func<uint64, uint64, uint64> Fdiv64 => ref ((StaticBox<Func<uint64, uint64, uint64>>)ᏑFdiv64).ValueSlot;
-
 public static readonly ж<Func<uint64, uint32>> ᏑF64to32 = new StaticBox<Func<uint64, uint32>>(f64to32);
 public static ref Func<uint64, uint32> F64to32 => ref ((StaticBox<Func<uint64, uint32>>)ᏑF64to32).ValueSlot;
-
 public static readonly ж<Func<uint32, uint64>> ᏑF32to64 = new StaticBox<Func<uint32, uint64>>(f32to64);
 public static ref Func<uint32, uint64> F32to64 => ref ((StaticBox<Func<uint32, uint64>>)ᏑF32to64).ValueSlot;
-
 public static readonly ж<Func<uint64, uint64, (int32, bool)>> ᏑFcmp64 = new StaticBox<Func<uint64, uint64, (int32, bool)>>(fcmp64);
 public static ref Func<uint64, uint64, (int32, bool)> Fcmp64 => ref ((StaticBox<Func<uint64, uint64, (int32, bool)>>)ᏑFcmp64).ValueSlot;
-
 public static readonly ж<Func<int64, uint64>> ᏑFintto64 = new StaticBox<Func<int64, uint64>>(fintto64);
 public static ref Func<int64, uint64> Fintto64 => ref ((StaticBox<Func<int64, uint64>>)ᏑFintto64).ValueSlot;
-
 public static readonly ж<Func<uint64, (int64, bool)>> ᏑF64toint = new StaticBox<Func<uint64, (int64, bool)>>(f64toint);
 public static ref Func<uint64, (int64, bool)> F64toint => ref ((StaticBox<Func<uint64, (int64, bool)>>)ᏑF64toint).ValueSlot;
 
 public static readonly ж<Action> ᏑEntersyscall = new StaticBox<Action>(default(Action));
 public static ref Action Entersyscall => ref ((StaticBox<Action>)ᏑEntersyscall).ValueSlot;
 internal static void initᴛEntersyscall() { Entersyscall = entersyscall; }
-
 public static readonly ж<Action> ᏑExitsyscall = new StaticBox<Action>(default(Action));
 public static ref Action Exitsyscall => ref ((StaticBox<Action>)ᏑExitsyscall).ValueSlot;
 internal static void initᴛExitsyscall() { Exitsyscall = exitsyscall; }
-
 public static readonly ж<Func<bool>> ᏑLockedOSThread = new StaticBox<Func<bool>>(lockedOSThread);
 public static ref Func<bool> LockedOSThread => ref ((StaticBox<Func<bool>>)ᏑLockedOSThread).ValueSlot;
-
 public static readonly ж<Func<ж<uintptr>, uintptr, uintptr>> ᏑXadduintptr = new StaticBox<Func<ж<uintptr>, uintptr, uintptr>>(atomic.Xadduintptr);
 public static ref Func<ж<uintptr>, uintptr, uintptr> Xadduintptr => ref ((StaticBox<Func<ж<uintptr>, uintptr, uintptr>>)ᏑXadduintptr).ValueSlot;
 
@@ -81,18 +68,14 @@ public static ref Func<@string, (int64, bool)> ParseByteCount => ref ((StaticBox
 
 public static readonly ж<Func<int64>> ᏑNanotime = new StaticBox<Func<int64>>(nanotime);
 public static ref Func<int64> Nanotime => ref ((StaticBox<Func<int64>>)ᏑNanotime).ValueSlot;
-
 public static readonly ж<Func<int64>> ᏑCputicks = new StaticBox<Func<int64>>(cputicks);
 public static ref Func<int64> Cputicks => ref ((StaticBox<Func<int64>>)ᏑCputicks).ValueSlot;
-
 public static readonly ж<Func<int64>> ᏑCyclesPerSecond = new StaticBox<Func<int64>>(default(Func<int64>));
 public static ref Func<int64> CyclesPerSecond => ref ((StaticBox<Func<int64>>)ᏑCyclesPerSecond).ValueSlot;
 internal static void initᴛCyclesPerSecond() { CyclesPerSecond = pprof_cyclesPerSecond; }
-
 public static readonly ж<Action> ᏑNetpollBreak = new StaticBox<Action>(default(Action));
 public static ref Action NetpollBreak => ref ((StaticBox<Action>)ᏑNetpollBreak).ValueSlot;
 internal static void initᴛNetpollBreak() { NetpollBreak = netpollBreak; }
-
 public static readonly ж<Action<uint32>> ᏑUsleep = new StaticBox<Action<uint32>>(default(Action<uint32>));
 public static ref Action<uint32> Usleep => ref ((StaticBox<Action<uint32>>)ᏑUsleep).ValueSlot;
 internal static void initᴛUsleep() { Usleep = usleep; }
@@ -100,7 +83,6 @@ internal static void initᴛUsleep() { Usleep = usleep; }
 public static readonly ж<uintptr> ᏑPhysPageSize = new StaticBox<uintptr>(default(uintptr));
 public static ref uintptr PhysPageSize => ref ((StaticBox<uintptr>)ᏑPhysPageSize).ValueSlot;
 internal static void initᴛPhysPageSize() { PhysPageSize = physPageSize; }
-
 public static readonly ж<uintptr> ᏑPhysHugePageSize = new StaticBox<uintptr>(default(uintptr));
 public static ref uintptr PhysHugePageSize => ref ((StaticBox<uintptr>)ᏑPhysHugePageSize).ValueSlot;
 internal static void initᴛPhysHugePageSize() { PhysHugePageSize = physHugePageSize; }
@@ -111,7 +93,6 @@ internal static void initᴛNetpollGenericInit() { NetpollGenericInit = netpollG
 
 public static readonly ж<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>> ᏑMemmove = new StaticBox<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>>(memmove);
 public static ref Action<@unsafe.Pointer, @unsafe.Pointer, uintptr> Memmove => ref ((StaticBox<Action<@unsafe.Pointer, @unsafe.Pointer, uintptr>>)ᏑMemmove).ValueSlot;
-
 public static readonly ж<Action<@unsafe.Pointer, uintptr>> ᏑMemclrNoHeapPointers = new StaticBox<Action<@unsafe.Pointer, uintptr>>(memclrNoHeapPointers);
 public static ref Action<@unsafe.Pointer, uintptr> MemclrNoHeapPointers => ref ((StaticBox<Action<@unsafe.Pointer, uintptr>>)ᏑMemclrNoHeapPointers).ValueSlot;
 
@@ -122,7 +103,6 @@ internal static void initᴛCgoCheckPointer() { CgoCheckPointer = cgoCheckPointe
 public const bool CrashStackImplemented = /* crashStackImplemented */ false;
 
 public static UntypedInt TracebackInnerFrames => /* tracebackInnerFrames */ 50;
-
 public static UntypedInt TracebackOuterFrames => /* tracebackOuterFrames */ 50;
 
 internal static readonly ж<slice<slice<global::go.runtime_package.lockRank>>> ᏑLockPartialOrder = new StaticBox<slice<slice<global::go.runtime_package.lockRank>>>(default(slice<slice<global::go.runtime_package.lockRank>>));
@@ -149,7 +129,6 @@ public static void LFStackPush(ж<uint64> head, ж<LFNode> node) {
 public static ж<LFNode> LFStackPop(ж<uint64> head) {
     return (ж<LFNode>)(uintptr)((head.Reinterpret<uint64, global::go.runtime_package.lfstack>()).pop());
 }
-
 public static void LFNodeValidate(ж<LFNode> node) {
     lfnodeValidate(node.Reinterpret<LFNode, global::go.runtime_package.lfnode>());
 }
@@ -191,11 +170,9 @@ public static void RunSchedLocalQueueTest() {
             runqput(pp, Ꮡ(gs, i), false);
         }
         for (nint j = 0; j < i; j++) {
-            {
-                var (g, _) = runqget(pp); if (g != Ꮡ(gs, i)) {
-                    print((@string)"bad element at iter ", i, (@string)"/", j, (@string)"\n");
-                    @throw(badElementˢ);
-                }
+            var (g, _) = runqget(pp); if (g != Ꮡ(gs, i)) {
+                print((@string)"bad element at iter ", i, (@string)"/", j, (@string)"\n");
+                @throw(badElementˢ);
             }
         }
         {
@@ -341,26 +318,18 @@ public static @string /*s*/ GostringW(slice<uint16> w) {
 public static readonly ж<Func<ж<byte>, int32, int32, int32>> ᏑOpen = new StaticBox<Func<ж<byte>, int32, int32, int32>>(default(Func<ж<byte>, int32, int32, int32>));
 public static ref Func<ж<byte>, int32, int32, int32> Open => ref ((StaticBox<Func<ж<byte>, int32, int32, int32>>)ᏑOpen).ValueSlot;
 internal static void initᴛOpen() { Open = (ж<byte> ᴛ0, int32 ᴛ1, int32 ᴛ2) => open(ref ᴛ0.DerefOrNull(), ᴛ1, ᴛ2); }
-
 public static readonly ж<Func<int32, int32>> ᏑΔClose = new StaticBox<Func<int32, int32>>(default(Func<int32, int32>));
 public static ref Func<int32, int32> ΔClose => ref ((StaticBox<Func<int32, int32>>)ᏑΔClose).ValueSlot;
 internal static void initᴛΔClose() { ΔClose = closefd; }
-
 public static readonly ж<Func<int32, @unsafe.Pointer, int32, int32>> ᏑΔRead = new StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>(default(Func<int32, @unsafe.Pointer, int32, int32>));
 public static ref Func<int32, @unsafe.Pointer, int32, int32> ΔRead => ref ((StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>)ᏑΔRead).ValueSlot;
 internal static void initᴛΔRead() { ΔRead = read; }
-
 public static readonly ж<Func<uintptr, @unsafe.Pointer, int32, int32>> ᏑΔWrite = new StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>(default(Func<uintptr, @unsafe.Pointer, int32, int32>));
 public static ref Func<uintptr, @unsafe.Pointer, int32, int32> ΔWrite => ref ((StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>)ᏑΔWrite).ValueSlot;
 internal static void initᴛΔWrite() { ΔWrite = write; }
 
-public static slice<@string> Envs() {
-    return envs;
-}
-
-public static void SetEnvs(slice<@string> e) {
-    envs = e;
-}
+public static slice<@string> Envs() { return envs; }
+public static void SetEnvs(slice<@string> e) { envs = e; }
 
 public static UntypedInt PtrSize => /* goarch.PtrSize */ 8;
 
@@ -383,7 +352,6 @@ public static void SetTracebackEnv(@string level) {
 
 public static readonly ж<Func<@unsafe.Pointer, uint32>> ᏑReadUnaligned32 = new StaticBox<Func<@unsafe.Pointer, uint32>>(readUnaligned32);
 public static ref Func<@unsafe.Pointer, uint32> ReadUnaligned32 => ref ((StaticBox<Func<@unsafe.Pointer, uint32>>)ᏑReadUnaligned32).ValueSlot;
-
 public static readonly ж<Func<@unsafe.Pointer, uint64>> ᏑReadUnaligned64 = new StaticBox<Func<@unsafe.Pointer, uint64>>(readUnaligned64);
 public static ref Func<@unsafe.Pointer, uint64> ReadUnaligned64 => ref ((StaticBox<Func<@unsafe.Pointer, uint64>>)ᏑReadUnaligned64).ValueSlot;
 
@@ -395,7 +363,7 @@ public static (uintptr pagesInUse, uintptr counted) CountPagesInUse() {
 
     pagesInUse = Ꮡmheap_.ᏑpagesInUse.Load();
 
-    foreach (var (_, s) in mheap_.allspans) {
+    foreach (var (_, s) in range(mheap_.allspans)) {
         if (s.Ꮡstate.get() == mSpanInUse) {
             counted += s.npages;
         }
@@ -406,17 +374,9 @@ public static (uintptr pagesInUse, uintptr counted) CountPagesInUse() {
     return (pagesInUse, counted);
 }
 
-public static uint32 Fastrand() {
-    return (uint32)rand();
-}
-
-public static uint64 Fastrand64() {
-    return rand();
-}
-
-public static uint32 Fastrandn(uint32 n) {
-    return randn(n);
-}
+public static uint32 Fastrand() { return (uint32)rand(); }
+public static uint64 Fastrand64() { return rand(); }
+public static uint32 Fastrandn(uint32 n) { return randn(n); }
 
 public partial struct ProfBuf /*global::go.runtime_package.profBuf*/;
 
@@ -515,22 +475,20 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
         array<ReadMemStatsSlow_bySize> bySize = new(68); /* gc.NumSizeClasses */
 
         // Add up current allocations in spans.
-        foreach (var (_, s) in mheap_.allspans) {
+        foreach (var (_, s) in range(mheap_.allspans)) {
             if (s.Ꮡstate.get() != mSpanInUse) {
                 continue;
             }
             if (s.isUnusedUserArenaChunk()) {
                 continue;
             }
-            {
-                var sizeclass = s.spanclass.sizeclass(); if (sizeclass == 0) {
-                    slow.Mallocs++;
-                    slow.Alloc += (uint64)s.elemsize;
-                } else {
-                    slow.Mallocs += (uint64)s.allocCount;
-                    slow.Alloc += (uint64)s.allocCount * (uint64)s.elemsize;
-                    bySize[sizeclass].Mallocs += (uint64)s.allocCount;
-                }
+            var sizeclass = s.spanclass.sizeclass(); if (sizeclass == 0) {
+                slow.Mallocs++;
+                slow.Alloc += (uint64)s.elemsize;
+            } else {
+                slow.Mallocs += (uint64)s.allocCount;
+                slow.Alloc += (uint64)s.allocCount * (uint64)s.elemsize;
+                bySize[sizeclass].Mallocs += (uint64)s.allocCount;
             }
         }
 
@@ -551,7 +509,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
 
         slow.TotalAlloc = slow.Alloc + m.largeFree + smallFree;
 
-        foreach (var i in range(slow.BySize)) {
+        foreach (var i in range(len(slow.BySize))) {
             slow.BySize[i].Mallocs = bySize[i].Mallocs;
             slow.BySize[i].Frees = bySize[i].Frees;
         }
@@ -564,7 +522,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
             nuint pg = chunk.Ꮡscavenged.popcntRange(0, pallocChunkPages);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
         }
-        foreach (var (_, Δp) in allp) {
+        foreach (var (_, Δp) in range(allp)) {
             // Only count scav bits for pages in the cache
             nint pg = sys.OnesCount64((~Δp).pcache.cache & (~Δp).pcache.scav);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
@@ -604,9 +562,7 @@ public static void ShrinkStackAndVerifyFramePointers() {
 
 public partial struct StackPoisonCopyRestore /*num:nint*/;
 
-public static void Restore(this StackPoisonCopyRestore s) {
-    stackPoisonCopy = (nint)s;
-}
+public static void Restore(this StackPoisonCopyRestore s) { stackPoisonCopy = (nint)s; }
 
 public static StackPoisonCopyRestore StackPoisonCopy() {
     nint before = stackPoisonCopy;
@@ -809,21 +765,10 @@ public static uintptr PallocSumBytes => /* pallocSumBytes */ 8;
 // Expose pallocSum for testing.
 public partial struct PallocSum /*num:uint64*/;
 
-public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) {
-    return (PallocSum)(uint64)packPallocSum(start, max, end);
-}
-
-public static nuint Start(this PallocSum m) {
-    return ((global::go.runtime_package.pallocSum)(uint64)m).start();
-}
-
-public static nuint Max(this PallocSum m) {
-    return ((global::go.runtime_package.pallocSum)(uint64)m).max();
-}
-
-public static nuint End(this PallocSum m) {
-    return ((global::go.runtime_package.pallocSum)(uint64)m).end();
-}
+public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) { return (PallocSum)(uint64)packPallocSum(start, max, end); }
+public static nuint Start(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).start(); }
+public static nuint Max(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).max(); }
+public static nuint End(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).end(); }
 
 // Expose pallocBits for testing.
 public partial struct ΔPallocBits /*global::go.runtime_package.pallocBits*/;
@@ -831,22 +776,10 @@ public partial struct ΔPallocBits /*global::go.runtime_package.pallocBits*/;
 public static (nuint, nuint) Find(this ж<ΔPallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
     return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).find(npages, searchIdx);
 }
-
-public static void AllocRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
-    (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).allocRange(i, n);
-}
-
-public static void Free(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
-    (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).free(i, n);
-}
-
-public static PallocSum Summarize(this ж<ΔPallocBits> Ꮡb) {
-    return (PallocSum)(uint64)(Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).summarize();
-}
-
-public static nuint PopcntRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
-    return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).popcntRange(i, n);
-}
+public static void AllocRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).allocRange(i, n); }
+public static void Free(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).free(i, n); }
+public static PallocSum Summarize(this ж<ΔPallocBits> Ꮡb) { return (PallocSum)(uint64)(Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).summarize(); }
+public static nuint PopcntRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).popcntRange(i, n); }
 
 // SummarizeSlow is a slow but more obviously correct implementation
 // of (*pallocBits).summarize. Used for testing.
@@ -875,9 +808,7 @@ public static PallocSum SummarizeSlow(ж<ΔPallocBits> b) {
 }
 
 // Expose non-trivial helpers for testing.
-public static nuint FindBitRange64(uint64 c, nuint n) {
-    return findBitRange64(c, n);
-}
+public static nuint FindBitRange64(uint64 c, nuint n) { return findBitRange64(c, n); }
 
 // Given two PallocBits, returns a set of bit ranges where
 // they differ.
@@ -928,27 +859,19 @@ public partial struct ΔPallocData /*global::go.runtime_package.pallocData*/;
 public static (nuint, nuint) FindScavengeCandidate(this ж<ΔPallocData> Ꮡd, nuint searchIdx, uintptr min, uintptr max) {
     return (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).findScavengeCandidate(searchIdx, min, max);
 }
-
-public static void AllocRange(this ж<ΔPallocData> Ꮡd, nuint i, nuint n) {
-    (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).allocRange(i, n);
-}
-
+public static void AllocRange(this ж<ΔPallocData> Ꮡd, nuint i, nuint n) { (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).allocRange(i, n); }
 public static void ScavengedSetRange(this ж<ΔPallocData> Ꮡd, nuint i, nuint n) {
     (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.scavenged.setRange(i, n);
 }
-
 public static ж<ΔPallocBits> PallocBits(this ж<ΔPallocData> Ꮡd) {
     return Ꮡ((Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.pallocBits).Reinterpret<global::go.runtime_package.pallocBits, ΔPallocBits>();
 }
-
 public static ж<ΔPallocBits> Scavenged(this ж<ΔPallocData> Ꮡd) {
     return Ꮡ((Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.scavenged).Reinterpret<global::go.runtime_package.pageBits, ΔPallocBits>();
 }
 
 // Expose fillAligned for testing.
-public static uint64 FillAligned(uint64 x, nuint m) {
-    return fillAligned(x, m);
-}
+public static uint64 FillAligned(uint64 x, nuint m) { return fillAligned(x, m); }
 
 // Expose pageCache for testing.
 public partial struct PageCache /*global::go.runtime_package.pageCache*/;
@@ -958,27 +881,13 @@ public static uintptr PageCachePages => /* pageCachePages */ 64;
 public static PageCache NewPageCache(uintptr @base, uint64 cache, uint64 scav) {
     return new PageCache(new pageCache(@base: @base, cache: cache, scav: scav));
 }
-
-public static bool Empty(this ж<PageCache> Ꮡc) {
-    return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).empty();
-}
-
-public static uintptr Base(this ж<PageCache> Ꮡc) {
-    return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.@base;
-}
-
-public static uint64 Cache(this ж<PageCache> Ꮡc) {
-    return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.cache;
-}
-
-public static uint64 Scav(this ж<PageCache> Ꮡc) {
-    return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.scav;
-}
-
+public static bool Empty(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).empty(); }
+public static uintptr Base(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.@base; }
+public static uint64 Cache(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.cache; }
+public static uint64 Scav(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.scav; }
 public static (uintptr, uintptr) Alloc(this ж<PageCache> Ꮡc, uintptr npages) {
     return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).alloc(npages);
 }
-
 public static void Flush(this ж<PageCache> Ꮡc, ж<PageAlloc> s) {
     var cp = Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>();
     var sp = s.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
@@ -1016,7 +925,6 @@ public static (uintptr, uintptr) Alloc(this ж<PageAlloc> Ꮡp, uintptr npages) 
     });
     return (addr, scav);
 }
-
 public static PageCache AllocToCache(this ж<PageAlloc> Ꮡp) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
 
@@ -1031,7 +939,6 @@ public static PageCache AllocToCache(this ж<PageAlloc> Ꮡp) {
     });
     return c;
 }
-
 public static void Free(this ж<PageAlloc> Ꮡp, uintptr @base, uintptr npages) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
 
@@ -1044,11 +951,9 @@ public static void Free(this ж<PageAlloc> Ꮡp, uintptr @base, uintptr npages) 
         unlock(ppʗ1.mheapLock);
     });
 }
-
 public static (ChunkIdx, ChunkIdx) Bounds(this ж<PageAlloc> Ꮡp) {
     return ((ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.start, (ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.end);
 }
-
 public static uintptr /*r*/ Scavenge(this ж<PageAlloc> Ꮡp, uintptr nbytes) {
     uintptr r = default;
 
@@ -1059,10 +964,9 @@ public static uintptr /*r*/ Scavenge(this ж<PageAlloc> Ꮡp, uintptr nbytes) {
     });
     return r;
 }
-
 public static slice<AddrRange> InUse(this ref PageAlloc Δp) {
     var ranges = new slice<AddrRange>(0, () => new(nil), len(Δp.inUse.ranges));
-    foreach (var (_, r) in Δp.inUse.ranges) {
+    foreach (var (_, r) in range(Δp.inUse.ranges)) {
         ranges = append(ranges, new AddrRange(r));
     }
     return ranges;
@@ -1147,7 +1051,7 @@ public static AddrRanges MakeAddrRanges(params ꓸꓸꓸAddrRange aʗp) {
     // we'll leak some memory implicitly.
     var ranges = new slice<global::go.runtime_package.addrRange>(0, len(a));
     var total = (uintptr)0;
-    foreach (var (_, r) in a) {
+    foreach (var (_, r) in range(a)) {
         ranges = append(ranges, r.addrRange);
         total += r.Size();
     }
@@ -1162,7 +1066,7 @@ public static AddrRanges MakeAddrRanges(params ꓸꓸꓸAddrRange aʗp) {
 // addrRanges.
 public static slice<AddrRange> Ranges(this ref AddrRanges a) {
     var result = new slice<AddrRange>(0, () => new(nil), len(a.addrRanges.ranges));
-    foreach (var (_, r) in a.addrRanges.ranges) {
+    foreach (var (_, r) in range(a.addrRanges.ranges)) {
         result = append(result, new AddrRange(r));
     }
     return result;
@@ -1247,21 +1151,19 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
 
         // Apply scavenge state if applicable.
         if (scav != nil) {
-            {
-                var (scvg, ok) = scav[i, ꟷ]; if (ok) {
-                    foreach (var (_, s) in scvg) {
-                        // Ignore the case of s.N == 0. setRange doesn't handle
-                        // it and it's a no-op anyway.
-                        if (s.N != 0) {
-                            chunk.Ꮡscavenged.setRange(s.I, s.N);
-                        }
+            var (scvg, ok) = scav[i, ꟷ]; if (ok) {
+                foreach (var (_, s) in range(scvg)) {
+                    // Ignore the case of s.N == 0. setRange doesn't handle
+                    // it and it's a no-op anyway.
+                    if (s.N != 0) {
+                        chunk.Ꮡscavenged.setRange(s.I, s.N);
                     }
                 }
             }
         }
 
         // Apply alloc state.
-        foreach (var (_, s) in init) {
+        foreach (var (_, s) in range(init)) {
             // Ignore the case of s.N == 0. allocRange doesn't handle
             // it and it's a no-op anyway.
             if (s.N != 0) {
@@ -1301,7 +1203,7 @@ public static void FreePageAlloc(ж<PageAlloc> pp) {
         }
     } else {
         var resSize = (uintptr)0;
-        foreach (var (_, s) in Δp.summary.ΔRangeSnapshot()) {
+        foreach (var (_, s) in range(Δp.summary.ΔRangeSnapshot())) {
             resSize += (uintptr)cap(s) * pallocSumBytes;
         }
         // See sysUnreserve comment above.
@@ -1322,13 +1224,11 @@ public static void FreePageAlloc(ж<PageAlloc> pp) {
     sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(Δp.scav.index.chunks, 0)), (uintptr)cap(Δp.scav.index.chunks) * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8);
 
     // Free the mapped space for chunks.
-    foreach (var i in range(Δp.chunks)) {
-        {
-            var x = Δp.chunks[i]; if (x != nil) {
-                Δp.chunks[i] = ж<array<global::go.runtime_package.pallocData>>.NilBoxOfDims(8192L);
-                // This memory comes from sysAlloc and will always be page-aligned.
-                sysFree(@unsafe.Pointer.FromPinnedBox(x), /* unsafe.Sizeof(*p.chunks[0]) */ (uintptr)1048576, testSysStat);
-            }
+    foreach (var i in range(len(Δp.chunks))) {
+        var x = Δp.chunks[i]; if (x != nil) {
+            Δp.chunks[i] = ж<array<global::go.runtime_package.pallocData>>.NilBoxOfDims(8192L);
+            // This memory comes from sysAlloc and will always be page-aligned.
+            sysFree(@unsafe.Pointer.FromPinnedBox(x), /* unsafe.Sizeof(*p.chunks[0]) */ (uintptr)1048576, testSysStat);
         }
     }
 }
@@ -1431,7 +1331,7 @@ break_chunkLoop:;
         // is likely to be somewhat predictable, potentially defeating the purpose
         // of our randomization).
         var affectedArenas = new map<global::go.runtime_package.arenaIdx, bool>{};
-        foreach (var (_, mismatch) in mismatches) {
+        foreach (var (_, mismatch) in range(mismatches)) {
             if (mismatch.Base > 0) {
                 affectedArenas[arenaIndex(mismatch.Base)] = true;
             }
@@ -1455,7 +1355,7 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
 
     // Walk over destroyed Ps and look for unflushed caches.
     var deadp = allp.slice(len(allp), cap(allp));
-    foreach (var (_, Δp) in deadp) {
+    foreach (var (_, Δp) in range(deadp)) {
         // Since we're going past len(allp) we may see nil Ps.
         // Just ignore them.
         if (Δp != nil) {
@@ -1469,7 +1369,6 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
 
 public static readonly ж<Action<uint32>> ᏑProcYield = new StaticBox<Action<uint32>>(procyield);
 public static ref Action<uint32> ProcYield => ref ((StaticBox<Action<uint32>>)ᏑProcYield).ValueSlot;
-
 public static readonly ж<Action> ᏑOSYield = new StaticBox<Action>(default(Action));
 public static ref Action OSYield => ref ((StaticBox<Action>)ᏑOSYield).ValueSlot;
 internal static void initᴛOSYield() { OSYield = osyield; }
@@ -1477,7 +1376,6 @@ internal static void initᴛOSYield() { OSYield = osyield; }
 internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔLock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
 internal static ref Action<ж<global::go.runtime_package.mutex>> ΔLock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔLock).ValueSlot;
 internal static void initᴛΔLock() { ΔLock = @lock; }
-
 internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔUnlock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
 internal static ref Action<ж<global::go.runtime_package.mutex>> ΔUnlock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔUnlock).ValueSlot;
 internal static void initᴛΔUnlock() { ΔUnlock = unlock; }
@@ -1493,7 +1391,6 @@ internal static ж<global::go.runtime_package.mutex> SemRootLock(ж<uint32> addr
 public static readonly ж<Action<ж<uint32>>> ᏑSemacquire = new StaticBox<Action<ж<uint32>>>(default(Action<ж<uint32>>));
 public static ref Action<ж<uint32>> Semacquire => ref ((StaticBox<Action<ж<uint32>>>)ᏑSemacquire).ValueSlot;
 internal static void initᴛSemacquire() { Semacquire = semacquire; }
-
 public static readonly ж<Action<ж<uint32>, bool, nint>> ᏑSemrelease1 = new StaticBox<Action<ж<uint32>, bool, nint>>(default(Action<ж<uint32>, bool, nint>));
 public static ref Action<ж<uint32>, bool, nint> Semrelease1 => ref ((StaticBox<Action<ж<uint32>, bool, nint>>)ᏑSemrelease1).ValueSlot;
 internal static void initᴛSemrelease1() { Semrelease1 = semrelease1; }
@@ -1728,7 +1625,6 @@ public static void SetMaxIdleMarkWorkers(this ж<GCController> Ꮡc, int32 max) 
 }
 
 internal static bool alwaysFalse;
-
 internal static any escapeSink;
 
 public static T Escape<T>(T x) {
@@ -2018,7 +1914,7 @@ public static void FreeRange(this ж<ScavengeIndex> Ꮡs, uintptr @base, uintptr
 public static void ResetSearchAddrs(this ж<ScavengeIndex> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    foreach (var (_, a) in slice<ж<global::go.runtime_package.atomicOffAddr>>([Ꮡs.Ꮡi.ᏑsearchAddrBg, Ꮡs.Ꮡi.ᏑsearchAddrForce])) {
+    foreach (var (_, a) in range(slice<ж<global::go.runtime_package.atomicOffAddr>>([Ꮡs.Ꮡi.ᏑsearchAddrBg, Ꮡs.Ꮡi.ᏑsearchAddrForce]))) {
         var (addr, marked) = a.Load();
         if (marked) {
             a.StoreUnmark(addr, addr);
@@ -2133,7 +2029,6 @@ internal static void initᴛGetPinCounter() { GetPinCounter = pinnerGetPinCounte
 public static void SetPinnerLeakPanic(Action f) {
     pinnerLeakPanic = f;
 }
-
 public static Action GetPinnerLeakPanic() {
     return pinnerLeakPanic;
 }
@@ -2218,7 +2113,6 @@ public static BitCursor NewBitCursor(ж<byte> buf) {
 public static void Write(this BitCursor b, ж<byte> data, uintptr cnt) {
     b.b.write(data, cnt);
 }
-
 public static BitCursor Offset(this BitCursor b, uintptr cnt) {
     return new BitCursor(b: b.b.offset(cnt));
 }
@@ -2243,9 +2137,7 @@ internal static void initᴛX86HasAVX() { X86HasAVX = Ꮡx86HasAVX; }
 public static ж<int32> DebugDecorateMappings;
 internal static void initᴛDebugDecorateMappings() { DebugDecorateMappings = Ꮡdebug.of(debugᴛ1.Ꮡdecoratemappings); }
 
-public static bool SetVMANameSupported() {
-    return setVMANameSupported();
-}
+public static bool SetVMANameSupported() { return setVMANameSupported(); }
 
 public partial struct ListHead {
     internal global::go.runtime_package.listHead l;
@@ -2307,7 +2199,7 @@ public static @string Hexdumper(uintptr @base, nint wordBytes, Action<uintptr, A
             mark(addr, () => mʗ1.start());
         };
     }
-    foreach (var (_, d) in data) {
+    foreach (var (_, d) in range(data)) {
         h.write(d);
     }
     h.close();

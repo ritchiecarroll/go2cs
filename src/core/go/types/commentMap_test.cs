@@ -96,7 +96,7 @@ public static void TestCommentMap(ж<testing.T> t) {
     var m = commentMap(slice<byte>(src), regexp.MustCompile(errorˢ2));
     nint found = 0; // number of errors found
     foreach (var (line, errlist) in m) {
-        foreach (var (_, err) in errlist) {
+        foreach (var (_, err) in range(errlist)) {
             if (err.line != line) {
                 t.Errorf("%v: got map line %d; want %d", err, err.line, line);
                 continue;

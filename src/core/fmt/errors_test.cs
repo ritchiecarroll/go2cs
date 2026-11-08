@@ -33,7 +33,7 @@ public static void TestErrorf(ж<Δtesting.T> t) {
     Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
     var wrapped = errors.New(innerErrorˢ);
-    foreach (var (_, test) in slice<TestErrorf_type>([new(
+    foreach (var (_, test) in range(slice<TestErrorf_type>([new(
         err: fmt.Errorf("%w"u8, wrapped),
         wantText: "inner error",
         wantUnwrap: wrapped
@@ -77,34 +77,34 @@ public static void TestErrorf(ж<Δtesting.T> t) {
     ), new(
         err: noVetErrorf("wrapped two errors: %w %w", (errString)(@string)"1", (errString)(@string)"2"),
         wantText: "wrapped two errors: 1 2",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"2")]
     ), new(
         err: noVetErrorf("wrapped three errors: %w %w %w", (errString)(@string)"1", (errString)(@string)"2", (errString)(@string)"3"),
         wantText: "wrapped three errors: 1 2 3",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")]
     ), new(
         err: noVetErrorf("wrapped nil error: %w %w %w", (errString)(@string)"1", (any)(default), (errString)(@string)"2"),
         wantText: "wrapped nil error: 1 %!w(<nil>) 2",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"2")]
     ), new(
         err: noVetErrorf("wrapped one non-error: %w %w %w", (errString)(@string)"1", notAnErrorˢ, (errString)(@string)"3"),
         wantText: "wrapped one non-error: 1 %!w(string=not-an-error) 3",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"3")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"3")]
     ), new(
         err: fmt.Errorf("wrapped errors out of order: %[3]w %[2]w %[1]w"u8, (errString)(@string)"1", (errString)(@string)"2", (errString)(@string)"3"),
         wantText: "wrapped errors out of order: 3 2 1",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")]
     ), new(
         err: fmt.Errorf("wrapped several times: %[1]w %[1]w %[2]w %[1]w"u8, (errString)(@string)"1", (errString)(@string)"2"),
         wantText: "wrapped several times: 1 1 2 1",
-        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
+        wantSplit: [((errString)(@string)"1"), ((errString)(@string)"2")]
     ), new(
         err: fmt.Errorf("%w"u8, (any)(default)),
         wantText: "%!w(<nil>)",
         wantUnwrap: default // still nil
 
     )
-    ])) {
+    ]))) {
         {
             var (got, want) = (errors.Unwrap(test.err), test.wantUnwrap); if (!AreEqual(got, want)) {
                 t.Errorf("Formatted error: %v\nerrors.Unwrap() = %v, want %v", test.err, got, want);
@@ -129,18 +129,14 @@ internal partial interface splitErr_type /*dyn*/ {
 }
 
 internal static slice<error> splitErr(error err) {
-    {
-        var (e, ok) = err._<splitErr_type>(ᐧ); if (ok) {
-            return e.Unwrap();
-        }
+    var (e, ok) = err._<splitErr_type>(ᐧ); if (ok) {
+        return e.Unwrap();
     }
     return default;
 }
 
 partial struct errString /*@string*/;
 
-internal static @string Error(this errString e) {
-    return (@string)e;
-}
+internal static @string Error(this errString e) { return (@string)e; }
 
 } // end fmt_test_package

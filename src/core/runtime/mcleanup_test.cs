@@ -10,8 +10,6 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -331,14 +329,12 @@ public static void TestCleanupPointerEqualsArg(ж<testing.T> t) {
         // See go.dev/issue/71316
         defer(() => {
             @string want = runtimeAddCleanupPtrIsˢ;
-            {
-                var r = recover(); if (r == nil) {
-                    t.Error(wantPanicTestDidNotPanicˢ);
-                } else if (AreEqual(r, want)) {
-                    // do nothing
-                } else {
-                    t.Errorf("wrong panic: want=%q, got=%q", want, r);
-                }
+            var r = recover(); if (r == nil) {
+                t.Error(wantPanicTestDidNotPanicˢ);
+            } else if (AreEqual(r, want)) {
+                // do nothing
+            } else {
+                t.Errorf("wrong panic: want=%q, got=%q", want, r);
             }
         }, ref ᒐ);
         var v = @new<TestCleanupPointerEqualsArg_T>().Ꮡv;
@@ -394,10 +390,8 @@ public static partial void TestCleanupLost(ж<testing.T> t) {
         t.Errorf("failed to drain cleanup queue within %s", timeout);
     }
 
-    {
-        nint gotΔ1 = (nint)Ꮡgot.Load(); if (gotΔ1 != want) {
-            t.Errorf("%d cleanups executed, expected %d", gotΔ1, want);
-        }
+    nint gotΔ1 = (nint)Ꮡgot.Load(); if (gotΔ1 != want) {
+        t.Errorf("%d cleanups executed, expected %d", gotΔ1, want);
     }
 }
 

@@ -17,8 +17,6 @@ using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using exec = global::go.os.exec_package;
 using global::go.math;
@@ -104,23 +102,18 @@ partial struct HashSet {
 internal static partial ж<HashSet> newHashSet() {
     return Ꮡ(new HashSet(list: new slice<uintptr>(0, 1024)));
 }
-
 internal static void add(this ref HashSet s, uintptr h) {
     s.list = append(s.list, h);
 }
-
 internal static void addS(this ref HashSet s, @string x) {
     s.add(runtime_internal_test_package.StringHash(x, 0));
 }
-
 internal static void addB(this ref HashSet s, slice<byte> x) {
     s.add(runtime_internal_test_package.BytesHash(x, 0));
 }
-
 internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
     s.add(runtime_internal_test_package.StringHash(x, seed));
 }
-
 internal static void check(this ref HashSet s, ж<testing.T> t) {
     var list = s.list;
     slices.Sort<slice<uintptr>, uintptr>(list);
@@ -218,7 +211,6 @@ public static void TestSmhasherTwoNonzero(ж<testing.T> t) {
     }
     h.check(t);
 }
-
 internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -301,7 +293,6 @@ public static void TestSmhasherSparse(ж<testing.T> t) {
     sparse(t, h, 256, 3);
     sparse(t, h, 2048, 2);
 }
-
 internal static void sparse(ж<testing.T> t, ж<HashSet> Ꮡh, nint n, nint k) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -339,13 +330,12 @@ public static void TestSmhasherPermutation(ж<testing.T> t) {
     }
     testenv.ParallelOn64Bit(t);
     var h = newHashSet();
-    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7]), 8);
-    permutation(t, h, slice<uint32>([0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 8);
-    permutation(t, h, slice<uint32>([0, 1]), 20);
-    permutation(t, h, slice<uint32>([0, (uint32)1 << 31]), 20);
-    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 6);
+    permutation(t, h, [0, 1, 2, 3, 4, 5, 6, 7], 8);
+    permutation(t, h, [0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29], 8);
+    permutation(t, h, [0, 1], 20);
+    permutation(t, h, [0, (uint32)1 << 31], 20);
+    permutation(t, h, [0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29], 6);
 }
-
 internal static void permutation(ж<testing.T> t, ж<HashSet> Ꮡh, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -353,7 +343,6 @@ internal static void permutation(ж<testing.T> t, ж<HashSet> Ꮡh, slice<uint32
     genPerm(Ꮡh, b, s, 0);
     h.check(t);
 }
-
 internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -361,7 +350,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     if (n == len(b)) {
         return;
     }
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         byteorder.LEPutUint32(b.slice(n), v);
         genPerm(Ꮡh, b, s, n + 4);
     }
@@ -383,23 +372,18 @@ partial struct BytesKey {
 internal static void clear(this ref BytesKey k) {
     builtin.clear(k.b);
 }
-
 internal static void random(this ref BytesKey k, ж<rand.Rand> r) {
     randBytes(r, k.b);
 }
-
 internal static nint bits(this ref BytesKey k) {
     return len(k.b) * 8;
 }
-
 internal static void flipBit(this ref BytesKey k, nint i) {
     k.b[(i >> 3)] ^= (byte)((byte)(((byte)1).Lsh((nuint)(i & 7))));
 }
-
 internal static partial uintptr hash(this ref BytesKey k) {
     return runtime_internal_test_package.BytesHash(k.b, 0);
 }
-
 internal static @string name(this ref BytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
@@ -411,25 +395,20 @@ partial struct Int32Key {
 internal static void clear(this ref Int32Key k) {
     k.i = 0;
 }
-
 internal static void random(this ref Int32Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = r.Uint32();
 }
-
 internal static nint bits(this ref Int32Key k) {
     return 32;
 }
-
 internal static void flipBit(this ref Int32Key k, nint i) {
     k.i ^= (uint32)(((uint32)1).Lsh((nuint)i));
 }
-
 internal static partial uintptr hash(this ref Int32Key k) {
     return runtime_internal_test_package.Int32Hash(k.i, 0);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string int32ˢ => ref int32ˢᵇ;
 private static readonly @string int32ˢᵇ = "int32"u8;
@@ -445,25 +424,20 @@ partial struct Int64Key {
 internal static void clear(this ref Int64Key k) {
     k.i = 0;
 }
-
 internal static void random(this ref Int64Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << 32);
 }
-
 internal static nint bits(this ref Int64Key k) {
     return 64;
 }
-
 internal static void flipBit(this ref Int64Key k, nint i) {
     k.i ^= (uint64)(((uint64)1).Lsh((nuint)i));
 }
-
 internal static partial uintptr hash(this ref Int64Key k) {
     return runtime_internal_test_package.Int64Hash(k.i, 0);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string int64ˢ => ref int64ˢᵇ;
 private static readonly @string int64ˢᵇ = "int64"u8;
@@ -479,28 +453,23 @@ partial struct EfaceKey {
 internal static void clear(this ref EfaceKey k) {
     k.i = default;
 }
-
 internal static void random(this ref EfaceKey k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = (uint64)r.Int63();
 }
-
 internal static nint bits(this ref EfaceKey k) {
     // use 64 bits. This tests inlined interfaces
     // on 64-bit targets and indirect interfaces on
     // 32-bit targets.
     return 64;
 }
-
 internal static void flipBit(this ref EfaceKey k, nint i) {
     k.i = k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i);
 }
-
 internal static partial uintptr hash(this ref EfaceKey k) {
     return runtime_internal_test_package.EfaceHash(k.i, 0);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string efaceˢ => ref efaceˢᵇ;
 private static readonly @string efaceˢᵇ = "Eface"u8;
@@ -513,7 +482,6 @@ internal static @string name(this ref EfaceKey k) {
 partial struct IfaceKey {
     internal ifaceHash_i i;
 }
-
 partial struct fInter /*num:uint64*/;
 
 internal static void F(this fInter x) {
@@ -522,28 +490,23 @@ internal static void F(this fInter x) {
 internal static void clear(this ref IfaceKey k) {
     k.i = default;
 }
-
 internal static void random(this ref IfaceKey k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = ((fInter)(uint64)r.Int63());
 }
-
 internal static nint bits(this ref IfaceKey k) {
     // use 64 bits. This tests inlined interfaces
     // on 64-bit targets and indirect interfaces on
     // 32-bit targets.
     return 64;
 }
-
 internal static void flipBit(this ref IfaceKey k, nint i) {
     k.i = (fInter)(k.i._<fInter>() ^ ((fInter)1) << (nuint)i);
 }
-
 internal static partial uintptr hash(this ref IfaceKey k) {
     return runtime_internal_test_package.IfaceHash(k.i, 0);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ifaceˢ => ref ifaceˢᵇ;
 private static readonly @string ifaceˢᵇ = "Iface"u8;
@@ -575,7 +538,6 @@ public static void TestSmhasherAvalanche(ж<testing.T> t) {
     avalancheTest1(t, new runtime_test_package.EfaceKeyжKey(Ꮡ(new EfaceKey())));
     avalancheTest1(t, new runtime_test_package.IfaceKeyжKey(Ꮡ(new IfaceKey())));
 }
-
 internal static void avalancheTest1(ж<testing.T> t, Key k) {
     UntypedInt REP = 100000;
     var r = rand.New(rand.NewSource(1234));
@@ -644,7 +606,6 @@ public static void TestSmhasherWindowed(ж<testing.T> t) {
     t.Logf("string keys");
     windowed(t, h, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(128)))));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object flakyOn32BitSystemsˢ = (@string)"Flaky on 32-bit systems"u8;
 
@@ -699,7 +660,6 @@ public static void TestSmhasherText(ж<testing.T> t) {
     text(t, h, fooBarˢ, ""u8);
     text(t, h, ""u8, fooBarˢ);
 }
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string Sᶜ => ref Sᶜᵇ;
 private static readonly @string Sᶜᵇ = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;
@@ -779,7 +739,7 @@ internal const nint hashSize = /* 32 + int(^uintptr(0)>>63<<5) */ 64;
 internal static void randBytes(ж<rand.Rand> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = (byte)r.Uint32();
     }
 }
@@ -795,25 +755,11 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, nint n) {
     b.SetBytes((int64)n);
 }
 
-public static void BenchmarkHash5(ж<testing.B> b) {
-    benchmarkHash(b, 5);
-}
-
-public static void BenchmarkHash16(ж<testing.B> b) {
-    benchmarkHash(b, 16);
-}
-
-public static void BenchmarkHash64(ж<testing.B> b) {
-    benchmarkHash(b, 64);
-}
-
-public static void BenchmarkHash1024(ж<testing.B> b) {
-    benchmarkHash(b, 1024);
-}
-
-public static void BenchmarkHash65536(ж<testing.B> b) {
-    benchmarkHash(b, 65536);
-}
+public static void BenchmarkHash5(ж<testing.B> b) { benchmarkHash(b, 5); }
+public static void BenchmarkHash16(ж<testing.B> b) { benchmarkHash(b, 16); }
+public static void BenchmarkHash64(ж<testing.B> b) { benchmarkHash(b, 64); }
+public static void BenchmarkHash1024(ж<testing.B> b) { benchmarkHash(b, 1024); }
+public static void BenchmarkHash65536(ж<testing.B> b) { benchmarkHash(b, 65536); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ2 => ref fooˢ2ᵇ;
@@ -856,13 +802,10 @@ public static void TestArrayHash(ж<testing.T> t) {
             t.Errorf("bad test: (8 choose 4) should be 70, not %d", len(m));
         }
     };
-    {
-        var n = testing.AllocsPerRun(10, f); if (n > 6D) {
-            t.Errorf("too many allocs %f - hash not balanced", n);
-        }
+    var n = testing.AllocsPerRun(10, f); if (n > 6D) {
+        t.Errorf("too many allocs %f - hash not balanced", n);
     }
 }
-
 internal partial struct TestStructHash_key /*dyn*/ {
     internal @string a, b, c, d, e, f, g, h;
 }
@@ -916,10 +859,8 @@ public static void TestStructHash(ж<testing.T> t) {
             t.Errorf("bad test: (8 choose 4) should be 70, not %d", len(m));
         }
     };
-    {
-        var n = testing.AllocsPerRun(10, f); if (n > 6D) {
-            t.Errorf("too many allocs %f - hash not balanced", n);
-        }
+    var n = testing.AllocsPerRun(10, f); if (n > 6D) {
+        t.Errorf("too many allocs %f - hash not balanced", n);
     }
 }
 

@@ -20,42 +20,42 @@ internal partial struct TestConsume_tests /*dyn*/ {
 public static void TestConsume(ж<testing.T> t) {
     var tests = slice<TestConsume_tests>([
         new(
-            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
+            @in: [slice<byte>("foo"u8), slice<byte>("bar"u8)],
             consume: 0,
-            want: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)])
+            want: [slice<byte>("foo"u8), slice<byte>("bar"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
+            @in: [slice<byte>("foo"u8), slice<byte>("bar"u8)],
             consume: 2,
-            want: slice<slice<byte>>([slice<byte>("o"u8), slice<byte>("bar"u8)])
+            want: [slice<byte>("o"u8), slice<byte>("bar"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
+            @in: [slice<byte>("foo"u8), slice<byte>("bar"u8)],
             consume: 3,
-            want: slice<slice<byte>>([slice<byte>("bar"u8)])
+            want: [slice<byte>("bar"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
+            @in: [slice<byte>("foo"u8), slice<byte>("bar"u8)],
             consume: 4,
-            want: slice<slice<byte>>([slice<byte>("ar"u8)])
+            want: [slice<byte>("ar"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([default, default, default, slice<byte>("bar"u8)]),
+            @in: [default, default, default, slice<byte>("bar"u8)],
             consume: 1,
-            want: slice<slice<byte>>([slice<byte>("ar"u8)])
+            want: [slice<byte>("ar"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([default, default, default, slice<byte>("foo"u8)]),
+            @in: [default, default, default, slice<byte>("foo"u8)],
             consume: 0,
-            want: slice<slice<byte>>([slice<byte>("foo"u8)])
+            want: [slice<byte>("foo"u8)]
         ),
         new(
-            @in: slice<slice<byte>>([default, default, default]),
+            @in: [default, default, default],
             consume: 0,
-            want: slice<slice<byte>>([])
+            want: []
         )
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         ref var @in = ref heap<slice<slice<byte>>>(tt.@in, out var Ꮡin);
         poll_internal_test_package.Consume(Ꮡin, tt.consume);
         if (!reflect.DeepEqual(@in, tt.want)) {

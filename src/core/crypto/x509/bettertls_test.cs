@@ -47,7 +47,7 @@ public static void TestBetterTLS(ж<testing.T> t) {
     ref var data = ref heap<betterTLS>(out var Ꮡdata);
     (data, var roots) = betterTLSTestData(t);
 
-    foreach (var (_, suite) in slice<@string>(["pathbuilding", "nameconstraints"])) {
+    foreach (var (_, suite) in range(slice<@string>(["pathbuilding", "nameconstraints"]))) {
         var rootsʗ1 = roots;
         t.Run(suite, (ж<testing.T> tΔ1) => {
             runTestSuite(tΔ1, suite, Ꮡdata, rootsʗ1);
@@ -67,7 +67,7 @@ internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterT
         "running %s test suite with %d test cases",
         suiteName, builtin.len(suite.TestCases));
 
-    foreach (var (_, vᴛ1) in suite.TestCases) {
+    foreach (var (_, vᴛ1) in range(suite.TestCases)) {
         var tc = vᴛ1;
 
         t.Logf("testing %s test case %d", suiteName, tc.ID);
@@ -104,7 +104,7 @@ internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterT
         }
 
         var intermediates = NewCertPool();
-        foreach (var (i, certDER) in certsDER[1..]) {
+        foreach (var (i, certDER) in range(certsDER[1..])) {
             var (cert, errΔ1) = ParseCertificate(certDER);
             if (errΔ1 != nil) {
                 t.Fatalf(
@@ -118,7 +118,7 @@ internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterT
             Roots: roots,
             Intermediates: intermediates,
             DNSName: tc.Hostname,
-            KeyUsages: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+            KeyUsages: [ExtKeyUsageServerAuth]
         ));
 
         var exprᴛ1 = tc.Expected;
@@ -184,10 +184,8 @@ internal static (betterTLS, ж<global::go.crypto.x509_package.CertPool>) betterT
         outˢ, testsJSONPath);
     cmd.Dir = bettertlsDir;
     t.Log(runningBettertlsExportˢ);
-    {
-        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
-            t.Fatalf("failed to run bettertls export-tests: %v\n%s", errΔ1, @out);
-        }
+    var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
+        t.Fatalf("failed to run bettertls export-tests: %v\n%s", errΔ1, @out);
     }
 
     var (jsonData, err) = os.ReadFile(testsJSONPath);
@@ -198,10 +196,8 @@ internal static (betterTLS, ж<global::go.crypto.x509_package.CertPool>) betterT
     t.Logf("successfully loaded tests.json at %s", testsJSONPath);
 
     ref var data = ref heap(new betterTLS(), out var Ꮡdata);
-    {
-        var errΔ2 = json.Unmarshal(jsonData, Ꮡdata); if (errΔ2 != nil) {
-            t.Fatalf("failed to unmarshal JSON data: %v", errΔ2);
-        }
+    var errΔ2 = json.Unmarshal(jsonData, Ꮡdata); if (errΔ2 != nil) {
+        t.Fatalf("failed to unmarshal JSON data: %v", errΔ2);
     }
 
     t.Logf("testing betterTLS revision: %s", data.Revision);
@@ -246,7 +242,7 @@ public partial struct betterTLSTest {
 
 public static (slice<slice<byte>>, error) Certs(this ref betterTLSTest test) {
     var certs = new slice<slice<byte>>(builtin.len(test.Certificates));
-    foreach (var (i, cert) in test.Certificates) {
+    foreach (var (i, cert) in range(test.Certificates)) {
         var (decoded, err) = base64.StdEncoding.DecodeString(cert);
         if (err != nil) {
             return (default, err);

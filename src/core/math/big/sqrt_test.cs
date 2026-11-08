@@ -36,7 +36,7 @@ internal partial struct TestFloatSqrt_type /*dyn*/ {
 }
 
 public static void TestFloatSqrt(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatSqrt_type>([
+    foreach (var (_, test) in range(slice<TestFloatSqrt_type>([
         // Test values were generated on Wolfram Alpha using query
         //   'sqrt(N) to 350 digits'
         // 350 decimal digits give up to 1000 binary digits.
@@ -54,8 +54,8 @@ public static void TestFloatSqrt(ж<testing.T> t) {
         new("1p-1024", "1p-512"),
         new("4p-2048", "2p-1024"),
         new("9p-4096", "3p-2048")
-    ])) {
-        foreach (var (_, prec) in slice<nuint>([24, 53, 64, 65, 100, 128, 129, 200, 256, 400, 600, 800, 1000])) {
+    ]))) {
+        foreach (var (_, prec) in range(slice<nuint>([24, 53, 64, 65, 100, 128, 129, 200, 256, 400, 600, 800, 1000]))) {
             var x = @new<global::go.math.big_package.Float>().SetPrec(prec);
             x.Parse(test.x, 10);
 
@@ -101,11 +101,11 @@ internal partial struct TestFloatSqrtSpecial_type /*dyn*/ {
 }
 
 public static void TestFloatSqrtSpecial(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatSqrtSpecial_type>([
+    foreach (var (_, test) in range(slice<TestFloatSqrtSpecial_type>([
         new(NewFloat(+0D), NewFloat(+0D)),
         new(NewFloat(-0D), NewFloat(-0D)),
         new(NewFloat(math.Inf(+1)), NewFloat(math.Inf(+1)))
-    ])) {
+    ]))) {
         var got = @new<global::go.math.big_package.Float>().Sqrt(test.x);
         if (got.neg != test.want.neg || got.form != test.want.form) {
             t.Errorf("Sqrt(%v) = %v (neg: %v); want %v (neg: %v)",
@@ -116,7 +116,7 @@ public static void TestFloatSqrtSpecial(ж<testing.T> t) {
 
 // Benchmarks
 public static void BenchmarkFloatSqrt(ж<testing.B> b) {
-    foreach (var (_, prec) in slice<nuint>([64, 128, 256, 1000, 10000, 100000, 1000000])) {
+    foreach (var (_, prec) in range(slice<nuint>([64, 128, 256, 1000, 10000, 100000, 1000000]))) {
         var x = NewFloat(2D);
         var z = @new<global::go.math.big_package.Float>().SetPrec(prec);
         var xʗ1 = x;

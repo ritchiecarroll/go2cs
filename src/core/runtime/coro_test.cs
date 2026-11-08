@@ -14,7 +14,7 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 public static void TestCoroLockOSThread(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "CoroLockOSThreadIterLock",
         "CoroLockOSThreadIterLockYield",
         "CoroLockOSThreadLock",
@@ -25,7 +25,7 @@ public static void TestCoroLockOSThread(ж<testing.T> t) {
         "CoroLockOSThreadLockAfterPull",
         "CoroLockOSThreadStopLocked",
         "CoroLockOSThreadStopLockedIterNested"
-    ])) {
+    ]))) {
         t.Run(test, (ж<testing.T> tΔ1) => {
             checkCoroTestProgOutput(tΔ1, runTestProg(tΔ1, testprogˢ, test));
         });
@@ -45,7 +45,7 @@ public static void TestCoroCgoCallback(ж<testing.T> t) {
     if (Δruntime.GOOS == "freebsd"u8 && race.Enabled) {
         t.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788.");
     }
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "CoroCgoIterCallback",
         "CoroCgoIterCallbackYield",
         "CoroCgoCallback",
@@ -55,7 +55,7 @@ public static void TestCoroCgoCallback(ж<testing.T> t) {
         "CoroCgoCallbackAfterPull",
         "CoroCgoStopCallback",
         "CoroCgoStopCallbackIterNested"
-    ])) {
+    ]))) {
         t.Run(test, (ж<testing.T> tΔ1) => {
             checkCoroTestProgOutput(tΔ1, runTestProg(tΔ1, testprogcgoˢ, test));
         });

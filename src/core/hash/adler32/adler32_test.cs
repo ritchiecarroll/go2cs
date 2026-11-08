@@ -73,7 +73,7 @@ internal static slice<goldenᴛ1> golden = slice<goldenᴛ1>([
 // It is a straight port of the sample code in RFC 1950 section 9.
 internal static uint32 checksum(slice<byte> p) {
     var (s1, s2) = ((uint32)1, (uint32)0);
-    foreach (var (_, x) in p) {
+    foreach (var (_, x) in range(p)) {
         s1 = (s1 + (uint32)x) % (uint32)mod;
         s2 = (s2 + s1) % (uint32)mod;
     }
@@ -81,7 +81,7 @@ internal static uint32 checksum(slice<byte> p) {
 }
 
 public static void TestGolden(ж<testing.T> t) {
-    foreach (var (_, g) in golden) {
+    foreach (var (_, g) in range(golden)) {
         @string @in = g.@in;
         if (len(@in) > 220) {
             @in = @in[..100] + "..." + @in.slice(len(@in) - 100);
@@ -103,7 +103,7 @@ public static void TestGolden(ж<testing.T> t) {
 }
 
 public static void TestGoldenMarshal(ж<testing.T> t) {
-    foreach (var (_, g) in golden) {
+    foreach (var (_, g) in range(golden)) {
         var h = New();
         var h2 = New();
 
@@ -132,11 +132,9 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
             continue;
         }
 
-        {
-            var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
-                t.Errorf("could not unmarshal: %v", errΔ1);
-                continue;
-            }
+        var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
+            t.Errorf("could not unmarshal: %v", errΔ1);
+            continue;
         }
 
         io.WriteString(new adler32_internal_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
@@ -153,7 +151,7 @@ public static void BenchmarkAdler32KB(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1024);
     var data = new slice<byte>(1024);
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = (byte)i;
     }
     var h = New();

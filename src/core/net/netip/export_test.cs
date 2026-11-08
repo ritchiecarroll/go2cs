@@ -33,19 +33,12 @@ internal static ΔAddr MkAddr(Uint128 u, unique.Handle<AddrDetail> z) {
     return new ΔAddr(u, z);
 }
 
-public static ΔAddr IPv4(uint8 a, uint8 b, uint8 c, uint8 d) {
-    return AddrFrom4(new byte[]{a, b, c, d}.array());
-}
+public static ΔAddr IPv4(uint8 a, uint8 b, uint8 c, uint8 d) { return AddrFrom4(new byte[]{a, b, c, d}.array()); }
 
 public static readonly ж<Action<ж<testing.T>, appendMarshaler>> ᏑTestAppendToMarshal = new StaticBox<Action<ж<testing.T>, appendMarshaler>>(testAppendToMarshal);
 public static ref Action<ж<testing.T>, appendMarshaler> TestAppendToMarshal => ref ((StaticBox<Action<ж<testing.T>, appendMarshaler>>)ᏑTestAppendToMarshal).ValueSlot;
 
-public static bool IsZero(this ΔAddr a) {
-    return a.isZero();
-}
-
-public static bool IsZero(this ΔPrefix p) {
-    return p.isZero();
-}
+public static bool IsZero(this ΔAddr a) { return a.isZero(); }
+public static bool IsZero(this ΔPrefix p) { return p.isZero(); }
 
 } // end netip_package

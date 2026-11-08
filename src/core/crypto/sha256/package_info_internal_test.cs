@@ -32,7 +32,7 @@ using static go.crypto.sha256_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/sha256/sha256_test.go", "sha256_test.cs", "ABgyACFEACVEgqaCgoKClIKCgpSCgpSCgpSmgoKClIKCgpSCgpSCgpTKggAIBoIABBKykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6CgoKCgoKCgpSCgoKCgpSCgtyCgoKCgoKCgpSCgoKCgpSCgtyCgpSCgqaAgsiCgoCCpIKAgsiCgoCCABEiABMowoKAgsjkgoSCgIKCtoKCgqaCyoKCgIKClIKCgoKUgoKCgqaClAAJEqaCgoKCggAIBoKCgqaCggAMCoKCgoKmgoKCyqKAkqSmAAkEgoKCooKCgoKCppKCgoKmkoKCgsqCpoKmgqaCpoKmgoKCgoKCgpSC", "157-199:1;319-323:1;350-369:1;391-395:1;392-394:1.1;396-400:2;397-399:2.1;404-409:1;405-408:1.1;410-415:2;411-414:2.1;430-438:1;439-445:2;446-452:3;477-483:1")]
+[assembly: GoPositionMap("crypto/sha256/sha256_test.go", "sha256_test.cs", "ABgyACFEACVEgqaCgoKClIKCgpSCgpSCgpSmgoKClIKCgpSCgpSCgpTKggAIBoIABBKykoKClJSCgoKmgoKClJSCgqaCgqaCgqaClILugoKCgoKCgoKUgoKCgoKUgoLcgoKCgoKCgoKUgoKCgoKUgoLcgoKUgoKmgriCgoCCpIKAgsiCgoIAECIAEyjCgoK41IKEgoKCpoKCgqaCyoKCgIKClIKCgoKUgoKCgqaClAAJEqaCgoKCggAIBoKCgqaCggAMCoKCgoKmgoKCyqKSlKYACQSCgoKigoKCgoKmkoKCgqaSgoKCyoKmgqaCpoKmgqaCgoKCgoKClII=", "157-199:1;319-323:1;350-369:1;391-395:1;392-394:1.1;396-400:2;397-399:2.1;404-409:1;405-408:1.1;410-415:2;411-414:2.1;430-438:1;439-445:2;446-452:3;477-483:1", "", "", "", "337:21,338:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

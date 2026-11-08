@@ -49,7 +49,7 @@ using static global::go.html.template_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABsqooKClIKCgpSSgoKmAAkMAAgIAAgSpsqkgoLYAAgG6MrckoLcuKSCgtgADg4ACgjuprikgoKmgoK4goKUgoLqAA8MAAkI7qa47IKCpoKCyoKCpoKCyoKClIKC/A==", "90-94:1", "", "130=Join/1/2/1,Join/2/2/2", "41:25,121:27")]
-[assembly: GoPositionMap("html/template/template_test.go", "template_test.cs", "AB4glIKCgpSCpoKSgoKClICCAAwIgoKCgqaCgoKCggAKBoKCgoKC5oKCgoKC5oKCgoKCpoKCgoKCAAoGgoKCuIIACAaCgoKCggAKBoKCgoKAgqSAgqSAggAICIKCggAWBpQACxiqkrKigoCCpIKCgIKkggALDIKCgoKCgpSCgpQABxCC3IKmooKCuKKCgriigoKClII=", "147-160:1", "", "293=New/1/1/2")]
+[assembly: GoPositionMap("html/template/template_test.go", "template_test.cs", "ABwglIKCgpSCpoKSgoKClIIACwiCgoKCpoKCgoKCAAoGgoKCgoLmgoKCgoLmgoKCgoKmgoKCgoIACgaCgoK4ggAIBoKCgoKCAAoGgoKCgoCCpICCpICCAAgIgoKCABYGlAALGKqSsqKCgIKkgoKAgqSCAAsMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "289=New/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.html;

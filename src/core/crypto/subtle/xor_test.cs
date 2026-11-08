@@ -110,7 +110,7 @@ public static void BenchmarkXORBytes(ж<testing.B> b) {
     var data0 = new slice<byte>((1 << 15));
     var data1 = new slice<byte>((1 << 15));
     var sizes = slice<int64>([(int64)1 << 3, (int64)1 << 7, (int64)1 << 11, (int64)1 << 13, (int64)1 << 15]);
-    foreach (var (_, size) in sizes) {
+    foreach (var (_, size) in range(sizes)) {
         var data0ʗ1 = data0;
         var data1ʗ1 = data1;
         var dstʗ1 = dst;
@@ -130,7 +130,7 @@ public static void BenchmarkXORBytesAlignment(ж<testing.B> b) {
     var data0 = new slice<byte>(8 + (1 << 11));
     var data1 = new slice<byte>(8 + (1 << 11));
     var sizes = slice<int64>([(int64)1 << 3, (int64)1 << 7, (int64)1 << 11]);
-    foreach (var (_, size) in sizes) {
+    foreach (var (_, size) in range(sizes)) {
         for (var offsetᴛ1 = (int64)0; offsetᴛ1 < 8; offsetᴛ1++) {
             var offset = offsetᴛ1;
             var data0ʗ1 = data0;

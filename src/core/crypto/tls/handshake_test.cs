@@ -157,24 +157,20 @@ internal static (nint n, error err) Read(this ж<recordingConn> Ꮡr, slice<byte
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
-        {
-            (n, err) = r.Conn.Read(b); if (n == 0) {
-                goto ᒐdone;
-            }
+        (n, err) = r.Conn.Read(b); if (n == 0) {
+            goto ᒐdone;
         }
         b = b.slice(0, n);
 
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
 
-        {
-            nint l = len(r.flows); if (l == 0 || !r.reading) {
-                var buf = new slice<byte>(len(b));
-                copy(buf, b);
-                r.flows = append(r.flows, buf);
-            } else {
-                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
-            }
+        nint l = len(r.flows); if (l == 0 || !r.reading) {
+            var buf = new slice<byte>(len(b));
+            copy(buf, b);
+            r.flows = append(r.flows, buf);
+        } else {
+            r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
         }
         r.reading = true;
     }
@@ -190,24 +186,20 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
-        {
-            (n, err) = r.Conn.Write(b); if (n == 0) {
-                goto ᒐdone;
-            }
+        (n, err) = r.Conn.Write(b); if (n == 0) {
+            goto ᒐdone;
         }
         b = b.slice(0, n);
 
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
 
-        {
-            nint l = len(r.flows); if (l == 0 || r.reading) {
-                var buf = new slice<byte>(len(b));
-                copy(buf, b);
-                r.flows = append(r.flows, buf);
-            } else {
-                r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
-            }
+        nint l = len(r.flows); if (l == 0 || r.reading) {
+            var buf = new slice<byte>(len(b));
+            copy(buf, b);
+            r.flows = append(r.flows, buf);
+        } else {
+            r.flows[l - 1] = appendꓸꓸꓸ(r.flows[l - 1], b.slice(0, n));
         }
         r.reading = false;
     }
@@ -221,7 +213,7 @@ internal static (int64, error) WriteTo(this ref recordingConn r, io.Writer w) {
     // TLS always starts with a client to server flow.
     var clientToServer = true;
     int64 written = default;
-    foreach (var (i, flow) in r.flows) {
+    foreach (var (i, flow) in range(r.flows)) {
         @string source = clientˢ;
         @string dest = serverˢ;
         if (!clientToServer) {
@@ -285,7 +277,7 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
         line = before;
 
         var hexBytes = strings.Fields(line);
-        foreach (var (_, hexByte) in hexBytes) {
+        foreach (var (_, hexByte) in range(hexBytes)) {
             var (val, errΔ1) = strconv.ParseUint(hexByte, 16, 8);
             if (errΔ1 != nil) {
                 return (default, errors.New("invalid hex byte in test data: "u8 + errΔ1.Error()));
@@ -393,25 +385,11 @@ internal static error Close(this ж<replayingConn> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.of(replayingConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static netꓸAddr LocalAddr(this ref replayingConn r) {
-    return default;
-}
-
-internal static netꓸAddr RemoteAddr(this ref replayingConn r) {
-    return default;
-}
-
-internal static error SetDeadline(this ref replayingConn r, time.Time t) {
-    return default;
-}
-
-internal static error SetReadDeadline(this ref replayingConn r, time.Time t) {
-    return default;
-}
-
-internal static error SetWriteDeadline(this ref replayingConn r, time.Time t) {
-    return default;
-}
+internal static netꓸAddr LocalAddr(this ref replayingConn r) { return default; }
+internal static netꓸAddr RemoteAddr(this ref replayingConn r) { return default; }
+internal static error SetDeadline(this ref replayingConn r, time.Time t) { return default; }
+internal static error SetReadDeadline(this ref replayingConn r, time.Time t) { return default; }
+internal static error SetWriteDeadline(this ref replayingConn r, time.Time t) { return default; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string goTlsTestˢ => ref goTlsTestˢᵇ;
@@ -535,7 +513,7 @@ internal static (nint n, error err) Read(this zeroSource _, slice<byte> b) {
 
 internal static slice<uint16> allCipherSuites() {
     var ids = new slice<uint16>(len(ΔcipherSuites));
-    foreach (var (i, suite) in ΔcipherSuites) {
+    foreach (var (i, suite) in range(ΔcipherSuites)) {
         ids[i] = suite.id;
     }
 
@@ -589,11 +567,9 @@ internal static partial nint runMain(ж<testing.M> m) {
         defer(() => lʗ1.Close(), ref ᒐ);
         goǃ(localServer, l);
 
-        {
-            var errΔ1 = checkOpenSSLVersion(); if (errΔ1 != nil) {
-                fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: %v"u8, errΔ1);
-                os.Exit(1);
-            }
+        var errΔ1 = checkOpenSSLVersion(); if (errΔ1 != nil) {
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: %v"u8, errΔ1);
+            os.Exit(1);
         }
 
         // TODO(filippo): deprecate Config.Rand, and regenerate handshake recordings
@@ -606,13 +582,13 @@ internal static partial nint runMain(ж<testing.M> m) {
             Certificates: new slice<global::go.crypto.tls_package.Certificate>(2),
             InsecureSkipVerify: true,
             CipherSuites: allCipherSuites(),
-            CurvePreferences: slice<global::go.crypto.tls_package.CurveID>([X25519, CurveP256, CurveP384, CurveP521]),
+            CurvePreferences: [X25519, CurveP256, CurveP384, CurveP521],
             MinVersion: VersionTLS10,
             MaxVersion: VersionTLS13
         ));
-        testConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testRSACertificate]);
+        testConfig.Certificates[0].ΔCertificate = [testRSACertificate];
         testConfig.Certificates[0].PrivateKey = testRSAPrivateKey.OrTypedNil();
-        testConfig.Certificates[1].ΔCertificate = slice<slice<byte>>([testSNICertificate]);
+        testConfig.Certificates[1].ΔCertificate = [testSNICertificate];
         testConfig.Certificates[1].PrivateKey = testRSAPrivateKey.OrTypedNil();
         testConfig.BuildNameToCertificate();
         if (keyFile.Value != ""u8) {
@@ -629,11 +605,11 @@ internal static partial nint runMain(ж<testing.M> m) {
         // Only crypto/rand.Reader is allowed in FIPS 140-only mode.
         testConfigFIPS140.Rand = default;
         // FIPS 140-only mode requires 2048-bit RSA keys.
-        testConfigFIPS140.Certificates = slice<global::go.crypto.tls_package.Certificate>([new(
-            ΔCertificate: slice<slice<byte>>([testRSA2048Certificate]),
+        testConfigFIPS140.Certificates = [new(
+            ΔCertificate: [testRSA2048Certificate],
             PrivateKey: testRSA2048PrivateKey.OrTypedNil()
         )
-        ]);
+        ];
 
         return m.Run();
     }
@@ -674,10 +650,8 @@ internal static partial (global::go.crypto.tls_package.ΔConnectionState serverS
             if (errΔ1 != nil) {
                 t.Errorf("failed to call cli.Read: %v", errΔ1);
             }
-            {
-                @string got = (@string)buf; if (got != sentinel) {
-                    t.Errorf("read %q from TLS connection, but expected %q", got, sentinel);
-                }
+            @string got = (@string)buf; if (got != sentinel) {
+                t.Errorf("read %q from TLS connection, but expected %q", got, sentinel);
             }
             // We discard the error because after ReadAll returns the server must
             // have already closed the connection. Sending data (the closeNotify
@@ -691,15 +665,11 @@ internal static partial (global::go.crypto.tls_package.ΔConnectionState serverS
     err = server.Handshake();
     if (err == nil) {
         serverState = server.ConnectionState();
-        {
-            var (_, errΔ2) = io.WriteString(new tls_test_package.tls_ConnжWriter(server), sentinel); if (errΔ2 != nil) {
-                t.Errorf("failed to call server.Write: %v", errΔ2);
-            }
+        var (_, errΔ2) = io.WriteString(new tls_test_package.tls_ConnжWriter(server), sentinel); if (errΔ2 != nil) {
+            t.Errorf("failed to call server.Write: %v", errΔ2);
         }
-        {
-            var errΔ3 = server.Close(); if (errΔ3 != nil) {
-                t.Errorf("failed to call server.Close: %v", errΔ3);
-            }
+        var errΔ3 = server.Close(); if (errΔ3 != nil) {
+            t.Errorf("failed to call server.Close: %v", errΔ3);
         }
     } else {
         err = fmt.Errorf("server: %v"u8, err);
@@ -871,15 +841,11 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> t) {
             ctx: ctx,
             clientHello: clientHello
         ), out var Ꮡhs);
-        {
-            var errΔ1 = Ꮡhs.processClientHello(); if (errΔ1 != nil) {
-                testFatal(t, errΔ1);
-            }
+        var errΔ1 = Ꮡhs.processClientHello(); if (errΔ1 != nil) {
+            testFatal(t, errΔ1);
         }
-        {
-            var errΔ2 = transcriptMsg(new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(hs.clientHello), new tls_test_package.hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ2 != nil) {
-                testFatal(t, errΔ2);
-            }
+        var errΔ2 = transcriptMsg(new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(hs.clientHello), new tls_test_package.hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ2 != nil) {
+            testFatal(t, errΔ2);
         }
 
         (var record, err) = concatHandshakeMessages(new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(hs.hello), new global::go.crypto.tls_package.encryptedExtensionsMsgжhandshakeMessage(Ꮡ(new encryptedExtensionsMsg(alpnProtocol: "h2"))));
@@ -887,10 +853,8 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> t) {
             testFatal(t, err);
         }
 
-        {
-            var (_, errΔ3) = sʗ1.Write(record); if (errΔ3 != nil) {
-                testFatal(t, errΔ3);
-            }
+        var (_, errΔ3) = sʗ1.Write(record); if (errΔ3 != nil) {
+            testFatal(t, errΔ3);
         }
         srv.Close();
     });
@@ -924,10 +888,8 @@ public static partial void TestClientHelloTrailingMessage(ж<testing.T> t) {
             testFatal(t, err);
         }
 
-        {
-            var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != nil) {
-                testFatal(t, errΔ1);
-            }
+        var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != nil) {
+            testFatal(t, errΔ1);
         }
         cli.Close();
     });
@@ -965,10 +927,8 @@ public static partial void TestDoubleClientHelloHRR(ж<testing.T> t) {
             testFatal(t, err);
         }
 
-        {
-            var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != nil) {
-                testFatal(t, errΔ1);
-            }
+        var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != nil) {
+            testFatal(t, errΔ1);
         }
         cli.Close();
     });
@@ -990,7 +950,7 @@ internal static (slice<byte>, error) concatHandshakeMessages(params Span<global:
     var msgs = msgsʗp.sslice();
 
     slice<byte> marshalled = default;
-    foreach (var (_, msg) in msgs) {
+    foreach (var (_, msg) in range(msgs)) {
         var (data, err) = msg.marshal();
         if (err != nil) {
             return (default, err);
@@ -1015,7 +975,7 @@ internal static ref readonly @string tlsUnexpectedMessageˢ => ref tlsUnexpected
 private static readonly @string tlsUnexpectedMessageˢᵇ = "tls: unexpected message"u8;
 
 public static void TestMultipleKeyUpdate(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<bool>([true, false])) {
+    foreach (var (_, vᴛ1) in range(slice<bool>([true, false]))) {
         ref var requestUpdate = ref heap(new bool(), out var ᏑrequestUpdate);
         requestUpdate = vᴛ1;
 
@@ -1033,18 +993,14 @@ public static void TestMultipleKeyUpdate(ж<testing.T> t) {
             var clientHandshakeDoneʗ1 = clientHandshakeDone;
             var serverʗ1 = server;
             goǃ(() => {
-                {
-                    var errΔ1 = clientʗ1.Handshake(); if (errΔ1 != nil) {
-                    }
+                var errΔ1 = clientʗ1.Handshake(); if (errΔ1 != nil) {
                 }
                 close(clientHandshakeDoneʗ1);
                 io.Copy(io.Discard, new tls_test_package.tls_ConnжReader(serverʗ1));
             });
 
-            {
-                var errΔ2 = server.Handshake(); if (errΔ2 != nil) {
-                    tΔ1.Fatalf("server handshake failed: %v\n", errΔ2);
-                }
+            var errΔ2 = server.Handshake(); if (errΔ2 != nil) {
+                tΔ1.Fatalf("server handshake failed: %v\n", errΔ2);
             }
             ᐸꟷ(clientHandshakeDone);
 

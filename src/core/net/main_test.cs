@@ -13,8 +13,6 @@ using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using iter = iter_package;
 using net.@internal;
 using static go.net_package;
@@ -180,7 +178,7 @@ internal static void printRunningGoroutines() {
         return;
     }
     fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Running goroutines:\n"u8);
-    foreach (var (_, gs) in gss) {
+    foreach (var (_, gs) in range(gss)) {
         fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "%v\n"u8, gs);
     }
     fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "\n"u8);
@@ -225,7 +223,7 @@ internal static void printSocketStats() {
         return;
     }
     fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Socket statistical information:\n"u8);
-    foreach (var (_, st) in sts) {
+    foreach (var (_, st) in range(sts)) {
         fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "%v\n"u8, st);
     }
     fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "\n"u8);

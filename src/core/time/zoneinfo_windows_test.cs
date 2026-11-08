@@ -80,15 +80,11 @@ public static void TestToEnglishName(ж<Δtesting.T> t) {
             (dlt, err) = k.GetMUIStringValue(muiDltˢ);
         }
         if (err != nil) { // Fallback to Std and Dlt
-            {
-                (std, _, err) = k.GetStringValue(stdˢ); if (err != nil) {
-                    t.Fatalf("cannot read CEST Std registry key: %s", err);
-                }
+            (std, _, err) = k.GetStringValue(stdˢ); if (err != nil) {
+                t.Fatalf("cannot read CEST Std registry key: %s", err);
             }
-            {
-                (dlt, _, err) = k.GetStringValue(dltˢ); if (err != nil) {
-                    t.Fatalf("cannot read CEST Dlt registry key: %s", err);
-                }
+            (dlt, _, err) = k.GetStringValue(dltˢ); if (err != nil) {
+                t.Fatalf("cannot read CEST Dlt registry key: %s", err);
             }
         }
 

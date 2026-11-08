@@ -57,10 +57,8 @@ public static void TestNode(ж<testing.T> t) {
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
-    {
-        err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != nil) {
-            t.Fatal(nodeFailedˢ, err);
-        }
+    err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != nil) {
+        t.Fatal(nodeFailedˢ, err);
     }
 
     diff(t, buf.Bytes(), src);
@@ -92,10 +90,8 @@ public static void TestNodeNoModify(ж<testing.T> t) {
     @string wantVal = wantLit.Value.Value;
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != nil) {
-            t.Fatal(nodeFailedˢ, err);
-        }
+    err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != nil) {
+        t.Fatal(nodeFailedˢ, err);
     }
     diff(t, buf.Bytes(), slice<byte>(golden));
 
@@ -130,7 +126,7 @@ public static void TestSource(ж<testing.T> t) {
 
 // Test cases that are expected to fail are marked by the prefix "ERROR".
 // The formatted result must look the same as the input for successful tests.
-internal static slice<@string> tests = slice<@string>([
+internal static slice<@string> tests = [
     // declaration lists
     @"import ""go/format""",
     "var x int",
@@ -174,7 +170,7 @@ internal static slice<@string> tests = slice<@string>([
     // build comments
     "// copyright\n\n//go:build x\n\npackage p\n",
     "// copyright\n\n//go:build x\n// +build x\n\npackage p\n"
-]);
+];
 
 public static (@string, error) String(@string s) {
     var (res, err) = Source(slice<byte>(s));
@@ -189,7 +185,7 @@ internal static ref readonly @string errorˢ => ref errorˢᵇ;
 private static readonly @string errorˢᵇ = "ERROR"u8;
 
 public static void TestPartial(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var src = vᴛ1;
 
         if (strings.HasPrefix(src, errorˢ)) {

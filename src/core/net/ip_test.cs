@@ -52,21 +52,17 @@ internal static void initᴛparseIPTests() { parseIPTests = slice<parseIPTests�
 ]); }
 
 public static void TestParseIP(ж<testing.T> t) {
-    foreach (var (_, tt) in parseIPTests) {
-        {
-            var outΔ1 = ParseIP(tt.@in); if (!reflect.DeepEqual(outΔ1, tt.@out)) {
-                t.Errorf("ParseIP(%q) = %v, want %v", tt.@in, outΔ1, tt.@out);
-            }
+    foreach (var (_, tt) in range(parseIPTests)) {
+        var outΔ1 = ParseIP(tt.@in); if (!reflect.DeepEqual(outΔ1, tt.@out)) {
+            t.Errorf("ParseIP(%q) = %v, want %v", tt.@in, outΔ1, tt.@out);
         }
         if (tt.@in == ""u8) {
             // Tested in TestMarshalEmptyIP below.
             continue;
         }
         global::go.net_package.IP @out = default;
-        {
-            var err = @out.UnmarshalText(slice<byte>(tt.@in)); if (!reflect.DeepEqual(@out, tt.@out) || (tt.@out == nil) != (err != nil)) {
-                t.Errorf("IP.UnmarshalText(%q) = %v, %v, want %v", tt.@in, @out, err, tt.@out);
-            }
+        var err = @out.UnmarshalText(slice<byte>(tt.@in)); if (!reflect.DeepEqual(@out, tt.@out) || (tt.@out == nil) != (err != nil)) {
+            t.Errorf("IP.UnmarshalText(%q) = %v, %v, want %v", tt.@in, @out, err, tt.@out);
         }
     }
 }
@@ -83,7 +79,7 @@ public static void TestLookupWithIP(ж<testing.T> t) {
 
     // Test that LookupHost and LookupIP, which normally
     // expect host names, work with IP addresses.
-    foreach (var (_, tt) in parseIPTests) {
+    foreach (var (_, tt) in range(parseIPTests)) {
         if (tt.@out != nil) {
             var (addrs, errΔ1) = LookupHost(tt.@in);
             if (len(addrs) != 1 || addrs[0] != tt.@in || errΔ1 != nil) {
@@ -120,7 +116,7 @@ public static void BenchmarkParseIP(ж<testing.B> Ꮡb) {
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, tt) in parseIPTests) {
+        foreach (var (_, tt) in range(parseIPTests)) {
             ParseIP(tt.@in);
         }
     }
@@ -152,12 +148,10 @@ public static void BenchmarkParseIPValidIPv6(ж<testing.B> Ꮡb) {
 
 // Issue 6339
 public static void TestMarshalEmptyIP(ж<testing.T> t) {
-    foreach (var (_, @in) in slice<slice<byte>>([default, slice<byte>(""u8)])) {
+    foreach (var (_, @in) in range(slice<slice<byte>>([default, slice<byte>(""u8)]))) {
         global::go.net_package.IP @out = new IP(new byte[]{1, 2, 3, 4}.slice());
-        {
-            var errΔ1 = @out.UnmarshalText(@in); if (errΔ1 != nil || @out != nil) {
-                t.Errorf("UnmarshalText(%v) = %v, %v; want nil, nil", @in, @out, errΔ1);
-            }
+        var errΔ1 = @out.UnmarshalText(@in); if (errΔ1 != nil || @out != nil) {
+            t.Errorf("UnmarshalText(%v) = %v, %v; want nil, nil", @in, @out, errΔ1);
         }
     }
     global::go.net_package.IP ip = default;
@@ -186,7 +180,7 @@ partial struct ipStringTestsᴛ1 /*dyn*/ {
     /*embed*/ internal error error;
 }
 internal static slice<ж<ipStringTestsᴛ1>> ipStringTests;
-internal static void initᴛipStringTests() { ipStringTests = slice<ж<ipStringTestsᴛ1>>([
+internal static void initᴛipStringTests() { ipStringTests = [
     // IPv4 address
     Ꮡ(new ipStringTestsᴛ1(
         new IP(new byte[]{192, 0, 2, 1}.slice()),
@@ -271,10 +265,10 @@ internal static void initᴛipStringTests() { ipStringTests = slice<ж<ipStringT
         "?0123456789abcdef",
         default,
         new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid IP address", Addr: "0123456789abcdef")))))
-]); }
+]; }
 
 public static void TestIPString(ж<testing.T> t) {
-    foreach (var (_, tt) in ipStringTests) {
+    foreach (var (_, tt) in range(ipStringTests)) {
         {
             @string @out = (~tt).@in.String(); if (@out != (~tt).str) {
                 t.Errorf("IP.String(%v) = %q, want %q", (~tt).@in, @out, (~tt).str);
@@ -296,7 +290,7 @@ public static void TestIPString(ж<testing.T> t) {
 
 public static void TestIPAppendTextNoAllocs(ж<testing.T> t) {
     // except the invalid IP
-    foreach (var (_, tt) in ipStringTests.slice(0, len(ipStringTests) - 1)) {
+    foreach (var (_, tt) in range(ipStringTests.slice(0, len(ipStringTests) - 1))) {
         var ttʗ1 = tt;
         nint allocs = (nint)testing.AllocsPerRun(1000, () => {
             var buf = new slice<byte>(0, 64);
@@ -364,7 +358,7 @@ internal static void benchmarkIPString(ж<testing.B> Ꮡb, nint size) {
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, tt) in ipStringTests) {
+        foreach (var (_, tt) in range(ipStringTests)) {
             if ((~tt).@in != nil && len((~tt).@in) == size) {
                 sink = (~tt).@in.String();
             }
@@ -388,11 +382,9 @@ internal static void initᴛipMaskTests() { ipMaskTests = slice<ipMaskTestsᴛ1>
 ]); }
 
 public static void TestIPMask(ж<testing.T> t) {
-    foreach (var (_, tt) in ipMaskTests) {
-        {
-            var @out = tt.@in.Mask(tt.mask); if (@out == nil || !tt.@out.Equal(@out)) {
-                t.Errorf("IP(%v).Mask(%v) = %v, want %v", tt.@in, tt.mask, @out, tt.@out);
-            }
+    foreach (var (_, tt) in range(ipMaskTests)) {
+        var @out = tt.@in.Mask(tt.mask); if (@out == nil || !tt.@out.Equal(@out)) {
+            t.Errorf("IP(%v).Mask(%v) = %v, want %v", tt.@in, tt.mask, @out, tt.@out);
         }
     }
 }
@@ -410,11 +402,9 @@ internal static slice<ipMaskStringTestsᴛ1> ipMaskStringTests = slice<ipMaskStr
 ]);
 
 public static void TestIPMaskString(ж<testing.T> t) {
-    foreach (var (_, tt) in ipMaskStringTests) {
-        {
-            @string @out = tt.@in.String(); if (@out != tt.@out) {
-                t.Errorf("IPMask.String(%v) = %q, want %q", tt.@in, @out, tt.@out);
-            }
+    foreach (var (_, tt) in range(ipMaskStringTests)) {
+        @string @out = tt.@in.String(); if (@out != tt.@out) {
+            t.Errorf("IPMask.String(%v) = %q, want %q", tt.@in, @out, tt.@out);
         }
     }
 }
@@ -425,7 +415,7 @@ public static void BenchmarkIPMaskString(ж<testing.B> Ꮡb) {
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, tt) in ipMaskStringTests) {
+        foreach (var (_, tt) in range(ipMaskStringTests)) {
             sink = tt.@in.String();
         }
     }
@@ -470,7 +460,7 @@ internal static void initᴛparseCIDRTests() { parseCIDRTests = slice<parseCIDRT
 ]); }
 
 public static void TestParseCIDR(ж<testing.T> t) {
-    foreach (var (_, tt) in parseCIDRTests) {
+    foreach (var (_, tt) in range(parseCIDRTests)) {
         var (ip, net, err) = ParseCIDR(tt.@in);
         if (!reflect.DeepEqual(err, tt.err)) {
             t.Errorf("ParseCIDR(%q) = %v, %v; want %v, %v", tt.@in, ip, net.OrTypedNil(), tt.ip, tt.net.OrTypedNil());
@@ -499,11 +489,9 @@ internal static void initᴛipNetContainsTests() { ipNetContainsTests = slice<ip
 ]); }
 
 public static void TestIPNetContains(ж<testing.T> t) {
-    foreach (var (_, tt) in ipNetContainsTests) {
-        {
-            var ok = tt.net.Contains(tt.ip); if (ok != tt.ok) {
-                t.Errorf("IPNet(%v).Contains(%v) = %v, want %v", tt.net.OrTypedNil(), tt.ip, ok, tt.ok);
-            }
+    foreach (var (_, tt) in range(ipNetContainsTests)) {
+        var ok = tt.net.Contains(tt.ip); if (ok != tt.ok) {
+            t.Errorf("IPNet(%v).Contains(%v) = %v, want %v", tt.net.OrTypedNil(), tt.ip, ok, tt.ok);
         }
     }
 }
@@ -522,11 +510,9 @@ internal static void initᴛipNetStringTests() { ipNetStringTests = slice<ipNetS
 ]); }
 
 public static void TestIPNetString(ж<testing.T> t) {
-    foreach (var (_, tt) in ipNetStringTests) {
-        {
-            @string @out = tt.@in.String(); if (@out != tt.@out) {
-                t.Errorf("IPNet.String(%v) = %q, want %q", tt.@in.OrTypedNil(), @out, tt.@out);
-            }
+    foreach (var (_, tt) in range(ipNetStringTests)) {
+        @string @out = tt.@in.String(); if (@out != tt.@out) {
+            t.Errorf("IPNet.String(%v) = %q, want %q", tt.@in.OrTypedNil(), @out, tt.@out);
         }
     }
 }
@@ -552,11 +538,9 @@ internal static slice<cidrMaskTestsᴛ1> cidrMaskTests = slice<cidrMaskTestsᴛ1
 ]);
 
 public static void TestCIDRMask(ж<testing.T> t) {
-    foreach (var (_, tt) in cidrMaskTests) {
-        {
-            var @out = CIDRMask(tt.ones, tt.bits); if (!reflect.DeepEqual(@out, tt.@out)) {
-                t.Errorf("CIDRMask(%v, %v) = %v, want %v", tt.ones, tt.bits, @out, tt.@out);
-            }
+    foreach (var (_, tt) in range(cidrMaskTests)) {
+        var @out = CIDRMask(tt.ones, tt.bits); if (!reflect.DeepEqual(@out, tt.@out)) {
+            t.Errorf("CIDRMask(%v, %v) = %v, want %v", tt.ones, tt.bits, @out, tt.@out);
         }
     }
 }
@@ -575,7 +559,7 @@ partial struct networkNumberAndMaskTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IPNet @in;
     internal global::go.net_package.IPNet @out;
 }
-internal static slice<networkNumberAndMaskTestsᴛ1> networkNumberAndMaskTests = slice<networkNumberAndMaskTestsᴛ1>([
+internal static slice<networkNumberAndMaskTestsᴛ1> networkNumberAndMaskTests = [
     new(new IPNet(IP: v4addr, Mask: v4mask), new IPNet(IP: v4addr, Mask: v4mask)),
     new(new IPNet(IP: v4addr, Mask: v4mappedv6mask), new IPNet(IP: v4addr, Mask: v4mask)),
     new(new IPNet(IP: v4mappedv6addr, Mask: v4mappedv6mask), new IPNet(IP: v4addr, Mask: v4mask)),
@@ -591,10 +575,10 @@ internal static slice<networkNumberAndMaskTestsᴛ1> networkNumberAndMaskTests =
     new(@in: new IPNet(IP: badaddr, Mask: v4mappedv6mask)),
     new(@in: new IPNet(IP: badaddr, Mask: v6mask)),
     new(@in: new IPNet(IP: badaddr, Mask: badmask))
-]);
+];
 
 public static void TestNetworkNumberAndMask(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in networkNumberAndMaskTests) {
+    foreach (var (_, vᴛ1) in range(networkNumberAndMaskTests)) {
         ref var tt = ref heap(new networkNumberAndMaskTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -618,7 +602,7 @@ internal partial struct TestSplitHostPort_typeᴛ1 /*dyn*/ {
 }
 
 public static void TestSplitHostPort(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestSplitHostPort_type>([
+    foreach (var (_, tt) in range(slice<TestSplitHostPort_type>([
         // Host name
         new("localhost:http", "localhost", "http"),
         new("localhost:80", "localhost", "80"),
@@ -650,15 +634,13 @@ public static void TestSplitHostPort(ж<testing.T> t) {
 
         // Opaque service name
         new("golang.org:https%foo", "golang.org", "https%foo") // Go 1 behavior
-    ])) {
-        {
-            var (host, port, err) = SplitHostPort(tt.hostPort); if (host != tt.host || port != tt.port || err != nil) {
-                t.Errorf("SplitHostPort(%q) = %q, %q, %v; want %q, %q, nil", tt.hostPort, host, port, err, tt.host, tt.port);
-            }
+    ]))) {
+        var (host, port, err) = SplitHostPort(tt.hostPort); if (host != tt.host || port != tt.port || err != nil) {
+            t.Errorf("SplitHostPort(%q) = %q, %q, %v; want %q, %q, nil", tt.hostPort, host, port, err, tt.host, tt.port);
         }
     }
 
-    foreach (var (_, tt) in slice<TestSplitHostPort_typeᴛ1>([
+    foreach (var (_, tt) in range(slice<TestSplitHostPort_typeᴛ1>([
         new("golang.org", "missing port in address"),
         new("127.0.0.1", "missing port in address"),
         new("[::1]", "missing port in address"),
@@ -682,18 +664,16 @@ public static void TestSplitHostPort(ж<testing.T> t) {
         new("foo[bar]:baz", "unexpected '[' in address"),
 
         new("foo]bar:baz", "unexpected ']' in address")
-    ])) {
-        {
-            var (host, port, err) = SplitHostPort(tt.hostPort); if (err == nil) {
-                t.Errorf("SplitHostPort(%q) should have failed", tt.hostPort);
-            } else {
-                var e = err._<ж<global::go.net_package.AddrError>>();
-                if (e.Err != tt.err) {
-                    t.Errorf("SplitHostPort(%q) = _, _, %q; want %q", tt.hostPort, e.Err, tt.err);
-                }
-                if (host != ""u8 || port != ""u8) {
-                    t.Errorf("SplitHostPort(%q) = %q, %q, err; want %q, %q, err on failure", tt.hostPort, host, port, (@string)""u8, (@string)""u8);
-                }
+    ]))) {
+        var (host, port, err) = SplitHostPort(tt.hostPort); if (err == nil) {
+            t.Errorf("SplitHostPort(%q) should have failed", tt.hostPort);
+        } else {
+            var e = err._<ж<global::go.net_package.AddrError>>();
+            if (e.Err != tt.err) {
+                t.Errorf("SplitHostPort(%q) = _, _, %q; want %q", tt.hostPort, e.Err, tt.err);
+            }
+            if (host != ""u8 || port != ""u8) {
+                t.Errorf("SplitHostPort(%q) = %q, %q, err; want %q, %q, err on failure", tt.hostPort, host, port, (@string)""u8, (@string)""u8);
             }
         }
     }
@@ -706,7 +686,7 @@ internal partial struct TestJoinHostPort_type /*dyn*/ {
 }
 
 public static void TestJoinHostPort(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestJoinHostPort_type>([
+    foreach (var (_, tt) in range(slice<TestJoinHostPort_type>([
         // Host name
         new("localhost", "http", "localhost:http"),
         new("localhost", "80", "localhost:80"),
@@ -736,11 +716,9 @@ public static void TestJoinHostPort(ж<testing.T> t) {
 
         // Opaque service name
         new("golang.org", "https%foo", "golang.org:https%foo") // Go 1 behavior
-    ])) {
-        {
-            @string hostPort = JoinHostPort(tt.host, tt.port); if (hostPort != tt.hostPort) {
-                t.Errorf("JoinHostPort(%q, %q) = %q; want %q", tt.host, tt.port, hostPort, tt.hostPort);
-            }
+    ]))) {
+        @string hostPort = JoinHostPort(tt.host, tt.port); if (hostPort != tt.hostPort) {
+            t.Errorf("JoinHostPort(%q, %q) = %q; want %q", tt.host, tt.port, hostPort, tt.hostPort);
         }
     }
 }
@@ -770,7 +748,7 @@ internal static void initᴛipAddrFamilyTests() { ipAddrFamilyTests = slice<ipAd
 ]); }
 
 public static void TestIPAddrFamily(ж<testing.T> t) {
-    foreach (var (_, tt) in ipAddrFamilyTests) {
+    foreach (var (_, tt) in range(ipAddrFamilyTests)) {
         {
             var af = tt.@in.To4() != nil; if (af != tt.af4) {
                 t.Errorf("verifying IPv4 address family for %q = %v, want %v", tt.@in, af, tt.af4);
@@ -862,7 +840,7 @@ internal static @string name(any f) {
 }
 
 public static void TestIPAddrScope(ж<testing.T> t) {
-    foreach (var (_, tt) in ipAddrScopeTests) {
+    foreach (var (_, tt) in range(ipAddrScopeTests)) {
         {
             var ok = tt.scope(tt.@in); if (ok != tt.ok) {
                 t.Errorf("%s(%q) = %v, want %v", name((tt.scope).OrTypedNilFunc()), tt.@in, ok, tt.ok);
@@ -893,7 +871,7 @@ internal static void benchmarkIPEqual(ж<testing.B> Ꮡb, nint size) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var ips = new slice<global::go.net_package.IP>(1000);
-    foreach (var i in range(ips)) {
+    foreach (var i in range(len(ips))) {
         ips[i] = new global::go.net_package.IP(size);
         rand.Read(ips[i]);
     }

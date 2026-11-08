@@ -40,7 +40,7 @@ using static global::go.testing.cryptotest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/cryptotest/rand_test.go", "rand_test.cs", "ACsmgpaSlKKCgoKmgoKmgoKCpqaCgqaigoKCypKUooKCgqamgoKmgpCSlKKCgoK4goLKkoKCpoKCgqaAgtqSgoKmgoKCpoLcgpSCgoKmgoKUgoKmgoKCgoKUlLS0pIKmgriUgoKCgoKUlLS0pIKmgg==", "23-59:1;26-45:1.1;52-58:1.2;61-95:2;64-72:2.1;80-80:2.2;83-89:2.3;98-113:3;116-131:4;135-201:5")]
+[assembly: GoPositionMap("testing/cryptotest/rand_test.go", "rand_test.cs", "ACsmgpaSlKKCgoKmgoKmgoKCpqaCgqaigoKCypKUooKCgqamgoKmgpCSlKKCgoK4goLKkoKCpoKCgqaCypKCgqaCgoKmgtyClIKCgqaCgpSCgqaCgoKCgpSUtLSkgqaCuJSCgoKCgpSUtLSkgqaC", "23-59:1;26-45:1.1;52-58:1.2;61-95:2;64-72:2.1;80-80:2.2;83-89:2.3;98-113:3;116-131:4;135-201:5")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

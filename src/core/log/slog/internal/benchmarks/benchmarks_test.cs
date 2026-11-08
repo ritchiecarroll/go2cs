@@ -53,13 +53,13 @@ internal partial struct BenchmarkAttrs_typeᴛ1 /*dyn*/ {
 // reduces measured allocations.
 public static void BenchmarkAttrs(ж<testing.B> b) {
     var ctx = context.Background();
-    foreach (var (_, vᴛ1) in slice<BenchmarkAttrs_type>([
+    foreach (var (_, vᴛ1) in range(slice<BenchmarkAttrs_type>([
         new("disabled", new benchmarks_internal_test_package.benchmarks_disabledHandlerᴠΔHandler(new disabledHandler()), false),
         new("async discard", new benchmarks_internal_test_package.benchmarks_asyncHandlerжΔHandler(newAsyncHandler()), true),
         new("fastText discard", newFastTextHandler(io.Discard), false),
         new("Text discard", new slog.TextHandlerжΔHandler(slog.NewTextHandler(io.Discard, nil)), false),
         new("JSON discard", new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(io.Discard, nil)), false)
-    ])) {
+    ]))) {
         ref var handler = ref heap(new BenchmarkAttrs_type(), out var Ꮡhandler);
         handler = vᴛ1;
 
@@ -79,7 +79,7 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                     var loggerʗ4 = loggerʗ1;
 
                     var loggerʗ5 = loggerʗ1;
-            foreach (var (_, vᴛ2) in slice<BenchmarkAttrs_typeᴛ1>([
+            foreach (var (_, vᴛ2) in range(slice<BenchmarkAttrs_typeᴛ1>([
                 new(
                     // The number should match nAttrsInline in slog/record.go.
                     // This should exercise the code path where no allocations
@@ -169,7 +169,7 @@ public static void BenchmarkAttrs(ж<testing.B> b) {
                             slog.Any(eventˢ, testEvent));
                     }
                 )
-            ])) {
+            ]))) {
                 ref var call = ref heap(new BenchmarkAttrs_typeᴛ1(), out var Ꮡcall);
                 call = vᴛ2;
 

@@ -68,21 +68,19 @@ internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> t, 
 
     slice<ж<ast.File>> files = default;
     slice<error> errlist = default;
-    foreach (var (i, filename) in filenames) {
+    foreach (var (i, filename) in range(filenames)) {
         var (@file, err) = parser.ParseFile(fset, filename, srcs[i], mode);
         if (@file == nil) {
             t.Fatalf("%s: %s", filename, err);
         }
         files = append(filesᴷ, files, @file);
         if (err != nil) {
-            {
-                var (list, _) = err._<scanner.ErrorList>(ᐧ); if (len(list) > 0) {
-                    foreach (var (_, errΔ1) in list) {
-                        errlist = append(errlist, (error)(new types_test_package.scanner_ΔErrorжerror(errΔ1)));
-                    }
-                } else {
-                    errlist = append(errlist, err);
+            var (list, _) = err._<scanner.ErrorList>(ᐧ); if (len(list) > 0) {
+                foreach (var (_, errΔ1) in range<ж<scannerꓸError>>(list)) {
+                    errlist = append(errlist, (error)(new types_test_package.scanner_ΔErrorжerror(errΔ1)));
                 }
+            } else {
+                errlist = append(errlist, err);
             }
         }
     }
@@ -123,10 +121,8 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> flags) {
         return default; // first line is not a line comment
     }
     src = src[(int)(len(prefix))..];
-    {
-        nint i = bytes.Index(src, slice<byte>("-"u8)); if (i < 0 || len(bytes.TrimSpace(src.slice(0, i))) != 0) {
-            return default; // comment doesn't start with a "-"
-        }
+    nint i = bytes.Index(src, slice<byte>("-"u8)); if (i < 0 || len(bytes.TrimSpace(src.slice(0, i))) != 0) {
+        return default; // comment doesn't start with a "-"
     }
     nint end = bytes.Index(src, slice<byte>("\n"u8));
     const nint maxLen = 256;
@@ -200,7 +196,7 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
         var listErrors = manual && !verifyErrors.Value;
         if (listErrors && len(errlist) > 0) {
             t.Errorf("--- %s:", pkgName);
-            foreach (var (_, err) in errlist) {
+            foreach (var (_, err) in range(errlist)) {
                 t.Error(err);
             }
         }
@@ -230,7 +226,7 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
         };
 
         // apply custom configuration
-        foreach (var (_, opt) in opts) {
+        foreach (var (_, opt) in range(opts)) {
             opt(Ꮡconf);
         }
 
@@ -279,17 +275,15 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
 
         // collect expected errors
         var errmap = new map<@string, map<nint, slice<comment>>>();
-        foreach (var (i, filename) in filenames) {
-            {
-                var m = commentMap(srcs[i], regexp.MustCompile(erroRxˢ)); if (len(m) > 0) {
-                    errmap[filename] = m;
-                }
+        foreach (var (i, filename) in range(filenames)) {
+            var m = commentMap(srcs[i], regexp.MustCompile(erroRxˢ)); if (len(m) > 0) {
+                errmap[filename] = m;
             }
         }
 
         // match against found errors
         slice<nint> indices = default; // list indices of matching errors, reused for each error
-        foreach (var (_, err) in errlist) {
+        foreach (var (_, err) in range(errlist)) {
             var (gotPos, gotMsg) = unpackError(fset, err);
 
             // find list of errors for the respective error line
@@ -303,7 +297,7 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
 
             // At least one of the errors in errList should match the current error.
             indices = indices[..0];
-            foreach (var (i, want) in errList) {
+            foreach (var (i, want) in range(errList)) {
                 var (pattern, substr) = strings.CutPrefix(want.text, errorˢ);
                 if (!substr) {
                     bool found = default;
@@ -342,11 +336,9 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
             // If there are multiple matching errors, select the one with the closest column position.
             nint index = -1; // index of matching error
             nint delta = default;
-            foreach (var (_, i) in indices) {
-                {
-                    nint d = absDiff(gotPos.Column, errList[i].col); if (index < 0 || d < delta) {
-                        (index, delta) = (i, d);
-                    }
+            foreach (var (_, i) in range(indices)) {
+                nint d = absDiff(gotPos.Column, errList[i].col); if (index < 0 || d < delta) {
+                    (index, delta) = (i, d);
                 }
             }
 
@@ -357,15 +349,13 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
             }
 
             // eliminate from errList
-            {
-                nint n = len(errList) - 1; if (n > 0) {
-                    // not the last entry - slide entries down (don't reorder)
-                    copy(errList.slice(index), errList.slice(index + 1));
-                    filemap[line] = errList.slice(0, n);
-                } else {
-                    // last entry - remove errList from filemap
-                    delete(filemap, line);
-                }
+            nint n = len(errList) - 1; if (n > 0) {
+                // not the last entry - slide entries down (don't reorder)
+                copy(errList.slice(index), errList.slice(index + 1));
+                filemap[line] = errList.slice(0, n);
+            } else {
+                // last entry - remove errList from filemap
+                delete(filemap, line);
             }
 
             // if filemap is empty, eliminate from errmap
@@ -379,7 +369,7 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
             t.Errorf("--- %s: unreported errors:", pkgName);
             foreach (var (filename, filemap) in errmap) {
                 foreach (var (line, errList) in filemap) {
-                    foreach (var (_, err) in errList) {
+                    foreach (var (_, err) in range(errList)) {
                         t.Errorf("%s:%d:%d: %s", filename, line, err.col, err.text);
                     }
                 }
@@ -480,7 +470,7 @@ private static readonly @string packageLongconstConstSˢᵇ = @"package longcons
 public static void TestLongConstants(ж<testing.T> t) {
     @string format = packageLongconstConstSˢ;
     @string src = fmt.Sprintf(format, strings.Repeat("1", 9999), strings.Repeat("1", 10001));
-    testFiles(t, slice<@string>(["longconst.go"]), slice<slice<byte>>([slice<byte>(src)]), false);
+    testFiles(t, ["longconst.go"], [slice<byte>(src)], false);
 }
 
 internal static Action<ж<types.Config>> withSizes(types.Sizes sizes) {
@@ -498,7 +488,7 @@ private static readonly @string srcᶜ13ᵇ = @"package index; var s []byte; var
 // represent larger values.
 public static void TestIndexRepresentability(ж<testing.T> t) {
     @string src = srcᶜ13;
-    testFiles(t, slice<@string>(["index.go"]), slice<slice<byte>>([slice<byte>(src)]), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
+    testFiles(t, ["index.go"], [slice<byte>(src)], false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -509,7 +499,7 @@ public static void TestIssue47243_TypedRHS(ж<testing.T> t) {
     // The RHS of the shift expression below overflows uint on 32bit platforms,
     // but this is OK as it is explicitly typed.
     @string src = srcᶜ14; // uint64(1<<32)
-    testFiles(t, slice<@string>(["p.go"]), slice<slice<byte>>([slice<byte>(src)]), false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
+    testFiles(t, ["p.go"], [slice<byte>(src)], false, withSizes(new types.StdSizesжSizes(Ꮡ(new StdSizes(4, 4)))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -520,38 +510,26 @@ public static void TestCheck(ж<testing.T> t) {
     DefPredeclaredTestFuncs();
     testDirFiles(t, internalTypesTestdataˢ, false);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string internalTypesTestdataˢ2 => ref internalTypesTestdataˢ2ᵇ;
 private static readonly @string internalTypesTestdataˢ2ᵇ = "../../internal/types/testdata/spec"u8;
 
-public static void TestSpec(ж<testing.T> t) {
-    testDirFiles(t, internalTypesTestdataˢ2, false);
-}
-
+public static void TestSpec(ж<testing.T> t) { testDirFiles(t, internalTypesTestdataˢ2, false); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string internalTypesTestdataˢ3 => ref internalTypesTestdataˢ3ᵇ;
 private static readonly @string internalTypesTestdataˢ3ᵇ = "../../internal/types/testdata/examples"u8;
 
-public static void TestExamples(ж<testing.T> t) {
-    testDirFiles(t, internalTypesTestdataˢ3, false);
-}
-
+public static void TestExamples(ж<testing.T> t) { testDirFiles(t, internalTypesTestdataˢ3, false); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string internalTypesTestdataˢ4 => ref internalTypesTestdataˢ4ᵇ;
 private static readonly @string internalTypesTestdataˢ4ᵇ = "../../internal/types/testdata/fixedbugs"u8;
 
-public static void TestFixedbugs(ж<testing.T> t) {
-    testDirFiles(t, internalTypesTestdataˢ4, false);
-}
-
+public static void TestFixedbugs(ж<testing.T> t) { testDirFiles(t, internalTypesTestdataˢ4, false); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataLocalˢ => ref testdataLocalˢᵇ;
 private static readonly @string testdataLocalˢᵇ = "testdata/local"u8;
 
-public static void TestLocal(ж<testing.T> t) {
-    testDirFiles(t, testdataLocalˢ, false);
-}
+public static void TestLocal(ж<testing.T> t) { testDirFiles(t, testdataLocalˢ, false); }
 
 internal static void testDirFiles(ж<testing.T> t, @string dir, bool manual) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
@@ -563,7 +541,7 @@ internal static void testDirFiles(ж<testing.T> t, @string dir, bool manual) {
         return;
     }
 
-    foreach (var (_, fi) in fis) {
+    foreach (var (_, fi) in range(fis)) {
         @string path = filepath.Join(dir, fi.Name());
 
         // If fi is a directory, its files make up a single package.
@@ -571,7 +549,7 @@ internal static void testDirFiles(ж<testing.T> t, @string dir, bool manual) {
             testDir(t, path, manual);
         } else {
             t.Run(filepath.Base(path), (ж<testing.T> tΔ1) => {
-                testPkg(tΔ1, slice<@string>([path]), manual);
+                testPkg(tΔ1, [path], manual);
             });
         }
     }
@@ -587,7 +565,7 @@ internal static void testDir(ж<testing.T> t, @string dir, bool manual) {
     }
 
     slice<@string> filenames = default;
-    foreach (var (_, fi) in fis) {
+    foreach (var (_, fi) in range(fis)) {
         filenames = append(filenames, filepath.Join(dir, fi.Name()));
     }
 
@@ -599,7 +577,7 @@ internal static void testDir(ж<testing.T> t, @string dir, bool manual) {
 
 internal static void testPkg(ж<testing.T> t, slice<@string> filenames, bool manual) {
     var srcs = new slice<slice<byte>>(len(filenames));
-    foreach (var (i, filename) in filenames) {
+    foreach (var (i, filename) in range(filenames)) {
         var (src, err) = os.ReadFile(filename);
         if (err != nil) {
             t.Fatalf("could not read %s: %v", filename, err);

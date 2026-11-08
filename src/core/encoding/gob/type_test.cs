@@ -7,8 +7,6 @@ using bytes = bytes_package;
 using reflect = reflect_package;
 using sync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using io = io_package;
 using static go.encoding.gob_package;
 
@@ -20,14 +18,14 @@ internal partial struct typeT {
 }
 
 internal static slice<typeT> basicTypes;
-internal static void initᴛbasicTypes() { basicTypes = slice<typeT>([
+internal static void initᴛbasicTypes() { basicTypes = [
     new(tBool, "bool"),
     new(tInt, "int"),
     new(tUint, "uint"),
     new(tFloat, "float"),
     new(tBytes, "bytes"),
     new(tString, "string")
-]); }
+]; }
 
 internal static global::go.encoding.gob_package.ΔgobType getTypeUnlocked(@string name, reflectꓸType rt) {
     GoFrame ᒐ = default;
@@ -46,7 +44,7 @@ internal static global::go.encoding.gob_package.ΔgobType getTypeUnlocked(@strin
 
 // Sanity checks
 public static void TestBasic(ж<testing.T> t) {
-    foreach (var (_, tt) in basicTypes) {
+    foreach (var (_, tt) in range(basicTypes)) {
         if (tt.id.@string() != tt.str) {
             t.Errorf("checkType: expected %q got %s", tt.str, tt.id.@string());
         }
@@ -210,7 +208,6 @@ public static void TestRegistration(ж<testing.T> t) {
 
 public partial struct N1 {
 }
-
 public partial struct N2 {
 }
 
@@ -228,7 +225,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
         new(new N2(), "encoding/gob.N2")
     ]);
 
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         Register(tc.t);
 
         var tct = reflect.TypeOf(tc.t);
@@ -240,10 +237,8 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
         if (tct.Kind() == reflect.ΔPointer) {
             tct = tct.Elem();
         }
-        {
-            var (n, _) = ᏑconcreteTypeToName.Load(tct); if (!AreEqual(n, tc.name)) {
-                Ꮡt.Errorf("concreteTypeToName[%v] got %v, want %v", tct, n, tc.name);
-            }
+        var (n, _) = ᏑconcreteTypeToName.Load(tct); if (!AreEqual(n, tc.name)) {
+            Ꮡt.Errorf("concreteTypeToName[%v] got %v, want %v", tct, n, tc.name);
         }
     }
 }

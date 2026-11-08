@@ -26,7 +26,7 @@ public static void TestFloatSetFloat64String(ж<testing.T> t) {
     var inf = math.Inf(0);
     var nan = math.NaN();
 
-    foreach (var (_, test) in slice<TestFloatSetFloat64String_type>([
+    foreach (var (_, test) in range(slice<TestFloatSetFloat64String_type>([
         // basics
         new("0", 0D),
         new("-0", -zero_),
@@ -171,7 +171,7 @@ public static void TestFloatSetFloat64String(ж<testing.T> t) {
         new("0b_1000", 8D),
         new("0b_1011_1101", 189D),
         new("0x_f0_0d_1eP+0_8", 4027391488D)
-    ])) {
+    ]))) {
         ref var x = ref heap(new global::go.math.big_package.Float(), out var Ꮡx);
         Ꮡx.SetPrec(53);
         var (_, ok) = Ꮡx.SetString(test.s);
@@ -195,9 +195,7 @@ public static void TestFloatSetFloat64String(ж<testing.T> t) {
     }
 }
 
-internal static float64 fdiv(float64 a, float64 b) {
-    return a / b;
-}
+internal static float64 fdiv(float64 a, float64 b) { return a / b; }
 
 internal static ref readonly GoBigConst below1e23 => ref below1e23ᵇ;
 private static readonly GoBigConst below1e23ᵇ = /* 99999999999999974834176 */
@@ -214,7 +212,7 @@ internal partial struct TestFloat64Text_type /*dyn*/ {
 }
 
 public static void TestFloat64Text(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloat64Text_type>([
+    foreach (var (_, test) in range(slice<TestFloat64Text_type>([
         new(0D, (byte)'f', 0, "0"),
         new(math.Copysign(0D, -1D), (byte)'f', 0, "-0"),
         new(1D, (byte)'f', 0, "1"),
@@ -357,7 +355,7 @@ public static void TestFloat64Text(ж<testing.T> t) {
         new(1D, (byte)'f', -10, "1"),
         new(1D, (byte)'f', -11, "1"),
         new(1D, (byte)'f', -12, "1")
-    ])) {
+    ]))) {
         // The test cases are from the strconv package which tests float64 values.
         // When formatting values with prec = -1 (shortest representation),
         // the actually available mantissa precision matters.
@@ -387,11 +385,9 @@ public static void TestFloat64Text(ж<testing.T> t) {
 
 // actualPrec returns the number of actually used mantissa bits.
 internal static nuint actualPrec(float64 x) {
-    {
-        var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & ((uint64)0x7ff << 52)) == 0) {
-            // x is denormalized
-            return 64 - (nuint)bits.LeadingZeros64((uint64)(mant & ((uint64)(4503599627370496L - 1))));
-        }
+    var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & ((uint64)0x7ff << 52)) == 0) {
+        // x is denormalized
+        return 64 - (nuint)bits.LeadingZeros64((uint64)(mant & ((uint64)(4503599627370496L - 1))));
     }
     return 53;
 }
@@ -408,7 +404,7 @@ internal partial struct TestFloatText_type /*dyn*/ {
 public static void TestFloatText(ж<testing.T> t) {
     global::go.math.big_package.RoundingMode defaultRound = /* ^RoundingMode(0) */ 255;
 
-    foreach (var (_, test) in slice<TestFloatText_type>([
+    foreach (var (_, test) in range(slice<TestFloatText_type>([
         new("0", defaultRound, 10, (byte)'f', 0, "0"),
         new("-0", defaultRound, 10, (byte)'f', 0, "-0"),
         new("1", defaultRound, 10, (byte)'f', 0, "1"),
@@ -554,7 +550,7 @@ public static void TestFloatText(ж<testing.T> t) {
         // issue 34343
         new("0x.8p-2147483648", ToNearestEven, 4, (byte)'p', -1, "0x.8p-2147483648"),
         new("0x.8p-2147483648", ToNearestEven, 4, (byte)'x', -1, "0x1p-2147483649")
-    ])) {
+    ]))) {
         var (f, _, err) = ParseFloat(test.x, 0, test.prec, ToNearestEven);
         if (err != nil) {
             t.Errorf("%v: %s", test, err);
@@ -594,7 +590,7 @@ internal partial struct TestFloatFormat_type /*dyn*/ {
 }
 
 public static void TestFloatFormat(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatFormat_type>([
+    foreach (var (_, test) in range(slice<TestFloatFormat_type>([
         // from fmt/fmt_test.go
         new("%+.3e", 0.0D, "+0.000e+00"),
         new("%+.3e", 1.0D, "+1.000e+00"),
@@ -706,7 +702,7 @@ public static void TestFloatFormat(ж<testing.T> t) {
 
         // erroneous formats
         new("%s", 1.0D, "%!s(*big.Float=1)")
-    ])) {
+    ]))) {
         var value = @new<global::go.math.big_package.Float>();
         switch (test.value.type()) {
         case float32 v: {
@@ -727,10 +723,8 @@ public static void TestFloatFormat(ж<testing.T> t) {
             break;
         }}
 
-        {
-            @string got = fmt.Sprintf(test.format, value.OrTypedNil()); if (got != test.want) {
-                t.Errorf("%v: got %q; want %q", test, got, test.want);
-            }
+        @string got = fmt.Sprintf(test.format, value.OrTypedNil()); if (got != test.want) {
+            t.Errorf("%v: got %q; want %q", test, got, test.want);
         }
     }
 }
@@ -739,7 +733,7 @@ public static void BenchmarkParseFloatSmallExp(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, s) in slice<@string>([
+        foreach (var (_, s) in range(slice<@string>([
             "1e0",
             "1e-1",
             "1e-2",
@@ -757,7 +751,7 @@ public static void BenchmarkParseFloatSmallExp(ж<testing.B> Ꮡb) {
             "1e10",
             "1e20",
             "1e50"
-        ])) {
+        ]))) {
             ref var x = ref heap(new global::go.math.big_package.Float(), out var Ꮡx);
             var (_, _, err) = Ꮡx.Parse(s, 0);
             if (err != nil) {
@@ -771,7 +765,7 @@ public static void BenchmarkParseFloatLargeExp(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, s) in slice<@string>([
+        foreach (var (_, s) in range(slice<@string>([
             "1e0",
             "1e-10",
             "1e-20",
@@ -793,7 +787,7 @@ public static void BenchmarkParseFloatLargeExp(ж<testing.B> Ꮡb) {
             "1e1000",
             "1e5000",
             "1e10000"
-        ])) {
+        ]))) {
             ref var x = ref heap(new global::go.math.big_package.Float(), out var Ꮡx);
             var (_, _, err) = Ꮡx.Parse(s, 0);
             if (err != nil) {
@@ -831,7 +825,7 @@ public static void TestFloatScan(ж<testing.T> t) {
     };
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (i, test) in floatScanTests) {
+    foreach (var (i, test) in range(floatScanTests)) {
         var x = @new<global::go.math.big_package.Float>();
         buf.Reset();
         buf.WriteString(test.input);

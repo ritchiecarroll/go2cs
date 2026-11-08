@@ -43,10 +43,8 @@ internal static fuzzOp fuzzOpDelete => 2;
 
 internal static slice<byte> encode(slice<fuzzCommand> fc) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = binary.Write(new maps_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, fc); if (err != nil) {
-            throw panic(fmt.Sprintf("error writing %v: %v"u8, fc, err));
-        }
+    var err = binary.Write(new maps_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, fc); if (err != nil) {
+        throw panic(fmt.Sprintf("error writing %v: %v"u8, fc, err));
     }
     return buf.Bytes();
 }
@@ -60,10 +58,8 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
 
     ref var fc = ref heap<slice<fuzzCommand>>(new slice<fuzzCommand>(entries), out var Ꮡfc);
     var buf = bytes.NewReader(b);
-    {
-        var err = binary.Read(new maps_test_package.bytes_ReaderжReader(buf), binary.LittleEndian, Ꮡfc); if (err != nil) {
-            throw panic(fmt.Sprintf("error reading %v: %v"u8, b, err));
-        }
+    var err = binary.Read(new maps_test_package.bytes_ReaderжReader(buf), binary.LittleEndian, Ꮡfc); if (err != nil) {
+        throw panic(fmt.Sprintf("error reading %v: %v"u8, b, err));
     }
 
     return fc;
@@ -100,7 +96,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // All of the ops.
-    f.Add(encode(slice<fuzzCommand>([
+    f.Add(encode([
         new(
             Op: fuzzOpPut,
             Key: 123,
@@ -114,10 +110,10 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Op: fuzzOpGet,
             Key: 123
         )
-    ])));
+    ]));
 
     // Add enough times to trigger grow.
-    f.Add(encode(slice<fuzzCommand>([
+    f.Add(encode([
         new(
             Op: fuzzOpPut,
             Key: 1,
@@ -175,7 +171,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Op: fuzzOpGet,
             Key: 2
         )
-    ])));
+    ]));
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         var fc = decode(@in);
@@ -185,7 +181,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
 
         var (m, typ) = maps_internal_test_package.NewTestMap<uint16, uint32>(8);
         var @ref = new map<uint16, uint32>();
-        foreach (var (_, vᴛ1) in fc) {
+        foreach (var (_, vᴛ1) in range(fc)) {
             ref var c = ref heap(new fuzzCommand(), out var Ꮡc);
             c = vᴛ1;
 

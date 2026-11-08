@@ -12,21 +12,16 @@ partial class sys_test_package {
 public static void TestTrailingZeros64(ж<testing.T> t) {
     for (nint i = 0; i <= 64; i++) {
         var x = ((uint64)5).Lsh((nuint)i);
-        {
-            nint got = sys.TrailingZeros64(x); if (got != i) {
-                t.Errorf("TrailingZeros64(%d)=%d, want %d", x, got, i);
-            }
+        nint got = sys.TrailingZeros64(x); if (got != i) {
+            t.Errorf("TrailingZeros64(%d)=%d, want %d", x, got, i);
         }
     }
 }
-
 public static void TestTrailingZeros32(ж<testing.T> t) {
     for (nint i = 0; i <= 32; i++) {
         var x = ((uint32)5).Lsh((nuint)i);
-        {
-            nint got = sys.TrailingZeros32(x); if (got != i) {
-                t.Errorf("TrailingZeros32(%d)=%d, want %d", x, got, i);
-            }
+        nint got = sys.TrailingZeros32(x); if (got != i) {
+            t.Errorf("TrailingZeros32(%d)=%d, want %d", x, got, i);
         }
     }
 }
@@ -38,7 +33,6 @@ public static void TestBswap64(ж<testing.T> t) {
         t.Errorf("Bswap(%x)=%x, want 0x8877665544332211", x, y);
     }
 }
-
 public static void TestBswap32(ж<testing.T> t) {
     var x = (uint32)0x11223344;
     var y = sys.Bswap32(x);

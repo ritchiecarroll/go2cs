@@ -24,8 +24,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime.syscall;
 using @internal.syscall.windows;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.os;
 using path;
@@ -330,10 +328,8 @@ public static partial void TestBlockingCallback(ж<testing.T> t) {
     nestedCall(t, () => {
         for (nint i = 0; i < 10; i++) {
             cʗ2.ᐸꟷ(i);
-            {
-                nint j = ᐸꟷ(cʗ2); if (j != i) {
-                    t.Errorf("out of sync %d != %d", j, i);
-                }
+            nint j = ᐸꟷ(cʗ2); if (j != i) {
+                t.Errorf("out of sync %d != %d", j, i);
             }
         }
     });
@@ -358,22 +354,20 @@ public static void TestCallbackInAnotherThread(ж<testing.T> t) {
         var h = (syscallꓸHandle)r;
         defer(syscall.CloseHandle, h, ref ᒐ);
 
-        {
-            var (s, errΔ1) = syscall.WaitForSingleObject(h, syscall.INFINITE);
-            switch (s) {
-            case var ᴛ when ᴛ == syscall.WAIT_OBJECT_0: {
-                break;
-                break;
-            }
-            case var ᴛ when ᴛ == syscall.WAIT_FAILED: {
-                t.Fatalf("WaitForSingleObject failed: %v", errΔ1);
-                break;
-            }
-            default: {
-                t.Fatalf("WaitForSingleObject returns unexpected value %v", s);
-                break;
-            }}
+        var (s, errΔ1) = syscall.WaitForSingleObject(h, syscall.INFINITE);
+        switch (s) {
+        case var ᴛ when ᴛ == syscall.WAIT_OBJECT_0: {
+            break;
+            break;
         }
+        case var ᴛ when ᴛ == syscall.WAIT_FAILED: {
+            t.Fatalf("WaitForSingleObject failed: %v", errΔ1);
+            break;
+        }
+        default: {
+            t.Fatalf("WaitForSingleObject returns unexpected value %v", s);
+            break;
+        }}
 
         ref var ec = ref heap(new uint32(), out var Ꮡec);
         (r, _, err) = d.Proc(getExitCodeThreadˢ).Call((uintptr)h, (uintptr)Ꮡec);
@@ -428,7 +422,7 @@ internal static void cSrc(this cbFunc f, Δio.Writer w, bool cdecl) {
     var t = reflect.TypeOf(f.goFunc);
     var cTypes = new slice<@string>(t.NumIn());
     var cArgs = new slice<@string>(t.NumIn());
-    foreach (var i in range(cTypes)) {
+    foreach (var i in range(len(cTypes))) {
         // We included stdint.h, so this works for all sized
         // integer types, and uint8Pair_t.
         cTypes[i] = t.In(i).Name() + "_t"u8;
@@ -464,7 +458,7 @@ partial struct uint8Pair {
     internal uint8 x, y;
 }
 
-internal static slice<cbFunc> cbFuncs = slice<cbFunc>([
+internal static slice<cbFunc> cbFuncs = [
     new(uintptr (uintptr i1, uintptr i2) => i1 + i2),
     new(uintptr (uintptr i1, uintptr i2, uintptr i3) => i1 + i2 + i3),
     new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4) => i1 + i2 + i3 + i4),
@@ -484,7 +478,7 @@ internal static slice<cbFunc> cbFuncs = slice<cbFunc>([
         Δruntime.GC();
         return (uintptr)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9);
     })
-]);
+];
 
 //go:registerparams
 internal static uintptr sum2(uintptr i1, uintptr i2) {
@@ -570,7 +564,7 @@ internal static uintptr sum9andGC(uint32 i1, uint32 i2, uint32 i3, uint32 i4, ui
 // TODO(register args): Remove this once we switch to using the register
 // calling convention by default, since this is redundant with the existing
 // tests.
-internal static slice<cbFunc> cbFuncsRegABI = slice<cbFunc>([
+internal static slice<cbFunc> cbFuncsRegABI = [
     new(sum2),
     new(sum3),
     new(sum4),
@@ -586,13 +580,11 @@ internal static slice<cbFunc> cbFuncsRegABI = slice<cbFunc>([
     new(sum5mix),
     new(sum5andPair),
     new(sum9andGC)
-]);
+];
 
 internal static slice<cbFunc> getCallbackTestFuncs() {
-    {
-        nint regs = runtime_internal_test_package.SetIntArgRegs(-1); if (regs > 0) {
-            return cbFuncsRegABI;
-        }
+    nint regs = runtime_internal_test_package.SetIntArgRegs(-1); if (regs > 0) {
+        return cbFuncsRegABI;
     }
     return cbFuncs;
 }
@@ -621,7 +613,7 @@ internal static void makeSrc(this ref cbDLL d, ж<testing.T> t, @string path) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         fmt.Fprint(new Δos.FileжWriter(f), includeStdintHTypedefˢ);
-        foreach (var (_, cbf) in getCallbackTestFuncs()) {
+        foreach (var (_, cbf) in range(getCallbackTestFuncs())) {
             cbf.cSrc(new Δos.FileжWriter(f), false);
             cbf.cSrc(new Δos.FileжWriter(f), true);
         }
@@ -644,7 +636,7 @@ internal static @string build(this ref cbDLL d, ж<testing.T> t, @string dir) {
     return filepath.Join(dir, outname);
 }
 
-internal static slice<cbDLL> cbDLLs = slice<cbDLL>([
+internal static slice<cbDLL> cbDLLs = [
     new(
         "test",
         (@string @out, @string src) => slice<@string>(["gcc", "-shared", "-s", "-Werror", "-o", @out, src])
@@ -653,7 +645,7 @@ internal static slice<cbDLL> cbDLLs = slice<cbDLL>([
         "testO2",
         (@string @out, @string src) => slice<@string>(["gcc", "-shared", "-s", "-Werror", "-o", @out, "-O2", src])
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestGccIsMissingˢ = (@string)"skipping test: gcc is missing"u8;
@@ -661,17 +653,15 @@ internal static readonly object skippingTestGccIsMissingˢ = (@string)"skipping 
 public static void TestStdcallAndCDeclCallbacks(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, err) = exec.LookPath(gccˢ); if (err != nil) {
-                t.Skip(skippingTestGccIsMissingˢ);
-            }
+        var (_, err) = exec.LookPath(gccˢ); if (err != nil) {
+            t.Skip(skippingTestGccIsMissingˢ);
         }
         @string tmp = t.TempDir();
 
         nint oldRegs = runtime_internal_test_package.SetIntArgRegs(abi.IntArgRegs);
         defer(runtime_internal_test_package.SetIntArgRegs, oldRegs, ref ᒐ);
 
-        foreach (var (_, vᴛ1) in cbDLLs) {
+        foreach (var (_, vᴛ1) in range(cbDLLs)) {
             ref var dll = ref heap(new cbDLL(), out var Ꮡdll);
             dll = vᴛ1;
 
@@ -682,7 +672,7 @@ public static void TestStdcallAndCDeclCallbacks(ж<testing.T> t) {
                     var dllΔ1 = syscall.MustLoadDLL(dllPath);
                     var dllʗ1 = dllΔ1;
                     defer(() => dllʗ1.Release(), ref ᒐ);
-                    foreach (var (_, vᴛ2) in getCallbackTestFuncs()) {
+                    foreach (var (_, vᴛ2) in range(getCallbackTestFuncs())) {
                         ref var cbf = ref heap(new cbFunc(), out var Ꮡcbf);
                         cbf = vᴛ2;
 
@@ -849,18 +839,16 @@ public static void TestWindowsStackMemory(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("Failed to read stack usage: %v", err);
     }
-    {
-        nint expected = 128 << 10;
-        nint got = stackUsage; if (got > expected) {
-            t.Fatalf("expected < %d bytes of memory per thread, got %d", expected, got);
-        }
+    nint expected = 128 << 10;
+    nint got = stackUsage; if (got > expected) {
+        t.Fatalf("expected < %d bytes of memory per thread, got %d", expected, got);
     }
 }
 
 internal static byte used;
 
 internal static void use(slice<byte> buf) {
-    foreach (var (_, c) in buf) {
+    foreach (var (_, c) in range(buf)) {
         used += c;
     }
 }
@@ -918,10 +906,8 @@ internal partial struct TestReturnAfterStackGrowInCallback_result /*dyn*/ {
 public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
-                t.Skip(skippingTestGccIsMissingˢ);
-            }
+        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
+            t.Skip(skippingTestGccIsMissingˢ);
         }
 
         @string src = srcᶜ;
@@ -964,10 +950,8 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> t) {
             var (r, _, errΔ2) = procʗ1.Call(cb, wantʗ1.r);
             cʗ1.ᐸꟷ(new TestReturnAfterStackGrowInCallback_result(r, errΔ2._<syscall.Errno>()));
         });
-        {
-            var got = ᐸꟷ(c); if (got != want) {
-                t.Errorf("got %d want %d", got, want);
-            }
+        var got = ᐸꟷ(c); if (got != want) {
+            t.Errorf("got %d want %d", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -993,7 +977,7 @@ public static void TestSyscallN(ж<testing.T> t) {
                 var args = new slice<@string>(arglenΔ1);
                 var rets = new slice<@string>(arglenΔ1 + 1);
                 var @params = new slice<uintptr>(arglenΔ1);
-                foreach (var i in range(args)) {
+                foreach (var i in range(len(args))) {
                     args[i] = fmt.Sprintf("int a%d"u8, i);
                     rets[i] = fmt.Sprintf("(a%d == %d)"u8, i, i);
                     @params[i] = (uintptr)i;
@@ -1060,10 +1044,8 @@ uintptr_t cfunc(uintptr_t a, double b, float c, double d) {
 public static void TestFloatArgs(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
-                t.Skip(skippingTestGccIsMissingˢ);
-            }
+        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
+            t.Skip(skippingTestGccIsMissingˢ);
         }
         if (Δruntime.GOARCH != "amd64"u8) {
             t.Skipf("skipping test: GOARCH=%s", Δruntime.GOARCH);
@@ -1137,10 +1119,8 @@ double cfuncDouble(uintptr_t a, double b, float c, double d) {
 public static void TestFloatReturn(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
-                t.Skip(skippingTestGccIsMissingˢ);
-            }
+        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
+            t.Skip(skippingTestGccIsMissingˢ);
         }
         if (Δruntime.GOARCH != "amd64"u8) {
             t.Skipf("skipping test: GOARCH=%s", Δruntime.GOARCH);
@@ -1301,20 +1281,18 @@ public static void TestNumCPU(ж<testing.T> t) {
             Δos.Exit(0);
         }
 
-        {
-            var n = runtime_internal_test_package.NumberOfProcessors();
-            switch (ᐧ) {
-            case {} when n is < 1: {
-                t.Fatalf("system cannot have %d cpu(s)", n);
-                break;
-            }
-            case {} when n is 1: {
-                if (Δruntime.NumCPU() != 1) {
-                    t.Fatalf("runtime.NumCPU() returns %d on single cpu system", Δruntime.NumCPU());
-                }
-                return;
-            }}
+        var n = runtime_internal_test_package.NumberOfProcessors();
+        switch (ᐧ) {
+        case {} when n is < 1: {
+            t.Fatalf("system cannot have %d cpu(s)", n);
+            break;
         }
+        case {} when n is 1: {
+            if (Δruntime.NumCPU() != 1) {
+                t.Fatalf("runtime.NumCPU() returns %d on single cpu system", Δruntime.NumCPU());
+            }
+            return;
+        }}
 
         const uint32 _CREATE_SUSPENDED = 0x00000004;
         const uint32 _PROCESS_ALL_ACCESS = /* syscall.STANDARD_RIGHTS_REQUIRED | syscall.SYNCHRONIZE | 0xfff */ 2035711;
@@ -1412,10 +1390,8 @@ uintptr_t cfunc(void) {
 
 // See Issue 14959
 public static void TestDLLPreloadMitigation(ж<testing.T> t) {
-    {
-        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
-            t.Skip(skippingTestGccIsMissingˢ);
-        }
+    var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
+        t.Skip(skippingTestGccIsMissingˢ);
     }
 
     @string tmpdir = t.TempDir();
@@ -1479,10 +1455,8 @@ private static readonly @string bigStackˢᵇ = "bigStack"u8;
 public static void TestBigStackCallbackSyscall(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
-                t.Skip(skippingTestGccIsMissingˢ);
-            }
+        var (_, errΔ1) = exec.LookPath(gccˢ); if (errΔ1 != nil) {
+            t.Skip(skippingTestGccIsMissingˢ);
         }
 
         var (srcname, err) = filepath.Abs(testdataTestprogcgoˢ);
@@ -1591,19 +1565,15 @@ public static partial void BenchmarkSyscallToSyscallPing(ж<testing.B> Ꮡb) {
     goǃ(() => {
         for (nint i = 0; i < n; i++) {
             syscall.WaitForSingleObject(event1, syscall.INFINITE);
-            {
-                var errΔ1 = setEvent(event2); if (errΔ1 != nil) {
-                    Ꮡb.Errorf("Set event failed: %v", errΔ1);
-                    return;
-                }
+            var errΔ1 = setEvent(event2); if (errΔ1 != nil) {
+                Ꮡb.Errorf("Set event failed: %v", errΔ1);
+                return;
             }
         }
     });
     for (nint i = 0; i < n; i++) {
-        {
-            var errΔ2 = setEvent(event1); if (errΔ2 != nil) {
-                Ꮡb.Fatal(errΔ2);
-            }
+        var errΔ2 = setEvent(event1); if (errΔ2 != nil) {
+            Ꮡb.Fatal(errΔ2);
         }
         if (Ꮡb.Failed()) {
             break;

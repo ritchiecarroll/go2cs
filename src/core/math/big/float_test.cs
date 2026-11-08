@@ -41,17 +41,13 @@ internal partial struct TestFloatZeroValue_type /*dyn*/ {
 public static void TestFloatZeroValue(ж<testing.T> t) {
     // zero (uninitialized) value is a ready-to-use 0.0
     ref var x = ref heap(new global::go.math.big_package.Float(), out var Ꮡx);
-    {
-        @string s = Ꮡx.Text((byte)'f', 1); if (s != "0.0"u8) {
-            t.Errorf("zero value = %s; want 0.0", s);
-        }
+    @string s = Ꮡx.Text((byte)'f', 1); if (s != "0.0"u8) {
+        t.Errorf("zero value = %s; want 0.0", s);
     }
 
     // zero value has precision 0
-    {
-        nuint prec = x.Prec(); if (prec != 0) {
-            t.Errorf("prec = %d; want 0", prec);
-        }
+    nuint prec = x.Prec(); if (prec != 0) {
+        t.Errorf("prec = %d; want 0", prec);
     }
 
     // zero value can be used in any and all positions of binary operations
@@ -63,7 +59,7 @@ public static void TestFloatZeroValue(ж<testing.T> t) {
         // x == 0 translates into the zero value
         return Ꮡf;
     }
-    foreach (var (_, test) in slice<TestFloatZeroValue_type>([
+    foreach (var (_, test) in range(slice<TestFloatZeroValue_type>([
         new(0, 0, 0, 0, '+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
         new(0, 1, 2, 3, '+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
         new(1, 2, 0, 2, '+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
@@ -83,7 +79,7 @@ public static void TestFloatZeroValue(ж<testing.T> t) {
         new(0, 2, 1, 2, '/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo))),
         new(1, 2, 0, 0, '/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo))), // = +Inf
         new(2, 0, 1, 0, '/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo)))
-    ])) {
+    ]))) {
         var z = make(test.z);
         test.op(z, make(test.x), make(test.y));
         nint got = 0;
@@ -114,7 +110,7 @@ internal partial struct TestFloatSetPrec_type /*dyn*/ {
 }
 
 public static void TestFloatSetPrec(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatSetPrec_type>([
+    foreach (var (_, test) in range(slice<TestFloatSetPrec_type>([
         // prec 0
         new("0", 0, "0", Exact),
         new("-0", 0, "-0", Exact),
@@ -134,7 +130,7 @@ public static void TestFloatSetPrec(ж<testing.T> t) {
         new("-1.5", 1, "-2", Below),
         new("123", 1000000, "123", Exact),
         new("-123", 1000000, "-123", Exact)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x).SetPrec(test.prec);
         nuint prec = test.prec;
         if (prec > MaxPrec) {
@@ -161,7 +157,7 @@ internal partial struct TestFloatMinPrec_type /*dyn*/ {
 
 public static void TestFloatMinPrec(ж<testing.T> t) {
     const nuint max = 100;
-    foreach (var (_, test) in slice<TestFloatMinPrec_type>([
+    foreach (var (_, test) in range(slice<TestFloatMinPrec_type>([
         new("0", 0),
         new("-0", 0),
         new("+Inf", 0),
@@ -173,12 +169,10 @@ public static void TestFloatMinPrec(ж<testing.T> t) {
         new("0x8001p-1000", 16),
         new("0x8001p+1000", 16),
         new("0.1", max)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x).SetPrec(max);
-        {
-            nuint got = x.MinPrec(); if (got != test.want) {
-                t.Errorf("%s.MinPrec() = %d; want %d", test.x, got, test.want);
-            }
+        nuint got = x.MinPrec(); if (got != test.want) {
+            t.Errorf("%s.MinPrec() = %d; want %d", test.x, got, test.want);
         }
     }
 }
@@ -189,14 +183,14 @@ internal partial struct TestFloatSign_type /*dyn*/ {
 }
 
 public static void TestFloatSign(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatSign_type>([
+    foreach (var (_, test) in range(slice<TestFloatSign_type>([
         new("-Inf", -1),
         new("-1", -1),
         new("-0", 0),
         new("+0", 0),
         new("+1", +1),
         new("+Inf", +1)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         nint s = x.Sign();
         if (s != test.s) {
@@ -230,7 +224,7 @@ internal partial struct TestFloatMantExp_type /*dyn*/ {
 }
 
 public static void TestFloatMantExp(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatMantExp_type>([
+    foreach (var (_, test) in range(slice<TestFloatMantExp_type>([
         new("0", "0", 0),
         new("+0", "0", 0),
         new("-0", "-0", 0),
@@ -240,7 +234,7 @@ public static void TestFloatMantExp(ж<testing.T> t) {
         new("1.5", "0.75", 1),
         new("1.024e3", "0.5", 11),
         new("-0.125", "-0.5", -2)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         var mant = makeFloat(test.mant);
         var m = @new<global::go.math.big_package.Float>();
@@ -253,15 +247,11 @@ public static void TestFloatMantExp(ж<testing.T> t) {
 
 public static void TestFloatMantExpAliasing(ж<testing.T> t) {
     var x = makeFloat("0.5p10");
-    {
-        nint e = x.MantExp(x); if (e != 10) {
-            t.Fatalf("Float.MantExp aliasing error: got %d; want 10", e);
-        }
+    nint e = x.MantExp(x); if (e != 10) {
+        t.Fatalf("Float.MantExp aliasing error: got %d; want 10", e);
     }
-    {
-        var want = makeFloat("0.5"); if (!alike(x, want)) {
-            t.Fatalf("Float.MantExp aliasing error: got %s; want %s", x.Text((byte)'g', 10), want.Text((byte)'g', 10));
-        }
+    var want = makeFloat("0.5"); if (!alike(x, want)) {
+        t.Fatalf("Float.MantExp aliasing error: got %s; want %s", x.Text((byte)'g', 10), want.Text((byte)'g', 10));
     }
 }
 
@@ -272,7 +262,7 @@ internal partial struct TestFloatSetMantExp_type /*dyn*/ {
 }
 
 public static void TestFloatSetMantExp(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatSetMantExp_type>([
+    foreach (var (_, test) in range(slice<TestFloatSetMantExp_type>([
         new("0", 0, "0"),
         new("+0", 0, "0"),
         new("-0", 0, "-0"),
@@ -289,7 +279,7 @@ public static void TestFloatSetMantExp(ж<testing.T> t) {
         new("-0.5", -2, "-0.125"),
         new("32", 5, "1024"),
         new("1024", -10, "1")
-    ])) {
+    ]))) {
         var frac = makeFloat(test.frac);
         var want = makeFloat(test.z);
         ref var z = ref heap(new global::go.math.big_package.Float(), out var Ꮡz);
@@ -312,14 +302,14 @@ internal partial struct TestFloatPredicates_type /*dyn*/ {
 }
 
 public static void TestFloatPredicates(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatPredicates_type>([
+    foreach (var (_, test) in range(slice<TestFloatPredicates_type>([
         new(x: "-Inf", sign: -1, signbit: true, inf: true),
         new(x: "-1", sign: -1, signbit: true),
         new(x: "-0", signbit: true),
         new(x: "0"),
         new(x: "1", sign: 1),
         new(x: "+Inf", sign: 1, inf: true)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         {
             var got = x.Signbit(); if (got != test.signbit) {
@@ -344,7 +334,7 @@ internal static ref readonly @string intˢ2 => ref intˢ2ᵇ;
 private static readonly @string intˢ2ᵇ = " int"u8;
 
 public static void TestFloatIsInt(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "0 int",
         "-0 int",
         "1 int",
@@ -359,13 +349,11 @@ public static void TestFloatIsInt(ж<testing.T> t) {
         "Inf",
         "+Inf",
         "-Inf"
-    ])) {
+    ]))) {
         @string s = strings.TrimSuffix(test, intˢ2);
         var want = s != test;
-        {
-            var got = makeFloat(s).IsInt(); if (got != want) {
-                t.Errorf("%s.IsInt() == %t", s, got);
-            }
+        var got = makeFloat(s).IsInt(); if (got != want) {
+            t.Errorf("%s.IsInt() == %t", s, got);
         }
     }
 }
@@ -483,7 +471,7 @@ internal partial struct TestFloatRound_type /*dyn*/ {
 
 // TestFloatRound tests basic rounding.
 public static void TestFloatRound(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatRound_type>([
+    foreach (var (_, test) in range(slice<TestFloatRound_type>([
         new(5, "1000", "1000", "1000", "1000", "1000"),
         new(5, "1001", "1001", "1001", "1001", "1001"),
         new(5, "1010", "1010", "1010", "1010", "1010"),
@@ -555,7 +543,7 @@ public static void TestFloatRound(ж<testing.T> t) {
         new(1, "1101001", "1000000", "10000000", "10000000", "10000000"),
         new(1, "1110001", "1000000", "10000000", "10000000", "10000000"),
         new(1, "1111001", "1000000", "10000000", "10000000", "10000000")
-    ])) {
+    ]))) {
         var x = fromBinary(test.x);
         var z = fromBinary(test.zero);
         var e = fromBinary(test.neven);
@@ -593,7 +581,7 @@ public static void TestFloatRound24(ж<testing.T> t) {
 }
 
 public static void TestFloatSetUint64(ж<testing.T> t) {
-    foreach (var (_, want) in slice<uint64>([
+    foreach (var (_, want) in range(slice<uint64>([
         0,
         1,
         2,
@@ -602,13 +590,11 @@ public static void TestFloatSetUint64(ж<testing.T> t) {
         (uint64)(4294967296L - 1),
         (uint64)1 << 32,
         18446744073709551615UL
-    ])) {
+    ]))) {
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
         Ꮡf.SetUint64(want);
-        {
-            var got = Ꮡf.uint64(); if (got != want) {
-                t.Errorf("got %#x (%s); want %#x", got, Ꮡf.Text((byte)'p', 0), want);
-            }
+        var got = Ꮡf.uint64(); if (got != want) {
+            t.Errorf("got %#x (%s); want %#x", got, Ꮡf.Text((byte)'p', 0), want);
         }
     }
 
@@ -625,7 +611,7 @@ public static void TestFloatSetUint64(ж<testing.T> t) {
 }
 
 public static void TestFloatSetInt64(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<int64>([
+    foreach (var (_, vᴛ1) in range(slice<int64>([
         0,
         1,
         2,
@@ -634,19 +620,17 @@ public static void TestFloatSetInt64(ж<testing.T> t) {
         4294967295L,
         4294967296L,
         9223372036854775807L
-    ])) {
+    ]))) {
         var want = vᴛ1;
 
-        foreach (var i in range(new nint[]{}.array(2))) {
+        foreach (var i in range(len(new nint[]{}.array(2)))) {
             if ((i & 1) != 0) {
                 want = -want;
             }
             ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
             Ꮡf.SetInt64(want);
-            {
-                var got = Ꮡf.int64(); if (got != want) {
-                    t.Errorf("got %#x (%s); want %#x", got, Ꮡf.Text((byte)'p', 0), want);
-                }
+            var got = Ꮡf.int64(); if (got != want) {
+                t.Errorf("got %#x (%s); want %#x", got, Ꮡf.Text((byte)'p', 0), want);
             }
         }
     }
@@ -666,7 +650,7 @@ public static void TestFloatSetInt64(ж<testing.T> t) {
 public static void TestFloatSetFloat64(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, vᴛ1) in slice<float64>([
+        foreach (var (_, vᴛ1) in range(slice<float64>([
             0D,
             1D,
             2D,
@@ -683,19 +667,17 @@ public static void TestFloatSetFloat64(ж<testing.T> t) {
             math.Inf(-1),
             math.Inf(0),
             -math.Inf(1)
-        ])) {
+        ]))) {
             var want = vᴛ1;
 
-            foreach (var i in range(new nint[]{}.array(2))) {
+            foreach (var i in range(len(new nint[]{}.array(2)))) {
                 if ((i & 1) != 0) {
                     want = -want;
                 }
                 ref var fΔ1 = ref heap(new global::go.math.big_package.Float(), out var ᏑfΔ1);
                 ᏑfΔ1.SetFloat64(want);
-                {
-                    var (got, acc) = ᏑfΔ1.Float64(); if (got != want || acc != Exact) {
-                        t.Errorf("got %g (%s, %s); want %g (Exact)", got, ᏑfΔ1.Text((byte)'p', 0), acc, want);
-                    }
+                var (got, acc) = ᏑfΔ1.Float64(); if (got != want || acc != Exact) {
+                    t.Errorf("got %g (%s, %s); want %g (Exact)", got, ᏑfΔ1.Text((byte)'p', 0), acc, want);
                 }
             }
         }
@@ -713,11 +695,9 @@ public static void TestFloatSetFloat64(ж<testing.T> t) {
 
         // test NaN
         defer(() => {
-            {
-                ref var p = ref heap<global::go.math.big_package.ErrNaN>(out var Ꮡp);
-                (p, var ok) = recover()._<ErrNaN>(ᐧ); if (!ok) {
-                    t.Errorf("got %v; want ErrNaN panic", p);
-                }
+            ref var p = ref heap<global::go.math.big_package.ErrNaN>(out var Ꮡp);
+            (p, var ok) = recover()._<ErrNaN>(ᐧ); if (!ok) {
+                t.Errorf("got %v; want ErrNaN panic", p);
             }
         }, ref ᒐ);
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -730,14 +710,14 @@ public static void TestFloatSetFloat64(ж<testing.T> t) {
 }
 
 public static void TestFloatSetInt(ж<testing.T> t) {
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "0",
         "1",
         "-1",
         "1234567890",
         "123456789012345678901234567890",
         "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
-    ])) {
+    ]))) {
         ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(want, 0);
         if (!ok) {
@@ -753,10 +733,8 @@ public static void TestFloatSetInt(ж<testing.T> t) {
         if (n < 64) {
             n = 64;
         }
-        {
-            nuint prec = f.Prec(); if (prec != (nuint)n) {
-                t.Errorf("got prec = %d; want %d", prec, n);
-            }
+        nuint prec = f.Prec(); if (prec != (nuint)n) {
+            t.Errorf("got prec = %d; want %d", prec, n);
         }
 
         // check value
@@ -770,7 +748,7 @@ public static void TestFloatSetInt(ж<testing.T> t) {
 }
 
 public static void TestFloatSetRat(ж<testing.T> t) {
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "0",
         "1",
         "-1",
@@ -780,7 +758,7 @@ public static void TestFloatSetRat(ж<testing.T> t) {
         "1.2",
         "3.14159265"
         // TODO(gri) expand
-    ])) {
+    ]))) {
         ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(want);
         if (!ok) {
@@ -799,10 +777,8 @@ public static void TestFloatSetRat(ж<testing.T> t) {
         if (n < 64) {
             n = 64;
         }
-        {
-            nuint prec = f1.Prec(); if (prec != (nuint)n) {
-                t.Errorf("got prec = %d; want %d", prec, n);
-            }
+        nuint prec = f1.Prec(); if (prec != (nuint)n) {
+            t.Errorf("got prec = %d; want %d", prec, n);
         }
 
         @string got = Ꮡf2.Text((byte)'g', 100);
@@ -820,17 +796,15 @@ internal partial struct TestFloatSetInf_type /*dyn*/ {
 
 public static void TestFloatSetInf(ж<testing.T> t) {
     ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
-    foreach (var (_, test) in slice<TestFloatSetInf_type>([
+    foreach (var (_, test) in range(slice<TestFloatSetInf_type>([
         new(false, 0, "+Inf"),
         new(true, 0, "-Inf"),
         new(false, 10, "+Inf"),
         new(true, 30, "-Inf")
-    ])) {
+    ]))) {
         var x = Ꮡf.SetPrec(test.prec).SetInf(test.signbit);
-        {
-            @string got = x.String(); if (got != test.want || x.Prec() != test.prec) {
-                t.Errorf("SetInf(%v) = %s (prec = %d); want %s (prec = %d)", test.signbit, got, x.Prec(), test.want, test.prec);
-            }
+        @string got = x.String(); if (got != test.want || x.Prec() != test.prec) {
+            t.Errorf("SetInf(%v) = %s (prec = %d); want %s (prec = %d)", test.signbit, got, x.Prec(), test.want, test.prec);
         }
     }
 }
@@ -842,7 +816,7 @@ internal partial struct TestFloatUint64_type /*dyn*/ {
 }
 
 public static void TestFloatUint64(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatUint64_type>([
+    foreach (var (_, test) in range(slice<TestFloatUint64_type>([
         new("-Inf", 0, Above),
         new("-1", 0, Above),
         new("-1e-1000", 0, Above),
@@ -858,7 +832,7 @@ public static void TestFloatUint64(ж<testing.T> t) {
         new("18446744073709551616", math.MaxUint64, Below),
         new("1e10000", math.MaxUint64, Below),
         new("+Inf", math.MaxUint64, Below)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         var (@out, acc) = x.Uint64();
         if (@out != test.@out || acc != test.acc) {
@@ -874,7 +848,7 @@ internal partial struct TestFloatInt64_type /*dyn*/ {
 }
 
 public static void TestFloatInt64(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatInt64_type>([
+    foreach (var (_, test) in range(slice<TestFloatInt64_type>([
         new("-Inf", math.MinInt64, Above),
         new("-1e10000", math.MinInt64, Above),
         new("-9223372036854775809", math.MinInt64, Above),
@@ -900,7 +874,7 @@ public static void TestFloatInt64(ж<testing.T> t) {
         new("9223372036854775808", math.MaxInt64, Below),
         new("1e10000", math.MaxInt64, Below),
         new("+Inf", math.MaxInt64, Below)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         var (@out, acc) = x.Int64();
         if (@out != test.@out || acc != test.acc) {
@@ -916,7 +890,7 @@ internal partial struct TestFloatFloat32_type /*dyn*/ {
 }
 
 public static void TestFloatFloat32(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatFloat32_type>([
+    foreach (var (_, test) in range(slice<TestFloatFloat32_type>([
         new("0", 0F, Exact),
 
         // underflow to zero
@@ -993,7 +967,7 @@ public static void TestFloatFloat32(ж<testing.T> t) {
 
         // inf
         new("Inf", (float32)math.Inf(+1), Exact)
-    ])) {
+    ]))) {
         for (nint i = 0; i < 2; i++) {
             // test both signs
             @string tx = test.x;
@@ -1006,10 +980,8 @@ public static void TestFloatFloat32(ж<testing.T> t) {
             }
 
             // conversion should match strconv where syntax is agreeable
-            {
-                var (f, err) = strconv.ParseFloat(tx, 32); if (err == nil && !alike32((float32)f, tout)) {
-                    t.Errorf("%s: got %g; want %g (incorrect test data)", tx, f, tout);
-                }
+            var (f, err) = strconv.ParseFloat(tx, 32); if (err == nil && !alike32((float32)f, tout)) {
+                t.Errorf("%s: got %g; want %g (incorrect test data)", tx, f, tout);
             }
 
             var x = makeFloat(tx);
@@ -1036,7 +1008,7 @@ internal partial struct TestFloatFloat64_type /*dyn*/ {
 
 public static void TestFloatFloat64(ж<testing.T> t) {
     UntypedFloat smallestNormalFloat64 = 2.2250738585072014e-308; // 1p-1022
-    foreach (var (_, test) in slice<TestFloatFloat64_type>([
+    foreach (var (_, test) in range(slice<TestFloatFloat64_type>([
         new("0", 0D, Exact),
 
         // underflow to zero
@@ -1106,7 +1078,7 @@ public static void TestFloatFloat64(ж<testing.T> t) {
         new("2.2250738585072011e-308", 2.225073858507201e-308D, Below),
         // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
         new("2.2250738585072012e-308", 2.2250738585072014e-308D, Above)
-    ])) {
+    ]))) {
         for (nint i = 0; i < 2; i++) {
             // test both signs
             @string tx = test.x;
@@ -1119,10 +1091,8 @@ public static void TestFloatFloat64(ж<testing.T> t) {
             }
 
             // conversion should match strconv where syntax is agreeable
-            {
-                var (f, err) = strconv.ParseFloat(tx, 64); if (err == nil && !alike64(f, tout)) {
-                    t.Errorf("%s: got %g; want %g (incorrect test data)", tx, f, tout);
-                }
+            var (f, err) = strconv.ParseFloat(tx, 64); if (err == nil && !alike64(f, tout)) {
+                t.Errorf("%s: got %g; want %g (incorrect test data)", tx, f, tout);
             }
 
             var x = makeFloat(tx);
@@ -1152,7 +1122,7 @@ internal partial struct TestFloatInt_type /*dyn*/ {
 }
 
 public static void TestFloatInt(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatInt_type>([
+    foreach (var (_, test) in range(slice<TestFloatInt_type>([
         new("0", "0", Exact),
         new("+0", "0", Exact),
         new("-0", "0", Exact),
@@ -1170,7 +1140,7 @@ public static void TestFloatInt(ж<testing.T> t) {
         new("-1e-1000", "0", Above),
         new("1e+10", "10000000000", Exact),
         new("1e+100", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", Exact)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         var (res, acc) = x.Int(nil);
         @string got = nilˢ2;
@@ -1183,13 +1153,11 @@ public static void TestFloatInt(ж<testing.T> t) {
     }
 
     // check that supplied *Int is used
-    foreach (var (_, f) in slice<@string>(["0", "1", "-1", "1234"])) {
+    foreach (var (_, f) in range(slice<@string>(["0", "1", "-1", "1234"]))) {
         var x = makeFloat(f);
         var i = @new<global::go.math.big_package.ΔInt>();
-        {
-            var (res, _) = x.Int(i); if (res != i) {
-                t.Errorf("(%s).Int is not using supplied *Int", f);
-            }
+        var (res, _) = x.Int(i); if (res != i) {
+            t.Errorf("(%s).Int is not using supplied *Int", f);
         }
     }
 }
@@ -1200,7 +1168,7 @@ internal partial struct TestFloatRat_type /*dyn*/ {
 }
 
 public static void TestFloatRat(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatRat_type>([
+    foreach (var (_, test) in range(slice<TestFloatRat_type>([
         new("0", "0/1", Exact),
         new("+0", "0/1", Exact),
         new("-0", "0/1", Exact),
@@ -1215,7 +1183,7 @@ public static void TestFloatRat(ж<testing.T> t) {
         new("1p10", "1024/1", Exact),
         new("-1p-10", "-1/1024", Exact),
         new("3.14159265", "7244019449799623199/2305843009213693952", Exact)
-    ])) {
+    ]))) {
         var x = makeFloat(test.x).SetPrec(64);
         var (res, acc) = x.Rat(nil);
         @string got = nilˢ2;
@@ -1241,19 +1209,17 @@ public static void TestFloatRat(ж<testing.T> t) {
     }
 
     // check that supplied *Rat is used
-    foreach (var (_, f) in slice<@string>(["0", "1", "-1", "1234"])) {
+    foreach (var (_, f) in range(slice<@string>(["0", "1", "-1", "1234"]))) {
         var x = makeFloat(f);
         var r = @new<global::go.math.big_package.ΔRat>();
-        {
-            var (res, _) = x.Rat(r); if (res != r) {
-                t.Errorf("(%s).Rat is not using supplied *Rat", f);
-            }
+        var (res, _) = x.Rat(r); if (res != r) {
+            t.Errorf("(%s).Rat is not using supplied *Rat", f);
         }
     }
 }
 
 public static void TestFloatAbs(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "0",
         "1",
         "1234",
@@ -1261,7 +1227,7 @@ public static void TestFloatAbs(ж<testing.T> t) {
         "1e-1000",
         "1e1000",
         "Inf"
-    ])) {
+    ]))) {
         var p = makeFloat(test);
         var a = @new<global::go.math.big_package.Float>().Abs(p);
         if (!alike(a, p)) {
@@ -1277,7 +1243,7 @@ public static void TestFloatAbs(ж<testing.T> t) {
 }
 
 public static void TestFloatNeg(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "0",
         "1",
         "1234",
@@ -1285,7 +1251,7 @@ public static void TestFloatNeg(ж<testing.T> t) {
         "1e-1000",
         "1e1000",
         "Inf"
-    ])) {
+    ]))) {
         var p1 = makeFloat(test);
         var n1 = makeFloat("-"u8 + test);
         var n2 = @new<global::go.math.big_package.Float>().Neg(p1);
@@ -1301,7 +1267,7 @@ public static void TestFloatNeg(ж<testing.T> t) {
 
 public static void TestFloatInc(ж<testing.T> t) {
     UntypedInt n = 10;
-    foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
+    foreach (var (_, prec) in range(precList.ΔRangeSnapshot())) {
         if (((nint)1).Lsh(prec) < n) {
             continue; // prec must be large enough to hold all numbers from 0 to n
         }
@@ -1340,16 +1306,16 @@ internal static array<ΔBits> bitsList = new ΔBits[]{
 // respective Float addition/subtraction for a variety of precisions
 // and rounding modes.
 public static void TestFloatAdd(ж<testing.T> t) {
-    foreach (var (_, xbits) in bitsList.ΔRangeSnapshot()) {
-        foreach (var (_, ybits) in bitsList.ΔRangeSnapshot()) {
+    foreach (var (_, xbits) in range(bitsList.ΔRangeSnapshot())) {
+        foreach (var (_, ybits) in range(bitsList.ΔRangeSnapshot())) {
             // exact values
             var x = xbits.ΔFloat();
             var y = ybits.ΔFloat();
             var zbits = xbits.add(ybits);
             var z = zbits.ΔFloat();
 
-            foreach (var (i, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
-                foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
+            foreach (var (i, mode) in range(new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array())) {
+                foreach (var (_, prec) in range(precList.ΔRangeSnapshot())) {
                     var got = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(mode);
                     got.Add(x, y);
                     var want = zbits.round(prec, mode);
@@ -1374,7 +1340,7 @@ public static void TestFloatAdd(ж<testing.T> t) {
 // x + (-x) or x - x for non-zero x should be +0 in all cases except when
 // the rounding mode is ToNegativeInf in which case it should be -0.
 public static void TestFloatAddRoundZero(ж<testing.T> t) {
-    foreach (var (_, mode) in new global::go.math.big_package.RoundingMode[]{ToNearestEven, ToNearestAway, ToZero, AwayFromZero, ToPositiveInf, ToNegativeInf}.array()) {
+    foreach (var (_, mode) in range(new global::go.math.big_package.RoundingMode[]{ToNearestEven, ToNearestAway, ToZero, AwayFromZero, ToPositiveInf, ToNegativeInf}.array())) {
         var x = NewFloat(5.0D);
         var y = @new<global::go.math.big_package.Float>().Neg(x);
         var want = NewFloat(0.0D);
@@ -1402,7 +1368,7 @@ public static void TestFloatAdd32(ж<testing.T> t) {
     // chose base such that we cross the mantissa precision limit
     UntypedInt @base = /* 1<<26 - 0x10 */ 67108848; // 11...110000 (26 bits)
     for (nint d = 0; d <= 0x10; d++) {
-        foreach (var i in range(new nint[]{}.array(2))) {
+        foreach (var i in range(len(new nint[]{}.array(2)))) {
             var (x0, y0) = ((float64)@base, (float64)d);
             if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
@@ -1435,7 +1401,7 @@ public static void TestFloatAdd64(ж<testing.T> t) {
     // chose base such that we cross the mantissa precision limit
     UntypedInt @base = /* 1<<55 - 0x10 */ 36028797018963952; // 11...110000 (55 bits)
     for (nint d = 0; d <= 0x10; d++) {
-        foreach (var i in range(new nint[]{}.array(2))) {
+        foreach (var i in range(len(new nint[]{}.array(2)))) {
             var (x0, y0) = ((float64)@base, (float64)d);
             if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
@@ -1474,7 +1440,7 @@ public static void TestIssue20490(ж<testing.T> t) {
         new(-4D, -1D)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (a, b) = (NewFloat(test.a), NewFloat(test.b));
         var diff = @new<global::go.math.big_package.Float>().Sub(a, b);
         b.Sub(a, b);
@@ -1496,16 +1462,16 @@ public static void TestIssue20490(ж<testing.T> t) {
 // respective Float multiplication/division for a variety of precisions
 // and rounding modes.
 public static void TestFloatMul(ж<testing.T> t) {
-    foreach (var (_, xbits) in bitsList.ΔRangeSnapshot()) {
-        foreach (var (_, ybits) in bitsList.ΔRangeSnapshot()) {
+    foreach (var (_, xbits) in range(bitsList.ΔRangeSnapshot())) {
+        foreach (var (_, ybits) in range(bitsList.ΔRangeSnapshot())) {
             // exact values
             var x = xbits.ΔFloat();
             var y = ybits.ΔFloat();
             var zbits = xbits.mul(ybits);
             var z = zbits.ΔFloat();
 
-            foreach (var (i, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
-                foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
+            foreach (var (i, mode) in range(new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array())) {
+                foreach (var (_, prec) in range(precList.ΔRangeSnapshot())) {
                     var got = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(mode);
                     got.Mul(x, y);
                     var want = zbits.round(prec, mode);
@@ -1536,7 +1502,7 @@ internal partial struct TestFloatMul64_type /*dyn*/ {
 // TestFloatMul64 tests that Float.Mul/Quo of numbers with
 // 53bit mantissa behaves like float64 multiplication/division.
 public static void TestFloatMul64(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatMul64_type>([
+    foreach (var (_, test) in range(slice<TestFloatMul64_type>([
         new(0D, 0D),
         new(0D, 1D),
         new(1D, 1D),
@@ -1545,8 +1511,8 @@ public static void TestFloatMul64(ж<testing.T> t) {
         new(2.718281828D, 3.14159265358979D),
         new(2.718281828e10D, 3.14159265358979e-32D),
         new(1.0D / 3D, 1e200D)
-    ])) {
-        foreach (var i in range(new nint[]{}.array(8))) {
+    ]))) {
+        foreach (var i in range(len(new nint[]{}.array(8)))) {
             var (x0, y0) = (test.x, test.y);
             if ((i & 1) != 0) {
                 x0 = -x0;
@@ -1583,7 +1549,7 @@ public static void TestFloatMul64(ж<testing.T> t) {
 }
 
 public static void TestIssue6866(ж<testing.T> t) {
-    foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
+    foreach (var (_, prec) in range(precList.ΔRangeSnapshot())) {
         var two = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(2);
         var one = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(1);
         var three = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(3);
@@ -1654,7 +1620,7 @@ public static void TestFloatQuo(ж<testing.T> t) {
 
         // round accurate z for a variety of precisions and
         // modes and compare against result of x / y.
-        foreach (var (_, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
+        foreach (var (_, mode) in range(new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array())) {
             for (nint d = -5; d < 5; d++) {
                 nuint prec = (nuint)(preci + d);
                 var got = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(mode).Quo(x, y);
@@ -1722,17 +1688,15 @@ public static void TestFloatArithmeticSpecialValues(ж<testing.T> t) {
     var got = @new<global::go.math.big_package.Float>();
     var want = @new<global::go.math.big_package.Float>();
     for (nint i = 0; i < 4; i++) {
-        foreach (var (_, x) in args) {
+        foreach (var (_, x) in range(args)) {
             xx.SetFloat64(x);
             // check conversion is correct
             // (no need to do this for y, since we see exactly the
             // same values there)
-            {
-                var (gotΔ1, acc) = xx.Float64(); if (gotΔ1 != x || acc != Exact) {
-                    t.Errorf("Float(%g) == %g (%s)", x, gotΔ1, acc);
-                }
+            var (gotΔ1, acc) = xx.Float64(); if (gotΔ1 != x || acc != Exact) {
+                t.Errorf("Float(%g) == %g (%s)", x, gotΔ1, acc);
             }
-            foreach (var (_, y) in args) {
+            foreach (var (_, y) in range(args)) {
                 yy.SetFloat64(y);
                 @string op = default;
                 float64 z = default;
@@ -1775,11 +1739,9 @@ public static void TestFloatArithmeticSpecialValues(ж<testing.T> t) {
                     GoFrame ᒐ = default;
                     try {
                         defer(() => {
-                            {
-                                var p = recover(); if (p != nil) {
-                                    _ = p._<ErrNaN>(); // re-panic if not ErrNaN
-                                    errnan = true;
-                                }
+                            var p = recover(); if (p != nil) {
+                                _ = p._<ErrNaN>(); // re-panic if not ErrNaN
+                                errnan = true;
                             }
                         }, ref ᒐ);
                         Ꮡf.ValueSlot(gotʗ1, xxʗ1, yyʗ1);
@@ -1815,7 +1777,7 @@ internal partial struct TestFloatArithmeticOverflow_type /*dyn*/ {
 }
 
 public static void TestFloatArithmeticOverflow(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatArithmeticOverflow_type>([
+    foreach (var (_, test) in range(slice<TestFloatArithmeticOverflow_type>([
         new(4, ToNearestEven, (byte)'+', "0", "0", "0", Exact),                   // smoke test
         new(4, ToNearestEven, (byte)'+', "0x.8p+0", "0x.8p+0", "0x.8p+1", Exact), // smoke test
 
@@ -1845,7 +1807,7 @@ public static void TestFloatArithmeticOverflow(ж<testing.T> t) {
         new(4, ToNearestEven, (byte)'/', "0x.8p-1", "0x.8p2147483647", "0x.8p-2147483647", Exact),
         new(4, ToNearestEven, (byte)'/', "0x.8p-2", "0x.8p2147483647", "0x.8p-2147483648", Exact),
         new(4, ToNearestEven, (byte)'/', "0x.8p-3", "0x.8p2147483647", "0", Below) // exponent underflow in /
-    ])) {
+    ]))) {
         var x = makeFloat(test.x);
         var y = makeFloat(test.y);
         var z = @new<global::go.math.big_package.Float>().SetPrec(test.prec).SetMode(test.mode);
@@ -1870,12 +1832,10 @@ public static void TestFloatArithmeticOverflow(ж<testing.T> t) {
             throw panic("unreachable");
             break;
         }}
-        {
-            @string got = z.Text((byte)'p', 0); if (got != test.want || z.Acc() != test.acc) {
-                t.Errorf(
-                    "prec = %d (%s): %s %c %s = %s (%s); want %s (%s)",
-                    test.prec, test.mode, x.Text((byte)'p', 0), test.op, y.Text((byte)'p', 0), got, z.Acc(), test.want, test.acc);
-            }
+        @string got = z.Text((byte)'p', 0); if (got != test.want || z.Acc() != test.acc) {
+            t.Errorf(
+                "prec = %d (%s): %s %c %s = %s (%s); want %s (%s)",
+                test.prec, test.mode, x.Text((byte)'p', 0), test.op, y.Text((byte)'p', 0), got, z.Acc(), test.want, test.acc);
         }
     }
 }
@@ -1895,7 +1855,7 @@ internal partial struct TestFloatArithmeticRounding_type /*dyn*/ {
 // This test uses specific values that are known to fail if rounding is
 // "factored" out before setting the result sign.
 public static void TestFloatArithmeticRounding(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloatArithmeticRounding_type>([
+    foreach (var (_, test) in range(slice<TestFloatArithmeticRounding_type>([
         new(ToZero, 3, -0x8, -0x1, -0x8, (byte)'+'),
         new(AwayFromZero, 3, -0x8, -0x1, -0xa, (byte)'+'),
         new(ToNegativeInf, 3, -0x8, -0x1, -0xa, (byte)'+'),
@@ -1911,7 +1871,7 @@ public static void TestFloatArithmeticRounding(ж<testing.T> t) {
         new(ToZero, 3, -0x9, 0x1, -0x8, (byte)'/'),
         new(AwayFromZero, 3, -0x9, 0x1, -0xa, (byte)'/'),
         new(ToNegativeInf, 3, -0x9, 0x1, -0xa, (byte)'/')
-    ])) {
+    ]))) {
         ref var x = ref heap(new global::go.math.big_package.Float(), out var Ꮡx);
         ref var y = ref heap(new global::go.math.big_package.Float(), out var Ꮡy);
         ref var z = ref heap(new global::go.math.big_package.Float(), out var Ꮡz);
@@ -1939,11 +1899,9 @@ public static void TestFloatArithmeticRounding(ж<testing.T> t) {
             throw panic("unreachable");
             break;
         }}
-        {
-            var (got, acc) = Ꮡz.Int64(); if (got != test.want || acc != Exact) {
-                t.Errorf("%s, %d bits: %d %c %d = %d (%s); want %d (Exact)",
-                    test.mode, test.prec, test.x, test.op, test.y, got, acc, test.want);
-            }
+        var (got, acc) = Ꮡz.Int64(); if (got != test.want || acc != Exact) {
+            t.Errorf("%s, %d bits: %d %c %d = %d (%s); want %d (Exact)",
+                test.mode, test.prec, test.x, test.op, test.y, got, acc, test.want);
         }
     }
 }
@@ -1957,7 +1915,7 @@ public static void TestFloatCmpSpecialValues(ж<testing.T> t) {
     var xx = @new<global::go.math.big_package.Float>();
     var yy = @new<global::go.math.big_package.Float>();
     for (nint i = 0; i < 4; i++) {
-        foreach (var (_, x) in args) {
+        foreach (var (_, x) in range(args)) {
             xx.SetFloat64(x);
             // check conversion is correct
             // (no need to do this for y, since we see exactly the
@@ -1967,7 +1925,7 @@ public static void TestFloatCmpSpecialValues(ж<testing.T> t) {
                     t.Errorf("Float(%g) == %g (%s)", x, got, acc);
                 }
             }
-            foreach (var (_, y) in args) {
+            foreach (var (_, y) in range(args)) {
                 yy.SetFloat64(y);
                 nint got = xx.Cmp(yy);
                 nint want = 0;
@@ -1993,7 +1951,7 @@ public static void BenchmarkFloatAdd(ж<testing.B> b) {
     var y = @new<global::go.math.big_package.Float>();
     var z = @new<global::go.math.big_package.Float>();
 
-    foreach (var (_, prec) in slice<nuint>([10, 100, 1000, 10000, 100000])) {
+    foreach (var (_, prec) in range(slice<nuint>([10, 100, 1000, 10000, 100000]))) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         y.SetPrec(prec).SetRat(NewRat(1, 6));
         z.SetPrec(prec);
@@ -2015,7 +1973,7 @@ public static void BenchmarkFloatSub(ж<testing.B> b) {
     var y = @new<global::go.math.big_package.Float>();
     var z = @new<global::go.math.big_package.Float>();
 
-    foreach (var (_, prec) in slice<nuint>([10, 100, 1000, 10000, 100000])) {
+    foreach (var (_, prec) in range(slice<nuint>([10, 100, 1000, 10000, 100000]))) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         y.SetPrec(prec).SetRat(NewRat(1, 6));
         z.SetPrec(prec);

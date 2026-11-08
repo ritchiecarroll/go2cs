@@ -23,14 +23,14 @@ public static void BenchmarkMutatorBytes(ж<testing.B> b) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
 
-        foreach (var (_, size) in slice<nint>([
+        foreach (var (_, size) in range(slice<nint>([
             1,
             10,
             100,
             1000,
             10000,
             100000
-        ])) {
+        ]))) {
             var mʗ1 = m;
             b.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
@@ -40,7 +40,7 @@ public static void BenchmarkMutatorBytes(ж<testing.B> b) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
                     mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(slice<any>([buf]), workerSharedMemSize);
+                    mʗ1.mutate([buf], workerSharedMemSize);
                 }
             });
         }
@@ -59,14 +59,14 @@ public static void BenchmarkMutatorString(ж<testing.B> b) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
 
-        foreach (var (_, size) in slice<nint>([
+        foreach (var (_, size) in range(slice<nint>([
             1,
             10,
             100,
             1000,
             10000,
             100000
-        ])) {
+        ]))) {
             var mʗ1 = m;
             b.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
@@ -76,7 +76,7 @@ public static void BenchmarkMutatorString(ж<testing.B> b) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
                     mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(slice<any>([(@string)buf]), workerSharedMemSize);
+                    mʗ1.mutate([(@string)buf], workerSharedMemSize);
                 }
             });
         }
@@ -112,13 +112,13 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> b) {
             (uint64)0
         ]);
 
-        foreach (var (_, t) in types) {
+        foreach (var (_, t) in range(types)) {
             var mʗ1 = m;
             var tʗ1 = t;
             b.Run(fmt.Sprintf("%T"u8, t), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(slice<any>([tʗ1]), workerSharedMemSize);
+                    mʗ1.mutate([tʗ1], workerSharedMemSize);
                 }
             });
         }

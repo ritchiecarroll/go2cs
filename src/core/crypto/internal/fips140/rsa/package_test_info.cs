@@ -40,9 +40,9 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABkkgoKCpoKSgoKCgoKCpoKkpLS01rSUgoKUgqaCgoKCpoKCgoKmgoKC2LaAggALCIKCgqaygoKCgoKCpoKktLS0lIKClIKmgoKClJSCgILIgoKClJSClICC6LaAgsiCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABkkgoKCpoKSgoKCgoKCpoKkpLS01rSUgoKUgqaCgoKCpoKCgoKmgoKC2LaCAAoIgoKCprKCgoKCgoKmgqS0tLSUgoKUgqaCgoKUlIKCuIKCgpSUgpSAgui2griCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAnUIIABhSClIKCgg==", "", "", "64=Size/1/1/8")]
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoCC")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

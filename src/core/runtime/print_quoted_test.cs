@@ -14,7 +14,7 @@ internal partial struct TestPrintQuoted_type /*dyn*/ {
 }
 
 public static void TestPrintQuoted(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestPrintQuoted_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestPrintQuoted_type>([
         new(@in: "baz", expected: @"""baz"""),
         new(@in: "foobar", expected: @"""foobar"""),
         // make sure newlines get escaped
@@ -29,7 +29,7 @@ public static void TestPrintQuoted(ж<testing.T> t) {
         new(@in: "\U00045678boop", expected: @"""\U00045678boop"""),
         // verify carriage returns and backslashes get escaped along with our nulls, newlines and a 32-bit unicode character
         new(@in: "fiz\\zl\re", expected: @"""fiz\\zl\re""")
-    ])) {
+    ]))) {
         ref var tbl = ref heap(new TestPrintQuoted_type(), out var Ꮡtbl);
         tbl = vᴛ1;
 

@@ -10,8 +10,6 @@ using windows = @internal.syscall.windows_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal.syscall;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {

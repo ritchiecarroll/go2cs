@@ -20,7 +20,7 @@ public static void TestClone(ж<testing.T> t) {
         "short",
         strings.Repeat("a", 42)
     ]);
-    foreach (var (_, input) in cloneTests) {
+    foreach (var (_, input) in range(cloneTests)) {
         @string clone = strings.Clone(input);
         if (clone != input) {
             t.Errorf("Clone(%q) = %q; want %q", input, clone, input);

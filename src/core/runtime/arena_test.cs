@@ -22,29 +22,22 @@ partial class runtime_test_package {
 partial struct smallScalar {
     public uintptr X;
 }
-
 public partial struct smallPointer {
     public ж<smallPointer> X;
 }
-
 partial struct smallPointerMix {
     public ж<smallPointer> A;
     public byte B;
     public ж<smallPointer> C;
     public array<byte> D = new(11);
 }
-
 partial struct mediumScalarEven /*[8192]byte*/;
-
 partial struct mediumScalarOdd /*[3321]byte*/;
-
 partial struct mediumPointerEven /*[1024]ж<smallPointer>*/;
-
 partial struct mediumPointerOdd /*[1023]ж<smallPointer>*/;
 
 /* [runtime_internal_test_package.UserArenaChunkBytes + 1]byte */
 partial struct largeScalar /*[4194305]byte*/;
-
 /* [runtime_internal_test_package.UserArenaChunkBytes /  unsafe.Sizeof(&smallPointer{})  (uintptr)8 + 1]ж<smallPointer> */
 partial struct largePointer /*[524289]ж<smallPointer>*/;
 
@@ -121,19 +114,19 @@ public static void TestUserArena(ж<testing.T> t) {
             runSubTestUserArenaNew(tΔ1, lp, false);
 
             var sss = new slice<smallScalar>(25);
-            foreach (var i in range(sss)) {
+            foreach (var i in range(len(sss))) {
                 sss[i] = new smallScalar(12);
             }
             runSubTestUserArenaSlice(tΔ1, sss, true);
 
             var mpos = GoReflect.WithElemDims(new slice<mediumPointerOdd>(5), 1023);
-            foreach (var i in range(mpos)) {
+            foreach (var i in range(len(mpos))) {
                 mpos[i] = mpo.Value.Clone();
             }
             runSubTestUserArenaSlice(tΔ1, mpos, true);
 
             var sps = new slice<smallPointer>((nint)(runtime_internal_test_package.UserArenaChunkBytes / /* unsafe.Sizeof(smallPointer{}) */ (uintptr)8 + 1));
-            foreach (var i in range(sps)) {
+            foreach (var i in range(len(sps))) {
                 sps[i] = sp.Value;
             }
             // Not in parallel because we don't want to hold this large allocation live.
@@ -145,10 +138,8 @@ public static void TestUserArena(ж<testing.T> t) {
                 ref var x = ref heap<any>(out var Ꮡx);
                 x = (ж<EmptyStruct>)nil;
                 arena.New(Ꮡx);
-                {
-                    @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
-                    }
+                @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
+                    tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                 }
                 arena.Free();
             });
@@ -156,10 +147,8 @@ public static void TestUserArena(ж<testing.T> t) {
                 var arena = runtime_internal_test_package.NewUserArena();
                 ref var sl = ref heap<slice<EmptyStruct>>(out var Ꮡsl);
                 arena.Slice(Ꮡsl, 10);
-                {
-                    @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡ(sl, 0)); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
-                    }
+                @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡ(sl, 0)); if (v != runtime_internal_test_package.ZeroBase) {
+                    tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                 }
                 arena.Free();
             });
@@ -177,10 +166,8 @@ public static void TestUserArena(ж<testing.T> t) {
         // Run a GC cycle to get any arenas off the quarantine list.
         GC();
 
-        {
-            nint n = runtime_internal_test_package.GlobalWaitingArenaChunks(); if (n != 0) {
-                t.Errorf("expected zero waiting arena chunks, found %d", n);
-            }
+        nint n = runtime_internal_test_package.GlobalWaitingArenaChunks(); if (n != 0) {
+            t.Errorf("expected zero waiting arena chunks, found %d", n);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -216,7 +203,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> t, ж<S> value, boo
             arenaValues = append(arenaValuesᴷ, arenaValues, s);
         }
         // Check integrity of allocated data.
-        foreach (var (_, s) in arenaValues) {
+        foreach (var (_, s) in range(arenaValues)) {
             if (!AreEqual(s.ValueSlot, value.ValueSlot)) {
                 tΔ1.Errorf("failed integrity check: got %#v, want %#v", (s.ValueSlot).OrTypedNilOf(), (value.ValueSlot).OrTypedNilOf());
             }
@@ -255,8 +242,8 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> t, slice<S> value
             arenaValues = append(arenaValuesᴷ, arenaValues, sl);
         }
         // Check integrity of allocated data.
-        foreach (var (_, sl) in arenaValues) {
-            foreach (var i in range(sl)) {
+        foreach (var (_, sl) in range(arenaValues)) {
+            foreach (var i in range(len(sl))) {
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
@@ -557,7 +544,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> t) {
     if (len(b) != len(bCopy)) {
         t.Errorf("Clone made an incorrect copy (bad length): %d -> %d", len(b), len(bCopy));
     } else {
-        foreach (var i in range(b)) {
+        foreach (var i in range(len(b))) {
             if (b[i] != bCopy[i]) {
                 t.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d", i, b[i], bCopy[i]);
             }
@@ -573,7 +560,7 @@ public static void TestUserArenaCloneSlice(ж<testing.T> t) {
     if (len(bSub) != len(bSubCopy)) {
         t.Errorf("Clone made an incorrect copy (bad length): %d -> %d", len(bSub), len(bSubCopy));
     } else {
-        foreach (var i in range(bSub)) {
+        foreach (var i in range(len(bSub))) {
             if (bSub[i] != bSubCopy[i]) {
                 t.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d", i, bSub[i], bSubCopy[i]);
             }
@@ -598,10 +585,8 @@ public static void TestUserArenaClonePanic(ж<testing.T> t) {
         try {
             var x = new smallScalar(2);
             defer(() => {
-                {
-                    var v = recover(); if (v != nil) {
-                        s = v._<@string>();
-                    }
+                var v = recover(); if (v != nil) {
+                    s = v._<@string>();
                 }
             }, ref ᒐ);
             runtime_internal_test_package.UserArenaClone(x);

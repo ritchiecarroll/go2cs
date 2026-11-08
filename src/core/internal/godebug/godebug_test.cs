@@ -50,7 +50,7 @@ public static void TestGet(ж<testing.T> t) {
         new(",foo", foo, ""),
         new("foo=bar,baz", New(loooooooongˢ), "")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         t.Setenv(godebugˢ, tt.godebug);
         @string got = tt.setting.Value();
         if (got != tt.want) {
@@ -86,10 +86,8 @@ public static void TestMetrics(ж<testing.T> t) {
             t.Fatalf("NonDefault kind = %v, want uint64", kind);
         }
     }
-    {
-        var count = m[0].Value.Uint64(); if (count != 3) {
-            t.Fatalf("NonDefault value = %d, want 3", count);
-        }
+    var count = m[0].Value.Uint64(); if (count != 3) {
+        t.Fatalf("NonDefault value = %d, want 3", count);
     }
 }
 
@@ -169,7 +167,7 @@ public static void TestCmdBisect(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, line) in strings.Split((@string)src, "\n")) {
+    foreach (var (i, line) in range(strings.Split((@string)src, "\n"))) {
         if (strings.Contains(line, "BISECT"u8 + " "u8 + "BUG"u8)) {
             want = append(want, fmt.Sprintf("godebug_test.go:%d"u8, i + 1));
         }
@@ -177,7 +175,7 @@ public static void TestCmdBisect(ж<testing.T> t) {
     slices.Sort<slice<@string>, @string>(want);
 
     slice<@string> have = default;
-    foreach (var (_, line) in strings.Split((@string)@out, "\n")) {
+    foreach (var (_, line) in range(strings.Split((@string)@out, "\n"))) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
             have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }

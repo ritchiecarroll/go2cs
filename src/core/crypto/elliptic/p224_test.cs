@@ -18,7 +18,7 @@ internal partial struct baseMultTest {
     internal @string x, y;
 }
 
-internal static slice<baseMultTest> p224BaseMultTests = slice<baseMultTest>([
+internal static slice<baseMultTest> p224BaseMultTests = [
     new(
         "1",
         "b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21",
@@ -279,11 +279,11 @@ internal static slice<baseMultTest> p224BaseMultTests = slice<baseMultTest>([
         "b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21",
         "42c89c774a08dc04b3dd201932bc8a5ea5f8b89bbb2a7e667aff81cd"
     )
-]);
+];
 
 public static void TestP224BaseMult(ж<testing.T> t) {
     var p224 = P224();
-    foreach (var (i, e) in p224BaseMultTests) {
+    foreach (var (i, e) in range(p224BaseMultTests)) {
         var (k, ok) = @new<bigꓸInt>().SetString(e.k, 10);
         if (!ok) {
             t.Errorf("%d: bad value for k: %s", i, e.k);
@@ -301,7 +301,7 @@ public static void TestP224BaseMult(ж<testing.T> t) {
 public static void TestP224GenericBaseMult(ж<testing.T> t) {
     // We use the P224 CurveParams directly in order to test the generic implementation.
     var p224 = genericParamsForCurve(P224());
-    foreach (var (i, e) in p224BaseMultTests) {
+    foreach (var (i, e) in range(p224BaseMultTests)) {
         var (k, ok) = @new<bigꓸInt>().SetString(e.k, 10);
         if (!ok) {
             t.Errorf("%d: bad value for k: %s", i, e.k);

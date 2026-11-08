@@ -114,7 +114,7 @@ public static void TestChildCriticalEnv(ж<testing.T> t) {
 
     // Explicitly remove SYSTEMROOT from the command's environment.
     slice<@string> env = default;
-    foreach (var (_, kv) in cmd.Environ()) {
+    foreach (var (_, kv) in range(cmd.Environ())) {
         var (k, _, ok) = strings.Cut(kv, "=");
         if (!ok || !strings.EqualFold(k, systemrootˢ)) {
             env = append(envᴷ, env, kv);

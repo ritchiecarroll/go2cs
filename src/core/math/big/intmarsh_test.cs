@@ -14,7 +14,7 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-internal static slice<@string> encodingTests = slice<@string>([
+internal static slice<@string> encodingTests = [
     "0",
     "1",
     "2",
@@ -22,14 +22,14 @@ internal static slice<@string> encodingTests = slice<@string>([
     "1000",
     "1234567890",
     "298472983472983471903246121093472394872319615612417471234712061"
-]);
+];
 
 public static void TestIntGobEncoding(ж<testing.T> t) {
     ref var medium = ref heap(new bytes.Buffer(), out var Ꮡmedium);
     var enc = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(Ꮡmedium));
     var dec = gob.NewDecoder(new big_test_package.bytes_BufferжReader(Ꮡmedium));
-    foreach (var (_, test) in encodingTests) {
-        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+    foreach (var (_, test) in range(encodingTests)) {
+        foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
             medium.Reset(); // empty buffer for each test case (in case of failures)
             ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
@@ -83,8 +83,8 @@ public static void TestGobEncodingNilIntInSlice(ж<testing.T> t) {
 }
 
 public static void TestIntJSONEncoding(ж<testing.T> t) {
-    foreach (var (_, test) in encodingTests) {
-        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+    foreach (var (_, test) in range(encodingTests)) {
+        foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
             ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
             Ꮡtx.SetString(x, 10);
@@ -94,11 +94,9 @@ public static void TestIntJSONEncoding(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
-            {
-                var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("JSON encoding of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);
@@ -125,8 +123,8 @@ public static void TestIntJSONEncodingNil(ж<testing.T> t) {
 }
 
 public static void TestIntXMLEncoding(ж<testing.T> t) {
-    foreach (var (_, test) in encodingTests) {
-        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+    foreach (var (_, test) in range(encodingTests)) {
+        foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
             ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
             Ꮡtx.SetString(x, 0);
@@ -136,11 +134,9 @@ public static void TestIntXMLEncoding(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
-            {
-                var errΔ1 = xml.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = xml.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("XML encoding of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);
@@ -150,8 +146,8 @@ public static void TestIntXMLEncoding(ж<testing.T> t) {
 }
 
 public static void TestIntAppendText(ж<testing.T> t) {
-    foreach (var (_, test) in encodingTests) {
-        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+    foreach (var (_, test) in range(encodingTests)) {
+        foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
             ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
             Ꮡtx.SetString(x, 10);
@@ -162,11 +158,9 @@ public static void TestIntAppendText(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
-            {
-                var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("AppendText of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);

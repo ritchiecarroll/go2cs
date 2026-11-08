@@ -37,12 +37,10 @@ public static void ExampleDB_QueryContext() {
 
         while (rows.Next()) {
             ref var name = ref heap(new @string(), out var Ꮡname);
-            {
-                var errΔ1 = rows.Scan(Ꮡname); if (errΔ1 != nil) {
-                    // Check for a scan error.
-                    // Query rows will be closed with defer.
-                    log.Fatal(errΔ1);
-                }
+            var errΔ1 = rows.Scan(Ꮡname); if (errΔ1 != nil) {
+                // Check for a scan error.
+                // Query rows will be closed with defer.
+                log.Fatal(errΔ1);
             }
             names = append(namesᴷ, names, name);
         }
@@ -55,10 +53,8 @@ public static void ExampleDB_QueryContext() {
         }
 
         // Rows.Err will report the last error encountered by Rows.Scan.
-        {
-            var errΔ2 = rows.Err(); if (errΔ2 != nil) {
-                log.Fatal(errΔ2);
-            }
+        var errΔ2 = rows.Err(); if (errΔ2 != nil) {
+            log.Fatal(errΔ2);
         }
         fmt.Printf("%s are %d years old"u8, strings.Join(names, ", "), age);
     }
@@ -150,10 +146,8 @@ public static void ExampleDB_Query_multipleResultSets() {
         while (rows.Next()) {
             ref var id = ref heap(new int64(), out var Ꮡid);
             ref var name = ref heap(new @string(), out var Ꮡname);
-            {
-                var errΔ1 = rows.Scan(Ꮡid, Ꮡname); if (errΔ1 != nil) {
-                    log.Fatal(errΔ1);
-                }
+            var errΔ1 = rows.Scan(Ꮡid, Ꮡname); if (errΔ1 != nil) {
+                log.Fatal(errΔ1);
             }
             log.Printf("id %d name is %s\n", id, name);
         }
@@ -168,17 +162,13 @@ public static void ExampleDB_Query_multipleResultSets() {
         while (rows.Next()) {
             ref var id = ref heap(new int64(), out var Ꮡid);
             ref var role = ref heap(new int64(), out var Ꮡrole);
-            {
-                var errΔ2 = rows.Scan(Ꮡid, Ꮡrole); if (errΔ2 != nil) {
-                    log.Fatal(errΔ2);
-                }
+            var errΔ2 = rows.Scan(Ꮡid, Ꮡrole); if (errΔ2 != nil) {
+                log.Fatal(errΔ2);
             }
             log.Printf("id %d has role %s\n", id, roleMap[role]);
         }
-        {
-            var errΔ3 = rows.Err(); if (errΔ3 != nil) {
-                log.Fatal(errΔ3);
-            }
+        var errΔ3 = rows.Err(); if (errΔ3 != nil) {
+            log.Fatal(errΔ3);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -206,10 +196,8 @@ public static void ExampleDB_PingContext() {
         defer(() => cancelʗ1(), ref ᒐ);
 
         @string status = "up";
-        {
-            var err = db.PingContext(ctxΔ1); if (err != nil) {
-                status = downˢ;
-            }
+        var err = db.PingContext(ctxΔ1); if (err != nil) {
+            status = downˢ;
         }
         log.Println(status);
     }
@@ -244,11 +232,9 @@ public static void ExampleDB_Prepare() {
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ); // Prepared statements take up server resources and should be closed after use.
 
-        foreach (var (id, project) in projects) {
-            {
-                var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != nil) {
-                    log.Fatal(errΔ1);
-                }
+        foreach (var (id, project) in range(projects)) {
+            var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != nil) {
+                log.Fatal(errΔ1);
             }
         }
     }
@@ -285,17 +271,13 @@ public static void ExampleTx_Prepare() {
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ); // Prepared statements take up server resources and should be closed after use.
 
-        foreach (var (id, project) in projects) {
-            {
-                var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != nil) {
-                    log.Fatal(errΔ1);
-                }
+        foreach (var (id, project) in range(projects)) {
+            var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != nil) {
+                log.Fatal(errΔ1);
             }
         }
-        {
-            var errΔ2 = tx.Commit(); if (errΔ2 != nil) {
-                log.Fatal(errΔ2);
-            }
+        var errΔ2 = tx.Commit(); if (errΔ2 != nil) {
+            log.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -318,10 +300,8 @@ public static void ExampleDB_BeginTx() {
         _ = tx.Rollback();
         log.Fatal(execErr);
     }
-    {
-        var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
-            log.Fatal(errΔ1);
-        }
+    var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
+        log.Fatal(errΔ1);
     }
 }
 
@@ -369,17 +349,13 @@ public static void ExampleTx_ExecContext() {
     nint id = 37;
     var (_, execErr) = tx.ExecContext(ctx, updateUsersSetStatusˢ2, paidˢ, id);
     if (execErr != nil) {
-        {
-            var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
-                log.Fatalf("update failed: %v, unable to rollback: %v\n", execErr, rollbackErr);
-            }
+        var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
+            log.Fatalf("update failed: %v, unable to rollback: %v\n", execErr, rollbackErr);
         }
         log.Fatalf("update failed: %v", execErr);
     }
-    {
-        var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
-            log.Fatal(errΔ1);
-        }
+    var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
+        log.Fatal(errΔ1);
     }
 }
 
@@ -398,26 +374,20 @@ public static void ExampleTx_Rollback() {
     nint id = 53;
     (_, err) = tx.ExecContext(ctx, updateDriversSetStatusˢ, assignedˢ, id);
     if (err != nil) {
-        {
-            var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
-                log.Fatalf("update drivers: unable to rollback: %v", rollbackErr);
-            }
+        var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
+            log.Fatalf("update drivers: unable to rollback: %v", rollbackErr);
         }
         log.Fatal(err);
     }
     (_, err) = tx.ExecContext(ctx, updatePickupsSetDriverIdˢ, id);
     if (err != nil) {
-        {
-            var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
-                log.Fatalf("update failed: %v, unable to back: %v", err, rollbackErr);
-            }
+        var rollbackErr = tx.Rollback(); if (rollbackErr != nil) {
+            log.Fatalf("update failed: %v, unable to back: %v", err, rollbackErr);
         }
         log.Fatal(err);
     }
-    {
-        var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
-            log.Fatal(errΔ1);
-        }
+    var errΔ1 = tx.Commit(); if (errΔ1 != nil) {
+        log.Fatal(errΔ1);
     }
 }
 
@@ -507,18 +477,14 @@ public static void ExampleRows() {
         var names = new slice<@string>(0);
         while (rows.Next()) {
             ref var name = ref heap(new @string(), out var Ꮡname);
-            {
-                var errΔ1 = rows.Scan(Ꮡname); if (errΔ1 != nil) {
-                    log.Fatal(errΔ1);
-                }
+            var errΔ1 = rows.Scan(Ꮡname); if (errΔ1 != nil) {
+                log.Fatal(errΔ1);
             }
             names = append(namesᴷ, names, name);
         }
         // Check for errors from iterating over rows.
-        {
-            var errΔ2 = rows.Err(); if (errΔ2 != nil) {
-                log.Fatal(errΔ2);
-            }
+        var errΔ2 = rows.Err(); if (errΔ2 != nil) {
+            log.Fatal(errΔ2);
         }
         log.Printf("%s are %d years old", strings.Join(names, ", "), age);
     }

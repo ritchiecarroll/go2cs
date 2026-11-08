@@ -20,7 +20,7 @@ public static void TestDataCacheSizes(ж<testing.T> t) {
     // fail on some random x86 chip that happens to not support the right
     // CPUID bits for some reason.
     var caches = cpu.DataCacheSizes();
-    foreach (var (i, size) in caches) {
+    foreach (var (i, size) in range(caches)) {
         t.Logf("L%d: %d", i + 1, size);
     }
 }

@@ -10,8 +10,6 @@ using os = os_package;
 using runtime = runtime_package;
 using sync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using exec = go.os.exec_package;
 using go.@internal;

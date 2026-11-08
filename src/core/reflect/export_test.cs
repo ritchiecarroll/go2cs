@@ -95,9 +95,9 @@ public static slice<@string> TypeLinks() {
 
     slice<@string> r = default;
     var (sections, offset) = typelinks();
-    foreach (var (i, offs) in offset) {
+    foreach (var (i, offs) in range(offset)) {
         @unsafe.Pointer rodata = sections[i];
-        foreach (var (_, off) in offs) {
+        foreach (var (_, off) in range(offs)) {
             var typ = (ж<global::go.reflect_package.rtype>)(uintptr)(resolveTypeOff(rodata, off));
             r = builtin.append(rᴷ, r, typ.String());
         }
@@ -115,8 +115,7 @@ public static ref Func<any, slice<byte>> GCBits => ref ((StaticBox<Func<any, sli
 public partial struct EmbedWithUnexpMeth {
 }
 
-internal static void f(this EmbedWithUnexpMeth _) {
-}
+internal static void f(this EmbedWithUnexpMeth _) { }
 
 internal partial interface pinUnexpMeth {
     void f();

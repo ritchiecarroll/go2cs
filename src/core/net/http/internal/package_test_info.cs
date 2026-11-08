@@ -35,8 +35,8 @@ using static global::go.net.http.internal_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("chunked_test.cs", 245, 5, 0)]
-[assembly: GoBoundedGoroutine("chunked_test.cs", 259, 5, 1)]
+[assembly: GoBoundedGoroutine("chunked_test.cs", 241, 5, 0)]
+[assembly: GoBoundedGoroutine("chunked_test.cs", 255, 5, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -46,7 +46,7 @@ using static global::go.net.http.internal_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/internal/chunked_test.go", "chunked_test.cs", "AB8igpSCgoKCgpSAkraCgoKClICSABEIlIKCgoKClIKCgoKUgoLcgoKKwoKCgpSCgoKClIKCpoKCyoKCgoKClIL6goKUgoKCgoKClIKCgrKCgoKCgpSCpoIACQiCAAoggpSCgoKCpoIACQyCqoKClICSAAgMooKSlIKCgoKUgoKUkpSCgIIACAySlIKCgoCCyIKAggAICIKUgoCCyKaCgpSCgpKClKSCgriEkoKClKSCgpSCAAgIggAQIJKCgoIADBqigoKUgoKClA==", "124-135:1;194-196:1;207-209:2;253-258:1;268-273:1;300-306:1")]
+[assembly: GoPositionMap("net/http/internal/chunked_test.go", "chunked_test.cs", "AB0igpSCgoKCgpSAkraCgoKClICSABEIlIKCgoKClIKCgoKUgoLcgoKKwoKCgpSCgoKClIKCpoKCyoKCgoKClIL6goKUgoKCgoKClIKCgrKCgoKCgpSCpoIACQiCAAoggpSCgoKCpoIACQyCqoKClJL8ooKSlIKCgoKUgoKUkpSCgvySlIKCgoK4goCCAAgIgpSCgrimgoKUgoKSgpSkgoK4hJKCgpSkgoKUggAICIIAECCSgoKCAAwaooKClIKCgpQ=", "124-135:1;194-196:1;207-209:2;253-258:1;268-273:1;300-306:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

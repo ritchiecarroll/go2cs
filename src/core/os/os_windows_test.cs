@@ -34,8 +34,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
 using @internal.syscall.windows;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
 using go.io;
 using go.os;
@@ -47,7 +45,6 @@ using unicode;
 partial class os_test_package {
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink");
-
 internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlinkvolume");
 
 public static void TestSameWindowsFile(ж<Δtesting.T> t) {
@@ -113,7 +110,7 @@ internal static void testDirLinks(ж<Δtesting.T> t, slice<dirLinkTest> tests) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string link = filepath.Join(tmpdir, test.name + "_link");
         var errΔ1 = test.mklink(link, dir);
         if (errΔ1 != nil) {
@@ -628,10 +625,8 @@ internal static ref readonly @string linkᶜ1 => ref linkᶜ1ᵇ;
 private static readonly @string linkᶜ1ᵇ = "link"u8;
 
 public static void TestStatLxSymLink(ж<Δtesting.T> t) {
-    {
-        var (_, errΔ1) = exec.LookPath(wslˢ); if (errΔ1 != nil) {
-            t.Skip(skippingWslNotDetectedˢ);
-        }
+    var (_, errΔ1) = exec.LookPath(wslˢ); if (errΔ1 != nil) {
+        t.Skip(skippingWslNotDetectedˢ);
     }
 
     t.Chdir(t.TempDir());
@@ -654,11 +649,9 @@ public static void TestStatLxSymLink(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var m = fi.Mode(); if ((fs.FileMode)(m & fs.ModeSymlink) != 0) {
-            // This can happen depending on newer WSL versions when running as admin or in developer mode.
-            t.Skip(skippingWslCreatedˢ);
-        }
+    var m = fi.Mode(); if ((fs.FileMode)(m & fs.ModeSymlink) != 0) {
+        // This can happen depending on newer WSL versions when running as admin or in developer mode.
+        t.Skip(skippingWslCreatedˢ);
     }
     // Stat'ing a IO_REPARSE_TAG_LX_SYMLINK from outside WSL always return ERROR_CANT_ACCESS_FILE.
     // We check this condition to validate that os.Stat has tried to follow the link.
@@ -674,7 +667,7 @@ public static void TestStartProcessAttr(ж<Δtesting.T> t) {
     try {
         t.Parallel();
 
-        var (p, err) = Δos.StartProcess(Δos.Getenv(comspecˢ), slice<@string>(["/c", "cd"]), @new<Δos.ProcAttr>());
+        var (p, err) = Δos.StartProcess(Δos.Getenv(comspecˢ), ["/c", "cd"], @new<Δos.ProcAttr>());
         if (err != nil) {
             return;
         }
@@ -763,7 +756,7 @@ public static void TestOpenVolumeName(ж<Δtesting.T> t) {
 
         var want = slice<@string>(["file1", "file2", "file3", "gopher.txt"]);
         slices.Sort<slice<@string>, @string>(want);
-        foreach (var (_, name) in want) {
+        foreach (var (_, name) in range(want)) {
             var errΔ1 = Δos.WriteFile(filepath.Join(tmpdir, name), default, 511);
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);
@@ -803,15 +796,11 @@ public static void TestDeleteReadOnly(ж<Δtesting.T> t) {
     }
     f.Close();
 
-    {
-        err = Δos.Chmod(p, 256); if (err != nil) {
-            t.Fatal(err);
-        }
+    err = Δos.Chmod(p, 256); if (err != nil) {
+        t.Fatal(err);
     }
-    {
-        err = Δos.Remove(p); if (err != nil) {
-            t.Fatal(err);
-        }
+    err = Δos.Remove(p); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -844,9 +833,9 @@ public static void TestReadStdin(ж<Δtesting.T> t) {
             "\U0001F648\U0001F649\U0001F64A"
         ]);
 
-        foreach (var (_, consoleSize) in slice<nint>([1, 2, 3, 10, 16, 100, 1000])) {
-            foreach (var (_, readSize) in slice<nint>([1, 2, 3, 4, 5, 8, 10, 16, 20, 50, 100])) {
-                foreach (var (_, s) in tests) {
+        foreach (var (_, consoleSize) in range(slice<nint>([1, 2, 3, 10, 16, 100, 1000]))) {
+            foreach (var (_, readSize) in range(slice<nint>([1, 2, 3, 4, 5, 8, 10, 16, 20, 50, 100]))) {
+                foreach (var (_, s) in range(tests)) {
                     var testConsoleʗ1 = testConsole;
                     t.Run(fmt.Sprintf("c%d/r%d/%s"u8, consoleSize, readSize, s), (ж<Δtesting.T> tΔ1) => {
                         ref var s16 = ref heap<slice<uint16>>(utf16.Encode(slice<rune>(s)), out var Ꮡs16);
@@ -941,7 +930,7 @@ internal static (slice<@string>, error) syscallCommandLineToArgv(@string cmd) {
         defer(syscall.LocalFree, (syscallꓸHandle)(uintptr)argv, ref ᒐ);
 
         slice<@string> args = default;
-        foreach (var (_, v) in (argv.Value).slice(0, argc)) {
+        foreach (var (_, v) in range((argv.Value).slice(0, argc))) {
             args = append(argsᴷ, args, syscall.UTF16ToString((v.Value)[..]));
         }
         args = move2heap(argsᴷ, args);
@@ -960,12 +949,10 @@ internal static void compareCommandLineToArgvWithSyscall(ж<Δtesting.T> t, @str
         t.Fatal(err);
     }
     var args = os_internal_test_package.CommandLineToArgv(cmd);
-    {
-        @string want = fmt.Sprintf("%q"u8, syscallArgs);
-        @string have = fmt.Sprintf("%q"u8, args); if (want != have) {
-            t.Errorf("testing os.commandLineToArgv(%q) failed: have %q want %q", cmd, args, syscallArgs);
-            return;
-        }
+    @string want = fmt.Sprintf("%q"u8, syscallArgs);
+    @string have = fmt.Sprintf("%q"u8, args); if (want != have) {
+        t.Errorf("testing os.commandLineToArgv(%q) failed: have %q want %q", cmd, args, syscallArgs);
+        return;
     }
 }
 
@@ -1002,10 +989,8 @@ public static void TestCmdArgs(ж<Δtesting.T> t) {
 
     @string prog = progᶜ;
     @string src = filepath.Join(tmpdir, mainGoˢ);
-    {
-        var errΔ1 = Δos.WriteFile(src, slice<byte>(prog), 438); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Δos.WriteFile(src, slice<byte>(prog), 438); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     @string exe = filepath.Join(tmpdir, mainExeˢ);
@@ -1067,7 +1052,7 @@ public static void TestCmdArgs(ж<Δtesting.T> t) {
         @" """"""Call Me Ishmael""""""",
         @" """"""""Call Me Ishmael"""" b c"
     ]);
-    foreach (var (_, cmdΔ1) in cmds) {
+    foreach (var (_, cmdΔ1) in range(cmds)) {
         compareCommandLineToArgvWithSyscall(t, "test"u8 + cmdΔ1);
         compareCommandLineToArgvWithSyscall(t, @"""cmd line"""u8 + cmdΔ1);
         compareCommandLineToArgvWithSyscall(t, exe + cmdΔ1);
@@ -1078,12 +1063,10 @@ public static void TestCmdArgs(ж<Δtesting.T> t) {
         if (errΔ2 != nil) {
             t.Fatalf("running %q failed: %v\n%v", args, errΔ2, (@string)outΔ1);
         }
-        {
-            @string want = fmt.Sprintf("%q"u8, args);
-            @string have = (@string)outΔ1; if (want != have) {
-                t.Errorf("wrong output of executing %q: have %q want %q", args, have, want);
-                continue;
-            }
+        @string want = fmt.Sprintf("%q"u8, args);
+        @string have = (@string)outΔ1; if (want != have) {
+            t.Errorf("wrong output of executing %q: have %q want %q", args, have, want);
+            continue;
         }
     }
 }
@@ -1198,10 +1181,8 @@ public static void TestFileStatNUL(ж<Δtesting.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var (got, want) = (fi.Mode(), (fs.FileMode)((fs.FileMode)(Δos.ModeDevice | Δos.ModeCharDevice) | 438)); if (got != want) {
-                t.Errorf("Open(%q).Stat().Mode() = %v, want %v", nulˢ4, got, want);
-            }
+        var (got, want) = (fi.Mode(), (fs.FileMode)((fs.FileMode)(Δos.ModeDevice | Δos.ModeCharDevice) | 438)); if (got != want) {
+            t.Errorf("Open(%q).Stat().Mode() = %v, want %v", nulˢ4, got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1215,10 +1196,8 @@ public static void TestStatNUL(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (got, want) = (fi.Mode(), (fs.FileMode)((fs.FileMode)(Δos.ModeDevice | Δos.ModeCharDevice) | 438)); if (got != want) {
-            t.Errorf("Stat(%q).Mode() = %v, want %v", nulˢ4, got, want);
-        }
+    var (got, want) = (fi.Mode(), (fs.FileMode)((fs.FileMode)(Δos.ModeDevice | Δos.ModeCharDevice) | 438)); if (got != want) {
+        t.Errorf("Stat(%q).Mode() = %v, want %v", nulˢ4, got, want);
     }
 }
 
@@ -1262,10 +1241,8 @@ public static void TestRootRelativeDirSymlink(ж<Δtesting.T> t) {
 
         @string temp = t.TempDir();
         @string dir = filepath.Join(temp, dirˢ);
-        {
-            var errΔ1 = Δos.Mkdir(dir, 493); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.Mkdir(dir, 493); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         @string volumeRelDir = strings.TrimPrefix(dir, filepath.VolumeName(dir)); // leaves leading backslash
@@ -1283,12 +1260,10 @@ public static void TestRootRelativeDirSymlink(ж<Δtesting.T> t) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        {
-            var (fi, errΔ2) = f.Stat(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            } else if (!fi.IsDir()) {
-                t.Errorf("Open(%#q).Stat().IsDir() = false; want true", f.Name());
-            }
+        var (fi, errΔ2) = f.Stat(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
+        } else if (!fi.IsDir()) {
+            t.Errorf("Open(%#q).Stat().IsDir() = false; want true", f.Name());
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1310,17 +1285,13 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> t) {
 
         // Construct a directory to be symlinked.
         @string temp = t.TempDir();
-        {
-            @string v = filepath.VolumeName(temp); if (len(v) < 2 || v[1] != ':') {
-                t.Skipf("Can't test relative symlinks: t.TempDir() (%#q) does not begin with a drive letter.", temp);
-            }
+        @string v = filepath.VolumeName(temp); if (len(v) < 2 || v[1] != ':') {
+            t.Skipf("Can't test relative symlinks: t.TempDir() (%#q) does not begin with a drive letter.", temp);
         }
 
         @string absDir = filepath.Join(temp, dirSubˢ);
-        {
-            var errΔ1 = Δos.MkdirAll(absDir, 493); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.MkdirAll(absDir, 493); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         // Change to the temporary directory and construct a
@@ -1343,10 +1314,8 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> t) {
         // Now change back to the original working directory and verify that the
         // symlink still refers to its original path and is correctly marked as a
         // directory.
-        {
-            var errΔ2 = Δos.Chdir(oldwd); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = Δos.Chdir(oldwd); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         t.Logf("Chdir(%#q)", oldwd);
 
@@ -1447,11 +1416,9 @@ public static void TestRootDirAsTemp(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatalf("Failed to spawn child process: %v %q", err, (@string)output);
     }
-    {
-        @string want = newtmp;
-        @string have = (@string)output; if (have != want) {
-            t.Fatalf("unexpected child process output %q, want %q", have, want);
-        }
+    @string want = newtmp;
+    @string have = (@string)output; if (have != want) {
+        t.Fatalf("unexpected child process output %q, want %q", have, want);
     }
 }
 
@@ -1495,7 +1462,7 @@ public static void TestReadlink(ж<Δtesting.T> t) {
         new(junction: false, dir: false, drive: false, relative: false),
         new(junction: false, dir: false, drive: false, relative: true)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var ttΔ1 = ref heap<TestReadlink_tests>(tt, out var ᏑttΔ1);
         @string name = default;
         if (ttΔ1.junction) {
@@ -1535,16 +1502,12 @@ public static void TestReadlink(ж<Δtesting.T> t) {
             @string link = filepath.Join(tmpdir, linkˢ);
             @string target = filepath.Join(tmpdir, targetˢ);
             if (ttʗ1.dir) {
-                {
-                    var errΔ1 = Δos.MkdirAll(target, 511); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.MkdirAll(target, 511); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             } else {
-                {
-                    var errΔ2 = Δos.WriteFile(target, default, 438); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = Δos.WriteFile(target, default, 438); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
             }
             @string want = default;
@@ -1573,16 +1536,12 @@ public static void TestReadlink(ж<Δtesting.T> t) {
             }
             if (ttʗ1.junction) {
                 var cmd = testenv.Command(new os_test_package.testing_TжTB(tΔ1), cmdˢ, "/c", mklinkˢ, "/J", link, target);
-                {
-                    var (@out, errΔ3) = cmd.CombinedOutput(); if (errΔ3 != nil) {
-                        tΔ1.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), errΔ3, @out);
-                    }
+                var (@out, errΔ3) = cmd.CombinedOutput(); if (errΔ3 != nil) {
+                    tΔ1.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), errΔ3, @out);
                 }
             } else {
-                {
-                    var errΔ4 = Δos.Symlink(target, link); if (errΔ4 != nil) {
-                        tΔ1.Fatalf("Symlink(%#q, %#q): %v", target, link, errΔ4);
-                    }
+                var errΔ4 = Δos.Symlink(target, link); if (errΔ4 != nil) {
+                    tΔ1.Fatalf("Symlink(%#q, %#q): %v", target, link, errΔ4);
                 }
             }
             (var got, err) = Δos.Readlink(link);
@@ -1607,10 +1566,8 @@ public static void TestOpenDirTOCTOU(ж<Δtesting.T> t) {
     // See issue 52747.
     @string tmpdir = t.TempDir();
     @string dir = filepath.Join(tmpdir, dirˢ);
-    {
-        var errΔ1 = Δos.Mkdir(dir, 511); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Δos.Mkdir(dir, 511); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var (f, err) = Δos.Open(dir);
     if (err != nil) {
@@ -1677,12 +1634,10 @@ public static void TestAppExecLinkStat(ж<Δtesting.T> t) {
     if (lfi.Name() != pythonExeName) {
         t.Errorf("Stat %s: got %q, but wanted %q", pythonPath, lfi.Name(), pythonExeName);
     }
-    {
-        var tp = lfi.Mode().Type(); if (tp != fs.ModeIrregular) {
-            // A reparse point is not a regular file, but we don't have a more appropriate
-            // ModeType bit for it, so it should be marked as irregular.
-            t.Errorf("%q should not be a an irregular file (mode=0x%x)", pythonPath, (uint32)tp);
-        }
+    var tp = lfi.Mode().Type(); if (tp != fs.ModeIrregular) {
+        // A reparse point is not a regular file, but we don't have a more appropriate
+        // ModeType bit for it, so it should be marked as irregular.
+        t.Errorf("%q should not be a an irregular file (mode=0x%x)", pythonPath, (uint32)tp);
     }
 
     if (sfi.Name() != pythonExeName) {
@@ -1750,10 +1705,8 @@ public static void TestIllformedUTF16FileName(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = fi.Name(); if (got != name) {
-            t.Errorf("got %q, want %q", got, name);
-        }
+    @string got = fi.Name(); if (got != name) {
+        t.Errorf("got %q, want %q", got, name);
     }
     // Verify that File.Readdirnames lists the file.
     (var f, err) = Δos.Open(dir);
@@ -1785,7 +1738,7 @@ public static partial void TestUTF16Alloc(ж<Δtesting.T> t) {
         }
     }
     allowsPerRun(1, () => {
-        syscall.UTF16ToString(slice<uint16>(['a', 'b', 'c']));
+        syscall.UTF16ToString(['a', 'b', 'c']);
     });
     allowsPerRun(1, () => {
         syscall.UTF16FromString(abcˢ);
@@ -1798,10 +1751,8 @@ private static readonly @string invalidˢᵇ = "invalid"u8;
 
 public static void TestNewFileInvalid(ж<Δtesting.T> t) {
     t.Parallel();
-    {
-        var f = Δos.NewFile((uintptr)syscall.InvalidHandle, invalidˢ); if (f != nil) {
-            t.Errorf("NewFile(InvalidHandle) got %v want nil", f.OrTypedNil());
-        }
+    var f = Δos.NewFile((uintptr)syscall.InvalidHandle, invalidˢ); if (f != nil) {
+        t.Errorf("NewFile(InvalidHandle) got %v want nil", f.OrTypedNil());
     }
 }
 
@@ -1832,15 +1783,11 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> t) {
         @string dir = t.TempDir();
         @string pathA = filepath.Join(dir, "a");
         @string pathB = filepath.Join(dir, "b");
-        {
-            var errΔ1 = Δos.WriteFile(pathA, default, 438); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.WriteFile(pathA, default, 438); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var errΔ2 = Δos.WriteFile(pathB, default, 438); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = Δos.WriteFile(pathB, default, 438); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         var (files, err) = Δos.ReadDir(dir);
@@ -1913,10 +1860,8 @@ public static void TestReadWriteFileOverlapped(ж<Δtesting.T> t) {
             t.Fatalf("Write = %d; want %d", n, len(data));
         }
 
-        {
-            var (_, errΔ1) = f.Seek(0, Δio.SeekStart); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = f.Seek(0, Δio.SeekStart); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         (var got, err) = Δio.ReadAll(new os_test_package.os_FileжReader(f));
@@ -1969,10 +1914,8 @@ public static void TestStdinOverlappedPipe(ж<Δtesting.T> t) {
 
         // Write some data to the pipe. The child process will read it.
         var want = slice<byte>("test\n"u8);
-        {
-            var (_, errΔ2) = w.Write(want); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = w.Write(want); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         // Create a child process that will read from the pipe
@@ -2005,10 +1948,8 @@ internal static ж<Δos.File> newFileOverlapped(Δtesting.TB t, @string name, bo
     }
     var fʗ1 = f;
     t.Cleanup(() => {
-        {
-            var errΔ1 = fʗ1.Close(); if (errΔ1 != nil && !errors.Is(errΔ1, Δos.ErrClosed)) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = fʗ1.Close(); if (errΔ1 != nil && !errors.Is(errΔ1, Δos.ErrClosed)) {
+            t.Fatal(errΔ1);
         }
     });
     return f;
@@ -2055,10 +1996,8 @@ internal static ж<Δos.File> newPipe(Δtesting.TB t, @string name, bool message
     var f = Δos.NewFile((uintptr)h, name);
     var fʗ1 = f;
     t.Cleanup(() => {
-        {
-            var errΔ1 = fʗ1.Close(); if (errΔ1 != nil && !errors.Is(errΔ1, Δos.ErrClosed)) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = fʗ1.Close(); if (errΔ1 != nil && !errors.Is(errΔ1, Δos.ErrClosed)) {
+            t.Fatal(errΔ1);
         }
     });
     return f;
@@ -2181,7 +2120,7 @@ public static void TestFile(ж<Δtesting.T> t) {
         new("overlapped-write", false, true),
         new("sync", false, false)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestFile_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2203,10 +2142,8 @@ public static void TestFileOverlappedSeek(ж<Δtesting.T> t) {
     @string name = filepath.Join(t.TempDir(), fooˢ);
     var f = newFileOverlapped(new os_test_package.testing_TжTB(t), name, true);
     var content = slice<byte>("foo"u8);
-    {
-        var (_, errΔ1) = f.Write(content); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var (_, errΔ1) = f.Write(content); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     // Check that the file pointer is at the expected offset.
     var (n, err) = f.Seek(0, Δio.SeekCurrent);
@@ -2217,17 +2154,13 @@ public static void TestFileOverlappedSeek(ж<Δtesting.T> t) {
         t.Errorf("expected file pointer to be at offset %d, got %d", len(content), n);
     }
     // Set the file pointer to the start of the file.
-    {
-        var (_, errΔ2) = f.Seek(0, Δio.SeekStart); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var (_, errΔ2) = f.Seek(0, Δio.SeekStart); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
     // Read the first byte.
     array<byte> buf = new(1);
-    {
-        var (_, errΔ3) = f.Read(buf[..]); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var (_, errΔ3) = f.Read(buf[..]); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
     if (!bytes.Equal(buf[..], content[..(int)(len(buf))])) {
         t.Errorf("expected %q, got %q", content[..(int)(len(buf))], buf[..]);
@@ -2240,29 +2173,21 @@ public static void TestFileOverlappedSeek(ж<Δtesting.T> t) {
     if (n != (int64)len(buf)) {
         t.Errorf("expected file pointer to be at offset %d, got %d", len(buf), n);
     }
-    {
-        (n, err) = f.Seek(1, Δio.SeekStart); if (err != nil) {
-            t.Fatal(err);
-        } else if (n != 1) {
-            t.Errorf("expected file pointer to be at offset %d, got %d", (nint)1, n);
-        }
+    (n, err) = f.Seek(1, Δio.SeekStart); if (err != nil) {
+        t.Fatal(err);
+    } else if (n != 1) {
+        t.Errorf("expected file pointer to be at offset %d, got %d", (nint)1, n);
     }
-    {
-        (n, err) = f.Seek(-1, Δio.SeekEnd); if (err != nil) {
-            t.Fatal(err);
-        } else if (n != (int64)(len(content) - 1)) {
-            t.Errorf("expected file pointer to be at offset %d, got %d", len(content) - 1, n);
-        }
+    (n, err) = f.Seek(-1, Δio.SeekEnd); if (err != nil) {
+        t.Fatal(err);
+    } else if (n != (int64)(len(content) - 1)) {
+        t.Errorf("expected file pointer to be at offset %d, got %d", len(content) - 1, n);
     }
-    {
-        var (_, errΔ4) = f.Seek(-1, Δio.SeekStart); if (!errors.Is(errΔ4, windows.ERROR_NEGATIVE_SEEK)) {
-            t.Errorf("expected ERROR_NEGATIVE_SEEK, got %v", errΔ4);
-        }
+    var (_, errΔ4) = f.Seek(-1, Δio.SeekStart); if (!errors.Is(errΔ4, windows.ERROR_NEGATIVE_SEEK)) {
+        t.Errorf("expected ERROR_NEGATIVE_SEEK, got %v", errΔ4);
     }
-    {
-        var (_, errΔ5) = f.Seek(0, -1); if (!errors.Is(errΔ5, windows.ERROR_INVALID_PARAMETER)) {
-            t.Errorf("expected ERROR_INVALID_PARAMETER, got %v", errΔ5);
-        }
+    var (_, errΔ5) = f.Seek(0, -1); if (!errors.Is(errΔ5, windows.ERROR_INVALID_PARAMETER)) {
+        t.Errorf("expected ERROR_INVALID_PARAMETER, got %v", errΔ5);
     }
 }
 
@@ -2287,15 +2212,11 @@ public static void TestFileOverlappedReadAtSeekVolume(ж<Δtesting.T> t) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         array<byte> buf = new(0);
-        {
-            var (_, errΔ1) = f.ReadAt(buf[..], 0); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = f.ReadAt(buf[..], 0); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = f.Seek(0, Δio.SeekCurrent); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = f.Seek(0, Δio.SeekCurrent); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2313,15 +2234,11 @@ public static void TestPipe(ж<Δtesting.T> t) {
         var rʗ1 = r;
         var wʗ1 = w;
         defer(() => {
-            {
-                var errΔ1 = rʗ1.Close(); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = rʗ1.Close(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
-            {
-                var errΔ2 = wʗ1.Close(); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var errΔ2 = wʗ1.Close(); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }, ref ᒐ);
         testReadWrite(t, r, w);
@@ -2344,7 +2261,7 @@ public static void TestNamedPipe(ж<Δtesting.T> t) {
         new("overlapped-read", true, false),
         new("sync", false, false)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNamedPipe_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2497,10 +2414,8 @@ public static partial void TestFileAssociatedWithExternalIOCP(ж<Δtesting.T> t)
                 // Already closed at the end of the test.
                 return;
             }
-            {
-                var errΔ1 = syscall.CloseHandle(iocp); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = syscall.CloseHandle(iocp); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }, ref ᒐ);
 
@@ -2514,41 +2429,29 @@ public static partial void TestFileAssociatedWithExternalIOCP(ж<Δtesting.T> t)
             chʗ1.ᐸꟷ(errΔ2);
         });
 
-        {
-            var errΔ3 = iocpAssociateFile(pipe, iocp); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = iocpAssociateFile(pipe, iocp); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
-        {
-            var errΔ4 = iocpAssociateFile(@file, iocp); if (errΔ4 != nil) {
-                t.Fatal(errΔ4);
-            }
+        var errΔ4 = iocpAssociateFile(@file, iocp); if (errΔ4 != nil) {
+            t.Fatal(errΔ4);
         }
 
-        {
-            var (_, errΔ5) = pipe.Write(slice<byte>("hello"u8)); if (errΔ5 != nil) {
-                t.Fatal(errΔ5);
-            }
+        var (_, errΔ5) = pipe.Write(slice<byte>("hello"u8)); if (errΔ5 != nil) {
+            t.Fatal(errΔ5);
         }
-        {
-            var (_, errΔ6) = @file.Write(slice<byte>("hello"u8)); if (errΔ6 != nil) {
-                t.Fatal(errΔ6);
-            }
+        var (_, errΔ6) = @file.Write(slice<byte>("hello"u8)); if (errΔ6 != nil) {
+            t.Fatal(errΔ6);
         }
-        {
-            var (_, errΔ7) = @file.WriteAt(slice<byte>("hello"u8), 0); if (errΔ7 != nil) {
-                t.Fatal(errΔ7);
-            }
+        var (_, errΔ7) = @file.WriteAt(slice<byte>("hello"u8), 0); if (errΔ7 != nil) {
+            t.Fatal(errΔ7);
         }
 
         // Wait fot he goroutine to call GetQueuedCompletionStatus.
         time.Sleep(100 * time.Millisecond);
 
         // Trigger ERROR_ABANDONED_WAIT_0.
-        {
-            var errΔ8 = syscall.CloseHandle(iocp); if (errΔ8 != nil) {
-                t.Fatal(errΔ8);
-            }
+        var errΔ8 = syscall.CloseHandle(iocp); if (errΔ8 != nil) {
+            t.Fatal(errΔ8);
         }
 
         // Wait for the completion to be posted to the IOCP.
@@ -2629,16 +2532,12 @@ public static partial void TestFileWriteFdRace(ж<Δtesting.T> t) {
             t.Fatal(err);
         }
         defer(syscall.CloseHandle, iocp, ref ᒐ);
-        {
-            var errΔ2 = iocpAssociateFile(f, iocp); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = iocpAssociateFile(f, iocp); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
-        {
-            var (_, errΔ3) = f.Write(slice<byte>("hi"u8)); if (errΔ3 != nil) {
-                t.Error(errΔ3);
-            }
+        var (_, errΔ3) = f.Write(slice<byte>("hi"u8)); if (errΔ3 != nil) {
+            t.Error(errΔ3);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2651,7 +2550,7 @@ internal partial struct TestSplitPath_type /*dyn*/ {
 
 public static void TestSplitPath(ж<Δtesting.T> t) {
     t.Parallel();
-    foreach (var (_, tt) in slice<TestSplitPath_type>([
+    foreach (var (_, tt) in range(slice<TestSplitPath_type>([
         new(@"a", @".", @"a"),
         new(@"a\", @".", @"a"),
         new(@"a\\", @".", @"a"),
@@ -2678,11 +2577,9 @@ public static void TestSplitPath(ж<Δtesting.T> t) {
         new(@"a/b/c", @"a/b", @"c"),
         new(@"a/b/c/", @"a/b", @"c"),
         new(@"\\?\c:\a", @"\\?\c:\", @"a")
-    ])) {
-        {
-            var (dir, @base) = os_internal_test_package.SplitPath(tt.path); if (dir != tt.wantDir || @base != tt.wantBase) {
-                t.Errorf("splitPath(%q) = %q, %q, want %q, %q", tt.path, dir, @base, tt.wantDir, tt.wantBase);
-            }
+    ]))) {
+        var (dir, @base) = os_internal_test_package.SplitPath(tt.path); if (dir != tt.wantDir || @base != tt.wantBase) {
+            t.Errorf("splitPath(%q) = %q, %q, want %q, %q", tt.path, dir, @base, tt.wantDir, tt.wantBase);
         }
     }
 }
@@ -2709,7 +2606,7 @@ public static void TestOpenFileFlags(ж<Δtesting.T> t) {
         new(windows.O_FILE_FLAG_SEQUENTIAL_SCAN, (uint32)((uint32)windows.FILE_SEQUENTIAL_ONLY | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT)),
         new(windows.O_FILE_FLAG_WRITE_THROUGH, (uint32)((uint32)windows.FILE_WRITE_THROUGH | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT))
     ]);
-    foreach (var (i, vᴛ1) in tests) {
+    foreach (var (i, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestOpenFileFlags_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2725,11 +2622,9 @@ public static void TestOpenFileFlags(ж<Δtesting.T> t) {
                 var fʗ1 = f;
                 defer(() => fʗ1.Close(), ref ᒐ);
                 ref var info = ref heap(new windows.FILE_MODE_INFORMATION(), out var Ꮡinfo);
-                {
-                    var errΔ1 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
-                        @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
+                    @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
                 if (info.Mode != ttʗ1.wantMode) {
                     tΔ1.Errorf("file mode = 0x%x; want 0x%x", info.Mode, ttʗ1.wantMode);
@@ -2748,16 +2643,12 @@ public static void TestOpenFileDeleteOnClose(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = f.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = f.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     // The file should be deleted after closing.
-    {
-        var (_, errΔ2) = Δos.Stat(name); if (!errors.Is(errΔ2, Δos.ErrNotExist)) {
-            t.Errorf("expected file to be deleted, got %v", errΔ2);
-        }
+    var (_, errΔ2) = Δos.Stat(name); if (!errors.Is(errΔ2, Δos.ErrNotExist)) {
+        t.Errorf("expected file to be deleted, got %v", errΔ2);
     }
 }
 
@@ -2808,12 +2699,12 @@ public static void TestFileKeepsCompletionNotificationModes(ж<Δtesting.T> t) {
     // NewFile must preserve completion notification modes and perform I/O
     // correctly with each combination. See go.dev/issue/80979.
     t.Parallel();
-    foreach (var (_, vᴛ1) in slice<TestFileKeepsCompletionNotificationModes_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestFileKeepsCompletionNotificationModes_type>([
         new("none", 0),
         new("skipSuccess", syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS),
         new("skipEvent", syscall.FILE_SKIP_SET_EVENT_ON_HANDLE),
         new("both", (uint8)((uint8)syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS | (uint8)syscall.FILE_SKIP_SET_EVENT_ON_HANDLE))
-    ])) {
+    ]))) {
         ref var tt = ref heap(new TestFileKeepsCompletionNotificationModes_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2832,11 +2723,9 @@ public static void TestFileKeepsCompletionNotificationModes(ж<Δtesting.T> t) {
                 if (err != nil) {
                     tΔ1.Fatal(err);
                 }
-                {
-                    var errΔ1 = syscall.SetFileCompletionNotificationModes(h, ttʗ1.modes); if (errΔ1 != nil) {
-                        syscall.CloseHandle(h);
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = syscall.SetFileCompletionNotificationModes(h, ttʗ1.modes); if (errΔ1 != nil) {
+                    syscall.CloseHandle(h);
+                    tΔ1.Fatal(errΔ1);
                 }
                 var f = Δos.NewFile((uintptr)h, name);
                 if (f == nil) {
@@ -2848,20 +2737,16 @@ public static void TestFileKeepsCompletionNotificationModes(ж<Δtesting.T> t) {
 
                 // Query h directly: calling f.Fd would disassociate it from the poller.
                 ref var info = ref heap(new windows.FILE_IO_COMPLETION_NOTIFICATION_INFORMATION(), out var Ꮡinfo);
-                {
-                    var errΔ2 = windows.NtQueryInformationFile(h, Ꮡ(new windows.IO_STATUS_BLOCK()),
-                        @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileIoCompletionNotificationInformation); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = windows.NtQueryInformationFile(h, Ꮡ(new windows.IO_STATUS_BLOCK()),
+                    @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileIoCompletionNotificationInformation); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
                 if (info.Flags != (uint32)ttʗ1.modes) {
                     tΔ1.Fatalf("completion modes = %#x; want %#x", info.Flags, ttʗ1.modes);
                 }
                 // Check that NewFile has initialized the runtime poller.
-                {
-                    var errΔ3 = f.SetDeadline(new time.Time()); if (errΔ3 != nil) {
-                        tΔ1.Fatal(errΔ3);
-                    }
+                var errΔ3 = f.SetDeadline(new time.Time()); if (errΔ3 != nil) {
+                    tΔ1.Fatal(errΔ3);
                 }
                 @string want = wantᶜ;
                 {
@@ -2905,10 +2790,8 @@ public static void TestNewFileStdinBlocked(ж<Δtesting.T> t) {
     var stdinʗ1 = stdin;
     Ꮡwg.Go(() => {
         // Block stdin on a read.
-        {
-            var (_, err) = stdinʗ1.Read(new slice<byte>(1)); if (err != nil) {
-                t.Error(err);
-            }
+        var (_, err) = stdinʗ1.Read(new slice<byte>(1)); if (err != nil) {
+            t.Error(err);
         }
     });
 

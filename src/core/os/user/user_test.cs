@@ -6,8 +6,6 @@ namespace go.os;
 using os = os_package;
 using slices = slices_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.os.user_package;
 
 partial class user_internal_test_package {

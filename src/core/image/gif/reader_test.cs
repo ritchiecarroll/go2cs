@@ -97,7 +97,7 @@ public static void TestDecode(ж<testing.T> t) {
         // a bogus sub-block following.
         new(2, 1, 1, errTooMuch)
     ]);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var b = Ꮡ(new bytes.Buffer());
         b.WriteString(headerStr);
         b.WriteString(paletteStr);
@@ -143,7 +143,7 @@ public static void TestDecode(ж<testing.T> t) {
             continue;
         }
         var want = Ꮡ(new image.Paletted(
-            Pix: slice<uint8>([0, 0]),
+            Pix: [0, 0],
             Stride: 2,
             Rect: image.Rect(0, 0, 2, 1),
             Palette: new Δcolor.Palette(new Δcolor.Color[]{new colorꓸRGBA(0x10, 0x20, 0x30, 0xff), new colorꓸRGBA(0x40, 0x50, 0x60, 0xff)
@@ -169,7 +169,7 @@ public static void TestTransparentIndex(ж<testing.T> t) {
         }
         // Write an image with bounds 2x1, as per TestDecode.
         b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
-        var enc = lzwEncode(slice<byte>([0x00, 0x00]));
+        var enc = lzwEncode([0x00, 0x00]);
         if (len(enc) > 0xff) {
             t.Fatalf("compressed length %d is too large", len(enc));
         }
@@ -194,7 +194,7 @@ public static void TestTransparentIndex(ж<testing.T> t) {
     if (len(g.Image) != len(wants)) {
         t.Fatalf("got %d images, want %d", len(g.Image), len(wants));
     }
-    foreach (var (i, want) in wants) {
+    foreach (var (i, want) in range(wants)) {
         var got = g.Image[i].Palette;
         if (!reflect.DeepEqual(got, want)) {
             t.Errorf("palette #%d:\ngot  %v\nwant %v", i, got, want);
@@ -203,7 +203,7 @@ public static void TestTransparentIndex(ж<testing.T> t) {
 }
 
 // testGIF is a simple GIF that we can modify to test different scenarios.
-internal static slice<byte> testGIF = slice<byte>([
+internal static slice<byte> testGIF = [
     (byte)'G', (byte)'I', (byte)'F', (byte)'8', (byte)'9', (byte)'a',
     1, 0, 1, 0, // w=1, h=1 (6)
     128, 0, 0, // headerFields, bg, aspect (10)
@@ -217,7 +217,7 @@ internal static slice<byte> testGIF = slice<byte>([
     0x02, 0x02, 0x4c, 0x01, 0x00, // lzw pixels
     // trailer
     0x3b
-]);
+];
 
 internal static void @try(ж<testing.T> t, slice<byte> b, @string want) {
     var (_, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
@@ -270,7 +270,7 @@ public static void TestNoPalette(ж<testing.T> t) {
     b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
     // Encode the pixels: neither is in range, because there is no palette.
-    var enc = lzwEncode(slice<byte>([0x00, 0x03]));
+    var enc = lzwEncode([0x00, 0x03]);
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
@@ -285,7 +285,7 @@ internal static ref readonly @string gifInvalidPixelValueˢ => ref gifInvalidPix
 private static readonly @string gifInvalidPixelValueˢᵇ = "gif: invalid pixel value"u8;
 
 public static void TestPixelOutsidePaletteRange(ж<testing.T> t) {
-    foreach (var (_, pval) in slice<byte>([0, 1, 2, 3])) {
+    foreach (var (_, pval) in range(slice<byte>([0, 1, 2, 3]))) {
         var b = Ꮡ(new bytes.Buffer());
 
         // Manufacture a GIF with a 2 color palette.
@@ -296,7 +296,7 @@ public static void TestPixelOutsidePaletteRange(ж<testing.T> t) {
         b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
         // Encode the pixels; some pvals trigger the expected error.
-        var enc = lzwEncode(slice<byte>([pval, pval]));
+        var enc = lzwEncode([pval, pval]);
         b.WriteByte((byte)len(enc));
         b.Write(enc);
         b.WriteByte(0x00); // An empty block signifies the end of the image data.
@@ -332,7 +332,7 @@ public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> t) {
     b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
     // Encode the pixels.
-    var enc = lzwEncode(slice<byte>([0x03, 0x03]));
+    var enc = lzwEncode([0x03, 0x03]);
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
@@ -380,7 +380,7 @@ public static void TestLoopCount(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestLoopCount_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -465,10 +465,8 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> t) {
             }
         }
         runtime.ReadMemStats(s1);
-        {
-            var heapDiff = (int64)(s1.HeapAlloc - s0.HeapAlloc); if (heapDiff > (int64)30 << 20) {
-                t.Fatalf("Decode of %d frames increased heap by %dMB", (nint)(frames), heapDiff >> 20);
-            }
+        var heapDiff = (int64)(s1.HeapAlloc - s0.HeapAlloc); if (heapDiff > (int64)30 << 20) {
+            t.Fatalf("Decode of %d frames increased heap by %dMB", (nint)(frames), heapDiff >> 20);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

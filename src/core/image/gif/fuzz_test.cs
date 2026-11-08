@@ -35,7 +35,7 @@ public static void FuzzDecode(ж<testing.F> Ꮡf) {
     if (err != nil) {
         Ꮡf.Fatalf("failed to read testdata directory: %s", err);
     }
-    foreach (var (_, de) in testdata) {
+    foreach (var (_, de) in range(testdata)) {
         if (de.IsDir() || !strings.HasSuffix(de.Name(), gifˢ)) {
             continue;
         }

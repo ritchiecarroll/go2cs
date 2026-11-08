@@ -29,7 +29,7 @@ public static void TestCloseRead(ж<testing.T> t) {
     }}
     t.Parallel();
 
-    foreach (var (_, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -71,10 +71,8 @@ public static void TestCloseRead(ж<testing.T> t) {
                     break;
                 }}
                 if (err != nil) {
-                    {
-                        var perr = parseCloseError(err, true); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCloseError(err, true); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -108,7 +106,7 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
         deadline = deadline.Add(-time.Until(deadline) / 10);
     }
 
-    foreach (var (_, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         var deadlineʗ1 = deadline;
         Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
@@ -160,10 +158,8 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                             break;
                         }}
                         if (errΔ1 != nil) {
-                            {
-                                var perr = parseCloseError(errΔ1, true); if (perr != nil) {
-                                    tΔ1.Error(perr);
-                                }
+                            var perr = parseCloseError(errΔ1, true); if (perr != nil) {
+                                tΔ1.Error(perr);
                             }
                             tΔ1.Error(errΔ1);
                             return;
@@ -181,10 +177,8 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                 var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), network);
                 var lsʗ1 = ls;
                 defer(() => lsʗ1.teardown(), ref ᒐ);
-                {
-                    var errΔ2 = ls.buildup(handler); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = ls.buildup(handler); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
 
                 var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
@@ -213,10 +207,8 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                     break;
                 }}
                 if (err != nil) {
-                    {
-                        var perr = parseCloseError(err, true); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCloseError(err, true); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -238,7 +230,7 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
 
 public static void TestConnClose(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -270,15 +262,11 @@ public static void TestConnClose(ж<testing.T> t) {
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
 
-                {
-                    var errΔ1 = c.Close(); if (errΔ1 != nil) {
-                        {
-                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Fatal(errΔ1);
+                var errΔ1 = c.Close(); if (errΔ1 != nil) {
+                    var perr = parseCloseError(errΔ1, false); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Fatal(errΔ1);
                 }
                 array<byte> b = new(1);
                 (var n, err) = c.Read(b[..]);
@@ -294,7 +282,7 @@ public static void TestConnClose(ж<testing.T> t) {
 
 public static void TestListenerClose(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -311,15 +299,11 @@ public static void TestListenerClose(ж<testing.T> t) {
                     break;
                 }}
 
-                {
-                    var errΔ1 = ln.Close(); if (errΔ1 != nil) {
-                        {
-                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Fatal(errΔ1);
+                var errΔ1 = ln.Close(); if (errΔ1 != nil) {
+                    var perr = parseCloseError(errΔ1, false); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Fatal(errΔ1);
                 }
                 var (c, err) = ln.Accept();
                 if (err == nil) {
@@ -342,7 +326,7 @@ public static void TestListenerClose(ж<testing.T> t) {
 
 public static void TestPacketConnClose(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, network) in slice<@string>(["udp", "unixgram"])) {
+    foreach (var (_, network) in range(slice<@string>(["udp", "unixgram"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -361,15 +345,11 @@ public static void TestPacketConnClose(ж<testing.T> t) {
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
 
-                {
-                    var errΔ1 = c.Close(); if (errΔ1 != nil) {
-                        {
-                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Fatal(errΔ1);
+                var errΔ1 = c.Close(); if (errΔ1 != nil) {
+                    var perr = parseCloseError(errΔ1, false); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Fatal(errΔ1);
                 }
                 array<byte> b = new(1);
                 var (n, _, err) = c.ReadFrom(b[..]);
@@ -400,7 +380,7 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => builtin.close(ᴛ1), syserrʗ1, ref ᒐ);
-                foreach (var (_, errΔ1) in abortedConnRequestErrors) {
+                foreach (var (_, errΔ1) in range(abortedConnRequestErrors)) {
                     syserrʗ1.ᐸꟷ(errΔ1);
                 }
             }
@@ -409,10 +389,8 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
         });
         var syserrʗ2 = syserr;
         Ꮡsw.Set(socktest.FilterAccept, (ж<socktest.Status> so) => {
-            {
-                var (errΔ2, ok) = ᐸꟷ(syserrʗ2, ꟷ); if (ok) {
-                    return (default, errΔ2);
-                }
+            var (errΔ2, ok) = ᐸꟷ(syserrʗ2, ꟷ); if (ok) {
+                return (default, errΔ2);
             }
             return (default, default);
         });
@@ -426,10 +404,8 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
                 defer(ᴛ1 => builtin.close(ᴛ1), operrʗ1, ref ᒐ);
                 var (cΔ1, errΔ3) = ln.Accept();
                 if (errΔ3 != nil) {
-                    {
-                        var perr = parseAcceptError(errΔ3); if (perr != nil) {
-                            operrʗ1.ᐸꟷ(perr);
-                        }
+                    var perr = parseAcceptError(errΔ3); if (perr != nil) {
+                        operrʗ1.ᐸꟷ(perr);
                     }
                     operrʗ1.ᐸꟷ(errΔ3);
                     return;
@@ -442,10 +418,8 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
         var ls = newLocalServer(new net_test_package.testing_TжTB(t), tcpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ4 = ls.buildup(handler); if (errΔ4 != nil) {
-                t.Fatal(errΔ4);
-            }
+        var errΔ4 = ls.buildup(handler); if (errΔ4 != nil) {
+            t.Fatal(errΔ4);
         }
 
         var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
@@ -464,7 +438,7 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
 
 public static void TestZeroByteRead(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         t.Run(network, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -576,10 +550,8 @@ internal static partial void withTCPConnPair(ж<testing.T> t, Func<ж<global::go
             errcʗ2.ᐸꟷ(err);
         });
         for (nint i = 0; i < 2; i++) {
-            {
-                var err = ᐸꟷ(errc); if (err != nil) {
-                    t.Error(err);
-                }
+            var err = ᐸꟷ(errc); if (err != nil) {
+                t.Error(err);
             }
         }
     }
@@ -663,7 +635,7 @@ public static void TestCloseUnblocksRead(ж<testing.T> t) {
         return default;
     };
     var client = error (ж<global::go.net_package.TCPConn> ss) => {
-        var (n, err) = ss.of(global::go.net_package.TCPConn.Ꮡconn).Read(slice<byte>([0]));
+        var (n, err) = ss.of(global::go.net_package.TCPConn.Ꮡconn).Read([0]);
         if (n != 0 || !AreEqual(err, Δio.EOF)) {
             return fmt.Errorf("Read = %v, %v; want 0, EOF"u8, n, err);
         }
@@ -714,7 +686,7 @@ public static void TestCloseUnblocksReadUDP(ж<testing.T> t) {
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
 
-        (var n, var src, err) = pc._<ж<global::go.net_package.UDPConn>>().ReadFromUDPAddrPort(slice<byte>([]));
+        (var n, var src, err) = pc._<ж<global::go.net_package.UDPConn>>().ReadFromUDPAddrPort([]);
 
         // Check for n > 0. Checking err == nil alone isn't enough;
         // on macOS, it returns (n=0, src=0.0.0.0:0, err=nil).
@@ -774,7 +746,7 @@ public static partial void TestNotTemporaryRead(ж<testing.T> t) {
         var ssʗ1 = ss;
         defer(() => ssʗ1.Close(), ref ᒐ);
 
-        (_, err) = ss.Read(slice<byte>([0]));
+        (_, err) = ss.Read([0]);
         if (err == nil) {
             t.Fatal(readSucceededˢ);
         } else if (AreEqual(err, Δio.EOF)) {
@@ -785,12 +757,10 @@ public static partial void TestNotTemporaryRead(ж<testing.T> t) {
             }
             t.Fatal(readUnexpectedlyReturnedˢ);
         }
-        {
-            var (ne, ok) = err._<ΔError>(ᐧ); if (!ok) {
-                t.Errorf("Read error does not implement net.Error: %v", err);
-            } else if (ne.Temporary()) {
-                t.Errorf("Read error is unexpectedly temporary: %v", err);
-            }
+        var (ne, ok) = err._<ΔError>(ᐧ); if (!ok) {
+            t.Errorf("Read error does not implement net.Error: %v", err);
+        } else if (ne.Temporary()) {
+            t.Errorf("Read error is unexpectedly temporary: %v", err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -813,10 +783,8 @@ public static void TestErrors(ж<testing.T> t) {
 
     // ErrClosed was introduced as type error, so we can't check
     // it using a declaration.
-    {
-        var (_, ok) = ErrClosed._<ΔError>(ᐧ); if (!ok) {
-            t.Fatal(errClosedDoesNotˢ);
-        }
+    var (_, ok) = ErrClosed._<ΔError>(ᐧ); if (!ok) {
+        t.Fatal(errClosedDoesNotˢ);
     }
 }
 

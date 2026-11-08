@@ -120,7 +120,7 @@ internal partial struct TestAliasing_target /*dyn*/ {
 //
 // without any of the inputs getting clobbered by the output being written.
 public static void TestAliasing(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestAliasing_target>([
+    foreach (var (_, tt) in range(slice<TestAliasing_target>([
         new(name: "Absolute", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Absolute))),
         new(name: "Invert", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Invert))),
         new(name: "Negate", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Negate))),
@@ -149,7 +149,7 @@ public static void TestAliasing(ж<testing.T> t) {
             name: "Select1",
             twoArgsF: (ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> v, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> x, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> y) => v.Select(x, y, 1)
         )
-    ])) {
+    ]))) {
         error err = default;
         switch (ᐧ) {
         case {} when tt.oneArgF != nil: {

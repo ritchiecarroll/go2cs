@@ -38,8 +38,6 @@ partial interface _ᴛ1 /*dyn*/ {
     bool Equal(cryptoꓸPublicKey x);
 }
 internal static _ᴛ1 _ᴛ1ʗ = new ecdh_ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey()));
-
-
 partial interface _ᴛ2 /*dyn*/ {
     cryptoꓸPublicKey Public();
     bool Equal(cryptoꓸPrivateKey x);
@@ -123,11 +121,9 @@ public static void TestGenerateKey(ж<testing.T> t) {
         // which for all curves is small enough (at most 2^-32, for P-256) that
         // a bit flip is more likely to make this test fail than bad luck.
         // Account for the extra MaybeReadByte byte, too.
-        {
-            nint got = r.n;
-            nint expected = len(k.Bytes()) + 1; if (got > expected) {
-                tΔ1.Errorf("expected GenerateKey to consume at most %v bytes, got %v", expected, got);
-            }
+        nint got = r.n;
+        nint expected = len(k.Bytes()) + 1; if (got > expected) {
+            tΔ1.Errorf("expected GenerateKey to consume at most %v bytes, got %v", expected, got);
         }
     });
 }
@@ -319,7 +315,7 @@ private static readonly @string boringcryptoˢᵇ = "boringcrypto"u8;
 
 public static void TestNewPrivateKey(ж<testing.T> t) {
     testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
-        foreach (var (_, input) in invalidPrivateKeys[curve]) {
+        foreach (var (_, input) in range(invalidPrivateKeys[curve])) {
             var (k, err) = curve.NewPrivateKey(hexDecode(tΔ1, input));
             if (err == nil) {
                 tΔ1.Errorf("unexpectedly accepted %q", input);
@@ -378,7 +374,7 @@ internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ec
         "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         // Non-canonical encoding.
         "0402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100d9254fdf800496acb33790b103c5ee9fac12832fe546c632225b0f7fce3da4574b1a879b623d722fa8fc34d5fc2a8731aad691a9a8bb8b554c95a051d6aa505acf"]),
-    [ecdh.X25519()] = slice<@string>([])
+    [ecdh.X25519()] = []
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -386,7 +382,7 @@ private static readonly object publicKeyWasNotNilOnˢ = (@string)"PublicKey was 
 
 public static void TestNewPublicKey(ж<testing.T> t) {
     testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
-        foreach (var (_, input) in invalidPublicKeys[curve]) {
+        foreach (var (_, input) in range(invalidPublicKeys[curve])) {
             var (k, err) = curve.NewPublicKey(hexDecode(tΔ1, input));
             if (err == nil) {
                 tΔ1.Errorf("unexpectedly accepted %q", input);
@@ -573,7 +569,7 @@ public static void TestLinker(ж<testing.T> t) {
     // P256, but none for the other curves.
     bool consistent = default;
     @string nm = run(testenv.GoToolPath(new testing_TжTB(t)), toolˢ, "nm", helloExeˢ);
-    foreach (var (_, match) in regexp.MustCompile(mTCryptoˢ).FindAllStringSubmatch(nm, -1)) {
+    foreach (var (_, match) in range(regexp.MustCompile(mTCryptoˢ).FindAllStringSubmatch(nm, -1))) {
         @string symbol = strings.ToLower(match[1]);
         if (strings.Contains(symbol, p256ˢ2)) {
             consistent = true;
@@ -604,13 +600,13 @@ public static void TestMismatchedCurves(ж<testing.T> t) {
         new("X25519", ecdh.X25519())
     ]);
 
-    foreach (var (_, privCurve) in curves) {
+    foreach (var (_, privCurve) in range(curves)) {
         var (priv, err) = privCurve.curve.GenerateKey(rand.Reader);
         if (err != nil) {
             t.Fatalf("failed to generate test key: %s", err);
         }
 
-        foreach (var (_, vᴛ1) in curves) {
+        foreach (var (_, vᴛ1) in range(curves)) {
             ref var pubCurve = ref heap(new TestMismatchedCurves_curves(), out var ᏑpubCurve);
             pubCurve = vᴛ1;
 

@@ -11,10 +11,10 @@ using static go.time_internal_test_package;
 
 partial class time_test_package {
 
-internal static slice<@string> zones = slice<@string>([
+internal static slice<@string> zones = [
     "Asia/Jerusalem",
     "America/Los_Angeles"
-]);
+];
 
 public static void TestEmbeddedTZData(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
@@ -23,7 +23,7 @@ public static void TestEmbeddedTZData(ж<Δtesting.T> t) {
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
 
-        foreach (var (_, zone) in zones) {
+        foreach (var (_, zone) in range(zones)) {
             var (@ref, err) = Δtime.LoadLocation(zone);
             if (err != nil) {
                 t.Errorf("LoadLocation(%q): %v", zone, err);

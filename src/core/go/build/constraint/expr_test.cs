@@ -41,7 +41,7 @@ internal static slice<exprStringTestsᴛ1> exprStringTests = slice<exprStringTes
 ]);
 
 public static void TestExprString(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in exprStringTests) {
+    foreach (var (i, vᴛ1) in range(exprStringTests)) {
         ref var tt = ref heap(new exprStringTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -59,7 +59,7 @@ partial struct lexTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
-internal static slice<lexTestsᴛ1> lexTests = slice<lexTestsᴛ1>([
+internal static slice<lexTestsᴛ1> lexTests = [
     new("", ""),
     new("x", "x"),
     new("x.y", "x.y"),
@@ -74,10 +74,10 @@ internal static slice<lexTestsᴛ1> lexTests = slice<lexTestsᴛ1>([
     new("x ~", "x err: invalid syntax at ~"),
     new("x &", "x err: invalid syntax at &"),
     new("x &y", "x err: invalid syntax at &")
-]);
+];
 
 public static void TestLex(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in lexTests) {
+    foreach (var (i, vᴛ1) in range(lexTests)) {
         ref var tt = ref heap(new lexTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -114,16 +114,12 @@ internal static (@string tok, error err) lexHelp(ж<global::go.go.build.constrai
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    {
-                        var (eΔ1, ok) = e._<ж<global::go.go.build.constraint_package.SyntaxError>>(ᐧ); if (ok) {
-                            err = new global::go.go.build.constraint_package.SyntaxErrorжerror(eΔ1);
-                            return;
-                        }
-                    }
-                    throw panic(e);
+            var e = recover(); if (e != nil) {
+                var (eΔ1, ok) = e._<ж<global::go.go.build.constraint_package.SyntaxError>>(ᐧ); if (ok) {
+                    err = new global::go.go.build.constraint_package.SyntaxErrorжerror(eΔ1);
+                    return;
                 }
+                throw panic(e);
             }
         }, ref ᒐ);
 
@@ -152,7 +148,7 @@ internal static slice<parseExprTestsᴛ1> parseExprTests = slice<parseExprTests�
 ]);
 
 public static void TestParseExpr(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in parseExprTests) {
+    foreach (var (i, vᴛ1) in range(parseExprTests)) {
         ref var tt = ref heap(new parseExprTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -173,7 +169,7 @@ partial struct parseExprErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal error err;
 }
-internal static slice<parseExprErrorTestsᴛ1> parseExprErrorTests = slice<parseExprErrorTestsᴛ1>([
+internal static slice<parseExprErrorTestsᴛ1> parseExprErrorTests = [
     new("x && ", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 5, Err: "unexpected end of expression")))),
     new("x && (", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 6, Err: "missing close paren")))),
     new("x && ||", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 5, Err: "unexpected token ||")))),
@@ -181,10 +177,10 @@ internal static slice<parseExprErrorTestsᴛ1> parseExprErrorTests = slice<parse
     new("x && !!", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 6, Err: "double negation not allowed")))),
     new("x !", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 2, Err: "unexpected token !")))),
     new("x && (y", new global::go.go.build.constraint_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(Offset: 5, Err: "missing close paren"))))
-]);
+];
 
 public static void TestParseError(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in parseExprErrorTests) {
+    foreach (var (i, vᴛ1) in range(parseExprErrorTests)) {
         ref var tt = ref heap(new parseExprErrorTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -206,16 +202,16 @@ partial struct exprEvalTestsᴛ1 /*dyn*/ {
     internal bool ok;
     internal @string tags;
 }
-internal static slice<exprEvalTestsᴛ1> exprEvalTests = slice<exprEvalTestsᴛ1>([
+internal static slice<exprEvalTestsᴛ1> exprEvalTests = [
     new("x", false, "x"),
     new("x && y", false, "x y"),
     new("x || y", false, "x y"),
     new("!x && yes", true, "x yes"),
     new("yes || y", true, "y yes")
-]);
+];
 
 public static void TestExprEval(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in exprEvalTests) {
+    foreach (var (i, vᴛ1) in range(exprEvalTests)) {
         ref var tt = ref heap(new exprEvalTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -227,7 +223,7 @@ public static void TestExprEval(ж<testing.T> t) {
             }
             var tags = new map<@string, bool>();
             var wantTags = new map<@string, bool>();
-            foreach (var (_, tag) in strings.Fields(ttʗ1.tags)) {
+            foreach (var (_, tag) in range(strings.Fields(ttʗ1.tags))) {
                 wantTags[tag] = true;
             }
             var tagsʗ1 = tags;
@@ -259,7 +255,7 @@ internal static slice<parseExprTestsᴛ1> parsePlusBuildExprTests = slice<parseE
 ]);
 
 public static void TestParsePlusBuildExpr(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in parsePlusBuildExprTests) {
+    foreach (var (i, vᴛ1) in range(parsePlusBuildExprTests)) {
         ref var tt = ref heap(new parseExprTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -296,7 +292,7 @@ internal static slice<constraintTestsᴛ1> constraintTests = slice<constraintTes
 ]);
 
 public static void TestParse(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in constraintTests) {
+    foreach (var (i, vᴛ1) in range(constraintTests)) {
         ref var tt = ref heap(new constraintTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -328,19 +324,19 @@ partial struct plusBuildLinesTestsᴛ1 /*dyn*/ {
     internal error err;
 }
 internal static slice<plusBuildLinesTestsᴛ1> plusBuildLinesTests;
-internal static void initᴛplusBuildLinesTests() { plusBuildLinesTests = slice<plusBuildLinesTestsᴛ1>([
-    new("x", slice<@string>(["x"]), default),
-    new("x && !y", slice<@string>(["x,!y"]), default),
-    new("x || y", slice<@string>(["x y"]), default),
-    new("x && (y || z)", slice<@string>(["x", "y z"]), default),
-    new("!(x && y)", slice<@string>(["!x !y"]), default),
-    new("x || (y && z)", slice<@string>(["x y,z"]), default),
-    new("w && (x || (y && z))", slice<@string>(["w", "x y,z"]), default),
+internal static void initᴛplusBuildLinesTests() { plusBuildLinesTests = [
+    new("x", ["x"], default),
+    new("x && !y", ["x,!y"], default),
+    new("x || y", ["x y"], default),
+    new("x && (y || z)", ["x", "y z"], default),
+    new("!(x && y)", ["!x !y"], default),
+    new("x || (y && z)", ["x y,z"], default),
+    new("w && (x || (y && z))", ["w", "x y,z"], default),
     new("v || (w && (x || (y && z)))", default, errComplex)
-]); }
+]; }
 
 public static void TestPlusBuildLines(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in plusBuildLinesTests) {
+    foreach (var (i, vᴛ1) in range(plusBuildLinesTests)) {
         ref var tt = ref heap(new plusBuildLinesTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -364,7 +360,7 @@ public static void TestPlusBuildLines(ж<testing.T> t) {
                 return;
             }
             slice<@string> want = default;
-            foreach (var (_, line) in ttʗ1.@out) {
+            foreach (var (_, line) in range(ttʗ1.@out)) {
                 want = append(want, "// +build "u8 + line);
             }
             if (!slices.Equal<slice<@string>, @string>(lines, want)) {
@@ -383,7 +379,7 @@ internal partial struct TestSizeLimits_type /*dyn*/ {
 }
 
 public static void TestSizeLimits(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestSizeLimits_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestSizeLimits_type>([
         new(
             name: "go:build or limit",
             expr: "//go:build "u8 + strings.Repeat("a || ", maxSize + 2)
@@ -400,7 +396,7 @@ public static void TestSizeLimits(ж<testing.T> t) {
             name: "go:build or depth limit",
             expr: "//go:build "u8 + strings.Repeat("(a ||", maxSize + 2)
         )
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestSizeLimits_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -409,13 +405,11 @@ public static void TestSizeLimits(ж<testing.T> t) {
             var (_, err) = Parse(tcʗ1.expr);
             if (err == nil) {
                 tΔ1.Error(expressionDidNotTriggerˢ);
-            } else {
-                var (syntaxErr, ok) = err._<ж<global::go.go.build.constraint_package.SyntaxError>>(ᐧ); if (!ok || syntaxErr.Err != "build expression too large"u8) {
-                    if (!ok) {
-                        tΔ1.Errorf("unexpected error: %v", err);
-                    } else {
-                        tΔ1.Errorf("unexpected syntax error: %s", syntaxErr.Err);
-                    }
+            } else if (err._<ж<global::go.go.build.constraint_package.SyntaxError>>(ᐧ) is var (syntaxErr, ok) && (!ok || syntaxErr.Err != "build expression too large"u8)) {
+                if (!ok) {
+                    tΔ1.Errorf("unexpected error: %v", err);
+                } else {
+                    tΔ1.Errorf("unexpected syntax error: %s", syntaxErr.Err);
                 }
             }
         });
@@ -429,7 +423,7 @@ internal partial struct TestPlusSizeLimits_type /*dyn*/ {
 
 public static void TestPlusSizeLimits(ж<testing.T> t) {
     nint maxOldSize = 100;
-    foreach (var (_, vᴛ1) in slice<TestPlusSizeLimits_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestPlusSizeLimits_type>([
         new(
             name: "+build or limit",
             expr: "// +build "u8 + strings.Repeat("a ", maxOldSize + 2)
@@ -438,7 +432,7 @@ public static void TestPlusSizeLimits(ж<testing.T> t) {
             name: "+build and limit",
             expr: "// +build "u8 + strings.Repeat("a,", maxOldSize + 2)
         )
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestPlusSizeLimits_type(), out var Ꮡtc);
         tc = vᴛ1;
 

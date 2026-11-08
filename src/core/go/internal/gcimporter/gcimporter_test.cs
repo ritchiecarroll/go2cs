@@ -22,8 +22,6 @@ using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
 using types = global::go.go.types_package;
 using static global::go.go.@internal.gcimporter_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using global::go.@internal;
 using global::go.go;
@@ -105,11 +103,9 @@ internal static @string mktmpdir(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(mktmpdirˢ, err);
     }
-    {
-        var errΔ1 = os.Mkdir(filepath.Join(tmpdir, testdataˢ), 448); if (errΔ1 != nil) {
-            os.RemoveAll(tmpdir);
-            t.Fatal(mktmpdirˢ, errΔ1);
-        }
+    var errΔ1 = os.Mkdir(filepath.Join(tmpdir, testdataˢ), 448); if (errΔ1 != nil) {
+        os.RemoveAll(tmpdir);
+        t.Fatal(mktmpdirˢ, errΔ1);
     }
     return tmpdir;
 }
@@ -129,10 +125,10 @@ public static void TestImportTestdata(ж<testing.T> t) {
         testenv.MustHaveGoBuild(new testing_TжTB(t));
 
         var testfiles = new map<@string, slice<@string>>{
-            ["exports.go"] = slice<@string>(["go/ast", "go/token"]),
+            ["exports.go"] = ["go/ast", "go/token"],
             ["generics.go"] = default
         };
-        testfiles[exportsGoˢ] = slice<@string>(["go/ast"]);
+        testfiles[exportsGoˢ] = ["go/ast"];
 
         foreach (var (testfile, wantImports) in testfiles) {
             @string tmpdir = mktmpdir(t);
@@ -141,16 +137,14 @@ public static void TestImportTestdata(ж<testing.T> t) {
             compile(t, "testdata"u8, testfile, filepath.Join(tmpdir, testdataˢ), default, wantImports.ꓸꓸꓸ);
             @string path = "./testdata/"u8 + strings.TrimSuffix(testfile, ".go");
 
-            {
-                var pkg = testPath(t, path, tmpdir); if (pkg != nil) {
-                    // The package's Imports list must include all packages
-                    // explicitly imported by testfile, plus all packages
-                    // referenced indirectly via exported objects in testfile.
-                    @string got = fmt.Sprint(pkg.Imports());
-                    foreach (var (_, want) in wantImports) {
-                        if (!strings.Contains(got, want)) {
-                            t.Errorf(@"Package(""exports"").Imports() = %s, does not contain %s", got, want);
-                        }
+            var pkg = testPath(t, path, tmpdir); if (pkg != nil) {
+                // The package's Imports list must include all packages
+                // explicitly imported by testfile, plus all packages
+                // referenced indirectly via exported objects in testfile.
+                @string got = fmt.Sprint(pkg.Imports());
+                foreach (var (_, want) in range(wantImports)) {
+                    if (!strings.Contains(got, want)) {
+                        t.Errorf(@"Package(""exports"").Imports() = %s, does not contain %s", got, want);
                     }
                 }
             }
@@ -184,13 +178,9 @@ public static void TestImportTypeparamTests(ж<testing.T> t) {
         // cmd/distpack also requires the presence of GOROOT/VERSION, so use that to
         // avoid false-positive skips.
         @string gorootTest = filepath.Join(testenv.GOROOT(new testing_TжTB(t)), testˢ);
-        {
-            var (_, errΔ1) = os.Stat(gorootTest); if (os.IsNotExist(errΔ1)) {
-                {
-                    var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new testing_TжTB(t)), versionˢ)); if (errΔ2 == nil) {
-                        t.Skipf("skipping: GOROOT/test not present");
-                    }
-                }
+        var (_, errΔ1) = os.Stat(gorootTest); if (os.IsNotExist(errΔ1)) {
+            var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new testing_TжTB(t)), versionˢ)); if (errΔ2 == nil) {
+                t.Skipf("skipping: GOROOT/test not present");
             }
         }
 
@@ -207,7 +197,7 @@ public static void TestImportTypeparamTests(ж<testing.T> t) {
             t.Fatal(err);
         }
 
-        foreach (var (_, entry) in list) {
+        foreach (var (_, entry) in range(list)) {
             if (entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go")) {
                 // For now, only consider standalone go files.
                 continue;
@@ -235,7 +225,7 @@ public static void TestImportTypeparamTests(ж<testing.T> t) {
                 var @checked = checkFile(tΔ1, filename, src);
 
                 var seen = new map<@string, bool>();
-                foreach (var (_, name) in imported.Scope().Names()) {
+                foreach (var (_, name) in range(imported.Scope().Names())) {
                     if (!token.IsExported(name)) {
                         continue; // ignore synthetic names like .inittask and .dict.*
                     }
@@ -257,7 +247,7 @@ public static void TestImportTypeparamTests(ж<testing.T> t) {
                     }
                 }
 
-                foreach (var (_, name) in @checked.Scope().Names()) {
+                foreach (var (_, name) in range(@checked.Scope().Names())) {
                     if (!token.IsExported(name) || seen[name]) {
                         continue;
                     }
@@ -295,7 +285,7 @@ internal static ж<types.Package> checkFile(ж<testing.T> t, @string filename, s
     ref var config = ref heap<types.Config>(new types.Config(
         Importer: importer.Default()
     ), out var Ꮡconfig);
-    (var pkg, err) = Ꮡconfig.Check(""u8, fset, slice<ж<ast.File>>([f]), nil);
+    (var pkg, err) = Ꮡconfig.Check(""u8, fset, [f], nil);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -339,15 +329,13 @@ public static void TestVersionHandling(ж<testing.T> t) {
         @string tmpdir = mktmpdir(t);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
         @string corruptdir = filepath.Join(tmpdir, testdataˢ, versionsˢ);
-        {
-            var errΔ1 = os.Mkdir(corruptdir, 448); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = os.Mkdir(corruptdir, 448); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         var fset = token.NewFileSet();
 
-        foreach (var (_, f) in list) {
+        foreach (var (_, f) in range(list)) {
             @string name = f.Name();
             if (!strings.HasSuffix(name, ".a")) {
                 continue; // not a package file
@@ -469,7 +457,7 @@ public static void TestImportStdLib(ж<testing.T> t) {
     var pkgs = strings.Fields((@string)@out);
 
     nint nimports = default;
-    foreach (var (_, pkg) in pkgs) {
+    foreach (var (_, pkg) in range(pkgs)) {
         t.Run(pkg, (ж<testing.T> tΔ1) => {
             if (testPath(tΔ1, pkg, filepath.Join(testenv.GOROOT(new testing_TжTB(tΔ1)), srcˢ, path.Dir(pkg))) != nil) {
                 nimports++;
@@ -488,7 +476,7 @@ partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }
-internal static slice<importedObjectTestsᴛ1> importedObjectTests = slice<importedObjectTestsᴛ1>([
+internal static slice<importedObjectTestsᴛ1> importedObjectTests = [
     // non-interfaces
     new("crypto.Hash", "type Hash uint"),
     new("go/ast.ObjKind", "type ObjKind int"),
@@ -507,7 +495,7 @@ internal static slice<importedObjectTestsᴛ1> importedObjectTests = slice<impor
     new("io.ReadWriter", "type ReadWriter interface{Reader; Writer}"),
     new("go/ast.Node", "type Node interface{End() go/token.Pos; Pos() go/token.Pos}"),
     new("go/types.Type", "type Type interface{String() string; Underlying() Type}")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object inconsistentTestDataˢ = (@string)"inconsistent test data"u8;
@@ -521,7 +509,7 @@ public static void TestImportedTypes(ж<testing.T> t) {
     }
 
     var fset = token.NewFileSet();
-    foreach (var (_, test) in importedObjectTests) {
+    foreach (var (_, test) in range(importedObjectTests)) {
         var s = strings.Split(test.name, ".");
         if (len(s) != 2) {
             t.Fatal(inconsistentTestDataˢ);
@@ -546,10 +534,8 @@ public static void TestImportedTypes(ж<testing.T> t) {
             t.Errorf("%s: got %q; want %q", test.name, got, test.want);
         }
 
-        {
-            var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
-                verifyInterfaceMethodRecvs(t, named, 0);
-            }
+        var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
+            verifyInterfaceMethodRecvs(t, named, 0);
         }
     }
 }
@@ -584,10 +570,8 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> t, ж<types.Named>
     // check embedded interfaces (if they are named, too)
     for (nint i = 0; i < iface.NumEmbeddeds(); i++) {
         // embedding of interfaces cannot have cycles; recursion will terminate
-        {
-            var (etype, _) = iface.EmbeddedType(i)._<ж<types.Named>>(ᐧ); if (etype != nil) {
-                verifyInterfaceMethodRecvs(t, etype, level + 1);
-            }
+        var (etype, _) = iface.EmbeddedType(i)._<ж<types.Named>>(ᐧ); if (etype != nil) {
+            verifyInterfaceMethodRecvs(t, etype, level + 1);
         }
     }
 }
@@ -607,19 +591,17 @@ public static void TestIssue5815(ж<testing.T> t) {
     var pkg = importPkg(t, stringsˢ, ".");
 
     var scope = pkg.Scope();
-    foreach (var (_, name) in scope.Names()) {
+    foreach (var (_, name) in range(scope.Names())) {
         var obj = scope.Lookup(name);
         if (obj.Pkg() == nil) {
             t.Errorf("no pkg for %s", obj);
         }
-        {
-            var (tname, _) = obj._<ж<types.TypeName>>(ᐧ); if (tname != nil) {
-                var named = tname.Type()._<ж<types.Named>>();
-                for (nint i = 0; i < named.NumMethods(); i++) {
-                    var m = named.Method(i);
-                    if (m.Pkg() == nil) {
-                        t.Errorf("no pkg for %s", m.OrTypedNil());
-                    }
+        var (tname, _) = obj._<ж<types.TypeName>>(ᐧ); if (tname != nil) {
+            var named = tname.Type()._<ж<types.Named>>();
+            for (nint i = 0; i < named.NumMethods(); i++) {
+                var m = named.Method(i);
+                if (m.Pkg() == nil) {
+                    t.Errorf("no pkg for %s", m.OrTypedNil());
                 }
             }
         }
@@ -656,11 +638,9 @@ public static void TestCorrectMethodPackage(ж<testing.T> t) {
     var mset = types.NewMethodSet(new types.PointerжΔType(types.NewPointer(mutex))); // methods of *sync.Mutex
     var sel = mset.Lookup(nil, lockˢ);
     var @lock = sel.Obj()._<ж<types.Func>>();
-    {
-        @string got = @lock.Pkg().Path();
-        @string want = syncˢ; if (got != want) {
-            t.Errorf("got package path %q; want %q", got, want);
-        }
+    @string got = @lock.Pkg().Path();
+    @string want = syncˢ; if (got != want) {
+        t.Errorf("got package path %q; want %q", got, want);
     }
 }
 
@@ -703,7 +683,7 @@ public static void TestIssue13566(ж<testing.T> t) {
         var pkg = importPkg(t, testdataBˢ, tmpdir);
 
         // make sure all indirectly imported packages have names
-        foreach (var (_, imp) in pkg.Imports()) {
+        foreach (var (_, imp) in range(pkg.Imports())) {
             if (imp.Name() == ""u8) {
                 t.Errorf("no name for %s package", imp.Path());
             }
@@ -834,10 +814,8 @@ public static void TestIssue15517(ж<testing.T> t) {
         var imports = new map<@string, ж<types.Package>>();
         var fset = token.NewFileSet();
         for (nint i = 0; i < 3; i++) {
-            {
-                var (_, err) = Import(fset, imports, testdataPˢ, tmpdir, default); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var (_, err) = Import(fset, imports, testdataPˢ, tmpdir, default); if (err != nil) {
+                t.Fatal(err);
             }
         }
     }
@@ -875,13 +853,10 @@ public static void TestIssue20046(ж<testing.T> t) {
     // "./issue20046".V.M must exist
     var pkg = compileAndImportPkg(t, issue20046ˢ);
     var obj = lookupObj(t, pkg.Scope(), "V");
-    {
-        var (_, ok) = types.LookupSelection(obj.Type(), false, nil, "M"); if (!ok) {
-            t.Fatalf("V.M not found");
-        }
+    var (_, ok) = types.LookupSelection(obj.Type(), false, nil, "M"); if (!ok) {
+        t.Fatalf("V.M not found");
     }
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string issue25301ˢ => ref issue25301ˢᵇ;
 private static readonly @string issue25301ˢᵇ = "issue25301"u8;
@@ -953,10 +928,8 @@ internal static ж<types.Package> compileAndImportPkg(ж<testing.T> t, @string n
 internal static types.Object lookupObj(ж<testing.T> t, ж<typesꓸScope> Ꮡscope, @string name) {
     ref var scope = ref Ꮡscope.DerefOrNull();
 
-    {
-        var obj = scope.Lookup(name); if (obj != nil) {
-            return obj;
-        }
+    var obj = scope.Lookup(name); if (obj != nil) {
+        return obj;
     }
     t.Helper();
     t.Fatalf("%s not found", name);
@@ -966,9 +939,7 @@ internal static types.Object lookupObj(ж<testing.T> t, ж<typesꓸScope> Ꮡsco
 // importMap implements the types.Importer interface.
 partial struct importMap /*map[@string, ж<types.Package>]*/;
 
-internal static (ж<types.Package>, error) ΔImport(this importMap m, @string path) {
-    return (m[path], default);
-}
+internal static (ж<types.Package>, error) ΔImport(this importMap m, @string path) { return (m[path], default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string issue69912Goˢ => ref issue69912Goˢᵇ;
@@ -999,10 +970,8 @@ public static partial void TestIssue69912(ж<testing.T> t) {
 
     @string tmpdir = t.TempDir();
     @string testoutdir = filepath.Join(tmpdir, testdataˢ);
-    {
-        var errΔ1 = os.Mkdir(testoutdir, 448); if (errΔ1 != nil) {
-            t.Fatalf("making output dir: %v", errΔ1);
-        }
+    var errΔ1 = os.Mkdir(testoutdir, 448); if (errΔ1 != nil) {
+        t.Fatalf("making output dir: %v", errΔ1);
     }
 
     compile(t, testdataˢ, issue69912Goˢ, testoutdir, default);
@@ -1023,7 +992,7 @@ public static partial void TestIssue69912(ж<testing.T> t) {
         var config = Ꮡ(new types.Config(
             Importer: imports
         ));
-        return config.Check(pkgname, fsetʗ1, slice<ж<ast.File>>([f]), nil);
+        return config.Check(pkgname, fsetʗ1, [f], nil);
     }
 
     // Use the resulting package concurrently, via dot-imports, to exercise the
@@ -1041,10 +1010,8 @@ public static partial void TestIssue69912(ж<testing.T> t) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                {
-                    var (_, errΔ3) = checkʗ1("p", pSrc, importerʗ1); if (errΔ3 != nil) {
-                        t.Errorf("Check failed: %v", errΔ3);
-                    }
+                var (_, errΔ3) = checkʗ1("p", pSrc, importerʗ1); if (errΔ3 != nil) {
+                    t.Errorf("Check failed: %v", errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

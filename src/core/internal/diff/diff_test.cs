@@ -33,7 +33,7 @@ public static void Test(ж<testing.T> t) {
         t.Fatalf("no testdata");
     }
 
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         t.Run(filepath.Base(@file), (ж<testing.T> tΔ1) => {
             var (a, err) = txtar.ParseFile(@file);
             if (err != nil) {

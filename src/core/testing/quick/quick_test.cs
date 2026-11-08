@@ -6,8 +6,6 @@ namespace go.testing;
 using rand = go.math.rand_package;
 using reflect = reflect_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using static go.testing.quick_package;
 
@@ -27,115 +25,71 @@ internal static TestArrayAlias fArrayAlias(TestArrayAlias a) {
     return a.Clone();
 }
 
-internal static bool fBool(bool a) {
-    return a;
-}
+internal static bool fBool(bool a) { return a; }
 
 public partial struct TestBoolAlias /*bool*/;
 
-internal static TestBoolAlias fBoolAlias(TestBoolAlias a) {
-    return a;
-}
+internal static TestBoolAlias fBoolAlias(TestBoolAlias a) { return a; }
 
-internal static float32 fFloat32(float32 a) {
-    return a;
-}
+internal static float32 fFloat32(float32 a) { return a; }
 
 public partial struct TestFloat32Alias /*num:float32*/;
 
-internal static TestFloat32Alias fFloat32Alias(TestFloat32Alias a) {
-    return a;
-}
+internal static TestFloat32Alias fFloat32Alias(TestFloat32Alias a) { return a; }
 
-internal static float64 fFloat64(float64 a) {
-    return a;
-}
+internal static float64 fFloat64(float64 a) { return a; }
 
 public partial struct TestFloat64Alias /*num:float64*/;
 
-internal static TestFloat64Alias fFloat64Alias(TestFloat64Alias a) {
-    return a;
-}
+internal static TestFloat64Alias fFloat64Alias(TestFloat64Alias a) { return a; }
 
-internal static complex64 fComplex64(complex64 a) {
-    return a;
-}
+internal static complex64 fComplex64(complex64 a) { return a; }
 
 public partial struct TestComplex64Alias /*num:complex64*/;
 
-internal static TestComplex64Alias fComplex64Alias(TestComplex64Alias a) {
-    return a;
-}
+internal static TestComplex64Alias fComplex64Alias(TestComplex64Alias a) { return a; }
 
-internal static complex128 fComplex128(complex128 a) {
-    return a;
-}
+internal static complex128 fComplex128(complex128 a) { return a; }
 
 public partial struct TestComplex128Alias /*num:complex128*/;
 
-internal static TestComplex128Alias fComplex128Alias(TestComplex128Alias a) {
-    return a;
-}
+internal static TestComplex128Alias fComplex128Alias(TestComplex128Alias a) { return a; }
 
-internal static int16 fInt16(int16 a) {
-    return a;
-}
+internal static int16 fInt16(int16 a) { return a; }
 
 public partial struct TestInt16Alias /*num:int16*/;
 
-internal static TestInt16Alias fInt16Alias(TestInt16Alias a) {
-    return a;
-}
+internal static TestInt16Alias fInt16Alias(TestInt16Alias a) { return a; }
 
-internal static int32 fInt32(int32 a) {
-    return a;
-}
+internal static int32 fInt32(int32 a) { return a; }
 
 public partial struct TestInt32Alias /*num:int32*/;
 
-internal static TestInt32Alias fInt32Alias(TestInt32Alias a) {
-    return a;
-}
+internal static TestInt32Alias fInt32Alias(TestInt32Alias a) { return a; }
 
-internal static int64 fInt64(int64 a) {
-    return a;
-}
+internal static int64 fInt64(int64 a) { return a; }
 
 public partial struct TestInt64Alias /*num:int64*/;
 
-internal static TestInt64Alias fInt64Alias(TestInt64Alias a) {
-    return a;
-}
+internal static TestInt64Alias fInt64Alias(TestInt64Alias a) { return a; }
 
-internal static int8 fInt8(int8 a) {
-    return a;
-}
+internal static int8 fInt8(int8 a) { return a; }
 
 public partial struct TestInt8Alias /*num:int8*/;
 
-internal static TestInt8Alias fInt8Alias(TestInt8Alias a) {
-    return a;
-}
+internal static TestInt8Alias fInt8Alias(TestInt8Alias a) { return a; }
 
-internal static nint fInt(nint a) {
-    return a;
-}
+internal static nint fInt(nint a) { return a; }
 
 public partial struct TestIntAlias /*num:nint*/;
 
-internal static TestIntAlias fIntAlias(TestIntAlias a) {
-    return a;
-}
+internal static TestIntAlias fIntAlias(TestIntAlias a) { return a; }
 
-internal static map<nint, nint> fMap(map<nint, nint> a) {
-    return a;
-}
+internal static map<nint, nint> fMap(map<nint, nint> a) { return a; }
 
 public partial struct TestMapAlias /*map[nint, nint]*/;
 
-internal static TestMapAlias fMapAlias(TestMapAlias a) {
-    return a;
-}
+internal static TestMapAlias fMapAlias(TestMapAlias a) { return a; }
 
 internal static ж<nint> fPtr(ж<nint> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -149,104 +103,66 @@ internal static ж<nint> fPtr(ж<nint> Ꮡa) {
 
 public partial class TestPtrAlias /*ж<nint>*/;
 
-internal static TestPtrAlias fPtrAlias(TestPtrAlias a) {
-    return a;
-}
+internal static TestPtrAlias fPtrAlias(TestPtrAlias a) { return a; }
 
-internal static slice<byte> fSlice(slice<byte> a) {
-    return a;
-}
+internal static slice<byte> fSlice(slice<byte> a) { return a; }
 
 public partial struct TestSliceAlias /*[]byte*/;
 
-internal static TestSliceAlias fSliceAlias(TestSliceAlias a) {
-    return a;
-}
+internal static TestSliceAlias fSliceAlias(TestSliceAlias a) { return a; }
 
-internal static @string fString(@string a) {
-    return a;
-}
+internal static @string fString(@string a) { return a; }
 
 public partial struct TestStringAlias /*@string*/;
 
-internal static TestStringAlias fStringAlias(TestStringAlias a) {
-    return a;
-}
+internal static TestStringAlias fStringAlias(TestStringAlias a) { return a; }
 
 public partial struct TestStruct {
     public nint A;
     public @string B;
 }
 
-internal static TestStruct fStruct(TestStruct a) {
-    return a;
-}
+internal static TestStruct fStruct(TestStruct a) { return a; }
 
 public partial struct TestStructAlias /*TestStruct*/;
 
-internal static TestStructAlias fStructAlias(TestStructAlias a) {
-    return a;
-}
+internal static TestStructAlias fStructAlias(TestStructAlias a) { return a; }
 
-internal static uint16 fUint16(uint16 a) {
-    return a;
-}
+internal static uint16 fUint16(uint16 a) { return a; }
 
 public partial struct TestUint16Alias /*num:uint16*/;
 
-internal static TestUint16Alias fUint16Alias(TestUint16Alias a) {
-    return a;
-}
+internal static TestUint16Alias fUint16Alias(TestUint16Alias a) { return a; }
 
-internal static uint32 fUint32(uint32 a) {
-    return a;
-}
+internal static uint32 fUint32(uint32 a) { return a; }
 
 public partial struct TestUint32Alias /*num:uint32*/;
 
-internal static TestUint32Alias fUint32Alias(TestUint32Alias a) {
-    return a;
-}
+internal static TestUint32Alias fUint32Alias(TestUint32Alias a) { return a; }
 
-internal static uint64 fUint64(uint64 a) {
-    return a;
-}
+internal static uint64 fUint64(uint64 a) { return a; }
 
 public partial struct TestUint64Alias /*num:uint64*/;
 
-internal static TestUint64Alias fUint64Alias(TestUint64Alias a) {
-    return a;
-}
+internal static TestUint64Alias fUint64Alias(TestUint64Alias a) { return a; }
 
-internal static uint8 fUint8(uint8 a) {
-    return a;
-}
+internal static uint8 fUint8(uint8 a) { return a; }
 
 public partial struct TestUint8Alias /*num:uint8*/;
 
-internal static TestUint8Alias fUint8Alias(TestUint8Alias a) {
-    return a;
-}
+internal static TestUint8Alias fUint8Alias(TestUint8Alias a) { return a; }
 
-internal static nuint fUint(nuint a) {
-    return a;
-}
+internal static nuint fUint(nuint a) { return a; }
 
 public partial struct TestUintAlias /*num:nuint*/;
 
-internal static TestUintAlias fUintAlias(TestUintAlias a) {
-    return a;
-}
+internal static TestUintAlias fUintAlias(TestUintAlias a) { return a; }
 
-internal static uintptr fUintptr(uintptr a) {
-    return a;
-}
+internal static uintptr fUintptr(uintptr a) { return a; }
 
 public partial struct TestUintptrAlias /*num:uintptr*/;
 
-internal static TestUintptrAlias fUintptrAlias(TestUintptrAlias a) {
-    return a;
-}
+internal static TestUintptrAlias fUintptrAlias(TestUintptrAlias a) { return a; }
 
 internal static partial void reportError(@string property, error err, ж<testing.T> t) {
     if (err != nil) {
@@ -403,9 +319,7 @@ internal static reflectꓸValue Generate(this myStruct m, ж<rand.Rand> r, nint 
     return reflect.ValueOf(new myStruct(x: 42));
 }
 
-internal static bool myStructProperty(myStruct @in) {
-    return @in.x == 42;
-}
+internal static bool myStructProperty(myStruct @in) { return @in.x == 42; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string myStructPropertyˢ => ref myStructPropertyˢᵇ;
@@ -421,20 +335,16 @@ public static void TestFailure(ж<testing.T> t) {
     if (err == nil) {
         t.Errorf("Check didn't return an error");
     }
-    {
-        var (_, ok) = err._<ж<global::go.testing.quick_package.CheckError>>(ᐧ); if (!ok) {
-            t.Errorf("Error was not a CheckError: %s", err);
-        }
+    if (!err._<ж<global::go.testing.quick_package.CheckError>>(out _)) {
+        t.Errorf("Error was not a CheckError: %s", err);
     }
 
     err = CheckEqual(fUint, fUint32, nil);
     if (err == nil) {
         t.Errorf("#1 CheckEqual didn't return an error");
     }
-    {
-        var (_, ok) = err._<SetupError>(ᐧ); if (!ok) {
-            t.Errorf("#1 Error was not a SetupError: %s", err);
-        }
+    if (!err._<SetupError>(out _)) {
+        t.Errorf("#1 Error was not a SetupError: %s", err);
     }
 
     err = CheckEqual((nint x, nint y) => {
@@ -443,20 +353,16 @@ public static void TestFailure(ж<testing.T> t) {
     if (err == nil) {
         t.Errorf("#2 CheckEqual didn't return an error");
     }
-    {
-        var (_, ok) = err._<SetupError>(ᐧ); if (!ok) {
-            t.Errorf("#2 Error was not a SetupError: %s", err);
-        }
+    if (!err._<SetupError>(out _)) {
+        t.Errorf("#2 Error was not a SetupError: %s", err);
     }
 
     err = CheckEqual(nint (nint x) => 0, int32 (nint x) => 0, nil);
     if (err == nil) {
         t.Errorf("#3 CheckEqual didn't return an error");
     }
-    {
-        var (_, ok) = err._<SetupError>(ᐧ); if (!ok) {
-            t.Errorf("#3 Error was not a SetupError: %s", err);
-        }
+    if (!err._<SetupError>(out _)) {
+        t.Errorf("#3 Error was not a SetupError: %s", err);
     }
 }
 

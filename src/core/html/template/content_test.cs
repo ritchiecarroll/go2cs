@@ -55,7 +55,7 @@ public static void TestTypedContent(ж<testing.T> t) {
     var tests = slice<TestTypedContent_tests>([
         new(
             @"<style>{{.}} { color: blue }</style>",
-            slice<@string>([
+            [
                 @"ZgotmplZ",
                 // Allowed but not escaped.
                 @"a[href =~ ""//example.com""]#foo",
@@ -66,11 +66,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"ZgotmplZ",
                 @"ZgotmplZ",
                 @"ZgotmplZ"
-            ])
+            ]
         ),
         new(
             @"<div style=""{{.}}"">",
-            slice<@string>([
+            [
                 @"ZgotmplZ",
                 // Allowed and HTML escaped.
                 @"a[href =~ &#34;//example.com&#34;]#foo",
@@ -81,11 +81,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"ZgotmplZ",
                 @"ZgotmplZ",
                 @"ZgotmplZ"
-            ])
+            ]
         ),
         new(
             @"{{.}}",
-            slice<@string>([
+            [
                 @"&lt;b&gt; &#34;foo%&#34; O&#39;Reilly &amp;bar;",
                 @"a[href =~ &#34;//example.com&#34;]#foo",
                 // Not escaped.
@@ -96,11 +96,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&amp;addressee=(World)",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<a{{.}}>",
-            slice<@string>([
+            [
                 @"ZgotmplZ",
                 @"ZgotmplZ",
                 @"ZgotmplZ",
@@ -111,11 +111,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"ZgotmplZ",
                 @"ZgotmplZ",
                 @"ZgotmplZ"
-            ])
+            ]
         ),
         new(
             @"<a title={{.}}>",
-            slice<@string>([
+            [
                 @"&lt;b&gt;&#32;&#34;foo%&#34;&#32;O&#39;Reilly&#32;&amp;bar;",
                 @"a[href&#32;&#61;~&#32;&#34;//example.com&#34;]#foo",
                 // Tags stripped, spaces escaped, entity not re-escaped.
@@ -126,11 +126,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting&#61;H%69,&amp;addressee&#61;(World)",
                 @"greeting&#61;H%69,&amp;addressee&#61;(World)&#32;2x,&#32;https://golang.org/favicon.ico&#32;500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<a title='{{.}}'>",
-            slice<@string>([
+            [
                 @"&lt;b&gt; &#34;foo%&#34; O&#39;Reilly &amp;bar;",
                 @"a[href =~ &#34;//example.com&#34;]#foo",
                 // Tags stripped, entity not re-escaped.
@@ -141,11 +141,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&amp;addressee=(World)",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<textarea>{{.}}</textarea>",
-            slice<@string>([
+            [
                 @"&lt;b&gt; &#34;foo%&#34; O&#39;Reilly &amp;bar;",
                 @"a[href =~ &#34;//example.com&#34;]#foo",
                 // Angle brackets escaped to prevent injection of close tags, entity not re-escaped.
@@ -156,11 +156,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&amp;addressee=(World)",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<script>alert({{.}})</script>",
-            slice<@string>([
+            [
                 @"""\u003cb\u003e \""foo%\"" O'Reilly \u0026bar;""",
                 @"""a[href =~ \""//example.com\""]#foo""",
                 @"""Hello, \u003cb\u003eWorld\u003c/b\u003e \u0026amp;tc!""",
@@ -172,11 +172,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"""greeting=H%69,\u0026addressee=(World)""",
                 @"""greeting=H%69,\u0026addressee=(World) 2x, https://golang.org/favicon.ico 500.5w""",
                 @""",foo/,"""
-            ])
+            ]
         ),
         new(
             @"<button onclick=""alert({{.}})"">",
-            slice<@string>([
+            [
                 @"&#34;\u003cb\u003e \&#34;foo%\&#34; O&#39;Reilly \u0026bar;&#34;",
                 @"&#34;a[href =~ \&#34;//example.com\&#34;]#foo&#34;",
                 @"&#34;Hello, \u003cb\u003eWorld\u003c/b\u003e \u0026amp;tc!&#34;",
@@ -188,11 +188,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"&#34;greeting=H%69,\u0026addressee=(World)&#34;",
                 @"&#34;greeting=H%69,\u0026addressee=(World) 2x, https://golang.org/favicon.ico 500.5w&#34;",
                 @"&#34;,foo/,&#34;"
-            ])
+            ]
         ),
         new(
             @"<script>alert(""{{.}}"")</script>",
-            slice<@string>([
+            [
                 @"\u003cb\u003e \u0022foo%\u0022 O\u0027Reilly \u0026bar;",
                 @"a[href =~ \u0022\/\/example.com\u0022]#foo",
                 @"Hello, \u003cb\u003eWorld\u003c\/b\u003e \u0026amp;tc!",
@@ -203,11 +203,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,\u0026addressee=(World)",
                 @"greeting=H%69,\u0026addressee=(World) 2x, https:\/\/golang.org\/favicon.ico 500.5w",
                 @",foo\/,"
-            ])
+            ]
         ),
         new(
             @"<script type=""text/javascript"">alert(""{{.}}"")</script>",
-            slice<@string>([
+            [
                 @"\u003cb\u003e \u0022foo%\u0022 O\u0027Reilly \u0026bar;",
                 @"a[href =~ \u0022\/\/example.com\u0022]#foo",
                 @"Hello, \u003cb\u003eWorld\u003c\/b\u003e \u0026amp;tc!",
@@ -218,11 +218,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,\u0026addressee=(World)",
                 @"greeting=H%69,\u0026addressee=(World) 2x, https:\/\/golang.org\/favicon.ico 500.5w",
                 @",foo\/,"
-            ])
+            ]
         ),
         new(
             @"<script type=""text/javascript"">alert({{.}})</script>",
-            slice<@string>([
+            [
                 @"""\u003cb\u003e \""foo%\"" O'Reilly \u0026bar;""",
                 @"""a[href =~ \""//example.com\""]#foo""",
                 @"""Hello, \u003cb\u003eWorld\u003c/b\u003e \u0026amp;tc!""",
@@ -234,12 +234,12 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"""greeting=H%69,\u0026addressee=(World)""",
                 @"""greeting=H%69,\u0026addressee=(World) 2x, https://golang.org/favicon.ico 500.5w""",
                 @""",foo/,"""
-            ])
+            ]
         ),
         new(
             // Not treated as JS. The output is same as for <div>{{.}}</div>
             @"<script type=""text/template"">{{.}}</script>",
-            slice<@string>([
+            [
                 @"&lt;b&gt; &#34;foo%&#34; O&#39;Reilly &amp;bar;",
                 @"a[href =~ &#34;//example.com&#34;]#foo",
                 // Not escaped.
@@ -250,11 +250,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&amp;addressee=(World)",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<button onclick='alert(""{{.}}"")'>",
-            slice<@string>([
+            [
                 @"\u003cb\u003e \u0022foo%\u0022 O\u0027Reilly \u0026bar;",
                 @"a[href =~ \u0022\/\/example.com\u0022]#foo",
                 @"Hello, \u003cb\u003eWorld\u003c\/b\u003e \u0026amp;tc!",
@@ -265,11 +265,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,\u0026addressee=(World)",
                 @"greeting=H%69,\u0026addressee=(World) 2x, https:\/\/golang.org\/favicon.ico 500.5w",
                 @",foo\/,"
-            ])
+            ]
         ),
         new(
             @"<a href=""?q={{.}}"">",
-            slice<@string>([
+            [
                 @"%3cb%3e%20%22foo%25%22%20O%27Reilly%20%26bar%3b",
                 @"a%5bhref%20%3d~%20%22%2f%2fexample.com%22%5d%23foo",
                 @"Hello%2c%20%3cb%3eWorld%3c%2fb%3e%20%26amp%3btc%21",
@@ -280,11 +280,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&amp;addressee=%28World%29",
                 @"greeting%3dH%2569%2c%26addressee%3d%28World%29%202x%2c%20https%3a%2f%2fgolang.org%2ffavicon.ico%20500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<style>body { background: url('?img={{.}}') }</style>",
-            slice<@string>([
+            [
                 @"%3cb%3e%20%22foo%25%22%20O%27Reilly%20%26bar%3b",
                 @"a%5bhref%20%3d~%20%22%2f%2fexample.com%22%5d%23foo",
                 @"Hello%2c%20%3cb%3eWorld%3c%2fb%3e%20%26amp%3btc%21",
@@ -295,11 +295,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69,&addressee=%28World%29",
                 @"greeting%3dH%2569%2c%26addressee%3d%28World%29%202x%2c%20https%3a%2f%2fgolang.org%2ffavicon.ico%20500.5w",
                 @",foo/,"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""{{.}}"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 // Commas are not escaped.
@@ -313,11 +313,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 // Metadata is not escaped.
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset={{.}}>",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -329,11 +329,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting&#61;H%69,&amp;addressee&#61;(World)&#32;2x,&#32;https://golang.org/favicon.ico&#32;500.5w",
                 // Commas are escaped.
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""{{.}} 2x, https://golang.org/ 500.5w"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -343,11 +343,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69%2c&amp;addressee=%28World%29",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""http://godoc.org/ {{.}}, https://golang.org/ 500.5w"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -357,11 +357,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69%2c&amp;addressee=%28World%29",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""http://godoc.org/?q={{.}} 2x, https://golang.org/ 500.5w"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -371,11 +371,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69%2c&amp;addressee=%28World%29",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""http://godoc.org/ 2x, {{.}} 500.5w"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -385,11 +385,11 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69%2c&amp;addressee=%28World%29",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         ),
         new(
             @"<img srcset=""http://godoc.org/ 2x, https://golang.org/ {{.}}"">",
-            slice<@string>([
+            [
                 @"#ZgotmplZ",
                 @"#ZgotmplZ",
                 @"Hello,#ZgotmplZ",
@@ -399,30 +399,26 @@ public static void TestTypedContent(ж<testing.T> t) {
                 @"greeting=H%69%2c&amp;addressee=%28World%29",
                 @"greeting=H%69,&amp;addressee=(World) 2x, https://golang.org/favicon.ico 500.5w",
                 @"%2cfoo/%2c"
-            ])
+            ]
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (ᴛ1, ᴛ2) = New("x").Parse(test.input);
         var tmpl = Must(ᴛ1, ᴛ2);
         nint pre = strings.Index(test.input, "{{.}}");
         nint post = len(test.input) - (pre + 5);
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-        foreach (var (i, x) in data) {
+        foreach (var (i, x) in range(data)) {
             b.Reset();
-            {
-                var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), x); if (err != nil) {
-                    t.Errorf("%q with %v: %s", test.input, x, err);
-                    continue;
-                }
+            var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), x); if (err != nil) {
+                t.Errorf("%q with %v: %s", test.input, x, err);
+                continue;
             }
-            {
-                @string want = test.want[i];
-                @string got = b.String().slice(pre, b.Len() - post); if (want != got) {
-                    t.Errorf("%q with %v:\nwant\n\t%q,\ngot\n\t%q\n", test.input, x, want, got);
-                    continue;
-                }
+            @string want = test.want[i];
+            @string got = b.String().slice(pre, b.Len() - post); if (want != got) {
+                t.Errorf("%q with %v:\nwant\n\t%q,\ngot\n\t%q\n", test.input, x, want, got);
+                continue;
             }
         }
     }

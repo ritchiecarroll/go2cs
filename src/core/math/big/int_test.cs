@@ -14,8 +14,6 @@ using strings = strings_package;
 using testing = testing_package;
 using quick = go.testing.quick_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.math;
 using go.testing;
@@ -34,7 +32,6 @@ internal static bool isNormalized(ж<global::go.math.big_package.ΔInt> Ꮡx) {
 }
 
 // type funZZ is a methodless func type — rendered inline as its base delegate
-
 internal partial struct argZZ {
     internal ж<global::go.math.big_package.ΔInt> z, x, y;
 }
@@ -58,7 +55,7 @@ internal static slice<argZZ> prodZZ = slice<argZZ>([
 
 public static void TestSignZ(ж<testing.T> t) {
     ref var zero = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡzero);
-    foreach (var (_, a) in sumZZ) {
+    foreach (var (_, a) in range(sumZZ)) {
         nint s = a.z.Sign();
         nint e = a.z.Cmp(Ꮡzero);
         if (s != e) {
@@ -68,7 +65,7 @@ public static void TestSignZ(ж<testing.T> t) {
 }
 
 public static void TestSetZ(ж<testing.T> t) {
-    foreach (var (_, a) in sumZZ) {
+    foreach (var (_, a) in range(sumZZ)) {
         ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
         Ꮡz.Set(a.z);
         if (!isNormalized(Ꮡz)) {
@@ -82,7 +79,7 @@ public static void TestSetZ(ж<testing.T> t) {
 
 public static void TestAbsZ(ж<testing.T> t) {
     ref var zero = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡzero);
-    foreach (var (_, a) in sumZZ) {
+    foreach (var (_, a) in range(sumZZ)) {
         ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
         Ꮡz.Abs(a.z);
         ref var e = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡe);
@@ -120,7 +117,7 @@ private static readonly @string subZZSymmetricˢᵇ = "SubZZ symmetric"u8;
 public static void TestSumZZ(ж<testing.T> t) {
     var AddZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Add(x, y);
     var SubZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Sub(x, y);
-    foreach (var (_, a) in sumZZ) {
+    foreach (var (_, a) in range(sumZZ)) {
         var arg = a;
         testFunZZ(t, addZZˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(AddZZ), arg);
 
@@ -143,7 +140,7 @@ private static readonly @string mulZZSymmetricˢᵇ = "MulZZ symmetric"u8;
 
 public static void TestProdZZ(ж<testing.T> t) {
     var MulZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Mul(x, y);
-    foreach (var (_, a) in prodZZ) {
+    foreach (var (_, a) in range(prodZZ)) {
         var arg = a;
         testFunZZ(t, mulZZˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(MulZZ), arg);
 
@@ -199,10 +196,8 @@ internal static bool checkMul(slice<byte> a, slice<byte> b) {
 }
 
 public static partial void TestMul(ж<testing.T> t) {
-    {
-        var err = quick.Check(checkMul, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check(checkMul, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -210,7 +205,7 @@ partial struct mulRangesZᴛ1 /*dyn*/ {
     internal int64 a, b;
     internal @string prod;
 }
-internal static slice<mulRangesZᴛ1> mulRangesZ = slice<mulRangesZᴛ1>([
+internal static slice<mulRangesZᴛ1> mulRangesZ = [
     // entirely positive ranges are covered by mulRangesN
     new(-1, 1, "0"),
     new(-2, -1, "2"),
@@ -235,12 +230,12 @@ internal static slice<mulRangesZᴛ1> mulRangesZ = slice<mulRangesZᴛ1>([
     new(9223372036854775806L, math.MaxInt64, "85070591730234615838173535747377725442"),
     new(9223372036854775805L, math.MaxInt64, "784637716923335094969050127519550606919189611815754530810"),
     new(9223372036854775804L, math.MaxInt64, "7237005577332262206126809393809643289012107973151163787181513908099760521240")
-]);
+];
 
 public static void TestMulRangeZ(ж<testing.T> t) {
     ref var tmp = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtmp);
     // test entirely positive ranges
-    foreach (var (i, r) in mulRangesN) {
+    foreach (var (i, r) in range(mulRangesN)) {
         // skip mulRangesN entries that overflow int64
         if ((int64)r.a < 0 || (int64)r.b < 0) {
             continue;
@@ -251,7 +246,7 @@ public static void TestMulRangeZ(ж<testing.T> t) {
         }
     }
     // test other ranges
-    foreach (var (i, r) in mulRangesZ) {
+    foreach (var (i, r) in range(mulRangesZ)) {
         @string prod = Ꮡtmp.MulRange(r.a, r.b).String();
         if (prod != r.prod) {
             t.Errorf("#%db: got %s; want %s", i, prod, r.prod);
@@ -266,7 +261,7 @@ internal partial struct TestBinomial_type /*dyn*/ {
 
 public static void TestBinomial(ж<testing.T> t) {
     ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
-    foreach (var (_, test) in slice<TestBinomial_type>([
+    foreach (var (_, test) in range(slice<TestBinomial_type>([
         new(0, 0, "1"),
         new(0, 1, "0"),
         new(1, 0, "1"),
@@ -286,11 +281,9 @@ public static void TestBinomial(ж<testing.T> t) {
         new(100, 90, "17310309456440"),
         new(1000, 10, "263409560461970212832400"),
         new(1000, 990, "263409560461970212832400")
-    ])) {
-        {
-            @string got = Ꮡz.Binomial(test.n, test.k).String(); if (got != test.want) {
-                t.Errorf("Binomial(%d, %d) = %s; want %s", test.n, test.k, got, test.want);
-            }
+    ]))) {
+        @string got = Ꮡz.Binomial(test.n, test.k).String(); if (got != test.want) {
+            t.Errorf("Binomial(%d, %d) = %s; want %s", test.n, test.k, got, test.want);
         }
     }
 }
@@ -310,17 +303,17 @@ partial struct divisionSignsTestsᴛ1 /*dyn*/ {
     internal int64 q, r; // T-division
     internal int64 d, m; // Euclidean division
 }
-internal static slice<divisionSignsTestsᴛ1> divisionSignsTests = slice<divisionSignsTestsᴛ1>([
+internal static slice<divisionSignsTestsᴛ1> divisionSignsTests = [
     new(5, 3, 1, 2, 1, 2),
     new(-5, 3, -1, -2, -2, 1),
     new(5, -3, -1, 2, -1, 2),
     new(-5, -3, 1, -2, 2, 1),
     new(1, 2, 0, 1, 0, 1),
     new(8, 4, 2, 0, 2, 0)
-]);
+];
 
 public static void TestDivisionSigns(ж<testing.T> t) {
-    foreach (var (i, test) in divisionSignsTests) {
+    foreach (var (i, test) in range(divisionSignsTests)) {
         var x = NewInt(test.x);
         var y = NewInt(test.y);
         var q = NewInt(test.q);
@@ -385,14 +378,14 @@ internal static global::go.math.big_package.Δnat Δnorm(global::go.math.big_pac
 }
 
 public static void TestBits(ж<testing.T> t) {
-    foreach (var (_, test) in slice<global::go.math.big_package.Δnat>([
+    foreach (var (_, test) in range(slice<global::go.math.big_package.Δnat>([
         default,
         slice<global::go.math.big_package.Word>([0]),
         slice<global::go.math.big_package.Word>([1]),
         slice<global::go.math.big_package.Word>([0, 1, 2, 3, 4]),
         slice<global::go.math.big_package.Word>([4, 3, 2, 1, 0]),
         slice<global::go.math.big_package.Word>([4, 3, 2, 1, 0, 0, 0, 0])
-    ])) {
+    ]))) {
         ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
         z.neg = true;
         var got = Ꮡz.SetBits(test);
@@ -428,10 +421,8 @@ internal static bool checkSetBytes(slice<byte> b) {
 }
 
 public static partial void TestSetBytes(ж<testing.T> t) {
-    {
-        var err = quick.Check(checkSetBytes, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check(checkSetBytes, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -446,10 +437,8 @@ internal static bool checkBytes(slice<byte> b) {
 }
 
 public static partial void TestBytes(ж<testing.T> t) {
-    {
-        var err = quick.Check(checkBytes, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check(checkBytes, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -479,7 +468,7 @@ partial struct quoTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string q, r;
 }
-internal static slice<quoTestsᴛ1> quoTests = slice<quoTestsᴛ1>([
+internal static slice<quoTestsᴛ1> quoTests = [
     new(
         "476217953993950760840509444250624797097991362735329973741718102894495832294430498335824897858659711275234906400899559094370964723884706254265559534144986498357",
         "9353930466774385905609975137998169297361893554149986716853295022578535724979483772383667534691121982974895531435241089241440253066816724367338287092081996",
@@ -492,16 +481,14 @@ internal static slice<quoTestsᴛ1> quoTests = slice<quoTestsᴛ1>([
         "8",
         "885443715537658812968"
     )
-]);
+];
 
 public static void TestQuo(ж<testing.T> t) {
-    {
-        var err = quick.Check(checkQuo, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check(checkQuo, nil); if (err != nil) {
+        t.Error(err);
     }
 
-    foreach (var (i, test) in quoTests) {
+    foreach (var (i, test) in range(quoTests)) {
         var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 10);
         var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 10);
         var (expectedQ, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.q, 10);
@@ -568,7 +555,7 @@ partial struct bitLenTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nint @out;
 }
-internal static slice<bitLenTestsᴛ1> bitLenTests = slice<bitLenTestsᴛ1>([
+internal static slice<bitLenTestsᴛ1> bitLenTests = [
     new("-1", 1),
     new("0", 0),
     new("1", 1),
@@ -581,20 +568,18 @@ internal static slice<bitLenTestsᴛ1> bitLenTests = slice<bitLenTestsᴛ1>([
     new("0x8000000000000000", 64),
     new("0x80000000000000000000", 80),
     new("-0x4000000000000000000000", 87)
-]);
+];
 
 public static void TestBitLen(ж<testing.T> t) {
-    foreach (var (i, test) in bitLenTests) {
+    foreach (var (i, test) in range(bitLenTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 0);
         if (!ok) {
             t.Errorf("#%d test input invalid: %s", i, test.@in);
             continue;
         }
 
-        {
-            nint n = x.BitLen(); if (n != test.@out) {
-                t.Errorf("#%d got %d want %d", i, n, test.@out);
-            }
+        nint n = x.BitLen(); if (n != test.@out) {
+            t.Errorf("#%d got %d want %d", i, n, test.@out);
         }
     }
 }
@@ -603,7 +588,7 @@ partial struct expTestsᴛ1 /*dyn*/ {
     internal @string x, y, m;
     internal @string @out;
 }
-internal static slice<expTestsᴛ1> expTests = slice<expTestsᴛ1>([
+internal static slice<expTestsᴛ1> expTests = [
     // y <= 0
     new("0", "0", "", "1"),
     new("1", "0", "", "1"),
@@ -678,10 +663,10 @@ internal static slice<expTestsᴛ1> expTests = slice<expTestsᴛ1>([
         "0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF72", // even
         "0x7858794B5897C29F4ED0B40913416AB6C48588484E6A45F2ED3E26C941D878E923575AAC434EE2750E6439A6976F9BB4D64CEDB2A53CE8D04DD48CADCDF8E46F22747C6B81C6CEA86C0D873FBF7CEF262BAAC43A522BD7F32F3CDAC52B9337C77B3DCFB3DB3EDD80476331E82F4B1DF8EFDC1220C92656DFC9197BDC1877804E28D928A2A284B8DED506CBA304435C9D0133C246C98A7D890D1DE60CBC53A024361DA83A9B8775019083D22AC6820ED7C3C68F8E801DD4EC779EE0A05C6EB682EF9840D285B838369BA7E148FA27691D524FAEAF7C6ECE2A4B99A294B9F2C241857B5B90CC8BFFCFCF18DFA7D676131D5CD3855A5A3E8EBFA0CDFADB4D198B4A"
     )
-]);
+];
 
 public static void TestExp(ж<testing.T> t) {
-    foreach (var (i, test) in expTests) {
+    foreach (var (i, test) in range(expTests)) {
         var (x, ok1) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 0);
         var (y, ok2) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 0);
 
@@ -764,7 +749,7 @@ public static void BenchmarkExpMont(ж<testing.B> b) {
         new("SmallEven3", "0x78"),
         new("SmallEven4", "0x70")
     ]);
-    foreach (var (_, mod) in mods) {
+    foreach (var (_, mod) in range(mods)) {
         var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString(mod.val, 0);
         var @out = @new<global::go.math.big_package.ΔInt>();
         var nʗ1 = n;
@@ -878,7 +863,7 @@ internal static bool checkLehmerExtGcd(slice<byte> aBytes, slice<byte> bBytes) {
 partial struct gcdTestsᴛ1 /*dyn*/ {
     internal @string d, x, y, a, b;
 }
-internal static slice<gcdTestsᴛ1> gcdTests = slice<gcdTestsᴛ1>([
+internal static slice<gcdTestsᴛ1> gcdTests = [
     // a <= 0 || b <= 0
     new("0", "0", "0", "0", "0"),
     new("7", "0", "1", "0", "7"),
@@ -894,7 +879,7 @@ internal static slice<gcdTestsᴛ1> gcdTests = slice<gcdTestsᴛ1>([
     new("935", "-3", "8", "64515", "24310"),
     new("935000000000000000", "-3", "8", "64515000000000000000", "24310000000000000000"),
     new("1", "-221", "22059940471369027483332068679400581064239780177629666810348940098015901108344", "98920366548084643601728869055592650835572950932266967461790948584315647051443", "991")
-]);
+];
 
 internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔInt> d, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y, ж<global::go.math.big_package.ΔInt> a, ж<global::go.math.big_package.ΔInt> b) {
     ж<global::go.math.big_package.ΔInt> X = default;
@@ -972,7 +957,7 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
 }
 
 public static void TestGcd(ж<testing.T> t) {
-    foreach (var (_, test) in gcdTests) {
+    foreach (var (_, test) in range(gcdTests)) {
         var (d, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.d, 0);
         var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 0);
         var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 0);
@@ -1010,7 +995,7 @@ internal partial struct intShiftTest {
     internal @string @out;
 }
 
-internal static slice<intShiftTest> rshTests = slice<intShiftTest>([
+internal static slice<intShiftTest> rshTests = [
     new("0", 0, "0"),
     new("-0", 0, "0"),
     new("0", 1, "0"),
@@ -1035,10 +1020,10 @@ internal static slice<intShiftTest> rshTests = slice<intShiftTest>([
     new("18446744073709551616", 64, "1"),
     new("340282366920938463463374607431768211456", 64, "18446744073709551616"),
     new("340282366920938463463374607431768211456", 128, "1")
-]);
+];
 
 public static void TestRsh(ж<testing.T> t) {
-    foreach (var (i, test) in rshTests) {
+    foreach (var (i, test) in range(rshTests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
         var @out = @new<global::go.math.big_package.ΔInt>().Rsh(@in, test.shift);
@@ -1053,7 +1038,7 @@ public static void TestRsh(ж<testing.T> t) {
 }
 
 public static void TestRshSelf(ж<testing.T> t) {
-    foreach (var (i, test) in rshTests) {
+    foreach (var (i, test) in range(rshTests)) {
         var (z, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
         z.Rsh(z, test.shift);
@@ -1067,7 +1052,7 @@ public static void TestRshSelf(ж<testing.T> t) {
     }
 }
 
-internal static slice<intShiftTest> lshTests = slice<intShiftTest>([
+internal static slice<intShiftTest> lshTests = [
     new("0", 0, "0"),
     new("0", 1, "0"),
     new("0", 2, "0"),
@@ -1087,10 +1072,10 @@ internal static slice<intShiftTest> lshTests = slice<intShiftTest>([
     new("1", 64, "18446744073709551616"),
     new("18446744073709551616", 64, "340282366920938463463374607431768211456"),
     new("1", 128, "340282366920938463463374607431768211456")
-]);
+];
 
 public static void TestLsh(ж<testing.T> t) {
-    foreach (var (i, test) in lshTests) {
+    foreach (var (i, test) in range(lshTests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
         var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
@@ -1105,7 +1090,7 @@ public static void TestLsh(ж<testing.T> t) {
 }
 
 public static void TestLshSelf(ж<testing.T> t) {
-    foreach (var (i, test) in lshTests) {
+    foreach (var (i, test) in range(lshTests)) {
         var (z, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
         z.Lsh(z, test.shift);
@@ -1120,7 +1105,7 @@ public static void TestLshSelf(ж<testing.T> t) {
 }
 
 public static void TestLshRsh(ж<testing.T> t) {
-    foreach (var (i, test) in rshTests) {
+    foreach (var (i, test) in range(rshTests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
         @out = @out.Rsh(@out, test.shift);
@@ -1132,7 +1117,7 @@ public static void TestLshRsh(ж<testing.T> t) {
             t.Errorf("#%d: got %s want %s", i, @out.OrTypedNil(), @in.OrTypedNil());
         }
     }
-    foreach (var (i, test) in lshTests) {
+    foreach (var (i, test) in range(lshTests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
         @out.Rsh(@out, test.shift);
@@ -1147,7 +1132,7 @@ public static void TestLshRsh(ж<testing.T> t) {
 }
 
 // Entries must be sorted by value in ascending order.
-internal static slice<@string> cmpAbsTests = slice<@string>([
+internal static slice<@string> cmpAbsTests = [
     "0",
     "1",
     "2",
@@ -1156,7 +1141,7 @@ internal static slice<@string> cmpAbsTests = slice<@string>([
     "2783678367462374683678456387645876387564783686583485",
     "2783678367462374683678456387645876387564783686583486",
     "32957394867987420967976567076075976570670947609750670956097509670576075067076027578341538"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cmpAbsTestsEntriesNotˢ = (@string)"cmpAbsTests entries not sorted in ascending order"u8;
@@ -1164,7 +1149,7 @@ internal static readonly object cmpAbsTestsEntriesNotˢ = (@string)"cmpAbsTests 
 public static void TestCmpAbs(ж<testing.T> t) {
     var values = new slice<ж<global::go.math.big_package.ΔInt>>(len(cmpAbsTests));
     ж<global::go.math.big_package.ΔInt> prev = default;
-    foreach (var (i, s) in cmpAbsTests) {
+    foreach (var (i, s) in range(cmpAbsTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(s, 0);
         if (!ok) {
             t.Fatalf("SetString(%s, 0) failed", s);
@@ -1176,8 +1161,8 @@ public static void TestCmpAbs(ж<testing.T> t) {
         prev = x;
     }
 
-    foreach (var (i, x) in values) {
-        foreach (var (j, y) in values) {
+    foreach (var (i, x) in range(values)) {
+        foreach (var (j, y) in range(values)) {
             // try all combinations of signs for x, y
             for (nint k = 0; k < 4; k++) {
                 ref var a = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡa);
@@ -1211,7 +1196,7 @@ public static void TestCmpAbs(ж<testing.T> t) {
 }
 
 public static void TestIntCmpSelf(ж<testing.T> t) {
-    foreach (var (_, s) in cmpAbsTests) {
+    foreach (var (_, s) in range(cmpAbsTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(s, 0);
         if (!ok) {
             t.Fatalf("SetString(%s, 0) failed", s);
@@ -1224,7 +1209,7 @@ public static void TestIntCmpSelf(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> int64Tests = slice<@string>([
+internal static slice<@string> int64Tests = [
     // int64
     "0",
     "1",
@@ -1242,10 +1227,10 @@ internal static slice<@string> int64Tests = slice<@string>([
     "-0x8000000000000001",
     "38579843757496759476987459679745",
     "-38579843757496759476987459679745"
-]);
+];
 
 public static void TestInt64(ж<testing.T> t) {
-    foreach (var (_, s) in int64Tests) {
+    foreach (var (_, s) in range(int64Tests)) {
         ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(s, 0);
         if (!ok) {
@@ -1276,7 +1261,7 @@ public static void TestInt64(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> uint64Tests = slice<@string>([
+internal static slice<@string> uint64Tests = [
     // uint64
     "0",
     "1",
@@ -1292,10 +1277,10 @@ internal static slice<@string> uint64Tests = slice<@string>([
     "0x10000000000000000",
     "-0x08000000000000000",
     "-1"
-]);
+];
 
 public static void TestUint64(ж<testing.T> t) {
-    foreach (var (_, s) in uint64Tests) {
+    foreach (var (_, s) in range(uint64Tests)) {
         ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(s, 0);
         if (!ok) {
@@ -1331,7 +1316,7 @@ partial struct bitwiseTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string and, or, xor, andNot;
 }
-internal static slice<bitwiseTestsᴛ1> bitwiseTests = slice<bitwiseTestsᴛ1>([
+internal static slice<bitwiseTestsᴛ1> bitwiseTests = [
     new("0x00", "0x00", "0x00", "0x00", "0x00", "0x00"),
     new("0x00", "0x01", "0x00", "0x01", "0x01", "0x00"),
     new("0x01", "0x00", "0x00", "0x01", "0x01", "0x01"),
@@ -1370,7 +1355,7 @@ internal static slice<bitwiseTestsᴛ1> bitwiseTests = slice<bitwiseTestsᴛ1>([
         "0xb9bd7d543685789d57ca918e8ae69d6fcdb2eae87df2b97215fc",
         "0xb9bd7d543685789d57ca918e82229142459020483cd2014001fc"
     )
-]);
+];
 
 // type bitFun is a methodless func type — rendered inline as its base delegate
 
@@ -1462,7 +1447,7 @@ partial struct bitsetTestsᴛ1 /*dyn*/ {
     internal nint i;
     internal nuint b;
 }
-internal static slice<bitsetTestsᴛ1> bitsetTests = slice<bitsetTestsᴛ1>([
+internal static slice<bitsetTestsᴛ1> bitsetTests = [
     new("0", 0, 0),
     new("0", 200, 0),
     new("1", 0, 1),
@@ -1475,10 +1460,10 @@ internal static slice<bitsetTestsᴛ1> bitsetTests = slice<bitsetTestsᴛ1>([
     new("-0x2000000000000000000000000001", 108, 1),
     new("-0x2000000000000000000000000001", 109, 0),
     new("-0x2000000000000000000000000001", 110, 1)
-]);
+];
 
 public static void TestBitSet(ж<testing.T> t) {
-    foreach (var (_, test) in bitwiseTests) {
+    foreach (var (_, test) in range(bitwiseTests)) {
         var x = @new<global::go.math.big_package.ΔInt>();
         x.SetString(test.x, 0);
         testBitset(t, x);
@@ -1486,7 +1471,7 @@ public static void TestBitSet(ж<testing.T> t) {
         x.SetString(test.y, 0);
         testBitset(t, x);
     }
-    foreach (var (i, test) in bitsetTests) {
+    foreach (var (i, test) in range(bitsetTests)) {
         var x = @new<global::go.math.big_package.ΔInt>();
         x.SetString(test.x, 0);
         nuint b = x.Bit(test.i);
@@ -1505,7 +1490,7 @@ partial struct tzbTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nuint @out;
 }
-internal static slice<tzbTestsᴛ1> tzbTests = slice<tzbTestsᴛ1>([
+internal static slice<tzbTestsᴛ1> tzbTests = [
     new("0", 0),
     new("1", 0),
     new("-1", 0),
@@ -1513,10 +1498,10 @@ internal static slice<tzbTestsᴛ1> tzbTests = slice<tzbTestsᴛ1>([
     new("-8", 3),
     new("0x4000000000000000000", 74),
     new("-0x8000000000000000000", 75)
-]);
+];
 
 public static void TestTrailingZeroBits(ж<testing.T> t) {
-    foreach (var (i, test) in tzbTests) {
+    foreach (var (i, test) in range(tzbTests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 0);
         nuint want = test.@out;
         nuint got = @in.TrailingZeroBits();
@@ -1641,7 +1626,7 @@ private static readonly @string xorˢᵇ = "xor"u8;
 public static void TestBitwise(ж<testing.T> t) {
     var x = @new<global::go.math.big_package.ΔInt>();
     var y = @new<global::go.math.big_package.ΔInt>();
-    foreach (var (_, test) in bitwiseTests) {
+    foreach (var (_, test) in range(bitwiseTests)) {
         x.SetString(test.x, 0);
         y.SetString(test.y, 0);
 
@@ -1660,7 +1645,7 @@ partial struct notTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
-internal static slice<notTestsᴛ1> notTests = slice<notTestsᴛ1>([
+internal static slice<notTestsᴛ1> notTests = [
     new("0", "-1"),
     new("1", "-2"),
     new("7", "-8"),
@@ -1670,13 +1655,13 @@ internal static slice<notTestsᴛ1> notTests = slice<notTestsᴛ1>([
         "298472983472983471903246121093472394872319615612417471234712061",
         "-298472983472983471903246121093472394872319615612417471234712062"
     )
-]);
+];
 
 public static void TestNot(ж<testing.T> t) {
     var @in = @new<global::go.math.big_package.ΔInt>();
     var @out = @new<global::go.math.big_package.ΔInt>();
     var expected = @new<global::go.math.big_package.ΔInt>();
-    foreach (var (i, test) in notTests) {
+    foreach (var (i, test) in range(notTests)) {
         @in.SetString(test.@in, 10);
         expected.SetString(test.@out, 10);
         @out = @out.Not(@in);
@@ -1694,13 +1679,13 @@ partial struct modInverseTestsᴛ1 /*dyn*/ {
     internal @string element;
     internal @string modulus;
 }
-internal static slice<modInverseTestsᴛ1> modInverseTests = slice<modInverseTestsᴛ1>([
+internal static slice<modInverseTestsᴛ1> modInverseTests = [
     new("1234567", "458948883992"),
     new("239487239847", "2410312426921032588552076022197566074856950548502459942654116941958108831682612228890093858261341614673227141477904012196503648957050582631942730706805009223062734745341073406696246014589361659774041027169249453200378729434170325843778659198143763193776859869524088940195577346119843545301547043747207749969763750084308926339295559968882457872412993810129130294592999947926365264059284647209730384947211681434464714438488520940127459844288859336526896320919633919"),
     new("-10", "13"), // issue #16984
     new("10", "-13"),
     new("-17", "-13")
-]);
+];
 
 public static void TestModInverse(ж<testing.T> t) {
     ref var element = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡelement);
@@ -1708,7 +1693,7 @@ public static void TestModInverse(ж<testing.T> t) {
     ref var gcd = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡgcd);
     ref var inverse = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡinverse);
     var one = NewInt(1);
-    foreach (var (_, test) in modInverseTests) {
+    foreach (var (_, test) in range(modInverseTests)) {
         (Ꮡelement).SetString(test.element, 10);
         (Ꮡmodulus).SetString(test.modulus, 10);
         (Ꮡinverse).ModInverse(Ꮡelement, Ꮡmodulus);
@@ -1797,7 +1782,7 @@ public static void TestModSqrt(ж<testing.T> t) {
     ref var sq = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡsq);
     ref var sqrt = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡsqrt);
     var r = Δrand.New(Δrand.NewSource(9));
-    foreach (var (i, s) in primes[1..]) { // skip 2, use only odd primes
+    foreach (var (i, s) in range(primes[1..])) { // skip 2, use only odd primes
         Ꮡmod.SetString(s, 10);
         Ꮡmodx4.Lsh(Ꮡmod, 2);
 
@@ -1876,7 +1861,7 @@ public static void TestJacobi(ж<testing.T> t) {
     ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
     ref var y = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡy);
 
-    foreach (var (i, test) in testCases) {
+    foreach (var (i, test) in range(testCases)) {
         Ꮡx.SetInt64(test.x);
         Ꮡy.SetInt64(test.y);
         nint expected = test.result;
@@ -1962,12 +1947,10 @@ public static void TestIssue22830(ж<testing.T> t) {
         0, 1, -1
     ]);
 
-    foreach (var (_, n) in tests) {
+    foreach (var (_, n) in range(tests)) {
         var m = NewInt(n);
-        {
-            var got = m.Exp(@base, one, mod); if (got.Cmp(want) != 0) {
-                t.Errorf("(%v).Exp(%s, 1, %s) = %s, want %s", n, @base.OrTypedNil(), mod.OrTypedNil(), got.OrTypedNil(), want.OrTypedNil());
-            }
+        var got = m.Exp(@base, one, mod); if (got.Cmp(want) != 0) {
+            t.Errorf("(%v).Exp(%s, 1, %s) = %s, want %s", n, @base.OrTypedNil(), mod.OrTypedNil(), got.OrTypedNil(), want.OrTypedNil());
         }
     }
 }
@@ -1996,7 +1979,7 @@ internal static void benchmarkIntSqr(ж<testing.B> Ꮡb, nint nwords) {
 }
 
 public static void BenchmarkIntSqr(ж<testing.B> b) {
-    foreach (var (_, n) in sqrBenchSizes) {
+    foreach (var (_, n) in range(sqrBenchSizes)) {
         if (isRaceBuilder && n > 1000) {
             continue;
         }
@@ -2029,7 +2012,7 @@ public static void BenchmarkDiv(ж<testing.B> b) {
         10, 20, 50, 100, 200, 500, 1000,
         10000, 100000, 1000000, 10000000
     ]);
-    foreach (var (_, i) in sizes) {
+    foreach (var (_, i) in range(sizes)) {
         nint j = 2 * i;
         b.Run(fmt.Sprintf("%d/%d"u8, j, i), (ж<testing.B> bΔ1) => {
             benchmarkDiv(bΔ1, j, i);
@@ -2060,7 +2043,7 @@ public static void TestFillBytes(ж<testing.T> t) {
         ᒐdone: return panicΔ1;
     }
 
-    foreach (var (_, n) in slice<@string>([
+    foreach (var (_, n) in range(slice<@string>([
         "0",
         "1000",
         "0xffffffff",
@@ -2069,7 +2052,7 @@ public static void TestFillBytes(ж<testing.T> t) {
         "0x10000000000000000",
         "0xabababababababababababababababababababababababababa",
         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    ])) {
+    ]))) {
         var checkResultʗ1 = checkResult;
         var panicsʗ1 = panics;
         t.Run(n, (ж<testing.T> tΔ2) => {
@@ -2086,7 +2069,7 @@ public static void TestFillBytes(ж<testing.T> t) {
 
             // Way larger, checking all bytes get zeroed.
             Ꮡbuf.ValueSlot = new slice<byte>(100);
-            foreach (var i in range(Ꮡbuf.ValueSlot)) {
+            foreach (var i in range(len(Ꮡbuf.ValueSlot))) {
                 Ꮡbuf.ValueSlot[i] = 0xff;
             }
             checkResultʗ1(tΔ2, x.FillBytes(Ꮡbuf.ValueSlot), x);
@@ -2108,16 +2091,14 @@ public static void TestFillBytes(ж<testing.T> t) {
 public static void TestNewIntMinInt64(ж<testing.T> t) {
     // Test for uint64 cast in NewInt.
     var want = (int64)math.MinInt64;
-    {
-        var got = NewInt(want).Int64(); if (got != want) {
-            t.Fatalf("wanted %d, got %d", want, got);
-        }
+    var got = NewInt(want).Int64(); if (got != want) {
+        t.Fatalf("wanted %d, got %d", want, got);
     }
 }
 
 public static void TestNewIntAllocs(ж<testing.T> t) {
     testenv.SkipIfOptimizationOff(new big_test_package.testing_TжTB(t));
-    foreach (var (_, n) in slice<int64>([0, 7, -7, (int64)1 << 30, (int64)(-1) << 30, 1125899906842624L, -1125899906842624L])) {
+    foreach (var (_, n) in range(slice<int64>([0, 7, -7, (int64)1 << 30, (int64)(-1) << 30, 1125899906842624L, -1125899906842624L]))) {
         var x = NewInt(3);
         var xʗ1 = x;
         var got = testing.AllocsPerRun(100, () => {
@@ -2139,7 +2120,7 @@ internal partial struct TestFloat64_type /*dyn*/ {
 }
 
 public static void TestFloat64(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFloat64_type>([
+    foreach (var (_, test) in range(slice<TestFloat64_type>([
         new("-1000000000000000000000000000000000000000000000000000000", -1000000000000000078291540404596243842305360299886116864.000000D, Below),
         new("-9223372036854775809", math.MinInt64, Above),
         new("-9223372036854775808", -9223372036854775808D, Exact), // -2^63
@@ -2162,7 +2143,7 @@ public static void TestFloat64(ж<testing.T> t) {
         new("9223372036854775807", 9223372036854775808D, Above),
         new("9223372036854775808", 9223372036854775808D, Exact), // +2^63
         new("1000000000000000000000000000000000000000000000000000000", 1000000000000000078291540404596243842305360299886116864.000000D, Above)
-    ])) {
+    ]))) {
         var (i, ok) = @new<global::go.math.big_package.ΔInt>().SetString(test.istr, 0);
         if (!ok) {
             t.Errorf("SetString(%s) failed", test.istr);

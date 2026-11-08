@@ -42,8 +42,8 @@ using static global::go.unicode_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("unicode/digit_test.go", "digit_test.cs", "AAsYADp2ACJGgoKCpoKCzJKCgg==")]
 [assembly: GoPositionMap("unicode/graphic_test.go", "graphic_test.cs", "AAseooKCgpS0pILKgoKCgoLKgoKCgoLKgoKCgoLKgoKCgoLKgoKCgoKUgsqCgoKCgsqCgoKCgsqCgoKCgsqCgoKCgg==")]
-[assembly: GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaABEkAHPoAYKCgqaCgqaCgsqCgoKmgoKmgoIADgqClKSklKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCygAXMIKCgoKCgIKkuICCAA0clIKCpoLugoKSgoKCgriSgoKCgriCgoKUpoKCgpSmgoKCgpSCpqaUgoKCgoKClIKUpqaC7oKCgoKUggALDIaigoKCuO4AESSCgoLKgoKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgsqigriiggANCIKCgoK4goKC", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
-[assembly: GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACtYAClMgoKClIKAgqSClJSC+IKCgpSCgIKkgpSUgg==")]
+[assembly: GoPositionMap("unicode/letter_test.go", "letter_test.cs", "ABAiABgyAA0cACJGAAwaABEkAHPoAYKCgqaCgqaCgsqCgoKmgoKmgoIADgqClKSklKaCgoKCyoKCgpSCgsqCgoKUgoLKgoKClIKCyoKCgqaCgs6igoKUgpSClIKUgpSClIKUgsqCgoKCgoKUgpSClIKUgpSCygAXMIKCgoKCgpS4gIIADRyUgoKmgu6CgpKCgoKCuJKCgoKCuIKCgpSmgoKClKaCgoKClIKmppSCgoKCgoKUgpSmpoLugoKCgpSCAAsMhqKCgoK47gARJIKCgsqCgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSCyqKCuKKCAA0IgoKCgriCgoI=", "467-491:1;469-477:1.1;478-486:1.2;659-665:1;660-664:1.1")]
+[assembly: GoPositionMap("unicode/script_test.go", "script_test.cs", "ABAiACtYAClMgoKClIKClIKUlIL4goKClIKClIKUlII=")]
 // </GoSourcePositionMaps>
 
 namespace go;

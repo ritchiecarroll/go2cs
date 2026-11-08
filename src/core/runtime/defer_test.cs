@@ -502,9 +502,7 @@ internal static void ff1(ж<foo> ap, nint a, nint b, nint c, nint d, nint e, nin
         // defer record for the open-coded frame (which means it won't use the
         // defer pool)
         defer((ж<foo> apΔ1, nint aΔ1, nint bΔ1, nint cΔ1, nint dΔ1, nint eΔ1, nint fΔ1, nint gΔ1, nint hΔ1, nint iΔ1) => {
-            {
-                var v = recover(); if (v != nil) {
-                }
+            var v = recover(); if (v != nil) {
             }
             globstruct.a = aΔ1;
             globstruct.b = bΔ1;

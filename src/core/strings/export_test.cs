@@ -37,7 +37,7 @@ internal static @string /*s*/ printNode(this ref global::go.strings_package.gene
         s += Repeat(".", depth) + t.prefix;
         s += r.printNode(t.next, depth + len(t.prefix));
     } else if (t.table != nil) {
-        foreach (var (b, m) in r.mapping.ΔRangeSnapshot()) {
+        foreach (var (b, m) in range(r.mapping.ΔRangeSnapshot())) {
             if ((nint)m != r.tableSize && t.table[m] != nil) {
                 s += Repeat(".", depth) + ((@string)slice<byte>([(byte)b]));
                 s += r.printNode(t.table[m], depth + 1);

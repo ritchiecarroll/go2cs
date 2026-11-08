@@ -28,7 +28,7 @@ public static void TestSpace(ж<Δtesting.T> t) {
     }
 }
 
-internal static slice<@string> scanTests = slice<@string>([
+internal static slice<@string> scanTests = [
     "",
     "a",
     "¼",
@@ -38,19 +38,17 @@ internal static slice<@string> scanTests = slice<@string>([
     "abcdefgh",
     "abc def\n\t\tgh    ",
     ((@string)(new byte[]{0x61, 0x62, 0x63, 0xc2, 0xbc, 0xe2, 0x98, 0xb9, 0x81, 0xef, 0xbf, 0xbd, 0xe6, 0x97, 0xa5, 0xe6, 0x9c, 0xac, 0xe8, 0xaa, 0x9e, 0x82, 0x61, 0x62, 0x63}))
-]);
+];
 
 public static void TestScanByte(ж<Δtesting.T> t) {
-    foreach (var (n, test) in scanTests) {
+    foreach (var (n, test) in range(scanTests)) {
         var buf = strings.NewReader(test);
         var s = NewScanner(new bufio_test_package.strings_ReaderжReader(buf));
         s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(ScanBytes));
         nint i = default;
         for (i = 0; s.Scan(); i++) {
-            {
-                var b = s.Bytes(); if (len(b) != 1 || b[0] != test[i]) {
-                    t.Errorf("#%d: %d: expected %q got %q", n, i, test, b);
-                }
+            var b = s.Bytes(); if (len(b) != 1 || b[0] != test[i]) {
+                t.Errorf("#%d: %d: expected %q got %q", n, i, test, b);
             }
         }
         if (i != len(test)) {
@@ -65,7 +63,7 @@ public static void TestScanByte(ж<Δtesting.T> t) {
 
 // Test that the rune splitter returns same sequence of runes (not bytes) as for range string.
 public static void TestScanRune(ж<Δtesting.T> t) {
-    foreach (var (n, test) in scanTests) {
+    foreach (var (n, test) in range(scanTests)) {
         var buf = strings.NewReader(test);
         var s = NewScanner(new bufio_test_package.strings_ReaderжReader(buf));
         s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(ScanRunes));
@@ -100,7 +98,7 @@ public static void TestScanRune(ж<Δtesting.T> t) {
     }
 }
 
-internal static slice<@string> wordScanTests = slice<@string>([
+internal static slice<@string> wordScanTests = [
     "",
     " ",
     "\n",
@@ -109,11 +107,11 @@ internal static slice<@string> wordScanTests = slice<@string>([
     "abc def",
     " abc def ",
     " abc\tdef\nghi\rjkl\fmno\vpqr\u0085stu\u00a0\n"
-]);
+];
 
 // Test that the word splitter returns the same data as strings.Fields.
 public static void TestScanWords(ж<Δtesting.T> t) {
-    foreach (var (n, test) in wordScanTests) {
+    foreach (var (n, test) in range(wordScanTests)) {
         var buf = strings.NewReader(test);
         var s = NewScanner(new bufio_test_package.strings_ReaderжReader(buf));
         s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(ScanWords));
@@ -457,10 +455,8 @@ public static void TestScanWordsExcessiveWhiteSpace(ж<Δtesting.T> t) {
     if (!scanner.Scan()) {
         t.Fatalf("scan failed: %v", scanner.Err());
     }
-    {
-        @string token = scanner.Text(); if (token != word) {
-            t.Fatalf("unexpected token: %v", token);
-        }
+    @string token = scanner.Text(); if (token != word) {
+        t.Fatalf("unexpected token: %v", token);
     }
 }
 
@@ -490,19 +486,17 @@ internal static void testEmptyTokens(ж<Δtesting.T> t, @string text, slice<@str
     if (i != len(values)) {
         t.Fatalf("got %d fields, expected %d", i, len(values));
     }
-    {
-        var err = s.Err(); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = s.Err(); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
 public static void TestEmptyTokens(ж<Δtesting.T> t) {
-    testEmptyTokens(t, "1,2,3,", slice<@string>(["1", "2", "3", ""]));
+    testEmptyTokens(t, "1,2,3,", ["1", "2", "3", ""]);
 }
 
 public static void TestWithNoEmptyTokens(ж<Δtesting.T> t) {
-    testEmptyTokens(t, "1,2,3", slice<@string>(["1", "2", "3"]));
+    testEmptyTokens(t, "1,2,3", ["1", "2", "3"]);
 }
 
 internal static (nint advance, slice<byte> token, error err) loopAtEOFSplit(slice<byte> data, bool atEOF) {
@@ -530,10 +524,8 @@ public static void TestDontLoopForever(ж<Δtesting.T> t) {
             if (err == nil) {
                 t.Fatal(shouldHavePanickedˢ);
             }
-            {
-                var (msg, ok) = err._<@string>(ᐧ); if (!ok || !strings.Contains(msg, emptyTokensˢ)) {
-                    throw panic(err);
-                }
+            var (msg, ok) = err._<@string>(ᐧ); if (!ok || !strings.Contains(msg, emptyTokensˢ)) {
+                throw panic(err);
             }
         }, ref ᒐ);
         for (nint count = 0; s.Scan(); count++) {
@@ -638,10 +630,8 @@ public static void TestNegativeEOFReader(ж<Δtesting.T> t) {
             break;
         }
     }
-    {
-        var (got, want) = (scanner.Err(), ErrBadReadCount); if (!AreEqual(got, want)) {
-            t.Errorf("scanner.Err: got %v, want %v", got, want);
-        }
+    var (got, want) = (scanner.Err(), ErrBadReadCount); if (!AreEqual(got, want)) {
+        t.Errorf("scanner.Err: got %v, want %v", got, want);
     }
 }
 
@@ -660,10 +650,8 @@ public static void TestLargeReader(ж<Δtesting.T> t) {
     var scanner = NewScanner(new largeReader());
     while (scanner.Scan()) {
     }
-    {
-        var (got, want) = (scanner.Err(), ErrBadReadCount); if (!AreEqual(got, want)) {
-            t.Errorf("scanner.Err: got %v, want %v", got, want);
-        }
+    var (got, want) = (scanner.Err(), ErrBadReadCount); if (!AreEqual(got, want)) {
+        t.Errorf("scanner.Err: got %v, want %v", got, want);
     }
 }
 

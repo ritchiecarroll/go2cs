@@ -66,8 +66,8 @@ using static global::go.encoding.xml_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSktLS2AAoGgoKUtLSkABYGggAAFoaAgraCgqY=")]
-[assembly: GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgqS0tKQACgaCgpS0tKQAFgaCAAAWhoCCtoKCpg==")]
+[assembly: GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKClKS0tLYACgaCgpS0tKQAFgaCAAAWhoKmgoKm")]
+[assembly: GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgqS0tKQACgaCgpS0tKQAFgaCAAAWhoKmgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

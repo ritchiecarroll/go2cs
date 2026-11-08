@@ -62,7 +62,7 @@ public static void TestWriter(ж<testing.T> t) {
     if (testing.Short()) {
         names = filenamesShort;
     }
-    foreach (var (_, fn) in names) {
+    foreach (var (_, fn) in range(names)) {
         @string qfn = "testdata/pngsuite/"u8 + fn + ".png"u8;
         // Read the image.
         var (m0, err) = readPNG(qfn);
@@ -132,7 +132,7 @@ public static void TestWriterPaletted(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestWriterPaletted_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -140,7 +140,7 @@ public static void TestWriterPaletted(ж<testing.T> t) {
         t.Run(fmt.Sprintf("plen-%d"u8, tc.plen), (ж<testing.T> tΔ1) => {
             // Create a paletted image with the correct palette length
             var palette = new color.Palette(tcʗ1.plen);
-            foreach (var iΔ1 in range(palette)) {
+            foreach (var iΔ1 in range(len(palette))) {
                 palette[iΔ1] = new color.NRGBA(
                     R: (uint8)iΔ1,
                     G: (uint8)iΔ1,
@@ -294,7 +294,7 @@ public static void TestWriteRGBA(ж<testing.T> t) {
         new("RGBA with variable alpha", new image.ΔRGBAжImage(translucentImg))
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestWriteRGBA_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 

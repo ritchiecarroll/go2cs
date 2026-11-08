@@ -11,7 +11,7 @@ partial class net_internal_test_package {
 
 internal static syscall.Errno errOpNotSupported = syscall.EOPNOTSUPP;
 
-internal static slice<error> abortedConnRequestErrors = slice<error>([syscall.ERROR_NETNAME_DELETED, syscall.WSAECONNRESET]); // see accept in fd_windows.go
+internal static slice<error> abortedConnRequestErrors = [syscall.ERROR_NETNAME_DELETED, syscall.WSAECONNRESET]; // see accept in fd_windows.go
 
 internal static bool isPlatformError(error err) {
     var (_, ok) = err._<syscall.Errno>(ᐧ);

@@ -17,20 +17,16 @@ partial class gzip_internal_test_package {
 public static void TestEmpty(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
 
-    {
-        var errΔ1 = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf)).Close(); if (errΔ1 != nil) {
-            t.Fatalf("Writer.Close: %v", errΔ1);
-        }
+    var errΔ1 = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf)).Close(); if (errΔ1 != nil) {
+        t.Fatalf("Writer.Close: %v", errΔ1);
     }
 
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
     if (err != nil) {
         t.Fatalf("NewReader: %v", err);
     }
-    {
-        var want = (new Header(OS: 255)); if (!reflect.DeepEqual(r.Header, want)) {
-            t.Errorf("Header mismatch:\ngot  %#v\nwant %#v", r.Header, want);
-        }
+    var want = (new Header(OS: 255)); if (!reflect.DeepEqual(r.Header, want)) {
+        t.Errorf("Header mismatch:\ngot  %#v\nwant %#v", r.Header, want);
     }
     (var b, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(r));
     if (err != nil) {
@@ -39,10 +35,8 @@ public static void TestEmpty(ж<testing.T> t) {
     if (len(b) != 0) {
         t.Fatalf("got %d bytes, want 0", len(b));
     }
-    {
-        var errΔ2 = r.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Reader.Close: %v", errΔ2);
-        }
+    var errΔ2 = r.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Reader.Close: %v", errΔ2);
     }
 }
 
@@ -64,15 +58,11 @@ public static void TestRoundTrip(ж<testing.T> t) {
     w.Extra = slice<byte>("extra"u8);
     w.ModTime = time.Unix(100000000, 0);
     w.Name = nameˢ;
-    {
-        var (_, errΔ1) = w.Write(slice<byte>("payload"u8)); if (errΔ1 != nil) {
-            t.Fatalf("Write: %v", errΔ1);
-        }
+    var (_, errΔ1) = w.Write(slice<byte>("payload"u8)); if (errΔ1 != nil) {
+        t.Fatalf("Write: %v", errΔ1);
     }
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Writer.Close: %v", errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Writer.Close: %v", errΔ2);
     }
 
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
@@ -98,10 +88,8 @@ public static void TestRoundTrip(ж<testing.T> t) {
     if (r.Name != "name"u8) {
         t.Fatalf("name is %q, want %q", r.Name, nameˢ);
     }
-    {
-        var errΔ3 = r.Close(); if (errΔ3 != nil) {
-            t.Fatalf("Reader.Close: %v", errΔ3);
-        }
+    var errΔ3 = r.Close(); if (errΔ3 != nil) {
+        t.Fatalf("Reader.Close: %v", errΔ3);
     }
 }
 
@@ -124,10 +112,8 @@ public static void TestLatin1(ж<testing.T> t) {
 
     var buf = bytes.NewBuffer(new slice<byte>(0, len(latin1)));
     var c = new Writer(w: new gzip_test_package.bytes_BufferжWriter(buf));
-    {
-        err = c.writeString(utf8); if (err != nil) {
-            t.Fatalf("writeString: %v", err);
-        }
+    err = c.writeString(utf8); if (err != nil) {
+        t.Fatalf("writeString: %v", err);
     }
     s = buf.String();
     if (s != ((sstring)latin1)) {
@@ -155,7 +141,7 @@ public static void TestLatin1RoundTrip(ж<testing.T> t) {
         new(((@string)(new byte[]{0x69, 0x6e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x20, 0x55, 0x54, 0x46, 0x2d, 0x38, 0x20, 0x61, 0x6c, 0x73, 0x6f, 0x20, 0xff, 0x61, 0x69, 0x6c, 0x73})), false),
         new("\x00 as does Látin-1 with NUL", false)
     ]);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var buf = @new<bytes.Buffer>();
 
         var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
@@ -183,11 +169,9 @@ public static void TestLatin1RoundTrip(ж<testing.T> t) {
             t.Errorf("name is %q, want %q", r.Name, tc.name);
             continue;
         }
-        {
-            var errΔ1 = r.Close(); if (errΔ1 != nil) {
-                t.Errorf("Reader.Close: %v", errΔ1);
-                continue;
-            }
+        var errΔ1 = r.Close(); if (errΔ1 != nil) {
+            t.Errorf("Reader.Close: %v", errΔ1);
+            continue;
         }
     }
 }
@@ -289,11 +273,9 @@ internal partial struct limitedWriter {
 }
 
 internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> p) {
-    {
-        nint nΔ1 = l.N; if (nΔ1 < len(p)) {
-            l.N = 0;
-            return (nΔ1, io.ErrShortWrite);
-        }
+    nint nΔ1 = l.N; if (nΔ1 < len(p)) {
+        l.N = 0;
+        return (nΔ1, io.ErrShortWrite);
     }
     l.N -= len(p);
     return (len(p), default);

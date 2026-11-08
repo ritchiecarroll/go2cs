@@ -49,24 +49,20 @@ public static void TestIssue74181(ж<testing.T> t) {
     }
 
     ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf);
-    (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, slice<ж<ast.File>>([@file]), Ꮡ(new typesꓸInfo()));
+    (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new typesꓸInfo()));
     if (err != nil) {
         t.Fatalf("could not type check: %v", err);
     }
 
     var b = pkg.Scope().Lookup("B").Type();
-    {
-        var (n, ok) = b._<ж<types.Named>>(ᐧ); if (ok) {
-            {
-                var (s, okΔ1) = n.Underlying()._<ж<types.Struct>>(ᐧ); if (okΔ1) {
-                    var got = s.Field(0).Type();
-                    var want = types.NewPointer(pkg.Scope().Lookup("AB").Type());
-                    if (!types.Identical(got, new types.PointerжΔType(want))) {
-                        t.Errorf("wrong type for f: got %v, want %v", got, want.OrTypedNil());
-                    }
-                    return;
-                }
+    var (n, ok) = b._<ж<types.Named>>(ᐧ); if (ok) {
+        var (s, okΔ1) = n.Underlying()._<ж<types.Struct>>(ᐧ); if (okΔ1) {
+            var got = s.Field(0).Type();
+            var want = types.NewPointer(pkg.Scope().Lookup("AB").Type());
+            if (!types.Identical(got, new types.PointerжΔType(want))) {
+                t.Errorf("wrong type for f: got %v, want %v", got, want.OrTypedNil());
             }
+            return;
         }
     }
     t.Errorf("unexpected type for B: %v", b);
@@ -92,19 +88,17 @@ public static void TestPartialTypeCheckUndeclaredAliasPanic(ж<testing.T> t) {
     }
 
     ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf); // no error handler, panic
-    var (pkg, _) = Ꮡconf.Check(@file.Name.Name, fset, slice<ж<ast.File>>([@file]), Ꮡ(new typesꓸInfo()));
+    var (pkg, _) = Ꮡconf.Check(@file.Name.Name, fset, [@file], Ꮡ(new typesꓸInfo()));
     var a = pkg.Scope().Lookup("A").Type();
 
-    {
-        var (alias, ok) = a._<ж<types.Alias>>(ᐧ); if (ok) {
-            var got = alias.Rhs();
-            var want = types.Typ[types.Invalid];
+    var (alias, ok) = a._<ж<types.Alias>>(ᐧ); if (ok) {
+        var got = alias.Rhs();
+        var want = types.Typ[types.Invalid];
 
-            if (!types.Identical(got, new types.BasicжΔType(want))) {
-                t.Errorf("wrong type for B: got %v, want %v", got, want.OrTypedNil());
-            }
-            return;
+        if (!types.Identical(got, new types.BasicжΔType(want))) {
+            t.Errorf("wrong type for B: got %v, want %v", got, want.OrTypedNil());
         }
+        return;
     }
     t.Errorf("unexpected type for A: %v", a);
 }

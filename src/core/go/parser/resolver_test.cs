@@ -44,7 +44,7 @@ public static void TestResolution(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, fi) in fis) {
+    foreach (var (_, fi) in range(fis)) {
         var fiʗ1 = fi;
         t.Run(fi.Name(), (ж<testing.T> tΔ1) => {
             var fset = token.NewFileSet();
@@ -72,10 +72,8 @@ public static void TestResolution(ж<testing.T> t) {
                 return p;
             }
             foreach (var (k, want) in fromComments) {
-                {
-                    tokenꓸPos got = fromParser[k]; if (got != want) {
-                        tΔ1.Errorf("%s resolved to %s, want %s", pos(k), pos(got), pos(want));
-                    }
+                tokenꓸPos got = fromParser[k]; if (got != want) {
+                    tΔ1.Errorf("%s resolved to %s, want %s", pos(k), pos(got), pos(want));
                 }
                 delete(fromParser, k);
             }
@@ -94,10 +92,8 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> @file
     var objmapʗ1 = objmap;
     ast.Inspect(new ast.FileжNode(@file), (ast.Node node) => {
         // Ignore blank identifiers to reduce noise.
-        {
-            var (ident, _) = node._<ж<ast.Ident>>(ᐧ); if (ident != nil && ident.Obj != nil && ident.Name != "_"u8) {
-                objmapʗ1[ident.Pos()] = ident.Obj.Pos();
-            }
+        var (ident, _) = node._<ж<ast.Ident>>(ᐧ); if (ident != nil && ident.Obj != nil && ident.Name != "_"u8) {
+            objmapʗ1[ident.Pos()] = ident.Obj.Pos();
         }
         return true;
     });
@@ -117,7 +113,7 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile>
         if (!ok) {
             throw panic(fmt.Sprintf("missing declaration for %s"u8, name));
         }
-        foreach (var (_, pos) in posns) {
+        foreach (var (_, pos) in range(posns)) {
             objmap[pos] = declpos;
         }
     }
@@ -150,10 +146,8 @@ scanFile:
             var (name, decl, use) = annotatedObj(lit);
             if (len(name) > 0) {
                 if (decl) {
-                    {
-                        var (_, ok) = decls[name, ꟷ]; if (ok) {
-                            throw panic(fmt.Sprintf("duplicate declaration markers for %s"u8, name));
-                        }
+                    var (_, ok) = decls[name, ꟷ]; if (ok) {
+                        throw panic(fmt.Sprintf("duplicate declaration markers for %s"u8, name));
                     }
                     decls[name] = prev;
                 }

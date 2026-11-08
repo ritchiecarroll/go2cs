@@ -97,7 +97,7 @@ public static void TestNextJsCtx(ж<testing.T> t) {
         new(jsCtxRegexp, "=\u00A0")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         {
             var ctx = nextJSCtx(slice<byte>(test.s), jsCtxRegexp); if (ctx != test.jsCtx) {
                 t.Errorf("%q: want %s got %s", test.s, test.jsCtx, ctx);
@@ -193,7 +193,7 @@ public static void TestJSValEscaper(ж<testing.T> t) {
         new(Ꮡ(new jsonErrType()), " /* json: error calling MarshalJSON for type *template.jsonErrType: a * / b \\x3Cscript c \\x3C/script d \\x3C!-- e \\x3Cscript f \\x3C/script */null ", true)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         {
             @string js = jsValEscaper(test.x); if (js != test.js) {
                 t.Errorf("%+v: want\n\t%q\ngot\n\t%q", test.x, test.js, js);
@@ -269,7 +269,7 @@ public static void TestJSStrEscaper(ж<testing.T> t) {
         new(((@string)(new byte[]{0x66, 0x6f, 0x6f, 0xed, 0xa0, 0x80, 0x62, 0x61, 0x72})), ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0xed, 0xa0, 0x80, 0x62, 0x61, 0x72})))
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string esc = jsStrEscaper(test.x);
         if (esc != test.esc) {
             t.Errorf("%q: want %q got %q", test.x, test.esc, esc);
@@ -318,7 +318,7 @@ public static void TestJSRegexpEscaper(ж<testing.T> t) {
         new((@string)"x^y", @"x\^y")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string esc = jsRegexpEscaper(test.x);
         if (esc != test.esc) {
             t.Errorf("%q: want %q got %q", test.x, test.esc, esc);
@@ -348,7 +348,7 @@ public static void TestEscapersOnLower7AndSelectHighCodepoints(ж<testing.T> t) 
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         {
             @string s = test.escaper(input); if (s != test.escaped) {
                 t.Errorf("%s once: want\n\t%q\ngot\n\t%q", test.name, test.escaped, s);
@@ -388,7 +388,7 @@ public static void TestIsJsMimeType(ж<testing.T> t) {
         new("module", true)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         if (isJSType(test.@in) != test.@out) {
             t.Errorf("isJSType(%q) = %v, want %v", test.@in, !test.@out, test.@out);
         }

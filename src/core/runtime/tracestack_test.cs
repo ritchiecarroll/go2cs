@@ -13,7 +13,7 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 public static void BenchmarkTraceStack(ж<testing.B> b) {
-    foreach (var (_, stackDepth) in slice<nint>([1, 10, 100])) {
+    foreach (var (_, stackDepth) in range(slice<nint>([1, 10, 100]))) {
         b.Run("stackDepth="u8 + strconv.Itoa(stackDepth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             benchmarkTraceStack(bΔ1, stackDepth);
         });

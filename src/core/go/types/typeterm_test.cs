@@ -31,10 +31,8 @@ internal static void initᴛtestTerms() { testTerms = new map<@string, ж<global
 
 public static void TestTermString(ж<testing.T> t) {
     foreach (var (want, x) in testTerms) {
-        {
-            @string got = x.String(); if (got != want) {
-                t.Errorf("%v.String() == %v; want %v", x.OrTypedNil(), got, want);
-            }
+        @string got = x.String(); if (got != want) {
+            t.Errorf("%v.String() == %v; want %v", x.OrTypedNil(), got, want);
         }
     }
 }
@@ -56,7 +54,7 @@ internal static ж<global::go.go.types_package.Δterm> testTerm(@string name) {
 }
 
 public static void TestTermEqual(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "∅ ∅ T",
         "𝓤 𝓤 T",
         "int int T",
@@ -71,7 +69,7 @@ public static void TestTermEqual(ж<testing.T> t) {
         "int ~int F",
         "int myInt F",
         "~int myInt F"
-    ])) {
+    ]))) {
         var args = split(test, 3);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]);
@@ -92,7 +90,7 @@ public static void TestTermEqual(ж<testing.T> t) {
 }
 
 public static void TestTermUnion(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "∅ ∅ ∅ ∅",
         "∅ 𝓤 𝓤 ∅",
         "∅ int int ∅",
@@ -124,22 +122,20 @@ public static void TestTermUnion(ж<testing.T> t) {
         "myInt int myInt int",
         "~string ~int ~string ~int",
         "myInt ~int ~int ∅"
-    ])) {
+    ]))) {
         var args = split(test, 4);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]);
         var want1 = testTerm(args[2]);
         var want2 = testTerm(args[3]);
-        {
-            var (got1, got2) = x.union(y); if (!got1.equal(want1) || !got2.equal(want2)) {
-                t.Errorf("%v.union(%v) = %v, %v; want %v, %v", x.OrTypedNil(), y.OrTypedNil(), got1.OrTypedNil(), got2.OrTypedNil(), want1.OrTypedNil(), want2.OrTypedNil());
-            }
+        var (got1, got2) = x.union(y); if (!got1.equal(want1) || !got2.equal(want2)) {
+            t.Errorf("%v.union(%v) = %v, %v; want %v, %v", x.OrTypedNil(), y.OrTypedNil(), got1.OrTypedNil(), got2.OrTypedNil(), want1.OrTypedNil(), want2.OrTypedNil());
         }
     }
 }
 
 public static void TestTermIntersection(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "∅ ∅ ∅",
         "∅ 𝓤 ∅",
         "∅ int ∅",
@@ -156,7 +152,7 @@ public static void TestTermIntersection(ж<testing.T> t) {
         "int string ∅",
         "~int ~string ∅",
         "~int myInt myInt"
-    ])) {
+    ]))) {
         var args = split(test, 3);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]);
@@ -177,7 +173,7 @@ public static void TestTermIntersection(ж<testing.T> t) {
 }
 
 public static void TestTermIncludes(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "∅ int F",
         "𝓤 int T",
         "int int T",
@@ -186,21 +182,19 @@ public static void TestTermIncludes(ж<testing.T> t) {
         "string int F",
         "~string int F",
         "myInt int F"
-    ])) {
+    ]))) {
         var args = split(test, 3);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]).typ;
         var want = args[2] == "T";
-        {
-            var got = x.includes(y); if (got != want) {
-                t.Errorf("%v.includes(%v) = %v; want %v", x.OrTypedNil(), y, got, want);
-            }
+        var got = x.includes(y); if (got != want) {
+            t.Errorf("%v.includes(%v) = %v; want %v", x.OrTypedNil(), y, got, want);
         }
     }
 }
 
 public static void TestTermSubsetOf(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "∅ ∅ T",
         "𝓤 𝓤 T",
         "int int T",
@@ -218,21 +212,19 @@ public static void TestTermSubsetOf(ж<testing.T> t) {
         "~int myInt F",
         "myInt int F",
         "myInt ~int T"
-    ])) {
+    ]))) {
         var args = split(test, 3);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]);
         var want = args[2] == "T";
-        {
-            var got = x.subsetOf(y); if (got != want) {
-                t.Errorf("%v.subsetOf(%v) = %v; want %v", x.OrTypedNil(), y.OrTypedNil(), got, want);
-            }
+        var got = x.subsetOf(y); if (got != want) {
+            t.Errorf("%v.subsetOf(%v) = %v; want %v", x.OrTypedNil(), y.OrTypedNil(), got, want);
         }
     }
 }
 
 public static void TestTermDisjoint(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "int int F",
         "~int ~int F",
         "int ~int F",
@@ -243,7 +235,7 @@ public static void TestTermDisjoint(ж<testing.T> t) {
         "~int myInt F",
         "string myInt T",
         "~string myInt T"
-    ])) {
+    ]))) {
         var args = split(test, 3);
         var x = testTerm(args[0]);
         var y = testTerm(args[1]);

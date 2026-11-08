@@ -11,8 +11,6 @@ using big = math.big_package;
 using mathrand = math.rand_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using math;
 using static go.crypto.rand_internal_test_package;
@@ -37,10 +35,8 @@ public static void TestPrimeSmall(ж<testing.T> t) {
 
 // Test that passing bits < 2 causes Prime to return nil, error
 public static partial void TestPrimeBitsLt2(ж<testing.T> t) {
-    {
-        var (p, err) = rand.Prime(rand.Reader, 1); if (p != nil || err == nil) {
-            t.Errorf("Prime should return nil, error when called with bits < 2");
-        }
+    var (p, err) = rand.Prime(rand.Reader, 1); if (p != nil || err == nil) {
+        t.Errorf("Prime should return nil, error when called with bits < 2");
     }
 }
 
@@ -70,10 +66,8 @@ public static void TestInt(ж<testing.T> t) {
     // start at 128 so the case of (max.BitLen() % 8) == 0 is covered
     for (nint n = 128; n < 140; n++) {
         var b = @new<bigꓸInt>().SetInt64((int64)n);
-        {
-            var (i, err) = rand.Int(rand.Reader, b); if (err != nil) {
-                t.Fatalf("Can't generate random value: %v, %v", i.OrTypedNil(), err);
-            }
+        var (i, err) = rand.Int(rand.Reader, b); if (err != nil) {
+            t.Fatalf("Can't generate random value: %v, %v", i.OrTypedNil(), err);
         }
     }
 }
@@ -140,10 +134,8 @@ internal static void testIntPanics(ж<testing.T> t, ж<bigꓸInt> b) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Errorf("Int should panic when called with max <= 0: %v", b.OrTypedNil());
-                }
+            var err = recover(); if (err == nil) {
+                t.Errorf("Int should panic when called with max <= 0: %v", b.OrTypedNil());
             }
         }, ref ᒐ);
         rand.Int(rand.Reader, b);

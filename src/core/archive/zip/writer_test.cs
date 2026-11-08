@@ -34,7 +34,7 @@ public partial struct WriteTest {
     public fs.FileMode Mode;
 }
 
-internal static slice<WriteTest> writeTests = slice<WriteTest>([
+internal static slice<WriteTest> writeTests = [
     new(
         Name: "foo",
         Data: slice<byte>("Rabbits, guinea pigs, gophers, marsupial rats, and quolls."u8),
@@ -77,7 +77,7 @@ internal static slice<WriteTest> writeTests = slice<WriteTest>([
         Method: Deflate,
         Mode: (fs.FileMode)((fs.FileMode)(493 | fs.ModeDevice) | fs.ModeCharDevice)
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object randReadFailedˢ = (@string)"rand.Read failed:"u8;
@@ -86,10 +86,8 @@ public static void TestWriter(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var largeData = new slice<byte>((1 << 17));
-        {
-            var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != nil) {
-                t.Fatal(randReadFailedˢ, errΔ1);
-            }
+        var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != nil) {
+            t.Fatal(randReadFailedˢ, errΔ1);
         }
         writeTests[1].Data = largeData;
         defer(() => {
@@ -100,17 +98,15 @@ public static void TestWriter(ж<testing.T> t) {
         var buf = @new<bytes.Buffer>();
         var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
 
-        foreach (var (_, vᴛ1) in writeTests) {
+        foreach (var (_, vᴛ1) in range(writeTests)) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ1;
 
             testCreate(t, w, Ꮡwt);
         }
 
-        {
-            var errΔ2 = w.Close(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = w.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         // read it back
@@ -118,7 +114,7 @@ public static void TestWriter(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        foreach (var (i, vᴛ2) in writeTests) {
+        foreach (var (i, vᴛ2) in range(writeTests)) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ2;
 
@@ -143,27 +139,23 @@ public static void TestWriterComment(ж<testing.T> t) {
         new(strings.Repeat("a", uint16max + 1), false)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         // write a zip file
         var buf = @new<bytes.Buffer>();
         var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
-        {
-            var errΔ1 = w.SetComment(test.comment); if (errΔ1 != nil) {
-                if (test.ok) {
-                    t.Fatalf("SetComment: unexpected error %v", errΔ1);
-                }
-                continue;
-            } else {
-                if (!test.ok) {
-                    t.Fatalf("SetComment: unexpected success, want error");
-                }
+        var errΔ1 = w.SetComment(test.comment); if (errΔ1 != nil) {
+            if (test.ok) {
+                t.Fatalf("SetComment: unexpected error %v", errΔ1);
+            }
+            continue;
+        } else {
+            if (!test.ok) {
+                t.Fatalf("SetComment: unexpected success, want error");
             }
         }
 
-        {
-            var errΔ2 = w.Close(); if (test.ok == (errΔ2 != nil)) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = w.Close(); if (test.ok == (errΔ2 != nil)) {
+            t.Fatal(errΔ2);
         }
 
         if (w.closed != test.ok) {
@@ -239,7 +231,7 @@ public static void TestWriterUTF8(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
 
-    foreach (var (_, test) in utf8Tests) {
+    foreach (var (_, test) in range(utf8Tests)) {
         var h = Ꮡ(new FileHeader(
             Name: test.name,
             Comment: test.comment,
@@ -250,13 +242,11 @@ public static void TestWriterUTF8(ж<testing.T> t) {
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
-        wΔ1.Write(slice<byte>([]));
+        wΔ1.Write([]);
     }
 
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 
     // read it back
@@ -264,7 +254,7 @@ public static void TestWriterUTF8(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, test) in utf8Tests) {
+    foreach (var (i, test) in range(utf8Tests)) {
         var flags = r.File[i].Flags;
         if (flags != test.flags) {
             t.Errorf("CreateHeader(name=%q comment=%q nonUTF8=%v): flags=%#x, want %#x", test.name, test.comment, test.nonUTF8, flags, test.flags);
@@ -284,26 +274,20 @@ public static void TestWriterTime(ж<testing.T> t) {
         Modified: time.Date(2017, 10, 31, 21, 11, 57, 0, timeZone((time.Duration)(-25200000000000L)))
     ));
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
-    {
-        var (_, errΔ1) = w.CreateHeader(h); if (errΔ1 != nil) {
-            t.Fatalf("unexpected CreateHeader error: %v", errΔ1);
-        }
+    var (_, errΔ1) = w.CreateHeader(h); if (errΔ1 != nil) {
+        t.Fatalf("unexpected CreateHeader error: %v", errΔ1);
     }
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatalf("unexpected Close error: %v", errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatalf("unexpected Close error: %v", errΔ2);
     }
 
     var (want, err) = os.ReadFile(testdataTimeGoZipˢ);
     if (err != nil) {
         t.Fatalf("unexpected ReadFile error: %v", err);
     }
-    {
-        var got = buf.Bytes(); if (!bytes.Equal(got, want)) {
-            fmt.Printf("%x\n%x\n"u8, got, want);
-            t.Error(contentsOfTimeGoZipˢ);
-        }
+    var got = buf.Bytes(); if (!bytes.Equal(got, want)) {
+        fmt.Printf("%x\n%x\n"u8, got, want);
+        t.Error(contentsOfTimeGoZipˢ);
     }
 }
 
@@ -311,10 +295,8 @@ public static void TestWriterOffset(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var largeData = new slice<byte>((1 << 17));
-        {
-            var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != nil) {
-                t.Fatal(randReadFailedˢ, errΔ1);
-            }
+        var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != nil) {
+            t.Fatal(randReadFailedˢ, errΔ1);
         }
         writeTests[1].Data = largeData;
         defer(() => {
@@ -328,17 +310,15 @@ public static void TestWriterOffset(ж<testing.T> t) {
         var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
         w.SetOffset((int64)n);
 
-        foreach (var (_, vᴛ1) in writeTests) {
+        foreach (var (_, vᴛ1) in range(writeTests)) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ1;
 
             testCreate(t, w, Ꮡwt);
         }
 
-        {
-            var errΔ2 = w.Close(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = w.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         // read it back
@@ -346,7 +326,7 @@ public static void TestWriterOffset(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        foreach (var (i, vᴛ2) in writeTests) {
+        foreach (var (i, vᴛ2) in range(writeTests)) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ2;
 
@@ -376,10 +356,8 @@ public static void TestWriterFlush(ж<testing.T> t) {
     if (buf.Len() > 0) {
         t.Fatalf("Unexpected %d bytes already in buffer", buf.Len());
     }
-    {
-        var errΔ1 = w.Flush(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = w.Flush(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     if (buf.Len() == 0) {
         t.Fatal(noBytesWrittenAfterFlushˢ);
@@ -397,15 +375,11 @@ public static void TestWriterDir(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (_, errΔ1) = dw.Write(default); if (errΔ1 != nil) {
-            t.Errorf("Write(nil) to directory: got %v, want nil", errΔ1);
-        }
+    var (_, errΔ1) = dw.Write(default); if (errΔ1 != nil) {
+        t.Errorf("Write(nil) to directory: got %v, want nil", errΔ1);
     }
-    {
-        var (_, errΔ2) = dw.Write(slice<byte>("hello"u8)); if (errΔ2 == nil) {
-            t.Error(writeHelloToDirectoryGotˢ);
-        }
+    var (_, errΔ2) = dw.Write(slice<byte>("hello"u8)); if (errΔ2 == nil) {
+        t.Error(writeHelloToDirectoryGotˢ);
     }
 }
 
@@ -442,7 +416,7 @@ public static void TestWriterDirAttributes(ж<testing.T> t) {
     }
     b = b.slice(idx);
 
-    if (!bytes.Equal(b[6..10], slice<byte>([0, 0, 0, 0]))) { // FileHeader.Flags: 0, FileHeader.Method: 0
+    if (!bytes.Equal(b[6..10], [0, 0, 0, 0])) { // FileHeader.Flags: 0, FileHeader.Method: 0
         t.Errorf("unexpected method and flags: %v", b[6..10]);
     }
 
@@ -460,16 +434,14 @@ public static void TestWriterCopy(ж<testing.T> t) {
     // make a zip file
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
-    foreach (var (_, vᴛ1) in writeTests) {
+    foreach (var (_, vᴛ1) in range(writeTests)) {
         ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
         wt = vᴛ1;
 
         testCreate(t, w, Ꮡwt);
     }
-    {
-        var errΔ1 = w.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = w.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     // read it back
@@ -477,7 +449,7 @@ public static void TestWriterCopy(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, vᴛ2) in writeTests) {
+    foreach (var (i, vᴛ2) in range(writeTests)) {
         ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
         wt = vᴛ2;
 
@@ -487,17 +459,13 @@ public static void TestWriterCopy(ж<testing.T> t) {
     // make a new zip file copying the old compressed data.
     var buf2 = @new<bytes.Buffer>();
     var dst = NewWriter(new zip_test_package.bytes_BufferжWriter(buf2));
-    foreach (var (_, f) in src.File) {
-        {
-            var errΔ2 = dst.Copy(f); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+    foreach (var (_, f) in range(src.File)) {
+        var errΔ2 = dst.Copy(f); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
-    {
-        var errΔ3 = dst.Close(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = dst.Close(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 
     // read the new one back
@@ -505,7 +473,7 @@ public static void TestWriterCopy(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, vᴛ3) in writeTests) {
+    foreach (var (i, vᴛ3) in range(writeTests)) {
         ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
         wt = vᴛ3;
 
@@ -542,7 +510,7 @@ public static void TestWriterCreateRaw(ж<testing.T> t) {
     var archive = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(archive));
 
-    foreach (var i in range(files)) {
+    foreach (var i in range(len(files))) {
         var f = Ꮡ(files, i);
         f.Value.crc32 = crc32.ChecksumIEEE((~f).content);
         var size = (uint64)len((~f).content);
@@ -590,10 +558,8 @@ public static void TestWriterCreateRaw(ж<testing.T> t) {
         }
     }
 
-    {
-        var errΔ3 = w.Close(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = w.Close(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 
     // read it back
@@ -601,7 +567,7 @@ public static void TestWriterCreateRaw(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, want) in files) {
+    foreach (var (i, want) in range(files)) {
         var got = r.File[i];
         if (got.Name != want.name) {
             t.Errorf("got Name %s; want %s", got.Name, want.name);
@@ -723,7 +689,7 @@ public static void BenchmarkCompressedZipGarbage(ж<testing.B> Ꮡb) {
 
 internal static fs.FS writeTestsToFS(slice<WriteTest> tests) {
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{});
-    foreach (var (_, wt) in tests) {
+    foreach (var (_, wt) in range(tests)) {
         fsys[wt.Name] = Ꮡ(new fstest.MapFile(
             Data: wt.Data,
             Mode: wt.Mode
@@ -746,10 +712,8 @@ public static void TestWriterAddFS(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = w.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = w.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     // Add subfolder into fsys to match what we'll read from the zip.
@@ -760,7 +724,7 @@ public static void TestWriterAddFS(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (i, vᴛ1) in tests) {
+    foreach (var (i, vᴛ1) in range(tests)) {
         ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
         wt = vᴛ1;
 

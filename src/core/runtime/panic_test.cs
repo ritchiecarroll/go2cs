@@ -40,7 +40,7 @@ public static void TestPanicWithDirectlyPrintableCustomTypes(ж<testing.T> t) {
         new("panicDoublieDeferFatal", "panic: runtime.errorString(\"invalid memory address or nil pointer dereference\") [recovered, repanicked]\n\tfatal error: sync: unlock of unlocked mutex")
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestPanicWithDirectlyPrintableCustomTypes_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

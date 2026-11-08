@@ -13,11 +13,9 @@ partial class version_internal_test_package {
 internal static ref readonly @string compareˢ => ref compareˢᵇ;
 private static readonly @string compareˢᵇ = "Compare"u8;
 
-public static void TestCompare(ж<testing.T> t) {
-    test2<@string, @string, nint>(t, compareTests, compareˢ, Compare);
-}
+public static void TestCompare(ж<testing.T> t) { test2<@string, @string, nint>(t, compareTests, compareˢ, Compare); }
 
-internal static slice<testCase2<@string, @string, nint>> compareTests = slice<testCase2<@string, @string, nint>>([
+internal static slice<testCase2<@string, @string, nint>> compareTests = [
     new("", "", 0),
     new("x", "x", 0),
     new("", "x", 0),
@@ -47,17 +45,15 @@ internal static slice<testCase2<@string, @string, nint>> compareTests = slice<te
     new("go1.19beta2", "go1.19rc1", -1),
     new("go1.1", "go1.99999999999999998", -1),
     new("go1.99999999999999998", "go1.99999999999999999", -1)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string langˢ => ref langˢᵇ;
 private static readonly @string langˢᵇ = "Lang"u8;
 
-public static void TestLang(ж<testing.T> t) {
-    test1<@string, @string>(t, langTests, langˢ, Lang);
-}
+public static void TestLang(ж<testing.T> t) { test1<@string, @string>(t, langTests, langˢ, Lang); }
 
-internal static slice<testCase1<@string, @string>> langTests = slice<testCase1<@string, @string>>([
+internal static slice<testCase1<@string, @string>> langTests = [
     new("bad", ""),
     new("go1.2rc3", "go1.2"),
     new("go1.2.3", "go1.2"),
@@ -65,17 +61,15 @@ internal static slice<testCase1<@string, @string>> langTests = slice<testCase1<@
     new("go1", "go1"),
     new("go222", "go222.0"),
     new("go1.999testmod", "go1.999")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string isValidˢ => ref isValidˢᵇ;
 private static readonly @string isValidˢᵇ = "IsValid"u8;
 
-public static void TestIsValid(ж<testing.T> t) {
-    test1<@string, bool>(t, isValidTests, isValidˢ, IsValid);
-}
+public static void TestIsValid(ж<testing.T> t) { test1<@string, bool>(t, isValidTests, isValidˢ, IsValid); }
 
-internal static slice<testCase1<@string, bool>> isValidTests = slice<testCase1<@string, bool>>([
+internal static slice<testCase1<@string, bool>> isValidTests = [
     new("", false),
     new("1.2.3", false),
     new("go1.2rc3", true),
@@ -92,7 +86,7 @@ internal static slice<testCase1<@string, bool>> isValidTests = slice<testCase1<@
     new("go1.3", true),
     new("go1.2", true),
     new("go1", true)
-]);
+];
 
 internal partial struct testCase1<In, Out> {
     internal In @in;
@@ -107,22 +101,18 @@ internal partial struct testCase2<In1, In2, Out> {
 
 internal static void test1<In, Out>(ж<testing.T> t, slice<testCase1<In, Out>> tests, @string name, Func<In, Out> f) {
     t.Helper();
-    foreach (var (_, tt) in tests) {
-        {
-            var @out = f(tt.@in); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
-                t.Errorf("%s(%v) = %v, want %v", name, (tt.@in).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
-            }
+    foreach (var (_, tt) in range(tests)) {
+        var @out = f(tt.@in); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
+            t.Errorf("%s(%v) = %v, want %v", name, (tt.@in).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
         }
     }
 }
 
 internal static void test2<In1, In2, Out>(ж<testing.T> t, slice<testCase2<In1, In2, Out>> tests, @string name, Func<In1, In2, Out> f) {
     t.Helper();
-    foreach (var (_, tt) in tests) {
-        {
-            var @out = f(tt.in1, tt.in2); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
-                t.Errorf("%s(%+v, %+v) = %+v, want %+v", name, (tt.in1).OrTypedNilOf(), (tt.in2).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
-            }
+    foreach (var (_, tt) in range(tests)) {
+        var @out = f(tt.in1, tt.in2); if (!reflect.DeepEqual((@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf())) {
+            t.Errorf("%s(%+v, %+v) = %+v, want %+v", name, (tt.in1).OrTypedNilOf(), (tt.in2).OrTypedNilOf(), (@out).OrTypedNilOf(), (tt.@out).OrTypedNilOf());
         }
     }
 }

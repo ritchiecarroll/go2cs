@@ -14,8 +14,6 @@ using @internal;
 using @internal.runtime;
 using @internal.runtime.syscall;
 using @internal.syscall;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -24,8 +22,7 @@ internal static nint sehf1() {
     return sehf1();
 }
 
-internal static void sehf2() {
-}
+internal static void sehf2() { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingAmd64OnlyTestˢ = (@string)"skipping amd64-only test"u8;
@@ -63,7 +60,7 @@ public static void TestSehLookupFunctionEntry(ж<testing.T> t) {
         new("anonymous func without frame", abi.FuncPCABIInternal((fnwithoutframe).OrTypedNilFunc()), false),
         new("pc at func body", sys.GetCallerPC(), true)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var @base = ref heap(new uintptr(), out var Ꮡbase);
         var fn = windows.RtlLookupFunctionEntry(tt.pc, Ꮡbase, nil);
         if (!tt.hasframe) {
@@ -129,7 +126,7 @@ internal static partial slice<uintptr> sehf4(bool pan) {
 internal static void testSehCallersEqual(ж<testing.T> t, slice<uintptr> pcs, slice<@string> want) {
     t.Helper();
     var got = new slice<@string>(0, len(want));
-    foreach (var (_, pc) in pcs) {
+    foreach (var (_, pc) in range(pcs)) {
         var fn = Δruntime.FuncForPC(pc);
         if (fn == nil || len(got) >= len(want)) {
             break;
@@ -160,7 +157,7 @@ public static void TestSehUnwind(ж<testing.T> t) {
         t.Skip(skippingAmd64OnlyTestˢ);
     }
     var pcs = sehf3(false);
-    testSehCallersEqual(t, pcs, slice<@string>(["runtime_test.sehf4", "runtime_test.sehf3", "runtime_test.TestSehUnwind"]));
+    testSehCallersEqual(t, pcs, ["runtime_test.sehf4", "runtime_test.sehf3", "runtime_test.TestSehUnwind"]);
 }
 
 public static void TestSehUnwindPanic(ж<testing.T> t) {
@@ -173,10 +170,8 @@ public static void TestSehUnwindPanic(ж<testing.T> t) {
             "runtime_test.sehf4", "runtime_test.sehf3", "runtime_test.TestSehUnwindPanic"]);
         var wantʗ1 = want;
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = sehCallers();
             testSehCallersEqual(t, pcs, wantʗ1);
@@ -231,10 +226,8 @@ public static void TestSehUnwindNilPointerPanic(ж<testing.T> t) {
             "runtime.sigpanic", "runtime_test.TestSehUnwindNilPointerPanic"]);
         var wantʗ1 = want;
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatal(didNotPanicˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var pcs = sehCallers();
             testSehCallersEqual(t, pcs, wantʗ1);

@@ -37,7 +37,7 @@ public static void TestMinimizeInput(ж<testing.T> t) {
             fn: error (CorpusEntry e) => {
                 var b = e.Values[0]._<slice<byte>>();
                 nint ones = 0;
-                foreach (var (_, v) in b) {
+                foreach (var (_, v) in range(b)) {
                     if (v == 1) {
                         ones++;
                     }
@@ -47,8 +47,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return default;
             },
-            input: slice<any>([slice<byte>([0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])]),
-            expected: slice<any>([slice<byte>([1, 1, 1])])
+            input: [slice<byte>([0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])],
+            expected: [slice<byte>([1, 1, 1])]
         ),
         new(
             name: "single_bytes",
@@ -62,8 +62,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return fmt.Errorf("bad %v"u8, e.Values[0]);
             },
-            input: slice<any>([slice<byte>([1, 2, 3, 4, 5])]),
-            expected: slice<any>([slice<byte>("00"u8)])
+            input: [slice<byte>([1, 2, 3, 4, 5])],
+            expected: [slice<byte>("00"u8)]
         ),
         new(
             name: "set_of_bytes",
@@ -72,13 +72,13 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 if (len(b) < 3) {
                     return default;
                 }
-                if (bytes.Equal(b, slice<byte>([0, 1, 2, 3, 4, 5])) || bytes.Equal(b, slice<byte>([0, 4, 5]))) {
+                if (bytes.Equal(b, [0, 1, 2, 3, 4, 5]) || bytes.Equal(b, [0, 4, 5])) {
                     return fmt.Errorf("bad %v"u8, e.Values[0]);
                 }
                 return default;
             },
-            input: slice<any>([slice<byte>([0, 1, 2, 3, 4, 5])]),
-            expected: slice<any>([slice<byte>([0, 4, 5])])
+            input: [slice<byte>([0, 1, 2, 3, 4, 5])],
+            expected: [slice<byte>([0, 4, 5])]
         ),
         new(
             name: "non_ascii_bytes",
@@ -89,8 +89,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return default;
             },
-            input: slice<any>([slice<byte>("ท"u8)]), // ท is 3 bytes
-            expected: slice<any>([slice<byte>("000"u8)])
+            input: [slice<byte>("ท"u8)], // ท is 3 bytes
+            expected: [slice<byte>("000"u8)]
         ),
         new(
             name: "ones_string",
@@ -107,8 +107,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return default;
             },
-            input: slice<any>([(@string)"001010001000000000000000000"]),
-            expected: slice<any>([(@string)"111"])
+            input: [(@string)"001010001000000000000000000"],
+            expected: [(@string)"111"]
         ),
         new(
             name: "string_length",
@@ -119,8 +119,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return default;
             },
-            input: slice<any>([zzzzzˢ]),
-            expected: slice<any>([(@string)"00000"])
+            input: [zzzzzˢ],
+            expected: [(@string)"00000"]
         ),
         new(
             name: "string_with_letter",
@@ -132,12 +132,12 @@ public static void TestMinimizeInput(ж<testing.T> t) {
                 }
                 return default;
             },
-            input: slice<any>([zzzzzˢ2]),
-            expected: slice<any>([(@string)"A"])
+            input: [zzzzzˢ2],
+            expected: [(@string)"A"]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tc = ref heap(new TestMinimizeInput_testcase(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -157,10 +157,8 @@ public static void TestMinimizeInput(ж<testing.T> t) {
             if (err == nil) {
                 tΔ1.Fatal(minimizeInputDidnTˢ);
             }
-            {
-                @string expected = fmt.Sprintf("bad %v"u8, tcʗ1.expected[0]); if (err.Error() != expected) {
-                    tΔ1.Errorf("unexpected error: got %q, want %q", err, expected);
-                }
+            @string expected = fmt.Sprintf("bad %v"u8, tcʗ1.expected[0]); if (err.Error() != expected) {
+                tΔ1.Errorf("unexpected error: got %q, want %q", err, expected);
             }
             if (!reflect.DeepEqual(vals, tcʗ1.expected)) {
                 tΔ1.Errorf("unexpected results: got %v, want %v", vals, tcʗ1.expected);
@@ -190,10 +188,8 @@ public static void TestMinimizeFlaky(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("unexpected error: %v", err);
     }
-    {
-        var count = mem.header().count; if (count != 1) {
-            t.Errorf("count: got %d, want 1", count);
-        }
+    var count = mem.header().count; if (count != 1) {
+        t.Errorf("count: got %d, want 1", count);
     }
 }
 

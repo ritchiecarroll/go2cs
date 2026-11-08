@@ -31,10 +31,8 @@ public static void TestRemoveAll(ж<Δtesting.T> t) {
     t.Parallel();
 
     @string tmpDir = t.TempDir();
-    {
-        var errΔ1 = RemoveAll(""u8); if (errΔ1 != nil) {
-            t.Errorf("RemoveAll(\"\"): %v; want nil", errΔ1);
-        }
+    var errΔ1 = RemoveAll(""u8); if (errΔ1 != nil) {
+        t.Errorf("RemoveAll(\"\"): %v; want nil", errΔ1);
     }
 
     @string @file = filepath.Join(tmpDir, fileˢ2);
@@ -48,44 +46,32 @@ public static void TestRemoveAll(ж<Δtesting.T> t) {
         t.Fatalf("create %q: %s", @file, err);
     }
     fd.Close();
-    {
-        err = RemoveAll(@file); if (err != nil) {
-            t.Fatalf("RemoveAll %q (first): %s", @file, err);
-        }
+    err = RemoveAll(@file); if (err != nil) {
+        t.Fatalf("RemoveAll %q (first): %s", @file, err);
     }
-    {
-        (_, err) = Lstat(@file); if (err == nil) {
-            t.Fatalf("Lstat %q succeeded after RemoveAll (first)", @file);
-        }
+    (_, err) = Lstat(@file); if (err == nil) {
+        t.Fatalf("Lstat %q succeeded after RemoveAll (first)", @file);
     }
 
     // Make directory with 1 file and remove.
-    {
-        var errΔ2 = MkdirAll(path, 511); if (errΔ2 != nil) {
-            t.Fatalf("MkdirAll %q: %s", path, errΔ2);
-        }
+    var errΔ2 = MkdirAll(path, 511); if (errΔ2 != nil) {
+        t.Fatalf("MkdirAll %q: %s", path, errΔ2);
     }
     (fd, err) = Create(fpath);
     if (err != nil) {
         t.Fatalf("create %q: %s", fpath, err);
     }
     fd.Close();
-    {
-        err = RemoveAll(path); if (err != nil) {
-            t.Fatalf("RemoveAll %q (second): %s", path, err);
-        }
+    err = RemoveAll(path); if (err != nil) {
+        t.Fatalf("RemoveAll %q (second): %s", path, err);
     }
-    {
-        (_, err) = Lstat(path); if (err == nil) {
-            t.Fatalf("Lstat %q succeeded after RemoveAll (second)", path);
-        }
+    (_, err) = Lstat(path); if (err == nil) {
+        t.Fatalf("Lstat %q succeeded after RemoveAll (second)", path);
     }
 
     // Make directory with file and subdirectory and remove.
-    {
-        err = MkdirAll(dpath, 511); if (err != nil) {
-            t.Fatalf("MkdirAll %q: %s", dpath, err);
-        }
+    err = MkdirAll(dpath, 511); if (err != nil) {
+        t.Fatalf("MkdirAll %q: %s", dpath, err);
     }
     (fd, err) = Create(fpath);
     if (err != nil) {
@@ -97,37 +83,29 @@ public static void TestRemoveAll(ж<Δtesting.T> t) {
         t.Fatalf("create %q: %s", fpath, err);
     }
     fd.Close();
-    {
-        err = RemoveAll(path); if (err != nil) {
-            t.Fatalf("RemoveAll %q (third): %s", path, err);
-        }
+    err = RemoveAll(path); if (err != nil) {
+        t.Fatalf("RemoveAll %q (third): %s", path, err);
     }
-    {
-        var (_, errΔ3) = Lstat(path); if (errΔ3 == nil) {
-            t.Fatalf("Lstat %q succeeded after RemoveAll (third)", path);
-        }
+    var (_, errΔ3) = Lstat(path); if (errΔ3 == nil) {
+        t.Fatalf("Lstat %q succeeded after RemoveAll (third)", path);
     }
 
     // Chmod is not supported under Windows or wasip1 and test fails as root.
     if (Δruntime.GOOS != "windows"u8 && Δruntime.GOOS != "wasip1"u8 && Getuid() != 0) {
         // Make directory with file and subdirectory and trigger error.
-        {
-            err = MkdirAll(dpath, 511); if (err != nil) {
-                t.Fatalf("MkdirAll %q: %s", dpath, err);
-            }
+        err = MkdirAll(dpath, 511); if (err != nil) {
+            t.Fatalf("MkdirAll %q: %s", dpath, err);
         }
 
-        foreach (var (_, s) in slice<@string>([fpath, dpath + "/file1"u8, path + "/zzz"u8])) {
+        foreach (var (_, s) in range(slice<@string>([fpath, dpath + "/file1"u8, path + "/zzz"u8]))) {
             (fd, err) = Create(s);
             if (err != nil) {
                 t.Fatalf("create %q: %s", s, err);
             }
             fd.Close();
         }
-        {
-            err = Chmod(dpath, 0); if (err != nil) {
-                t.Fatalf("Chmod %q 0: %s", dpath, err);
-            }
+        err = Chmod(dpath, 0); if (err != nil) {
+            t.Fatalf("Chmod %q 0: %s", dpath, err);
         }
 
         // No error checking here: either RemoveAll
@@ -140,23 +118,17 @@ public static void TestRemoveAll(ж<Δtesting.T> t) {
         RemoveAll(path);
         Chmod(dpath, 511);
 
-        foreach (var (_, s) in slice<@string>([fpath, path + "/zzz"u8])) {
-            {
-                (_, err) = Lstat(s); if (err == nil) {
-                    t.Fatalf("Lstat %q succeeded after partial RemoveAll", s);
-                }
+        foreach (var (_, s) in range(slice<@string>([fpath, path + "/zzz"u8]))) {
+            (_, err) = Lstat(s); if (err == nil) {
+                t.Fatalf("Lstat %q succeeded after partial RemoveAll", s);
             }
         }
     }
-    {
-        err = RemoveAll(path); if (err != nil) {
-            t.Fatalf("RemoveAll %q after partial RemoveAll: %s", path, err);
-        }
+    err = RemoveAll(path); if (err != nil) {
+        t.Fatalf("RemoveAll %q after partial RemoveAll: %s", path, err);
     }
-    {
-        (_, err) = Lstat(path); if (err == nil) {
-            t.Fatalf("Lstat %q succeeded after RemoveAll (final)", path);
-        }
+    (_, err) = Lstat(path); if (err == nil) {
+        t.Fatalf("Lstat %q succeeded after RemoveAll (final)", path);
     }
 }
 
@@ -222,15 +194,11 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> t) {
     // Removing paths with over 4096 chars commonly fails.
     @string name = strings.Repeat("a", 100);
     for (nint i = 0; i < 41; i++) {
-        {
-            var errΔ1 = Mkdir(name, 493); if (errΔ1 != nil) {
-                t.Fatalf("Could not mkdir %s: %s", name, errΔ1);
-            }
+        var errΔ1 = Mkdir(name, 493); if (errΔ1 != nil) {
+            t.Fatalf("Could not mkdir %s: %s", name, errΔ1);
         }
-        {
-            var errΔ2 = Chdir(name); if (errΔ2 != nil) {
-                t.Fatalf("Could not chdir %s: %s", name, errΔ2);
-            }
+        var errΔ2 = Chdir(name); if (errΔ2 != nil) {
+            t.Fatalf("Could not chdir %s: %s", name, errΔ2);
         }
     }
 
@@ -250,10 +218,8 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> t) {
 public static void TestRemoveAllDot(ж<Δtesting.T> t) {
     t.Chdir(t.TempDir());
 
-    {
-        var err = RemoveAll("."); if (err == nil) {
-            t.Errorf("RemoveAll succeed to remove .");
-        }
+    var err = RemoveAll("."); if (err == nil) {
+        t.Errorf("RemoveAll succeed to remove .");
     }
 }
 
@@ -273,11 +239,9 @@ public static void TestRemoveAllDotDot(ж<Δtesting.T> t) {
             t.Error(err);
         }
     }
-    foreach (var (_, dir) in slice<@string>([subsubdir, subdir])) {
-        {
-            var (_, err) = Stat(dir); if (err == nil) {
-                t.Errorf("%s: exists after RemoveAll", dir);
-            }
+    foreach (var (_, dir) in range(slice<@string>([subsubdir, subdir]))) {
+        var (_, err) = Stat(dir); if (err == nil) {
+            t.Errorf("%s: exists after RemoveAll", dir);
         }
     }
 }
@@ -347,7 +311,7 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> t) {
         ]);
         var readonlyʗ1 = @readonly;
         bool inReadonly(@string d) {
-            foreach (var (_, ro) in readonlyʗ1) {
+            foreach (var (_, ro) in range(readonlyʗ1)) {
                 if (d == ro) {
                     return true;
                 }
@@ -359,19 +323,15 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> t) {
             return false;
         }
 
-        foreach (var (_, dir) in dirs) {
-            {
-                var errΔ1 = Mkdir(filepath.Join(tempDir, dir), 511); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+        foreach (var (_, dir) in range(dirs)) {
+            var errΔ1 = Mkdir(filepath.Join(tempDir, dir), 511); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
-        foreach (var (_, dir) in @readonly) {
+        foreach (var (_, dir) in range(@readonly)) {
             @string d = filepath.Join(tempDir, dir);
-            {
-                var errΔ2 = Chmod(d, 365); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var errΔ2 = Chmod(d, 365); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
 
             // Defer changing the mode back so that the deferred
@@ -386,18 +346,16 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> t) {
 
         // The error should be of type *PathError.
         // see issue 30491 for details.
-        {
-            var (pathErr, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
-                @string want = filepath.Join(tempDir, "b", "y");
-                if (pathErr.Path != want) {
-                    t.Errorf("RemoveAll(%q): err.Path=%q, want %q", tempDir, pathErr.Path, want);
-                }
-            } else {
-                t.Errorf("RemoveAll(%q): error has type %T, want *fs.PathError", tempDir, err);
+        var (pathErr, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
+            @string want = filepath.Join(tempDir, "b", "y");
+            if (pathErr.Path != want) {
+                t.Errorf("RemoveAll(%q): err.Path=%q, want %q", tempDir, pathErr.Path, want);
             }
+        } else {
+            t.Errorf("RemoveAll(%q): error has type %T, want *fs.PathError", tempDir, err);
         }
 
-        foreach (var (_, dir) in dirs) {
+        foreach (var (_, dir) in range(dirs)) {
             var (_, errΔ3) = Stat(filepath.Join(tempDir, dir));
             if (inReadonly(dir)) {
                 if (errΔ3 != nil) {
@@ -463,10 +421,8 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> t) {
         @string path = filepath.Join(tmpDir, "_TestRemoveAllWithMoreErrorThanReqSize_");
 
         // Make directory with 1025 read-only files.
-        {
-            var errΔ1 = MkdirAll(path, 511); if (errΔ1 != nil) {
-                t.Fatalf("MkdirAll %q: %s", path, errΔ1);
-            }
+        var errΔ1 = MkdirAll(path, 511); if (errΔ1 != nil) {
+            t.Fatalf("MkdirAll %q: %s", path, errΔ1);
         }
         for (nint i = 0; i < 1025; i++) {
             @string fpath = filepath.Join(path, fmt.Sprintf("file%d"u8, i));
@@ -479,10 +435,8 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> t) {
 
         // Make the parent directory read-only. On some platforms, this is what
         // prevents Remove from removing the files within that directory.
-        {
-            var errΔ3 = Chmod(path, 365); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = Chmod(path, 365); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
         defer(Chmod, path, (fs.FileMode)493, ref ᒐ);
 
@@ -542,15 +496,11 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> t) {
     }
 
     @string env = envᶜ;
-    {
-        @string dir = Getenv(env); if (dir != ""u8) {
-            {
-                var errΔ1 = RemoveAll(dir); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
-            }
-            return;
+    @string dir = Getenv(env); if (dir != ""u8) {
+        var errΔ1 = RemoveAll(dir); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
+        return;
     }
 
     // Only test on Linux so that we can assume we have strace.
@@ -559,10 +509,8 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> t) {
     if (Δruntime.GOOS != "linux"u8) {
         t.Skipf("skipping test on %s", Δruntime.GOOS);
     }
-    {
-        var (_, errΔ2) = Stat(binStraceˢ); if (errΔ2 != nil) {
-            t.Skipf("skipping test because /bin/strace not found: %v", errΔ2);
-        }
+    var (_, errΔ2) = Stat(binStraceˢ); if (errΔ2 != nil) {
+        t.Skipf("skipping test because /bin/strace not found: %v", errΔ2);
     }
     var (me, err) = Executable();
     if (err != nil) {
@@ -574,22 +522,16 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> t) {
     // on each one.
     @string tmpdir = t.TempDir();
     @string subdir = filepath.Join(tmpdir, subdirˢ);
-    {
-        var errΔ3 = Mkdir(subdir, 493); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = Mkdir(subdir, 493); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
     for (nint i = 0; i < 100; i++) {
         @string subsubdir = filepath.Join(subdir, strconv.Itoa(i));
-        {
-            var errΔ4 = Mkdir(filepath.Join(subdir, strconv.Itoa(i)), 493); if (errΔ4 != nil) {
-                t.Fatal(errΔ4);
-            }
+        var errΔ4 = Mkdir(filepath.Join(subdir, strconv.Itoa(i)), 493); if (errΔ4 != nil) {
+            t.Fatal(errΔ4);
         }
-        {
-            var errΔ5 = WriteFile(filepath.Join(subsubdir, fileˢ2), default, 420); if (errΔ5 != nil) {
-                t.Fatal(errΔ5);
-            }
+        var errΔ5 = WriteFile(filepath.Join(subsubdir, fileˢ2), default, 420); if (errΔ5 != nil) {
+            t.Fatal(errΔ5);
         }
     }
 
@@ -604,10 +546,8 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> t) {
         t.Fatal(err);
     }
 
-    {
-        nint got = bytes.Count(@out, slice<byte>("fcntl"u8)); if (got >= 100) {
-            t.Errorf("found %d fcntl calls, want < 100", got);
-        }
+    nint got = bytes.Count(@out, slice<byte>("fcntl"u8)); if (got >= 100) {
+        t.Errorf("found %d fcntl calls, want < 100", got);
     }
 }
 
@@ -618,12 +558,12 @@ public static void TestRemoveAllTrailingSlash(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "windows"u8) {
         slashes = append(slashesᴷ, slashes, (@string)@"\");
     }
-    foreach (var (_, slash) in slashes) {
-        @string dir = makefs(t, slice<@string>([
+    foreach (var (_, slash) in range(slashes)) {
+        @string dir = makefs(t, [
             "dir/a/file1",
             "dir/a/file2",
             "dir/file3"
-        ]));
+        ]);
         @string path = dir + "/dir"u8;
         {
             var err = RemoveAll(path + slash); if (err != nil) {
@@ -642,14 +582,12 @@ public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         testRequiresPermissions(t);
-        @string dir = makefs(t, slice<@string>([
+        @string dir = makefs(t, [
             "parent/",
             "parent/link => target"
-        ]));
-        {
-            var errΔ1 = Chmod(dir + "/parent"u8, 365); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        ]);
+        var errΔ1 = Chmod(dir + "/parent"u8, 365); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         defer(() => {
             Chmod(dir + "/parent"u8, 493);
@@ -695,10 +633,8 @@ public static void BenchmarkRemoveAll(ж<Δtesting.B> Ꮡb) {
             Ꮡb.Fatal(err);
         }
         b.StartTimer();
-        {
-            var errΔ1 = RemoveAll(tmpDir); if (errΔ1 != nil) {
-                Ꮡb.Fatal(errΔ1);
-            }
+        var errΔ1 = RemoveAll(tmpDir); if (errΔ1 != nil) {
+            Ꮡb.Fatal(errΔ1);
         }
     }
 }

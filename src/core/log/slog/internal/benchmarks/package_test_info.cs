@@ -45,7 +45,7 @@ using static global::go.log.slog.@internal.benchmarks_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("log/slog/internal/benchmarks/benchmarks_test.go", "benchmarks_test.cs", "ABQiggAcDrKCAAkWgrKClAAPFgAKGAAKGAAQJAAuWpKCkoI=", "39-150:1;53-61:1.1;65-73:1.2;77-90:1.3;95-138:1.4;141-148:1.5;143-147:1.5.1", "", "90=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5;101=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5;112=String/1/2/1,Int/1/2/2,Duration/1/2/3,Time/1/2/4,Any/1/2/5,String/2/2/6,Int/2/2/7,Duration/2/2/8,Time/2/2/9,Any/2/2/10;129=String/1/8/1,Int/1/8/2,Duration/1/8/3,Time/1/8/4,Any/1/8/5,String/2/8/6,Int/2/8/7,Duration/2/8/8,Time/2/8/9,Any/2/8/10,String/3/8/11,Int/3/8/12,Duration/3/8/13,Time/3/8/14,Any/3/8/15,String/4/8/16,Int/4/8/17,Duration/4/8/18,Time/4/8/19,Any/4/8/20,String/5/8/21,Int/5/8/22,Duration/5/8/23,Time/5/8/24,Any/5/8/25,String/6/8/26,Int/6/8/27,Duration/6/8/28,Time/6/8/29,Any/6/8/30,String/7/8/31,Int/7/8/32,Duration/7/8/33,Time/7/8/34,Any/7/8/35,String/8/8/36,Int/8/8/37,Duration/8/8/38,Time/8/8/39,Any/8/8/40")]
-[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers_test.go", "handlers_test.cs", "ABcegoKCgqKCgoCCpIKCpqKCgIKkgoLKooKAgJI=", "19-29:1;30-39:2;44-44:1")]
+[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers_test.go", "handlers_test.cs", "ABcegoKCgqKCgoKUgoKmooKClIKCyqKCgICS", "19-29:1;30-39:2;44-44:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

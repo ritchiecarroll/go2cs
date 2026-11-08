@@ -95,10 +95,8 @@ public static void TestMultiReaderAsWriterTo(ж<testing.T> t) {
     if (n != 7) {
         t.Errorf("expected read 7 bytes; got %d", n);
     }
-    {
-        @string result = sink.String(); if (result != "foo bar"u8) {
-            t.Errorf(@"expected ""foo bar""; got %q", result);
-        }
+    @string result = sink.String(); if (result != "foo bar"u8) {
+        t.Errorf(@"expected ""foo bar""; got %q", result);
     }
 }
 

@@ -15,10 +15,8 @@ partial class bits_test_package {
 
 public static void TestUintSize(ж<testing.T> t) {
     nuint x = default;
-    {
-        var want = /* unsafe.Sizeof(x) */ (uintptr)8 * 8; if (UintSize != want) {
-            t.Fatalf("UintSize = %d; want %d", (nint)(UintSize), want);
-        }
+    var want = /* unsafe.Sizeof(x) */ (uintptr)8 * 8; if (UintSize != want) {
+        t.Fatalf("UintSize = %d; want %d", (nint)(UintSize), want);
     }
 }
 
@@ -505,7 +503,7 @@ public static void TestReverse(ж<testing.T> t) {
     }
 
     // test a few patterns
-    foreach (var (_, test) in slice<TestReverse_type>([
+    foreach (var (_, test) in range(slice<TestReverse_type>([
         new(0, 0),
         new(0x1, (uint64)0x8 << 60),
         new(0x2, (uint64)0x4 << 60),
@@ -524,7 +522,7 @@ public static void TestReverse(ж<testing.T> t) {
         new(0xf, (uint64)0xf << 60),
         new(0x5686487, 0xe12616a000000000UL),
         new(0x0123456789abcdefUL, 0xf7b3d591e6a2c480UL)
-    ])) {
+    ]))) {
         testReverse(t, test.x, test.r);
         testReverse(t, test.r, test.x);
     }
@@ -629,7 +627,7 @@ internal partial struct TestReverseBytes_type /*dyn*/ {
 }
 
 public static void TestReverseBytes(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestReverseBytes_type>([
+    foreach (var (_, test) in range(slice<TestReverseBytes_type>([
         new(0, 0),
         new(0x01, (uint64)0x01 << 56),
         new(0x0123, (uint64)0x2301 << 48),
@@ -639,7 +637,7 @@ public static void TestReverseBytes(ж<testing.T> t) {
         new(0x0123456789abUL, (uint64)unchecked((nint)0xab8967452301L) << 16),
         new(0x0123456789abcdUL, (uint64)unchecked((nint)0xcdab8967452301L) << 8),
         new(0x0123456789abcdefUL, (uint64)(nuint)0xefcdab8967452301UL << 0)
-    ])) {
+    ]))) {
         testReverseBytes(t, test.x, test.r);
         testReverseBytes(t, test.r, test.x);
     }
@@ -807,7 +805,7 @@ public static void TestAddSubUint(ж<testing.T> t) {
             t.Errorf("%s: got z:cout = %#x:%#x; want %#x:%#x", msg, z1, cout1, z, cout);
         }
     }
-    foreach (var (_, a) in slice<TestAddSubUint_type>([
+    foreach (var (_, a) in range(slice<TestAddSubUint_type>([
         new(0, 0, 0, 0, 0),
         new(0, 1, 0, 1, 0),
         new(0, 0, 1, 1, 0),
@@ -819,7 +817,7 @@ public static void TestAddSubUint(ж<testing.T> t) {
         new(_M, 1, 1, 1, 1),
         new(_M, _M, 0, _M - 1, 1),
         new(_M, _M, 1, _M, 1)
-    ])) {
+    ]))) {
         test(addˢ, Add, a.x, a.y, a.c, a.z, a.cout);
         test(addSymmetricˢ, Add, a.y, a.x, a.c, a.z, a.cout);
         test(subˢ, Sub, a.z, a.x, a.c, a.y, a.cout);
@@ -854,7 +852,7 @@ public static void TestAddSubUint32(ж<testing.T> t) {
             t.Errorf("%s: got z:cout = %#x:%#x; want %#x:%#x", msg, z1, cout1, z, cout);
         }
     }
-    foreach (var (_, a) in slice<TestAddSubUint32_type>([
+    foreach (var (_, a) in range(slice<TestAddSubUint32_type>([
         new(0, 0, 0, 0, 0),
         new(0, 1, 0, 1, 0),
         new(0, 0, 1, 1, 0),
@@ -866,7 +864,7 @@ public static void TestAddSubUint32(ж<testing.T> t) {
         new(_M32, 1, 1, 1, 1),
         new(_M32, _M32, 0, _M32 - 1, 1),
         new(_M32, _M32, 1, _M32, 1)
-    ])) {
+    ]))) {
         test(add32ˢ, Add32, a.x, a.y, a.c, a.z, a.cout);
         test(add32Symmetricˢ, Add32, a.y, a.x, a.c, a.z, a.cout);
         test(sub32ˢ, Sub32, a.z, a.x, a.c, a.y, a.cout);
@@ -903,7 +901,7 @@ public static void TestAddSubUint64(ж<testing.T> t) {
             t.Errorf("%s: got z:cout = %#x:%#x; want %#x:%#x", msg, z1, cout1, z, cout);
         }
     }
-    foreach (var (_, a) in slice<TestAddSubUint64_type>([
+    foreach (var (_, a) in range(slice<TestAddSubUint64_type>([
         new(0, 0, 0, 0, 0),
         new(0, 1, 0, 1, 0),
         new(0, 0, 1, 1, 0),
@@ -915,7 +913,7 @@ public static void TestAddSubUint64(ж<testing.T> t) {
         new(_M64, 1, 1, 1, 1),
         new(_M64, _M64, 0, _M64 - 1, 1),
         new(_M64, _M64, 1, _M64, 1)
-    ])) {
+    ]))) {
         test(add64ˢ, Add64, a.x, a.y, a.c, a.z, a.cout);
         test(add64Symmetricˢ, Add64, a.y, a.x, a.c, a.z, a.cout);
         test(sub64ˢ, Sub64, a.z, a.x, a.c, a.y, a.cout);
@@ -969,15 +967,13 @@ public static void TestAdd64OverflowPanic(ж<testing.T> t) {
             throw panic("overflow");
         }
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         void shouldPanic(Action f) {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    {
-                        var err = recover(); if (err == nil) {
-                            t.Fatalf("expected panic");
-                        }
+                    var err = recover(); if (err == nil) {
+                        t.Fatalf("expected panic");
                     }
                 }, ref ᒐ);
                 f();
@@ -1047,15 +1043,13 @@ public static void TestSub64OverflowPanic(ж<testing.T> t) {
             throw panic("overflow");
         }
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         void shouldPanic(Action f) {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    {
-                        var err = recover(); if (err == nil) {
-                            t.Fatalf("expected panic");
-                        }
+                    var err = recover(); if (err == nil) {
+                        t.Fatalf("expected panic");
                     }
                 }, ref ᒐ);
                 f();
@@ -1121,10 +1115,10 @@ public static void TestMulDiv(ж<testing.T> t) {
             t.Errorf("%s: got q:r = %#x:%#x; want %#x:%#x", msg, q1, r1, q, r);
         }
     }
-    foreach (var (_, a) in slice<TestMulDiv_type>([
+    foreach (var (_, a) in range(slice<TestMulDiv_type>([
         new((nuint)1 << (int)(UintSize - 1), 2, 1, 0, 1),
         new(_M, _M, _M - 1, 1, 42)
-    ])) {
+    ]))) {
         testMul(mulˢ, Mul, a.x, a.y, a.hi, a.lo);
         testMul(mulSymmetricˢ, Mul, a.y, a.x, a.hi, a.lo);
         testDiv(divˢ, Div, a.hi, a.lo + a.r, a.y, a.x, a.r);
@@ -1166,11 +1160,11 @@ public static void TestMulDiv32(ж<testing.T> t) {
             t.Errorf("%s: got q:r = %#x:%#x; want %#x:%#x", msg, q1, r1, q, r);
         }
     }
-    foreach (var (_, a) in slice<TestMulDiv32_type>([
+    foreach (var (_, a) in range(slice<TestMulDiv32_type>([
         new((uint32)1 << 31, 2, 1, 0, 1),
         new(0xc47dfa8cU, 50911, 0x98a4, 0x998587f4U, 13),
         new(_M32, _M32, _M32 - 1, 1, 42)
-    ])) {
+    ]))) {
         testMul(mul32ˢ, Mul32, a.x, a.y, a.hi, a.lo);
         testMul(mul32Symmetricˢ, Mul32, a.y, a.x, a.hi, a.lo);
         testDiv(div32ˢ, Div32, a.hi, a.lo + a.r, a.y, a.x, a.r);
@@ -1214,11 +1208,11 @@ public static void TestMulDiv64(ж<testing.T> t) {
             t.Errorf("%s: got q:r = %#x:%#x; want %#x:%#x", msg, q1, r1, q, r);
         }
     }
-    foreach (var (_, a) in slice<TestMulDiv64_type>([
+    foreach (var (_, a) in range(slice<TestMulDiv64_type>([
         new((uint64)1 << 63, 2, 1, 0, 1),
         new(0x3626229738a3b9UL, 0xd8988a9f1cc4a61UL, 0x2dd0712657fe8UL, 0x9dd6a3364c358319UL, 13),
         new(_M64, _M64, _M64 - 1, 1, 42)
-    ])) {
+    ]))) {
         testMul(mul64ˢ, Mul64, a.x, a.y, a.hi, a.lo);
         testMul(mul64Symmetricˢ, Mul64, a.y, a.x, a.hi, a.lo);
         testDiv(div64ˢ, Div64, a.hi, a.lo + a.r, a.y, a.x, a.r);
@@ -1245,14 +1239,10 @@ public static void TestDivPanicOverflow(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(divShouldHavePanickedˢ);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != overflowError) {
-                        t.Errorf("Div expected panic: %q, got: %q ", overflowError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(divShouldHavePanickedˢ);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+                t.Errorf("Div expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div(1, 0, 1);
@@ -1270,14 +1260,10 @@ public static void TestDiv32PanicOverflow(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(div32ShouldHavePanickedˢ);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != overflowError) {
-                        t.Errorf("Div32 expected panic: %q, got: %q ", overflowError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(div32ShouldHavePanickedˢ);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+                t.Errorf("Div32 expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div32(1, 0, 1);
@@ -1295,14 +1281,10 @@ public static void TestDiv64PanicOverflow(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(div64ShouldHavePanickedˢ);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != overflowError) {
-                        t.Errorf("Div64 expected panic: %q, got: %q ", overflowError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(div64ShouldHavePanickedˢ);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+                t.Errorf("Div64 expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div64(1, 0, 1);
@@ -1320,14 +1302,10 @@ public static void TestDivPanicZero(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(divShouldHavePanickedˢ2);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != divZeroError) {
-                        t.Errorf("Div expected panic: %q, got: %q ", divZeroError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(divShouldHavePanickedˢ2);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+                t.Errorf("Div expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div(1, 1, 0);
@@ -1345,14 +1323,10 @@ public static void TestDiv32PanicZero(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(div32ShouldHavePanickedˢ2);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != divZeroError) {
-                        t.Errorf("Div32 expected panic: %q, got: %q ", divZeroError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(div32ShouldHavePanickedˢ2);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+                t.Errorf("Div32 expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div32(1, 1, 0);
@@ -1370,14 +1344,10 @@ public static void TestDiv64PanicZero(ж<testing.T> t) {
     try {
         // Expect a panic
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Error(div64ShouldHavePanickedˢ2);
-                } else {
-                    var (e, ok) = err._<runtimeꓸError>(ᐧ); if (!ok || e.Error() != divZeroError) {
-                        t.Errorf("Div64 expected panic: %q, got: %q ", divZeroError, e.Error());
-                    }
-                }
+            var err = recover(); if (err == nil) {
+                t.Error(div64ShouldHavePanickedˢ2);
+            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+                t.Errorf("Div64 expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);
         var (q, r) = Div64(1, 1, 0);
@@ -1447,7 +1417,7 @@ public static void TestRem64Overflow(ж<testing.T> t) {
         new(3968194946088682615UL, 3192705705065114702UL, 1000037, 56067)
     ]);
 
-    foreach (var (_, rt) in Rem64Tests) {
+    foreach (var (_, rt) in range(Rem64Tests)) {
         if (rt.hi < rt.y) {
             t.Fatalf("Rem64(%v, %v, %v) is not a test with quo overflow", rt.hi, rt.lo, rt.y);
         }

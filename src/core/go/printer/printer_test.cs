@@ -16,8 +16,6 @@ using os = os_package;
 using filepath = path.filepath_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.@internal;
 using global::go.go;
@@ -69,18 +67,14 @@ internal static (slice<byte>, error) format(slice<byte> src, checkMode mode) {
 
     // print AST
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = Ꮡcfg.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil()); if (errΔ1 != nil) {
-            return (default, fmt.Errorf("print: %s"u8, errΔ1));
-        }
+    var errΔ1 = Ꮡcfg.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil()); if (errΔ1 != nil) {
+        return (default, fmt.Errorf("print: %s"u8, errΔ1));
     }
 
     // make sure formatted output is syntactically correct
     var res = buf.Bytes();
-    {
-        var (_, errΔ2) = parser.ParseFile(fset, ""u8, res, parser.ParseComments); if (errΔ2 != nil) {
-            return (default, fmt.Errorf("re-parse: %s\n%s"u8, errΔ2, buf.Bytes()));
-        }
+    var (_, errΔ2) = parser.ParseFile(fset, ""u8, res, parser.ParseComments); if (errΔ2 != nil) {
+        return (default, fmt.Errorf("re-parse: %s\n%s"u8, errΔ2, buf.Bytes()));
     }
 
     return (res, default);
@@ -118,10 +112,8 @@ internal static void runcheck(ж<testing.T> t, @string source, @string golden, c
 
     // update golden files if necessary
     if (update.Value) {
-        {
-            var errΔ1 = os.WriteFile(golden, res, 420); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = os.WriteFile(golden, res, 420); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
         return;
     }
@@ -134,11 +126,9 @@ internal static void runcheck(ж<testing.T> t, @string source, @string golden, c
     }
 
     // formatted source and golden must be the same
-    {
-        var errΔ2 = checkEqual(fmt.Sprintf("format(%v)"u8, source), golden, res, gld); if (errΔ2 != nil) {
-            t.Error(errΔ2);
-            return;
-        }
+    var errΔ2 = checkEqual(fmt.Sprintf("format(%v)"u8, source), golden, res, gld); if (errΔ2 != nil) {
+        t.Error(errΔ2);
+        return;
     }
 
     if ((checkMode)(mode & idempotent) != 0) {
@@ -150,10 +140,8 @@ internal static void runcheck(ж<testing.T> t, @string source, @string golden, c
             t.Error(err);
             return;
         }
-        {
-            var errΔ3 = checkEqual(golden, fmt.Sprintf("format(%s)"u8, golden), gld, res); if (errΔ3 != nil) {
-                t.Errorf("golden is not idempotent: %s", errΔ3);
-            }
+        var errΔ3 = checkEqual(golden, fmt.Sprintf("format(%s)"u8, golden), gld, res); if (errΔ3 != nil) {
+            t.Errorf("golden is not idempotent: %s", errΔ3);
         }
     }
 }
@@ -188,7 +176,7 @@ internal partial struct entry {
 }
 
 // Use go test -update to create/update the respective golden files.
-internal static slice<entry> data = slice<entry>([
+internal static slice<entry> data = [
     new("empty.input", "empty.golden", idempotent),
     new("comments.input", "comments.golden", 0),
     new("comments.input", "comments.x", export),
@@ -211,11 +199,11 @@ internal static slice<entry> data = slice<entry>([
     new("gobuild5.input", "gobuild5.golden", idempotent),
     new("gobuild6.input", "gobuild6.golden", idempotent),
     new("gobuild7.input", "gobuild7.golden", idempotent)
-]);
+];
 
 public static void TestFiles(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, e) in data) {
+    foreach (var (_, e) in range(data)) {
         @string source = filepath.Join(dataDir, e.source);
         @string golden = filepath.Join(dataDir, e.golden);
         checkMode mode = e.mode;
@@ -255,7 +243,7 @@ public static void TestLineComments(ж<testing.T> t) {
     Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil());
 
     nint nlines = 0;
-    foreach (var (_, ch) in buf.Bytes()) {
+    foreach (var (_, ch) in range(buf.Bytes())) {
         if (ch == '\n') {
             nlines++;
         }
@@ -272,17 +260,13 @@ public static void TestLineComments(ж<testing.T> t) {
 [GoInit] internal static void init() {
     @string name = "foobar";
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, Ꮡ(new ast.Ident(Name: name))); if (err != nil) {
-            throw panic(err); // error in test
-        }
+    var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, Ꮡ(new ast.Ident(Name: name))); if (err != nil) {
+        throw panic(err); // error in test
     }
     // in debug mode, the result contains additional information;
     // ignore it
-    {
-        @string s = Ꮡbuf.String(); if (!debug && s != name) {
-            throw panic("got " + s + ", want " + name);
-        }
+    @string s = Ꮡbuf.String(); if (!debug && s != name) {
+        throw panic("got " + s + ", want " + name);
     }
 }
 
@@ -391,10 +375,8 @@ public static void TestBadComments(ж<testing.T> t) {
 internal partial struct visitor /*chan ж<ast.Ident>*/;
 
 internal static ast.Visitor /*w*/ Visit(this visitor v, ast.Node n) {
-    {
-        var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-            v.ᐸꟷ(ident);
-        }
+    var (ident, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
+        v.ᐸꟷ(ident);
     }
     return v;
 }
@@ -565,14 +547,14 @@ public static void TestIssue5945(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> decls = slice<@string>([
+internal static slice<@string> decls = [
     @"import ""fmt""",
     "const pi = 3.1415\nconst e = 2.71828\n\nvar x = pi",
     "func sum(x, y int) int\t{ return x + y }"
-]);
+];
 
 public static void TestDeclLists(ж<testing.T> t) {
-    foreach (var (_, src) in decls) {
+    foreach (var (_, src) in range(decls)) {
         var (@file, err) = parser.ParseFile(fset, ""u8, "package p;" + src, parser.ParseComments);
         if (err != nil) {
             throw panic(err); // error in test
@@ -591,14 +573,14 @@ public static void TestDeclLists(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> stmts = slice<@string>([
+internal static slice<@string> stmts = [
     "i := 0",
     "select {}\nvar a, b = 1, 2\nreturn a + b",
     "go f()\ndefer func() {}()"
-]);
+];
 
 public static void TestStmtLists(ж<testing.T> t) {
-    foreach (var (_, src) in stmts) {
+    foreach (var (_, src) in range(stmts)) {
         var (@file, err) = parser.ParseFile(fset, ""u8, "package p; func _() {" + src + "}", parser.ParseComments);
         if (err != nil) {
             throw panic(err); // error in test
@@ -647,13 +629,13 @@ public static void TestBaseIndent(ж<testing.T> t) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             (Ꮡ(new Config(Tabwidth: tabwidth, Indent: indentʗ1))).Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, fileʗ1.OrTypedNil());
             // all code must be indented by at least 'indent' tabs
-            var lines = bytes.Split(buf.Bytes(), slice<byte>([(byte)'\n']));
-            foreach (var (i, line) in lines) {
+            var lines = bytes.Split(buf.Bytes(), [(byte)'\n']);
+            foreach (var (i, line) in range(lines)) {
                 if (len(line) == 0) {
                     continue; // empty lines don't have indentation
                 }
                 nint n = 0;
-                foreach (var (j, b) in line) {
+                foreach (var (j, b) in range(line)) {
                     if (b != '\t') {
                         // end of indentation
                         n = j;
@@ -683,18 +665,16 @@ func f()
 public static void TestFuncType(ж<testing.T> t) {
     var src = Ꮡ(new ast.File(
         Name: Ꮡ(new ast.Ident(Name: "p")),
-        Decls: slice<ast.Decl>([new ast.FuncDeclжDecl(Ꮡ(new ast.FuncDecl(
+        Decls: [new ast.FuncDeclжDecl(Ꮡ(new ast.FuncDecl(
             Name: Ꮡ(new ast.Ident(Name: "f")),
             Type: Ꮡ(new ast.FuncType())
         )))
-        ])
+        ]
     ));
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, src.OrTypedNil()); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, src.OrTypedNil()); if (err != nil) {
+        t.Fatal(err);
     }
     @string got = Ꮡbuf.String();
 
@@ -720,20 +700,16 @@ public static void TestChanType(ж<testing.T> t) {
                 Dir: ast.RECV,
                 Value: new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: "int")))
             ))),
-            Args: slice<ast.Expr>([new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: "nil")))])
+            Args: [new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: "nil")))]
         )))
     ));
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, expr.OrTypedNil()); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, expr.OrTypedNil()); if (err != nil) {
+        t.Fatal(err);
     }
-    {
-        @string got = Ꮡbuf.String();
-        @string want = chanIntNilˢ; if (got != want) {
-            t.Fatalf("got:\n%s\nwant:\n%s\n", got, want);
-        }
+    @string got = Ꮡbuf.String();
+    @string want = chanIntNilˢ; if (got != want) {
+        t.Fatalf("got:\n%s\nwant:\n%s\n", got, want);
     }
 }
 
@@ -982,16 +958,12 @@ public static void TestIssue32854(ж<testing.T> t) {
     ret.Results[0] = ret.Results[0]._<ж<ast.CompositeLit>>().Elts[0];
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, ret.OrTypedNil()); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, ret.OrTypedNil()); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     @string want = returnCallˢ;
-    {
-        @string got = Ꮡbuf.String(); if (got != want) {
-            t.Fatalf("got %q, want %q", got, want);
-        }
+    @string got = Ꮡbuf.String(); if (got != want) {
+        t.Fatalf("got %q, want %q", got, want);
     }
 }
 
@@ -1021,10 +993,8 @@ public static void TestSourcePosNewline(ж<testing.T> t) {
         Tabwidth: 8
     ));
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = cfg.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil()); if (errΔ1 == nil) {
-            t.Errorf("Fprint did not error for source file path containing newline");
-        }
+    var errΔ1 = cfg.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil()); if (errΔ1 == nil) {
+        t.Errorf("Fprint did not error for source file path containing newline");
     }
     if (buf.Len() != 0) {
         t.Errorf("unexpected Fprint output:\n%s", buf.Bytes());
@@ -1036,7 +1006,7 @@ public static void TestSourcePosNewline(ж<testing.T> t) {
 // be parsed.
 public static void TestEmptyDecl(ж<testing.T> t) {
     // issue 63566
-    foreach (var (_, vᴛ1) in slice<token.Token>([token.IMPORT, token.CONST, token.TYPE, token.VAR])) {
+    foreach (var (_, vᴛ1) in range(slice<token.Token>([token.IMPORT, token.CONST, token.TYPE, token.VAR]))) {
         ref var tok = ref heap(new token.Token(), out var Ꮡtok);
         tok = vᴛ1;
 

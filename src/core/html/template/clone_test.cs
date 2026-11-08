@@ -10,8 +10,6 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using parse = text.template.parse_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.html.template_package;
 using template = text.template_package;
 using text;
@@ -43,11 +41,9 @@ public static void TestAddParseTreeHTML(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = b.String();
-        @string want = gt0AHref13e0Aˢ; if (got != want) {
-            t.Errorf("got %q want %q", got, want);
-        }
+    @string got = b.String();
+    @string want = gt0AHref13e0Aˢ; if (got != want) {
+        t.Errorf("got %q want %q", got, want);
     }
 }
 
@@ -252,9 +248,9 @@ public static void TestTemplates(ж<testing.T> t) {
     if (len(templates) != len(names)) {
         t.Errorf("expected %d templates; got %d", len(names), len(templates));
     }
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         var found = false;
-        foreach (var (_, tmplΔ1) in templates) {
+        foreach (var (_, tmplΔ1) in range(templates)) {
             if (name == tmplΔ1.text.Name()) {
                 found = true;
                 break;
@@ -370,10 +366,8 @@ public static partial void TestTemplateCloneExecuteRace(ж<testing.T> t) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-                    {
-                        var err = tmplʗ1.Execute(io.Discard, dataˢ); if (err != nil) {
-                            throw panic(err);
-                        }
+                    var err = tmplʗ1.Execute(io.Discard, dataˢ); if (err != nil) {
+                        throw panic(err);
                     }
                 }
             }
@@ -465,20 +459,16 @@ internal partial struct TestClonePipe_data /*dyn*/ {
 public static void TestClonePipe(ж<testing.T> t) {
     var (ᴛ69, ᴛ70) = New("a").Parse(defineARangeVAVEndEndˢ);
     var a = Must(ᴛ69, ᴛ70);
-    ref var data = ref heap<TestClonePipe_data>(new TestClonePipe_data(A: slice<@string>(["hi"])), out var Ꮡdata);
+    ref var data = ref heap<TestClonePipe_data>(new TestClonePipe_data(A: ["hi"]), out var Ꮡdata);
     var (ᴛ71, ᴛ72) = a.Clone();
     var b = Must(ᴛ71, ᴛ72);
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    {
-        var err = b.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), Ꮡdata); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = b.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), Ꮡdata); if (err != nil) {
+        t.Fatal(err);
     }
-    {
-        @string got = buf.String();
-        @string want = "hi"; if (got != want) {
-            t.Errorf("got %q want %q", got, want);
-        }
+    @string got = buf.String();
+    @string want = "hi"; if (got != want) {
+        t.Errorf("got %q want %q", got, want);
     }
 }
 

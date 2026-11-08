@@ -48,8 +48,8 @@ using static global::go.debug.gosym_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/gosym/pclntab_test.go", "pclntab_test.cs", "ACQ0gpSCpoKUgoKClIKCgoKCgoCCyIKCgoK8oujIgoKCppSCgpQACwaigoKUgoKClIKCgqaCgoKCpvaClIKUuIKCyoKCgpSCgpSCgqaCgqaCgoKClJSCuIKUgpSmuIKCgoK4gqaAgpS2lIKCgoIADQyigpSCkoKCgriCgoKCgpSCgoKCgoLKgoKCgoKCgoKUgoKCgpSClIKClIKUgoKCprTUgpSCgpSCggAIHAAJAoKClIKCgpSCgoKU+JKCgoKCgpSCgoKClIKUgpSCABASgoKUkoKCuIKSgoKCgoLKkoKmooKCgoKCgpSClIKUgsqSgoKCgpSClII=", "347-352:1;355-364:2;371-390:3;392-406:4", "", "", "255:21")]
-[assembly: GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AA0YgoL4goKCgoKCAAgGgoKCgoKCABAGgoKCgoKCgoKCgoKCgoKCggAIBoKCgoKCgvaCAA8mog==")]
+[assembly: GoPositionMap("debug/gosym/pclntab_test.go", "pclntab_test.cs", "ACQ0gpSCpoKUgoKClIKCgoKCgoK4goKCgryi6MiCgoKmlIKClAALBqKCgpSCgoKUgoKCpoKCgoKm9oKUgpS4goLKgoKClIKClIKCpoKCpoKCgoKUlIK4gpSClKa4goKCgriCpoKUppSCgoKCAA0MooKUgpKCgoK4goKCgoKUgoKCgoKCyoKCgoKCgoKClIKCgoKUgpSCgpSClIKCgqa01IKUgoKUgoIACBwACQKCgpSCgoKUgoKClPiSgoKCgoKUgoKCgpSClIKUggAQEoKClJKCgriCkoKCgoKCypKCpqKCgoKCgoKUgpSClILKkoKCgoKUgpSC", "347-352:1;355-364:2;371-390:3;392-406:4", "", "", "251:21")]
+[assembly: GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AAsYgoL4goKCgoKCAAgGgoKCgoKCABAGgoKCgoKCgoKCgoKCgoKCggAIBoKCgoKCgvaCAA8mog==")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

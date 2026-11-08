@@ -24,10 +24,8 @@ public static void TestRun(ж<testing.T> t) {
     };
     var result = (ж<testing.T> tΔ1) => {
         ref var m = ref heap<map<@string, any>>(new map<@string, any>{}, out var Ꮡm);
-        {
-            var err = json.Unmarshal(Ꮡbuf.Value.Bytes(), Ꮡm); if (err != nil) {
-                tΔ1.Fatal(err);
-            }
+        var err = json.Unmarshal(Ꮡbuf.Value.Bytes(), Ꮡm); if (err != nil) {
+            tΔ1.Fatal(err);
         }
         return m;
     };

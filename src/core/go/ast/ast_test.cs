@@ -12,37 +12,37 @@ partial struct commentsᴛ1 /*dyn*/ {
     internal slice<@string> list;
     internal @string text;
 }
-internal static slice<commentsᴛ1> comments = slice<commentsᴛ1>([
-    new(slice<@string>(["//"]), ""),
-    new(slice<@string>(["//   "]), ""),
-    new(slice<@string>(["//", "//", "//   "]), ""),
-    new(slice<@string>(["// foo   "]), "foo\n"),
-    new(slice<@string>(["//", "//", "// foo"]), "foo\n"),
-    new(slice<@string>(["// foo  bar  "]), "foo  bar\n"),
-    new(slice<@string>(["// foo", "// bar"]), "foo\nbar\n"),
-    new(slice<@string>(["// foo", "//", "//", "//", "// bar"]), "foo\n\nbar\n"),
-    new(slice<@string>(["// foo", "/* bar */"]), "foo\n bar\n"),
-    new(slice<@string>(["//", "//", "//", "// foo", "//", "//", "//"]), "foo\n"),
+internal static slice<commentsᴛ1> comments = [
+    new(["//"], ""),
+    new(["//   "], ""),
+    new(["//", "//", "//   "], ""),
+    new(["// foo   "], "foo\n"),
+    new(["//", "//", "// foo"], "foo\n"),
+    new(["// foo  bar  "], "foo  bar\n"),
+    new(["// foo", "// bar"], "foo\nbar\n"),
+    new(["// foo", "//", "//", "//", "// bar"], "foo\n\nbar\n"),
+    new(["// foo", "/* bar */"], "foo\n bar\n"),
+    new(["//", "//", "//", "// foo", "//", "//", "//"], "foo\n"),
 
-    new(slice<@string>(["/**/"]), ""),
-    new(slice<@string>(["/*   */"]), ""),
-    new(slice<@string>(["/**/", "/**/", "/*   */"]), ""),
-    new(slice<@string>(["/* Foo   */"]), " Foo\n"),
-    new(slice<@string>(["/* Foo  Bar  */"]), " Foo  Bar\n"),
-    new(slice<@string>(["/* Foo*/", "/* Bar*/"]), " Foo\n Bar\n"),
-    new(slice<@string>(["/* Foo*/", "/**/", "/**/", "/**/", "// Bar"]), " Foo\n\nBar\n"),
-    new(slice<@string>(["/* Foo*/", "/*\n*/", "//", "/*\n*/", "// Bar"]), " Foo\n\nBar\n"),
-    new(slice<@string>(["/* Foo*/", "// Bar"]), " Foo\nBar\n"),
-    new(slice<@string>(["/* Foo\n Bar*/"]), " Foo\n Bar\n"),
+    new(["/**/"], ""),
+    new(["/*   */"], ""),
+    new(["/**/", "/**/", "/*   */"], ""),
+    new(["/* Foo   */"], " Foo\n"),
+    new(["/* Foo  Bar  */"], " Foo  Bar\n"),
+    new(["/* Foo*/", "/* Bar*/"], " Foo\n Bar\n"),
+    new(["/* Foo*/", "/**/", "/**/", "/**/", "// Bar"], " Foo\n\nBar\n"),
+    new(["/* Foo*/", "/*\n*/", "//", "/*\n*/", "// Bar"], " Foo\n\nBar\n"),
+    new(["/* Foo*/", "// Bar"], " Foo\nBar\n"),
+    new(["/* Foo\n Bar*/"], " Foo\n Bar\n"),
 
-    new(slice<@string>(["// foo", "//go:noinline", "// bar", "//:baz"]), "foo\nbar\n:baz\n"),
-    new(slice<@string>(["// foo", "//lint123:ignore", "// bar"]), "foo\nbar\n")
-]);
+    new(["// foo", "//go:noinline", "// bar", "//:baz"], "foo\nbar\n:baz\n"),
+    new(["// foo", "//lint123:ignore", "// bar"], "foo\nbar\n")
+];
 
 public static void TestCommentText(ж<testing.T> t) {
-    foreach (var (i, c) in comments) {
+    foreach (var (i, c) in range(comments)) {
         var list = new slice<ж<global::go.go.ast_package.Comment>>(len(c.list));
-        foreach (var (iΔ1, vᴛ1) in c.list) {
+        foreach (var (iΔ1, vᴛ1) in range(c.list)) {
             ref var s = ref heap(new @string(), out var Ꮡs);
             s = vᴛ1;
 
@@ -60,7 +60,7 @@ partial struct isDirectiveTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal bool ok;
 }
-internal static slice<isDirectiveTestsᴛ1> isDirectiveTests = slice<isDirectiveTestsᴛ1>([
+internal static slice<isDirectiveTestsᴛ1> isDirectiveTests = [
     new("abc", false),
     new("go:inline", true),
     new("Go:inline", false),
@@ -76,14 +76,12 @@ internal static slice<isDirectiveTestsᴛ1> isDirectiveTests = slice<isDirective
     new("export foo", true),
     new("extern foo", true),
     new("expert foo", false)
-]);
+];
 
 public static void TestIsDirective(ж<testing.T> t) {
-    foreach (var (_, tt) in isDirectiveTests) {
-        {
-            var ok = isDirective(tt.@in); if (ok != tt.ok) {
-                t.Errorf("isDirective(%q) = %v, want %v", tt.@in, ok, tt.ok);
-            }
+    foreach (var (_, tt) in range(isDirectiveTests)) {
+        var ok = isDirective(tt.@in); if (ok != tt.ok) {
+            t.Errorf("isDirective(%q) = %v, want %v", tt.@in, ok, tt.ok);
         }
     }
 }

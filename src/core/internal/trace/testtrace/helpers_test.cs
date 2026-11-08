@@ -39,10 +39,8 @@ public static void TestConvertDump(ж<testing.T> t) {
         t.Fatal(setOutToSpecifyˢ);
     }
 
-    {
-        var err = convertDump(convert.Value, output.Value); if (err != nil) {
-            t.Error(err);
-        }
+    var err = convertDump(convert.Value, output.Value); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -80,10 +78,8 @@ internal static error convertDump(@string inPath, @string outPath) {
             if (errΔ1 != nil) {
                 return fmt.Errorf("bad trace file: %v"u8, errΔ1);
             }
-            {
-                var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
-                    return fmt.Errorf("failed to write trace bytes: %v"u8, errΔ2);
-                }
+            var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
+                return fmt.Errorf("failed to write trace bytes: %v"u8, errΔ2);
             }
         }
 

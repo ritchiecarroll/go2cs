@@ -20,7 +20,6 @@ using ꓸꓸꓸany = Span<any>;
 partial class sql_internal_test_package {
 
 internal static time.Time someTime = time.Unix(123, 0);
-
 internal static readonly ж<int64> Ꮡanswer = new StaticBox<int64>(42);
 internal static ref int64 answer => ref ((StaticBox<int64>)Ꮡanswer).ValueSlot;
 
@@ -239,7 +238,7 @@ internal static time.Time timeValue(any ptr) {
 }
 
 public static void TestConversions(ж<testing.T> t) {
-    foreach (var (n, vᴛ1) in conversionTests()) {
+    foreach (var (n, vᴛ1) in range(conversionTests())) {
         ref var ct = ref heap(new conversionTest(), out var Ꮡct);
         ct = vᴛ1;
 
@@ -278,10 +277,8 @@ public static void TestConversions(ж<testing.T> t) {
         if (ct.wantf64 != 0D && ct.wantf64 != float64Value(ct.d)) {
             errf("want float32 %v, got %v", ct.wantf64, float64Value(ct.d));
         }
-        {
-            var (bp, boolTest) = ct.d._<ж<bool>>(ᐧ); if (boolTest && bp.Value != ct.wantbool && ct.wanterr == ""u8) {
-                errf("want bool %v, got %v", ct.wantbool, bp.Value);
-            }
+        var (bp, boolTest) = ct.d._<ж<bool>>(ᐧ); if (boolTest && bp.Value != ct.wantbool && ct.wanterr == ""u8) {
+            errf("want bool %v, got %v", ct.wantbool, bp.Value);
         }
         if (!ct.wanttime.IsZero() && !ct.wanttime.Equal(timeValue(ct.d))) {
             errf("want time %v, got %v", ct.wanttime, timeValue(ct.d));
@@ -296,19 +293,15 @@ public static void TestConversions(ж<testing.T> t) {
                 errf("want pointer to %v, got %v", ct.wantptr.Value, intPtrValue(ct.d));
             }
         }
-        {
-            var (ifptr, ok) = ct.d._<ж<any>>(ᐧ); if (ok) {
-                if (!reflect.DeepEqual(ct.wantiface, scaniface)) {
-                    errf("want interface %#v, got %#v", ct.wantiface, scaniface);
-                    continue;
-                }
-                {
-                    var (srcBytes, okΔ1) = ct.s._<slice<byte>>(ᐧ); if (okΔ1) {
-                        var dstBytes = (ifptr.ValueSlot)._<slice<byte>>();
-                        if (len(srcBytes) > 0 && Ꮡelem(dstBytes, 0) == Ꮡelem(srcBytes, 0)) {
-                            errf("copy into interface{} didn't copy []byte data");
-                        }
-                    }
+        var (ifptr, ok) = ct.d._<ж<any>>(ᐧ); if (ok) {
+            if (!reflect.DeepEqual(ct.wantiface, scaniface)) {
+                errf("want interface %#v, got %#v", ct.wantiface, scaniface);
+                continue;
+            }
+            var (srcBytes, okΔ1) = ct.s._<slice<byte>>(ᐧ); if (okΔ1) {
+                var dstBytes = (ifptr.ValueSlot)._<slice<byte>>();
+                if (len(srcBytes) > 0 && Ꮡelem(dstBytes, 0) == Ꮡelem(srcBytes, 0)) {
+                    errf("copy into interface{} didn't copy []byte data");
                 }
             }
         }
@@ -345,13 +338,13 @@ internal partial struct valueConverterTest {
     internal @string err;
 }
 
-internal static slice<valueConverterTest> valueConverterTests = slice<valueConverterTest>([
+internal static slice<valueConverterTest> valueConverterTests = [
     new(driver.DefaultParameterConverter, new NullString("hi", true), (@string)"hi", ""),
     new(driver.DefaultParameterConverter, new NullString("", false), default, "")
-]);
+];
 
 public static void TestValueConverters(ж<testing.T> t) {
-    foreach (var (i, tt) in valueConverterTests) {
+    foreach (var (i, tt) in range(valueConverterTests)) {
         var (@out, err) = tt.c.ConvertValue(tt.@in);
         @string goterr = ""u8;
         if (err != nil) {
@@ -406,14 +399,12 @@ public static void TestRawBytesAllocs(ж<testing.T> t) {
     var rows = Ꮡ(new Rows());
     var rowsʗ1 = rows;
     void test(@string name, any @in, @string want) {
-        {
-            var err = convertAssignRows(Ꮡbuf, @in, rowsʗ1); if (err != nil) {
-                t.Fatalf("%s: convertAssign = %v", name, err);
-            }
+        var err = convertAssignRows(Ꮡbuf, @in, rowsʗ1); if (err != nil) {
+            t.Fatalf("%s: convertAssign = %v", name, err);
         }
         var match = len(Ꮡbuf.ValueSlot) == len(want);
         if (match) {
-            foreach (var (i, b) in Ꮡbuf.ValueSlot) {
+            foreach (var (i, b) in range<byte>(Ꮡbuf.ValueSlot)) {
                 if (want[i] != b) {
                     match = false;
                     break;
@@ -429,7 +420,7 @@ public static void TestRawBytesAllocs(ж<testing.T> t) {
     var testʗ1 = test;
     var testsʗ1 = tests;
     var n = testing.AllocsPerRun(100, () => {
-        foreach (var (_, tt) in testsʗ1) {
+        foreach (var (_, tt) in range(testsʗ1)) {
             rowsʗ2.raw = rowsʗ2.raw[..0];
             testʗ1(tt.name, tt.@in, tt.want);
         }
@@ -512,52 +503,52 @@ public static void TestDriverArgs(ж<testing.T> t) {
     ж<@string> nilStrPtr = default;
     var tests = new slice<TestDriverArgs_tests>(5){
         [0] = new(
-            args: slice<any>([(Valuer_V)(@string)fooˢ]),
-            want: slice<driver.NamedValue>([
+            args: [(Valuer_V)(@string)fooˢ],
+            want: [
                 new(
                     Ordinal: 1,
                     Value: fooˢ2
                 )
-            ])
+            ]
         ),
         [1] = new(
-            args: slice<any>([nilValuerVPtr.OrTypedNil()]),
-            want: slice<driver.NamedValue>([
+            args: [nilValuerVPtr.OrTypedNil()],
+            want: [
                 new(
                     Ordinal: 1,
                     Value: default
                 )
-            ])
+            ]
         ),
         [2] = new(
-            args: slice<any>([nilValuerPPtr.OrTypedNil()]),
-            want: slice<driver.NamedValue>([
+            args: [nilValuerPPtr.OrTypedNil()],
+            want: [
                 new(
                     Ordinal: 1,
                     Value: nilToStrˢ
                 )
-            ])
+            ]
         ),
         [3] = new(
-            args: slice<any>([plainStrˢ]),
-            want: slice<driver.NamedValue>([
+            args: [plainStrˢ],
+            want: [
                 new(
                     Ordinal: 1,
                     Value: plainStrˢ
                 )
-            ])
+            ]
         ),
         [4] = new(
-            args: slice<any>([nilStrPtr.OrTypedNil()]),
-            want: slice<driver.NamedValue>([
+            args: [nilStrPtr.OrTypedNil()],
+            want: [
                 new(
                     Ordinal: 1,
                     Value: default
                 )
-            ])
+            ]
         )
     };
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var ds = Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex())), si: new stubDriverStmt((error)(default))));
         var (got, err) = driverArgsConnLocked(default, ds, tt.args);
         if (err != nil) {
@@ -666,7 +657,7 @@ public static void TestDecimal(ж<testing.T> t) {
 
         new(name: "bad-form", @in: new dec(form: 200), err: true)
     ]);
-    foreach (var (_, vᴛ1) in list) {
+    foreach (var (_, vᴛ1) in range(list)) {
         ref var item = ref heap(new TestDecimal_list(), out var Ꮡitem);
         item = vᴛ1.ΔClone();
 

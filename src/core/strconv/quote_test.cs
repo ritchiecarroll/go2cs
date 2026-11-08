@@ -46,7 +46,7 @@ partial struct quoteTest {
     internal @string graphic;
 }
 
-internal static slice<quoteTest> quotetests = slice<quoteTest>([
+internal static slice<quoteTest> quotetests = [
     new("\a\b\f\r\n\t\v", @"""\a\b\f\r\n\t\v""", @"""\a\b\f\r\n\t\v""", @"""\a\b\f\r\n\t\v"""),
     new("\\", @"""\\""", @"""\\""", @"""\\"""),
     new(((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x64, 0x65, 0x66})), @"""abc\xffdef""", @"""abc\xffdef""", @"""abc\xffdef"""),
@@ -56,10 +56,10 @@ internal static slice<quoteTest> quotetests = slice<quoteTest>([
     // Some non-printable but graphic runes. Final column is double-quoted.
     new("!\u00a0!\u2000!\u3000!", @"""!\u00a0!\u2000!\u3000!""", @"""!\u00a0!\u2000!\u3000!""", "\"!\u00a0!\u2000!\u3000!\""),
     new("\x7f", @"""\x7f""", @"""\x7f""", @"""\x7f""")
-]);
+];
 
 public static void TestQuote(ж<testing.T> t) {
-    foreach (var (_, tt) in quotetests) {
+    foreach (var (_, tt) in range(quotetests)) {
         {
             @string @out = Quote(tt.@in); if (@out != tt.@out) {
                 t.Errorf("Quote(%s) = %s, want %s", tt.@in, @out, tt.@out);
@@ -74,7 +74,7 @@ public static void TestQuote(ж<testing.T> t) {
 }
 
 public static void TestQuoteToASCII(ж<testing.T> t) {
-    foreach (var (_, tt) in quotetests) {
+    foreach (var (_, tt) in range(quotetests)) {
         {
             @string @out = QuoteToASCII(tt.@in); if (@out != tt.ascii) {
                 t.Errorf("QuoteToASCII(%s) = %s, want %s", tt.@in, @out, tt.ascii);
@@ -89,7 +89,7 @@ public static void TestQuoteToASCII(ж<testing.T> t) {
 }
 
 public static void TestQuoteToGraphic(ж<testing.T> t) {
-    foreach (var (_, tt) in quotetests) {
+    foreach (var (_, tt) in range(quotetests)) {
         {
             @string @out = QuoteToGraphic(tt.@in); if (@out != tt.graphic) {
                 t.Errorf("QuoteToGraphic(%s) = %s, want %s", tt.@in, @out, tt.graphic);
@@ -146,7 +146,7 @@ partial struct quoteRuneTest {
     internal @string graphic;
 }
 
-internal static slice<quoteRuneTest> quoterunetests = slice<quoteRuneTest>([
+internal static slice<quoteRuneTest> quoterunetests = [
     new('a', @"'a'", @"'a'", @"'a'"),
     new('\a', @"'\a'", @"'\a'", @"'\a'"),
     new('\\', @"'\\'", @"'\\'", @"'\\'"),
@@ -161,10 +161,10 @@ internal static slice<quoteRuneTest> quoterunetests = slice<quoteRuneTest>([
     new('\u00a0', @"'\u00a0'", @"'\u00a0'", "'\u00a0'"),
     new('\u2000', @"'\u2000'", @"'\u2000'", "'\u2000'"),
     new('\u3000', @"'\u3000'", @"'\u3000'", "'\u3000'")
-]);
+];
 
 public static void TestQuoteRune(ж<testing.T> t) {
-    foreach (var (_, tt) in quoterunetests) {
+    foreach (var (_, tt) in range(quoterunetests)) {
         {
             @string @out = QuoteRune(tt.@in); if (@out != tt.@out) {
                 t.Errorf("QuoteRune(%U) = %s, want %s", tt.@in, @out, tt.@out);
@@ -179,7 +179,7 @@ public static void TestQuoteRune(ж<testing.T> t) {
 }
 
 public static void TestQuoteRuneToASCII(ж<testing.T> t) {
-    foreach (var (_, tt) in quoterunetests) {
+    foreach (var (_, tt) in range(quoterunetests)) {
         {
             @string @out = QuoteRuneToASCII(tt.@in); if (@out != tt.ascii) {
                 t.Errorf("QuoteRuneToASCII(%U) = %s, want %s", tt.@in, @out, tt.ascii);
@@ -194,7 +194,7 @@ public static void TestQuoteRuneToASCII(ж<testing.T> t) {
 }
 
 public static void TestQuoteRuneToGraphic(ж<testing.T> t) {
-    foreach (var (_, tt) in quoterunetests) {
+    foreach (var (_, tt) in range(quoterunetests)) {
         {
             @string @out = QuoteRuneToGraphic(tt.@in); if (@out != tt.graphic) {
                 t.Errorf("QuoteRuneToGraphic(%U) = %s, want %s", tt.@in, @out, tt.graphic);
@@ -213,7 +213,7 @@ partial struct canBackquoteTest {
     internal bool @out;
 }
 
-internal static slice<canBackquoteTest> canbackquotetests = slice<canBackquoteTest>([
+internal static slice<canBackquoteTest> canbackquotetests = [
     new("`", false),
     new((@string)(rune)0, false),
     new((@string)(rune)1, false),
@@ -257,14 +257,12 @@ internal static slice<canBackquoteTest> canbackquotetests = slice<canBackquoteTe
     new(((@string)(new byte[]{0x61, 0xe0, 0xa0, 0x7a})), false),
     new("\ufeffabc", false),
     new("a\ufeffz", false)
-]);
+];
 
 public static void TestCanBackquote(ж<testing.T> t) {
-    foreach (var (_, tt) in canbackquotetests) {
-        {
-            var @out = CanBackquote(tt.@in); if (@out != tt.@out) {
-                t.Errorf("CanBackquote(%q) = %v, want %v", tt.@in, @out, tt.@out);
-            }
+    foreach (var (_, tt) in range(canbackquotetests)) {
+        var @out = CanBackquote(tt.@in); if (@out != tt.@out) {
+            t.Errorf("CanBackquote(%q) = %v, want %v", tt.@in, @out, tt.@out);
         }
     }
 }
@@ -274,7 +272,7 @@ partial struct unQuoteTest {
     internal @string @out;
 }
 
-internal static slice<unQuoteTest> unquotetests = slice<unQuoteTest>([
+internal static slice<unQuoteTest> unquotetests = [
     new(@"""""", ""),
     new(@"""a""", "a"),
     new(@"""abc""", "abc"),
@@ -312,9 +310,9 @@ internal static slice<unQuoteTest> unquotetests = slice<unQuoteTest>([
     new("`	`", @"	"),
     new("` `", @" "),
     new("`a\rb`", "ab")
-]);
+];
 
-internal static slice<@string> misquoted = slice<@string>([
+internal static slice<@string> misquoted = [
     @"",
     @"""",
     @"""a",
@@ -343,16 +341,16 @@ internal static slice<@string> misquoted = slice<@string>([
     "'\n'",
     @"""\udead""",
     @"""\ud83d\ude4f"""
-]);
+];
 
 public static void TestUnquote(ж<testing.T> t) {
-    foreach (var (_, tt) in unquotetests) {
+    foreach (var (_, tt) in range(unquotetests)) {
         testUnquote(t, tt.@in, tt.@out, default);
     }
-    foreach (var (_, tt) in quotetests) {
+    foreach (var (_, tt) in range(quotetests)) {
         testUnquote(t, tt.@out, tt.@in, default);
     }
-    foreach (var (_, s) in misquoted) {
+    foreach (var (_, s) in range(misquoted)) {
         testUnquote(t, s, ""u8, ErrSyntax);
     }
 }
@@ -373,7 +371,7 @@ public static void TestUnquoteInvalidUTF8(ж<testing.T> t) {
         new(@in: @"""a"u8 + ((@string)(new byte[]{0xc0})) + @""""u8, want: ((@string)(new byte[]{0x61, 0xef, 0xbf, 0xbd}))),
         new(@in: @"""\t"u8 + ((@string)(new byte[]{0xc0})) + @""""u8, want: ((@string)(new byte[]{0x09, 0xef, 0xbf, 0xbd})))
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         testUnquote(t, tt.@in, tt.want, tt.wantErr);
     }
 }

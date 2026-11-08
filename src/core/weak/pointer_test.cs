@@ -12,8 +12,6 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class weak_test_package {
 
@@ -79,12 +77,12 @@ public static void TestPointerEquality(ж<testing.T> t) {
     var bt = new slice<ж<T>>(10);
     var wt = new slice<weak.Pointer<T>>(10);
     var wo = new slice<weak.Pointer<nint>>(10);
-    foreach (var i in range(bt)) {
+    foreach (var i in range(len(bt))) {
         bt[i] = @new<T>();
         wt[i] = weak.Make<T>(bt[i]);
         wo[i] = weak.Make<nint>(bt[i].Ꮡa);
     }
-    foreach (var i in range(bt)) {
+    foreach (var i in range(len(bt))) {
         var st = wt[i].Value();
         if (st != bt[i]) {
             t.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p", st.OrTypedNil(), bt[i].OrTypedNil());
@@ -108,7 +106,7 @@ public static void TestPointerEquality(ж<testing.T> t) {
     }
     // bt is still referenced.
     Δruntime.GC();
-    foreach (var i in range(bt)) {
+    foreach (var i in range(len(bt))) {
         var st = wt[i].Value();
         if (st != bt[i]) {
             t.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p", st.OrTypedNil(), bt[i].OrTypedNil());
@@ -133,7 +131,7 @@ public static void TestPointerEquality(ж<testing.T> t) {
     bt = default;
     // bt is no longer referenced.
     Δruntime.GC();
-    foreach (var i in range(wt)) {
+    foreach (var i in range(len(wt))) {
         var st = wt[i].Value();
         if (st != nil) {
             t.Fatalf("expected weak pointer to be nil, got %p", st.OrTypedNil());
@@ -431,7 +429,7 @@ public static void TestPointerTiny(ж<testing.T> t) {
     // gets grouped with some other long-lived tiny allocation, but this
     // shouldn't be the case for the vast majority of allocations.
     nint n = 0;
-    foreach (var (_, wp) in wps) {
+    foreach (var (_, wp) in range(wps)) {
         if (wp.Value() == nil) {
             n++;
         }

@@ -10,7 +10,7 @@ using static go.os_internal_test_package;
 partial class os_test_package {
 
 [GoInit] internal static void initΔ2() {
-    pipeDeadlinesTestCases = slice<pipeDeadlineTest>([
+    pipeDeadlinesTestCases = [
         new(
             "named overlapped pipe",
             (ж<Δtesting.T> t) => {
@@ -22,7 +22,7 @@ partial class os_test_package {
                 return (r, w);
             }
         )
-    ]);
+    ];
 }
 
 } // end os_test_package

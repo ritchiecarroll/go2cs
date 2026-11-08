@@ -26,10 +26,8 @@ public static partial void TestSetGoroutineLabels(ж<testing.T> t) {
     }
     var syncʗ1 = sync;
     goǃ(() => {
-        {
-            var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
-                t.Errorf("Expected child goroutine's profile labels to be empty before test, got %v", gotLabels);
-            }
+        var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
+            t.Errorf("Expected child goroutine's profile labels to be empty before test, got %v", gotLabels);
         }
         syncʗ1.ᐸꟷ(new EmptyStruct());
     });
@@ -45,10 +43,8 @@ public static partial void TestSetGoroutineLabels(ж<testing.T> t) {
     }
     var syncʗ2 = sync;
     goǃ(() => {
-        {
-            var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
-                t.Errorf("child goroutine's profile labels: got %v, want %v", gotLabels, ᏑwantLabels.ValueSlot);
-            }
+        var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
+            t.Errorf("child goroutine's profile labels: got %v, want %v", gotLabels, ᏑwantLabels.ValueSlot);
         }
         syncʗ2.ᐸꟷ(new EmptyStruct());
     });
@@ -64,10 +60,8 @@ public static partial void TestSetGoroutineLabels(ж<testing.T> t) {
     }
     var syncʗ3 = sync;
     goǃ(() => {
-        {
-            var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
-                t.Errorf("Expected child goroutine's profile labels to be empty, got %v", gotLabels);
-            }
+        var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, ᏑwantLabels.ValueSlot)) {
+            t.Errorf("Expected child goroutine's profile labels to be empty, got %v", gotLabels);
         }
         syncʗ3.ᐸꟷ(new EmptyStruct());
     });
@@ -94,10 +88,8 @@ public static void TestDo(ж<testing.T> t) {
         var syncʗ1 = sync;
         goǃ(() => {
             var wantLabelsΔ2 = new map<@string, @string>{["key1"] = "value1", ["key2"] = "value2"};
-            {
-                var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, wantLabelsΔ2)) {
-                    t.Errorf("child goroutine's profile labels: got %v, want %v", gotLabels, wantLabelsΔ2);
-                }
+            var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, wantLabelsΔ2)) {
+                t.Errorf("child goroutine's profile labels: got %v, want %v", gotLabels, wantLabelsΔ2);
             }
             syncʗ1.ᐸꟷ(new EmptyStruct());
         });
@@ -121,7 +113,7 @@ internal static map<@string, @string> getProfLabel() {
     }
     var ls = l.Set.List;
     var m = new map<@string, @string>(len(ls));
-    foreach (var (_, lbl) in ls) {
+    foreach (var (_, lbl) in range(ls)) {
         m[lbl.Key] = lbl.Value;
     }
     return m;

@@ -53,7 +53,7 @@ internal static slice<reflectꓸValue> ct(reflectꓸType typ, params ꓸꓸꓸan
     var args = argsʗp.sslice();
 
     var value = new slice<reflectꓸValue>(len(args), () => new(nil));
-    foreach (var (i, v) in args) {
+    foreach (var (i, v) in range(args)) {
         var x = reflect.ValueOf(v);
         if (!x.IsValid()) { // Make it a typed nil.
             x = reflect.Zero(typ);
@@ -66,9 +66,9 @@ internal static slice<reflectꓸValue> ct(reflectꓸType typ, params ꓸꓸꓸan
 }
 
 public static void TestCompare(ж<testing.T> t) {
-    foreach (var (_, test) in compareTests) {
-        foreach (var (i, v0) in test) {
-            foreach (var (j, v1) in test) {
+    foreach (var (_, test) in range(compareTests)) {
+        foreach (var (i, v0) in range(test)) {
+            foreach (var (j, v1) in range(test)) {
                 nint c = fmtsort_internal_test_package.Compare(v0, v1);
                 nint expect = default;
                 switch (ᐧ) {
@@ -155,7 +155,7 @@ internal static @string sprint(any data) {
         return nilˢ;
     }
     var b = @new<strings.Builder>();
-    foreach (var (i, m) in om) {
+    foreach (var (i, m) in range<fmtsort.KeyValue>(om)) {
         if (i > 0) {
             b.WriteRune(' ');
         }
@@ -179,41 +179,39 @@ private static readonly @string chanˢᵇ = "CHAN???"u8;
 // for the troublesome types used in the test cases; it is not a general
 // printer.
 internal static @string sprintKey(reflectꓸValue key) {
-    {
-        @string str = key.Type().String();
-        var exprᴛ1 = str;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "*int"u8: {
-            var ptr = key.Interface()._<ж<nint>>();
-            foreach (var i in range(ints)) {
-                if (ptr == Ꮡints.at<nint>(i)) {
-                    return fmt.Sprintf("PTR%d"u8, i);
-                }
+    @string str = key.Type().String();
+    var exprᴛ1 = str;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "*int"u8: {
+        var ptr = key.Interface()._<ж<nint>>();
+        foreach (var i in range(len(ints))) {
+            if (ptr == Ꮡints.at<nint>(i)) {
+                return fmt.Sprintf("PTR%d"u8, i);
             }
-            return ptrˢ;
         }
-        case {} when exprᴛ1 == "unsafe.Pointer"u8: {
-            @unsafe.Pointer ptr = key.Interface()._<@unsafe.Pointer>();
-            foreach (var i in range(ints)) {
-                if (ptr == @unsafe.Pointer.FromPinnedBox(Ꮡints.at<nint>(i))) {
-                    return fmt.Sprintf("UNSAFEPTR%d"u8, i);
-                }
-            }
-            return unsafeptrˢ;
-        }
-        case {} when exprᴛ1 == "chan int"u8: {
-            var c = key.Interface()._<channel<nint>>();
-            foreach (var i in range(chans)) {
-                if (c == chans[i]) {
-                    return fmt.Sprintf("CHAN%d"u8, i);
-                }
-            }
-            return chanˢ;
-        }
-        default: {
-            return fmt.Sprint(key);
-        }}
+        return ptrˢ;
     }
+    case {} when exprᴛ1 == "unsafe.Pointer"u8: {
+        @unsafe.Pointer ptr = key.Interface()._<@unsafe.Pointer>();
+        foreach (var i in range(len(ints))) {
+            if (ptr == @unsafe.Pointer.FromPinnedBox(Ꮡints.at<nint>(i))) {
+                return fmt.Sprintf("UNSAFEPTR%d"u8, i);
+            }
+        }
+        return unsafeptrˢ;
+    }
+    case {} when exprᴛ1 == "chan int"u8: {
+        var c = key.Interface()._<channel<nint>>();
+        foreach (var i in range(len(chans))) {
+            if (c == chans[i]) {
+                return fmt.Sprintf("CHAN%d"u8, i);
+            }
+        }
+        return chanˢ;
+    }
+    default: {
+        return fmt.Sprint(key);
+    }}
 }
 
 internal static readonly ж<array<nint>> Ꮡints = new StaticBox<array<nint>>(new array<nint>(3));
@@ -226,7 +224,7 @@ internal static ref Δruntime.Pinner pin => ref ((StaticBox<Δruntime.Pinner>)�
 internal static slice<channel<nint>> makeChans() {
     var cs = slice<channel<nint>>([new channel<nint>(0), new channel<nint>(0), new channel<nint>(0)]);
     // Order channels by address. See issue #49431.
-    foreach (var i in range(cs)) {
+    foreach (var i in range(len(cs))) {
         pin.Pin(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(cs[i]).UnsafePointer()));
     }
     slices.SortFunc(cs, (channel<nint> a, channel<nint> b) => cmp.Compare(reflect.ValueOf(a).Pointer(), reflect.ValueOf(b).Pointer()));
@@ -263,7 +261,7 @@ partial struct toy {
 }
 
 public static void TestOrder(ж<testing.T> t) {
-    foreach (var (_, test) in sortTests) {
+    foreach (var (_, test) in range(sortTests)) {
         @string got = sprint(test.data);
         if (got != test.print) {
             t.Errorf("%s: got %q, want %q", reflect.TypeOf(test.data), got, test.print);
@@ -306,7 +304,7 @@ public static void TestInterface(ж<testing.T> t) {
         "[0 1]: [1 0]:",       // [2]int
         "{0 1}: {1 0}:"        // struct{ x int; y int }
     ]);
-    foreach (var (_, g) in typeGroups) {
+    foreach (var (_, g) in range(typeGroups)) {
         if (!strings.Contains(got, g)) {
             t.Errorf("sorted map should contain %q", g);
         }
