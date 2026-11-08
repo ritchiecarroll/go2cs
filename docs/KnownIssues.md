@@ -41,6 +41,21 @@ one, prefers AES-GCM on Apple silicon as Go does there. On the other three platf
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
 
+## On macOS, a `go` statement past the system's thread limit ends the program
+
+Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
+program already has nearly that many goroutines alive, the next `go` statement throws
+`System.OutOfMemoryException`, and the program ends unless something catches it. On the macOS 15 machines measured
+the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; a Mac's own limit is the
+`kern.num_taskthreads` setting.
+
+**To avoid it**, bound how many goroutines are alive at once, with a worker pool for example.
+[Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) has the details, under
+*Goroutines are operating-system threads*.
+<!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
+     (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
+     first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
+
 ## A program converted with local standard-library references runs its standard library built Debug
 
 **Symptom.** A program converted with plain `-recurse` or `-recurse=module` references the standard library as

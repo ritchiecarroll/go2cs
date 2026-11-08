@@ -146,6 +146,15 @@ silicon is planned work.
      arch-strict banking a darwin segment needs both RIDs, so check each row's darwin segment at the bank before adding
      a sentence about which platforms validate them. -->
 
+**PENDING (the darwin bank). `internal/synctest` is not validated on macOS in this release.** One of its tests holds
+about 10,000 goroutines alive at once, and each converted goroutine is an operating-system thread, past the number of
+threads macOS lets one process run. [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
+describes the limit and how to stay under it.
+<!-- source: COORD 2026-11-08; C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11) on the GitHub-hosted
+     macOS runners, both mac RIDs: TestWaitGroupManyBubbles (about 10,100 live goroutines) dies with
+     System.OutOfMemoryException from the thread start; kern.num_taskthreads 2048 (osx-arm64, macOS 15.8.2) and 3072
+     (osx-x64, macOS 15.7.9). PENDING until the darwin bank lands. -->
+
 **PENDING (the gojq seats and the nugetgo wave). gojq for .NET.** [`itchyny/gojq`](https://github.com/itchyny/gojq),
 a jq implementation in Go, is a NuGet package: `nugetgo.github.com.itchyny.gojq` 0.12.19 gives a .NET program an
 in-process, fully managed jq, with no native binary per platform. Its one dependency,
