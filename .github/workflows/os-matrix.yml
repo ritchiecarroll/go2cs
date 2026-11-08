@@ -975,6 +975,14 @@ jobs:
           if (Test-Path -LiteralPath $trx) {
               [xml]$doc = Get-Content -LiteralPath $trx -Raw
               $outcomes = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object { "  $($_.outcome) $($_.testName)" })
+              # A test's measured readings: the standard-output lines it starts with READING (the console logger prints
+              # a passing test's output at no verbosity this stage uses), so a measurement reads in the job's summary.
+              $readings = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object {
+                  $name = $_.testName
+                  @("$($_.Output.StdOut)" -split "`r?`n" | Where-Object { $_ -like 'READING *' } |
+                      ForEach-Object { "  $name -- $($_.Substring(8))" })
+              })
+              if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
           }
 
           $summary = @(
