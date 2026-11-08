@@ -1,4 +1,4 @@
-global using ptr = go.@unsafe.Pointer;
+global using ptr = go.unsafe_package.Pointer;
 
 namespace go;
 
