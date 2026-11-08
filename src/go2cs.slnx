@@ -326,6 +326,7 @@
     <Project Path="tests/Behavioral/AssignThroughTypeAssert/AssignThroughTypeAssert.csproj" />
     <Project Path="tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
+    <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
     <Project Path="tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
