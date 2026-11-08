@@ -471,8 +471,16 @@ The follow-ups run off the critical path:
   by construction (storage for Go array values, frame-local allocations kept off the heap, and
   ref-receiver method emission), and each disclosure retires when its assertion matches. Its design,
   stack-allocation parity, is written.
-- **Goroutine scheduling** (unscheduled): each live goroutine runs on its own OS thread today. A sizing
-  study weighs moving to Go's model of many goroutines over a few threads; nothing is decided.
+- **Goroutine scheduling** (planned next, after 1.26.10.3): each live goroutine runs on its own OS thread
+  today, so a program can hold only as many goroutines alive at once as the system allows threads, a limit
+  macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). The
+  work moves toward Go's model of many goroutines over a few threads.
+  <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "Im addution to the Typescript issues, M:N scheduling
+       right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
+       Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
+       phase4/DESIGN-cooperative-scheduler.md, and keeps the owner's 2026-10-24 position (no async/await lowering)
+       unless he re-rules it. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled"). -->
+
 - **Building against local standard-library sources** (planned for 1.26.10.3): a program converted against a
   local go2cs source tree and built in its folder gets a Release standard library and publishes. Until
   then, build the project file itself, `dotnet build MyProgram.csproj -c Release`.
@@ -554,9 +562,9 @@ something else finishing first.
 | When | Planned |
 |:--|:--|
 | Now | The 1.26.10.3 fix release. macOS validation of the standard library, package by package. The trimming work for Native AOT. The start-up cost of a converted process. Further converted modules as NuGet packages. |
-| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. Goroutine scheduling, after 1.26.10.3. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work, whose design is written. |
-| Unscheduled | Goroutine scheduling. The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
