@@ -98,4 +98,5 @@ listings got: no data-dependent branch on a limb value.
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
   MISS on `go/internal/gcimporter` and `debug/buildinfo` (above). Predicted `internal/synctest` validated 59 on both
   RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
-  The predicted total moves from 233 to 230, two BELOW the plan's 232 to 234.
+  Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. The predicted total moves from 233 to 230,
+  two BELOW the plan's 232 to 234.
