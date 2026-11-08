@@ -228,6 +228,9 @@ if ($Aot -or $AotOnly) {
         $code = $LASTEXITCODE
         $line = Get-FrameLine $run
         Write-Host "    AOT: exit $code :: $line :: .pdb in the output: $((@(Get-ChildItem $out -Filter '*.pdb' -File | ForEach-Object Name) | Sort-Object) -join ', ')"
+        # The Gosched escalation's clock under Native AOT (C1, 2026-11-08): about 1 ms where golib's macOS kqueue import
+        # binds, about 9 ms on osx-arm64 where it falls back to Thread.Sleep(1). Printed, not judged.
+        Write-Host "READ (Gosched escalation, AOT): $(@($run | Where-Object { $_ -like 'GOSCHED-ESCALATION:*' } | Select-Object -First 1))"
         # The executable must RUN and print its frame line. A file:line is not required: what Native AOT resolves for a
         # frame is printed, not judged. Before go.lib set TrimMode=partial, a consumer's AOT executable died at type
         # initialization (exit 2) and printed no line at all.
