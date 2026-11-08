@@ -1,0 +1,18 @@
+start 2026-11-08T17:25:48Z head=30ad20e17e goroot=%USERPROFILE%\sdk\go1.26.10
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 1393 expected verdicts, timeout 10m, test-config Release
+==> building the converter
+  COUNT crypto/tls                         4920, banked 1393 [1422s]
+        capability-absent check: shortfall -3527 does not match TestBogoSuite's registered block size 3419 -- a lost verdict outside the named block is never capability-conditional
+        host-limit check: shortfall -3527 does not match TestBogoSuite's registered block size 3419 -- a lost verdict outside the named block is never host-limited
+
+sweep: 0 pass / 1 fail  (1423s)
+
+CONTENT drift in the corpus after the sweep -- inspect before banking or restoring:
+  1	1	src/core/crypto/tls/README.md
+
+per-row wall times: 1 row(s) -> C:\go2cs-tmp\r-tlswin\scratchpad\sweep-row-walltimes\20261108-112620-sweep.tsv
+
+failed:
+  crypto/tls (count 4920, banked 1393)
+exit=1 end 2026-11-08T17:50:04Z

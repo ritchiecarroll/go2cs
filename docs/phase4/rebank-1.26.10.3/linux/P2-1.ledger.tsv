@@ -1,0 +1,60 @@
+event	seq	row	corpus	converter	bin_mtime	boot	utc	timeout	testdeadline	word	verdicts	rc	wall_s
+# 1.26.10.3 RE-BANK at 72043c1a66 (P2, linux cloud container, shard P2-1)
+# HOST 2026-11-08T11:44:57Z uid=0 TMPDIR=/tmp(4 bytes) GOROOT test/=3458 files toolchain: PATH go=go1.26.10 resolved=<GOROOT>/bin/go VERSION=go1.26.10 .NET sdk=10.0.403 runtime=10.0.14 nproc=4 mem=15G free=22G boot=74c2b671
+START	1	image/jpeg	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:44:58Z	30m	15m				
+END	1	image/jpeg	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:48:54Z	30m	15m	PASS	19	0	234
+START	2	crypto/elliptic	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:48:55Z	30m	15m				
+END	2	crypto/elliptic	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:52:40Z	30m	15m	PASS	81	0	221
+START	3	log	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:52:40Z	30m	15m				
+END	3	log	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:56:03Z	30m	15m	PASS	24	0	201
+START	4	compress/gzip	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:56:03Z	30m	15m				
+END	4	compress/gzip	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:59:17Z	30m	15m	PASS	15	0	191
+START	5	iter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T11:59:17Z	30m	15m				
+END	5	iter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:02:18Z	30m	15m	PASS	28	0	179
+START	6	crypto/internal/fips140/mldsa	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:02:19Z	30m	15m				
+END	6	crypto/internal/fips140/mldsa	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:05:34Z	30m	15m	PASS	46	0	192
+START	7	net/textproto	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:05:34Z	30m	15m				
+END	7	net/textproto	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:08:48Z	30m	15m	PASS	27	0	191
+START	8	internal/fuzz	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:08:48Z	30m	15m				
+END	8	internal/fuzz	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:12:06Z	30m	15m	PASS	52	0	193
+START	9	internal/zstd	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:12:06Z	30m	15m				
+END	9	internal/zstd	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:15:14Z	30m	15m	PASS	536	0	185
+START	10	strings	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:15:15Z	30m	15m				
+END	10	strings	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:18:45Z	30m	15m	PASS	68	0	208
+START	11	crypto/rand	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:18:45Z	30m	15m				
+END	11	crypto/rand	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:22:09Z	30m	15m	PASS	314	0	200
+START	12	go/internal/gccgoimporter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:22:09Z	30m	15m				
+END	12	go/internal/gccgoimporter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:25:55Z	30m	15m	PASS	4	0	221
+START	13	compress/flate	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:25:55Z	30m	15m				
+END	13	compress/flate	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:29:19Z	30m	15m	PASS	64	0	201
+START	14	internal/coverage/cfile	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:29:19Z	30m	15m				
+END	14	internal/coverage/cfile	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:33:10Z	30m	15m	PASS	16	0	228
+START	15	internal/types/errors	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:33:10Z	30m	15m				
+END	15	internal/types/errors	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:37:01Z	30m	15m	PASS	155	0	225
+START	16	crypto/cipher	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:37:01Z	30m	15m				
+END	16	crypto/cipher	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:40:57Z	30m	15m	PASS	27289	0	232
+START	17	go/internal/gcimporter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:40:57Z	30m	15m				
+END	17	go/internal/gcimporter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:45:53Z	30m	15m	PASS	636	0	290
+START	18	reflect	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:45:54Z	30m	15m				
+END	18	reflect	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:50:41Z	30m	15m	PASS	445	0	284
+START	19	net/http/fcgi	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:50:41Z	30m	15m				
+END	19	net/http/fcgi	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:55:41Z	30m	15m	PASS	12	0	288
+START	20	expvar	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T12:55:41Z	30m	15m				
+END	20	expvar	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:00:48Z	30m	15m	PASS	11	0	297
+START	21	database/sql	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:00:48Z	30m	15m				
+END	21	database/sql	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:04:19Z	30m	15m	PASS	141	0	209
+START	22	crypto/internal/fips140test	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:04:20Z	30m	15m				
+END	22	crypto/internal/fips140test	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:10:05Z	30m	15m	PASS	2270	0	340
+START	23	internal/trace/testtrace	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:10:06Z	30m	15m				
+END	23	internal/trace/testtrace	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:13:24Z	30m	15m	PASS	1	0	195
+ENV	24	crypto/x509	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:13:24Z			unset:SSL_CERT_FILE,NIX_SSL_CERT_FILE			
+START	24	crypto/x509	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:13:24Z	30m	15m				
+END	24	crypto/x509	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138191	74c2b671	2026-11-08T13:20:01Z	30m	15m	PASS	523	0	389
+# NOTE 2026-11-08T13:20:01Z END: 24 of 24 PASS rc 0 at their banked linux counts (0 moved); one launch, one boot (74c2b671), container restarts 0; walls 5,594 s total (legs.tsv projected 9,270 s); free 22G -> 21G; kit FLOOR_GB=15 (the 25 GB floor is out of reach on this container), Go build cache cleared before launch
+# NOTE residue before and after the shard: 0 entries (tracked, untracked, ignored under tracked paths, the converter binary excepted); tree clean at the tip after the last row
+# NOTE per-row dirt restored BY STATUS and recorded. Beyond each row's own docs/validation/current page, three rows rewrote non-page files:
+# NOTE   crypto/x509: crypto.x509.tests.csproj, go2cs_test_host.cs, package_info_internal_test.cs, package_test_info.cs, root_test.cs modified, root_linux_test.cs and root_unix_test.cs new; README.md modified
+# NOTE   internal/fuzz: internal.fuzz.tests.csproj modified (its syscall ProjectReference dropped)
+# NOTE   go/internal/gcimporter: README.md modified
+# NOTE   re-read once by -test-action convert after the shard (same converter, same tree): the crypto/x509 and internal/fuzz test-emission diffs reproduce exactly; both READMEs do not (they are rewritten by the compare stage, not the conversion)
+# NOTE   reading: the committed -tests emission is the windows target's; linux compiles root_linux_test.go and root_unix_test.go (build-tagged) and internal/fuzz's linux files do not import syscall. A per-GOOS test-emission difference, no verdict moved: class (h), pending COORD's ruling

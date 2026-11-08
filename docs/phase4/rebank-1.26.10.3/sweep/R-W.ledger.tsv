@@ -1,0 +1,4 @@
+30ad20e17e8c823b80855ba74bcebc2faa01f289
+# 1.26.10.3 RE-BANK at 30ad20e17e, the crypto/tls windows full-count read on R-LAPTOP (COORD 2026-11-08 17:21Z), ref claude/r-rebank-1263-tlswin. go1.26.10 windows/amd64, GOTOOLCHAIN=local, CGO_ENABLED=0; dotnet SDK 10.0.400; 16 logical cores; run ALONE (R-WSL idle, no other battery).
+utc	row	rc	word	count	wall_s	real_drift	oracle_rerun	disk_gb	del_census	restored	timing_tsv	sweep_line	drift_files
+2026-11-08T17:50:04Z	crypto/tls	1	COUNT	4920	1422	0	no	180	0	2/left=0	scratchpad/sweep-row-walltimes/20261108-112620-sweep.tsv	COUNT crypto/tls                         4920, banked 1393 [1422s]	src/core/crypto/tls/README.md (the badge line, 1393/2 -> 4920/1); docs/validation/current/crypto.tls.md (the page, kept as crypto.tls.win.md)

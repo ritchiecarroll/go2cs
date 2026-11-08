@@ -1,0 +1,7 @@
+2026-11-08 16:44:12Z HOST go1.26.10 linux/amd64 sdk=10.0.400 nslookup=1 free=892G head=72043c1a66
+2026-11-08 16:44:14Z argv (RWSL-1's, reused): /root/go2cs/src/go2cs/go2cs -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.10/src/crypto/tls /root/go2cs/src/core/crypto/tls
+2026-11-08 17:07:00Z crypto/tls rc=0 wall=1366s row: crypto/tls	PASS	4921	True	0	0	1366	1366	0	60m	15m
+2026-11-08 17:07:00Z page kept: 379248 bytes, sha256 99d17e0a34e8f3ce
+2026-11-08 17:07:07Z restored moved=5 untracked=2; tracked-dirty=0 deleted=0
+2026-11-08 17:07:07Z TLS-SOLO-DONE rc=0
+crypto/tls	PASS	4921	True	0	0	1366	1366	0	60m	15m

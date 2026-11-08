@@ -47,7 +47,7 @@ public static void TestRunAtLowIntegrity(ж<testing.T> t) {
         }
 
         var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)), testRunˢ, "--");
-        cmd.Env = slice<@string>(["GO_WANT_HELPER_PROCESS=1"]);
+        cmd.Env = ["GO_WANT_HELPER_PROCESS=1"];
 
         ref var token = ref heap<syscall.Token>(out var Ꮡtoken);
         (token, var err) = getIntegrityLevelToken(sidWilLow);

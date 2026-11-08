@@ -1,0 +1,35 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# 1.26.10.3 RE-BANK at 72043c1a66 (tip 72043c1a6639d460bf98a9cab270dac6ec743fd6), lane P1, shard P1-1, linux cloud container
+# toolchain: go1.26.10 linux/amd64, GOROOT spelled as go env GOROOT prints it (the kit checks it), GOTOOLCHAIN=local; dotnet SDK 10.0.403, runtime 10.0.14
+# host: free disk 20 GB at prep (go build cache cleared) (the box has no 25 GB; kit FLOOR_GB=15 as at .2); 4 cores, 15 GiB; TMPDIR /tmp; GOROOT test/ 3458 files; nslookup invalid.invalid -> NXDOMAIN; avx512f/bw/vl/vbmi/bitalg + gfni present
+# kit: linux-kit at the tip, sha256 rebank-linux.sh 99cdef2e8d0b, classify_row.py 81e543608d9c, derive-argv.ps1 0ea6f0b90f91 (equal to the README)
+math	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T11:52:38Z
+io	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T11:56:34Z
+mime/multipart	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T11:57:50Z
+os/user	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T11:58:12Z
+os/signal	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	DIVERGED	1	2026-11-08T11:59:18Z
+encoding/gob	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T12:00:35Z
+bufio	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T12:01:06Z
+crypto	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T12:02:15Z
+net/http/httptest	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794138445	PASS	0	2026-11-08T12:04:31Z
+# abort 2026-11-08 12:04:32Z: the kit's floor guard stopped before go/internal/srcimporter (free 14G < 15G after 9 rows). Purged by git clean -fdXq -- src (the kit's shard-end purge), 0 tracked deletions, free 19G; re-entered at go/internal/srcimporter as a second kit invocation (14 rows), floor lowered to 10 GB (no row read so far took more than 3 GB); each invocation rebuilds the converter at the same commit (new mtime)
+# finding os/signal DIVERGED (rc 1): the C# host was killed by SIGINT ("signal: interrupt") with TestNotifyContextNotifications and TestNotifyContextCause in flight; 4 verdicts differ (those two and the once/multiple subtests), Go=pass; the other 30 + 1 agree. .2 read PASS 30 + 1 on this box. Class (u) until one declared re-read, run after the shard's last row as its own invocation
+# finding (test emission flavour): a linux -tests conversion emits each row's //go:build unix test files (bufio net_test.cs; os/signal signal_test.cs, signal_linux_test.cs, example_unix_test.cs) that the committed emission does not carry, and so moves that row's package_info_internal_test.cs (import-init hooks), package_test_info.cs, go2cs_test_host.cs and tests csproj; the kit restores them; the moved and untracked lists equal .2's row for row
+go/internal/srcimporter	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:12:28Z
+context	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:13:16Z
+net/netip	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:14:20Z
+go/build	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:15:13Z
+debug/pe	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:15:56Z
+internal/synctest	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:17:06Z
+net/http/cgi	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:20:36Z
+os	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	DIVERGED	1	2026-11-08T12:22:21Z
+net/http/pprof	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:24:55Z
+net/rpc	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:25:51Z
+net/http/httputil	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:26:49Z
+internal/trace	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:30:25Z
+mime/quotedprintable	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:34:09Z
+log/slog	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794139654	PASS	0	2026-11-08T12:35:15Z
+# finding os DIVERGED (rc 1): the same signature as os/signal: the C# host was killed by SIGINT ("signal: interrupt") with TestProcessLiteral in flight (it sends os.Interrupt to its own process after signal.Notify), beside TestEnvironConsistency, TestErrIsExist and TestErrPathNUL; every later test is unread, so 3797 of 3833 verdicts differ (Go=pass, C# empty) and the 36 read before the kill agree. .2 read PASS 3831 + 2 on this box
+# re-read 2026-11-08 12:36:51Z-12:42:56Z, DECLARED, one each, as its own kit invocation in the same tree at the same tip (converter rebuilt, mtime 1794141411): os/signal DIVERGED rc 1 (30, 1 disclosed, 4 diverged; wall 273 s), os DIVERGED rc 1 (3833, 3797 diverged; wall 87 s); both crash markers identical to the first reading (same tests in flight, signal: interrupt). Reproduced, so class (c) at this tip under COORD's 12:09Z ruling. Not rooted here (COORD assigns the bisect). Axes it must separate: the tip (.2 read at f6666d98a2) and the .NET runtime (.2 read on runtime 10.0.13, SDK 10.0.113; .3 on runtime 10.0.14, SDK 10.0.403)
+# moved/untracked lists: equal to .2's for all 23 rows (docs/validation pages and READMEs aside, which move only on a PASS row)
+# end 2026-11-08 12:35:27Z: 23 of 23 rows read over two kit invocations (9, then 14); PASS 21, each equal to its banked linux count; DIVERGED 2 (os/signal, os; class (c), above); walls 2,658 s (first readings); every invocation ended with residue-after 0 and tracked-deleted 0; container restarts during the shard: 0

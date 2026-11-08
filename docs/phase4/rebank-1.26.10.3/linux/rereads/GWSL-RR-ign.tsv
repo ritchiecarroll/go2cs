@@ -1,0 +1,11 @@
+row	word	verdicts	matched	disclosed	diverged	sweep_s	wall_s	rc	timeout	deadline
+go/internal/gccgoimporter	PASS	4	True	0	0	216	216	0	30m	15m
+internal/fuzz	PASS	52	True	0	0	30	30	0	30m	15m
+os/signal	PASS	30	True	1	0	47	47	0	30m	15m
+os	DIVERGED	3831	False	2	1	186	186	1	30m	15m
+os/exec	PASS	88	True	1	0	165	165	0	30m	15m
+syscall	DIVERGED	40	False	19	2	1185	1185	1	30m	15m
+database/sql	PASS	141	True	2	0	65	65	0	30m	15m
+runtime/pprof	PASS	148	True	14	0	396	396	0	30m	15m
+net/http	PASS	1526	True	0	0	252	252	0	60m	15m
+runtime	PASS	11094	True	73	0	2665	2665	0	120m	60m
