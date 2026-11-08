@@ -136,9 +136,11 @@ prep table above where the two differ.
   - Route 2's comparator arm remains a post-1.26.10.3 seat.
 - **`runtime/pprof`: C1's opt-in os-matrix dotnet-stack step runs BEFORE the leg** (ruled option (a)). It roots the
   arm64 TestGoroutineSwitch cascade alongside the `-test.v` capture and goroutine dump in the ruling above.
-- **The fiat constant-time disassembly on osx-arm64 covers BOTH compiled forms** of the hand-owned field multiply
-  (P-256's `p256Mul` and `p256Square`, batch 245). This makes the constant-time claim per-RID; the win-x64 listings
-  are the only ones read so far.
+- **The fiat constant-time disassembly on osx-arm64 covers BOTH compiled forms** of the two hand-owned field
+  multiplies, which together make the constant-time claim per-RID (only the win-x64 listings have been read so far):
+  - P-256's `p256Mul` and `p256Square` (`p256_field_impl.cs`, batch 245);
+  - P-384's `p384Mul` and `p384Square` (`p384_impl.cs`). Each `Square` is its curve's `Mul` of an element by itself,
+    and its listing is read when the disassembly lists it.
   - crossgen2 ReadyToRun: compiled locally by C1, now;
   - the tier-1 JIT: on the runner, if cheap.
   - The constant-time read is the one the win-x64 listings got: no data-dependent branch on a limb value.
