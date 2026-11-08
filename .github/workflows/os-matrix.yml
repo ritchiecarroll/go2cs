@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks)'
         type: choice
         required: true
         default: census
@@ -60,8 +60,9 @@ on:
           - aot-smoke
           - nugetgo-behavior
           - golib-tests
+          - stack-probe
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -156,6 +157,9 @@ jobs:
       nugetgo-package: ${{ steps.derive.outputs.nugetgo-package }}
       nugetgo-feed: ${{ steps.derive.outputs.nugetgo-feed }}
       nugetgo-feed-sha256: ${{ steps.derive.outputs.nugetgo-feed-sha256 }}
+      probe-test: ${{ steps.derive.outputs.probe-test }}
+      probe-at: ${{ steps.derive.outputs.probe-at }}
+      jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -199,6 +203,37 @@ jobs:
           if (-not $stage)  { $stage = 'census' }
           if (-not $dotnet) { $dotnet = '10.0.x' }
           if ($null -eq $filter) { $filter = '' }
+
+          # The diagnostic stages' options ride in `filter`, after the stage's own filter, as ;key=value pairs: the
+          # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
+          # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. An unknown or repeated key, an
+          # empty value, or any option on any other stage FAILS the plan by name rather than being ignored.
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } })
+          if ($optionKeys.Count) {
+              $parts = @($filter -split ';')
+              $filter = $parts[0].Trim()
+              $seen = @{}
+              foreach ($option in @($parts | Select-Object -Skip 1)) {
+                  if ($option -notmatch '^\s*(?<key>[a-z]+)\s*=(?<value>.*)$') { throw "filter: '$option' is not a key=value option (stage $stage takes $($optionKeys -join ', '))." }
+                  $key = $Matches['key']; $value = $Matches['value'].Trim()
+                  if ($key -notin $optionKeys) { throw "filter: stage $stage takes options $($optionKeys -join ', '); got '$key'." }
+                  if ($seen.ContainsKey($key)) { throw "filter: option '$key' is given twice." }
+                  if (-not $value) { throw "filter: option '$key' has no value." }
+                  $seen[$key] = $value
+              }
+              $jitDisasm = "$($seen['jit'])"
+              if ($stage -eq 'stack-probe') {
+                  if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
+                  $probeTest = "$($seen['test'])"
+                  if (-not $probeTest) { throw 'stack-probe needs filter option test=REGEX, the -TestFilter regex (e.g. runtime/pprof;test=^TestGoroutineSwitch$).' }
+                  $probeAt = if ($seen.ContainsKey('at')) { $seen['at'] -replace '\s', '' } else { '120,870' }
+                  if ($probeAt -notmatch '^[0-9]+(,[0-9]+)*$') { throw "stack-probe filter option at= must be comma-separated whole seconds; got '$probeAt'." }
+                  Write-Host "stack-probe: row $filter, -TestFilter $probeTest, dumps at $probeAt s"
+              }
+              if ($jitDisasm) { Write-Host "golib-tests: JIT listing for '$jitDisasm' (tiering off)" }
+          }
+          elseif ($filter -match '(^|;)\s*(jit|test|at)\s*=') { throw "filter options (;key=value) apply to stages golib-tests and stack-probe only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -343,6 +378,8 @@ jobs:
                                          # thing here that has never been run end to end.
                                          # 150 is chosen to clear a pessimistic reading of it with
                                          # the headroom the table's own doctrine asks for.
+              'stack-probe'      = 90    # one row's -tests convert/build, the filtered compare, and up to the 900 s per-test
+                                         # deadline while the probe waits. PROVISIONAL until the first run (C1, 2026-11-08).
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
@@ -401,6 +438,9 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-package=$nugetgoPackage" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed=$nugetgoFeed" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed-sha256=$nugetgoFeedSha256" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -882,6 +922,7 @@ jobs:
         shell: pwsh
         env:
           GOLIB_FILTER: ${{ needs.plan.outputs.filter }}
+          GOLIB_JIT_DISASM: ${{ needs.plan.outputs.jit-disasm }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -903,8 +944,27 @@ jobs:
 
                   if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_FILTER)) { $testArgs += @('--filter', $env:GOLIB_FILTER) }
 
+                  # ;jit= (opt-in): the JIT's listing of each matching method, tiering off (FullOpts, as the corpus's
+                  # Release default runs), written by the test host and printed below. Blank sets nothing.
+                  $jitListing = Join-Path $art "jitdisasm-$goos-$rid.txt"
+                  if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_JIT_DISASM)) {
+                      $env:DOTNET_JitDisasm = $env:GOLIB_JIT_DISASM
+                      $env:DOTNET_JitStdOutFile = $jitListing
+                      $env:DOTNET_TieredCompilation = '0'
+                  }
+
                   & dotnet @testArgs *>&1 | Tee-Object -FilePath $log -Append
                   $runExit = $LASTEXITCODE
+
+                  if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_JIT_DISASM)) {
+                      Remove-Item Env:DOTNET_JitDisasm, Env:DOTNET_JitStdOutFile, Env:DOTNET_TieredCompilation -ErrorAction SilentlyContinue
+                      if (Test-Path -LiteralPath $jitListing) {
+                          $listing = @(Get-Content -LiteralPath $jitListing)
+                          Write-Host "==> JIT listing for '$($env:GOLIB_JIT_DISASM)': $($listing.Count) lines"
+                          $listing | ForEach-Object { Write-Host "    $_" }
+                      }
+                      else { Write-Host "==> JIT listing for '$($env:GOLIB_JIT_DISASM)': no listing was written" }
+                  }
               }
           }
           finally { Pop-Location }
@@ -929,6 +989,129 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
 
           exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # stack-probe -- OPT-IN diagnostic (COORD's ruling, 2026-11-08, before the 1.26.10.3 darwin leg). The converted test
+      # host abandons a test at its 900 s per-test deadline with one line and no stacks, so a hang (runtime/pprof's
+      # TestGoroutineSwitch on osx-arm64) could not be rooted from a sweep's reading. This stage sweeps ONE row filtered to
+      # ONE test (run-validated-sweep.ps1 -TestFilter) while .github/stack-probe.ps1 takes dotnet-stack reports of that
+      # row's converted test host at the at= offsets. It never banks: a filtered row reads COUNT or FAIL by design.
+      # The instrument is proven first, every run, on a deliberately hung program: a dump without the planted frame fails
+      # the step as BLIND, so an empty probe can never read as a clean one.
+      # -------------------------------------------------------------------------------------
+      - name: Stack probe -- dotnet-stack dumps of one row's test host (diagnostic, never banks)
+        if: needs.plan.outputs.stage == 'stack-probe'
+        shell: pwsh
+        env:
+          PROBE_ROW: ${{ needs.plan.outputs.filter }}
+          PROBE_TEST: ${{ needs.plan.outputs.probe-test }}
+          PROBE_AT: ${{ needs.plan.outputs.probe-at }}
+          SWEEP_TEST_TIMEOUT: '45m'
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $summary = [System.Collections.Generic.List[string]]::new()
+          $summary.Add("## Stack probe -- GOOS=$goos ($rid)")
+          $summary.Add('')
+
+          # The row, the regex and the offsets were validated by the plan job (filter ROW;test=REGEX;at=S,S).
+          $row = "$env:PROBE_ROW".Trim()
+          $offsets = @("$env:PROBE_AT" -split ',' | ForEach-Object { [int]$_.Trim() } | Sort-Object)
+
+          # The tool, pinned.
+          $tools = Join-Path $env:RUNNER_TEMP 'stack-tools'
+          & dotnet tool install dotnet-stack --version 10.0.731102 --tool-path $tools *>&1 | ForEach-Object { Write-Host $_ }
+          $dotnetStack = Join-Path $tools 'dotnet-stack'
+          $probeScript = Join-Path $PWD '.github/stack-probe.ps1'
+
+          # 1. THE INSTRUMENT, PROVEN: a program parked in a non-inlined ProbeSelfTestHang must show that frame.
+          $hang = Join-Path $env:RUNNER_TEMP 'stackprobe-selftest'
+          New-Item -ItemType Directory -Force -Path $hang | Out-Null
+          Set-Content -LiteralPath (Join-Path $hang 'stackprobe-selftest.csproj') -Encoding utf8 -Value @(
+              '<Project Sdk="Microsoft.NET.Sdk">'
+              '  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>'
+              '</Project>')
+          Set-Content -LiteralPath (Join-Path $hang 'Program.cs') -Encoding utf8 -Value @(
+              'using System.Runtime.CompilerServices;'
+              'static class Program'
+              '{'
+              '    [MethodImpl(MethodImplOptions.NoInlining)]'
+              '    static void ProbeSelfTestHang() { while (true) System.Threading.Thread.Sleep(1000); }'
+              '    static void Main() => ProbeSelfTestHang();'
+              '}')
+          & dotnet build $hang -c Release -nologo -v q *>&1 | ForEach-Object { Write-Host $_ }
+          $selfExe = Join-Path $hang 'bin/Release/net10.0/stackprobe-selftest'
+          $selfProc = Start-Process -FilePath $selfExe -PassThru
+          $self = @(& $probeScript -Pattern '/stackprobe-selftest$' -At 5 -OutDir (Join-Path $art 'stack-selftest') -DotnetStack $dotnetStack -WaitForStartSeconds 120)
+          Stop-Process -Id $selfProc.Id -Force -ErrorAction SilentlyContinue
+          $selfText = if ($self.Count -gt 0 -and $self[0].Path) { Get-Content -LiteralPath $self[0].Path -Raw } else { '' }
+
+          if ($selfText -notmatch 'ProbeSelfTestHang') {
+              $why = if ($self.Count -gt 0 -and $self[0].Error) { $self[0].Error } else { 'the dump lacks the planted frame' }
+              $summary.Add("**BLIND: the instrument did not capture the planted frame ($why). No probe was taken.**")
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+              & ./.github/annotate-summary.ps1 -Title "stack-probe $goos/$rid" -Lines $summary
+              exit 1
+          }
+
+          $summary.Add("Instrument proven: the self-test dump shows ``Program.ProbeSelfTestHang()``.")
+          $summary.Add('')
+
+          # 2. THE PROBE: the row swept with -TestFilter while the watcher dumps its converted test host.
+          # Anchored on the EXECUTABLE (the command line's first token): the converter's own dotnet publish of the host carries
+          # the publish directory in its arguments, and a pattern that matched anywhere could dump the build instead.
+          $hostPattern = '^\S*' + [regex]::Escape("src/core/$row/bin/tests/publish/") + '[^/\s]+\.tests(\s|$)'
+          $oracleGoarch = if ($rid -eq 'osx-arm64') { 'arm64' } else { '' }
+          $watch = Start-ThreadJob -ArgumentList $probeScript, $hostPattern, $offsets, (Join-Path $art 'stack-probe'), $dotnetStack -ScriptBlock {
+              param($script, $pattern, $at, $out, $ds)
+              & $script -Pattern $pattern -At $at -OutDir $out -DotnetStack $ds -WaitForStartSeconds 5400
+          }
+
+          $log = Join-Path $art "stack-probe-$goos-$rid.log"
+          & ./src/run-validated-sweep.ps1 -Filter $row -Exact -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -TestFilter $env:PROBE_TEST -IgnoreDiskPreflight *>&1 |
+              Tee-Object -FilePath $log
+          $sweepExit = $LASTEXITCODE
+
+          $dumps = @(Receive-Job -Job $watch -Wait -AutoRemoveJob)
+          $summary.Add("Row ``$row``, -TestFilter ``$($env:PROBE_TEST)``, offsets $($offsets -join ', ') s; the sweep exited $sweepExit (a filtered row is never a bank).")
+          $summary.Add('')
+
+          foreach ($dump in $dumps) {
+              if ($dump.Error) { $summary.Add("- at $($dump.Offset) s: $($dump.Error)") }
+              if (-not $dump.Path) { continue }
+              $text = @(Get-Content -LiteralPath $dump.Path)
+              Write-Host "==> stack probe: pid $($dump.Pid) at $($dump.Offset) s, $($text.Count) lines"
+              $text | ForEach-Object { Write-Host "    $_" }
+              $summary.Add("### pid $($dump.Pid) at $($dump.Offset) s ($($text.Count) lines)")
+              $summary.Add('```')
+              $text | Select-Object -First 150 | ForEach-Object { $summary.Add($_) }
+              $summary.Add('```')
+          }
+
+          # The probed test's own output, from the row's results record (-test.v), so the dump reads beside where it stopped.
+          $resultsPath = Join-Path $PWD "src/core/$row/go2cs_test_results.json"
+          if (Test-Path -LiteralPath $resultsPath) {
+              try {
+                  $results = Get-Content -LiteralPath $resultsPath -Raw | ConvertFrom-Json
+                  $own = @($results.events | Where-Object { $_.test -and $_.test -match $env:PROBE_TEST -and $_.output } | ForEach-Object { "$($_.output)" -split "`r?`n" } | Where-Object { $_.Trim() })
+                  Write-Host "==> the probed test's own output: $($own.Count) line(s)"
+                  $own | ForEach-Object { Write-Host "    $_" }
+                  $summary.Add('### The probed test''s output (last 40 lines)')
+                  $summary.Add('```')
+                  $own | Select-Object -Last 40 | ForEach-Object { $summary.Add($_) }
+                  $summary.Add('```')
+              }
+              catch { $summary.Add("results record unreadable: $($_.Exception.Message)") }
+          }
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "stack-probe $goos/$rid" -Lines $summary
+          # The step's verdict is the instrument's, not the row's: a filtered row fails its counts by design.
+          exit 0
 
       # -------------------------------------------------------------------------------------
       # behavioral-smoke — prove the harness itself runs on this runner.
