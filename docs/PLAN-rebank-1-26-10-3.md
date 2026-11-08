@@ -174,7 +174,7 @@ These pages carry text from before a landed record change. The re-bank re-render
 | `internal/cpu` | rendered before `b769aa3bc2` | 09:24 |
 | `internal/runtime/gc/scan` | rendered before `b769aa3bc2` | 09:24 |
 | `crypto/sha1` | its darwin withdrawn section | 12:26 |
-| `crypto/tls` | the host-limit class text calls `TestBogoSuite` throughput-bound (a 2026-08-28 reading); [`DATA-bogo-startup.md`](phase4/DATA-bogo-startup.md) shows it is start-up-bound, about 1.2 s per launch, most of it loading packages (§3, §7). The class text is re-worded at the bank; the verdict counts do not move | COORD ruling, 2026-11-07 |
+| `crypto/tls` | the host-limit class text calls `TestBogoSuite` throughput-bound (a 2026-08-28 reading); [`DATA-bogo-startup.md`](phase4/DATA-bogo-startup.md) shows it is start-up-bound, about 1.2 s per launch, most of it loading packages (§3, §7). The class text is re-worded at the bank; the verdict counts do not move. **Ruled 2026-11-08:** the reword (`TestBogoSuite`'s reason and its retirement sentence) is cut on `claude/g-bogo-blocksize` (`dc05941ed4`), and the batch that lands that branch carries, in order: (a) BlockSize 3527 and the ceiling guard, (b) the reword, (c) H's full-count row (windows 4920 \| 1), (d) this page RE-RENDERED from the committed manifest, as for the four pages above. H's run reads master's manifest at `72043c1a66`, with no scratch manifest. The gate: the re-rendered page's verdict lines are byte-identical to H's evidence page, and only the reason text differs; anything else is a finding | COORD ruling, 2026-11-07; amended 2026-11-08 |
 
 ## 6. Rows whose reading depends on the host (host truth)
 
