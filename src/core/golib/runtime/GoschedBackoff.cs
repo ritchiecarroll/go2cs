@@ -57,6 +57,11 @@ namespace go.golib;
 /// object Go's own Windows runtime uses for sub-tick sleeps: 1 ms measured at ~1.1-1.5 ms, 24 s per
 /// million lone yields. The threshold and the sleep length are the ratified ones; only the clock that
 /// delivers them changed.
+/// MACOS TOO (C1, 2026-11-08, COORD ruling). On the hosted macOS runners Sleep(1) coalesces: p50 9.0 ms on
+/// osx-arm64, so runtime/pprof's TestGoroutineSwitch paid ~1,290 s of escalation and overran its 900 s
+/// per-test deadline; osx-x64 read a ~3 ms mean with a ~7 ms p90. On macOS the escalation therefore waits
+/// on a one-shot kqueue timer with NOTE_CRITICAL (<see cref="GoCriticalTimer"/>), measured at p50 1.02 /
+/// p99 1.05 ms (arm64) and 1.11 / 1.27 ms (x64); docs/phase4/DESIGN-darwin-gosched-clock.md.
 /// Linux keeps Sleep(1), which is ~1 ms there. A timer is created per escalation (a few µs against a
 /// 1 ms wait) so no per-thread handle exists to classify or leak, and any failure to create or arm one
 /// falls back to Sleep(1).
@@ -105,7 +110,11 @@ internal static class GoschedBackoff
         t_consecutiveInertYields = 0;
         Interlocked.Increment(ref s_escalations);
 
-        if (!OperatingSystem.IsWindows() || !GoHighResolutionTimer.TrySleep(OneMillisecondInNanos))
+        bool slept = OperatingSystem.IsWindows()
+            ? GoHighResolutionTimer.TrySleep(OneMillisecondInNanos)
+            : OperatingSystem.IsMacOS() && GoCriticalTimer.TrySleep(OneMillisecondInNanos);
+
+        if (!slept)
             Thread.Sleep(1);
     }
 
