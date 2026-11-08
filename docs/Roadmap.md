@@ -478,13 +478,16 @@ The follow-ups run off the critical path:
   <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
        right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
        Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
-       phase4/DESIGN-cooperative-scheduler.md. Its scope, as the owner refined it on 2026-11-08 (relayed by COORD):
-       "Async is not a real option without completely overhauling 'everything', and the visual impact breaks a primary
-       project tenet. That said, if it helps in golib or generated code levels, I'd be open to it, so don't exclude it
-       at that level." So async/await stays out of the converted code a user reads (the visual-parity tenet; the
-       2026-10-24 position), and is in scope inside golib and go2cs-gen's generated code; the design names each
-       mechanism's level and confirms the visible emission does not change. Previously "unscheduled" (owner,
-       2026-11-07: "List as unscheduled"). -->
+       phase4/DESIGN-cooperative-scheduler.md. Its async scope, as the owner last refined it on 2026-11-08 (relayed by
+       COORD; spelling corrected, wording his), superseding both the 2026-10-24 "async out" position and the same
+       morning's "out of visible code, in scope inside golib and generated code": "I don't want to wholesale exclude
+       ideas related to async: if there are suggestions, even if impactful to visual parity, they should be 'weighed',
+       but the idea will be measured based on project tenets, parity versus behavior, for example. If behavior can be
+       better matched at some visual parity expense, it will get a strong consideration." So no async option is
+       excluded at any level, visible emission included. The design weighs each one: the behavioral-parity gain (which
+       Go semantics it matches better), the visual-parity cost (what a reader sees change), and the other tenets' costs.
+       A behavior gain bought with visual cost gets strong consideration; golib and generated-code async remains the
+       cheapest level where it suffices. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled"). -->
 
 - **Building against local standard-library sources** (planned for 1.26.10.3): a program converted against a
   local go2cs source tree and built in its folder gets a Release standard library and publishes. Until
