@@ -55,7 +55,7 @@ internal class ImplicitConvTemplate : TemplateBase
 
     private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
         string.Join(", ", StructMembers.Select(GetParamExpr)) : 
-        $"({ValueType})src.Value";
+        $"({ValueType})src.{WrapperValueMember(RHTypeName)}";
 
     private string GetParamExpr((string, string) member)
     {

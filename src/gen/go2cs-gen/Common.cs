@@ -113,6 +113,26 @@ public static class Common
         return index < 0 ? typeName : typeName[..index];
     }
 
+    /// <summary>
+    /// Gets the name of the underlying-value property a named non-struct wrapper (slice, map, chan, array,
+    /// numeric) declares: <c>Value</c>, or <see cref="Symbols.NamedWrapperValue"/> when the wrapper's own
+    /// type is named <c>Value</c>.
+    /// </summary>
+    /// <remarks>
+    /// A member may not share its enclosing type's name (CS0542), so <c>type Value []byte</c>
+    /// (go-json-experiment/json's <c>jsontext.Value</c>) yields the property's name. Every reader of the
+    /// property by name spells it through this rule: the wrapper template, the implicit-conversion records,
+    /// the converter's unwrap sites (<c>NamedWrapperValue</c> in symbols.go) and golib's by-name probe.
+    /// <paramref name="typeName"/> may be qualified (<c>global::go.pkg_package.Value</c>) or carry type
+    /// arguments.
+    /// </remarks>
+    public static string WrapperValueMember(string typeName)
+    {
+        string simpleName = StripGenericTypeArguments(typeName);
+        simpleName = simpleName[(simpleName.LastIndexOf('.') + 1)..].TrimStart('@');
+        return simpleName == "Value" ? NamedWrapperValue : "Value";
+    }
+
     public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
         // Check if type name is a pointer, i.e., ж<T>. Match the prefix as `ж<` specifically — a bare

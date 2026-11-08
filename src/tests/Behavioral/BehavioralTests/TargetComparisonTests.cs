@@ -1519,6 +1519,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedTypeOverStruct() => CheckTarget("NamedTypeOverStruct");
 
     [TestMethod]
+    public void CheckNamedValueTypeClash() => CheckTarget("NamedValueTypeClash");
+
+    [TestMethod]
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]

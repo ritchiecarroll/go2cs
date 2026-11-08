@@ -170,7 +170,7 @@ internal class InheritedTypeTemplate : TemplateBase
     {
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
         "Map" => HoldsMapInHolder ?
-            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, "Value", made => $"new {ValueFieldType}({made})") :
+            IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, ValueMember, made => $"new {ValueFieldType}({made})") :
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
         "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
@@ -212,9 +212,13 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string Value => TypeClass switch
     {
-        "Array" => "Value", // Null-coalescing property auto-creates array on first reference
-        _ => HoldsMapInHolder ? "Value" : "m_value"
+        "Array" => ValueMember, // Null-coalescing property auto-creates array on first reference
+        _ => HoldsMapInHolder ? ValueMember : "m_value"
     };
+
+    // The underlying-value property's name: `Value`, or NamedWrapperValue when this wrapper's own type is named
+    // Value, since a member may not share its type's name (CS0542; Common.WrapperValueMember).
+    private string ValueMember => WrapperValueMember(ObjectName);
 
     // The Pointer class supplies its own ref-returning Value (PointerTypeTemplate); emitting the
     // base value property too is a duplicate member (CS0102).
@@ -322,7 +326,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Pointer" => "",
         "Array" =>
             $$"""
-                      public {{TypeName}} Value
+                      public {{TypeName}} {{ValueMember}}
                       {
                           [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                           get => m_value is { } value ? value.Value : materializeValue();
@@ -337,8 +341,8 @@ internal class InheritedTypeTemplate : TemplateBase
               """,
         // A self-containing map's holder (see HoldsMapInHolder): a null holder is the nil map. READONLY,
         // because the map template's readonly indexer reads the map through this property.
-        _ when HoldsMapInHolder => $"        {MemberScope} readonly {TypeName} Value => m_value is {{ }} holder ? holder.Value : default;",
-        _ => $"        {MemberScope} {TypeName} Value => {ValueGetter};"
+        _ when HoldsMapInHolder => $"        {MemberScope} readonly {TypeName} {ValueMember} => m_value is {{ }} holder ? holder.Value : default;",
+        _ => $"        {MemberScope} {TypeName} {ValueMember} => {ValueGetter};"
     };
 
     // A wrapper over golib's `uintptr` STRUCT needs its own bridges to the plain numeric world:

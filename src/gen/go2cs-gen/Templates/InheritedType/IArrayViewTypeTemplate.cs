@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using static go2cs.Common;
 using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
@@ -38,7 +39,7 @@ internal static class IArrayViewTypeTemplate
                 {
                     get
                     {
-                        _ = m_value.Value;
+                        _ = m_value.{{WrapperValueMember(typeName)}};
                         return m_value;
                     }
                 }

@@ -193,7 +193,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                         string qualifiedConstructed = constructedType.ToDisplayString(s_qualifiedFormat);
 
                         lhTypeNameOverride = qualifiedConstructed;
-                        convExprOverride = $"new {qualifiedConstructed}(({constructedUnderlying})src.Value)";
+                        convExprOverride = $"new {qualifiedConstructed}(({constructedUnderlying})src.{WrapperValueMember((inverted ? targetType : sourceType).Name)})";
 
                         // The default host is the SOURCE type's partial struct. If that is itself
                         // foreign it can't be extended here (CS1729 phantom); relocate into the LOCAL
@@ -269,7 +269,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                 if (goTypeTag == "num:uintptr")
                 {
                     string lhName = inverted ? sourceTypeName : targetTypeName;
-                    convExprOverride = $"new {lhName}(({valueType})(nuint)src.Value)";
+                    convExprOverride = $"new {lhName}(({valueType})(nuint)src.{WrapperValueMember(srcSide.Name)})";
                 }
             }
 
@@ -302,7 +302,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                         !IsImplicitNumericConversion(srcBasic, constructedBasic))
                     {
                         string lhName = inverted ? sourceTypeName : targetTypeName;
-                        convExprOverride = $"new {lhName}(({constructedKeyword})src.Value)";
+                        convExprOverride = $"new {lhName}(({constructedKeyword})src.{WrapperValueMember(srcSideType.Name)})";
                     }
                 }
             }
@@ -372,7 +372,7 @@ public class ImplicitConvGenerator : ISourceGenerator
     // construct a foreign named-numeric type cross-assembly. Returns null when no such property exists.
     private static string? GetUnderlyingBasicName(ITypeSymbol type)
     {
-        IPropertySymbol? valProperty = type.GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
+        IPropertySymbol? valProperty = type.GetMembers(WrapperValueMember(type.Name)).OfType<IPropertySymbol>().FirstOrDefault();
         return valProperty?.Type.ToDisplayString(s_qualifiedFormat);
     }
 
