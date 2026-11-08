@@ -119,12 +119,29 @@ mints it):
 
 | row | ruling | banks at 1.26.10.3 if |
 |:--|:--|:--|
-| `runtime/pprof` | **TestVMInfo: mint APPROVED**, darwin `host-identity`, with the entry above. TestGoroutineSwitch: C1 captures `-test.v` and a goroutine dump at the deadline in the re-bank leg. If P2's follow-on reds surface, P2 mints and roots them. | the arm64 cascade is rooted. Otherwise it stays unbanked |
-| `internal/trace` | **Route 1 only.** C1 reads the x64 testprog's `tracing=on` sample count. Route 2 is not for 1.26.10.3 (below). | both RIDs pass: `darwin: n` |
+| `runtime/pprof` | **TestVMInfo: mint APPROVED**, darwin `host-identity`, with the entry above. TestGoroutineSwitch: C1 captures `-test.v` and a goroutine dump at the deadline in the re-bank leg, **after C1's opt-in os-matrix dotnet-stack step has run (amended below, option (a))**. If P2's follow-on reds surface, P2 mints and roots them. | the arm64 cascade is rooted. Otherwise it stays unbanked |
+| `internal/trace` | **Route 1 only, scored by the sweep's divergence line** (amended below). Pass/pass on both RIDs validates. A `Go=skip C#=pass` line on `TestTraceCPUProfile/Default` leaves the row unbanked at 1.26.10.3. Route 2 is not for 1.26.10.3 (below). | both RIDs pass: `darwin: n` |
 | `testing` | **Mint `TestChdir/relative`** as darwin `host-identity` (fix A). Owner: C1. | both RIDs read `m + 3` |
 | `syscall` | **No `deferred` entry.** TestGetdirentries is a real gap: the reinterpret seam, a Go-layout byte view over a reference-bearing box. A deferral would read as coverage the row does not have. The seam is a seat after 1.26.10.3. | — stays darwin-unbanked at 1.26.10.3 |
 | `internal/synctest` | C1 reads its existing run and **writes the verdict**. The prediction stands: 59 on both RIDs. | it validates |
 | `net` | H drafts `TestDialerFallbackDelay` as darwin `host-limit` (arm64, the 395 ms bound). The NXDOMAIN class needs a resolver that answers NXDOMAIN in time, which the hosted mac runners do not give. | C1 finds a runner whose resolver does. Otherwise it stays darwin-unbanked |
+
+**AMENDED (COORD, 2026-11-07, RULED from C1's read of the leg).** Three changes to the darwin leg. Each overrides the
+prep table above where the two differ.
+- **`internal/trace` is scored by the sweep's divergence line, not by a sample count.** The prep table's settling
+  measurement (count the x64 `cpu-profile.go` testprog's `tracing=on` samples in the Go-side stderr) is withdrawn:
+  that artifact is blob-served, and C1 cannot read it. The verdict decides the question by itself:
+  - pass/pass on `TestTraceCPUProfile/Default` validates the row, `darwin: n`, route 1;
+  - `Go=skip C#=pass` means Go's sampler again delivered nothing, and the row is unbanked at 1.26.10.3.
+  - Route 2's comparator arm remains a post-1.26.10.3 seat.
+- **`runtime/pprof`: C1's opt-in os-matrix dotnet-stack step runs BEFORE the leg** (ruled option (a)). It roots the
+  arm64 TestGoroutineSwitch cascade alongside the `-test.v` capture and goroutine dump in the ruling above.
+- **The fiat constant-time disassembly on osx-arm64 covers BOTH compiled forms** of the hand-owned field multiply
+  (P-256's `p256Mul` and `p256Square`, batch 245). This makes the constant-time claim per-RID; the win-x64 listings
+  are the only ones read so far.
+  - crossgen2 ReadyToRun: compiled locally by C1, now;
+  - the tier-1 JIT: on the runner, if cheap.
+  - The constant-time read is the one the win-x64 listings got: no data-dependent branch on a limb value.
 
 **The comparator question, ruled for after 1.26.10.3** (route 2 above, and `net`'s mirror shape): may a disclosure
 cover a test where GO is the side that skipped or failed?
