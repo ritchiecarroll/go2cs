@@ -62,6 +62,22 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   6 GB, and a million had not finished starting after ten minutes. `runtime.GOMAXPROCS(1)` does not make anything run one at a time.
   Bound your fan-out with a worker pool, and remember that a `net/http` server spends one on every open
   connection.
+  On macOS the kernel also caps how many threads one process may run. The cap is the `kern.num_taskthreads`
+  setting, which a program can read with `sysctl`; it was about 2,000 on Apple silicon and about 3,000 on Intel on
+  the macOS 15 machines measured. A few threads belong to the .NET runtime, so once nearly that many goroutines are
+  alive at once, the next `go` statement throws `System.OutOfMemoryException` and, uncaught, ends the program. It
+  is a limit on the number of threads, not on memory, so a smaller stack reserve does not raise it. On macOS keep
+  fan-out well below it, a `net/http` server's goroutine per open connection included.
+  <!-- Measured by C1 on 2026-11-08 (run 42497561630, claude/c1-darwin-threadcap a85e0cf11, the GolibTests probe
+       DarwinGoroutineThreadCapProbe), on GitHub-hosted macOS runners, both shipped mac RIDs:
+       - osx-arm64, macOS 15.8.2: kern.num_taskthreads 2048; the first go statement to fail found 2,027 live parked
+         goroutines;
+       - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
+       Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1256
+       (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
+       TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
+       developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
   <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1256 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.

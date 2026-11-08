@@ -313,7 +313,8 @@ real code. The next candidate:
 | [`itchyny/gojq`](https://github.com/itchyny/gojq) v0.12.19, with its dependency [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go) v0.1.8 | The first conversion with a dependency. It gives .NET an in-process, fully managed jq, with no native binary per platform. | Q4 2026 |
 
 gojq's full command-line conformance suite is a later second stage, once its command-line package's
-own dependencies convert. Further modules follow; the
+own dependencies convert. Further modules follow, and libraries come first: a converted module is most useful as Go
+code a .NET program calls, not as a stand-in for a command-line tool Go already runs well. The
 [go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is one input to their selection.
 
 ## NuGet packages of converted modules
@@ -470,8 +471,24 @@ The follow-ups run off the critical path:
   by construction (storage for Go array values, frame-local allocations kept off the heap, and
   ref-receiver method emission), and each disclosure retires when its assertion matches. Its design,
   stack-allocation parity, is written.
-- **Goroutine scheduling** (unscheduled): each live goroutine runs on its own OS thread today. A sizing
-  study weighs moving to Go's model of many goroutines over a few threads; nothing is decided.
+- **Goroutine scheduling** (planned next, after 1.26.10.3): each live goroutine runs on its own OS thread
+  today, so a program can hold only as many goroutines alive at once as the system allows threads, a limit
+  macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). The
+  work moves toward Go's model of many goroutines over a few threads.
+  <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
+       right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
+       Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
+       phase4/DESIGN-cooperative-scheduler.md. Its async scope, as the owner last refined it on 2026-11-08 (relayed by
+       COORD; spelling corrected, wording his), superseding both the 2026-10-24 "async out" position and the same
+       morning's "out of visible code, in scope inside golib and generated code": "I don't want to wholesale exclude
+       ideas related to async: if there are suggestions, even if impactful to visual parity, they should be 'weighed',
+       but the idea will be measured based on project tenets, parity versus behavior, for example. If behavior can be
+       better matched at some visual parity expense, it will get a strong consideration." So no async option is
+       excluded at any level, visible emission included. The design weighs each one: the behavioral-parity gain (which
+       Go semantics it matches better), the visual-parity cost (what a reader sees change), and the other tenets' costs.
+       A behavior gain bought with visual cost gets strong consideration; golib and generated-code async remains the
+       cheapest level where it suffices. Previously "unscheduled" (owner, 2026-11-07: "List as unscheduled"). -->
+
 - **Building against local standard-library sources** (planned for 1.26.10.3): a program converted against a
   local go2cs source tree and built in its folder gets a Release standard library and publishes. Until
   then, build the project file itself, `dotnet build MyProgram.csproj -c Release`.
@@ -553,9 +570,9 @@ something else finishing first.
 | When | Planned |
 |:--|:--|
 | Now | The 1.26.10.3 fix release. macOS validation of the standard library, package by package. The trimming work for Native AOT. The start-up cost of a converted process. Further converted modules as NuGet packages. |
-| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Next | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. Goroutine scheduling, after 1.26.10.3. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work, whose design is written. |
-| Unscheduled | Goroutine scheduling. The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
