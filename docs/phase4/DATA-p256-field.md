@@ -122,7 +122,10 @@ COORD ruled GO, the prediction and falsifiers accepted as worded.
   percent: ReadyToRun field Mul 0.193 and 0.189, the P-256 handshake 0.640 and 0.629 ([`ab-prior/`](data/p256-field/ab-prior/)).
 - **The controls, read honestly.** The default handshake moves 0.989 (JIT) and 0.985 (ReadyToRun). P-384's field Mul
   read slower in the cut under the JIT in all three A/Bs (+2%, +13%, +9%) and flat under ReadyToRun (+1%, +3%, 0%);
-  P-256's change does not touch `p384Mul`, and the cause is NOT rooted (code placement is the likeliest; not measured).
+  P-256's change does not touch `p384Mul`, MEASURED (amended 2026-11-07, G's note): `src/tools/ildiff` over the two
+  arms' fiat assemblies reads `methods=1070 differing=2`, exactly `p256Mul` and `p256Square`
+  ([`ildiff-fiat.txt`](data/p256-field/ildiff-fiat.txt)). `p384Mul` is IL-identical, so its JIT drift is JIT placement,
+  not code.
   P-521's ReadyToRun median read 1.164 in the union run, from one process whose readings reached 1.58 us; the two earlier
   runs read 0.991 and 1.014.
 - The JIT gains too, though the converted body already inlined: the hand-own replaces 28 MULX plus tuple-returning
