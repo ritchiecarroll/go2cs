@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using os = os_package;
 using runtime = runtime_package;
 using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
@@ -49,6 +50,22 @@ internal static partial nint Line(this impl _Δp0) {
 }
 
 internal static slice<nint> three(nint a, nint b, nint c) { return [a, b, c]; }
+
+internal static (nint, nint) pair(nint a, nint b) { return (a, b); }
+
+partial struct runner {
+}
+
+internal static ж<runner> command(params ꓸꓸꓸstring argsʗp) {
+    var args = argsʗp.sslice();
+
+    return Ꮡ(new runner());
+}
+
+internal static partial nint Run(this ref runner _Δp0) {
+    var (_, _, l, _) = runtime.Caller(1);
+    return l;
+}
 
 internal static slice<nint> recorded;
 
@@ -114,6 +131,16 @@ internal static void Main() {
     show(false, "S7", local);
 
     show(false, "S8", ret());
+
+    nint l = command("a",
+        "b").Run(); if (l > 0) {
+        show(true, "S9", l);
+    }
+
+    var (a, b) = pair(0,
+        line()); if (a == 0) {
+        show(false, "S10", b);
+    }
 }
 
 } // end main_package

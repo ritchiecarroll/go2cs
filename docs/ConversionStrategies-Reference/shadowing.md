@@ -126,6 +126,14 @@ moved local instead, and a closure over a moved variable would share one variabl
 separate passes of a backward `goto` loop. A collision the compiler does report (a second declaration of
 the name in the block, or a use before it) is refused by the same first condition.
 
+A moved init starts on the C# line the `if` itself maps, and it keeps its own record of the calls it makes on
+later Go lines, so a frame inside such a call reports the call's line, as Go does, not the statement's first
+line. The `if`'s own position record carries no calls, so the init's record joins it on that line. Pinned by
+`CallerLineMultiLine` S9 (Release) and S10 (`CallerLineMultiLineDebugTests`).<!-- 2026-11-08, H: batch 204
+moved the init onto the if's line and the extractor kept only the line's first record, the if's, so the
+init's per-call record was lost (R's .3 -tests regen census, DATA-dot3-tests-regen.md section 5: fips140test
+entropy_test.go:84-86, net/http serve_test.go:6467-6468, production internal/coverage/cformat format.go). -->
+
 ### A head `if` refused only because a sibling declares the same `ok` folds its init into the condition
 
 A comma-ok init whose only collision is its own `ok` folds into the condition, which declares no `ok`.
