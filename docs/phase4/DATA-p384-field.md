@@ -231,3 +231,34 @@ The two reds, each fixed in this branch and re-run green:
   `p384_fiat64.cs`: the two displaced functions' doc comments now live in `p384_impl.cs`, the same mechanism that
   already puts `p521_fiat64.cs` at 6 in `partial:decl-doc` since batch 220 read placeholder files. Re-baselined; no
   other class moved.
+
+## 11. osx-arm64 under ReadyToRun (C1, 2026-11-08, appended)
+
+COORD's ruling of 2026-11-08 (the 1.26.10.3 re-bank's darwin leg): the fiat multiply judged constant time per RID, with
+this record's win-x64 listings as the reference shape.
+
+**Method.** crossgen2 10.0.14 (`microsoft.netcore.app.crossgen2.linux-x64`), cross-targeting `--targetos osx
+--targetarch arm64 -O`, the default version bubble (fiat alone, as a single-file publish compiles it), with
+`--codegenopt JitDisasm=<method>` and `JitStdOutFile`. Inputs: fiat built Release for the darwin flavour at master
+`dab0675bd`, referenced against its own build output and the osx-arm64 runtime pack 10.0.14
+(`microsoft.netcore.app.runtime.osx-arm64`). The listing reads "ReadyToRun compilation" and "ARM64 on Apple". This is
+the code a ReadyToRun single-file publish ships for osx-arm64. The tier-1 JIT form needs an arm64 host and is read on
+the hosted runner (COORD's ruling, 2026-11-08).
+
+**The body** ([`listings/r2r-osx-arm64-p384Mul.txt`](data/p384-field/listings/r2r-osx-arm64-p384Mul.txt)):
+- 12,256 bytes of code (win-x64's [`r2r-final-p384Mul.txt`](data/p384-field/listings/r2r-final-p384Mul.txt): 18,842).
+- 222 multiply instructions (`mul` and `umulh` pairs, where x64 has one IMUL).
+- 36 calls, all indirect `blr` through ReadyToRun cells, one `ret`. That matches win-x64's 36: half golib
+  `array.get_Item` (the limb reads and writes at constant indexes), half cold `materializeValue`, the null-reference
+  path, which is where every branch below lands.
+
+**Constant time, checked.**
+- The only conditional branches are 18 `cbz`. Each tests `x0` just loaded from `[x19]`, `[x20]` or `[x21]`, the
+  three byref arguments' wrapper references (6 limb reads each): a null test, as win-x64's `je`.
+- None tests a limb value.
+- No `b.cond`, `tbz`, `tbnz` or `cbnz`.
+- No `udiv` or `sdiv`.
+- No register-indexed load or store.
+- No `csel` or `cset`: the final reduction's select is arithmetic.
+- win-x64 reads 19 conditional jumps: the same null tests, plus one `jne` for its prolog's frame-zeroing loop,
+  which arm64 does not emit.
