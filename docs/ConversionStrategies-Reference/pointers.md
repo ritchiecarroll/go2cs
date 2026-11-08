@@ -1225,7 +1225,7 @@ func boolFieldAddr(conf *Config, name string) *bool {
 
 which converts to
 
-<!-- source: src/core/go/types/check_test.cs:404-407 -->
+<!-- source: src/core/go/types/check_test.cs:394-397 -->
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
@@ -1782,7 +1782,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
     return ctx, func() { stop(); cancel(Canceled) }
 }
 ```
-<!-- source: src/core/context/example_test.cs:331, 339-343 -->
+<!-- source: src/core/context/example_test.cs:329, 337-341 -->
 ```csharp
 (context.Context, Action) mergeCancel(context.Context ctx, context.Context cancelCtx) {
     …
@@ -2256,7 +2256,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
-<!-- source: src/core/os/os_windows_test.cs:266-268 -->
+<!-- source: src/core/os/os_windows_test.cs:263-265 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();

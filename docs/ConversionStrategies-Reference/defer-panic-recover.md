@@ -369,7 +369,7 @@ IIFE already uses, and the registration takes the temp-parameter form so there i
 ```csharp
 defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
     var dirs = dirsʗp.sslice();
-    foreach (var (_, dir) in dirs) {
+    foreach (var (_, dir) in range(dirs)) {
         os.RemoveAll(dir);
     }
 }))(ᴛ1, ᴛ2), dir1, dir2, ref ᒐ);
@@ -520,7 +520,7 @@ defer panic(err)
 err = fmt.Errorf("second")     // Go recovers "first" — arguments evaluate at the defer
 ```
 
-<!-- source: src/core/go/types/check_test.cs:216 -->
+<!-- source: src/core/go/types/check_test.cs:212 -->
 ```csharp
 defer(ᴛ1 => throw panic(ᴛ1), err, ref ᒐ);
 ```
@@ -1127,14 +1127,14 @@ decls in at the statement's own start — it records that offset before conversi
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
 
-<!-- source: src/core/context/x_test.cs:417-418, 422, 425, 452-461, 472 -->
+<!-- source: src/core/context/x_test.cs:386-387, 391, 394, 421-430, 441 -->
 ```csharp
     var bg = Background();
             var bgʗ1 = bg;
             …
             var bgʗ3 = bg;
     …
-    foreach (var (_, test) in slice<TestAllocs_type>([
+    foreach (var (_, test) in range(slice<TestAllocs_type>([
         …
         new(
             desc: "WithCancel(bg)",
@@ -1147,7 +1147,7 @@ emitted much further down through a dozen different arms:
             gccgoLimit: 8D
         ),
     …
-    ])) {
+    ]))) {
 ```
 <!-- excerpt of src/core/context/x_test.cs (TestAllocs); the hoisted snapshots keep the splice's own indentation. -->
 

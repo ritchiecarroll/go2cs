@@ -407,7 +407,7 @@ for range b.N {
     _ = Size(data)
 }
 ```
-<!-- source: src/core/encoding/binary/binary_test.cs:1370-1372 -->
+<!-- source: src/core/encoding/binary/binary_test.cs:1338-1340 -->
 ```csharp
 foreach (var _ᴛ1 in range((~bΔ1).N)) {
     _ = Size(dataʗ1);
