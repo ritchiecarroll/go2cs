@@ -1,0 +1,4 @@
+72043c1a6639d460bf98a9cab270dac6ec743fd6
+# 1.26.10.3 RE-BANK at 72043c1a66, windows net on a GitHub-hosted runner (PLAN-rebank-1-26-10-3.md section 2, ruling (1)): workflow "OS matrix (on demand)", run 42476581291 (workflow_dispatch on master, head 72043c1a6639d460bf98a9cab270dac6ec743fd6, conclusion success), job "sweep-shard (windows / win-x64)" 128719251245, 11:38:03Z-11:47:14Z. go1.26.10 windows/amd64; 4 logical cores. https://github.com/ritchiecarroll/go2cs/actions/runs/42476581291
+utc	row	rc	word	count	wall_s	real_drift	oracle_rerun	sweep_line
+2026-11-08T11:47:03Z	net	0	PASS	505	478	0	no	PASS  net                                505 [478s]
