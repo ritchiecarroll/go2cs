@@ -110,6 +110,18 @@ listings got: no data-dependent branch on a limb value.
   - osx-x64 FAILS: "matched 539 of 555; disclosed 3; undisclosed divergences 13". That is 12 NXDOMAIN lines,
     Go=fail C#=pass, plus `TestDialerFallbackDelay` case #1, "got 307.0874ms; want <= 295ms", which the entry's
     "; want <= 395ms" signature (case #0) does not absorb. Not re-read, so (u).
+  - The DNS read (COORD 2026-11-08; run 42513405068 on `claude/c1-darwin-net-dns` cd0a6413e, whose corpus is
+    30ad20e17e's): an opt-in step timed NXDOMAIN for `invalid.invalid` through Go's resolvers, switched the job to two
+    public resolvers, and timed again.
+    - BEFORE the switch, the image's own resolver answered every MX/NS/TXT/host lookup with NXDOMAIN in 5 to 91 ms on
+      both RIDs. So the leg's NXDOMAIN failures are NOT a resolver that cannot answer this name at rest: their cause
+      is (u), something under the test's own conditions.
+    - AFTER the switch, all 12 MX/NS/TXT x mode lookups answered NXDOMAIN in 8 to 36 ms.
+    - net: osx-x64 validated 552 + 3; osx-arm64 FAILED 550 of 555 on one NEW converted-side line,
+      `TestUDPZeroByteBuffer` Go=pass C#=fail, "recvfrom: address family not supported by protocol family", a (u)
+      on the post-1.26.10.3 list.
+    - RULED (b): `net` stays darwin-unbanked at 1.26.10.3, with no second read. The dns option is HELD, unlanded,
+      until the NXDOMAIN cause is rooted.
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
   MISS on `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof` (above). Predicted `internal/synctest` validated 59 on both
   RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
