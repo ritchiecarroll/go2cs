@@ -181,3 +181,72 @@ func (v *Visitor) liftConversionTargetAnonStruct(callExpr *ast.CallExpr, name st
 	v.indentLevel--
 	v.liftAtCallBoundary = false
 }
+
+// liftDeclaredAnonStructTypeArgs lifts -- and publishes, as liftExplicitAnonStructTypeArgs does -- every non-empty
+// anonymous struct written as a TYPE ARGUMENT of a var declaration's type, `var seen Set[struct{ name string }]`,
+// under the var's name, the name a struct written as the declared type itself takes.
+//
+// The declared-type lifts in visitValueSpec find an anonymous struct through extractStructType, which walks type
+// COMPOSITION (pointer, slice, array, map, channel) but not instantiation, so a type argument was never lifted: the
+// declaration rendered through the deferred dynamic-type marker, which resolved to nothing and fell back to the raw
+// Go signature, `Set<struct{name string; kind int32}> seen = default;`, which is not C#. The identical struct in a
+// composite literal beside it was lifted, but function-scoped and unpublished, so nothing joined the two.
+//
+// Publishing (liftAtCallBoundary) is what makes the two one type: Go treats identical struct types as the same type,
+// so `seen.AddIfAbsent(key)` with `key := struct{ name string }{…}` must find ONE C# type at both sites, and
+// visitStructType's signature-keyed reuse block gives the composite literal the name this lift publishes.
+//
+// Bounds, stated: struct fields, parameters, results and composite-literal types written as `G[struct{…}]` are not
+// handled here. A census of Go 1.26.10's standard library (production and tests, cmd and testdata excluded) finds the
+// shape only as a called instantiation (liftExplicitAnonStructTypeArgs' six sites) and in no declaration, field or
+// literal type, so those positions are left to the first measurement that needs them.
+func (v *Visitor) liftDeclaredAnonStructTypeArgs(typeExpr ast.Expr, name string) {
+	for _, typeArg := range declaredTypeArgs(typeExpr) {
+		structType, exprType := v.extractStructType(typeArg)
+
+		if structType == nil || v.liftedTypeExists(structType) {
+			continue
+		}
+
+		savedBoundary := v.liftAtCallBoundary
+		v.liftAtCallBoundary = true
+		v.visitStructType(structType, exprType, name, nil, true, nil)
+		v.liftAtCallBoundary = savedBoundary
+	}
+}
+
+// declaredTypeArgs returns the type arguments of every instantiation a declared type expression reaches, through
+// composition (`*G[A]`, `[]G[A]`, `map[K]G[A]`) and nesting (`G[H[A]]` yields `H[A]` and then `A`), in source order.
+// In a type position an index expression is always an instantiation: an array type parses as *ast.ArrayType.
+func declaredTypeArgs(typeExpr ast.Expr) []ast.Expr {
+	var typeArgs []ast.Expr
+	var walk func(ast.Expr)
+
+	walk = func(expr ast.Expr) {
+		var indices []ast.Expr
+
+		switch typed := expr.(type) {
+		case *ast.IndexExpr:
+			indices = []ast.Expr{typed.Index}
+		case *ast.IndexListExpr:
+			indices = typed.Indices
+		default:
+			for _, operand := range composedTypeOperands(expr) {
+				walk(operand)
+			}
+
+			return
+		}
+
+		for _, index := range indices {
+			typeArgs = append(typeArgs, index)
+			walk(index)
+		}
+	}
+
+	if typeExpr != nil {
+		walk(typeExpr)
+	}
+
+	return typeArgs
+}

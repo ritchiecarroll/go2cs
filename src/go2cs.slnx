@@ -308,6 +308,7 @@
     <Project Path="tests/Behavioral/AnonStructNamedConversion/AnonStructNamedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/structs/AnonStructNamedConversion.structs.csproj" />
     <Project Path="tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
+    <Project Path="tests/Behavioral/AnonStructTypeArgVarDecl/AnonStructTypeArgVarDecl.csproj" />
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="tests/Behavioral/AnyBoxedUntypedConst/AnyBoxedUntypedConst.csproj" />
