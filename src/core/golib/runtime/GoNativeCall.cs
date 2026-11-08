@@ -44,8 +44,9 @@ public enum NativeCallHint
 /// </para>
 /// <para>
 /// <b>Under today's 1:1 model</b> there is no P to release, so a transition does golib's blocked accounting
-/// (<see cref="Goroutine.EnterBlocked"/> / <see cref="Goroutine.ExitBlocked"/>, which it COMPOSES over: those also mark
-/// the execution tracer's waits, which are not native calls) and nothing else. The <paramref name="hint"/> of
+/// (the marks <see cref="Goroutine.EnterBlocked"/> / <see cref="Goroutine.ExitBlocked"/> make, which it COMPOSES over:
+/// those also mark the execution tracer's waits, which are not native calls) and nothing else. It reads the current
+/// goroutine once per transition. The <paramref name="hint"/> of
 /// <see cref="Enter"/> is carried for the M:N scheduler and read by nothing yet.
 /// </para>
 /// </remarks>
@@ -62,7 +63,7 @@ public static class GoNativeCall
             throw OutOfOrder(goroutine, nameof(Enter), "already inside a native call");
 
         goroutine.m_nativeDepth++;
-        Goroutine.EnterBlocked();
+        goroutine.EnterBlockedOn();
     }
 
     /// <summary>The native call <see cref="Enter"/> opened has returned: Go's <c>exitsyscall</c>.</summary>
@@ -76,7 +77,7 @@ public static class GoNativeCall
             throw OutOfOrder(goroutine, nameof(Exit), "not inside a native call");
 
         goroutine.m_nativeDepth--;
-        Goroutine.ExitBlocked();
+        goroutine.ExitBlockedOn();
     }
 
     /// <summary>Native code calls back into Go: <c>cgocallbackg</c>'s <c>exitsyscall</c>.</summary>
@@ -89,7 +90,7 @@ public static class GoNativeCall
             throw OutOfOrder(goroutine, nameof(ReenterManaged), "not inside a native call");
 
         goroutine.m_nativeDepth++;
-        Goroutine.ExitBlocked();
+        goroutine.ExitBlockedOn();
     }
 
     /// <summary>The callback <see cref="ReenterManaged"/> opened returns to native code: <c>cgocallbackg</c>'s <c>reentersyscall</c>.</summary>
@@ -102,7 +103,7 @@ public static class GoNativeCall
             throw OutOfOrder(goroutine, nameof(ReturnToNative), "not inside a callback from a native call");
 
         goroutine.m_nativeDepth--;
-        Goroutine.EnterBlocked();
+        goroutine.EnterBlockedOn();
     }
 
     /// <summary>The calling goroutine's transition depth (§12.3), or -1 on a thread with no goroutine identity.</summary>

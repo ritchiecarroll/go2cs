@@ -248,6 +248,22 @@ public sealed class Goroutine
             Volatile.Write(ref goroutine.m_blockedDepth, goroutine.m_blockedDepth - 1);
     }
 
+    // The two marks above on a goroutine already in hand: GoNativeCall reads the current goroutine ONCE per
+    // transition and does its accounting here, rather than through the statics, which would read it again.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void EnterBlockedOn()
+    {
+        if (m_panicDefersCounted != 0)
+            EnterCountedBlock();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void ExitBlockedOn()
+    {
+        if (m_blockedDepth > 0)
+            Volatile.Write(ref m_blockedDepth, m_blockedDepth - 1);
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void EnterCountedBlock()
     {

@@ -699,12 +699,26 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
 
         uint32 flags = (uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
 
-        int ok = (~sys).Token != 0
-            ? win32CreateProcessAsUser((IntPtr)(nint)(nuint)(uintptr)(~sys).Token, argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip)
-            : win32CreateProcess(argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip);
+        int ok;
+        int lastError;
+
+        // Go's CreateProcess / CreateProcessAsUser are generated wrappers over Syscall, which reaches cgocall, so the
+        // call is a system call: entersyscall around it, and the last error read inside the window
+        // (DESIGN-native-call-seam §12.2, §4.3).
+        runtime_package.syscallEntersyscall();
+
+        try {
+            ok = (~sys).Token != 0
+                ? win32CreateProcessAsUser((IntPtr)(nint)(nuint)(uintptr)(~sys).Token, argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip)
+                : win32CreateProcess(argv0p, argvp, processAttrp, threadAttrp, willInheritHandles ? 1 : 0, flags, envp, dirp, sip, pip);
+            lastError = Marshal.GetLastSystemError();
+        }
+        finally {
+            runtime_package.syscallExitsyscall();
+        }
 
         if (ok == 0) {
-            return (0, 0, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
+            return (0, 0, errnoErr((Errno)(uint32)lastError));
         }
 
         NativeProcessInformation pi = Marshal.PtrToStructure<NativeProcessInformation>(pip);
