@@ -63,8 +63,10 @@ listings got: no data-dependent branch on a limb value.
 
 ## Findings, as ruled
 
-- **(s) structural -- GOARCH-enumerating tests on osx-arm64** (COORD, 2026-11-08, on C1-5). A test whose subtest SET
-  is computed from the target architecture diverges on osx-arm64. Since batch 208 the Go oracle there runs at
+- **(s) structural -- the converted darwin flavour reports `runtime.GOARCH = amd64` against an arm64 oracle**
+  (COORD, 2026-11-08: named on C1-5, widened to its root on C1-10, one class). Every GOARCH-sensitive test shape
+  diverges on osx-arm64: so far ENUMERATING (gcimporter), CURRENT-PLATFORM (buildinfo) and a GATED SKIP
+  (net/http/pprof). Since batch 208 the Go oracle there runs at
   GOARCH=arm64, while the converted darwin flavour IS darwin/amd64 (layout L3): the C# side's child `go` tools resolve
   amd64. The shape is Go-absent / C#-pass, which no disclosure admits, so the row cannot bank arch-strict until an
   arm64 flavour exists or a comparator arm for a GOARCH-derived subtest set is ruled (after 1.26.10.3, beside the
@@ -86,8 +88,7 @@ listings got: no data-dependent branch on a limb value.
     `if strings.HasPrefix(runtime.GOARCH, "arm") { testenv.SkipFlaky(t, 50218) }` (pprof_test.go:158), so the arm64
     oracle skips while the C# side (GOARCH amd64) runs it and passes. The osx-arm64 record: "matched 14 of 15 Go / 15
     C# verdicts; undisclosed divergences 1", `TestDeltaProfile` Go="skip" C#="pass". osx-x64 validates at its
-    segment, 15. At 1.26.10.2 both RIDs read 15 / 15. Filed under (s) pending COORD's word on the widening from
-    "enumerating" to "gated".
+    segment, 15. At 1.26.10.2 both RIDs read 15 / 15. Under (s): the widening was confirmed as one class.
   - BANK, for every row in this class: none banks darwin at 1.26.10.3; each loses its 1.26.10.2 segment, with a note
     naming this class.
 - **(c) the converted runtime's goroutine-per-OS-thread model meets darwin's thread cap** (C1-8, run 42485762191).
@@ -104,5 +105,7 @@ listings got: no data-dependent branch on a limb value.
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
   MISS on `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof` (above). Predicted `internal/synctest` validated 59 on both
   RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
-  Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. The predicted total moves from 233 to 229,
+  Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. Predicted `syscall` failing exactly
+  `TestGetdirentries/n=10`, `/n=1000` and the parent on both RIDs: HIT (unbanked, as ruled). Predicted `testing`
+  82 + 3 on both RIDs: it banks (HIT), but at 80 + 5 on both RIDs (the split MISSED; the total, 85, matches). The predicted total moves from 233 to 229,
   three BELOW the plan's 232 to 234.
