@@ -60,7 +60,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "397=Invoke/1/1/1", "321:21")]
+[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "361=Invoke/1/1/1;397=Invoke/1/1/1", "321:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
