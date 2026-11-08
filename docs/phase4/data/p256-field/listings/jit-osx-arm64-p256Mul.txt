@@ -1,0 +1,1746 @@
+; Assembly listing for method go.crypto.internal.fips140.nistec.fiat_package:p256Mul(byref,byref,byref) (FullOpts)
+; Emitting BLENDED_CODE for generic ARM64 on Apple
+; FullOpts code
+; optimized code
+; fp based frame
+; partially interruptible
+; No PGO data
+; 0 inlinees with PGO data; 52 single block inlinees; 36 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+            stp     fp, lr, [sp, #-0x120]!
+            stp     x19, x20, [sp, #0xD0]
+            stp     x21, x22, [sp, #0xE0]
+            stp     x23, x24, [sp, #0xF0]
+            stp     x25, x26, [sp, #0x100]
+            stp     x27, x28, [sp, #0x110]
+            mov     fp, sp
+            movi    v16.16b, #0
+            sub     x9, fp, #16
+            mov     x10, #128
+            stp     q16, q16, [x9, #0x20]
+            stp     q16, q16, [x9, #0x40]!
+            subs    x10, x10, #64
+            bge     pc-16 (-4 instructions)
+            mov     x19, x0
+            mov     x20, x1
+            mov     x21, x2
+ 
+G_M000_IG02:                ;; offset=0x0044
+            ldr     x0, [x20]
+            cbz     x0, G_M000_IG04
+ 
+G_M000_IG03:                ;; offset=0x004C
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0xC0]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0xC8]
+            b       G_M000_IG05
+ 
+G_M000_IG04:                ;; offset=0x0060
+            mov     x0, x20
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0xC0]
+ 
+G_M000_IG05:                ;; offset=0x007C
+            ldrsw   x0, [fp, #0xCC]
+            cmp     x0, #0
+            ble     G_M000_IG80
+            ldr     x22, [fp, #0xC0]
+            cbnz    x22, G_M000_IG08
+ 
+G_M000_IG06:                ;; offset=0x0090
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG81
+ 
+G_M000_IG07:                ;; offset=0x00A4
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x22, [x0]
+ 
+G_M000_IG08:                ;; offset=0x00B4
+            ldr     w0, [fp, #0xC8]
+            ldr     w1, [x22, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x22, #16
+            ldr     w1, [fp, #0xC8]
+            ldr     x22, [x0, w1, UXTW #3]
+            ldr     x0, [x20]
+            cbz     x0, G_M000_IG10
+ 
+G_M000_IG09:                ;; offset=0x00D8
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0xB0]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0xB8]
+            b       G_M000_IG11
+ 
+G_M000_IG10:                ;; offset=0x00EC
+            mov     x0, x20
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0xB0]
+ 
+G_M000_IG11:                ;; offset=0x0108
+            ldrsw   x0, [fp, #0xBC]
+            cmp     x0, #1
+            ble     G_M000_IG82
+            ldr     x23, [fp, #0xB0]
+            cbnz    x23, G_M000_IG14
+ 
+G_M000_IG12:                ;; offset=0x011C
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG83
+ 
+G_M000_IG13:                ;; offset=0x0130
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x23, [x0]
+ 
+G_M000_IG14:                ;; offset=0x0140
+            ldr     w0, [fp, #0xB8]
+            add     w0, w0, #1
+            ldr     w1, [x23, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x23, #16
+            ldr     w1, [fp, #0xB8]
+            add     w1, w1, #1
+            ldr     x23, [x0, w1, UXTW #3]
+            ldr     x0, [x20]
+            cbz     x0, G_M000_IG16
+ 
+G_M000_IG15:                ;; offset=0x016C
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0xA0]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0xA8]
+            b       G_M000_IG17
+ 
+G_M000_IG16:                ;; offset=0x0180
+            mov     x0, x20
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0xA0]
+ 
+G_M000_IG17:                ;; offset=0x019C
+            ldrsw   x0, [fp, #0xAC]
+            cmp     x0, #2
+            ble     G_M000_IG84
+            ldr     x24, [fp, #0xA0]
+            cbnz    x24, G_M000_IG20
+ 
+G_M000_IG18:                ;; offset=0x01B0
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG85
+ 
+G_M000_IG19:                ;; offset=0x01C4
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x24, [x0]
+ 
+G_M000_IG20:                ;; offset=0x01D4
+            ldr     w0, [fp, #0xA8]
+            add     w0, w0, #2
+            ldr     w1, [x24, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x24, #16
+            ldr     w1, [fp, #0xA8]
+            add     w1, w1, #2
+            ldr     x24, [x0, w1, UXTW #3]
+            ldr     x0, [x20]
+            cbz     x0, G_M000_IG22
+ 
+G_M000_IG21:                ;; offset=0x0200
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x90]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x98]
+            b       G_M000_IG23
+ 
+G_M000_IG22:                ;; offset=0x0214
+            mov     x0, x20
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x90]
+ 
+G_M000_IG23:                ;; offset=0x0230
+            ldrsw   x0, [fp, #0x9C]
+            cmp     x0, #3
+            ble     G_M000_IG86
+            ldr     x20, [fp, #0x90]
+            cbnz    x20, G_M000_IG26
+ 
+G_M000_IG24:                ;; offset=0x0244
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG87
+ 
+G_M000_IG25:                ;; offset=0x0258
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x20, [x0]
+ 
+G_M000_IG26:                ;; offset=0x0268
+            ldr     w0, [fp, #0x98]
+            add     w0, w0, #3
+            ldr     w1, [x20, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x20, #16
+            ldr     w1, [fp, #0x98]
+            add     w1, w1, #3
+            ldr     x20, [x0, w1, UXTW #3]
+            ldr     x0, [x21]
+            cbz     x0, G_M000_IG28
+ 
+G_M000_IG27:                ;; offset=0x0294
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x80]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x88]
+            b       G_M000_IG29
+ 
+G_M000_IG28:                ;; offset=0x02A8
+            mov     x0, x21
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x80]
+ 
+G_M000_IG29:                ;; offset=0x02C4
+            ldrsw   x0, [fp, #0x8C]
+            cmp     x0, #0
+            ble     G_M000_IG88
+            ldr     x25, [fp, #0x80]
+            cbnz    x25, G_M000_IG32
+ 
+G_M000_IG30:                ;; offset=0x02D8
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG89
+ 
+G_M000_IG31:                ;; offset=0x02EC
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x25, [x0]
+ 
+G_M000_IG32:                ;; offset=0x02FC
+            ldr     w0, [fp, #0x88]
+            ldr     w1, [x25, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x25, #16
+            ldr     w1, [fp, #0x88]
+            ldr     x25, [x0, w1, UXTW #3]
+            ldr     x0, [x21]
+            cbz     x0, G_M000_IG34
+ 
+G_M000_IG33:                ;; offset=0x0320
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x70]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x78]
+            b       G_M000_IG35
+ 
+G_M000_IG34:                ;; offset=0x0334
+            mov     x0, x21
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x70]
+ 
+G_M000_IG35:                ;; offset=0x0350
+            ldrsw   x0, [fp, #0x7C]
+            cmp     x0, #1
+            ble     G_M000_IG90
+            ldr     x26, [fp, #0x70]
+            cbnz    x26, G_M000_IG38
+ 
+G_M000_IG36:                ;; offset=0x0364
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG91
+ 
+G_M000_IG37:                ;; offset=0x0378
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x26, [x0]
+ 
+G_M000_IG38:                ;; offset=0x0388
+            ldr     w0, [fp, #0x78]
+            add     w0, w0, #1
+            ldr     w1, [x26, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x26, #16
+            ldr     w1, [fp, #0x78]
+            add     w1, w1, #1
+            ldr     x26, [x0, w1, UXTW #3]
+            ldr     x0, [x21]
+            cbz     x0, G_M000_IG40
+ 
+G_M000_IG39:                ;; offset=0x03B4
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x60]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x68]
+            b       G_M000_IG41
+ 
+G_M000_IG40:                ;; offset=0x03C8
+            mov     x0, x21
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x60]
+ 
+G_M000_IG41:                ;; offset=0x03E4
+            ldrsw   x0, [fp, #0x6C]
+            cmp     x0, #2
+            ble     G_M000_IG92
+            ldr     x27, [fp, #0x60]
+            cbnz    x27, G_M000_IG44
+ 
+G_M000_IG42:                ;; offset=0x03F8
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG93
+ 
+G_M000_IG43:                ;; offset=0x040C
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x27, [x0]
+ 
+G_M000_IG44:                ;; offset=0x041C
+            ldr     w0, [fp, #0x68]
+            add     w0, w0, #2
+            ldr     w1, [x27, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x27, #16
+            ldr     w1, [fp, #0x68]
+            add     w1, w1, #2
+            ldr     x27, [x0, w1, UXTW #3]
+            ldr     x0, [x21]
+            cbz     x0, G_M000_IG46
+ 
+G_M000_IG45:                ;; offset=0x0448
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x50]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x58]
+            b       G_M000_IG47
+ 
+G_M000_IG46:                ;; offset=0x045C
+            mov     x0, x21
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x50]
+ 
+G_M000_IG47:                ;; offset=0x0478
+            ldrsw   x0, [fp, #0x5C]
+            cmp     x0, #3
+            ble     G_M000_IG94
+            ldr     x21, [fp, #0x50]
+            cbnz    x21, G_M000_IG50
+ 
+G_M000_IG48:                ;; offset=0x048C
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG95
+ 
+G_M000_IG49:                ;; offset=0x04A0
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x21, [x0]
+ 
+G_M000_IG50:                ;; offset=0x04B0
+            ldr     w0, [fp, #0x58]
+            add     w0, w0, #3
+            ldr     w1, [x21, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x21, #16
+            ldr     w1, [fp, #0x58]
+            add     w1, w1, #3
+            ldr     x0, [x0, w1, UXTW #3]
+            lsr     x1, x22, #32
+            mov     x2, x1
+            mov     w3, w25
+            lsr     x4, x25, #32
+            mov     x5, x4
+            mov     w6, w22
+            mul     x7, x6, x3
+            mul     x6, x6, x5
+            mul     x3, x2, x3
+            lsr     x8, x7, #32
+            add     x8, x8, w6, UXTW
+            add     x8, x8, w3, UXTW
+            mov     w7, w7
+            orr     x21, x7, x8,  LSL #32
+            lsr     x6, x6, #32
+            madd    x2, x2, x5, x6
+            add     x2, x2, x3,  LSR #32
+            add     x2, x2, x8,  LSR #32
+            bic     x3, x21, x21
+            lsr     x3, x3, #63
+            add     x2, x2, x3
+            add     x2, x2, x3
+            lsr     x5, x23, #32
+            mov     x3, x5
+            mov     w6, w25
+            mov     x7, x4
+            mov     w8, w23
+            mul     x9, x8, x6
+            mul     x8, x8, x7
+            mul     x6, x3, x6
+            lsr     x10, x9, #32
+            add     x10, x10, w8, UXTW
+            add     x10, x10, w6, UXTW
+            mov     w9, w9
+            orr     x9, x9, x10,  LSL #32
+            lsr     x8, x8, #32
+            madd    x3, x3, x7, x8
+            add     x3, x3, x6,  LSR #32
+            add     x3, x3, x10,  LSR #32
+            bic     x6, x9, x9
+            lsr     x6, x6, #63
+            add     x28, x9, x2
+            add     x3, x3, x6
+            orr     x6, x9, x2
+            bic     x6, x6, x28
+            and     x2, x9, x2
+            orr     x9, x6, x2
+            lsr     x6, x9, #63
+            add     x2, x3, x6
+            lsr     x3, x24, #32
+            mov     x6, x3
+            mov     w7, w25
+            mov     x8, x4
+            mov     w9, w24
+            mul     x10, x9, x7
+            mul     x9, x9, x8
+            mul     x7, x6, x7
+            lsr     x11, x10, #32
+            add     x11, x11, w9, UXTW
+            add     x11, x11, w7, UXTW
+            mov     w10, w10
+            orr     x10, x10, x11,  LSL #32
+            lsr     x9, x9, #32
+            madd    x6, x6, x8, x9
+            add     x6, x6, x7,  LSR #32
+            add     x6, x6, x11,  LSR #32
+            bic     x7, x10, x10
+            lsr     x7, x7, #63
+            add     x8, x10, x2
+            add     x6, x6, x7
+            orr     x7, x10, x2
+            bic     x7, x7, x8
+            and     x2, x10, x2
+            orr     x10, x7, x2
+            lsr     x7, x10, #63
+            mov     x2, x8
+            add     x7, x6, x7
+            lsr     x6, x20, #32
+            mov     x8, x6
+            mov     w9, w25
+            mov     w10, w20
+            mul     x11, x10, x9
+            mul     x10, x10, x4
+            mul     x9, x8, x9
+            lsr     x13, x11, #32
+            add     x13, x13, w10, UXTW
+            add     x13, x13, w9, UXTW
+            mov     w11, w11
+            orr     x11, x11, x13,  LSL #32
+            lsr     x10, x10, #32
+            madd    x4, x8, x4, x10
+            add     x4, x4, x9,  LSR #32
+            add     x4, x4, x13,  LSR #32
+            bic     x8, x11, x11
+            lsr     x8, x8, #63
+            add     x9, x11, x7
+            mov     x25, x9
+            add     x4, x4, x8
+            orr     x8, x11, x7
+            bic     x8, x8, x25
+            and     x7, x11, x7
+            orr     x11, x8, x7
+            lsr     x8, x11, #63
+            mov     x7, x25
+            add     x8, x4, x8
+            mov     x4, x8
+            bic     x8, x4, x4
+            lsr     x8, x8, #63
+            mov     x9, x4
+            lsr     x10, x21, #32
+            mov     x4, x10
+            mov     w11, w21
+            mov     x13, #0xFFFFFFFF
+            mul     x11, x11, x13
+            mov     x13, x11
+            mov     x14, x11
+            mov     x12, #0xFFFFFFFF
+            mul     x4, x4, x12
+            mov     x12, x4
+            lsr     x15, x14, #32
+            add     x14, x15, w14, UXTW
+            add     x14, x14, w12, UXTW
+            mov     w13, w13
+            orr     x13, x13, x14,  LSL #32
+            add     xip0, x4, x15
+            add     x12, xip0, x12,  LSR #32
+            add     x14, x12, x14,  LSR #32
+            add     x25, x13, x21
+            orr     x12, x13, x21
+            bic     x12, x12, x25
+            and     x13, x13, x21
+            orr     x13, x12, x13
+            add     x13, x14, x13,  LSR #63
+            mov     x14, x11
+            add     x12, x15, w4, UXTW
+            mov     w14, w14
+            orr     x14, x14, x12,  LSL #32
+            lsr     x4, x4, #32
+            add     x4, x4, x12,  LSR #32
+            add     x25, x14, x28
+            orr     x12, x14, x28
+            bic     x12, x12, x25
+            and     x14, x14, x28
+            orr     x14, x12, x14
+            lsr     x14, x14, #63
+            mov     x12, x25
+            add     x25, x12, x13
+            add     x4, x4, x14
+            orr     x14, x12, x13
+            bic     x14, x14, x25
+            and     x13, x12, x13
+            orr     x12, x14, x13
+            lsr     x14, x12, #63
+            mov     x28, x25
+            add     x13, x4, x14
+            add     x25, x2, x13
+            orr     x14, x2, x13
+            bic     x4, x14, x25
+            and     x13, x2, x13
+            orr     x2, x4, x13
+            lsr     x14, x2, #63
+            mov     x13, x14
+            mov     w14, w21
+            lsr     x2, x14, #32
+            add     x2, x2, w11, UXTW
+            add     x2, x2, w10, UXTW
+            mov     w4, w14
+            orr     x12, x4, x2,  LSL #32
+            add     x4, xip0, x10,  LSR #32
+            add     x2, x4, x2,  LSR #32
+            add     x4, x12, x7
+            mov     x21, x4
+            orr     x4, x12, x7
+            bic     x4, x4, x21
+            and     x12, x12, x7
+            orr     x7, x4, x12
+            lsr     x14, x7, #63
+            mov     x12, x21
+            add     x21, x12, x13
+            add     x2, x2, x14
+            orr     x14, x12, x13
+            bic     x4, x14, x21
+            and     x13, x12, x13
+            orr     x12, x4, x13
+            lsr     x14, x12, #63
+            add     x13, x2, x14
+            mov     x2, x13
+            add     x14, x9, x2
+            mov     x4, x14
+            orr     x7, x9, x2
+            bic     x7, x7, x4
+            and     x9, x9, x2
+            orr     x2, x7, x9
+            lsr     x14, x2, #63
+            mov     x7, x4
+            add     x9, x8, x14
+            mov     x4, x1
+            mov     w14, w26
+            lsr     x2, x26, #32
+            mov     x8, x2
+            mov     w10, w22
+            mul     x11, x10, x14
+            mul     x10, x10, x8
+            mul     x13, x4, x14
+            lsr     x14, x11, #32
+            add     x14, x14, w10, UXTW
+            add     x14, x14, w13, UXTW
+            mov     w11, w11
+            orr     x12, x11, x14,  LSL #32
+            lsr     x10, x10, #32
+            madd    x4, x4, x8, x10
+            add     x4, x4, x13,  LSR #32
+            add     x4, x4, x14,  LSR #32
+            add     x8, x12, x28
+            orr     x10, x12, x28
+            bic     x10, x10, x8
+            and     x12, x12, x28
+ 
+G_M000_IG51:                ;; offset=0x0838
+            orr     x10, x10, x12
+            lsr     x14, x10, #63
+            mov     x12, x8
+            add     x4, x4, x14
+            bic     x14, x8, x12
+            lsr     x14, x14, #63
+            mov     x28, x8
+            add     x12, x4, x14
+            mov     x8, x5
+            mov     w14, w26
+            mov     x4, x2
+            mov     w10, w23
+            mul     x11, x10, x14
+            mul     x10, x10, x4
+            mul     x13, x8, x14
+            lsr     x14, x11, #32
+            add     x14, x14, w10, UXTW
+            add     x14, x14, w13, UXTW
+            mov     w11, w11
+            orr     x11, x11, x14,  LSL #32
+            lsr     x10, x10, #32
+            madd    x4, x8, x4, x10
+            add     x4, x4, x13,  LSR #32
+            add     x4, x4, x14,  LSR #32
+            add     x8, x11, x25
+            orr     x10, x11, x25
+            bic     x10, x10, x8
+            and     x11, x11, x25
+            orr     x10, x10, x11
+            lsr     x14, x10, #63
+            mov     x11, x8
+            add     x8, x11, x12
+            add     x4, x4, x14
+            orr     x14, x11, x12
+            bic     x10, x14, x8
+            and     x12, x11, x12
+            orr     x11, x10, x12
+            lsr     x14, x11, #63
+            mov     x25, x8
+            add     x12, x4, x14
+            mov     x8, x3
+            mov     w14, w26
+            mov     x4, x2
+            mov     w10, w24
+            mul     x11, x10, x14
+            mul     x10, x10, x4
+            mul     x13, x8, x14
+            lsr     x14, x11, #32
+            add     x14, x14, w10, UXTW
+            add     x14, x14, w13, UXTW
+            mov     w11, w11
+            orr     x11, x11, x14,  LSL #32
+            lsr     x10, x10, #32
+            madd    x4, x8, x4, x10
+            add     x4, x4, x13,  LSR #32
+            add     x4, x4, x14,  LSR #32
+            add     x8, x11, x21
+            orr     x10, x11, x21
+            bic     x10, x10, x8
+            and     x11, x11, x21
+            orr     x10, x10, x11
+            lsr     x14, x10, #63
+            mov     x11, x8
+            add     x8, x11, x12
+            add     x4, x4, x14
+            orr     x14, x11, x12
+            bic     x10, x14, x8
+            and     x12, x11, x12
+            orr     x11, x10, x12
+            lsr     x14, x11, #63
+            mov     x21, x8
+            add     x12, x4, x14
+            mov     x8, x6
+            mov     w14, w26
+            mov     w4, w20
+            mul     x10, x4, x14
+            mul     x4, x4, x2
+            mul     x11, x8, x14
+            lsr     x13, x10, #32
+            add     x13, x13, w4, UXTW
+            add     x13, x13, w11, UXTW
+            mov     w10, w10
+            orr     x10, x10, x13,  LSL #32
+            lsr     x4, x4, #32
+            madd    x2, x8, x2, x4
+            add     x2, x2, x11,  LSR #32
+            add     x2, x2, x13,  LSR #32
+            add     x8, x10, x7
+            mov     x26, x8
+            orr     x4, x10, x7
+            bic     x4, x4, x26
+            and     x10, x10, x7
+            orr     x7, x4, x10
+            lsr     x14, x7, #63
+            mov     x10, x26
+            add     x26, x10, x12
+            add     x2, x2, x14
+            orr     x14, x10, x12
+            bic     x4, x14, x26
+            and     x12, x10, x12
+            orr     x10, x4, x12
+            lsr     x14, x10, #63
+            mov     x7, x26
+            add     x12, x2, x14
+            add     x26, x9, x12
+            orr     x14, x9, x12
+            bic     x2, x14, x26
+            and     x9, x9, x12
+            orr     x12, x2, x9
+            lsr     x14, x12, #63
+            mov     x9, x26
+            lsr     x2, x28, #32
+            mov     x4, x2
+            mov     w8, w28
+            mov     x10, #0xFFFFFFFF
+            mul     x8, x8, x10
+            mov     x10, x8
+            mov     x11, x8
+            mov     x13, #0xFFFFFFFF
+            mul     x4, x4, x13
+            mov     x13, x4
+            lsr     x12, x11, #32
+            add     x11, x12, w11, UXTW
+            add     x11, x11, w13, UXTW
+            mov     w10, w10
+            orr     x10, x10, x11,  LSL #32
+            add     x15, x4, x12
+            add     x13, x15, x13,  LSR #32
+            add     x11, x13, x11,  LSR #32
+            add     x26, x10, x28
+            mov     x13, x14
+            orr     x14, x10, x28
+            bic     x14, x14, x26
+            and     x10, x10, x28
+            orr     x10, x14, x10
+            add     x10, x11, x10,  LSR #63
+            mov     x11, x8
+            add     x14, x12, w4, UXTW
+            mov     w11, w11
+            orr     x11, x11, x14,  LSL #32
+            lsr     x4, x4, #32
+            add     x4, x4, x14,  LSR #32
+            add     x26, x11, x25
+            orr     x14, x11, x25
+            bic     x14, x14, x26
+            and     x11, x11, x25
+            orr     x11, x14, x11
+            lsr     x14, x11, #63
+            mov     x11, x26
+            add     x26, x11, x10
+            add     x4, x4, x14
+            orr     x14, x11, x10
+            bic     x14, x14, x26
+            and     x10, x11, x10
+            orr     x11, x14, x10
+            lsr     x14, x11, #63
+            mov     x10, x28
+            mov     x28, x26
+            add     x14, x4, x14
+            add     x26, x21, x14
+            orr     x4, x21, x14
+            bic     x4, x4, x26
+            and     x14, x21, x14
+            orr     x4, x4, x14
+            lsr     x14, x4, #63
+            mov     x25, x26
+            mov     w4, w10
+            lsr     x10, x4, #32
+            add     x8, x10, w8, UXTW
+            add     x8, x8, w2, UXTW
+            mov     w4, w4
+            orr     x11, x4, x8,  LSL #32
+            add     x2, x15, x2,  LSR #32
+            add     x2, x2, x8,  LSR #32
+            add     x26, x11, x7
+            orr     x4, x11, x7
+            bic     x4, x4, x26
+            and     x11, x11, x7
+            orr     x7, x4, x11
+            lsr     x4, x7, #63
+            mov     x8, x4
+            mov     x11, x26
+            add     x26, x11, x14
+            add     x2, x2, x8
+            orr     x8, x11, x14
+            bic     x4, x8, x26
+            and     x14, x11, x14
+            orr     x11, x4, x14
+            lsr     x8, x11, #63
+            mov     x21, x26
+            add     x14, x2, x8
+            add     x26, x9, x14
+            orr     x8, x9, x14
+            bic     x2, x8, x26
+            and     x9, x9, x14
+            orr     x14, x2, x9
+            lsr     x8, x14, #63
+            mov     x7, x26
+            add     x9, x13, x8
+            mov     x8, x1
+            mov     w2, w27
+            lsr     x4, x27, #32
+            mov     x10, x4
+            mov     w11, w22
+            mul     x13, x11, x2
+            mul     x11, x11, x10
+            mul     x2, x8, x2
+            lsr     x14, x13, #32
+            add     x14, x14, w11, UXTW
+            add     x14, x14, w2, UXTW
+            mov     w13, w13
+            orr     x13, x13, x14,  LSL #32
+            lsr     x11, x11, #32
+            madd    x8, x8, x10, x11
+            add     x2, x8, x2,  LSR #32
+            add     x2, x2, x14,  LSR #32
+            add     x26, x13, x28
+            orr     x8, x13, x28
+            bic     x8, x8, x26
+            and     x13, x13, x28
+            orr     x8, x8, x13
+            lsr     x8, x8, #63
+            mov     x13, x26
+            add     x2, x2, x8
+            bic     x8, x26, x13
+ 
+G_M000_IG52:                ;; offset=0x0BBC
+            lsr     x8, x8, #63
+            mov     x28, x26
+            add     x14, x2, x8
+            mov     x8, x5
+            mov     w13, w27
+            mov     x2, x4
+            mov     w10, w23
+            mul     x11, x10, x13
+            mul     x10, x10, x2
+            mul     x13, x8, x13
+            lsr     x12, x11, #32
+            add     x12, x12, w10, UXTW
+            add     x12, x12, w13, UXTW
+            mov     w11, w11
+            orr     x11, x11, x12,  LSL #32
+            lsr     x10, x10, #32
+            madd    x2, x8, x2, x10
+            add     x2, x2, x13,  LSR #32
+            add     x2, x2, x12,  LSR #32
+            add     x26, x11, x25
+            orr     x8, x11, x25
+            bic     x8, x8, x26
+            and     x11, x11, x25
+            orr     x8, x8, x11
+            lsr     x8, x8, #63
+            mov     x11, x26
+            add     x26, x11, x14
+            add     x2, x2, x8
+            orr     x8, x11, x14
+            bic     x8, x8, x26
+            and     x14, x11, x14
+            orr     x11, x8, x14
+            lsr     x8, x11, #63
+            mov     x25, x26
+            add     x14, x2, x8
+            mov     x8, x3
+            mov     w2, w27
+            mov     x10, x4
+            mov     w11, w24
+            mul     x13, x11, x2
+            mul     x11, x11, x10
+            mul     x2, x8, x2
+            lsr     x12, x13, #32
+            add     x12, x12, w11, UXTW
+            add     x12, x12, w2, UXTW
+            mov     w13, w13
+            orr     x13, x13, x12,  LSL #32
+            lsr     x11, x11, #32
+            madd    x8, x8, x10, x11
+            add     x2, x8, x2,  LSR #32
+            add     x2, x2, x12,  LSR #32
+            add     x26, x13, x21
+            orr     x8, x13, x21
+            bic     x8, x8, x26
+            and     x13, x13, x21
+            orr     x8, x8, x13
+            lsr     x8, x8, #63
+            mov     x13, x26
+            add     x26, x13, x14
+            add     x2, x2, x8
+            orr     x8, x13, x14
+            bic     x8, x8, x26
+            and     x14, x13, x14
+            orr     x13, x8, x14
+            lsr     x8, x13, #63
+            mov     x21, x26
+            add     x14, x2, x8
+            mov     x8, x6
+            mov     w2, w27
+            mov     w10, w20
+            mul     x11, x10, x2
+            mul     x10, x10, x4
+            mul     x2, x8, x2
+            lsr     x13, x11, #32
+            add     x13, x13, w10, UXTW
+            add     x13, x13, w2, UXTW
+            mov     w11, w11
+            orr     x11, x11, x13,  LSL #32
+            lsr     x10, x10, #32
+            madd    x4, x8, x4, x10
+            add     x2, x4, x2,  LSR #32
+            add     x2, x2, x13,  LSR #32
+            add     x26, x11, x7
+            orr     x4, x11, x7
+            bic     x4, x4, x26
+            and     x11, x11, x7
+            orr     x7, x4, x11
+            lsr     x8, x7, #63
+            mov     x11, x26
+            add     x26, x11, x14
+            add     x2, x2, x8
+            orr     x8, x11, x14
+            bic     x4, x8, x26
+            and     x14, x11, x14
+            orr     x11, x4, x14
+            lsr     x8, x11, #63
+            mov     x7, x26
+            add     x14, x2, x8
+            add     x26, x9, x14
+            orr     x8, x9, x14
+            bic     x2, x8, x26
+            and     x9, x9, x14
+            orr     x14, x2, x9
+            lsr     x8, x14, #63
+            mov     x9, x26
+            lsr     x2, x28, #32
+            mov     x4, x2
+            mov     w10, w28
+            mov     x11, #0xFFFFFFFF
+            mul     x10, x10, x11
+            mov     x11, x10
+            mov     x13, x10
+            mov     x14, #0xFFFFFFFF
+            mul     x4, x4, x14
+            mov     x14, x4
+            lsr     x12, x13, #32
+            add     x13, x12, w13, UXTW
+            add     x13, x13, w14, UXTW
+            mov     w11, w11
+            orr     x11, x11, x13,  LSL #32
+            add     x15, x4, x12
+            add     x14, x15, x14,  LSR #32
+            add     x13, x14, x13,  LSR #32
+            add     x26, x11, x28
+            mov     x14, x8
+            orr     x8, x11, x28
+            bic     x8, x8, x26
+            and     x11, x11, x28
+            orr     x8, x8, x11
+            add     x8, x13, x8,  LSR #63
+            mov     x11, x10
+            add     x13, x12, w4, UXTW
+            mov     w11, w11
+            orr     x11, x11, x13,  LSL #32
+            lsr     x4, x4, #32
+            add     x4, x4, x13,  LSR #32
+            add     x26, x11, x25
+            orr     x13, x11, x25
+            bic     x13, x13, x26
+            and     x11, x11, x25
+            orr     x11, x13, x11
+            lsr     x11, x11, #63
+            mov     x13, x26
+            add     x4, x4, x11
+            add     x26, x13, x8
+            orr     x11, x13, x8
+            bic     x11, x11, x26
+            and     x8, x13, x8
+            orr     x13, x11, x8
+            lsr     x11, x13, #63
+            mov     x8, x28
+            mov     x28, x26
+            add     x11, x4, x11
+            add     x26, x21, x11
+            orr     x4, x21, x11
+            bic     x4, x4, x26
+            and     x11, x21, x11
+            orr     x4, x4, x11
+            lsr     x11, x4, #63
+            mov     x25, x26
+            mov     w4, w8
+            lsr     x8, x4, #32
+            add     x8, x8, w10, UXTW
+            add     x8, x8, w2, UXTW
+            mov     w4, w4
+            orr     x13, x4, x8,  LSL #32
+            add     x2, x15, x2,  LSR #32
+            add     x2, x2, x8,  LSR #32
+            add     x26, x13, x7
+            orr     x4, x13, x7
+            bic     x4, x4, x26
+            and     x13, x13, x7
+            orr     x7, x4, x13
+            lsr     x4, x7, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x2, x2, x4
+            orr     x4, x13, x11
+            bic     x4, x4, x26
+            and     x11, x13, x11
+            orr     x13, x4, x11
+            lsr     x4, x13, #63
+            mov     x21, x26
+            add     x11, x2, x4
+            add     x26, x9, x11
+            orr     x4, x9, x11
+            bic     x2, x4, x26
+            and     x9, x9, x11
+            orr     x11, x2, x9
+            lsr     x4, x11, #63
+            mov     x7, x26
+            add     x9, x14, x4
+            mov     w4, w0
+            lsr     x2, x0, #32
+            mov     w8, w22
+            mul     x10, x8, x4
+            mul     x8, x8, x2
+            mul     x4, x1, x4
+            lsr     x11, x10, #32
+            add     x11, x11, w8, UXTW
+            add     x11, x11, w4, UXTW
+            mov     w10, w10
+            orr     x13, x10, x11,  LSL #32
+            lsr     x8, x8, #32
+            madd    x1, x1, x2, x8
+            add     x1, x1, x4,  LSR #32
+            add     x1, x1, x11,  LSR #32
+            add     x26, x13, x28
+            orr     x2, x13, x28
+            bic     x2, x2, x26
+            and     x13, x13, x28
+            orr     x2, x2, x13
+            lsr     x4, x2, #63
+            mov     x13, x26
+            add     x1, x1, x4
+            bic     x4, x26, x13
+            lsr     x4, x4, #63
+            mov     x28, x26
+            add     x11, x1, x4
+            mov     w13, w0
+            lsr     x4, x0, #32
+            mov     w1, w23
+            mul     x2, x1, x13
+            mul     x1, x1, x4
+ 
+G_M000_IG53:                ;; offset=0x0F3C
+            mul     x8, x5, x13
+            lsr     x10, x2, #32
+            add     x10, x10, w1, UXTW
+            add     x10, x10, w8, UXTW
+            mov     w2, w2
+            orr     x13, x2, x10,  LSL #32
+            lsr     x1, x1, #32
+            madd    x1, x5, x4, x1
+            add     x1, x1, x8,  LSR #32
+            add     x1, x1, x10,  LSR #32
+            add     x26, x13, x25
+            orr     x2, x13, x25
+            bic     x2, x2, x26
+            and     x13, x13, x25
+            orr     x2, x2, x13
+            lsr     x4, x2, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x1, x1, x4
+            orr     x4, x13, x11
+            bic     x2, x4, x26
+            and     x11, x13, x11
+            orr     x13, x2, x11
+            lsr     x4, x13, #63
+            mov     x25, x26
+            add     x11, x1, x4
+            mov     w4, w0
+            lsr     x1, x0, #32
+            mov     w2, w24
+            mul     x5, x2, x4
+            mul     x2, x2, x1
+            mul     x4, x3, x4
+            lsr     x8, x5, #32
+            add     x8, x8, w2, UXTW
+            add     x8, x8, w4, UXTW
+            mov     w5, w5
+            orr     x13, x5, x8,  LSL #32
+            lsr     x2, x2, #32
+            madd    x1, x3, x1, x2
+            add     x1, x1, x4,  LSR #32
+            add     x1, x1, x8,  LSR #32
+            add     x26, x13, x21
+            orr     x2, x13, x21
+            bic     x2, x2, x26
+            and     x13, x13, x21
+            orr     x2, x2, x13
+            lsr     x4, x2, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x1, x1, x4
+            orr     x4, x13, x11
+            bic     x2, x4, x26
+            and     x11, x13, x11
+            orr     x13, x2, x11
+            lsr     x4, x13, #63
+            mov     x21, x26
+            add     x11, x1, x4
+            mov     w4, w0
+            lsr     x0, x0, #32
+            mov     w1, w20
+            mul     x2, x1, x4
+            mul     x1, x1, x0
+            mul     x3, x6, x4
+            lsr     x4, x2, #32
+            add     x4, x4, w1, UXTW
+            add     x4, x4, w3, UXTW
+            mov     w2, w2
+            orr     x13, x2, x4,  LSL #32
+            lsr     x1, x1, #32
+            madd    x0, x6, x0, x1
+            add     x0, x0, x3,  LSR #32
+            add     x0, x0, x4,  LSR #32
+            add     x26, x13, x7
+            orr     x1, x13, x7
+            bic     x1, x1, x26
+            and     x13, x13, x7
+            orr     x7, x1, x13
+            lsr     x4, x7, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x0, x0, x4
+            orr     x4, x13, x11
+            bic     x1, x4, x26
+            and     x11, x13, x11
+            orr     x13, x1, x11
+            lsr     x4, x13, #63
+            mov     x7, x26
+            add     x11, x0, x4
+            add     x26, x9, x11
+            orr     x4, x9, x11
+            bic     x0, x4, x26
+            and     x9, x9, x11
+            orr     x11, x0, x9
+            lsr     x4, x11, #63
+            mov     x9, x26
+            lsr     x0, x28, #32
+            mov     w1, w28
+            mov     x2, #0xFFFFFFFF
+            mul     x2, x1, x2
+            mov     x3, #0xFFFFFFFF
+            mul     x1, x1, x3
+            mul     x3, x0, x3
+            lsr     x5, x1, #32
+            add     x5, x5, w1, UXTW
+            add     x5, x5, w3, UXTW
+            mov     w2, w2
+            orr     x13, x2, x5,  LSL #32
+            mov     x2, #0xFFFFFFFF
+            lsr     x1, x1, #32
+            madd    x0, x0, x2, x1
+            add     x0, x0, x3,  LSR #32
+            add     x0, x0, x5,  LSR #32
+            add     x26, x13, x28
+            mov     x1, x4
+            orr     x4, x13, x28
+            bic     x2, x4, x26
+            and     x13, x13, x28
+            orr     x2, x2, x13
+            add     x11, x0, x2,  LSR #63
+            lsr     x0, x28, #32
+            mov     w2, w28
+            mov     x3, #0xFFFFFFFF
+            mul     x2, x2, x3
+            mul     x0, x0, x3
+            lsr     x3, x2, #32
+            add     x3, x3, w0, UXTW
+            mov     w2, w2
+            orr     x13, x2, x3,  LSL #32
+            lsr     x0, x0, #32
+            add     x0, x0, x3,  LSR #32
+            add     x26, x13, x25
+            orr     x2, x13, x25
+            bic     x2, x2, x26
+            and     x13, x13, x25
+            orr     x2, x2, x13
+            lsr     x4, x2, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x0, x0, x4
+            orr     x4, x13, x11
+            bic     x2, x4, x26
+            and     x11, x13, x11
+            orr     x13, x2, x11
+            lsr     x4, x13, #63
+            mov     x2, x28
+            mov     x28, x26
+            add     x11, x0, x4
+            add     x26, x21, x11
+            orr     x4, x21, x11
+            bic     x0, x4, x26
+            and     x11, x21, x11
+            orr     x0, x0, x11
+            lsr     x4, x0, #63
+            mov     x25, x26
+            mov     x11, x4
+            lsr     x4, x2, #32
+            mov     w0, w2
+            mov     x2, #0xFFFFFFFF
+            mul     x2, x0, x2
+            lsr     x3, x0, #32
+            add     x3, x3, w2, UXTW
+            add     x3, x3, w4, UXTW
+            mov     w0, w0
+            orr     x13, x0, x3,  LSL #32
+            mov     x0, #0xFFFFFFFF
+            lsr     x2, x2, #32
+            madd    x0, x4, x0, x2
+            add     x0, x0, x4,  LSR #32
+            add     x0, x0, x3,  LSR #32
+            add     x26, x13, x7
+            orr     x2, x13, x7
+            bic     x2, x2, x26
+            and     x13, x13, x7
+            orr     x2, x2, x13
+            lsr     x4, x2, #63
+            mov     x13, x26
+            add     x26, x13, x11
+            add     x0, x0, x4
+            orr     x4, x13, x11
+            bic     x2, x4, x26
+            and     x11, x13, x11
+            orr     x2, x2, x11
+            lsr     x4, x2, #63
+            mov     x21, x26
+            add     x11, x0, x4
+            add     x26, x9, x11
+            orr     x4, x9, x11
+            bic     x0, x4, x26
+            and     x9, x9, x11
+            orr     x0, x0, x9
+            lsr     x4, x0, #63
+            add     x9, x1, x4
+            add     x20, x28, #1
+            and     x0, x28, x20
+            orn     x0, x0, x28
+            mov     x1, #-0xFFFFFFFF
+            add     x1, x25, x1
+            sub     x22, x1, x0,  LSR #63
+            mvn     w0, w25
+            mov     w0, w0
+            eor     x1, x25, #0xFFFFFFFF
+            bic     x1, x22, x1
+            orr     x0, x0, x1
+            sub     x23, x21, x0,  LSR #63
+            bic     x0, x23, x21
+            mov     x1, #0xFFFFFFFF
+            add     x1, x26, x1
+            sub     x24, x1, x0,  LSR #63
+            mov     x0, #-0xFFFFFFFF
+            bic     x0, x0, x26
+            eor     x1, x26, #-0xFFFFFFFF
+            bic     x1, x24, x1
+            orr     x0, x0, x1
+            lsr     x0, x0, #63
+            eor     x0, x0, #1
+            orr     x0, x0, x9
+ 
+G_M000_IG54:                ;; offset=0x129C
+            neg     x27, x0
+            ldr     x0, [x19]
+            cbz     x0, G_M000_IG56
+ 
+G_M000_IG55:                ;; offset=0x12A8
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x40]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x48]
+            b       G_M000_IG57
+ 
+G_M000_IG56:                ;; offset=0x12BC
+            mov     x0, x19
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x40]
+ 
+G_M000_IG57:                ;; offset=0x12D8
+            ldrsw   x0, [fp, #0x4C]
+            cmp     x0, #0
+            ble     G_M000_IG96
+            ldr     x1, [fp, #0x40]
+            cbnz    x1, G_M000_IG60
+ 
+G_M000_IG58:                ;; offset=0x12EC
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG97
+ 
+G_M000_IG59:                ;; offset=0x1300
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x1, [x0]
+ 
+G_M000_IG60:                ;; offset=0x1310
+            ldr     w0, [fp, #0x48]
+            ldr     w2, [x1, #0x08]
+            cmp     w0, w2
+            bhs     G_M000_IG104
+            add     x0, x1, #16
+            ldr     w1, [fp, #0x48]
+            and     x2, x20, x27
+            bic     x3, x28, x27
+            orr     x2, x2, x3
+            str     x2, [x0, w1, UXTW #3]
+            ldr     x0, [x19]
+            cbz     x0, G_M000_IG62
+ 
+G_M000_IG61:                ;; offset=0x1340
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x30]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x38]
+            b       G_M000_IG63
+ 
+G_M000_IG62:                ;; offset=0x1354
+            mov     x0, x19
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x30]
+ 
+G_M000_IG63:                ;; offset=0x1370
+            ldrsw   x0, [fp, #0x3C]
+            cmp     x0, #1
+            ble     G_M000_IG98
+            ldr     x20, [fp, #0x30]
+            cbnz    x20, G_M000_IG66
+ 
+G_M000_IG64:                ;; offset=0x1384
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG99
+ 
+G_M000_IG65:                ;; offset=0x1398
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x20, [x0]
+ 
+G_M000_IG66:                ;; offset=0x13A8
+            ldr     w0, [fp, #0x38]
+            add     w0, w0, #1
+            ldr     w1, [x20, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x20, #16
+            ldr     w1, [fp, #0x38]
+            add     w1, w1, #1
+            and     x2, x22, x27
+            bic     x3, x25, x27
+            orr     x2, x2, x3
+            str     x2, [x0, w1, UXTW #3]
+            ldr     x0, [x19]
+            cbz     x0, G_M000_IG68
+ 
+G_M000_IG67:                ;; offset=0x13E0
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x20]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x28]
+            b       G_M000_IG69
+ 
+G_M000_IG68:                ;; offset=0x13F4
+            mov     x0, x19
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x20]
+ 
+G_M000_IG69:                ;; offset=0x1410
+            ldrsw   x0, [fp, #0x2C]
+            cmp     x0, #2
+            ble     G_M000_IG100
+            ldr     x20, [fp, #0x20]
+            cbnz    x20, G_M000_IG72
+ 
+G_M000_IG70:                ;; offset=0x1424
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG101
+ 
+G_M000_IG71:                ;; offset=0x1438
+            movz    x0, #0x9E78
+            movk    x0, #0x5800 LSL #16
+            movk    x0, #1 LSL #32
+            ldr     x20, [x0]
+ 
+G_M000_IG72:                ;; offset=0x1448
+            ldr     w0, [fp, #0x28]
+            add     w0, w0, #2
+            ldr     w1, [x20, #0x08]
+            cmp     w0, w1
+            bhs     G_M000_IG104
+            add     x0, x20, #16
+            ldr     w1, [fp, #0x28]
+            add     w1, w1, #2
+            and     x2, x23, x27
+            bic     x3, x21, x27
+            orr     x2, x2, x3
+            str     x2, [x0, w1, UXTW #3]
+            ldr     x0, [x19]
+            cbz     x0, G_M000_IG74
+ 
+G_M000_IG73:                ;; offset=0x1480
+            ldr     x1, [x0, #0x08]
+            str     x1, [fp, #0x10]
+            ldp     w1, w0, [x0, #0x10]
+            stp     w1, w0, [fp, #0x18]
+            b       G_M000_IG75
+ 
+G_M000_IG74:                ;; offset=0x1494
+            mov     x0, x19
+            movz    x1, #0x7360
+            movk    x1, #0xA04 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x1, [x1]
+            blr     x1
+            stp     x0, x1, [fp, #0x10]
+ 
+G_M000_IG75:                ;; offset=0x14B0
+            ldrsw   x0, [fp, #0x1C]
+            cmp     x0, #3
+            ble     G_M000_IG102
+            ldr     x19, [fp, #0x10]
+            cbnz    x19, G_M000_IG78
+ 
+G_M000_IG76:                ;; offset=0x14C4
+            movz    x0, #0xE668
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            ldapr   w0, [x0]
+            tbz     w0, #0, G_M000_IG103
+ 
+G_M000_IG77:                ;; offset=0x14D8
+            movz    x1, #0x9E78
+            movk    x1, #0x5800 LSL #16
+            movk    x1, #1 LSL #32
+            ldr     x19, [x1]
+ 
+G_M000_IG78:                ;; offset=0x14E8
+            ldr     w1, [fp, #0x18]
+            add     w1, w1, #3
+            ldr     w0, [x19, #0x08]
+            cmp     w1, w0
+            bhs     G_M000_IG104
+            add     x1, x19, #16
+            ldr     w0, [fp, #0x18]
+            add     w0, w0, #3
+            and     x2, x24, x27
+            bic     x3, x26, x27
+            orr     x2, x2, x3
+            str     x2, [x1, w0, UXTW #3]
+ 
+G_M000_IG79:                ;; offset=0x1518
+            ldp     x27, x28, [sp, #0x110]
+            ldp     x25, x26, [sp, #0x100]
+            ldp     x23, x24, [sp, #0xF0]
+            ldp     x21, x22, [sp, #0xE0]
+            ldp     x19, x20, [sp, #0xD0]
+            ldp     fp, lr, [sp], #0x120
+            ret     lr
+ 
+G_M000_IG80:                ;; offset=0x1534
+            ldrsw   x1, [fp, #0xCC]
+            mov     x0, xzr
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG81:                ;; offset=0x1558
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG07
+ 
+G_M000_IG82:                ;; offset=0x156C
+            ldrsw   x1, [fp, #0xBC]
+            mov     x0, #1
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG83:                ;; offset=0x1590
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG13
+ 
+G_M000_IG84:                ;; offset=0x15A4
+            ldrsw   x1, [fp, #0xAC]
+            mov     x0, #2
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG85:                ;; offset=0x15C8
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG19
+ 
+G_M000_IG86:                ;; offset=0x15DC
+            ldrsw   x1, [fp, #0x9C]
+            mov     x0, #3
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG87:                ;; offset=0x1600
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG25
+ 
+G_M000_IG88:                ;; offset=0x1614
+            ldrsw   x1, [fp, #0x8C]
+            mov     x0, xzr
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG89:                ;; offset=0x1638
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG31
+ 
+G_M000_IG90:                ;; offset=0x164C
+            ldrsw   x1, [fp, #0x7C]
+            mov     x0, #1
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG91:                ;; offset=0x1670
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG37
+ 
+G_M000_IG92:                ;; offset=0x1684
+            ldrsw   x1, [fp, #0x6C]
+            mov     x0, #2
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG93:                ;; offset=0x16A8
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG43
+ 
+G_M000_IG94:                ;; offset=0x16BC
+            ldrsw   x1, [fp, #0x5C]
+            mov     x0, #3
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG95:                ;; offset=0x16E0
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG49
+ 
+G_M000_IG96:                ;; offset=0x16F4
+            ldrsw   x1, [fp, #0x4C]
+            mov     x0, xzr
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG97:                ;; offset=0x1718
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG59
+ 
+G_M000_IG98:                ;; offset=0x172C
+            ldrsw   x1, [fp, #0x3C]
+            mov     x0, #1
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG99:                ;; offset=0x1750
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG65
+ 
+G_M000_IG100:                ;; offset=0x1764
+            ldrsw   x1, [fp, #0x2C]
+            mov     x0, #2
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG101:                ;; offset=0x1788
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG71
+ 
+G_M000_IG102:                ;; offset=0x179C
+            ldrsw   x1, [fp, #0x1C]
+            mov     x0, #3
+            movz    x2, #0xC108
+            movk    x2, #0x99F LSL #16
+            movk    x2, #1 LSL #32
+            ldr     x2, [x2]
+            blr     x2
+            bl      CORINFO_HELP_THROW
+            brk     #0
+ 
+G_M000_IG103:                ;; offset=0x17C0
+            movz    x0, #0xE5E0
+            movk    x0, #0x9C9 LSL #16
+            movk    x0, #1 LSL #32
+            bl      CORINFO_HELP_GET_GCSTATIC_BASE
+            b       G_M000_IG77
+ 
+G_M000_IG104:                ;; offset=0x17D4
+            bl      CORINFO_HELP_RNGCHKFAIL
+            brk     #0
+ 
+; Total bytes of code 6108
+

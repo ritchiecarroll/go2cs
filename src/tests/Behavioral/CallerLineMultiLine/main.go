@@ -11,8 +11,8 @@ import (
 //
 // The converted program answers it exactly where the JIT's native-to-IL map is per call, which a
 // Debug (unoptimized) build is. An optimized build maps only some of these shapes per call, so by
-// default the program prints the two shapes an optimized build answers exactly (the behavioral suite
-// runs Release), and with GO2CS_CALLER_LINE_ALL_SHAPES=1 it prints all eleven (GolibTests'
+// default the program prints the three shapes an optimized build answers exactly (the behavioral suite
+// runs Release), and with GO2CS_CALLER_LINE_ALL_SHAPES=1 it prints all thirteen (GolibTests'
 // CallerLineMultiLineDebugTests builds this project Debug and compares every shape with Go's).
 var all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES") == "1"
 
@@ -49,6 +49,19 @@ func (impl) Line() int {
 }
 
 func three(a, b, c int) []int { return []int{a, b, c} }
+
+func pair(a, b int) (int, int) { return a, b }
+
+// runner's terminal call reports its caller's line, as exec.Cmd's Run is called in
+// `if err := testenv.Command(t, ...).Run(); err != nil`.
+type runner struct{}
+
+func command(args ...string) *runner { return &runner{} }
+
+func (*runner) Run() int {
+	_, _, l, _ := runtime.Caller(1)
+	return l
+}
 
 var recorded []int
 
@@ -126,4 +139,17 @@ func main() {
 
 	// S8: the return of a multi-line call.
 	show(false, "S8", ret())
+
+	// S9: an if init over two lines whose LATER line holds a chain's terminal call. The init is emitted
+	// onto the if's own C# line (`init; if (cond) {`), which the if's own position already maps.
+	if l := command("a",
+		"b").Run(); l > 0 {
+		show(true, "S9", l)
+	}
+
+	// S10: the same init shape, the later call an argument of the first.
+	if a, b := pair(0,
+		line()); a == 0 {
+		show(false, "S10", b)
+	}
 }

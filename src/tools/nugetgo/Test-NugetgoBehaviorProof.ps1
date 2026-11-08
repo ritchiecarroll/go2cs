@@ -195,10 +195,17 @@ $yml = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot '../../../.github/
 Check 'nugetgo-behavior is a dispatchable stage' ($yml -match '(?m)^\s+- nugetgo-behavior\s*$') 'no such option'
 Check 'it has a job budget in $baseTimeout' ($yml -match "(?m)^\s+'nugetgo-behavior'\s+=\s+\d+") 'no budget'
 $inputs = [regex]::Match($yml, '(?s)workflow_dispatch:\s*\n\s*inputs:\s*\n(?<body>.*?)\n(permissions|concurrency):').Groups['body'].Value
-$names = @([regex]::Matches($inputs, '(?m)^      (?<n>[a-z_]+):\s*$') | ForEach-Object { $_.Groups['n'].Value })
-Check 'workflow_dispatch keeps at most 10 inputs' ($names.Count -ge 7 -and $names.Count -le 10) "inputs: $($names -join ', ')"
+# Every declared input is counted: an input id may carry digits and hyphens (nugetgo_feed_sha256), and a name pattern
+# without them undercounted master by one (C1, 2026-11-08). The cap is GitHub's own: "The maximum number of top-level
+# properties for `inputs` is 25" on github.com (10 on GitHub Enterprise Server), docs.github.com/en/actions/reference/
+# workflows-and-actions/events-that-trigger-workflows#workflow_dispatch -- read from that page's source,
+# github/docs data/reusables/actions/inputs-vs-github-event-inputs.md at 8cd1075179 (2026-11-06). The floor of 7 is
+# the parse check: a pattern that matched nothing would otherwise read as within the cap.
+$dispatchInputCap = 25
+$names = @([regex]::Matches($inputs, '(?m)^      (?<n>[A-Za-z_][A-Za-z0-9_-]*):\s*$') | ForEach-Object { $_.Groups['n'].Value })
+Check "workflow_dispatch keeps at most $dispatchInputCap inputs (GitHub's limit)" ($names.Count -ge 7 -and $names.Count -le $dispatchInputCap) "$($names.Count) inputs: $($names -join ', ')"
 Check 'each nugetgo input says it is stage-scoped' (@($names | Where-Object { $_ -like 'nugetgo_*' }).Count -ge 2 -and
-    @($names | Where-Object { $_ -like 'nugetgo_*' } | Where-Object { $inputs -notmatch "(?s)      ${_}:\s*\n\s*description: 'nugetgo-behavior only: " }).Count -eq 0) "inputs: $($names -join ', ')"
+    @($names | Where-Object { $_ -like 'nugetgo_*' } | Where-Object { $inputs -notmatch "(?s)      ${_}:\s*\n\s*description: 'nugetgo-behavior [^']*?\bonly\b" }).Count -eq 0) "inputs: $($names -join ', ')"
 Check 'no job reads inputs.nugetgo_* (inputs reach jobs only through plan''s outputs)' (
     @([regex]::Matches($yml, 'inputs\.nugetgo_\w+')).Count -eq @([regex]::Matches($yml, '(?m)^\s+INPUT_NUGETGO_\w+: \$\{\{ inputs\.nugetgo_\w+ \}\}\s*$')).Count) 'an inputs.nugetgo_ read outside plan''s env'
 Check 'the row is annotated in its own step, titled nugetgo-row <rid>' ($yml -match 'annotate-summary\.ps1 -Title "nugetgo-row \$\(\$env:RID\)"') 'no row annotation step'

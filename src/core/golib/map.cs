@@ -185,9 +185,20 @@ public interface IGoReflectMap
     bool ReflectTryGet(object? key, out object? value);
 }
 
+/// <summary>
+/// One entry of a live map, read from its store: what reflect's type layout measures an array or pointer
+/// side from (<c>GoReflect.MapElemArrayDims</c>). Go's range contract snapshots every entry before it
+/// produces one, which is right for a range and O(n) for a question about a single entry.
+/// </summary>
+internal interface IGoReflectMapFirstEntry
+{
+    /// <summary>Reads one entry (the nil-key entry first, as a range does); false when the map is empty.</summary>
+    bool ReflectFirstEntry(out object? key, out object? value);
+}
+
 [System.Diagnostics.DebuggerDisplay("len = {Count}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(map<,>.DebugView))]
-public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>> where TKey : notnull
+public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>>, IGoReflectMapFirstEntry where TKey : notnull
 {
     // The debugger's view (DebuggerTypeProxy): the map's key/value pairs, the nil-key entry first. It
     // reads the store DIRECTLY rather than through Go's range contract (enumerateStore), so expanding a
@@ -1292,6 +1303,41 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
         // Go's range-over-map contract — including the nil-key entry, and including a body that
         // mutates the map it is ranging over. See enumerateStore.
         return enumerateStore(m_map);
+    }
+
+    // The store's first entry, without the range snapshot. A Go map takes no lock, so neither does this read,
+    // and a write that lands between opening the store and reading it ends the read with no entry, as the
+    // debugger view does: TypeOf then measures nothing, where Go never reads an entry at all.
+    bool IGoReflectMapFirstEntry.ReflectFirstEntry(out object? key, out object? value)
+    {
+        key = null;
+        value = null;
+
+        NilKeyDictionary? store = m_map;
+
+        if (store is null)
+            return false;
+
+        if (!typeof(TKey).IsValueType && store.HasNilKey)
+        {
+            value = store.NilKeyValue;
+            return true;
+        }
+
+        try
+        {
+            foreach (KeyValuePair<TKey, TValue> entry in store)
+            {
+                key = entry.Key;
+                value = entry.Value;
+                return true;
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        return false;
     }
 
     IEnumerator IEnumerable.GetEnumerator()

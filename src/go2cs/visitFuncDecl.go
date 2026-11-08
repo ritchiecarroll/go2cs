@@ -1334,6 +1334,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 							// the box is an implementation detail of the body.
 							updatedSignature.WriteString(getHeapBoxParamName(param))
 							continue
+						} else if adjusted, ok := v.varNames[param]; ok && adjusted != "" {
+							// A shadow-renamed receiver emits its renamed name, as a parameter does
+							// (see generateParametersSignature's receiver arm).
+							recvParamName = adjusted
 						}
 
 						updatedSignature.WriteString(getSanitizedIdentifier(recvParamName))
@@ -2085,6 +2089,13 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				// future non-rebuilt path safe. getHeapBoxParamName already sanitizes.
 				result.WriteString(getHeapBoxParamName(param))
 				continue
+			} else if adjusted, ok := v.varNames[param]; ok && adjusted != "" {
+				// A receiver the variable analysis shadow-renamed, because it shares the name of an
+				// imported package the method also uses (`func (vfs *Common) Stat(…) vfs.FileInfo`,
+				// the TypeScript compiler's vfs), must emit the RENAMED name: every body use renders
+				// from v.varNames as `vfsΔ1`, so a raw `vfs` declaration left each use CS0103. The
+				// parameter arm below has applied the same lookup since crypto/rsa's `hash hash.Hash`.
+				paramName = adjusted
 			}
 
 			result.WriteString(getSanitizedIdentifier(paramName))

@@ -86,6 +86,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
+    public void CheckAnonStructTypeArgVarDecl() => CheckTarget("AnonStructTypeArgVarDecl");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
@@ -1463,6 +1466,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedTypeOverStruct() => CheckTarget("NamedTypeOverStruct");
 
     [TestMethod]
+    public void CheckNamedValueTypeClash() => CheckTarget("NamedValueTypeClash");
+
+    [TestMethod]
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
@@ -1911,6 +1917,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
+    public void CheckReceiverShadowsImport() => CheckTarget("ReceiverShadowsImport");
 
     [TestMethod]
     public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
@@ -2529,6 +2538,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
+
+    [TestMethod]
+    public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
 
     [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");

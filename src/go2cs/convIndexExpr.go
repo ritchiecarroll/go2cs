@@ -159,7 +159,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// A POINTER key looked up in an `any`-keyed map crosses as its BOX (see the tuple
 			// arm above and typedNilInterfaceBoxing.go).
 			contexts = v.emptyInterfacePointerContexts(mapType.Key(), indexExpr.Index, contexts)
-		} else if _, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
+		} else if ptr, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
 			// The deref-aliased-parameter exception applies only when the base ITSELF is the
 			// parameter ident (`p[i]` renders through the value alias). A pointer FIELD reached
 			// through a selector — `mp.cgoCallers[0]`, where cgoCallers is `*cgoCallers` (runtime
@@ -168,6 +168,13 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// (CS0021 on every named-array-wrapper box index).
 			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
 				ptrDeref = ".Value"
+
+				// A deref-aliased pointer RECEIVER (`this ref T v`) is the named array's WRAPPER, not a box,
+				// so this `.Value` is the wrapper's underlying-value property, which a type named Value
+				// spells NamedWrapperValue (wrapperValueMember; `v.Value‿[i] = x`).
+				if v.exprIsDerefAliasedPointer(indexExpr.X) {
+					ptrDeref = "." + v.wrapperValueMember(ptr.Elem())
+				}
 			}
 		}
 	}

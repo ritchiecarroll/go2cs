@@ -88,6 +88,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
+    public void CheckAnonStructTypeArgVarDecl() => CheckTarget("AnonStructTypeArgVarDecl");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
@@ -1513,6 +1516,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedTypeOverStruct() => CheckTarget("NamedTypeOverStruct");
 
     [TestMethod]
+    public void CheckNamedValueTypeClash() => CheckTarget("NamedValueTypeClash");
+
+    [TestMethod]
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
@@ -1973,6 +1979,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
+    public void CheckReceiverShadowsImport() => CheckTarget("ReceiverShadowsImport");
 
     [TestMethod]
     public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
@@ -2606,6 +2615,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
+
+    [TestMethod]
+    public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
 
     [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");

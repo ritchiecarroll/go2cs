@@ -308,6 +308,7 @@
     <Project Path="tests/Behavioral/AnonStructNamedConversion/AnonStructNamedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/structs/AnonStructNamedConversion.structs.csproj" />
     <Project Path="tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
+    <Project Path="tests/Behavioral/AnonStructTypeArgVarDecl/AnonStructTypeArgVarDecl.csproj" />
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="tests/Behavioral/AnyBoxedUntypedConst/AnyBoxedUntypedConst.csproj" />
@@ -325,6 +326,7 @@
     <Project Path="tests/Behavioral/AssignThroughTypeAssert/AssignThroughTypeAssert.csproj" />
     <Project Path="tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
+    <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
     <Project Path="tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
@@ -819,6 +821,10 @@
     <Project Path="tests/Behavioral/NamedStringZeroValue/NamedStringZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
     <Project Path="tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/NamedValueTypeClash.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/arrval/NamedValueTypeClash.arrval.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/mapval/NamedValueTypeClash.mapval.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/numval/NamedValueTypeClash.numval.csproj" />
     <Project Path="tests/Behavioral/NamedIntSignednessConv/NamedIntSignednessConv.csproj" />
     <Project Path="tests/Behavioral/NamedNumericConstCast/NamedNumericConstCast.csproj" />
     <Project Path="tests/Behavioral/NamedNumericConversion/NamedNumericConversion.csproj" />
@@ -1205,6 +1211,7 @@
     <Project Path="tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />
     <Project Path="tests/Behavioral/UnsafeSliceDataAliasing/UnsafeSliceDataAliasing.csproj" />
     <Project Path="tests/Behavioral/UnsignedIndexPastIntRange/UnsignedIndexPastIntRange.csproj" />
