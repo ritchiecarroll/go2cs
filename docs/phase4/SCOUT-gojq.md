@@ -164,3 +164,36 @@ One claim in COORD's brief was refuted by the tree: "-tests cannot combine with 
 (`main.go:636-641`, `:821-851`), for the plain `-recurse` form.
 
 — P1 (2026-11-07)
+
+## Amendment 2026-11-08: class G's cause, fixed
+
+Class G (§5) was listed as "cause not established". The cause is in golib, and the fix is on
+`claude/p1-gojq-class-g` at `f58605e59a715e5a4fb46d78a78fdf2f01e3e910`.
+
+**Cause.** `reflect.TypeOf` of a map asked `GoReflect.MapKeyArrayDims` and `MapElemArrayDims` for any array
+dimensions on the key or element side, and both answered by reading the map's first entry. That entry came
+from Go's range contract (`map`'s `enumerateStore`), which snapshots every entry before it yields one, so
+each `TypeOf` of a map cost O(n). gojq's `updateObject` calls `reflect.ValueOf` on the object it is filling
+once per key, so building an n-key object was quadratic. The same read was also wrong for an interface
+side: `TypeOf(map[string]any{"k": [3]int{}})` carried element dimensions taken from the dynamic value.
+
+**Fix.** The two functions ask the side's static kind first and read an entry only for an array or a
+pointer side. For those, `firstMapEntry` takes the store's first entry directly through a new internal
+interface on `map`, with no snapshot. The range contract is unchanged. Five GolibTests guard it; the
+scaling rows measure allocated bytes, not wall time.
+
+**Measured** (linux, Release, tiering off; one tree at `a0fba9b08a`, then the same tree with only the two
+golib files of the fix):
+
+| subtest | before | after | Go |
+|:--|--:|--:|--:|
+| `assignment_operator_against_large_object` | 87.57 s | 0.93 s | 0.15 s |
+| `update-assignment_operator_against_large_object` | 88.82 s | 1.18 s | 0.15 s |
+| `TestCliRun` (all subtests) | 186.89 s | 12.58 s | 0.32 s |
+
+`cli` read 914 of 914 in both arms (F and H landed in batch 244). The library root read 162 of 164 in both;
+the two failures are class E. The predicted bound (each subtest under 15 s) held, and the falsifier (either
+above 30 s would mean a second quadratic) did not fire. With G fixed, `cli` no longer needs a deadline above
+its 2-minute default (§6, item 7).
+
+— P1 (2026-11-08)
