@@ -1,0 +1,13 @@
+# crypto/tls TestBogoSuite on H at 72043c1a66: the BoGo fields COORD asked for (2026-11-08) and the measurement-only arms. Nothing on the box was changed.
+# status = the BoGo runner's last status line, failed/unimplemented/done/started/total (runner.go:2067). per_case_s_max = workers x 600 / done, an upper bound (the 600 s also covers the runner build). Runner -idle-timeout default 15 s (runner.go:70).
+arm	where	logical_cores	physical_cores	shim_workers	bogo_elapsed_s	verdict	status	done	started	total	per_case_s_max
+read1	sweep row 41 of the shard	8	4	8	602.0	FAIL host-limit (disclosed)	0/206/324/331/6473	324	331	6473	14.8
+solo	declared solo re-read, sweep	8	4	8	601.9	FAIL host-limit (disclosed)	0/206/324/332/6473	324	332	6473	14.8
+direct-full	published shim, -test.run=^TestBogoSuite$, no filter	8	4	8	601.1	FAIL	0/206/324/331/6473	324	331	6473	14.8
+direct-verify	published shim, -bogo-filter=*-Verify-*	8	4	8	19.7	PASS (54 cases)	-	54	54	54	2.6
+direct-one	published shim, -bogo-filter=Client-Verify-ECDSA-TLS1	8	4	8	2.65	PASS (1 case)	-	1	1	1	-
+#
+# direct shim launch, -test.run=^$ (rc 0 each), ms: label, launch 1..6
+# pre (existing exe):	1275/991/955/983/946/1053
+# post (freshly republished exe):	916/1028/945/945/1036/1023
+# CPU during BoGo in the solo (63 samples, 10 s apart, percent of one core, 800 = box): shims mean 158 max 585; MsMpEng mean 10 max 23; other Defender/EDR 0; one svchost ~100 during BoGo only (service UNRESOLVED, the mapper was faulty).
