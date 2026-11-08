@@ -151,8 +151,10 @@ func targetArchExcludedTests(inputPath string, options Options) []targetArchExcl
 	return result
 }
 
-// buildLineSuffix renders a file's //go:build line for the record (" (//go:build …)"), or "" when the
-// exclusion comes from the file name alone (x_amd64_test.go).
+// buildLineSuffix renders a file's //go:build line for the record as a code span (" (`//go:build …`)"), or ""
+// when the exclusion comes from the file name alone (x_amd64_test.go). The span is for the proof page, where the
+// detail is markdown: a bare `||` in an OR'd constraint makes the withdrawn section a pipe-only block the site
+// publishes as a table.
 func buildLineSuffix(file *ast.File) string {
 	for _, group := range file.Comments {
 		if group.Pos() >= file.Package {
@@ -161,7 +163,7 @@ func buildLineSuffix(file *ast.File) string {
 
 		for _, comment := range group.List {
 			if strings.HasPrefix(comment.Text, "//go:build ") {
-				return " (" + comment.Text + ")"
+				return " (`" + comment.Text + "`)"
 			}
 		}
 	}

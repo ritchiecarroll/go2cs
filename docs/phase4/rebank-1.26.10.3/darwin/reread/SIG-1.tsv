@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells
+SIG-1	runtime	osx-arm64	11120	11062	64	58	0	validated	no	11083	63	-	yes	42497815515	2710	read
+SIG-1	runtime	osx-x64	11120	11061	64	59	1	failing	no	11083	63	-	yes	42497815515	4751	read

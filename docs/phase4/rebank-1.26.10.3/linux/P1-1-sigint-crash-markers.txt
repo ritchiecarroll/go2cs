@@ -1,0 +1,17 @@
+# 1.26.10.3 RE-BANK at 72043c1a66, lane P1, shard P1-1: crash markers of the two (c) rows, both readings, copied from each row's run.log (tree path shown as <tree>)
+
+## os.signal -- first reading
+Converted test action failed: Go/C# test comparison failed: TestNotifyContextNotifications/multiple: Go="pass" C#=""; TestNotifyContextNotifications/once: Go="pass" C#=""; TestNotifyContextCause: Go="pass" C#="fail (crashed in flight)"; TestNotifyContextNotifications: Go="pass" C#="fail (crashed in flight)"; converted tests: <tree>/src/core/os/signal/bin/tests/publish/os.signal.tests -test.v=test2json -test.timeout=3 ...
+converted tests crashed: signal: interrupt; in flight: TestNotifyContextNotifications, TestNotifyContextCause; TestNotifyContextNotifications: C# crashed in flight (signal: interrupt); TestNotifyContextCause: C# crashed in flight (signal: interrupt)
+
+## os.signal -- declared re-read
+Converted test action failed: Go/C# test comparison failed: TestNotifyContextNotifications/multiple: Go="pass" C#=""; TestNotifyContextNotifications/once: Go="pass" C#=""; TestNotifyContextCause: Go="pass" C#="fail (crashed in flight)"; TestNotifyContextNotifications: Go="pass" C#="fail (crashed in flight)"; converted tests: <tree>/src/core/os/signal/bin/tests/publish/os.signal.tests -test.v=test2json -test.timeout=3 ...
+converted tests crashed: signal: interrupt; in flight: TestNotifyContextNotifications, TestNotifyContextCause; TestNotifyContextNotifications: C# crashed in flight (signal: interrupt); TestNotifyContextCause: C# crashed in flight (signal: interrupt)
+
+## os -- first reading
+Converted test action failed: Go/C# test comparison failed: TestCopyFile/Limited/Half/1: Go="pass" C#=""; TestCopyFile/Limited/Half/1025: Go="pass" C#=""; TestCopyFile/Limited/Half/32769: Go="pass" C#=""; TestCopyFile/Limited/Half/4097: Go="pass" C#=""; TestCopyFile/Limited/Half/42: Go="pass" C#=""; TestCopyFile/Limited/More/1: Go="pass" C#=""; TestCopyFile/Limited/More/1025: Go="pass" C#=""; TestCopyFile/Limited/More/32769: G ...
+converted tests crashed: signal: interrupt; in flight: TestEnvironConsistency, TestErrIsExist, TestErrPathNUL, TestProcessLiteral; TestEnvironConsistency: C# crashed in flight (signal: interrupt); TestErrIsExist: C# crashed in flight (signal: interrupt); TestErrPathNUL: C# crashed in flight (signal: interrupt); TestProcessLiteral: C# crashed in flight (signal: interrupt)
+
+## os -- declared re-read
+Converted test action failed: Go/C# test comparison failed: TestCopyFile/Limited/Half/1: Go="pass" C#=""; TestCopyFile/Limited/Half/1025: Go="pass" C#=""; TestCopyFile/Limited/Half/32769: Go="pass" C#=""; TestCopyFile/Limited/Half/4097: Go="pass" C#=""; TestCopyFile/Limited/Half/42: Go="pass" C#=""; TestCopyFile/Limited/More/1: Go="pass" C#=""; TestCopyFile/Limited/More/1025: Go="pass" C#=""; TestCopyFile/Limited/More/32769: G ...
+converted tests crashed: signal: interrupt; in flight: TestEnvironConsistency, TestErrIsExist, TestErrPathNUL, TestProcessLiteral; TestEnvironConsistency: C# crashed in flight (signal: interrupt); TestErrIsExist: C# crashed in flight (signal: interrupt); TestErrPathNUL: C# crashed in flight (signal: interrupt); TestProcessLiteral: C# crashed in flight (signal: interrupt)

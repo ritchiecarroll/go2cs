@@ -1,0 +1,2 @@
+row	word	verdicts	matched	disclosed	diverged	sweep_s	wall_s	rc	timeout	deadline
+internal/runtime/gc/scan	PASS	3095	True	0	0	153	153	0	30m	15m

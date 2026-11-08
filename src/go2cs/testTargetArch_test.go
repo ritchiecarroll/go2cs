@@ -10,6 +10,8 @@ package main
 
 import (
 	"go/build"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -143,5 +145,26 @@ func TestWithdrawnSkipExpressionJoinsHostFatalAndTargetArchNames(t *testing.T) {
 
 	if got := withdrawnSkipExpression(map[string]testDisclosure{}, nil); got != "" {
 		t.Fatalf("withdrawnSkipExpression with nothing to withdraw = %q, want empty", got)
+	}
+}
+
+// The withdrawn-section detail is markdown on a proof page, so its build constraint is a CODE SPAN: a bare `||` in
+// an OR'd constraint (internal/cpu's cpu_x86_test.go, `//go:build 386 || amd64`) otherwise makes every withdrawn line
+// a pipe line, and the site publishes the block as a table (repoguard's TestDocsNoPipeOnlyTable). The span covers the
+// AND'd shape too, and a file with no build line still adds nothing.
+func TestBuildLineSuffixIsACodeSpan(t *testing.T) {
+	for _, tc := range []struct{ src, want string }{
+		{"//go:build 386 || amd64\n\npackage p_test\n", " (`//go:build 386 || amd64`)"},
+		{"//go:build amd64 && (linux || darwin)\n\npackage p_test\n", " (`//go:build amd64 && (linux || darwin)`)"},
+		{"package p_test\n", ""},
+	} {
+		file, err := parser.ParseFile(token.NewFileSet(), "x_test.go", tc.src, parser.ParseComments)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got := buildLineSuffix(file); got != tc.want {
+			t.Errorf("buildLineSuffix(%q) = %q, want %q", tc.src, got, tc.want)
+		}
 	}
 }

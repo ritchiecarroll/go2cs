@@ -5187,6 +5187,25 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     linux leg's act, AMENDED 2026-10-25.
     <!-- G's linux-leg review of claude/coord-linux-annot 61fe31d90a, 2026-10-25: 619 - 266 + 1 + 17 = 371;
          COORD ruled the re-read (R, RWSL). -->
+90. **(2026-11-08, the 1.26.10.3 re-bank's linux leg.) The launch shape decides whether the kit inherits SIGINT
+    ignored, and a converted host that inherits it reads differently.** Record `grep SigIgn /proc/<kit pid>/status`
+    in the ledger header. Bits: 0x1 HUP, 0x2 INT, 0x4 QUIT. Measured on a linux container: foreground 0x0; `cmd &`
+    from a shell with job control on (`$-` contains `m`, e.g. a terminal) leaves INT default; `cmd &` from a script or
+    `bash -c` (no job control) 0x6; a subshell `( cmd & )` 0x6 even under job control; `nohup` adds 0x1; `setsid`
+    changes no disposition; `env --default-signal=INT` clears 0x2. The .2 leg ran `setsid nohup ... & disown` with job
+    control (0x1), and the .3 legs ran `( setsid nohup ... & )` (0x7). The bank reads in the DEFAULT shape (INT
+    clear), the shape cmd/go gives Go's test binary. The ignored shape is the signal bridge's regression arm, read
+    whenever golib's signal code changes; a row that differs between the two shapes is posted, never banked from the
+    ignored one. A launch that gives the DEFAULT shape:
+    `( env --default-signal=INT setsid nohup ./run.sh > out 2>&1 < /dev/null & )`. The ledger states the bits it read.
+    Why: at 72043c1a66 linux `os` and `os/signal` DIVERGED in the ignored shape (an inherited SIG_IGN on SIGINT plus
+    signal.Notify killed the converted host), fixed by batch 257, and the signal census banked from G-WSL's
+    DEFAULT-shape re-read at 30ad20e17e. **Step text:** the linux leg's act, AMENDED 2026-11-08.
+    <!-- P1's candidate paragraph (P1 -> COORD 2026-11-08 14:23Z, relayed to R 18:31Z, coord's copy
+         runbook-sigign-paragraph.md), text as written except its sentence on the bank's shape, which is COORD's ruled
+         text verbatim (brief 2026-11-08 18:31Z); the example launch line and the ledger sentence are P1's. The 'Why'
+         line is the bank's own record: COORD rulings 07:36 (the linux SIGINT root, G), 08:16 (the SIGINT seat
+         accepted), 10:01 (batch 257 landed) and the 1.26.10.3 bank assembly's linux fold (rereads/GWSL-RR-dfl.tsv). -->
 
 <!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
   1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)
