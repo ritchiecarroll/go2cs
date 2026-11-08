@@ -1,0 +1,30 @@
+package main
+
+import (
+	"errors"
+	"reflect"
+)
+
+// TS dep: gotest.tools/v3/assert/cmp.ErrorType
+func kind(expected interface{}) string {
+	switch expectedType := expected.(type) {
+	case func(error) bool:
+		return "func:" + boolStr(expectedType(errors.New("x")))
+	case reflect.Type:
+		return "type:" + expectedType.Kind().String()
+	case nil:
+		return "nil"
+	}
+	return "other"
+}
+
+func boolStr(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
+func main() {
+	println(kind(func(error) bool { return true }), kind(reflect.TypeOf(1)), kind(nil), kind(3))
+}

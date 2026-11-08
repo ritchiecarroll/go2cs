@@ -1,0 +1,3 @@
+module repro/c15recvshadowsimport
+
+go 1.26

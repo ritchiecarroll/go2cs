@@ -1,0 +1,9 @@
+package main
+
+import "repro/c11namedforeignstruct/win"
+
+type GUID win.GUID // TS dep: go-winio/pkg/guid (type GUID windows.GUID)
+
+var id = GUID{Data1: 0x25a207b9, Data2: 0xddf3, Data4: [2]byte{0x8e, 0xe9}}
+
+func main() { println(id.Data1, id.Data2, id.Data4[1]) }

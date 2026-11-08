@@ -1,0 +1,3 @@
+module repro/c8d
+
+go 1.26

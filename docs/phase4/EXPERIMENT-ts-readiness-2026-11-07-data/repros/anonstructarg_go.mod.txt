@@ -1,0 +1,3 @@
+module repro/anonstructarg
+
+go 1.26

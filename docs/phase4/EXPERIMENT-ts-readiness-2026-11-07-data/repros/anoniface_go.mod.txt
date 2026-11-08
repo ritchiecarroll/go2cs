@@ -1,0 +1,3 @@
+module repro/anoniface
+
+go 1.26

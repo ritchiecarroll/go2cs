@@ -1,0 +1,3 @@
+module repro/anonstructarglocal
+
+go 1.26

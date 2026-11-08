@@ -1,0 +1,3 @@
+module repro/c8valuerecvptrcall
+
+go 1.26

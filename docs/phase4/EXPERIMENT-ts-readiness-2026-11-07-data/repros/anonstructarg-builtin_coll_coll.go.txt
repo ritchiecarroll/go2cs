@@ -1,0 +1,14 @@
+package coll
+
+type Set[T comparable] struct{ m map[T]struct{} }
+
+func (s *Set[T]) AddIfAbsent(v T) bool {
+	if _, ok := s.m[v]; ok {
+		return false
+	}
+	if s.m == nil {
+		s.m = map[T]struct{}{}
+	}
+	s.m[v] = struct{}{}
+	return true
+}

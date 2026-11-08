@@ -1,0 +1,5 @@
+package lib
+
+import "golang.org/x/text/transform" // a path std ALSO vendors (GOROOT/src/vendor/golang.org/x/text/transform)
+
+func Nop() transform.Transformer { return transform.Nop }

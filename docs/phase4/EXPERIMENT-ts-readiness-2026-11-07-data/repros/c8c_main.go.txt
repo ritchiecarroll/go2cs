@@ -1,0 +1,40 @@
+package main
+
+type Tag struct {
+	str  string
+	pExt uint16
+}
+
+var Und Tag
+
+func (t Tag) equalTags(o Tag) bool { return t.str == o.str }
+
+func (t Tag) gen(b []byte) int { return copy(b, "core") }
+
+// Shaped like x/text's (*Tag).RemakeString: a stack buffer sliced through a method call.
+func (t *Tag) RemakeString() {
+	if t.equalTags(Und) {
+		return
+	}
+	var buf [8]byte
+	b := buf[:t.gen(buf[:])]
+	t.pExt = uint16(len(b))
+	t.str = string(b) + "!"
+}
+
+func next(t Tag) (Tag, error) { t.str += "+"; return t, nil }
+
+func (t Tag) minimize() (Tag, error) {
+	var err error
+	t, err = next(t)
+	if err != nil {
+		return t, err
+	}
+	t.RemakeString()
+	return t, nil
+}
+
+func main() {
+	t, _ := Tag{str: "a"}.minimize()
+	println(t.str, t.pExt)
+}

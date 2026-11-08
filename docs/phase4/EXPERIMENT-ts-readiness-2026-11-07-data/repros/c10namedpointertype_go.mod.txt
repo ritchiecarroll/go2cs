@@ -1,0 +1,3 @@
+module repro/c10namedpointertype
+
+go 1.26

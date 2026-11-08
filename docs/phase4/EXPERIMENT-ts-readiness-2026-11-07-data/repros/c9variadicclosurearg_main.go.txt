@@ -1,0 +1,13 @@
+package main
+
+import "fmt"
+
+func header(w func(format string, args ...interface{}), n int) { w("n=%d %s", n, "x") }
+
+// TS dep: gotest.tools/v3/internal/format.UnifiedDiff
+func main() {
+	out := ""
+	writeFormat := func(format string, args ...interface{}) { out += fmt.Sprintf(format, args...) }
+	header(writeFormat, 2)
+	println(out)
+}
