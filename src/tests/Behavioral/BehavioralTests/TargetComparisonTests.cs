@@ -1978,6 +1978,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckReceiverShadowsImport() => CheckTarget("ReceiverShadowsImport");
+
+    [TestMethod]
     public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
 
     [TestMethod]
