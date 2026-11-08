@@ -4,6 +4,10 @@
 > 246).** COORD's 03:25Z ruling: the `-tests` half of the .3 regen, which the end regen
 > ([`DATA-dot3-endregen.md`](DATA-dot3-endregen.md) section 4) left out. Evidence in
 > [`data/dot3-tests-regen/`](data/dot3-tests-regen/).
+>
+> **Re-derived (2026-11-08) at the final .3 converter tip `cf0408ed4d`** (master `3552da548a` plus batch 254), as
+> COORD ruled at 08:52Z. Sections 1-7 are the first regen at `dab0675bd9` and stand as written. Section 8 is the
+> re-derive, which moves 2 test files more.
 
 ## 1. Answer
 
@@ -18,10 +22,11 @@ batch 204's init fold, drops a position record it should keep: 2 sites here and 
 - **Converter:** `src/go2cs/bin/go2cs.exe` built from the worktree at `dab0675bd9` (go1.26.10, GOROOT
   `%USERPROFILE%\sdk\go1.26.10` as `go env GOROOT` prints it); sha256 prefix `4d5aca1a6fc209ea`.
 - **Rows:** all 238 roster rows, read through `Get-ValidatedRosterRows` in `src/_roster.ps1` (never a hand list).
-- **Conversion:** per row, `go2cs -tests -test-action convert -go2cspath <tree>/src <GOROOT>/src/<pkg>
-  <tree>/src/core/<pkg>`. It ran serial and in place, one conversion on the box, and ran no tests. rc 0 on 238 / 238,
+- **Conversion:** per row,
+  `go2cs -tests -test-action convert -go2cspath <tree>/src <GOROOT>/src/<pkg> <tree>/src/core/<pkg>`.
+  It ran serial and in place, one conversion on the box, and ran no tests. rc 0 on 238 / 238,
   03:31:06Z to 04:08:46Z
-  ([`testsregen-run1.log`](data/dot3-tests-regen/testsregen-run1.log)).
+  ([`testsregen-run1.txt`](data/dot3-tests-regen/testsregen-run1.txt)).
 - **The tree is the seed.** The end regen proved production a fixed point at `a0fba9b08a`, and master moved since only
   by golib (246), so the committed tree is the converter's own production output. The `-tests` convert rewrites
   production files too, and none of them changed (section 3).
@@ -118,7 +123,7 @@ because that is out of brief. It is routed to batch 204's seat (H).
 ## 6. Fixed point
 
 A second full pass ran the same 238 rows over the committed regen (`1d164c6eb4`), with the same binary: rc 0 on 238 /
-238, 04:52:36Z to 05:26:16Z ([`testsregen-run2.log`](data/dot3-tests-regen/testsregen-run2.log)). Afterwards `git status`
+238, 04:52:36Z to 05:26:16Z ([`testsregen-run2.txt`](data/dot3-tests-regen/testsregen-run2.txt)). Afterwards `git status`
 named only the same two `.cs.auto` siblings as the first pass, and both were restored by file list. **No other file
 moved, so the committed test emission is a fixed point of the converter.**
 
@@ -141,3 +146,43 @@ its notes the same way, so these are fixed in this batch.
 - **Gates:** `go test ./internal/repoguard/` passes 113 / 113 at the branch. Before the docs fix it failed 9; three of
   those were these docs guards and their planted twins. The other six were native-gate tests reading files the
   concurrent second pass was rewriting, and they pass on a quiet tree.
+
+## 8. Re-derive at the final .3 converter tip (2026-11-08)
+
+COORD held the first regen (`1fba598958`) for the last converter seats, 250-254. Batch 254 is H's fix for section 5's
+finding.
+
+- **Base:** `726c39eefb` merges the final tip `claude/coord-b254-gate` `cf0408ed4d` (verified by `ls-remote`) onto
+  `1fba598958`, as a commit on top. The merge is clean. Batches 247-254 change no committed test file.
+- **Converter:** built at `726c39eefb` (go1.26.10, sha256 prefix `9aaf26251829fd86`).
+- **Run:** the same 238 rows by the same procedure, serial, rc 0 on 238 / 238, 08:55:04Z to 09:32:14Z
+  ([`testsregen-run3.txt`](data/dot3-tests-regen/testsregen-run3.txt)).
+
+**Prediction.** It was written at 08:55:16Z, 12 s after the run started and before any output was read
+([`rederive-prediction.txt`](data/dot3-tests-regen/rederive-prediction.txt)). Each claim, scored:
+
+| claim | measured | score |
+|:--|:--|:--|
+| 0 production files, 0 `.tests.csproj` | 0, 0 | MET |
+| 254 returns exactly the two lost per-call payloads; census lost 0, gained 2 | lost 0, gained 2: entropy_test.go `Run/1/1/2` and serve_test.go `Repeat/1/1/1` ([`calls-rederive.txt`](data/dot3-tests-regen/calls-rederive.txt)) | MET |
+| 250-252 leave a small test-only footprint; a file not attributable to the five batches is the falsifier | **0 test files** from 250-253; the falsifier did not fire | MET, but my "small" was larger than the 0 measured |
+| a second pass at the new commit moves 0 files | 0 files (only the same two `.cs.auto` siblings) | MET |
+
+**Readings.** The re-derive moved two test `package_info` files, `crypto/internal/fips140test/package_test_info.cs`
+and `net/http/package_test_info.cs`. Each moved by one `GoPositionMap` record (+1 / −1): its per-call field regains
+the entry. It moved 0 `*_test.cs`, 0 `.tests.csproj` and 0 production files. The two `.cs.auto` siblings were
+restored as before. The commit is `0c0ca7c943`.
+
+Against the first regen's base `dab0675bd9`, the per-call census now reads lost 0 and gained 3
+([`calls-vs-original.txt`](data/dot3-tests-regen/calls-vs-original.txt)). The 3 are the production `cformat` site,
+which batch 254 restored, and batch 254's new behavioral guard `CallerLineMultiLine`. **No per-call payload is lost
+anywhere across the whole .3 `-tests` regen.**
+
+**Fixed point.** A second full pass over `0c0ca7c943`, with the same binary: rc 0 on 238 / 238, 09:33:45Z to 10:05:10Z
+([`testsregen-run4.txt`](data/dot3-tests-regen/testsregen-run4.txt)). Only the two `.cs.auto` siblings moved, and both were restored, so
+the re-derived test emission is a fixed point of the final .3 converter.
+
+**Docs.** `docsamples -check` at the merged commit: 0 to rewrite, 0 errors.
+
+**Correction to sections 2 and 6:** their run logs were first published as `.log`, which the repository ignores, so
+`1fba598958` did not carry them and the links led nowhere. All four run logs are now `.txt`, and the links point at them.

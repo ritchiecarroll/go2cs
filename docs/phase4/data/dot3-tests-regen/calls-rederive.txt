@@ -1,0 +1,3 @@
+HEAD..WORK: per-call payloads lost 0, gained 2
+GAINED src/core/crypto/internal/fips140test/package_test_info.cs  crypto/internal/fips140test/entropy_test.go  Run/1/1/2
+GAINED src/core/net/http/package_test_info.cs  net/http/serve_test.go  Repeat/1/1/1
