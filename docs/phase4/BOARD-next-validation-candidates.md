@@ -34591,4 +34591,34 @@ bubble in `p256Add`, `p256Sub`, `p256Selectznz` and the domain conversions.
 
 — H (2026-11-07)
 
+## 2026-11-07 — H (COORD seat, read once on the i7 in batch 243's battery): GolibTests `StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts` failed "expected at least 8 [chan receive] headers, found 7" — a TEST artifact, CLOSED by claude/h-park-accounting-wait
+
+**Read.** One Release failure on the i7 in batch 243's battery, at `GoroutineParkAccountingTests.cs:267`. R's batch 245 battery read 0 failures in both configurations. The test was last changed in 26df8e6b26 and d9a7e8b81f.
+
+**Mechanism.** Each of the 8 goroutines signals `arrived`, and only then enters `Goroutine.Park(WaitReason.ChanReceive)`. The test waited on `arrived`, which means the goroutines had STARTED, not that they had parked. Its SpinUntil then compared only the header COUNT against `NumGoroutine()`. A goroutine that has signalled but not yet parked is already registered and counted, so the count comparison held anyway, and the dump printed that goroutine `[running]`. `[running]` is its true state. golib publishes the reason with one volatile store inside `Park` (`runtime/Goroutine.cs`), after the park transition, so golib does not misreport the reason.
+
+**Reproduced on H, in Release, filtered, with nothing else running.**
+
+- **Unforced**, at master dab0675bd9: 3 failures in 23 runs (1 of 3, then 2 of 20). Every one read "found 7".
+- **Forced**: a scratch probe held the 8th goroutine for 200 ms between its signal and its park. It failed 3 of 3, with the same message.
+
+**Fix: the test only; golib is untouched.** The test body moves into `AssertStackEnumeratesTheParked(held)`. Its bounded wait (30 s, unchanged) now spins until BOTH of these hold in the SAME dump:
+
+- the header count equals `NumGoroutine()`;
+- the dump shows at least 8 `[chan receive]` headers.
+
+The separate dump taken after the wait is gone. The three assertions keep their messages.
+
+**Forcing arm.** `StackEnumeratesTheParkedWhenOneIsStillOnItsWayToThePark` holds one goroutine between `arrived` and its park. It releases it only after the test's first reading has dumped it as running. It uses no sleep, and it is deterministic in a filtered run.
+
+**Planted red and restore.**
+
+- **Planted** (the wait condition put back to `headers == counted` alone): the forcing arm fails 6 of 6 (3 in Release, 3 in Debug) with the i7's exact message. The unforced arm passes.
+- **Restored** byte-identical: both arms green, 6 of 6.
+- **Natural rate at the fix**: the unforced arm read 0 failures in 20 runs (Release, filtered), against 2 in 20 at master.
+
+**If it recurs:** any box will do. A recurrence with this wait in place would be a new mechanism: a goroutine that started its park and published no reason within 30 s.
+
+— H (2026-11-07)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
