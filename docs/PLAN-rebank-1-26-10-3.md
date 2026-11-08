@@ -295,3 +295,68 @@ These pages carry text from before a landed record change. The re-bank re-render
   | `github.com/clipperhouse/stringish` @ v0.1.1 | `nugetgo.github.com.clipperhouse.stringish` | 2 packages; nothing measured beyond the scout's build |
 
   - `github.com/google/go-cmp` is test-only (`cli`'s tests) and is never packed.
+
+## 9. Release day (release controls, G, 2026-11-08)
+
+The runbooks lead on procedure (GoCorpusMigration.md's release ritual and *Release day*; DotNetMigration.md). This
+section is the 1.26.10.3 instance: what is already true at the release tree, the CI runs COORD dispatches, and the
+owner's hands. **`<REL>`** is master once the release-controls batch (`claude/g-release-controls-1263`) has landed,
+**without** its last commit, the NEWS entry. That commit lands just before the tag mints (ritual item 1), as the .2
+entry did (`e665f4ea51`, held for release day), so nothing announces unpublished packages on go2cs.net.
+
+### 9.1 What the release-controls batch settled
+
+| Item | State at `<REL>` | Why |
+|:--|:--|:--|
+| `src/version.props` | **unchanged**: `GoStdLibVersion` 1.26.10, `GoBuildNumber` 2 | `GoBuildNumber` is the LAST-PUBLISHED build. `release-nuget.ps1` Phase 1 bumps it to 3 at the publish; a bump here would double-bump |
+| `src/go2cs/corpus-release.txt` | **unchanged**: 1.26.10.2 | MUST-NOT-CHANGE until Phase 4's record commit regenerates it (`TestCorpusReleaseMatchesThePublishedStamp`) |
+| package IDs | **0 new, 0 removed** against `nuget-1.26.10.2`: `src/go2cs-stdlib.slnx` lists 363 projects at both | no go.* deprecation is owed for a removed ID, and no new go.* ID needs the API key's scope |
+| README Tests badges | **0 stale** of 235 validated badges after `crypto/tls` 1393 / 2 -> 4920 / 1 | a value scan: each badge against `docs/validation/current/<id>.md`'s headline, the counts the converter reads. check-roster-format 2b3 checks presence, not values |
+| the Tests link and the C# Source badge | still `validation/1.26.10.2` and `nuget-1.26.10.2` | release-nuget retargets both at the publish |
+| NEWS | the .3 entry at the top of `docs/NEWS.md` and the README block, dated **November XX**, in the batch's LAST commit | ritual item 1; the date, the README block's first line and its link anchor all become the publish date |
+| AOT Gosched read | **in**: `claude/c1-aot-gosched-read` @ `a85c5869c0` merged by this batch (test tooling only, PackageSymbols) | COORD 2026-11-08: the darwin clock seat's Native AOT behaviour rides .3's aot-smoke, which runs at `<REL>` |
+
+### 9.2 The CI runs COORD dispatches (none run by the release-controls lane)
+
+All on `os-matrix.yml`, at `<REL>` unless stated.
+
+1. **`stage=release-smoke`**: one windows pack feeding all four shipped RIDs (win-x64, linux-x64, osx-x64,
+   osx-arm64), arms A-D on every leg, darwin's D (the README walkthrough on a Mac) gating.
+2. **`stage=aot-smoke`**: the same pack, then one Native AOT publish and run of the package consumer on all four RIDs.
+   It now also prints C1's `GOSCHED-ESCALATION` READ line (`a85c5869c0`). That line is measured, not judged: about
+   1 ms where golib's kqueue `NOTE_CRITICAL` import binds, about 9 ms on osx-arm64 where it falls back to
+   `Thread.Sleep(1)`. No arm gates on it.
+3. **`stage=census goos=darwin`**, at `<REL>` if the daily census ran before `<REL>` landed: this release ships macOS
+   assets.
+4. **After the publish and indexing**: `stage=release-smoke` with `published_version=1.26.10.3` (no pack), all four
+   RIDs restoring from nuget.org, D gating. A partial index fails restore loudly (NU1102), so wait until every ID in
+   the walkthrough's restore closure is listed.
+
+### 9.3 The owner's hands, in order
+
+1. **The NuGet API key**: confirm it is LIVE before Phase 0. A key expires 30 days after it is created, and the .2
+   publish ran on November 4. Its glob must be `*`. The go.* IDs are unchanged, but the nugetgo wave pushes
+   new IDs (`nugetgo.github.com.itchyny.timefmt-go`, `nugetgo.github.com.itchyny.gojq`), which a key scoped to existing
+   IDs refuses. Set it as `NUGET_API_KEY`; Phase 0 refuses to start without it.
+2. **The environment read-back**, at the release machine's console, from a checkout with empty porcelain: the .NET 10
+   SDK admitted by `global.json` (floor 10.0.400) and go1.26.10 first on PATH under `GOTOOLCHAIN=local`. No GPG
+   signing during Phase 2 (or `disable-scdaemon`).
+3. **The NEWS date**: set "November XX" to the publish date in all three places (the NEWS heading, the README block's
+   first line, its link anchor), as the last change before the tag. `TestDocsFragmentLinksResolve` catches a
+   mismatched anchor.
+4. **`release-nuget.ps1`**, and the **signing PIN**, entered once at the signer. Resume rules from .2:
+   - a failed Phase 2 NEVER re-runs release-nuget (it would re-bump): run the signer's census, then the signer with
+     `-Apply -Overwrite` (one PIN), then Phase 3's exact push;
+   - a Phase 3 stopped by nuget.org's quota (.2: 403 Quota Exceeded on push 351 of 362) resumes with `-ResumePush`,
+     which neither bumps nor packs.
+5. **The record**: Phase 4's commit (counter 3, the snapshot `docs/validation/1.26.10.3/`, `corpus-release.txt` =
+   1.26.10.3) lands on master. `TestCorpusReleaseMatchesThePublishedStamp` and
+   `TestPublishedCounterMatchesTheRecordedReleases` go green at the record.
+6. **The nugetgo wave** at the record (§8's order): C2's rebuild of the 7 published modules, then timefmt-go and gojq.
+7. **Deprecate the published 1.26.10.2 nugetgo revisions** once the wave is live, each naming its 1.26.10.3 revision as
+   the alternate (owner, 2026-11-07: "Can deprecate existing published modules, no prob"). C2 prepares the exact
+   package and version list.
+8. **`cmd/sitegen/go2cs-releases.txt`** in the nugetgo registry repository lists `1.26.10.3`, in its own pull request
+   and before any row that needs it (NugetgoPublish section 5, step 1). **Then timefmt-go's registry row**, the form
+   in §8. gojq's row follows its publish.
+9. **The GitHub Release** for tag `nuget-1.26.10.3`: its body is the NEWS entry from "NuGet 1.26.10.3" down.
