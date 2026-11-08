@@ -60,3 +60,30 @@ listings got: no data-dependent branch on a limb value.
     for it.
   - The tier-1 form (tiering on, with dynamic PGO) was not read. The hook pins `TieredCompilation=0`, and reading
     tier 1 needs a change to the workflow, which is not at the tip.
+
+## Findings, as ruled
+
+- **(s) structural -- GOARCH-enumerating tests on osx-arm64** (COORD, 2026-11-08, on C1-5). A test whose subtest SET
+  is computed from the target architecture diverges on osx-arm64. Since batch 208 the Go oracle there runs at
+  GOARCH=arm64, while the converted darwin flavour IS darwin/amd64 (layout L3): the C# side's child `go` tools resolve
+  amd64. The shape is Go-absent / C#-pass, which no disclosure admits, so the row cannot bank arch-strict until an
+  arm64 flavour exists or a comparator arm for a GOARCH-derived subtest set is ruled (after 1.26.10.3, beside the
+  route-2 question).
+  - `go/internal/gcimporter` (C1-5, run 42481111673). `TestImportStdLib` builds its list with
+    `go list -f "{{if .GoFiles}}{{.ImportPath}}{{end}}" std` (gcimporter_test.go:370). On osx-arm64 the record reads
+    "matched 634 of 634 Go / 636 C# verdicts; disclosed 0; undisclosed divergences 2", and the two are
+    `TestImportStdLib/runtime/race/internal/amd64v1` and `TestImportStdLib/internal/runtime/startlinetest`
+    (Go="" C#="pass"). osx-x64 validates at its segment, 636. At 1.26.10.2 both RIDs read 636 / 636, against an
+    oracle that was then amd64.
+  - `debug/buildinfo` (C1-3, run 42477307357), the mirror image. `TestReadFile` tests the CURRENT platform,
+    `platform{runtime.GOOS, runtime.GOARCH}` (buildinfo_test.go:48). The C# side's `runtime.GOARCH` is the flavour's
+    amd64, and the oracle's is arm64. On osx-arm64 the record reads "matched 193 of 211 Go / 211 C# verdicts; disclosed
+    0; undisclosed divergences 34":
+    - 17 `TestReadFile/darwin_amd64/...` lines with Go absent or skip and C# pass;
+    - 17 `TestReadFile/darwin_arm64/...` lines with Go pass and C# absent or skip.
+    osx-x64 validates at its segment, 211. At 1.26.10.2 both RIDs read 211 / 211.
+  - BANK, for both rows: neither banks darwin at 1.26.10.3; each loses its 1.26.10.2 segment, with a note naming this
+    class.
+- **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
+  MISS on `go/internal/gcimporter` and `debug/buildinfo` (above). The predicted total moves from 233 to 231, one BELOW
+  the plan's 232 to 234.
