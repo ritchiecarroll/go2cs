@@ -1072,6 +1072,26 @@ func (v *Visitor) dotImportCollisionQualifier(pkg *types.Package) (string, bool)
 	return globalQualifyForcingTarget(target), true
 }
 
+// wrapperValueMember names the underlying-value property of the named non-struct wrapper t (slice, map, chan,
+// array, numeric): `Value`, or NamedWrapperValue when the wrapper's own type is named Value, since a C# member may
+// not share its type's name (CS0542; `type Value []byte`, go-json-experiment/json's jsontext.Value). A local
+// Value type the converter collision-renames (`ΔValue`, nameCollisions) keeps the plain `Value`, exactly as
+// go2cs-gen's Common.WrapperValueMember decides from the declared C# name; keep the two in sync. It reads no
+// state that registers anything, so every other type's emission is unchanged by construction.
+func (v *Visitor) wrapperValueMember(t types.Type) string {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok || named.Obj().Name() != "Value" {
+		return "Value"
+	}
+
+	if named.Obj().Pkg() == v.pkg && nameCollisions["Value"] {
+		return "Value"
+	}
+
+	return NamedWrapperValue
+}
+
 // getCSharpTypeName renders t C#-shaped rather than Go-shaped: the alias-qualified Go name mapped
 // through convertToCSTypeName, so `[]byte` arrives as `slice<byte>` and `*T` as `ж<T>`. Reach for
 // it wherever the string lands in a C# TYPE position — a declaration, an element type, a generic

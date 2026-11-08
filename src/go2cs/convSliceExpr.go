@@ -179,9 +179,10 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 					// For a NAMED array type (`*pageBits` → `ref pageBits b`) that value is the wrapper,
 					// which has no slice/range members — reach its underlying `array<T>` via `.Value`
 					// (`b.Value[..]`). For an ANONYMOUS array (`*[N]T` → `ref array<T> p`) the value IS the
-					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023).
+					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023). The
+					// property is the wrapper's own, so a type named Value spells it NamedWrapperValue.
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident += ".Value"
+						ident += "." + v.wrapperValueMember(ptr.Elem())
 					}
 				} else {
 					// A pointer-to-array BOX (a local, field, or call result) is sliced through the box. A
