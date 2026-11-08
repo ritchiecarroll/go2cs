@@ -209,7 +209,22 @@ public class GoroutineParkAccountingTests
     }
 
     [TestMethod]
-    public void StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts()
+    public void StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts() => AssertStackEnumeratesTheParked(held: null);
+
+    // The window the flake fell into (BOARD 2026-11-07, park-accounting flake): a goroutine has
+    // signalled `arrived` and not yet entered its park, so it is counted, enumerated, and dumped
+    // [running]. Held there on purpose, one goroutine, until the test's first reading has seen it.
+    [TestMethod]
+    public void StackEnumeratesTheParkedWhenOneIsStillOnItsWayToThePark()
+    {
+        using ManualResetEventSlim held = new(false);
+
+        AssertStackEnumeratesTheParked(held);
+    }
+
+    // `held`, when given, keeps ONE goroutine between its `arrived` signal and its park until the
+    // test's first reading, which then lets it go.
+    private static void AssertStackEnumeratesTheParked(ManualResetEventSlim? held)
     {
         // runtime.NumGoroutine answers from the registry's COUNT while Stack(all: true) enumerates the
         // registry's MEMBERS, and Go's own TestNumGoroutine holds the two against each other: it
@@ -221,12 +236,16 @@ public class GoroutineParkAccountingTests
         using ManualResetEventSlim release = new(false);
         using CountdownEvent arrived = new(Parked);
         using CountdownEvent left = new(Parked);
+        int holding = 0;
 
         for (int i = 0; i < Parked; i++)
         {
             Goroutine.Start(() =>
             {
                 arrived.Signal();
+
+                if (held is not null && Interlocked.Exchange(ref holding, 1) == 0)
+                    held.Wait();
 
                 using (Goroutine.Park(WaitReason.ChanReceive))
                     release.Wait();
@@ -235,34 +254,42 @@ public class GoroutineParkAccountingTests
             });
         }
 
+        // STARTED, not parked: `arrived` is signalled before the park, so a goroutine can be past it
+        // and still running. The wait below is what waits for the parks.
         Assert.IsTrue(arrived.Wait(TimeoutMs), "not every goroutine started");
 
         try
         {
             int headers = 0;
             int counted = 0;
+            int parkedHeaders = 0;
 
-            bool agreed = SpinWait.SpinUntil(() =>
+            // A reading that never settles fails below, naming which half it missed.
+            SpinWait.SpinUntil(() =>
             {
                 // Counted FIRST and from the same instant as the dump it is compared against: reading
                 // the count after the dump would let a goroutine registered in between look like a
                 // disagreement.
                 counted = (int)Δruntime.NumGoroutine();
-                headers = CountGoroutineHeaders(WholeProcessDump());
+                string dump = WholeProcessDump();
+                headers = CountGoroutineHeaders(dump);
+                parkedHeaders = CountOccurrences(dump, "[" + WaitReasons.Text(WaitReason.ChanReceive) + "]:");
 
-                return headers == counted;
+                held?.Set();
+
+                // Until every one of ours shows its reason, in the SAME dump the agreement is read from:
+                // golib publishes the reason at the park (Goroutine.Park), and a goroutine short of it
+                // reads [running], which is its true state, not a misreport.
+                return headers == counted && parkedHeaders >= Parked;
             }, TimeoutMs);
 
-            Assert.IsTrue(agreed,
+            Assert.IsTrue(headers == counted,
                 $"Stack(all: true) printed {headers} goroutine headers against NumGoroutine()'s {counted}");
 
             // And the enumeration must actually contain the parked ones — an agreement between two
             // empty answers would satisfy the equality above and mean nothing.
             Assert.IsTrue(counted > Parked,
                 $"expected more than the {Parked} parked goroutines plus main, got {counted}");
-
-            string dump = WholeProcessDump();
-            int parkedHeaders = CountOccurrences(dump, "[" + WaitReasons.Text(WaitReason.ChanReceive) + "]:");
 
             Assert.IsTrue(parkedHeaders >= Parked,
                 $"expected at least {Parked} [chan receive] headers, found {parkedHeaders}");
