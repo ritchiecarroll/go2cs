@@ -11,8 +11,8 @@ SIG-2	os/exec	osx-arm64	88	86	2	2	0	validated	yes	117	0	86/2/True	yes	4249783415
 SIG-2	os/exec	osx-x64	88	86	2	2	0	validated	yes	117	0	86/2/True	yes	42497834152	140	implied
 SIG-2	os/signal	osx-arm64	30	30	0	0	0	validated	yes	1	0	30/0/True	yes	42497834152	54	implied
 SIG-2	os/signal	osx-x64	30	30	0	0	0	validated	yes	1	0	30/0/True	yes	42497834152	73	implied
-SIG-2	runtime/pprof	osx-arm64	relay	146	relay	relay	relay	validated	yes	146	8	-	relay	42497834152	425	read
-SIG-2	runtime/pprof	osx-x64	relay	146	relay	relay	relay	validated	yes	146	8	-	relay	42497834152	724	read
+SIG-2	runtime/pprof	osx-arm64	155	146	15	9	0	validated	yes	146	8	-	yes	42497834152	425	read
+SIG-2	runtime/pprof	osx-x64	155	146	15	9	0	validated	yes	146	8	-	yes	42497834152	724	read
 SIG-2	syscall	osx-arm64	33	29	1	4	3	failing	no	66	0	-	yes	42497834152	35	read
 SIG-2	syscall	osx-x64	33	29	1	4	3	failing	no	66	0	-	yes	42497834152	81	read
 SIG-2	go/internal/gccgoimporter	osx-arm64	4	4	0	0	0	validated	yes	4	0	4/0/True	no	42497834152	50	implied

@@ -18,7 +18,7 @@ C1-8	internal/strconv	osx-x64	47	47	0	0	0	validated	yes	47	0	47/0/True	no	424857
 C1-8	internal/sync	osx-arm64	106	106	0	0	0	validated	yes	106	0	106/0/True	no	42485762191	38	implied
 C1-8	internal/sync	osx-x64	106	106	0	0	0	validated	yes	106	0	106/0/True	no	42485762191	43	implied
 C1-8	internal/synctest	osx-arm64	59	56	0	3	3	failing	no	59	0	-	yes	42485762191	58	read
-C1-8	internal/synctest	osx-x64	relay	56	relay	relay	relay	FAIL	no	59	0	-	relay	42485762191	96	read
+C1-8	internal/synctest	osx-x64	59	56	0	3	3	FAIL	no	59	0	-	yes	42485762191	96	read
 C1-8	internal/syscall/unix	osx-arm64	8	8	0	0	0	validated	yes	7	0	8/0/True	yes	42485762191	23	implied
 C1-8	internal/syscall/unix	osx-x64	8	8	0	0	0	validated	yes	7	0	8/0/True	yes	42485762191	31	implied
 C1-8	internal/sysinfo	osx-arm64	1	1	0	0	0	validated	yes	1	0	1/0/True	no	42485762191	20	implied

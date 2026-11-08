@@ -25,8 +25,8 @@ C1-11	runtime/debug	osx-arm64	9	8	1	1	0	validated	yes	8	1	8/1/True	no	4248663881
 C1-11	runtime/debug	osx-x64	9	8	1	1	0	validated	yes	8	1	8/1/True	no	42486638811	40	implied
 C1-11	runtime/metrics	osx-arm64	2	2	0	0	0	validated	yes	2	0	2/0/True	no	42486638811	23	implied
 C1-11	runtime/metrics	osx-x64	2	2	0	0	0	validated	yes	2	0	2/0/True	no	42486638811	54	implied
-C1-11	runtime/pprof	osx-arm64	relay	146	relay	relay	relay	validated	yes	146	8	-	relay	42486638811	456	read
-C1-11	runtime/pprof	osx-x64	relay	146	relay	relay	relay	validated	yes	146	8	-	relay	42486638811	853	read
+C1-11	runtime/pprof	osx-arm64	155	146	15	9	0	validated	yes	146	8	-	yes	42486638811	456	read
+C1-11	runtime/pprof	osx-x64	155	146	15	9	0	validated	yes	146	8	-	yes	42486638811	853	read
 C1-11	runtime/trace	osx-arm64	19	19	0	0	0	validated	yes	19	0	19/0/True	no	42486638811	40	implied
 C1-11	runtime/trace	osx-x64	19	19	0	0	0	validated	yes	19	0	19/0/True	no	42486638811	109	implied
 C1-11	slices	osx-arm64	124	122	2	2	0	validated	yes	122	2	122/2/True	no	42486638811	20	implied
