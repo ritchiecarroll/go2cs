@@ -890,12 +890,34 @@ public static partial class GoReflect
 
     public static nint[]? MapKeyArrayDims(object? value)
     {
-        return firstMapEntry(unwrapAdapters(value), out object? key, out _) ? elemArrayDims(key) : null;
+        object? box = unwrapAdapters(value);
+
+        if (mapSideCannotCarryDims(KeyType(box?.GetType())))
+            return null;
+
+        return firstMapEntry(box, out object? key, out _) ? elemArrayDims(key) : null;
     }
 
     public static nint[]? MapElemArrayDims(object? value)
     {
-        return firstMapEntry(unwrapAdapters(value), out _, out object? elem) ? elemArrayDims(elem) : null;
+        object? box = unwrapAdapters(value);
+
+        if (mapSideCannotCarryDims(ElementType(box?.GetType())))
+            return null;
+
+        return firstMapEntry(box, out _, out object? elem) ? elemArrayDims(elem) : null;
+    }
+
+    // Observation reads an entry, so ask the map's TYPE first whether that side can carry dims: only an
+    // array or a pointer can, as for a slice's element (SliceElemArrayDims). An interface side is the
+    // case that matters twice. Its dims would come from the entry's DYNAMIC value, so TypeOf(map[string]any)
+    // whose first value was a [3]int carried element dims no interface element has: the type depended on
+    // content. And every TypeOf of such a map read an entry, which ranged the whole map (gojq's
+    // updateObject calls reflect.ValueOf on the object it is filling once per key: quadratic, 50,000 keys
+    // in 117 s where Go takes 0.18 s). A side whose type is unknown keeps the observation path.
+    private static bool mapSideCannotCarryDims(Type? side)
+    {
+        return side is not null && KindOf(side) is not (Array or Pointer);
     }
 
     // The element's own dims: an array measures itself, a pointer measures its pointee (any depth).
@@ -923,7 +945,15 @@ public static partial class GoReflect
         key = null;
         value = null;
 
-        if (map is not IMap { Length: > 0 } || map is not IEnumerable entries)
+        if (map is not IMap { Length: > 0 })
+            return false;
+
+        // golib's own map reads one entry from its store; the range below snapshots every entry to hand
+        // out the first (see map's enumerateStore), which made each TypeOf of a map O(n).
+        if (map is IGoReflectMapFirstEntry direct)
+            return direct.ReflectFirstEntry(out key, out value);
+
+        if (map is not IEnumerable entries)
             return false;
 
         foreach (object? entry in entries)
