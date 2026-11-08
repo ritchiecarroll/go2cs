@@ -7,6 +7,10 @@
 > be reviewed against M:N one line at a time. The M:N input is lane R's
 > [`DESIGN-mn-scheduler-sizing.md`](../DESIGN-mn-scheduler-sizing.md) (PROPOSED), whose §3.7 ("native calls") and
 > §4.E ("syscall handoff … nothing starts a replacement") this seam answers. Amended by dated blocks, never rewritten.
+>
+> **AMENDED 2026-11-08 (§12): G's M:N read is folded in (the contract HOLDS; M2 and M7 amended, a §4.1 rule added),
+> and COORD ruled Q2 (Go's shape, with a once-per-transition assertion) and Q4 (`GoNativeCall`). Increments S-a..S-d
+> are released, red-first, landing after `.3`.**
 
 ## 1. What this is, and why now
 
@@ -301,3 +305,71 @@ own.
   or does the seam carry a per-call override for generated cgo wrappers?
 - **Q4 (COORD).** Naming. `GoNativeCall` follows `GoLibcCall` (golib's darwin dispatcher). The alternative is
   methods on `Goroutine`, beside today's `EnterBlocked`.
+
+## 12. Amendment 2026-11-08 — G's M:N read, and COORD's rulings on Q2 and Q4
+
+*A dated block, not a rewrite: §§1–11 stand as written, and where this block differs from them, this block is the
+reading. Lane G, the co-owner, reviewed the contract against M:N and ruled nothing; **the contract holds.** COORD
+ruled the two questions left to it and released the increments.*
+
+### 12.1 G's read
+
+**ACCEPTED: M1, M3, M4, M5, M6, M8.**
+
+**M2, amended.** "The goroutine continues on the same thread after `Exit()`" is a **CLR / option-B constraint, not
+Go's semantics**. Go's `exitsyscallNoP` (`proc.go:5067`; `globrunqput` `:5089`; `stopm` `:5114`, per G) resumes the
+goroutine on whatever M schedules it next. §6.2 step 3 therefore becomes a **scheduler-supplied slow path**, in one
+of two forms:
+
+- **park this thread** until a P frees (option B, the async lowering; §6.2 as written);
+- **suspend the goroutine and return the carrier** (a stackful scheduler, the owner's green-threads lead). This form
+  is valid only with **no native frame below** the goroutine: see M7, as amended below.
+
+This changes the wording, not the structure. The seam calls the slow path, and the scheduler supplies it.
+
+**M7, amended.** Go **locks the goroutine to its thread for the whole callback**: `cgocallbackg` calls
+`lockOSThread()` before `exitsyscall` (`cgocall.go:326-330`, per G). So between `ReenterManaged()` and
+`ReturnToNative()` the goroutine is **implicitly locked**. A park inside a callback blocks that OS thread and never
+unmounts the goroutine, because a native frame is below it. §6.3 reads this way, for every scheduler.
+
+**§4.1, added: where the seam's state lives.** The seam's per-goroutine state (the transition depth, the saved hint,
+the released P) lives **on the goroutine object**, reached through the current-goroutine lookup, and **never in a
+thread-static**. Under M:N a goroutine's state must follow the goroutine, not the carrier. Today's `m_blockedDepth`
+(`Goroutine.cs:206`) already does this.
+
+**Q1, answered.** No under option B. Under a stackful scheduler the goroutine MAY resume elsewhere at `Exit()`'s slow
+path, and that is safe because §4.3 reads errno **before** `Exit()`. The rule stays exactly as written.
+
+**Q3, answered: a scheduler constant.** There is no per-call numeric override (Go's `retake`, `proc.go:6692`; sysmon's
+backoff, `:6498`, per G). The hint (`Blocks` / `MayBlock`) is the only knob a call site has.
+
+**For M:N, stated by G.** The seam does **not** lift the thread cap for goroutines blocked in native calls. Each one
+holds an OS thread (M1), as Go's Ms do, up to `sched.maxmcount` (`proc.go:863`, per G). On macOS the cap still bounds
+how many native calls can block **concurrently**. G's M:N design states it.
+
+### 12.2 COORD's rulings
+
+- **Q2 RULED: Go's shape.** The windows `callNative` calls the runtime's entersyscall family, which calls
+  `GoNativeCall`. That gives **one path per transition**, traceable to Go, with the `g`-status move **before** the
+  P release. The init-registered hook is dropped. **`GoNativeCall` must run exactly once per transition**, and an
+  assertion enforces it (§12.3).
+- **Q4 RULED:** the name `GoNativeCall` is approved.
+- **Increments released:** S-a through S-d, each a red-first branch, **nothing landing before the `.3` publish**.
+  F-1's linux red arm goes to G-WSL after `.3`, as G offered. F-2 and F-3 are H's, in that order, after S-a.
+
+### 12.3 Consequences for §10, as H reads them for the cut
+
+- **S-a: the type composes over golib's existing accounting; it does not replace it.** §10 S-a said `EnterBlocked` /
+  `ExitBlocked` would be "re-expressed through" `GoNativeCall`. That is wrong. Those two also serve waits that are
+  **not native transitions**: the execution tracer's reader and stop (`ExecutionTracer.cs:282-307`), golib's waits
+  that cannot park. So `GoNativeCall` calls them, and they stay. S-a changes no caller, so it is behaviour-neutral by
+  construction.
+- **"Exactly once per transition" is a parity rule on one per-goroutine counter.** The counter is even while the
+  goroutine runs managed code and odd while it is in native:
+  - `Enter()` requires even, and `ReenterManaged()` requires odd; each adds one;
+  - `ReturnToNative()` requires even and above zero, and `Exit()` requires odd; each subtracts one.
+
+  A second `Enter()` for one transition (the windows trampoline AND the runtime family both entering, say) lands on
+  odd and fails by name. The counter lives on the goroutine (§12.1's §4.1 addition), and a thread with no goroutine
+  identity stays inert.
+- **S-b carries F-2 by construction**, because the Q2 ruling is F-2's fix: `callNative` → runtime family → `GoNativeCall`.
