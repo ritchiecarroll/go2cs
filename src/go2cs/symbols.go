@@ -95,6 +95,14 @@ const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var 
 // punctuation character: legal in C#, illegal in Go).
 const MapWrapperSet = "Set\u203F"
 
+// NamedWrapperValue is the name of the underlying-value property a named non-struct wrapper (slice,
+// map, chan, array, numeric) declares when the Go type is itself NAMED `Value`: a member may not share
+// its type's name (CS0542), so `type Value []byte` (go-json-experiment/json's jsontext.Value) keeps this
+// door in place of `Value`. Every other wrapper keeps the plain `Value`. The converter, the generator
+// and golib's by-name probes all spell it from here. It follows MapWrapperSet's door: U+203F keeps it
+// out of reach of every Go identifier.
+const NamedWrapperValue = "Value\u203F"
+
 // FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Field‿Tokens.Ꮡf‿`:
 // the `static readonly FieldRefFunc<T, F>` the TypeGenerator emits for the field's `Ꮡf` accessor, which
 // the generated `p.Ꮡf` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in

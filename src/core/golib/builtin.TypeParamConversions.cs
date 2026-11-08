@@ -201,7 +201,10 @@ public static partial class builtin
     {
         private const BindingFlags ValueSurface = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        private static readonly PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value", ValueSurface);
+        // A wrapper whose own type is NAMED Value declares the property as NamedWrapperValue instead
+        // (CS0542: a member may not share its type's name), so the probe tries that name second.
+        private static readonly PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value", ValueSurface) ??
+            typeof(T).GetProperty(go2cs.Symbols.NamedWrapperValue, ValueSurface);
         private static readonly FieldInfo? s_valueField = s_valueProperty is null ? typeof(T).GetField("Value", ValueSurface) : null;
         private static readonly Type? s_valueType = s_valueProperty?.PropertyType ?? s_valueField?.FieldType;
         private static readonly ConstructorInfo? s_valueCtor = s_valueType is null
