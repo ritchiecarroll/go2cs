@@ -8,8 +8,6 @@ using Δhttp = global::go.net.http_package;
 using httptest = global::go.net.http.httptest_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net;
 using global::go.net.http;
 using static global::go.net.http_internal_test_package;
@@ -63,7 +61,7 @@ public static void TestCrossOriginProtectionSecFetchSite(ж<testing.T> t) {
         new("PUT blocked", "PUT", "cross-site", "", Δhttp.StatusForbidden)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestCrossOriginProtectionSecFetchSite_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -114,7 +112,7 @@ public static void TestCrossOriginProtectionTrustedOriginBypass(ж<testing.T> t)
         new("untrusted origin with cross-site", "https://attacker.example", "cross-site", Δhttp.StatusForbidden)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestCrossOriginProtectionTrustedOriginBypass_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -198,7 +196,7 @@ public static void TestCrossOriginProtectionPatternBypass(ж<testing.T> t) {
         new("method-specific miss (GET)", "/get-only/", "", Δhttp.StatusForbidden)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestCrossOriginProtectionPatternBypass_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -305,7 +303,7 @@ public static void TestCrossOriginProtectionAddTrustedOriginErrors(ж<testing.T>
         new("null", "null", true)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestCrossOriginProtectionAddTrustedOriginErrors_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -405,7 +403,7 @@ public static void TestCrossOriginProtectionServer(ж<testing.T> t) {
             new("bypass path", "POST", ts.URL + "/bypass/"u8, "https://attacker.example", "", Δhttp.StatusOK)
         ]);
 
-        foreach (var (_, vᴛ1) in tests) {
+        foreach (var (_, vᴛ1) in range(tests)) {
             ref var tc = ref heap(new TestCrossOriginProtectionServer_tests(), out var Ꮡtc);
             tc = vᴛ1;
 

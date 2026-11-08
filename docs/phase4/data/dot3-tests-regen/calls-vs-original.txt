@@ -1,0 +1,4 @@
+1d164c6eb4^..WORK: per-call payloads lost 0, gained 3
+GAINED src/core/internal/coverage/cformat/package_info.cs  internal/coverage/cformat/format.go  Invoke/1/1/1
+GAINED src/tests/Behavioral/CallerLineMultiLine/package_info.cs  main.go  Run/1/1/1
+GAINED src/tests/Behavioral/CallerLineMultiLine/package_info.cs  main.go  line/1/1/1

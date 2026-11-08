@@ -14,8 +14,6 @@ using runtime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using io = io_package;
 using static go.runtime.pprof_package;
 
@@ -115,7 +113,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
         memoryProfilerRun++;
 
         var tests = slice<TestMemoryProfiler_tests>([new(
-            stk: slice<@string>(["runtime/pprof.allocatePersistent1K", "runtime/pprof.TestMemoryProfiler"]),
+            stk: ["runtime/pprof.allocatePersistent1K", "runtime/pprof.TestMemoryProfiler"],
             legacy: fmt.Sprintf("""
 %v: %v \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+( 0x[0-9,a-f]+ 0x[0-9,a-f]+)?
 #	0x[0-9,a-f]+	runtime/pprof\.allocatePersistent1K\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test\.go:48
@@ -123,7 +121,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
 
 """u8.Raw(), 32 * memoryProfilerRun, 1024 * memoryProfilerRun, 32 * memoryProfilerRun, 1024 * memoryProfilerRun)
         ), new(
-            stk: slice<@string>(["runtime/pprof.allocateTransient1M", "runtime/pprof.TestMemoryProfiler"]),
+            stk: ["runtime/pprof.allocateTransient1M", "runtime/pprof.TestMemoryProfiler"],
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient1M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:25
@@ -131,7 +129,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
 
 """u8.Raw(), (1 << 10) * memoryProfilerRun, (1 << 20) * memoryProfilerRun)
         ), new(
-            stk: slice<@string>(["runtime/pprof.allocateTransient2M", "runtime/pprof.TestMemoryProfiler"]),
+            stk: ["runtime/pprof.allocateTransient2M", "runtime/pprof.TestMemoryProfiler"],
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:31
@@ -139,7 +137,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
 
 """u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
-            stk: slice<@string>(["runtime/pprof.allocateTransient2MInline", "runtime/pprof.TestMemoryProfiler"]),
+            stk: ["runtime/pprof.allocateTransient2MInline", "runtime/pprof.TestMemoryProfiler"],
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2MInline\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:35
@@ -147,7 +145,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
 
 """u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
-            stk: slice<@string>(["runtime/pprof.allocateReflectTransient"]),
+            stk: ["runtime/pprof.allocateReflectTransient"],
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @( 0x[0-9,a-f]+)+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateReflectTransient\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:56
@@ -159,13 +157,11 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
         var testsʗ1 = tests;
         t.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 1); if (err != nil) {
-                    tΔ1.Fatalf("failed to write heap profile: %v", err);
-                }
+            var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 1); if (err != nil) {
+                tΔ1.Fatalf("failed to write heap profile: %v", err);
             }
 
-            foreach (var (_, test) in testsʗ1) {
+            foreach (var (_, test) in range(testsʗ1)) {
                 if (!regexp.MustCompile(test.legacy).Match(buf.Bytes())) {
                     tΔ1.Fatalf("The entry did not match:\n%v\n\nProfile:\n%v\n", test.legacy, Ꮡbuf.String());
                 }
@@ -175,10 +171,8 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
         var testsʗ2 = tests;
         t.Run(protoˢ, (ж<testing.T> tΔ2) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
-                    tΔ2.Fatalf("failed to write heap profile: %v", errΔ1);
-                }
+            var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+                tΔ2.Fatalf("failed to write heap profile: %v", errΔ1);
             }
             var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
             if (err != nil) {
@@ -187,7 +181,7 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
             tΔ2.Logf("Profile = %v", p.OrTypedNil());
 
             var stks = profileStacks(p);
-            foreach (var (_, test) in testsʗ2) {
+            foreach (var (_, test) in range(testsʗ2)) {
                 if (!containsStack(stks, test.stk)) {
                     tΔ2.Fatalf("No matching stack entry for %q\n\nProfile:\n%v\n", test.stk, p.OrTypedNil());
                 }
@@ -199,9 +193,9 @@ public static void TestMemoryProfiler(ж<testing.T> t) {
             }
 
             // Check the inlined function location is encoded correctly.
-            foreach (var (_, loc) in p.Location) {
+            foreach (var (_, loc) in range(p.Location)) {
                 var (inlinedCaller, inlinedCallee) = (false, false);
-                foreach (var (_, line) in loc.Line) {
+                foreach (var (_, line) in range(loc.Line)) {
                     if (line.Function.Name == "runtime/pprof.allocateTransient2MInline"u8) {
                         inlinedCallee = true;
                     }

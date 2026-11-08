@@ -53,11 +53,11 @@ using static global::go.go.build_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/build/build_test.go", "build_test.cs", "ABoqgoIACAaCgoKCgoKClIKmgoKCgpSCuIKClIKCgoKCggALBoKCgpSCpoKClIKUgoL4goKClIKUggAICIKCgIIACwiClIKClMqCuICCtoCCtoCCAAgIgoKmgoKmgoKUggALCACIAfwCgrKSgoKCggALFIKCgoKClIIABxCCqIL2ABAsgrKCkoKUlJKUgoIACwqCgqaCgpSCusYADB6CgoKClAAJCoIACRqCgoKUggAWDsKClJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAMBIKUlIKCgpSCgoKUgoK4opSUgoKClIKCgoKCggAKCoKUlIKCgpSCgoKmgoK4gpSUgoKClJSCgpSClIKCABAOsri4goCCpICCtoKCgoKUgoCCgoCClAAJDNiCgqaC/NiCgqaCAA4OsoKCgIKkgoKUgpSCgoLKypSAggAIDrKCgoKClIKCABASwoKCgoKClIKClIKCpoKCgoKUgpSCgviCgoKUggAXCIKCgqaCgpSCgoKmlJQ=", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "151=FromSlash/1/1/1;549=Join/1/2/6,Join/2/2/8")]
+[assembly: GoPositionMap("go/build/build_test.go", "build_test.cs", "ABgqgoIACAaCgoKCgoKClIKmgoKCgpSCuIKClIKCgoKCggALBoKCgpSCpoKClIKUgoL4goKClIKUggAICIKCggAKCIKUgoKUyoK4gqaCpoL4goKmgoKmgoKUggALCACIAfwCgrKSgoKCggALFIKCgoKClIIABxCCqIL2ABAsgrKCkoKUlJKUgoIACwqCgqaCgpSCusYADB6CgoKClAAJCoIACRqCgoKUggAWDsKClJSClAAGFpSCkpSClIKCgoKUlIK4gqaC6gAMBIKUlIKCgpSCgoKUgoK4opSUgoKClIKCgoKCggAKCoKUlIKCgpSCgoKmgoK4gpSUgoKClJSCgpSClIKCABAOsri4goCCpICCtoKCgoKUgoCCgoCClAAJDNiCgqaC/NiCgqaCAA4OsoKCgpSCgpSClIKCgsrKlIL+soKCgoKUgoIAEBLCgoKCgoKUgoKUgoKmgoKCgpSClIKC+IKCgpSCABcIgoKCpoKClIKCgqaUlA==", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "147=FromSlash/1/1/1;539=Join/1/2/6,Join/2/2/8")]
 [assembly: GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AOAGuA2UpIKCgqaCgqaCgqaClICCpKaClIKCgpSUgpSCgoKClIKUgoKCgqaCytSCgoKUgoKClIKCgpSCgoKUlIKUuIKClIKCgpSClIKUgoKCgriCqJKCgpSqopSCgoKmgoLMkoKClIKCgoKCgqY=", "865-882:1", "", "963=Join/1/1/1")]
-[assembly: GoPositionMap("go/build/read_test.go", "read_test.cs", "ABguADtoADBagoKCgpSAgoK2goKCgoKClJSCgqaCgsqCgoKCuIKmAEaGAbiCgoKCgqaCgoLoAFiaAYKCgriCgoKUgoKCgpSCgoI=", "154-158:1;244-248:1")]
+[assembly: GoPositionMap("go/build/read_test.go", "read_test.cs", "ABguADtoADBagoKCgpSCgqaCgoKCgoKUlIKCpoKCyoKCgoK4gqYARoYBuIKCgoKCpoKCgugAWJoBgoKCuIKCgpSCgoKClIKCgg==", "154-158:1;244-248:1")]
 [assembly: GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
-[assembly: GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABgoAA4QkoKCgoKClIKCgoKCpoIAChKCgoKm9oIABhSCgg==")]
+[assembly: GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABYoAA4QkoKCgoKClIKCgoKCpoIAChKCgoKm9oIABhSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

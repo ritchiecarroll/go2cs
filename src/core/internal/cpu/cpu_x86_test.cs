@@ -7,8 +7,6 @@ namespace go.@internal;
 using static go.@internal.cpu_package;
 using godebug = go.@internal.godebug_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using static go.@internal.cpu_internal_test_package;
 
@@ -64,10 +62,8 @@ public static void TestSSE3DebugOption(ж<testing.T> t) {
     }
 
     var want = false;
-    {
-        var got = X86.HasSSE3; if (got != want) {
-            t.Errorf("X86.HasSSE3 expected %v, got %v", want, got);
-        }
+    var got = X86.HasSSE3; if (got != want) {
+        t.Errorf("X86.HasSSE3 expected %v, got %v", want, got);
     }
 }
 

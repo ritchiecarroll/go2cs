@@ -1,0 +1,128 @@
+files 1091  explained 1089  unexplained 2  (metadata re-encode files 242)
+
+mechanism  files  net-instance-delta(new-old)
+    196     -392  166: unused CompilerServices usings dropped
+     10      -64  189: value method through a pointer reads p.M()
+    177     +446  B3: range(len(x)) form
+    653    +3320  B3: range(...) over a collection
+    436    -7653  B3: bare slice literal [..]
+      1       +1  B3: global using for a range<T> element alias
+    541    -3401  204: init-scope block dropped
+     19      +40  204: init folded into the condition (out / is var)
+     82     +167  217: deferred-closure field in the position map
+    107     +641  K: one-line function bodies
+    161    -1205  K: blank lines
+
+label combinations (files):
+    161  metadata records re-encoded (positions / line numbers / maps)
+    113  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+     89  204: init-scope block dropped + B3: range(...) over a collection
+     81  217: deferred-closure field in the position map + metadata records re-encoded (positions / line numbers / maps)
+     69  B3: range(...) over a collection
+     61  B3: bare slice literal [..] + B3: range(...) over a collection
+     47  204: init-scope block dropped
+     39  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+     33  166: unused CompilerServices usings dropped
+     25  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+     21  B3: bare slice literal [..]
+     19  B3: range(...) over a collection + B3: range(len(x)) form
+     15  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines
+     15  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection
+     15  166: unused CompilerServices usings dropped + 204: init-scope block dropped
+     14  K: blank lines
+     14  204: init-scope block dropped + B3: bare slice literal [..]
+     13  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+     11  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+     11  B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+     11  166: unused CompilerServices usings dropped + B3: range(...) over a collection
+     10  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form
+      9  204: init-scope block dropped + B3: range(...) over a collection + K: one-line function bodies
+      8  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      8  204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form
+      7  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      7  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      7  B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines
+      7  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      6  166: unused CompilerServices usings dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+      6  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+      6  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: one-line function bodies
+      6  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines
+      6  204: init-scope block dropped + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      5  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + K: blank lines
+      5  B3: bare slice literal [..] + B3: range(len(x)) form
+      5  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: one-line function bodies
+      4  189: value method through a pointer reads p.M() + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+      4  K: one-line function bodies
+      4  B3: range(...) over a collection + K: blank lines
+      4  204: init-scope block dropped + K: blank lines
+      3  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+      3  204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      3  K: blank lines + K: one-line function bodies
+      3  B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      2  204: init-scope block dropped + B3: range(...) over a collection + K: blank lines
+      2  B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      2  166: unused CompilerServices usings dropped + B3: range(...) over a collection + B3: range(len(x)) form
+      2  B3: bare slice literal [..] + K: blank lines
+      2  204: init-scope block dropped + B3: range(len(x)) form
+      2  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      2  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+      2  166: unused CompilerServices usings dropped + K: blank lines + K: one-line function bodies
+      2  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection
+      2  K: layout only (rejoin / indentation)
+      2  B3: range(len(x)) form
+      2  166: unused CompilerServices usings dropped + B3: range(...) over a collection + K: one-line function bodies
+      2  166: unused CompilerServices usings dropped + K: one-line function bodies
+      2  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form + K: one-line function bodies
+      2  166: unused CompilerServices usings dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      2  204: init-scope block dropped + B3: bare slice literal [..] + K: blank lines + K: one-line function bodies
+      1  189: value method through a pointer reads p.M()
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      1  204: init folded into the condition (out / is var) + 204: init-scope block dropped
+      1  UNEXPLAINED
+      1  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 189: value method through a pointer reads p.M() + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 189: value method through a pointer reads p.M() + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      1  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: one-line function bodies
+      1  B3: global using for a range<T> element alias
+      1  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + B3: bare slice literal [..]
+      1  204: init-scope block dropped + K: one-line function bodies
+      1  B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      1  189: value method through a pointer reads p.M() + K: blank lines
+      1  B3: bare slice literal [..] + B3: range(len(x)) form + K: one-line function bodies
+      1  189: value method through a pointer reads p.M() + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+      1  B3: range(...) over a collection + K: one-line function bodies
+      1  B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form
+      1  204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: range(...) over a collection
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + K: one-line function bodies
+      1  217: deferred-closure field in the position map + UNEXPLAINED
+      1  B3: bare slice literal [..] + B3: range(len(x)) form + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 189: value method through a pointer reads p.M() + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form
+      1  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      1  166: unused CompilerServices usings dropped + B3: bare slice literal [..] + B3: range(len(x)) form
+      1  204: init-scope block dropped + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init-scope block dropped + B3: bare slice literal [..] + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + B3: range(len(x)) form + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + B3: range(...) over a collection + K: blank lines
+      1  B3: bare slice literal [..] + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      1  204: init-scope block dropped + B3: bare slice literal [..] + B3: range(len(x)) form
+      1  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped
+      1  B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      1  204: init-scope block dropped + B3: bare slice literal [..] + K: blank lines
+      1  166: unused CompilerServices usings dropped + 204: init folded into the condition (out / is var) + 204: init-scope block dropped + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + B3: range(...) over a collection + K: blank lines + K: one-line function bodies
+      1  166: unused CompilerServices usings dropped + B3: range(...) over a collection + B3: range(len(x)) form + K: blank lines
+
+-- src/core/crypto/internal/fips140test/package_test_info.cs  (1 residual lines)
+   -#=Run/#/#/#
+-- src/core/net/http/package_test_info.cs  (1 residual lines)
+   -#=Repeat/#/#/#

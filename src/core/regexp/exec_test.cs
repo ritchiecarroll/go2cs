@@ -155,10 +155,8 @@ internal static void testRE2(ж<testing.T> t, @string @file) {
                         continue;
                     }
                     t.Errorf("%s:%d: compile %#q: %v", @file, linenoΔ1, q, errΔ2);
-                    {
-                        nfail++; if (nfail >= 100) {
-                            t.Fatalf("stopping after %d errors", nfail);
-                        }
+                    nfail++; if (nfail >= 100) {
+                        t.Fatalf("stopping after %d errors", nfail);
                     }
                     continue;
                 }
@@ -195,25 +193,21 @@ internal static void testRE2(ж<testing.T> t, @string @file) {
                 if (len(res) != len(run)) {
                     t.Fatalf("%s:%d: have %d test results, want %d", @file, linenoΔ1, len(res), len(run));
                 }
-                foreach (var i in range(res)) {
+                foreach (var i in range(len(res))) {
                     var (have, suffix) = run[i](re, refull, text);
                     var want = parseResult(t, @file, linenoΔ1, res[i]);
                     if (!slices.Equal<slice<nint>, nint>(have, want)) {
                         t.Errorf("%s:%d: %#q%s.FindSubmatchIndex(%#q) = %v, want %v", @file, linenoΔ1, re.OrTypedNil(), suffix, text, have, want);
-                        {
-                            nfail++; if (nfail >= 100) {
-                                t.Fatalf("stopping after %d errors", nfail);
-                            }
+                        nfail++; if (nfail >= 100) {
+                            t.Fatalf("stopping after %d errors", nfail);
                         }
                         continue;
                     }
                     (var b, suffix) = Δmatch[i](re, refull, text);
                     if (b != (want != nil)) {
                         t.Errorf("%s:%d: %#q%s.MatchString(%#q) = %v, want %v", @file, linenoΔ1, re.OrTypedNil(), suffix, text, b, !b);
-                        {
-                            nfail++; if (nfail >= 100) {
-                                t.Fatalf("stopping after %d errors", nfail);
-                            }
+                        nfail++; if (nfail >= 100) {
+                            t.Fatalf("stopping after %d errors", nfail);
                         }
                         continue;
                     }
@@ -225,10 +219,8 @@ internal static void testRE2(ж<testing.T> t, @string @file) {
                 break;
             }}
         }
-        {
-            var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
-                t.Fatalf("%s:%d: %v", @file, lineno, errΔ3);
-            }
+        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+            t.Fatalf("%s:%d: %v", @file, lineno, errΔ3);
         }
         if (len(input) != 0) {
             t.Fatalf("%s:%d: out of sync: have %d strings left at EOF", @file, lineno, len(input));
@@ -240,12 +232,12 @@ internal static void testRE2(ж<testing.T> t, @string @file) {
 }
 
 internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (slice<nint>, @string)>> run;
-internal static void initᴛrun() { run = slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (slice<nint>, @string)>>([
+internal static void initᴛrun() { run = [
     runFull,
     runPartial,
     runFullLongest,
     runPartialLongest
-]); }
+]; }
 
 internal static (slice<nint>, @string) runFull(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
@@ -276,12 +268,12 @@ internal static (slice<nint>, @string) runPartialLongest(ж<global::go.regexp_pa
 }
 
 internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>> Δmatch;
-internal static void initᴛΔmatch() { Δmatch = slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>>([
+internal static void initᴛΔmatch() { Δmatch = [
     matchFull,
     matchPartial,
     matchFullLongest,
     matchPartialLongest
-]); }
+]; }
 
 internal static (bool, @string) matchFull(ж<global::go.regexp_package.Regexp> re, ж<global::go.regexp_package.Regexp> Ꮡrefull, @string text) {
     ref var refull = ref Ꮡrefull.DerefOrNull();
@@ -327,10 +319,8 @@ internal static (ж<global::go.regexp_package.Regexp> re, error err) tryCompile(
     try {
         // Protect against panic during Compile.
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    err = fmt.Errorf("panic: %v"u8, r);
-                }
+            var r = recover(); if (r != nil) {
+                err = fmt.Errorf("panic: %v"u8, r);
             }
         }, ref ᒐ);
         (re, err) = Compile(s);
@@ -391,7 +381,7 @@ public static void TestFowler(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         t.Log(@file);
         testFowler(t, @file);
     }
@@ -436,7 +426,7 @@ Reading:
             }
             line = line.slice(0, len(line) - 1);
             var field = notab.FindAllString(line, -1);
-            foreach (var (i, fΔ1) in field) {
+            foreach (var (i, fΔ1) in range(field)) {
                 if (fΔ1 == "NULL"u8) {
                     field[i] = ""u8;
                 }
@@ -522,11 +512,9 @@ Reading:
             }
             case (byte)':': {
                 bool okΔ2 = default;
-                {
-                    (_, flag, okΔ2) = strings.Cut(flag[1..], ":"); if (!okΔ2) {
-                        t.Logf("skip: %s", line);
-                        goto continue_Reading;
-                    }
+                (_, flag, okΔ2) = strings.Cut(flag[1..], ":"); if (!okΔ2) {
+                    t.Logf("skip: %s", line);
+                    goto continue_Reading;
                 }
                 break;
             }
@@ -545,16 +533,12 @@ Reading:
             // Expand C escapes (a.k.a. Go escapes).
             if (strings.Contains(flag, "$")) {
                 @string fΔ2 = @"""" + field[1] + @"""";
-                {
-                    (field[1], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
-                        t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
-                    }
+                (field[1], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
+                    t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
                 }
                 fΔ2 = @"""" + field[2] + @"""";
-                {
-                    (field[2], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
-                        t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
-                    }
+                (field[2], errΔ1) = strconv.Unquote(fΔ2); if (errΔ1 != nil) {
+                    t.Errorf("%s:%d: cannot unquote %s", @file, lineno, fΔ2);
                 }
             }
 
@@ -738,7 +722,7 @@ internal static slice<byte> makeText(nint n) {
     }
     text = new slice<byte>(n);
     var x = ~(uint32)0;
-    foreach (var i in range(text)) {
+    foreach (var i in range(len(text))) {
         x += x;
         x ^= (uint32)(1);
         if ((int32)x < 0) {
@@ -761,9 +745,9 @@ internal static readonly object matchˢ = (@string)"match!"u8;
 public static void BenchmarkMatch(ж<testing.B> b) {
     var isRaceBuilder = strings.HasSuffix(testenv.Builder(), raceˢ);
 
-    foreach (var (_, data) in benchData) {
+    foreach (var (_, data) in range(benchData)) {
         var r = MustCompile(data.re);
-        foreach (var (_, vᴛ1) in benchSizes) {
+        foreach (var (_, vᴛ1) in range(benchSizes)) {
             ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
             size = vᴛ1;
 
@@ -797,7 +781,7 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> b) {
     if (r.onepass == nil) {
         b.Fatalf("want onepass regex, but %q is not onepass", r.OrTypedNil());
     }
-    foreach (var (_, vᴛ1) in benchSizes) {
+    foreach (var (_, vᴛ1) in range(benchSizes)) {
         ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
         size = vᴛ1;
 
@@ -820,27 +804,27 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> b) {
     }
 }
 
-internal static slice<compileBenchDataᴛ1> benchData = slice<compileBenchDataᴛ1>([
+internal static slice<compileBenchDataᴛ1> benchData = [
     new("Easy0", "ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
     new("Easy0i", "(?i)ABCDEFGHIJklmnopqrstuvwxyz$"),
     new("Easy1", "A[AB]B[BC]C[CD]D[DE]E[EF]F[FG]G[GH]H[HI]I[IJ]J$"),
     new("Medium", "[XYZ]ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
     new("Hard", "[ -~]*ABCDEFGHIJKLMNOPQRSTUVWXYZ$"),
     new("Hard1", "ABCD|CDEF|EFGH|GHIJ|IJKL|KLMN|MNOP|OPQR|QRST|STUV|UVWX|WXYZ")
-]);
+];
 
 partial struct benchSizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static slice<benchSizesᴛ1> benchSizes = slice<benchSizesᴛ1>([
+internal static slice<benchSizesᴛ1> benchSizes = [
     new("16", 16),
     new("32", 32),
     new("1K", 1 << 10),
     new("32K", 32 << 10),
     new("1M", 1 << 20),
     new("32M", 32 << 20)
-]);
+];
 
 public static void TestLongest(ж<testing.T> t) {
     var (re, err) = Compile(@"a(|b)");

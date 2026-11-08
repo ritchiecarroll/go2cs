@@ -18,7 +18,6 @@ public static readonly ж<Func<uint64, (uint64, bool)>> ᏑAlignUpPow2 = new Sta
 public static ref Func<uint64, (uint64, bool)> AlignUpPow2 => ref ((StaticBox<Func<uint64, (uint64, bool)>>)ᏑAlignUpPow2).ValueSlot;
 
 public static UntypedInt MaxTableCapacity => /* maxTableCapacity */ 1024;
-
 public static UntypedInt MaxAvgGroupLoad => /* maxAvgGroupLoad */ 7;
 
 // This isn't equivalent to runtime.maxAlloc. It is fine for basic testing but
@@ -88,7 +87,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
 
         for (var iΔ1 = (uint64)0; iΔ1 <= t.groups.lengthMask; iΔ1++) {
             var g = t.Ꮡgroups.group(Ꮡtyp, iΔ1);
-            var match = (~g.ctrls()).matchEmpty();
+            var match = g.ctrls().matchEmpty();
             if (match != 0) {
                 continue;
             }

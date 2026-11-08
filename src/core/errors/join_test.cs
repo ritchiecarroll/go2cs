@@ -40,20 +40,20 @@ public static void TestJoin(ж<testing.T> t) {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
     var merr = new multiErr(new error[]{errors.New(err3ˢ)}.slice());
-    foreach (var (_, test) in slice<TestJoin_type>([new(
-        errs: slice<error>([err1]),
-        want: slice<error>([err1])
+    foreach (var (_, test) in range(slice<TestJoin_type>([new(
+        errs: [err1],
+        want: [err1]
     ), new(
-        errs: slice<error>([err1, err2]),
-        want: slice<error>([err1, err2])
+        errs: [err1, err2],
+        want: [err1, err2]
     ), new(
-        errs: slice<error>([err1, default, err2]),
-        want: slice<error>([err1, err2])
+        errs: [err1, default, err2],
+        want: [err1, err2]
     ), new(
-        errs: slice<error>([merr]),
-        want: slice<error>([merr])
+        errs: [merr],
+        want: [merr]
     )
-    ])) {
+    ]))) {
         var got = errors.Join(test.errs.ꓸꓸꓸ)._<ExampleJoin_type>().Unwrap();
         if (!reflect.DeepEqual(got, test.want)) {
             t.Errorf("Join(%v) = %v; want %v", test.errs, got, test.want);
@@ -72,17 +72,17 @@ internal partial struct TestJoinErrorMethod_type /*dyn*/ {
 public static void TestJoinErrorMethod(ж<testing.T> t) {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
-    foreach (var (_, test) in slice<TestJoinErrorMethod_type>([new(
-        errs: slice<error>([err1]),
+    foreach (var (_, test) in range(slice<TestJoinErrorMethod_type>([new(
+        errs: [err1],
         want: "err1"
     ), new(
-        errs: slice<error>([err1, err2]),
+        errs: [err1, err2],
         want: "err1\nerr2"
     ), new(
-        errs: slice<error>([err1, default, err2]),
+        errs: [err1, default, err2],
         want: "err1\nerr2"
     )
-    ])) {
+    ]))) {
         @string got = errors.Join(test.errs.ꓸꓸꓸ).Error();
         if (got != test.want) {
             t.Errorf("Join(%v).Error() = %q; want %q", test.errs, got, test.want);

@@ -28,7 +28,7 @@ partial struct PathTest {
     internal @string path, result;
 }
 
-internal static slice<PathTest> cleantests = slice<PathTest>([
+internal static slice<PathTest> cleantests = [
     // Already clean
     new("abc", "abc"),
     new("abc/def", "abc/def"),
@@ -77,16 +77,16 @@ internal static slice<PathTest> cleantests = slice<PathTest>([
     new("abc/./../def", "def"),
     new("abc//./../def", "def"),
     new("abc/../../././../def", "../../def")
-]);
+];
 
-internal static slice<PathTest> nonwincleantests = slice<PathTest>([
+internal static slice<PathTest> nonwincleantests = [
     // Remove leading doubled slash
     new("//abc", "/abc"),
     new("///abc", "/abc"),
     new("//abc//", "/abc")
-]);
+];
 
-internal static slice<PathTest> wincleantests = slice<PathTest>([
+internal static slice<PathTest> wincleantests = [
     new(@"c:", @"c:."),
     new(@"c:\", @"c:\"),
     new(@"c:\abc", @"c:\abc"),
@@ -125,7 +125,7 @@ internal static slice<PathTest> wincleantests = slice<PathTest>([
 
     // Don't allow cleaning to create a Root Local Device path like \??\a.
     new(@"/a/../??/a", @"\.\??\a")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingMallocCountInˢ = (@string)"skipping malloc count in short mode"u8;
@@ -134,14 +134,14 @@ internal static readonly object skippingAllocsPerRunˢ = (@string)"skipping Allo
 public static void TestClean(ж<testing.T> t) {
     var tests = cleantests;
     if (runtime.GOOS == "windows"u8) {
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             tests[i].result = filepath.FromSlash(tests[i].result);
         }
         tests = appendꓸꓸꓸ(tests, wincleantests);
     } else {
         tests = appendꓸꓸꓸ(tests, nonwincleantests);
     }
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         {
             @string s = filepath.Clean(test.path); if (s != test.result) {
                 t.Errorf("Clean(%q) = %q, want %q", test.path, s, test.result);
@@ -162,7 +162,7 @@ public static void TestClean(ж<testing.T> t) {
         return;
     }
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new PathTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -181,7 +181,7 @@ partial struct IsLocalTest {
     internal bool isLocal;
 }
 
-internal static slice<IsLocalTest> islocaltests = slice<IsLocalTest>([
+internal static slice<IsLocalTest> islocaltests = [
     new("", false),
     new(".", true),
     new("..", false),
@@ -195,9 +195,9 @@ internal static slice<IsLocalTest> islocaltests = slice<IsLocalTest>([
     new("a/.", true),
     new("a/./b/./c", true),
     new(@"a/../b:/../../c", false)
-]);
+];
 
-internal static slice<IsLocalTest> winislocaltests = slice<IsLocalTest>([
+internal static slice<IsLocalTest> winislocaltests = [
     new("NUL", false),
     new("nul", false),
     new("nul ", false),
@@ -234,11 +234,11 @@ internal static slice<IsLocalTest> winislocaltests = slice<IsLocalTest>([
     new(@"CONOUT$", false),
     new(@"conout$", false),
     new(@"dollar$", true) // not a special file name
-]);
+];
 
-internal static slice<IsLocalTest> plan9islocaltests = slice<IsLocalTest>([
+internal static slice<IsLocalTest> plan9islocaltests = [
     new("#a", false)
-]);
+];
 
 public static void TestIsLocal(ж<testing.T> t) {
     var tests = islocaltests;
@@ -248,11 +248,9 @@ public static void TestIsLocal(ж<testing.T> t) {
     if (runtime.GOOS == "plan9"u8) {
         tests = appendꓸꓸꓸ(tests, plan9islocaltests);
     }
-    foreach (var (_, test) in tests) {
-        {
-            var got = filepath.IsLocal(test.path); if (got != test.isLocal) {
-                t.Errorf("IsLocal(%q) = %v, want %v", test.path, got, test.isLocal);
-            }
+    foreach (var (_, test) in range(tests)) {
+        var got = filepath.IsLocal(test.path); if (got != test.isLocal) {
+            t.Errorf("IsLocal(%q) = %v, want %v", test.path, got, test.isLocal);
         }
     }
 }
@@ -262,7 +260,7 @@ partial struct LocalizeTest {
     internal @string want;
 }
 
-internal static slice<LocalizeTest> localizetests = slice<LocalizeTest>([
+internal static slice<LocalizeTest> localizetests = [
     new("", ""),
     new(".", "."),
     new("..", ""),
@@ -275,19 +273,19 @@ internal static slice<LocalizeTest> localizetests = slice<LocalizeTest>([
     new("\x00", ""),
     new("a", "a"),
     new("a/b/c", "a/b/c")
-]);
+];
 
-internal static slice<LocalizeTest> plan9localizetests = slice<LocalizeTest>([
+internal static slice<LocalizeTest> plan9localizetests = [
     new("#a", ""),
     new(@"a\b:c", @"a\b:c")
-]);
+];
 
-internal static slice<LocalizeTest> unixlocalizetests = slice<LocalizeTest>([
+internal static slice<LocalizeTest> unixlocalizetests = [
     new("#a", "#a"),
     new(@"a\b:c", @"a\b:c")
-]);
+];
 
-internal static slice<LocalizeTest> winlocalizetests = slice<LocalizeTest>([
+internal static slice<LocalizeTest> winlocalizetests = [
     new("#a", "#a"),
     new("c:", ""),
     new(@"a\b", ""),
@@ -297,7 +295,7 @@ internal static slice<LocalizeTest> winlocalizetests = slice<LocalizeTest>([
     new(@"a/NUL", ""),
     new(@"./com1", ""),
     new(@"a/nul/b", "")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errorˢ => ref errorˢᵇ;
@@ -313,7 +311,7 @@ public static void TestLocalize(ж<testing.T> t) {
     }
     case {} when exprᴛ1 == "windows"u8: {
         tests = appendꓸꓸꓸ(tests, winlocalizetests);
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             tests[i].want = filepath.FromSlash(tests[i].want);
         }
         break;
@@ -322,7 +320,7 @@ public static void TestLocalize(ж<testing.T> t) {
         tests = appendꓸꓸꓸ(tests, unixlocalizetests);
         break;
     }}
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (got, err) = filepath.Localize(test.path);
         @string wantErr = nilˢ;
         if (test.want == ""u8) {
@@ -336,15 +334,15 @@ public static void TestLocalize(ж<testing.T> t) {
 
 internal static UntypedInt sep => /* filepath.Separator */ 92;
 
-internal static slice<PathTest> slashtests = slice<PathTest>([
+internal static slice<PathTest> slashtests = [
     new("", ""),
     new("/", (@string)(rune)sep),
     new("/a/b", (@string)slice<byte>([sep, (byte)'a', sep, (byte)'b'])),
     new("a//b", (@string)slice<byte>([(byte)'a', sep, sep, (byte)'b']))
-]);
+];
 
 public static void TestFromAndToSlash(ж<testing.T> t) {
-    foreach (var (_, test) in slashtests) {
+    foreach (var (_, test) in range(slashtests)) {
         {
             @string s = filepath.FromSlash(test.path); if (s != test.result) {
                 t.Errorf("FromSlash(%q) = %q, want %q", test.path, s, test.result);
@@ -365,44 +363,42 @@ partial struct SplitListTest {
 
 internal static UntypedInt lsep => /* filepath.ListSeparator */ 59;
 
-internal static slice<SplitListTest> splitlisttests = slice<SplitListTest>([
-    new("", slice<@string>([])),
-    new((@string)slice<byte>([(byte)'a', lsep, (byte)'b']), slice<@string>(["a", "b"])),
-    new((@string)slice<byte>([lsep, (byte)'a', lsep, (byte)'b']), slice<@string>(["", "a", "b"]))
-]);
+internal static slice<SplitListTest> splitlisttests = [
+    new("", []),
+    new((@string)slice<byte>([(byte)'a', lsep, (byte)'b']), ["a", "b"]),
+    new((@string)slice<byte>([lsep, (byte)'a', lsep, (byte)'b']), ["", "a", "b"])
+];
 
-internal static slice<SplitListTest> winsplitlisttests = slice<SplitListTest>([
+internal static slice<SplitListTest> winsplitlisttests = [
     // quoted
-    new(@"""a""", slice<@string>([@"a"])),
+    new(@"""a""", [@"a"]),
 
     // semicolon
-    new(@""";""", slice<@string>([@";"])),
-    new(@"""a;b""", slice<@string>([@"a;b"])),
-    new(@""";"";", slice<@string>([@";", @""])),
-    new(@";"";""", slice<@string>([@"", @";"])),
+    new(@""";""", [@";"]),
+    new(@"""a;b""", [@"a;b"]),
+    new(@""";"";", [@";", @""]),
+    new(@";"";""", [@"", @";"]),
 
     // partially quoted
-    new(@"a"";""b", slice<@string>([@"a;b"])),
-    new(@"a; """"b", slice<@string>([@"a", @" b"])),
-    new(@"""a;b", slice<@string>([@"a;b"])),
-    new(@"""""a;b", slice<@string>([@"a", @"b"])),
-    new(@"""""""a;b", slice<@string>([@"a;b"])),
-    new(@"""""""""a;b", slice<@string>([@"a", @"b"])),
-    new(@"a"";b", slice<@string>([@"a;b"])),
-    new(@"a;b"";c", slice<@string>([@"a", @"b;c"])),
-    new(@"""a"";b"";c", slice<@string>([@"a", @"b;c"]))
-]);
+    new(@"a"";""b", [@"a;b"]),
+    new(@"a; """"b", [@"a", @" b"]),
+    new(@"""a;b", [@"a;b"]),
+    new(@"""""a;b", [@"a", @"b"]),
+    new(@"""""""a;b", [@"a;b"]),
+    new(@"""""""""a;b", [@"a", @"b"]),
+    new(@"a"";b", [@"a;b"]),
+    new(@"a;b"";c", [@"a", @"b;c"]),
+    new(@"""a"";b"";c", [@"a", @"b;c"])
+];
 
 public static void TestSplitList(ж<testing.T> t) {
     var tests = splitlisttests;
     if (runtime.GOOS == "windows"u8) {
         tests = appendꓸꓸꓸ(tests, winsplitlisttests);
     }
-    foreach (var (_, test) in tests) {
-        {
-            var l = filepath.SplitList(test.list); if (!slices.Equal<slice<@string>, @string>(l, test.result)) {
-                t.Errorf("SplitList(%#q) = %#q, want %#q", test.list, l, test.result);
-            }
+    foreach (var (_, test) in range(tests)) {
+        var l = filepath.SplitList(test.list); if (!slices.Equal<slice<@string>, @string>(l, test.result)) {
+            t.Errorf("SplitList(%#q) = %#q, want %#q", test.list, l, test.result);
         }
     }
 }
@@ -411,15 +407,15 @@ partial struct SplitTest {
     internal @string path, dir, @file;
 }
 
-internal static slice<SplitTest> unixsplittests = slice<SplitTest>([
+internal static slice<SplitTest> unixsplittests = [
     new("a/b", "a/", "b"),
     new("a/b/", "a/b/", ""),
     new("a/", "a/", ""),
     new("a", "", "a"),
     new("/", "/", "")
-]);
+];
 
-internal static slice<SplitTest> winsplittests = slice<SplitTest>([
+internal static slice<SplitTest> winsplittests = [
     new(@"c:", @"c:", @""),
     new(@"c:/", @"c:/", @""),
     new(@"c:/foo", @"c:/", @"foo"),
@@ -430,7 +426,7 @@ internal static slice<SplitTest> winsplittests = slice<SplitTest>([
     new(@"\\host\share", @"\\host\share", @""),
     new(@"\\host\share\", @"\\host\share\", @""),
     new(@"\\host\share\foo", @"\\host\share\", @"foo")
-]);
+];
 
 public static void TestSplit(ж<testing.T> t) {
     slice<SplitTest> splittests = default;
@@ -438,11 +434,9 @@ public static void TestSplit(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
         splittests = appendꓸꓸꓸ(splittests, winsplittests);
     }
-    foreach (var (_, test) in splittests) {
-        {
-            var (d, f) = filepath.Split(test.path); if (d != test.dir || f != test.@file) {
-                t.Errorf("Split(%q) = %q, %q, want %q, %q", test.path, d, f, test.dir, test.@file);
-            }
+    foreach (var (_, test) in range(splittests)) {
+        var (d, f) = filepath.Split(test.path); if (d != test.dir || f != test.@file) {
+            t.Errorf("Split(%q) = %q, %q, want %q, %q", test.path, d, f, test.dir, test.@file);
         }
     }
 }
@@ -452,70 +446,70 @@ partial struct JoinTest {
     internal @string path;
 }
 
-internal static slice<JoinTest> jointests = slice<JoinTest>([
+internal static slice<JoinTest> jointests = [
     // zero parameters
-    new(slice<@string>([]), ""),
+    new([], ""),
 
     // one parameter
-    new(slice<@string>([""]), ""),
-    new(slice<@string>(["/"]), "/"),
-    new(slice<@string>(["a"]), "a"),
+    new([""], ""),
+    new(["/"], "/"),
+    new(["a"], "a"),
 
     // two parameters
-    new(slice<@string>(["a", "b"]), "a/b"),
-    new(slice<@string>(["a", ""]), "a"),
-    new(slice<@string>(["", "b"]), "b"),
-    new(slice<@string>(["/", "a"]), "/a"),
-    new(slice<@string>(["/", "a/b"]), "/a/b"),
-    new(slice<@string>(["/", ""]), "/"),
-    new(slice<@string>(["/a", "b"]), "/a/b"),
-    new(slice<@string>(["a", "/b"]), "a/b"),
-    new(slice<@string>(["/a", "/b"]), "/a/b"),
-    new(slice<@string>(["a/", "b"]), "a/b"),
-    new(slice<@string>(["a/", ""]), "a"),
-    new(slice<@string>(["", ""]), ""),
+    new(["a", "b"], "a/b"),
+    new(["a", ""], "a"),
+    new(["", "b"], "b"),
+    new(["/", "a"], "/a"),
+    new(["/", "a/b"], "/a/b"),
+    new(["/", ""], "/"),
+    new(["/a", "b"], "/a/b"),
+    new(["a", "/b"], "a/b"),
+    new(["/a", "/b"], "/a/b"),
+    new(["a/", "b"], "a/b"),
+    new(["a/", ""], "a"),
+    new(["", ""], ""),
 
     // three parameters
-    new(slice<@string>(["/", "a", "b"]), "/a/b")
-]);
+    new(["/", "a", "b"], "/a/b")
+];
 
-internal static slice<JoinTest> nonwinjointests = slice<JoinTest>([
-    new(slice<@string>(["//", "a"]), "/a")
-]);
+internal static slice<JoinTest> nonwinjointests = [
+    new(["//", "a"], "/a")
+];
 
-internal static slice<JoinTest> winjointests = slice<JoinTest>([
-    new(slice<@string>([@"directory", @"file"]), @"directory\file"),
-    new(slice<@string>([@"C:\Windows\", @"System32"]), @"C:\Windows\System32"),
-    new(slice<@string>([@"C:\Windows\", @""]), @"C:\Windows"),
-    new(slice<@string>([@"C:\", @"Windows"]), @"C:\Windows"),
-    new(slice<@string>([@"C:", @"a"]), @"C:a"),
-    new(slice<@string>([@"C:", @"a\b"]), @"C:a\b"),
-    new(slice<@string>([@"C:", @"a", @"b"]), @"C:a\b"),
-    new(slice<@string>([@"C:", @"", @"b"]), @"C:b"),
-    new(slice<@string>([@"C:", @"", @"", @"b"]), @"C:b"),
-    new(slice<@string>([@"C:", @""]), @"C:."),
-    new(slice<@string>([@"C:", @"", @""]), @"C:."),
-    new(slice<@string>([@"C:", @"\a"]), @"C:\a"),
-    new(slice<@string>([@"C:", @"", @"\a"]), @"C:\a"),
-    new(slice<@string>([@"C:.", @"a"]), @"C:a"),
-    new(slice<@string>([@"C:a", @"b"]), @"C:a\b"),
-    new(slice<@string>([@"C:a", @"b", @"d"]), @"C:a\b\d"),
-    new(slice<@string>([@"\\host\share", @"foo"]), @"\\host\share\foo"),
-    new(slice<@string>([@"\\host\share\foo"]), @"\\host\share\foo"),
-    new(slice<@string>([@"//host/share", @"foo/bar"]), @"\\host\share\foo\bar"),
-    new(slice<@string>([@"\"]), @"\"),
-    new(slice<@string>([@"\", @""]), @"\"),
-    new(slice<@string>([@"\", @"a"]), @"\a"),
-    new(slice<@string>([@"\\", @"a"]), @"\\a"),
-    new(slice<@string>([@"\", @"a", @"b"]), @"\a\b"),
-    new(slice<@string>([@"\\", @"a", @"b"]), @"\\a\b"),
-    new(slice<@string>([@"\", @"\\a\b", @"c"]), @"\a\b\c"),
-    new(slice<@string>([@"\\a", @"b", @"c"]), @"\\a\b\c"),
-    new(slice<@string>([@"\\a\", @"b", @"c"]), @"\\a\b\c"),
-    new(slice<@string>([@"//", @"a"]), @"\\a"),
-    new(slice<@string>([@"a:\b\c", @"x\..\y:\..\..\z"]), @"a:\b\z"),
-    new(slice<@string>([@"\", @"??\a"]), @"\.\??\a")
-]);
+internal static slice<JoinTest> winjointests = [
+    new([@"directory", @"file"], @"directory\file"),
+    new([@"C:\Windows\", @"System32"], @"C:\Windows\System32"),
+    new([@"C:\Windows\", @""], @"C:\Windows"),
+    new([@"C:\", @"Windows"], @"C:\Windows"),
+    new([@"C:", @"a"], @"C:a"),
+    new([@"C:", @"a\b"], @"C:a\b"),
+    new([@"C:", @"a", @"b"], @"C:a\b"),
+    new([@"C:", @"", @"b"], @"C:b"),
+    new([@"C:", @"", @"", @"b"], @"C:b"),
+    new([@"C:", @""], @"C:."),
+    new([@"C:", @"", @""], @"C:."),
+    new([@"C:", @"\a"], @"C:\a"),
+    new([@"C:", @"", @"\a"], @"C:\a"),
+    new([@"C:.", @"a"], @"C:a"),
+    new([@"C:a", @"b"], @"C:a\b"),
+    new([@"C:a", @"b", @"d"], @"C:a\b\d"),
+    new([@"\\host\share", @"foo"], @"\\host\share\foo"),
+    new([@"\\host\share\foo"], @"\\host\share\foo"),
+    new([@"//host/share", @"foo/bar"], @"\\host\share\foo\bar"),
+    new([@"\"], @"\"),
+    new([@"\", @""], @"\"),
+    new([@"\", @"a"], @"\a"),
+    new([@"\\", @"a"], @"\\a"),
+    new([@"\", @"a", @"b"], @"\a\b"),
+    new([@"\\", @"a", @"b"], @"\\a\b"),
+    new([@"\", @"\\a\b", @"c"], @"\a\b\c"),
+    new([@"\\a", @"b", @"c"], @"\\a\b\c"),
+    new([@"\\a\", @"b", @"c"], @"\\a\b\c"),
+    new([@"//", @"a"], @"\\a"),
+    new([@"a:\b\c", @"x\..\y:\..\..\z"], @"a:\b\z"),
+    new([@"\", @"??\a"], @"\.\??\a")
+];
 
 public static void TestJoin(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
@@ -523,12 +517,10 @@ public static void TestJoin(ж<testing.T> t) {
     } else {
         jointests = appendꓸꓸꓸ(jointests, nonwinjointests);
     }
-    foreach (var (_, test) in jointests) {
+    foreach (var (_, test) in range(jointests)) {
         @string expected = filepath.FromSlash(test.path);
-        {
-            @string p = filepath.Join(test.elem.ꓸꓸꓸ); if (p != expected) {
-                t.Errorf("join(%q) = %q, want %q", test.elem, p, expected);
-            }
+        @string p = filepath.Join(test.elem.ꓸꓸꓸ); if (p != expected) {
+            t.Errorf("join(%q) = %q, want %q", test.elem, p, expected);
         }
     }
 }
@@ -537,20 +529,18 @@ partial struct ExtTest {
     internal @string path, ext;
 }
 
-internal static slice<ExtTest> exttests = slice<ExtTest>([
+internal static slice<ExtTest> exttests = [
     new("path.go", ".go"),
     new("path.pb.go", ".go"),
     new("a.dir/b", ""),
     new("a.dir/b.go", ".go"),
     new("a.dir/", "")
-]);
+];
 
 public static void TestExt(ж<testing.T> t) {
-    foreach (var (_, test) in exttests) {
-        {
-            @string x = filepath.Ext(test.path); if (x != test.ext) {
-                t.Errorf("Ext(%q) = %q, want %q", test.path, x, test.ext);
-            }
+    foreach (var (_, test) in range(exttests)) {
+        @string x = filepath.Ext(test.path); if (x != test.ext) {
+            t.Errorf("Ext(%q) = %q, want %q", test.path, x, test.ext);
         }
     }
 }
@@ -563,7 +553,7 @@ partial struct Node {
 
 internal static ж<Node> tree = Ꮡ(new Node(
     "testdata",
-    slice<ж<Node>>([
+    [
         Ꮡ(new Node("a", default, 0)),
         Ꮡ(new Node("b", slice<ж<Node>>([]), 0)),
         Ꮡ(new Node("c", default, 0)),
@@ -581,7 +571,7 @@ internal static ж<Node> tree = Ꮡ(new Node(
                     0))
             ]),
             0))
-    ]),
+    ],
     0
 ));
 
@@ -589,7 +579,7 @@ internal static void walkTree(ж<Node> Ꮡn, @string path, Action<@string, ж<No
     ref var n = ref Ꮡn.DerefOrNull();
 
     f(path, Ꮡn);
-    foreach (var (_, e) in n.entries) {
+    foreach (var (_, e) in range(n.entries)) {
         walkTree(e, filepath.Join(path, e.name), f);
     }
 }
@@ -760,10 +750,8 @@ internal static void touch(ж<testing.T> t, @string name) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = f.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = f.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 }
 
@@ -894,10 +882,8 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> t) {
     void check(ж<testing.T> tΔ1, Func<@string, error> walk, @string root) {
         tΔ1.Helper();
         remainingWereSkipped = true;
-        {
-            var err = walk(root); if (err != nil) {
-                tΔ1.Fatal(err);
-            }
+        var err = walk(root); if (err != nil) {
+            tΔ1.Fatal(err);
         }
         if (!remainingWereSkipped) {
             tΔ1.Errorf("SkipAll on file foo2 did not block processing of remaining files and directories");
@@ -940,10 +926,8 @@ public static void TestWalkFileError(ж<testing.T> t) {
         touch(t, filepath.Join(td, fooˢ));
         touch(t, filepath.Join(td, barˢ));
         @string dir = filepath.Join(td, dirˢ);
-        {
-            var errΔ1 = os.MkdirAll(filepath.Join(td, dirˢ), 493); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = os.MkdirAll(filepath.Join(td, dirˢ), 493); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         touch(t, filepath.Join(dir, bazˢ));
         touch(t, filepath.Join(dir, statErrorˢ));
@@ -1037,11 +1021,11 @@ public static void TestWalkSymlinkRoot(ж<testing.T> t) {
     // Walk should report the symlink itself (since it is the last pathname component);
     // but if it does end in a slash, Walk should walk the directory to which the symlink
     // refers (since it must be fully resolved before walking).
-    foreach (var (_, vᴛ1) in slice<TestWalkSymlinkRoot_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestWalkSymlinkRoot_type>([
         new(
             desc: "no slash",
             root: link,
-            want: slice<@string>([link])
+            want: [link]
         ),
         new(
             desc: "slash",
@@ -1051,7 +1035,7 @@ public static void TestWalkSymlinkRoot(ж<testing.T> t) {
         new(
             desc: "abs no slash",
             root: abslink,
-            want: slice<@string>([abslink])
+            want: [abslink]
         ),
         new(
             desc: "abs with slash",
@@ -1061,16 +1045,16 @@ public static void TestWalkSymlinkRoot(ж<testing.T> t) {
         new(
             desc: "double link no slash",
             root: linklink,
-            want: slice<@string>([linklink])
+            want: [linklink]
         ),
         new(
             desc: "double link with slash",
             root: linklink + ((@string)(rune)filepath.Separator),
             want: slice<@string>([linklink, filepath.Join(linklink, fooˢ)]),
-            buggyGOOS: slice<@string>(["darwin", "ios"]) // https://go.dev/issue/59586
+            buggyGOOS: ["darwin", "ios"] // https://go.dev/issue/59586
 
         )
-    ])) {
+    ]))) {
         ref var tt = ref heap(new TestWalkSymlinkRoot_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1101,7 +1085,7 @@ public static void TestWalkSymlinkRoot(ж<testing.T> t) {
     }
 }
 
-internal static slice<PathTest> basetests = slice<PathTest>([
+internal static slice<PathTest> basetests = [
     new("", "."),
     new(".", "."),
     new("/.", "."),
@@ -1113,9 +1097,9 @@ internal static slice<PathTest> basetests = slice<PathTest>([
     new("a/b/.x", ".x"),
     new("a/b/c.", "c."),
     new("a/b/c.x", "c.x")
-]);
+];
 
-internal static slice<PathTest> winbasetests = slice<PathTest>([
+internal static slice<PathTest> winbasetests = [
     new(@"c:\", @"\"),
     new(@"c:.", @"."),
     new(@"c:\a\b", @"b"),
@@ -1124,28 +1108,26 @@ internal static slice<PathTest> winbasetests = slice<PathTest>([
     new(@"\\host\share\", @"\"),
     new(@"\\host\share\a", @"a"),
     new(@"\\host\share\a\b", @"b")
-]);
+];
 
 public static void TestBase(ж<testing.T> t) {
     var tests = basetests;
     if (runtime.GOOS == "windows"u8) {
         // make unix tests work on windows
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             tests[i].result = filepath.Clean(tests[i].result);
         }
         // add windows specific tests
         tests = appendꓸꓸꓸ(tests, winbasetests);
     }
-    foreach (var (_, test) in tests) {
-        {
-            @string s = filepath.Base(test.path); if (s != test.result) {
-                t.Errorf("Base(%q) = %q, want %q", test.path, s, test.result);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string s = filepath.Base(test.path); if (s != test.result) {
+            t.Errorf("Base(%q) = %q, want %q", test.path, s, test.result);
         }
     }
 }
 
-internal static slice<PathTest> dirtests = slice<PathTest>([
+internal static slice<PathTest> dirtests = [
     new("", "."),
     new(".", "."),
     new("/.", "/"),
@@ -1157,13 +1139,13 @@ internal static slice<PathTest> dirtests = slice<PathTest>([
     new("a/b/.x", "a/b"),
     new("a/b/c.", "a/b"),
     new("a/b/c.x", "a/b")
-]);
+];
 
-internal static slice<PathTest> nonwindirtests = slice<PathTest>([
+internal static slice<PathTest> nonwindirtests = [
     new("////", "/")
-]);
+];
 
-internal static slice<PathTest> windirtests = slice<PathTest>([
+internal static slice<PathTest> windirtests = [
     new(@"c:\", @"c:\"),
     new(@"c:.", @"c:."),
     new(@"c:\a\b", @"c:\a"),
@@ -1174,13 +1156,13 @@ internal static slice<PathTest> windirtests = slice<PathTest>([
     new(@"\\host\share\a", @"\\host\share\"),
     new(@"\\host\share\a\b", @"\\host\share\a"),
     new(@"\\\\", @"\\\\")
-]);
+];
 
 public static void TestDir(ж<testing.T> t) {
     var tests = dirtests;
     if (runtime.GOOS == "windows"u8) {
         // make unix tests work on windows
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             tests[i].result = filepath.Clean(tests[i].result);
         }
         // add windows specific tests
@@ -1188,11 +1170,9 @@ public static void TestDir(ж<testing.T> t) {
     } else {
         tests = appendꓸꓸꓸ(tests, nonwindirtests);
     }
-    foreach (var (_, test) in tests) {
-        {
-            @string s = filepath.Dir(test.path); if (s != test.result) {
-                t.Errorf("Dir(%q) = %q, want %q", test.path, s, test.result);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string s = filepath.Dir(test.path); if (s != test.result) {
+            t.Errorf("Dir(%q) = %q, want %q", test.path, s, test.result);
         }
     }
 }
@@ -1202,7 +1182,7 @@ partial struct IsAbsTest {
     internal bool isAbs;
 }
 
-internal static slice<IsAbsTest> isabstests = slice<IsAbsTest>([
+internal static slice<IsAbsTest> isabstests = [
     new("", false),
     new("/", true),
     new("/usr/bin/gcc", true),
@@ -1211,9 +1191,9 @@ internal static slice<IsAbsTest> isabstests = slice<IsAbsTest>([
     new(".", false),
     new("./", false),
     new("lala", false)
-]);
+];
 
-internal static slice<IsAbsTest> winisabstests = slice<IsAbsTest>([
+internal static slice<IsAbsTest> winisabstests = [
     new(@"C:\", true),
     new(@"c\", false),
     new(@"c::", false),
@@ -1230,7 +1210,7 @@ internal static slice<IsAbsTest> winisabstests = slice<IsAbsTest>([
     new(@"//host/share/foo/bar", true),
     new(@"\\?\a\b\c", true),
     new(@"\??\a\b\c", true)
-]);
+];
 
 public static void TestIsAbs(ж<testing.T> t) {
     var testsᴷ = new stackAppend<IsAbsTest>();
@@ -1239,22 +1219,20 @@ public static void TestIsAbs(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
         tests = appendꓸꓸꓸ(tests, winisabstests);
         // All non-windows tests should fail, because they have no volume letter.
-        foreach (var (_, test) in isabstests) {
+        foreach (var (_, test) in range(isabstests)) {
             tests = append(testsᴷ, tests, new IsAbsTest(test.path, false));
         }
         // All non-windows test should work as intended if prefixed with volume letter.
-        foreach (var (_, test) in isabstests) {
+        foreach (var (_, test) in range(isabstests)) {
             tests = append(tests, new IsAbsTest("c:"u8 + test.path, test.isAbs));
         }
     } else {
         tests = isabstests;
     }
 
-    foreach (var (_, test) in tests) {
-        {
-            var r = filepath.IsAbs(test.path); if (r != test.isAbs) {
-                t.Errorf("IsAbs(%q) = %v, want %v", test.path, r, test.isAbs);
-            }
+    foreach (var (_, test) in range(tests)) {
+        var r = filepath.IsAbs(test.path); if (r != test.isAbs) {
+            t.Errorf("IsAbs(%q) = %v, want %v", test.path, r, test.isAbs);
         }
     }
 }
@@ -1264,7 +1242,7 @@ partial struct EvalSymlinksTest {
     internal @string path, dest;
 }
 
-public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTestDirs = new StaticBox<slice<EvalSymlinksTest>>(slice<EvalSymlinksTest>([
+public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTestDirs = new StaticBox<slice<EvalSymlinksTest>>([
     new("test", ""),
     new("test/dir", ""),
     new("test/dir/link3", "../../"),
@@ -1283,10 +1261,10 @@ public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTestDirs = new
     new("src/versions/v1/modules", ""),
     new("src/versions/v1/modules/test", "../../../pool/test"),
     new("version", "src/versions/v1")
-]));
+]);
 public static ref slice<EvalSymlinksTest> EvalSymlinksTestDirs => ref ((StaticBox<slice<EvalSymlinksTest>>)ᏑEvalSymlinksTestDirs).ValueSlot;
 
-public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTests = new StaticBox<slice<EvalSymlinksTest>>(slice<EvalSymlinksTest>([
+public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTests = new StaticBox<slice<EvalSymlinksTest>>([
     new("test", "test"),
     new("test/dir", "test/dir"),
     new("test/dir/../..", "."),
@@ -1299,7 +1277,7 @@ public static readonly ж<slice<EvalSymlinksTest>> ᏑEvalSymlinksTests = new St
     new("test/linkabs", "/"),
     new("test/link4/..", "test"),
     new("src/versions/current/modules/test", "src/pool/test")
-]));
+]);
 public static ref slice<EvalSymlinksTest> EvalSymlinksTests => ref ((StaticBox<slice<EvalSymlinksTest>>)ᏑEvalSymlinksTests).ValueSlot;
 
 // simpleJoin builds a file name from the directory and path.
@@ -1350,7 +1328,7 @@ public static void TestEvalSymlinks(ж<testing.T> t) {
     }
 
     // Create the symlink farm using relative paths.
-    foreach (var (_, d) in EvalSymlinksTestDirs) {
+    foreach (var (_, d) in range(EvalSymlinksTestDirs)) {
         error errΔ1 = default;
         @string path = simpleJoin(tmpDir, d.path);
         if (d.dest == ""u8) {
@@ -1364,7 +1342,7 @@ public static void TestEvalSymlinks(ж<testing.T> t) {
     }
 
     // Evaluate the symlink farm.
-    foreach (var (_, test) in EvalSymlinksTests) {
+    foreach (var (_, test) in range(EvalSymlinksTests)) {
         @string path = simpleJoin(tmpDir, test.path);
 
         @string dest = simpleJoin(tmpDir, test.dest);
@@ -1487,7 +1465,7 @@ public static void TestIssue13582(ж<testing.T> t) {
         new(link1, realFile),
         new(link2, realFile)
     ]);
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (have, errΔ1) = filepath.EvalSymlinks(test.path);
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
@@ -1510,10 +1488,8 @@ public static void TestRelativeSymlinkToAbsolute(ж<testing.T> t) {
     // absolute path. On macOS, this path is likely to begin with a symlink
     // itself: generally either in /var (symlinked to "private/var") or /tmp
     // (symlinked to "private/tmp").
-    {
-        var errΔ1 = os.Symlink(tmpDir, linkˢ); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.Symlink(tmpDir, linkˢ); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     t.Logf(@"os.Symlink(%q, ""link"")", tmpDir);
 
@@ -1533,16 +1509,16 @@ public static void TestRelativeSymlinkToAbsolute(ж<testing.T> t) {
 
 // Test directories relative to temporary directory.
 // The tests are run in absTestDirs[0].
-internal static slice<@string> absTestDirs = slice<@string>([
+internal static slice<@string> absTestDirs = [
     "a",
     "a/b",
     "a/b/c"
-]);
+];
 
 // Test paths relative to temporary directory. $ expands to the directory.
 // The tests are run in absTestDirs[0].
 // We create absTestDirs first.
-internal static slice<@string> absTests = slice<@string>([
+internal static slice<@string> absTests = [
     ".",
     "b",
     "b/",
@@ -1555,7 +1531,7 @@ internal static slice<@string> absTests = slice<@string>([
     "$/a/../a/b",
     "$/a/b/c/../../.././a",
     "$/a/b/c/../../.././a/"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object mkdirFailedˢ = (@string)"Mkdir failed: "u8;
@@ -1567,7 +1543,7 @@ public static void TestAbs(ж<testing.T> t) {
     @string root = t.TempDir();
     t.Chdir(root);
 
-    foreach (var (_, dir) in absTestDirs) {
+    foreach (var (_, dir) in range(absTestDirs)) {
         var errΔ1 = os.Mkdir(dir, 511);
         if (errΔ1 != nil) {
             t.Fatal(mkdirFailedˢ, errΔ1);
@@ -1580,7 +1556,7 @@ public static void TestAbs(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
         @string vol = filepath.VolumeName(root);
         slice<@string> extra = default;
-        foreach (var (_, vᴛ1) in absTests) {
+        foreach (var (_, vᴛ1) in range(absTests)) {
             var path = vᴛ1;
 
             if (strings.Contains(path, "$")) {
@@ -1597,7 +1573,7 @@ public static void TestAbs(ж<testing.T> t) {
         t.Fatal(chdirFailedˢ, err);
     }
 
-    foreach (var (_, vᴛ2) in tests) {
+    foreach (var (_, vᴛ2) in range(tests)) {
         var path = vᴛ2;
 
         path = strings.ReplaceAll(path, "$", root);
@@ -1657,7 +1633,7 @@ partial struct RelTests {
     internal @string root, path, want;
 }
 
-internal static slice<RelTests> reltests = slice<RelTests>([
+internal static slice<RelTests> reltests = [
     new("a/b", "a/b", "."),
     new("a/b/.", "a/b", "."),
     new("a/b", "a/b/.", "."),
@@ -1700,9 +1676,9 @@ internal static slice<RelTests> reltests = slice<RelTests>([
     new("../..", "..", "err"),
     new("a", "/a", "err"),
     new("/a", "a", "err")
-]);
+];
 
-internal static slice<RelTests> winreltests = slice<RelTests>([
+internal static slice<RelTests> winreltests = [
     new(@"C:a\b\c", @"C:a/b/d", @"..\d"),
     new(@"C:\", @"D:\", @"err"),
     new(@"C:", @"D:", @"err"),
@@ -1710,17 +1686,17 @@ internal static slice<RelTests> winreltests = slice<RelTests>([
     new(@"C:\Projects", @"c:\projects", @"."),
     new(@"C:\Projects\a\..", @"c:\projects", @"."),
     new(@"\\host\share", @"\\host\share\file.txt", @"file.txt")
-]);
+];
 
 public static void TestRel(ж<testing.T> t) {
     var tests = appendꓸꓸꓸ(slice<RelTests>([]), reltests);
     if (runtime.GOOS == "windows"u8) {
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             tests[i].want = filepath.FromSlash(tests[i].want);
         }
         tests = appendꓸꓸꓸ(tests, winreltests);
     }
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (got, err) = filepath.Rel(test.root, test.path);
         if (test.want == "err"u8) {
             if (err == nil) {
@@ -1742,7 +1718,7 @@ partial struct VolumeNameTest {
     internal @string vol;
 }
 
-internal static slice<VolumeNameTest> volumenametests = slice<VolumeNameTest>([
+internal static slice<VolumeNameTest> volumenametests = [
     new(@"c:/foo/bar", @"c:"),
     new(@"c:", @"c:"),
     new(@"c:\", @"c:"),
@@ -1786,17 +1762,15 @@ internal static slice<VolumeNameTest> volumenametests = slice<VolumeNameTest>([
     new(@"//./UNC/", @"\\.\UNC\"),
     new(@"\\?\x", @"\\?\x"),
     new(@"\??\x", @"\??\x")
-]);
+];
 
 public static void TestVolumeName(ж<testing.T> t) {
     if (runtime.GOOS != "windows"u8) {
         return;
     }
-    foreach (var (_, v) in volumenametests) {
-        {
-            @string vol = filepath.VolumeName(v.path); if (vol != v.vol) {
-                t.Errorf("VolumeName(%q)=%q, want %q", v.path, vol, v.vol);
-            }
+    foreach (var (_, v) in range(volumenametests)) {
+        @string vol = filepath.VolumeName(v.path); if (vol != v.vol) {
+            t.Errorf("VolumeName(%q)=%q, want %q", v.path, vol, v.vol);
         }
     }
 }
@@ -1932,7 +1906,7 @@ public static void TestIssue29372(ж<testing.T> t) {
         path + strings.Repeat(pathSeparator, 2) + ".."u8
     ]);
 
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         (_, err) = filepath.EvalSymlinks(test);
         if (!AreEqual(err, syscall.ENOTDIR)) {
             t.Fatalf("test#%d: want %q, got %q", i, syscall.ENOTDIR, err);
@@ -1955,20 +1929,14 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    {
-        var errΔ1 = os.Mkdir(filepath.Join(evalTmpDir, "a"), 511); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.Mkdir(filepath.Join(evalTmpDir, "a"), 511); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
-    {
-        var errΔ2 = os.Symlink(filepath.Join(evalTmpDir, "a"), filepath.Join(evalTmpDir, "b")); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = os.Symlink(filepath.Join(evalTmpDir, "a"), filepath.Join(evalTmpDir, "b")); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
-    {
-        var errΔ3 = os.WriteFile(filepath.Join(evalTmpDir, "a", fileˢ), default, 438); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = os.WriteFile(filepath.Join(evalTmpDir, "a", fileˢ), default, 438); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 
     // Count the number of ".." elements to get to the root directory.
@@ -1979,10 +1947,10 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> t) {
         dd = append(ddᴷ, dd, (@string)"..");
     }
 
-    @string wantSuffix = strings.Join(slice<@string>(["a", "file"]), (@string)(rune)os.PathSeparator);
+    @string wantSuffix = strings.Join(["a", "file"], (@string)(rune)os.PathSeparator);
 
     // Try different numbers of "..".
-    foreach (var (_, i) in slice<nint>([c, c + 1, c + 2])) {
+    foreach (var (_, i) in range(slice<nint>([c, c + 1, c + 2]))) {
         @string check = strings.Join(slice<@string>([evalTmpDir, strings.Join(dd.slice(0, i), (@string)(rune)os.PathSeparator), evalTmpDir.slice(len(vol) + 1), "b", "file"]), (@string)(rune)os.PathSeparator);
         var (resolved, errΔ4) = filepath.EvalSymlinks(check);
         switch (ᐧ) {
@@ -2063,18 +2031,14 @@ public static void TestIssue51617(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string dir = t.TempDir();
-        foreach (var (_, sub) in slice<@string>(["a", filepath.Join("a", badˢ), filepath.Join("a", nextˢ)])) {
-            {
-                var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+        foreach (var (_, sub) in range(slice<@string>(["a", filepath.Join("a", badˢ), filepath.Join("a", nextˢ)]))) {
+            var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         @string bad = filepath.Join(dir, "a", badˢ);
-        {
-            var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
@@ -2107,9 +2071,9 @@ public static void TestEscaping(ж<testing.T> t) {
     @string dir = t.TempDir();
     t.Chdir(t.TempDir());
 
-    foreach (var (_, p) in slice<@string>([
+    foreach (var (_, p) in range(slice<@string>([
         filepath.Join(dir, "x")
-    ])) {
+    ]))) {
         if (!filepath.IsLocal(p)) {
             continue;
         }
@@ -2121,7 +2085,7 @@ public static void TestEscaping(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        foreach (var (_, e) in ents) {
+        foreach (var (_, e) in range(ents)) {
             t.Fatalf("found: %v", e.Name());
         }
     }
@@ -2152,7 +2116,7 @@ public static void BenchmarkIsLocal(ж<testing.B> b) {
         tests = appendꓸꓸꓸ(tests, plan9islocaltests);
     }
     while (b.Loop()) {
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             filepath.IsLocal(test.path);
         }
     }

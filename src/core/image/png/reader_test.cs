@@ -13,14 +13,12 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.image;
 using static go.image.png_package;
 
 partial class png_internal_test_package {
 
-internal static slice<@string> filenames = slice<@string>([
+internal static slice<@string> filenames = [
     "basn0g01",
     "basn0g01-30",
     "basn0g02",
@@ -56,21 +54,21 @@ internal static slice<@string> filenames = slice<@string>([
     "ftp0n2c08",
     "ftp0n3p08",
     "ftp1n3p08"
-]);
+];
 
-internal static slice<@string> filenamesPaletted = slice<@string>([
+internal static slice<@string> filenamesPaletted = [
     "basn3p01",
     "basn3p02",
     "basn3p04",
     "basn3p08",
     "basn3p08-trns"
-]);
+];
 
-internal static slice<@string> filenamesShort = slice<@string>([
+internal static slice<@string> filenamesShort = [
     "basn0g01",
     "basn0g04-31",
     "basn6a16"
-]);
+];
 
 internal static (image.Image, error) readPNG(@string filename) {
     GoFrame ᒐ = default;
@@ -239,7 +237,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
         if (cpm != nil) {
             nint lastAlpha = -1;
             io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), plteˢ2);
-            foreach (var (i, c) in cpm) {
+            foreach (var (i, c) in range<color.Color>(cpm)) {
                 uint8 r = default;
                 uint8 g = default;
                 uint8 b = default;
@@ -264,10 +262,8 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    (%3d,%3d,%3d)     # rgb = (0x%02x,0x%02x,0x%02x)\n"u8, r, g, b, r, g, b);
             }
             io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
-            {
-                var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
-                }
+            var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
+                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
             }
             if (lastAlpha != -1) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
@@ -279,10 +275,8 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n");
             }
         } else if (strings.HasPrefix(filename, "ft")) {
-            {
-                var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
-                }
+            var (s, ok) = fakebKGDs[filename, ꟷ]; if (ok) {
+                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
             }
             // We fake a tRNS chunk. The test files' grayscale and truecolor
             // transparent images all have their top left corner transparent.
@@ -441,7 +435,7 @@ public static partial void TestReader(ж<testing.T> t) {
         if (testing.Short()) {
             names = filenamesShort;
         }
-        foreach (var (_, fn) in names) {
+        foreach (var (_, fn) in range(names)) {
             // Read the .png file.
             var (img, err) = readPNG("testdata/pngsuite/"u8 + fn + ".png"u8);
             if (err != nil) {
@@ -498,10 +492,8 @@ public static partial void TestReader(ж<testing.T> t) {
                 //	# rgb = (0x00,0x00,0xff)
                 // We strip any such name.
                 if (strings.Contains(ss, rgbˢ) && !strings.HasSuffix(ss, ")")) {
-                    {
-                        nint i = strings.LastIndex(ss, ") "); if (i >= 0) {
-                            ss = ss.slice(0, i + 1);
-                        }
+                    nint i = strings.LastIndex(ss, ") "); if (i >= 0) {
+                        ss = ss.slice(0, i + 1);
                     }
                 }
 
@@ -526,15 +518,15 @@ partial struct readerErrorsᴛ1 /*dyn*/ {
     internal @string @file;
     internal @string err;
 }
-internal static slice<readerErrorsᴛ1> readerErrors = slice<readerErrorsᴛ1>([
+internal static slice<readerErrorsᴛ1> readerErrors = [
     new("invalid-zlib.png", "zlib: invalid checksum"),
     new("invalid-crc32.png", "invalid checksum"),
     new("invalid-noend.png", "unexpected EOF"),
     new("invalid-trunc.png", "unexpected EOF")
-]);
+];
 
 public static void TestReaderError(ж<testing.T> t) {
-    foreach (var (_, tt) in readerErrors) {
+    foreach (var (_, tt) in range(readerErrors)) {
         var (img, err) = readPNG("testdata/"u8 + tt.@file);
         if (err == nil) {
             t.Errorf("decoding %s: missing error", tt.@file);
@@ -552,7 +544,7 @@ public static void TestReaderError(ж<testing.T> t) {
 public static void TestPalettedDecodeConfig(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, fn) in filenamesPaletted) {
+        foreach (var (_, fn) in range(filenamesPaletted)) {
             var (f, err) = os.Open("testdata/pngsuite/"u8 + fn + ".png"u8);
             if (err != nil) {
                 t.Errorf("%s: open failed: %v", fn, err);
@@ -751,10 +743,8 @@ public static void TestMultipletRNSChunks(ж<testing.T> t) {
             continue;
             break;
         }}
-        {
-            var got = m.At(0, 0); if (!AreEqual(got, want)) {
-                t.Errorf("%d tRNS chunks: got %T %v, want %T %v", i, got, got, want, want);
-            }
+        var got = m.At(0, 0); if (!AreEqual(got, want)) {
+            t.Errorf("%d tRNS chunks: got %T %v, want %T %v", i, got, got, want, want);
         }
     }
 }
@@ -785,10 +775,8 @@ public static void TestPaletted8OutOfRangePixel(ж<testing.T> t) {
 
     // Expect that the palette is extended with opaque black.
     var want = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
-    {
-        var got = img.At(15, 15); if (!AreEqual(got, want)) {
-            t.Errorf("got %F %v, expected %T %v", got, got, want, want);
-        }
+    var got = img.At(15, 15); if (!AreEqual(got, want)) {
+        t.Errorf("got %F %v, expected %T %v", got, got, want, want);
     }
 }
 
@@ -802,7 +790,7 @@ private static readonly @string wantᶜᵇ = ".. .. .. ce bd bd bd bd bd bd bd b
 
 public static void TestGray8Transparent(ж<testing.T> t) {
     // These bytes come from https://golang.org/issues/19553
-    var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>([
+    var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
         0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x0b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x85, 0x2c, 0x88,
         0x80, 0x00, 0x00, 0x00, 0x02, 0x74, 0x52, 0x4e, 0x53, 0x00, 0xff, 0x5b, 0x91, 0x22, 0xb5, 0x00,
@@ -816,7 +804,7 @@ public static void TestGray8Transparent(ж<testing.T> t) {
         0x92, 0xd7, 0x82, 0x41, 0x31, 0x9c, 0x3f, 0x07, 0x02, 0xee, 0xa1, 0xaa, 0xff, 0xff, 0x9f, 0xe1,
         0xd9, 0x56, 0x30, 0xf8, 0x0e, 0xe5, 0x03, 0x00, 0xa9, 0x42, 0x84, 0x3d, 0xdf, 0x8f, 0xa6, 0x8f,
         0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-    ]))));
+    ])));
     if (err != nil) {
         t.Fatalf("Decode: %v", err);
     }
@@ -826,18 +814,16 @@ public static void TestGray8Transparent(ж<testing.T> t) {
     var bounds = m.Bounds();
     for (nint y = bounds.Min.Y; y < bounds.Max.Y; y++) {
         for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
-            {
-                var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0) {
-                    got = append(got,
-                        hex[(0x0f & (r >> 12))],
-                        hex[(0x0f & (r >> 8))],
-                        (byte)' ');
-                } else {
-                    got = append(got,
-                        (byte)'.',
-                        (byte)'.',
-                        (byte)' ');
-                }
+            var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0) {
+                got = append(got,
+                    hex[(0x0f & (r >> 12))],
+                    hex[(0x0f & (r >> 8))],
+                    (byte)' ');
+            } else {
+                got = append(got,
+                    (byte)'.',
+                    (byte)'.',
+                    (byte)' ');
             }
         }
         got = append(got, (byte)'\n');
@@ -871,13 +857,13 @@ public static void TestDimensionOverflow(ж<testing.T> t) {
         // NRGBA image. The (width × height) per se doesn't overflow an int64, but
         // (width × height × bytesPerPixel) will.
         new(
-            src: slice<byte>([
+            src: [
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x7f, 0xff, 0xff, 0xfe, 0x7f, 0xff, 0xff, 0xfe, 0x08, 0x06, 0x00, 0x00, 0x00, 0x30, 0x57, 0xb3,
                 0xfd, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            ]),
+            ],
             // It's debatable whether DecodeConfig (which does not allocate a
             // pixel buffer, unlike Decode) should fail in this case. The Go
             // standard library has made its choice, and the standard library
@@ -890,13 +876,13 @@ public static void TestDimensionOverflow(ж<testing.T> t) {
         // The next three cases come from https://golang.org/issues/38435
 
         new(
-            src: slice<byte>([
+            src: [
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x00, 0x00, 0xb5, 0x04, 0x00, 0x00, 0xb5, 0x04, 0x08, 0x06, 0x00, 0x00, 0x00, 0xf5, 0x60, 0x2c,
                 0xb8, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            ]),
+            ],
             // Here, width * height = 0x7ffea810, just under MaxInt32, but at 4
             // bytes per pixel, the number of pixels overflows an int32.
             unsupportedConfig: have32BitInts,
@@ -905,41 +891,39 @@ public static void TestDimensionOverflow(ж<testing.T> t) {
         ),
 
         new(
-            src: slice<byte>([
+            src: [
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x30, 0x6e, 0xc5,
                 0x21, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            ]),
+            ],
             unsupportedConfig: false,
             width: 0x04000000,
             height: 0x00000001
         ),
 
         new(
-            src: slice<byte>([
+            src: [
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
                 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0xaa, 0xd4, 0x7c,
                 0xda, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x66, 0x20, 0x12, 0x30,
                 0x8d, 0x2a, 0xa4, 0xaf, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x14, 0xd2, 0x00, 0x16, 0x00,
                 0x00, 0x00
-            ]),
+            ],
             unsupportedConfig: false,
             width: 0x08000000,
             height: 0x00000001
         )
     ]);
 
-    foreach (var (i, tc) in testCases) {
+    foreach (var (i, tc) in range(testCases)) {
         var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src)));
         if (tc.unsupportedConfig) {
             if (err == nil) {
                 t.Errorf("i=%d: DecodeConfig: got nil error, want non-nil", i);
-            } else {
-                var (_, ok) = err._<UnsupportedError>(ᐧ); if (!ok) {
-                    t.Fatalf("Decode: got %v (of type %T), want non-nil error (of type png.UnsupportedError)", err, err);
-                }
+            } else if (!err._<UnsupportedError>(out _)) {
+                t.Fatalf("Decode: got %v (of type %T), want non-nil error (of type png.UnsupportedError)", err, err);
             }
             continue;
         } else if (err != nil) {
@@ -953,30 +937,26 @@ public static void TestDimensionOverflow(ж<testing.T> t) {
             continue;
         }
 
-        {
-            var nPixels = (int64)cfg.Width * (int64)cfg.Height; if (nPixels > 0x7f000000) {
-                // In theory, calling Decode would succeed, given several gigabytes
-                // of memory. In practice, trying to make a []uint8 big enough to
-                // hold all of the pixels can often result in OOM (out of memory).
-                // OOM is unrecoverable; we can't write a test that passes when OOM
-                // happens. Instead we skip the Decode call (and its tests).
-                continue;
-            } else if (testing.Short()) {
-                // Even for smaller image dimensions, calling Decode might allocate
-                // 1 GiB or more of memory. This is usually feasible, and we want
-                // to check that calling Decode doesn't panic if there's enough
-                // memory, but we provide a runtime switch (testing.Short) to skip
-                // these if it would OOM. See also http://golang.org/issue/5050
-                // "decoding... images can cause huge memory allocations".
-                continue;
-            }
+        var nPixels = (int64)cfg.Width * (int64)cfg.Height; if (nPixels > 0x7f000000) {
+            // In theory, calling Decode would succeed, given several gigabytes
+            // of memory. In practice, trying to make a []uint8 big enough to
+            // hold all of the pixels can often result in OOM (out of memory).
+            // OOM is unrecoverable; we can't write a test that passes when OOM
+            // happens. Instead we skip the Decode call (and its tests).
+            continue;
+        } else if (testing.Short()) {
+            // Even for smaller image dimensions, calling Decode might allocate
+            // 1 GiB or more of memory. This is usually feasible, and we want
+            // to check that calling Decode doesn't panic if there's enough
+            // memory, but we provide a runtime switch (testing.Short) to skip
+            // these if it would OOM. See also http://golang.org/issue/5050
+            // "decoding... images can cause huge memory allocations".
+            continue;
         }
 
         // Even if we don't panic, these aren't valid PNG images.
-        {
-            var (_, errΔ1) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src))); if (errΔ1 == nil) {
-                t.Errorf("i=%d: Decode: got nil error, want non-nil", i);
-            }
+        var (_, errΔ1) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src))); if (errΔ1 == nil) {
+            t.Errorf("i=%d: Decode: got nil error, want non-nil", i);
         }
     }
 
@@ -1026,19 +1006,15 @@ public static void TestDecodePalettedWithTransparency(ж<testing.T> t) {
     var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
     if (err != nil) {
         t.Fatalf("DecodeConfig: %v", err);
-    } else {
-        var (_, _, _, alpha) = cfg.ColorModel._<color.Palette>()[0].RGBA(); if (alpha != 0) {
-            t.Errorf("DecodeConfig: got %d, want 0", alpha);
-        }
+    } else if (cfg.ColorModel._<color.Palette>()[0].RGBA() is var (_, _, _, alpha) && alpha != 0) {
+        t.Errorf("DecodeConfig: got %d, want 0", alpha);
     }
 
     (var img, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
     if (err != nil) {
         t.Fatalf("Decode: %v", err);
-    } else {
-        var (_, _, _, alpha) = img.ColorModel()._<color.Palette>()[0].RGBA(); if (alpha != 0) {
-            t.Errorf("Decode: got %d, want 0", alpha);
-        }
+    } else if (img.ColorModel()._<color.Palette>()[0].RGBA() is var (_, _, _, alpha) && alpha != 0) {
+        t.Errorf("Decode: got %d, want 0", alpha);
     }
 }
 

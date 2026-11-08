@@ -26,8 +26,6 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 using Δio = io_package;
 
@@ -65,10 +63,8 @@ public static void TestDebugLog(ж<testing.T> t) {
     runtime_internal_test_package.ResetDebugLog();
     runtime_internal_test_package.Dlog().S(testingˢ).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
-    {
-        @string want = testingˢ2; if (got != want) {
-            t.Fatalf("want %q, got %q", want, got);
-        }
+    @string want = testingˢ2; if (got != want) {
+        t.Fatalf("want %q, got %q", want, got);
     }
 }
 
@@ -84,10 +80,8 @@ public static void TestDebugLogTypes(ж<testing.T> t) {
     @string varString = strings.Repeat("a", 4);
     runtime_internal_test_package.Dlog().B(true).B(false).I(-42).I16(0x7fff).U64(~(uint64)0).Hex(0xfff).P(default).S(varString).S(constStringˢ).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
-    {
-        @string want = trueFalse4232767ˢ; if (got != want) {
-            t.Fatalf("want %q, got %q", want, got);
-        }
+    @string want = trueFalse4232767ˢ; if (got != want) {
+        t.Fatalf("want %q, got %q", want, got);
     }
 }
 

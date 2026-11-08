@@ -16,8 +16,6 @@ using testing = testing_package;
 using time = time_package;
 using @internal;
 using @internal.trace;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
 using go.sync;
 
@@ -49,10 +47,8 @@ public static void TestFlightRecorderEnabled(ж<testing.T> t) {
     if (fr.Enabled()) {
         t.Fatal(flightRecorderIsEnabledˢ);
     }
-    {
-        var err = fr.Start(); if (err != nil) {
-            t.Fatalf("unexpected error on Start: %v", err);
-        }
+    var err = fr.Start(); if (err != nil) {
+        t.Fatalf("unexpected error on Start: %v", err);
     }
     if (!fr.Enabled()) {
         t.Fatal(flightRecorderIsNotˢ);
@@ -104,7 +100,7 @@ public static partial void TestFlightRecorderConcurrentWriteTo(ж<testing.T> t) 
     ref var bufs = ref heap(new array<bytes.Buffer>(2), out var Ꮡbufs);
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     ref var successes = ref heap(new atomic.Uint32(), out var Ꮡsuccesses);
-    foreach (var i in range(bufs)) {
+    foreach (var i in range(len(bufs))) {
         Ꮡwg.Add(1);
         var frʗ1 = fr;
         goǃ(() => {
@@ -147,7 +143,7 @@ public static partial void TestFlightRecorderConcurrentWriteTo(ж<testing.T> t) 
     }
 
     // Validate the traces that came out.
-    foreach (var i in range(bufs)) {
+    foreach (var i in range(len(bufs))) {
         var buf = Ꮡbufs.at<bytes.Buffer>(i);
         if (buf.Len() == 0) {
             continue;
@@ -251,11 +247,9 @@ public static void TestFlightRecorderGenerationCount(ж<testing.T> t) {
                 (nint)(wantMaxSyncs), len(syncs), syncs);
         }
         var ends = slice<nint>([syncs[0], syncs[len(syncs) - 1]]);
-        {
-            var wantEnds = slice<nint>([0, evs - 1]); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
-                tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d",
-                    ends, wantEnds);
-            }
+        var wantEnds = slice<nint>([0, evs - 1]); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
+            tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d",
+                ends, wantEnds);
         }
     }
     var testʗ1 = test;
@@ -329,10 +323,8 @@ internal static void testReader(ж<testing.T> t, slice<byte> tb, ж<testtrace.Ex
 
     var (r, err) = inttrace.NewReader(new bytes_ReaderжReader(bytes.NewReader(tb)));
     if (err != nil) {
-        {
-            var errΔ1 = exp.Check(err); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = exp.Check(err); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
         return;
     }
@@ -344,23 +336,17 @@ internal static void testReader(ж<testing.T> t, slice<byte> tb, ж<testtrace.Ex
             break;
         }
         if (errΔ2 != nil) {
-            {
-                var errΔ3 = exp.Check(errΔ2); if (errΔ3 != nil) {
-                    t.Error(errΔ3);
-                }
+            var errΔ3 = exp.Check(errΔ2); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
             return;
         }
-        {
-            var errΔ4 = v.Event(ev); if (errΔ4 != nil) {
-                t.Error(errΔ4);
-            }
+        var errΔ4 = v.Event(ev); if (errΔ4 != nil) {
+            t.Error(errΔ4);
         }
     }
-    {
-        var errΔ5 = exp.Check(default); if (errΔ5 != nil) {
-            t.Error(errΔ5);
-        }
+    var errΔ5 = exp.Check(default); if (errΔ5 != nil) {
+        t.Error(errΔ5);
     }
     if (t.Failed() || dumpTraces.Value) {
         testtrace.Dump(t, traceˢ, tb, dumpTraces.Value);
@@ -370,10 +356,8 @@ internal static void testReader(ж<testing.T> t, slice<byte> tb, ж<testtrace.Ex
 public static void TestTraceAndFlightRecorder(ж<testing.T> t) {
     ref var tBuf = ref heap(new bytes.Buffer(), out var ᏑtBuf);
     ref var frBuf = ref heap(new bytes.Buffer(), out var ᏑfrBuf);
-    {
-        var err = trace.Start(new bytes_BufferжWriter(ᏑtBuf)); if (err != nil) {
-            t.Errorf("unable to start execution tracer: %s", err);
-        }
+    var err = trace.Start(new bytes_BufferжWriter(ᏑtBuf)); if (err != nil) {
+        t.Errorf("unable to start execution tracer: %s", err);
     }
     var fr = trace.NewFlightRecorder(new trace.FlightRecorderConfig(MaxBytes: 16));
     fr.Start();

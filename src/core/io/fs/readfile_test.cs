@@ -34,9 +34,7 @@ partial struct readFileOnly {
     /*embed*/ public go.io.fs_package.ReadFileFS ReadFileFS;
 }
 
-internal static (fs.File, error) Open(this readFileOnly _, @string name) {
-    return (default, ErrNotExist);
-}
+internal static (fs.File, error) Open(this readFileOnly _, @string name) { return (default, ErrNotExist); }
 
 partial struct openOnly {
     /*embed*/ public go.io.fs_package.FS FS;
@@ -75,11 +73,9 @@ public static void TestReadFilePath(ж<testing.T> t) {
     var fsys = os.DirFS(t.TempDir());
     var (_, err1) = ReadFile(fsys, nonExistentˢ);
     var (_, err2) = ReadFile(new TestReadDirPath_fsys(fsys), nonExistentˢ);
-    {
-        @string s1 = errorPath(err1);
-        @string s2 = errorPath(err2); if (s1 != s2) {
-            t.Fatalf("s1: %s != s2: %s", s1, s2);
-        }
+    @string s1 = errorPath(err1);
+    @string s2 = errorPath(err2); if (s1 != s2) {
+        t.Fatalf("s1: %s != s2: %s", s1, s2);
     }
 }
 

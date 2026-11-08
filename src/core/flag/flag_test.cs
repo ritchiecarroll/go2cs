@@ -241,7 +241,7 @@ public static void TestUsage(ж<testing.T> t) {
     flag_internal_test_package.ResetForTesting(() => {
         called = true;
     });
-    if (CommandLine.Parse(slice<@string>(["-x"])) == nil) {
+    if (CommandLine.Parse(["-x"]) == nil) {
         t.Error(parseDidNotFailForˢ);
     }
     if (!called) {
@@ -313,10 +313,8 @@ internal static void testParse(ж<flag.FlagSet> Ꮡf, ж<testing.T> t) {
         "-duration", "2m",
         extra
     ]);
-    {
-        var err = Ꮡf.Parse(args); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = Ꮡf.Parse(args); if (err != nil) {
+        t.Fatal(err);
     }
     if (!f.Parsed()) {
         t.Error(fParseFalseAfterParseˢ);
@@ -396,10 +394,8 @@ public static void TestUserDefined(ж<testing.T> t) {
     flags.SetOutput(Δio.Discard);
     ref var v = ref heap<flagVar>(out var Ꮡv);
     flags.Var(new flag_test_package.flagVarжValue(Ꮡv), "v", usageˢ);
-    {
-        var err = Ꮡflags.Parse(slice<@string>(["-v", "1", "-v", "2", "-v=3"])); if (err != nil) {
-            t.Error(err);
-        }
+    var err = Ꮡflags.Parse(["-v", "1", "-v", "2", "-v=3"]); if (err != nil) {
+        t.Error(err);
     }
     if (len(v) != 3) {
         t.Fatal(expected3ArgsGotˢ, len(v));
@@ -424,7 +420,7 @@ public static void TestUserDefinedFunc(ж<testing.T> t) {
         return default;
     });
     {
-        var err = flags.Parse(slice<@string>(["-v", "1", "-v", "2", "-v=3"])); if (err != nil) {
+        var err = flags.Parse(["-v", "1", "-v", "2", "-v=3"]); if (err != nil) {
             t.Error(err);
         }
     }
@@ -432,19 +428,15 @@ public static void TestUserDefinedFunc(ж<testing.T> t) {
         t.Fatal(expected3ArgsGotˢ, len(ss));
     }
     @string expect = "[1 2 3]";
-    {
-        @string got = fmt.Sprint(ss); if (got != expect) {
-            t.Errorf("expected value %q got %q", expect, got);
-        }
+    @string got = fmt.Sprint(ss); if (got != expect) {
+        t.Errorf("expected value %q got %q", expect, got);
     }
     // test usage
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     flags.SetOutput(new flag_test_package.strings_BuilderжWriter(Ꮡbuf));
-    flags.Parse(slice<@string>(["-h"]));
-    {
-        @string usage = buf.String(); if (!strings.Contains(usage, usageˢ)) {
-            t.Errorf("usage string not included: %q", usage);
-        }
+    flags.Parse(["-h"]);
+    @string usage = buf.String(); if (!strings.Contains(usage, usageˢ)) {
+        t.Errorf("usage string not included: %q", usage);
     }
     // test Func error
     flags = NewFlagSet(testˢ, ContinueOnError);
@@ -458,7 +450,7 @@ public static void TestUserDefinedFunc(ж<testing.T> t) {
     }
     // flag set, expect error
     {
-        var err = flags.Parse(slice<@string>(["-v", "1"])); if (err == nil) {
+        var err = flags.Parse(["-v", "1"]); if (err == nil) {
             t.Error(expectedErrorGotNoneˢ);
         } else {
             @string errMsg = err.Error(); if (!strings.Contains(errMsg, testErrorˢ)) {
@@ -511,11 +503,9 @@ public static void TestUserDefinedBool(ж<testing.T> t) {
     ref var b = ref heap(new boolFlagVar(), out var Ꮡb);
     error err = default;
     flags.Var(new flag_test_package.boolFlagVarжValue(Ꮡb), "b", usageˢ);
-    {
-        err = Ꮡflags.Parse(slice<@string>(["-b", "-b", "-b", "-b=true", "-b=false", "-b", "barg", "-b"])); if (err != nil) {
-            if (b.count < 4) {
-                t.Error(err);
-            }
+    err = Ꮡflags.Parse(["-b", "-b", "-b", "-b=true", "-b=false", "-b", "barg", "-b"]); if (err != nil) {
+        if (b.count < 4) {
+            t.Error(err);
         }
     }
 
@@ -566,11 +556,9 @@ public static void TestSetOutput(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     flags.SetOutput(new flag_test_package.strings_BuilderжWriter(Ꮡbuf));
     flags.Init(testˢ, ContinueOnError);
-    Ꮡflags.Parse(slice<@string>(["-unknown"]));
-    {
-        @string @out = buf.String(); if (!strings.Contains(@out, unknownˢ)) {
-            t.Logf("expected output mentioning unknown; got %q", @out);
-        }
+    Ꮡflags.Parse(["-unknown"]);
+    @string @out = buf.String(); if (!strings.Contains(@out, unknownˢ)) {
+        t.Logf("expected output mentioning unknown; got %q", @out);
     }
 }
 
@@ -593,12 +581,10 @@ public static void TestChangingArgs(ж<testing.T> t) {
         defer(() => {
             Δos.Args = oldArgsʗ1;
         }, ref ᒐ);
-        Δos.Args = slice<@string>(["cmd", "-before", "subcmd", "-after", "args"]);
+        Δos.Args = ["cmd", "-before", "subcmd", "-after", "args"];
         var before = Bool(beforeˢ, false, ""u8);
-        {
-            var err = CommandLine.Parse(Δos.Args[1..]); if (err != nil) {
-                t.Fatal(err);
-            }
+        var err = CommandLine.Parse(Δos.Args[1..]); if (err != nil) {
+            t.Fatal(err);
         }
         @string cmd = Arg(0);
         Δos.Args = Args();
@@ -644,7 +630,7 @@ public static void TestHelp(ж<testing.T> t) {
     ref var flag = ref heap(new bool(), out var Ꮡflag);
     fs.BoolVar(Ꮡflag, flagˢ, false, regularFlagˢ);
     // Regular flag invocation should work
-    var err = fs.Parse(slice<@string>(["-flag=true"]));
+    var err = fs.Parse(["-flag=true"]);
     if (err != nil) {
         t.Fatal(expectedNoErrorGotˢ, err);
     }
@@ -656,7 +642,7 @@ public static void TestHelp(ж<testing.T> t) {
         helpCalled = false; // reset for next test
     }
     // Help flag should work as expected.
-    err = fs.Parse(slice<@string>(["-help"]));
+    err = fs.Parse(["-help"]);
     if (err == nil) {
         t.Fatal(errorExpectedˢ);
     }
@@ -670,7 +656,7 @@ public static void TestHelp(ж<testing.T> t) {
     ref var help = ref heap(new bool(), out var Ꮡhelp);
     fs.BoolVar(Ꮡhelp, helpˢ, false, helpFlagˢ);
     helpCalled = false;
-    err = fs.Parse(slice<@string>(["-help"]));
+    err = fs.Parse(["-help"]);
     if (err != nil) {
         t.Fatal(expectedNoErrorForˢ, err);
     }
@@ -840,13 +826,11 @@ public static void TestUsageOutput(ж<testing.T> t) {
         defer((slice<@string> old) => {
             Δos.Args = old;
         }, Δos.Args, ref ᒐ);
-        Δos.Args = slice<@string>(["app", "-i=1", "-unknown"]);
+        Δos.Args = ["app", "-i=1", "-unknown"];
         Parse();
         @string want = wantᶜ;
-        {
-            @string got = buf.String(); if (got != want) {
-                t.Errorf("output = %q; want %q", got, want);
-            }
+        @string got = buf.String(); if (got != want) {
+            t.Errorf("output = %q; want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -901,7 +885,7 @@ internal static ref readonly @string parseErrorˢ => ref parseErrorˢᵇ;
 private static readonly @string parseErrorˢᵇ = "parse error"u8;
 
 public static void TestParseError(ж<testing.T> t) {
-    foreach (var (_, typ) in slice<@string>(["bool", "int", "int64", "uint", "uint64", "float64", "duration"])) {
+    foreach (var (_, typ) in range(slice<@string>(["bool", "int", "int64", "uint", "uint64", "float64", "duration"]))) {
         var fs = NewFlagSet(parseErrorTestˢ, ContinueOnError);
         fs.SetOutput(Δio.Discard);
         _ = fs.Bool(boolˢ, false, ""u8);
@@ -936,7 +920,7 @@ public static void TestRangeError(ж<testing.T> t) {
         "-uint64=123456789012345678901",
         "-float64=1e1000"
     ]);
-    foreach (var (_, arg) in bad) {
+    foreach (var (_, arg) in range(bad)) {
         var fs = NewFlagSet(parseErrorTestˢ, ContinueOnError);
         fs.SetOutput(Δio.Discard);
         _ = fs.Int(intˢ, 0, ""u8);
@@ -945,7 +929,7 @@ public static void TestRangeError(ж<testing.T> t) {
         _ = fs.Uint64(uint64ˢ, 0, ""u8);
         _ = fs.Float64(float64ˢ, 0D, ""u8);
         // Strings cannot give errors, and bools and durations do not return strconv.NumError.
-        var err = fs.Parse(slice<@string>([arg]));
+        var err = fs.Parse([arg]);
         if (err == nil) {
             t.Errorf("Parse(%q)=%v; expected range error", arg, err);
             continue;
@@ -1009,7 +993,7 @@ public static void TestExitCode(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var test = vᴛ1;
 
         var cmd = exec.Command(testenv.Executable(new flag_test_package.testing_TжTB(t)), testRunTestExitCodeˢ);
@@ -1042,10 +1026,8 @@ internal static void mustPanic(ж<testing.T> t, @string testName, @string expect
                 break;
             }
             case @string msg: {
-                {
-                    var (ok, _) = Δregexp.MatchString(expected, msg); if (!ok) {
-                        t.Errorf("%s\n: expected panic(%q), but got panic(%q)", testName, expected, msg);
-                    }
+                var (ok, _) = Δregexp.MatchString(expected, msg); if (!ok) {
+                    t.Errorf("%s\n: expected panic(%q), but got panic(%q)", testName, expected, msg);
                 }
                 break;
             }
@@ -1078,7 +1060,7 @@ public static void TestInvalidFlags(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestInvalidFlags_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1094,10 +1076,8 @@ public static void TestInvalidFlags(ж<testing.T> t) {
             ref var v = ref heap<flagVar>(out var Ꮡv);
             fsʗ1.Var(new flag_test_package.flagVarжValue(Ꮡv), testʗ1.flag, ""u8);
         });
-        {
-            @string msg = test.errorMsg + "\n"u8; if (msg != buf.String()) {
-                t.Errorf("%s\n: unexpected output: expected %q, bug got %q", testName, msg, buf.OrTypedNil());
-            }
+        @string msg = test.errorMsg + "\n"u8; if (msg != buf.String()) {
+            t.Errorf("%s\n: unexpected output: expected %q, bug got %q", testName, msg, buf.OrTypedNil());
         }
     }
 }
@@ -1123,7 +1103,7 @@ public static void TestRedefinedFlags(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string testName = fmt.Sprintf("flag redefined in FlagSet(%q)"u8, test.flagSetName);
 
         var fs = NewFlagSet(test.flagSetName, ContinueOnError);
@@ -1137,10 +1117,8 @@ public static void TestRedefinedFlags(ж<testing.T> t) {
         mustPanic(t, testName, test.errorMsg, () => {
             fsʗ1.Var(new flag_test_package.flagVarжValue(Ꮡv), fooˢ, ""u8);
         });
-        {
-            @string msg = test.errorMsg + "\n"u8; if (msg != buf.String()) {
-                t.Errorf("%s\n: unexpected output: expected %q, bug got %q", testName, msg, buf.OrTypedNil());
-            }
+        @string msg = test.errorMsg + "\n"u8; if (msg != buf.String()) {
+            t.Errorf("%s\n: unexpected output: expected %q, bug got %q", testName, msg, buf.OrTypedNil());
         }
     }
 }
@@ -1159,7 +1137,7 @@ public static void TestUserDefinedBoolFunc(ж<testing.T> t) {
         return default;
     });
     {
-        var err = flags.Parse(slice<@string>(["-v", "", "-v", "1", "-v=2"])); if (err != nil) {
+        var err = flags.Parse(["-v", "", "-v", "1", "-v=2"]); if (err != nil) {
             t.Error(err);
         }
     }
@@ -1167,19 +1145,15 @@ public static void TestUserDefinedBoolFunc(ж<testing.T> t) {
         t.Fatalf("got %d args; want 1 arg", len(ss));
     }
     @string want = trueˢ2;
-    {
-        @string got = fmt.Sprint(ss); if (got != want) {
-            t.Errorf("got %q; want %q", got, want);
-        }
+    @string got = fmt.Sprint(ss); if (got != want) {
+        t.Errorf("got %q; want %q", got, want);
     }
     // test usage
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     flags.SetOutput(new flag_test_package.strings_BuilderжWriter(Ꮡbuf));
-    flags.Parse(slice<@string>(["-h"]));
-    {
-        @string usage = buf.String(); if (!strings.Contains(usage, usageˢ)) {
-            t.Errorf("usage string not included: %q", usage);
-        }
+    flags.Parse(["-h"]);
+    @string usage = buf.String(); if (!strings.Contains(usage, usageˢ)) {
+        t.Errorf("usage string not included: %q", usage);
     }
     // test BoolFunc error
     flags = NewFlagSet(testˢ, ContinueOnError);
@@ -1193,7 +1167,7 @@ public static void TestUserDefinedBoolFunc(ж<testing.T> t) {
     }
     // flag set, expect error
     {
-        var err = flags.Parse(slice<@string>(["-v", ""])); if (err == nil) {
+        var err = flags.Parse(["-v", ""]); if (err == nil) {
             t.Error(gotErrNilWantErrNilˢ);
         } else {
             @string errMsg = err.Error(); if (!strings.Contains(errMsg, testErrorˢ)) {

@@ -33,7 +33,7 @@ using Δtime = time_package;
 partial class time_test_package {
 
 public static void TestInternal(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in time_internal_test_package.InternalTests) {
+    foreach (var (_, vᴛ1) in range(time_internal_test_package.InternalTests)) {
         ref var tt = ref heap(new InternalTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -66,11 +66,9 @@ internal static readonly object likelyProblemTheTimeZoneˢ = (@string)"Likely pr
 public static void TestZoneData(ж<Δtesting.T> t) {
     var lt = Now();
     // PST is 8 hours west, PDT is 7 hours west. We could use the name but it's not unique.
-    {
-        var (name, off) = lt.Zone(); if (off != -8 * 60 * 60 && off != -7 * 60 * 60) {
-            t.Errorf("Unable to find US Pacific time zone data for testing; time zone is %q offset %d", name, off);
-            t.Error(likelyProblemTheTimeZoneˢ);
-        }
+    var (name, off) = lt.Zone(); if (off != -8 * 60 * 60 && off != -7 * 60 * 60) {
+        t.Errorf("Unable to find US Pacific time zone data for testing; time zone is %q offset %d", name, off);
+        t.Error(likelyProblemTheTimeZoneˢ);
     }
 }
 
@@ -91,21 +89,21 @@ partial struct TimeTest {
     internal parsedTime golden;
 }
 
-internal static slice<TimeTest> utctests = slice<TimeTest>([
+internal static slice<TimeTest> utctests = [
     new(0, new parsedTime(1970, January, 1, 0, 0, 0, 0, Thursday, 0, "UTC")),
     new(1221681866, new parsedTime(2008, September, 17, 20, 4, 26, 0, Wednesday, 0, "UTC")),
     new(-1221681866, new parsedTime(1931, April, 16, 3, 55, 34, 0, Thursday, 0, "UTC")),
     new(-11644473600L, new parsedTime(1601, January, 1, 0, 0, 0, 0, Monday, 0, "UTC")),
     new(599529660, new parsedTime(1988, December, 31, 0, 1, 0, 0, Saturday, 0, "UTC")),
     new(978220860, new parsedTime(2000, December, 31, 0, 1, 0, 0, Sunday, 0, "UTC"))
-]);
+];
 
-internal static slice<TimeTest> nanoutctests = slice<TimeTest>([
+internal static slice<TimeTest> nanoutctests = [
     new(0, new parsedTime(1970, January, 1, 0, 0, 0, 100000000, Thursday, 0, "UTC")),
     new(1221681866, new parsedTime(2008, September, 17, 20, 4, 26, 200000000, Wednesday, 0, "UTC"))
-]);
+];
 
-internal static slice<TimeTest> localtests = slice<TimeTest>([
+internal static slice<TimeTest> localtests = [
     new(0, new parsedTime(1969, December, 31, 16, 0, 0, 0, Wednesday, -8 * 60 * 60, "PST")),
     new(1221681866, new parsedTime(2008, September, 17, 13, 4, 26, 0, Wednesday, -7 * 60 * 60, "PDT")),
     new(2159200800L, new parsedTime(2038, June, 3, 11, 0, 0, 0, Thursday, -7 * 60 * 60, "PDT")),
@@ -115,12 +113,12 @@ internal static slice<TimeTest> localtests = slice<TimeTest>([
     new(2172733199L, new parsedTime(2038, November, 7, 1, 59, 59, 0, Sunday, -7 * 60 * 60, "PDT")),
     new(2172733200L, new parsedTime(2038, November, 7, 1, 0, 0, 0, Sunday, -8 * 60 * 60, "PST")),
     new(2172733201L, new parsedTime(2038, November, 7, 1, 0, 1, 0, Sunday, -8 * 60 * 60, "PST"))
-]);
+];
 
-internal static slice<TimeTest> nanolocaltests = slice<TimeTest>([
+internal static slice<TimeTest> nanolocaltests = [
     new(0, new parsedTime(1969, December, 31, 16, 0, 0, 100000000, Wednesday, -8 * 60 * 60, "PST")),
     new(1221681866, new parsedTime(2008, September, 17, 13, 4, 26, 300000000, Wednesday, -7 * 60 * 60, "PDT"))
-]);
+];
 
 internal static bool same(Δtime.Time t, ж<parsedTime> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
@@ -137,7 +135,7 @@ internal static bool same(Δtime.Time t, ж<parsedTime> Ꮡu) {
 }
 
 public static void TestUnixUTC(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in utctests) {
+    foreach (var (_, vᴛ1) in range(utctests)) {
         ref var test = ref heap(new TimeTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -157,7 +155,7 @@ public static void TestUnixUTC(ж<Δtesting.T> t) {
 }
 
 public static void TestUnixNanoUTC(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in nanoutctests) {
+    foreach (var (_, vᴛ1) in range(nanoutctests)) {
         ref var test = ref heap(new TimeTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -177,7 +175,7 @@ public static void TestUnixNanoUTC(ж<Δtesting.T> t) {
 }
 
 public static void TestUnix(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in localtests) {
+    foreach (var (_, vᴛ1) in range(localtests)) {
         ref var test = ref heap(new TimeTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -197,7 +195,7 @@ public static void TestUnix(ж<Δtesting.T> t) {
 }
 
 public static void TestUnixNano(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in nanolocaltests) {
+    foreach (var (_, vᴛ1) in range(nanolocaltests)) {
         ref var test = ref heap(new TimeTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -265,10 +263,8 @@ public static void TestUnixMilli(ж<Δtesting.T> t) {
         return tΔ1.UnixMilli() == msec;
     };
     var cfg = Ꮡ(new quick.Config(MaxCount: 10000));
-    {
-        var err = quick.Check((f).OrTypedNilFunc(), cfg); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = quick.Check((f).OrTypedNilFunc(), cfg); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -278,10 +274,8 @@ public static void TestUnixMicro(ж<Δtesting.T> t) {
         return tΔ1.UnixMicro() == usec;
     };
     var cfg = Ꮡ(new quick.Config(MaxCount: 10000));
-    {
-        var err = quick.Check((f).OrTypedNilFunc(), cfg); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = quick.Check((f).OrTypedNilFunc(), cfg); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -377,13 +371,11 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         var t1 = t0.Add(-((Δtime.Duration)r));
 
         // Check that time.Truncate works.
-        {
-            var trunc = t0.Truncate(d); if (trunc != t1) {
-                Ꮡt.Errorf("Time.Truncate(%s, %s) = %s, want %s\n"u8 + "%v trunc %v =\n%v want\n%v"u8,
-                    t0.Format(RFC3339Nano), d, trunc, t1.Format(RFC3339Nano),
-                    absString(t0), (int64)d, absString(trunc), absString(t1));
-                return false;
-            }
+        var trunc = t0.Truncate(d); if (trunc != t1) {
+            Ꮡt.Errorf("Time.Truncate(%s, %s) = %s, want %s\n"u8 + "%v trunc %v =\n%v want\n%v"u8,
+                t0.Format(RFC3339Nano), d, trunc, t1.Format(RFC3339Nano),
+                absString(t0), (int64)d, absString(trunc), absString(t1));
+            return false;
         }
 
         // To round, add d back if remainder r > d/2 or r == exactly d/2.
@@ -395,19 +387,17 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         }
 
         // Check that time.Round works.
-        {
-            var rnd = t0.Round(d); if (rnd != t1) {
-                Ꮡt.Errorf("Time.Round(%s, %s) = %s, want %s\n"u8 + "%v round %v =\n%v want\n%v"u8,
-                    t0.Format(RFC3339Nano), d, rnd, t1.Format(RFC3339Nano),
-                    absString(t0), (int64)d, absString(rnd), absString(t1));
-                return false;
-            }
+        var rnd = t0.Round(d); if (rnd != t1) {
+            Ꮡt.Errorf("Time.Round(%s, %s) = %s, want %s\n"u8 + "%v round %v =\n%v want\n%v"u8,
+                t0.Format(RFC3339Nano), d, rnd, t1.Format(RFC3339Nano),
+                absString(t0), (int64)d, absString(rnd), absString(t1));
+            return false;
         }
         return true;
     }
 
     // manual test cases
-    foreach (var (_, tt) in truncateRoundTests) {
+    foreach (var (_, tt) in range(truncateRoundTests)) {
         testOne(tt.t.Unix(), (int64)tt.t.Nanosecond(), (int64)tt.d);
     }
 
@@ -498,7 +488,7 @@ partial struct ISOWeekTest {
     internal nint wex;        // expected week
 }
 
-internal static slice<ISOWeekTest> isoWeekTests = slice<ISOWeekTest>([
+internal static slice<ISOWeekTest> isoWeekTests = [
     new(1981, 1, 1, 1981, 1), new(1982, 1, 1, 1981, 53), new(1983, 1, 1, 1982, 52),
     new(1984, 1, 1, 1983, 52), new(1985, 1, 1, 1985, 1), new(1986, 1, 1, 1986, 1),
     new(1987, 1, 1, 1987, 1), new(1988, 1, 1, 1987, 53), new(1989, 1, 1, 1988, 52),
@@ -532,11 +522,11 @@ internal static slice<ISOWeekTest> isoWeekTests = slice<ISOWeekTest>([
     new(2033, 1, 1, 2032, 53), new(2034, 1, 1, 2033, 52), new(2035, 1, 1, 2035, 1),
     new(2036, 1, 1, 2036, 1), new(2037, 1, 1, 2037, 1), new(2038, 1, 1, 2037, 53),
     new(2039, 1, 1, 2038, 52), new(2040, 1, 1, 2039, 52)
-]);
+];
 
 public static void TestISOWeek(ж<Δtesting.T> t) {
     // Selected dates and corner cases
-    foreach (var (_, wt) in isoWeekTests) {
+    foreach (var (_, wt) in range(isoWeekTests)) {
         var dt = Date(wt.year, (timeꓸMonth)wt.month, wt.day, 0, 0, 0, 0, ΔUTC);
         var (y, w) = dt.ISOWeek();
         if (w != wt.wex || y != wt.yex) {
@@ -547,10 +537,8 @@ public static void TestISOWeek(ж<Δtesting.T> t) {
 
     // The only real invariant: Jan 04 is in week 1
     for (nint year = 1950; year < 2100; year++) {
-        {
-            var (y, w) = Date(year, January, 4, 0, 0, 0, 0, ΔUTC).ISOWeek(); if (y != year || w != 1) {
-                t.Errorf("got %d/%d; expected %d/1 for Jan 04", y, w, year);
-            }
+        var (y, w) = Date(year, January, 4, 0, 0, 0, 0, ΔUTC).ISOWeek(); if (y != year || w != 1) {
+            t.Errorf("got %d/%d; expected %d/1 for Jan 04", y, w, year);
         }
     }
 }
@@ -562,7 +550,7 @@ partial struct YearDayTest {
 
 // Test YearDay in several different scenarios
 // and corner cases
-internal static slice<YearDayTest> yearDayTests = slice<YearDayTest>([
+internal static slice<YearDayTest> yearDayTests = [
     // Non-leap-year tests
     new(2007, 1, 1, 1),
     new(2007, 1, 15, 15),
@@ -628,7 +616,7 @@ internal static slice<YearDayTest> yearDayTests = slice<YearDayTest>([
     // Gregorian calendar change (no effect)
     new(1582, 10, 4, 277),
     new(1582, 10, 15, 288)
-]);
+];
 
 // Check to see if YearDay is location sensitive
 internal static slice<ж<timeꓸLocation>> yearDayLocations = slice<ж<timeꓸLocation>>([
@@ -640,8 +628,8 @@ internal static slice<ж<timeꓸLocation>> yearDayLocations = slice<ж<timeꓸLo
 ]);
 
 public static void TestYearDay(ж<Δtesting.T> t) {
-    foreach (var (i, loc) in yearDayLocations) {
-        foreach (var (_, ydt) in yearDayTests) {
+    foreach (var (i, loc) in range(yearDayLocations)) {
+        foreach (var (_, ydt) in range(yearDayTests)) {
             var dt = Date(ydt.year, (timeꓸMonth)ydt.month, ydt.day, 0, 0, 0, 0, loc);
             nint yday = dt.YearDay();
             if (yday != ydt.yday) {
@@ -671,7 +659,7 @@ partial struct durationTestsᴛ1 /*dyn*/ {
     internal @string str;
     internal Δtime.Duration d;
 }
-internal static slice<durationTestsᴛ1> durationTests = slice<durationTestsᴛ1>([
+internal static slice<durationTestsᴛ1> durationTests = [
     new("0s", 0),
     new("1ns", 1 * ΔNanosecond),
     new("1.1µs", 1100 * ΔNanosecond),
@@ -683,20 +671,18 @@ internal static slice<durationTestsᴛ1> durationTests = slice<durationTestsᴛ1
     new("8m0.000000001s", (Δtime.Duration)(480000000001L)),
     new("2562047h47m16.854775807s", (Δtime.Duration)(9223372036854775807L)),
     new("-2562047h47m16.854775808s", (Δtime.Duration)(-9223372036854775808L))
-]);
+];
 
 public static void TestDurationString(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in durationTests) {
+    foreach (var (_, tt) in range(durationTests)) {
         {
             @string str = tt.d.String(); if (str != tt.str) {
                 t.Errorf("Duration(%d).String() = %s, want %s", (int64)tt.d, str, tt.str);
             }
         }
         if (tt.d > 0) {
-            {
-                @string str = (-tt.d).String(); if (str != "-"u8 + tt.str) {
-                    t.Errorf("Duration(%d).String() = %s, want %s", (int64)(-tt.d), str, "-" + tt.str);
-                }
+            @string str = (-tt.d).String(); if (str != "-"u8 + tt.str) {
+                t.Errorf("Duration(%d).String() = %s, want %s", (int64)(-tt.d), str, "-" + tt.str);
             }
         }
     }
@@ -707,7 +693,7 @@ partial struct dateTestsᴛ1 /*dyn*/ {
     internal ж<timeꓸLocation> z;
     internal int64 unix;
 }
-internal static slice<dateTestsᴛ1> dateTests = slice<dateTestsᴛ1>([
+internal static slice<dateTestsᴛ1> dateTests = [
     new(2011, 11, 6, 1, 0, 0, 0, ΔLocal, 1320566400),   // 1:00:00 PDT
     new(2011, 11, 6, 1, 59, 59, 0, ΔLocal, 1320569999), // 1:59:59 PDT
     new(2011, 11, 6, 2, 0, 0, 0, ΔLocal, 1320573600),   // 2:00:00 PST
@@ -733,10 +719,10 @@ internal static slice<dateTestsᴛ1> dateTests = slice<dateTestsᴛ1>([
     new(1970, 1, 15297, 7, 56, 35, 0, ΔLocal, 1321631795),                  // large number of days
 
     new(1970, 1, -25508, 0, 0, 0, 0, ΔLocal, -2203948800L) // negative Unix time
-]);
+];
 
 public static void TestDate(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in dateTests) {
+    foreach (var (_, tt) in range(dateTests)) {
         var time = Date(tt.year, (timeꓸMonth)tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
         var want = Unix(tt.unix, 0);
         if (!time.Equal(want)) {
@@ -754,17 +740,17 @@ public static void TestDate(ж<Δtesting.T> t) {
 partial struct addDateTestsᴛ1 /*dyn*/ {
     internal nint years, months, days;
 }
-internal static slice<addDateTestsᴛ1> addDateTests = slice<addDateTestsᴛ1>([
+internal static slice<addDateTestsᴛ1> addDateTests = [
     new(4, 4, 1),
     new(3, 16, 1),
     new(3, 15, 30),
     new(5, -6, -18 - 30 - 12)
-]);
+];
 
 public static void TestAddDate(ж<Δtesting.T> t) {
     var t0 = Date(2011, 11, 18, 7, 56, 35, 0, ΔUTC);
     var t1 = Date(2016, 3, 19, 7, 56, 35, 0, ΔUTC);
-    foreach (var (_, at) in addDateTests) {
+    foreach (var (_, at) in range(addDateTests)) {
         var time = t0.AddDate(at.years, at.months, at.days);
         if (!time.Equal(t1)) {
             t.Errorf("AddDate(%d, %d, %d) = %v, want %v",
@@ -784,19 +770,19 @@ public static void TestAddDate(ж<Δtesting.T> t) {
 partial struct daysInTestsᴛ1 /*dyn*/ {
     internal nint year, month, di;
 }
-internal static slice<daysInTestsᴛ1> daysInTests = slice<daysInTestsᴛ1>([
+internal static slice<daysInTestsᴛ1> daysInTests = [
     new(2011, 1, 31), // January, first month, 31 days
     new(2011, 2, 28), // February, non-leap year, 28 days
     new(2012, 2, 29), // February, leap year, 29 days
     new(2011, 6, 30), // June, 30 days
     new(2011, 12, 31) // December, last month, 31 days
-]);
+];
 
 public static void TestDaysIn(ж<Δtesting.T> t) {
     // The daysIn function is not exported.
     // Test the daysIn function via the `var DaysIn = daysIn`
     // statement in the internal_test.go file.
-    foreach (var (_, tt) in daysInTests) {
+    foreach (var (_, tt) in range(daysInTests)) {
         nint di = time_internal_test_package.DaysIn((timeꓸMonth)tt.month, tt.year);
         if (di != tt.di) {
             t.Errorf("got %d; expected %d for %d-%02d",
@@ -835,21 +821,17 @@ public static void TestTimeGob(ж<Δtesting.T> t) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var enc = gob.NewEncoder(new time_test_package.bytes_BufferжWriter(Ꮡb));
     var dec = gob.NewDecoder(new time_test_package.bytes_BufferжReader(Ꮡb));
-    foreach (var (_, vᴛ1) in gobTests) {
+    foreach (var (_, vᴛ1) in range(gobTests)) {
         ref var tt = ref heap(new Δtime.Time(), out var Ꮡtt);
         tt = vᴛ1;
 
         ref var gobtt = ref heap(new Δtime.Time(), out var Ꮡgobtt);
-        {
-            var err = enc.Encode(Ꮡtt); if (err != nil) {
-                t.Errorf("%v gob Encode error = %q, want nil", tt, err);
-            } else {
-                var errΔ1 = dec.Decode(Ꮡgobtt); if (errΔ1 != nil) {
-                    t.Errorf("%v gob Decode error = %q, want nil", tt, errΔ1);
-                } else if (!equalTimeAndZone(gobtt, tt)) {
-                    t.Errorf("Decoded time = %v, want %v", gobtt, tt);
-                }
-            }
+        var err = enc.Encode(Ꮡtt); if (err != nil) {
+            t.Errorf("%v gob Encode error = %q, want nil", tt, err);
+        } else if (dec.Decode(Ꮡgobtt) is var errΔ1 && errΔ1 != nil) {
+            t.Errorf("%v gob Decode error = %q, want nil", tt, errΔ1);
+        } else if (!equalTimeAndZone(gobtt, tt)) {
+            t.Errorf("Decoded time = %v, want %v", gobtt, tt);
         }
         b.Reset();
     }
@@ -859,14 +841,14 @@ partial struct invalidEncodingTestsᴛ1 /*dyn*/ {
     internal slice<byte> bytes;
     internal @string want;
 }
-internal static slice<invalidEncodingTestsᴛ1> invalidEncodingTests = slice<invalidEncodingTestsᴛ1>([
-    new(slice<byte>([]), "Time.UnmarshalBinary: no data"),
-    new(slice<byte>([0, 2, 3]), "Time.UnmarshalBinary: unsupported version"),
-    new(slice<byte>([1, 2, 3]), "Time.UnmarshalBinary: invalid length")
-]);
+internal static slice<invalidEncodingTestsᴛ1> invalidEncodingTests = [
+    new([], "Time.UnmarshalBinary: no data"),
+    new([0, 2, 3], "Time.UnmarshalBinary: unsupported version"),
+    new([1, 2, 3], "Time.UnmarshalBinary: invalid length")
+];
 
 public static void TestInvalidTimeGob(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in invalidEncodingTests) {
+    foreach (var (_, tt) in range(invalidEncodingTests)) {
         Δtime.Time ignored = default;
         var err = ignored.GobDecode(tt.bytes);
         if (err == nil || err.Error() != tt.want) {
@@ -890,7 +872,7 @@ internal static slice<notEncodableTimesᴛ1> notEncodableTimes = slice<notEncoda
 ]);
 
 public static void TestNotGobEncodableTime(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in notEncodableTimes) {
+    foreach (var (_, tt) in range(notEncodableTimes)) {
         var (_, err) = tt.time.GobEncode();
         if (err == nil || err.Error() != tt.want) {
             t.Errorf("%v GobEncode error = %v, want %v", tt.time, err, tt.want);
@@ -914,20 +896,18 @@ internal static slice<jsonTestsᴛ1> jsonTests = slice<jsonTestsᴛ1>([
 ]);
 
 public static void TestTimeJSON(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in jsonTests) {
+    foreach (var (_, tt) in range(jsonTests)) {
         ref var jsonTime = ref heap(new Δtime.Time(), out var ᏑjsonTime);
 
-        {
-            var (jsonBytes, err) = json.Marshal(tt.time); if (err != nil) {
-                t.Errorf("%v json.Marshal error = %v, want nil", tt.time, err);
-            } else if (((sstring)jsonBytes) != tt.json) {
-                t.Errorf("%v JSON = %#q, want %#q", tt.time, (@string)jsonBytes, tt.json);
-            } else {
-                err = json.Unmarshal(jsonBytes, ᏑjsonTime); if (err != nil) {
-                    t.Errorf("%v json.Unmarshal error = %v, want nil", tt.time, err);
-                } else if (!equalTimeAndZone(jsonTime, tt.time)) {
-                    t.Errorf("Unmarshaled time = %v, want %v", jsonTime, tt.time);
-                }
+        var (jsonBytes, err) = json.Marshal(tt.time); if (err != nil) {
+            t.Errorf("%v json.Marshal error = %v, want nil", tt.time, err);
+        } else if (((sstring)jsonBytes) != tt.json) {
+            t.Errorf("%v JSON = %#q, want %#q", tt.time, (@string)jsonBytes, tt.json);
+        } else {
+            err = json.Unmarshal(jsonBytes, ᏑjsonTime); if (err != nil) {
+                t.Errorf("%v json.Unmarshal error = %v, want nil", tt.time, err);
+            } else if (!equalTimeAndZone(jsonTime, tt.time)) {
+                t.Errorf("Unmarshaled time = %v, want %v", jsonTime, tt.time);
             }
         }
     }
@@ -969,7 +949,7 @@ public static void TestUnmarshalInvalidTimes(ж<Δtesting.T> t) {
         new(@"""2000-01-01T00:00:00+123:45""", @"parsing time ""2000-01-01T00:00:00+123:45"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""+123:45"" as ""Z07:00""")
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var ts = ref heap(new Δtime.Time(), out var Ꮡts);
 
         @string want = tt.want;
@@ -1006,7 +986,7 @@ public static void TestMarshalInvalidTimes(ж<Δtesting.T> t) {
         new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone(""u8, 123 * 60 * 60)), "Time.MarshalJSON: timezone hour outside of range [0,23]")
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         @string want = tt.want;
         var (b, err) = tt.time.MarshalJSON();
         switch (ᐧ) {
@@ -1050,7 +1030,7 @@ partial struct parseDurationTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal Δtime.Duration want;
 }
-internal static slice<parseDurationTestsᴛ1> parseDurationTests = slice<parseDurationTestsᴛ1>([
+internal static slice<parseDurationTestsᴛ1> parseDurationTests = [
     // simple
     new("0", 0),
     new("5s", (Δtime.Duration)(5000000000L)),
@@ -1107,10 +1087,10 @@ internal static slice<parseDurationTestsᴛ1> parseDurationTests = slice<parseDu
     new("0.100000000000000000000h", (Δtime.Duration)(360000000000L)),
     // This value tests the first overflow check in leadingFraction.
     new("0.830103483285477580700h", (Δtime.Duration)(2988372539827L))
-]);
+];
 
 public static void TestParseDuration(ж<Δtesting.T> t) {
-    foreach (var (_, tc) in parseDurationTests) {
+    foreach (var (_, tc) in range(parseDurationTests)) {
         var (d, err) = ParseDuration(tc.@in);
         if (err != nil || d != tc.want) {
             t.Errorf("ParseDuration(%q) = %v, %v, want %v, nil", tc.@in, d, err, tc.want);
@@ -1122,7 +1102,7 @@ partial struct parseDurationErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string expect;
 }
-internal static slice<parseDurationErrorTestsᴛ1> parseDurationErrorTests = slice<parseDurationErrorTestsᴛ1>([
+internal static slice<parseDurationErrorTestsᴛ1> parseDurationErrorTests = [
     // invalid
     new("", @""""""),
     new("3", @"""3"""),
@@ -1146,10 +1126,10 @@ internal static slice<parseDurationErrorTestsᴛ1> parseDurationErrorTests = sli
     new("3000000h", @"""3000000h"""),
     new("9223372036854775.808us", @"""9223372036854775.808us"""),
     new("9223372036854ms775us808ns", @"""9223372036854ms775us808ns""")
-]);
+];
 
 public static void TestParseDurationErrors(ж<Δtesting.T> t) {
-    foreach (var (_, tc) in parseDurationErrorTests) {
+    foreach (var (_, tc) in range(parseDurationErrorTests)) {
         var (_, err) = ParseDuration(tc.@in);
         if (err == nil) {
             t.Errorf("ParseDuration(%q) = _, nil, want _, non-nil", tc.@in);
@@ -1210,7 +1190,7 @@ partial struct mallocTestᴛ1 /*dyn*/ {
     internal @string desc;
     internal Action fn;
 }
-internal static slice<mallocTestᴛ1> mallocTest = slice<mallocTestᴛ1>([
+internal static slice<mallocTestᴛ1> mallocTest = [
     new(0, @"time.Now()", () => {
         t = Now();
     }),
@@ -1223,7 +1203,7 @@ internal static slice<mallocTestᴛ1> mallocTest = slice<mallocTestᴛ1>([
     new(0, @"time.Now().UnixMicro()", () => {
         u = Now().UnixMicro();
     })
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingMallocCountInˢ = (@string)"skipping malloc count in short mode"u8;
@@ -1236,7 +1216,7 @@ public static void TestCountMallocs(ж<Δtesting.T> t) {
     if (Δruntime.GOMAXPROCS(0) > 1) {
         t.Skip(skippingGomaxprocs1ˢ);
     }
-    foreach (var (_, mt) in mallocTest) {
+    foreach (var (_, mt) in range(mallocTest)) {
         nint allocs = (nint)Δtesting.AllocsPerRun(100, mt.fn);
         if (allocs > mt.count) {
             t.Errorf("%s: %d allocs, want %d", mt.desc, allocs, mt.count);
@@ -1302,7 +1282,7 @@ internal static slice<subTestsᴛ1> subTests = slice<subTestsᴛ1>([
 public static void TestSub(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (i, st) in subTests) {
+    foreach (var (i, st) in range(subTests)) {
         var got = st.t.Sub(st.u);
         if (got != st.d) {
             Ꮡt.Errorf("#%d: Sub(%v, %v): got %v; want %v", i, st.t, st.u, got, st.d);
@@ -1314,49 +1294,43 @@ partial struct nsDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal int64 want;
 }
-internal static slice<nsDurationTestsᴛ1> nsDurationTests = slice<nsDurationTestsᴛ1>([
+internal static slice<nsDurationTestsᴛ1> nsDurationTests = [
     new((Δtime.Duration)(-1000), -1000),
     new((Δtime.Duration)(-1), -1),
     new((Δtime.Duration)1, 1),
     new((Δtime.Duration)1000, 1000)
-]);
+];
 
 public static void TestDurationNanoseconds(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in nsDurationTests) {
-        {
-            var got = tt.d.Nanoseconds(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Nanoseconds() = %d; want: %d", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(nsDurationTests)) {
+        var got = tt.d.Nanoseconds(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Nanoseconds() = %d; want: %d", tt.d, got, tt.want);
         }
     }
 }
 
-internal static slice<nsDurationTestsᴛ1> usDurationTests = slice<nsDurationTestsᴛ1>([
+internal static slice<nsDurationTestsᴛ1> usDurationTests = [
     new((Δtime.Duration)(-1000), -1),
     new((Δtime.Duration)1000, 1)
-]);
+];
 
 public static void TestDurationMicroseconds(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in usDurationTests) {
-        {
-            var got = tt.d.Microseconds(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Microseconds() = %d; want: %d", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(usDurationTests)) {
+        var got = tt.d.Microseconds(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Microseconds() = %d; want: %d", tt.d, got, tt.want);
         }
     }
 }
 
-internal static slice<nsDurationTestsᴛ1> msDurationTests = slice<nsDurationTestsᴛ1>([
+internal static slice<nsDurationTestsᴛ1> msDurationTests = [
     new((Δtime.Duration)(-1000000), -1),
     new((Δtime.Duration)1000000, 1)
-]);
+];
 
 public static void TestDurationMilliseconds(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in msDurationTests) {
-        {
-            var got = tt.d.Milliseconds(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Milliseconds() = %d; want: %d", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(msDurationTests)) {
+        var got = tt.d.Milliseconds(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Milliseconds() = %d; want: %d", tt.d, got, tt.want);
         }
     }
 }
@@ -1365,52 +1339,46 @@ partial struct secDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal float64 want;
 }
-internal static slice<secDurationTestsᴛ1> secDurationTests = slice<secDurationTestsᴛ1>([
+internal static slice<secDurationTestsᴛ1> secDurationTests = [
     new((Δtime.Duration)300000000, 0.3D)
-]);
+];
 
 public static void TestDurationSeconds(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in secDurationTests) {
-        {
-            var got = tt.d.Seconds(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Seconds() = %g; want: %g", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(secDurationTests)) {
+        var got = tt.d.Seconds(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Seconds() = %g; want: %g", tt.d, got, tt.want);
         }
     }
 }
 
-internal static slice<secDurationTestsᴛ1> minDurationTests = slice<secDurationTestsᴛ1>([
+internal static slice<secDurationTestsᴛ1> minDurationTests = [
     new((Δtime.Duration)(-60000000000L), -1D),
     new((Δtime.Duration)(-1), -1D / 60e9D),
     new((Δtime.Duration)1, 1D / 60e9D),
     new((Δtime.Duration)60000000000L, 1D),
     new((Δtime.Duration)3000, 5e-8D)
-]);
+];
 
 public static void TestDurationMinutes(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in minDurationTests) {
-        {
-            var got = tt.d.Minutes(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Minutes() = %g; want: %g", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(minDurationTests)) {
+        var got = tt.d.Minutes(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Minutes() = %g; want: %g", tt.d, got, tt.want);
         }
     }
 }
 
-internal static slice<secDurationTestsᴛ1> hourDurationTests = slice<secDurationTestsᴛ1>([
+internal static slice<secDurationTestsᴛ1> hourDurationTests = [
     new((Δtime.Duration)(-3600000000000L), -1D),
     new((Δtime.Duration)(-1), -1D / 3600e9D),
     new((Δtime.Duration)1, 1D / 3600e9D),
     new((Δtime.Duration)3600000000000L, 1D),
     new((Δtime.Duration)36, 1e-11D)
-]);
+];
 
 public static void TestDurationHours(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in hourDurationTests) {
-        {
-            var got = tt.d.Hours(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Hours() = %g; want: %g", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(hourDurationTests)) {
+        var got = tt.d.Hours(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Hours() = %g; want: %g", tt.d, got, tt.want);
         }
     }
 }
@@ -1420,7 +1388,7 @@ partial struct durationTruncateTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration m;
     internal Δtime.Duration want;
 }
-internal static slice<durationTruncateTestsᴛ1> durationTruncateTests = slice<durationTruncateTestsᴛ1>([
+internal static slice<durationTruncateTestsᴛ1> durationTruncateTests = [
     new(0, ΔSecond, 0),
     new(ΔMinute, (Δtime.Duration)(-7000000000L), ΔMinute),
     new(ΔMinute, 0, ΔMinute),
@@ -1433,19 +1401,17 @@ internal static slice<durationTruncateTestsᴛ1> durationTruncateTests = slice<d
     new(-ΔMinute, ΔSecond, -ΔMinute),
     new((Δtime.Duration)(-600000000000L), (Δtime.Duration)(180000000000L), (Δtime.Duration)(-540000000000L)),
     new((Δtime.Duration)(-600000000000L), ΔHour, 0)
-]);
+];
 
 public static void TestDurationTruncate(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in durationTruncateTests) {
-        {
-            var got = tt.d.Truncate(tt.m); if (got != tt.want) {
-                t.Errorf("Duration(%s).Truncate(%s) = %s; want: %s", tt.d, tt.m, got, tt.want);
-            }
+    foreach (var (_, tt) in range(durationTruncateTests)) {
+        var got = tt.d.Truncate(tt.m); if (got != tt.want) {
+            t.Errorf("Duration(%s).Truncate(%s) = %s; want: %s", tt.d, tt.m, got, tt.want);
         }
     }
 }
 
-internal static slice<durationTruncateTestsᴛ1> durationRoundTests = slice<durationTruncateTestsᴛ1>([
+internal static slice<durationTruncateTestsᴛ1> durationRoundTests = [
     new(0, ΔSecond, 0),
     new(ΔMinute, (Δtime.Duration)(-11000000000L), ΔMinute),
     new(ΔMinute, 0, ΔMinute),
@@ -1464,14 +1430,12 @@ internal static slice<durationTruncateTestsᴛ1> durationRoundTests = slice<dura
     new(-8000000000000000000, 3000000000000000000, -9000000000000000000),
     new(-9000000000000000000, 5000000000000000000, (Δtime.Duration)(-9223372036854775808L)),
     new((Δtime.Duration)(6917529027641081855L), (Δtime.Duration)(6917529027641081856L), (Δtime.Duration)(6917529027641081856L))
-]);
+];
 
 public static void TestDurationRound(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in durationRoundTests) {
-        {
-            var got = tt.d.Round(tt.m); if (got != tt.want) {
-                t.Errorf("Duration(%s).Round(%s) = %s; want: %s", tt.d, tt.m, got, tt.want);
-            }
+    foreach (var (_, tt) in range(durationRoundTests)) {
+        var got = tt.d.Round(tt.m); if (got != tt.want) {
+            t.Errorf("Duration(%s).Round(%s) = %s; want: %s", tt.d, tt.m, got, tt.want);
         }
     }
 }
@@ -1480,7 +1444,7 @@ partial struct durationAbsTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal Δtime.Duration want;
 }
-internal static slice<durationAbsTestsᴛ1> durationAbsTests = slice<durationAbsTestsᴛ1>([
+internal static slice<durationAbsTestsᴛ1> durationAbsTests = [
     new(0, 0),
     new(1, 1),
     new(-1, 1),
@@ -1491,14 +1455,12 @@ internal static slice<durationAbsTestsᴛ1> durationAbsTests = slice<durationAbs
     new((Δtime.Duration)(-9223372036854775806L), (Δtime.Duration)(9223372036854775806L)),
     new(maxDuration, maxDuration),
     new((Δtime.Duration)(9223372036854775806L), (Δtime.Duration)(9223372036854775806L))
-]);
+];
 
 public static void TestDurationAbs(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in durationAbsTests) {
-        {
-            var got = tt.d.Abs(); if (got != tt.want) {
-                t.Errorf("Duration(%s).Abs() = %s; want: %s", tt.d, got, tt.want);
-            }
+    foreach (var (_, tt) in range(durationAbsTests)) {
+        var got = tt.d.Abs(); if (got != tt.want) {
+            t.Errorf("Duration(%s).Abs() = %s; want: %s", tt.d, got, tt.want);
         }
     }
 }
@@ -1507,7 +1469,7 @@ partial struct defaultLocTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<Δtime.Time, Δtime.Time, bool> f;
 }
-internal static slice<defaultLocTestsᴛ1> defaultLocTests = slice<defaultLocTestsᴛ1>([
+internal static slice<defaultLocTestsᴛ1> defaultLocTests = [
     new("After", (Δtime.Time t1, Δtime.Time t2) => t1.After(t2) == t2.After(t1)),
     new("Before", (Δtime.Time t1, Δtime.Time t2) => t1.Before(t2) == t2.Before(t1)),
     new("Equal", (Δtime.Time t1, Δtime.Time t2) => t1.Equal(t2) == t2.Equal(t1)),
@@ -1602,12 +1564,12 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = slice<defaultLocTes
     new("Round", (Δtime.Time t1, Δtime.Time t2) => t1.Round(ΔHour).Equal(t2.Round(ΔHour))),
 
     new("== Time{}", (Δtime.Time t1, Δtime.Time t2) => (t1 == new Time()) == (t2 == new Time()))
-]);
+];
 
 public static void TestDefaultLoc(ж<Δtesting.T> t) {
     // Verify that all of Time's methods behave identically if loc is set to
     // nil or UTC.
-    foreach (var (_, tt) in defaultLocTests) {
+    foreach (var (_, tt) in range(defaultLocTests)) {
         var t1 = new Time();
         var t2 = new Time().UTC();
         if (!tt.f(t1, t2)) {
@@ -1907,10 +1869,8 @@ public static void TestMarshalBinaryZeroTime(ж<Δtesting.T> t) {
         t.Fatal(err);
     }
     var t1 = Now(); // not zero
-    {
-        var errΔ1 = t1.UnmarshalBinary(enc); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = t1.UnmarshalBinary(enc); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     if (t1 != t0) {
         t.Errorf("t0=%#v\nt1=%#v\nwant identical structures", t0, t1);
@@ -1971,11 +1931,9 @@ private static readonly @string month0ˢᵇ = "%!Month(0)"u8;
 
 // Issue 17720: Zero value of time.Month fails to print
 public static partial void TestZeroMonthString(ж<Δtesting.T> t) {
-    {
-        @string got = ((timeꓸMonth)0).String();
-        @string want = month0ˢ; if (got != want) {
-            t.Errorf("zero month = %q; want %q", got, want);
-        }
+    @string got = ((timeꓸMonth)0).String();
+    @string want = month0ˢ; if (got != want) {
+        t.Errorf("zero month = %q; want %q", got, want);
     }
 }
 
@@ -2012,10 +1970,8 @@ private static readonly @string zeroᶜᵇ = "/dev/zero"u8;
 
 public static void TestReadFileLimit(ж<Δtesting.T> t) {
     @string zero = zeroᶜ;
-    {
-        var (_, errΔ1) = Δos.Stat(zero); if (errΔ1 != nil) {
-            t.Skip(skippingTestWithoutADevˢ);
-        }
+    var (_, errΔ1) = Δos.Stat(zero); if (errΔ1 != nil) {
+        t.Skip(skippingTestWithoutADevˢ);
     }
     var (_, err) = time_internal_test_package.ReadFile(zero);
     if (err == nil || !strings.Contains(err.Error(), isTooLargeˢ)) {
@@ -2124,7 +2080,7 @@ public static void TestTimeIsDST(ж<Δtesting.T> t) {
             [7] = new(Date(2009, 6, 1, 12, 0, 0, 0, tzFixed), false)
         };
 
-        foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
+        foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {
             var got = tt.time.IsDST();
             if (got != tt.want) {
                 t.Errorf("#%d:: (%#v).IsDST()=%t, want %t", i, tt.time.Format(RFC3339), got, tt.want);
@@ -2143,10 +2099,8 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> t) {
     for (var i = (int64)0; i < 100; i++) {
         var sec = notMonoTime.Unix();
         notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
-        {
-            var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
-                t.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d", newSec, maxInt64);
-            }
+        var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
+            t.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d", newSec, maxInt64);
         }
     }
 
@@ -2156,10 +2110,8 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> t) {
     for (var i = (int64)0; i > -100; i--) {
         var sec = notMonoTime.Unix();
         notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
-        {
-            var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
-                t.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d", newSec, maxInt64);
-            }
+        var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
+            t.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d", newSec, maxInt64);
         }
     }
 }
@@ -2204,7 +2156,7 @@ public static void TestTimeWithZoneTransition(ж<Δtesting.T> t) {
             [7] = new(Date(1991, September, 15, 2, 0, 0, 0, loc), Date(1991, September, 14, 18, 0, 0, 0, ΔUTC))
         };
 
-        foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
+        foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {
             if (!tt.give.Equal(tt.want)) {
                 t.Errorf("#%d:: %#v is not equal to %#v", i, tt.give.Format(RFC3339), tt.want.Format(RFC3339));
             }
@@ -2232,7 +2184,7 @@ public static void TestZoneBounds(ж<Δtesting.T> t) {
         }
 
         // The ZoneBounds of a UTC location would just return two zero Time.
-        foreach (var (_, vᴛ1) in utctests) {
+        foreach (var (_, vᴛ1) in range(utctests)) {
             ref var test = ref heap(new TimeTest(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -2297,7 +2249,7 @@ public static void TestZoneBounds(ж<Δtesting.T> t) {
             [21] = new(makeLocalTime(2172733199L), makeLocalTime(2152173600L), makeLocalTime(2172733200L)),
             [22] = new(makeLocalTime(2172733200L), makeLocalTime(2172733200L), makeLocalTime(2177452800L))
         };
-        foreach (var (i, tt) in realTests.ΔRangeSnapshot()) {
+        foreach (var (i, tt) in range(realTests.ΔRangeSnapshot())) {
             var (startΔ2, endΔ2) = tt.giveTime.ZoneBounds();
             if (!startΔ2.Equal(tt.wantStart) || !endΔ2.Equal(tt.wantEnd)) {
                 t.Errorf("#%d:: ZoneBounds of %v expects right bounds:\n  got start=%v\n  want start=%v\n  got end=%v\n  want end=%v",

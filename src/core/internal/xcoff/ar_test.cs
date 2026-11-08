@@ -18,29 +18,29 @@ internal partial struct archiveTest {
 
 internal static readonly ж<slice<archiveTest>> ᏑarchTest = new StaticBox<slice<archiveTest>>(default(slice<archiveTest>));
 internal static ref slice<archiveTest> archTest => ref ((StaticBox<slice<archiveTest>>)ᏑarchTest).ValueSlot;
-internal static void initᴛarchTest() { archTest = slice<archiveTest>([
+internal static void initᴛarchTest() { archTest = [
     new(
         "testdata/bigar-ppc64",
         new ArchiveHeader(AIAMAGBIG),
-        slice<ж<global::go.@internal.xcoff_package.MemberHeader>>([
+        [
             Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printbye.o", 836)),
             Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printhello.o", 860))
-        ]),
-        slice<global::go.@internal.xcoff_package.FileHeader>([
+        ],
+        [
             new(U64_TOCMAGIC),
             new(U64_TOCMAGIC)
-        ])
+        ]
     ),
     new(
         "testdata/bigar-empty",
         new ArchiveHeader(AIAMAGBIG),
-        slice<ж<global::go.@internal.xcoff_package.MemberHeader>>([]),
-        slice<global::go.@internal.xcoff_package.FileHeader>([])
+        [],
+        []
     )
-]); }
+]; }
 
 public static void TestOpenArchive(ж<testing.T> t) {
-    foreach (var i in range(archTest)) {
+    foreach (var i in range(len(archTest))) {
         var tt = Ꮡ(archTest, i);
         var (arch, err) = OpenArchive(tt.@file);
         if (err != nil) {
@@ -52,7 +52,7 @@ public static void TestOpenArchive(ж<testing.T> t) {
             continue;
         }
 
-        foreach (var (iΔ1, mem) in arch.Members) {
+        foreach (var (iΔ1, mem) in range(arch.Members)) {
             if (iΔ1 >= len(tt.members)) {
                 break;
             }

@@ -153,10 +153,8 @@ public static void TestHasGoBuild(ж<testing.T> t) {
 
     @string dir = t.TempDir();
     @string mainGo = filepath.Join(dir, mainGoˢ);
-    {
-        var errΔ1 = os.WriteFile(mainGo, slice<byte>("package main\nfunc main() {}\n"u8), 420); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(mainGo, slice<byte>("package main\nfunc main() {}\n"u8), 420); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var cmd = testenv.Command(new testing_TжTB(t), "go", buildˢ, "-o", os.DevNull, mainGo);
     var (@out, err) = cmd.CombinedOutput();
@@ -221,7 +219,7 @@ public static void TestCleanCmdEnvPWD(ж<testing.T> t) {
     cmd.Dir = dir;
     cmd = testenv.CleanCmdEnv(cmd);
 
-    foreach (var (_, env) in cmd.Env) {
+    foreach (var (_, env) in range(cmd.Env)) {
         if (strings.HasPrefix(env, pwdˢ)) {
             @string pwd = strings.TrimPrefix(env, pwdˢ);
             if (pwd != dir) {

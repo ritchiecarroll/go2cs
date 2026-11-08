@@ -33,7 +33,7 @@ public partial struct GoodFileTest {
     internal bool result;
 }
 
-internal static slice<GoodFileTest> tests = slice<GoodFileTest>([
+internal static slice<GoodFileTest> tests = [
     new("file.go", true),
     new("file.c", true),
     new("file_foo.go", true),
@@ -49,10 +49,10 @@ internal static slice<GoodFileTest> tests = slice<GoodFileTest>([
     new("file_foo_"u8 + otherArch + ".go"u8, false),
     new("file_"u8 + thisOS + ".c"u8, true),
     new("file_"u8 + otherOS + ".c"u8, false)
-]);
+];
 
 public static void TestGoodOSArch(ж<testing.T> t) {
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         if (Default.goodOSArchFile(test.name, new map<@string, bool>()) != test.result) {
             t.Fatalf("goodOSArchFile(%q) != %v", test.name, test.result);
         }

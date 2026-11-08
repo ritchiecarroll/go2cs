@@ -44,7 +44,7 @@ public static void TestAddExtendedPrefix(ж<Δtesting.T> t) {
     // so let's make a long path which is comfortably bigger than MAX_PATH on Windows
     // (256) and thus requires fixLongPath to be correctly interpreted in I/O syscalls.
     @string veryLong = "l"u8 + strings.Repeat("o", 500) + "ng"u8;
-    foreach (var (_, test) in slice<TestAddExtendedPrefix_type>([
+    foreach (var (_, test) in range(slice<TestAddExtendedPrefix_type>([
         // Test cases use word substitutions:
         //   * "long" is replaced with a very long pathname
         //   * "c:" or "C:" are replaced with the drive of the current directory (preserving case)
@@ -113,7 +113,7 @@ public static void TestAddExtendedPrefix(ж<Δtesting.T> t) {
         new(@"C:\.\long\..\.", @"\\?\C:\"),
         new(@"\\?\C:\long\foo.txt", @"\\?\C:\long\foo.txt"),
         new(@"\\?\C:\long/foo.txt", @"\\?\C:\long/foo.txt")
-    ])) {
+    ]))) {
         @string @in = strings.ReplaceAll(test.@in, longˢ, veryLong);
         @in = strings.ToLower(@in);
         @in = strings.ReplaceAll(@in, "c:", drive);
@@ -193,7 +193,7 @@ public static void TestOpenRootSlash(ж<Δtesting.T> t) {
         @"\"
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (dir, err) = Δos.Open(test);
         if (err != nil) {
             t.Fatalf("Open(%q) failed: %v", test, err);
@@ -289,12 +289,12 @@ public static void TestRemoveAllFallback(ж<Δtesting.T> t) {
 
     @string dir = t.TempDir();
     {
-        var err = Δos.WriteFile(filepath.Join(dir, file1ˢ), slice<byte>([]), 448); if (err != nil) {
+        var err = Δos.WriteFile(filepath.Join(dir, file1ˢ), [], 448); if (err != nil) {
             t.Fatal(err);
         }
     }
     {
-        var err = Δos.WriteFile(filepath.Join(dir, file2ˢ), slice<byte>([]), 256); if (err != nil) { // read-only file
+        var err = Δos.WriteFile(filepath.Join(dir, file2ˢ), [], 256); if (err != nil) { // read-only file
             t.Fatal(err);
         }
     }

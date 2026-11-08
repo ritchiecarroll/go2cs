@@ -6,8 +6,6 @@ namespace go.io;
 using fmt = fmt_package;
 using static go.io.fs_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 
@@ -17,9 +15,7 @@ partial struct statOnly {
     /*embed*/ public go.io.fs_package.StatFS StatFS;
 }
 
-internal static (fs.File, error) Open(this statOnly _, @string name) {
-    return (default, ErrNotExist);
-}
+internal static (fs.File, error) Open(this statOnly _, @string name) { return (default, ErrNotExist); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string nilˢ => ref nilˢᵇ;

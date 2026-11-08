@@ -13,8 +13,6 @@ using net = net_package;
 using testcert = global::go.net.http.@internal.testcert_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using global::go.net.http.@internal;
 using static global::go.net.http_package;
@@ -123,7 +121,6 @@ internal static ж<global::go.net.http_package.Request> dummyRequest(@string met
     }
     return req;
 }
-
 internal static ж<global::go.net.http_package.Request> dummyRequestWithBody(@string method) {
     var (req, err) = NewRequest(method, httpFakeTldˢ, new http_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)));
     if (err != nil) {
@@ -142,16 +139,12 @@ internal static ж<global::go.net.http_package.Request> dummyRequestWithBodyNoGe
 internal partial struct issue22091Error {
 }
 
-internal static void IsHTTP2NoCachedConnError(this issue22091Error _) {
-}
-
+internal static void IsHTTP2NoCachedConnError(this issue22091Error _) { }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string issue22091Errorˢ => ref issue22091Errorˢᵇ;
 private static readonly @string issue22091Errorˢᵇ = "issue22091Error"u8;
 
-internal static @string Error(this issue22091Error _) {
-    return issue22091Errorˢ;
-}
+internal static @string Error(this issue22091Error _) { return issue22091Errorˢ; }
 
 internal partial struct TestTransportShouldRetryRequest_tests /*dyn*/ {
     internal ж<global::go.net.http_package.persistConn> pc;
@@ -223,7 +216,7 @@ public static void TestTransportShouldRetryRequest(ж<testing.T> t) {
             want: false
         )
     };
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var got = tt.pc.shouldRetryRequest(tt.req, tt.err);
         if (got != tt.want) {
             t.Errorf("%d. shouldRetryRequest = %v; want %v", i, got, tt.want);
@@ -261,8 +254,8 @@ public static partial void TestTransportBodyAltRewind(ж<testing.T> t) {
         var lnʗ2 = ln;
         goǃ(() => {
             var tln = tls.NewListener(lnʗ2, Ꮡ(new tls.Config(
-                NextProtos: slice<@string>(["foo"]),
-                Certificates: slice<tls.Certificate>([certʗ1])
+                NextProtos: ["foo"],
+                Certificates: [certʗ1]
             )));
             for (nint i = 0; i < 2; i++) {
                 var (sc, errΔ1) = tln.Accept();
@@ -270,11 +263,9 @@ public static partial void TestTransportBodyAltRewind(ж<testing.T> t) {
                     t.Error(errΔ1);
                     return;
                 }
-                {
-                    var errΔ2 = sc._<ж<tls.Conn>>().Handshake(); if (errΔ2 != nil) {
-                        t.Error(errΔ2);
-                        return;
-                    }
+                var errΔ2 = sc._<ж<tls.Conn>>().Handshake(); if (errΔ2 != nil) {
+                    t.Error(errΔ2);
+                    return;
                 }
                 sc.Close();
             }
@@ -305,15 +296,13 @@ public static partial void TestTransportBodyAltRewind(ж<testing.T> t) {
             DialTLS: (@string _Δp0, @string _Δp1) => {
                 var (tc, errΔ3) = tls.Dial(tcpˢ, addr, Ꮡ(new tls.Config(
                     InsecureSkipVerify: true,
-                    NextProtos: slice<@string>(["foo"])
+                    NextProtos: ["foo"]
                 )));
                 if (errΔ3 != nil) {
                     return (default, errΔ3);
                 }
-                {
-                    var errΔ4 = tc.Handshake(); if (errΔ4 != nil) {
-                        return (default, errΔ4);
-                    }
+                var errΔ4 = tc.Handshake(); if (errΔ4 != nil) {
+                    return (default, errΔ4);
                 }
                 return (new tls.ConnжConn(tc), default);
             }

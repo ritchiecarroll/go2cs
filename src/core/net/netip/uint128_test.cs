@@ -29,7 +29,7 @@ public static void TestUint128AddSub(ж<testing.T> t) {
         new(new uint128(1, 0), sub1, new uint128(0, ~(uint64)0)),
         new(new uint128(1, 1), sub1, new uint128(1, 0))
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         uint128 got = default;
         switch (tt.op) {
         case var ᴛ when ᴛ == add1: {
@@ -65,7 +65,7 @@ public static void TestBitsSetFrom(ж<testing.T> t) {
         new(127, new uint128(0, 1)),
         new(128, new uint128(0, 0))
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         uint128 zero = default;
         var got = zero.bitsSetFrom(tt.bit);
         if (got != tt.want) {
@@ -89,7 +89,7 @@ public static void TestBitsClearedFrom(ж<testing.T> t) {
         new(127, new uint128(~(uint64)0, (uint64)(~(uint64)0 & ~(uint64)1))),
         new(128, new uint128(~(uint64)0, ~(uint64)0))
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var ones = new uint128(~(uint64)0, ~(uint64)0);
         var got = ones.bitsClearedFrom(tt.bit);
         if (got != tt.want) {

@@ -68,7 +68,7 @@ public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
         return io.EOF;
     }
     g.a = data[0];
-    foreach (var (i, c) in data) {
+    foreach (var (i, c) in range(data)) {
         if (c != (byte)(g.a + (byte)i)) {
             return errors.New(invalidDataSequenceˢ);
         }
@@ -86,7 +86,7 @@ public static error GobDecode(this ref StringStruct g, slice<byte> data) {
         return io.EOF;
     }
     var a = data[0];
-    foreach (var (i, c) in data) {
+    foreach (var (i, c) in range(data)) {
         if (c != (byte)(a + (byte)i)) {
             return errors.New(invalidDataSequenceˢ);
         }
@@ -332,7 +332,7 @@ public static void TestGobEncoderArrayField(ж<testing.T> t) {
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     ref var a = ref heap(new GobTestArrayEncDec(), out var Ꮡa);
     a.X = 17;
-    foreach (var i in range(a.A.a)) {
+    foreach (var i in range(len(a.A.a))) {
         a.A.a[i] = (byte)i;
     }
     var err = enc.Encode(Ꮡa);
@@ -345,7 +345,7 @@ public static void TestGobEncoderArrayField(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(decodeErrorˢ, err);
     }
-    foreach (var (i, v) in x.A.a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(x.A.a.ΔRangeSnapshot())) {
         if (v != (byte)i) {
             t.Errorf("expected %x got %x", (byte)i, v);
             break;
@@ -363,7 +363,7 @@ public static void TestGobEncoderIndirectArrayField(ж<testing.T> t) {
     ref var ap = ref heap<ж<ArrayStruct>>(Ꮡarray, out var Ꮡap);
     ref var app = ref heap<ж<ж<ArrayStruct>>>(Ꮡap, out var Ꮡapp);
     a.A = Ꮡapp;
-    foreach (var i in range(Δarray.a)) {
+    foreach (var i in range(len(Δarray.a))) {
         Δarray.a[i] = (byte)i;
     }
     var err = enc.Encode(a);
@@ -376,7 +376,7 @@ public static void TestGobEncoderIndirectArrayField(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(decodeErrorˢ, err);
     }
-    foreach (var (i, v) in (((x.A.ValueSlot).ValueSlot).Value).a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range((((x.A.ValueSlot).ValueSlot).Value).a.ΔRangeSnapshot())) {
         if (v != (byte)i) {
             t.Errorf("expected %x got %x", (byte)i, v);
             break;
@@ -898,7 +898,7 @@ public static void TestIgnoreDepthLimit(ж<testing.T> t) {
         for (nint i = 0; i < 100; i++) {
             nested = reflect.ArrayOf(1, nested);
         }
-        var badStruct = reflect.New(reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)])));
+        var badStruct = reflect.New(reflect.StructOf([new(Name: "F", Type: nested)]));
         enc.Encode(badStruct.Interface());
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
         ref var output = ref heap(new TestIgnoreDepthLimit_output(), out var Ꮡoutput);
@@ -910,11 +910,11 @@ public static void TestIgnoreDepthLimit(ж<testing.T> t) {
         }
 
         // Nested struct
-        nested = reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: typ)]));
+        nested = reflect.StructOf([new(Name: "F", Type: typ)]);
         for (nint i = 0; i < 100; i++) {
-            nested = reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)]));
+            nested = reflect.StructOf([new(Name: "F", Type: nested)]);
         }
-        badStruct = reflect.New(reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)])));
+        badStruct = reflect.New(reflect.StructOf([new(Name: "F", Type: nested)]));
         enc.Encode(badStruct.Interface());
         dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
         {

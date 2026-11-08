@@ -106,7 +106,7 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
 ]);
 
 public static void TestFormatFileInfo(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in formatTests) {
+    foreach (var (i, vᴛ1) in range(formatTests)) {
         ref var test = ref heap(new formatTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -118,7 +118,7 @@ public static void TestFormatFileInfo(ж<testing.T> t) {
 }
 
 public static void TestFormatDirEntry(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in formatTests) {
+    foreach (var (i, vᴛ1) in range(formatTests)) {
         ref var test = ref heap(new formatTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 

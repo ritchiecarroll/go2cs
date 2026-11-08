@@ -18,8 +18,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using global::go.runtime;
@@ -188,7 +186,7 @@ redacted.go:0: runtime.goexit
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestTracebackSystem_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -441,18 +439,16 @@ internal static @string formatStack(slice<uintptr> pcs) {
             fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "pc=%x "u8, pcs[i]);
             i++;
         }
-        {
-            @string @base = filepath.Base(fr.File); if (@base == "traceback_system_test.go"u8 || debug) {
-                var (content, err) = Δos.ReadFile(fr.File);
-                if (err != nil) {
-                    throw panic(err);
-                }
-                var lines = bytes.Split(content, slice<byte>("\n"u8));
-                fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "%s:%d: %s: %s\n"u8, @base, fr.Line, fr.Function, lines[fr.Line - 1]);
-            } else {
-                // For robustness, don't show file/line for functions from other files.
-                fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "redacted.go:0: %s\n"u8, fr.Function);
+        @string @base = filepath.Base(fr.File); if (@base == "traceback_system_test.go"u8 || debug) {
+            var (content, err) = Δos.ReadFile(fr.File);
+            if (err != nil) {
+                throw panic(err);
             }
+            var lines = bytes.Split(content, slice<byte>("\n"u8));
+            fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "%s:%d: %s: %s\n"u8, @base, fr.Line, fr.Function, lines[fr.Line - 1]);
+        } else {
+            // For robustness, don't show file/line for functions from other files.
+            fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "redacted.go:0: %s\n"u8, fr.Function);
         }
 
         if (!more) {

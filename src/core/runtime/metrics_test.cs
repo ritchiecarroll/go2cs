@@ -37,7 +37,7 @@ internal static (map<@string, metrics.Description>, slice<metrics.Sample>) prepa
     var all = metrics.All();
     var samples = new slice<metrics.Sample>(len(all));
     var descs = new map<@string, metrics.Description>();
-    foreach (var i in range(all)) {
+    foreach (var i in range(len(all))) {
         samples[i].Name = all[i].Name;
         descs[all[i].Name] = all[i];
     }
@@ -89,205 +89,193 @@ public static void TestReadMetrics(ж<testing.T> t) {
         uint64 tinyAllocs = default;
         uint64 mallocs = default;
         uint64 frees = default;
-        foreach (var i in range(samples)) {
-            {
-                @string name = samples[i].Name;
-                var exprᴛ1 = name;
-                switch (ᐧ) {
-                case {} when exprᴛ1 == "/cgo/go-to-c-calls:calls"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)Δruntime.NumCgoCall());
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/heap/free:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapIdle - mstats.HeapReleased);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/heap/released:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapReleased);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/heap/objects:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapAlloc);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/heap/unused:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapInuse - mstats.HeapAlloc);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/heap/stacks:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/metadata/mcache/free:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheSys - mstats.MCacheInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/metadata/mcache/inuse:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/metadata/mspan/free:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanSys - mstats.MSpanInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/metadata/mspan/inuse:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/metadata/other:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.GCSys);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/os-stacks:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackSys - mstats.StackInuse);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/other:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.OtherSys);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/profiling/buckets:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.BuckHashSys);
-                    break;
-                }
-                case {} when exprᴛ1 == "/memory/classes/total:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.Sys);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/allocs-by-size:bytes"u8: {
-                    var hist = samples[i].Value.Float64Histogram();
-                    // Skip size class 0 in BySize, because it's always empty and not represented
-                    // in the histogram.
-                    foreach (var (iΔ3, sc) in mstats.BySize[1..]) {
-                        {
-                            var (b, s) = (hist.Buckets[iΔ3 + 1], (float64)(sc.Size + 1)); if (b != s) {
-                                t.Errorf("bucket does not match size class: got %f, want %f", b, s);
-                                // The rest of the checks aren't expected to work anyway.
-                                continue;
-                            }
-                        }
-                        {
-                            var (c, m) = (hist.Counts[iΔ3], sc.Mallocs); if (c != m) {
-                                t.Errorf("histogram counts do not much BySize for class %d: got %d, want %d", iΔ3, c, m);
-                            }
-                        }
-                    }
-                    allocsBySize = hist;
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/allocs:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/frees-by-size:bytes"u8: {
-                    var hist = samples[i].Value.Float64Histogram();
-                    // Skip size class 0 in BySize, because it's always empty and not represented
-                    // in the histogram.
-                    foreach (var (iΔ4, sc) in mstats.BySize[1..]) {
-                        {
-                            var (b, s) = (hist.Buckets[iΔ4 + 1], (float64)(sc.Size + 1)); if (b != s) {
-                                t.Errorf("bucket does not match size class: got %f, want %f", b, s);
-                                // The rest of the checks aren't expected to work anyway.
-                                continue;
-                            }
-                        }
-                        {
-                            var (c, f) = (hist.Counts[iΔ4], sc.Frees); if (c != f) {
-                                t.Errorf("histogram counts do not match BySize for class %d: got %d, want %d", iΔ4, c, f);
-                            }
-                        }
-                    }
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/frees:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc - mstats.HeapAlloc);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/tiny/allocs:objects"u8: {
-                    // Currently, MemStats adds tiny alloc count to both Mallocs AND Frees.
-                    // The reason for this is because MemStats couldn't be extended at the time
-                    // but there was a desire to have Mallocs at least be a little more representative,
-                    // while having Mallocs - Frees still represent a live object count.
-                    // Unfortunately, MemStats doesn't actually export a large allocation count,
-                    // so it's impossible to pull this number out directly.
-                    //
-                    // Check tiny allocation count outside of this loop, by using the allocs-by-size
-                    // histogram in order to figure out how many large objects there are.
-                    tinyAllocs = samples[i].Value.Uint64();
-                    // Because the next two metrics tests are checking against Mallocs and Frees,
-                    // we can't check them directly for the same reason: we need to account for tiny
-                    // allocations included in Mallocs and Frees.
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/allocs:objects"u8: {
-                    mallocs = samples[i].Value.Uint64();
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/frees:objects"u8: {
-                    frees = samples[i].Value.Uint64();
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/live:bytes"u8: {
-                    // Check for "obviously wrong" values. We can't check a stronger invariant,
-                    // such as live <= HeapAlloc, because live is not 100% accurate. It's computed
-                    // under racy conditions, and some objects may be double-counted (this is
-                    // intentional and necessary for GC performance).
-                    //
-                    // Instead, check against a much more reasonable upper-bound: the amount of
-                    // mapped heap memory. We can't possibly overcount to the point of exceeding
-                    // total mapped heap memory, except if there's an accounting bug.
-                    {
-                        var live = samples[i].Value.Uint64(); if (live > mstats.HeapSys) {
-                            t.Errorf("live bytes: %d > heap sys: %d", live, mstats.HeapSys);
-                        } else if (live == 0) {
-                            // Might happen if we don't call runtime.GC() above.
-                            t.Error(liveBytesIs0ˢ);
-                        }
-                    }
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/gomemlimit:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)limit);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/objects:objects"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapObjects);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/heap/goal:bytes"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), mstats.NextGC);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/gogc:percent"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)gcPercent);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/cycles/automatic:gc-cycles"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)(mstats.NumGC - mstats.NumForcedGC));
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/cycles/forced:gc-cycles"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumForcedGC);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/cycles/total:gc-cycles"u8: {
-                    checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumGC);
-                    break;
-                }
-                case {} when exprᴛ1 == "/gc/pauses:seconds"u8: {
-                    gcPauses = samples[i].Value.Float64Histogram();
-                    break;
-                }
-                case {} when exprᴛ1 == "/sched/pauses/total/gc:seconds"u8: {
-                    schedPausesTotalGC = samples[i].Value.Float64Histogram();
-                    break;
-                }}
+        foreach (var i in range(len(samples))) {
+            @string name = samples[i].Name;
+            var exprᴛ1 = name;
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "/cgo/go-to-c-calls:calls"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)Δruntime.NumCgoCall());
+                break;
             }
+            case {} when exprᴛ1 == "/memory/classes/heap/free:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapIdle - mstats.HeapReleased);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/heap/released:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapReleased);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/heap/objects:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapAlloc);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/heap/unused:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapInuse - mstats.HeapAlloc);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/heap/stacks:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/metadata/mcache/free:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheSys - mstats.MCacheInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/metadata/mcache/inuse:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/metadata/mspan/free:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanSys - mstats.MSpanInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/metadata/mspan/inuse:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/metadata/other:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.GCSys);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/os-stacks:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackSys - mstats.StackInuse);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/other:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.OtherSys);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/profiling/buckets:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.BuckHashSys);
+                break;
+            }
+            case {} when exprᴛ1 == "/memory/classes/total:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.Sys);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/allocs-by-size:bytes"u8: {
+                var hist = samples[i].Value.Float64Histogram();
+                // Skip size class 0 in BySize, because it's always empty and not represented
+                // in the histogram.
+                foreach (var (iΔ3, sc) in range(mstats.BySize[1..])) {
+                    var (b, s) = (hist.Buckets[iΔ3 + 1], (float64)(sc.Size + 1)); if (b != s) {
+                        t.Errorf("bucket does not match size class: got %f, want %f", b, s);
+                        // The rest of the checks aren't expected to work anyway.
+                        continue;
+                    }
+                    var (c, m) = (hist.Counts[iΔ3], sc.Mallocs); if (c != m) {
+                        t.Errorf("histogram counts do not much BySize for class %d: got %d, want %d", iΔ3, c, m);
+                    }
+                }
+                allocsBySize = hist;
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/allocs:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/frees-by-size:bytes"u8: {
+                var hist = samples[i].Value.Float64Histogram();
+                // Skip size class 0 in BySize, because it's always empty and not represented
+                // in the histogram.
+                foreach (var (iΔ4, sc) in range(mstats.BySize[1..])) {
+                    var (b, s) = (hist.Buckets[iΔ4 + 1], (float64)(sc.Size + 1)); if (b != s) {
+                        t.Errorf("bucket does not match size class: got %f, want %f", b, s);
+                        // The rest of the checks aren't expected to work anyway.
+                        continue;
+                    }
+                    var (c, f) = (hist.Counts[iΔ4], sc.Frees); if (c != f) {
+                        t.Errorf("histogram counts do not match BySize for class %d: got %d, want %d", iΔ4, c, f);
+                    }
+                }
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/frees:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc - mstats.HeapAlloc);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/tiny/allocs:objects"u8: {
+                // Currently, MemStats adds tiny alloc count to both Mallocs AND Frees.
+                // The reason for this is because MemStats couldn't be extended at the time
+                // but there was a desire to have Mallocs at least be a little more representative,
+                // while having Mallocs - Frees still represent a live object count.
+                // Unfortunately, MemStats doesn't actually export a large allocation count,
+                // so it's impossible to pull this number out directly.
+                //
+                // Check tiny allocation count outside of this loop, by using the allocs-by-size
+                // histogram in order to figure out how many large objects there are.
+                tinyAllocs = samples[i].Value.Uint64();
+                // Because the next two metrics tests are checking against Mallocs and Frees,
+                // we can't check them directly for the same reason: we need to account for tiny
+                // allocations included in Mallocs and Frees.
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/allocs:objects"u8: {
+                mallocs = samples[i].Value.Uint64();
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/frees:objects"u8: {
+                frees = samples[i].Value.Uint64();
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/live:bytes"u8: {
+                // Check for "obviously wrong" values. We can't check a stronger invariant,
+                // such as live <= HeapAlloc, because live is not 100% accurate. It's computed
+                // under racy conditions, and some objects may be double-counted (this is
+                // intentional and necessary for GC performance).
+                //
+                // Instead, check against a much more reasonable upper-bound: the amount of
+                // mapped heap memory. We can't possibly overcount to the point of exceeding
+                // total mapped heap memory, except if there's an accounting bug.
+                var live = samples[i].Value.Uint64(); if (live > mstats.HeapSys) {
+                    t.Errorf("live bytes: %d > heap sys: %d", live, mstats.HeapSys);
+                } else if (live == 0) {
+                    // Might happen if we don't call runtime.GC() above.
+                    t.Error(liveBytesIs0ˢ);
+                }
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/gomemlimit:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)limit);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/objects:objects"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapObjects);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/heap/goal:bytes"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), mstats.NextGC);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/gogc:percent"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)gcPercent);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/cycles/automatic:gc-cycles"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)(mstats.NumGC - mstats.NumForcedGC));
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/cycles/forced:gc-cycles"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumForcedGC);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/cycles/total:gc-cycles"u8: {
+                checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumGC);
+                break;
+            }
+            case {} when exprᴛ1 == "/gc/pauses:seconds"u8: {
+                gcPauses = samples[i].Value.Float64Histogram();
+                break;
+            }
+            case {} when exprᴛ1 == "/sched/pauses/total/gc:seconds"u8: {
+                schedPausesTotalGC = samples[i].Value.Float64Histogram();
+                break;
+            }}
         }
 
         // Check tinyAllocs.
         var nonTinyAllocs = (uint64)0;
-        foreach (var (_, c) in allocsBySize.Counts) {
+        foreach (var (_, c) in range(allocsBySize.Counts)) {
             nonTinyAllocs += c;
         }
         checkUint64(t, gcHeapTinyAllocsObjectsˢ, tinyAllocs, mstats.Mallocs - nonTinyAllocs);
@@ -372,7 +360,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
     TestReadMetricsConsistency_gc gc = default;
     TestReadMetricsConsistency_totalVirtual totalScan = default;
     TestReadMetricsConsistency_cpu cpu = default;
-    foreach (var i in range(samples)) {
+    foreach (var i in range(len(samples))) {
         metrics.ValueKind kind = samples[i].Value.Kind();
         {
             metrics.ValueKind want = descs[samples[i].Name].Kind; if (kind != want) {
@@ -480,7 +468,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
         case {} when exprᴛ1 == "/gc/pauses:seconds"u8: {
             var h = samples[i].Value.Float64Histogram();
             gc.pauses = 0;
-            foreach (var iΔ2 in range(h.Counts)) {
+            foreach (var iΔ2 in range(len(h.Counts))) {
                 gc.pauses += h.Counts[iΔ2];
             }
             break;
@@ -502,10 +490,8 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
             break;
         }
         case {} when exprᴛ1 == "/sched/gomaxprocs:threads"u8: {
-            {
-                var (got, want) = (samples[i].Value.Uint64(), (uint64)Δruntime.GOMAXPROCS(-1)); if (got != want) {
-                    t.Errorf("gomaxprocs doesn't match runtime.GOMAXPROCS: got %d, want %d", got, want);
-                }
+            var (got, want) = (samples[i].Value.Uint64(), (uint64)Δruntime.GOMAXPROCS(-1)); if (got != want) {
+                t.Errorf("gomaxprocs doesn't match runtime.GOMAXPROCS: got %d, want %d", got, want);
             }
             break;
         }
@@ -579,7 +565,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
     } else if (len(objects.alloc.Counts) != len(objects.free.Counts)) {
         t.Error(allocsBySizeAndFreesByˢ2);
     } else {
-        foreach (var i in range(objects.alloc.Buckets)) {
+        foreach (var i in range(len(objects.alloc.Buckets))) {
             var ba = objects.alloc.Buckets[i];
             var bf = objects.free.Buckets[i];
             if (ba != bf) {
@@ -590,7 +576,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
             uint64 gotAlloc = default;
             uint64 gotFree = default;
             var want = objects.total;
-            foreach (var i in range(objects.alloc.Counts)) {
+            foreach (var i in range(len(objects.alloc.Counts))) {
                 if (objects.alloc.Counts[i] < objects.free.Counts[i]) {
                     t.Errorf("found more allocs than frees in object dist bucket %d", i);
                     continue;
@@ -598,10 +584,8 @@ public static void TestReadMetricsConsistency(ж<testing.T> t) {
                 gotAlloc += objects.alloc.Counts[i];
                 gotFree += objects.free.Counts[i];
             }
-            {
-                var got = gotAlloc - gotFree; if (got != want) {
-                    t.Errorf("object distribution counts don't match count of live objects: got %d, want %d", got, want);
-                }
+            var got = gotAlloc - gotFree; if (got != want) {
+                t.Errorf("object distribution counts don't match count of live objects: got %d, want %d", got, want);
             }
             if (gotAlloc != objects.allocs) {
                 t.Errorf("object distribution counts don't match total allocs: got %d, want %d", gotAlloc, objects.allocs);
@@ -670,7 +654,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> t) {
     samples[0] = new slice<metrics.Sample>(len(descs));
     samples[1] = new slice<metrics.Sample>(len(descs));
     nint total = 0;
-    foreach (var i in range(samples[0])) {
+    foreach (var i in range(len(samples[0]))) {
         if (!descs[i].Cumulative) {
             continue;
         }
@@ -718,7 +702,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> t) {
 
     uint64 sum(slice<uint64> us) {
         var totalΔ1 = (uint64)0;
-        foreach (var (_, u) in us) {
+        foreach (var (_, u) in range(us)) {
             totalΔ1 += u;
         }
         return totalΔ1;
@@ -730,7 +714,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> t) {
     // Check to make sure that these metrics only grow monotonically.
     for (nint gen = 1; gen < 10; gen++) {
         metrics.Read(samples[gen % 2]);
-        foreach (var i in range(samples[gen % 2])) {
+        foreach (var i in range(len(samples[gen % 2]))) {
             @string name = samples[gen % 2][i].Name;
             var (vNew, vOld) = (samples[gen % 2][i].Value, samples[1 - (gen % 2)][i].Value);
 
@@ -780,7 +764,7 @@ public static void TestMutexWaitTimeMetric(ж<testing.T> t) {
 
     var locks = slice<locker2>([new runtime_test_package.mutexжlocker2(@new<mutex>()), new runtime_test_package.rwmutexWriteжlocker2(@new<rwmutexWrite>()), new runtime_test_package.rwmutexReadWriteжlocker2(@new<rwmutexReadWrite>()), new runtime_test_package.rwmutexWriteReadжlocker2(@new<rwmutexWriteRead>())
     ]);
-    foreach (var (_, @lock) in locks) {
+    foreach (var (_, @lock) in range(locks)) {
         var lockʗ1 = @lock;
         var sampleʗ1 = sample;
         t.Run(reflect.TypeOf(@lock).Elem().Name(), (ж<testing.T> tΔ1) => {
@@ -792,10 +776,8 @@ public static void TestMutexWaitTimeMetric(ж<testing.T> t) {
             metrics.Read(sampleʗ1[..]);
             var after = (time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D);
 
-            {
-                var wt = after - before; if (wt < minMutexWaitTime) {
-                    tΔ1.Errorf("too little mutex wait time: got %s, want %s", wt, minMutexWaitTime);
-                }
+            var wt = after - before; if (wt < minMutexWaitTime) {
+                tΔ1.Errorf("too little mutex wait time: got %s, want %s", wt, minMutexWaitTime);
             }
         });
     }
@@ -844,61 +826,28 @@ partial struct rwmutexWrite {
     internal Δsync.RWMutex mu;
 }
 
-internal static void Lock1(this ж<rwmutexWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Lock();
-}
-
-internal static void Unlock1(this ж<rwmutexWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Unlock();
-}
-
-internal static void Lock2(this ж<rwmutexWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Lock();
-}
-
-internal static void Unlock2(this ж<rwmutexWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Unlock();
-}
+internal static void Lock1(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
+internal static void Unlock1(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
+internal static void Lock2(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
+internal static void Unlock2(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 
 partial struct rwmutexReadWrite {
     internal Δsync.RWMutex mu;
 }
 
-internal static void Lock1(this ж<rwmutexReadWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.RLock();
-}
-
-internal static void Unlock1(this ж<rwmutexReadWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.RUnlock();
-}
-
-internal static void Lock2(this ж<rwmutexReadWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Lock();
-}
-
-internal static void Unlock2(this ж<rwmutexReadWrite> Ꮡm) {
-    Ꮡm.Ꮡmu.Unlock();
-}
+internal static void Lock1(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.RLock(); }
+internal static void Unlock1(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.RUnlock(); }
+internal static void Lock2(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
+internal static void Unlock2(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 
 partial struct rwmutexWriteRead {
     internal Δsync.RWMutex mu;
 }
 
-internal static void Lock1(this ж<rwmutexWriteRead> Ꮡm) {
-    Ꮡm.Ꮡmu.Lock();
-}
-
-internal static void Unlock1(this ж<rwmutexWriteRead> Ꮡm) {
-    Ꮡm.Ꮡmu.Unlock();
-}
-
-internal static void Lock2(this ж<rwmutexWriteRead> Ꮡm) {
-    Ꮡm.Ꮡmu.RLock();
-}
-
-internal static void Unlock2(this ж<rwmutexWriteRead> Ꮡm) {
-    Ꮡm.Ꮡmu.RUnlock();
-}
+internal static void Lock1(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
+internal static void Unlock1(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
+internal static void Lock2(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.RLock(); }
+internal static void Unlock2(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.RUnlock(); }
 
 // generateMutexWaitTime causes a couple of goroutines
 // to block a whole bunch of times on a sync.Mutex, returning
@@ -983,7 +932,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> t) {
     var namesʗ1 = names;
     slice<metrics.Sample> prep() {
         var mm = new slice<metrics.Sample>(len(namesʗ1));
-        foreach (var i in range(namesʗ1)) {
+        foreach (var i in range(len(namesʗ1))) {
             mm[i].Name = namesʗ1[i];
         }
         return mm;
@@ -1043,11 +992,11 @@ public static void TestCPUMetricsSleep(ж<testing.T> t) {
     }
 
     // We couldn't observe the expected idle time even once.
-    foreach (var (i, dt) in failureIdleTimes) {
+    foreach (var (i, dt) in range(failureIdleTimes)) {
         t.Logf("try %2d: idle time = %.5fs\n", i + 1, dt);
     }
     t.Logf("try %d breakdown:\n", len(failureIdleTimes));
-    foreach (var i in range(names)) {
+    foreach (var i in range(len(names))) {
         if (m1[i].Value.Kind() == metrics.KindBad) {
             continue;
         }
@@ -1075,7 +1024,7 @@ internal static void testSchedPauseMetrics(ж<testing.T> t, Action<ж<testing.T>
         var h = (~s).Value.Float64Histogram();
 
         uint64 n = default;
-        foreach (var (_, c) in h.Counts) {
+        foreach (var (_, c) in range(h.Counts)) {
             n += c;
         }
         return n;
@@ -1233,10 +1182,8 @@ public static void TestSchedPauseMetrics(ж<testing.T> t) {
                     }
 
                     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-                    {
-                        var err = trace.Start(new runtime_test_package.bytes_BufferжWriter(Ꮡbuf)); if (err != nil) {
-                            tΔ7.Errorf("trace.Start err got %v want nil", err);
-                        }
+                    var err = trace.Start(new runtime_test_package.bytes_BufferжWriter(Ꮡbuf)); if (err != nil) {
+                        tΔ7.Errorf("trace.Start err got %v want nil", err);
                     }
                     trace.Stop();
                 }
@@ -1252,7 +1199,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> t) {
         defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
         Δruntime.GC();
 
-        foreach (var (_, vᴛ1) in tests) {
+        foreach (var (_, vᴛ1) in range(tests)) {
             ref var tc = ref heap(new TestSchedPauseMetrics_tests(), out var Ꮡtc);
             tc = vᴛ1;
 
@@ -1304,10 +1251,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
         t.Logf("NumCPU %d", Δruntime.NumCPU());
         t.Logf("GOMAXPROCS %d", Δruntime.GOMAXPROCS(0));
-        {
-            nint minCPU = 2; if (Δruntime.NumCPU() < minCPU) {
-                t.Skipf("creating and observing contention on runtime-internal locks requires NumCPU >= %d", minCPU);
-            }
+        nint minCPU = 2; if (Δruntime.NumCPU() < minCPU) {
+            t.Skipf("creating and observing contention on runtime-internal locks requires NumCPU >= %d", minCPU);
         }
 
         ж<profile.Profile> loadProfile(ж<testing.T> tΔ1) {
@@ -1317,10 +1262,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatalf("failed to parse profile: %v", err);
             }
-            {
-                var errΔ1 = p.CheckValid(); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("invalid profile: %v", errΔ1);
-                }
+            var errΔ1 = p.CheckValid(); if (errΔ1 != nil) {
+                tΔ1.Fatalf("invalid profile: %v", errΔ1);
             }
             return p;
         }
@@ -1342,7 +1285,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
             int64 sumSamples(ж<profile.Profile> pΔ1, nint i) {
                 int64 sum = default;
-                foreach (var (_, s) in pΔ1.Sample) {
+                foreach (var (_, s) in range(pΔ1.Sample)) {
                     sum += (~s).Value[i];
                 }
                 return sum;
@@ -1420,7 +1363,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                 tΔ3.Logf("lock contention growth in runtime/metrics' view (%fs)", metricGrowth);
 
                 acceptStacks = appendꓸꓸꓸ(slice<slice<@string>>(default), acceptStacks);
-                foreach (var (i, vᴛ1) in acceptStacks) {
+                foreach (var (i, vᴛ1) in range(acceptStacks)) {
                     var stk = vᴛ1;
 
                     if (goexperiment.StaticLockRanking) {
@@ -1437,16 +1380,16 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                 slice<slice<@string>> stks = default;
                 var values = GoReflect.WithElemDims(new slice<array<int64>>(len(acceptStacks) + 1, () => new(2)), 2);
-                foreach (var (_, s) in p.Sample) {
+                foreach (var (_, s) in range(p.Sample)) {
                     slice<@string> have = default;
-                    foreach (var (_, loc) in s.Location) {
-                        foreach (var (_, line) in loc.Line) {
+                    foreach (var (_, loc) in range(s.Location)) {
+                        foreach (var (_, line) in range(loc.Line)) {
                             have = append(have, line.Function.Name);
                         }
                     }
                     stks = append(stksᴷ, stks, have);
                     var found = false;
-                    foreach (var (i, stk) in acceptStacks) {
+                    foreach (var (i, stk) in range(acceptStacks)) {
                         if (slices.Equal<slice<@string>, @string>(have, stk)) {
                             values[i][0] += (~s).Value[0];
                             values[i][1] += (~s).Value[1];
@@ -1461,7 +1404,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                 }
                 profileGrowth = new slice<int64>(len(acceptStacks) + 1);
                 profileGrowth[len(profileGrowth) - 1] = values[len(values) - 1][1];
-                foreach (var (i, stk) in acceptStacks) {
+                foreach (var (i, stk) in range(acceptStacks)) {
                     n += values[i][0];
                     value += values[i][1];
                     profileGrowth[i] = values[i][1];
@@ -1470,10 +1413,10 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                 if (n == 0 && value == 0) {
                     tΔ3.Logf("profile:\n%s", p.OrTypedNil());
                     stks = move2heap(stksᴷ, stks);
-                    foreach (var (_, have) in stks) {
+                    foreach (var (_, have) in range(stks)) {
                         tΔ3.Logf("have stack %v", have);
                     }
-                    foreach (var (_, stk) in acceptStacks) {
+                    foreach (var (_, stk) in range(acceptStacks)) {
                         tΔ3.Errorf("want stack %v", stk);
                     }
                 }
@@ -1516,7 +1459,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                 var minTicks = new slice<slice<int64>>(workerCount); // lower bound, known-contended time, measured by cputicks
                 var maxTicks = new slice<slice<int64>>(workerCount); // upper bound, total lock() duration, measured by cputicks
-                foreach (var i in range(minTicks)) {
+                foreach (var i in range(len(minTicks))) {
                     minTicks[i] = new slice<int64>(len(mus));
                     maxTicks[i] = new slice<int64>(len(mus));
                 }
@@ -1585,19 +1528,19 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                 };
 
                 var stks = new slice<slice<@string>>(2);
-                foreach (var i in range(stks)) {
+                foreach (var i in range(len(stks))) {
                     @string marker = runtimeTestˢ;
                     if (i == slowRole) {
                         marker = runtimeTestˢ2;
                     }
 
-                    stks[i] = slice<@string>([
+                    stks[i] = [
                         "runtime.unlock",
                         "runtime_test."u8 + name + ".func4.1.1"u8,
                         marker,
                         "runtime_test."u8 + name + ".func4.1"u8,
                         "runtime_test.(*contentionWorker).run"
-                    ]);
+                    ];
                 }
 
                 var fnʗ1 = fn;
@@ -1627,14 +1570,12 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                             // gTrackingPeriod, so we don't have a hard lower bound here.
                             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(tΔ6), 64253);
 
-                            {
-                                var (have, want) = (metricGrowth, baseDelay.Seconds() * (float64)len(musʗ3)); if (have < want) {
-                                    // The test imposes a delay with usleep, verified with calls to
-                                    // nanotime. Compare against the runtime/metrics package's view
-                                    // (based on nanotime) rather than runtime/pprof's view (based
-                                    // on cputicks).
-                                    tΔ6.Errorf("runtime/metrics reported less than the known minimum contention duration (%fs < %fs)", have, want);
-                                }
+                            var (have, want) = (metricGrowth, baseDelay.Seconds() * (float64)len(musʗ3)); if (have < want) {
+                                // The test imposes a delay with usleep, verified with calls to
+                                // nanotime. Compare against the runtime/metrics package's view
+                                // (based on nanotime) rather than runtime/pprof's view (based
+                                // on cputicks).
+                                tΔ6.Errorf("runtime/metrics reported less than the known minimum contention duration (%fs < %fs)", have, want);
                             }
                         });
                         {
@@ -1645,8 +1586,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                         int64 slowMinTicks = default;
                         int64 fastMinTicks = default;
-                        foreach (var (role, ticks) in minTicksʗ3) {
-                            foreach (var (_, delta) in ticks) {
+                        foreach (var (role, ticks) in range(minTicksʗ3)) {
+                            foreach (var (_, delta) in range(ticks)) {
                                 if (role == slowRole) {
                                     slowMinTicks += delta;
                                 } else {
@@ -1656,8 +1597,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                         }
                         int64 slowMaxTicks = default;
                         int64 fastMaxTicks = default;
-                        foreach (var (role, ticks) in maxTicksʗ3) {
-                            foreach (var (_, delta) in ticks) {
+                        foreach (var (role, ticks) in range(maxTicksʗ3)) {
+                            foreach (var (_, delta) in range(ticks)) {
                                 if (role == slowRole) {
                                     slowMaxTicks += delta;
                                 } else {
@@ -1667,7 +1608,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                         }
 
                         var cpuGHz = (float64)runtime_internal_test_package.CyclesPerSecond() / 1e9D;
-                        foreach (var (_, set) in slice<TestRuntimeLockMetricsAndProfile_type>([
+                        foreach (var (_, set) in range(slice<TestRuntimeLockMetricsAndProfile_type>([
                             new(
                                 name: "slow",
                                 profTime: profileGrowth[slowRole],
@@ -1680,7 +1621,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                                 minTime: (int64)((float64)fastMinTicks / cpuGHz),
                                 maxTime: (int64)((float64)slowMaxTicks / cpuGHz)
                             )
-                        ])) {
+                        ]))) {
                             tΔ5.Logf("profile's view of delays due to %q critical section:                 %dns", set.name, set.profTime);
                             tΔ5.Logf("test's view of known-contended time within %q critical section:      %dns", set.name, set.minTime);
                             tΔ5.Logf("test's view of lock duration before critical sections other than %q: %dns", set.name, set.maxTime);
@@ -1694,7 +1635,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                         }
 
                         float64 totalProfileGrowth = default;
-                        foreach (var (_, growth) in profileGrowth) {
+                        foreach (var (_, growth) in range(profileGrowth)) {
                             totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
                         }
 
@@ -1753,7 +1694,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                         }
 
                         float64 totalProfileGrowth = default;
-                        foreach (var (_, growth) in profileGrowth) {
+                        foreach (var (_, growth) in range(profileGrowth)) {
                             totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
                         }
 
@@ -1807,17 +1748,17 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                 };
 
                 var stks = slice<slice<@string>>([
-                    slice<@string>([
+                    [
                         "runtime.unlock",
                         "runtime.semrelease1",
                         "runtime_test.TestRuntimeLockMetricsAndProfile.func5.1",
-                        "runtime_test.(*contentionWorker).run"]),
-                    slice<@string>([
+                        "runtime_test.(*contentionWorker).run"],
+                    [
                         "runtime.unlock",
                         "runtime.semacquire1",
                         "runtime.semacquire",
                         "runtime_test.TestRuntimeLockMetricsAndProfile.func5.1",
-                        "runtime_test.(*contentionWorker).run"])
+                        "runtime_test.(*contentionWorker).run"]
                 ]);
 
                 // Verify that we get call stack we expect, with anything more than zero
@@ -1827,10 +1768,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                 testcaseʗ4(false, stks, workers, fn)(tΔ9);
 
-                {
-                    var remaining = Ꮡtries.Load(); if (remaining >= 0) {
-                        tΔ9.Logf("finished test early (%d tries remaining)", remaining);
-                    }
+                var remaining = Ꮡtries.Load(); if (remaining >= 0) {
+                    tΔ9.Logf("finished test early (%d tries remaining)", remaining);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1841,13 +1780,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void slowMarkerFrame(Action fn) {
-    fn();
-}
-
-internal static partial void fastMarkerFrame(Action fn) {
-    fn();
-}
+internal static partial void slowMarkerFrame(Action fn) { fn(); }
+internal static partial void fastMarkerFrame(Action fn) { fn(); }
 
 // contentionWorker provides cleaner call stacks for lock contention profile tests
 partial struct contentionWorker {

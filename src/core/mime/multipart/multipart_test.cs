@@ -12,8 +12,6 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using net;
 using static go.mime.multipart_package;
@@ -69,7 +67,7 @@ public static void TestNameAccessors(ж<testing.T> t) {
         new @string[]{@" FORM-DATA ; filename=""foo.txt""; name=foo; baz=quux", "foo", "foo.txt"}.array(),
         new @string[]{@" not-form-data ; filename=""bar.txt""; name=foo; baz=quux", "", "bar.txt"}.array()
     }.array();
-    foreach (var (i, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         var test = vᴛ1.Clone();
 
         var p = Ꮡ(new Part(Header: new map<@string, slice<@string>>()));
@@ -203,10 +201,8 @@ internal static void testMultipart(ж<testing.T> t, io.Reader r, bool onlyNewlin
         }
     }
     buf.Reset();
-    {
-        var (_, errΔ1) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ1 != nil) {
-            t.Errorf("part 1 copy: %v", errΔ1);
-        }
+    var (_, errΔ1) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ1 != nil) {
+        t.Errorf("part 1 copy: %v", errΔ1);
     }
 
     @string adjustNewlines(@string sΔ1) {
@@ -224,17 +220,13 @@ internal static void testMultipart(ж<testing.T> t, io.Reader r, bool onlyNewlin
         t.Fatalf("Expected part2; got: %v", err);
         return;
     }
-    {
-        @string e = bigsectionˢ;
-        @string g = part.Header.Get(nameˢ); if (e != g) {
-            t.Errorf("part2's name header: expected %q, got %q", e, g);
-        }
+    @string e = bigsectionˢ;
+    @string g = part.Header.Get(nameˢ); if (e != g) {
+        t.Errorf("part2's name header: expected %q, got %q", e, g);
     }
     buf.Reset();
-    {
-        var (_, errΔ2) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ2 != nil) {
-            t.Errorf("part 2 copy: %v", errΔ2);
-        }
+    var (_, errΔ2) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ2 != nil) {
+        t.Errorf("part 2 copy: %v", errΔ2);
     }
     @string s = buf.String();
     if (len(s) != len(longLine)) {
@@ -255,10 +247,8 @@ internal static void testMultipart(ж<testing.T> t, io.Reader r, bool onlyNewlin
         t.Error(expectedFooBarBazbˢ);
     }
     buf.Reset();
-    {
-        var (_, errΔ3) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ3 != nil) {
-            t.Errorf("part 3 copy: %v", errΔ3);
-        }
+    var (_, errΔ3) = io.Copy(new multipart_test_package.strings_BuilderжWriter(buf), new global::go.mime.multipart_package.PartжReader(part)); if (errΔ3 != nil) {
+        t.Errorf("part 3 copy: %v", errΔ3);
     }
     expectEq(t, adjustNewlines(line1Line2Line3EndsInAˢ),
         buf.String(), bodyOfPart3ˢ);
@@ -295,7 +285,7 @@ public static void TestVariousTextLineEndings(ж<testing.T> t) {
         "\x00\x01\x02\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"
     }.array();
 
-    foreach (var (testNum, expectedBody) in tests.ΔRangeSnapshot()) {
+    foreach (var (testNum, expectedBody) in range(tests.ΔRangeSnapshot())) {
         @string body = "--BOUNDARY\r\n"u8 + "Content-Disposition: form-data; name=\"value\"\r\n"u8 + "\r\n"u8 + expectedBody + "\r\n--BOUNDARY--\r\n"u8;
         var bodyReader = strings.NewReader(body);
 
@@ -365,7 +355,7 @@ public static void TestLineLimit(ж<testing.T> t) {
 }
 
 public static void TestMultipartTruncated(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<@string>([
+    foreach (var (_, vᴛ1) in range(slice<@string>([
         """
 
 This is a multi-part message.  This line is ignored.
@@ -384,7 +374,7 @@ foo-bar: baz
 Oh no, premature EOF!
 --MyBoundary-
 """u8.Raw()
-    ])) {
+    ]))) {
         var body = vᴛ1;
 
         body = strings.ReplaceAll(body, "\n", "\r\n");
@@ -484,7 +474,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> t) {
         i++;
     }
 
-    readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"] = slice<@string>(["baz"])}), bodyˢ);
+    readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"] = ["baz"]}), bodyˢ);
 
     var selᴛ1 = done1;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
@@ -496,7 +486,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> t) {
         break;
     }}
 
-    readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"] = slice<@string>(["bop"])}), body2ˢ);
+    readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"] = ["bop"]}), body2ˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -532,7 +522,7 @@ public static void TestLineContinuation(ж<testing.T> t) {
 }
 
 public static void TestQuotedPrintableEncoding(ж<testing.T> t) {
-    foreach (var (_, cte) in slice<@string>(["quoted-printable", "Quoted-PRINTABLE"])) {
+    foreach (var (_, cte) in range(slice<@string>(["quoted-printable", "Quoted-PRINTABLE"]))) {
         t.Run(cte, (ж<testing.T> tΔ1) => {
             testQuotedPrintableEncoding(tΔ1, cte);
         });
@@ -553,10 +543,8 @@ internal static void testQuotedPrintableEncoding(ж<testing.T> t, @string cte) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (te, ok) = part.Header[contentTransferEncodingˢ, ꟷ]; if (ok) {
-            t.Errorf("unexpected Content-Transfer-Encoding of %q", te);
-        }
+    var (te, ok) = part.Header[contentTransferEncodingˢ, ꟷ]; if (ok) {
+        t.Errorf("unexpected Content-Transfer-Encoding of %q", te);
     }
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     (_, err) = io.Copy(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf), new global::go.mime.multipart_package.PartжReader(part));
@@ -603,10 +591,8 @@ public static void TestRawPart(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (_, ok) = part.Header[contentTransferEncodingˢ, ꟷ]; if (!ok) {
-            t.Errorf("missing Content-Transfer-Encoding");
-        }
+    if (part.Header[contentTransferEncodingˢ, ꟷ] is not (_, true)) {
+        t.Errorf("missing Content-Transfer-Encoding");
     }
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     (_, err) = io.Copy(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf), new global::go.mime.multipart_package.PartжReader(part));
@@ -625,10 +611,8 @@ public static void TestRawPart(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (te, ok) = part.Header[contentTransferEncodingˢ, ꟷ]; if (ok) {
-            t.Errorf("unexpected Content-Transfer-Encoding of %q", te);
-        }
+    if (part.Header[contentTransferEncodingˢ, ꟷ] is (var te, true)) {
+        t.Errorf("unexpected Content-Transfer-Encoding of %q", te);
     }
 
     buf.Reset();
@@ -715,8 +699,8 @@ internal partial struct headerBody {
 internal static headerBody formData(@string key, @string value) {
     return new headerBody(
         new textproto.MIMEHeader(new map<@string, slice<@string>>{
-            ["Content-Type"] = slice<@string>(["text/plain; charset=ISO-8859-1"]),
-            ["Content-Disposition"] = slice<@string>(["form-data; name="u8 + key])
+            ["Content-Type"] = ["text/plain; charset=ISO-8859-1"],
+            ["Content-Disposition"] = ["form-data; name="u8 + key]
         }),
         value
     );
@@ -750,8 +734,8 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
             formData("otherRepeatEmpty", ""),
             formData("submit", "Submit"),
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{
-                ["Content-Type"] = slice<@string>(["message/external-body; charset=ISO-8859-1; blob-key=AHAZQqG84qllx7HUqO_oou5EvdYQNS3Mbbkb0RjjBoM_Kc1UqEN2ygDxWiyCPulIhpHRPx-VbpB6RX4MrsqhWAi_ZxJ48O9P2cTIACbvATHvg7IgbvZytyGMpL7xO1tlIvgwcM47JNfv_tGhy1XwyEUO8oldjPqg5Q"]),
-                ["Content-Disposition"] = slice<@string>(["form-data; name=file; filename=\"fall.png\""])
+                ["Content-Type"] = ["message/external-body; charset=ISO-8859-1; blob-key=AHAZQqG84qllx7HUqO_oou5EvdYQNS3Mbbkb0RjjBoM_Kc1UqEN2ygDxWiyCPulIhpHRPx-VbpB6RX4MrsqhWAi_ZxJ48O9P2cTIACbvATHvg7IgbvZytyGMpL7xO1tlIvgwcM47JNfv_tGhy1XwyEUO8oldjPqg5Q"],
+                ["Content-Disposition"] = ["form-data; name=file; filename=\"fall.png\""]
             }), "Content-Type: image/png\r\nContent-Length: 232303\r\nX-AppEngine-Upload-Creation: 2012-05-10 23:14:02.715173\r\nContent-MD5: MzRjODU1ZDZhZGU1NmRlOWEwZmMwMDdlODBmZTA0NzA=\r\nContent-Disposition: form-data; name=file; filename=\"fall.png\"\r\n\r\n")
         ])
     ),
@@ -761,9 +745,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "single empty part, --boundary",
         sep: "abc",
         @in: "--abc\r\nFoo: bar\r\n\r\n--abc--",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "")
+        ]
     ),
 
     // Single empty part, ended with \r\n--boundary immediately after headers.
@@ -771,9 +755,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "single empty part, \r\n--boundary",
         sep: "abc",
         @in: "--abc\r\nFoo: bar\r\n\r\n\r\n--abc--",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "")
+        ]
     ),
 
     // Final part empty.
@@ -781,10 +765,10 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "final part empty",
         sep: "abc",
         @in: "--abc\r\nFoo: bar\r\n\r\n--abc\r\nFoo2: bar2\r\n\r\n--abc--",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), ""),
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo2"] = slice<@string>(["bar2"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), ""),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo2"] = ["bar2"]}), "")
+        ]
     ),
 
     // Final part empty with newlines after final separator.
@@ -792,9 +776,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "final part empty then crlf",
         sep: "abc",
         @in: "--abc\r\nFoo: bar\r\n\r\n--abc--\r\n",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "")
+        ]
     ),
 
     // Final part empty with lwsp-chars after final separator.
@@ -802,9 +786,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "final part empty then lwsp",
         sep: "abc",
         @in: "--abc\r\nFoo: bar\r\n\r\n--abc-- \t",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "")
+        ]
     ),
 
     // No parts (empty form as submitted by Chrome)
@@ -812,7 +796,7 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "no parts",
         sep: "----WebKitFormBoundaryQfEAfzFOiSemeHfA",
         @in: "------WebKitFormBoundaryQfEAfzFOiSemeHfA--\r\n",
-        want: slice<headerBody>([])
+        want: []
     ),
 
     // Part containing data starting with the boundary, but with additional suffix.
@@ -820,9 +804,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "fake separator as data",
         sep: "sep",
         @in: "--sep\r\nFoo: bar\r\n\r\n--sepFAKE\r\n--sep--",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "--sepFAKE")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "--sepFAKE")
+        ]
     ),
 
     // Part containing a boundary with whitespace following it.
@@ -830,9 +814,9 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
         name: "boundary with whitespace",
         sep: "sep",
         @in: "--sep \r\nFoo: bar\r\n\r\ntext\r\n--sep--",
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "text")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "text")
+        ]
     ),
 
     // With ignored leading line.
@@ -847,9 +831,9 @@ foo: bar
 
 --MyBoundary--
 """u8.Raw(), "\n", "\r\n", -1),
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "")
+        ]
     ),
 
     // Issue 10616; minimal
@@ -857,9 +841,9 @@ foo: bar
         name: "issue 10616 minimal",
         sep: "sep",
         @in: "--sep \r\nFoo: bar\r\n\r\n"u8 + "a\r\n"u8 + "--sep_alt\r\n"u8 + "b\r\n"u8 + "\r\n--sep--"u8,
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])}), "a\r\n--sep_alt\r\nb\r\n")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]}), "a\r\n--sep_alt\r\nb\r\n")
+        ]
     ),
 
     // Issue 10616; full example from bug.
@@ -885,7 +869,7 @@ html things
 ------=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9--
 """u8.Raw(), "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/alternative; boundary=""----=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/alternative; boundary=""----=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt"""]}),
                 strings.Replace("""
 ------=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt
 Content-Type: text/plain; charset="utf-8"
@@ -917,7 +901,7 @@ Content-Type: application/octet-stream
 
 """u8.Raw() + strings.Repeat("A", peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"application/octet-stream"]), ["Content-Disposition"] = slice<@string>([@"form-data; name=""block""; filename=""block"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"application/octet-stream"], ["Content-Disposition"] = [@"form-data; name=""block""; filename=""block"""]}),
                 strings.Repeat("A", peekBufferSize - 65)
             )
         ])
@@ -935,7 +919,7 @@ Content-Type: application/octet-stream
 
 """u8.Raw() + strings.Repeat("A", peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--\n"u8, "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"application/octet-stream"]), ["Content-Disposition"] = slice<@string>([@"form-data; name=""block""; filename=""block"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"application/octet-stream"], ["Content-Disposition"] = [@"form-data; name=""block""; filename=""block"""]}),
                 strings.Repeat("A", peekBufferSize - 65)
             )
         ])
@@ -955,7 +939,7 @@ Content-Type: application/octet-stream
 
 """u8.Raw() + strings.Repeat("A", peekBufferSize) + "\n--aaaaaaaaaa00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"application/octet-stream"]), ["Content-Disposition"] = slice<@string>([@"form-data; name=""block""; filename=""block"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"application/octet-stream"], ["Content-Disposition"] = [@"form-data; name=""block""; filename=""block"""]}),
                 strings.Repeat("A", peekBufferSize)
             )
         ])
@@ -987,10 +971,10 @@ val
 
 """u8.Raw(), "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"application/octet-stream"]), ["Content-Disposition"] = slice<@string>([@"form-data; name=""myfile""; filename=""my-file.txt"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"application/octet-stream"], ["Content-Disposition"] = [@"form-data; name=""myfile""; filename=""my-file.txt"""]}),
                 strings.Repeat("A", (nint)peekBufferSize - (len("\n--") + len("08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74") + len("\r") + 1))
             ),
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Disposition"] = slice<@string>([@"form-data; name=""key"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Disposition"] = [@"form-data; name=""key"""]}),
                 "val"
             )
         ])
@@ -1015,7 +999,7 @@ Body2
 --foo--
 """u8.Raw(), "\n", "\r\n", -1),
         want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/alternative; boundary=""foo-bar"""])}),
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/alternative; boundary=""foo-bar"""]}),
                 strings.Replace("""
 --foo-bar
 
@@ -1043,9 +1027,9 @@ Body
 
 --foo--
 """u8.Raw(), "\n", "\r\n", -1),
-        want: slice<headerBody>([
-            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = slice<@string>([@"multipart/alternative; boundary=""foo--"""])}), "")
-        ])
+        want: [
+            new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"] = [@"multipart/alternative; boundary=""foo--"""]}), "")
+        ]
     ),
 
     roundTripParseTest()
@@ -1053,7 +1037,7 @@ Body
 
 public static void TestParse(ж<testing.T> t) {
 Cases:
-    foreach (var (_, tt) in parseTests) {
+    foreach (var (_, tt) in range(parseTests)) {
         var r = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)), tt.sep);
         var got = slice<headerBody>([]);
         for (;;) {
@@ -1077,7 +1061,7 @@ Cases:
             if (len(tt.want) != len(got)) {
                 t.Errorf("test %q: got %d parts, want %d", tt.name, len(got), len(tt.want));
             } else if (len(got) > 1) {
-                foreach (var (pi, wantPart) in tt.want) {
+                foreach (var (pi, wantPart) in range(tt.want)) {
                     if (!reflect.DeepEqual(wantPart, got[pi])) {
                         t.Errorf("test %q, part %d:\n got: %v\nwant: %v", tt.name, pi, got[pi], wantPart);
                     }
@@ -1157,7 +1141,7 @@ internal static parseTest roundTripParseTest() {
     );
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf));
-    foreach (var (_, p) in t.want) {
+    foreach (var (_, p) in range(t.want)) {
         var (pw, err) = w.CreatePart(p.header);
         if (err != nil) {
             throw panic(err);
@@ -1180,11 +1164,9 @@ private static readonly @string multipartBoundaryIsEmptyˢᵇ = "multipart: boun
 public static void TestNoBoundary(ж<testing.T> t) {
     var mr = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(""u8)), ""u8);
     var (_, err) = mr.NextPart();
-    {
-        @string got = fmt.Sprint(err);
-        @string want = multipartBoundaryIsEmptyˢ; if (got != want) {
-            t.Errorf("NextPart error = %v; want %v", got, want);
-        }
+    @string got = fmt.Sprint(err);
+    @string want = multipartBoundaryIsEmptyˢ; if (got != want) {
+        t.Errorf("NextPart error = %v; want %v", got, want);
     }
 }
 

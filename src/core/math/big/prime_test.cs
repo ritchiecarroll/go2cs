@@ -11,7 +11,7 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-internal static slice<@string> primes = slice<@string>([
+internal static slice<@string> primes = [
     "2",
     "3",
     "5",
@@ -41,9 +41,9 @@ internal static slice<@string> primes = slice<@string>([
     "9850501549098619803069760025035903451269934817616361666987073351061430442874302652853566563721228910201656997576599",                                          // E-382: 2^382-105
     "42307582002575910332922579714097346549017899709713998034217522897561970639123926132812109468141778230245837569601494931472367",                                // Curve41417: 2^414-17
     "6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151" // E-521: 2^521-1
-]);
+];
 
-internal static slice<@string> composites = slice<@string>([
+internal static slice<@string> composites = [
     "0",
     "1",
     "21284175091214687912771199898307297748211672914763848041968395774954376176754",
@@ -115,7 +115,7 @@ internal static slice<@string> composites = slice<@string>([
     "8725753",
     "80579735209",
     "105919633"
-]);
+];
 
 internal static rune cutSpace(rune r) {
     if (unicode.IsSpace(r)) {
@@ -129,14 +129,14 @@ public static void TestProbablyPrime(ж<testing.T> t) {
     if (testing.Short()) {
         nreps = 1;
     }
-    foreach (var (i, s) in primes) {
+    foreach (var (i, s) in range(primes)) {
         var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString(s, 10);
         if (!p.ProbablyPrime(nreps) || nreps != 1 && !p.ProbablyPrime(1) || !p.ProbablyPrime(0)) {
             t.Errorf("#%d prime found to be non-prime (%s)", i, s);
         }
     }
 
-    foreach (var (i, vᴛ1) in composites) {
+    foreach (var (i, vᴛ1) in range(composites)) {
         var s = vᴛ1;
 
         s = strings.Map(cutSpace, s);
@@ -148,7 +148,7 @@ public static void TestProbablyPrime(ж<testing.T> t) {
 
     // check that ProbablyPrime panics if n <= 0
     var c = NewInt(11); // a prime
-    foreach (var (_, n) in slice<nint>([-1, 0, 1])) {
+    foreach (var (_, n) in range(slice<nint>([-1, 0, 1]))) {
         var cʗ1 = c;
         func(() => {
             GoFrame ᒐ = default;
@@ -182,7 +182,7 @@ public static void BenchmarkProbablyPrime(ж<testing.B> b) {
         defer(stkʗ1.free, ref ᒐ);
 
         var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString("203956878356401977405765866929034577280193993314348263094772646453283062722701277632936616063144088173312372882677123879538709400158306567338328279154499698366071906766440037074217117805690872792848149112022286332144876183376326512083574821647933992961249917319836219304274280243803104015000563790123", 10);
-        foreach (var (_, n) in slice<nint>([0, 1, 5, 10, 20])) {
+        foreach (var (_, n) in range(slice<nint>([0, 1, 5, 10, 20]))) {
             var pʗ1 = p;
             b.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -225,7 +225,7 @@ public static void TestMillerRabinPseudoprimes(ж<testing.T> t) {
         testPseudoprimes(t, probablyPrimeMillerRabinˢ,
             (global::go.math.big_package.Δnat n) => n.probablyPrimeMillerRabin(stkʗ2, 1, true) && !n.probablyPrimeLucas(stkʗ2),
             // https://oeis.org/A001262
-            slice<nint>([2047, 3277, 4033, 4681, 8321, 15841, 29341, 42799, 49141, 52633, 65281, 74665, 80581, 85489, 88357, 90751]));
+            [2047, 3277, 4033, 4681, 8321, 15841, 29341, 42799, 49141, 52633, 65281, 74665, 80581, 85489, 88357, 90751]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -246,7 +246,7 @@ public static void TestLucasPseudoprimes(ж<testing.T> t) {
         testPseudoprimes(t, probablyPrimeLucasˢ,
             (global::go.math.big_package.Δnat n) => n.probablyPrimeLucas(stkʗ2) && !n.probablyPrimeMillerRabin(stkʗ2, 1, true),
             // https://oeis.org/A217719
-            slice<nint>([989, 3239, 5777, 10877, 27971, 29681, 30739, 31631, 39059, 72389, 73919, 75077]));
+            [989, 3239, 5777, 10877, 27971, 29681, 30739, 31631, 39059, 72389, 73919, 75077]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

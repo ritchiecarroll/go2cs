@@ -63,8 +63,8 @@ public static void TestEscape(ж<testing.T> t) {
         C: "<Cincinnati>",
         G: "<Goodbye>",
         H: "<Hello>",
-        A: slice<@string>(["<a>", "<b>"]),
-        E: slice<@string>([]),
+        A: ["<a>", "<b>"],
+        E: [],
         N: 42,
         B: new template_internal_test_package.badMarshalerжMarshaler(Ꮡ(new badMarshaler())),
         M: new template_internal_test_package.goodMarshalerжMarshaler(Ꮡ(new goodMarshaler())),
@@ -779,7 +779,7 @@ public static void TestEscape(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestEscape_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -833,7 +833,7 @@ public static void TestEscapeMap(ж<testing.T> t) {
         ["html"] = @"<h1>Hi!</h1>",
         ["urlquery"] = @"http://www.foo.com/index.html?title=main"
     };
-    foreach (var (_, test) in new TestEscapeMap_type[]{
+    foreach (var (_, test) in range(new TestEscapeMap_type[]{
         // covering issue 20323
         new(
             "field with predefined escaper name 1",
@@ -846,22 +846,18 @@ public static void TestEscapeMap(ж<testing.T> t) {
             @"{{.urlquery | print}}",
             @"http://www.foo.com/index.html?title=main"
         )
-    }.array()) {
+    }.array())) {
         var (ᴛ3, ᴛ4) = New(""u8).Parse(test.input);
         var tmpl = Must(ᴛ3, ᴛ4);
         var b = @new<strings.Builder>();
-        {
-            var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(b), data); if (err != nil) {
-                t.Errorf("%s: template execution failed: %s", test.desc, err);
-                continue;
-            }
+        var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(b), data); if (err != nil) {
+            t.Errorf("%s: template execution failed: %s", test.desc, err);
+            continue;
         }
-        {
-            @string w = test.output;
-            @string g = b.String(); if (w != g) {
-                t.Errorf("%s: escaped output: want\n\t%q\ngot\n\t%q", test.desc, w, g);
-                continue;
-            }
+        @string w = test.output;
+        @string g = b.String(); if (w != g) {
+            t.Errorf("%s: escaped output: want\n\t%q\ngot\n\t%q", test.desc, w, g);
+            continue;
         }
     }
 }
@@ -882,14 +878,14 @@ internal partial struct TestEscapeSet_tests /*dyn*/ {
 
 public static void TestEscapeSet(ж<testing.T> t) {
     var data = new TestEscapeSet_dataItem(
-        Children: slice<ж<TestEscapeSet_dataItem>>([
+        Children: [
             Ꮡ(new TestEscapeSet_dataItem(X: "foo")),
             Ꮡ(new TestEscapeSet_dataItem(X: "<bar>")),
             Ꮡ(new TestEscapeSet_dataItem(
                 Children: slice<ж<TestEscapeSet_dataItem>>([
                     Ꮡ(new TestEscapeSet_dataItem(X: "baz"))
                 ])))
-        ])
+        ]
     );
 
     var tests = slice<TestEscapeSet_tests>([
@@ -985,17 +981,15 @@ public static void TestEscapeSet(ж<testing.T> t) {
     var fns = new FuncMap(new map<@string, any>{["pred"] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ꓸꓸꓸany aʗp) => {
         var a = aʗp.slice();
         if (len(a) == 1) {
-            {
-                var (i, _) = a[0]._<nint>(ᐧ); if (i > 0) {
-                    return (i - 1, default);
-                }
+            var (i, _) = a[0]._<nint>(ᐧ); if (i > 0) {
+                return (i - 1, default);
             }
         }
         return (default, fmt.Errorf("undefined pred(%v)"u8, (any)(a)));
     }))
     });
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string source = ""u8;
         foreach (var (name, body) in test.inputs) {
             source += fmt.Sprintf("{{define %q}}%s{{end}} "u8, name, body);
@@ -1007,16 +1001,12 @@ public static void TestEscapeSet(ж<testing.T> t) {
         }
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
 
-        {
-            var errΔ1 = tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), mainˢ, data); if (errΔ1 != nil) {
-                t.Errorf("%q executing %v", errΔ1.Error(), tmpl.Lookup(mainˢ).OrTypedNil());
-                continue;
-            }
+        var errΔ1 = tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), mainˢ, data); if (errΔ1 != nil) {
+            t.Errorf("%q executing %v", errΔ1.Error(), tmpl.Lookup(mainˢ).OrTypedNil());
+            continue;
         }
-        {
-            @string got = b.String(); if (test.want != got) {
-                t.Errorf("want\n\t%q\ngot\n\t%q", test.want, got);
-            }
+        @string got = b.String(); if (test.want != got) {
+            t.Errorf("want\n\t%q\ngot\n\t%q", test.want, got);
         }
     }
 }
@@ -1269,7 +1259,7 @@ public static void TestErrors(ж<testing.T> t) {
             @""
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var buf = @new<bytes.Buffer>();
         var (tmpl, err) = New("z").Parse(test.input);
         if (err != nil) {
@@ -1292,10 +1282,8 @@ public static void TestErrors(ж<testing.T> t) {
             continue;
         }
         // Check that we get the same error if we call Execute again.
-        {
-            var errΔ1 = tmpl.Execute(new template_test_package.bytes_BufferжWriter(buf), default); if (errΔ1 == nil || errΔ1.Error() != got) {
-                t.Errorf("input=%q: unexpected error on second call %q", test.input, errΔ1);
-            }
+        var errΔ1 = tmpl.Execute(new template_test_package.bytes_BufferжWriter(buf), default); if (errΔ1 == nil || errΔ1.Error() != got) {
+            t.Errorf("input=%q: unexpected error on second call %q", test.input, errΔ1);
         }
     }
 }
@@ -1842,7 +1830,7 @@ public static void TestEscapeText(ж<testing.T> t) {
         ),
         new(
             "<script>var a = `${",
-            new context(state: stateJS, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJS, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${}",
@@ -1850,27 +1838,27 @@ public static void TestEscapeText(ж<testing.T> t) {
         ),
         new(
             "<script>var a = `${`",
-            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${var a = \"",
-            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${var a = \"`",
-            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${var a = \"}",
-            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${``",
-            new context(state: stateJS, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJS, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${`}",
-            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>`${ {} } asd`</script><script>`${ {} }",
@@ -1878,7 +1866,7 @@ public static void TestEscapeText(ж<testing.T> t) {
         ),
         new(
             "<script>var foo = `${ (_ => { return \"x\" })() + \"${",
-            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSDqStr, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var a = `${ {</script><script>var b = `${ x }",
@@ -1906,35 +1894,35 @@ public static void TestEscapeText(ж<testing.T> t) {
         ),
         new(
             "<script>`${ { `` }",
-            new context(state: stateJS, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJS, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>`${ { }`",
-            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>var foo = `${ foo({ a: { c: `${",
-            new context(state: stateJS, element: elementScript, jsBraceDepth: slice<nint>([2, 0]))
+            new context(state: stateJS, element: elementScript, jsBraceDepth: [2, 0])
         ),
         new(
             "<script>var foo = `${ foo({ a: { c: `${ {{.}} }` }, b: ",
-            new context(state: stateJS, element: elementScript, jsBraceDepth: slice<nint>([1]))
+            new context(state: stateJS, element: elementScript, jsBraceDepth: [1])
         ),
         new(
             "<script>`${ `}",
-            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJSTmplLit, element: elementScript, jsBraceDepth: [0])
         ),
         new(
             "<script>`${1}${",
-            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: slice<nint>([0]))
+            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: [0])
         ),
         new(
             "<script>`${`${1}${",
-            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: slice<nint>([0, 0]))
+            new context(state: stateJS, element: elementScript, jsCtx: jsCtxRegexp, jsBraceDepth: [0, 0])
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (b, e) = (slice<byte>(test.input), makeEscaper(nil));
         var c = e.escapeText(new context(), Ꮡ(new parse.TextNode(NodeType: parse.NodeText, Text: b)));
         if (!test.output.eq(c)) {
@@ -1962,94 +1950,94 @@ public static void TestEnsurePipelineContains(ж<testing.T> t) {
         new(
             "{{.X}}",
             ".X",
-            slice<@string>([])
+            []
         ),
         new(
             "{{.X | html}}",
             ".X | html",
-            slice<@string>([])
+            []
         ),
         new(
             "{{.X}}",
             ".X | html",
-            slice<@string>(["html"])
+            ["html"]
         ),
         new(
             "{{html .X}}",
             "_eval_args_ .X | html | urlquery",
-            slice<@string>(["html", "urlquery"])
+            ["html", "urlquery"]
         ),
         new(
             "{{html .X .Y .Z}}",
             "_eval_args_ .X .Y .Z | html | urlquery",
-            slice<@string>(["html", "urlquery"])
+            ["html", "urlquery"]
         ),
         new(
             "{{.X | print}}",
             ".X | print | urlquery",
-            slice<@string>(["urlquery"])
+            ["urlquery"]
         ),
         new(
             "{{.X | print | urlquery}}",
             ".X | print | urlquery",
-            slice<@string>(["urlquery"])
+            ["urlquery"]
         ),
         new(
             "{{.X | urlquery}}",
             ".X | html | urlquery",
-            slice<@string>(["html", "urlquery"])
+            ["html", "urlquery"]
         ),
         new(
             "{{.X | print 2 | .f 3}}",
             ".X | print 2 | .f 3 | urlquery | html",
-            slice<@string>(["urlquery", "html"])
+            ["urlquery", "html"]
         ),
         new(
             // covering issue 10801
             "{{.X | println.x }}",
             ".X | println.x | urlquery | html",
-            slice<@string>(["urlquery", "html"])
+            ["urlquery", "html"]
         ),
         new(
             // covering issue 10801
             "{{.X | (print 12 | println).x }}",
             ".X | (print 12 | println).x | urlquery | html",
-            slice<@string>(["urlquery", "html"])
+            ["urlquery", "html"]
         ),
         // The following test cases ensure that the merging of internal escapers
         // with the predefined "html" and "urlquery" escapers is correct.
         new(
             "{{.X | urlquery}}",
             ".X | _html_template_urlfilter | urlquery",
-            slice<@string>(["_html_template_urlfilter", "_html_template_urlnormalizer"])
+            ["_html_template_urlfilter", "_html_template_urlnormalizer"]
         ),
         new(
             "{{.X | urlquery}}",
             ".X | urlquery | _html_template_urlfilter | _html_template_cssescaper",
-            slice<@string>(["_html_template_urlfilter", "_html_template_cssescaper"])
+            ["_html_template_urlfilter", "_html_template_cssescaper"]
         ),
         new(
             "{{.X | urlquery}}",
             ".X | urlquery",
-            slice<@string>(["_html_template_urlnormalizer"])
+            ["_html_template_urlnormalizer"]
         ),
         new(
             "{{.X | urlquery}}",
             ".X | urlquery",
-            slice<@string>(["_html_template_urlescaper"])
+            ["_html_template_urlescaper"]
         ),
         new(
             "{{.X | html}}",
             ".X | html",
-            slice<@string>(["_html_template_htmlescaper"])
+            ["_html_template_htmlescaper"]
         ),
         new(
             "{{.X | html}}",
             ".X | html",
-            slice<@string>(["_html_template_rcdataescaper"])
+            ["_html_template_rcdataescaper"]
         )
     ]);
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (ᴛ5, ᴛ6) = text.template_package.New(testˢ).Parse(test.input);
         var tmpl = text.template_package.Must(ᴛ5, ᴛ6);
         var (action, ok) = (tmpl.Tree.Root.Nodes[0]._<ж<parse.ActionNode>>(ᐧ));
@@ -2075,7 +2063,7 @@ public static void TestEscapeMalformedPipelines(ж<testing.T> t) {
         "{{ 0 | (nil) }}",
         "{{ 0 | (nil) | html }}"
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var (tmpl, err) = New(testˢ).Parse(test);
         if (err != nil) {
@@ -2142,12 +2130,10 @@ public static void TestRedundantFuncs(ж<testing.T> t) {
         var f0 = funcMap[n0]._<Funcꓸꓸꓸ<any, @string>>();
         foreach (var (n1, _) in m) {
             var f1 = funcMap[n1]._<Funcꓸꓸꓸ<any, @string>>();
-            foreach (var (_, input) in inputs) {
+            foreach (var (_, input) in range(inputs)) {
                 @string want = f0(input);
-                {
-                    @string got = f1(want); if (want != got) {
-                        t.Errorf("%s %s with %T %q: want\n\t%q,\ngot\n\t%q", n0, n1, input, input, want, got);
-                    }
+                @string got = f1(want); if (want != got) {
+                    t.Errorf("%s %s with %T %q: want\n\t%q,\ngot\n\t%q", n0, n1, input, input, want, got);
                 }
             }
         }
@@ -2192,10 +2178,8 @@ internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 public static void TestEmptyTemplateHTML(ж<testing.T> t) {
     var (ᴛ9, ᴛ10) = New(pageˢ).ParseFiles(os.DevNull);
     var page = Must(ᴛ9, ᴛ10);
-    {
-        var err = page.ExecuteTemplate(new os.FileжWriter(os.Stdout), pageˢ, nothingˢ); if (err == nil) {
-            t.Fatal(expectedErrorˢ);
-        }
+    var err = page.ExecuteTemplate(new os.FileжWriter(os.Stdout), pageˢ, nothingˢ); if (err == nil) {
+        t.Fatal(expectedErrorˢ);
     }
 }
 
@@ -2371,10 +2355,8 @@ public static void TestOrphanedTemplate(ж<testing.T> t) {
         }
     }
     @string want = wantᶜ;
-    {
-        @string got = b.String(); if (got != want) {
-            t.Fatalf("t2 rendered %q, want %q", got, want);
-        }
+    @string got = b.String(); if (got != want) {
+        t.Fatalf("t2 rendered %q, want %q", got, want);
     }
 }
 
@@ -2449,16 +2431,12 @@ public static void TestMetaContentEscapeGODEBUG(ж<testing.T> t) {
         var (ᴛ25, ᴛ26) = New(""u8).Parse(metaHttpEquivRefreshˢ);
         var tmpl = Must(ᴛ25, ᴛ26);
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-        {
-            var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), default); if (err != nil) {
-                t.Fatalf("unexpected error: %s", err);
-            }
+        var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), default); if (err != nil) {
+            t.Fatalf("unexpected error: %s", err);
         }
         @string want = metaHttpEquivRefreshˢ2;
-        {
-            @string got = b.String(); if (got != want) {
-                t.Fatalf("got %q, want %q", got, want);
-            }
+        @string got = b.String(); if (got != want) {
+            t.Fatalf("got %q, want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2476,16 +2454,12 @@ public static void TestIssue81821(ж<testing.T> t) {
     var (ᴛ27, ᴛ28) = New(testˢ).Parse(scriptConstS1GScriptˢ);
     var tmpl = Must(ᴛ27, ᴛ28);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), xExecAlert1ˢ); if (err != nil) {
-            t.Fatalf("Execute: %v", err);
-        }
+    var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), xExecAlert1ˢ); if (err != nil) {
+        t.Fatalf("Execute: %v", err);
     }
     @string want = scriptConstS1XExecAlert1ˢ;
-    {
-        @string got = Ꮡbuf.String(); if (got != want) {
-            t.Errorf("got:  %s\nwant: %s", got, want);
-        }
+    @string got = Ꮡbuf.String(); if (got != want) {
+        t.Errorf("got:  %s\nwant: %s", got, want);
     }
 }
 
@@ -2529,7 +2503,7 @@ public static void TestCVE202656858(ж<testing.T> t) {
             want: "<script>`${ (function(){}/a\\.b/g.test(x)) }`</script>"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCVE202656858_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2538,15 +2512,11 @@ public static void TestCVE202656858(ж<testing.T> t) {
             var (ᴛ29, ᴛ30) = New(testˢ).Parse(ttʗ1.tmpl);
             var tmpl = Must(ᴛ29, ᴛ30);
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), ttʗ1.input); if (err != nil) {
-                    tΔ1.Fatalf("Execute: %v", err);
-                }
+            var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), ttʗ1.input); if (err != nil) {
+                tΔ1.Fatalf("Execute: %v", err);
             }
-            {
-                @string got = Ꮡbuf.String(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("got:  %s\nwant: %s", got, ttʗ1.want);
-                }
+            @string got = Ꮡbuf.String(); if (got != ttʗ1.want) {
+                tΔ1.Errorf("got:  %s\nwant: %s", got, ttʗ1.want);
             }
         });
     }
@@ -2586,7 +2556,7 @@ public static void TestIssue81823(ж<testing.T> t) {
             want: "<script>const kb = traffic.in / 1024;\nconst user = \"1;pwned=1;0\"; \n</script>"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIssue81823_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2595,15 +2565,11 @@ public static void TestIssue81823(ж<testing.T> t) {
             var (ᴛ31, ᴛ32) = New(testˢ).Parse(ttʗ1.tmpl);
             var tmpl = Must(ᴛ31, ᴛ32);
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-            {
-                var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), ttʗ1.input); if (err != nil) {
-                    tΔ1.Fatalf("Execute: %v", err);
-                }
+            var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), ttʗ1.input); if (err != nil) {
+                tΔ1.Fatalf("Execute: %v", err);
             }
-            {
-                @string got = buf.String(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("got:  %s\nwant: %s", got, ttʗ1.want);
-                }
+            @string got = buf.String(); if (got != ttʗ1.want) {
+                tΔ1.Errorf("got:  %s\nwant: %s", got, ttʗ1.want);
             }
         });
     }

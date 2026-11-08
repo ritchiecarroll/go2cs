@@ -228,7 +228,7 @@ public static void TestParseSimple(ж<testing.T> t) {
     testParseDump(t, parseTests, testFlags);
 }
 
-internal static slice<parseTest> foldcaseTests = slice<parseTest>([
+internal static slice<parseTest> foldcaseTests = [
     new(@"AbCdE", @"strfold{ABCDE}"),
     new(@"[Aa]", @"litfold{A}"),
     new(@"a", @"litfold{A}"),
@@ -238,37 +238,37 @@ internal static slice<parseTest> foldcaseTests = slice<parseTest>([
     new(@"A[F-g]", @"cat{litfold{A}cc{0x41-0x7a 0x17f 0x212a}}"), // [Aa][A-z...]
     new(@"[[:upper:]]", @"cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"),
     new(@"[[:lower:]]", @"cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}")
-]);
+];
 
 public static void TestParseFoldCase(ж<testing.T> t) {
     testParseDump(t, foldcaseTests, FoldCase);
 }
 
-internal static slice<parseTest> literalTests = slice<parseTest>([
+internal static slice<parseTest> literalTests = [
     new("(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}")
-]);
+];
 
 public static void TestParseLiteral(ж<testing.T> t) {
     testParseDump(t, literalTests, Literal);
 }
 
-internal static slice<parseTest> matchnlTests = slice<parseTest>([
+internal static slice<parseTest> matchnlTests = [
     new(@".", @"dot{}"),
     new("\n", "lit{\n}"),
     new(@"[^a]", @"cc{0x0-0x60 0x62-0x10ffff}"),
     new(@"[a\n]", @"cc{0xa 0x61}")
-]);
+];
 
 public static void TestParseMatchNL(ж<testing.T> t) {
     testParseDump(t, matchnlTests, MatchNL);
 }
 
-internal static slice<parseTest> nomatchnlTests = slice<parseTest>([
+internal static slice<parseTest> nomatchnlTests = [
     new(@".", @"dnl{}"),
     new("\n", "lit{\n}"),
     new(@"[^a]", @"cc{0x0-0x9 0xb-0x60 0x62-0x10ffff}"),
     new(@"[a\n]", @"cc{0xa 0x61}")
-]);
+];
 
 public static void TestParseNoMatchNL(ж<testing.T> t) {
     testParseDump(t, nomatchnlTests, 0);
@@ -276,7 +276,7 @@ public static void TestParseNoMatchNL(ж<testing.T> t) {
 
 // Test Parse -> Dump.
 internal static void testParseDump(ж<testing.T> t, slice<parseTest> tests, global::go.regexp.syntax_package.Flags flags) {
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (re, err) = Parse(tt.Regexp, flags);
         if (err != nil) {
             t.Errorf("Parse(%#q): %v", tt.Regexp, err);
@@ -351,7 +351,7 @@ internal static void dumpRegexp(ж<strings.Builder> b, ж<global::go.regexp.synt
                 b.WriteString("lit");
             }
             if ((global::go.regexp.syntax_package.Flags)(re.Flags & FoldCase) != 0) {
-                foreach (var (_, r) in re.Rune) {
+                foreach (var (_, r) in range(re.Rune)) {
                     if (unicode.SimpleFold(r) != r) {
                         b.WriteString("fold");
                         break;
@@ -370,13 +370,13 @@ internal static void dumpRegexp(ж<strings.Builder> b, ж<global::go.regexp.synt
         break;
     }
     case var ᴛ when ᴛ == OpLiteral: {
-        foreach (var (_, r) in re.Rune) {
+        foreach (var (_, r) in range(re.Rune)) {
             b.WriteRune(r);
         }
         break;
     }
     case var ᴛ when ᴛ == OpConcat || ᴛ == OpAlternate: {
-        foreach (var (_, sub) in re.Sub) {
+        foreach (var (_, sub) in range(re.Sub)) {
             dumpRegexp(b, sub);
         }
         break;
@@ -528,7 +528,7 @@ internal static slice<@string> invalidRegexps = slice<@string>([
     strings.Repeat(@"\pL", 27000)                             // too many runes
 ]);
 
-internal static slice<@string> onlyPerl = slice<@string>([
+internal static slice<@string> onlyPerl = [
     @"[a-b-c]",
     @"\Qabc\E",
     @"\Q*+?{[\E",
@@ -538,19 +538,19 @@ internal static slice<@string> onlyPerl = slice<@string>([
     @"\Q\\\\\E",
     @"(?:a)",
     @"(?P<name>a)"
-]);
+];
 
-internal static slice<@string> onlyPOSIX = slice<@string>([
+internal static slice<@string> onlyPOSIX = [
     "a++",
     "a**",
     "a?*",
     "a+*",
     "a{1}*",
     ".{1}{2}.{3}"
-]);
+];
 
 public static void TestParseInvalidRegexps(ж<testing.T> t) {
-    foreach (var (_, regexp) in invalidRegexps) {
+    foreach (var (_, regexp) in range(invalidRegexps)) {
         {
             var (re, err) = Parse(regexp, Perl); if (err == nil) {
                 t.Errorf("Parse(%#q, Perl) = %s, should have failed", regexp, dump(re));
@@ -562,7 +562,7 @@ public static void TestParseInvalidRegexps(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, regexp) in onlyPerl) {
+    foreach (var (_, regexp) in range(onlyPerl)) {
         {
             var (_, err) = Parse(regexp, Perl); if (err != nil) {
                 t.Errorf("Parse(%#q, Perl): %v", regexp, err);
@@ -574,7 +574,7 @@ public static void TestParseInvalidRegexps(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, regexp) in onlyPOSIX) {
+    foreach (var (_, regexp) in range(onlyPOSIX)) {
         {
             var (re, err) = Parse(regexp, Perl); if (err == nil) {
                 t.Errorf("Parse(%#q, Perl) = %s, should have failed", regexp, dump(re));
@@ -589,7 +589,7 @@ public static void TestParseInvalidRegexps(ж<testing.T> t) {
 }
 
 public static void TestToStringEquivalentParse(ж<testing.T> t) {
-    foreach (var (_, tt) in parseTests) {
+    foreach (var (_, tt) in range(parseTests)) {
         var (re, err) = Parse(tt.Regexp, testFlags);
         if (err != nil) {
             t.Errorf("Parse(%#q): %v", tt.Regexp, err);
@@ -634,7 +634,7 @@ partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string re;
     internal @string @out;
 }
-internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
+internal static slice<stringTestsᴛ1> stringTests = [
     new(@"x(?i:ab*c|d?e)1", @"x(?i:AB*C|D?E)1"),
     new(@"x(?i:ab*cd?e)1", @"x(?i:AB*CD?E)1"),
     new(@"0(?i:ab*c|d?e)1", @"(?i:0(?:AB*C|D?E)1)"),
@@ -651,10 +651,10 @@ internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
     new(@"[Aa][Bb]*[Cc]", @"(?i:AB*C)"),
     new(@"A(?:[Bb][Cc]|[Dd])[Zz]", @"A(?i:(?:BC|D)Z)"),
     new(@"[Aa](?:[Bb][Cc]|[Dd])Z", @"(?i:A(?:BC|D))Z")
-]);
+];
 
 public static void TestString(ж<testing.T> t) {
-    foreach (var (_, tt) in stringTests) {
+    foreach (var (_, tt) in range(stringTests)) {
         var (re, err) = Parse(tt.re, Perl);
         if (err != nil) {
             t.Errorf("Parse(%#q): %v", tt.re, err);

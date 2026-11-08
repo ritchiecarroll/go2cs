@@ -28,7 +28,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var inp = slice<byte>("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."u8);
-    foreach (var (_, level) in slice<nint>([BestSpeed, BestCompression, DefaultCompression, HuffmanOnly])) {
+    foreach (var (_, level) in range(slice<nint>([BestSpeed, BestCompression, DefaultCompression, HuffmanOnly]))) {
         var b = bytes.NewBuffer(default);
         var (w, errΔ1) = NewWriterLevel(new gzip_test_package.bytes_BufferжWriter(b), level);
         if (errΔ1 != nil) {
@@ -45,7 +45,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     if (err != nil) {
         Ꮡf.Fatalf("failed to read testdata directory: %s", err);
     }
-    foreach (var (_, de) in testdata) {
+    foreach (var (_, de) in range(testdata)) {
         if (de.IsDir()) {
             continue;
         }
@@ -66,7 +66,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     }
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
-        foreach (var (_, multistream) in slice<bool>([true, false])) {
+        foreach (var (_, multistream) in range(slice<bool>([true, false]))) {
             var (r, errΔ3) = NewReader(new gzip_test_package.bytes_BufferжReader(bytes.NewBuffer(b)));
             if (errΔ3 != nil) {
                 continue;
@@ -75,19 +75,15 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             r.Multistream(multistream);
 
             var decompressed = bytes.NewBuffer(default);
-            {
-                var (_, errΔ4) = io.Copy(new gzip_test_package.bytes_BufferжWriter(decompressed), new gzip_test_package.gzip_ReaderжReader(r)); if (errΔ4 != nil) {
-                    continue;
-                }
+            var (_, errΔ4) = io.Copy(new gzip_test_package.bytes_BufferжWriter(decompressed), new gzip_test_package.gzip_ReaderжReader(r)); if (errΔ4 != nil) {
+                continue;
             }
 
-            {
-                var errΔ5 = r.Close(); if (errΔ5 != nil) {
-                    continue;
-                }
+            var errΔ5 = r.Close(); if (errΔ5 != nil) {
+                continue;
             }
 
-            foreach (var (_, level) in slice<nint>([NoCompression, BestSpeed, BestCompression, DefaultCompression, HuffmanOnly])) {
+            foreach (var (_, level) in range(slice<nint>([NoCompression, BestSpeed, BestCompression, DefaultCompression, HuffmanOnly]))) {
                 var (w, errΔ6) = NewWriterLevel(io.Discard, level);
                 if (errΔ6 != nil) {
                     t.Fatalf("failed to construct writer: %s", errΔ6);
@@ -96,15 +92,11 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 if (errΔ6 != nil) {
                     t.Fatalf("failed to write: %s", errΔ6);
                 }
-                {
-                    var errΔ7 = w.Flush(); if (errΔ7 != nil) {
-                        t.Fatalf("failed to flush: %s", errΔ7);
-                    }
+                var errΔ7 = w.Flush(); if (errΔ7 != nil) {
+                    t.Fatalf("failed to flush: %s", errΔ7);
                 }
-                {
-                    var errΔ8 = w.Close(); if (errΔ8 != nil) {
-                        t.Fatalf("failed to close: %s", errΔ8);
-                    }
+                var errΔ8 = w.Close(); if (errΔ8 != nil) {
+                    t.Fatalf("failed to close: %s", errΔ8);
                 }
             }
         }

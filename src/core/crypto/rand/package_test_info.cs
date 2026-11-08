@@ -47,8 +47,8 @@ using static global::go.crypto.rand_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/rand/text_test.go", "text_test.cs", "AA0agoKCgtyCgoKCgpSCgqaAgqSUgoKCgqaCpoKCuKKCgoKUgoKCgpQ=")]
-[assembly: GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABUmkoKCgpSClILMkoCC+IKCgoKUgoKCgpSCpqaUgoKAggAKFLKCgqqikoKClIKClIKC3pKSgoKClIKCgoKUgu6igoCCtqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1")]
+[assembly: GoPositionMap("crypto/rand/text_test.go", "text_test.cs", "AA0agoKCgtyCgoKCgpSCgqaClJSCgoKCpoKmgoK4ooKCgpSCgoKClA==")]
+[assembly: GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABMmkoKCgpSClILMkoLogoKCgpSCgoKClIKmppSCgoIACRSygoKqopKCgpSCgpSCgt6SkoKCgpSCgoKClILuooKCpqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1", "", "", "", "136:21,137:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

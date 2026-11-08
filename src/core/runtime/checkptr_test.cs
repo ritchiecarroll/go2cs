@@ -55,7 +55,7 @@ public static void TestCheckPtr(ж<testing.T> t) {
         new("CheckPtrStringFail", "fatal error: checkptr: unsafe.String result straddles multiple allocations\n")
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestCheckPtr_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -107,7 +107,7 @@ public static void TestCheckPtr2(ж<testing.T> t) {
         new("CheckPtrAlignmentNested", "fatal error: checkptr: converted pointer straddles multiple allocations\n")
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestCheckPtr2_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 

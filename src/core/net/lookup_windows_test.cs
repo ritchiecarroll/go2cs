@@ -23,9 +23,8 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-internal static slice<@string> nslookupTestServers = slice<@string>(["mail.golang.com", "gmail.com"]);
-
-internal static slice<@string> lookupTestIPs = slice<@string>(["8.8.8.8", "1.1.1.1"]);
+internal static slice<@string> nslookupTestServers = ["mail.golang.com", "gmail.com"];
+internal static slice<@string> lookupTestIPs = ["8.8.8.8", "1.1.1.1"];
 
 internal static @string toJson(any v) {
     var (data, _) = json.Marshal(v);
@@ -37,8 +36,8 @@ internal static ref readonly @string defaultˢ => ref defaultˢᵇ;
 private static readonly @string defaultˢᵇ = "default/"u8;
 
 internal static void testLookup(ж<testing.T> t, Action<ж<testing.T>, ж<global::go.net_package.Resolver>, @string> fn) {
-    foreach (var (_, def) in slice<bool>([true, false])) {
-        foreach (var (_, server) in nslookupTestServers) {
+    foreach (var (_, def) in range(slice<bool>([true, false]))) {
+        foreach (var (_, server) in range(nslookupTestServers)) {
             @string name = default;
             if (def) {
                 name = defaultˢ;
@@ -76,10 +75,8 @@ public static void TestNSLookupMX(ж<testing.T> t) {
             tΔ1.Skipf("skipping failed nslookup %s test: %s", server, err);
         }
         var byPrefAndHost = (ж<global::go.net_package.MX> a, ж<global::go.net_package.MX> b) => {
-            {
-                nint rΔ1 = cmp.Compare(a.Pref, b.Pref); if (rΔ1 != 0) {
-                    return rΔ1;
-                }
+            nint rΔ1 = cmp.Compare(a.Pref, b.Pref); if (rΔ1 != 0) {
+                return rΔ1;
             }
             return strings.Compare(a.Host, b.Host);
         };
@@ -187,7 +184,7 @@ public static void TestLookupLocalPTR(ж<testing.T> t) {
 public static void TestLookupPTR(ж<testing.T> t) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
-    foreach (var (_, addr) in lookupTestIPs) {
+    foreach (var (_, addr) in range(lookupTestIPs)) {
         var (names, err) = LookupAddr(addr);
         if (err != nil) {
             // The DNSError type stores the error as a string, so it cannot wrap the
@@ -228,10 +225,8 @@ internal static (@string, error) nslookup(@string qtype, @string name) {
     var cmd = exec.Command(nslookupˢ, "-querytype="u8 + qtype, name);
     cmd.Stdout = new net_test_package.strings_BuilderжWriter(Ꮡout);
     cmd.Stderr = new net_test_package.strings_BuilderжWriter(Ꮡerr);
-    {
-        var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
-            return ("", errΔ1);
-        }
+    var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+        return ("", errΔ1);
     }
     @string r = strings.ReplaceAll(@out.String(), "\r\n", "\n");
     // nslookup stderr output contains also debug information such as
@@ -253,23 +248,21 @@ internal static (slice<ж<global::go.net_package.MX>> mx, error err) nslookupMX(
     error err = default;
 
     @string r = default;
-    {
-        (r, err) = nslookup("mx", name); if (err != nil) {
-            return (mx, err);
-        }
+    (r, err) = nslookup("mx", name); if (err != nil) {
+        return (mx, err);
     }
     mx = new slice<ж<global::go.net_package.MX>>(0, 10);
     // linux nslookup syntax
     // golang.org      mail exchanger = 2 alt1.aspmx.l.google.com.
     var rx = Δregexp.MustCompile(mAZ09SMailExchangerSS09Sˢ);
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         var (pref, _, _) = dtoi(ans[2]);
         mx = append(mx, Ꮡ(new MX(absDomainName(ans[3]), (uint16)pref)));
     }
     // windows nslookup syntax
     // gmail.com       MX preference = 30, mail exchanger = alt3.gmail-smtp-in.l.google.com
     rx = Δregexp.MustCompile(mAZ09SMxPreferenceSS09SSˢ);
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         var (pref, _, _) = dtoi(ans[2]);
         mx = append(mx, Ꮡ(new MX(absDomainName(ans[3]), (uint16)pref)));
     }
@@ -285,15 +278,13 @@ internal static (slice<ж<global::go.net_package.NS>> ns, error err) nslookupNS(
     error err = default;
 
     @string r = default;
-    {
-        (r, err) = nslookup("ns", name); if (err != nil) {
-            return (ns, err);
-        }
+    (r, err) = nslookup("ns", name); if (err != nil) {
+        return (ns, err);
     }
     ns = new slice<ж<global::go.net_package.NS>>(0, 10);
     // golang.org      nameserver = ns1.google.com.
     var rx = Δregexp.MustCompile(mAZ09SNameserverSSAZ09ˢ);
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         ns = append(ns, Ꮡ(new NS(absDomainName(ans[2]))));
     }
     return (ns, err);
@@ -310,16 +301,14 @@ internal static (@string cname, error err) nslookupCNAME(@string name) {
     error err = default;
 
     @string r = default;
-    {
-        (r, err) = nslookup(cnameˢ2, name); if (err != nil) {
-            return (cname, err);
-        }
+    (r, err) = nslookup(cnameˢ2, name); if (err != nil) {
+        return (cname, err);
     }
     // mail.golang.com canonical name = golang.org.
     var rx = Δregexp.MustCompile(mAZ09SCanonicalNameSSAZ0ˢ);
     // assumes the last CNAME is the correct one
     @string last = name;
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         last = ans[2];
     }
     return (absDomainName(last), default);
@@ -336,10 +325,8 @@ internal static (slice<@string> txt, error err) nslookupTXT(@string name) {
     error err = default;
 
     @string r = default;
-    {
-        (r, err) = nslookup(txtˢ, name); if (err != nil) {
-            return (txt, err);
-        }
+    (r, err) = nslookup(txtˢ, name); if (err != nil) {
+        return (txt, err);
     }
     txt = new slice<@string>(0, 10);
     // linux
@@ -350,7 +337,7 @@ internal static (slice<@string> txt, error err) nslookupTXT(@string name) {
     //
     //    "v=spf1 redirect=_spf.google.com"
     var rx = Δregexp.MustCompile(mAZ09STextSSˢ);
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         txt = append(txt, ans[2]);
     }
     return (txt, err);
@@ -379,14 +366,12 @@ internal static (slice<@string> ptr, error err) lookupPTR(@string name) {
     error err = default;
 
     @string r = default;
-    {
-        (r, err) = ping(name); if (err != nil) {
-            return (ptr, err);
-        }
+    (r, err) = ping(name); if (err != nil) {
+        return (ptr, err);
     }
     ptr = new slice<@string>(0, 10);
     var rx = Δregexp.MustCompile(mPingingSAZAZ09Sˢ);
-    foreach (var (_, ans) in rx.FindAllStringSubmatch(r, -1)) {
+    foreach (var (_, ans) in range(rx.FindAllStringSubmatch(r, -1))) {
         ptr = append(ptr, absDomainName(ans[1]));
     }
     return (ptr, err);

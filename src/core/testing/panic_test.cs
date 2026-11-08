@@ -19,11 +19,8 @@ using Δio = io_package;
 partial class testing_test_package {
 
 internal static ж<@string> testPanicTest = flag.String("test_panic_test", "", "TestPanic: indicates which test should panic");
-
 internal static ж<bool> testPanicParallel = flag.Bool("test_panic_parallel", false, "TestPanic: run subtests in parallel");
-
 internal static ж<bool> testPanicCleanup = flag.Bool("test_panic_cleanup", false, "TestPanic: indicates whether test should call Cleanup");
-
 internal static ж<@string> testPanicCleanupPanic = flag.String("test_panic_cleanup_panic", "", "TestPanic: indicate whether test should call Cleanup function that panics");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -41,7 +38,7 @@ public static void TestPanic(ж<testing.T> t) {
 
     var testCases = slice<TestPanic_testCases>([new(
         desc: "root test panics",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper"]),
+        flags: ["-test_panic_test=TestPanicHelper"],
         want: """
 
 --- FAIL: TestPanicHelper (N.NNs)
@@ -51,7 +48,7 @@ public static void TestPanic(ж<testing.T> t) {
 """u8.Raw()
     ), new(
         desc: "subtest panics",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1"]),
+        flags: ["-test_panic_test=TestPanicHelper/1"],
         want: """
 
 --- FAIL: TestPanicHelper (N.NNs)
@@ -64,7 +61,7 @@ public static void TestPanic(ж<testing.T> t) {
 """u8.Raw()
     ), new(
         desc: "subtest panics with cleanup",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup"],
         want: """
 
 ran inner cleanup 1
@@ -80,7 +77,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "subtest panics with outer cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer"],
         want: """
 
 ran inner cleanup 1
@@ -93,7 +90,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "subtest panics with middle cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle"],
         want: """
 
 ran inner cleanup 1
@@ -109,7 +106,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "subtest panics with inner cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner"],
         want: """
 
 ran inner cleanup 1
@@ -125,7 +122,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "parallel subtest panics with cleanup",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_parallel"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_parallel"],
         want: """
 
 ran inner cleanup 1
@@ -141,7 +138,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "parallel subtest panics with outer cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer", "-test_panic_parallel"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer", "-test_panic_parallel"],
         want: """
 
 ran inner cleanup 1
@@ -154,7 +151,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "parallel subtest panics with middle cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle", "-test_panic_parallel"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle", "-test_panic_parallel"],
         want: """
 
 ran inner cleanup 1
@@ -170,7 +167,7 @@ ran outer cleanup
 """u8.Raw()
     ), new(
         desc: "parallel subtest panics with inner cleanup panic",
-        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner", "-test_panic_parallel"]),
+        flags: ["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner", "-test_panic_parallel"],
         want: """
 
 ran inner cleanup 1
@@ -199,10 +196,8 @@ ran outer cleanup
             @string got = (@string)b;
             @string want = strings.TrimSpace(tcʗ1.want);
             @string re = makeRegexp(want);
-            {
-                var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
-                    tΔ1.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
-                }
+            var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
+                tΔ1.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
             }
         });
     }
@@ -294,7 +289,7 @@ public static void TestMorePanic(ж<testing.T> t) {
     var testCases = slice<TestMorePanic_testCases>([
         new(
             desc: "Issue 48502: call runtime.Goexit in t.Cleanup after panic",
-            flags: slice<@string>(["-test.run=^TestGoexitInCleanupAfterPanicHelper$"]),
+            flags: ["-test.run=^TestGoexitInCleanupAfterPanicHelper$"],
             want: """
 panic: die
 	panic: test executed panic(nil) or runtime.Goexit
@@ -302,7 +297,7 @@ panic: die
         ),
         new(
             desc: "Issue 48515: call t.Run in t.Cleanup should trigger panic",
-            flags: slice<@string>(["-test.run=^TestCallRunInCleanupHelper$"]),
+            flags: ["-test.run=^TestCallRunInCleanupHelper$"],
             want: @"panic: testing: t.Run called during t.Cleanup"
         )
     ]);
@@ -314,10 +309,8 @@ panic: die
         @string got = (@string)b;
         @string want = tc.want;
         @string re = makeRegexp(want);
-        {
-            var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
-                t.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
-            }
+        var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
+            t.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
         }
     }
 }

@@ -35,7 +35,7 @@ public static void TestReaderGolden(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("failed to glob for tests: %v", err);
     }
-    foreach (var (_, testPath) in matches) {
+    foreach (var (_, testPath) in range(matches)) {
         var (testName, errΔ1) = filepath.Rel(testdataˢ, testPath);
         if (errΔ1 != nil) {
             t.Fatalf("failed to relativize testdata path: %v", errΔ1);
@@ -126,10 +126,8 @@ internal static void testReader(ж<testing.T> t, io.Reader tr, ж<testtrace.Vali
 
     var (r, err) = Δtrace.NewReader(tr);
     if (err != nil) {
-        {
-            var errΔ1 = exp.Check(err); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = exp.Check(err); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
         return;
     }
@@ -143,26 +141,20 @@ internal static void testReader(ж<testing.T> t, io.Reader tr, ж<testtrace.Vali
             v.SkipClockSnapshotChecks();
         }
         if (errΔ2 != nil) {
-            {
-                var errΔ3 = exp.Check(errΔ2); if (errΔ3 != nil) {
-                    t.Error(errΔ3);
-                }
+            var errΔ3 = exp.Check(errΔ2); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
             return;
         }
         if (logEvents.Value) {
             t.Log(ev.String());
         }
-        {
-            var errΔ4 = Ꮡv.Event(ev); if (errΔ4 != nil) {
-                t.Error(errΔ4);
-            }
+        var errΔ4 = Ꮡv.Event(ev); if (errΔ4 != nil) {
+            t.Error(errΔ4);
         }
     }
-    {
-        var errΔ5 = exp.Check(default); if (errΔ5 != nil) {
-            t.Error(errΔ5);
-        }
+    var errΔ5 = exp.Check(default); if (errΔ5 != nil) {
+        t.Error(errΔ5);
     }
 }
 
@@ -211,7 +203,7 @@ public static void TestTraceGenSync(ж<testing.T> t) {
                 }
             }
 
-            foreach (var (i, want) in wantSyncsʗ1) {
+            foreach (var (i, want) in range(wantSyncsʗ1)) {
                 var got = syncEvents[i].ΔClone();
                 var gotSync = syncEvents[i].Sync();
                 if (got.Time() != want.Time) {
@@ -233,14 +225,14 @@ public static void TestTraceGenSync(ж<testing.T> t) {
         });
     }
 
-    runTest(go123SyncTestˢ, slice<TestTraceGenSync_sync>([
+    runTest(go123SyncTestˢ, [
         new(10, nil),
         new(40, nil),
         // The EvFrequency batch for generation 3 is emitted at trace.Time(80),
         // but 60 is the minTs of the generation, see b30 in the go generator.
         new(60, nil),
         new(63, nil)
-    ]));
+    ]);
 
     runTest(go125SyncTestˢ, slice<TestTraceGenSync_sync>([
         new(9, Ꮡ(new Δtrace.ClockSnapshot(Trace: 10, Mono: 99, Wall: time.Date(2025, 2, 28, 15, 4, 9, 123, time.ΔUTC)))),

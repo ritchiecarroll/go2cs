@@ -25,7 +25,7 @@ partial struct Node {
 
 internal static ж<Node> tree = Ꮡ(new Node(
     "testdata",
-    slice<ж<Node>>([
+    [
         Ꮡ(new Node("a", default, 0)),
         Ꮡ(new Node("b", slice<ж<Node>>([]), 0)),
         Ꮡ(new Node("c", default, 0)),
@@ -43,7 +43,7 @@ internal static ж<Node> tree = Ꮡ(new Node(
                     0))
             ]),
             0))
-    ]),
+    ],
     0
 ));
 
@@ -51,7 +51,7 @@ internal static void walkTree(ж<Node> Ꮡn, @string path, Action<@string, ж<No
     ref var n = ref Ꮡn.DerefOrNull();
 
     f(path, Ꮡn);
-    foreach (var (_, e) in n.entries) {
+    foreach (var (_, e) in range(n.entries)) {
         walkTree(e, pathpkg.Join(path, e.name), f);
     }
 }
@@ -134,14 +134,10 @@ public static void TestWalkDirSymlink(ж<testing.T> t) {
     var wantTypesʗ1 = wantTypes;
     var walkFn = error (@string path, fs.DirEntry entry, error errΔ1) => {
         marksʗ1[path]++;
-        {
-            var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok) {
-                t.Errorf("Unexpected path %q in walk", path);
-            } else {
-                var got = entry.Type(); if (got != want) {
-                    t.Errorf("%s entry type = %v; want %v", path, got, want);
-                }
-            }
+        var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok) {
+            t.Errorf("Unexpected path %q in walk", path);
+        } else if (entry.Type() is var got && got != want) {
+            t.Errorf("%s entry type = %v; want %v", path, got, want);
         }
         if (errΔ1 != nil) {
             t.Errorf("Walking %s: %v", path, errΔ1);
@@ -155,10 +151,8 @@ public static void TestWalkDirSymlink(ж<testing.T> t) {
         t.Fatalf("no error expected, found: %s", err);
     }
     foreach (var (path, _) in wantTypes) {
-        {
-            nint got = marks[path]; if (got != 1) {
-                t.Errorf("%s visited %d times; expected 1", path, got);
-            }
+        nint got = marks[path]; if (got != 1) {
+            t.Errorf("%s visited %d times; expected 1", path, got);
         }
     }
 }
@@ -173,18 +167,14 @@ public static void TestIssue51617(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string dir = t.TempDir();
-        foreach (var (_, sub) in slice<@string>(["a", filepath.Join("a", badˢ), filepath.Join("a", nextˢ)])) {
-            {
-                var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+        foreach (var (_, sub) in range(slice<@string>(["a", filepath.Join("a", badˢ), filepath.Join("a", nextˢ)]))) {
+            var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         @string bad = filepath.Join(dir, "a", badˢ);
-        {
-            var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);

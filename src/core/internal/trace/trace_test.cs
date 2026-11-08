@@ -42,15 +42,15 @@ internal partial struct TestTraceAnnotations_evDesc /*dyn*/ {
 public static void TestTraceAnnotations(ж<testing.T> t) {
     testTraceProg(t, annotationsGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) => {
         var want = slice<TestTraceAnnotations_evDesc>([
-            new(Δtrace.EventTaskBegin, (Δtrace.TaskID)1, slice<@string>(["task0"])),
-            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, slice<@string>(["region0"])),
-            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, slice<@string>(["region1"])),
-            new(Δtrace.EventLog, (Δtrace.TaskID)1, slice<@string>(["key0", "0123456789abcdef"])),
-            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, slice<@string>(["region1"])),
-            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, slice<@string>(["region0"])),
-            new(Δtrace.EventTaskEnd, (Δtrace.TaskID)1, slice<@string>(["task0"])),
+            new(Δtrace.EventTaskBegin, (Δtrace.TaskID)1, ["task0"]),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, ["region0"]),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, ["region1"]),
+            new(Δtrace.EventLog, (Δtrace.TaskID)1, ["key0", "0123456789abcdef"]),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, ["region1"]),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, ["region0"]),
+            new(Δtrace.EventTaskEnd, (Δtrace.TaskID)1, ["task0"]),
             //  Currently, pre-existing region is not recorded to avoid allocations.
-            new(Δtrace.EventRegionBegin, Δtrace.BackgroundTask, slice<@string>(["post-existing region"]))
+            new(Δtrace.EventRegionBegin, Δtrace.BackgroundTask, ["post-existing region"])
         ]);
         var (r, err) = Δtrace.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tb)));
         if (err != nil) {
@@ -64,7 +64,7 @@ public static void TestTraceAnnotations(ж<testing.T> t) {
             if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
-            foreach (var (i, wantEv) in want) {
+            foreach (var (i, wantEv) in range(want)) {
                 if (wantEv.kind != ev.Kind()) {
                     continue;
                 }
@@ -93,7 +93,7 @@ public static void TestTraceAnnotations(ж<testing.T> t) {
             }
         }
         if (len(want) != 0) {
-            foreach (var (_, ev) in want) {
+            foreach (var (_, ev) in range(want)) {
                 tΔ1.Errorf("no match for %s TaskID=%d Args=%#v", ev.kind, ev.task, ev.args);
             }
         }
@@ -146,10 +146,8 @@ public static void TestTraceCPUProfile(ж<testing.T> t) {
             pprofStacks[stack] = samples;
             pprofSamples += samples;
         }
-        {
-            var errΔ2 = scanner.Err(); if (errΔ2 != nil) {
-                tΔ1.Fatalf("failed to parse CPU profile summary in stderr: %v", errΔ2);
-            }
+        var errΔ2 = scanner.Err(); if (errΔ2 != nil) {
+            tΔ1.Fatalf("failed to parse CPU profile summary in stderr: %v", errΔ2);
         }
         if (pprofSamples == 0) {
             tΔ1.Skip(cpuProfileDidNotIncludeˢ);
@@ -182,7 +180,7 @@ public static void TestTraceCPUProfile(ж<testing.T> t) {
             }
             if (ev.Kind() == Δtrace.EventStackSample) {
                 totalTraceSamples++;
-                if (hogRegion != nil && ev.Goroutine() == (~hogRegion).Goroutine()) {
+                if (hogRegion != nil && ev.Goroutine() == hogRegion.Goroutine()) {
                     traceSamples++;
                     slice<@string> fns = default;
                     foreach (var frame in range<Δtrace.StackFrame>(ev.Stack().Frames().Invoke)) {
@@ -388,94 +386,94 @@ public static void TestTraceStacks(ж<testing.T> t) {
         // mainLine is the line number of `func main()` in testprog/stacks.go.
         UntypedInt mainLine = 21;
         var want = slice<TestTraceStacks_evDesc>([
-            new(Δtrace.EventStateTransition, "Goroutine Running->Runnable", slice<TestTraceStacks_frame>([
+            new(Δtrace.EventStateTransition, "Goroutine Running->Runnable", [
                 new("runtime.Gosched", 0),
                 new("main.main", mainLine + 87)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine NotExist->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine NotExist->Runnable", [
                 new("main.main", mainLine + 11)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.block", 0),
                 new("main.main.func1", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.chansend1", 0),
                 new("main.main.func2", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.chanrecv1", 0),
                 new("main.main.func3", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.chanrecv1", 0),
                 new("main.main.func4", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("runtime.chansend1", 0),
                 new("main.main", mainLine + 89)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.chansend1", 0),
                 new("main.main.func5", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("runtime.chanrecv1", 0),
                 new("main.main", mainLine + 90)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("runtime.selectgo", 0),
                 new("main.main.func6", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("runtime.selectgo", 0),
                 new("main.main", mainLine + 91)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("sync.(*Mutex).Lock", 0),
                 new("main.main.func7", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("sync.(*Mutex).Unlock", 0),
                 new("main.main", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("sync.(*WaitGroup).Wait", 0),
                 new("main.main.func8", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("sync.(*WaitGroup).Add", 0),
                 new("sync.(*WaitGroup).Done", 0),
                 new("main.main", mainLine + 96)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("sync.(*Cond).Wait", 0),
                 new("main.main.func9", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Waiting->Runnable", [
                 new("sync.(*Cond).Signal", 0),
                 new("main.main", 0)
-            ])),
-            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                 new("time.Sleep", 0),
                 new("main.main", 0)
-            ])),
-            new(Δtrace.EventMetric, "/sched/gomaxprocs:threads", slice<TestTraceStacks_frame>([
+            ]),
+            new(Δtrace.EventMetric, "/sched/gomaxprocs:threads", [
                 new("runtime.startTheWorld", 0), // this is when the current gomaxprocs is logged.
                 new("runtime.startTheWorldGC", 0),
                 new("runtime.GOMAXPROCS", 0),
                 new("main.main", 0)
-            ]))
+            ])
         ]);
         var asyncPreemptOff = strings.Contains(godebug, asyncpreemptoff1ˢ);
         if (asyncPreemptOff) {
             // Only check for syncPreemptPoint if asynchronous preemption is disabled.
             // Otherwise, the syncPreemptPoint goroutine might be exclusively async
             // preempted, causing this test to flake.
-            var syncPreemptEv = new TestTraceStacks_evDesc(Δtrace.EventStateTransition, "Goroutine Running->Runnable", slice<TestTraceStacks_frame>([
+            var syncPreemptEv = new TestTraceStacks_evDesc(Δtrace.EventStateTransition, "Goroutine Running->Runnable", [
                 new("main.syncPreemptPoint", 0),
                 new("main.main.func12", 0)
-            ])
+            ]
             );
             want = append(want, syncPreemptEv);
         }
@@ -487,23 +485,23 @@ public static void TestTraceStacks(ж<testing.T> t) {
             // coalesce with an active GC triggered this by traceAdvance. In that case
             // we won't have an EventRangeBegin event that matches the stace trace we're
             // looking for, since runtime.GC will not have triggered the GC.
-            var gcEv = new TestTraceStacks_evDesc(Δtrace.EventRangeBegin, "GC concurrent mark phase", slice<TestTraceStacks_frame>([
+            var gcEv = new TestTraceStacks_evDesc(Δtrace.EventRangeBegin, "GC concurrent mark phase", [
                 new("runtime.GC", 0),
                 new("main.main", 0)
-            ])
+            ]
             );
             want = append(want, gcEv);
         }
         if (Δruntime.GOOS != "windows"u8 && Δruntime.GOOS != "plan9"u8) {
             want = appendꓸꓸꓸ(want, slice<TestTraceStacks_evDesc>([
-                new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", slice<TestTraceStacks_frame>([
+                new(Δtrace.EventStateTransition, "Goroutine Running->Waiting", [
                     new("internal/poll.(*FD).Accept", 0),
                     new("net.(*netFD).accept", 0),
                     new("net.(*TCPListener).accept", 0),
                     new("net.(*TCPListener).Accept", 0),
                     new("main.main.func10", 0)
-                ])),
-                new(Δtrace.EventStateTransition, "Goroutine Running->Syscall", slice<TestTraceStacks_frame>([
+                ]),
+                new(Δtrace.EventStateTransition, "Goroutine Running->Syscall", [
                     new("syscall.read", 0),
                     new("syscall.Read", 0),
                     new("internal/poll.ignoringEINTRIO", 0),
@@ -511,21 +509,19 @@ public static void TestTraceStacks(ж<testing.T> t) {
                     new("os.(*File).read", 0),
                     new("os.(*File).Read", 0),
                     new("main.main.func11", 0)
-                ]))
+                ])
             ]));
             if (Δruntime.GOOS == "darwin"u8) {
                 want[len(want) - 1].frames = appendꓸꓸꓸ(slice<TestTraceStacks_frame>([new("syscall.syscall", 0)]), want[len(want) - 1].frames);
             }
         }
         bool stackMatches(traceꓸStack stk, slice<TestTraceStacks_frame> frames) {
-            foreach (var (i, f) in slices.Collect(stk.Frames())) {
+            foreach (var (i, f) in range(slices.Collect(stk.Frames()))) {
                 if (f.Func != frames[i].fn) {
                     return false;
                 }
-                {
-                    var line = (uint64)frames[i].line; if (line != 0 && line != f.Line) {
-                        return false;
-                    }
+                var line = (uint64)frames[i].line; if (line != 0 && line != f.Line) {
+                    return false;
                 }
             }
             return true;
@@ -542,7 +538,7 @@ public static void TestTraceStacks(ж<testing.T> t) {
             if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
-            foreach (var (i, wantEv) in want) {
+            foreach (var (i, wantEv) in range(want)) {
                 if (wantEv.kind != ev.Kind()) {
                     continue;
                 }
@@ -579,7 +575,7 @@ public static void TestTraceStacks(ж<testing.T> t) {
             }
         }
         if (len(want) != 0) {
-            foreach (var (_, ev) in want) {
+            foreach (var (_, ev) in range(want)) {
                 tΔ1.Errorf("no match for %s Match=%s Stack=%#v", ev.kind, ev.match, ev.frames);
             }
         }
@@ -670,22 +666,18 @@ internal static void checkReaderDeterminism(ж<testing.T> t, slice<byte> tb, sli
     var evs1 = events();
     var evs2 = events();
 
-    {
-        nint l1 = len(evs1);
-        nint l2 = len(evs2); if (l1 != l2) {
-            t.Fatalf("re-reading trace gives different event count (%d != %d)", l1, l2);
-        }
+    nint l1 = len(evs1);
+    nint l2 = len(evs2); if (l1 != l2) {
+        t.Fatalf("re-reading trace gives different event count (%d != %d)", l1, l2);
     }
-    foreach (var (i, vᴛ1) in evs1) {
+    foreach (var (i, vᴛ1) in range(evs1)) {
         var ev1 = vᴛ1.ΔClone();
 
         var ev2 = evs2[i].ΔClone();
-        {
-            @string s1 = ev1.String();
-            @string s2 = ev2.String(); if (s1 != s2) {
-                t.Errorf("re-reading trace gives different event %d:\n%s\n%s\n", i, s1, s2);
-                break;
-            }
+        @string s1 = ev1.String();
+        @string s2 = ev2.String(); if (s1 != s2) {
+            t.Errorf("re-reading trace gives different event %d:\n%s\n%s\n", i, s1, s2);
+            break;
         }
     }
 }
@@ -771,11 +763,9 @@ internal static void testTraceProg(ж<testing.T> t, @string progName, Action<ж<
             godebug += ","u8 + extraGODEBUG;
         }
         cmd.Env = append(cmd.Env, "GODEBUG="u8 + godebug);
-        {
-            var (_, ok) = os.LookupEnv(gotracebackˢ); if (!ok) {
-                // Unless overriden, set GOTRACEBACK=crash.
-                cmd.Env = append(cmd.Env, (@string)"GOTRACEBACK=crash");
-            }
+        var (_, ok) = os.LookupEnv(gotracebackˢ); if (!ok) {
+            // Unless overriden, set GOTRACEBACK=crash.
+            cmd.Env = append(cmd.Env, (@string)"GOTRACEBACK=crash");
         }
 
         // Capture stdout and stderr.
@@ -787,13 +777,11 @@ internal static void testTraceProg(ж<testing.T> t, @string progName, Action<ж<
         cmd.Stdout = new trace_test_package.bytes_BufferжWriter(ᏑtraceBuf);
         cmd.Stderr = new trace_test_package.bytes_BufferжWriter(ᏑerrBuf);
         // Run the program.
-        {
-            var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
-                if (errBuf.Len() != 0) {
-                    tΔ1.Logf("stderr: %s", (@string)errBuf.Bytes());
-                }
-                tΔ1.Fatal(errΔ1);
+        var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+            if (errBuf.Len() != 0) {
+                tΔ1.Logf("stderr: %s", (@string)errBuf.Bytes());
             }
+            tΔ1.Fatal(errΔ1);
         }
         var tb = traceBuf.Bytes();
 

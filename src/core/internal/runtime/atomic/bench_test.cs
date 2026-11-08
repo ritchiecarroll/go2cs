@@ -206,7 +206,6 @@ public static void BenchmarkCas64(ж<testing.B> b) {
         }
     });
 }
-
 public static void BenchmarkXchg(ж<testing.B> b) {
     ref var x = ref heap(new uint32(), out var Ꮡx);
     x = 1;

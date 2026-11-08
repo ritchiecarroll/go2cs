@@ -16,7 +16,7 @@ partial struct aliasingTestsᴛ1 /*dyn*/ {
     internal slice<byte> x, y;
     internal bool anyOverlap, inexactOverlap;
 }
-internal static slice<aliasingTestsᴛ1> aliasingTests = slice<aliasingTestsᴛ1>([
+internal static slice<aliasingTestsᴛ1> aliasingTests = [
     new(a[..], b[..], false, false),
     new(a[..], b[..0], false, false),
     new(a[..], b[..50], false, false),
@@ -30,7 +30,7 @@ internal static slice<aliasingTestsᴛ1> aliasingTests = slice<aliasingTestsᴛ1
     new(a[..], a[..0], false, false),
     new(a[..10], a.slice(0, 10, 20), true, false),
     new(a[..10], a.slice(5, 10, 20), true, true)
-]);
+];
 
 internal static void testAliasing(ж<testing.T> t, nint i, slice<byte> x, slice<byte> y, bool anyOverlap, bool inexactOverlap) {
     var any = alias.AnyOverlap(x, y);
@@ -44,7 +44,7 @@ internal static void testAliasing(ж<testing.T> t, nint i, slice<byte> x, slice<
 }
 
 public static void TestAliasing(ж<testing.T> t) {
-    foreach (var (i, tt) in aliasingTests) {
+    foreach (var (i, tt) in range(aliasingTests)) {
         testAliasing(t, i, tt.x, tt.y, tt.anyOverlap, tt.inexactOverlap);
         testAliasing(t, i, tt.y, tt.x, tt.anyOverlap, tt.inexactOverlap);
     }

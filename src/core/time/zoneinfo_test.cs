@@ -47,10 +47,8 @@ public static void TestEnvVarUsage(ж<Δtesting.T> t) {
         Δtime.LoadLocation(asiaJerusalemˢ);
         defer(time_internal_test_package.ResetZoneinfoForTesting, ref ᒐ);
 
-        {
-            var zoneinfo = time_internal_test_package.ZoneinfoForTesting(); if (testZoneinfo != zoneinfo.Value) {
-                t.Errorf("zoneinfo does not match env variable: got %q want %q", zoneinfo.Value, testZoneinfo);
-            }
+        var zoneinfo = time_internal_test_package.ZoneinfoForTesting(); if (testZoneinfo != zoneinfo.Value) {
+            t.Errorf("zoneinfo does not match env variable: got %q want %q", zoneinfo.Value, testZoneinfo);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -86,7 +84,7 @@ public static void TestLoadLocationValidatesNames(ж<Δtesting.T> t) {
         "..",
         "a.."
     ]);
-    foreach (var (_, v) in bad) {
+    foreach (var (_, v) in range(bad)) {
         var (_, err) = Δtime.LoadLocation(v);
         if (!AreEqual(err, time_internal_test_package.ErrLocation)) {
             t.Errorf("LoadLocation(%q) error = %v; want ErrLocation", v, err);
@@ -146,7 +144,7 @@ public static void TestFirstZone(ж<Δtesting.T> t) {
             )
         ]);
 
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var (z, err) = Δtime.LoadLocation(test.zone);
             if (err != nil) {
                 t.Fatal(err);
@@ -275,7 +273,7 @@ partial struct slimTestsᴛ1 /*dyn*/ {
     internal @string wantName;
     internal nint wantOffset;
 }
-internal static slice<slimTestsᴛ1> slimTests = slice<slimTestsᴛ1>([
+internal static slice<slimTestsᴛ1> slimTests = [
     new(
         // 2020b slim tzdata for Europe/Berlin.
         zoneName: "Europe/Berlin",
@@ -308,10 +306,10 @@ internal static slice<slimTestsᴛ1> slimTests = slice<slimTestsᴛ1>([
         wantName: "IST",
         wantOffset: 3600
     )
-]);
+];
 
 public static void TestLoadLocationFromTZDataSlim(ж<Δtesting.T> t) {
-    foreach (var (_, test) in slimTests) {
+    foreach (var (_, test) in range(slimTests)) {
         var (tzData, err) = Δos.ReadFile("testdata/"u8 + test.fileName);
         if (err != nil) {
             t.Error(err);
@@ -347,7 +345,7 @@ internal partial struct TestTzset_type /*dyn*/ {
 }
 
 public static void TestTzset(ж<Δtesting.T> t) {
-    foreach (var (_, test) in slice<TestTzset_type>([
+    foreach (var (_, test) in range(slice<TestTzset_type>([
         new("", 0, 0, "", 0, 0, 0, false, false),
         new("PST8PDT,M3.2.0,M11.1.0", 0, 2159200800L, "PDT", -7 * 60 * 60, 2152173600L, 2172733200L, true, true),
         new("PST8PDT,M3.2.0,M11.1.0", 0, 2152173599L, "PST", -8 * 60 * 60, 2145916800, 2152173600L, false, true),
@@ -357,7 +355,7 @@ public static void TestTzset(ж<Δtesting.T> t) {
         new("PST8PDT,M3.2.0,M11.1.0", 0, 2172733200L, "PST", -8 * 60 * 60, 2172733200L, 2177452800L, false, true),
         new("PST8PDT,M3.2.0,M11.1.0", 0, 2172733201L, "PST", -8 * 60 * 60, 2172733200L, 2177452800L, false, true),
         new("KST-9", 592333200, 1677246697, "KST", 9 * 60 * 60, 592333200, 9223372036854775807L, false, true)
-    ])) {
+    ]))) {
         var (name, off, start, end, isDST, ok) = time_internal_test_package.Tzset(test.inStr, test.inEnd, test.inSec);
         if (name != test.name || off != test.off || start != test.start || end != test.end || isDST != test.isDST || ok != test.ok) {
             t.Errorf("tzset(%q, %d, %d) = %q, %d, %d, %d, %t, %t, want %q, %d, %d, %d, %t, %t", test.inStr, test.inEnd, test.inSec, name, off, start, end, isDST, ok, test.name, test.off, test.start, test.end, test.isDST, test.ok);
@@ -373,14 +371,14 @@ internal partial struct TestTzsetName_type /*dyn*/ {
 }
 
 public static void TestTzsetName(ж<Δtesting.T> t) {
-    foreach (var (_, test) in slice<TestTzsetName_type>([
+    foreach (var (_, test) in range(slice<TestTzsetName_type>([
         new("", "", "", false),
         new("X", "", "", false),
         new("PST", "PST", "", true),
         new("PST8PDT", "PST", "8PDT", true),
         new("PST-08", "PST", "-08", true),
         new("<A+B>+08", "A+B", "+08", true)
-    ])) {
+    ]))) {
         var (name, @out, ok) = time_internal_test_package.TzsetName(test.@in);
         if (name != test.name || @out != test.@out || ok != test.ok) {
             t.Errorf("tzsetName(%q) = %q, %q, %t, want %q, %q, %t", test.@in, name, @out, ok, test.name, test.@out, test.ok);
@@ -396,7 +394,7 @@ internal partial struct TestTzsetOffset_type /*dyn*/ {
 }
 
 public static void TestTzsetOffset(ж<Δtesting.T> t) {
-    foreach (var (_, test) in slice<TestTzsetOffset_type>([
+    foreach (var (_, test) in range(slice<TestTzsetOffset_type>([
         new("", 0, "", false),
         new("X", 0, "", false),
         new("+", 0, "", false),
@@ -406,7 +404,7 @@ public static void TestTzsetOffset(ж<Δtesting.T> t) {
         new("100", 100 * 60 * 60, "", true),
         new("1000", 0, "", false),
         new("8PDT", 8 * 60 * 60, "PDT", true)
-    ])) {
+    ]))) {
         var (off, @out, ok) = time_internal_test_package.TzsetOffset(test.@in);
         if (off != test.off || @out != test.@out || ok != test.ok) {
             t.Errorf("tzsetName(%q) = %d, %q, %t, want %d, %q, %t", test.@in, off, @out, ok, test.off, test.@out, test.ok);
@@ -422,7 +420,7 @@ internal partial struct TestTzsetRule_type /*dyn*/ {
 }
 
 public static void TestTzsetRule(ж<Δtesting.T> t) {
-    foreach (var (_, test) in slice<TestTzsetRule_type>([
+    foreach (var (_, test) in range(slice<TestTzsetRule_type>([
         new("", new time_internal_test_package.Rule(), "", false),
         new("X", new time_internal_test_package.Rule(), "", false),
         new("J10", new time_internal_test_package.Rule(Kind: time_internal_test_package.RuleJulian, Day: 10, Time: 2 * 60 * 60), "", true),
@@ -432,7 +430,7 @@ public static void TestTzsetRule(ж<Δtesting.T> t) {
         new("M4.5.6/03:00:00", new time_internal_test_package.Rule(Kind: time_internal_test_package.RuleMonthWeekDay, Mon: 4, Week: 5, Day: 6, Time: 3 * 60 * 60), "", true),
         new("M4.5.7/03:00:00", new time_internal_test_package.Rule(), "", false),
         new("M4.5.6/-04", new time_internal_test_package.Rule(Kind: time_internal_test_package.RuleMonthWeekDay, Mon: 4, Week: 5, Day: 6, Time: -4 * 60 * 60), "", true)
-    ])) {
+    ]))) {
         var (r, @out, ok) = time_internal_test_package.TzsetRule(test.@in);
         if (r != test.r || @out != test.@out || ok != test.ok) {
             t.Errorf("tzsetName(%q) = %#v, %q, %t, want %#v, %q, %t", test.@in, r, @out, ok, test.r, test.@out, test.ok);

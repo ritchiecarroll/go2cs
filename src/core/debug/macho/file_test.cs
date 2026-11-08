@@ -10,8 +10,6 @@ using reflect = reflect_package;
 using slices = slices_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.debug.macho_package;
 
 partial class macho_internal_test_package {
@@ -25,11 +23,11 @@ internal partial struct fileTest {
     internal slice<@string> importedSyms;
 }
 
-internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(slice<fileTest>([
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>([
     new(
         "testdata/gcc-386-darwin-exec.base64",
         new FileHeader(0xfeedfaceU, Cpu386, 0x3, 0x2, 0xc, 0x3c0, 0x85),
-        slice<any>([
+        [
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0x38, "__PAGEZERO", 0x0, 0x1000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0xc0, "__TEXT", 0x1000, 0x1000, 0x0, 0x1000, 0x7, 0x5, 0x2, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0xc0, "__DATA", 0x2000, 0x1000, 0x1000, 0x1000, 0x7, 0x3, 0x2, 0x0)),
@@ -42,21 +40,21 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             default, // LC_UNIXTHREAD
             Ꮡ(new Dylib(default, "/usr/lib/libgcc_s.1.dylib", 0x2, 0x10000, 0x10000)),
             Ꮡ(new Dylib(default, "/usr/lib/libSystem.B.dylib", 0x2, 0x6f0104, 0x10000))
-        ]),
-        slice<ж<global::go.debug.macho_package.SectionHeader>>([
+        ],
+        [
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__text", "__TEXT", 0x1f68, 0x88, 0xf68, 0x2, 0x0, 0x0, 0x80000400U)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__cstring", "__TEXT", 0x1ff0, 0xd, 0xff0, 0x0, 0x0, 0x0, 0x2)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__data", "__DATA", 0x2000, 0x14, 0x1000, 0x2, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__dyld", "__DATA", 0x2014, 0x1c, 0x1014, 0x2, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__jump_table", "__IMPORT", 0x3000, 0xa, 0x2000, 0x6, 0x0, 0x0, 0x4000008))
-        ]),
+        ],
         default,
         default
     ),
     new(
         "testdata/gcc-amd64-darwin-exec.base64",
         new FileHeader(0xfeedfacfU, CpuAmd64, 0x80000003U, 0x2, 0xb, 0x568, 0x85),
-        slice<any>([
+        [
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x48, "__PAGEZERO", 0x0, 0x100000000UL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x1d8, "__TEXT", 0x100000000UL, 0x1000, 0x0, 0x1000, 0x7, 0x5, 0x5, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x138, "__DATA", 0x100001000UL, 0x1000, 0x1000, 0x1000, 0x7, 0x3, 0x3, 0x0)),
@@ -68,8 +66,8 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             default, // LC_UNIXTHREAD
             Ꮡ(new Dylib(default, "/usr/lib/libgcc_s.1.dylib", 0x2, 0x10000, 0x10000)),
             Ꮡ(new Dylib(default, "/usr/lib/libSystem.B.dylib", 0x2, 0x6f0104, 0x10000))
-        ]),
-        slice<ж<global::go.debug.macho_package.SectionHeader>>([
+        ],
+        [
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__text", "__TEXT", 0x100000f14UL, 0x6d, 0xf14, 0x2, 0x0, 0x0, 0x80000400U)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__symbol_stub1", "__TEXT", 0x100000f81UL, 0xc, 0xf81, 0x0, 0x0, 0x0, 0x80000408U)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__stub_helper", "__TEXT", 0x100000f90UL, 0x18, 0xf90, 0x2, 0x0, 0x0, 0x0)),
@@ -78,20 +76,20 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__data", "__DATA", 0x100001000UL, 0x1c, 0x1000, 0x3, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__dyld", "__DATA", 0x100001020UL, 0x38, 0x1020, 0x3, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__la_symbol_ptr", "__DATA", 0x100001058UL, 0x10, 0x1058, 0x2, 0x0, 0x0, 0x7))
-        ]),
+        ],
         default,
         default
     ),
     new(
         "testdata/gcc-amd64-darwin-exec-debug.base64",
         new FileHeader(0xfeedfacfU, CpuAmd64, 0x80000003U, 0xa, 0x4, 0x5a0, 0),
-        slice<any>([
+        [
             default, // LC_UUID
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x1d8, "__TEXT", 0x100000000UL, 0x1000, 0x0, 0x0, 0x7, 0x5, 0x5, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x138, "__DATA", 0x100001000UL, 0x1000, 0x0, 0x0, 0x7, 0x3, 0x3, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x278, "__DWARF", 0x100002000UL, 0x1000, 0x1000, 0x1bc, 0x7, 0x3, 0x7, 0x0))
-        ]),
-        slice<ж<global::go.debug.macho_package.SectionHeader>>([
+        ],
+        [
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__text", "__TEXT", 0x100000f14UL, 0x0, 0x0, 0x2, 0x0, 0x0, 0x80000400U)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__symbol_stub1", "__TEXT", 0x100000f81UL, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80000408U)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__stub_helper", "__TEXT", 0x100000f90UL, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0)),
@@ -107,14 +105,14 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__debug_line", "__DWARF", 0x1000020faUL, 0x47, 0x10fa, 0x0, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__debug_pubnames", "__DWARF", 0x100002141UL, 0x1b, 0x1141, 0x0, 0x0, 0x0, 0x0)),
             Ꮡ(new global::go.debug.macho_package.SectionHeader("__debug_str", "__DWARF", 0x10000215cUL, 0x60, 0x115c, 0x0, 0x0, 0x0, 0x0))
-        ]),
+        ],
         default,
         default
     ),
     new(
         "testdata/clang-386-darwin-exec-with-rpath.base64",
         new FileHeader(0xfeedfaceU, Cpu386, 0x3, 0x2, 0x10, 0x42c, 0x1200085),
-        slice<any>([
+        [
             default, // LC_SEGMENT
             default, // LC_SEGMENT
             default, // LC_SEGMENT
@@ -131,7 +129,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new Rpath(default, "/my/rpath")),
             default, // LC_FUNCTION_STARTS
             default  // LC_DATA_IN_CODE
-        ]),
+        ],
         default,
         default,
         default
@@ -139,7 +137,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
     new(
         "testdata/clang-amd64-darwin-exec-with-rpath.base64",
         new FileHeader(0xfeedfacfU, CpuAmd64, 0x80000003U, 0x2, 0x10, 0x4c8, 0x200085),
-        slice<any>([
+        [
             default, // LC_SEGMENT
             default, // LC_SEGMENT
             default, // LC_SEGMENT
@@ -156,7 +154,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new Rpath(default, "/my/rpath")),
             default, // LC_FUNCTION_STARTS
             default  // LC_DATA_IN_CODE
-        ]),
+        ],
         default,
         default,
         default
@@ -167,7 +165,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
         default,
         default,
         new map<@string, slice<global::go.debug.macho_package.Reloc>>{
-            ["__text"] = slice<global::go.debug.macho_package.Reloc>([
+            ["__text"] = [
                 new(
                     Addr: 0x1d,
                     Type: (uint8)GENERIC_RELOC_VANILLA,
@@ -192,7 +190,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                     Pcrel: false,
                     Value: 0xb,
                     Scattered: true
-                )])
+                )]
         },
         default
     ),
@@ -202,7 +200,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
         default,
         default,
         new map<@string, slice<global::go.debug.macho_package.Reloc>>{
-            ["__text"] = slice<global::go.debug.macho_package.Reloc>([
+            ["__text"] = [
                 new(
                     Addr: 0x19,
                     Type: (uint8)X86_64_RELOC_BRANCH,
@@ -218,8 +216,8 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                     Pcrel: true,
                     Extern: false,
                     Value: 2
-                )]),
-            ["__compact_unwind"] = slice<global::go.debug.macho_package.Reloc>([
+                )],
+            ["__compact_unwind"] = [
                 new(
                     Addr: 0x0,
                     Type: (uint8)X86_64_RELOC_UNSIGNED,
@@ -227,9 +225,9 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                     Pcrel: false,
                     Extern: false,
                     Value: 1
-                )])
+                )]
         },
-        slice<@string>(["_printf"])
+        ["_printf"]
     ),
     new(
         "testdata/clang-amd64-darwin-ld-r.obj.base64",
@@ -237,9 +235,9 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
         default,
         default,
         default,
-        slice<@string>(["_printf"])
+        ["_printf"]
     )
-]));
+]);
 internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 internal static (io.ReaderAt, error) readerAtFromObscured(@string name) {
@@ -275,7 +273,7 @@ internal static (ж<global::go.debug.macho_package.FatFile>, error) openFatObscu
 }
 
 public static void TestOpen(ж<testing.T> t) {
-    foreach (var i in range(fileTests)) {
+    foreach (var i in range(len(fileTests))) {
         var tt = Ꮡ(fileTests, i);
 
         // Use obscured files to prevent Apple’s notarization service from
@@ -291,13 +289,13 @@ public static void TestOpen(ж<testing.T> t) {
             t.Errorf("open %s:\n\thave %#v\n\twant %#v\n", tt.@file, f.FileHeader, tt.hdr);
             continue;
         }
-        foreach (var (iΔ1, l) in f.Loads) {
+        foreach (var (iΔ1, l) in range(f.Loads)) {
             if (len(l.Raw()) < 8) {
                 t.Errorf("open %s, command %d:\n\tload command %T don't have enough data\n", tt.@file, iΔ1, l);
             }
         }
         if (tt.loads != nil) {
-            foreach (var (iΔ2, l) in f.Loads) {
+            foreach (var (iΔ2, l) in range(f.Loads)) {
                 if (iΔ2 >= len(tt.loads)) {
                     break;
                 }
@@ -345,7 +343,7 @@ public static void TestOpen(ж<testing.T> t) {
         }
 
         if (tt.sections != nil) {
-            foreach (var (iΔ3, sh) in f.Sections) {
+            foreach (var (iΔ3, sh) in range(f.Sections)) {
                 if (iΔ3 >= len(tt.sections)) {
                     break;
                 }
@@ -363,7 +361,7 @@ public static void TestOpen(ж<testing.T> t) {
         }
 
         if (tt.relocations != nil) {
-            foreach (var (iΔ4, sh) in f.Sections) {
+            foreach (var (iΔ4, sh) in range(f.Sections)) {
                 var have = sh.Relocs;
                 var want = tt.relocations[sh.Name];
                 if (!reflect.DeepEqual(have, want)) {
@@ -414,7 +412,7 @@ public static void TestOpenFat(ж<testing.T> t) {
         t.Errorf("OpenFat: got %d architectures, want 2", len(ff.Arches));
     }
 
-    foreach (var i in range(ff.Arches)) {
+    foreach (var i in range(len(ff.Arches))) {
         var arch = Ꮡ(ff.Arches, i);
         var ftArch = Ꮡ(fileTests, i);
 
@@ -434,10 +432,8 @@ private static readonly @string testdataGcc386DarwinExecˢᵇ = "testdata/gcc-38
 
 public static void TestOpenFatFailure(ж<testing.T> t) {
     @string filename = fileGoˢ; // not a Mach-O file
-    {
-        var (_, errΔ1) = OpenFat(filename); if (errΔ1 == nil) {
-            t.Errorf("OpenFat %s: succeeded unexpectedly", filename);
-        }
+    var (_, errΔ1) = OpenFat(filename); if (errΔ1 == nil) {
+        t.Errorf("OpenFat %s: succeeded unexpectedly", filename);
     }
 
     filename = testdataGcc386DarwinExecˢ; // not a fat Mach-O

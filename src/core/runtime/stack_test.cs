@@ -302,7 +302,6 @@ internal static void set(ж<nint> Ꮡp, nint x) {
 
     p = x;
 }
-
 public static void TestDeferPtrs(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
@@ -333,10 +332,8 @@ public static partial void TestDeferPtrsGoexit(ж<testing.T> t) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsGoexit, c, i);
-        {
-            nint n = ᐸꟷ(c); if (n != 42) {
-                t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
-            }
+        nint n = ᐸꟷ(c); if (n != 42) {
+            t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
         }
     }
 }
@@ -370,10 +367,8 @@ public static partial void TestDeferPtrsPanic(ж<testing.T> t) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsPanic, c, i);
-        {
-            nint n = ᐸꟷ(c); if (n != 42) {
-                t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
-            }
+        nint n = ᐸꟷ(c); if (n != 42) {
+            t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
         }
     }
 }
@@ -423,10 +418,8 @@ public static void TestDeferLeafSigpanic(ж<testing.T> t) {
     try {
         // Push a defer that will walk the stack.
         defer(() => {
-            {
-                var err = recover(); if (err == nil) {
-                    t.Fatal(expectedPanicFromNilˢ);
-                }
+            var err = recover(); if (err == nil) {
+                t.Fatal(expectedPanicFromNilˢ);
             }
             GC();
         }, ref ᒐ);
@@ -608,10 +601,8 @@ public static void TestStackPanic(ж<testing.T> t) {
         // To make this test effective, edit panic.go:gopanic and uncomment
         // the GC() call just before freedefer(d).
         defer(() => {
-            {
-                var x = recover(); if (x == nil) {
-                    t.Errorf("recover failed");
-                }
+            var x = recover(); if (x == nil) {
+                t.Errorf("recover failed");
             }
         }, ref ᒐ);
         useStack(32);
@@ -688,93 +679,28 @@ internal static nint count1(nint n) {
     return 1 + count2(n - 1);
 }
 
-internal static nint count2(nint n) {
-    return 1 + count3(n - 1);
-}
-
-internal static nint count3(nint n) {
-    return 1 + count4(n - 1);
-}
-
-internal static nint count4(nint n) {
-    return 1 + count5(n - 1);
-}
-
-internal static nint count5(nint n) {
-    return 1 + count6(n - 1);
-}
-
-internal static nint count6(nint n) {
-    return 1 + count7(n - 1);
-}
-
-internal static nint count7(nint n) {
-    return 1 + count8(n - 1);
-}
-
-internal static nint count8(nint n) {
-    return 1 + count9(n - 1);
-}
-
-internal static nint count9(nint n) {
-    return 1 + count10(n - 1);
-}
-
-internal static nint count10(nint n) {
-    return 1 + count11(n - 1);
-}
-
-internal static nint count11(nint n) {
-    return 1 + count12(n - 1);
-}
-
-internal static nint count12(nint n) {
-    return 1 + count13(n - 1);
-}
-
-internal static nint count13(nint n) {
-    return 1 + count14(n - 1);
-}
-
-internal static nint count14(nint n) {
-    return 1 + count15(n - 1);
-}
-
-internal static nint count15(nint n) {
-    return 1 + count16(n - 1);
-}
-
-internal static nint count16(nint n) {
-    return 1 + count17(n - 1);
-}
-
-internal static nint count17(nint n) {
-    return 1 + count18(n - 1);
-}
-
-internal static nint count18(nint n) {
-    return 1 + count19(n - 1);
-}
-
-internal static nint count19(nint n) {
-    return 1 + count20(n - 1);
-}
-
-internal static nint count20(nint n) {
-    return 1 + count21(n - 1);
-}
-
-internal static nint count21(nint n) {
-    return 1 + count22(n - 1);
-}
-
-internal static nint count22(nint n) {
-    return 1 + count23(n - 1);
-}
-
-internal static nint count23(nint n) {
-    return 1 + count1(n - 1);
-}
+internal static nint count2(nint n) { return 1 + count3(n - 1); }
+internal static nint count3(nint n) { return 1 + count4(n - 1); }
+internal static nint count4(nint n) { return 1 + count5(n - 1); }
+internal static nint count5(nint n) { return 1 + count6(n - 1); }
+internal static nint count6(nint n) { return 1 + count7(n - 1); }
+internal static nint count7(nint n) { return 1 + count8(n - 1); }
+internal static nint count8(nint n) { return 1 + count9(n - 1); }
+internal static nint count9(nint n) { return 1 + count10(n - 1); }
+internal static nint count10(nint n) { return 1 + count11(n - 1); }
+internal static nint count11(nint n) { return 1 + count12(n - 1); }
+internal static nint count12(nint n) { return 1 + count13(n - 1); }
+internal static nint count13(nint n) { return 1 + count14(n - 1); }
+internal static nint count14(nint n) { return 1 + count15(n - 1); }
+internal static nint count15(nint n) { return 1 + count16(n - 1); }
+internal static nint count16(nint n) { return 1 + count17(n - 1); }
+internal static nint count17(nint n) { return 1 + count18(n - 1); }
+internal static nint count18(nint n) { return 1 + count19(n - 1); }
+internal static nint count19(nint n) { return 1 + count20(n - 1); }
+internal static nint count20(nint n) { return 1 + count21(n - 1); }
+internal static nint count21(nint n) { return 1 + count22(n - 1); }
+internal static nint count22(nint n) { return 1 + count23(n - 1); }
+internal static nint count23(nint n) { return 1 + count1(n - 1); }
 
 public partial struct stkobjT {
     internal ж<stkobjT> p;
@@ -868,23 +794,18 @@ internal static partial @string stack(this structWithMethod s) {
     return (@string)(buf.slice(0, Stack(buf, false)));
 }
 
-internal static void nop(this structWithMethod s) {
-}
+internal static void nop(this structWithMethod s) { }
 
-internal static void inlinablePanic(this structWithMethod s) {
-    throw panic("panic");
-}
+internal static void inlinablePanic(this structWithMethod s) { throw panic("panic"); }
 
 public static void TestStackWrapperCaller(ж<testing.T> t) {
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     // Force the compiler to construct a wrapper method.
     var wrapper = ((Func<ж<structWithMethod>, @string>)([GoWrapper("(*structWithMethod).caller")] (p0) => caller(panicwrapRecv(p0, "value method runtime_test.structWithMethod.caller called using nil *structWithMethod pointer").Value)));
     // Check that the wrapper doesn't affect the stack trace.
-    {
-        @string dc = d.caller();
-        @string ic = wrapper(Ꮡd); if (dc != ic) {
-            t.Fatalf("direct caller %q != indirect caller %q", dc, ic);
-        }
+    @string dc = d.caller();
+    @string ic = wrapper(Ꮡd); if (dc != ic) {
+        t.Fatalf("direct caller %q != indirect caller %q", dc, ic);
     }
 }
 
@@ -1050,7 +971,7 @@ public static void TestCallersFromWrapper(ж<testing.T> t) {
     // calls the thing you actually wanted to see, but in this
     // case we need to keep it.
     var pc = reflect.ValueOf(((Action<I>)([GoWrapper("I.M")] (p0) => wrapperRecv(p0).M()))).Pointer();
-    var frames = CallersFrames(slice<uintptr>([pc]));
+    var frames = CallersFrames([pc]);
     var (frame, more) = frames.Next();
     if (frame.Function != "runtime_test.I.M"u8) {
         t.Fatalf("want function %s, got %s", runtimeTestIMˢ, frame.Function);
@@ -1112,7 +1033,7 @@ private static readonly @string mainRecurseThenCallGo0xˢᵇ = "main.recurseThen
 
 public static void TestTracebackAncestors(ж<testing.T> t) {
     var goroutineRegex = Δregexp.MustCompile(goroutine09ˢ);
-    foreach (var (_, tracebackDepth) in slice<nint>([0, 1, 5, 50])) {
+    foreach (var (_, tracebackDepth) in range(slice<nint>([0, 1, 5, 50]))) {
         @string output = runTestProg(t, testprogˢ, tracebackAncestorsˢ, fmt.Sprintf("GODEBUG=tracebackancestors=%d"u8, tracebackDepth));
 
         nint numGoroutines = 3;
@@ -1129,7 +1050,7 @@ public static void TestTracebackAncestors(ж<testing.T> t) {
 
         // Check functions in the traceback.
         var fns = slice<@string>(["main.recurseThenCallGo", "main.main", "main.printStack", "main.TracebackAncestors"]);
-        foreach (var (_, fn) in fns) {
+        foreach (var (_, fn) in range(fns)) {
             if (!strings.Contains(output, "\n"u8 + fn + "("u8)) {
                 t.Fatalf("expected %q function in traceback:\n%s", fn, output);
             }

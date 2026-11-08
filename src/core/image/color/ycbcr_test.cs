@@ -69,10 +69,8 @@ public static void TestYCbCrGray(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         var c0 = new YCbCr((uint8)i, 0x80, 0x80);
         var c1 = new Gray((uint8)i);
-        {
-            var err = eq(c0, c1); if (err != nil) {
-                t.Errorf("i=0x%02x:\n%v", i, err);
-            }
+        var err = eq(c0, c1); if (err != nil) {
+            t.Errorf("i=0x%02x:\n%v", i, err);
         }
     }
 }
@@ -82,10 +80,8 @@ public static void TestNYCbCrAAlpha(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         var c0 = new NYCbCrA(new YCbCr(0xff, 0x80, 0x80), (uint8)i);
         var c1 = new Alpha((uint8)i);
-        {
-            var err = eq(c0, c1); if (err != nil) {
-                t.Errorf("i=0x%02x:\n%v", i, err);
-            }
+        var err = eq(c0, c1); if (err != nil) {
+            t.Errorf("i=0x%02x:\n%v", i, err);
         }
     }
 }
@@ -95,10 +91,8 @@ public static void TestNYCbCrAYCbCr(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
         var c0 = new NYCbCrA(new YCbCr((uint8)i, 0x40, 0xc0), 0xff);
         var c1 = new YCbCr((uint8)i, 0x40, 0xc0);
-        {
-            var err = eq(c0, c1); if (err != nil) {
-                t.Errorf("i=0x%02x:\n%v", i, err);
-            }
+        var err = eq(c0, c1); if (err != nil) {
+            t.Errorf("i=0x%02x:\n%v", i, err);
         }
     }
 }
@@ -146,10 +140,8 @@ public static void TestCMYKToRGBConsistency(ж<testing.T> t) {
 // TestCMYKGray tests that CMYK colors are a superset of Gray colors.
 public static void TestCMYKGray(ж<testing.T> t) {
     for (nint i = 0; i < 256; i++) {
-        {
-            var err = eq(new CMYK(0x00, 0x00, 0x00, (uint8)(255 - i)), new Gray((uint8)i)); if (err != nil) {
-                t.Errorf("i=0x%02x:\n%v", i, err);
-            }
+        var err = eq(new CMYK(0x00, 0x00, 0x00, (uint8)(255 - i)), new Gray((uint8)i)); if (err != nil) {
+            t.Errorf("i=0x%02x:\n%v", i, err);
         }
     }
 }
@@ -159,7 +151,7 @@ public static void TestPalette(ж<testing.T> t) {
     }.slice());
     // Check that, for a Palette with no repeated colors, the closest color to
     // each element is itself.
-    foreach (var (i, c) in p) {
+    foreach (var (i, c) in range<global::go.image.color_package.Color>(p)) {
         nint j = p.Index(c);
         if (i != j) {
             t.Errorf("Index(%v): got %d (color = %v), want %d", c, j, p[j], i);
@@ -175,7 +167,6 @@ public static void TestPalette(ж<testing.T> t) {
 }
 
 internal static uint8 sink8;
-
 internal static uint32 sink32;
 
 public static void BenchmarkYCbCrToRGB(ж<testing.B> b) {

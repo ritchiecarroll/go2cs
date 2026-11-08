@@ -19,8 +19,6 @@ using strings = strings_package;
 using testing = testing_package;
 using unique = unique_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using go.net;
 using netip = go.net.netip_package;
@@ -147,7 +145,7 @@ public static void TestParseAddr(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in validIPs) {
+    foreach (var (_, vᴛ1) in range(validIPs)) {
         ref var test = ref heap(new TestParseAddr_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -214,10 +212,8 @@ public static void TestParseAddr(ж<testing.T> t) {
             // ParseAddr/String).
             @string js = @""""u8 + testʗ1.@in + @""""u8;
             ref var jsgot = ref heap(new netipꓸAddr(), out var Ꮡjsgot);
-            {
-                var errΔ1 = json.Unmarshal(slice<byte>(js), Ꮡjsgot); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = json.Unmarshal(slice<byte>(js), Ꮡjsgot); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
             if (jsgot != got) {
                 tΔ1.Errorf("json.Unmarshal(%q) = %#v, want %#v", testʗ1.@in, jsgot, got);
@@ -298,7 +294,7 @@ public static void TestParseAddr(ж<testing.T> t) {
         "0:0:0:0:00000:ffff:127.1.2.3"
     ]);
 
-    foreach (var (_, s) in invalidIPs) {
+    foreach (var (_, s) in range(invalidIPs)) {
         t.Run(s, (ж<testing.T> tΔ2) => {
             var (got, err) = ParseAddr(s);
             if (err == nil) {
@@ -322,10 +318,8 @@ public static void TestParseAddr(ж<testing.T> t) {
             }
             ref var jsgot = ref heap(new netipꓸAddr(), out var Ꮡjsgot);
             var js = slice<byte>(@"""" + s + @"""");
-            {
-                var errΔ1 = json.Unmarshal(js, Ꮡjsgot); if (errΔ1 == nil) {
-                    tΔ2.Errorf("json.Unmarshal(%q) = %#v, want error", s, jsgot);
-                }
+            var errΔ1 = json.Unmarshal(js, Ꮡjsgot); if (errΔ1 == nil) {
+                tΔ2.Errorf("json.Unmarshal(%q) = %#v, want error", s, jsgot);
             }
         });
     }
@@ -344,7 +338,7 @@ internal partial struct TestAddrFromSlice_tests /*dyn*/ {
 public static void TestAddrFromSlice(ж<testing.T> t) {
     var tests = slice<TestAddrFromSlice_tests>([
         new(
-            ip: slice<byte>([10, 0, 0, 1]),
+            ip: [10, 0, 0, 1],
             wantAddr: mustIP("10.0.0.1"),
             wantOK: true
         ),
@@ -354,7 +348,7 @@ public static void TestAddrFromSlice(ж<testing.T> t) {
             wantOK: true
         ),
         new(
-            ip: slice<byte>([0, 1, 2]),
+            ip: [0, 1, 2],
             wantAddr: new netipꓸAddr(),
             wantOK: false
         ),
@@ -364,7 +358,7 @@ public static void TestAddrFromSlice(ж<testing.T> t) {
             wantOK: false
         )
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (addr, ok) = AddrFromSlice(tt.ip);
         if (ok != tt.wantOK || addr != tt.wantAddr) {
             t.Errorf("AddrFromSlice(%#v) = %#v, %v, want %#v, %v", tt.ip, addr, ok, tt.wantAddr, tt.wantOK);
@@ -399,7 +393,7 @@ public static void TestAddrAppendText(ж<testing.T> t) {
         new(mustIP(ffff192168140255ˢ), "::ffff:192.168.140.255"),
         new(mustIP(ffff192168140255En0ˢ), "::ffff:192.168.140.255%en0")
     ]);
-    foreach (var (i, tc) in tests) {
+    foreach (var (i, tc) in range(tests)) {
         var ip = tc.ip;
 
         var mtAppend = new slice<byte>(4, 32);
@@ -427,7 +421,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
         new("::ffff:c000:0280", 16),
         new("::ffff:c000:0280%eth0", 20)
     ]);
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         netipꓸAddr ip = default;
         if (len(tc.ip) > 0) {
             ip = mustIP(tc.ip);
@@ -440,10 +434,8 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ip, len(b), tc.wantSize);
         }
         netipꓸAddr ip2 = default;
-        {
-            var errΔ1 = ip2.UnmarshalBinary(b); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = ip2.UnmarshalBinary(b); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         if (ip != ip2) {
             t.Fatalf("got %v; want %v", ip2, ip);
@@ -459,10 +451,8 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ip, len(bAppend), tc.wantSize);
         }
         netipꓸAddr ip3 = default;
-        {
-            var errΔ2 = ip3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = ip3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         if (ip != ip3) {
             t.Fatalf("got %v; want %v", ip3, ip);
@@ -470,12 +460,10 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
     }
 
     // Cannot unmarshal from unexpected IP length.
-    foreach (var (_, n) in slice<nint>([3, 5])) {
+    foreach (var (_, n) in range(slice<nint>([3, 5]))) {
         netipꓸAddr ip2 = default;
-        {
-            var err = ip2.UnmarshalBinary(bytes.Repeat(slice<byte>([1]), n)); if (err == nil) {
-                t.Fatalf("unmarshaled from unexpected IP length %d", n);
-            }
+        var err = ip2.UnmarshalBinary(bytes.Repeat([1], n)); if (err == nil) {
+            t.Fatalf("unmarshaled from unexpected IP length %d", n);
         }
     }
 }
@@ -504,11 +492,9 @@ public static void TestAddrPortMarshalTextString(ж<testing.T> t) {
         new(mustIPPort(ffff19216814025580ˢ), "[::ffff:192.168.140.255]:80"),
         new(mustIPPort(ffff192168140255En080ˢ), "[::ffff:192.168.140.255%en0]:80")
     ]);
-    foreach (var (i, tt) in tests) {
-        {
-            @string got = tt.@in.String(); if (got != tt.want) {
-                t.Errorf("%d. for (%v, %v) String = %q; want %q", i, tt.@in.Addr(), tt.@in.Port(), got, tt.want);
-            }
+    foreach (var (i, tt) in range(tests)) {
+        @string got = tt.@in.String(); if (got != tt.want) {
+            t.Errorf("%d. for (%v, %v) String = %q; want %q", i, tt.@in.Addr(), tt.@in.Port(), got, tt.want);
         }
         var (mt, err) = tt.@in.MarshalText();
         if (err != nil) {
@@ -544,7 +530,7 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> t) {
         new("[::ffff:c000:0280]:65535", 16 + 2),
         new("[::ffff:c000:0280%eth0]:1", 20 + 2)
     ]);
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         netip.AddrPort ipport = default;
         if (len(tc.ipport) > 0) {
             ipport = mustIPPort(tc.ipport);
@@ -557,10 +543,8 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ipport, len(b), tc.wantSize);
         }
         netip.AddrPort ipport2 = default;
-        {
-            var errΔ1 = ipport2.UnmarshalBinary(b); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = ipport2.UnmarshalBinary(b); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         if (ipport != ipport2) {
             t.Fatalf("got %v; want %v", ipport2, ipport);
@@ -576,10 +560,8 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ipport, len(bAppend), tc.wantSize);
         }
         netip.AddrPort ipport3 = default;
-        {
-            var errΔ2 = ipport3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = ipport3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         if (ipport != ipport3) {
             t.Fatalf("got %v; want %v", ipport3, ipport);
@@ -587,12 +569,10 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> t) {
     }
 
     // Cannot unmarshal from unexpected lengths.
-    foreach (var (_, n) in slice<nint>([3, 7])) {
+    foreach (var (_, n) in range(slice<nint>([3, 7]))) {
         netip.AddrPort ipport2 = default;
-        {
-            var err = ipport2.UnmarshalBinary(bytes.Repeat(slice<byte>([1]), n)); if (err == nil) {
-                t.Fatalf("unmarshaled from unexpected length %d", n);
-            }
+        var err = ipport2.UnmarshalBinary(bytes.Repeat([1], n)); if (err == nil) {
+            t.Fatalf("unmarshaled from unexpected length %d", n);
         }
     }
 }
@@ -620,11 +600,9 @@ public static void TestPrefixMarshalTextString(ж<testing.T> t) {
         new(mustPrefix(ffff1921681402558ˢ), "::ffff:192.168.140.255/8"),
         new(PrefixFrom(mustIP(ffffC0000280ˢ).WithZone(eth0ˢ), 37), "::ffff:192.0.2.128/37") // Zone should be stripped
     ]);
-    foreach (var (i, tt) in tests) {
-        {
-            @string got = tt.@in.String(); if (got != tt.want) {
-                t.Errorf("%d. for %v String = %q; want %q", i, tt.@in, got, tt.want);
-            }
+    foreach (var (i, tt) in range(tests)) {
+        @string got = tt.@in.String(); if (got != tt.want) {
+            t.Errorf("%d. for %v String = %q; want %q", i, tt.@in, got, tt.want);
         }
         var (mt, err) = tt.@in.MarshalText();
         if (err != nil) {
@@ -663,7 +641,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
     tests = append(tests,
         new TestPrefixMarshalUnmarshalBinary_testCase(PrefixFrom(tests[0].prefix.Addr(), 33), tests[0].wantSize),
         new TestPrefixMarshalUnmarshalBinary_testCase(PrefixFrom(tests[1].prefix.Addr(), 129), tests[1].wantSize));
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         var prefix = tc.prefix;
         var (b, err) = prefix.MarshalBinary();
         if (err != nil) {
@@ -673,10 +651,8 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.prefix, len(b), tc.wantSize);
         }
         netipꓸPrefix prefix2 = default;
-        {
-            var errΔ1 = prefix2.UnmarshalBinary(b); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = prefix2.UnmarshalBinary(b); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         if (prefix != prefix2) {
             t.Fatalf("got %v; want %v", prefix2, prefix);
@@ -692,10 +668,8 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
             t.Fatalf("%q encoded to size %d; want %d", tc.prefix, len(bAppend), tc.wantSize);
         }
         netipꓸPrefix prefix3 = default;
-        {
-            var errΔ2 = prefix3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = prefix3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         if (prefix != prefix3) {
             t.Fatalf("got %v; want %v", prefix3, prefix);
@@ -703,12 +677,10 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
     }
 
     // Cannot unmarshal from unexpected lengths.
-    foreach (var (_, n) in slice<nint>([3, 6])) {
+    foreach (var (_, n) in range(slice<nint>([3, 6]))) {
         netipꓸPrefix prefix2 = default;
-        {
-            var err = prefix2.UnmarshalBinary(bytes.Repeat(slice<byte>([1]), n)); if (err == nil) {
-                t.Fatalf("unmarshaled from unexpected length %d", n);
-            }
+        var err = prefix2.UnmarshalBinary(bytes.Repeat([1], n)); if (err == nil) {
+            t.Fatalf("unmarshaled from unexpected length %d", n);
         }
     }
 }
@@ -719,10 +691,8 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> t) {
     // see TestParseAddr above.
     @string orig = @"""""";
     ref var ip = ref heap(new netipꓸAddr(), out var Ꮡip);
-    {
-        var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡip); if (errΔ1 != nil) {
-            t.Fatalf("Unmarshal(%q) got error %v", orig, errΔ1);
-        }
+    var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡip); if (errΔ1 != nil) {
+        t.Fatalf("Unmarshal(%q) got error %v", orig, errΔ1);
     }
     if (ip != (new netipꓸAddr())) {
         t.Errorf("Unmarshal(%q) is not the zero Addr", orig);
@@ -757,7 +727,7 @@ public static void TestAddrFrom16(ж<testing.T> t) {
             want: MkAddr(Mk128(0, 0xffff01020304UL), Z6noz)
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestAddrFrom16_tests(), out var Ꮡtt);
         tt = vᴛ1.ΔClone();
 
@@ -1002,7 +972,7 @@ public static void TestIPProperties(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIPProperties_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1086,7 +1056,7 @@ public static void TestAddrWellKnown(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestAddrWellKnown_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1146,7 +1116,7 @@ public static void TestAddrLessCompare(ж<testing.T> t) {
         // but pointing to identical structures.
         new(mustIP(ffff111112ˢ), mustIP("11.1.1.12"), false)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var gotΔ1 = tt.a.Less(tt.b);
         if (gotΔ1 != tt.want) {
             t.Errorf("Less(%q, %q) = %v; want %v", tt.a, tt.b, gotΔ1, tt.want);
@@ -1224,7 +1194,7 @@ public static void TestAddrPortCompare(ж<testing.T> t) {
 
         new(mustIPPort("1.2.3.4:80"), mustIPPort("[0102:0304::0]:80"), -1)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         nint gotΔ1 = tt.a.Compare(tt.b);
         if (gotΔ1 != tt.want) {
             t.Errorf("Compare(%q, %q) = %v; want %v", tt.a, tt.b, gotΔ1, tt.want);
@@ -1233,10 +1203,8 @@ public static void TestAddrPortCompare(ж<testing.T> t) {
         // Also check inverse.
         if (gotΔ1 == tt.want) {
             nint got2 = tt.b.Compare(tt.a);
-            {
-                nint want2 = -1 * tt.want; if (got2 != want2) {
-                    t.Errorf("Compare(%q, %q) was correctly %v, but Compare(%q, %q) was %v", tt.a, tt.b, gotΔ1, tt.b, tt.a, got2);
-                }
+            nint want2 = -1 * tt.want; if (got2 != want2) {
+                t.Errorf("Compare(%q, %q) was correctly %v, but Compare(%q, %q) was %v", tt.a, tt.b, gotΔ1, tt.b, tt.a, got2);
             }
         }
     }
@@ -1316,7 +1284,7 @@ public static void TestPrefixCompare(ж<testing.T> t) {
         new(mustPrefix("1.2.3.0/24"), mustPrefix("1.2.3.4/24"), -1),
         new(mustPrefix("1.2.3.0/24"), mustPrefix("1.2.3.0/28"), -1)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         nint gotΔ1 = tt.a.Compare(tt.b);
         if (gotΔ1 != tt.want) {
             t.Errorf("Compare(%q, %q) = %v; want %v", tt.a, tt.b, gotΔ1, tt.want);
@@ -1325,10 +1293,8 @@ public static void TestPrefixCompare(ж<testing.T> t) {
         // Also check inverse.
         if (gotΔ1 == tt.want) {
             nint got2 = tt.b.Compare(tt.a);
-            {
-                nint want2 = -1 * tt.want; if (got2 != want2) {
-                    t.Errorf("Compare(%q, %q) was correctly %v, but Compare(%q, %q) was %v", tt.a, tt.b, gotΔ1, tt.b, tt.a, got2);
-                }
+            nint want2 = -1 * tt.want; if (got2 != want2) {
+                t.Errorf("Compare(%q, %q) was correctly %v, but Compare(%q, %q) was %v", tt.a, tt.b, gotΔ1, tt.b, tt.a, got2);
             }
         }
     }
@@ -1444,7 +1410,7 @@ public static void TestIPStringExpanded(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIPStringExpanded_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1523,7 +1489,7 @@ public static void TestPrefixMasking(ж<testing.T> t) {
     var tests = slice<TestPrefixMasking_tests>([
         new(
             family: "nil",
-            subtests: slice<TestPrefixMasking_subtest>([
+            subtests: [
                 new(
                     bits: 255,
                     ok: true
@@ -1532,7 +1498,7 @@ public static void TestPrefixMasking(ж<testing.T> t) {
                     bits: 16,
                     ok: true
                 )
-            ])
+            ]
         ),
         new(
             family: "IPv4",
@@ -1573,13 +1539,13 @@ public static void TestPrefixMasking(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestPrefixMasking_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.family, (ж<testing.T> tΔ1) => {
-            foreach (var (_, vᴛ2) in ttʗ1.subtests) {
+            foreach (var (_, vᴛ2) in range(ttʗ1.subtests)) {
                 ref var st = ref heap(new TestPrefixMasking_subtest(), out var Ꮡst);
                 st = vᴛ2;
 
@@ -1604,10 +1570,8 @@ public static void TestPrefixMasking(ж<testing.T> t) {
                         tΔ2.Errorf("prefix = %q, want %q", p, stʗ1.p);
                     }
 
-                    {
-                        @string got = stʗ1.ip.String(); if (got != orig) {
-                            tΔ2.Errorf("IP was mutated: %q, want %q", got, orig);
-                        }
+                    @string got = stʗ1.ip.String(); if (got != orig) {
+                        tΔ2.Errorf("IP was mutated: %q, want %q", got, orig);
                     }
                 });
             }
@@ -1625,17 +1589,15 @@ public static void TestPrefixMarshalUnmarshal(ж<testing.T> t) {
         "2001:db8::/32"
     ]);
 
-    foreach (var (_, s) in tests) {
+    foreach (var (_, s) in range(tests)) {
         t.Run(s, (ж<testing.T> tΔ1) => {
             // Ensure that JSON  (and by extension, text) marshaling is
             // sane by entering quoted input.
             @string orig = @""""u8 + s + @""""u8;
 
             ref var p = ref heap(new netipꓸPrefix(), out var Ꮡp);
-            {
-                var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡp); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("failed to unmarshal: %v", errΔ1);
-                }
+            var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡp); if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to unmarshal: %v", errΔ1);
             }
 
             var (pb, err) = json.Marshal(p);
@@ -1656,10 +1618,8 @@ internal static readonly object unmarshaledIntoNonEmptyˢ = (@string)"unmarshale
 
 public static void TestPrefixUnmarshalTextNonZero(ж<testing.T> t) {
     var ip = mustPrefix(fe8064ˢ);
-    {
-        var err = ip.UnmarshalText(slice<byte>("xxx"u8)); if (err == nil) {
-            t.Fatal(unmarshaledIntoNonEmptyˢ);
-        }
+    var err = ip.UnmarshalText(slice<byte>("xxx"u8)); if (err == nil) {
+        t.Fatal(unmarshaledIntoNonEmptyˢ);
     }
 }
 
@@ -1687,7 +1647,7 @@ public static void TestIs4AndIs6(ж<testing.T> t) {
         new(mustIP(fffeC0000280ˢ), false, true),
         new(mustIP(eth0ˢ2), false, true)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got4 = tt.ip.Is4();
         if (got4 != tt.is4) {
             t.Errorf("Is4(%q) = %v; want %v", tt.ip, got4, tt.is4);
@@ -1732,7 +1692,7 @@ public static void TestIs4In6(ж<testing.T> t) {
         new(mustIP("::1"), false, mustIP("::1")),
         new(mustIP("1.2.3.4"), false, mustIP("1.2.3.4"))
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = tt.ip.Is4In6();
         if (got != tt.want) {
             t.Errorf("Is4In6(%q) = %v; want %v", tt.ip, got, tt.want);
@@ -1768,7 +1728,7 @@ public static void TestPrefixMasked(ж<testing.T> t) {
             masked: new netipꓸPrefix()
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestPrefixMasked_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1853,7 +1813,7 @@ public static void TestPrefix(ж<testing.T> t) {
             notContains: mustIPs(fe801ˢ)
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestPrefix_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1869,12 +1829,12 @@ public static void TestPrefix(ж<testing.T> t) {
             if (prefix.Bits() != testʗ1.bits) {
                 tΔ1.Errorf("bits=%d, want %d", prefix.Bits(), testʗ1.bits);
             }
-            foreach (var (_, ip) in testʗ1.contains) {
+            foreach (var (_, ip) in range(testʗ1.contains)) {
                 if (!prefix.Contains(ip)) {
                     tΔ1.Errorf("does not contain %s", ip);
                 }
             }
-            foreach (var (_, ip) in testʗ1.notContains) {
+            foreach (var (_, ip) in range(testʗ1.notContains)) {
                 if (prefix.Contains(ip)) {
                     tΔ1.Errorf("contains %s", ip);
                 }
@@ -1883,10 +1843,8 @@ public static void TestPrefix(ж<testing.T> t) {
             if (want == ""u8) {
                 want = testʗ1.prefix;
             }
-            {
-                @string got = prefix.String(); if (got != want) {
-                    tΔ1.Errorf("prefix.String()=%q, want %q", got, want);
-                }
+            @string got = prefix.String(); if (got != want) {
+                tΔ1.Errorf("prefix.String()=%q, want %q", got, want);
             }
 
             TestAppendToMarshal(tΔ1, prefix);
@@ -1917,12 +1875,10 @@ public static void TestPrefixFromInvalidBits(ж<testing.T> t) {
         new(v4, -5, -1),
         new(v6, -5, -1)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var p = PrefixFrom(tt.ip, tt.@in);
-        {
-            nint got = p.Bits(); if (got != tt.want) {
-                t.Errorf("for (%v, %v), Bits out = %v; want %v", tt.ip, tt.@in, got, tt.want);
-            }
+        nint got = p.Bits(); if (got != tt.want) {
+            t.Errorf("for (%v, %v), Bits out = %v; want %v", tt.ip, tt.@in, got, tt.want);
         }
     }
 }
@@ -1937,7 +1893,7 @@ public static void TestParsePrefixAllocs(ж<testing.T> t) {
         new("192.168.1.0", "/24"),
         new("aaaa:bbbb:cccc::", "/24")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestParsePrefixAllocs_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1951,10 +1907,8 @@ public static void TestParsePrefixAllocs(ж<testing.T> t) {
             nint prefixAllocs = (nint)testing.AllocsPerRun(5, () => {
                 ParsePrefix(prefix);
             });
-            {
-                nint got = prefixAllocs - ipAllocs; if (got != 0) {
-                    tΔ1.Errorf("allocs=%d, want 0", got);
-                }
+            nint got = prefixAllocs - ipAllocs; if (got != 0) {
+                tΔ1.Errorf("allocs=%d, want 0", got);
             }
         });
     }
@@ -2020,7 +1974,7 @@ public static void TestParsePrefixError(ж<testing.T> t) {
             errstr: "bad bits"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestParsePrefixError_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -2030,10 +1984,8 @@ public static void TestParsePrefixError(ж<testing.T> t) {
             if (err == nil) {
                 tΔ1.Fatal(noErrorˢ);
             }
-            {
-                @string got = err.Error(); if (!strings.Contains(got, testʗ1.errstr)) {
-                    tΔ1.Errorf("error is missing substring %q: %s", testʗ1.errstr, got);
-                }
+            @string got = err.Error(); if (!strings.Contains(got, testʗ1.errstr)) {
+                tΔ1.Errorf("error is missing substring %q: %s", testʗ1.errstr, got);
             }
         });
     }
@@ -2054,7 +2006,7 @@ public static void TestPrefixIsSingleIP(ж<testing.T> t) {
         new(ipp: mustPrefix("::1/0"), want: false),
         new(ipp: new netipꓸPrefix(), want: false)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = tt.ipp.IsSingleIP();
         if (got != tt.want) {
             t.Errorf("IsSingleIP(%v) = %v want %v", tt.ipp, got, tt.want);
@@ -2066,7 +2018,7 @@ internal static slice<netipꓸAddr> mustIPs(params ꓸꓸꓸstring strsʗp) {
     var strs = strsʗp.sslice();
 
     slice<netipꓸAddr> res = default;
-    foreach (var (_, s) in strs) {
+    foreach (var (_, s) in range(strs)) {
         res = append(res, mustIP(s));
     }
     return res;
@@ -2086,7 +2038,7 @@ public static void BenchmarkBinaryMarshalRoundTrip(ж<testing.B> Ꮡb) {
         new("ipv6", "2001:db8::1"),
         new("ipv6+zone", "2001:db8::1%eth0")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new BenchmarkBinaryMarshalRoundTrip_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2099,10 +2051,8 @@ public static void BenchmarkBinaryMarshalRoundTrip(ж<testing.B> Ꮡb) {
                     bΔ1.Fatal(err);
                 }
                 netipꓸAddr ip2 = default;
-                {
-                    var errΔ1 = ip2.UnmarshalBinary(bt); if (errΔ1 != nil) {
-                        bΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = ip2.UnmarshalBinary(bt); if (errΔ1 != nil) {
+                    bΔ1.Fatal(errΔ1);
                 }
             }
         });
@@ -2227,17 +2177,17 @@ partial struct parseBenchInputsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string ip;
 }
-internal static slice<parseBenchInputsᴛ1> parseBenchInputs = slice<parseBenchInputsᴛ1>([
+internal static slice<parseBenchInputsᴛ1> parseBenchInputs = [
     new("v4", "192.168.1.1"),
     new("v6", "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"),
     new("v6_ellipsis", "fd7a:115c::626b:430b"),
     new("v6_v4", "::ffff:192.168.140.255"),
     new("v6_zone", "1:2::ffff:192.168.140.255%eth1")
-]);
+];
 
 public static void BenchmarkParseAddr(ж<testing.B> b) {
     sinkInternValue = unique.Make<AddrDetail>(MakeAddrDetail(true, eth1ˢ)); // Pin to not benchmark the intern package
-    foreach (var (_, vᴛ1) in parseBenchInputs) {
+    foreach (var (_, vᴛ1) in range(parseBenchInputs)) {
         ref var test = ref heap(new parseBenchInputsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -2252,7 +2202,7 @@ public static void BenchmarkParseAddr(ж<testing.B> b) {
 }
 
 public static void BenchmarkStdParseIP(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in parseBenchInputs) {
+    foreach (var (_, vᴛ1) in range(parseBenchInputs)) {
         ref var test = ref heap(new parseBenchInputsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -2267,7 +2217,7 @@ public static void BenchmarkStdParseIP(ж<testing.B> b) {
 }
 
 public static void BenchmarkAddrString(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
@@ -2280,7 +2230,7 @@ public static void BenchmarkAddrString(ж<testing.B> b) {
 }
 
 public static void BenchmarkIPStringExpanded(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
@@ -2293,7 +2243,7 @@ public static void BenchmarkIPStringExpanded(ж<testing.B> b) {
 }
 
 public static void BenchmarkAddrMarshalText(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
@@ -2306,7 +2256,7 @@ public static void BenchmarkAddrMarshalText(ж<testing.B> b) {
 }
 
 public static void BenchmarkAddrPortString(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         var ip = MustParseAddr(test.ip);
         ref var ipp = ref heap<netip.AddrPort>(AddrPortFrom(ip, 60000), out var Ꮡipp);
         var ippʗ1 = ipp;
@@ -2320,7 +2270,7 @@ public static void BenchmarkAddrPortString(ж<testing.B> b) {
 }
 
 public static void BenchmarkAddrPortMarshalText(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         var ip = MustParseAddr(test.ip);
         ref var ipp = ref heap<netip.AddrPort>(AddrPortFrom(ip, 60000), out var Ꮡipp);
         var ippʗ1 = ipp;
@@ -2388,7 +2338,7 @@ public static void BenchmarkPrefixMasking(ж<testing.B> b) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new BenchmarkPrefixMasking_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2414,7 +2364,7 @@ public static void BenchmarkPrefixMarshalText(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkParseAddrPort(ж<testing.B> b) {
-    foreach (var (_, test) in parseBenchInputs) {
+    foreach (var (_, test) in range(parseBenchInputs)) {
         @string ipp = default;
         if (strings.HasPrefix(test.name, "v6")) {
             ipp = fmt.Sprintf("[%s]:1234"u8, test.ip);
@@ -2478,7 +2428,7 @@ public static void TestAs4(ж<testing.T> t) {
         finally { ᒐ.Run(); }
         ᒐdone: return (v, gotPanic);
     }
-    foreach (var (i, vᴛ1) in tests) {
+    foreach (var (i, vᴛ1) in range(tests)) {
         var tt = vᴛ1.ΔClone();
 
         var (got, gotPanic) = as4(tt.ip);
@@ -2533,7 +2483,7 @@ public static void TestPrefixOverlaps(ж<testing.T> t) {
         new(PrefixFrom(mustIP("1.2.3.4"), 33), pfx("1.2.3.0/24"), false),
         new(PrefixFrom(mustIP("2000::"), 129), pfx("2000::/64"), false)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         {
             var got = tt.a.Overlaps(tt.b); if (got != tt.want) {
                 t.Errorf("%d. (%v).Overlaps(%v) = %v; want %v", i, tt.a, tt.b, got, tt.want);
@@ -2902,7 +2852,7 @@ public static void TestAddrStringAllocs(ж<testing.T> t) {
         new("ipv4-in-ipv6+zone", MustParseAddr(ffff19216811Eth0ˢ), 1)
     ]);
     var optimizationOff = testenv.OptimizationOff();
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestAddrStringAllocs_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2935,11 +2885,9 @@ public static void TestPrefixString(ж<testing.T> t) {
         new(PrefixFrom(MustParseAddr("1.2.3.4"), 88), "invalid Prefix")
     ]);
 
-    foreach (var (_, tt) in tests) {
-        {
-            @string got = tt.ipp.String(); if (got != tt.want) {
-                t.Errorf("(%#v).String() = %q want %q", tt.ipp, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        @string got = tt.ipp.String(); if (got != tt.want) {
+            t.Errorf("(%#v).String() = %q want %q", tt.ipp, got, tt.want);
         }
     }
 }
@@ -2962,11 +2910,9 @@ public static void TestAddrPortString(ж<testing.T> t) {
         new(AddrPortFrom(new netipꓸAddr(), 80), "invalid AddrPort")
     ]);
 
-    foreach (var (_, tt) in tests) {
-        {
-            @string got = tt.ipp.String(); if (got != tt.want) {
-                t.Errorf("(%#v).String() = %q want %q", tt.ipp, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        @string got = tt.ipp.String(); if (got != tt.want) {
+            t.Errorf("(%#v).String() = %q want %q", tt.ipp, got, tt.want);
         }
     }
 }
@@ -2983,11 +2929,11 @@ internal partial struct TestAsSlice_tests /*dyn*/ {
 public static void TestAsSlice(ж<testing.T> t) {
     var tests = slice<TestAsSlice_tests>([
         new(@in: new netipꓸAddr(), want: default),
-        new(@in: mustIP("1.2.3.4"), want: slice<byte>([1, 2, 3, 4])),
+        new(@in: mustIP("1.2.3.4"), want: [1, 2, 3, 4]),
         new(@in: mustIP(ffff1ˢ), want: new slice<byte>(16){[0] = 0xff, [1] = 0xff, [15] = 1})
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var got = test.@in.AsSlice();
         if (!bytes.Equal(got, test.want)) {
             t.Errorf("%v.AsSlice() = %v want %v", test.@in, got, test.want);

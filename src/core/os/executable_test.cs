@@ -40,12 +40,10 @@ public static void TestExecutable(ж<Δtesting.T> t) {
             dirΔ1 = filepath.VolumeName(cwd);
         }
         Δos.Chdir(dirΔ1);
-        {
-            var (epΔ1, errΔ2) = Δos.Executable(); if (errΔ2 != nil) {
-                fmt.Fprint(new Δos.FileжWriter(Δos.Stderr), errorˢ, errΔ2);
-            } else {
-                fmt.Fprint(new Δos.FileжWriter(Δos.Stderr), epΔ1);
-            }
+        var (epΔ1, errΔ2) = Δos.Executable(); if (errΔ2 != nil) {
+            fmt.Fprint(new Δos.FileжWriter(Δos.Stderr), errorˢ, errΔ2);
+        } else {
+            fmt.Fprint(new Δos.FileжWriter(Δos.Stderr), epΔ1);
         }
         Δos.Exit(0);
     }

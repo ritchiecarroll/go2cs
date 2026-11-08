@@ -84,13 +84,11 @@ internal static void testUnalignedWrite(ж<testing.T> t) {
             // Cycle through offsets which make a 137 byte sequence.
             // Because 137 is prime this sequence should exercise all corner cases.
             var offsets = new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1}.array();
-            foreach (var (_, vᴛ1) in offsets.ΔRangeSnapshot()) {
+            foreach (var (_, vᴛ1) in range(offsets.ΔRangeSnapshot())) {
                 var j = vᴛ1;
 
-                {
-                    nint v = len(buf) - i; if (v < j) {
-                        j = v;
-                    }
+                nint v = len(buf) - i; if (v < j) {
+                    j = v;
                 }
                 d.Write(buf.slice(i, i + j));
                 i += j;
@@ -116,13 +114,11 @@ internal static void testUnalignedWrite(ж<testing.T> t) {
             // Cycle through offsets which make a 137 byte sequence.
             // Because 137 is prime this sequence should exercise all corner cases.
             var offsets = new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1}.array();
-            foreach (var (_, vᴛ2) in offsets.ΔRangeSnapshot()) {
+            foreach (var (_, vᴛ2) in range(offsets.ΔRangeSnapshot())) {
                 var j = vᴛ2;
 
-                {
-                    nint v = len(buf) - i; if (v < j) {
-                        j = v;
-                    }
+                nint v = len(buf) - i; if (v < j) {
+                    j = v;
                 }
                 d.Write(buf.slice(i, i + j));
                 i += j;
@@ -148,13 +144,11 @@ internal static void testAppend(ж<testing.T> t) {
         // The second time, it will not.
         var buf = new slice<byte>(2, capacity);
         d.Reset();
-        d.Write(slice<byte>([0xcc]));
+        d.Write([0xcc]);
         buf = d.Sum(buf);
         @string expected = "0000DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39";
-        {
-            @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
-                t.Errorf("got %s, want %s", got, expected);
-            }
+        @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
+            t.Errorf("got %s, want %s", got, expected);
         }
     }
 }
@@ -167,13 +161,11 @@ public static void TestAppendNoRealloc(ж<testing.T> t) {
 internal static void testAppendNoRealloc(ж<testing.T> t) {
     var buf = new slice<byte>(1, 200);
     var d = New224();
-    d.Write(slice<byte>([0xcc]));
+    d.Write([0xcc]);
     buf = d.Sum(buf);
     @string expected = "00DF70ADC49B2E76EEE3A6931B93FA41841C3AF2CDF5B32A18B5478C39";
-    {
-        @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
-            t.Errorf("got %s, want %s", got, expected);
-        }
+    @string got = strings.ToUpper(hex.EncodeToString(buf)); if (got != expected) {
+        t.Errorf("got %s, want %s", got, expected);
     }
 }
 
@@ -193,7 +185,7 @@ internal static void testSqueezing(ж<testing.T> t) {
         var d1 = v.constructor(slice<byte>(v.defAlgoName), slice<byte>(v.defCustomStr));
         d1.Write(slice<byte>(testString));
         slice<byte> multiple = default;
-        foreach (var _ᴛ1 in range(@ref)) {
+        foreach (var _ᴛ1 in range(len(@ref))) {
             d1.Read(new slice<byte>(0));
             var one = new slice<byte>(1);
             d1.Read(one);
@@ -214,7 +206,7 @@ internal static void testSqueezing(ж<testing.T> t) {
 internal static slice<byte> sequentialBytes(nint size) {
     nint alignmentOffset = rand.Intn(8);
     var result = new slice<byte>(size + alignmentOffset).slice(alignmentOffset);
-    foreach (var i in range(result)) {
+    foreach (var i in range(len(result))) {
         result[i] = (byte)i;
     }
     return result;
@@ -234,7 +226,7 @@ internal static void testReset(ж<testing.T> t) {
 
     foreach (var (_, v) in testShakes) {
         // Calculate hash for the first time
-        var c = v.constructor(default, slice<byte>([0x99, 0x98]));
+        var c = v.constructor(default, [0x99, 0x98]);
         c.Write(sequentialBytes(0x100));
         c.Read(out1);
 
@@ -402,10 +394,8 @@ internal static void testCSHAKEAccumulated(ж<testing.T> t, Func<slice<byte>, sl
     }
     var @out = new slice<byte>(32);
     acc.Read(@out);
-    {
-        @string got = hex.EncodeToString(@out); if (got != exp) {
-            t.Errorf("got %s, want %s", got, exp);
-        }
+    @string got = hex.EncodeToString(@out); if (got != exp) {
+        t.Errorf("got %s, want %s", got, exp);
     }
 }
 
@@ -441,10 +431,8 @@ internal static void testCSHAKELargeS(ж<testing.T> t) {
     //    print(c.read(32).hex())
     //
     @string exp = "2cb9f237767e98f2614b8779cf096a52da9b3a849280bbddec820771ae529cf0";
-    {
-        @string got = hex.EncodeToString(@out); if (got != exp) {
-            t.Errorf("got %s, want %s", got, exp);
-        }
+    @string got = hex.EncodeToString(@out); if (got != exp) {
+        t.Errorf("got %s, want %s", got, exp);
     }
 }
 
@@ -506,11 +494,9 @@ internal static void testMarshalUnmarshal(ж<testing.T> t, ж<sha3.SHA3> Ꮡh) {
     if (err != nil) {
         t.Errorf("MarshalBinary: %v", err);
     }
-    Ꮡh.Write(bytes.Repeat(slice<byte>([0]), 200));
-    {
-        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
-            t.Errorf("UnmarshalBinary: %v", errΔ1);
-        }
+    Ꮡh.Write(bytes.Repeat([0], 200));
+    var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
+        t.Errorf("UnmarshalBinary: %v", errΔ1);
     }
     Ꮡh.Write(buf.slice(n));
     var got = h.Sum(default);
@@ -535,11 +521,9 @@ internal static void testMarshalUnmarshalSHAKE(ж<testing.T> t, ж<sha3.SHAKE> �
     if (err != nil) {
         t.Errorf("MarshalBinary: %v", err);
     }
-    Ꮡh.Write(bytes.Repeat(slice<byte>([0]), 200));
-    {
-        var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
-            t.Errorf("UnmarshalBinary: %v", errΔ1);
-        }
+    Ꮡh.Write(bytes.Repeat([0], 200));
+    var errΔ1 = h.UnmarshalBinary(b); if (errΔ1 != nil) {
+        t.Errorf("UnmarshalBinary: %v", errΔ1);
     }
     Ꮡh.Write(buf.slice(n));
     var got = new slice<byte>(32);
@@ -592,40 +576,16 @@ internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> h, nint s
     }
 }
 
-public static void BenchmarkSha3_512_MTU(ж<testing.B> b) {
-    benchmarkHash(b, new sha3.SHA3жHash(New512()), 1350, 1);
-}
+public static void BenchmarkSha3_512_MTU(ж<testing.B> b) { benchmarkHash(b, new sha3.SHA3жHash(New512()), 1350, 1); }
+public static void BenchmarkSha3_384_MTU(ж<testing.B> b) { benchmarkHash(b, new sha3.SHA3жHash(New384()), 1350, 1); }
+public static void BenchmarkSha3_256_MTU(ж<testing.B> b) { benchmarkHash(b, new sha3.SHA3жHash(New256()), 1350, 1); }
+public static void BenchmarkSha3_224_MTU(ж<testing.B> b) { benchmarkHash(b, new sha3.SHA3жHash(New224()), 1350, 1); }
 
-public static void BenchmarkSha3_384_MTU(ж<testing.B> b) {
-    benchmarkHash(b, new sha3.SHA3жHash(New384()), 1350, 1);
-}
+public static void BenchmarkShake128_MTU(ж<testing.B> b) { benchmarkShake(b, NewSHAKE128(), 1350, 1); }
+public static void BenchmarkShake256_MTU(ж<testing.B> b) { benchmarkShake(b, NewSHAKE256(), 1350, 1); }
+public static void BenchmarkShake256_16x(ж<testing.B> b) { benchmarkShake(b, NewSHAKE256(), 16, 1024); }
+public static void BenchmarkShake256_1MiB(ж<testing.B> b) { benchmarkShake(b, NewSHAKE256(), 1024, 1024); }
 
-public static void BenchmarkSha3_256_MTU(ж<testing.B> b) {
-    benchmarkHash(b, new sha3.SHA3жHash(New256()), 1350, 1);
-}
-
-public static void BenchmarkSha3_224_MTU(ж<testing.B> b) {
-    benchmarkHash(b, new sha3.SHA3жHash(New224()), 1350, 1);
-}
-
-public static void BenchmarkShake128_MTU(ж<testing.B> b) {
-    benchmarkShake(b, NewSHAKE128(), 1350, 1);
-}
-
-public static void BenchmarkShake256_MTU(ж<testing.B> b) {
-    benchmarkShake(b, NewSHAKE256(), 1350, 1);
-}
-
-public static void BenchmarkShake256_16x(ж<testing.B> b) {
-    benchmarkShake(b, NewSHAKE256(), 16, 1024);
-}
-
-public static void BenchmarkShake256_1MiB(ж<testing.B> b) {
-    benchmarkShake(b, NewSHAKE256(), 1024, 1024);
-}
-
-public static void BenchmarkSha3_512_1MiB(ж<testing.B> b) {
-    benchmarkHash(b, new sha3.SHA3жHash(New512()), 1024, 1024);
-}
+public static void BenchmarkSha3_512_1MiB(ж<testing.B> b) { benchmarkHash(b, new sha3.SHA3жHash(New512()), 1024, 1024); }
 
 } // end sha3_test_package

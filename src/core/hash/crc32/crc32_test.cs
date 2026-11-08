@@ -12,8 +12,6 @@ using rand = math.rand_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math;
 using static go.hash.crc32_package;
 
@@ -79,11 +77,9 @@ internal static slice<test> golden = slice<test>([
 // testGoldenIEEE verifies that the given function returns
 // correct IEEE checksums.
 internal static void testGoldenIEEE(ж<testing.T> t, Func<slice<byte>, uint32> crcFunc) {
-    foreach (var (_, g) in golden) {
-        {
-            var crc = crcFunc(slice<byte>(g.@in)); if (crc != g.ieee) {
-                t.Errorf("IEEE(%s) = 0x%x want 0x%x", g.@in, crc, g.ieee);
-            }
+    foreach (var (_, g) in range(golden)) {
+        var crc = crcFunc(slice<byte>(g.@in)); if (crc != g.ieee) {
+            t.Errorf("IEEE(%s) = 0x%x want 0x%x", g.@in, crc, g.ieee);
         }
     }
 }
@@ -91,11 +87,9 @@ internal static void testGoldenIEEE(ж<testing.T> t, Func<slice<byte>, uint32> c
 // testGoldenCastagnoli verifies that the given function returns
 // correct IEEE checksums.
 internal static void testGoldenCastagnoli(ж<testing.T> t, Func<slice<byte>, uint32> crcFunc) {
-    foreach (var (_, g) in golden) {
-        {
-            var crc = crcFunc(slice<byte>(g.@in)); if (crc != g.castagnoli) {
-                t.Errorf("Castagnoli(%s) = 0x%x want 0x%x", g.@in, crc, g.castagnoli);
-            }
+    foreach (var (_, g) in range(golden)) {
+        var crc = crcFunc(slice<byte>(g.@in)); if (crc != g.castagnoli) {
+            t.Errorf("Castagnoli(%s) = 0x%x want 0x%x", g.@in, crc, g.castagnoli);
         }
     }
 }
@@ -110,7 +104,7 @@ internal static void testCrossCheck(ж<testing.T> t, Func<uint32, slice<byte>, u
         127, 128, 129, 255, 256, 257, 300, 312, 384, 416, 448, 480,
         500, 501, 502, 503, 504, 505, 512, 513, 1000, 1024, 2000,
         4030, 4031, 4032, 4033, 4036, 4040, 4048, 4096, 5000, 10000]);
-    foreach (var (_, length) in lengths) {
+    foreach (var (_, length) in range(lengths)) {
         var p = new slice<byte>(length);
         (_, _) = rand.Read(p);
         var crcInit = (uint32)rand.Int63();
@@ -139,7 +133,7 @@ private static readonly @string castagnoliˢᵇ = "Castagnoli"u8;
 
 public static void TestGoldenMarshal(ж<testing.T> t) {
     t.Run(ieeeˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, g) in golden) {
+        foreach (var (_, g) in range(golden)) {
             var h = New(IEEETable);
             var h2 = New(IEEETable);
 
@@ -168,11 +162,9 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
                 continue;
             }
 
-            {
-                var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
-                    tΔ1.Errorf("could not unmarshal: %v", errΔ1);
-                    continue;
-                }
+            var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
+                tΔ1.Errorf("could not unmarshal: %v", errΔ1);
+                continue;
             }
 
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
@@ -185,7 +177,7 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
     });
     t.Run(castagnoliˢ, (ж<testing.T> tΔ2) => {
         var table = MakeTable(Castagnoli);
-        foreach (var (_, g) in golden) {
+        foreach (var (_, g) in range(golden)) {
             var h = New(table);
             var h2 = New(table);
 
@@ -214,11 +206,9 @@ public static void TestGoldenMarshal(ж<testing.T> t) {
                 continue;
             }
 
-            {
-                var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
-                    tΔ2.Errorf("could not unmarshal: %v", errΔ1);
-                    continue;
-                }
+            var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != nil) {
+                tΔ2.Errorf("could not unmarshal: %v", errΔ1);
+                continue;
             }
 
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
@@ -240,10 +230,8 @@ public static void TestMarshalTableMismatch(ж<testing.T> t) {
         t.Errorf("could not marshal: %v", err);
     }
 
-    {
-        var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == nil) {
-            t.Errorf("no error when one was expected");
-        }
+    var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == nil) {
+        t.Errorf("no error when one was expected");
     }
 }
 
@@ -256,7 +244,7 @@ public static void TestSlicing(ж<testing.T> t) {
     testGoldenCastagnoli(t, (slice<byte> b) => slicingUpdate(0, Ꮡtab.ValueSlot, b));
 
     // Cross-check various polys against the simple algorithm.
-    foreach (var (_, poly) in slice<uint32>([IEEE, Castagnoli, Koopman, 0xD5828281U])) {
+    foreach (var (_, poly) in range(slice<uint32>([IEEE, Castagnoli, Koopman, 0xD5828281U]))) {
         var t1 = simpleMakeTable(poly);
         var t1ʗ1 = t1;
         var f1 = (uint32 crc, slice<byte> b) => simpleUpdate(crc, ref (t1ʗ1).DerefOrNull(), b);
@@ -358,7 +346,7 @@ public static partial void BenchmarkCRC32(ж<testing.B> b) {
 
 internal static Action<ж<testing.B>> benchmarkAll(hash.Hash32 h) {
     return (ж<testing.B> b) => {
-        foreach (var (_, size) in slice<nint>([15, 40, 512, 1 << 10, 4 << 10, 32 << 10])) {
+        foreach (var (_, size) in range(slice<nint>([15, 40, 512, 1 << 10, 4 << 10, 32 << 10]))) {
             @string name = fmt.Sprint(size);
             if (size >= 1024) {
                 name = fmt.Sprintf("%dkB"u8, size / 1024);
@@ -381,7 +369,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, hash.Hash32 h, int64 n, int64
     b.SetBytes(n);
     var data = new slice<byte>((nint)(n + alignment));
     data = data.slice((nint)(alignment));
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = (byte)i;
     }
     var @in = new slice<byte>(0, h.Size());

@@ -89,7 +89,7 @@ public static void TestDetectInMemoryReaders(ж<testing.T> t) {
         new(io.NopCloser(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default))), true),
         new(io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))), true)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var got = isKnownInMemoryReader(tt.r);
         if (got != tt.want) {
             t.Errorf("%d: got = %v; want %v", i, got, tt.want);
@@ -145,15 +145,11 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
         }
 
         // Write some bytes to the file to enable reading.
-        {
-            var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != nil) {
-                return (default, default, fmt.Errorf("failed to write data to file: %v"u8, errΔ1));
-            }
+        var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != nil) {
+            return (default, default, fmt.Errorf("failed to write data to file: %v"u8, errΔ1));
         }
-        {
-            var (_, errΔ2) = f.Seek(0, 0); if (errΔ2 != nil) {
-                return (default, default, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
-            }
+        var (_, errΔ2) = f.Seek(0, 0); if (errΔ2 != nil) {
+            return (default, default, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
         }
 
         var fʗ1 = f;
@@ -209,7 +205,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
             name: "file, chunked",
             method: "PUT",
             bodyFunc: newFileFunc,
-            transferEncoding: slice<@string>(["chunked"]),
+            transferEncoding: ["chunked"],
             expectedWrite: true
         ),
         new(
@@ -249,12 +245,12 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
             name: "buffer, chunked",
             method: "PUT",
             bodyFunc: newBufferFunc,
-            transferEncoding: slice<@string>(["chunked"]),
+            transferEncoding: ["chunked"],
             expectedWrite: true
         )
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tc = ref heap(new TestTransferWriterWriteBodyReaderTypes_cases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -276,10 +272,8 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
                     TransferEncoding: tcʗ1.transferEncoding
                 ));
 
-                {
-                    var errΔ1 = tw.writeBody(new http_internal_test_package.mockTransferWriterжWriter(mw)); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = tw.writeBody(new http_internal_test_package.mockTransferWriterжWriter(mw)); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
 
                 if (tcʗ1.expectedReader != nil) {
@@ -324,36 +318,36 @@ internal partial struct TestParseTransferEncoding_tests /*dyn*/ {
 public static void TestParseTransferEncoding(ж<testing.T> t) {
     var tests = slice<TestParseTransferEncoding_tests>([
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["fugazi"])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["fugazi"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""fugazi""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked, chunked", "identity", "chunked"])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, chunked", "identity", "chunked"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked, chunked"" ""identity"" ""chunked""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>([""])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = [""]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: """"")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked, identity"])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, identity"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""chunked, identity""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked", "identity"])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked", "identity"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked"" ""identity""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>([((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = [((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""\vchunked""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = slice<@string>(["chunked"])}),
+            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked"]}),
             wantErr: default
         )
     ]);
 
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var tr = Ꮡ(new transferReader(
             Header: tt.hdr,
             ProtoMajor: 1,
@@ -401,11 +395,9 @@ public static void TestParseContentLength(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, tt) in tests) {
-        {
-            var (_, gotErr) = parseContentLength(slice<@string>([tt.cl])); if (!reflect.DeepEqual(gotErr, tt.wantErr)) {
-                t.Errorf("%q:\n\tgot=%v\n\twant=%v", tt.cl, gotErr, tt.wantErr);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        var (_, gotErr) = parseContentLength([tt.cl]); if (!reflect.DeepEqual(gotErr, tt.wantErr)) {
+            t.Errorf("%q:\n\tgot=%v\n\twant=%v", tt.cl, gotErr, tt.wantErr);
         }
     }
 }

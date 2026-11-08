@@ -14,8 +14,6 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
 using math;
 using static go.context_internal_test_package;
@@ -27,15 +25,12 @@ partial class context_test_package {
 public static void TestParentFinishesChild(ж<testing.T> t) {
     context_internal_test_package.XTestParentFinishesChild(new context_test_package.testing_TжtestingT(t)); // uses unexported context types
 }
-
 public static void TestChildFinishesFirst(ж<testing.T> t) {
     context_internal_test_package.XTestChildFinishesFirst(new context_test_package.testing_TжtestingT(t)); // uses unexported context types
 }
-
 public static void TestCancelRemoves(ж<testing.T> t) {
     context_internal_test_package.XTestCancelRemoves(new context_test_package.testing_TжtestingT(t)); // uses unexported context types
 }
-
 public static void TestCustomContextGoroutines(ж<testing.T> t) {
     context_internal_test_package.XTestCustomContextGoroutines(new context_test_package.testing_TжtestingT(t)); // reads the context.goroutines counter
 }
@@ -65,7 +60,6 @@ internal static time.Duration quiescent(ж<testing.T> Ꮡt) {
     time.Duration arbitraryCleanupMargin = /* 1 * time.Second */ 1000000000;
     return time.Until(deadline) - arbitraryCleanupMargin;
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextBackgroundˢ => ref contextBackgroundˢᵇ;
 private static readonly @string contextBackgroundˢᵇ = "context.Background"u8;
@@ -84,11 +78,9 @@ public static void TestBackground(ж<testing.T> t) {
     default: {
         break;
     }}
-    {
-        @string got = fmt.Sprint(c);
-        @string want = contextBackgroundˢ; if (got != want) {
-            t.Errorf("Background().String() = %q want %q", got, want);
-        }
+    @string got = fmt.Sprint(c);
+    @string want = contextBackgroundˢ; if (got != want) {
+        t.Errorf("Background().String() = %q want %q", got, want);
     }
 }
 
@@ -110,11 +102,9 @@ public static void TestTODO(ж<testing.T> t) {
     default: {
         break;
     }}
-    {
-        @string got = fmt.Sprint(c);
-        @string want = contextTodoˢ; if (got != want) {
-            t.Errorf("TODO().String() = %q want %q", got, want);
-        }
+    @string got = fmt.Sprint(c);
+    @string want = contextTodoˢ; if (got != want) {
+        t.Errorf("TODO().String() = %q want %q", got, want);
     }
 }
 
@@ -125,27 +115,21 @@ private static readonly @string contextBackgroundˢ2ᵇ = "context.Background.Wi
 public static void TestWithCancel(ж<testing.T> t) {
     var (c1, cancel) = WithCancel(Background());
 
-    {
-        @string got = fmt.Sprint(c1);
-        @string want = contextBackgroundˢ2; if (got != want) {
-            t.Errorf("c1.String() = %q want %q", got, want);
-        }
+    @string got = fmt.Sprint(c1);
+    @string want = contextBackgroundˢ2; if (got != want) {
+        t.Errorf("c1.String() = %q want %q", got, want);
     }
 
     var o = new otherContext(c1);
     var (c2, _) = WithCancel(o);
     var contexts = slice<context.Context>([c1, o, c2]);
 
-    foreach (var (i, c) in contexts) {
-        {
-            var d = c.Done(); if (d == nil) {
-                t.Errorf("c[%d].Done() == %v want non-nil", i, d);
-            }
+    foreach (var (i, c) in range(contexts)) {
+        var d = c.Done(); if (d == nil) {
+            t.Errorf("c[%d].Done() == %v want non-nil", i, d);
         }
-        {
-            var e = c.Err(); if (e != nil) {
-                t.Errorf("c[%d].Err() == %v want nil", i, e);
-            }
+        var e = c.Err(); if (e != nil) {
+            t.Errorf("c[%d].Err() == %v want nil", i, e);
         }
 
         var selᴛ11 = c.Done();
@@ -160,7 +144,7 @@ public static void TestWithCancel(ж<testing.T> t) {
     }
 
     cancel(); // Should propagate synchronously.
-    foreach (var (i, c) in contexts) {
+    foreach (var (i, c) in range(contexts)) {
         var selᴛ12 = c.Done();
         switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
         case 0 when selᴛ12.ꟷᐳ(out _): {
@@ -170,10 +154,8 @@ public static void TestWithCancel(ж<testing.T> t) {
             t.Errorf("<-c[%d].Done() blocked, but shouldn't have", i);
             break;
         }}
-        {
-            var e = c.Err(); if (!AreEqual(e, Canceled)) {
-                t.Errorf("c[%d].Err() == %v want %v", i, e, Canceled);
-            }
+        var e = c.Err(); if (!AreEqual(e, Canceled)) {
+            t.Errorf("c[%d].Err() == %v want %v", i, e, Canceled);
         }
     }
 }
@@ -196,10 +178,8 @@ internal static void testDeadline(context.Context c, @string name, ж<testing.T>
         case 1 when selᴛ14.ꟷᐳ(out _): {
             break;
         }}
-        {
-            var e = c.Err(); if (!AreEqual(e, DeadlineExceeded)) {
-                t.Errorf("%s: c.Err() == %v; want %v", name, e, DeadlineExceeded);
-            }
+        var e = c.Err(); if (!AreEqual(e, DeadlineExceeded)) {
+            t.Errorf("%s: c.Err() == %v; want %v", name, e, DeadlineExceeded);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -224,11 +204,9 @@ public static void TestDeadline(ж<testing.T> t) {
     t.Parallel();
 
     var (c, _) = WithDeadline(Background(), time.Now().Add(shortDuration));
-    {
-        @string got = fmt.Sprint(c);
-        @string prefix = contextBackgroundˢ3; if (!strings.HasPrefix(got, prefix)) {
-            t.Errorf("c.String() = %q want prefix %q", got, prefix);
-        }
+    @string got = fmt.Sprint(c);
+    @string prefix = contextBackgroundˢ3; if (!strings.HasPrefix(got, prefix)) {
+        t.Errorf("c.String() = %q want prefix %q", got, prefix);
     }
     testDeadline(c, withDeadlineˢ, t);
 
@@ -260,11 +238,9 @@ public static void TestTimeout(ж<testing.T> t) {
     t.Parallel();
 
     var (c, _) = WithTimeout(Background(), shortDuration);
-    {
-        @string got = fmt.Sprint(c);
-        @string prefix = contextBackgroundˢ3; if (!strings.HasPrefix(got, prefix)) {
-            t.Errorf("c.String() = %q want prefix %q", got, prefix);
-        }
+    @string got = fmt.Sprint(c);
+    @string prefix = contextBackgroundˢ3; if (!strings.HasPrefix(got, prefix)) {
+        t.Errorf("c.String() = %q want prefix %q", got, prefix);
     }
     testDeadline(c, withTimeoutˢ, t);
 
@@ -292,25 +268,18 @@ public static void TestCanceledTimeout(ж<testing.T> t) {
         t.Errorf("<-c.Done() blocked, but shouldn't have");
         break;
     }}
-    {
-        var e = c.Err(); if (!AreEqual(e, Canceled)) {
-            t.Errorf("c.Err() == %v want %v", e, Canceled);
-        }
+    var e = c.Err(); if (!AreEqual(e, Canceled)) {
+        t.Errorf("c.Err() == %v want %v", e, Canceled);
     }
 }
 
 partial struct key1 /*num:nint*/;
-
 partial struct key2 /*num:nint*/;
 
-internal static @string String(this key2 k) {
-    return fmt.Sprintf("%[1]T(%[1]d)"u8, k);
-}
+internal static @string String(this key2 k) { return fmt.Sprintf("%[1]T(%[1]d)"u8, k); }
 
 internal static key1 k1 = ((key1)1);
-
 internal static key2 k2 = ((key2)1); // same int as k1, different type
-
 internal static key2 k3 = ((key2)3); // same type as k2, different int
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -422,7 +391,7 @@ public static void TestAllocs(ж<testing.T> t) {
             var bgʗ3 = bg;
 
             var bgʗ4 = bg;
-    foreach (var (_, test) in slice<TestAllocs_type>([
+    foreach (var (_, test) in range(slice<TestAllocs_type>([
         new(
             desc: "Background()",
             f: () => {
@@ -469,7 +438,7 @@ public static void TestAllocs(ж<testing.T> t) {
             limit: 8D,
             gccgoLimit: 25D
         )
-    ])) {
+    ]))) {
         var limit = test.limit;
         if (Δruntime.Compiler == "gccgo") {
             // gccgo does not yet do escape analysis.
@@ -480,10 +449,8 @@ public static void TestAllocs(ж<testing.T> t) {
         if (testing.Short()) {
             numRuns = 10;
         }
-        {
-            var n = testing.AllocsPerRun(numRuns, test.f); if (n > limit) {
-                t.Errorf("%s allocs = %f want %d", test.desc, n, (nint)limit);
-            }
+        var n = testing.AllocsPerRun(numRuns, test.f); if (n > limit) {
+            t.Errorf("%s allocs = %f want %d", test.desc, n, (nint)limit);
         }
     }
 }
@@ -666,11 +633,9 @@ internal static void testLayers(ж<testing.T> t, int64 seed, bool testTimeout) {
         var errorfʗ1 = errorf;
         var valsʗ1 = vals;
         void checkValues(@string when) {
-            foreach (var (_, key) in valsʗ1) {
-                {
-                    var val = ctxʗ1.Value(key.OrTypedNil())._<ж<testLayers_value>>(); if (key != val) {
-                        errorfʗ1("%s: ctx.Value(%p) = %p want %p", when, key.OrTypedNil(), val.OrTypedNil(), key.OrTypedNil());
-                    }
+            foreach (var (_, key) in range(valsʗ1)) {
+                var val = ctxʗ1.Value(key.OrTypedNil())._<ж<testLayers_value>>(); if (key != val) {
+                    errorfʗ1("%s: ctx.Value(%p) = %p want %p", when, key.OrTypedNil(), val.OrTypedNil(), key.OrTypedNil());
                 }
             }
         }
@@ -685,11 +650,9 @@ internal static void testLayers(ж<testing.T> t, int64 seed, bool testTimeout) {
                 break;
             }}
         }
-        {
-            @string s = fmt.Sprint(ctx);
-            @string prefixΔ1 = contextBackgroundˢ7; if (!strings.HasPrefix(s, prefixΔ1)) {
-                t.Errorf("ctx.String() = %q want prefix %q", s, prefixΔ1);
-            }
+        @string s = fmt.Sprint(ctx);
+        @string prefixΔ1 = contextBackgroundˢ7; if (!strings.HasPrefix(s, prefixΔ1)) {
+            t.Errorf("ctx.String() = %q want prefix %q", s, prefixΔ1);
         }
         t.Log(ctx);
         checkValues(beforeCancelˢ);
@@ -794,11 +757,9 @@ public static void TestWithValueChecksKey(ж<testing.T> t) {
     panicVal = recoveredValue(() => {
         _ = WithValue(Background(), default, barˢ);
     });
-    {
-        @string got = fmt.Sprint(panicVal);
-        @string want = nilKeyˢ; if (got != want) {
-            t.Errorf("panic = %q; want %q", got, want);
-        }
+    @string got = fmt.Sprint(panicVal);
+    @string want = nilKeyˢ; if (got != want) {
+        t.Errorf("panic = %q; want %q", got, want);
     }
 }
 
@@ -857,7 +818,6 @@ public static void TestDeadlineExceededSupportsTimeout(ж<testing.T> t) {
         t.Fatal(wrongValueForTimeoutˢ);
     }
 }
-
 internal partial struct TestCause_type /*dyn*/ {
     internal @string name;
     internal Func<context.Context> ctx;
@@ -909,7 +869,7 @@ public static void TestCause(ж<testing.T> t) {
             var parentCauseʗ6 = parentCause;
 
             var parentCauseʗ7 = parentCause;
-    foreach (var (_, vᴛ1) in slice<TestCause_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestCause_type>([
         new(
             name: "Background",
             ctx: Background,
@@ -1153,7 +1113,7 @@ public static void TestCause(ж<testing.T> t) {
             // to tell which was canceled first and returns the parent's cause.
             cause: parentCause
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestCause_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1190,13 +1150,11 @@ public static partial void TestCauseRace(ж<testing.T> t) {
     for (;;) {
         // Poll Cause, rather than waiting for Done, to test that
         // access to the underlying cause is synchronized properly.
-        {
-            var err = Cause(ctx); if (err != nil) {
-                if (!AreEqual(err, cause)) {
-                    t.Errorf("Cause returned %v, want %v", err, cause);
-                }
-                break;
+        var err = Cause(ctx); if (err != nil) {
+            if (!AreEqual(err, cause)) {
+                t.Errorf("Cause returned %v, want %v", err, cause);
             }
+            break;
         }
         Δruntime.Gosched();
     }
@@ -1207,25 +1165,17 @@ public static void TestWithoutCancel(ж<testing.T> t) {
     @string value = valueˢ;
     var ctx = WithValue(Background(), key, value);
     ctx = WithoutCancel(ctx);
-    {
-        var (d, ok) = ctx.Deadline(); if (!d.IsZero() || ok != false) {
-            t.Errorf("ctx.Deadline() = %v, %v want zero, false", d, ok);
-        }
+    var (d, ok) = ctx.Deadline(); if (!d.IsZero() || ok != false) {
+        t.Errorf("ctx.Deadline() = %v, %v want zero, false", d, ok);
     }
-    {
-        var done = ctx.Done(); if (done != nil) {
-            t.Errorf("ctx.Deadline() = %v want nil", done);
-        }
+    var done = ctx.Done(); if (done != nil) {
+        t.Errorf("ctx.Deadline() = %v want nil", done);
     }
-    {
-        var err = ctx.Err(); if (err != nil) {
-            t.Errorf("ctx.Err() = %v want nil", err);
-        }
+    var err = ctx.Err(); if (err != nil) {
+        t.Errorf("ctx.Err() = %v want nil", err);
     }
-    {
-        var v = ctx.Value(key); if (!AreEqual(v, value)) {
-            t.Errorf("ctx.Value(%q) = %q want %q", key, v, value);
-        }
+    var v = ctx.Value(key); if (!AreEqual(v, value)) {
+        t.Errorf("ctx.Value(%q) = %q want %q", key, v, value);
     }
 }
 

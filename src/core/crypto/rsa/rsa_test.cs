@@ -42,7 +42,7 @@ public static void TestKeyGeneration(ж<testing.T> t) {
     if (testing.Short()) {
         sizes = sizes[..2];
     }
-    foreach (var (_, size) in sizes) {
+    foreach (var (_, size) in range(sizes)) {
         t.Run(fmt.Sprintf("%d"u8, size), (ж<testing.T> tΔ1) => {
             if (size < 1024) {
                 var (_, errΔ1) = GenerateKey(rand.Reader, size);
@@ -55,10 +55,8 @@ public static void TestKeyGeneration(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Errorf("GenerateKey(%d): %v", size, err);
             }
-            {
-                nint bits = priv.N.BitLen(); if (bits != size) {
-                    tΔ1.Errorf("key too short (%d vs %d)", bits, size);
-                }
+            nint bits = priv.N.BitLen(); if (bits != size) {
+                tΔ1.Errorf("key too short (%d vs %d)", bits, size);
             }
             testKeyBasics(tΔ1, priv);
         });
@@ -138,10 +136,8 @@ public static void TestTinyKeyGeneration(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("GenerateKey(32): %v", err);
         }
-        {
-            var errΔ1 = k.Validate(); if (errΔ1 != nil) {
-                t.Fatalf("Validate(32): %v", errΔ1);
-            }
+        var errΔ1 = k.Validate(); if (errΔ1 != nil) {
+            t.Fatalf("Validate(32): %v", errΔ1);
         }
     }
 }
@@ -176,10 +172,8 @@ internal static void testKeyBasics(ж<testing.T> t, ж<rsa.PrivateKey> Ꮡpriv) 
             }
         }, ref ᒐ);
 
-        {
-            var errΔ1 = priv.Validate(); if (errΔ1 != nil) {
-                t.Errorf("Validate() failed: %s", errΔ1);
-            }
+        var errΔ1 = priv.Validate(); if (errΔ1 != nil) {
+            t.Errorf("Validate() failed: %s", errΔ1);
         }
         if (priv.D.Cmp(priv.N) > 0) {
             t.Errorf("private exponent too large");
@@ -236,7 +230,7 @@ internal static ж<bool> allFlag = flag.Bool("all", false, "test all key sizes u
 public static void TestEverything(ж<testing.T> t) {
     if (testing.Short()) {
         // Skip key generation, but still test real sizes.
-        foreach (var (_, key) in slice<ж<rsa.PrivateKey>>([test1024Key, test2048Key])) {
+        foreach (var (_, key) in range(slice<ж<rsa.PrivateKey>>([test1024Key, test2048Key]))) {
             var keyʗ1 = key;
             t.Run(fmt.Sprintf("%d"u8, key.N.BitLen()), (ж<testing.T> tΔ1) => {
                 tΔ1.Parallel();
@@ -260,10 +254,8 @@ public static void TestEverything(ж<testing.T> t) {
             if (err != nil) {
                 tΔ2.Fatalf("GenerateKey(%d): %v", size, err);
             }
-            {
-                nint bits = priv.N.BitLen(); if (bits != size) {
-                    tΔ2.Errorf("key too short (%d vs %d)", bits, size);
-                }
+            nint bits = priv.N.BitLen(); if (bits != size) {
+                tΔ2.Errorf("key too short (%d vs %d)", bits, size);
             }
             testEverything(tΔ2, priv);
         });
@@ -414,7 +406,7 @@ internal static void testEverything(ж<testing.T> t, ж<rsa.PrivateKey> Ꮡpriv)
 
     // Check that an input bigger than the modulus is handled correctly,
     // whether it is longer than the byte size of the modulus or not.
-    var c = bytes.Repeat(slice<byte>([0xff]), Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey).Size());
+    var c = bytes.Repeat([0xff], Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey).Size());
     err = VerifyPSS(Ꮡpriv.ᏑPublicKey, crypto.SHA256, hash[..], c, opts);
     if (err == nil) {
         t.Errorf("VerifyPSS accepted a large signature");
@@ -507,9 +499,7 @@ public static partial void TestKeyTooSmall(ж<testing.T> t) {
     checkErr(DecryptPKCS1v15SessionKey(default, test512Key, buf, buf));
 }
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY"); }
 
 internal static ж<rsa.PrivateKey> parseKey(@string s) {
     var (p, _) = pem.Decode(slice<byte>(s));
@@ -923,10 +913,8 @@ public static void BenchmarkParsePKCS8PrivateKey(ж<testing.B> b) {
         var (p, _) = pem.Decode(slice<byte>(test2048KeyPEM));
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            {
-                var (_, err) = Δx509.ParsePKCS8PrivateKey(p.Bytes); if (err != nil) {
-                    bΔ1.Fatal(err);
-                }
+            var (_, err) = Δx509.ParsePKCS8PrivateKey(p.Bytes); if (err != nil) {
+                bΔ1.Fatal(err);
             }
         }
     });
@@ -944,10 +932,8 @@ public static void BenchmarkGenerateKey(ж<testing.B> b) {
         }
         while (bΔ1.Loop()) {
             var r = Ꮡ(new testPrimeReader(primes: ((@string)primes)));
-            {
-                var (_, errΔ1) = GenerateKey(new rsa_test_package.testPrimeReaderжReader(r), 2048); if (errΔ1 != nil) {
-                    bΔ1.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = GenerateKey(new rsa_test_package.testPrimeReaderжReader(r), 2048); if (errΔ1 != nil) {
+                bΔ1.Fatal(errΔ1);
             }
         }
     });
@@ -1008,11 +994,11 @@ partial struct testEncryptOAEPStruct {
 public static void TestEncryptOAEP(ж<testing.T> t) {
     var sha1Δ1 = sha1.New();
     var n = @new<bigꓸInt>();
-    foreach (var (i, test) in testEncryptOAEPData) {
+    foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         ref var @public = ref heap<rsa.PublicKey>(new PublicKey(N: n, E: test.e), out var Ꮡpublic);
 
-        foreach (var (j, message) in test.msgs) {
+        foreach (var (j, message) in range(test.msgs)) {
             var randomSource = bytes.NewReader(message.seed);
             var (@out, err) = EncryptOAEP(sha1Δ1, new rsa_test_package.bytes_ReaderжReader(randomSource), Ꮡpublic, message.@in, default);
             if (err != nil) {
@@ -1031,14 +1017,14 @@ public static void TestDecryptOAEP(ж<testing.T> t) {
     var sha1Δ1 = sha1.New();
     var n = @new<bigꓸInt>();
     var d = @new<bigꓸInt>();
-    foreach (var (i, test) in testEncryptOAEPData) {
+    foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         d.SetString(test.d, 16);
         var @private = @new<rsa.PrivateKey>();
         @private.PublicKey = new PublicKey(N: n, E: test.e);
         @private.D = d;
 
-        foreach (var (j, message) in test.msgs) {
+        foreach (var (j, message) in range(test.msgs)) {
             var (@out, err) = DecryptOAEP(sha1Δ1, default, @private, message.@out, default);
             if (err != nil) {
                 t.Errorf("#%d,%d error: %s", i, j, err);
@@ -1089,14 +1075,14 @@ public static void TestEncryptDecryptOAEP(ж<testing.T> t) {
     var sha256Δ1 = sha256.New();
     var n = @new<bigꓸInt>();
     var d = @new<bigꓸInt>();
-    foreach (var (i, test) in testEncryptOAEPData) {
+    foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         d.SetString(test.d, 16);
         var priv = @new<rsa.PrivateKey>();
         priv.PublicKey = new PublicKey(N: n, E: test.e);
         priv.D = d;
 
-        foreach (var (j, message) in test.msgs) {
+        foreach (var (j, message) in range(test.msgs)) {
             var label = slice<byte>(fmt.Sprintf("hi#%d"u8, j));
             var (enc, err) = EncryptOAEP(sha256Δ1, rand.Reader, priv.ᏑPublicKey, message.@in, label);
             if (err != nil) {
@@ -1146,24 +1132,24 @@ public static void TestEncryptDecryptOAEP(ж<testing.T> t) {
 }
 
 // testEncryptOAEPData contains a subset of the vectors from RSA's "Test vectors for RSA-OAEP".
-internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = slice<testEncryptOAEPStruct>([
+internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = [
     // Key 1
     new("a8b3b284af8eb50b387034a860f146c4919f318763cd6c5598c8ae4811a1e0abc4c7e0b082d693a5e7fced675cf4668512772c0cbc64a742c6c630f533c8cc72f62ae833c40bf25842e984bb78bdbf97c0107d55bdb662f5c4e0fab9845cb5148ef7392dd3aaff93ae1e6b667bb3d4247616d4f5ba10d4cfd226de88d39f16fb",
         65537,
         "53339cfdb79fc8466a655c7316aca85c55fd8f6dd898fdaf119517ef4f52e8fd8e258df93fee180fa0e4ab29693cd83b152a553d4ac4d1812b8b9fa5af0e7f55fe7304df41570926f3311f15c4d65a732c483116ee3d3d2d0af3549ad9bf7cbfb78ad884f84d5beb04724dc7369b31def37d0cf539e9cfcdd3de653729ead5d1",
-        slice<testEncryptOAEPMessage>([
+        [
             // Example 1.1
             new(
-                slice<byte>([0x66, 0x28, 0x19, 0x4e, 0x12, 0x07, 0x3d, 0xb0,
+                [0x66, 0x28, 0x19, 0x4e, 0x12, 0x07, 0x3d, 0xb0,
                     0x3b, 0xa9, 0x4c, 0xda, 0x9e, 0xf9, 0x53, 0x23, 0x97,
                     0xd5, 0x0d, 0xba, 0x79, 0xb9, 0x87, 0x00, 0x4a, 0xfe,
                     0xfe, 0x34
-                ]),
-                slice<byte>([0x18, 0xb7, 0x76, 0xea, 0x21, 0x06, 0x9d, 0x69,
+                ],
+                [0x18, 0xb7, 0x76, 0xea, 0x21, 0x06, 0x9d, 0x69,
                     0x77, 0x6a, 0x33, 0xe9, 0x6b, 0xad, 0x48, 0xe1, 0xdd,
                     0xa0, 0xa5, 0xef
-                ]),
-                slice<byte>([0x35, 0x4f, 0xe6, 0x7b, 0x4a, 0x12, 0x6d, 0x5d,
+                ],
+                [0x35, 0x4f, 0xe6, 0x7b, 0x4a, 0x12, 0x6d, 0x5d,
                     0x35, 0xfe, 0x36, 0xc7, 0x77, 0x79, 0x1a, 0x3f, 0x7b,
                     0xa1, 0x3d, 0xef, 0x48, 0x4e, 0x2d, 0x39, 0x08, 0xaf,
                     0xf7, 0x22, 0xfa, 0xd4, 0x68, 0xfb, 0x21, 0x69, 0x6d,
@@ -1178,20 +1164,20 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = slice<testEnc
                     0xa0, 0xd9, 0xfa, 0x1e, 0x8c, 0x40, 0x24, 0x30, 0x9c,
                     0xe1, 0xec, 0xcc, 0xb5, 0x21, 0x00, 0x35, 0xd4, 0x7a,
                     0xc7, 0x2e, 0x8a
-                ])
+                ]
             ),
             // Example 1.2
             new(
-                slice<byte>([0x75, 0x0c, 0x40, 0x47, 0xf5, 0x47, 0xe8, 0xe4,
+                [0x75, 0x0c, 0x40, 0x47, 0xf5, 0x47, 0xe8, 0xe4,
                     0x14, 0x11, 0x85, 0x65, 0x23, 0x29, 0x8a, 0xc9, 0xba,
                     0xe2, 0x45, 0xef, 0xaf, 0x13, 0x97, 0xfb, 0xe5, 0x6f,
                     0x9d, 0xd5
-                ]),
-                slice<byte>([0x0c, 0xc7, 0x42, 0xce, 0x4a, 0x9b, 0x7f, 0x32,
+                ],
+                [0x0c, 0xc7, 0x42, 0xce, 0x4a, 0x9b, 0x7f, 0x32,
                     0xf9, 0x51, 0xbc, 0xb2, 0x51, 0xef, 0xd9, 0x25, 0xfe,
                     0x4f, 0xe3, 0x5f
-                ]),
-                slice<byte>([0x64, 0x0d, 0xb1, 0xac, 0xc5, 0x8e, 0x05, 0x68,
+                ],
+                [0x64, 0x0d, 0xb1, 0xac, 0xc5, 0x8e, 0x05, 0x68,
                     0xfe, 0x54, 0x07, 0xe5, 0xf9, 0xb7, 0x01, 0xdf, 0xf8,
                     0xc3, 0xc9, 0x1e, 0x71, 0x6c, 0x53, 0x6f, 0xc7, 0xfc,
                     0xec, 0x6c, 0xb5, 0xb7, 0x1c, 0x11, 0x65, 0x98, 0x8d,
@@ -1206,23 +1192,23 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = slice<testEnc
                     0x5a, 0x35, 0x2d, 0x5e, 0xd1, 0x15, 0x91, 0x2d, 0xf6,
                     0x96, 0xff, 0xe0, 0x70, 0x29, 0x32, 0x94, 0x6d, 0x71,
                     0x49, 0x2b, 0x44
-                ])
+                ]
             ),
             // Example 1.3
             new(
-                slice<byte>([0xd9, 0x4a, 0xe0, 0x83, 0x2e, 0x64, 0x45, 0xce,
+                [0xd9, 0x4a, 0xe0, 0x83, 0x2e, 0x64, 0x45, 0xce,
                     0x42, 0x33, 0x1c, 0xb0, 0x6d, 0x53, 0x1a, 0x82, 0xb1,
                     0xdb, 0x4b, 0xaa, 0xd3, 0x0f, 0x74, 0x6d, 0xc9, 0x16,
                     0xdf, 0x24, 0xd4, 0xe3, 0xc2, 0x45, 0x1f, 0xff, 0x59,
                     0xa6, 0x42, 0x3e, 0xb0, 0xe1, 0xd0, 0x2d, 0x4f, 0xe6,
                     0x46, 0xcf, 0x69, 0x9d, 0xfd, 0x81, 0x8c, 0x6e, 0x97,
                     0xb0, 0x51
-                ]),
-                slice<byte>([0x25, 0x14, 0xdf, 0x46, 0x95, 0x75, 0x5a, 0x67,
+                ],
+                [0x25, 0x14, 0xdf, 0x46, 0x95, 0x75, 0x5a, 0x67,
                     0xb2, 0x88, 0xea, 0xf4, 0x90, 0x5c, 0x36, 0xee, 0xc6,
                     0x6f, 0xd2, 0xfd
-                ]),
-                slice<byte>([0x42, 0x37, 0x36, 0xed, 0x03, 0x5f, 0x60, 0x26,
+                ],
+                [0x42, 0x37, 0x36, 0xed, 0x03, 0x5f, 0x60, 0x26,
                     0xaf, 0x27, 0x6c, 0x35, 0xc0, 0xb3, 0x74, 0x1b, 0x36,
                     0x5e, 0x5f, 0x76, 0xca, 0x09, 0x1b, 0x4e, 0x8c, 0x29,
                     0xe2, 0xf0, 0xbe, 0xfe, 0xe6, 0x03, 0x59, 0x5a, 0xa8,
@@ -1237,27 +1223,27 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = slice<testEnc
                     0x7d, 0x62, 0x9b, 0x02, 0xd8, 0xf8, 0x62, 0x5c, 0xa3,
                     0x83, 0x36, 0x24, 0xd4, 0x80, 0x0f, 0xb0, 0x81, 0xb1,
                     0xcf, 0x94, 0xeb
-                ])
+                ]
             )
-        ])
+        ]
     ),
     // Key 10
     new("ae45ed5601cec6b8cc05f803935c674ddbe0d75c4c09fd7951fc6b0caec313a8df39970c518bffba5ed68f3f0d7f22a4029d413f1ae07e4ebe9e4177ce23e7f5404b569e4ee1bdcf3c1fb03ef113802d4f855eb9b5134b5a7c8085adcae6fa2fa1417ec3763be171b0c62b760ede23c12ad92b980884c641f5a8fac26bdad4a03381a22fe1b754885094c82506d4019a535a286afeb271bb9ba592de18dcf600c2aeeae56e02f7cf79fc14cf3bdc7cd84febbbf950ca90304b2219a7aa063aefa2c3c1980e560cd64afe779585b6107657b957857efde6010988ab7de417fc88d8f384c4e6e72c3f943e0c31c0c4a5cc36f879d8a3ac9d7d59860eaada6b83bb",
         65537,
         "056b04216fe5f354ac77250a4b6b0c8525a85c59b0bd80c56450a22d5f438e596a333aa875e291dd43f48cb88b9d5fc0d499f9fcd1c397f9afc070cd9e398c8d19e61db7c7410a6b2675dfbf5d345b804d201add502d5ce2dfcb091ce9997bbebe57306f383e4d588103f036f7e85d1934d152a323e4a8db451d6f4a5b1b0f102cc150e02feee2b88dea4ad4c1baccb24d84072d14e1d24a6771f7408ee30564fb86d4393a34bcf0b788501d193303f13a2284b001f0f649eaf79328d4ac5c430ab4414920a9460ed1b7bc40ec653e876d09abc509ae45b525190116a0c26101848298509c1c3bf3a483e7274054e15e97075036e989f60932807b5257751e79",
-        slice<testEncryptOAEPMessage>([
+        [
             // Example 10.1
             new(
-                slice<byte>([0x8b, 0xba, 0x6b, 0xf8, 0x2a, 0x6c, 0x0f, 0x86,
+                [0x8b, 0xba, 0x6b, 0xf8, 0x2a, 0x6c, 0x0f, 0x86,
                     0xd5, 0xf1, 0x75, 0x6e, 0x97, 0x95, 0x68, 0x70, 0xb0,
                     0x89, 0x53, 0xb0, 0x6b, 0x4e, 0xb2, 0x05, 0xbc, 0x16,
                     0x94, 0xee
-                ]),
-                slice<byte>([0x47, 0xe1, 0xab, 0x71, 0x19, 0xfe, 0xe5, 0x6c,
+                ],
+                [0x47, 0xe1, 0xab, 0x71, 0x19, 0xfe, 0xe5, 0x6c,
                     0x95, 0xee, 0x5e, 0xaa, 0xd8, 0x6f, 0x40, 0xd0, 0xaa,
                     0x63, 0xbd, 0x33
-                ]),
-                slice<byte>([0x53, 0xea, 0x5d, 0xc0, 0x8c, 0xd2, 0x60, 0xfb,
+                ],
+                [0x53, 0xea, 0x5d, 0xc0, 0x8c, 0xd2, 0x60, 0xfb,
                     0x3b, 0x85, 0x85, 0x67, 0x28, 0x7f, 0xa9, 0x15, 0x52,
                     0xc3, 0x0b, 0x2f, 0xeb, 0xfb, 0xa2, 0x13, 0xf0, 0xae,
                     0x87, 0x70, 0x2d, 0x06, 0x8d, 0x19, 0xba, 0xb0, 0x7f,
@@ -1286,11 +1272,11 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = slice<testEnc
                     0x95, 0x52, 0x01, 0x68, 0x24, 0xf0, 0x54, 0xbf, 0x4d,
                     0x3c, 0x8c, 0x90, 0xa9, 0x7b, 0xb6, 0xb6, 0x55, 0x32,
                     0x84, 0xeb, 0x42, 0x9f, 0xcc
-                ])
+                ]
             )
-        ])
+        ]
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string beginRsaTestingKeyˢ2 => ref beginRsaTestingKeyˢ2ᵇ;

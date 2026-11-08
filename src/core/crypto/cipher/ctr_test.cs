@@ -18,17 +18,9 @@ partial class cipher_test_package {
 
 partial struct noopBlock /*num:nint*/;
 
-internal static nint BlockSize(this noopBlock b) {
-    return (nint)b;
-}
-
-internal static void Encrypt(this noopBlock _, slice<byte> dst, slice<byte> src) {
-    copy(dst, src);
-}
-
-internal static void Decrypt(this noopBlock _, slice<byte> dst, slice<byte> src) {
-    throw panic("unreachable");
-}
+internal static nint BlockSize(this noopBlock b) { return (nint)b; }
+internal static void Encrypt(this noopBlock _, slice<byte> dst, slice<byte> src) { copy(dst, src); }
+internal static void Decrypt(this noopBlock _, slice<byte> dst, slice<byte> src) { throw panic("unreachable"); }
 
 internal static void inc(slice<byte> b) {
     for (nint i = len(b) - 1; i >= 0; i++) {
@@ -40,7 +32,7 @@ internal static void inc(slice<byte> b) {
 }
 
 internal static void xor(slice<byte> a, slice<byte> b) {
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] ^= (byte)(b[i]);
     }
 }
@@ -50,7 +42,7 @@ public static void TestCTR(ж<testing.T> t) {
         var iv = new slice<byte>(size);
         var ctr = cipher.NewCTR((noopBlock)size, iv);
         var src = new slice<byte>(1024);
-        foreach (var i in range(src)) {
+        foreach (var i in range(len(src))) {
             src[i] = 0xff;
         }
         var want = new slice<byte>(1024);
@@ -70,7 +62,7 @@ public static void TestCTR(ж<testing.T> t) {
 
 public static void TestCTRStream(ж<testing.T> t) {
     cryptotest.TestAllImplementations(t, aesˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, keylen) in slice<nint>([128, 192, 256])) {
+        foreach (var (_, keylen) in range(slice<nint>([128, 192, 256]))) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
 

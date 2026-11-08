@@ -104,7 +104,7 @@ public static void TestReader(ж<testing.T> t) {
         input: mustLoadFile(testdataPassSawtoothBz2ˢ),
         output: func(slice<byte> () => {
             var b = new slice<byte>((1 << 20));
-            foreach (var i in range(b)) {
+            foreach (var i in range(len(b))) {
                 b[i] = (byte)i;
             }
             return b;
@@ -128,17 +128,15 @@ public static void TestReader(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var rd = NewReader(new bzip2_internal_test_package.bytes_ReaderжReader(bytes.NewReader(v.input)));
         var (buf, err) = io.ReadAll(rd);
 
-        {
-            var fail = (bool)(err != nil); if (fail != v.fail) {
-                if (fail) {
-                    t.Errorf("test %d (%s), unexpected failure: %v", i, v.desc, err);
-                } else {
-                    t.Errorf("test %d (%s), unexpected success", i, v.desc);
-                }
+        var fail = (bool)(err != nil); if (fail != v.fail) {
+            if (fail) {
+                t.Errorf("test %d (%s), unexpected failure: %v", i, v.desc, err);
+            } else {
+                t.Errorf("test %d (%s), unexpected success", i, v.desc);
             }
         }
         if (!v.fail && !bytes.Equal(buf, v.output)) {
@@ -166,17 +164,15 @@ public static void TestBitReader(ж<testing.T> t) {
         new(nbits: 1, fail: true)
     ]);
 
-    var rd = bytes.NewReader(slice<byte>([0xab, 0x12, 0x34, 0x56, 0x78, 0x71, 0x3f, 0x8d]));
+    var rd = bytes.NewReader([0xab, 0x12, 0x34, 0x56, 0x78, 0x71, 0x3f, 0x8d]);
     var br = newBitReader(new bzip2_internal_test_package.bytes_ReaderжReader(rd));
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         nint val = br.ReadBits(v.nbits);
-        {
-            var fail = (bool)(br.err != nil); if (fail != v.fail) {
-                if (fail) {
-                    t.Errorf("test %d, unexpected failure: ReadBits(%d) = %v", i, v.nbits, br.err);
-                } else {
-                    t.Errorf("test %d, unexpected success: ReadBits(%d) = nil", i, v.nbits);
-                }
+        var fail = (bool)(br.err != nil); if (fail != v.fail) {
+            if (fail) {
+                t.Errorf("test %d, unexpected failure: ReadBits(%d) = %v", i, v.nbits, br.err);
+            } else {
+                t.Errorf("test %d, unexpected success: ReadBits(%d) = nil", i, v.nbits);
             }
         }
         if (!v.fail && val != v.value) {
@@ -200,7 +196,7 @@ public static void TestMTF(ж<testing.T> t) {
     ]);
 
     var mtf = newMTFDecoderWithRange(5);
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var sym = mtf.Decode(v.idx);
         t.Log(mtf);
         if (sym != v.sym) {
@@ -212,10 +208,8 @@ public static void TestMTF(ж<testing.T> t) {
 public static void TestZeroRead(ж<testing.T> t) {
     var b = mustDecodeHex("425a6839314159265359b5aa5098000000600040000004200021008283177245385090b5aa5098");
     var r = NewReader(new bzip2_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
-    {
-        var (n, err) = r.Read(default); if (n != 0 || err != nil) {
-            t.Errorf("Read(nil) = (%d, %v), want (0, nil)", n, err);
-        }
+    var (n, err) = r.Read(default); if (n != 0 || err != nil) {
+        t.Errorf("Read(nil) = (%d, %v), want (0, nil)", n, err);
     }
 }
 
@@ -242,16 +236,8 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, slice<byte> compressed)
     }
 }
 
-public static void BenchmarkDecodeDigits(ж<testing.B> b) {
-    benchmarkDecode(b, digits);
-}
-
-public static void BenchmarkDecodeNewton(ж<testing.B> b) {
-    benchmarkDecode(b, newton);
-}
-
-public static void BenchmarkDecodeRand(ж<testing.B> b) {
-    benchmarkDecode(b, random);
-}
+public static void BenchmarkDecodeDigits(ж<testing.B> b) { benchmarkDecode(b, digits); }
+public static void BenchmarkDecodeNewton(ж<testing.B> b) { benchmarkDecode(b, newton); }
+public static void BenchmarkDecodeRand(ж<testing.B> b) { benchmarkDecode(b, random); }
 
 } // end bzip2_internal_test_package

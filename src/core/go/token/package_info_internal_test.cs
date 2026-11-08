@@ -23,9 +23,9 @@ using static go.go.token_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("position_test.cs", 280, 5, 1)]
-[assembly: GoBoundedGoroutine("position_test.cs", 725, 5, 3)]
-[assembly: GoBoundedGoroutine("position_test.cs", 738, 5, 4)]
+[assembly: GoBoundedGoroutine("position_test.cs", 274, 5, 1)]
+[assembly: GoBoundedGoroutine("position_test.cs", 715, 5, 3)]
+[assembly: GoBoundedGoroutine("position_test.cs", 728, 5, 4)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -35,10 +35,10 @@ using static go.go.token_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/token/export_test.go", "export_test.cs", "AAkSkA==")]
-[assembly: GoPositionMap("go/token/position_test.go", "position_test.cs", "ABMggoKUgpSClIIACQiCgpSCgoIACAYACiCCgoKClJSmooKCgoKUgoKCuIKCgoKmpoKCgpSCuIKClIKUgriCgoKmgoKUuICCpIKUgpSmgpSUgoKUAAkIgoKClIKCpoKCgoKCuIKCgoKmlIKCgoKUgpSCzJKCgpSAgsiCgoKCgpSCgoLOooKClIKCgoKCgqKClKaqooK8ooKUprKCgpSmggAUBoIACxSCgoKmgoKCgoKCgqiigqaCgoK4goKClIKCgpSCgpSCAAsIgoKCgpSCgoKCAA4KgoKCgoKCgpSSgIK2koKAgJKCuIKCgoKmgoKCpoKCggAMBoKqAEWUAbKSgoKClILctIKCgsqCgoKmgIKkgIKkgILIgIKkgILIgoCCpIKAgriSgoKAgraCgILWABIEgpSSgoCCyIKCgpSClIKCgpSCgqaCgoKCgoKClIKokpaSgoK4goLCgoKClIKCpqKCuIKCgoKClLiilpKCgqaSpoKCgIIACQqCgoKAgg==", "183-189:1;235-240:1;255-260:1;262-268:2;357-361:1;362-368:2;364-364:2.1;470-479:1;486-490:1;545-550:1;574-578:1;597-606:1;608-612:2;635-637:1")]
+[assembly: GoPositionMap("go/token/export_test.go", "export_test.cs", "AAkSgA==")]
+[assembly: GoPositionMap("go/token/position_test.go", "position_test.cs", "ABEggoKUgpSClIIACQiCgpSCgoIACAYACiCCgoKClJSmooKCgoKUgoKCuIKCgoKmpoKCgpSCuIKClIKUgriCgoKmgoKUuIKUgpSClKaClJSCgpQACQiCgoKUgoKmgoKCgoK4goKCgqaUgoKCgpSClILMkoKClIK4goKCgoKUgoKCzqKCgpSCgoKCgoKigpSmqqKCvKKClKaygoKUpoIAFAaCAAsUgoKCpoKCgoKCgoKoooKmgoKCuIKCgpSCgoKUgoKUggALCIKCgoKUgoKCggAOCoKCgoKCgoKUkoKmkoKAgJKCuIKCgoKmgoKCpoKCggAMBoKqAEWUAbKSgoKClILctIKCgsqCgoKmgIKkgIKkgILIgIKkgILIgoCCpIKAgriSgoKAgraCgILWABIEgpSSgoK4goKClIKUgoKClIKCpoKCgoKCgoKUgqiSlpKCgriCgsKCgoKUgoKmooK4goKCgoKUuKKWkoKCppKmgoKCAAgKgoKCgg==", "183-189:1;235-240:1;255-260:1;262-268:2;357-361:1;362-368:2;364-364:2.1;470-479:1;486-490:1;545-550:1;574-578:1;597-606:1;608-612:2;635-637:1", "", "", "", "562:25,563:17")]
 [assembly: GoPositionMap("go/token/serialize_test.go", "serialize_test.cs", "ABEi8pS4goKClIKmgoKCpoKCgpSClIKUgoKCpoKCgtzWgoKGgIKCpIKGgIKCpICCyIKClIKClIKCgoKCpg==", "70-72:1;78-80:2")]
-[assembly: GoPositionMap("go/token/token_test.go", "token_test.cs", "ABASggALILKSgII=", "27-31:1")]
+[assembly: GoPositionMap("go/token/token_test.go", "token_test.cs", "ABASggALILKSgg==", "27-31:1")]
 [assembly: GoPositionMap("go/token/tree_test.go", "tree_test.cs", "AA4cpIKCpoKCgoKCgqiSgoKCgsqCgoKClJSCgpS4goKUyoKCAAcQgoK4opI=", "76-76:1;83-85:1")]
 // </GoSourcePositionMaps>
 

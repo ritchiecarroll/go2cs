@@ -7,8 +7,6 @@ using bytes = bytes_package;
 using io = io_package;
 using net = net_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.crypto.tls_package;
 using time = time_package;
 
@@ -34,27 +32,27 @@ partial struct paddingTestsᴛ1 /*dyn*/ {
     internal bool good;
     internal nint expectedLen;
 }
-internal static slice<paddingTestsᴛ1> paddingTests = slice<paddingTestsᴛ1>([
-    new(slice<byte>([1, 2, 3, 4, 0]), true, 4),
-    new(slice<byte>([1, 2, 3, 4, 0, 1]), false, 0),
-    new(slice<byte>([1, 2, 3, 4, 99, 99]), false, 0),
-    new(slice<byte>([1, 2, 3, 4, 1, 1]), true, 4),
-    new(slice<byte>([1, 2, 3, 2, 2, 2]), true, 3),
-    new(slice<byte>([1, 2, 3, 3, 3, 3]), true, 2),
-    new(slice<byte>([1, 2, 3, 4, 3, 3]), false, 0),
-    new(slice<byte>([1, 4, 4, 4, 4, 4]), true, 1),
-    new(slice<byte>([5, 5, 5, 5, 5, 5]), true, 0),
-    new(slice<byte>([6, 6, 6, 6, 6, 6]), false, 0),
+internal static slice<paddingTestsᴛ1> paddingTests = [
+    new([1, 2, 3, 4, 0], true, 4),
+    new([1, 2, 3, 4, 0, 1], false, 0),
+    new([1, 2, 3, 4, 99, 99], false, 0),
+    new([1, 2, 3, 4, 1, 1], true, 4),
+    new([1, 2, 3, 2, 2, 2], true, 3),
+    new([1, 2, 3, 3, 3, 3], true, 2),
+    new([1, 2, 3, 4, 3, 3], false, 0),
+    new([1, 4, 4, 4, 4, 4], true, 1),
+    new([5, 5, 5, 5, 5, 5], true, 0),
+    new([6, 6, 6, 6, 6, 6], false, 0),
     new(padding255Bad[..], false, 0),
     new(padding255Good[..], true, 0)
-]);
+];
 
 public static void TestRemovePadding(ж<testing.T> t) {
     for (nint i = 1; i < len(padding255Bad); i++) {
         padding255Bad[i] = 255;
         padding255Good[i] = 255;
     }
-    foreach (var (i, test) in paddingTests) {
+    foreach (var (i, test) in range(paddingTests)) {
         var (paddingLen, good) = extractPadding(test.@in);
         var expectedGood = (byte)255;
         if (!test.good) {
@@ -103,7 +101,7 @@ public static void TestCertificateSelection(ж<testing.T> t) {
     config.BuildNameToCertificate();
 
     nint pointerToIndex(ж<global::go.crypto.tls_package.Certificate> c) {
-        foreach (var i in range(Ꮡconfig.Value.Certificates)) {
+        foreach (var i in range(len(Ꮡconfig.Value.Certificates))) {
             if (c == Ꮡ(Ꮡconfig.Value.Certificates, i)) {
                 return i;
             }
@@ -115,13 +113,11 @@ public static void TestCertificateSelection(ж<testing.T> t) {
         var clientHello = Ꮡ(new ClientHelloInfo(
             ServerName: name
         ));
-        {
-            var (cert, err) = Ꮡconfig.Value.getCertificate(clientHello); if (err != nil) {
-                t.Errorf("unable to get certificate for name '%s': %s", name, err);
-                return default;
-            } else {
-                return cert;
-            }
+        var (cert, err) = Ꮡconfig.Value.getCertificate(clientHello); if (err != nil) {
+            t.Errorf("unable to get certificate for name '%s': %s", name, err);
+            return default;
+        } else {
+            return cert;
         }
     }
 
@@ -256,7 +252,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> t, ж<glob
         // recordSizes should contain a series of records smaller than
         // tcpMSSEstimate followed by some larger than maxPlaintext.
         var seenLargeRecord = false;
-        foreach (var (i, size) in recordSizes) {
+        foreach (var (i, size) in range(recordSizes)) {
             if (!seenLargeRecord) {
                 if (size > (i + 1) * (nint)tcpMSSEstimate) {
                     t.Fatalf("Record #%d has size %d, which is too large too soon", i, size);
@@ -282,7 +278,7 @@ public static void TestDynamicRecordSizingWithStreamCipher(ж<testing.T> t) {
 
     var config = testConfig.Clone();
     config.MaxVersion = VersionTLS12;
-    config.CipherSuites = slice<uint16>([TLS_RSA_WITH_RC4_128_SHA]);
+    config.CipherSuites = [TLS_RSA_WITH_RC4_128_SHA];
     runDynamicRecordSizingTest(t, config);
 }
 
@@ -291,14 +287,14 @@ public static void TestDynamicRecordSizingWithCBC(ж<testing.T> t) {
 
     var config = testConfig.Clone();
     config.MaxVersion = VersionTLS12;
-    config.CipherSuites = slice<uint16>([TLS_RSA_WITH_AES_256_CBC_SHA]);
+    config.CipherSuites = [TLS_RSA_WITH_AES_256_CBC_SHA];
     runDynamicRecordSizingTest(t, config);
 }
 
 public static void TestDynamicRecordSizingWithAEAD(ж<testing.T> t) {
     var config = testConfig.Clone();
     config.MaxVersion = VersionTLS12;
-    config.CipherSuites = slice<uint16>([TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256]);
+    config.CipherSuites = [TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256];
     runDynamicRecordSizingTest(t, config);
 }
 
@@ -393,22 +389,18 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> t) {
         var configʗ1 = config;
         goǃ(() => {
             var tlsConnΔ1 = Client(clientʗ2, configʗ1);
-            {
-                var errΔ1 = tlsConnΔ1.Handshake(); if (errΔ1 != nil) {
-                    t.Errorf("Error from client handshake: %v", errΔ1);
-                    return;
-                }
+            var errΔ1 = tlsConnΔ1.Handshake(); if (errΔ1 != nil) {
+                t.Errorf("Error from client handshake: %v", errΔ1);
+                return;
             }
             tlsConnΔ1.vers = 0x1111;
-            tlsConnΔ1.Write(slice<byte>([1]));
+            tlsConnΔ1.Write([1]);
         });
 
         var tlsConn = Server(server, config);
-        {
-            var errΔ2 = tlsConn.Handshake(); if (errΔ2 != nil) {
-                t.Errorf("Error from client handshake: %v", errΔ2);
-                return;
-            }
+        var errΔ2 = tlsConn.Handshake(); if (errΔ2 != nil) {
+            t.Errorf("Error from client handshake: %v", errΔ2);
+            return;
         }
 
         @string expectedErr = tlsReceivedRecordWithˢ;
@@ -436,11 +428,9 @@ public static partial void TestKeyUpdateSpamPostHandshakeTLS13(ж<testing.T> t) 
         var clientʗ2 = client;
         goǃ(() => {
             var c = Client(clientʗ2, testConfig.Clone());
-            {
-                var errΔ1 = c.Handshake(); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                    return;
-                }
+            var errΔ1 = c.Handshake(); if (errΔ1 != nil) {
+                t.Error(errΔ1);
+                return;
             }
             var (ku, err) = (Ꮡ(new keyUpdateMsg())).marshal();
             if (err != nil) {

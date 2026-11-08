@@ -33,28 +33,24 @@ internal static error checkMono(ж<testing.T> t, @string body) {
 }
 
 public static void TestMonoGood(ж<testing.T> t) {
-    foreach (var (i, good) in goods) {
-        {
-            var err = checkMono(t, good); if (err != nil) {
-                t.Errorf("%d: unexpected failure: %v", i, err);
-            }
+    foreach (var (i, good) in range(goods)) {
+        var err = checkMono(t, good); if (err != nil) {
+            t.Errorf("%d: unexpected failure: %v", i, err);
         }
     }
 }
 
 public static void TestMonoBad(ж<testing.T> t) {
-    foreach (var (i, bad) in bads) {
-        {
-            var err = checkMono(t, bad); if (err == nil) {
-                t.Errorf("%d: unexpected success", i);
-            } else {
-                t.Log(err);
-            }
+    foreach (var (i, bad) in range(bads)) {
+        var err = checkMono(t, bad); if (err == nil) {
+            t.Errorf("%d: unexpected success", i);
+        } else {
+            t.Log(err);
         }
     }
 }
 
-internal static slice<@string> goods = slice<@string>([
+internal static slice<@string> goods = [
     "func F[T any](x T) { F(x) }",
     "func F[T, U, V any]() { F[U, V, T](); F[V, T, U]() }",
     "type Ring[A, B, C any] struct { L *Ring[B, C, A]; R *Ring[C, A, B] }",
@@ -62,10 +58,10 @@ internal static slice<@string> goods = slice<@string>([
     "func F[T any]() { type U[T any] [unsafe.Sizeof(F[*T])]byte; var _ U[int] }",
     "type U[T any] [unsafe.Sizeof(F[*T])]byte; func F[T any]() { var _ U[U[int]] }",
     "func F[T any]() { type A = int; F[A]() }"
-]);
+];
 
 // TODO(mdempsky): Validate specific error messages and positioning.
-internal static slice<@string> bads = slice<@string>([
+internal static slice<@string> bads = [
     "func F[T any](x T) { F(&x) }",
     "func F[T any]() { F[*T]() }",
     "func F[T any]() { F[[]T]() }",
@@ -87,6 +83,6 @@ internal static slice<@string> bads = slice<@string>([
     "type U[_ any] int; const X = unsafe.Sizeof(func() { type A[T any] U[A[*T]] })",
     "func F[T any]() { type A = *T; F[A]() }",
     "type A[T any] struct { _ A[*T] }"
-]);
+];
 
 } // end types_test_package

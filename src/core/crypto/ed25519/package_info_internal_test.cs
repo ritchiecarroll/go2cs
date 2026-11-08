@@ -29,7 +29,7 @@ using static go.crypto.ed25519_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ed25519/ed25519_test.go", "ed25519_test.cs", "AB0sgoKCppSmgqaApsiUgoKmgpSClIKUgoKmgoKUgqaCgpSCuIKCgoKUgoLsgoKmgoKUgoKCpoKC6JSCgpSCgoKCgpSClIKClIKUgIK2gIK2goKmgoKUgoKCyoKClICCpICCpICCAAgIlIKCgpSCgoKClIKUgIK2gpSCpoKClIKCgriCgpSUgoKCpoKmgoKCgqaCgpSCpoK4gpSClIKUgqaCgpSC+MaCgpSSgoKUpIKUgpSCgoKmgoKCppSAgraCgpSCgqaCpoKCpoCCtoCCyICCxNS4ggAHENyC6IKCgoKAkoKCgoKmyKKCgoCC2qKCgriigoKClIKCgriigoKClIKCgoI=", "374-381:1", "", "", "320:21,326:21")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519_test.go", "ed25519_test.cs", "AB0sgoKCppSmgqamuJSCgqaClIKUgpSCgqaCgpSCpoKClIK4goKCgpSCguyCgqaCgpSCgoKmgoLolIKClIKCgoKClIKUgoKUgpSCpoKmgoKmgoKUgoKCyoKClIKUgpSC+JSCgoKUgoKCgpSClIKmgpSCpoKClIKCgriCgpSUgoKCpoKmgoKCgqaCgpSCpoK4gpSClIKUgqaCgpSC+MaCgpSSgoKUpIKUgpSCgoKmgoKCppSCpoKClIKCpoKmgoKmgqaCuIK01LiCAAcQ3ILogoKCgoCSgoKCgqbIooKCgsqigoK4ooKCgpSCgoK4ooKCgpSCgoKC", "374-381:1", "", "", "306:21,312:21")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

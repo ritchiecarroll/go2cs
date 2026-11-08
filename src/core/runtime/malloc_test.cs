@@ -76,7 +76,7 @@ public static void TestMemStats(ж<testing.T> t) {
         ["MSpanInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["MSpanSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
         ["MCacheInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["MCacheSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
         ["BuckHashSys"] = slice<Func<any, error>>([nz, le(1e10D)]), ["GCSys"] = slice<Func<any, error>>([nz, le(1e10D)]), ["OtherSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
-        ["NextGC"] = slice<Func<any, error>>([nz, le(1e10D)]), ["LastGC"] = slice<Func<any, error>>([nz]),
+        ["NextGC"] = slice<Func<any, error>>([nz, le(1e10D)]), ["LastGC"] = [nz],
         ["PauseTotalNs"] = slice<Func<any, error>>([le(1e11D)]), ["PauseNs"] = default, ["PauseEnd"] = default,
         ["NumGC"] = slice<Func<any, error>>([nz, le(1e9D)]), ["NumForcedGC"] = slice<Func<any, error>>([nz, le(1e9D)]),
         ["GCCPUFraction"] = slice<Func<any, error>>([le(0.99D)]), ["EnableGC"] = slice<Func<any, error>>([eq(true)]), ["DebugGC"] = slice<Func<any, error>>([eq(false)]),
@@ -92,11 +92,9 @@ public static void TestMemStats(ж<testing.T> t) {
             t.Errorf("unknown MemStats field %s", name);
             continue;
         }
-        foreach (var (_, check) in checks) {
-            {
-                var err = check(val); if (err != nil) {
-                    t.Errorf("%s = %v: %s", name, val, err);
-                }
+        foreach (var (_, check) in range(checks)) {
+            var err = check(val); if (err != nil) {
+                t.Errorf("%s = %v: %s", name, val, err);
             }
         }
     }
@@ -109,14 +107,12 @@ public static void TestMemStats(ж<testing.T> t) {
         t.Fatalf("HeapIdle(%d) + HeapInuse(%d) should be equal to HeapSys(%d), but isn't.", st.HeapIdle, st.HeapInuse, st.HeapSys);
     }
 
-    {
-        var lpe = st.PauseEnd[(nint)(st.NumGC + 255) % len(st.PauseEnd)]; if (st.LastGC != lpe) {
-            t.Fatalf("LastGC(%d) != last PauseEnd(%d)", st.LastGC, lpe);
-        }
+    var lpe = st.PauseEnd[(nint)(st.NumGC + 255) % len(st.PauseEnd)]; if (st.LastGC != lpe) {
+        t.Fatalf("LastGC(%d) != last PauseEnd(%d)", st.LastGC, lpe);
     }
 
     uint64 pauseTotal = default;
-    foreach (var (_, pause) in st.PauseNs.ΔRangeSnapshot()) {
+    foreach (var (_, pause) in range(st.PauseNs.ΔRangeSnapshot())) {
         pauseTotal += pause;
     }
     if ((nint)st.NumGC < len(st.PauseNs)) {
@@ -154,10 +150,8 @@ public static void TestStringConcatenationAllocs(ж<testing.T> t) {
             b[i] = (byte)((byte)i + '0');
         }
         @string s = "foo"u8 + ((sstring)b);
-        {
-            @string want = foo0123456789ˢ; if (s != want) {
-                t.Fatalf("want %v, got %v", want, s);
-            }
+        @string want = foo0123456789ˢ; if (s != want) {
+            t.Fatalf("want %v, got %v", want, s);
         }
     });
     // Only string concatenation allocates.
@@ -180,12 +174,12 @@ public static void TestTinyAlloc(ж<testing.T> t) {
     }
     UntypedInt N = 16;
     array<@unsafe.Pointer> v = new(16); /* N */
-    foreach (var i in range(v)) {
+    foreach (var i in range(len(v))) {
         v[i] = @unsafe.Pointer.FromPinnedBox(@new<byte>());
     }
 
     var chunks = new map<uintptr, bool>(N);
-    foreach (var (_, p) in v.ΔRangeSnapshot()) {
+    foreach (var (_, p) in range(v.ΔRangeSnapshot())) {
         chunks[(uintptr)((uintptr)p & ~(uintptr)7)] = true;
     }
 
@@ -277,7 +271,7 @@ public static void TestFreegc(ж<testing.T> t) {
     // Run the tests twice if not in -short mode or not otherwise saving test time.
     // First while manually calling runtime.GC to slightly increase isolation (perhaps making
     // problems more reproducible).
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         Δruntime.GC();
         t.Run(fmt.Sprintf("gc=yes/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
     }
@@ -289,7 +283,7 @@ public static void TestFreegc(ж<testing.T> t) {
 
     // Again, but without manually calling runtime.GC in the loop (perhaps less isolation might
     // trigger problems).
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         t.Run(fmt.Sprintf("gc=no/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
     }
     Δruntime.GC();
@@ -450,7 +444,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                     var p = allocʗ7();
                     Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, p);
                 }
-                foreach (var (_, p) in Ꮡs.ValueSlot) {
+                foreach (var (_, p) in range(Ꮡs.ValueSlot)) {
                     freeʗ5(p);
                 }
             });
@@ -482,7 +476,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                     var p = allocʗ8();
                     s = append(sᴷ, s, p);
                 }
-                foreach (var (_, p) in s) {
+                foreach (var (_, p) in range(s)) {
                     freeʗ6(p);
                 }
             }
@@ -511,7 +505,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 }
                 // Explicitly free those pointers, removing them from the live map.
                 s = move2heap(sᴷ, s);
-                foreach (var k in range(s)) {
+                foreach (var k in range(len(s))) {
                     var p = s[k];
                     s[k] = default;
                     var uptr = (uintptr)p;
@@ -528,7 +522,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             // This also lightly simulates how the free code sees P migration or flushing
             // the mcache, assuming we have > 1 P. (Not using testing.AllocsPerRun here).
             nint iterations = 10 * stressMultiple * stressMultiple; // currently 10 (-short) or 1000
-            foreach (var (_, capacity) in slice<nint>([2])) {
+            foreach (var (_, capacity) in range(slice<nint>([2]))) {
                 foreach (var _ᴛ8 in range(iterations)) {
                     var ch = new channel<ж<T>>(capacity);
                     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -564,7 +558,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             // Allocate across multiple goroutines, freeing on the same goroutine.
             // TODO: probably remove the duplicate checking here; not that useful.
             var counts = slice<nint>([1, 2, 4, 8, 10 * stressMultiple]);
-            foreach (var (_, goroutines) in counts) {
+            foreach (var (_, goroutines) in range(counts)) {
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 foreach (var _ᴛ11 in range(goroutines)) {
                     Ꮡwg.Add(1);
@@ -642,7 +636,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 // Dropping down to GOMAXPROCS=1 might help reduce noise.
                 defer(GOMAXPROCS, GOMAXPROCS(1), ref ᒐ);
                 var size = (int64)@unsafe.Sizeof(GoArrayZero.New<T, Tᴀ>().ValueSlot);
-                foreach (var (_, count) in counts) {
+                foreach (var (_, count) in range(counts)) {
                     // Start by forcing a GC to reset this g's assist credit
                     // and perhaps help us get a cleaner measurement of GC cycle count.
                     Δruntime.GC();
@@ -727,16 +721,14 @@ public static void TestPhysicalMemoryUtilization(ж<testing.T> t) {
 
 public static void TestScavengedBitsCleared(ж<testing.T> t) {
     array<global::go.runtime_internal_test_package.BitsMismatch> mismatches = new(128);
-    {
-        var (n, ok) = runtime_internal_test_package.CheckScavengedBitsCleared(mismatches[..]); if (!ok) {
-            t.Errorf("uncleared scavenged bits");
-            foreach (var (_, m) in mismatches.slice(0, n)) {
-                t.Logf("\t@ address 0x%x", m.Base);
-                t.Logf("\t|  got: %064b", m.Got);
-                t.Logf("\t| want: %064b", m.Want);
-            }
-            t.FailNow();
+    var (n, ok) = runtime_internal_test_package.CheckScavengedBitsCleared(mismatches[..]); if (!ok) {
+        t.Errorf("uncleared scavenged bits");
+        foreach (var (_, m) in range(mismatches.slice(0, n))) {
+            t.Logf("\t@ address 0x%x", m.Base);
+            t.Logf("\t|  got: %064b", m.Got);
+            t.Logf("\t| want: %064b", m.Want);
         }
+        t.FailNow();
     }
 }
 
@@ -770,10 +762,8 @@ public static void TestArenaCollision(ж<testing.T> t) {
             // heap wherever it can. The race detector
             // doesn't support this, so look for the
             // expected failure.
-            {
-                @string want = tooManyAddressSpaceˢ; if (!strings.Contains((@string)@out, want)) {
-                    t.Fatalf("want %q, got:\n%s", want, (@string)@out);
-                }
+            @string want = tooManyAddressSpaceˢ; if (!strings.Contains((@string)@out, want)) {
+                t.Fatalf("want %q, got:\n%s", want, (@string)@out);
             }
         } else if (!strings.Contains((@string)@out, passˢ) || err != nil) {
             t.Fatalf("%s\n(exit status %v)", (@string)@out, err);
@@ -808,19 +798,17 @@ public static void TestArenaCollision(ж<testing.T> t) {
         // Allocate until the runtime tries to use the hint we
         // just mapped over.
         for (;;) {
-            {
-                var (next, okΔ1) = runtime_internal_test_package.NextArenaHint(); if (!okΔ1) {
-                    t.Skip(ranOutOfArenaHintsˢ);
-                } else if (next != hint) {
-                    break;
-                }
+            var (next, okΔ1) = runtime_internal_test_package.NextArenaHint(); if (!okΔ1) {
+                t.Skip(ranOutOfArenaHintsˢ);
+            } else if (next != hint) {
+                break;
             }
             var ac = @new<acLink>();
             arenaCollisionSink = append(arenaCollisionSink, ac);
             // The allocation must not have fallen into
             // one of the reserved regions.
             var p = (uintptr)ac;
-            foreach (var (_, vᴛ1) in disallowed) {
+            foreach (var (_, vᴛ1) in range(disallowed)) {
                 var d = vᴛ1.Clone();
 
                 if (d[0] <= p && p < d[1]) {
@@ -937,10 +925,8 @@ public static void BenchmarkGoroutineSelect(ж<testing.B> b) {
 public static void BenchmarkGoroutineBlocking(ж<testing.B> b) {
     var read = (channel<EmptyStruct> ch) => {
         for (;;) {
-            {
-                var (_, ok) = ᐸꟷ(ch, ꟷ); if (!ok) {
-                    return;
-                }
+            var (_, ok) = ᐸꟷ(ch, ꟷ); if (!ok) {
+                return;
             }
         }
     };
@@ -959,7 +945,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new slice<channel<EmptyStruct>>(n);
-    foreach (var i in range(m)) {
+    foreach (var i in range(len(m))) {
         m[i] = new channel<EmptyStruct>(1);
         goǃ(read, m[i]);
     }
@@ -968,7 +954,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
     GC();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, ch) in m) {
+        foreach (var (_, ch) in range(m)) {
             if (ch != nil) {
                 ch.ᐸꟷ(new EmptyStruct());
             }
@@ -979,7 +965,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
         b.StopTimer();
     }
 
-    foreach (var (_, ch) in m) {
+    foreach (var (_, ch) in range(m)) {
         close(ch);
     }
     time.Sleep(10 * time.Millisecond);

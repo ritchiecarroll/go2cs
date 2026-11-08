@@ -65,7 +65,7 @@ public static void BenchmarkSplitAfterSeqMultiByteSeparator(ж<testing.B> Ꮡb) 
 }
 
 internal static @string findKvBySplit(@string s, @string k) {
-    foreach (var (_, kv) in Split(s, ",")) {
+    foreach (var (_, kv) in range(Split(s, ","))) {
         if (HasPrefix(kv, k)) {
             return kv;
         }
@@ -104,7 +104,7 @@ public static void BenchmarkSplitAndSplitSeq(ж<testing.B> b) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var testCase = ref heap(new BenchmarkSplitAndSplitSeq_testCases(), out var ᏑtestCase);
         testCase = vᴛ1;
 

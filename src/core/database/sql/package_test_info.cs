@@ -63,8 +63,8 @@ using static global::go.database.sql_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("database/sql/example_cli_test.go", "example_cli_test.cs", "ACUmooKClIKUgpSmgqaUlIKClIKkgpSigqaUoqjCgqSAgsQACAjCgqSCgoKUog==", "51-54:1", "", "", "60:21,68:21,95:21,120:21")]
-[assembly: GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABcqwoKCgpSSlIKCgKakyoKCuICCpKLkgoKCgoKUtLQACAiCgoKClIKClIIAHQiiggAAKoKClKSCmICCpJSClMqCmICCpJSAgsTkAAsUgqSCgIKkogAMBKIABhSCgpSkgoCC1vSiAAYUgoKUpIKClKSCgIK2gILE9IKCgpSCgoKClICCAAgIxoKClJKCgoKUgoKUgrTkgoKClIKCgoCCpJSAggALCIKCgpSCgoKAgqSUgoKAgqSUgIIACAi0goKUtoKCgpS0tMSktIKClLaCgoKUtLTEpMKCgoKUpIKCgoCCpKaAgqSi", "", "", "", "35:21,148:21,206:21,245:21,279:21,286:21,342:21,437:21,470:21,505:21")]
+[assembly: GoPositionMap("database/sql/example_cli_test.go", "example_cli_test.cs", "ACMmooKClIKUgpSmgqaUlIKClIKkgpSigqaUoqjCgqSCtAAICMKCpIKCgpSi", "51-54:1", "", "", "58:21,66:21,93:21,116:21")]
+[assembly: GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABcqwoKCgpSSlIKCppTKgoK4gpSi5IKCgoKClLS0AAgIgoKCgpSCgpSCAB0IooIAACqCgpSkgpiClJSClMqCmIKUlIK05AALFIKkgoKUogAMBKIABhSCgpSkgoLG9KIABhSCgpSkgoKUpIKCpoK09IKCgpSCgoKClIL4xoKClJKCgoKUgoKUgrTkgoKClIKCgoKUlIIACgiCgoKUgoKCgpSUgoKClJSC+LSCgpS2goKClLS0xKS0goKUtoKCgpS0tMSkwoKCgpSkgoKCgpSmgpSi", "", "", "", "35:21,144:21,196:21,233:21,265:21,272:21,322:21,407:21,440:21,475:21")]
 // </GoSourcePositionMaps>
 
 namespace go.database;

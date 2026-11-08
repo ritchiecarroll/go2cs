@@ -12,7 +12,7 @@ internal partial struct canonicalHeaderKeyTest {
     internal @string @in, @out;
 }
 
-internal static slice<canonicalHeaderKeyTest> canonicalHeaderKeyTests = slice<canonicalHeaderKeyTest>([
+internal static slice<canonicalHeaderKeyTest> canonicalHeaderKeyTests = [
     new("a-b-c", "A-B-C"),
     new("a-1-c", "A-1-C"),
     new("User-Agent", "User-Agent"),
@@ -33,14 +33,12 @@ internal static slice<canonicalHeaderKeyTest> canonicalHeaderKeyTests = slice<ca
     // This caused a panic due to mishandling of a space:
     new("C Ontent-Transfer-Encoding", "C Ontent-Transfer-Encoding"),
     new("foo bar", "foo bar")
-]);
+];
 
 public static void TestCanonicalMIMEHeaderKey(ж<testing.T> t) {
-    foreach (var (_, tt) in canonicalHeaderKeyTests) {
-        {
-            @string s = CanonicalMIMEHeaderKey(tt.@in); if (s != tt.@out) {
-                t.Errorf("CanonicalMIMEHeaderKey(%q) = %q, want %q", tt.@in, s, tt.@out);
-            }
+    foreach (var (_, tt) in range(canonicalHeaderKeyTests)) {
+        @string s = CanonicalMIMEHeaderKey(tt.@in); if (s != tt.@out) {
+            t.Errorf("CanonicalMIMEHeaderKey(%q) = %q, want %q", tt.@in, s, tt.@out);
         }
     }
 }
@@ -52,7 +50,7 @@ private static readonly @string setCookieˢᵇ = "set-cookie"u8;
 // Issue #34799 add a Header method to get multiple values []string, with canonicalized key
 public static void TestMIMEHeaderMultipleValues(ж<testing.T> t) {
     var testHeader = new MIMEHeader(new map<@string, slice<@string>>{
-        ["Set-Cookie"] = slice<@string>(["cookie 1", "cookie 2"])
+        ["Set-Cookie"] = ["cookie 1", "cookie 2"]
     });
     var values = testHeader.Values(setCookieˢ);
     nint n = len(values);

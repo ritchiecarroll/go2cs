@@ -52,7 +52,7 @@ internal static void benchmarkAESGCMOpen(ж<testing.B> Ꮡb, slice<byte> buf, ni
 }
 
 public static void BenchmarkAESGCM(ж<testing.B> b) {
-    foreach (var (_, length) in slice<nint>([64, 1350, 8 * 1024])) {
+    foreach (var (_, length) in range(slice<nint>([64, 1350, 8 * 1024]))) {
         b.Run("Open-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ1) => {
             benchmarkAESGCMOpen(bΔ1, new slice<byte>(length), 128 / 8);
         });
@@ -90,11 +90,10 @@ internal static void benchmarkAESStream(ж<testing.B> Ꮡb, Func<cipher.Block, s
 // always be wordsize aligned, whereas non-aligned is a more typical
 // use-case.
 internal static UntypedInt almost1K => /* 1024 - 5 */ 1019;
-
 internal static UntypedInt almost8K => /* 8*1024 - 5 */ 8187;
 
 public static void BenchmarkAESCTR(ж<testing.B> b) {
-    foreach (var (_, keyBits) in slice<nint>([128, 192, 256])) {
+    foreach (var (_, keyBits) in range(slice<nint>([128, 192, 256]))) {
         nint keySize = keyBits / 8;
         b.Run(strconv.Itoa(keyBits), (ж<testing.B> bΔ1) => {
             bΔ1.Run("50", (ж<testing.B> bΔ2) => {

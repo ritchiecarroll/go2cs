@@ -1,0 +1,12 @@
+REWRITTEN docs/ConversionStrategies-Reference/defer-panic-recover.md:368
+REWRITTEN docs/ConversionStrategies-Reference/defer-panic-recover.md:523
+REWRITTEN docs/ConversionStrategies-Reference/defer-panic-recover.md:1130
+REWRITTEN docs/ConversionStrategies-Reference/generic-constraints.md:56
+REWRITTEN docs/ConversionStrategies-Reference/labels-and-loop-variables.md:410
+REWRITTEN docs/ConversionStrategies-Reference/named-numeric-types.md:110
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:1228
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:1785
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:2259
+REWRITTEN docs/ConversionStrategies-Reference/shadowing.md:1054
+REWRITTEN docs/ConversionStrategies.md:1469
+docsamples: base dab0675bd9, target HEAD: 369 page(s) read, 1009 source comment(s): 975 the same, 11 rewritten, 21 refused (0 error(s), 21 note(s)), 2 not checked; 0 unlabelled csharp block(s); 7 page(s) changed

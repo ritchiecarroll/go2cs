@@ -42,12 +42,10 @@ public static void Example_ed25519ctx() {
         log.Fatal(err);
     }
 
-    {
-        var errΔ1 = VerifyWithOptions(pub, msg, sig, Ꮡ(new Options(
-            Context: "Example_ed25519ctx"
-        ))); if (errΔ1 != nil) {
-            log.Fatal(invalidSignatureˢ);
-        }
+    var errΔ1 = VerifyWithOptions(pub, msg, sig, Ꮡ(new Options(
+        Context: "Example_ed25519ctx"
+    ))); if (errΔ1 != nil) {
+        log.Fatal(invalidSignatureˢ);
     }
 }
 
@@ -151,16 +149,12 @@ public static void TestSignVerifyHashed(ж<testing.T> t) {
     if (!bytes.Equal(sig, expectedSig)) {
         t.Error(signatureDoesnTMatchTestˢ);
     }
-    {
-        var errΔ1 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512))); if (errΔ1 != nil) {
-            t.Errorf("valid signature rejected: %v", errΔ1);
-        }
+    var errΔ1 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512))); if (errΔ1 != nil) {
+        t.Errorf("valid signature rejected: %v", errΔ1);
     }
 
-    {
-        var errΔ2 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA256))); if (errΔ2 == nil) {
-            t.Errorf("expected error for wrong hash");
-        }
+    var errΔ2 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA256))); if (errΔ2 == nil) {
+        t.Errorf("expected error for wrong hash");
     }
 
     var wrongHash = sha512.Sum512(slice<byte>("wrong message"u8));
@@ -184,20 +178,14 @@ public static void TestSignVerifyHashed(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ3 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512, Context: "123"))); if (errΔ3 != nil) {
-            t.Errorf("valid signature rejected: %v", errΔ3);
-        }
+    var errΔ3 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512, Context: "123"))); if (errΔ3 != nil) {
+        t.Errorf("valid signature rejected: %v", errΔ3);
     }
-    {
-        var errΔ4 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512, Context: "321"))); if (errΔ4 == nil) {
-            t.Errorf("expected error for wrong context");
-        }
+    var errΔ4 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA512, Context: "321"))); if (errΔ4 == nil) {
+        t.Errorf("expected error for wrong context");
     }
-    {
-        var errΔ5 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA256, Context: "123"))); if (errΔ5 == nil) {
-            t.Errorf("expected error for wrong hash");
-        }
+    var errΔ5 = VerifyWithOptions(@public, hash[..], sig, Ꮡ(new Options(Hash: crypto.SHA256, Context: "123"))); if (errΔ5 == nil) {
+        t.Errorf("expected error for wrong hash");
     }
 }
 
@@ -221,10 +209,8 @@ public static void TestSignVerifyContext(ж<testing.T> t) {
     if (!bytes.Equal(sig, expectedSig)) {
         t.Error(signatureDoesnTMatchTestˢ);
     }
-    {
-        var errΔ1 = VerifyWithOptions(@public, message, sig, Ꮡ(new Options(Context: context))); if (errΔ1 != nil) {
-            t.Errorf("valid signature rejected: %v", errΔ1);
-        }
+    var errΔ1 = VerifyWithOptions(@public, message, sig, Ꮡ(new Options(Context: context))); if (errΔ1 != nil) {
+        t.Errorf("valid signature rejected: %v", errΔ1);
     }
 
     if (VerifyWithOptions(@public, slice<byte>("bar"u8), sig, Ꮡ(new Options(Context: context))) == nil) {
@@ -345,10 +331,8 @@ public static void TestGolden(ж<testing.T> t) {
             // at the end, but we just want R and S.
             sig = sig[..(int)(SignatureSize)];
 
-            {
-                nint l = len(pubKey); if (l != PublicKeySize) {
-                    t.Fatalf("bad public key length on line %d: got %d bytes", lineNo, l);
-                }
+            nint l = len(pubKey); if (l != PublicKeySize) {
+                t.Fatalf("bad public key length on line %d: got %d bytes", lineNo, l);
             }
 
             array<byte> priv = new(64); /* PrivateKeySize */
@@ -369,23 +353,17 @@ public static void TestGolden(ж<testing.T> t) {
                 t.Errorf("recreating key pair gave different private key on line %d: %x vs %x", lineNo, priv[..], priv2);
             }
 
-            {
-                var pubKey2 = priv2.Public()._<PublicKey>(); if (!bytes.Equal(pubKey, pubKey2)) {
-                    t.Errorf("recreating key pair gave different public key on line %d: %x vs %x", lineNo, pubKey, pubKey2);
-                }
+            var pubKey2 = priv2.Public()._<PublicKey>(); if (!bytes.Equal(pubKey, pubKey2)) {
+                t.Errorf("recreating key pair gave different public key on line %d: %x vs %x", lineNo, pubKey, pubKey2);
             }
 
-            {
-                var seed = priv2.Seed(); if (!bytes.Equal(priv[..32], seed)) {
-                    t.Errorf("recreating key pair gave different seed on line %d: %x vs %x", lineNo, priv[..32], seed);
-                }
+            var seed = priv2.Seed(); if (!bytes.Equal(priv[..32], seed)) {
+                t.Errorf("recreating key pair gave different seed on line %d: %x vs %x", lineNo, priv[..32], seed);
             }
         }
 
-        {
-            var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
-                t.Fatalf("error reading test data: %s", errΔ1);
-            }
+        var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
+            t.Fatalf("error reading test data: %s", errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -446,10 +424,8 @@ public static void BenchmarkKeyGeneration(ж<testing.B> Ꮡb) {
 
     zeroReader zero = default;
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, _, err) = GenerateKey(zero); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, _, err) = GenerateKey(zero); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }

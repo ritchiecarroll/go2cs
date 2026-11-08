@@ -28,10 +28,8 @@ public static void TestLockRankGenerated(ж<testing.T> t) {
     var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(t), testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), runˢ, mklockrankGoˢ));
     var (want, err) = cmd.Output();
     if (err != nil) {
-        {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
-                t.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), err, ee.Stderr);
-            }
+        var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+            t.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), err, ee.Stderr);
         }
         t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
     }

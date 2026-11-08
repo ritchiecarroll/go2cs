@@ -9,8 +9,6 @@ using path = path_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 
 partial class fs_test_package {
@@ -28,7 +26,7 @@ internal static slice<globTestsᴛ1> globTests = slice<globTestsᴛ1>([
 ]);
 
 public static void TestGlob(ж<testing.T> t) {
-    foreach (var (_, tt) in globTests) {
+    foreach (var (_, tt) in range(globTests)) {
         var (matches, err) = Glob(tt.fs, tt.pattern);
         if (err != nil) {
             t.Errorf("Glob error for %q: %s", tt.pattern, err);
@@ -38,7 +36,7 @@ public static void TestGlob(ж<testing.T> t) {
             t.Errorf("Glob(%#q) = %#v want %v", tt.pattern, matches, tt.result);
         }
     }
-    foreach (var (_, pattern) in slice<@string>(["no_match", "../*/no_match", @"\*"])) {
+    foreach (var (_, pattern) in range(slice<@string>(["no_match", "../*/no_match", @"\*"]))) {
         var (matches, err) = Glob(os.DirFS("."), pattern);
         if (err != nil) {
             t.Errorf("Glob error for %q: %s", pattern, err);
@@ -52,7 +50,7 @@ public static void TestGlob(ж<testing.T> t) {
 
 public static void TestGlobError(ж<testing.T> t) {
     var bad = slice<@string>([@"[]", @"nonexist/[]"]);
-    foreach (var (_, pattern) in bad) {
+    foreach (var (_, pattern) in range(bad)) {
         var (_, err) = Glob(os.DirFS("."), pattern);
         if (!AreEqual(err, path.ErrBadPattern)) {
             t.Errorf("Glob(fs, %#q) returned err=%v, want path.ErrBadPattern", pattern, err);
@@ -73,9 +71,7 @@ partial struct globOnly {
     /*embed*/ public go.io.fs_package.GlobFS GlobFS;
 }
 
-internal static (fs.File, error) Open(this globOnly _, @string name) {
-    return (default, ErrNotExist);
-}
+internal static (fs.File, error) Open(this globOnly _, @string name) { return (default, ErrNotExist); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string txtˢ => ref txtˢᵇ;

@@ -1,0 +1,26 @@
+== r2r run 1
+P384 first_SBM_us 166775 second_SBM_us 9104 jit_in_first_us 13991
+fiat P384 Mul            min       5027.9 ns  median       5061.3 ns
+fiat P384 Square         min       4945.8 ns  median       4963.9 ns
+fiat P384 Add            min        327.1 ns  median        329.5 ns
+P384 point Add           min      82642.6 ns  median      83796.0 ns
+P384 point Double        min      74999.2 ns  median      76093.8 ns
+P384 ScalarBaseMult      min    8886856.0 ns  median    9040687.5 ns
+P384 ScalarMult          min   38679643.0 ns  median   39149166.0 ns
+fiat P256 Mul (control)  min       1663.3 ns  median       1667.0 ns
+fiat P256 Square (control) min       1596.8 ns  median       1626.4 ns
+fiat P521 Mul (hand-own) min       1480.0 ns  median       1492.3 ns
+gc0 158 gc1 7 gc2 1
+== r2r run 2
+P384 first_SBM_us 182420 second_SBM_us 11984 jit_in_first_us 15249
+fiat P384 Mul            min       5068.8 ns  median       5279.3 ns
+fiat P384 Square         min       5089.0 ns  median       5118.9 ns
+fiat P384 Add            min        376.1 ns  median        385.1 ns
+P384 point Add           min      81315.3 ns  median      82544.0 ns
+P384 point Double        min      75820.1 ns  median      76159.9 ns
+P384 ScalarBaseMult      min    8969292.5 ns  median    9195487.5 ns
+P384 ScalarMult          min   38979692.0 ns  median   39933944.0 ns
+fiat P256 Mul (control)  min       1638.3 ns  median       1657.2 ns
+fiat P256 Square (control) min       1588.5 ns  median       1622.2 ns
+fiat P521 Mul (hand-own) min       1412.0 ns  median       1447.1 ns
+gc0 158 gc1 7 gc2 1

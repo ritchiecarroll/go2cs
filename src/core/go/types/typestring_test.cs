@@ -124,7 +124,7 @@ public static void TestTypeString(ж<testing.T> t) {
     tests = appendꓸꓸꓸ(tests, independentTestTypes);
     tests = appendꓸꓸꓸ(tests, dependentTestTypes);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string src = @"package p; import ""io""; type _ io.Writer; type T "u8 + test.src;
         var (pkg, err) = typecheck(src, nil, nil);
         if (err != nil) {
@@ -137,10 +137,8 @@ public static void TestTypeString(ж<testing.T> t) {
             continue;
         }
         var typ = obj.Type().Underlying();
-        {
-            @string got = typ.String(); if (got != test.str) {
-                t.Errorf("%s: got %s, want %s", test.src, got, test.str);
-            }
+        @string got = typ.String(); if (got != test.str) {
+            t.Errorf("%s: got %s, want %s", test.src, got, test.str);
         }
     }
 }
@@ -162,14 +160,14 @@ public static void TestQualifiedTypeString(ж<testing.T> t) {
     var q = mustTypecheck(packageQˢ, nil, nil);
 
     var pT = p.Scope().Lookup("T").Type();
-    foreach (var (_, vᴛ1) in slice<TestQualifiedTypeString_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestQualifiedTypeString_type>([
         new(default, nil, "<nil>"),
         new(pT, nil, "p.T"),
         new(pT, p, "T"),
         new(pT, q, "p.T"),
         new(new types.PointerжΔType(NewPointer(pT)), p, "*T"),
         new(new types.PointerжΔType(NewPointer(pT)), q, "*p.T")
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestQualifiedTypeString_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -180,11 +178,9 @@ public static void TestQualifiedTypeString(ж<testing.T> t) {
             }
             return ""u8;
         };
-        {
-            @string got = TypeString(test.typ, new Func<ж<types.Package>, @string>(qualifier)); if (got != test.want) {
-                t.Errorf("TypeString(%s, %s) = %s, want %s",
-                    test.@this.OrTypedNil(), test.typ, got, test.want);
-            }
+        @string got = TypeString(test.typ, new Func<ж<types.Package>, @string>(qualifier)); if (got != test.want) {
+            t.Errorf("TypeString(%s, %s) = %s, want %s",
+                test.@this.OrTypedNil(), test.typ, got, test.want);
         }
     }
 }

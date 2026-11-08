@@ -33,7 +33,6 @@ public partial interface TestingT {
 
 public static readonly ж<Funcꓸꓸꓸ<@string, any, @string>> ᏑFmtSprintf = new StaticBox<Funcꓸꓸꓸ<@string, any, @string>>(default(Funcꓸꓸꓸ<@string, any, @string>));
 public static ref Funcꓸꓸꓸ<@string, any, @string> FmtSprintf => ref ((StaticBox<Funcꓸꓸꓸ<@string, any, @string>>)ᏑFmtSprintf).ValueSlot;
-
 public static readonly ж<Func<bool>> ᏑTestenvOptimizationOff = new StaticBox<Func<bool>>(default(Func<bool>));
 public static ref Func<bool> TestenvOptimizationOff => ref ((StaticBox<Func<bool>>)ᏑTestenvOptimizationOff).ValueSlot;
 

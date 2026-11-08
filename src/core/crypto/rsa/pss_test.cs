@@ -17,8 +17,6 @@ using os = os_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using compress;
 using encoding;
 using go.crypto;
@@ -105,10 +103,8 @@ public static partial void TestPSSGolden(ж<testing.T> t) {
                         break;
                     }}
                 }
-                {
-                    var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
-                        throw panic(errΔ1);
-                    }
+                var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
+                    throw panic(errΔ1);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -149,10 +145,8 @@ public static partial void TestPSSGolden(ж<testing.T> t) {
                 h.Write(msg);
                 hashed = h.Sum(hashed[..0]);
 
-                {
-                    var errΔ3 = VerifyPSS(key, hash, hashed, sig, opts); if (errΔ3 != nil) {
-                        t.Error(errΔ3);
-                    }
+                var errΔ3 = VerifyPSS(key, hash, hashed, sig, opts); if (errΔ3 != nil) {
+                    t.Error(errΔ3);
                 }
                 break;
             }
@@ -187,10 +181,8 @@ public static void TestPSSOpenSSL(ж<testing.T> t) {
         0x0a, 0x37, 0x9c, 0x69
     ]);
 
-    {
-        var err = VerifyPSS(test512Key.ᏑPublicKey, hash, hashed, sig, nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = VerifyPSS(test512Key.ᏑPublicKey, hash, hashed, sig, nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -230,7 +222,7 @@ public static void TestPSSSigning(ж<testing.T> t) {
     var hashed = h.Sum(default);
     ref var opts = ref heap(new rsa.PSSOptions(), out var Ꮡopts);
 
-    foreach (var (i, test) in saltLengthCombinations) {
+    foreach (var (i, test) in range(saltLengthCombinations)) {
         opts.SaltLength = test.signSaltLength;
         var (sig, err) = SignPSS(rand.Reader, rsaPrivateKey, hash, hashed, Ꮡopts);
         if (err != nil) {
@@ -309,23 +301,19 @@ public static void TestInvalidPSSSaltLength(ж<testing.T> t) {
     }
 
     var digest = sha256.Sum256(slice<byte>("message"u8));
-    {
-        var (_, errΔ1) = SignPSS(rand.Reader, key, crypto.SHA256, digest[..], Ꮡ(new PSSOptions(
-            SaltLength: -2,
-            Hash: crypto.SHA256
-        ))); if (errΔ1.Error() != "crypto/rsa: invalid PSS salt length"u8) {
-            t.Fatalf("SignPSS unexpected error: got %v, want %v", errΔ1, cryptoRsaInvalidPssSaltˢ);
-        }
+    var (_, errΔ1) = SignPSS(rand.Reader, key, crypto.SHA256, digest[..], Ꮡ(new PSSOptions(
+        SaltLength: -2,
+        Hash: crypto.SHA256
+    ))); if (errΔ1.Error() != "crypto/rsa: invalid PSS salt length"u8) {
+        t.Fatalf("SignPSS unexpected error: got %v, want %v", errΔ1, cryptoRsaInvalidPssSaltˢ);
     }
 
     // We don't check the specific error here, because crypto/rsa and crypto/internal/boring
     // return different errors, so we just check that _an error_ was returned.
-    {
-        var errΔ2 = VerifyPSS(key.ᏑPublicKey, crypto.SHA256, slice<byte>([1, 2, 3]), new slice<byte>(31), Ꮡ(new PSSOptions(
-            SaltLength: -2
-        ))); if (errΔ2 == nil) {
-            t.Fatal(verifyPSSUnexpectedˢ);
-        }
+    var errΔ2 = VerifyPSS(key.ᏑPublicKey, crypto.SHA256, [1, 2, 3], new slice<byte>(31), Ꮡ(new PSSOptions(
+        SaltLength: -2
+    ))); if (errΔ2 == nil) {
+        t.Fatal(verifyPSSUnexpectedˢ);
     }
 }
 
@@ -338,10 +326,8 @@ public static void TestHashOverride(ж<testing.T> t) {
     }
 
     // VerifyPSS has the inverse behavior, opts.Hash is always ignored, check this is true.
-    {
-        var errΔ1 = VerifyPSS(test2048Key.ᏑPublicKey, crypto.SHA512, digest[..], sig, Ꮡ(new PSSOptions(Hash: crypto.SHA256))); if (errΔ1 != nil) {
-            t.Fatalf("VerifyPSS unexpected error: got %v, want nil", errΔ1);
-        }
+    var errΔ1 = VerifyPSS(test2048Key.ᏑPublicKey, crypto.SHA512, digest[..], sig, Ꮡ(new PSSOptions(Hash: crypto.SHA256))); if (errΔ1 != nil) {
+        t.Fatalf("VerifyPSS unexpected error: got %v, want nil", errΔ1);
     }
 }
 

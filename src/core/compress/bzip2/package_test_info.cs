@@ -36,7 +36,7 @@ using static global::go.compress.bzip2_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/bzip2/bzip2_test.go", "bzip2_test.cs", "ABMkgoKClKaCgoKClKaCgpSmgoKClAAXBoIAH3iCgpQAFDqCgpSAgoKUtoIACgqCAAsggoKCgoCCgpS2ggAJCoIABxaCgoKCgsqCgoKAgsqCgpa0goKmgoKUgoK4gKKAooA=", "110-116:1")]
+[assembly: GoPositionMap("compress/bzip2/bzip2_test.go", "bzip2_test.cs", "ABMkgoKClKaCgoKClKaCgpSmgoKClAAXBoIAH3iCgpQAFDqCgpSCgpSmggAKCoIACyCCgoKCgoKUpoIACQqCAAcWgoKCgoLKgoKCgrqCgpa0goKmgoKUgoK4goI=", "110-116:1")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

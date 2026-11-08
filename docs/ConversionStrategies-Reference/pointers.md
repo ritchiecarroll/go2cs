@@ -1225,7 +1225,7 @@ func boolFieldAddr(conf *Config, name string) *bool {
 
 which converts to
 
-<!-- source: src/core/go/types/check_test.cs:404-407 -->
+<!-- source: src/core/go/types/check_test.cs:394-397 -->
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
@@ -1240,6 +1240,10 @@ The information needed to do better is never actually lost. `reflect.Value.Addr`
 Two properties are deliberate. **The token VALUE does not change.** The obvious alternative — minting self-identifying handles from a reserved numeric range — would also change what `%p` prints and what order pointer-keyed maps print in, because those read the very same token; carrying the association out of band instead leaves every existing observable byte-identical, and costs one dictionary probe on a conversion that was already allocating an object. **Entries are weak, and verified on resolve**: the table must never be the reason a box stays alive, and a resolve re-derives the box's current token and requires equality, so a stale entry cannot answer. The type-descriptor path (`typeDescriptorOrderToken`, which packs type NAMES so fmtsort orders them lexically) returns before registration and is untouched — those tokens are shared by every descriptor with the same name and are not identities to recover.
 
 Corpus footprint of the idiom: in all of GOROOT it is `go/types`' `check_test.go` (bool and string), its `cmd/compile/internal/types2` twin, and four descriptor-walking sites in `reflect/type.go`; `sync/atomic`'s two uses only test alignment (`p&7 != 0`) and never dereference. (Guarded by the `ReflectFieldAddrWrite` behavioral **output** test — writes to a bool, a string and an int field through `Addr().UnsafePointer()`, each read back through the ORIGINAL struct to prove aliasing rather than a detached copy, two derivations of one field compared for pointer equality, and the untouched neighbours asserted unchanged, all vs `go run`. It faults with an access violation on pre-fix golib.)
+
+### Converting back as ANOTHER layout-identical type answers the direct reinterpret's view
+
+The convert-back is not limited to the field's own type. gojq's code tests read a defined-type field through its underlying type, `*(*int)(unsafe.Pointer(v.FieldByName("op").UnsafeAddr()))` over `op opcode`. Go's direct form of the same pointer, `(*int)(unsafe.Pointer(&r.op))`, emits `Reinterpret<opcode, nint>()` over the field pointer, which aliases the field (`ReinterpretAliasing.HoldsForRoot`). So the uintptr route answers the same view: where the number is the resolved box's OWN order token and that rule holds over the same root, `explicit operator ж<T>(uintptr)` returns the root, or a `FieldRefBox<T>` over it, instead of a native box over the token. One rule decides both routes. A pair the direct form refuses keeps today's carrier. A real address keeps the native route: the step is keyed on the number (`ManagedPointerTokens.IsTaggedToken`, which every managed order token passes and no real address does), so a native box, whose token IS its address, and a view whose token is a native address (a field of an element over native storage) are both excluded, whatever the box kind. A pinned real address is not the box's token. Before this, the number reached a native box over the token: reflect hands out the order token for a reference-free field box too, which the interior step's flag (`IsOrderTokenAt`, reference-bearing only) does not cover. Its first dereference panicked, and a non-first field met the token-arithmetic refusal. Not covered: the identity `uintptr(unsafe.Pointer(p)) == v.UnsafeAddr()` reads false on the C# side, as it already does for the exact type, because a reference-free box's uintptr is its pinned address, not reflect's token; and `reflect.NewAt` over the same number still resolves exactly only. (Guarded by the `ReflectUnsafeAddrDeref` behavioral **output** test, 6 re-typed arms and 5 exact-type controls, and GolibTests `UintptrReinterpretViewTests`; BOARD 2026-11-07, gojq class E.)
 
 ## An OPAQUE `*struct{}` conversion mints a recoverable token — `syscall.Pointer(unsafe.Pointer(p))` keeps its referent
 
@@ -1778,7 +1782,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
     return ctx, func() { stop(); cancel(Canceled) }
 }
 ```
-<!-- source: src/core/context/example_test.cs:331, 339-343 -->
+<!-- source: src/core/context/example_test.cs:329, 337-341 -->
 ```csharp
 (context.Context, Action) mergeCancel(context.Context ctx, context.Context cancelCtx) {
     …
@@ -2252,7 +2256,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
-<!-- source: src/core/os/os_windows_test.cs:266-268 -->
+<!-- source: src/core/os/os_windows_test.cs:263-265 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();

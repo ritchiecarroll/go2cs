@@ -13,8 +13,6 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net.textproto_package;
 
 partial class textproto_internal_test_package {
@@ -97,10 +95,8 @@ public static void TestReadCodeLine(ж<testing.T> t) {
     if (code != 345 || msg != "no way"u8 || err == nil) {
         t.Fatalf("Line 3: %d, %s, %v", code, msg, err);
     }
-    {
-        var (e, ok) = err._<ж<global::go.net.textproto_package.ΔError>>(ᐧ); if (!ok || e.Code != code || e.Msg != msg) {
-            t.Fatalf("Line 3: wrong error %v\n", err);
-        }
+    var (e, ok) = err._<ж<global::go.net.textproto_package.ΔError>>(ᐧ); if (!ok || e.Code != code || e.Msg != msg) {
+        t.Fatalf("Line 3: wrong error %v\n", err);
     }
     (code, msg, err) = r.ReadCodeLine(1);
     if (code != 0 || msg != ""u8 || !AreEqual(err, io.EOF)) {
@@ -121,7 +117,7 @@ public static void TestReadDotLines(ж<testing.T> t) {
     }
 
     (s, err) = r.ReadDotLines();
-    want = slice<@string>(["another"]);
+    want = ["another"];
     if (!slices.Equal<slice<@string>, @string>(s, want) || !AreEqual(err, io.ErrUnexpectedEOF)) {
         t.Fatalf("ReadDotLines2: %v, %v", s, err);
     }
@@ -154,8 +150,8 @@ public static void TestReadMIMEHeader(ж<testing.T> t) {
     var r = reader(myKeyValue1LongKeyEvenˢ);
     var (m, err) = r.ReadMIMEHeader();
     var want = new MIMEHeader(new map<@string, slice<@string>>{
-        ["My-Key"] = slice<@string>(["Value 1", "Value 2"]),
-        ["Long-Key"] = slice<@string>(["Even Longer Value"])
+        ["My-Key"] = ["Value 1", "Value 2"],
+        ["Long-Key"] = ["Even Longer Value"]
     });
     if (!reflect.DeepEqual(m, want) || err != nil) {
         t.Fatalf("ReadMIMEHeader: %v, %v; want %v", m, err, want);
@@ -169,7 +165,7 @@ private static readonly @string fooBarˢᵇ = "Foo: bar\n\n"u8;
 public static void TestReadMIMEHeaderSingle(ж<testing.T> t) {
     var r = reader(fooBarˢ);
     var (m, err) = r.ReadMIMEHeader();
-    var want = new MIMEHeader(new map<@string, slice<@string>>{["Foo"] = slice<@string>(["bar"])});
+    var want = new MIMEHeader(new map<@string, slice<@string>>{["Foo"] = ["bar"]});
     if (!reflect.DeepEqual(m, want) || err != nil) {
         t.Fatalf("ReadMIMEHeader: %v, %v; want %v", m, err, want);
     }
@@ -183,7 +179,7 @@ internal partial struct TestReaderUpcomingHeaderKeys_type /*dyn*/ {
 // TestReaderUpcomingHeaderKeys is testing an internal function, but it's very
 // difficult to test well via the external API.
 public static void TestReaderUpcomingHeaderKeys(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestReaderUpcomingHeaderKeys_type>([new(
+    foreach (var (_, test) in range(slice<TestReaderUpcomingHeaderKeys_type>([new(
         input: "",
         want: 0
     ), new(
@@ -205,7 +201,7 @@ public static void TestReaderUpcomingHeaderKeys(ж<testing.T> t) {
         input: "A: v"u8 + strings.Repeat("\n", 1000),
         want: 1
     )
-    ])) {
+    ]))) {
         var r = reader(test.input);
         nint got = r.upcomingHeaderKeys();
         if (test.want != got) {
@@ -255,11 +251,11 @@ public static void TestReadMIMEHeaderNonCompliant(ж<testing.T> t) {
     var r = reader("Foo: bar\r\n"u8 + "Content-Language: en\r\n"u8 + "SID : 0\r\n"u8 + "Audio Mode : None\r\n"u8 + "Privilege : 127\r\n\r\n"u8);
     var (m, err) = r.ReadMIMEHeader();
     var want = new MIMEHeader(new map<@string, slice<@string>>{
-        ["Foo"] = slice<@string>(["bar"]),
-        ["Content-Language"] = slice<@string>(["en"]),
-        ["SID "] = slice<@string>(["0"]),
-        ["Audio Mode "] = slice<@string>(["None"]),
-        ["Privilege "] = slice<@string>(["127"])
+        ["Foo"] = ["bar"],
+        ["Content-Language"] = ["en"],
+        ["SID "] = ["0"],
+        ["Audio Mode "] = ["None"],
+        ["Privilege "] = ["127"]
     });
     if (!reflect.DeepEqual(m, want) || err != nil) {
         t.Fatalf("ReadMIMEHeader =\n%v, %v; want:\n%v", m, err, want);
@@ -281,12 +277,10 @@ public static void TestReadMIMEHeaderMalformed(ж<testing.T> t) {
         "Foo \tBar: foo\r\n\r\n",
         ": empty key\r\n\r\n"
     ]);
-    foreach (var (_, input) in inputs) {
+    foreach (var (_, input) in range(inputs)) {
         var r = reader(input);
-        {
-            var (m, err) = r.ReadMIMEHeader(); if (err == nil || AreEqual(err, io.EOF)) {
-                t.Errorf("ReadMIMEHeader(%q) = %v, %v; want nil, err", input, m, err);
-            }
+        var (m, err) = r.ReadMIMEHeader(); if (err == nil || AreEqual(err, io.EOF)) {
+            t.Errorf("ReadMIMEHeader(%q) = %v, %v; want nil, err", input, m, err);
         }
     }
 }
@@ -367,9 +361,9 @@ public static void TestReadMIMEHeaderTrimContinued(ж<testing.T> t) {
         t.Fatal(err);
     }
     var want = new MIMEHeader(new map<@string, slice<@string>>{
-        ["A"] = slice<@string>(["0"]),
-        ["B"] = slice<@string>(["1"]),
-        ["C"] = slice<@string>(["2 3 4"])
+        ["A"] = ["0"],
+        ["B"] = ["1"],
+        ["C"] = ["2 3 4"]
     });
     if (!reflect.DeepEqual(m, want)) {
         t.Fatalf("ReadMIMEHeader mismatch.\n got: %q\nwant: %q", m, want);
@@ -394,10 +388,8 @@ public static void TestReadMIMEHeaderAllocations(ж<testing.T> t) {
     }
     // 32k is large and we actually allocate substantially less,
     // but prior to the fix for #58975 we allocated ~400k in this case.
-    {
-        var (got, want) = (totalAlloc / (uint64)count, (uint64)32768); if (got > want) {
-            t.Fatalf("ReadMIMEHeader allocated %v bytes, want < %v", got, want);
-        }
+    var (got, want) = (totalAlloc / (uint64)count, (uint64)32768); if (got > want) {
+        t.Fatalf("ReadMIMEHeader allocated %v bytes, want < %v", got, want);
     }
 }
 
@@ -405,9 +397,7 @@ internal partial struct testReader {
     internal Func<slice<byte>, (nint, error)> read;
 }
 
-internal static (nint n, error err) Read(this testReader r, slice<byte> p) {
-    return r.read(p);
-}
+internal static (nint n, error err) Read(this testReader r, slice<byte> p) { return r.read(p); }
 
 public static void TestReadMIMEHeaderShortLimitLongLine(ж<testing.T> t) {
     // Small limit, long first line.
@@ -416,7 +406,7 @@ public static void TestReadMIMEHeaderShortLimitLongLine(ж<testing.T> t) {
             new textproto_internal_test_package.strings_ReaderжReader(strings.NewReader("K:")),
             new testReader(
                 read: (slice<byte> p) => {
-                    foreach (var i in range(p)) {
+                    foreach (var i in range(len(p))) {
                         p[i] = (byte)' ';
                     }
                     return (len(p), default);
@@ -435,7 +425,7 @@ internal partial struct readResponseTest {
     internal @string wantMsg;
 }
 
-internal static slice<readResponseTest> readResponseTests = slice<readResponseTest>([
+internal static slice<readResponseTest> readResponseTests = [
     new("230-Anonymous access granted, restrictions apply\n"u8 + "Read the file README.txt,\n"u8 + "230  please"u8,
         23,
         230,
@@ -459,11 +449,11 @@ internal static slice<readResponseTest> readResponseTests = slice<readResponseTe
         400,
         "A\nB\nC"
     )
-]);
+];
 
 // See https://www.ietf.org/rfc/rfc959.txt page 36.
 public static void TestRFC959Lines(ж<testing.T> t) {
-    foreach (var (i, tt) in readResponseTests) {
+    foreach (var (i, tt) in range(readResponseTests)) {
         var r = reader(tt.@in + "\nFOLLOWING DATA"u8);
         var (code, msg, err) = r.ReadResponse(tt.inCode);
         if (err != nil) {
@@ -521,10 +511,8 @@ public static void TestCommonHeaders(ж<testing.T> t) {
     @string want = contentLengthˢ;
     var bʗ1 = b;
     var n = testing.AllocsPerRun(200, () => {
-        {
-            var (x, _) = canonicalMIMEHeaderKey(bʗ1); if (x != want) {
-                t.Fatalf("canonicalMIMEHeaderKey(%q) = %q; want %q", bʗ1, x, want);
-            }
+        var (x, _) = canonicalMIMEHeaderKey(bʗ1); if (x != want) {
+            t.Fatalf("canonicalMIMEHeaderKey(%q) = %q; want %q", bʗ1, x, want);
         }
     });
     if (n > 0D) {
@@ -601,10 +589,10 @@ public static void BenchmarkReadMIMEHeader(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    foreach (var (_, vᴛ1) in slice<BenchmarkReadMIMEHeader_type>([
+    foreach (var (_, vᴛ1) in range(slice<BenchmarkReadMIMEHeader_type>([
         new("client_headers", clientHeaders),
         new("server_headers", serverHeaders)
-    ])) {
+    ]))) {
         ref var set = ref heap(new BenchmarkReadMIMEHeader_type(), out var Ꮡset);
         set = vᴛ1;
 
@@ -616,10 +604,8 @@ public static void BenchmarkReadMIMEHeader(ж<testing.B> Ꮡb) {
 
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 buf.WriteString(setʗ1.headers);
-                {
-                    var (_, err) = r.ReadMIMEHeader(); if (err != nil) {
-                        bΔ1.Fatal(err);
-                    }
+                var (_, err) = r.ReadMIMEHeader(); if (err != nil) {
+                    bΔ1.Fatal(err);
                 }
             }
         });
@@ -646,10 +632,8 @@ public static void BenchmarkUncommon(ж<testing.B> Ꮡb) {
         if (err != nil) {
             Ꮡb.Fatal(err);
         }
-        {
-            var (_, ok) = h[uncommonHeaderForˢ2, ꟷ]; if (!ok) {
-                Ꮡb.Fatal(missingResultHeaderˢ);
-            }
+        var (_, ok) = h[uncommonHeaderForˢ2, ꟷ]; if (!ok) {
+            Ꮡb.Fatal(missingResultHeaderˢ);
         }
     }
 }

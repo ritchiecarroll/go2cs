@@ -30,10 +30,8 @@ public static void TestCASTRejectionPaths(ж<testing.T> t) {
         testingOnlyRejectionOutcome = default;
     });
 
-    {
-        var err = fips140CAST(); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = fips140CAST(); if (err != nil) {
+        t.Fatal(err);
     }
 
     if (!rejected) {

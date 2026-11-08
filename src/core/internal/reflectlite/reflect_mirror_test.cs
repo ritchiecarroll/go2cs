@@ -15,8 +15,6 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = global::go.sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go;
 using global::go.go;
 using global::go.io;
@@ -25,7 +23,7 @@ using static global::go.@internal.reflectlite_internal_test_package;
 
 partial class reflectlite_test_package {
 
-internal static slice<@string> typeNames = slice<@string>([
+internal static slice<@string> typeNames = [
     "uncommonType",
     "arrayType",
     "chanType",
@@ -34,7 +32,7 @@ internal static slice<@string> typeNames = slice<@string>([
     "ptrType",
     "sliceType",
     "structType"
-]);
+];
 
 partial struct visitor {
     internal map<@string, map<@string, bool>> m;
@@ -46,7 +44,6 @@ internal static visitor newVisitor() {
 
     return v;
 }
-
 internal static bool filter(this visitor v, @string name) {
     return slices.Contains(typeNames, name);
 }
@@ -55,16 +52,14 @@ internal static ast.Visitor Visit(this visitor v, ast.Node n) {
     switch (n.type()) {
     case ж<ast.TypeSpec> x: {
         if (v.filter(x.Name.String())) {
-            {
-                var (st, ok) = x.Type._<ж<ast.StructType>>(ᐧ); if (ok) {
-                    v.m[x.Name.String()] = new map<@string, bool>();
-                    foreach (var (_, field) in st.Fields.List) {
-                        @string k = fmt.Sprintf("%s"u8, field.Type);
-                        if (len(field.Names) > 0) {
-                            k = field.Names[0].Name;
-                        }
-                        v.m[x.Name.String()].Set(k, true);
+            var (st, ok) = x.Type._<ж<ast.StructType>>(ᐧ); if (ok) {
+                v.m[x.Name.String()] = new map<@string, bool>();
+                foreach (var (_, field) in range(st.Fields.List)) {
+                    @string k = fmt.Sprintf("%s"u8, field.Type);
+                    if (len(field.Names) > 0) {
+                        k = field.Names[0].Name;
                     }
+                    v.m[x.Name.String()].Set(k, true);
                 }
             }
         }
@@ -104,21 +99,19 @@ public static partial void TestMirrorWithReflect(ж<testing.T> t) {
     // TODO when the dust clears, figure out what this should actually test.
     t.Skipf("reflect and reflectlite are out of sync for now");
     @string reflectDir = filepath.Join(Δruntime.GOROOT(), srcˢ, reflectˢ);
-    {
-        var (_, err) = os.Stat(reflectDir); if (os.IsNotExist(err)) {
-            // On some mobile builders, the test binary executes on a machine without a
-            // complete GOROOT source tree.
-            t.Skipf("GOROOT source not present");
-        }
+    var (_, err) = os.Stat(reflectDir); if (os.IsNotExist(err)) {
+        // On some mobile builders, the test binary executes on a machine without a
+        // complete GOROOT source tree.
+        t.Skipf("GOROOT source not present");
     }
 
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (rl, r) = (newVisitor(), newVisitor());
 
-    foreach (var (_, vᴛ1) in slice<TestMirrorWithReflect_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestMirrorWithReflect_type>([
         new(".", "reflectlite", rl),
         new(reflectDir, "reflect", r)
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestMirrorWithReflect_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -146,10 +139,8 @@ public static partial void TestMirrorWithReflect(ж<testing.T> t) {
             continue;
         }
         foreach (var (field, _) in r.m[typName]) {
-            {
-                var (_, ok) = rl.m[typName][field, ꟷ]; if (!ok) {
-                    t.Errorf(@"Field mismatch, reflect have ""%s"", relectlite does not.", field);
-                }
+            var (_, ok) = rl.m[typName][field, ꟷ]; if (!ok) {
+                t.Errorf(@"Field mismatch, reflect have ""%s"", relectlite does not.", field);
             }
         }
     }

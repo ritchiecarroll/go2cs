@@ -27,7 +27,7 @@ public static void TestEndsWithCSSKeyword(ж<testing.T> t) {
         new("imageurl", "url", false),
         new("image url", "url", true)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var got = endsWithCSSKeyword(slice<byte>(test.css), test.kw);
         if (got != test.want) {
             t.Errorf("want %t but got %t for css=%v, kw=%v", test.want, got, test.css, test.kw);
@@ -63,7 +63,7 @@ public static void TestIsCSSNmchar(ж<testing.T> t) {
         new(0x10000, true),
         new(0x110000, false)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var got = isCSSNmchar(test.rune);
         if (got != test.want) {
             t.Errorf("%q: want %t but got %t", (@string)test.rune, test.want, got);
@@ -105,16 +105,14 @@ public static void TestDecodeCSS(ж<testing.T> t) {
             "The <i>quick</i>,\r\n<span style='color:brown'>brown</span> fox jumps\u2028over the <canine class=\"lazy\">dog</canine>"
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string got1 = (@string)decodeCSS(slice<byte>(test.css));
         if (got1 != test.want) {
             t.Errorf("%q: want\n\t%q\nbut got\n\t%q", test.css, test.want, got1);
         }
         @string recoded = cssEscaper(got1);
-        {
-            @string got2 = (@string)decodeCSS(slice<byte>(recoded)); if (got2 != test.want) {
-                t.Errorf("%q: escape & decode not dual for %q", test.css, recoded);
-            }
+        @string got2 = (@string)decodeCSS(slice<byte>(recoded)); if (got2 != test.want) {
+            t.Errorf("%q: escape & decode not dual for %q", test.css, recoded);
         }
     }
 }
@@ -155,7 +153,7 @@ public static void TestSkipCSSSpace(ж<testing.T> t) {
         new("  foo", " foo"),
         new(@"\20", @"\20")
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string got = (@string)skipCSSSpace(slice<byte>(test.css));
         if (got != test.want) {
             t.Errorf("%q: want %q but got %q", test.css, test.want, got);
@@ -233,7 +231,7 @@ public static void TestCSSValueFilter(ж<testing.T> t) {
         new("<", "ZgotmplZ"),
         new(">", "ZgotmplZ")
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string got = cssValueFilter(test.css);
         if (got != test.want) {
             t.Errorf("%q: want %q but got %q", test.css, test.want, got);

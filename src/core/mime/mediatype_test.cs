@@ -18,7 +18,7 @@ public static void TestConsumeToken(ж<testing.T> t) {
         new @string[]{"", "", ""}.array(),
         new @string[]{" foo", "", " foo"}.array()
     }.array();
-    foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         var test = vᴛ1.Clone();
 
         var (token, rest) = consumeToken(test[0]);
@@ -47,7 +47,7 @@ public static void TestConsumeValue(ж<testing.T> t) {
         new @string[]{@"""C:\dev\go\robots.txt""", @"C:\dev\go\robots.txt", ""}.array(),
         new @string[]{@"""C:\新建文件夹\中文第二次测试.mp4""", @"C:\新建文件夹\中文第二次测试.mp4", ""}.array()
     }.array();
-    foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         var test = vᴛ1.Clone();
 
         var (value, rest) = consumeValue(test[0]);
@@ -77,7 +77,7 @@ public static void TestConsumeMediaParam(ж<testing.T> t) {
         new @string[]{@";  blah=""value"";name=""foo"" ", "blah", "value", @";name=""foo"" "}.array(),
         new @string[]{@";name=""foo"" ", "name", "foo", @" "}.array()
     }.array();
-    foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         var test = vᴛ1.Clone();
 
         var (param, value, rest) = consumeMediaParam(test[0]);
@@ -427,7 +427,7 @@ message/external-body; access-type=URL;
 public static void TestParseMediaType(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, test) in parseMediaTypeTests) {
+    foreach (var (_, test) in range(parseMediaTypeTests)) {
         var (mt, @params, err) = ParseMediaType(test.@in);
         if (err != nil) {
             if (test.t != ""u8) {
@@ -436,13 +436,11 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
             }
             continue;
         }
-        {
-            @string g = mt;
-            @string e = test.t; if (g != e) {
-                Ꮡt.Errorf("for input %#q, expected type %q, got %q",
-                    test.@in, e, g);
-                continue;
-            }
+        @string g = mt;
+        @string e = test.t; if (g != e) {
+            Ꮡt.Errorf("for input %#q, expected type %q, got %q",
+                test.@in, e, g);
+            continue;
         }
         if (len(@params) == 0 && len(test.p) == 0) {
             continue;
@@ -458,7 +456,7 @@ public static void BenchmarkParseMediaType(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     foreach (var _ᴛ1 in range(b.N)) {
-        foreach (var (_, test) in parseMediaTypeTests) {
+        foreach (var (_, test) in range(parseMediaTypeTests)) {
             ParseMediaType(test.@in);
         }
     }
@@ -470,7 +468,7 @@ internal partial struct badMediaTypeTest {
     internal @string err;
 }
 
-internal static slice<badMediaTypeTest> badMediaTypeTests = slice<badMediaTypeTest>([
+internal static slice<badMediaTypeTest> badMediaTypeTests = [
     new("bogus ;=========", "bogus", "mime: invalid media parameter"),
     // The following example is from real email delivered by gmail (error: missing semicolon)
     // and it is there to check behavior described in #19498
@@ -488,10 +486,10 @@ internal static slice<badMediaTypeTest> badMediaTypeTests = slice<badMediaTypeTe
     new("attachment; filename=foo-ä.html", "attachment", "mime: invalid media parameter"),
     new("attachment; filename=foo-Ã¤.html", "attachment", "mime: invalid media parameter"),
     new(@"attachment; filename *=UTF-8''foo-%c3%a4.html", "attachment", "mime: invalid media parameter")
-]);
+];
 
 public static void TestParseMediaTypeBogus(ж<testing.T> t) {
-    foreach (var (_, tt) in badMediaTypeTests) {
+    foreach (var (_, tt) in range(badMediaTypeTests)) {
         var (mt, @params, err) = ParseMediaType(tt.@in);
         if (err == nil) {
             t.Errorf("ParseMediaType(%q) = nil error; want parse error", tt.@in);
@@ -516,7 +514,7 @@ public static void BenchmarkParseMediaTypeBogus(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     foreach (var _ᴛ1 in range(b.N)) {
-        foreach (var (_, test) in badMediaTypeTests) {
+        foreach (var (_, test) in range(badMediaTypeTests)) {
             ParseMediaType(test.@in);
         }
     }
@@ -528,7 +526,7 @@ internal partial struct formatTest {
     internal @string want;
 }
 
-internal static slice<formatTest> formatTests = slice<formatTest>([
+internal static slice<formatTest> formatTests = [
     new("noslash", new map<@string, @string>{["X"] = "Y"}, "noslash; x=Y"), // e.g. Content-Disposition values (RFC 2183); issue 11289
     new("foo bar/baz", default, ""),
     new("foo/bar baz", default, ""),
@@ -548,10 +546,10 @@ internal static slice<formatTest> formatTests = slice<formatTest>([
     new("foo/bar", new map<@string, @string>{["a"] = "av", ["b"] = "bv", ["c"] = "cv"}, "foo/bar; a=av; b=bv; c=cv"),
     new("foo/bar", new map<@string, @string>{["0"] = "'", ["9"] = "'"}, "foo/bar; 0='; 9='"),
     new("foo", new map<@string, @string>{["bar"] = ""}, @"foo; bar=""""")
-]);
+];
 
 public static void TestFormatMediaType(ж<testing.T> t) {
-    foreach (var (i, tt) in formatTests) {
+    foreach (var (i, tt) in range(formatTests)) {
         @string got = FormatMediaType(tt.typ, tt.@params);
         if (got != tt.want) {
             t.Errorf("%d. FormatMediaType(%q, %v) = %q; want %q", i, tt.typ, tt.@params, got, tt.want);

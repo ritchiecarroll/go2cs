@@ -13,7 +13,7 @@ partial struct testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nint @out;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new("//go:build linux && go1.60", 60),
     new("//go:build ignore && go1.60", 60),
     new("//go:build ignore || go1.60", -1),
@@ -24,10 +24,10 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     new("//go:build !go1.60", -1),
     new("//go:build linux && go1.50 || darwin && go1.60", 50),
     new("//go:build linux && go1.50 || !(!darwin || !go1.60)", 50)
-]);
+];
 
 public static void TestGoVersion(ж<testing.T> t) {
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (x, err) = Parse(tt.@in);
         if (err != nil) {
             t.Fatal(err);

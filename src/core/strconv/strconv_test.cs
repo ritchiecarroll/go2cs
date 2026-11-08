@@ -21,7 +21,7 @@ partial struct mallocTestᴛ1 /*dyn*/ {
     internal Action fn;
 }
 internal static slice<mallocTestᴛ1> mallocTest;
-internal static void initᴛmallocTest() { mallocTest = slice<mallocTestᴛ1>([
+internal static void initᴛmallocTest() { mallocTest = [
     new(0, @"AppendInt(localBuf[:0], 123, 10)", () => {
         array<byte> localBuf = new(64);
         AppendInt(localBuf[..0], 123, 10);
@@ -53,7 +53,7 @@ internal static void initᴛmallocTest() { mallocTest = slice<mallocTestᴛ1>([
     new(0, @"ParseFloat(""1.0000000000000001110223024625156540423631668090820312500...001"", 64)", () => {
         ParseFloat(nextToOne, 64);
     })
-]); }
+]; }
 
 internal static slice<byte> oneMB; // Will be allocated to 1MB of random data by TestCountMallocs.
 
@@ -70,15 +70,13 @@ public static void TestCountMallocs(ж<testing.T> t) {
     }
     // Allocate a big messy buffer for AppendQuoteToASCII's test.
     oneMB = new slice<byte>(1000000);
-    foreach (var i in range(oneMB)) {
+    foreach (var i in range(len(oneMB))) {
         oneMB[i] = (byte)i;
     }
-    foreach (var (_, mt) in mallocTest) {
+    foreach (var (_, mt) in range(mallocTest)) {
         var allocs = testing.AllocsPerRun(100, mt.fn);
-        {
-            var max = (float64)mt.count; if (allocs > max) {
-                t.Errorf("%s: %v allocs, want <=%v", mt.desc, allocs, max);
-            }
+        var max = (float64)mt.count; if (allocs > max) {
+            t.Errorf("%s: %v allocs, want <=%v", mt.desc, allocs, max);
         }
     }
 }
@@ -130,10 +128,8 @@ public static void TestAllocationsFromBytes(ж<testing.T> t) {
 
     Action<ж<testing.T>> checkNoAllocs(Action f) => (ж<testing.T> tΔ1) => {
             tΔ1.Helper();
-            {
-                var allocs = testing.AllocsPerRun(runsPerTest, f); if (allocs != 0D) {
-                    tΔ1.Errorf("got %v allocs, want 0 allocs", allocs);
-                }
+            var allocs = testing.AllocsPerRun(runsPerTest, f); if (allocs != 0D) {
+                tΔ1.Errorf("got %v allocs, want 0 allocs", allocs);
             }
         };
 
@@ -203,16 +199,14 @@ public static void TestErrorPrefixes(ж<testing.T> t) {
         new(errUint64, "ParseUint")
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var (nerr, ok) = v.err._<ж<strconv.NumError>>(ᐧ);
         if (!ok) {
             t.Errorf("test %s, error was not a *NumError", v.want);
             continue;
         }
-        {
-            @string got = nerr.Func; if (got != v.want) {
-                t.Errorf("mismatching Func: got %s, want %s", got, v.want);
-            }
+        @string got = nerr.Func; if (got != v.want) {
+            t.Errorf("mismatching Func: got %s, want %s", got, v.want);
         }
     }
 }

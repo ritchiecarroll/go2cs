@@ -14,7 +14,7 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }
-internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
+internal static slice<compareTestsᴛ1> compareTests = [
     new(slice<byte>(""u8), slice<byte>(""u8), 0),
     new(slice<byte>("a"u8), slice<byte>(""u8), 1),
     new(slice<byte>(""u8), slice<byte>("a"u8), -1),
@@ -38,10 +38,10 @@ internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
     new(default, slice<byte>(""u8), 0),
     new(slice<byte>("a"u8), default, 1),
     new(default, slice<byte>("a"u8), -1)
-]);
+];
 
 public static void TestCompare(ж<testing.T> t) {
-    foreach (var (_, tt) in compareTests) {
+    foreach (var (_, tt) in range(compareTests)) {
         nint numShifts = 16;
         var buffer = new slice<byte>(len(tt.b) + numShifts);
         // vary the input alignment of tt.b
@@ -85,7 +85,7 @@ public static void TestCompareBytes(ж<testing.T> t) {
     nint n = lengths[len(lengths) - 1];
     var a = new slice<byte>(n + 1);
     var b = new slice<byte>(n + 1);
-    foreach (var (_, lenΔ1) in lengths) {
+    foreach (var (_, lenΔ1) in range(lengths)) {
         // randomish but deterministic data. No 0 or 255.
         for (nint i = 0; i < lenΔ1; i++) {
             a[i] = (byte)(1 + 31 * i % 254);

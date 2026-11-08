@@ -11,8 +11,7 @@ using static go.crypto.@internal.boring_package;
 partial class boring_internal_test_package {
 
 // Test that func init does not panic.
-public static void TestInit(ж<testing.T> t) {
-}
+public static void TestInit(ж<testing.T> t) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedUnreachableToˢ = (@string)"expected Unreachable to panic"u8;
@@ -23,16 +22,12 @@ public static void TestUnreachable(ж<testing.T> t) {
     try {
         defer(() => {
             if (Enabled) {
-                {
-                    var err = recover(); if (err == nil) {
-                        t.Fatal(expectedUnreachableToˢ);
-                    }
+                var err = recover(); if (err == nil) {
+                    t.Fatal(expectedUnreachableToˢ);
                 }
             } else {
-                {
-                    var err = recover(); if (err != nil) {
-                        t.Fatalf("expected Unreachable to be a no-op");
-                    }
+                var err = recover(); if (err != nil) {
+                    t.Fatalf("expected Unreachable to be a no-op");
                 }
             }
         }, ref ᒐ);

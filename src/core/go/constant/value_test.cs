@@ -15,7 +15,7 @@ using static global::go.go.constant_package;
 
 partial class constant_internal_test_package {
 
-internal static slice<@string> intTests = slice<@string>([
+internal static slice<@string> intTests = [
     // 0-octals
     @"0_123 = 0123",
     @"0123_456 = 0123456",
@@ -58,10 +58,10 @@ internal static slice<@string> intTests = slice<@string>([
     @"0b_0 = 0",
     @"0b10_11 = 0xb",
     @"0b_0010_1101 = 0x2d"
-]);
+];
 
 // The RHS operand may be a floating-point quotient n/d of two integer values n and d.
-internal static slice<@string> floatTests = slice<@string>([
+internal static slice<@string> floatTests = [
     // decimal floats
     @"1_2_3. = 123.",
     @"0_123. = 123.",
@@ -112,9 +112,9 @@ internal static slice<@string> floatTests = slice<@string>([
 
     @"0X_dead_cafe.p-10 = 0xdeadcafe.p-10",
     @"0x12_34.P1_2_3 = 0x1234.p123"
-]);
+];
 
-internal static slice<@string> imagTests = slice<@string>([
+internal static slice<@string> imagTests = [
     @"1_234i = 1234i",
     @"1_234_567i = 1234567i",
 
@@ -130,10 +130,10 @@ internal static slice<@string> imagTests = slice<@string>([
     @"1e+1000000000i = ?",
     @"6e5518446744i = ?",
     @"-6e5518446744i = ?"
-]);
+];
 
 internal static void testNumbers(ж<testing.T> t, token.Token kind, slice<@string> tests) {
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var a = strings.Split(test, " = ");
         if (len(a) != 2) {
             t.Errorf("invalid test case: %s", test);
@@ -145,14 +145,12 @@ internal static void testNumbers(ж<testing.T> t, token.Token kind, slice<@strin
         if (a[1] == "?") {
             y = MakeUnknown();
         } else {
-            {
-                var (ns, ds, ok) = strings.Cut(a[1], "/"); if (ok && kind == token.FLOAT) {
-                    var n = MakeFromLiteral(ns, token.INT, 0);
-                    var d = MakeFromLiteral(ds, token.INT, 0);
-                    y = BinaryOp(n, token.QUO, d);
-                } else {
-                    y = MakeFromLiteral(a[1], kind, 0);
-                }
+            var (ns, ds, ok) = strings.Cut(a[1], "/"); if (ok && kind == token.FLOAT) {
+                var n = MakeFromLiteral(ns, token.INT, 0);
+                var d = MakeFromLiteral(ds, token.INT, 0);
+                y = BinaryOp(n, token.QUO, d);
+            } else {
+                y = MakeFromLiteral(a[1], kind, 0);
             }
             if (y.Kind() == Unknown) {
                 throw panic(fmt.Sprintf("invalid test case: %s %d"u8, test, y.Kind()));
@@ -184,7 +182,7 @@ public static void TestNumbers(ж<testing.T> t) {
     testNumbers(t, token.IMAG, imagTests);
 }
 
-internal static slice<@string> opTests = slice<@string>([
+internal static slice<@string> opTests = [
     // unary operations
     @"+ 0 = 0",
     @"+ ? = ?",
@@ -319,10 +317,10 @@ internal static slice<@string> opTests = slice<@string>([
     @"10 >= ? = false"
 
     // etc.
-]);
+];
 
 public static void TestOps(ж<testing.T> t) {
-    foreach (var (_, test) in opTests) {
+    foreach (var (_, test) in range(opTests)) {
         var a = strings.Split(test, " ");
         nint i = 0; // operator index
 
@@ -383,13 +381,12 @@ internal static bool eql(global::go.go.constant_package.Value x, global::go.go.c
 // ----------------------------------------------------------------------------
 // String tests
 internal static @string xxx = strings.Repeat("x", 68);
-
 internal static @string issue14262 = @"""بموجب الشروط التالية نسب المصنف — يجب عليك أن تنسب العمل بالطريقة التي تحددها المؤلف أو المرخص (ولكن ليس بأي حال من الأحوال أن توحي وتقترح بتحول أو استخدامك للعمل).  المشاركة على قدم المساواة — إذا كنت يعدل ، والتغيير ، أو الاستفادة من هذا العمل ، قد ينتج عن توزيع العمل إلا في ظل تشابه او تطابق فى واحد لهذا الترخيص.""";
 
 partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string input, @short, exact;
 }
-internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
+internal static slice<stringTestsᴛ1> stringTests = [
     // Unknown
     new("", "unknown", "unknown"),
     new("0x", "unknown", "unknown"),
@@ -434,10 +431,10 @@ internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
     new("10i", "(0 + 10i)", "(0 + 10i)"),
     new("-10i", "(0 + -10i)", "(0 + -10i)"),
     new("1e9999i", "(0 + 1e+9999i)", "(0 + 0x.f8d4a9da224650a8cb2959e10d985ad92adbd44c62917e608b1f24c0e1b76b6f61edffeb15c135a4b601637315f7662f325f82325422b244286a07663c9415d2p+33216i)")
-]);
+];
 
 public static void TestString(ж<testing.T> t) {
-    foreach (var (_, test) in stringTests) {
+    foreach (var (_, test) in range(stringTests)) {
         var x = val(test.input);
         {
             @string got = x.String(); if (got != test.@short) {
@@ -471,39 +468,35 @@ internal static global::go.go.constant_package.Value val(@string lit) {
         return MakeBool(false);
     }}
 
-    {
-        var (@as, bs, ok) = strings.Cut(lit, "/"); if (ok) {
-            // assume fraction
-            var a = MakeFromLiteral(@as, token.INT, 0);
-            var b = MakeFromLiteral(bs, token.INT, 0);
-            return BinaryOp(a, token.QUO, b);
-        }
+    var (@as, bs, ok) = strings.Cut(lit, "/"); if (ok) {
+        // assume fraction
+        var a = MakeFromLiteral(@as, token.INT, 0);
+        var b = MakeFromLiteral(bs, token.INT, 0);
+        return BinaryOp(a, token.QUO, b);
     }
 
     token.Token tok = token.INT;
-    {
-        var (first, last) = (lit[0], lit[len(lit) - 1]);
-        switch (ᐧ) {
-        case {} when first == (byte)'"' || first == (byte)'`': {
-            tok = token.STRING;
-            lit = strings.ReplaceAll(lit, "_", " ");
-            break;
-        }
-        case {} when first is (byte)'\'': {
-            tok = token.CHAR;
-            break;
-        }
-        case {} when last is (byte)'i': {
-            tok = token.IMAG;
-            break;
-        }
-        default: {
-            if (!strings.HasPrefix(lit, "0x") && strings.ContainsAny(lit, "./Ee")) {
-                tok = token.FLOAT;
-            }
-            break;
-        }}
+    var (first, last) = (lit[0], lit[len(lit) - 1]);
+    switch (ᐧ) {
+    case {} when first == (byte)'"' || first == (byte)'`': {
+        tok = token.STRING;
+        lit = strings.ReplaceAll(lit, "_", " ");
+        break;
     }
+    case {} when first is (byte)'\'': {
+        tok = token.CHAR;
+        break;
+    }
+    case {} when last is (byte)'i': {
+        tok = token.IMAG;
+        break;
+    }
+    default: {
+        if (!strings.HasPrefix(lit, "0x") && strings.ContainsAny(lit, "./Ee")) {
+            tok = token.FLOAT;
+        }
+        break;
+    }}
 
     return MakeFromLiteral(lit, tok, 0);
 }
@@ -594,7 +587,7 @@ internal static global::go.go.constant_package.Value /*z*/ doOp(global::go.go.co
 
 // ----------------------------------------------------------------------------
 // Other tests
-internal static slice<@string> fracTests = slice<@string>([
+internal static slice<@string> fracTests = [
     "0",
     "1",
     "-1",
@@ -604,10 +597,10 @@ internal static slice<@string> fracTests = slice<@string>([
     "3.14159265358979323e-10",
     "1e100",
     "1e1000"
-]);
+];
 
 public static void TestFractions(ж<testing.T> t) {
-    foreach (var (_, test) in fracTests) {
+    foreach (var (_, test) in range(fracTests)) {
         var x = val(test);
         // We don't check the actual numerator and denominator because they
         // are unlikely to be 100% correct due to floatVal rounding errors.
@@ -622,15 +615,15 @@ public static void TestFractions(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> bytesTests = slice<@string>([
+internal static slice<@string> bytesTests = [
     "0",
     "1",
     "123456789",
     "123456789012345678901234567890123456789012345678901234567890"
-]);
+];
 
 public static void TestBytes(ж<testing.T> t) {
-    foreach (var (_, test) in bytesTests) {
+    foreach (var (_, test) in range(bytesTests)) {
         var x = val(test);
         var bytes = Bytes(x);
 
@@ -639,16 +632,12 @@ public static void TestBytes(ж<testing.T> t) {
             t.Errorf("%s: got %v; want empty byte slice", test, bytes);
         }
 
-        {
-            nint n = len(bytes); if (n > 0 && bytes[n - 1] == 0) {
-                t.Errorf("%s: got %v; want no leading 0 byte", test, bytes);
-            }
+        nint n = len(bytes); if (n > 0 && bytes[n - 1] == 0) {
+            t.Errorf("%s: got %v; want no leading 0 byte", test, bytes);
         }
 
-        {
-            var got = MakeFromBytes(bytes); if (!eql(got, x)) {
-                t.Errorf("%s: got %s; want %s (bytes = %v)", test, got, x, bytes);
-            }
+        var got = MakeFromBytes(bytes); if (!eql(got, x)) {
+            t.Errorf("%s: got %s; want %s (bytes = %v)", test, got, x, bytes);
         }
     }
 }
@@ -658,9 +647,9 @@ public static void TestUnknown(ж<testing.T> t) {
 // token.ADD ok below, operation is never considered
     slice<global::go.go.constant_package.Value> values = slice<global::go.go.constant_package.Value>([u, MakeBool(false), MakeString(""u8), MakeInt64(1), MakeFromLiteral("''", token.CHAR, 0), MakeFromLiteral("-1234567890123456789012345678901234567890", token.INT, 0), MakeFloat64(1.2D), MakeImag(MakeFloat64(1.2D))
     ]);
-    foreach (var (_, val) in values) {
+    foreach (var (_, val) in range(values)) {
         var (x, y) = (val, u);
-        foreach (var i in range(new nint[]{}.array(2))) {
+        foreach (var i in range(len(new nint[]{}.array(2)))) {
             if (i == 1) {
                 (x, y) = (y, x);
             }
@@ -685,7 +674,7 @@ public static void TestUnknown(ж<testing.T> t) {
 
 public static void TestMakeFloat64(ж<testing.T> t) {
     float64 zero = default;
-    foreach (var (_, arg) in slice<float64>([
+    foreach (var (_, arg) in range(slice<float64>([
         -math.MaxFloat32,
         -10D,
         -0.5D,
@@ -696,7 +685,7 @@ public static void TestMakeFloat64(ж<testing.T> t) {
         123456789.87654321e-23D,
         1e10D,
         math.MaxFloat64
-    ])) {
+    ]))) {
         var val = MakeFloat64(arg);
         if (val.Kind() != Float) {
             t.Errorf("%v: got kind = %d; want %d", arg, val.Kind(), Float);
@@ -710,7 +699,7 @@ public static void TestMakeFloat64(ж<testing.T> t) {
     }
 
     // infinity
-    foreach (var sign in range(slice<nint>([-1, 1]))) {
+    foreach (var sign in range(len(slice<nint>([-1, 1])))) {
         var arg = math.Inf(sign);
         var val = MakeFloat64(arg);
         if (val.Kind() != Unknown) {
@@ -724,15 +713,13 @@ internal partial struct makeTestCase {
     internal any arg, want;
 }
 
-internal static makeTestCase dup(global::go.go.constant_package.ΔKind k, any x) {
-    return new makeTestCase(k, x, x);
-}
+internal static makeTestCase dup(global::go.go.constant_package.ΔKind k, any x) { return new makeTestCase(k, x, x); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello"u8;
 
 public static void TestMake(ж<testing.T> t) {
-    foreach (var (_, test) in slice<makeTestCase>([
+    foreach (var (_, test) in range(slice<makeTestCase>([
         new(Bool, false, false),
         new(ΔString, helloˢ, helloˢ),
 
@@ -744,7 +731,7 @@ public static void TestMake(ж<testing.T> t) {
         new(Float, big.NewFloat(0D).OrTypedNil(), floatVal0.val.OrTypedNil()),
         dup(Float, big.NewFloat(2.0D).OrTypedNil()),
         dup(Float, big.NewRat(1, 3).OrTypedNil())
-    ])) {
+    ]))) {
         var val = Make(test.arg);
         var got = Val(val);
         if (val.Kind() != test.kind || !AreEqual(got, test.want)) {
@@ -779,7 +766,7 @@ partial struct bitLenTestsᴛ1 /*dyn*/ {
     internal int64 val;
     internal nint want;
 }
-internal static slice<bitLenTestsᴛ1> bitLenTests = slice<bitLenTestsᴛ1>([
+internal static slice<bitLenTestsᴛ1> bitLenTests = [
     new(0, 0),
     new(1, 1),
     new(-16, 5),
@@ -787,14 +774,12 @@ internal static slice<bitLenTestsᴛ1> bitLenTests = slice<bitLenTestsᴛ1>([
     new(4611686018427387904L, 63),
     new(-4611686018427387904L, 63),
     new(-9223372036854775808L, 64)
-]);
+];
 
 public static void TestBitLen(ж<testing.T> t) {
-    foreach (var (_, test) in bitLenTests) {
-        {
-            nint got = BitLen(MakeInt64(test.val)); if (got != test.want) {
-                t.Errorf("%v: got %v, want %v", test.val, got, test.want);
-            }
+    foreach (var (_, test) in range(bitLenTests)) {
+        nint got = BitLen(MakeInt64(test.val)); if (got != test.want) {
+            t.Errorf("%v: got %v, want %v", test.val, got, test.want);
         }
     }
 }

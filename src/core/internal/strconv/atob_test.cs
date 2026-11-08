@@ -16,7 +16,7 @@ partial struct atobTest {
     internal error err;
 }
 
-internal static slice<atobTest> atobtests = slice<atobTest>([
+internal static slice<atobTest> atobtests = [
     new("", false, ErrSyntax),
     new("asdf", false, ErrSyntax),
     new("0", false, default),
@@ -31,10 +31,10 @@ internal static slice<atobTest> atobtests = slice<atobTest>([
     new("TRUE", true, default),
     new("true", true, default),
     new("True", true, default)
-]);
+];
 
 public static void TestParseBool(ж<testing.T> t) {
-    foreach (var (_, test) in atobtests) {
+    foreach (var (_, test) in range(atobtests)) {
         var (b, e) = ParseBool(test.@in);
         if (b != test.@out || !AreEqual(e, test.err)) {
             t.Errorf("ParseBool(%s) = %v, %v, want %v, %v", test.@in, b, e, test.@out, test.err);
@@ -49,10 +49,8 @@ internal static map<bool, @string> boolString = new map<bool, @string>{
 
 public static void TestFormatBool(ж<testing.T> t) {
     foreach (var (b, s) in boolString) {
-        {
-            @string f = FormatBool(b); if (f != s) {
-                t.Errorf("FormatBool(%v) = %q; want %q", b, f, s);
-            }
+        @string f = FormatBool(b); if (f != s) {
+            t.Errorf("FormatBool(%v) = %q; want %q", b, f, s);
         }
     }
 }
@@ -63,13 +61,13 @@ partial struct appendBoolTest {
     internal slice<byte> @out;
 }
 
-internal static slice<appendBoolTest> appendBoolTests = slice<appendBoolTest>([
+internal static slice<appendBoolTest> appendBoolTests = [
     new(true, slice<byte>("foo "u8), slice<byte>("foo true"u8)),
     new(false, slice<byte>("foo "u8), slice<byte>("foo false"u8))
-]);
+];
 
 public static void TestAppendBool(ж<testing.T> t) {
-    foreach (var (_, test) in appendBoolTests) {
+    foreach (var (_, test) in range(appendBoolTests)) {
         var b = AppendBool(test.@in, test.b);
         if (!bytes.Equal(b, test.@out)) {
             t.Errorf("AppendBool(%q, %v) = %q; want %q", test.@in, test.b, b, test.@out);

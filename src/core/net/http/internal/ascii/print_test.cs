@@ -39,16 +39,14 @@ public static void TestEqualFold(ж<testing.T> t) {
             want: false
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestEqualFold_type(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
-            {
-                var got = EqualFold(ttʗ1.a, ttʗ1.b); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("AsciiEqualFold(%q,%q): got %v want %v", ttʗ1.a, ttʗ1.b, got, ttʗ1.want);
-                }
+            var got = EqualFold(ttʗ1.a, ttʗ1.b); if (got != ttʗ1.want) {
+                tΔ1.Errorf("AsciiEqualFold(%q,%q): got %v want %v", ttʗ1.a, ttʗ1.b, got, ttʗ1.want);
             }
         });
     }
@@ -97,16 +95,14 @@ public static void TestIsPrint(ж<testing.T> t) {
             want: false
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIsPrint_type(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
-            {
-                var got = IsPrint(ttʗ1.@in); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("IsASCIIPrint(%q): got %v want %v", ttʗ1.@in, got, ttʗ1.want);
-                }
+            var got = IsPrint(ttʗ1.@in); if (got != ttʗ1.want) {
+                tΔ1.Errorf("IsASCIIPrint(%q): got %v want %v", ttʗ1.@in, got, ttʗ1.want);
             }
         });
     }

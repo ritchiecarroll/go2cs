@@ -80,7 +80,7 @@ public static bool Less(this ref multiSorter ms, nint i, nint j) {
     return ms.less[k](p, q);
 }
 
-internal static slice<Change> changes = slice<Change>([
+internal static slice<Change> changes = [
     new("gri", "Go", 100),
     new("ken", "C", 150),
     new("glenda", "Go", 200),
@@ -90,7 +90,7 @@ internal static slice<Change> changes = slice<Change>([
     new("dmr", "C", 100),
     new("r", "C", 150),
     new("gri", "Smalltalk", 80)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object byUserˢ = (@string)"By user:"u8;

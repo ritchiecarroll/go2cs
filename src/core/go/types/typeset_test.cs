@@ -7,8 +7,6 @@ using ast = global::go.go.ast_package;
 using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.go;
 using static global::go.go.types_package;
 
@@ -65,7 +63,7 @@ public static void TestTypeSetString(ж<testing.T> t) {
 
         // type check
         ref var conf = ref heap(new global::go.go.types_package.Config(), out var Ꮡconf);
-        (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, slice<ж<ast.File>>([@file]), nil);
+        (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, [@file], nil);
         if (err != nil) {
             t.Fatalf("%s: %v (invalid test case)", body, err);
         }

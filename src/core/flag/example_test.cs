@@ -55,7 +55,7 @@ internal static error ΔSet(this ref interval i, @string value) {
     if (len(i) > 0) {
         return errors.New(intervalFlagAlreadySetˢ);
     }
-    foreach (var (_, dt) in strings.Split(value, ",")) {
+    foreach (var (_, dt) in range(strings.Split(value, ","))) {
         var (duration, err) = time.ParseDuration(dt);
         if (err != nil) {
             return err;

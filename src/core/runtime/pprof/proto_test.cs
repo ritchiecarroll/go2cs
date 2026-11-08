@@ -18,8 +18,6 @@ using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.os;
 using io = io_package;
@@ -67,10 +65,8 @@ public static void TestConvertCPUProfileNoSamples(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("translateCPUProfile: %v", err);
     }
-    {
-        var errΔ1 = p.Write(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf)); if (errΔ1 != nil) {
-            t.Fatalf("writing profile: %v", errΔ1);
-        }
+    var errΔ1 = p.Write(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf)); if (errΔ1 != nil) {
+        t.Fatalf("writing profile: %v", errΔ1);
     }
 
     (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
@@ -89,14 +85,10 @@ public static void TestConvertCPUProfileNoSamples(ж<testing.T> t) {
 }
 
 //go:noinline
-internal static partial void f1() {
-    f1();
-}
+internal static partial void f1() { f1(); }
 
 //go:noinline
-internal static partial void f2() {
-    f2();
-}
+internal static partial void f2() { f2(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string procSelfMapsˢ => ref procSelfMapsˢᵇ;
@@ -241,14 +233,14 @@ internal static void checkProfile(ж<testing.T> t, ж<profile.Profile> Ꮡp, int
     }
     // Clear line info since it is not in the expected samples.
     // If we used f1 and f2 above, then the samples will have line info.
-    foreach (var (_, s) in p.Sample) {
-        foreach (var (_, l) in s.Location) {
+    foreach (var (_, s) in range(p.Sample)) {
+        foreach (var (_, l) in range(s.Location)) {
             l.Line = default;
         }
     }
     if (fmtJSON(p.Sample) != fmtJSON(samples)) { // ignore unexported fields
         if (len(p.Sample) == len(samples)) {
-            foreach (var i in range(p.Sample)) {
+            foreach (var i in range(len(p.Sample))) {
                 if (!reflect.DeepEqual(p.Sample[i].OrTypedNil(), samples[i].OrTypedNil())) {
                     t.Errorf("sample %d = %v\nwant = %v\n", i, fmtJSON(p.Sample[i].OrTypedNil()), fmtJSON(samples[i].OrTypedNil()));
                 }
@@ -364,7 +356,7 @@ private static readonly @string withDeletedFileˢᵇ = "WithDeletedFile"u8;
 
 public static void TestProcSelfMaps(ж<testing.T> t) {
     void f(ж<testing.T> tΔ1, @string input) {
-        foreach (var (tx, tt) in strings_package.Split(input, "\n\n")) {
+        foreach (var (tx, tt) in range(strings_package.Split(input, "\n\n"))) {
             var (@in, @out, ok) = strings_package.Cut(tt, "->\n");
             if (!ok) {
                 tΔ1.Fatal(malformedTestCaseˢ);
@@ -415,7 +407,7 @@ public static void TestMapping(ж<testing.T> t) {
 
     // GoOnly includes only Go symbols that runtime will symbolize.
     // Go+C includes C symbols that runtime will not symbolize.
-    foreach (var (_, traceback) in slice<@string>(["GoOnly", "Go+C"])) {
+    foreach (var (_, traceback) in range(slice<@string>(["GoOnly", "Go+C"]))) {
         t.Run("traceback"u8 + traceback, (ж<testing.T> tΔ1) => {
             var cmd = exec.Command(testenv.GoToolPath(new pprof_internal_test_package.testing_TжTB(tΔ1)), runˢ, prog);
             if (traceback != "GoOnly"u8) {
@@ -436,7 +428,7 @@ public static void TestMapping(ж<testing.T> t) {
 
             var hit = new map<ж<profile.Mapping>, bool>();
             var miss = new map<ж<profile.Mapping>, bool>();
-            foreach (var (_, loc) in prof.Location) {
+            foreach (var (_, loc) in range(prof.Location)) {
                 if (symbolized(loc)) {
                     hit[loc.Mapping] = true;
                 } else {
@@ -447,7 +439,7 @@ public static void TestMapping(ж<testing.T> t) {
                 tΔ1.Log(noLocationWithMissingˢ);
             }
 
-            foreach (var (_, m) in prof.Mapping) {
+            foreach (var (_, m) in range(prof.Mapping)) {
                 if (miss[m] && m.HasFunctions) {
                     tΔ1.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization", m.OrTypedNil());
                     continue;
@@ -462,7 +454,7 @@ public static void TestMapping(ж<testing.T> t) {
                 // The test code was arranged to have PCs from C and
                 // they are not symbolized.
                 // Check no Location containing those unsymbolized PCs contains multiple lines.
-                foreach (var (i, loc) in prof.Location) {
+                foreach (var (i, loc) in range(prof.Location)) {
                     if (!symbolized(loc) && len(loc.Line) > 1) {
                         tΔ1.Errorf("Location[%d] contains unsymbolized PCs and multiple lines: %v", i, loc.OrTypedNil());
                     }
@@ -494,10 +486,8 @@ internal static readonly object wantProfileWithAtLeastˢ = (@string)"want profil
 // are set correctly.
 public static void TestFakeMapping(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
-            t.Fatalf("failed to write heap profile: %v", errΔ1);
-        }
+    var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+        t.Fatalf("failed to write heap profile: %v", errΔ1);
     }
     var (prof, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
     if (err != nil) {
@@ -510,14 +500,14 @@ public static void TestFakeMapping(ж<testing.T> t) {
 
     var hit = new map<ж<profile.Mapping>, bool>();
     var miss = new map<ж<profile.Mapping>, bool>();
-    foreach (var (_, loc) in prof.Location) {
+    foreach (var (_, loc) in range(prof.Location)) {
         if (symbolized(loc)) {
             hit[loc.Mapping] = true;
         } else {
             miss[loc.Mapping] = true;
         }
     }
-    foreach (var (_, m) in prof.Mapping) {
+    foreach (var (_, m) in range(prof.Mapping)) {
         if (miss[m] && m.HasFunctions) {
             t.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization", m.OrTypedNil());
             continue;
@@ -547,9 +537,7 @@ internal static error errWrite = errors.New("error from writer");
 internal partial struct errWriter {
 }
 
-internal static (nint, error) Write(this errWriter _, slice<byte> p) {
-    return (0, errWrite);
-}
+internal static (nint, error) Write(this errWriter _, slice<byte> p) { return (0, errWrite); }
 
 public static partial void TestWriteToErr(ж<testing.T> t) {
     var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.errWriterжWriter(Ꮡ(new errWriter())), 0);

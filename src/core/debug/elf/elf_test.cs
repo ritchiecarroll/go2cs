@@ -14,7 +14,7 @@ internal partial struct nameTest {
     internal @string str;
 }
 
-internal static slice<nameTest> nameTests = slice<nameTest>([
+internal static slice<nameTest> nameTests = [
     new(ELFOSABI_LINUX, "ELFOSABI_LINUX"),
     new(ET_EXEC, "ET_EXEC"),
     new(EM_860, "EM_860"),
@@ -40,10 +40,10 @@ internal static slice<nameTest> nameTests = slice<nameTest>([
     new(ET_LOOS + 5, "ET_LOOS+5"),
     new((global::go.debug.elf_package.ProgFlag)0x50, "0x50"),
     new(COMPRESS_ZLIB + 2, "COMPRESS_ZSTD+1")
-]);
+];
 
 public static void TestNames(ж<testing.T> t) {
-    foreach (var (i, tt) in nameTests) {
+    foreach (var (i, tt) in range(nameTests)) {
         @string s = fmt.Sprint(tt.val);
         if (s != tt.str) {
             t.Errorf("#%d: Sprint(%d) = %q, want %q", i, tt.val, s, tt.str);

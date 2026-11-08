@@ -10,21 +10,19 @@ using io = io_package;
 using os = os_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.compress.zlib_package;
 
 partial class zlib_internal_test_package {
 
-internal static slice<@string> filenames = slice<@string>([
+internal static slice<@string> filenames = [
     "../testdata/gettysburg.txt",
     "../testdata/e.txt",
     "../testdata/pi.txt"
-]);
+];
 
-internal static slice<@string> data = slice<@string>([
+internal static slice<@string> data = [
     "test a reasonable sized string that can be compressed"
-]);
+];
 
 // Tests that compressing and then decompressing the given file at the given compression level and dictionary
 // yields equivalent bytes to the original file.
@@ -167,7 +165,7 @@ internal static void testFileLevelDictReset(ж<testing.T> t, @string fn, nint le
 }
 
 public static void TestWriter(ж<testing.T> t) {
-    foreach (var (i, s) in data) {
+    foreach (var (i, s) in range(data)) {
         var b = slice<byte>(s);
         @string tag = fmt.Sprintf("#%d"u8, i);
         testLevelDict(t, tag, b, DefaultCompression, ""u8);
@@ -180,7 +178,7 @@ public static void TestWriter(ж<testing.T> t) {
 }
 
 public static void TestWriterBig(ж<testing.T> t) {
-    foreach (var (i, fn) in filenames) {
+    foreach (var (i, fn) in range(filenames)) {
         testFileLevelDict(t, fn, DefaultCompression, ""u8);
         testFileLevelDict(t, fn, NoCompression, ""u8);
         testFileLevelDict(t, fn, HuffmanOnly, ""u8);
@@ -202,7 +200,7 @@ private static readonly @string dictionaryᶜᵇ = "0123456789."u8;
 
 public static void TestWriterDict(ж<testing.T> t) {
     @string dictionary = dictionaryᶜ;
-    foreach (var (i, fn) in filenames) {
+    foreach (var (i, fn) in range(filenames)) {
         testFileLevelDict(t, fn, DefaultCompression, dictionary);
         testFileLevelDict(t, fn, NoCompression, dictionary);
         testFileLevelDict(t, fn, HuffmanOnly, dictionary);
@@ -224,7 +222,7 @@ private static readonly @string dictionaryᶜ1ᵇ = "0123456789."u8;
 
 public static void TestWriterReset(ж<testing.T> t) {
     @string dictionary = dictionaryᶜ1;
-    foreach (var (_, fn) in filenames) {
+    foreach (var (_, fn) in range(filenames)) {
         testFileLevelDictReset(t, fn, NoCompression, default);
         testFileLevelDictReset(t, fn, DefaultCompression, default);
         testFileLevelDictReset(t, fn, HuffmanOnly, default);

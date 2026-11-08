@@ -18,7 +18,7 @@ partial class gccgoimporter_internal_test_package {
 partial struct typeParserTestsᴛ1 /*dyn*/ {
     internal @string id, typ, want, underlying, methods;
 }
-internal static slice<typeParserTestsᴛ1> typeParserTests = slice<typeParserTestsᴛ1>([
+internal static slice<typeParserTestsᴛ1> typeParserTests = [
     new(id: "foo", typ: "<type -1>", want: "int8"),
     new(id: "foo", typ: "<type 1 *<type -19>>", want: "*error"),
     new(id: "foo", typ: "<type 1 *any>", want: "unsafe.Pointer"),
@@ -34,14 +34,14 @@ internal static slice<typeParserTestsᴛ1> typeParserTests = slice<typeParserTes
     new(id: "foo", typ: "<type 1 struct { I8 <type -1>; I16 <type -2> \"i16\"; }>", want: "struct{I8 int8; I16 int16 \"i16\"}"),
     new(id: "foo", typ: "<type 1 interface { Foo (a <type -1>, b <type -2>) <type -1>; Bar (? <type -2>, ? ...<type -1>) (? <type -2>, ? <type -1>); Baz (); }>", want: "interface{Bar(int16, ...int8) (int16, int8); Baz(); Foo(a int8, b int16) int8}"),
     new(id: "foo", typ: "<type 1 (? <type -1>) <type -2>>", want: "func(int8) int16")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testGoxˢ => ref testGoxˢᵇ;
 private static readonly @string testGoxˢᵇ = "test.gox"u8;
 
 public static void TestTypeParser(ж<testing.T> t) {
-    foreach (var (_, test) in typeParserTests) {
+    foreach (var (_, test) in range(typeParserTests)) {
         ref var p = ref heap(new global::go.go.@internal.gccgoimporter_package.parser(), out var Ꮡp);
         Ꮡp.init(testGoxˢ, new gccgoimporter_internal_test_package.strings_ReaderжReader(strings.NewReader(test.typ)), new map<@string, ж<types.Package>>());
         p.version = "v2";
@@ -55,10 +55,8 @@ public static void TestTypeParser(ж<testing.T> t) {
         }
 
         // interfaces must be explicitly completed
-        {
-            var (ityp, _) = typ._<ж<types.Interface>>(ᐧ); if (ityp != nil) {
-                ityp.Complete();
-            }
+        var (ityp, _) = typ._<ж<types.Interface>>(ᐧ); if (ityp != nil) {
+            ityp.Complete();
         }
 
         @string got = typ.String();

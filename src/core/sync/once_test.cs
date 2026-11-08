@@ -5,8 +5,6 @@ namespace go;
 
 using static sync_package;
 using Δtesting = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
 
@@ -24,10 +22,8 @@ internal static void run(ж<Δtesting.T> t, ж<Δsync.Once> once, ж<one> Ꮡo, 
     once.Do(() => {
         Ꮡo.Value.Increment();
     });
-    {
-        one v = o; if (v != 1) {
-            t.Errorf("once failed inside run: %d is not 1", v);
-        }
+    one v = o; if (v != 1) {
+        t.Errorf("once failed inside run: %d is not 1", v);
     }
     c.ᐸꟷ(true);
 }
@@ -54,10 +50,8 @@ public static void TestOncePanic(ж<Δtesting.T> t) {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r == nil) {
-                        t.Fatalf("Once.Do did not panic");
-                    }
+                var r = recover(); if (r == nil) {
+                    t.Fatalf("Once.Do did not panic");
                 }
             }, ref ᒐ);
             Ꮡonce.Do(() => {

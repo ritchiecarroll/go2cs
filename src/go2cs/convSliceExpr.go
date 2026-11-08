@@ -179,9 +179,10 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 					// For a NAMED array type (`*pageBits` → `ref pageBits b`) that value is the wrapper,
 					// which has no slice/range members — reach its underlying `array<T>` via `.Value`
 					// (`b.Value[..]`). For an ANONYMOUS array (`*[N]T` → `ref array<T> p`) the value IS the
-					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023).
+					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023). The
+					// property is the wrapper's own, so a type named Value spells it NamedWrapperValue.
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident += ".Value"
+						ident += "." + v.wrapperValueMember(ptr.Elem())
 					}
 				} else {
 					// A pointer-to-array BOX (a local, field, or call result) is sliced through the box. A
@@ -714,9 +715,18 @@ func typeParamIsNumericWithFloat(tp *types.TypeParam) bool {
 	return hasFloat
 }
 
-// typeParamIsStringByteUnion reports whether the type parameter's constraint is exactly Go's
-// `string | []byte` union (in either order) — the shape golib's IByteSeq<byte> models. Used to
-// widen a FUNC-LITERAL parameter of that type to the interface (a lambda has no where-clause).
+// typeParamIsStringByteUnion reports whether the type parameter's type set is Go's string-or-bytes
+// union: exactly two terms, one the unnamed `string` and one the unnamed `[]byte`, each with or
+// without `~`, in either order, written inline or through a named constraint (`type Stringish
+// interface{ ~[]byte | ~string }`). That is the shape golib's IByteSeq<TSelf, byte> models, and it is
+// decided here from the TYPE SET so the definition site (getGenericDefinition's constraint) and the
+// slice, conversion and construction sites always agree.
+//
+// A NAMED term (crypto/x509's `net.IP | string`) does not count, although its core type is []byte:
+// a named string or []byte type's C# struct does not implement IByteSeq, so constraining such a
+// parameter to it would reject the type argument Go instantiates it with (CS0315). For the same
+// reason a `~` term still cannot be satisfied in C# by a NAMED string or []byte type argument, which
+// Go allows; nothing in the corpus instantiates one.
 func typeParamIsStringByteUnion(tp *types.TypeParam) bool {
 	iface, ok := tp.Constraint().Underlying().(*types.Interface)
 
@@ -736,15 +746,15 @@ func typeParamIsStringByteUnion(tp *types.TypeParam) bool {
 		for j := range union.Len() {
 			terms++
 
-			switch u := union.Term(j).Type().Underlying().(type) {
+			switch u := types.Unalias(union.Term(j).Type()).(type) {
 			case *types.Basic:
-				if u.Info()&types.IsString != 0 {
+				if u.Kind() == types.String {
 					sawString = true
 				} else {
 					return false
 				}
 			case *types.Slice:
-				if basic, ok := u.Elem().Underlying().(*types.Basic); ok && basic.Kind() == types.Byte {
+				if basic, ok := types.Unalias(u.Elem()).(*types.Basic); ok && basic.Kind() == types.Byte {
 					sawByteSlice = true
 				} else {
 					return false

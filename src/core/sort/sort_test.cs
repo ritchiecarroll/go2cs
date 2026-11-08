@@ -21,9 +21,7 @@ using static go.sort_internal_test_package;
 partial class sort_test_package {
 
 internal static array<nint> ints = new nint[]{74, 59, 238, -784, 9845, 959, 905, 0, 0, 42, 7586, -5467984, 7586}.array();
-
 internal static array<float64> float64s = new float64[]{74.3D, 59.0D, Δmath.Inf(1), 238.2D, -784.0D, 2.3D, Δmath.NaN(), Δmath.NaN(), Δmath.Inf(-1), 9845.768D, -959.7485D, 905D, 7.8D, 7.8D}.array();
-
 internal static array<@string> stringsData = new @string[]{"", "Hello", "foo", "bar", "foo", "f00", "%*&^*&^&", "***"}.array();
 
 public static void TestSortIntSlice(ж<testing.T> t) {
@@ -146,7 +144,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> t) {
 public static void TestBreakPatterns(ж<testing.T> t) {
     // Special slice used to trigger breakPatterns.
     var data = new slice<nint>(30);
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = 10;
     }
     data[(len(data) / 4) * 1] = 0;
@@ -167,7 +165,7 @@ public static void TestReverseRange(ж<testing.T> t) {
     var data1 = slice<nint>([1, 2, 3, 4, 5, 6, 7]);
     var data2 = slice<nint>([1, 2, 5, 4, 3, 6, 7]);
     sort_internal_test_package.ReverseRange((sort.IntSlice)data1, 2, 5);
-    foreach (var (i, v) in data1) {
+    foreach (var (i, v) in range(data1)) {
         if (v != data2[i]) {
             t.Fatalf("reverseRange didn't work");
         }
@@ -181,14 +179,12 @@ partial struct nonDeterministicTestingData {
 internal static nint Len(this ref nonDeterministicTestingData t) {
     return 500;
 }
-
 internal static bool Less(this ref nonDeterministicTestingData t, nint i, nint j) {
     if (i < 0 || j < 0 || i >= t.Len() || j >= t.Len()) {
         throw panic("nondeterministic comparison out of bounds");
     }
     return t.r.Float32() < 0.5F;
 }
-
 internal static void Swap(this ref nonDeterministicTestingData t, nint i, nint j) {
     if (i < 0 || j < 0 || i >= t.Len() || j >= t.Len()) {
         throw panic("nondeterministic comparison out of bounds");
@@ -201,10 +197,8 @@ public static void TestNonDeterministicComparison(ж<testing.T> t) {
         // Ensure that sort.Sort does not panic when Less returns inconsistent results.
         // See https://golang.org/issue/14377.
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    t.Error(r);
-                }
+            var r = recover(); if (r != nil) {
+                t.Error(r);
             }
         }, ref ᒐ);
 
@@ -225,7 +219,7 @@ public static void BenchmarkSortString1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var i in range(unsorted)) {
+    foreach (var i in range(len(unsorted))) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -243,7 +237,7 @@ public static void BenchmarkSortString1K_Slice(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var i in range(unsorted)) {
+    foreach (var i in range(len(unsorted))) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -262,7 +256,7 @@ public static void BenchmarkStableString1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var i in range(unsorted)) {
+    foreach (var i in range(len(unsorted))) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -340,7 +334,7 @@ public static void BenchmarkStableInt1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<nint>((1 << 10));
-    foreach (var i in range(unsorted)) {
+    foreach (var i in range(len(unsorted))) {
         unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
@@ -357,7 +351,7 @@ public static void BenchmarkStableInt1K_Slice(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<nint>((1 << 10));
-    foreach (var i in range(unsorted)) {
+    foreach (var i in range(len(unsorted))) {
         unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
@@ -439,15 +433,11 @@ partial struct testingData {
     internal nint ncmp, nswap;
 }
 
-internal static nint Len(this ref testingData d) {
-    return len(d.data);
-}
-
+internal static nint Len(this ref testingData d) { return len(d.data); }
 internal static bool Less(this ref testingData d, nint i, nint j) {
     d.ncmp++;
     return d.data[i] < d.data[j];
 }
-
 internal static void Swap(this ref testingData d, nint i, nint j) {
     if (d.nswap >= d.maxswap) {
         d.t.Fatalf("%s: used %d swaps sorting slice of %d", d.desc, d.nswap, len(d.data));
@@ -467,13 +457,13 @@ internal static nint lg(nint n) {
 internal static void testBentleyMcIlroy(ж<testing.T> t, Action<sort.Interface> sort, Func<nint, nint> maxswap) {
     var sizes = slice<nint>([100, 1023, 1024, 1025]);
     if (testing.Short()) {
-        sizes = slice<nint>([100, 127, 128, 129]);
+        sizes = [100, 127, 128, 129];
     }
     var dists = slice<@string>(["sawtooth", "rand", "stagger", "plateau", "shuffle"]);
     var modes = slice<@string>(["copy", "reverse", "reverse1", "reverse2", "sort", "dither"]);
     array<nint> tmp1 = new(1025);
     array<nint> tmp2 = new(1025);
-    foreach (var (_, n) in sizes) {
+    foreach (var (_, n) in range(sizes)) {
         for (nint m = 1; m < 2 * n; m *= 2) {
             for (nint dist = 0; dist < _NDist; dist++) {
                 nint j = 0;
@@ -605,9 +595,7 @@ partial struct adversaryTestingData {
     internal nint gas;         // special value for unset elements, higher than everything else
 }
 
-internal static nint Len(this ref adversaryTestingData d) {
-    return len(d.data);
-}
+internal static nint Len(this ref adversaryTestingData d) { return len(d.data); }
 
 internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
     if (d.ncmp >= d.maxcmp) {
@@ -655,7 +643,7 @@ public static void TestAdversary(ж<testing.T> t) {
     var d = newAdversaryTestingData(t, size, maxcmp);
     Sort(new sort_test_package.adversaryTestingDataжInterface(d)); // This should degenerate to heapsort.
     // Check data is fully populated and sorted.
-    foreach (var (i, v) in d.data) {
+    foreach (var (i, v) in range(d.data)) {
         if (v != i) {
             t.Fatalf("adversary data not fully sorted");
         }
@@ -677,21 +665,13 @@ partial struct intPairsᴛ1 /*dyn*/ {
 partial struct intPairs /*[]intPairsᴛ1*/;
 
 // IntPairs compare on a only.
-internal static nint Len(this intPairs d) {
-    return len(d);
-}
-
-internal static bool Less(this intPairs d, nint i, nint j) {
-    return d[i].a < d[j].a;
-}
-
-internal static void Swap(this intPairs d, nint i, nint j) {
-    (d[i], d[j]) = (d[j], d[i]);
-}
+internal static nint Len(this intPairs d) { return len(d); }
+internal static bool Less(this intPairs d, nint i, nint j) { return d[i].a < d[j].a; }
+internal static void Swap(this intPairs d, nint i, nint j) { (d[i], d[j]) = (d[j], d[i]); }
 
 // Record initial order in B.
 internal static void initB(this intPairs d) {
-    foreach (var i in range(d)) {
+    foreach (var i in range(len(d))) {
         d[i].b = i;
     }
 }
@@ -762,7 +742,7 @@ public static void TestStability(ж<testing.T> t) {
     }
 }
 
-internal static slice<nint> countOpsSizes = slice<nint>([100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000]);
+internal static slice<nint> countOpsSizes = [100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object countingSkippedAsNonˢ = (@string)"Counting skipped as non-verbose mode."u8;
@@ -775,7 +755,7 @@ internal static void countOps(ж<testing.T> t, Action<sort.Interface> algo, @str
     if (!testing.Verbose()) {
         t.Skip(countingSkippedAsNonˢ);
     }
-    foreach (var (_, n) in sizes) {
+    foreach (var (_, n) in range(sizes)) {
         ref var td = ref heap<testingData>(new testingData(
             desc: name,
             t: t,
@@ -794,17 +774,12 @@ internal static void countOps(ж<testing.T> t, Action<sort.Interface> algo, @str
 internal static ref readonly @string stableˢ => ref stableˢᵇ;
 private static readonly @string stableˢᵇ = "Stable"u8;
 
-public static void TestCountStableOps(ж<testing.T> t) {
-    countOps(t, Stable, stableˢ);
-}
-
+public static void TestCountStableOps(ж<testing.T> t) { countOps(t, Stable, stableˢ); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sortˢ => ref sortˢᵇ;
 private static readonly @string sortˢᵇ = "Sort  "u8;
 
-public static void TestCountSortOps(ж<testing.T> t) {
-    countOps(t, Sort, sortˢ);
-}
+public static void TestCountSortOps(ж<testing.T> t) { countOps(t, Sort, sortˢ); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string raceˢ => ref raceˢᵇ;
@@ -848,28 +823,11 @@ internal static void bench(ж<testing.B> Ꮡb, nint size, Action<sort.Interface>
 internal static ref readonly @string sortˢ2 => ref sortˢ2ᵇ;
 private static readonly @string sortˢ2ᵇ = "Sort"u8;
 
-public static void BenchmarkSort1e2(ж<testing.B> b) {
-    bench(b, 100, Sort, sortˢ2);
-}
-
-public static void BenchmarkStable1e2(ж<testing.B> b) {
-    bench(b, 100, Stable, stableˢ);
-}
-
-public static void BenchmarkSort1e4(ж<testing.B> b) {
-    bench(b, 10000, Sort, sortˢ2);
-}
-
-public static void BenchmarkStable1e4(ж<testing.B> b) {
-    bench(b, 10000, Stable, stableˢ);
-}
-
-public static void BenchmarkSort1e6(ж<testing.B> b) {
-    bench(b, 1000000, Sort, sortˢ2);
-}
-
-public static void BenchmarkStable1e6(ж<testing.B> b) {
-    bench(b, 1000000, Stable, stableˢ);
-}
+public static void BenchmarkSort1e2(ж<testing.B> b) { bench(b, 100, Sort, sortˢ2); }
+public static void BenchmarkStable1e2(ж<testing.B> b) { bench(b, 100, Stable, stableˢ); }
+public static void BenchmarkSort1e4(ж<testing.B> b) { bench(b, 10000, Sort, sortˢ2); }
+public static void BenchmarkStable1e4(ж<testing.B> b) { bench(b, 10000, Stable, stableˢ); }
+public static void BenchmarkSort1e6(ж<testing.B> b) { bench(b, 1000000, Sort, sortˢ2); }
+public static void BenchmarkStable1e6(ж<testing.B> b) { bench(b, 1000000, Stable, stableˢ); }
 
 } // end sort_test_package

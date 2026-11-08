@@ -31,10 +31,10 @@ partial struct prohibitionaryDialArgTestsᴛ1 /*dyn*/ {
     internal @string network;
     internal @string address;
 }
-internal static slice<prohibitionaryDialArgTestsᴛ1> prohibitionaryDialArgTests = slice<prohibitionaryDialArgTestsᴛ1>([
+internal static slice<prohibitionaryDialArgTestsᴛ1> prohibitionaryDialArgTests = [
     new("tcp6", "127.0.0.1"),
     new("tcp6", "::ffff:127.0.0.1")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object mappingIpv4AddressInsideˢ = (@string)"mapping ipv4 address inside ipv6 address not supported"u8;
@@ -66,7 +66,7 @@ public static void TestProhibitionaryDialArg(ж<testing.T> t) {
             t.Fatal(err);
         }
 
-        foreach (var (i, tt) in prohibitionaryDialArgTests) {
+        foreach (var (i, tt) in range(prohibitionaryDialArgTests)) {
             var (c, errΔ1) = Dial(tt.network, JoinHostPort(tt.address, port));
             if (errΔ1 == nil) {
                 c.Close();
@@ -142,11 +142,9 @@ public static partial void TestDialerDualStackFDLeak(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
-                dss.teardown();
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
+            dss.teardown();
+            t.Fatal(errΔ2);
         }
 
         const nint N = 10;
@@ -258,33 +256,33 @@ public static void TestDialParallel(ж<testing.T> t) {
 
     slice<TestDialParallel_type> testCases = slice<TestDialParallel_type>([
         // These should just work on the first try.
-        new(slice<@string>(["127.0.0.1"]), slice<@string>([]), "", true, instant),
-        new(slice<@string>(["::1"]), slice<@string>([]), "", true, instant),
-        new(slice<@string>(["127.0.0.1", "::1"]), slice<@string>([slowDst6]), "tcp6", true, instant),
-        new(slice<@string>(["::1", "127.0.0.1"]), slice<@string>([slowDst4]), "tcp4", true, instant),
+        new(["127.0.0.1"], [], "", true, instant),
+        new(["::1"], [], "", true, instant),
+        new(["127.0.0.1", "::1"], [slowDst6], "tcp6", true, instant),
+        new(["::1", "127.0.0.1"], [slowDst4], "tcp4", true, instant),
         // Primary is slow; fallback should kick in.
-        new(slice<@string>([slowDst4]), slice<@string>(["::1"]), "", true, fallbackDelay),
+        new([slowDst4], ["::1"], "", true, fallbackDelay),
         // Skip a "connection refused" in the primary thread.
-        new(slice<@string>(["127.0.0.1", "::1"]), slice<@string>([]), "tcp4", true, instant),
-        new(slice<@string>(["::1", "127.0.0.1"]), slice<@string>([]), "tcp6", true, instant),
+        new(["127.0.0.1", "::1"], [], "tcp4", true, instant),
+        new(["::1", "127.0.0.1"], [], "tcp6", true, instant),
         // Skip a "connection refused" in the fallback thread.
-        new(slice<@string>([slowDst4, slowDst6]), slice<@string>(["::1", "127.0.0.1"]), "tcp6", true, fallbackDelay),
+        new([slowDst4, slowDst6], ["::1", "127.0.0.1"], "tcp6", true, fallbackDelay),
         // Primary refused, fallback without delay.
-        new(slice<@string>(["127.0.0.1"]), slice<@string>(["::1"]), "tcp4", true, instant),
-        new(slice<@string>(["::1"]), slice<@string>(["127.0.0.1"]), "tcp6", true, instant),
+        new(["127.0.0.1"], ["::1"], "tcp4", true, instant),
+        new(["::1"], ["127.0.0.1"], "tcp6", true, instant),
         // Everything is refused.
-        new(slice<@string>(["127.0.0.1"]), slice<@string>([]), "tcp4", false, instant),
+        new(["127.0.0.1"], [], "tcp4", false, instant),
         // Nothing to do; fail instantly.
-        new(slice<@string>([]), slice<@string>([]), "", false, instant),
+        new([], [], "", false, instant),
         // Connecting to tons of addresses should not trip the deadline.
-        new(nCopies("::1", 1000), slice<@string>([]), "", true, instant)
+        new(nCopies("::1", 1000), [], "", true, instant)
     ]);
 
     // Convert a list of IP strings into TCPAddrs.
     global::go.net_package.addrList makeAddrs(slice<@string> ips, @string port) {
         var outᴷ = new stackAppend<global::go.net_package.ΔAddr>(moves: true);
         global::go.net_package.addrList @out = default;
-        foreach (var (_, ip) in ips) {
+        foreach (var (_, ip) in range(ips)) {
             var (addr, err) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, port));
             if (err != nil) {
                 t.Fatal(err);
@@ -295,7 +293,7 @@ public static void TestDialParallel(ж<testing.T> t) {
         return @out;
     }
 
-    foreach (var (i, vᴛ1) in testCases) {
+    foreach (var (i, vᴛ1) in range(testCases)) {
         ref var tt = ref heap(new TestDialParallel_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -311,11 +309,9 @@ public static void TestDialParallel(ж<testing.T> t) {
                 if (n == ttʗ2.teardownNetwork) {
                     return (default, errors.New(unreachableˢ));
                 }
-                {
-                    @string r = raddr.IP.String(); if (r == slowDst4 || r == slowDst6) {
-                        ᐸꟷ(ctxΔ1.Done());
-                        return (default, ctxΔ1.Err());
-                    }
+                @string r = raddr.IP.String(); if (r == slowDst4 || r == slowDst6) {
+                    ᐸꟷ(ctxΔ1.Done());
+                    return (default, ctxΔ1.Err());
                 }
                 return (Ꮡ(new TCPConn()), default);
             };
@@ -446,13 +442,11 @@ public static void TestDialerFallbackDelay(ж<testing.T> t) {
         }
         var dssʗ1 = dss;
         defer(() => dssʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
-        foreach (var (i, tt) in testCases) {
+        foreach (var (i, tt) in range(testCases)) {
             var d = Ꮡ(new Dialer(DualStack: tt.dualstack, FallbackDelay: tt.delay));
 
             var startTime = time.Now();
@@ -487,13 +481,11 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
         }
 
         ref var readDeadline = ref heap(new time.Time(), out var ᏑreadDeadline);
-        {
-            var (td, ok) = t.Deadline(); if (ok) {
-                time.Duration arbitraryCleanupMargin = /* 1 * time.Second */ 1000000000;
-                readDeadline = td.Add(-arbitraryCleanupMargin);
-            } else {
-                readDeadline = time.Now().Add((time.Duration)(5000000000L));
-            }
+        var (td, ok) = t.Deadline(); if (ok) {
+            time.Duration arbitraryCleanupMargin = /* 1 * time.Second */ 1000000000;
+            readDeadline = td.Add(-arbitraryCleanupMargin);
+        } else {
+            readDeadline = time.Now().Add((time.Duration)(5000000000L));
         }
 
         ref var closed = ref heap(new Δsync.WaitGroup(), out var Ꮡclosed);
@@ -519,10 +511,8 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
             // The client should close itself, without sending data.
             cΔ1.SetReadDeadline(readDeadlineʗ1);
             array<byte> b = new(1);
-            {
-                var (_, errΔ2) = cΔ1.Read(b[..]); if (!AreEqual(errΔ2, Δio.EOF)) {
-                    Ꮡt.Errorf("got %v; want %v", errΔ2, Δio.EOF);
-                }
+            var (_, errΔ2) = cΔ1.Read(b[..]); if (!AreEqual(errΔ2, Δio.EOF)) {
+                Ꮡt.Errorf("got %v; want %v", errΔ2, Δio.EOF);
             }
             cΔ1.Close();
             Ꮡclosed.Done();
@@ -533,10 +523,8 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
         }
         var dssʗ1 = dss;
         defer(() => dssʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ3 = dss.buildup(handler); if (errΔ3 != nil) {
-                Ꮡt.Fatal(errΔ3);
-            }
+        var errΔ3 = dss.buildup(handler); if (errΔ3 != nil) {
+            Ꮡt.Fatal(errΔ3);
         }
 
         time.Duration fallbackDelay = /* 100 * time.Millisecond */ 100000000;
@@ -620,7 +608,7 @@ public static void TestDialerPartialDeadline(ж<testing.T> t) {
         new(now.Add(0 * time.Millisecond), now, 1, noDeadline, errTimeout),
         new(now.Add(1 * time.Millisecond), now, 1, noDeadline, errTimeout)
     ]);
-    foreach (var (i, tt) in testCases) {
+    foreach (var (i, tt) in range(testCases)) {
         var (deadline, err) = partialDeadline(tt.now, tt.deadline, tt.addrs);
         if (!AreEqual(err, tt.expectErr)) {
             t.Errorf("#%d: got %v; want %v", i, err, tt.expectErr);
@@ -719,18 +707,16 @@ public static void TestDialerLocalAddr(ж<testing.T> t) {
             }
         };
         ref var lss = ref heap(new array<ж<localServer>>(2), out var Ꮡlss);
-        foreach (var (i, network) in slice<@string>(["tcp4", "tcp6"])) {
+        foreach (var (i, network) in range(slice<@string>(["tcp4", "tcp6"]))) {
             lss[i] = newLocalServer(new net_test_package.testing_TжTB(t), network);
             var lssʗ1 = lss;
             defer(ᴛ0 => ᴛ0.teardown(), lssʗ1[i], ref ᒐ);
-            {
-                var err = lss[i].buildup(handler); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var err = lss[i].buildup(handler); if (err != nil) {
+                t.Fatal(err);
             }
         }
 
-        foreach (var (i, tt) in tests) {
+        foreach (var (i, tt) in range(tests)) {
             var d = Ꮡ(new Dialer(LocalAddr: tt.laddr));
             @string addr = default;
             var ip = ParseIP(tt.raddr);
@@ -753,10 +739,8 @@ public static void TestDialerLocalAddr(ж<testing.T> t) {
                 }
             }
             if (err != nil) {
-                {
-                    var perr = parseDialError(err); if (perr != nil) {
-                        t.Error(perr);
-                    }
+                var perr = parseDialError(err); if (perr != nil) {
+                    t.Error(perr);
                 }
                 continue;
             }
@@ -797,7 +781,7 @@ public static void TestDialerDualStack(ж<testing.T> t) {
         ref var timeout = ref heap(new time.Duration(), out var Ꮡtimeout);
 
         timeout = 150 * time.Millisecond + closedPortDelay;
-        foreach (var (_, vᴛ1) in slice<bool>([false, true])) {
+        foreach (var (_, vᴛ1) in range(slice<bool>([false, true]))) {
             ref var dualstack = ref heap(new bool(), out var Ꮡdualstack);
             dualstack = vᴛ1;
 
@@ -807,31 +791,27 @@ public static void TestDialerDualStack(ж<testing.T> t) {
             }
             var dssʗ1 = dss;
             defer(() => dssʗ1.teardown(), ref ᒐ);
-            {
-                var errΔ1 = dss.buildup(handler); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = dss.buildup(handler); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
 
             var d = Ꮡ(new Dialer(DualStack: dualstack, Timeout: timeout));
-            foreach (var _ᴛ1 in range(dss.lns)) {
+            foreach (var _ᴛ1 in range(len(dss.lns))) {
                 var (c, errΔ2) = d.Dial(tcpˢ, JoinHostPort(localhostˢ, dss.port));
                 if (errΔ2 != nil) {
                     t.Error(errΔ2);
                     continue;
                 }
-                {
-                    var addr = c.LocalAddr()._<ж<global::go.net_package.TCPAddr>>();
-                    switch (ᐧ) {
-                    case {} when addr.IP.To4() != nil: {
-                        dss.teardownNetwork(tcp4ˢ);
-                        break;
-                    }
-                    case {} when addr.IP.To16() != nil && addr.IP.To4() == nil: {
-                        dss.teardownNetwork(tcp6ˢ);
-                        break;
-                    }}
+                var addr = c.LocalAddr()._<ж<global::go.net_package.TCPAddr>>();
+                switch (ᐧ) {
+                case {} when addr.IP.To4() != nil: {
+                    dss.teardownNetwork(tcp4ˢ);
+                    break;
                 }
+                case {} when addr.IP.To16() != nil && addr.IP.To4() == nil: {
+                    dss.teardownNetwork(tcp6ˢ);
+                    break;
+                }}
                 c.Close();
             }
         }
@@ -886,7 +866,7 @@ public static void TestDialerKeepAlive(ж<testing.T> t) {
             got = cfg.Idle;
         };
 
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             got = -1;
             ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(KeepAlive: test.ka), out var Ꮡd);
             var (c, err) = Ꮡd.Dial(tcpˢ, ls.Listener.Addr().String());
@@ -932,12 +912,10 @@ public static partial void TestDialCancel(ж<testing.T> t) {
         var conncʗ1 = connc;
         var errcʗ1 = errc;
         goǃ(() => {
-            {
-                var (c, err) = Ꮡd.Dial(tcpˢ, blackholeIPPort); if (err != nil) {
-                    errcʗ1.ᐸꟷ(err);
-                } else {
-                    conncʗ1.ᐸꟷ(c);
-                }
+            var (c, err) = Ꮡd.Dial(tcpˢ, blackholeIPPort); if (err != nil) {
+                errcʗ1.ᐸꟷ(err);
+            } else {
+                conncʗ1.ᐸꟷ(c);
             }
         });
         nint ticks = 0;
@@ -962,10 +940,8 @@ public static partial void TestDialCancel(ж<testing.T> t) {
                 break;
             }
             case 2 when selᴛ3.ꟷᐳ(out var err): {
-                {
-                    var perr = parseDialError(err); if (perr != nil) {
-                        t.Error(perr);
-                    }
+                var perr = parseDialError(err); if (perr != nil) {
+                    t.Error(perr);
                 }
                 if (ticks < cancelTick) {
                     // Using strings.Contains is ugly but
@@ -977,7 +953,7 @@ public static partial void TestDialCancel(ж<testing.T> t) {
                         "invalid argument"
                     ]);
                     @string e = err.Error();
-                    foreach (var (_, ignore) in ignorable) {
+                    foreach (var (_, ignore) in range(ignorable)) {
                         if (strings.Contains(e, ignore)) {
                             t.Skipf("connection to %v failed fast with %v", blackholeIPPort, err);
                         }
@@ -986,10 +962,8 @@ public static partial void TestDialCancel(ж<testing.T> t) {
                     t.Fatalf("dial error after %d ticks (%d before cancel sent): %v",
                         ticks, cancelTick - ticks, err);
                 }
-                {
-                    var (oe, ok) = err._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual(oe.Err, errCanceled)) {
-                        t.Fatalf("dial error = %v (%T); want OpError with Err == errCanceled", err, err);
-                    }
+                var (oe, ok) = err._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual(oe.Err, errCanceled)) {
+                    t.Fatalf("dial error = %v (%T); want OpError with Err == errCanceled", err, err);
                 }
                 return; // success.
             }}
@@ -1038,10 +1012,8 @@ public static partial void TestCancelAfterDial(ж<testing.T> t) {
                     c.Close();
                     continue;
                 }
-                {
-                    var (_, errΔ1) = c.Write(slice<byte>(line)); if (errΔ1 != nil) {
-                        t.Error(errΔ1);
-                    }
+                var (_, errΔ1) = c.Write(slice<byte>(line)); if (errΔ1 != nil) {
+                    t.Error(errΔ1);
                 }
                 c.Close();
             }
@@ -1070,10 +1042,8 @@ public static partial void TestCancelAfterDial(ж<testing.T> t) {
 
                 // Send some data to confirm that the connection is still alive.
                 @string message = messageᶜ;
-                {
-                    var (_, errΔ1) = c.Write(slice<byte>(message)); if (errΔ1 != nil) {
-                        t.Fatal(errΔ1);
-                    }
+                var (_, errΔ1) = c.Write(slice<byte>(message)); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
 
                 // The server should echo the line, and close the connection.
@@ -1085,10 +1055,8 @@ public static partial void TestCancelAfterDial(ж<testing.T> t) {
                 if (line != message) {
                     t.Errorf("got %q; want %q", line, message);
                 }
-                {
-                    var (_, errΔ2) = rb.ReadByte(); if (!AreEqual(errΔ2, Δio.EOF)) {
-                        t.Errorf("got %v; want %v", errΔ2, Δio.EOF);
-                    }
+                var (_, errΔ2) = rb.ReadByte(); if (!AreEqual(errΔ2, Δio.EOF)) {
+                    t.Errorf("got %v; want %v", errΔ2, Δio.EOF);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1113,7 +1081,7 @@ public static void TestDialClosedPortFailFast(ж<testing.T> t) {
         // Reported by go.dev/issues/23366.
         t.Skip(skippingWindowsOnlyTestˢ);
     }
-    foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "tcp4", "tcp6"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -1242,7 +1210,7 @@ public static void TestDialerControl(ж<testing.T> t) {
     t.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
-            foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
+            foreach (var (_, network) in range(slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"]))) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
@@ -1264,7 +1232,7 @@ public static void TestDialerControl(ж<testing.T> t) {
     t.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
-            foreach (var (_, network) in slice<@string>(["udp", "udp4", "udp6", "unixgram"])) {
+            foreach (var (_, network) in range(slice<@string>(["udp", "udp4", "udp6", "unixgram"]))) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
@@ -1300,7 +1268,7 @@ public static void TestDialerControlContext(ж<testing.T> t) {
         break;
     }}
     t.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (i, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
+        foreach (var (i, network) in range(slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"]))) {
             tΔ1.Run(network, (ж<testing.T> tΔ2) => {
                 GoFrame ᒐ = default;
                 try {
@@ -1349,7 +1317,7 @@ public static void TestDialContext(ж<testing.T> t) {
         GoFrame ᒐ = default;
         try {
             error err = default;
-            foreach (var (i, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
+            foreach (var (i, network) in range(slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"]))) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
@@ -1402,7 +1370,7 @@ public static void TestDialContext(ж<testing.T> t) {
         GoFrame ᒐ = default;
         try {
             error err = default;
-            foreach (var (i, network) in slice<@string>(["udp", "udp4", "udp6", "unixgram"])) {
+            foreach (var (i, network) in range(slice<@string>(["udp", "udp4", "udp6", "unixgram"]))) {
                 if (!testableNetwork(network)) {
                     continue;
                 }

@@ -29,13 +29,9 @@ internal static ref readonly @string testGocoverdirˢ => ref testGocoverdirˢᵇ
 private static readonly @string testGocoverdirˢᵇ = "test.gocoverdir"u8;
 
 internal static @string testGoCoverDir(ж<testing.T> t) {
-    {
-        var f = flag.Lookup(testGocoverdirˢ); if (f != nil) {
-            {
-                @string dir = (~f).Value.String(); if (dir != ""u8) {
-                    return dir;
-                }
-            }
+    var f = flag.Lookup(testGocoverdirˢ); if (f != nil) {
+        @string dir = (~f).Value.String(); if (dir != ""u8) {
+            return dir;
         }
     }
     return t.TempDir();
@@ -68,12 +64,10 @@ public static void TestTestSupport(ж<testing.T> t) {
     }
 
     // Check for existence of text file.
-    {
-        var (inf, errΔ1) = os.Open(textfile); if (errΔ1 != nil) {
-            t.Fatalf("problems opening text file %s: %v", textfile, errΔ1);
-        } else {
-            inf.Close();
-        }
+    var (inf, errΔ1) = os.Open(textfile); if (errΔ1 != nil) {
+        t.Fatalf("problems opening text file %s: %v", textfile, errΔ1);
+    } else {
+        inf.Close();
     }
 
     // Check for percent output with expected tokens.
@@ -103,10 +97,8 @@ public static void TestCoverageSnapshot(ж<testing.T> t) {
     var args = slice<@string>(["test", "-tags", "SELECT_USING_THIS_TAG",
         "-cover", "-run=TestCoverageSnapshotImpl", "internal/coverage/cfile"]);
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
-    {
-        var (b, err) = cmd.CombinedOutput(); if (err != nil) {
-            t.Fatalf("go test failed (%v): %s", err, b);
-        }
+    var (b, err) = cmd.CombinedOutput(); if (err != nil) {
+        t.Fatalf("go test failed (%v): %s", err, b);
     }
 }
 
@@ -135,18 +127,14 @@ private static readonly @string helloGoˢ2ᵇ = "hello.go:"u8;
 internal static (@string, @string) genAuxMeta(ж<testing.T> t, @string dstdir) {
     // Do a GOCOVERDIR=<tmp> go run hello.go
     @string src = filepath.Join(dstdir, helloGoˢ);
-    {
-        var errΔ1 = os.WriteFile(src, slice<byte>(hellogo), 511); if (errΔ1 != nil) {
-            t.Fatalf("write failed: %v", errΔ1);
-        }
+    var errΔ1 = os.WriteFile(src, slice<byte>(hellogo), 511); if (errΔ1 != nil) {
+        t.Fatalf("write failed: %v", errΔ1);
     }
     var args = slice<@string>(["run", "-covermode="u8 + testing.CoverMode(), src]);
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
     cmd.Env = updateGoCoverDir(os.Environ(), dstdir, true);
-    {
-        var (b, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
-            t.Fatalf("go run failed (%v): %s", errΔ2, b);
-        }
+    var (b, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+        t.Fatalf("go run failed (%v): %s", errΔ2, b);
     }
 
     // Pick out the generated meta-data file.
@@ -154,7 +142,7 @@ internal static (@string, @string) genAuxMeta(ж<testing.T> t, @string dstdir) {
     if (err != nil) {
         t.Fatalf("reading %s: %v", dstdir, err);
     }
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         if (strings.HasPrefix(f.Name(), covmetaˢ)) {
             return (filepath.Join(dstdir, f.Name()), helloGoˢ2);
         }
@@ -184,27 +172,23 @@ public static void TestAuxMetaDataFiles(ж<testing.T> t) {
     // test. Contents are not important, just so long as the
     // packages/paths are different.
     @string othermetadir = filepath.Join(td, othermetaˢ);
-    {
-        var errΔ1 = os.Mkdir(othermetadir, 511); if (errΔ1 != nil) {
-            t.Fatalf("mkdir failed: %v", errΔ1);
-        }
+    var errΔ1 = os.Mkdir(othermetadir, 511); if (errΔ1 != nil) {
+        t.Fatalf("mkdir failed: %v", errΔ1);
     }
     var (mfile, token) = genAuxMeta(t, othermetadir);
 
     // Write a metafiles file.
     @string metafiles = filepath.Join(tgcd, coverage.MetaFilesFileName);
     var mfc = new coverage.MetaFileCollection(
-        ImportPaths: slice<@string>(["command-line-arguments"]),
-        MetaFileFragments: slice<@string>([mfile])
+        ImportPaths: ["command-line-arguments"],
+        MetaFileFragments: [mfile]
     );
     var (jdata, err) = json.Marshal(mfc);
     if (err != nil) {
         t.Fatalf("marshal MetaFileCollection: %v", err);
     }
-    {
-        var errΔ2 = os.WriteFile(metafiles, jdata, 438); if (errΔ2 != nil) {
-            t.Fatalf("write failed: %v", errΔ2);
-        }
+    var errΔ2 = os.WriteFile(metafiles, jdata, 438); if (errΔ2 != nil) {
+        t.Fatalf("write failed: %v", errΔ2);
     }
 
     // Kick off guts of test.
@@ -215,10 +199,8 @@ public static void TestAuxMetaDataFiles(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("bad: %v", err);
     }
-    {
-        err = os.Remove(metafiles); if (err != nil) {
-            t.Fatalf("removing metafiles file: %v", err);
-        }
+    err = os.Remove(metafiles); if (err != nil) {
+        t.Fatalf("removing metafiles file: %v", err);
     }
 
     // Look for the expected things in the coverage profile.

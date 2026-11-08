@@ -41,10 +41,10 @@ using static global::go.unique_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("unique/canonmap_test.go", "canonmap_test.cs", "ABIggqqCqoLKAA0IgoKUgqaCkpSCgoKCgpSCgoKUgoKCgoKmgryCgoKCgoLSlIKCgoKUgoKUgoKCgIIACAykABMopqaChoKC7oKCgpSCyoKCgpSClIKUvMaChqrGgoKCgpY=", "17-19:1;23-25:1;29-35:1;39-45:1;46-144:2;47-69:2.1;70-143:2.2;71-73:2.2.1;83-106:2.2.2;135-137:2.2.3;149-155:1;160-170:1;179-181:1;194-196:1")]
+[assembly: GoPositionMap("unique/canonmap_test.go", "canonmap_test.cs", "ABIggqqCqoLKAA0IgoKUgqaCkpSCgoKCgpSCgoKUgoKCgoKmgryCgoKCgoLSlIKCgoKUgoKUgoKCgvykABMopqaChoKC7oKCgpSCyoKCgpSClIKUvMaChqrGgoKCgpY=", "17-19:1;23-25:1;29-35:1;39-45:1;46-144:2;47-69:2.1;70-143:2.2;71-73:2.2.1;83-106:2.2.2;135-137:2.2.3;149-155:1;160-170:1;179-181:1;194-196:1")]
 [assembly: GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
 [assembly: GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmsoKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
-[assembly: GoPositionMap("unique/handle_test.go", "handle_test.cs", "AEFcgoKCgoKCgoKmgoLmgoKCgpSClIKUgqaCupKUgpSmgpSCppSCgoKUgoKC6IKCgoKUppS01taygoKUgoKCgpSCgpSCgoLKotyCgoKClICCpICCpICC2oIAAhAACAaCggAQEIKCgqacuLi4uIKCuLi4uLi4uLiCgri4goKCzJKCgoKUqJI=", "64-80:1;117-119:1;214-216:1;218-220:2;222-224:3;226-228:4;230-234:5;236-238:6;240-242:7;244-246:8;248-250:9;252-254:10;256-258:11;260-262:12;264-268:13;270-272:14", "", "197=Make/1/1/1")]
+[assembly: GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADlcgoKCgoKCgoKmgoLmgoKCgpSClIKUgqaCupKUgpSmgpSCppSCgoKUgoKC6IKCgoKUppS01taygoKUgoKCgpSCgpSCgoLKotyCgoKClICCpICCpICC2oIAAhAACAaCggAQEIKCgqacuLi4uIKCuLi4uLi4uLiCgri4goKCzJKCgoKUqJI=", "64-80:1;117-119:1;214-216:1;218-220:2;222-224:3;226-228:4;230-234:5;236-238:6;240-242:7;244-246:8;248-250:9;252-254:10;256-258:11;260-262:12;264-268:13;270-272:14", "", "189=Make/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

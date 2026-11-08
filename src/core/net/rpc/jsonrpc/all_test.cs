@@ -12,8 +12,6 @@ using rpc = global::go.net.rpc_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.net;
 using static global::go.net.rpc.jsonrpc_package;
@@ -111,10 +109,8 @@ public static partial void TestServerNoParams(ж<testing.T> t) {
 
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), @"{""method"": ""Arith.Add"", ""id"": ""123""}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
-        {
-            var err = dec.Decode(Ꮡresp); if (err != nil) {
-                t.Fatalf("Decode after no params: %s", err);
-            }
+        var err = dec.Decode(Ꮡresp); if (err != nil) {
+            t.Fatalf("Decode after no params: %s", err);
         }
         if (resp.Error == nil) {
             t.Fatalf("Expected error, got nil");
@@ -135,10 +131,8 @@ public static partial void TestServerEmptyMessage(ж<testing.T> t) {
 
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), "{}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
-        {
-            var err = dec.Decode(Ꮡresp); if (err != nil) {
-                t.Fatalf("Decode after empty: %s", err);
-            }
+        var err = dec.Decode(Ꮡresp); if (err != nil) {
+            t.Fatalf("Decode after empty: %s", err);
         }
         if (resp.Error == nil) {
             t.Fatalf("Expected error, got nil");
@@ -377,10 +371,8 @@ public static void TestServerErrorHasNullResult(ж<testing.T> t) {
         Closer: new jsonrpc_internal_test_package.io_ReadCloserᴠCloser(io.NopCloser(default))
     ));
     var r = @new<rpc.Request>();
-    {
-        var errΔ1 = sc.ReadRequestHeader(r); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = sc.ReadRequestHeader(r); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     @string valueText = valueTextᶜ;
     @string errorText = errorTextᶜ;

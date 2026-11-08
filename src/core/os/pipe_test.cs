@@ -23,8 +23,6 @@ using syscall = syscall_package;
 using Δtesting = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.os;
 using static go.os_internal_test_package;
@@ -49,10 +47,8 @@ public static void TestEPIPE(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = r.Close(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = r.Close(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     var expect = syscall.EPIPE;
@@ -66,15 +62,11 @@ public static void TestEPIPE(ж<Δtesting.T> t) {
         if (err == nil) {
             t.Fatal(unexpectedSuccessOfWriteˢ);
         }
-        {
-            var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
-                err = pe.Err;
-            }
+        if (err._<ж<fs.PathError>>(out var pe)) {
+            err = pe.Err;
         }
-        {
-            var (se, ok) = err._<ж<Δos.SyscallError>>(ᐧ); if (ok) {
-                err = se.Err;
-            }
+        if (err._<ж<Δos.SyscallError>>(out var se)) {
+            err = se.Err;
         }
         if (!AreEqual(err, expect)) {
             t.Errorf("iteration %d: got %v, expected %v", i, err, expect);
@@ -116,10 +108,8 @@ public static void TestStdPipe(ж<Δtesting.T> t) {
             break;
         }
         case {} when exprᴛ2 == "3"u8: {
-            {
-                var (_, errΔ2) = Δos.NewFile(3, "3").Write(slice<byte>("3"u8)); if (errΔ2 == nil) {
-                    Δos.Exit(3);
-                }
+            var (_, errΔ2) = Δos.NewFile(3, "3").Write(slice<byte>("3"u8)); if (errΔ2 == nil) {
+                Δos.Exit(3);
             }
             break;
         }
@@ -143,10 +133,8 @@ public static void TestStdPipe(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ3 = r.Close(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = r.Close(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
     // Invoke the test program to run the test and write to a closed pipe.
     // If sig is false:
@@ -154,36 +142,30 @@ public static void TestStdPipe(ж<Δtesting.T> t) {
     // writing to descriptor 3 should fail with EPIPE and then exit 0.
     // If sig is true:
     // all writes should fail with EPIPE and then exit 0.
-    foreach (var (_, sig) in slice<bool>([false, true])) {
+    foreach (var (_, sig) in range(slice<bool>([false, true]))) {
         for (nint dest = 1; dest < 4; dest++) {
             var cmdΔ1 = testenv.Command(new os_test_package.testing_TжTB(t), testenv.Executable(new os_test_package.testing_TжTB(t)), testRunˢ3, testStdPipeˢ);
             cmdΔ1.Stdout = new Δos.FileжWriter(w);
             cmdΔ1.Stderr = new Δos.FileжWriter(w);
-            cmdΔ1.ExtraFiles = slice<ж<Δos.File>>([w]);
+            cmdΔ1.ExtraFiles = [w];
             cmdΔ1.Env = append(Δos.Environ(), fmt.Sprintf("GO_TEST_STD_PIPE_HELPER=%d"u8, dest));
             if (sig) {
                 cmdΔ1.Env = append(cmdΔ1.Env, (@string)"GO_TEST_STD_PIPE_HELPER_SIGNAL=1");
             }
-            {
-                var errΔ4 = cmdΔ1.Run(); if (errΔ4 == nil) {
-                    if (!sig && dest < 3) {
-                        t.Errorf("unexpected success of write to closed pipe %d sig %t in child", dest, sig);
-                    }
-                } else {
-                    var (ee, ok) = errΔ4._<ж<exec.ExitError>>(ᐧ); if (!ok) {
-                        t.Errorf("unexpected exec error type %T: %v", errΔ4, errΔ4);
-                    } else {
-                        var (ws, okΔ1) = ee.Value.ProcessState.Value.Sys()._<syscall.WaitStatus>(ᐧ); if (!okΔ1) {
-                            t.Errorf("unexpected wait status type %T: %v", ee.Value.ProcessState.Value.Sys(), ee.Value.ProcessState.Value.Sys());
-                        } else if (ws.Signaled() && ws.Signal() == syscall.SIGPIPE) {
-                            if (sig || dest > 2) {
-                                t.Errorf("unexpected SIGPIPE signal for descriptor %d sig %t", dest, sig);
-                            }
-                        } else {
-                            t.Errorf("unexpected exit status %v for descriptor %d sig %t", errΔ4, dest, sig);
-                        }
-                    }
+            var errΔ4 = cmdΔ1.Run(); if (errΔ4 == nil) {
+                if (!sig && dest < 3) {
+                    t.Errorf("unexpected success of write to closed pipe %d sig %t in child", dest, sig);
                 }
+            } else if (!errΔ4._<ж<exec.ExitError>>(out var ee)) {
+                t.Errorf("unexpected exec error type %T: %v", errΔ4, errΔ4);
+            } else if (!ee.Value.ProcessState.Value.Sys()._<syscall.WaitStatus>(out var ws)) {
+                t.Errorf("unexpected wait status type %T: %v", ee.Value.ProcessState.Value.Sys(), ee.Value.ProcessState.Value.Sys());
+            } else if (ws.Signaled() && ws.Signal() == syscall.SIGPIPE) {
+                if (sig || dest > 2) {
+                    t.Errorf("unexpected SIGPIPE signal for descriptor %d sig %t", dest, sig);
+                }
+            } else {
+                t.Errorf("unexpected exit status %v for descriptor %d sig %t", errΔ4, dest, sig);
             }
         }
     }
@@ -194,25 +176,17 @@ public static void TestStdPipe(ж<Δtesting.T> t) {
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
     cmd.Stderr = new os_test_package.bytes_BufferжWriter(Ꮡstderr);
     cmd.Env = append(cmd.Environ(), (@string)"GO_TEST_STD_PIPE_HELPER=1");
-    {
-        var errΔ5 = cmd.Run(); if (errΔ5 == nil) {
-            t.Errorf("unexpected success of write to closed stdout");
-        } else {
-            var (ee, ok) = errΔ5._<ж<exec.ExitError>>(ᐧ); if (!ok) {
-                t.Errorf("unexpected exec error type %T: %v", errΔ5, errΔ5);
-            } else {
-                var (ws, okΔ1) = ee.Value.ProcessState.Value.Sys()._<syscall.WaitStatus>(ᐧ); if (!okΔ1) {
-                    t.Errorf("unexpected wait status type %T: %v", ee.Value.ProcessState.Value.Sys(), ee.Value.ProcessState.Value.Sys());
-                } else if (!ws.Signaled() || ws.Signal() != syscall.SIGPIPE) {
-                    t.Errorf("unexpected exit status %v for write to closed stdout", errΔ5);
-                }
-            }
-        }
+    var errΔ5 = cmd.Run(); if (errΔ5 == nil) {
+        t.Errorf("unexpected success of write to closed stdout");
+    } else if (!errΔ5._<ж<exec.ExitError>>(out var ee)) {
+        t.Errorf("unexpected exec error type %T: %v", errΔ5, errΔ5);
+    } else if (!ee.Value.ProcessState.Value.Sys()._<syscall.WaitStatus>(out var ws)) {
+        t.Errorf("unexpected wait status type %T: %v", ee.Value.ProcessState.Value.Sys(), ee.Value.ProcessState.Value.Sys());
+    } else if (!ws.Signaled() || ws.Signal() != syscall.SIGPIPE) {
+        t.Errorf("unexpected exit status %v for write to closed stdout", errΔ5);
     }
-    {
-        var output = stderr.Bytes(); if (len(output) > 0) {
-            t.Errorf("unexpected output on stderr: %s", output);
-        }
+    var output = stderr.Bytes(); if (len(output) > 0) {
+        t.Errorf("unexpected output on stderr: %s", output);
     }
 }
 
@@ -231,13 +205,9 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> t, bool read) {
             // Get the amount we have to write to overload a pipe
             // with no reader.
             limit = 131073;
-            {
-                var (bΔ1, errΔ1) = Δos.ReadFile(procSysFsPipeMaxSizeˢ); if (errΔ1 == nil) {
-                    {
-                        var (i, errΔ2) = strconv.Atoi(strings.TrimSpace((@string)bΔ1)); if (errΔ2 == nil) {
-                            limit = i + 1;
-                        }
-                    }
+            var (bΔ1, errΔ1) = Δos.ReadFile(procSysFsPipeMaxSizeˢ); if (errΔ1 == nil) {
+                var (i, errΔ2) = strconv.Atoi(strings.TrimSpace((@string)bΔ1)); if (errΔ2 == nil) {
+                    limit = i + 1;
                 }
             }
             t.Logf("using pipe write limit of %d", limit);
@@ -281,14 +251,12 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> t, bool read) {
         }
         if (err == nil) {
             t.Error(iOOnClosedPipeˢ);
+        } else if (!err._<ж<fs.PathError>>(out var pe)) {
+            t.Errorf("I/O on closed pipe returned unexpected error type %T; expected fs.PathError", pe.OrTypedNil());
+        } else if (!AreEqual(pe.Err, fs.ErrClosed)) {
+            t.Errorf("got error %q but expected %q", pe.Err, fs.ErrClosed);
         } else {
-            var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok) {
-                t.Errorf("I/O on closed pipe returned unexpected error type %T; expected fs.PathError", pe.OrTypedNil());
-            } else if (!AreEqual(pe.Err, fs.ErrClosed)) {
-                t.Errorf("got error %q but expected %q", pe.Err, fs.ErrClosed);
-            } else {
-                t.Logf("I/O returned expected error %q", err);
-            }
+            t.Logf("I/O returned expected error %q", err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -326,10 +294,8 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> t) {
             defer(syscall.SetNonblock, fd, (bool)false, ref ᒐ);
             var (_, errΔ1) = Δos.Stdin.Read(new slice<byte>(1));
             if (errΔ1 != nil) {
-                {
-                    var (perr, ok) = errΔ1._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual(perr.Err, syscall.EAGAIN)) {
-                        t.Fatalf("read on nonblocking stdin got %q, should have gotten EAGAIN", errΔ1);
-                    }
+                var (perr, ok) = errΔ1._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual(perr.Err, syscall.EAGAIN)) {
+                    t.Fatalf("read on nonblocking stdin got %q, should have gotten EAGAIN", errΔ1);
                 }
             }
             Δos.Exit(0);
@@ -403,10 +369,8 @@ internal static partial void testCloseWithBlockingRead(ж<Δtesting.T> t, ж<Δo
             t.Error(iOOnClosedPipeˢ);
         }
 
-        {
-            var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
-                err = pe.Err;
-            }
+        var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
+            err = pe.Err;
         }
         if (!AreEqual(err, Δio.EOF) && !AreEqual(err, fs.ErrClosed)) {
             t.Errorf("got %v, expected EOF or closed", err);
@@ -461,10 +425,8 @@ internal static partial void testPipeEOF(ж<Δtesting.T> t, Δio.ReadCloser r, �
         var writerDone = new channel<EmptyStruct>(0);
         var writerDoneʗ1 = writerDone;
         defer(() => {
-            {
-                var errΔ1 = r.Close(); if (errΔ1 != nil) {
-                    t.Errorf("error closing reader: %v", errΔ1);
-                }
+            var errΔ1 = r.Close(); if (errΔ1 != nil) {
+                t.Errorf("error closing reader: %v", errΔ1);
             }
             ᐸꟷ(writerDoneʗ1);
         }, ref ᒐ);
@@ -487,10 +449,8 @@ internal static partial void testPipeEOF(ж<Δtesting.T> t, Δio.ReadCloser r, �
                 }
 
                 time.Sleep(parkDelay);
-                {
-                    var errΔ3 = w.Close(); if (errΔ3 != nil) {
-                        t.Errorf("error closing writer: %v", errΔ3);
-                    }
+                var errΔ3 = w.Close(); if (errΔ3 != nil) {
+                    t.Errorf("error closing writer: %v", errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -590,10 +550,8 @@ public static partial void TestFdReadRace(ж<Δtesting.T> t) {
                 ref var buf = ref heap(new array<byte>(10), out var Ꮡbuf);
                 rʗ2.SetReadDeadline(time.Now().Add(time.ΔMinute));
                 cʗ1.ᐸꟷ(true);
-                {
-                    var (_, errΔ1) = rʗ2.Read(buf[..]); if (Δos.IsTimeout(errΔ1)) {
-                        t.Error(readTimedOutˢ);
-                    }
+                var (_, errΔ1) = rʗ2.Read(buf[..]); if (Δos.IsTimeout(errΔ1)) {
+                    t.Error(readTimedOutˢ);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

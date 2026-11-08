@@ -13,8 +13,6 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using static go.net_package;
 
@@ -71,11 +69,9 @@ public static partial void TestReadUnixgramWithUnnamedSocket(ж<testing.T> t) {
                 }
                 defer(syscall.Close, s, ref ᒐ);
                 var rsa = Ꮡ(new syscall.SockaddrUnix(Name: addrʗ2));
-                {
-                    var errΔ2 = syscall.Sendto(s, dataʗ1[..], 0, new syscall.SockaddrUnixжΔSockaddr(rsa)); if (errΔ2 != nil) {
-                        t.Error(errΔ2);
-                        return;
-                    }
+                var errΔ2 = syscall.Sendto(s, dataʗ1[..], 0, new syscall.SockaddrUnixжΔSockaddr(rsa)); if (errΔ2 != nil) {
+                    t.Error(errΔ2);
+                    return;
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -120,7 +116,7 @@ public static void TestUnixgramZeroBytePayload(ж<testing.T> t) {
         var c2ʗ1 = c2;
         defer(() => c2ʗ1.Close(), ref ᒐ);
 
-        foreach (var (_, genericRead) in slice<bool>([false, true])) {
+        foreach (var (_, genericRead) in range(slice<bool>([false, true]))) {
             var (n, errΔ1) = c2.Write(default);
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);
@@ -178,7 +174,7 @@ public static void TestUnixgramZeroByteBuffer(ж<testing.T> t) {
         defer(() => c2ʗ1.Close(), ref ᒐ);
 
         var b = slice<byte>("UNIXGRAM ZERO BYTE BUFFER TEST"u8);
-        foreach (var (_, genericRead) in slice<bool>([false, true])) {
+        foreach (var (_, genericRead) in range(slice<bool>([false, true]))) {
             var (n, errΔ1) = c2.Write(b);
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);
@@ -250,31 +246,23 @@ internal static void testUnixgramWriteConn(ж<testing.T> t, ж<global::go.net_pa
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var b = slice<byte>("CONNECTED-MODE SOCKET"u8);
-        {
-            var (_, errΔ1) = c._<ж<global::go.net_package.UnixConn>>().WriteToUnix(b, raddr); if (errΔ1 == nil) {
-                t.Fatal(shouldFailˢ);
-            } else if (!AreEqual(errΔ1._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
-                t.Fatalf("should fail as ErrWriteToConnected: %v", errΔ1);
-            }
+        var (_, errΔ1) = c._<ж<global::go.net_package.UnixConn>>().WriteToUnix(b, raddr); if (errΔ1 == nil) {
+            t.Fatal(shouldFailˢ);
+        } else if (!AreEqual(errΔ1._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
+            t.Fatalf("should fail as ErrWriteToConnected: %v", errΔ1);
         }
-        {
-            (_, err) = c._<ж<global::go.net_package.UnixConn>>().WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (err == nil) {
-                t.Fatal(shouldFailˢ);
-            } else if (!AreEqual(err._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
-                t.Fatalf("should fail as ErrWriteToConnected: %v", err);
-            }
+        (_, err) = c._<ж<global::go.net_package.UnixConn>>().WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (err == nil) {
+            t.Fatal(shouldFailˢ);
+        } else if (!AreEqual(err._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
+            t.Fatalf("should fail as ErrWriteToConnected: %v", err);
         }
-        {
-            (_, _, err) = c._<ж<global::go.net_package.UnixConn>>().WriteMsgUnix(b, default, raddr); if (err == nil) {
-                t.Fatal(shouldFailˢ);
-            } else if (!AreEqual(err._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
-                t.Fatalf("should fail as ErrWriteToConnected: %v", err);
-            }
+        (_, _, err) = c._<ж<global::go.net_package.UnixConn>>().WriteMsgUnix(b, default, raddr); if (err == nil) {
+            t.Fatal(shouldFailˢ);
+        } else if (!AreEqual(err._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
+            t.Fatalf("should fail as ErrWriteToConnected: %v", err);
         }
-        {
-            var (_, errΔ2) = c.Write(b); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = c.Write(b); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -294,25 +282,17 @@ internal static void testUnixgramWritePacketConn(ж<testing.T> t, ж<global::go.
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var b = slice<byte>("UNCONNECTED-MODE SOCKET"u8);
-        {
-            var (_, errΔ1) = c._<ж<global::go.net_package.UnixConn>>().WriteToUnix(b, raddr); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = c._<ж<global::go.net_package.UnixConn>>().WriteToUnix(b, raddr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = c.WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = c.WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            var (_, _, errΔ3) = c._<ж<global::go.net_package.UnixConn>>().WriteMsgUnix(b, default, raddr); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var (_, _, errΔ3) = c._<ж<global::go.net_package.UnixConn>>().WriteMsgUnix(b, default, raddr); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
-        {
-            var (_, errΔ4) = c._<ж<global::go.net_package.UnixConn>>().of(global::go.net_package.UnixConn.Ꮡconn).Write(b); if (errΔ4 == nil) {
-                t.Fatal(shouldFailˢ);
-            }
+        var (_, errΔ4) = c._<ж<global::go.net_package.UnixConn>>().of(global::go.net_package.UnixConn.Ꮡconn).Write(b); if (errΔ4 == nil) {
+            t.Fatal(shouldFailˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -332,7 +312,7 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
 
         var handler = (ж<localServer> ls, global::go.net_package.Listener ln) => {
         };
-        foreach (var (_, vᴛ1) in slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))])) {
+        foreach (var (_, vᴛ1) in range(slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))]))) {
             ref var laddr = ref heap(new @string(), out var Ꮡladdr);
             laddr = vᴛ1;
 
@@ -348,10 +328,8 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
             var ls = (Ꮡ(new streamListener(Listener: new global::go.net_package.UnixListenerжListener(ln)))).newLocalServer();
             var lsʗ1 = ls;
             defer(() => lsʗ1.teardown(), ref ᒐ);
-            {
-                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
 
             (var la, err) = ResolveUnixAddr(unixˢ, laddr);
@@ -376,10 +354,8 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             }, ref ᒐ);
-            {
-                var (_, errΔ2) = c.of(global::go.net_package.UnixConn.Ꮡconn).Write(slice<byte>("UNIXCONN LOCAL AND REMOTE NAME TEST"u8)); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, errΔ2) = c.of(global::go.net_package.UnixConn.Ꮡconn).Write(slice<byte>("UNIXCONN LOCAL AND REMOTE NAME TEST"u8)); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
 
             var exprᴛ1 = Δruntime.GOOS;
@@ -395,7 +371,7 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
                 new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
                 new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
             }.array();
-            foreach (var (_, ca) in connAddrs.ΔRangeSnapshot()) {
+            foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {
                     t.Fatalf("got %#v, expected %#v", ca.got, ca.want);
                 }
@@ -417,7 +393,7 @@ public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
             t.Skip(unixgramTestˢ);
         }
 
-        foreach (var (_, vᴛ1) in slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))])) {
+        foreach (var (_, vᴛ1) in range(slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))]))) {
             ref var laddr = ref heap(new @string(), out var Ꮡladdr);
             laddr = vᴛ1;
 
@@ -438,10 +414,8 @@ public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
 
             ref var la = ref heap<ж<global::go.net_package.UnixAddr>>(out var Ꮡla);
             if (laddr != ""u8) {
-                {
-                    (la, err) = ResolveUnixAddr(unixgramˢ, laddr); if (err != nil) {
-                        t.Fatal(err);
-                    }
+                (la, err) = ResolveUnixAddr(unixgramˢ, laddr); if (err != nil) {
+                    t.Fatal(err);
                 }
             }
             (var c2, err) = DialUnix(unixgramˢ, la, ta);
@@ -477,7 +451,7 @@ public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
                 new(c2.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unixgram")))),
                 new(c2.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
             }.array();
-            foreach (var (_, ca) in connAddrs.ΔRangeSnapshot()) {
+            foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {
                     t.Fatalf("got %#v; want %#v", ca.got, ca.want);
                 }
@@ -550,17 +524,13 @@ public static void TestUnixUnlink(ж<testing.T> t) {
         return (f, ln);
     }
     void checkExists(ж<testing.T> tΔ3, @string desc) {
-        {
-            var (_, err) = Δos.Stat(name); if (err != nil) {
-                tΔ3.Fatalf("unix socket does not exist %s: %v", desc, err);
-            }
+        var (_, err) = Δos.Stat(name); if (err != nil) {
+            tΔ3.Fatalf("unix socket does not exist %s: %v", desc, err);
         }
     }
     void checkNotExists(ж<testing.T> tΔ4, @string desc) {
-        {
-            var (_, err) = Δos.Stat(name); if (err == nil) {
-                tΔ4.Fatalf("unix socket does exist %s: %v", desc, err);
-            }
+        var (_, err) = Δos.Stat(name); if (err == nil) {
+            tΔ4.Fatalf("unix socket does exist %s: %v", desc, err);
         }
     }
 
@@ -601,10 +571,8 @@ public static void TestUnixUnlink(ж<testing.T> t) {
         checkExistsʗ3(tΔ7, afterListenˢ);
         l.Close();
         checkNotExistsʗ3(tΔ7, afterListenerCloseˢ);
-        {
-            var err = Δos.WriteFile(name, slice<byte>("hello world"u8), 438); if (err != nil) {
-                tΔ7.Fatalf("cannot recreate socket file: %v", err);
-            }
+        var err = Δos.WriteFile(name, slice<byte>("hello world"u8), 438); if (err != nil) {
+            tΔ7.Fatalf("cannot recreate socket file: %v", err);
         }
         checkExistsʗ3(tΔ7, afterWritingTempFileˢ);
         l.Close();

@@ -120,13 +120,11 @@ public static void TestIssue6413(ж<testing.T> t) {
     var want = Typ[Int];
     nint n = 0;
     foreach (var (x, tv) in types) {
-        {
-            var (_, ok) = x._<ж<ast.CallExpr>>(ᐧ); if (ok) {
-                if (!AreEqual(tv.Type, want)) {
-                    t.Errorf("%s: got %s; want %s", fset.Position(x.Pos()), tv.Type, want.OrTypedNil());
-                }
-                n++;
+        var (_, ok) = x._<ж<ast.CallExpr>>(ᐧ); if (ok) {
+            if (!AreEqual(tv.Type, want)) {
+                t.Errorf("%s: got %s; want %s", fset.Position(x.Pos()), tv.Type, want.OrTypedNil());
             }
+            n++;
         }
     }
 
@@ -151,7 +149,7 @@ public static void TestIssue7245(ж<testing.T> t) {
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), Ꮡ(new typesꓸInfo(Defs: defs)));
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new typesꓸInfo(Defs: defs)));
     if (err != nil) {
         t.Fatal(err);
     }
@@ -218,11 +216,9 @@ public static void TestIssue7827(ж<testing.T> t) {
     }), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
     var uses = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
-    {
-        @string s = err.Error(); if (!strings.HasSuffix(s, cannotAssignToWˢ)) {
-            t.Errorf("Check: unexpected error: %s", s);
-        }
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
+    @string s = err.Error(); if (!strings.HasSuffix(s, cannotAssignToWˢ)) {
+        t.Errorf("Check: unexpected error: %s", s);
     }
 
     slice<@string> facts = default;
@@ -375,7 +371,7 @@ public static void TestIssue25627(ж<testing.T> t) {
     @string prefix = prefixᶜ2;
     // The src strings (without prefix) are constructed such that the number of semicolons
     // plus one corresponds to the number of fields expected in the respective struct.
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         @"struct { x Missing }",
         @"struct { Missing }",
         @"struct { *Missing }",
@@ -383,34 +379,26 @@ public static void TestIssue25627(ж<testing.T> t) {
         @"struct { P }",
         @"struct { *I }",
         @"struct { a int; b Missing; *Missing }"
-    ])) {
+    ]))) {
         var f = mustParse(fset, prefix + src);
 
         ref var cfg = ref heap<types.Config>(new Config(Importer: defaultImporter(fset), Error: (error errΔ1) => {
         }), out var Ꮡcfg);
         var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
-        var (_, err) = Ꮡcfg.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), info);
+        var (_, err) = Ꮡcfg.Check(f.Name.Name, fset, [f], info);
         if (err != nil) {
-            {
-                var (_, ok) = err._<typesꓸError>(ᐧ); if (!ok) {
-                    t.Fatal(err);
-                }
+            var (_, ok) = err._<typesꓸError>(ᐧ); if (!ok) {
+                t.Fatal(err);
             }
         }
 
         var infoʗ1 = info;
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-            {
-                var (spec, _) = n._<ж<ast.TypeSpec>>(ᐧ); if (spec != nil) {
-                    {
-                        var (tv, ok) = infoʗ1.Types[spec.Type, ꟷ]; if (ok && spec.Name.Name == "T"u8) {
-                            nint want = strings.Count(src, ";") + 1;
-                            {
-                                nint got = tv.Type._<ж<types.Struct>>().NumFields(); if (got != want) {
-                                    t.Errorf("%s: got %d fields; want %d", src, got, want);
-                                }
-                            }
-                        }
+            var (spec, _) = n._<ж<ast.TypeSpec>>(ᐧ); if (spec != nil) {
+                var (tv, ok) = infoʗ1.Types[spec.Type, ꟷ]; if (ok && spec.Name.Name == "T"u8) {
+                    nint want = strings.Count(src, ";") + 1;
+                    nint got = tv.Type._<ж<types.Struct>>().NumFields(); if (got != want) {
+                        t.Errorf("%s: got %d fields; want %d", src, got, want);
                     }
                 }
             }
@@ -433,24 +421,24 @@ public static void TestIssue28005(ж<testing.T> t) {
 
     // compute original file ASTs
     array<ж<ast.File>> orig = new(3); /* len(sources) */
-    foreach (var (i, src) in sources.ΔRangeSnapshot()) {
+    foreach (var (i, src) in range(sources.ΔRangeSnapshot())) {
         orig[i] = mustParse(fset, src);
     }
 
     // run the test for all order permutations of the incoming files
-    foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 1, 2}.array(),
         new nint[]{0, 2, 1}.array(),
         new nint[]{1, 0, 2}.array(),
         new nint[]{1, 2, 0}.array(),
         new nint[]{2, 0, 1}.array(),
         new nint[]{2, 1, 0}.array()
-    }.slice(), 3)) {
+    }.slice(), 3))) {
         var perm = vᴛ1.Clone();
 
         // create file order permutation
         var files = new slice<ж<ast.File>>(len(sources));
-        foreach (var i in range(perm)) {
+        foreach (var i in range(len(perm))) {
             files[i] = orig[perm[i]];
         }
 
@@ -496,7 +484,7 @@ private static readonly @string errorˢ4ᵇ = "Error"u8;
 public static void TestIssue28282(ж<testing.T> t) {
     // create type interface { error }
     var et = Universe.Lookup(errorˢ3).Type();
-    var it = NewInterfaceType(default, slice<typesꓸType>([et]));
+    var it = NewInterfaceType(default, [et]);
     it.Complete();
     // verify that after completing the interface, the embedded method remains unchanged
     var want = et.Underlying()._<ж<types.Interface>>().Method(0);
@@ -529,10 +517,8 @@ public static void TestIssue29029(ж<testing.T> t) {
     @string printInfo(ж<typesꓸInfo> infoΔ1) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         foreach (var (_, obj) in infoΔ1.Defs) {
-            {
-                var (fn, ok) = obj._<ж<types.Func>>(ᐧ); if (ok) {
-                    fmt.Fprintln(new types_test_package.strings_BuilderжWriter(Ꮡbuf), fn.OrTypedNil());
-                }
+            var (fn, ok) = obj._<ж<types.Func>>(ᐧ); if (ok) {
+                fmt.Fprintln(new types_test_package.strings_BuilderжWriter(Ꮡbuf), fn.OrTypedNil());
             }
         }
         return buf.String();
@@ -547,7 +533,7 @@ public static void TestIssue29029(ж<testing.T> t) {
     var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
     var check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
-        var err = check.Files(slice<ж<ast.File>>([f1, f2])); if (err != nil) {
+        var err = check.Files([f1, f2]); if (err != nil) {
             t.Fatal(err);
         }
     }
@@ -557,12 +543,12 @@ public static void TestIssue29029(ж<testing.T> t) {
     info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
     check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
-        var err = check.Files(slice<ж<ast.File>>([f1])); if (err != nil) {
+        var err = check.Files([f1]); if (err != nil) {
             t.Fatal(err);
         }
     }
     {
-        var err = check.Files(slice<ж<ast.File>>([f2])); if (err != nil) {
+        var err = check.Files([f2]); if (err != nil) {
             t.Fatal(err);
         }
     }
@@ -616,10 +602,8 @@ public static void TestIssue34921(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    t.Error(r);
-                }
+            var r = recover(); if (r != nil) {
+                t.Error(r);
             }
         }, ref ᒐ);
 
@@ -629,7 +613,7 @@ public static void TestIssue34921(ж<testing.T> t) {
         ]);
 
         ж<types.Package> pkg = default;
-        foreach (var (_, src) in sources) {
+        foreach (var (_, src) in range(sources)) {
             ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: pkg)), out var Ꮡconf);
             pkg = mustTypecheck(src, Ꮡconf, nil); // pkg imported by the next package in this test
         }
@@ -781,9 +765,9 @@ public static void TestIssue43124(ж<testing.T> t) {
         cfg.Importer = impʗ1;
     };
 
-    testFiles(t, slice<@string>(["b.go"]), slice<slice<byte>>([slice<byte>(bsrc)]), false, withImporter);
-    testFiles(t, slice<@string>(["c.go"]), slice<slice<byte>>([slice<byte>(csrc)]), false, withImporter);
-    testFiles(t, slice<@string>(["t.go"]), slice<slice<byte>>([slice<byte>(tsrc)]), false, withImporter);
+    testFiles(t, ["b.go"], [slice<byte>(bsrc)], false, withImporter);
+    testFiles(t, ["c.go"], [slice<byte>(csrc)], false, withImporter);
+    testFiles(t, ["t.go"], [slice<byte>(tsrc)], false, withImporter);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -834,10 +818,8 @@ public static void TestIssue55030(ж<testing.T> t) {
                     if (r == nil) {
                         throw panic("NewSignatureType panic expected");
                     }
-                    {
-                        var (_, ok) = r._<@string>(ᐧ); if (!ok) {
-                            throw panic("NewSignatureType string panic expected");
-                        }
+                    var (_, ok) = r._<@string>(ᐧ); if (!ok) {
+                        throw panic("NewSignatureType string panic expected");
                     }
                 }, ref ᒐ);
             }
@@ -859,7 +841,7 @@ public static void TestIssue55030(ж<testing.T> t) {
     // P where P's common underlying type is string
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P string]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]))))), true);
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.BasicжΔType(Typ[ΔString])])))), true);
     }
 
     // P where P's common underlying type is an (unnamed) slice
@@ -872,9 +854,9 @@ public static void TestIssue55030(ж<testing.T> t) {
     {
         var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString]));                                // ~string
         var t2 = NewTerm(false, new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Byte])))); // []byte
-        var u = NewUnion(slice<ж<typesꓸTerm>>([t1, t2]));                                           // ~string | []byte
+        var u = NewUnion([t1, t2]);                                                                 // ~string | []byte
         var P = NewTypeName(nopos, nil, "P", default);                                              // [P ~string | []byte]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(u)]))))), true);
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.UnionжΔType(u)])))), true);
     }
 
     // makeSig must panic for the following (example) types:
@@ -890,7 +872,7 @@ public static void TestIssue55030(ж<testing.T> t) {
     // P where P's type set doesn't have any slice or string types
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P any]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]))))), false);
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.BasicжΔType(Typ[Int])])))), false);
     }
 }
 
@@ -919,30 +901,26 @@ public static void TestIssue51093(ж<testing.T> t) {
         new("~uint64 | ~rune", "'X'")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string src = fmt.Sprintf("package p; func _[P %s]() { _ = P(%s) }"u8, test.typ, test.val);
         var types = new map<ast.Expr, types.TypeAndValue>();
         mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
 
         nint n = default;
         foreach (var (x, tv) in types) {
-            {
-                var (xΔ1, _) = x._<ж<ast.CallExpr>>(ᐧ); if (xΔ1 != nil) {
-                    // there must be exactly one CallExpr which is the P(val) conversion
-                    n++;
-                    var (tpar, _) = tv.Type._<ж<types.TypeParam>>(ᐧ);
-                    if (tpar == nil) {
-                        t.Fatalf("%s: got type %s, want type parameter", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Type);
-                    }
-                    {
-                        @string name = tpar.Obj().Name(); if (name != "P"u8) {
-                            t.Fatalf("%s: got type parameter name %s, want P", ExprString(new ast.CallExprжExpr(xΔ1)), name);
-                        }
-                    }
-                    // P(val) must not be constant
-                    if (tv.Value != nil) {
-                        t.Errorf("%s: got constant value %s (%s), want no constant", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Value, tv.Value.String());
-                    }
+            var (xΔ1, _) = x._<ж<ast.CallExpr>>(ᐧ); if (xΔ1 != nil) {
+                // there must be exactly one CallExpr which is the P(val) conversion
+                n++;
+                var (tpar, _) = tv.Type._<ж<types.TypeParam>>(ᐧ);
+                if (tpar == nil) {
+                    t.Fatalf("%s: got type %s, want type parameter", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Type);
+                }
+                @string name = tpar.Obj().Name(); if (name != "P"u8) {
+                    t.Fatalf("%s: got type parameter name %s, want P", ExprString(new ast.CallExprжExpr(xΔ1)), name);
+                }
+                // P(val) must not be constant
+                if (tv.Value != nil) {
+                    t.Errorf("%s: got constant value %s (%s), want no constant", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Value, tv.Value.String());
                 }
             }
         }
@@ -1104,7 +1082,7 @@ func (S) M5(struct {S;t}) {}
         var bpkg = mustTypecheck(b, nil, nil);
         var mast = mustParse(fsetʗ1, main);
         ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: bpkg)), out var Ꮡconf);
-        var (_, err) = Ꮡconf.Check(mast.Name.Name, fsetʗ1, slice<ж<ast.File>>([mast]), nil);
+        var (_, err) = Ꮡconf.Check(mast.Name.Name, fsetʗ1, [mast], nil);
         if (err == nil) {
             t.Error(expectedFailureButItDidˢ);
         } else {
@@ -1115,7 +1093,7 @@ func (S) M5(struct {S;t}) {}
             }
         }
     }
-    foreach (var (_, tΔ1) in tests) {
+    foreach (var (_, tΔ1) in range(tests)) {
         test(tΔ1.main, tΔ1.b, tΔ1.want);
     }
 }
@@ -1195,7 +1173,7 @@ public static void TestIssue59944(ж<testing.T> t) {
 
     // code generated by cmd/cgo for the above source.
     @string cgoTypes = cgoTypesᶜ;
-    testFiles(t, slice<@string>(["p.go", "_cgo_gotypes.go"]), slice<slice<byte>>([slice<byte>(src), slice<byte>(cgoTypes)]), false, (ж<types.Config> cfg) => {
+    testFiles(t, ["p.go", "_cgo_gotypes.go"], [slice<byte>(src), slice<byte>(cgoTypes)], false, (ж<types.Config> cfg) => {
         boolFieldAddr(cfg, go115UsesCgoˢ).Value = true;
     });
 }
@@ -1227,7 +1205,7 @@ public static void TestIssue61931(ж<testing.T> t) {
     }
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), nil); // must not panic
+    Ꮡconf.Check(f.Name.Name, fset, [f], nil); // must not panic
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -1400,7 +1378,7 @@ public static void TestIssue59831(ж<testing.T> t) {
             "S does not implement interface{n()} (missing method n)")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         // typecheck test source
         ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: test.imported)), out var Ꮡconf);
         var (pkg, err) = typecheck(test.src, Ꮡconf, nil);
@@ -1535,7 +1513,7 @@ public static void TestIssue69092(ж<testing.T> t) {
     ref var conf = ref heap<types.Config>(new Config(Error: (error err) => {
     }), out var Ꮡconf); // ignore errors
     ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
-    Ꮡconf.Check("p", fset, slice<ж<ast.File>>([@file]), Ꮡinfo);
+    Ꮡconf.Check("p", fset, [@file], Ꮡinfo);
 
     // look for {x} expression
     var outer = @file.Decls[0]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>().Values[0]._<ж<ast.CompositeLit>>(); // T{{x}}

@@ -1,0 +1,3035 @@
+; Assembly listing for method go.crypto.internal.fips140.nistec.fiat_package:p384Mul(byref,byref,byref) (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; 0 inlinees with PGO data; 33 single block inlinees; 41 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     r15
+       push     r14
+       push     r13
+       push     r12
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       lea      r11, [rsp-0x1888]
+       call     CORINFO_HELP_STACK_PROBE
+       mov      rsp, r11
+       xor      eax, eax
+       mov      qword ptr [rsp+0x28], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rsp+0x30], xmm4
+       mov      rax, -0x10E0
+       vmovdqa  xmmword ptr [rsp+rax+0x1120], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x1130], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x1140], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      rdi, rcx
+       mov      rsi, rdx
+       mov      rbx, r8
+ 
+G_M000_IG02:                ;; offset=0x0061
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG05
+ 
+G_M000_IG03:                ;; offset=0x0069
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x100], xmm0
+ 
+G_M000_IG04:                ;; offset=0x0077
+       jmp      SHORT G_M000_IG06
+ 
+G_M000_IG05:                ;; offset=0x0079
+       lea      rdx, [rsp+0x100]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG06:                ;; offset=0x008A
+       mov      rdx, gword ptr [rsp+0x100]
+       mov      ecx, dword ptr [rsp+0x108]
+       mov      ebp, dword ptr [rsp+0x10C]
+       movsxd   rax, ebp
+       cmp      rax, 1
+       jle      G_M000_IG114
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x01]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       inc      ecx
+       mov      rbp, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG09
+ 
+G_M000_IG07:                ;; offset=0x00D9
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xF0], xmm0
+ 
+G_M000_IG08:                ;; offset=0x00E7
+       jmp      SHORT G_M000_IG10
+ 
+G_M000_IG09:                ;; offset=0x00E9
+       lea      rdx, [rsp+0xF0]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG10:                ;; offset=0x00FA
+       mov      rdx, gword ptr [rsp+0xF0]
+       mov      ecx, dword ptr [rsp+0xF8]
+       mov      r14d, dword ptr [rsp+0xFC]
+       movsxd   rax, r14d
+       cmp      rax, 2
+       jle      G_M000_IG115
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x02]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 2
+       mov      r14, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG13
+ 
+G_M000_IG11:                ;; offset=0x014B
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xE0], xmm0
+ 
+G_M000_IG12:                ;; offset=0x0159
+       jmp      SHORT G_M000_IG14
+ 
+G_M000_IG13:                ;; offset=0x015B
+       lea      rdx, [rsp+0xE0]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG14:                ;; offset=0x016C
+       mov      rdx, gword ptr [rsp+0xE0]
+       mov      ecx, dword ptr [rsp+0xE8]
+       mov      r15d, dword ptr [rsp+0xEC]
+       movsxd   rax, r15d
+       cmp      rax, 3
+       jle      G_M000_IG116
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x03]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 3
+       mov      r15, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG17
+ 
+G_M000_IG15:                ;; offset=0x01BD
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xD0], xmm0
+ 
+G_M000_IG16:                ;; offset=0x01CB
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG17:                ;; offset=0x01CD
+       lea      rdx, [rsp+0xD0]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG18:                ;; offset=0x01DE
+       mov      rdx, gword ptr [rsp+0xD0]
+       mov      ecx, dword ptr [rsp+0xD8]
+       mov      r13d, dword ptr [rsp+0xDC]
+       movsxd   rax, r13d
+       cmp      rax, 4
+       jle      G_M000_IG117
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x04]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 4
+       mov      r13, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG21
+ 
+G_M000_IG19:                ;; offset=0x022F
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xC0], xmm0
+ 
+G_M000_IG20:                ;; offset=0x023D
+       jmp      SHORT G_M000_IG22
+ 
+G_M000_IG21:                ;; offset=0x023F
+       lea      rdx, [rsp+0xC0]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG22:                ;; offset=0x0250
+       mov      rdx, gword ptr [rsp+0xC0]
+       mov      ecx, dword ptr [rsp+0xC8]
+       mov      r12d, dword ptr [rsp+0xCC]
+       movsxd   rax, r12d
+       cmp      rax, 5
+       jle      G_M000_IG118
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x05]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 5
+       mov      r12, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rsi]
+       test     rdx, rdx
+       je       SHORT G_M000_IG25
+ 
+G_M000_IG23:                ;; offset=0x02A1
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xB0], xmm0
+ 
+G_M000_IG24:                ;; offset=0x02AF
+       jmp      SHORT G_M000_IG26
+ 
+G_M000_IG25:                ;; offset=0x02B1
+       lea      rdx, [rsp+0xB0]
+       mov      rcx, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG26:                ;; offset=0x02C2
+       mov      rdx, gword ptr [rsp+0xB0]
+       mov      ecx, dword ptr [rsp+0xB8]
+       mov      esi, dword ptr [rsp+0xBC]
+       movsxd   rax, esi
+       test     rax, rax
+       jle      G_M000_IG119
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       cmp      ecx, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       mov      rsi, qword ptr [rdx+8*rcx+0x10]
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG29
+ 
+G_M000_IG27:                ;; offset=0x030B
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0xA0], xmm0
+ 
+G_M000_IG28:                ;; offset=0x0319
+       jmp      SHORT G_M000_IG30
+ 
+G_M000_IG29:                ;; offset=0x031B
+       lea      rdx, [rsp+0xA0]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG30:                ;; offset=0x032C
+       mov      rdx, gword ptr [rsp+0xA0]
+       mov      ecx, dword ptr [rsp+0xA8]
+       mov      eax, dword ptr [rsp+0xAC]
+       movsxd   r8, eax
+       cmp      r8, 5
+       jle      G_M000_IG120
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x05]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 5
+       mov      rcx, qword ptr [rdx+8*rcx+0x10]
+       lea      rax, [rsp+0x98]
+       mov      rdx, rsi
+       mulx     r10, r8, rcx
+       mov      qword ptr [rax], r8
+       mov      rax, r10
+       mov      r8, qword ptr [rsp+0x98]
+       mov      qword ptr [rsp+0x1878], rax
+       mov      qword ptr [rsp+0x1880], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG33
+ 
+G_M000_IG31:                ;; offset=0x03AA
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x88], xmm0
+ 
+G_M000_IG32:                ;; offset=0x03B8
+       jmp      SHORT G_M000_IG34
+ 
+G_M000_IG33:                ;; offset=0x03BA
+       lea      rdx, [rsp+0x88]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG34:                ;; offset=0x03CB
+       mov      rdx, gword ptr [rsp+0x88]
+       mov      ecx, dword ptr [rsp+0x90]
+       mov      eax, dword ptr [rsp+0x94]
+       movsxd   r8, eax
+       cmp      r8, 4
+       jle      G_M000_IG121
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x04]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 4
+       mov      rcx, qword ptr [rdx+8*rcx+0x10]
+       lea      rax, [rsp+0x80]
+       mov      rdx, rsi
+       mulx     r10, r8, rcx
+       mov      qword ptr [rax], r8
+       mov      rax, r10
+       mov      r8, qword ptr [rsp+0x80]
+       mov      qword ptr [rsp+0x1868], rax
+       mov      qword ptr [rsp+0x1870], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG37
+ 
+G_M000_IG35:                ;; offset=0x0449
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x70], xmm0
+ 
+G_M000_IG36:                ;; offset=0x0454
+       jmp      SHORT G_M000_IG38
+ 
+G_M000_IG37:                ;; offset=0x0456
+       lea      rdx, [rsp+0x70]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG38:                ;; offset=0x0464
+       mov      rdx, gword ptr [rsp+0x70]
+       mov      ecx, dword ptr [rsp+0x78]
+       mov      eax, dword ptr [rsp+0x7C]
+       movsxd   r8, eax
+       cmp      r8, 3
+       jle      G_M000_IG122
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x03]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 3
+       mov      rcx, qword ptr [rdx+8*rcx+0x10]
+       lea      rax, [rsp+0x68]
+       mov      rdx, rsi
+       mulx     r10, r8, rcx
+       mov      qword ptr [rax], r8
+       mov      rax, r10
+       mov      r8, qword ptr [rsp+0x68]
+       mov      qword ptr [rsp+0x1858], rax
+       mov      qword ptr [rsp+0x1860], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG41
+ 
+G_M000_IG39:                ;; offset=0x04D3
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG40:                ;; offset=0x04DE
+       jmp      SHORT G_M000_IG42
+ 
+G_M000_IG41:                ;; offset=0x04E0
+       lea      rdx, [rsp+0x58]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG42:                ;; offset=0x04EE
+       mov      rdx, gword ptr [rsp+0x58]
+       mov      ecx, dword ptr [rsp+0x60]
+       mov      eax, dword ptr [rsp+0x64]
+       movsxd   r8, eax
+       cmp      r8, 2
+       jle      G_M000_IG123
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x02]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       add      ecx, 2
+       mov      rcx, qword ptr [rdx+8*rcx+0x10]
+       lea      rax, [rsp+0x50]
+       mov      rdx, rsi
+       mulx     r10, r8, rcx
+       mov      qword ptr [rax], r8
+       mov      rax, r10
+       mov      r8, qword ptr [rsp+0x50]
+       mov      qword ptr [rsp+0x1848], rax
+       mov      qword ptr [rsp+0x1850], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG45
+ 
+G_M000_IG43:                ;; offset=0x055D
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x40], xmm0
+ 
+G_M000_IG44:                ;; offset=0x0568
+       jmp      SHORT G_M000_IG46
+ 
+G_M000_IG45:                ;; offset=0x056A
+       lea      rdx, [rsp+0x40]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG46:                ;; offset=0x0578
+       mov      rdx, gword ptr [rsp+0x40]
+       mov      ecx, dword ptr [rsp+0x48]
+       mov      eax, dword ptr [rsp+0x4C]
+       movsxd   r8, eax
+       cmp      r8, 1
+       jle      G_M000_IG124
+       mov      rax, 0x21B246F5510
+       test     rdx, rdx
+       cmove    rdx, rax
+       lea      eax, [rcx+0x01]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG126
+       inc      ecx
+       mov      rcx, qword ptr [rdx+8*rcx+0x10]
+       lea      rax, [rsp+0x38]
+       mov      rdx, rsi
+       mulx     r10, r8, rcx
+       mov      qword ptr [rax], r8
+       mov      rax, r10
+       mov      r8, qword ptr [rsp+0x38]
+       mov      qword ptr [rsp+0x1838], rax
+       mov      qword ptr [rsp+0x1840], r8
+       mov      rdx, gword ptr [rbx]
+       test     rdx, rdx
+       je       SHORT G_M000_IG49
+ 
+G_M000_IG47:                ;; offset=0x05E6
+       vmovdqu  xmm0, xmmword ptr [rdx+0x08]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG48:                ;; offset=0x05F1
+       jmp      SHORT G_M000_IG50
+ 
+G_M000_IG49:                ;; offset=0x05F3
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:materializeValue():go.array`1[ulong]:this]
+ 
+G_M000_IG50:                ;; offset=0x0601
+       mov      rax, gword ptr [rsp+0x28]
+       mov      ecx, dword ptr [rsp+0x30]
+       mov      dword ptr [rsp+0x24], ecx
+       mov      edx, dword ptr [rsp+0x34]
+       movsxd   r8, edx
+       test     r8, r8
+       jle      G_M000_IG125
+       test     rax, rax
+       jne      SHORT G_M000_IG52
+ 
+G_M000_IG51:                ;; offset=0x0623
+       call     [System.Array:Empty[ulong]():ulong[]]
+ 
+G_M000_IG52:                ;; offset=0x0629
+       mov      ecx, dword ptr [rsp+0x24]
+       cmp      ecx, dword ptr [rax+0x08]
+       jae      G_M000_IG126
+       mov      r8d, ecx
+       mov      r8, qword ptr [rax+8*r8+0x10]
+       lea      rcx, [rsp+0x10E0]
+       mov      rdx, rsi
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       lea      rcx, [rsp+0x10D0]
+       mov      rdx, qword ptr [rsp+0x10E0]
+       mov      r8, qword ptr [rsp+0x1840]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x10D0]
+       mov      rcx, qword ptr [rsp+0x10D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x10C0]
+       mov      rdx, qword ptr [rsp+0x1838]
+       mov      r8, qword ptr [rsp+0x1850]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x10C0]
+       mov      qword ptr [rsp+0x1830], rax
+       mov      rcx, qword ptr [rsp+0x10C8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x10B0]
+       mov      rdx, qword ptr [rsp+0x1848]
+       mov      r8, qword ptr [rsp+0x1860]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x10B0]
+       mov      qword ptr [rsp+0x1828], rax
+       mov      rcx, qword ptr [rsp+0x10B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG53:                ;; offset=0x0719
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x10A0]
+       mov      rdx, qword ptr [rsp+0x1858]
+       mov      r8, qword ptr [rsp+0x1870]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x10A0]
+       mov      qword ptr [rsp+0x1820], rax
+       mov      rcx, qword ptr [rsp+0x10A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       mov      rax, qword ptr [rsp+0x10E8]
+       mov      qword ptr [rsp+0x1098], rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x1088]
+       mov      rdx, qword ptr [rsp+0x1868]
+       mov      r8, qword ptr [rsp+0x1880]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1088]
+       mov      qword ptr [rsp+0x1818], rax
+       mov      rcx, qword ptr [rsp+0x1090]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1878]
+       mov      qword ptr [rsp+0x1810], rax
+       lea      rcx, [rsp+0x1078]
+       mov      rdx, qword ptr [rsp+0x1098]
+       mov      r8, 0x100000001
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1080]
+       mov      qword ptr [rsp+0x1070], rax
+       lea      rcx, [rsp+0x1060]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1060]
+       mov      qword ptr [rsp+0x1800], rax
+ 
+G_M000_IG54:                ;; offset=0x082A
+       mov      r10, qword ptr [rsp+0x1068]
+       mov      qword ptr [rsp+0x1808], r10
+       lea      rcx, [rsp+0x1050]
+       mov      rdx, qword ptr [rsp+0x1070]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1050]
+       mov      qword ptr [rsp+0x17F0], rax
+       mov      r10, qword ptr [rsp+0x1058]
+       mov      qword ptr [rsp+0x17F8], r10
+       lea      rcx, [rsp+0x1040]
+       mov      rdx, qword ptr [rsp+0x1070]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1040]
+       mov      qword ptr [rsp+0x17E0], rax
+       mov      r10, qword ptr [rsp+0x1048]
+       mov      qword ptr [rsp+0x17E8], r10
+       lea      rcx, [rsp+0x1030]
+       mov      rdx, qword ptr [rsp+0x1070]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1030]
+       mov      qword ptr [rsp+0x17D0], rax
+       mov      r10, qword ptr [rsp+0x1038]
+       mov      qword ptr [rsp+0x17D8], r10
+       lea      rcx, [rsp+0x1020]
+       mov      rdx, qword ptr [rsp+0x1070]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1020]
+       mov      qword ptr [rsp+0x17C0], rax
+       mov      r10, qword ptr [rsp+0x1028]
+       mov      qword ptr [rsp+0x17C8], r10
+       lea      rcx, [rsp+0x1010]
+       mov      rdx, qword ptr [rsp+0x1070]
+       mov      r8d, 0xFFFFFFFF
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x1010]
+       mov      rax, qword ptr [rsp+0x1018]
+       mov      qword ptr [rsp+0x17B8], rax
+       lea      rcx, [rsp+0x1000]
+       mov      r8, qword ptr [rsp+0x17C8]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+ 
+G_M000_IG55:                ;; offset=0x0987
+       mov      rax, qword ptr [rsp+0x1000]
+       mov      qword ptr [rsp+0x17B0], rax
+       mov      rcx, qword ptr [rsp+0x1008]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xFF0]
+       mov      rdx, qword ptr [rsp+0x17C0]
+       mov      r8, qword ptr [rsp+0x17D8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xFF0]
+       mov      qword ptr [rsp+0x17A8], rax
+       mov      rcx, qword ptr [rsp+0xFF8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xFE0]
+       mov      rdx, qword ptr [rsp+0x17D0]
+       mov      r8, qword ptr [rsp+0x17E8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xFE0]
+       mov      qword ptr [rsp+0x17A0], rax
+       mov      rcx, qword ptr [rsp+0xFE8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xFD0]
+       mov      rdx, qword ptr [rsp+0x17E0]
+       mov      r8, qword ptr [rsp+0x17F8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xFD0]
+       mov      qword ptr [rsp+0x1798], rax
+       mov      rcx, qword ptr [rsp+0xFD8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG56:                ;; offset=0x0A80
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xFC0]
+       mov      rdx, qword ptr [rsp+0x17F0]
+       mov      r8, qword ptr [rsp+0x1808]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xFC0]
+       mov      qword ptr [rsp+0x1790], rax
+       mov      rcx, qword ptr [rsp+0xFC8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1800]
+       mov      qword ptr [rsp+0x1788], rax
+       lea      rcx, [rsp+0xFB0]
+       mov      rdx, qword ptr [rsp+0x1098]
+       mov      r8, qword ptr [rsp+0x17B8]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0xFB8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xFA0]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x17B0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0xFA0]
+       mov      rcx, qword ptr [rsp+0xFA8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xF90]
+       mov      rdx, qword ptr [rsp+0x1830]
+       mov      r8, qword ptr [rsp+0x17A8]
+ 
+G_M000_IG57:                ;; offset=0x0B6C
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF90]
+       mov      qword ptr [rsp+0x1780], rax
+       mov      rcx, qword ptr [rsp+0xF98]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xF80]
+       mov      rdx, qword ptr [rsp+0x1828]
+       mov      r8, qword ptr [rsp+0x17A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF80]
+       mov      qword ptr [rsp+0x1778], rax
+       mov      rcx, qword ptr [rsp+0xF88]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xF70]
+       mov      rdx, qword ptr [rsp+0x1820]
+       mov      r8, qword ptr [rsp+0x1798]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF70]
+       mov      qword ptr [rsp+0x1770], rax
+       mov      rcx, qword ptr [rsp+0xF78]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xF60]
+       mov      rdx, qword ptr [rsp+0x1818]
+       mov      r8, qword ptr [rsp+0x1790]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF60]
+       mov      qword ptr [rsp+0x1768], rax
+       mov      rcx, qword ptr [rsp+0xF68]
+ 
+G_M000_IG58:                ;; offset=0x0C62
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xF50]
+       mov      rdx, qword ptr [rsp+0x1810]
+       mov      r8, qword ptr [rsp+0x1788]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF50]
+       mov      qword ptr [rsp+0x1760], rax
+       mov      rcx, rbx
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xF40]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF40]
+       mov      qword ptr [rsp+0x1750], rax
+       mov      r8, qword ptr [rsp+0xF48]
+       mov      qword ptr [rsp+0x1758], r8
+       mov      rcx, rbx
+       mov      edx, 4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xF30]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF30]
+       mov      qword ptr [rsp+0x1740], rax
+       mov      r8, qword ptr [rsp+0xF38]
+       mov      qword ptr [rsp+0x1748], r8
+       mov      rcx, rbx
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xF20]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF20]
+       mov      qword ptr [rsp+0x1730], rax
+ 
+G_M000_IG59:                ;; offset=0x0D58
+       mov      r8, qword ptr [rsp+0xF28]
+       mov      qword ptr [rsp+0x1738], r8
+       mov      rcx, rbx
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xF10]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xF10]
+       mov      qword ptr [rsp+0x1720], rax
+       mov      r8, qword ptr [rsp+0xF18]
+       mov      qword ptr [rsp+0x1728], r8
+       mov      r10, qword ptr [rsp+0xF58]
+       mov      qword ptr [rsp+0xF08], r10
+       mov      rcx, rbx
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xEF8]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xEF8]
+       mov      qword ptr [rsp+0x1710], rax
+       mov      r8, qword ptr [rsp+0xF00]
+       mov      qword ptr [rsp+0x1718], r8
+       mov      rcx, rbx
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xEE8]
+       mov      rdx, rbp
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0xEE8]
+       mov      rbp, qword ptr [rsp+0xEF0]
+       lea      rcx, [rsp+0xED8]
+       mov      r8, qword ptr [rsp+0x1718]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xED8]
+       mov      qword ptr [rsp+0x1708], rax
+       mov      rcx, qword ptr [rsp+0xEE0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG60:                ;; offset=0x0E65
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xEC8]
+       mov      rdx, qword ptr [rsp+0x1710]
+       mov      r8, qword ptr [rsp+0x1728]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xEC8]
+       mov      qword ptr [rsp+0x1700], rax
+       mov      rcx, qword ptr [rsp+0xED0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xEB8]
+       mov      rdx, qword ptr [rsp+0x1720]
+       mov      r8, qword ptr [rsp+0x1738]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xEB8]
+       mov      qword ptr [rsp+0x16F8], rax
+       mov      rcx, qword ptr [rsp+0xEC0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xEA8]
+       mov      rdx, qword ptr [rsp+0x1730]
+       mov      r8, qword ptr [rsp+0x1748]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xEA8]
+       mov      qword ptr [rsp+0x16F0], rax
+       mov      rcx, qword ptr [rsp+0xEB0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE98]
+       mov      rdx, qword ptr [rsp+0x1740]
+       mov      r8, qword ptr [rsp+0x1758]
+ 
+G_M000_IG61:                ;; offset=0x0F5E
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE98]
+       mov      qword ptr [rsp+0x16E8], rax
+       mov      rcx, qword ptr [rsp+0xEA0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1750]
+       mov      qword ptr [rsp+0x16E0], rax
+       lea      rcx, [rsp+0xE88]
+       mov      rdx, rsi
+       mov      r8, rbp
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0xE88]
+       mov      rcx, qword ptr [rsp+0xE90]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE78]
+       mov      rdx, qword ptr [rsp+0x1780]
+       mov      r8, qword ptr [rsp+0x1708]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0xE78]
+       mov      rcx, qword ptr [rsp+0xE80]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE68]
+       mov      rdx, qword ptr [rsp+0x1778]
+       mov      r8, qword ptr [rsp+0x1700]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE68]
+       mov      qword ptr [rsp+0x16D8], rax
+       mov      rcx, qword ptr [rsp+0xE70]
+ 
+G_M000_IG62:                ;; offset=0x104A
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE58]
+       mov      rdx, qword ptr [rsp+0x1770]
+       mov      r8, qword ptr [rsp+0x16F8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE58]
+       mov      qword ptr [rsp+0x16D0], rax
+       mov      rcx, qword ptr [rsp+0xE60]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE48]
+       mov      rdx, qword ptr [rsp+0x1768]
+       mov      r8, qword ptr [rsp+0x16F0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE48]
+       mov      qword ptr [rsp+0x16C8], rax
+       mov      rcx, qword ptr [rsp+0xE50]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE38]
+       mov      rdx, qword ptr [rsp+0x1760]
+       mov      r8, qword ptr [rsp+0x16E8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE38]
+       mov      qword ptr [rsp+0x16C0], rax
+       mov      rdx, qword ptr [rsp+0xE40]
+       mov      qword ptr [rsp+0x16B8], rdx
+       mov      rcx, qword ptr [rsp+0xF08]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG63:                ;; offset=0x113B
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      qword ptr [rsp+0xE30], rax
+       mov      rcx, qword ptr [rsp+0x16B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xE20]
+       mov      rdx, qword ptr [rsp+0xE30]
+       mov      r8, qword ptr [rsp+0x16E0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE20]
+       mov      qword ptr [rsp+0x16B0], rax
+       mov      r10, qword ptr [rsp+0xE28]
+       mov      qword ptr [rsp+0x16A8], r10
+       lea      rcx, [rsp+0xE10]
+       mov      rdx, rsi
+       mov      r8, 0x100000001
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xE18]
+       mov      qword ptr [rsp+0xE08], rax
+       lea      rcx, [rsp+0xDF8]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xDF8]
+       mov      qword ptr [rsp+0x1698], rax
+       mov      r10, qword ptr [rsp+0xE00]
+       mov      qword ptr [rsp+0x16A0], r10
+       lea      rcx, [rsp+0xDE8]
+       mov      rdx, qword ptr [rsp+0xE08]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xDE8]
+       mov      qword ptr [rsp+0x1688], rax
+       mov      r10, qword ptr [rsp+0xDF0]
+       mov      qword ptr [rsp+0x1690], r10
+       lea      rcx, [rsp+0xDD8]
+       mov      rdx, qword ptr [rsp+0xE08]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xDD8]
+ 
+G_M000_IG64:                ;; offset=0x126F
+       mov      qword ptr [rsp+0x1678], rax
+       mov      r10, qword ptr [rsp+0xDE0]
+       mov      qword ptr [rsp+0x1680], r10
+       lea      rcx, [rsp+0xDC8]
+       mov      rdx, qword ptr [rsp+0xE08]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xDC8]
+       mov      qword ptr [rsp+0x1668], rax
+       mov      r10, qword ptr [rsp+0xDD0]
+       mov      qword ptr [rsp+0x1670], r10
+       lea      rcx, [rsp+0xDB8]
+       mov      rdx, qword ptr [rsp+0xE08]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xDB8]
+       mov      qword ptr [rsp+0x1658], rax
+       mov      r10, qword ptr [rsp+0xDC0]
+       mov      qword ptr [rsp+0x1660], r10
+       lea      rcx, [rsp+0xDA8]
+       mov      rdx, qword ptr [rsp+0xE08]
+       mov      r8d, 0xFFFFFFFF
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0xDA8]
+       mov      rax, qword ptr [rsp+0xDB0]
+       mov      qword ptr [rsp+0x1650], rax
+       lea      rcx, [rsp+0xD98]
+       mov      r8, qword ptr [rsp+0x1660]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD98]
+       mov      qword ptr [rsp+0x1648], rax
+       mov      rcx, qword ptr [rsp+0xDA0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD88]
+       mov      rdx, qword ptr [rsp+0x1658]
+       mov      r8, qword ptr [rsp+0x1670]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD88]
+       mov      qword ptr [rsp+0x1640], rax
+ 
+G_M000_IG65:                ;; offset=0x13AC
+       mov      rcx, qword ptr [rsp+0xD90]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD78]
+       mov      rdx, qword ptr [rsp+0x1668]
+       mov      r8, qword ptr [rsp+0x1680]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD78]
+       mov      qword ptr [rsp+0x1638], rax
+       mov      rcx, qword ptr [rsp+0xD80]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD68]
+       mov      rdx, qword ptr [rsp+0x1678]
+       mov      r8, qword ptr [rsp+0x1690]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD68]
+       mov      qword ptr [rsp+0x1630], rax
+       mov      rcx, qword ptr [rsp+0xD70]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD58]
+       mov      rdx, qword ptr [rsp+0x1688]
+       mov      r8, qword ptr [rsp+0x16A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD58]
+       mov      qword ptr [rsp+0x1628], rax
+       mov      rcx, qword ptr [rsp+0xD60]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG66:                ;; offset=0x1495
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1698]
+       mov      qword ptr [rsp+0x1620], rax
+       lea      rcx, [rsp+0xD48]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x1650]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0xD50]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD38]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x1648]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0xD38]
+       mov      rcx, qword ptr [rsp+0xD40]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD28]
+       mov      rdx, qword ptr [rsp+0x16D8]
+       mov      r8, qword ptr [rsp+0x1640]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0xD28]
+       mov      rcx, qword ptr [rsp+0xD30]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD18]
+       mov      rdx, qword ptr [rsp+0x16D0]
+       mov      r8, qword ptr [rsp+0x1638]
+ 
+G_M000_IG67:                ;; offset=0x1574
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD18]
+       mov      qword ptr [rsp+0x1618], rax
+       mov      rcx, qword ptr [rsp+0xD20]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xD08]
+       mov      rdx, qword ptr [rsp+0x16C8]
+       mov      r8, qword ptr [rsp+0x1630]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xD08]
+       mov      qword ptr [rsp+0x1610], rax
+       mov      rcx, qword ptr [rsp+0xD10]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xCF8]
+       mov      rdx, qword ptr [rsp+0x16C0]
+       mov      r8, qword ptr [rsp+0x1628]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xCF8]
+       mov      qword ptr [rsp+0x1608], rax
+       mov      rcx, qword ptr [rsp+0xD00]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xCE8]
+       mov      rdx, qword ptr [rsp+0x16B0]
+       mov      r8, qword ptr [rsp+0x1620]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xCE8]
+       mov      qword ptr [rsp+0x1600], rax
+       mov      rcx, qword ptr [rsp+0xCF0]
+ 
+G_M000_IG68:                ;; offset=0x166A
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      qword ptr [rsp+0xCE0], rax
+       mov      rcx, qword ptr [rsp+0x16A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0xCE0]
+       mov      qword ptr [rsp+0xCD8], rax
+       mov      rcx, rbx
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xCC8]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xCC8]
+       mov      qword ptr [rsp+0x15F0], rax
+       mov      r8, qword ptr [rsp+0xCD0]
+       mov      qword ptr [rsp+0x15F8], r8
+       mov      rcx, rbx
+       mov      edx, 4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xCB8]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xCB8]
+       mov      qword ptr [rsp+0x15E0], rax
+       mov      r8, qword ptr [rsp+0xCC0]
+       mov      qword ptr [rsp+0x15E8], r8
+       mov      rcx, rbx
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xCA8]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+ 
+G_M000_IG69:                ;; offset=0x174E
+       mov      rax, qword ptr [rsp+0xCA8]
+       mov      qword ptr [rsp+0x15D0], rax
+       mov      r8, qword ptr [rsp+0xCB0]
+       mov      qword ptr [rsp+0x15D8], r8
+       mov      rcx, rbx
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xC98]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC98]
+       mov      qword ptr [rsp+0x15C0], rax
+       mov      r8, qword ptr [rsp+0xCA0]
+       mov      qword ptr [rsp+0x15C8], r8
+       mov      rcx, rbx
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xC88]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC88]
+       mov      qword ptr [rsp+0x15B0], rax
+       mov      r8, qword ptr [rsp+0xC90]
+       mov      qword ptr [rsp+0x15B8], r8
+       mov      rcx, rbx
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xC78]
+       mov      rdx, r14
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0xC78]
+       mov      r14, qword ptr [rsp+0xC80]
+       lea      rcx, [rsp+0xC68]
+       mov      r8, qword ptr [rsp+0x15B8]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC68]
+       mov      qword ptr [rsp+0x15A8], rax
+       mov      rcx, qword ptr [rsp+0xC70]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG70:                ;; offset=0x185B
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xC58]
+       mov      rdx, qword ptr [rsp+0x15B0]
+       mov      r8, qword ptr [rsp+0x15C8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC58]
+       mov      qword ptr [rsp+0x15A0], rax
+       mov      rcx, qword ptr [rsp+0xC60]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xC48]
+       mov      rdx, qword ptr [rsp+0x15C0]
+       mov      r8, qword ptr [rsp+0x15D8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC48]
+       mov      qword ptr [rsp+0x1598], rax
+       mov      rcx, qword ptr [rsp+0xC50]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xC38]
+       mov      rdx, qword ptr [rsp+0x15D0]
+       mov      r8, qword ptr [rsp+0x15E8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC38]
+       mov      qword ptr [rsp+0x1590], rax
+       mov      rcx, qword ptr [rsp+0xC40]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xC28]
+       mov      rdx, qword ptr [rsp+0x15E0]
+       mov      r8, qword ptr [rsp+0x15F8]
+ 
+G_M000_IG71:                ;; offset=0x1954
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xC28]
+       mov      qword ptr [rsp+0x1588], rax
+       mov      rcx, qword ptr [rsp+0xC30]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x15F0]
+       mov      qword ptr [rsp+0x1580], rax
+       lea      rcx, [rsp+0xC18]
+       mov      rdx, rsi
+       mov      r8, r14
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0xC18]
+       mov      rcx, qword ptr [rsp+0xC20]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xC08]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x15A8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0xC08]
+       mov      rcx, qword ptr [rsp+0xC10]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xBF8]
+       mov      rdx, qword ptr [rsp+0x1618]
+       mov      r8, qword ptr [rsp+0x15A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0xBF8]
+       mov      rcx, qword ptr [rsp+0xC00]
+ 
+G_M000_IG72:                ;; offset=0x1A33
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xBE8]
+       mov      rdx, qword ptr [rsp+0x1610]
+       mov      r8, qword ptr [rsp+0x1598]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xBE8]
+       mov      qword ptr [rsp+0x1578], rax
+       mov      rcx, qword ptr [rsp+0xBF0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xBD8]
+       mov      rdx, qword ptr [rsp+0x1608]
+       mov      r8, qword ptr [rsp+0x1590]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xBD8]
+       mov      qword ptr [rsp+0x1570], rax
+       mov      rcx, qword ptr [rsp+0xBE0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xBC8]
+       mov      rdx, qword ptr [rsp+0x1600]
+       mov      r8, qword ptr [rsp+0x1588]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xBC8]
+       mov      qword ptr [rsp+0x1568], rax
+       mov      rcx, qword ptr [rsp+0xBD0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG73:                ;; offset=0x1B14
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xBB8]
+       mov      rdx, qword ptr [rsp+0xCD8]
+       mov      r8, qword ptr [rsp+0x1580]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xBB8]
+       mov      qword ptr [rsp+0x1560], rax
+       mov      r10, qword ptr [rsp+0xBC0]
+       mov      qword ptr [rsp+0x1558], r10
+       lea      rcx, [rsp+0xBA8]
+       mov      rdx, rsi
+       mov      r8, 0x100000001
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xBB0]
+       mov      qword ptr [rsp+0xBA0], rax
+       lea      rcx, [rsp+0xB90]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB90]
+       mov      qword ptr [rsp+0x1548], rax
+       mov      r10, qword ptr [rsp+0xB98]
+       mov      qword ptr [rsp+0x1550], r10
+       lea      rcx, [rsp+0xB80]
+       mov      rdx, qword ptr [rsp+0xBA0]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB80]
+       mov      qword ptr [rsp+0x1538], rax
+       mov      r10, qword ptr [rsp+0xB88]
+       mov      qword ptr [rsp+0x1540], r10
+       lea      rcx, [rsp+0xB70]
+       mov      rdx, qword ptr [rsp+0xBA0]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB70]
+       mov      qword ptr [rsp+0x1528], rax
+       mov      r10, qword ptr [rsp+0xB78]
+       mov      qword ptr [rsp+0x1530], r10
+       lea      rcx, [rsp+0xB60]
+       mov      rdx, qword ptr [rsp+0xBA0]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+ 
+G_M000_IG74:                ;; offset=0x1C61
+       mov      rax, qword ptr [rsp+0xB60]
+       mov      qword ptr [rsp+0x1518], rax
+       mov      r10, qword ptr [rsp+0xB68]
+       mov      qword ptr [rsp+0x1520], r10
+       lea      rcx, [rsp+0xB50]
+       mov      rdx, qword ptr [rsp+0xBA0]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB50]
+       mov      qword ptr [rsp+0x1508], rax
+       mov      r10, qword ptr [rsp+0xB58]
+       mov      qword ptr [rsp+0x1510], r10
+       lea      rcx, [rsp+0xB40]
+       mov      rdx, qword ptr [rsp+0xBA0]
+       mov      r8d, 0xFFFFFFFF
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0xB40]
+       mov      rax, qword ptr [rsp+0xB48]
+       mov      qword ptr [rsp+0x1500], rax
+       lea      rcx, [rsp+0xB30]
+       mov      r8, qword ptr [rsp+0x1510]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB30]
+       mov      qword ptr [rsp+0x14F8], rax
+       mov      rcx, qword ptr [rsp+0xB38]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xB20]
+       mov      rdx, qword ptr [rsp+0x1508]
+       mov      r8, qword ptr [rsp+0x1520]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB20]
+       mov      qword ptr [rsp+0x14F0], rax
+       mov      rcx, qword ptr [rsp+0xB28]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+ 
+G_M000_IG75:                ;; offset=0x1D80
+       lea      rcx, [rsp+0xB10]
+       mov      rdx, qword ptr [rsp+0x1518]
+       mov      r8, qword ptr [rsp+0x1530]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB10]
+       mov      qword ptr [rsp+0x14E8], rax
+       mov      rcx, qword ptr [rsp+0xB18]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xB00]
+       mov      rdx, qword ptr [rsp+0x1528]
+       mov      r8, qword ptr [rsp+0x1540]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xB00]
+       mov      qword ptr [rsp+0x14E0], rax
+       mov      rcx, qword ptr [rsp+0xB08]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xAF0]
+       mov      rdx, qword ptr [rsp+0x1538]
+       mov      r8, qword ptr [rsp+0x1550]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xAF0]
+       mov      qword ptr [rsp+0x14D8], rax
+       mov      rcx, qword ptr [rsp+0xAF8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1548]
+       mov      qword ptr [rsp+0x14D0], rax
+       lea      rcx, [rsp+0xAE0]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x1500]
+       xor      r9d, r9d
+ 
+G_M000_IG76:                ;; offset=0x1E7B
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0xAE8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xAD0]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x14F8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0xAD0]
+       mov      rcx, qword ptr [rsp+0xAD8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xAC0]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x14F0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0xAC0]
+       mov      rcx, qword ptr [rsp+0xAC8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xAB0]
+       mov      rdx, qword ptr [rsp+0x1578]
+       mov      r8, qword ptr [rsp+0x14E8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0xAB0]
+       mov      rcx, qword ptr [rsp+0xAB8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG77:                ;; offset=0x1F48
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xAA0]
+       mov      rdx, qword ptr [rsp+0x1570]
+       mov      r8, qword ptr [rsp+0x14E0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xAA0]
+       mov      qword ptr [rsp+0x14C8], rax
+       mov      rcx, qword ptr [rsp+0xAA8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xA90]
+       mov      rdx, qword ptr [rsp+0x1568]
+       mov      r8, qword ptr [rsp+0x14D8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA90]
+       mov      qword ptr [rsp+0x14C0], rax
+       mov      rcx, qword ptr [rsp+0xA98]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0xA80]
+       mov      rdx, qword ptr [rsp+0x1560]
+       mov      r8, qword ptr [rsp+0x14D0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA80]
+       mov      qword ptr [rsp+0x14B8], rax
+       mov      rcx, qword ptr [rsp+0xA88]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      qword ptr [rsp+0xA78], rax
+       mov      rcx, qword ptr [rsp+0x1558]
+ 
+G_M000_IG78:                ;; offset=0x2036
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0xA78]
+       mov      qword ptr [rsp+0xA70], rax
+       mov      rcx, rbx
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xA60]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA60]
+       mov      qword ptr [rsp+0x14A8], rax
+       mov      r8, qword ptr [rsp+0xA68]
+       mov      qword ptr [rsp+0x14B0], r8
+       mov      rcx, rbx
+       mov      edx, 4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xA50]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA50]
+       mov      qword ptr [rsp+0x1498], rax
+       mov      r8, qword ptr [rsp+0xA58]
+       mov      qword ptr [rsp+0x14A0], r8
+       mov      rcx, rbx
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xA40]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA40]
+       mov      qword ptr [rsp+0x1488], rax
+       mov      r8, qword ptr [rsp+0xA48]
+       mov      qword ptr [rsp+0x1490], r8
+       mov      rcx, rbx
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+ 
+G_M000_IG79:                ;; offset=0x212C
+       lea      rcx, [rsp+0xA30]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA30]
+       mov      qword ptr [rsp+0x1478], rax
+       mov      r8, qword ptr [rsp+0xA38]
+       mov      qword ptr [rsp+0x1480], r8
+       mov      rcx, rbx
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xA20]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA20]
+       mov      qword ptr [rsp+0x1468], rax
+       mov      r8, qword ptr [rsp+0xA28]
+       mov      qword ptr [rsp+0x1470], r8
+       mov      rcx, rbx
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0xA10]
+       mov      rdx, r15
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0xA10]
+       mov      r15, qword ptr [rsp+0xA18]
+       lea      rcx, [rsp+0xA00]
+       mov      r8, qword ptr [rsp+0x1470]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0xA00]
+       mov      qword ptr [rsp+0x1460], rax
+       mov      rcx, qword ptr [rsp+0xA08]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x9F0]
+       mov      rdx, qword ptr [rsp+0x1468]
+       mov      r8, qword ptr [rsp+0x1480]
+ 
+G_M000_IG80:                ;; offset=0x2229
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x9F0]
+       mov      qword ptr [rsp+0x1458], rax
+       mov      rcx, qword ptr [rsp+0x9F8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x9E0]
+       mov      rdx, qword ptr [rsp+0x1478]
+       mov      r8, qword ptr [rsp+0x1490]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x9E0]
+       mov      qword ptr [rsp+0x1450], rax
+       mov      rcx, qword ptr [rsp+0x9E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x9D0]
+       mov      rdx, qword ptr [rsp+0x1488]
+       mov      r8, qword ptr [rsp+0x14A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x9D0]
+       mov      qword ptr [rsp+0x1448], rax
+       mov      rcx, qword ptr [rsp+0x9D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x9C0]
+       mov      rdx, qword ptr [rsp+0x1498]
+       mov      r8, qword ptr [rsp+0x14B0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x9C0]
+       mov      qword ptr [rsp+0x1440], rax
+       mov      rcx, qword ptr [rsp+0x9C8]
+ 
+G_M000_IG81:                ;; offset=0x231F
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x14A8]
+       mov      qword ptr [rsp+0x1438], rax
+       lea      rcx, [rsp+0x9B0]
+       mov      rdx, rsi
+       mov      r8, r15
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x9B0]
+       mov      rcx, qword ptr [rsp+0x9B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x9A0]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x1460]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x9A0]
+       mov      rcx, qword ptr [rsp+0x9A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x990]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x1458]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x990]
+       mov      rcx, qword ptr [rsp+0x998]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x980]
+ 
+G_M000_IG82:                ;; offset=0x23F5
+       mov      rdx, qword ptr [rsp+0x14C8]
+       mov      r8, qword ptr [rsp+0x1450]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r15, qword ptr [rsp+0x980]
+       mov      rcx, qword ptr [rsp+0x988]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x970]
+       mov      rdx, qword ptr [rsp+0x14C0]
+       mov      r8, qword ptr [rsp+0x1448]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x970]
+       mov      qword ptr [rsp+0x1430], rax
+       mov      rcx, qword ptr [rsp+0x978]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x960]
+       mov      rdx, qword ptr [rsp+0x14B8]
+       mov      r8, qword ptr [rsp+0x1440]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x960]
+       mov      qword ptr [rsp+0x1428], rax
+       mov      rcx, qword ptr [rsp+0x968]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x950]
+       mov      rdx, qword ptr [rsp+0xA70]
+       mov      r8, qword ptr [rsp+0x1438]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x950]
+       mov      qword ptr [rsp+0x1420], rax
+ 
+G_M000_IG83:                ;; offset=0x24EB
+       mov      r10, qword ptr [rsp+0x958]
+       mov      qword ptr [rsp+0x1418], r10
+       lea      rcx, [rsp+0x940]
+       mov      rdx, rsi
+       mov      r8, 0x100000001
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x948]
+       mov      qword ptr [rsp+0x938], rax
+       lea      rcx, [rsp+0x928]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x928]
+       mov      qword ptr [rsp+0x1408], rax
+       mov      r10, qword ptr [rsp+0x930]
+       mov      qword ptr [rsp+0x1410], r10
+       lea      rcx, [rsp+0x918]
+       mov      rdx, qword ptr [rsp+0x938]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x918]
+       mov      qword ptr [rsp+0x13F8], rax
+       mov      r10, qword ptr [rsp+0x920]
+       mov      qword ptr [rsp+0x1400], r10
+       lea      rcx, [rsp+0x908]
+       mov      rdx, qword ptr [rsp+0x938]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x908]
+       mov      qword ptr [rsp+0x13E8], rax
+       mov      r10, qword ptr [rsp+0x910]
+       mov      qword ptr [rsp+0x13F0], r10
+       lea      rcx, [rsp+0x8F8]
+       mov      rdx, qword ptr [rsp+0x938]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x8F8]
+       mov      qword ptr [rsp+0x13D8], rax
+       mov      r10, qword ptr [rsp+0x900]
+       mov      qword ptr [rsp+0x13E0], r10
+       lea      rcx, [rsp+0x8E8]
+       mov      rdx, qword ptr [rsp+0x938]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x8E8]
+       mov      qword ptr [rsp+0x13C8], rax
+ 
+G_M000_IG84:                ;; offset=0x2651
+       mov      r10, qword ptr [rsp+0x8F0]
+       mov      qword ptr [rsp+0x13D0], r10
+       lea      rcx, [rsp+0x8D8]
+       mov      rdx, qword ptr [rsp+0x938]
+       mov      r8d, 0xFFFFFFFF
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x8D8]
+       mov      rax, qword ptr [rsp+0x8E0]
+       mov      qword ptr [rsp+0x13C0], rax
+       lea      rcx, [rsp+0x8C8]
+       mov      r8, qword ptr [rsp+0x13D0]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x8C8]
+       mov      qword ptr [rsp+0x13B8], rax
+       mov      rcx, qword ptr [rsp+0x8D0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x8B8]
+       mov      rdx, qword ptr [rsp+0x13C8]
+       mov      r8, qword ptr [rsp+0x13E0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x8B8]
+       mov      qword ptr [rsp+0x13B0], rax
+       mov      rcx, qword ptr [rsp+0x8C0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x8A8]
+       mov      rdx, qword ptr [rsp+0x13D8]
+       mov      r8, qword ptr [rsp+0x13F0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x8A8]
+       mov      qword ptr [rsp+0x13A8], rax
+       mov      rcx, qword ptr [rsp+0x8B0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+ 
+G_M000_IG85:                ;; offset=0x275C
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x898]
+       mov      rdx, qword ptr [rsp+0x13E8]
+       mov      r8, qword ptr [rsp+0x1400]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x898]
+       mov      qword ptr [rsp+0x13A0], rax
+       mov      rcx, qword ptr [rsp+0x8A0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x888]
+       mov      rdx, qword ptr [rsp+0x13F8]
+       mov      r8, qword ptr [rsp+0x1410]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x888]
+       mov      qword ptr [rsp+0x1398], rax
+       mov      rcx, qword ptr [rsp+0x890]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1408]
+       mov      qword ptr [rsp+0x1390], rax
+       lea      rcx, [rsp+0x878]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x13C0]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0x880]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x868]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x13B8]
+ 
+G_M000_IG86:                ;; offset=0x284E
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x868]
+       mov      rcx, qword ptr [rsp+0x870]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x858]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x13B0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x858]
+       mov      rcx, qword ptr [rsp+0x860]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x848]
+       mov      rdx, r15
+       mov      r8, qword ptr [rsp+0x13A8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x848]
+       mov      rcx, qword ptr [rsp+0x850]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x838]
+       mov      rdx, qword ptr [rsp+0x1430]
+       mov      r8, qword ptr [rsp+0x13A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r15, qword ptr [rsp+0x838]
+       mov      rcx, qword ptr [rsp+0x840]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+ 
+G_M000_IG87:                ;; offset=0x2923
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x828]
+       mov      rdx, qword ptr [rsp+0x1428]
+       mov      r8, qword ptr [rsp+0x1398]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x828]
+       mov      qword ptr [rsp+0x1388], rax
+       mov      rcx, qword ptr [rsp+0x830]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x818]
+       mov      rdx, qword ptr [rsp+0x1420]
+       mov      r8, qword ptr [rsp+0x1390]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x818]
+       mov      qword ptr [rsp+0x1380], rax
+       mov      rcx, qword ptr [rsp+0x820]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      qword ptr [rsp+0x810], rax
+       mov      rcx, qword ptr [rsp+0x1418]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x810]
+       mov      qword ptr [rsp+0x808], rax
+       mov      rcx, rbx
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7F8]
+       mov      rdx, r13
+ 
+G_M000_IG88:                ;; offset=0x2A04
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x7F8]
+       mov      qword ptr [rsp+0x1370], rax
+       mov      r8, qword ptr [rsp+0x800]
+       mov      qword ptr [rsp+0x1378], r8
+       mov      rcx, rbx
+       mov      edx, 4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7E8]
+       mov      rdx, r13
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x7E8]
+       mov      qword ptr [rsp+0x1360], rax
+       mov      r8, qword ptr [rsp+0x7F0]
+       mov      qword ptr [rsp+0x1368], r8
+       mov      rcx, rbx
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7D8]
+       mov      rdx, r13
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x7D8]
+       mov      qword ptr [rsp+0x1350], rax
+       mov      r8, qword ptr [rsp+0x7E0]
+       mov      qword ptr [rsp+0x1358], r8
+       mov      rcx, rbx
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7C8]
+       mov      rdx, r13
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x7C8]
+       mov      qword ptr [rsp+0x1340], rax
+       mov      r8, qword ptr [rsp+0x7D0]
+       mov      qword ptr [rsp+0x1348], r8
+       mov      rcx, rbx
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7B8]
+       mov      rdx, r13
+ 
+G_M000_IG89:                ;; offset=0x2B0C
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x7B8]
+       mov      qword ptr [rsp+0x1330], rax
+       mov      r8, qword ptr [rsp+0x7C0]
+       mov      qword ptr [rsp+0x1338], r8
+       mov      rcx, rbx
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x7A8]
+       mov      rdx, r13
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x7A8]
+       mov      r13, qword ptr [rsp+0x7B0]
+       lea      rcx, [rsp+0x798]
+       mov      r8, qword ptr [rsp+0x1338]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x798]
+       mov      qword ptr [rsp+0x1328], rax
+       mov      rcx, qword ptr [rsp+0x7A0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x788]
+       mov      rdx, qword ptr [rsp+0x1330]
+       mov      r8, qword ptr [rsp+0x1348]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x788]
+       mov      qword ptr [rsp+0x1320], rax
+       mov      rcx, qword ptr [rsp+0x790]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x778]
+       mov      rdx, qword ptr [rsp+0x1340]
+       mov      r8, qword ptr [rsp+0x1358]
+ 
+G_M000_IG90:                ;; offset=0x2C04
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x778]
+       mov      qword ptr [rsp+0x1318], rax
+       mov      rcx, qword ptr [rsp+0x780]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      rcx, rax
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x768]
+       mov      rdx, qword ptr [rsp+0x1350]
+       mov      r8, qword ptr [rsp+0x1368]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x768]
+       mov      qword ptr [rsp+0x1310], rax
+       mov      rcx, qword ptr [rsp+0x770]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x760], rax
+       mov      rcx, qword ptr [rsp+0x760]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x750]
+       mov      rdx, qword ptr [rsp+0x1360]
+       mov      r8, qword ptr [rsp+0x1378]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x750]
+       mov      qword ptr [rsp+0x1308], rax
+       mov      rcx, qword ptr [rsp+0x758]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x748], rax
+       mov      rcx, qword ptr [rsp+0x748]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1370]
+       mov      qword ptr [rsp+0x1300], rax
+       lea      rcx, [rsp+0x738]
+       mov      rdx, rsi
+       mov      r8, r13
+       xor      r9d, r9d
+ 
+G_M000_IG91:                ;; offset=0x2CFC
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x738]
+       mov      rcx, qword ptr [rsp+0x740]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x730], rax
+       mov      rcx, qword ptr [rsp+0x730]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x720]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x1328]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x720]
+       mov      rcx, qword ptr [rsp+0x728]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x718], rax
+       mov      rcx, qword ptr [rsp+0x718]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x708]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x1320]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x708]
+       mov      rcx, qword ptr [rsp+0x710]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x700], rax
+       mov      rcx, qword ptr [rsp+0x700]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x6F0]
+       mov      rdx, r15
+       mov      r8, qword ptr [rsp+0x1318]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r15, qword ptr [rsp+0x6F0]
+       mov      rcx, qword ptr [rsp+0x6F8]
+ 
+G_M000_IG92:                ;; offset=0x2DEA
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x6E8], rax
+       mov      rcx, qword ptr [rsp+0x6E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x6D8]
+       mov      rdx, qword ptr [rsp+0x1388]
+       mov      r8, qword ptr [rsp+0x1310]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r13, qword ptr [rsp+0x6D8]
+       mov      rcx, qword ptr [rsp+0x6E0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x6D0], rax
+       mov      rcx, qword ptr [rsp+0x6D0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x6C0]
+       mov      rdx, qword ptr [rsp+0x1380]
+       mov      r8, qword ptr [rsp+0x1308]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x6C0]
+       mov      qword ptr [rsp+0x12F8], rax
+       mov      rcx, qword ptr [rsp+0x6C8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x6B8], rax
+       mov      rcx, qword ptr [rsp+0x6B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x6A8]
+       mov      rdx, qword ptr [rsp+0x808]
+       mov      r8, qword ptr [rsp+0x1300]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x6A8]
+       mov      qword ptr [rsp+0x12F0], rax
+       mov      r10, qword ptr [rsp+0x6B0]
+       mov      qword ptr [rsp+0x12E8], r10
+       lea      rcx, [rsp+0x698]
+       mov      rdx, rsi
+       mov      r8, 0x100000001
+ 
+G_M000_IG93:                ;; offset=0x2EFE
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x6A0]
+       mov      qword ptr [rsp+0x690], rax
+       lea      rcx, [rsp+0x680]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x680]
+       mov      qword ptr [rsp+0x12D8], rax
+       mov      r10, qword ptr [rsp+0x688]
+       mov      qword ptr [rsp+0x12E0], r10
+       lea      rcx, [rsp+0x670]
+       mov      rdx, qword ptr [rsp+0x690]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x670]
+       mov      qword ptr [rsp+0x12C8], rax
+       mov      r10, qword ptr [rsp+0x678]
+       mov      qword ptr [rsp+0x12D0], r10
+       lea      rcx, [rsp+0x660]
+       mov      rdx, qword ptr [rsp+0x690]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x660]
+       mov      qword ptr [rsp+0x12B8], rax
+       mov      r10, qword ptr [rsp+0x668]
+       mov      qword ptr [rsp+0x12C0], r10
+       lea      rcx, [rsp+0x650]
+       mov      rdx, qword ptr [rsp+0x690]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x650]
+       mov      qword ptr [rsp+0x12A8], rax
+       mov      r10, qword ptr [rsp+0x658]
+       mov      qword ptr [rsp+0x12B0], r10
+       lea      rcx, [rsp+0x640]
+       mov      rdx, qword ptr [rsp+0x690]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x640]
+       mov      qword ptr [rsp+0x1298], rax
+       mov      r10, qword ptr [rsp+0x648]
+       mov      qword ptr [rsp+0x12A0], r10
+       lea      rcx, [rsp+0x630]
+       mov      rdx, qword ptr [rsp+0x690]
+       mov      r8d, 0xFFFFFFFF
+ 
+G_M000_IG94:                ;; offset=0x3065
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x630]
+       mov      rax, qword ptr [rsp+0x638]
+       mov      qword ptr [rsp+0x1290], rax
+       lea      rcx, [rsp+0x620]
+       mov      r8, qword ptr [rsp+0x12A0]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x620]
+       mov      qword ptr [rsp+0x1288], rax
+       mov      rcx, qword ptr [rsp+0x628]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x618], rax
+       mov      rcx, qword ptr [rsp+0x618]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x608]
+       mov      rdx, qword ptr [rsp+0x1298]
+       mov      r8, qword ptr [rsp+0x12B0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x608]
+       mov      qword ptr [rsp+0x1280], rax
+       mov      rcx, qword ptr [rsp+0x610]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x600], rax
+       mov      rcx, qword ptr [rsp+0x600]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x5F0]
+       mov      rdx, qword ptr [rsp+0x12A8]
+       mov      r8, qword ptr [rsp+0x12C0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x5F0]
+       mov      qword ptr [rsp+0x1278], rax
+       mov      rcx, qword ptr [rsp+0x5F8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x5E8], rax
+       mov      rcx, qword ptr [rsp+0x5E8]
+ 
+G_M000_IG95:                ;; offset=0x3174
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x5D8]
+       mov      rdx, qword ptr [rsp+0x12B8]
+       mov      r8, qword ptr [rsp+0x12D0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x5D8]
+       mov      qword ptr [rsp+0x1270], rax
+       mov      rcx, qword ptr [rsp+0x5E0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x5D0], rax
+       mov      rcx, qword ptr [rsp+0x5D0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x5C0]
+       mov      rdx, qword ptr [rsp+0x12C8]
+       mov      r8, qword ptr [rsp+0x12E0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x5C0]
+       mov      qword ptr [rsp+0x1268], rax
+       mov      rcx, qword ptr [rsp+0x5C8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x5B8], rax
+       mov      rcx, qword ptr [rsp+0x5B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x12D8]
+       mov      qword ptr [rsp+0x1260], rax
+       lea      rcx, [rsp+0x5A8]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x1290]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0x5B0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x5A0], rax
+       mov      rcx, qword ptr [rsp+0x5A0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+ 
+G_M000_IG96:                ;; offset=0x3274
+       mov      r9, rax
+       lea      rcx, [rsp+0x590]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x1288]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x590]
+       mov      rcx, qword ptr [rsp+0x598]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x588], rax
+       mov      rcx, qword ptr [rsp+0x588]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x578]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x1280]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x578]
+       mov      rcx, qword ptr [rsp+0x580]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x570], rax
+       mov      rcx, qword ptr [rsp+0x570]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x560]
+       mov      rdx, r15
+       mov      r8, qword ptr [rsp+0x1278]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x560]
+       mov      rcx, qword ptr [rsp+0x568]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x558], rax
+       mov      rcx, qword ptr [rsp+0x558]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x548]
+       mov      rdx, r13
+       mov      r8, qword ptr [rsp+0x1270]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+ 
+G_M000_IG97:                ;; offset=0x3368
+       mov      r15, qword ptr [rsp+0x548]
+       mov      rcx, qword ptr [rsp+0x550]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x540], rax
+       mov      rcx, qword ptr [rsp+0x540]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x530]
+       mov      rdx, qword ptr [rsp+0x12F8]
+       mov      r8, qword ptr [rsp+0x1268]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r13, qword ptr [rsp+0x530]
+       mov      rcx, qword ptr [rsp+0x538]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x528], rax
+       mov      rcx, qword ptr [rsp+0x528]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x518]
+       mov      rdx, qword ptr [rsp+0x12F0]
+       mov      r8, qword ptr [rsp+0x1260]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x518]
+       mov      qword ptr [rsp+0x1258], rax
+       mov      rcx, qword ptr [rsp+0x520]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x510], rax
+       mov      rcx, qword ptr [rsp+0x510]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      qword ptr [rsp+0x508], rax
+       mov      rcx, qword ptr [rsp+0x12E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x500], rax
+       mov      rcx, qword ptr [rsp+0x500]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x508]
+ 
+G_M000_IG98:                ;; offset=0x346A
+       mov      qword ptr [rsp+0x4F8], rax
+       mov      rcx, rbx
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x4E8]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x4E8]
+       mov      qword ptr [rsp+0x1248], rax
+       mov      r8, qword ptr [rsp+0x4F0]
+       mov      qword ptr [rsp+0x1250], r8
+       mov      rcx, rbx
+       mov      edx, 4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x4D8]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x4D8]
+       mov      qword ptr [rsp+0x1238], rax
+       mov      r8, qword ptr [rsp+0x4E0]
+       mov      qword ptr [rsp+0x1240], r8
+       mov      rcx, rbx
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x4C8]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x4C8]
+       mov      qword ptr [rsp+0x1228], rax
+       mov      r8, qword ptr [rsp+0x4D0]
+       mov      qword ptr [rsp+0x1230], r8
+       mov      rcx, rbx
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x4B8]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x4B8]
+       mov      qword ptr [rsp+0x1218], rax
+       mov      r8, qword ptr [rsp+0x4C0]
+ 
+G_M000_IG99:                ;; offset=0x3572
+       mov      qword ptr [rsp+0x1220], r8
+       mov      rcx, rbx
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x4A8]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x4A8]
+       mov      qword ptr [rsp+0x1208], rax
+       mov      r8, qword ptr [rsp+0x4B0]
+       mov      qword ptr [rsp+0x1210], r8
+       mov      rcx, rbx
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      r8, qword ptr [rax]
+       lea      rcx, [rsp+0x498]
+       mov      rdx, r12
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x498]
+       mov      rbx, qword ptr [rsp+0x4A0]
+       lea      rcx, [rsp+0x488]
+       mov      r8, qword ptr [rsp+0x1210]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r12, qword ptr [rsp+0x488]
+       mov      rcx, qword ptr [rsp+0x490]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x480], rax
+       mov      rcx, qword ptr [rsp+0x480]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x470]
+       mov      rdx, qword ptr [rsp+0x1208]
+       mov      r8, qword ptr [rsp+0x1220]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x470]
+       mov      qword ptr [rsp+0x1200], rax
+       mov      rcx, qword ptr [rsp+0x478]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+ 
+G_M000_IG100:                ;; offset=0x366F
+       mov      qword ptr [rsp+0x468], rax
+       mov      rcx, qword ptr [rsp+0x468]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x458]
+       mov      rdx, qword ptr [rsp+0x1218]
+       mov      r8, qword ptr [rsp+0x1230]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x458]
+       mov      qword ptr [rsp+0x11F8], rax
+       mov      rcx, qword ptr [rsp+0x460]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x450], rax
+       mov      rcx, qword ptr [rsp+0x450]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x440]
+       mov      rdx, qword ptr [rsp+0x1228]
+       mov      r8, qword ptr [rsp+0x1240]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x440]
+       mov      qword ptr [rsp+0x11F0], rax
+       mov      rcx, qword ptr [rsp+0x448]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x438], rax
+       mov      rcx, qword ptr [rsp+0x438]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x428]
+       mov      rdx, qword ptr [rsp+0x1238]
+       mov      r8, qword ptr [rsp+0x1250]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x428]
+       mov      qword ptr [rsp+0x11E8], rax
+       mov      rcx, qword ptr [rsp+0x430]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x420], rax
+       mov      rcx, qword ptr [rsp+0x420]
+ 
+G_M000_IG101:                ;; offset=0x377E
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x1248]
+       mov      qword ptr [rsp+0x11E0], rax
+       lea      rcx, [rsp+0x410]
+       mov      rdx, rsi
+       mov      r8, rbx
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbx, qword ptr [rsp+0x410]
+       mov      rcx, qword ptr [rsp+0x418]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x408], rax
+       mov      rcx, qword ptr [rsp+0x408]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x3F8]
+       mov      rdx, rbp
+       mov      r8, r12
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x3F8]
+       mov      rcx, qword ptr [rsp+0x400]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x3F0], rax
+       mov      rcx, qword ptr [rsp+0x3F0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x3E0]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x1200]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x3E0]
+       mov      rcx, qword ptr [rsp+0x3E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x3D8], rax
+       mov      rcx, qword ptr [rsp+0x3D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x3C8]
+       mov      rdx, r15
+ 
+G_M000_IG102:                ;; offset=0x3870
+       mov      r8, qword ptr [rsp+0x11F8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x3C8]
+       mov      rcx, qword ptr [rsp+0x3D0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x3C0], rax
+       mov      rcx, qword ptr [rsp+0x3C0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x3B0]
+       mov      rdx, r13
+       mov      r8, qword ptr [rsp+0x11F0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r15, qword ptr [rsp+0x3B0]
+       mov      rcx, qword ptr [rsp+0x3B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x3A8], rax
+       mov      rcx, qword ptr [rsp+0x3A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x398]
+       mov      rdx, qword ptr [rsp+0x1258]
+       mov      r8, qword ptr [rsp+0x11E8]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r13, qword ptr [rsp+0x398]
+       mov      rcx, qword ptr [rsp+0x3A0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x390], rax
+       mov      rcx, qword ptr [rsp+0x390]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x380]
+       mov      rdx, qword ptr [rsp+0x4F8]
+       mov      r8, qword ptr [rsp+0x11E0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r12, qword ptr [rsp+0x380]
+       mov      rax, qword ptr [rsp+0x388]
+ 
+G_M000_IG103:                ;; offset=0x3970
+       mov      qword ptr [rsp+0x11D8], rax
+       lea      rcx, [rsp+0x370]
+       mov      rdx, rbx
+       mov      r8, 0x100000001
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x378]
+       mov      qword ptr [rsp+0x368], rax
+       lea      rcx, [rsp+0x358]
+       mov      rdx, rax
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x358]
+       mov      qword ptr [rsp+0x11C8], rax
+       mov      r10, qword ptr [rsp+0x360]
+       mov      qword ptr [rsp+0x11D0], r10
+       lea      rcx, [rsp+0x348]
+       mov      rdx, qword ptr [rsp+0x368]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x348]
+       mov      qword ptr [rsp+0x11B8], rax
+       mov      r10, qword ptr [rsp+0x350]
+       mov      qword ptr [rsp+0x11C0], r10
+       lea      rcx, [rsp+0x338]
+       mov      rdx, qword ptr [rsp+0x368]
+       mov      r8, -1
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x338]
+       mov      qword ptr [rsp+0x11A8], rax
+       mov      r10, qword ptr [rsp+0x340]
+       mov      qword ptr [rsp+0x11B0], r10
+       lea      rcx, [rsp+0x328]
+       mov      rdx, qword ptr [rsp+0x368]
+       mov      r8, -2
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x328]
+       mov      qword ptr [rsp+0x1198], rax
+       mov      r10, qword ptr [rsp+0x330]
+       mov      qword ptr [rsp+0x11A0], r10
+       lea      rcx, [rsp+0x318]
+       mov      rdx, qword ptr [rsp+0x368]
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x318]
+       mov      qword ptr [rsp+0x1188], rax
+       mov      r10, qword ptr [rsp+0x320]
+ 
+G_M000_IG104:                ;; offset=0x3AD6
+       mov      qword ptr [rsp+0x1190], r10
+       lea      rcx, [rsp+0x308]
+       mov      rdx, qword ptr [rsp+0x368]
+       mov      r8d, 0xFFFFFFFF
+       call     [go.math.bits_package:Mul64(ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rdx, qword ptr [rsp+0x308]
+       mov      rax, qword ptr [rsp+0x310]
+       mov      qword ptr [rsp+0x1180], rax
+       lea      rcx, [rsp+0x2F8]
+       mov      r8, qword ptr [rsp+0x1190]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x2F8]
+       mov      qword ptr [rsp+0x1178], rax
+       mov      rcx, qword ptr [rsp+0x300]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x2F0], rax
+       mov      rcx, qword ptr [rsp+0x2F0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x2E0]
+       mov      rdx, qword ptr [rsp+0x1188]
+       mov      r8, qword ptr [rsp+0x11A0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x2E0]
+       mov      qword ptr [rsp+0x1170], rax
+       mov      rcx, qword ptr [rsp+0x2E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x2D8], rax
+       mov      rcx, qword ptr [rsp+0x2D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x2C8]
+       mov      rdx, qword ptr [rsp+0x1198]
+       mov      r8, qword ptr [rsp+0x11B0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x2C8]
+       mov      qword ptr [rsp+0x1168], rax
+       mov      rcx, qword ptr [rsp+0x2D0]
+ 
+G_M000_IG105:                ;; offset=0x3BED
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x2C0], rax
+       mov      rcx, qword ptr [rsp+0x2C0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x2B0]
+       mov      rdx, qword ptr [rsp+0x11A8]
+       mov      r8, qword ptr [rsp+0x11C0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x2B0]
+       mov      qword ptr [rsp+0x1160], rax
+       mov      rcx, qword ptr [rsp+0x2B8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x2A8], rax
+       mov      rcx, qword ptr [rsp+0x2A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x298]
+       mov      rdx, qword ptr [rsp+0x11B8]
+       mov      r8, qword ptr [rsp+0x11D0]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x298]
+       mov      qword ptr [rsp+0x1158], rax
+       mov      rcx, qword ptr [rsp+0x2A0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x290], rax
+       mov      rcx, qword ptr [rsp+0x290]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      rax, qword ptr [rsp+0x11C8]
+       mov      qword ptr [rsp+0x1150], rax
+       lea      rcx, [rsp+0x280]
+       mov      rdx, rbx
+       mov      r8, qword ptr [rsp+0x1180]
+       xor      r9d, r9d
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rcx, qword ptr [rsp+0x288]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+ 
+G_M000_IG106:                ;; offset=0x3CED
+       mov      qword ptr [rsp+0x278], rax
+       mov      rcx, qword ptr [rsp+0x278]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x268]
+       mov      rdx, rsi
+       mov      r8, qword ptr [rsp+0x1178]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbx, qword ptr [rsp+0x268]
+       mov      rcx, qword ptr [rsp+0x270]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x260], rax
+       mov      rcx, qword ptr [rsp+0x260]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x250]
+       mov      rdx, rbp
+       mov      r8, qword ptr [rsp+0x1170]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rsi, qword ptr [rsp+0x250]
+       mov      rcx, qword ptr [rsp+0x258]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x248], rax
+       mov      rcx, qword ptr [rsp+0x248]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x238]
+       mov      rdx, r14
+       mov      r8, qword ptr [rsp+0x1168]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rbp, qword ptr [rsp+0x238]
+       mov      rcx, qword ptr [rsp+0x240]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x230], rax
+       mov      rcx, qword ptr [rsp+0x230]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x220]
+ 
+G_M000_IG107:                ;; offset=0x3DE6
+       mov      rdx, r15
+       mov      r8, qword ptr [rsp+0x1160]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r14, qword ptr [rsp+0x220]
+       mov      rcx, qword ptr [rsp+0x228]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x218], rax
+       mov      rcx, qword ptr [rsp+0x218]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x208]
+       mov      rdx, r13
+       mov      r8, qword ptr [rsp+0x1158]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r15, qword ptr [rsp+0x208]
+       mov      rcx, qword ptr [rsp+0x210]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x200], rax
+       mov      rcx, qword ptr [rsp+0x200]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x1F0]
+       mov      rdx, r12
+       mov      r8, qword ptr [rsp+0x1150]
+       call     [go.math.bits_package:Add64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r13, qword ptr [rsp+0x1F0]
+       mov      rcx, qword ptr [rsp+0x1F8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x1E8], rax
+       mov      rcx, qword ptr [rsp+0x1E8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r12, rax
+       mov      rcx, qword ptr [rsp+0x11D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x1E0], rax
+       mov      rcx, qword ptr [rsp+0x1E0]
+ 
+G_M000_IG108:                ;; offset=0x3ED4
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       add      r12, rax
+       lea      rcx, [rsp+0x1D0]
+       mov      rdx, rbx
+       mov      r8d, 0xFFFFFFFF
+       xor      r9d, r9d
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1D0]
+       mov      qword ptr [rsp+0x1148], rax
+       mov      rcx, qword ptr [rsp+0x1D8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x1C8], rax
+       mov      rcx, qword ptr [rsp+0x1C8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x1B8]
+       mov      rdx, rsi
+       mov      r8, 0xFFFFFFFF00000000
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1B8]
+       mov      qword ptr [rsp+0x1140], rax
+       mov      rcx, qword ptr [rsp+0x1C0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x1B0], rax
+       mov      rcx, qword ptr [rsp+0x1B0]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x1A0]
+       mov      rdx, rbp
+       mov      r8, -2
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x1A0]
+       mov      qword ptr [rsp+0x1138], rax
+       mov      rcx, qword ptr [rsp+0x1A8]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x198], rax
+       mov      rcx, qword ptr [rsp+0x198]
+ 
+G_M000_IG109:                ;; offset=0x3FC9
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x188]
+       mov      rdx, r14
+       mov      r8, -1
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x188]
+       mov      qword ptr [rsp+0x1130], rax
+       mov      rcx, qword ptr [rsp+0x190]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x180], rax
+       mov      rcx, qword ptr [rsp+0x180]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x170]
+       mov      rdx, r15
+       mov      r8, -1
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x170]
+       mov      qword ptr [rsp+0x1128], rax
+       mov      rcx, qword ptr [rsp+0x178]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x168], rax
+       mov      rcx, qword ptr [rsp+0x168]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x158]
+       mov      rdx, r13
+       mov      r8, -1
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      rax, qword ptr [rsp+0x158]
+       mov      qword ptr [rsp+0x1120], rax
+       mov      rcx, qword ptr [rsp+0x160]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x150], rax
+       mov      rcx, qword ptr [rsp+0x150]
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(go.crypto.internal.fips140.nistec.fiat_package+p384Uint1):ulong]
+       mov      r9, rax
+       lea      rcx, [rsp+0x140]
+ 
+G_M000_IG110:                ;; offset=0x40D0
+       mov      rdx, r12
+       xor      r8d, r8d
+       call     [go.math.bits_package:Sub64(ulong,ulong,ulong):System.ValueTuple`2[ulong,ulong]]
+       mov      r12, qword ptr [rsp+0x148]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x1118], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x138], rax
+       lea      rcx, [rsp+0x1118]
+       mov      rdx, qword ptr [rsp+0x138]
+       mov      r8, qword ptr [rsp+0x1148]
+       mov      r9, rbx
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x1110], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x130], rax
+       lea      rcx, [rsp+0x1110]
+       mov      rdx, qword ptr [rsp+0x130]
+       mov      r8, qword ptr [rsp+0x1140]
+       mov      r9, rsi
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x1108], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x128], rax
+       lea      rcx, [rsp+0x1108]
+       mov      rdx, qword ptr [rsp+0x128]
+       mov      r8, qword ptr [rsp+0x1138]
+       mov      r9, rbp
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x1100], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x120], rax
+       lea      rcx, [rsp+0x1100]
+       mov      rdx, qword ptr [rsp+0x120]
+       mov      r8, qword ptr [rsp+0x1130]
+       mov      r9, r14
+ 
+G_M000_IG111:                ;; offset=0x41CE
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x10F8], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x118], rax
+       lea      rcx, [rsp+0x10F8]
+       mov      rdx, qword ptr [rsp+0x118]
+       mov      r8, qword ptr [rsp+0x1128]
+       mov      r9, r15
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x10F0], rcx
+       mov      rcx, r12
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384Uint1:op_Implicit(ulong):go.crypto.internal.fips140.nistec.fiat_package+p384Uint1]
+       mov      qword ptr [rsp+0x110], rax
+       lea      rcx, [rsp+0x10F0]
+       mov      rdx, qword ptr [rsp+0x110]
+       mov      r8, qword ptr [rsp+0x1120]
+       mov      r9, r13
+       call     [go.crypto.internal.fips140.nistec.fiat_package:p384CmovznzU64(byref,go.crypto.internal.fips140.nistec.fiat_package+p384Uint1,ulong,ulong)]
+       mov      rcx, rdi
+       xor      edx, edx
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rcx, qword ptr [rsp+0x1118]
+       mov      qword ptr [rax], rcx
+       mov      rcx, rdi
+       mov      edx, 1
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rcx, qword ptr [rsp+0x1110]
+       mov      qword ptr [rax], rcx
+       mov      rcx, rdi
+       mov      edx, 2
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rcx, qword ptr [rsp+0x1108]
+       mov      qword ptr [rax], rcx
+       mov      rcx, rdi
+       mov      edx, 3
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rcx, qword ptr [rsp+0x1100]
+       mov      qword ptr [rax], rcx
+       mov      rcx, rdi
+       mov      edx, 4
+ 
+G_M000_IG112:                ;; offset=0x42B5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rcx, qword ptr [rsp+0x10F8]
+       mov      qword ptr [rax], rcx
+       mov      rcx, rdi
+       mov      edx, 5
+       call     [go.crypto.internal.fips140.nistec.fiat_package+p384MontgomeryDomainFieldElement:get_Item(int):byref:this]
+       mov      rdx, qword ptr [rsp+0x10F0]
+       mov      qword ptr [rax], rdx
+ 
+G_M000_IG113:                ;; offset=0x42DF
+       add      rsp, 0x1888
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r12
+       pop      r13
+       pop      r14
+       pop      r15
+       ret      
+ 
+G_M000_IG114:                ;; offset=0x42F3
+       movsxd   rdx, ebp
+       mov      ecx, 1
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG115:                ;; offset=0x430A
+       movsxd   rdx, r14d
+       mov      ecx, 2
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG116:                ;; offset=0x4321
+       movsxd   rdx, r15d
+       mov      ecx, 3
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG117:                ;; offset=0x4338
+       movsxd   rdx, r13d
+       mov      ecx, 4
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG118:                ;; offset=0x434F
+       movsxd   rdx, r12d
+       mov      ecx, 5
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG119:                ;; offset=0x4366
+       movsxd   rdx, esi
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG120:                ;; offset=0x437A
+       movsxd   rdx, eax
+       mov      ecx, 5
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG121:                ;; offset=0x4391
+       movsxd   rdx, eax
+       mov      ecx, 4
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG122:                ;; offset=0x43A8
+       movsxd   rdx, eax
+       mov      ecx, 3
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG123:                ;; offset=0x43BF
+       movsxd   rdx, eax
+       mov      ecx, 2
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG124:                ;; offset=0x43D6
+       movsxd   rdx, eax
+       mov      ecx, 1
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG125:                ;; offset=0x43ED
+       movsxd   rdx, edx
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:IndexOutOfRange(long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG126:                ;; offset=0x4401
+       call     CORINFO_HELP_RNGCHKFAIL
+       int3     
+ 
+; Total bytes of code 17415
+

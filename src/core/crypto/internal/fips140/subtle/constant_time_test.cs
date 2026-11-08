@@ -71,7 +71,7 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> t) {
             continue;
         }
         var max = new slice<byte>(l);
-        foreach (var i in range(max)) {
+        foreach (var i in range(len(max))) {
             max[i] = 0xff;
         }
         {

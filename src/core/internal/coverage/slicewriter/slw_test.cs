@@ -17,7 +17,7 @@ public static void TestSliceWriter(ж<testing.T> t) {
         if (len(got) != len(want)) {
             tΔ1.Fatalf("bad length got %d want %d", len(got), len(want));
         }
-        foreach (var i in range(got)) {
+        foreach (var i in range(len(got))) {
             if (got[i] != want[i]) {
                 tΔ1.Fatalf("bad read at %d got %d want %d", i, got[i], want[i]);
             }
@@ -66,7 +66,7 @@ public static void TestSliceWriter(ж<testing.T> t) {
     // check that BytesWritten returns what we wrote.
     sleq(t, ws.BytesWritten(), wp1);
     // offset is at end of slice, so reading should return zero bytes.
-    rf(t, ws, slice<byte>([]));
+    rf(t, ws, []);
 
     // write some more stuff
     var wp2 = slice<byte>([7, 8, 9]);
@@ -74,22 +74,22 @@ public static void TestSliceWriter(ж<testing.T> t) {
     // check that BytesWritten returns what we expect.
     var wpex = slice<byte>([1, 2, 7, 8, 9]);
     sleq(t, ws.BytesWritten(), wpex);
-    rf(t, ws, slice<byte>([]));
+    rf(t, ws, []);
 
     // seeks and reads.
     sk(t, ws, 1, io.SeekStart);
-    rf(t, ws, slice<byte>([2, 7]));
+    rf(t, ws, [2, 7]);
     sk(t, ws, -2, io.SeekCurrent);
-    rf(t, ws, slice<byte>([2, 7]));
+    rf(t, ws, [2, 7]);
     sk(t, ws, -4, io.SeekEnd);
-    rf(t, ws, slice<byte>([2, 7]));
+    rf(t, ws, [2, 7]);
     var off = sk(t, ws, 0, io.SeekEnd);
     sk(t, ws, off, io.SeekStart);
 
     // seek back and overwrite
     sk(t, ws, 1, io.SeekStart);
-    wf(t, ws, slice<byte>([9, 11]));
-    wpex = slice<byte>([1, 9, 11, 8, 9]);
+    wf(t, ws, [9, 11]);
+    wpex = [1, 9, 11, 8, 9];
     sleq(t, ws.BytesWritten(), wpex);
 
     // seeks on empty writer.

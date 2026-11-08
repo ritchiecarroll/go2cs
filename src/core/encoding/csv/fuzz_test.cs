@@ -18,7 +18,7 @@ public static void FuzzRoundtrip(ж<testing.F> f) {
         var buf = @new<bytes.Buffer>();
 
         t.Logf("input = %q", @in);
-        foreach (var (_, tt) in slice<global::go.encoding.csv_package.Reader>([
+        foreach (var (_, tt) in range(slice<global::go.encoding.csv_package.Reader>([
             new(Comma: ','),
             new(Comma: ';'),
             new(Comma: '\t'),
@@ -26,7 +26,7 @@ public static void FuzzRoundtrip(ж<testing.F> f) {
             new(Comma: ',', TrimLeadingSpace: true),
             new(Comma: ',', Comment: '#'),
             new(Comma: ',', Comment: ';')
-        ])) {
+        ]))) {
             t.Logf("With options:");
             t.Logf("  Comma            = %q", tt.Comma);
             t.Logf("  LazyQuotes       = %t", tt.LazyQuotes);
@@ -73,8 +73,8 @@ public static void FuzzRoundtrip(ж<testing.F> f) {
             }
 
             // The reader turns \r\n into \n.
-            foreach (var (_, record) in records) {
-                foreach (var (i, s) in record) {
+            foreach (var (_, record) in range(records)) {
+                foreach (var (i, s) in range(record)) {
                     record[i] = strings.ReplaceAll(s, "\r\n", "\n");
                 }
             }

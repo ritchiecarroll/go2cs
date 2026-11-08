@@ -6,8 +6,6 @@ namespace go;
 using fmt = fmt_package;
 using Δos = os_package;
 using Δsync = sync_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 
 partial class sync_test_package {
@@ -15,8 +13,7 @@ partial class sync_test_package {
 partial struct httpPkg {
 }
 
-internal static void Get(this httpPkg _, @string url) {
-}
+internal static void Get(this httpPkg _, @string url) { }
 
 internal static httpPkg http;
 
@@ -29,7 +26,7 @@ public static void ExampleWaitGroup() {
         "http://www.google.com/",
         "http://www.example.com/"
     ]);
-    foreach (var (_, url) in urls) {
+    foreach (var (_, url) in range(urls)) {
         // Launch a goroutine to fetch the URL.
         Ꮡwg.Go(() => {
             // Fetch the URL.
@@ -49,7 +46,7 @@ public static partial void ExampleWaitGroup_addAndDone() {
         "http://www.google.com/",
         "http://www.example.com/"
     ]);
-    foreach (var (_, url) in urls) {
+    foreach (var (_, url) in range(urls)) {
         // Increment the WaitGroup counter.
         Ꮡwg.Add(1);
         // Launch a goroutine to fetch the URL.

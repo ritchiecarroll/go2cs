@@ -20,7 +20,7 @@ partial struct bench {
 }
 
 internal static void benchMap(ж<Δtesting.B> b, bench bench) {
-    foreach (var (_, vᴛ1) in new mapInterface[]{new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap())), new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap())), new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>())), new sync_test_package.sync_MapжmapInterface(Ꮡ(new Δsync.Map()))}.array()) {
+    foreach (var (_, vᴛ1) in range(new mapInterface[]{new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap())), new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap())), new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>())), new sync_test_package.sync_MapжmapInterface(Ꮡ(new Δsync.Map()))}.array())) {
         var m = vᴛ1;
 
         var benchʗ1 = bench;
@@ -100,10 +100,8 @@ public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> b) {
 
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -118,16 +116,12 @@ public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> b) {
             for (; pb.Next(); i++) {
                 nint j = i % (nint)(hits + misses);
                 if (j < hits) {
-                    {
-                        var (_, ok) = m.LoadOrStore(j, i); if (!ok) {
-                            bΔ2.Fatalf("unexpected miss for %v", j);
-                        }
+                    var (_, ok) = m.LoadOrStore(j, i); if (!ok) {
+                        bΔ2.Fatalf("unexpected miss for %v", j);
                     }
                 } else {
-                    {
-                        var (v, loaded) = m.LoadOrStore(i, i); if (loaded) {
-                            bΔ2.Fatalf("failed to store %v: existing value %v", i, v);
-                        }
+                    var (v, loaded) = m.LoadOrStore(i, i); if (loaded) {
+                        bΔ2.Fatalf("failed to store %v: existing value %v", i, v);
                     }
                 }
             }
@@ -138,10 +132,8 @@ public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> b) {
 public static void BenchmarkMapLoadOrStoreUnique(ж<Δtesting.B> b) {
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
         },
 
@@ -173,10 +165,8 @@ public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> b) {
 
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -203,10 +193,8 @@ public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> b) {
 public static void BenchmarkMapLoadAndDeleteUnique(ж<Δtesting.B> b) {
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
         },
 
@@ -226,10 +214,8 @@ public static void BenchmarkMapLoadAndDeleteCollision(ж<Δtesting.B> b) {
 
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                {
-                    var (_, loaded) = m.LoadAndDelete((nint)0); if (loaded) {
-                        m.Store((nint)0, (nint)0);
-                    }
+                var (_, loaded) = m.LoadAndDelete((nint)0); if (loaded) {
+                    m.Store((nint)0, (nint)0);
                 }
             }
         }
@@ -266,12 +252,10 @@ public static void BenchmarkMapAdversarialAlloc(ж<Δtesting.B> b) {
             int64 loadsSinceStore = default;
             for (; pb.Next(); i++) {
                 m.Load(i);
-                {
-                    loadsSinceStore++; if (loadsSinceStore > stores) {
-                        m.LoadOrStore(i, stores);
-                        loadsSinceStore = 0;
-                        stores++;
-                    }
+                loadsSinceStore++; if (loadsSinceStore > stores) {
+                    m.LoadOrStore(i, stores);
+                    loadsSinceStore = 0;
+                    stores++;
                 }
             }
         }
@@ -443,10 +427,8 @@ public static void BenchmarkMapCompareAndSwapMostlyHits(ж<Δtesting.B> b) {
 
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
 
             for (nint i = 0; i < hits; i++) {
@@ -519,10 +501,8 @@ public static void BenchmarkMapCompareAndDeleteMostlyHits(ж<Δtesting.B> b) {
 
     benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
-            {
-                var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
-                    bΔ1.Skip(deepCopyMapHasQuadraticˢ);
-                }
+            var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
+                bΔ1.Skip(deepCopyMapHasQuadraticˢ);
             }
 
             for (nint i = 0; i < hits; i++) {

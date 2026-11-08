@@ -157,6 +157,38 @@ func TestExtractPositionSentinelsCarriesTheCallPayload(t *testing.T) {
 	}
 }
 
+// An init emitted as a statement of the enclosing block, `init; if (cond) {`, binds the same C# line as its
+// `if`, whose own mark comes first and carries no calls (sentinelCallRoots gives an if with an init none). The
+// init's payload rides onto that line's entry; the line's first binding still wins otherwise.
+func TestExtractPositionSentinelsKeepsAnInitsPayloadOnItsIfsLine(t *testing.T) {
+	shared := func(first, second string) []positionEntry {
+		_, entries := extractPositionSentinels(strings.Join([]string{
+			"namespace go;",
+			PositionSentinel + first + PositionSentinel + PositionSentinel + second + PositionSentinel,
+			"    nint l = command(\"a\",",
+			"        \"b\").Run(); if (l > 0) {",
+		}, "\r\n"))
+
+		return entries
+	}
+
+	cases := []struct {
+		name          string
+		first, second string
+		want          positionEntry
+	}{
+		{"the init's payload is kept", "145", "145;Run/1/1/1", positionEntry{csLine: 3, goLine: 145, calls: "Run/1/1/1"}},
+		{"another Go line's payload is not", "145", "146;Run/1/1/1", positionEntry{csLine: 3, goLine: 145}},
+		{"a payload of the line's own is kept", "145;Add/2/2/1", "145;Run/1/1/1", positionEntry{csLine: 3, goLine: 145, calls: "Add/2/2/1"}},
+	}
+
+	for _, c := range cases {
+		if entries := shared(c.first, c.second); len(entries) != 1 || entries[0] != c.want {
+			t.Errorf("%s: entries %+v, want [%+v]", c.name, entries, c.want)
+		}
+	}
+}
+
 func TestEncodePositionCallsIsEmptyWithoutLaterLineCalls(t *testing.T) {
 	if got := encodePositionCalls([]positionEntry{{csLine: 3, goLine: 12}, {csLine: 5, goLine: 15}}); got != "" {
 		t.Errorf("a file without later-line calls encoded %q; its record must keep its old shape", got)

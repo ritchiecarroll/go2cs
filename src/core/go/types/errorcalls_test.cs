@@ -31,7 +31,7 @@ public static void TestErrorCalls(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(@file), (ast.Node n) => {
             var (call, _) = n._<ж<ast.CallExpr>>(ᐧ);
@@ -47,26 +47,20 @@ public static void TestErrorCalls(ж<testing.T> t) {
             }
             // check.errorf calls should have at least errorfMinArgCount arguments:
             // position, code, format string, and arguments to format
-            {
-                nint nΔ1 = len(call.Args); if (nΔ1 < errorfMinArgCount) {
-                    t.Errorf("%s: got %d arguments, want at least %d", fsetʗ1.Position(call.Pos()), nΔ1, (nint)(errorfMinArgCount));
-                    return false;
-                }
+            nint nΔ1 = len(call.Args); if (nΔ1 < errorfMinArgCount) {
+                t.Errorf("%s: got %d arguments, want at least %d", fsetʗ1.Position(call.Pos()), nΔ1, (nint)(errorfMinArgCount));
+                return false;
             }
             var format = call.Args[errorfFormatIndex];
             var fsetʗ2 = fsetʗ1;
             ast.Inspect(format, (ast.Node nΔ2) => {
-                {
-                    var (lit, _) = nΔ2._<ж<ast.BasicLit>>(ᐧ); if (lit != nil && lit.Kind == token.STRING) {
-                        {
-                            var (s, errΔ1) = strconv.Unquote((~lit).Value); if (errΔ1 == nil) {
-                                if (!balancedParentheses(s)) {
-                                    t.Errorf("%s: unbalanced parentheses/brackets", fsetʗ2.Position(lit.ValuePos));
-                                }
-                            }
+                var (lit, _) = nΔ2._<ж<ast.BasicLit>>(ᐧ); if (lit != nil && lit.Kind == token.STRING) {
+                    var (s, errΔ1) = strconv.Unquote((~lit).Value); if (errΔ1 == nil) {
+                        if (!balancedParentheses(s)) {
+                            t.Errorf("%s: unbalanced parentheses/brackets", fsetʗ2.Position(lit.ValuePos));
                         }
-                        return false;
                     }
+                    return false;
                 }
                 return true;
             });
@@ -76,10 +70,8 @@ public static void TestErrorCalls(ж<testing.T> t) {
 }
 
 internal static bool isName(ast.Node n, @string name) {
-    {
-        var (nΔ1, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-            return nΔ1.Name == name;
-        }
+    var (nΔ1, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
+        return nΔ1.Name == name;
     }
     return false;
 }

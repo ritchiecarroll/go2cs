@@ -92,7 +92,9 @@ func trailingCommentRuns(fset *token.FileSet, file *ast.File) map[token.Pos]int 
 				continue
 			}
 
-			position := fset.Position(comment.Slash)
+			// The file as written: a `//line` directive ADJUSTS a position to another file's lines, and a line-only
+			// directive leaves the adjusted column 0 (goyacc's parser.go).
+			position := fset.PositionFor(comment.Slash, false)
 
 			if position.Line < 1 || position.Line > len(lines) || position.Column-1 > len(lines[position.Line-1]) {
 				continue

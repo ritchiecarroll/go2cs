@@ -86,6 +86,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
 
     [TestMethod]
+    public void CheckAnonStructTypeArgVarDecl() => CheckTarget("AnonStructTypeArgVarDecl");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
@@ -381,6 +384,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
+
+    [TestMethod]
+    public void CheckDeferCallFuncLitArgCapture() => CheckTarget("DeferCallFuncLitArgCapture");
 
     [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
@@ -1259,6 +1265,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedAnySliceType() => CheckTarget("NamedAnySliceType");
 
     [TestMethod]
+    public void CheckNamedApproxStringByteConstraint() => CheckTarget("NamedApproxStringByteConstraint");
+
+    [TestMethod]
     public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
 
     [TestMethod]
@@ -1445,6 +1454,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");
+
+    [TestMethod]
     public void CheckNamedStringZeroValue() => CheckTarget("NamedStringZeroValue");
 
     [TestMethod]
@@ -1452,6 +1464,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedTypeOverStruct() => CheckTarget("NamedTypeOverStruct");
+
+    [TestMethod]
+    public void CheckNamedValueTypeClash() => CheckTarget("NamedValueTypeClash");
 
     [TestMethod]
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
@@ -1592,6 +1607,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
+
+    [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
@@ -1599,6 +1617,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
+
+    [TestMethod]
+    public void CheckP256CurveBytes() => CheckTarget("P256CurveBytes");
+
+    [TestMethod]
+    public void CheckP384CurveBytes() => CheckTarget("P384CurveBytes");
 
     [TestMethod]
     public void CheckP521CurveBytes() => CheckTarget("P521CurveBytes");
@@ -1895,6 +1919,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckReceiverShadowsImport() => CheckTarget("ReceiverShadowsImport");
+
+    [TestMethod]
     public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
 
     [TestMethod]
@@ -1992,6 +2019,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReflectUnexportedFieldFlags() => CheckTarget("ReflectUnexportedFieldFlags");
+
+    [TestMethod]
+    public void CheckReflectUnsafeAddrDeref() => CheckTarget("ReflectUnsafeAddrDeref");
 
     [TestMethod]
     public void CheckReflectValueMapKeyIdentity() => CheckTarget("ReflectValueMapKeyIdentity");
@@ -2510,6 +2540,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
 
     [TestMethod]
+    public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
+
+    [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");
 
     [TestMethod]
@@ -2523,6 +2556,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
+
+    [TestMethod]
+    public void CheckUntypedConstAppendAny() => CheckTarget("UntypedConstAppendAny");
 
     [TestMethod]
     public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");

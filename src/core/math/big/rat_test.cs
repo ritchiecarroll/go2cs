@@ -5,8 +5,6 @@ namespace go.math;
 
 using math = math_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.math.big_package;
 
 partial class big_internal_test_package {
@@ -58,10 +56,8 @@ public static void TestZeroRat(ж<testing.T> t) {
 
         // check for division by zero
         defer(() => {
-            {
-                var s = recover(); if (s == nil || s._<@string>() != "division by zero"u8) {
-                    throw panic(s);
-                }
+            var s = recover(); if (s == nil || s._<@string>() != "division by zero"u8) {
+                throw panic(s);
             }
         }, ref ᒐ);
         Ꮡz.Quo(Ꮡx, Ꮡy);
@@ -72,7 +68,7 @@ public static void TestZeroRat(ж<testing.T> t) {
 
 public static void TestRatSign(ж<testing.T> t) {
     var zero = NewRat(0, 1);
-    foreach (var (_, a) in setStringTests) {
+    foreach (var (_, a) in range(setStringTests)) {
         ref var x = ref heap<ж<global::go.math.big_package.ΔRat>>(out var Ꮡx);
         (x, var ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
         if (!ok) {
@@ -90,7 +86,7 @@ partial struct ratCmpTestsᴛ1 /*dyn*/ {
     internal @string rat1, rat2;
     internal nint @out;
 }
-internal static slice<ratCmpTestsᴛ1> ratCmpTests = slice<ratCmpTestsᴛ1>([
+internal static slice<ratCmpTestsᴛ1> ratCmpTests = [
     new("0", "0/1", 0),
     new("1/1", "1", 0),
     new("-1", "-2/2", 0),
@@ -100,10 +96,10 @@ internal static slice<ratCmpTestsᴛ1> ratCmpTests = slice<ratCmpTestsᴛ1>([
     new("49832350382626108453/8964749413", "49832350382626108454/8964749413", -1),
     new("-37414950961700930/7204075375675961", "37414950961700930/7204075375675961", -1),
     new("37414950961700930/7204075375675961", "74829901923401860/14408150751351922", 0)
-]);
+];
 
 public static void TestRatCmp(ж<testing.T> t) {
-    foreach (var (i, test) in ratCmpTests) {
+    foreach (var (i, test) in range(ratCmpTests)) {
         var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat1);
         var (y, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat2);
 
@@ -116,7 +112,7 @@ public static void TestRatCmp(ж<testing.T> t) {
 
 public static void TestIsInt(ж<testing.T> t) {
     var one = NewInt(1);
-    foreach (var (_, a) in setStringTests) {
+    foreach (var (_, a) in range(setStringTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
         if (!ok) {
             continue;
@@ -131,7 +127,7 @@ public static void TestIsInt(ж<testing.T> t) {
 
 public static void TestRatAbs(ж<testing.T> t) {
     var zero = @new<global::go.math.big_package.ΔRat>();
-    foreach (var (_, a) in setStringTests) {
+    foreach (var (_, a) in range(setStringTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
         if (!ok) {
             continue;
@@ -149,7 +145,7 @@ public static void TestRatAbs(ж<testing.T> t) {
 
 public static void TestRatNeg(ж<testing.T> t) {
     var zero = @new<global::go.math.big_package.ΔRat>();
-    foreach (var (_, a) in setStringTests) {
+    foreach (var (_, a) in range(setStringTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
         if (!ok) {
             continue;
@@ -164,7 +160,7 @@ public static void TestRatNeg(ж<testing.T> t) {
 
 public static void TestRatInv(ж<testing.T> t) {
     var zero = @new<global::go.math.big_package.ΔRat>();
-    foreach (var (_, a) in setStringTests) {
+    foreach (var (_, a) in range(setStringTests)) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
         if (!ok) {
             continue;
@@ -181,7 +177,6 @@ public static void TestRatInv(ж<testing.T> t) {
 }
 
 // type ratBinFun is a methodless func type — rendered inline as its base delegate
-
 internal partial struct ratBinArg {
     internal @string x, y, z;
 }
@@ -201,7 +196,7 @@ partial struct ratBinTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string sum, prod;
 }
-internal static slice<ratBinTestsᴛ1> ratBinTests = slice<ratBinTestsᴛ1>([
+internal static slice<ratBinTestsᴛ1> ratBinTests = [
     new("0", "0", "0", "0"),
     new("0", "1", "1", "0"),
     new("-1", "0", "-1", "0"),
@@ -220,7 +215,7 @@ internal static slice<ratBinTestsᴛ1> ratBinTests = slice<ratBinTestsᴛ1>([
     new("575775209696864/1320203974639986246357", "29/712593081308", "410331716733912717985762465/940768218243776489278275419794956", "808/45524274987585732633"),
     new("1786597389946320496771/2066653520653241", "6269770/1992362624741777", "3559549865190272133656109052308126637/4117523232840525481453983149257", "8967230/3296219033"),
     new("-36459180403360509753/32150500941194292113930", "9381566963714/9633539", "301622077145533298008420642898530153/309723104686531919656937098270", "-3784609207827/3426986245")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addˢ2 => ref addˢ2ᵇ;
@@ -239,7 +234,7 @@ internal static ref readonly @string quoSymmetricˢ => ref quoSymmetricˢᵇ;
 private static readonly @string quoSymmetricˢᵇ = "Quo symmetric"u8;
 
 public static void TestRatBin(ж<testing.T> t) {
-    foreach (var (i, test) in ratBinTests) {
+    foreach (var (i, test) in range(ratBinTests)) {
         var arg = new ratBinArg(test.x, test.y, test.sum);
         testRatBin(t, i, addˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
 
@@ -299,7 +294,7 @@ partial struct setFrac64Testsᴛ1 /*dyn*/ {
     internal int64 a, b;
     internal @string @out;
 }
-internal static slice<setFrac64Testsᴛ1> setFrac64Tests = slice<setFrac64Testsᴛ1>([
+internal static slice<setFrac64Testsᴛ1> setFrac64Tests = [
     new(0, 1, "0"),
     new(0, -1, "0"),
     new(1, 1, "1"),
@@ -307,10 +302,10 @@ internal static slice<setFrac64Testsᴛ1> setFrac64Tests = slice<setFrac64Tests�
     new(1, -1, "-1"),
     new(-1, -1, "1"),
     new(-9223372036854775808L, -9223372036854775808L, "1")
-]);
+];
 
 public static void TestRatSetFrac64Rat(ж<testing.T> t) {
-    foreach (var (i, test) in setFrac64Tests) {
+    foreach (var (i, test) in range(setFrac64Tests)) {
         var x = @new<global::go.math.big_package.ΔRat>().SetFrac64(test.a, test.b);
         if (x.RatString() != test.@out) {
             t.Errorf("#%d got %s want %s", i, x.RatString(), test.@out);
@@ -453,7 +448,7 @@ public static void TestFloat32Distribution(ж<testing.T> t) {
     }
 
     foreach (var (_, sign) in (@string)"+-") {
-        foreach (var (_, a) in add) {
+        foreach (var (_, a) in range(add)) {
             for (var wid = (uint64)0; wid < 30; wid += winc) {
                 var b = ((int64)1).Lsh(wid) + a;
                 if (sign == '-') {
@@ -502,7 +497,7 @@ public static void TestFloat64Distribution(ж<testing.T> t) {
     }
 
     foreach (var (_, sign) in (@string)"+-") {
-        foreach (var (_, a) in add) {
+        foreach (var (_, a) in range(add)) {
             for (var wid = (uint64)0; wid < 60; wid += winc) {
                 var b = ((int64)1).Lsh(wid) + a;
                 if (sign == '-') {
@@ -534,12 +529,10 @@ public static void TestFloat64Distribution(ж<testing.T> t) {
 // TestSetFloat64NonFinite checks that SetFloat64 of a non-finite value
 // returns nil.
 public static void TestSetFloat64NonFinite(ж<testing.T> t) {
-    foreach (var (_, f) in slice<float64>([math.NaN(), math.Inf(+1), math.Inf(-1)])) {
+    foreach (var (_, f) in range(slice<float64>([math.NaN(), math.Inf(+1), math.Inf(-1)]))) {
         ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
-        {
-            var r2 = Ꮡr.SetFloat64(f); if (r2 != nil) {
-                t.Errorf("SetFloat64(%g) was %v, want nil", f, r2.OrTypedNil());
-            }
+        var r2 = Ꮡr.SetFloat64(f); if (r2 != nil) {
+            t.Errorf("SetFloat64(%g) was %v, want nil", f, r2.OrTypedNil());
         }
     }
 }
@@ -660,13 +653,8 @@ internal static bool checkIsBestApprox64(ж<testing.T> t, float64 f, ж<global::
     return true;
 }
 
-internal static bool isEven32(float32 f) {
-    return (math.Float32bits(f) & 1) == 0;
-}
-
-internal static bool isEven64(float64 f) {
-    return (math.Float64bits(f) & 1) == 0;
-}
+internal static bool isEven32(float32 f) { return (math.Float32bits(f) & 1) == 0; }
+internal static bool isEven64(float64 f) { return (math.Float64bits(f) & 1) == 0; }
 
 public static void TestIsFinite(ж<testing.T> t) {
     var finites = slice<float64>([
@@ -677,7 +665,7 @@ public static void TestIsFinite(ж<testing.T> t) {
         -math.MaxFloat64,
         -math.SmallestNonzeroFloat64
     ]);
-    foreach (var (_, f) in finites) {
+    foreach (var (_, f) in range(finites)) {
         if (!isFinite(f)) {
             t.Errorf("!IsFinite(%g (%b))", f, f);
         }
@@ -687,7 +675,7 @@ public static void TestIsFinite(ж<testing.T> t) {
         math.Inf(-1),
         math.Inf(+1)
     ]);
-    foreach (var (_, f) in nonfinites) {
+    foreach (var (_, f) in range(nonfinites)) {
         if (isFinite(f)) {
             t.Errorf("IsFinite(%g, (%b))", f, f);
         }
@@ -705,7 +693,7 @@ public static void TestRatSetInt64(ж<testing.T> t) {
         math.MinInt64
     ]);
     ж<global::go.math.big_package.ΔRat> r = @new<global::go.math.big_package.ΔRat>();
-    foreach (var (i, want) in testCases) {
+    foreach (var (i, want) in range(testCases)) {
         r.SetInt64(want);
         if (!r.IsInt()) {
             t.Errorf("#%d: Rat.SetInt64(%d) is not an integer", i, want);
@@ -729,7 +717,7 @@ public static void TestRatSetUint64(ж<testing.T> t) {
         ~(uint64)0
     ]);
     ж<global::go.math.big_package.ΔRat> r = @new<global::go.math.big_package.ΔRat>();
-    foreach (var (i, want) in testCases) {
+    foreach (var (i, want) in range(testCases)) {
         r.SetUint64(want);
         if (!r.IsInt()) {
             t.Errorf("#%d: Rat.SetUint64(%d) is not an integer", i, want);
@@ -762,7 +750,7 @@ internal partial struct TestIssue34919_type /*dyn*/ {
 // TestIssue34919 verifies that a Rat's denominator is not modified
 // when simply accessing the Rat value.
 public static void TestIssue34919(ж<testing.T> t) {
-    foreach (var (_, acc) in slice<TestIssue34919_type>([
+    foreach (var (_, acc) in range(slice<TestIssue34919_type>([
         new("Float32", (ж<global::go.math.big_package.ΔRat> x) => {
             x.Float32();
         }),
@@ -782,16 +770,14 @@ public static void TestIssue34919(ж<testing.T> t) {
             x.Num();
         })
         // {"Denom", func(x *Rat) { x.Denom() }}, TODO(gri) should we change the API? See issue #33792.
-    ])) {
+    ]))) {
         // A denominator of length 0 is interpreted as 1. Make sure that
         // "materialization" of the denominator doesn't lead to setting
         // the underlying array element 0 to 1.
         var r = Ꮡ(new ΔRat(new ΔInt(abs: new Δnat(new global::go.math.big_package.Word[]{991}.slice())), new ΔInt(abs: new global::go.math.big_package.Δnat(0, 1))));
         acc.f(r);
-        {
-            global::go.math.big_package.Word d = r.b.abs[..1][0]; if (d != 0) {
-                t.Errorf("%s modified denominator: got %d, want 0", acc.name, d);
-            }
+        global::go.math.big_package.Word d = r.b.abs[..1][0]; if (d != 0) {
+            t.Errorf("%s modified denominator: got %d, want 0", acc.name, d);
         }
     }
 }

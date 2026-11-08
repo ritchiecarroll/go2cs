@@ -70,11 +70,9 @@ public static void TestSubscribers(ж<testing.T> t) {
                     tΔ1.Errorf("unexpected error reading trace for %s: %v", source, errΔ1);
                     break;
                 }
-                {
-                    var errΔ2 = v.Event(ev); if (errΔ2 != nil) {
-                        tΔ1.Errorf("event validation failed: %s", errΔ2);
-                        break;
-                    }
+                var errΔ2 = v.Event(ev); if (errΔ2 != nil) {
+                    tΔ1.Errorf("event validation failed: %s", errΔ2);
+                    break;
                 }
                 if (ev.Kind() == inttrace.EventSync) {
                     syncs = append(syncsᴷ, syncs, evs);
@@ -83,11 +81,9 @@ public static void TestSubscribers(ж<testing.T> t) {
             }
             if (!tΔ1.Failed()) {
                 var ends = slice<nint>([syncs[0], syncs[len(syncs) - 1]]);
-                {
-                    var wantEnds = slice<nint>([0, evs - 1]); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
-                        tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d for %s",
-                            ends, wantEnds, source);
-                    }
+                var wantEnds = slice<nint>([0, evs - 1]); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
+                    tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d for %s",
+                        ends, wantEnds, source);
                 }
             }
         }
@@ -102,25 +98,19 @@ public static void TestSubscribers(ж<testing.T> t) {
     }
     ж<trace.FlightRecorder> startFlightRecorder(ж<testing.T> tΔ3) {
         var fr = trace.NewFlightRecorder(new trace.FlightRecorderConfig());
-        {
-            var err = fr.Start(); if (err != nil) {
-                tΔ3.Fatalf("unexpected error creating flight recorder: %v", err);
-            }
+        var err = fr.Start(); if (err != nil) {
+            tΔ3.Fatalf("unexpected error creating flight recorder: %v", err);
         }
         return fr;
     }
     void startTrace(ж<testing.T> tΔ4, io.Writer w) {
-        {
-            var err = trace.Start(w); if (err != nil) {
-                tΔ4.Fatalf("unexpected error starting flight recorder: %v", err);
-            }
+        var err = trace.Start(w); if (err != nil) {
+            tΔ4.Fatalf("unexpected error starting flight recorder: %v", err);
         }
     }
     void stopFlightRecorder(ж<testing.T> tΔ5, ж<trace.FlightRecorder> fr, io.Writer w) {
-        {
-            var (_, err) = fr.WriteTo(w); if (err != nil) {
-                tΔ5.Fatalf("unexpected error writing trace from flight recorder: %v", err);
-            }
+        var (_, err) = fr.WriteTo(w); if (err != nil) {
+            tΔ5.Fatalf("unexpected error writing trace from flight recorder: %v", err);
         }
         fr.Stop();
     }

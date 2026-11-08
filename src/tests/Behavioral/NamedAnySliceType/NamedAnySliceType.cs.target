@@ -30,7 +30,7 @@ internal static void Main() {
     }
 
     SE s = default;
-    s = append(s, (any)1, (any)(twoˢ), (any)3.5D);
+    s = append(s, (any)((nint)1), (any)(twoˢ), (any)3.5D);
     fmt.Println(len(s), cap(s) >= 3, s);
     fmt.Println(s[0], s[1], s[2]);
     fmt.Println(s[1..], s.describe());

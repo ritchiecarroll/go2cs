@@ -14,8 +14,6 @@ using slices = slices_package;
 using sort = sort_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.math;
 using io = io_package;
@@ -30,23 +28,23 @@ internal partial struct testCase {
     internal slice<@string> patterns; // patterns to lookup
 }
 
-internal static slice<testCase> testCases = slice<testCase>([
+internal static slice<testCase> testCases = [
     new(
         "empty string",
         "",
-        slice<@string>([
+        [
             "",
             "foo",
             "(foo)",
             ".*",
             "a*"
-        ])
+        ]
     ),
 
     new(
         "all a's",
         "aaaaaaaaaa", // 10 a's
-        slice<@string>([
+        [
             "",
             "a",
             "aa",
@@ -65,13 +63,13 @@ internal static slice<testCase> testCases = slice<testCase>([
             "aa+",
             "aaaa[b]?",
             "aaa*"
-        ])
+        ]
     ),
 
     new(
         "abc",
         "abc",
-        slice<@string>([
+        [
             "a",
             "b",
             "c",
@@ -81,40 +79,40 @@ internal static slice<testCase> testCases = slice<testCase>([
             "a.c",
             "a(b|c)",
             "abc?"
-        ])
+        ]
     ),
 
     new(
         "barbara*3",
         "barbarabarbarabarbara",
-        slice<@string>([
+        [
             "a",
             "bar",
             "rab",
             "arab",
             "barbar",
             "bara?bar"
-        ])
+        ]
     ),
 
     new(
         "typing drill",
         "Now is the time for all good men to come to the aid of their country.",
-        slice<@string>([
+        [
             "Now",
             "the time",
             "to come the aid",
             "is the time for all good men to come to the aid of their",
             "to (come|the)?"
-        ])
+        ]
     ),
 
     new(
         "godoc simulation",
         "package main\n\nimport(\n    \"rand\"\n    ",
-        slice<@string>([])
+        []
     )
-]);
+];
 
 // find all occurrences of s in source; report at most n occurrences
 internal static slice<nint> find(@string src, @string s, nint n) {
@@ -154,7 +152,7 @@ internal static void testLookup(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::
 
     // check that each result is in fact a correct match and there are no duplicates
     slices.Sort<slice<nint>, nint>(res);
-    foreach (var (i, r) in res) {
+    foreach (var (i, r) in range(res)) {
         if (r < 0 || builtin.len(tc.source) <= r) {
             t.Errorf("test %q, lookup %q, result %d (n = %d): index %d out of range [0, %d[", tc.name, s, i, n, r, builtin.len(tc.source));
         } else if (!strings.HasPrefix(tc.source.slice(r), s)) {
@@ -167,7 +165,7 @@ internal static void testLookup(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::
 
     if (n < 0) {
         // all results computed - sorted res and exp must be equal
-        foreach (var (i, r) in res) {
+        foreach (var (i, r) in range(res)) {
             nint e = exp[i];
             if (r != e) {
                 t.Errorf("test %q, lookup %q, result %d: expected index %d; got %d", tc.name, s, i, e, r);
@@ -193,7 +191,7 @@ internal static void testFindAllIndex(ж<testing.T> t, ж<testCase> Ꮡtc, ж<gl
     // we cannot simply check that the res and exp lists are equal
 
     // check that each result is in fact a correct match and the result is sorted
-    foreach (var (i, r) in res) {
+    foreach (var (i, r) in range(res)) {
         if (r[0] < 0 || r[0] > r[1] || builtin.len(tc.source) < r[1]) {
             t.Errorf("test %q, FindAllIndex %q, result %d (n == %d): illegal match [%d, %d]", tc.name, rx.OrTypedNil(), i, n, r[0], r[1]);
         } else if (!rx.MatchString(tc.source.slice(r[0], r[1]))) {
@@ -203,7 +201,7 @@ internal static void testFindAllIndex(ж<testing.T> t, ж<testCase> Ꮡtc, ж<gl
 
     if (n < 0) {
         // all results computed - sorted res and exp must be equal
-        foreach (var (i, r) in res) {
+        foreach (var (i, r) in range(res)) {
             var e = exp[i];
             if (r[0] != e[0] || r[1] != e[1]) {
                 t.Errorf("test %q, FindAllIndex %q, result %d: expected match [%d, %d]; got [%d, %d]",
@@ -216,12 +214,10 @@ internal static void testFindAllIndex(ж<testing.T> t, ж<testCase> Ꮡtc, ж<gl
 internal static void testLookups(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> x, nint n) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
-    foreach (var (_, pat) in tc.patterns) {
+    foreach (var (_, pat) in range(tc.patterns)) {
         testLookup(t, Ꮡtc, x, pat, n);
-        {
-            var (rx, err) = regexp.Compile(pat); if (err == nil) {
-                testFindAllIndex(t, Ꮡtc, x, rx, n);
-            }
+        var (rx, err) = regexp.Compile(pat); if (err == nil) {
+            testFindAllIndex(t, Ꮡtc, x, rx, n);
         }
     }
 }
@@ -229,14 +225,8 @@ internal static void testLookups(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global:
 // index is used to hide the sort.Interface
 internal partial struct index /*global::go.index.suffixarray_package.Index*/;
 
-internal static nint Len(this ref index x) {
-    return x.sa.len();
-}
-
-internal static bool Less(this ref index x, nint i, nint j) {
-    return bytes.Compare(x.at(i), x.at(j)) < 0;
-}
-
+internal static nint Len(this ref index x) { return x.sa.len(); }
+internal static bool Less(this ref index x, nint i, nint j) { return bytes.Compare(x.at(i), x.at(j)) < 0; }
 internal static void Swap(this ref index x, nint i, nint j) {
     if (x.sa.int32 != nil) {
         (x.sa.int32[i], x.sa.int32[j]) = (x.sa.int32[j], x.sa.int32[i]);
@@ -335,7 +325,7 @@ internal static nint testSaveRestore(ж<testing.T> t, ж<testCase> Ꮡtc, ж<glo
 }
 
 internal static void testIndex(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new testCase(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -372,7 +362,7 @@ public static void TestNew32(ж<testing.T> t) {
         var sa = new slice<int32>(builtin.len(x));
         text_32(x, sa);
         var @out = new slice<nint>(builtin.len(sa));
-        foreach (var (i, v) in sa) {
+        foreach (var (i, v) in range(sa)) {
             @out[i] = (nint)v;
         }
         return @out;
@@ -384,7 +374,7 @@ public static void TestNew64(ж<testing.T> t) {
         var sa = new slice<int64>(builtin.len(x));
         text_64(x, sa);
         var @out = new slice<nint>(builtin.len(sa));
-        foreach (var (i, v) in sa) {
+        foreach (var (i, v) in range(sa)) {
             @out[i] = (nint)v;
         }
         return @out;
@@ -413,7 +403,7 @@ internal static void test(ж<testing.T> t, Func<slice<byte>, slice<nint>> build)
             size = 10000;
         }
         var x = new slice<byte>(size);
-        foreach (var i in range(x)) {
+        foreach (var i in range(builtin.len(x))) {
             x[i] = LiteralByteAt("ab"u8, i % 2);
         }
         testSA(tΔ1, x, build);
@@ -434,7 +424,7 @@ internal static void test(ж<testing.T> t, Func<slice<byte>, slice<nint>> build)
         var x = new slice<byte>(100000, 100001);
         var lo = (byte)1;
         var hi = (byte)255;
-        foreach (var i in range(x)) {
+        foreach (var i in range(builtin.len(x))) {
             if (i % 2 == 0) {
                 x[i] = lo;
             } else {
@@ -510,11 +500,9 @@ internal static bool testSA(ж<testing.T> t, slice<byte> x, Func<slice<byte>, sl
     try {
         var xʗ1 = x;
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    t.Logf("build %v", xʗ1);
-                    throw panic(e);
-                }
+            var e = recover(); if (e != nil) {
+                t.Logf("build %v", xʗ1);
+                throw panic(e);
             }
         }, ref ᒐ);
         var sa = build(x);
@@ -554,7 +542,7 @@ internal static void benchmarkNew(ж<testing.B> Ꮡb, bool random) {
     if (random) {
         data = benchrand;
         if (data[0] == 0) {
-            foreach (var i in range(data)) {
+            foreach (var i in range(builtin.len(data))) {
                 data[i] = (byte)rand.Intn(256);
             }
         }
@@ -604,7 +592,7 @@ internal static (slice<byte>, error) makeText(@string name) {
     }
     case {} when exprᴛ1 == "rand"u8: {
         data = new slice<byte>(50000000);
-        foreach (var i in range(data)) {
+        foreach (var i in range(builtin.len(data))) {
             data[i] = (byte)rand.Intn(256);
         }
         break;
@@ -624,7 +612,7 @@ internal static Action /*cleanup*/ setBits(nint bits) {
 }
 
 public static void BenchmarkNew(ж<testing.B> b) {
-    foreach (var (_, text) in slice<@string>(["opticks", "go", "zero", "rand"])) {
+    foreach (var (_, text) in range(slice<@string>(["opticks", "go", "zero", "rand"]))) {
         b.Run("text="u8 + text, (ж<testing.B> bΔ1) => {
             var (data, err) = makeText(text);
             if (err != nil) {
@@ -633,7 +621,7 @@ public static void BenchmarkNew(ж<testing.B> b) {
             if (testing.Short() && builtin.len(data) > 5000000) {
                 data = data[..(int)5000000];
             }
-            foreach (var (_, size) in slice<nint>([100000, 500000, 1000000, 5000000, 10000000, 50000000])) {
+            foreach (var (_, size) in range(slice<nint>([100000, 500000, 1000000, 5000000, 10000000, 50000000]))) {
                 if (builtin.len(data) < size) {
                     continue;
                 }
@@ -644,7 +632,7 @@ public static void BenchmarkNew(ж<testing.B> b) {
                 }
                 var dataʗ1 = dataΔ1;
                 bΔ1.Run("size="u8 + name, (ж<testing.B> bΔ2) => {
-                    foreach (var (_, bits) in slice<nint>([32, 64])) {
+                    foreach (var (_, bits) in range(slice<nint>([32, 64]))) {
                         if (~(nuint)0 == 0xffffffffU && bits == 64) {
                             continue;
                         }
@@ -675,10 +663,10 @@ public static void BenchmarkNew(ж<testing.B> b) {
 public static void BenchmarkSaveRestore(ж<testing.B> b) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
     var data = new slice<byte>((1 << 20));      // 1MB of data to index
-    foreach (var i in range(data)) {
+    foreach (var i in range(builtin.len(data))) {
         data[i] = (byte)r.Intn(256);
     }
-    foreach (var (_, bits) in slice<nint>([32, 64])) {
+    foreach (var (_, bits) in range(slice<nint>([32, 64]))) {
         if (~(nuint)0 == 0xffffffffU && bits == 64) {
             continue;
         }

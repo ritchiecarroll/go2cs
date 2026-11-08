@@ -50,7 +50,7 @@ internal static global::go.crypto.@internal.fips140.edwards25519.field_package.E
 
 // weirdLimbs can be combined to generate a range of edge-case field elements.
 // 0 and -1 are intentionally more weighted, as they combine well.
-internal static slice<uint64> weirdLimbs51 = slice<uint64>([
+internal static slice<uint64> weirdLimbs51 = [
     0, 0, 0, 0,
     1,
     19 - 1,
@@ -61,8 +61,8 @@ internal static slice<uint64> weirdLimbs51 = slice<uint64>([
     (uint64)((2251799813685248L) - 19),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1)
-]);
-internal static slice<uint64> weirdLimbs52 = slice<uint64>([
+];
+internal static slice<uint64> weirdLimbs52 = [
     0, 0, 0, 0, 0, 0,
     1,
     19 - 1,
@@ -78,7 +78,7 @@ internal static slice<uint64> weirdLimbs52 = slice<uint64>([
     (uint64)((2251799813685248L) + 1),
     (uint64)((4503599627370496L) - 19),
     (uint64)((4503599627370496L) - 1)
-]);
+];
 
 internal static global::go.crypto.@internal.fips140.edwards25519.field_package.Element generateWeirdFieldElement(ж<mathrand.Rand> Ꮡrand) {
     ref var rand = ref Ꮡrand.DerefOrNull();
@@ -129,10 +129,8 @@ public static void TestMultiplyDistributesOverAdd(ж<testing.T> t) {
         return t1.Equal(t2) == 1 && isInBounds(t1) && isInBounds(t2);
     };
 
-    {
-        var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -207,15 +205,15 @@ public static void TestSetBytesRoundTrip(ж<testing.T> t) {
     slice<TestSetBytesRoundTrip_feRTTest> tests = slice<TestSetBytesRoundTrip_feRTTest>([
         new(
             fe: new Element(358744748052810UL, 1691584618240980UL, 977650209285361UL, 1429865912637724UL, 560044844278676UL),
-            b: slice<byte>([74, 209, 69, 197, 70, 70, 161, 222, 56, 226, 229, 19, 112, 60, 25, 92, 187, 74, 222, 56, 50, 153, 51, 233, 40, 74, 57, 6, 160, 185, 213, 31])
+            b: [74, 209, 69, 197, 70, 70, 161, 222, 56, 226, 229, 19, 112, 60, 25, 92, 187, 74, 222, 56, 50, 153, 51, 233, 40, 74, 57, 6, 160, 185, 213, 31]
         ),
         new(
             fe: new Element(84926274344903UL, 473620666599931UL, 365590438845504UL, 1028470286882429UL, 2146499180330972UL),
-            b: slice<byte>([199, 23, 106, 112, 61, 77, 216, 79, 186, 60, 11, 118, 13, 16, 103, 15, 42, 32, 83, 250, 44, 57, 204, 198, 78, 199, 253, 119, 146, 172, 3, 122])
+            b: [199, 23, 106, 112, 61, 77, 216, 79, 186, 60, 11, 118, 13, 16, 103, 15, 42, 32, 83, 250, 44, 57, 204, 198, 78, 199, 253, 119, 146, 172, 3, 122]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestSetBytesRoundTrip_feRTTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -254,10 +252,8 @@ public static void TestBytesBigEquivalence(ж<testing.T> t) {
 
         return bytes_package.Equal(fe.Bytes(), buf) && isInBounds(Ꮡfe) && isInBounds(Ꮡfe1);
     };
-    {
-        var err = quick.Check((f1).OrTypedNilFunc(), nil); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((f1).OrTypedNilFunc(), nil); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -271,7 +267,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
     }
 
     var buf = new slice<byte>(0, 32);
-    foreach (var (_, vᴛ1) in n.Bits()) {
+    foreach (var (_, vᴛ1) in range(n.Bits())) {
         var word = vᴛ1;
 
         for (nint i = 0; i < bits.UintSize; i += 8) {
@@ -300,7 +296,7 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
     var buf = v.Bytes();
 
     var words = new slice<big.Word>(32 * 8 / bits.UintSize);
-    foreach (var n in range(words)) {
+    foreach (var n in range(len(words))) {
         for (nint i = 0; i < bits.UintSize; i += 8) {
             if (len(buf) == 0) {
                 break;
@@ -315,10 +311,8 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
 
 public static void TestDecimalConstants(ж<testing.T> t) {
     @string sqrtM1String = "19681161376707505956807079304988542015446066515923890162744021073123829784752";
-    {
-        var exp = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().fromDecimal(sqrtM1String); if (sqrtM1.Equal(exp) != 1) {
-            t.Errorf("sqrtM1 is %v, expected %v", sqrtM1.OrTypedNil(), exp.OrTypedNil());
-        }
+    var exp = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().fromDecimal(sqrtM1String); if (sqrtM1.Equal(exp) != 1) {
+        t.Errorf("sqrtM1 is %v, expected %v", sqrtM1.OrTypedNil(), exp.OrTypedNil());
     }
     // d is in the parent package, and we don't want to expose d or fromDecimal.
     // dString := "37095705934669439343138083508754565189542113879843219016388785533085940283555"
@@ -410,12 +404,10 @@ public static void TestInvert(ж<testing.T> t) {
 
     ref var zero = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(new Element(), out var Ꮡzero);
     Ꮡx.Set(Ꮡzero);
-    {
-        var xx = Ꮡxinv.Invert(Ꮡx); if (xx != Ꮡxinv) {
-            t.Errorf("inverting zero did not return the receiver");
-        } else if (xinv.Equal(Ꮡzero) != 1) {
-            t.Errorf("inverting zero did not return zero");
-        }
+    var xx = Ꮡxinv.Invert(Ꮡx); if (xx != Ꮡxinv) {
+        t.Errorf("inverting zero did not return the receiver");
+    } else if (xinv.Equal(Ꮡzero) != 1) {
+        t.Errorf("inverting zero did not return zero");
     }
 }
 
@@ -465,10 +457,8 @@ public static void TestMult32(ж<testing.T> t) {
         return t1.Equal(t2) == 1 && isInBounds(t1) && isInBounds(t2);
     };
 
-    {
-        var err = quick.Check((mult32EquivalentToMul).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((mult32EquivalentToMul).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -521,7 +511,7 @@ public static void TestSqrtRatio(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (u, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.u);
         var (v, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.v);
         var (want, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.r);
@@ -547,10 +537,8 @@ public static void TestFeSquare(ж<testing.T> t) {
         return t1 == t2 && isInBounds(Ꮡt2);
     };
 
-    {
-        var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -572,10 +560,8 @@ public static void TestFeMul(ж<testing.T> t) {
         return a1 == a2 && isInBounds(Ꮡa2) && b1 == b2 && isInBounds(Ꮡb2);
     };
 
-    {
-        var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
-            t.Error(err);
-        }
+    var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+        t.Error(err);
     }
 }
 

@@ -54,7 +54,7 @@ internal partial struct TestNewRequestWithContext_typeᴛ1 /*dyn*/ {
 }
 
 public static void TestNewRequestWithContext(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in new TestNewRequestWithContext_type[]{
+    foreach (var (_, vᴛ1) in range(new TestNewRequestWithContext_type[]{
         new(
             name: "Empty method means GET",
             method: "",
@@ -200,7 +200,7 @@ public static void TestNewRequestWithContext(ж<testing.T> t) {
                 RequestURI: "*"
             ))
         )
-    }.array()) {
+    }.array())) {
         ref var tt = ref heap(new TestNewRequestWithContext_type(), out var Ꮡtt);
         tt = vᴛ1;
 

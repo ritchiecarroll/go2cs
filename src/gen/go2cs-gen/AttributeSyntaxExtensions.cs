@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,6 +21,30 @@ public static class AttributeSyntaxExtensions
             name: argument.NameEquals?.Name.Identifier.Text ?? string.Empty,
             value: argument.Expression.NormalizeWhitespace().ToFullString()
         )).ToArray();
+    }
+
+    // The two types of a GoImplement record in either form: the generic form's type arguments (`GoImplement<S, I>`), or the
+    // open-generic form's first two typeof arguments (`GoImplement(typeof(S<>), typeof(I))`). An unbound generic in a
+    // typeof argument reads as its open DEFINITION, the type every closed instantiation of the pair collapses to.
+    public static (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) GetImplementTypeArguments(this AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
+    {
+        (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) = attributeSyntax.Get2GenericTypeArguments(context);
+
+        if (typeArg1 is not null || typeArg2 is not null)
+            return (typeArg1, typeArg2);
+
+        List<TypeSyntax> typeOfTypes = (attributeSyntax.ArgumentList?.Arguments ?? default)
+            .Where(argument => argument.NameEquals is null && argument.Expression is TypeOfExpressionSyntax)
+            .Select(argument => ((TypeOfExpressionSyntax)argument.Expression).Type)
+            .ToList();
+
+        if (typeOfTypes.Count != 2)
+            return (null, null);
+
+        static ITypeSymbol? Definition(ITypeSymbol? type) =>
+            type is INamedTypeSymbol { IsUnboundGenericType: true } unbound ? unbound.OriginalDefinition : type;
+
+        return (Definition(context.SemanticModel.GetTypeInfo(typeOfTypes[0]).Type), Definition(context.SemanticModel.GetTypeInfo(typeOfTypes[1]).Type));
     }
 
     public static (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) Get2GenericTypeArguments(this AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)

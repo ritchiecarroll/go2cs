@@ -216,6 +216,12 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		rangeType = types.Unalias(ptrType.Elem())
 		ptrDeref = ".Value"
 
+		// A deref-aliased pointer RECEIVER is the named wrapper itself, not a box, so this `.Value` is the
+		// wrapper's underlying-value property, which a type named Value spells NamedWrapperValue.
+		if v.exprIsDerefAliasedPointer(rangeStmt.X) {
+			ptrDeref = "." + v.wrapperValueMember(ptrType.Elem())
+		}
+
 		// A pointer parameter is implicitly dereferenced to a value local in the body
 		// (`ref var p = ref Ꮡp.Value`), so `p` already denotes the pointed-to value — ranging over
 		// it must not add a second `.Value` (which would be applied to the value type, CS1061).

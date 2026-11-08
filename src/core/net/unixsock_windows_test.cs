@@ -28,7 +28,7 @@ public static void TestUnixConnLocalWindows(ж<testing.T> t) {
         }
         var handler = (ж<localServer> ls, global::go.net_package.Listener ln) => {
         };
-        foreach (var (_, vᴛ1) in slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))])) {
+        foreach (var (_, vᴛ1) in range(slice<@string>(["", testUnixAddr(new net_test_package.testing_TжTB(t))]))) {
             ref var laddr = ref heap(new @string(), out var Ꮡladdr);
             laddr = vᴛ1;
 
@@ -44,10 +44,8 @@ public static void TestUnixConnLocalWindows(ж<testing.T> t) {
             var ls = (Ꮡ(new streamListener(Listener: new global::go.net_package.UnixListenerжListener(ln)))).newLocalServer();
             var lsʗ1 = ls;
             defer(() => lsʗ1.teardown(), ref ᒐ);
-            {
-                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
 
             (var la, err) = ResolveUnixAddr(unixˢ, laddr);
@@ -72,10 +70,8 @@ public static void TestUnixConnLocalWindows(ж<testing.T> t) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             }, ref ᒐ);
-            {
-                var (_, errΔ2) = c.of(global::go.net_package.UnixConn.Ꮡconn).Write(slice<byte>("UNIXCONN LOCAL AND REMOTE NAME TEST"u8)); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, errΔ2) = c.of(global::go.net_package.UnixConn.Ꮡconn).Write(slice<byte>("UNIXCONN LOCAL AND REMOTE NAME TEST"u8)); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
 
             if (laddr == ""u8) {
@@ -86,7 +82,7 @@ public static void TestUnixConnLocalWindows(ж<testing.T> t) {
                 new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
                 new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
             }.array();
-            foreach (var (_, ca) in connAddrs.ΔRangeSnapshot()) {
+            foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {
                     t.Fatalf("got %#v, expected %#v", ca.got, ca.want);
                 }

@@ -47,13 +47,13 @@ internal partial struct TestStripAnnotations_type /*dyn*/ {
 }
 
 public static void TestStripAnnotations(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestStripAnnotations_type>([
+    foreach (var (_, test) in range(slice<TestStripAnnotations_type>([
         new("", ""),
         new("   ", "   "),
         new("foo", "foo"),
         new("foo₀", "foo"),
         new("foo(T₀)", "foo(T)")
-    ])) {
+    ]))) {
         @string got = stripAnnotations(test.@in);
         if (got != test.want) {
             t.Errorf("%q: got %q; want %q", test.@in, got, test.want);

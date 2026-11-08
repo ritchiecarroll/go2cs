@@ -23,10 +23,8 @@ partial struct LevelHandler {
 // All methods except Enabled delegate to h.
 public static ж<LevelHandler> NewLevelHandler(Δslog.Leveler level, slogꓸHandler h) {
     // Optimization: avoid chains of LevelHandlers.
-    {
-        var (lh, ok) = h._<ж<LevelHandler>>(ᐧ); if (ok) {
-            h = lh.Handler();
-        }
+    var (lh, ok) = h._<ж<LevelHandler>>(ᐧ); if (ok) {
+        h = lh.Handler();
     }
     return Ꮡ(new LevelHandler(level, h));
 }

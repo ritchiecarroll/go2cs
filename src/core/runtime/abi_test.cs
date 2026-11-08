@@ -45,8 +45,7 @@ partial struct TintPointer {
     internal ж<Tint> p;
 }
 
-internal static void m(this ref TintPointer _) {
-}
+internal static void m(this ref TintPointer _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testFinalizerRegabiˢ => ref testFinalizerRegabiˢᵇ;
@@ -116,7 +115,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> t) {
             new("Pointer", regFinalizerPointer, -1),
             new("Interface", regFinalizerIface, -2)
         ]);
-        foreach (var i in range(tests)) {
+        foreach (var i in range(len(tests))) {
             var test = Ꮡ(tests, i);
             var testʗ1 = test;
             t.Run((~test).name, (ж<testing.T> tΔ1) => {
@@ -133,10 +132,8 @@ public static void TestFinalizerRegisterABI(ж<testing.T> t) {
                 if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)time.ΔSecond)) {
                     tΔ1.Fatal(finalizerFailedToExecuteˢ);
                 }
-                {
-                    nint got = (nint)ᏑregConfirmRun.Load(); if (got != (~testʗ1).confirmValue) {
-                        tΔ1.Fatalf("wrong finalizer executed? got %d, want %d", got, (~testʗ1).confirmValue);
-                    }
+                nint got = (nint)ᏑregConfirmRun.Load(); if (got != (~testʗ1).confirmValue) {
+                    tΔ1.Fatalf("wrong finalizer executed? got %d, want %d", got, (~testʗ1).confirmValue);
                 }
             });
         }

@@ -135,23 +135,19 @@ internal static void testTypedefs(ж<testing.T> t, ж<dwarf.Data> d, @string kin
             }
             var t1 = typ._<ж<dwarf.TypedefType>>();
             @string typstr = default;
-            {
-                var (ts, ok) = t1.Type._<ж<dwarf.StructType>>(ᐧ); if (ok) {
-                    typstr = ts.Defn();
-                } else {
-                    typstr = t1.Type.String();
-                }
+            if (t1.Type._<ж<dwarf.StructType>>(out var ts)) {
+                typstr = ts.Defn();
+            } else {
+                typstr = t1.Type.String();
             }
 
-            {
-                var (want, ok) = testcases[t1.Name, ꟷ]; if (ok) {
-                    if (seen[t1.Name]) {
-                        t.Errorf("multiple definitions for %s", t1.Name);
-                    }
-                    seen[t1.Name] = true;
-                    if (typstr != want && (kind != "macho"u8 || typstr != machoBug[want])) {
-                        t.Errorf("%s:\n\thave %s\n\twant %s", t1.Name, typstr, want);
-                    }
+            if (testcases[t1.Name, ꟷ] is (var want, true)) {
+                if (seen[t1.Name]) {
+                    t.Errorf("multiple definitions for %s", t1.Name);
+                }
+                seen[t1.Name] = true;
+                if (typstr != want && (kind != "macho"u8 || typstr != machoBug[want])) {
+                    t.Errorf("%s:\n\thave %s\n\twant %s", t1.Name, typstr, want);
                 }
             }
         }
@@ -200,7 +196,7 @@ public static void TestTypedefCycle(ж<testing.T> t) {
 
     // Parse each type with a fresh type cache.
     offsets = move2heap(offsetsᴷ, offsets);
-    foreach (var (_, offset) in offsets) {
+    foreach (var (_, offset) in range(offsets)) {
         var dΔ1 = elfData(t, testdataCycleElfˢ);
         var (_, err) = dΔ1.Type(offset);
         if (err != nil) {
@@ -209,11 +205,11 @@ public static void TestTypedefCycle(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> unsupportedTypeTests = slice<@string>([
+internal static slice<@string> unsupportedTypeTests = [
     // varname:typename:string:size
     "culprit::(unsupported type ReferenceType):8",
     "pdm::(unsupported type PtrToMemberType):-1"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataCppunsuptypesElfˢ => ref testdataCppunsuptypesElfˢᵇ;
@@ -257,7 +253,7 @@ public static void TestUnsupportedTypes(ж<testing.T> t) {
         }
     }
     var dumpseen = false;
-    foreach (var (_, v) in unsupportedTypeTests) {
+    foreach (var (_, v) in range(unsupportedTypeTests)) {
         if (!seen[v]) {
             t.Errorf("missing %s", v);
             dumpseen = true;
@@ -343,7 +339,7 @@ internal static void testBitOffsets(ж<testing.T> t, ж<dwarf.Data> d, @string t
                 return res;
             }
 
-            foreach (var (_, field) in t1.Field) {
+            foreach (var (_, field) in range(t1.Field)) {
                 // We're only testing for bitfields
                 if (field.BitSize == 0) {
                     continue;

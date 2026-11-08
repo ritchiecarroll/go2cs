@@ -308,6 +308,7 @@
     <Project Path="tests/Behavioral/AnonStructNamedConversion/AnonStructNamedConversion.csproj" />
     <Project Path="tests/Behavioral/AnonStructNamedConversion/structs/AnonStructNamedConversion.structs.csproj" />
     <Project Path="tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
+    <Project Path="tests/Behavioral/AnonStructTypeArgVarDecl/AnonStructTypeArgVarDecl.csproj" />
     <Project Path="tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="tests/Behavioral/AnyBoxedUntypedConst/AnyBoxedUntypedConst.csproj" />
@@ -325,6 +326,7 @@
     <Project Path="tests/Behavioral/AssignThroughTypeAssert/AssignThroughTypeAssert.csproj" />
     <Project Path="tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
+    <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
     <Project Path="tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
@@ -431,6 +433,7 @@
     <Project Path="tests/Behavioral/DeepEqual/DeepEqual.csproj" />
     <Project Path="tests/Behavioral/DeepSelectRecursion/DeepSelectRecursion.csproj" />
     <Project Path="tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
+    <Project Path="tests/Behavioral/DeferCallFuncLitArgCapture/DeferCallFuncLitArgCapture.csproj" />
     <Project Path="tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="tests/Behavioral/DeferClosure/DeferClosure.csproj" />
     <Project Path="tests/Behavioral/DeferDiscardedMultiValue/DeferDiscardedMultiValue.csproj" />
@@ -755,6 +758,7 @@
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
     <Project Path="tests/Behavioral/MultiValueReturnOrder/MultiValueReturnOrder.csproj" />
     <Project Path="tests/Behavioral/NamedAnySliceType/NamedAnySliceType.csproj" />
+    <Project Path="tests/Behavioral/NamedApproxStringByteConstraint/NamedApproxStringByteConstraint.csproj" />
     <Project Path="tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />
@@ -813,9 +817,14 @@
     <Project Path="tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="tests/Behavioral/NamedStringConsts/NamedStringConsts.csproj" />
     <Project Path="tests/Behavioral/NamedStringDefine/NamedStringDefine.csproj" />
+    <Project Path="tests/Behavioral/NamedStringSliceConcatBoxing/NamedStringSliceConcatBoxing.csproj" />
     <Project Path="tests/Behavioral/NamedStringZeroValue/NamedStringZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
     <Project Path="tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/NamedValueTypeClash.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/arrval/NamedValueTypeClash.arrval.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/mapval/NamedValueTypeClash.mapval.csproj" />
+    <Project Path="tests/Behavioral/NamedValueTypeClash/numval/NamedValueTypeClash.numval.csproj" />
     <Project Path="tests/Behavioral/NamedIntSignednessConv/NamedIntSignednessConv.csproj" />
     <Project Path="tests/Behavioral/NamedNumericConstCast/NamedNumericConstCast.csproj" />
     <Project Path="tests/Behavioral/NamedNumericConversion/NamedNumericConversion.csproj" />
@@ -872,9 +881,12 @@
     <Project Path="tests/Behavioral/NoinlineDirectiveFrame/NoinlineDirectiveFrame.csproj" />
     <Project Path="tests/Behavioral/NoInlinePartial/NoInlinePartial.csproj" />
     <Project Path="tests/Behavioral/InitOrderNoInline/InitOrderNoInline.csproj" />
+    <Project Path="tests/Behavioral/OpenGenericPointerImplement/OpenGenericPointerImplement.csproj" />
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/OsGetpagesize/OsGetpagesize.csproj" />
+    <Project Path="tests/Behavioral/P256CurveBytes/P256CurveBytes.csproj" />
+    <Project Path="tests/Behavioral/P384CurveBytes/P384CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
@@ -1007,6 +1019,7 @@
     <Project Path="tests/Behavioral/ReflectTypedNilInterface/ReflectTypedNilInterface.csproj" />
     <Project Path="tests/Behavioral/ReflectTypedNilStore/ReflectTypedNilStore.csproj" />
     <Project Path="tests/Behavioral/ReflectUnexportedFieldFlags/ReflectUnexportedFieldFlags.csproj" />
+    <Project Path="tests/Behavioral/ReflectUnsafeAddrDeref/ReflectUnsafeAddrDeref.csproj" />
     <Project Path="tests/Behavioral/ReflectValueMapKeyIdentity/ReflectValueMapKeyIdentity.csproj" />
     <Project Path="tests/Behavioral/ReflectValueSingles/ReflectValueSingles.csproj" />
     <Project Path="tests/Behavioral/ReflectVariadicCall/ReflectVariadicCall.csproj" />
@@ -1198,10 +1211,12 @@
     <Project Path="tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />
     <Project Path="tests/Behavioral/UnsafeSliceDataAliasing/UnsafeSliceDataAliasing.csproj" />
     <Project Path="tests/Behavioral/UnsignedIndexPastIntRange/UnsignedIndexPastIntRange.csproj" />
     <Project Path="tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
+    <Project Path="tests/Behavioral/UntypedConstAppendAny/UntypedConstAppendAny.csproj" />
     <Project Path="tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedConstDefine/UntypedConstDefine.csproj" />
     <Project Path="tests/Behavioral/UntypedConstFloatContext/UntypedConstFloatContext.csproj" />

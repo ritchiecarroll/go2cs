@@ -1,0 +1,20 @@
+go version go1.26.10 windows/amd64
+go run -tags purego,math_big_pure_go . (3 processes)
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5233
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2428
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 4967
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2526
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5236
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2522
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5142
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2389
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5242
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2416
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5920
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2506
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5141
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2480
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 5027
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2674
+default(rsa,x25519mlkem) checksum: 32 772 4865 4588 per_handshake_us: 4936
+p256(ecdsa-p256,ecdhe-p256) checksum: 32 772 4865 23 per_handshake_us: 2408

@@ -96,11 +96,9 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> t)
         }
         // If the user already exists, try again with a different name.
         if (errors.Is(errΔ1, windows.NERR_UserExists)) {
-            {
-                @try++; if (@try < 1000) {
-                    t.Log(userAlreadyExistsTryingˢ);
-                    continue;
-                }
+            @try++; if (@try < 1000) {
+                t.Log(userAlreadyExistsTryingˢ);
+                continue;
             }
         }
         if (errΔ1 != nil) {
@@ -109,11 +107,9 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> t)
         // Delete the user when the test is done.
         var name16ʗ1 = name16;
         t.Cleanup(() => {
-            {
-                var errΔ2 = windows.NetUserDel(nil, name16ʗ1); if (errΔ2 != nil) {
-                    if (!errors.Is(errΔ2, windows.NERR_UserNotFound)) {
-                        t.Fatal(errΔ2);
-                    }
+            var errΔ2 = windows.NetUserDel(nil, name16ʗ1); if (errΔ2 != nil) {
+                if (!errors.Is(errΔ2, windows.NERR_UserNotFound)) {
+                    t.Fatal(errΔ2);
                 }
             }
         });
@@ -151,10 +147,8 @@ internal static (syscall.Token, ж<global::go.os.user_package.User>) windowsTest
     const uint32 LOGON32_PROVIDER_DEFAULT = 0;
     const uint32 LOGON32_LOGON_INTERACTIVE = 2;
     ref var token = ref heap(new syscall.Token(), out var Ꮡtoken);
-    {
-        err = windows.LogonUser(name16, domain, pwd16, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, Ꮡtoken); if (err != nil) {
-            t.Fatal(err);
-        }
+    err = windows.LogonUser(name16, domain, pwd16, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, Ꮡtoken); if (err != nil) {
+        t.Fatal(err);
     }
     t.Cleanup(() => {
         Ꮡtoken.Value.Close();
@@ -187,15 +181,13 @@ public static void TestImpersonatedSelf(ж<testing.T> t) {
             windows.SecurityImpersonation,
             windows.SecurityDelegation
         ]);
-        foreach (var (_, level) in levels) {
+        foreach (var (_, level) in range(levels)) {
             var wantʗ1 = want;
             t.Run(strconv.Itoa((nint)level), (ж<testing.T> tΔ1) => {
                 GoFrame ᒐ = default;
                 try {
-                    {
-                        Ꮡerr.ValueSlot = windows.ImpersonateSelf(level); if (Ꮡerr.ValueSlot != nil) {
-                            tΔ1.Fatal(Ꮡerr.ValueSlot);
-                        }
+                    Ꮡerr.ValueSlot = windows.ImpersonateSelf(level); if (Ꮡerr.ValueSlot != nil) {
+                        tΔ1.Fatal(Ꮡerr.ValueSlot);
                     }
                     defer(() => windows.RevertToSelf(), ref ᒐ);
 
@@ -238,10 +230,8 @@ public static void TestImpersonated(ж<testing.T> t) {
         var (token, _) = windowsTestAccount(t);
 
         // Impersonate the test user.
-        {
-            err = windows.ImpersonateLoggedOnUser(token); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = windows.ImpersonateLoggedOnUser(token); if (err != nil) {
+            t.Fatal(err);
         }
         defer(() => {
             Ꮡerr.ValueSlot = windows.RevertToSelf();
@@ -333,15 +323,15 @@ partial struct serviceAccountsᴛ1 /*dyn*/ {
     internal @string sid;
     internal @string name; // name on english Windows
 }
-internal static slice<serviceAccountsᴛ1> serviceAccounts = slice<serviceAccountsᴛ1>([
+internal static slice<serviceAccountsᴛ1> serviceAccounts = [
     new("S-1-5-18", "NT AUTHORITY\\SYSTEM"),
     new("S-1-5-19", "NT AUTHORITY\\LOCAL SERVICE"),
     new("S-1-5-20", "NT AUTHORITY\\NETWORK SERVICE")
-]);
+];
 
 public static void TestLookupServiceAccount(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, vᴛ1) in serviceAccounts) {
+    foreach (var (_, vᴛ1) in range(serviceAccounts)) {
         ref var tt = ref heap(new serviceAccountsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -366,7 +356,7 @@ public static void TestLookupServiceAccount(ж<testing.T> t) {
 
 public static void TestLookupIdServiceAccount(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, tt) in serviceAccounts) {
+    foreach (var (_, tt) in range(serviceAccounts)) {
         var (u, err) = LookupId(tt.sid);
         if (err != nil) {
             t.Errorf("LookupId(%q): %v", tt.sid, err);
@@ -387,7 +377,7 @@ public static void TestLookupIdServiceAccount(ж<testing.T> t) {
 
 public static void TestLookupGroupServiceAccount(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, vᴛ1) in serviceAccounts) {
+    foreach (var (_, vᴛ1) in range(serviceAccounts)) {
         ref var tt = ref heap(new serviceAccountsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -411,7 +401,7 @@ public static void TestLookupGroupServiceAccount(ж<testing.T> t) {
 
 public static void TestLookupGroupIdServiceAccount(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, tt) in serviceAccounts) {
+    foreach (var (_, tt) in range(serviceAccounts)) {
         var (u, err) = LookupGroupId(tt.sid);
         if (err != nil) {
             t.Errorf("LookupGroupId(%q): %v", tt.sid, err);

@@ -21,15 +21,11 @@ internal static (ж<ast.FuncDecl> fun, ж<token.FileSet> fset) parseFunc(@string
     ж<token.FileSet> fset = default;
 
     fset = token.NewFileSet();
-    {
-        var (@file, err) = parser.ParseFile(fset, filename, default, 0); if (err == nil) {
-            foreach (var (_, d) in @file.Decls) {
-                {
-                    var (f, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && f.Name.Name == functionname) {
-                        fun = f;
-                        return (fun, fset);
-                    }
-                }
+    var (@file, err) = parser.ParseFile(fset, filename, default, 0); if (err == nil) {
+        foreach (var (_, d) in range(@file.Decls)) {
+            var (f, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && f.Name.Name == functionname) {
+                fun = f;
+                return (fun, fset);
             }
         }
     }

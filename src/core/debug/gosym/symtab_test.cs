@@ -5,8 +5,6 @@ namespace go.debug;
 
 using fmt = fmt_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.debug.gosym_package;
 
 partial class gosym_internal_test_package {
@@ -115,7 +113,7 @@ public static void TestIssue29551(ж<testing.T> t) {
         new(new Sym(goVersion: ver118, Name: "go.uber.org/zap/buffer.(*Buffer).AppendString"), "")
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var tc = vᴛ1;
 
         assertString(t, fmt.Sprintf("package of %q"u8, tc.sym.Name), tc.sym.PackageName(), tc.pkgName);

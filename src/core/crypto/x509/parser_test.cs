@@ -32,96 +32,96 @@ public static void TestParseASN1String(ж<testing.T> t) {
         new(
             name: "T61String",
             tag: cryptobyte_asn1.T61String,
-            value: slice<byte>([0xbf, 0x61, 0x3f]),
+            value: [0xbf, 0x61, 0x3f],
             expected: ((@string)"¿a?"u8)
         ),
         new(
             name: "PrintableString",
             tag: cryptobyte_asn1.PrintableString,
-            value: slice<byte>([80, 81, 82]),
+            value: [80, 81, 82],
             expected: ((@string)"PQR"u8)
         ),
         new(
             name: "PrintableString (invalid)",
             tag: cryptobyte_asn1.PrintableString,
-            value: slice<byte>([1, 2, 3]),
+            value: [1, 2, 3],
             expectedErr: "invalid PrintableString"
         ),
         new(
             name: "UTF8String",
             tag: cryptobyte_asn1.UTF8String,
-            value: slice<byte>([80, 81, 82]),
+            value: [80, 81, 82],
             expected: ((@string)"PQR"u8)
         ),
         new(
             name: "UTF8String (invalid)",
             tag: cryptobyte_asn1.UTF8String,
-            value: slice<byte>([255]),
+            value: [255],
             expectedErr: "invalid UTF-8 string"
         ),
         new(
             name: "BMPString",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([80, 81]),
+            value: [80, 81],
             expected: ((@string)"偑"u8)
         ),
         new(
             name: "BMPString (invalid length)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([255]),
+            value: [255],
             expectedErr: "invalid BMPString"
         ),
         new(
             name: "BMPString (invalid surrogate)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([80, 81, 216, 1]),
+            value: [80, 81, 216, 1],
             expectedErr: "invalid BMPString"
         ),
         new(
             name: "BMPString (invalid noncharacter 0xfdd1)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([80, 81, 253, 209]),
+            value: [80, 81, 253, 209],
             expectedErr: "invalid BMPString"
         ),
         new(
             name: "BMPString (invalid noncharacter 0xffff)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([80, 81, 255, 255]),
+            value: [80, 81, 255, 255],
             expectedErr: "invalid BMPString"
         ),
         new(
             name: "BMPString (invalid noncharacter 0xfffe)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: slice<byte>([80, 81, 255, 254]),
+            value: [80, 81, 255, 254],
             expectedErr: "invalid BMPString"
         ),
         new(
             name: "IA5String",
             tag: cryptobyte_asn1.IA5String,
-            value: slice<byte>([80, 81]),
+            value: [80, 81],
             expected: ((@string)"PQ"u8)
         ),
         new(
             name: "IA5String (invalid)",
             tag: cryptobyte_asn1.IA5String,
-            value: slice<byte>([255]),
+            value: [255],
             expectedErr: "invalid IA5String"
         ),
         new(
             name: "NumericString",
             tag: ((cryptobyte_asn1.Tag)asn1.TagNumericString),
-            value: slice<byte>([49, 50]),
+            value: [49, 50],
             expected: ((@string)"12"u8)
         ),
         new(
             name: "NumericString (invalid)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagNumericString),
-            value: slice<byte>([80]),
+            value: [80],
             expectedErr: "invalid NumericString"
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseASN1String_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -214,10 +214,10 @@ public static void TestPolicyParse(ж<testing.T> t) {
 internal static readonly object parsingShouldVeFailedˢ = (@string)"parsing should've failed"u8;
 
 public static void TestParsePolicies(ж<testing.T> t) {
-    foreach (var (_, tc) in slice<@string>([
+    foreach (var (_, tc) in range(slice<@string>([
         "testdata/policy_leaf_duplicate.pem",
         "testdata/policy_leaf_invalid.pem"
-    ])) {
+    ]))) {
         t.Run(tc, (ж<testing.T> tΔ1) => {
             var (b, err) = os.ReadFile(tc);
             if (err != nil) {
@@ -270,7 +270,7 @@ d5l1tRhScKu2NBgm74nYmJxJYgvuTA38wGhRrGU=
 """u8.Raw()
     ]);
 
-    foreach (var (_, cert) in certs) {
+    foreach (var (_, cert) in range(certs)) {
         var (b, _) = pem.Decode(slice<byte>(cert));
         var (_, err) = ParseCertificate(b.Bytes);
         if (err == nil || err.Error() != "x509: invalid basic constraints"u8) {
@@ -287,7 +287,7 @@ internal partial struct TestDomainNameValid_type /*dyn*/ {
 }
 
 public static void TestDomainNameValid(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestDomainNameValid_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestDomainNameValid_type>([
         // TODO(#75835): these tests are for stricter name validation, which we
         // had to disable. Once we reenable these strict checks, behind a
         // GODEBUG, we should add them back in.
@@ -330,7 +330,7 @@ public static void TestDomainNameValid(ж<testing.T> t) {
         new("63 char single label, constraint", strings.Repeat("a", 63), true, true),
         new("63 char label, name", "a."u8 + strings.Repeat("a", 63), false, true),
         new("63 char label, constraint", "a."u8 + strings.Repeat("a", 63), true, true)
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestDomainNameValid_type(), out var Ꮡtc);
         tc = vᴛ1;
 

@@ -53,10 +53,10 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 			return false, 0
 		}
 
-		return false, v.fset.Position(prevEnd).Line
+		return false, v.goLine(prevEnd)
 	}
 
-	prevLine := v.fset.Position(prevEnd).Line
+	prevLine := v.goLine(prevEnd)
 	lastLine := prevLine
 	handledPos := []token.Pos{}
 	endsInLineComment := false
@@ -74,7 +74,7 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 			continue
 		}
 
-		line := v.fset.Position(pos).Line
+		line := v.goLine(pos)
 
 		if pos > prevEnd && line == prevLine {
 			builder.WriteString(" ")
@@ -447,6 +447,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 				if !keyed || !isSimpleIdentifierName(label) {
 					label, value, keyed = "", resultExpr, false
+				}
+
+				// An untyped constant cast to the empty interface boxes at Go's DEFAULT type first:
+				// `append(path, 0)` with `path []any` stores an int, and a bare `(any)0` boxed a C# int
+				// (gojq's --stream encoder: "invalid type: int32 (0)") — a named constant boxed its
+				// UntypedInt wrapper. See untypedConstBoxCast.
+				if castType == "any" {
+					value = v.applyUntypedConstBoxCast(expr, value)
 				}
 
 				// Skip when the WHOLE value is already `(castType)(…)` (convBinaryExpr casts a

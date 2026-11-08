@@ -102,18 +102,13 @@ internal static void expectSendfile(ж<testing.T> t, global::go.net_package.Conn
     finally { ᒐ.Run(); }
 }
 
-public static void TestSendfile(ж<testing.T> t) {
-    testSendfile(t, newton, newtonSHA256, newtonLen, 0);
-}
-
+public static void TestSendfile(ж<testing.T> t) { testSendfile(t, newton, newtonSHA256, newtonLen, 0); }
 public static void TestSendfileWithExactLimit(ж<testing.T> t) {
     testSendfile(t, newton, newtonSHA256, newtonLen, newtonLen);
 }
-
 public static void TestSendfileWithLimitLargerThanFile(ж<testing.T> t) {
     testSendfile(t, newton, newtonSHA256, newtonLen, newtonLen * 2);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnNonAmd64AndNonˢ = (@string)"skipping on non-amd64 and non-arm64 platforms"u8;
 internal static readonly object skipItDuringShortTestingˢ = (@string)"Skip it during short testing"u8;
@@ -137,7 +132,6 @@ public static void TestSendfileWithLargeFile(ж<testing.T> t) {
     // skip the content check.
     testSendfile(t, f.Name(), ""u8, 2147483648L, 0);
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object retrievedDataHashDidNotˢ = (@string)"retrieved data hash did not match"u8;
 
@@ -307,11 +301,9 @@ public static partial void TestSendfileParts(ж<testing.T> t) {
         var buf = @new<bytes.Buffer>();
         buf.ReadFrom(new net_test_package.net_ConnᴠReader(c));
 
-        {
-            @string want = producedˢ;
-            @string have = buf.String(); if (have != want) {
-                t.Errorf("unexpected server reply %q, want %q", have, want);
-            }
+        @string want = producedˢ;
+        @string have = buf.String(); if (have != want) {
+            t.Errorf("unexpected server reply %q, want %q", have, want);
         }
 
         foreach (var errΔ3 in errc) {
@@ -360,11 +352,9 @@ public static partial void TestSendfileSeeked(ж<testing.T> t) {
                     }
                     var fʗ1 = f;
                     defer(() => fʗ1.Close(), ref ᒐ);
-                    {
-                        var (_, errΔ3) = f.Seek(seekTo, Δio.SeekStart); if (errΔ3 != nil) {
-                            errcʗ2.ᐸꟷ(errΔ3);
-                            return;
-                        }
+                    var (_, errΔ3) = f.Seek(seekTo, Δio.SeekStart); if (errΔ3 != nil) {
+                        errcʗ2.ᐸꟷ(errΔ3);
+                        return;
                     }
 
                     var connʗ3 = connʗ1;
@@ -477,7 +467,7 @@ public static partial void TestSendfilePipe(ж<testing.T> t) {
             try {
                 // Write 1 byte to the write end of the pipe.
                 defer(Ꮡwg.Done, ref ᒐ);
-                var (_, errΔ2) = wʗ2.Write(slice<byte>([(byte)'a']));
+                var (_, errΔ2) = wʗ2.Write([(byte)'a']);
                 if (errΔ2 != nil) {
                     t.Error(errΔ2);
                 }
@@ -512,10 +502,8 @@ public static partial void TestSendfilePipe(ж<testing.T> t) {
         ᐸꟷ(copied);
 
         // Set a very short deadline on the read end of the pipe.
-        {
-            var errΔ4 = r.SetDeadline(time.Now().Add(time.Microsecond)); if (errΔ4 != nil) {
-                t.Fatal(errΔ4);
-            }
+        var errΔ4 = r.SetDeadline(time.Now().Add(time.Microsecond)); if (errΔ4 != nil) {
+            t.Fatal(errΔ4);
         }
 
         Ꮡwg.Add(1);
@@ -527,7 +515,7 @@ public static partial void TestSendfilePipe(ж<testing.T> t) {
                 // to the pipe.
                 defer(Ꮡwg.Done, ref ᒐ);
                 time.Sleep(50 * time.Millisecond);
-                wʗ3.Write(slice<byte>([(byte)'b']));
+                wʗ3.Write([(byte)'b']);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -577,10 +565,8 @@ public static partial void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> t) {
 
                 // Set the write deadline in the past(1h ago). It makes
                 // sure that it is always write timeout.
-                {
-                    var errΔ2 = connΔ1.SetWriteDeadline(time.Now().Add((time.Duration)(-3600000000000L))); if (errΔ2 != nil) {
-                        retErr = errΔ2; goto ᒐdone1;
-                    }
+                var errΔ2 = connΔ1.SetWriteDeadline(time.Now().Add((time.Duration)(-3600000000000L))); if (errΔ2 != nil) {
+                    retErr = errΔ2; goto ᒐdone1;
                 }
 
                 (var f, errΔ1) = Δos.Open(newton);
@@ -624,10 +610,8 @@ public static partial void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> t) {
             t.Fatalf("expected receive zero, but got %d byte(s)", n);
         }
 
-        {
-            var errΔ3 = ᐸꟷ(errc); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = ᐸꟷ(errc); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -670,11 +654,9 @@ public static partial void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
                 defer(Ꮡwg.Done, ref ᒐ);
 
                 for (nint i = 0; i < dataSize; i++) {
-                    {
-                        var (_, errΔ1) = f.Write(slice<byte>([1])); if (errΔ1 != nil) {
-                            Ꮡb.Errorf("failed to write: %v", errΔ1);
-                            return;
-                        }
+                    var (_, errΔ1) = f.Write([1]); if (errΔ1 != nil) {
+                        Ꮡb.Errorf("failed to write: %v", errΔ1);
+                        return;
                     }
                     if (i % 1000 == 0) {
                         f.Sync();
@@ -716,11 +698,9 @@ public static partial void BenchmarkSendfileZeroBytes(ж<testing.B> Ꮡb) {
                         return;
                     }
 
-                    {
-                        var (_, errΔ3) = Δio.Copy(new net_test_package.net_ConnᴠWriter(connΔ1), new net_test_package.os_FileжReader(f)); if (errΔ3 != nil) {
-                            Ꮡb.Errorf("failed to copy: %v", errΔ3);
-                            return;
-                        }
+                    var (_, errΔ3) = Δio.Copy(new net_test_package.net_ConnᴠWriter(connΔ1), new net_test_package.os_FileжReader(f)); if (errΔ3 != nil) {
+                        Ꮡb.Errorf("failed to copy: %v", errΔ3);
+                        return;
                     }
                 }
             }
@@ -838,15 +818,11 @@ internal static ж<Δos.File> createTempFile(testing.TB tb, int64 size) {
         fʗ1.Close();
     });
 
-    {
-        var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(f), newRandReader(tb), size); if (errΔ1 != nil) {
-            tb.Fatalf("failed to fill the file with random data: %v", errΔ1);
-        }
+    var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(f), newRandReader(tb), size); if (errΔ1 != nil) {
+        tb.Fatalf("failed to fill the file with random data: %v", errΔ1);
     }
-    {
-        var (_, errΔ2) = f.Seek(0, Δio.SeekStart); if (errΔ2 != nil) {
-            tb.Fatalf("failed to rewind the file: %v", errΔ2);
-        }
+    var (_, errΔ2) = f.Seek(0, Δio.SeekStart); if (errΔ2 != nil) {
+        tb.Fatalf("failed to rewind the file: %v", errΔ2);
     }
 
     return f;

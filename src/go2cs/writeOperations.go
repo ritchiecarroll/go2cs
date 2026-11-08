@@ -55,9 +55,22 @@ func (v *Visitor) indent(indentLevel int) string {
 	return strings.Repeat(" ", v.options.indentSpaces*indentLevel)
 }
 
+// goPosition returns where pos sits in the file as written. Layout — which lines a comment or a blank line
+// sits on, and the line starts token.File.LineStart takes — is measured there, never at the position a
+// `//line` directive adjusts it to: that is another file's line, and a line-only directive leaves the
+// column 0 (goyacc's parser.go).
+func (v *Visitor) goPosition(pos token.Pos) token.Position {
+	return v.fset.PositionFor(pos, false)
+}
+
+// goLine returns pos's line in the file as written (see goPosition).
+func (v *Visitor) goLine(pos token.Pos) int {
+	return v.goPosition(pos).Line
+}
+
 func (v *Visitor) isLineFeedBetween(prevEndPos, currPos token.Pos) bool {
-	prevLine := v.fset.Position(prevEndPos).Line
-	currLine := v.fset.Position(currPos).Line
+	prevLine := v.goLine(prevEndPos)
+	currLine := v.goLine(currPos)
 	return currLine > prevLine
 }
 
@@ -132,8 +145,8 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 			// Add line breaks if there is a gap between the last comment and the target position
 			if lastCommentPos > token.NoPos && doc != nil {
 				docPos := doc.Pos()
-				targetLine := v.file.Line(lastCommentPos)
-				nodeLine := v.file.Line(docPos)
+				targetLine := v.goLine(lastCommentPos)
+				nodeLine := v.goLine(docPos)
 
 				if int(nodeLine-targetLine)-1 > 0 {
 					builder.WriteString(v.newline)
@@ -224,7 +237,7 @@ func (v *Visitor) writeTrailingComment(stmtEnd token.Pos) bool {
 		return false
 	}
 
-	endPos := v.fset.Position(stmtEnd)
+	endPos := v.goPosition(stmtEnd)
 	handledPos := []token.Pos{}
 	trailing := strings.Builder{}
 
@@ -234,7 +247,7 @@ func (v *Visitor) writeTrailingComment(stmtEnd token.Pos) bool {
 	first := sort.Search(len(v.sortedCommentPos), func(i int) bool { return v.sortedCommentPos[i] > stmtEnd })
 
 	for _, pos := range v.sortedCommentPos[first:] {
-		commentPos := v.fset.Position(pos)
+		commentPos := v.goPosition(pos)
 
 		// sortedCommentPos is ordered and a FileSet lays every position of one file ahead of the
 		// next, so the first comment past this line — or past this file — ends the run.

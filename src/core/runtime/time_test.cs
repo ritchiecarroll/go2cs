@@ -67,13 +67,13 @@ public static void TestFakeTime(ж<testing.T> t) {
 
     UntypedInt time0 = 1257894000000000000;
     var got = slice<slice<fakeTimeFrame>>([f1, f2]);
-    slice<slice<fakeTimeFrame>> want = slice<slice<fakeTimeFrame>>([slice<fakeTimeFrame>([
+    slice<slice<fakeTimeFrame>> want = slice<slice<fakeTimeFrame>>([[
         new(time0 + 1, "line 2\n"),
         new(time0 + 1, "line 3\n"),
         new(/* time0 + 1e9 */ 1257894001000000000UL, "line 5\n"),
-        new(/* time0 + 1e9 */ 1257894001000000000UL, "2009-11-10T23:00:01Z")]), slice<fakeTimeFrame>([
+        new(/* time0 + 1e9 */ 1257894001000000000UL, "2009-11-10T23:00:01Z")], [
         new(time0, "line 1\n"),
-        new(time0 + 2, "line 4\n")])
+        new(time0 + 2, "line 4\n")]
     ]);
     if (!reflect.DeepEqual(want, got)) {
         t.Fatalf("want %v, got %v", want, got);

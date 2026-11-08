@@ -48,7 +48,7 @@ internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_pac
     t.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
         var m = newMap();
 
-        foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+        foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
             expectMissing(tΔ1, s)(m.Load(s));
         }
     });
@@ -58,21 +58,21 @@ internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_pac
             var m = newMap();
 
             slice<ж<@string>> refs = default;
-            foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+            foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
                 expectMissing(tΔ3, s)(m.Load(s));
                 refs = append(refsᴷ, refs, expectPresent(tΔ3, s)(m.LoadOrStore(s)));
                 expectPresent(tΔ3, s)(m.Load(s));
                 expectPresent(tΔ3, s)(m.LoadOrStore(s));
             }
             drainCleanupQueue(tΔ3);
-            foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+            foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
                 expectPresent(tΔ3, s)(m.Load(s));
                 expectPresent(tΔ3, s)(m.LoadOrStore(s));
             }
             Δruntime.KeepAlive(refs);
             refs = default;
             drainCleanupQueue(tΔ3);
-            foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+            foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
                 expectMissing(tΔ3, s)(m.Load(s));
                 expectPresent(tΔ3, s)(m.LoadOrStore(s));
             }
@@ -97,7 +97,7 @@ internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_pac
                             defer(Ꮡwg.Done, ref ᒐ);
 
                             slice<ж<@string>> refs = default;
-                            foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+                            foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
                                 @string key = makeKeyʗ1(s, id);
                                 if (@try == 0) {
                                     expectMissing(tΔ4, key)(mʗ1.Load(key));
@@ -106,13 +106,11 @@ internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_pac
                                 expectPresent(tΔ4, key)(mʗ1.Load(key));
                                 expectPresent(tΔ4, key)(mʗ1.LoadOrStore(key));
                             }
-                            foreach (var (iΔ1, s) in testData.ΔRangeSnapshot()) {
+                            foreach (var (iΔ1, s) in range(testData.ΔRangeSnapshot())) {
                                 @string key = makeKeyʗ1(s, id);
                                 expectPresent(tΔ4, key)(mʗ1.Load(key));
-                                {
-                                    var (got, want) = (expectPresent(tΔ4, key)(mʗ1.LoadOrStore(key)), refs[iΔ1]); if (got != want) {
-                                        tΔ4.Errorf("canonical entry %p did not match ref %p", got.OrTypedNil(), want.OrTypedNil());
-                                    }
+                                var (got, want) = (expectPresent(tΔ4, key)(mʗ1.LoadOrStore(key)), refs[iΔ1]); if (got != want) {
+                                    tΔ4.Errorf("canonical entry %p did not match ref %p", got.OrTypedNil(), want.OrTypedNil());
                                 }
                             }
                             // N.B. We avoid trying to test entry cleanup here
@@ -151,7 +149,7 @@ internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_pac
             // Double-check that it's all gone.
             foreach (var id in range(gmp)) {
                 @string makeKeyΔ1(@string s) => s + "-"u8 + strconv.Itoa(id);
-                foreach (var (_, s) in testData.ΔRangeSnapshot()) {
+                foreach (var (_, s) in range(testData.ΔRangeSnapshot())) {
                     @string key = makeKeyΔ1(s);
                     expectMissing(tΔ4, key)(m.Load(key));
                 }

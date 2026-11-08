@@ -6,8 +6,6 @@ namespace go;
 using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -18,9 +16,7 @@ partial struct response {
 partial struct myError {
 }
 
-internal static @string Error(this myError _) {
-    return ""u8;
-}
+internal static @string Error(this myError _) { return ""u8; }
 
 internal partial struct doRequest_async /*dyn*/ {
     internal ж<response> resp;

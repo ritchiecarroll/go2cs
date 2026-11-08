@@ -19,7 +19,7 @@ internal static ж<global::go.net_package.Interface> loopbackInterface() {
     if (err != nil) {
         return default;
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -41,12 +41,10 @@ internal static @string ipv6LinkLocalUnicastAddr(ж<global::go.net_package.Inter
     if (err != nil) {
         return ""u8;
     }
-    foreach (var (_, ifa) in ifat) {
-        {
-            var (ifaΔ1, ok) = ifa._<ж<global::go.net_package.IPNet>>(ᐧ); if (ok) {
-                if (ifaΔ1.IP.To4() == nil && ifaΔ1.IP.IsLinkLocalUnicast()) {
-                    return ifaΔ1.IP.String();
-                }
+    foreach (var (_, ifa) in range(ifat)) {
+        var (ifaΔ1, ok) = ifa._<ж<global::go.net_package.IPNet>>(ᐧ); if (ok) {
+            if (ifaΔ1.IP.To4() == nil && ifaΔ1.IP.IsLinkLocalUnicast()) {
+                return ifaΔ1.IP.String();
             }
         }
     }
@@ -58,7 +56,7 @@ public static void TestInterfaces(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -107,10 +105,8 @@ public static void TestInterfaceAddrs(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = checkUnicastStats(ifStats, uniStats); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = checkUnicastStats(ifStats, uniStats); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 }
 
@@ -124,7 +120,7 @@ public static void TestInterfaceUnicastAddrs(ж<testing.T> t) {
         t.Fatal(err);
     }
     ref var uniStats = ref heap(new routeStats(), out var ᏑuniStats);
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -139,10 +135,8 @@ public static void TestInterfaceUnicastAddrs(ж<testing.T> t) {
         uniStats.ipv4 += stats.ipv4;
         uniStats.ipv6 += stats.ipv6;
     }
-    {
-        var errΔ2 = checkUnicastStats(ifStats, ᏑuniStats); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = checkUnicastStats(ifStats, ᏑuniStats); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 }
 
@@ -161,7 +155,7 @@ public static void TestInterfaceMulticastAddrs(ж<testing.T> t) {
         t.Fatal(err);
     }
     ref var multiStats = ref heap(new routeStats(), out var ᏑmultiStats);
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -176,10 +170,8 @@ public static void TestInterfaceMulticastAddrs(ж<testing.T> t) {
         multiStats.ipv4 += stats.ipv4;
         multiStats.ipv6 += stats.ipv6;
     }
-    {
-        var errΔ2 = checkMulticastStats(ifStats, uniStats, ᏑmultiStats); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = checkMulticastStats(ifStats, uniStats, ᏑmultiStats); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 }
 
@@ -190,7 +182,7 @@ internal partial struct ifStats {
 
 internal static ж<ifStats> interfaceStats(slice<global::go.net_package.Interface> ift) {
     ref var stats = ref heap(new ifStats(), out var Ꮡstats);
-    foreach (var (_, ifi) in ift) {
+    foreach (var (_, ifi) in range(ift)) {
         if ((global::go.net_package.Flags)(ifi.Flags & FlagUp) != 0) {
             if ((global::go.net_package.Flags)(ifi.Flags & FlagLoopback) != 0) {
                 stats.loop++;
@@ -214,7 +206,7 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
     // In other words, there is no tightly-coupled combination of
     // interface address prefixes and connected routes.
     var stats = @new<routeStats>();
-    foreach (var (_, ifa) in ifat) {
+    foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {
         case ж<global::go.net_package.IPNet> ifaΔ1: {
             if (ifaΔ1 == nil || ifaΔ1.IP == nil || ifaΔ1.IP.IsMulticast() || ifaΔ1.Mask == nil) {
@@ -269,7 +261,7 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
 
 internal static (ж<routeStats>, error) validateInterfaceMulticastAddrs(slice<global::go.net_package.ΔAddr> ifat) {
     var stats = @new<routeStats>();
-    foreach (var (_, ifa) in ifat) {
+    foreach (var (_, ifa) in range(ifat)) {
         switch (ifa.type()) {
         case ж<global::go.net_package.IPAddr> ifaΔ1: {
             if (ifaΔ1 == nil || ifaΔ1.IP == nil || ifaΔ1.IP.IsUnspecified() || !ifaΔ1.IP.IsMulticast()) {
@@ -349,10 +341,8 @@ public static void BenchmarkInterfaces(ж<testing.B> Ꮡb) {
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
 
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = Interfaces(); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = Interfaces(); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -371,10 +361,8 @@ public static void BenchmarkInterfaceByIndex(ж<testing.B> Ꮡb) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
     }
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = InterfaceByIndex(ifi.Index); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = InterfaceByIndex(ifi.Index); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -390,10 +378,8 @@ public static void BenchmarkInterfaceByName(ж<testing.B> Ꮡb) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
     }
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = InterfaceByName(ifi.Name); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = InterfaceByName(ifi.Name); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -405,10 +391,8 @@ public static void BenchmarkInterfaceAddrs(ж<testing.B> Ꮡb) {
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
 
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = InterfaceAddrs(); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = InterfaceAddrs(); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -424,10 +408,8 @@ public static void BenchmarkInterfacesAndAddrs(ж<testing.B> Ꮡb) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
     }
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = ifi.Addrs(); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = ifi.Addrs(); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -443,10 +425,8 @@ public static void BenchmarkInterfacesAndMulticastAddrs(ж<testing.B> Ꮡb) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
     }
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = ifi.MulticastAddrs(); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var (_, err) = ifi.MulticastAddrs(); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }

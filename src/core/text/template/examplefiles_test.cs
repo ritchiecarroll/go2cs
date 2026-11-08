@@ -31,7 +31,7 @@ internal static @string createTestDir(slice<templateFile> files) {
         if (err != nil) {
             log.Fatal(err);
         }
-        foreach (var (_, @file) in files) {
+        foreach (var (_, @file) in range(files)) {
             var (f, errΔ1) = os.Create(filepath.Join(dir, @file.name));
             if (errΔ1 != nil) {
                 log.Fatal(errΔ1);
@@ -60,14 +60,14 @@ public static void ExampleTemplate_glob() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(slice<templateFile>([
+        @string dir = createTestDir([
             // T0.tmpl is a plain template file that just invokes T1.
             new("T0.tmpl", @"T0 invokes T1: ({{template ""T1""}})"),
             // T1.tmpl defines a template, T1 that invokes T2.
             new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"),
             // T2.tmpl defines a template T2.
             new("T2.tmpl", @"{{define ""T2""}}This is T2{{end}}")
-        ]));
+        ]);
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 
@@ -112,12 +112,12 @@ public static void ExampleTemplate_helpers() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(slice<templateFile>([
+        @string dir = createTestDir([
             // T1.tmpl defines a template, T1 that invokes T2.
             new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"),
             // T2.tmpl defines a template T2.
             new("T2.tmpl", @"{{define ""T2""}}This is T2{{end}}")
-        ]));
+        ]);
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 
@@ -177,12 +177,12 @@ public static void ExampleTemplate_share() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(slice<templateFile>([
+        @string dir = createTestDir([
             // T0.tmpl is a plain template file that just invokes T1.
             new("T0.tmpl", "T0 ({{.}} version) invokes T1: ({{template `T1`}})\n"),
             // T1.tmpl defines a template, T1 that invokes T2. Note T2 is not defined
             new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}")
-        ]));
+        ]);
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 

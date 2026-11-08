@@ -1,0 +1,2 @@
+642621b43f^1..642621b43f: per-call payloads lost 1, gained 0
+LOST  src/core/internal/coverage/cformat/package_info.cs  internal/coverage/cformat/format.go  Invoke/1/1/1

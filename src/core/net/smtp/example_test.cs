@@ -28,15 +28,11 @@ public static void Example() {
     }
 
     // Set the sender and recipient first
-    {
-        var errΔ1 = c.Mail(senderExampleOrgˢ); if (errΔ1 != nil) {
-            log.Fatal(errΔ1);
-        }
+    var errΔ1 = c.Mail(senderExampleOrgˢ); if (errΔ1 != nil) {
+        log.Fatal(errΔ1);
     }
-    {
-        var errΔ2 = c.Rcpt(recipientExampleNetˢ); if (errΔ2 != nil) {
-            log.Fatal(errΔ2);
-        }
+    var errΔ2 = c.Rcpt(recipientExampleNetˢ); if (errΔ2 != nil) {
+        log.Fatal(errΔ2);
     }
 
     // Send the email body.
@@ -64,7 +60,7 @@ public static void Example() {
 // unnecessary noise there.
 internal static @string from = "gopher@example.net";
 internal static slice<byte> msg = slice<byte>("dummy message"u8);
-internal static slice<@string> recipients = slice<@string>(["foo@example.com"]);
+internal static slice<@string> recipients = ["foo@example.com"];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mailExampleComˢ => ref mailExampleComˢᵇ;

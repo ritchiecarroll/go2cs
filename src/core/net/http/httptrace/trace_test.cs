@@ -35,11 +35,9 @@ public static void TestWithClientTrace(ж<testing.T> t) {
 
     buf.Reset();
     trace.ConnectStart(netˢ, addrˢ);
-    {
-        @string got = buf.String();
-        @string want = "NO"; if (got != want) {
-            t.Errorf("got %q; want %q", got, want);
-        }
+    @string got = buf.String();
+    @string want = "NO"; if (got != want) {
+        t.Errorf("got %q; want %q", got, want);
     }
 }
 
@@ -79,7 +77,7 @@ public static void TestCompose(ж<testing.T> t) {
             old: Ꮡ(new ClientTrace(ConnectStart: connectStart((byte)'O')))
         )
     };
-    foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
+    foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {
         testNum = i;
         buf.Reset();
 
@@ -88,10 +86,8 @@ public static void TestCompose(ж<testing.T> t) {
         if (tr.ConnectStart != nil) {
             tr.ConnectStart(netˢ, addrˢ);
         }
-        {
-            @string got = buf.String(); if (got != tt.want) {
-                t.Errorf("%d. got = %q; want %q", i, got, tt.want);
-            }
+        @string got = buf.String(); if (got != tt.want) {
+            t.Errorf("%d. got = %q; want %q", i, got, tt.want);
         }
     }
 }

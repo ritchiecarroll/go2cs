@@ -53,7 +53,7 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
-<!-- source: src/core/runtime/pprof/pprof_test.cs:3784-3785 -->
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3711-3712 -->
 ```csharp
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> t, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
@@ -929,6 +929,55 @@ interface at three instantiations, a sibling type named exactly like the type pa
 `runtime/debug` shape that made the spilled members render as `debug_test_package.T`), struct
 equality, struct-versus-interface comparison, and interface dispatch over a mixed slice, all
 output-compared against `go run`.
+
+## A conversion at a generic type's OWN type parameters is recorded by the type's DEFINITION
+Inside a generic function, a value of a local generic type instantiated at that function's own type
+parameters can be converted to an interface:
+
+```go
+func NewIter[T any](values []T) Iter {
+    it := sliceIter[T](values)
+    return &it
+}
+```
+
+The cast site emits `new sliceIterжIter<T>(…)`, naming the generic adapter, but no
+`[assembly: GoImplement<…>]` record can carry the pair: an assembly attribute's type argument cannot name
+`T`, which is in scope only inside `NewIter` (CS0246). Without a record the adapter was generated only when
+some OTHER conversion closed the same pair (`sliceIter[int]` in `main`, or crypto/elliptic's per-curve
+`nistCurve[*nistec.P224Point]` records); a type reached only through its parameters failed CS0246 at the cast, and
+the value form CS0029.
+
+The converter therefore records such a pair by its definition, through the non-generic
+`GoImplementAttribute`, which takes `typeof` arguments and so can spell an unbound generic. The guard's records,
+with the closed `sliceIter[int]` record beside the open one:
+
+<!-- source: src/tests/Behavioral/OpenGenericPointerImplement/package_info.cs:39-42 -->
+```csharp
+[assembly: GoImplement(typeof(counter<>), typeof(Iter), Pointer = true)]
+[assembly: GoImplement(typeof(pair<,>), typeof(Namer))]
+[assembly: GoImplement(typeof(sliceIter<>), typeof(Iter), Pointer = true)]
+[assembly: GoImplement<sliceIter<nint>, Iter>(Pointer = true)]
+```
+
+`ImplementGenerator` reads the unbound generic as its definition, so the record takes the same
+local-generic arms as a closed record of the pair: the pointer adapter keyed by `(OriginalDefinition,
+interface)` and the value partial at the open definition (previous section). An open record and a closed
+record of one pair generate ONE adapter, byte-identical to the closed record's own.
+
+The scope is a LOCAL generic converted to an interface with NO type parameters. Two shapes keep their
+earlier emission:
+
+- A **foreign** generic is keyed per closed instantiation (its adapter is non-generic over the closed type),
+  so an open conversion of one has no definition-keyed adapter to share. Its pointer path still records the
+  open instantiation, `GoImplement<…lib_package.Box<T>, Iter>`, which names `T` out of scope.
+- An interface over the type parameter (`Getter[T]`) cannot be named by `typeof` in its closed form either;
+  that pair is unrecorded, as before.
+
+Guarded by the `OpenGenericPointerImplement` behavioral test (pointer and value forms, a type reached only
+through its parameters, and a closed record beside the open one, output-compared against `go run`), by
+`TestOpenGenericImplementIsRecordedByDefinition` in the converter, and by GenTests
+`OpenGenericImplementRecordTests` for the one-adapter claim.
 
 ## The `string | []byte` union
 C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:

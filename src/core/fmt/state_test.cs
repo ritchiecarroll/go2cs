@@ -73,7 +73,7 @@ public static void TestFormatString(ж<Δtesting.T> t) {
         new(7, 3, "#", "%#7.3x"),
         new(7, 3, "0", "%07.3x")
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string got = fmt.FormatString(mkState(test.width, test.prec, test.flags), 'x');
         if (got != test.result) {
             t.Errorf("%v: got %s", test, got);

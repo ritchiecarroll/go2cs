@@ -63,7 +63,7 @@ public static void TestLookPath(ж<testing.T> t) {
         executable += ".exe"u8;
     }
     {
-        var err = os.WriteFile(filepath.Join(tmpDir, executable), slice<byte>([1, 2, 3]), 511); if (err != nil) {
+        var err = os.WriteFile(filepath.Join(tmpDir, executable), [1, 2, 3], 511); if (err != nil) {
             t.Fatal(err);
         }
     }
@@ -74,10 +74,10 @@ public static void TestLookPath(ж<testing.T> t) {
 
     // Add "." to PATH so that exec.LookPath looks in the current directory on all systems.
     // And try to trick it with "../testdir" too.
-    foreach (var (_, errdot) in slice<@string>(["1", "0"])) {
+    foreach (var (_, errdot) in range(slice<@string>(["1", "0"]))) {
         t.Run("GODEBUG=execerrdot="u8 + errdot, (ж<testing.T> tΔ1) => {
             tΔ1.Setenv(godebugˢ, "execerrdot="u8 + errdot + ",execwait=2"u8);
-            foreach (var (_, dir) in slice<@string>([".", "../testdir"])) {
+            foreach (var (_, dir) in range(slice<@string>([".", "../testdir"]))) {
                 tΔ1.Run(pathVar + "="u8 + dir, (ж<testing.T> tΔ2) => {
                     tΔ2.Setenv(pathVar, dir + ((@string)(rune)filepath.ListSeparator) + origPath);
                     @string good = dir + "/execabs-test"u8;
@@ -88,10 +88,8 @@ public static void TestLookPath(ж<testing.T> t) {
                     }
                     if (runtime.GOOS == "windows"u8) {
                         good = dir + @"\execabs-test"u8;
-                        {
-                            var (found, errΔ2) = LookPath(good); if (errΔ2 != nil || !strings.HasPrefix(found, good)) {
-                                tΔ2.Fatalf(@"LookPath(%#q) = %#q, %v, want ""%s..."", nil", good, found, errΔ2, good);
-                            }
+                        var (found, errΔ2) = LookPath(good); if (errΔ2 != nil || !strings.HasPrefix(found, good)) {
+                            tΔ2.Fatalf(@"LookPath(%#q) = %#q, %v, want ""%s..."", nil", good, found, errΔ2, good);
                         }
                     }
 
@@ -180,12 +178,10 @@ public static void TestLookPath(ж<testing.T> t) {
         // unambiguously absolute).
         var wantErrDot = false;
         tΔ4.Setenv(pathVar, ""u8);
-        {
-            var (foundΔ1, errΔ1) = LookPath(execabsTestˢ); if (errors.Is(errΔ1, ErrDot)) {
-                wantErrDot = true;
-            } else if (errΔ1 == nil) {
-                tΔ4.Fatalf(@"with PATH='', LookPath(%#q) = %#q; want non-nil error", execabsTestˢ, foundΔ1);
-            }
+        var (foundΔ1, errΔ1) = LookPath(execabsTestˢ); if (errors.Is(errΔ1, ErrDot)) {
+            wantErrDot = true;
+        } else if (errΔ1 == nil) {
+            tΔ4.Fatalf(@"with PATH='', LookPath(%#q) = %#q; want non-nil error", execabsTestˢ, foundΔ1);
         }
 
         // Set PATH to include an explicit directory that contains a completely
@@ -200,10 +196,8 @@ public static void TestLookPath(ж<testing.T> t) {
         if (runtime.GOOS == "windows"u8) {
             executableΔ1 += ".exe"u8;
         }
-        {
-            var errΔ2 = os.WriteFile(filepath.Join(dir, executableΔ1), slice<byte>([1, 2, 3]), 511); if (errΔ2 != nil) {
-                tΔ4.Fatal(errΔ2);
-            }
+        var errΔ2 = os.WriteFile(filepath.Join(dir, executableΔ1), [1, 2, 3], 511); if (errΔ2 != nil) {
+            tΔ4.Fatal(errΔ2);
         }
         tΔ4.Setenv(pathVar, dir + ((@string)(rune)filepath.ListSeparator) + origPath);
 

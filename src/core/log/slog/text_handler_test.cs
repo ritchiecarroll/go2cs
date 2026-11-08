@@ -44,7 +44,7 @@ internal partial struct TestTextHandler_typeᴛ2 /*dyn*/ {
 }
 
 public static void TestTextHandler(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestTextHandler_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestTextHandler_type>([
         new(
             "unquoted",
             Int("a", 1),
@@ -80,13 +80,13 @@ public static void TestTextHandler(ж<testing.T> t) {
             go.log.slog_package.Any("a", default),
             @"a", @"<nil>"
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestTextHandler_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            foreach (var (_, vᴛ2) in slice<TestTextHandler_typeᴛ2>([
+            foreach (var (_, vᴛ2) in range(slice<TestTextHandler_typeᴛ2>([
                 new(
                     "none",
                     new HandlerOptions(),
@@ -99,7 +99,7 @@ public static void TestTextHandler(ж<testing.T> t) {
                     @"TIME=2000-01-02T03:04:05.000Z LEVEL=INFO MSG=""a message""",
                     strings.ToUpper
                 )
-            ])) {
+            ]))) {
                 ref var opts = ref heap(new TestTextHandler_typeᴛ2(), out var Ꮡopts);
                 Ꮡopts.Value = vᴛ2;
 
@@ -109,10 +109,8 @@ public static void TestTextHandler(ж<testing.T> t) {
                     var h = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡopts.of(TestTextHandler_typeᴛ2.Ꮡopts));
                     var r = NewRecord(testTime, LevelInfo, aMessageˢ, 0);
                     r.AddAttrs(testʗ2.attr);
-                    {
-                        var err = h.Handle(context.Background(), r); if (err != nil) {
-                            tΔ2.Fatal(err);
-                        }
+                    var err = h.Handle(context.Background(), r); if (err != nil) {
+                        tΔ2.Fatal(err);
                     }
                     @string got = Ꮡbuf.String();
                     // Remove final newline.
@@ -132,18 +130,14 @@ internal partial struct name {
     public @string First, Last;
 }
 
-internal static @string String(this name n) {
-    return n.Last + ", "u8 + n.First;
-}
+internal static @string String(this name n) { return n.Last + ", "u8 + n.First; }
 
 // for testing TextMarshaler
 internal partial struct text {
     internal @string s;
 }
 
-internal static @string String(this text t) {
-    return t.s; // should be ignored
-}
+internal static @string String(this text t) { return t.s; } // should be ignored
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string textEmptyStringˢ => ref textEmptyStringˢᵇ;
@@ -167,10 +161,8 @@ public static void TestTextHandlerPreformatted(ж<testing.T> t) {
     // Also test omitting time.
     var r = NewRecord(new time_package.Time(), 0, /* 0 Level is INFO */ "m", 0);
     r.AddAttrs(Int("a", 1));
-    {
-        var err = h.Handle(context.Background(), r); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = h.Handle(context.Background(), r); if (err != nil) {
+        t.Fatal(err);
     }
     @string got = strings.TrimSuffix(Ꮡbuf.String(), "\n");
     @string want = levelInfoMsgMDur1m0sBˢ;
@@ -205,7 +197,7 @@ internal partial struct TestNeedsQuoting_type /*dyn*/ {
 }
 
 public static void TestNeedsQuoting(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestNeedsQuoting_type>([
+    foreach (var (_, test) in range(slice<TestNeedsQuoting_type>([
         new("", true),
         new("ab", false),
         new("a=b", true),
@@ -215,7 +207,7 @@ public static void TestNeedsQuoting(ж<testing.T> t) {
         new("µåπ", false),
         new("a b", true),
         new(((@string)(new byte[]{0x62, 0x61, 0x64, 0x75, 0x74, 0x66, 0x38, 0xf6})), true)
-    ])) {
+    ]))) {
         var got = needsQuoting(test.@in);
         if (got != test.want) {
             t.Errorf("%q: got %t, want %t", test.@in, got, test.want);

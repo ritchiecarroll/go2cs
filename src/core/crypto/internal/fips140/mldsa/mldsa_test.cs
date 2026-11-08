@@ -260,7 +260,7 @@ public static void TestACVPRejectionKATs(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestACVPRejectionKATs_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -341,16 +341,12 @@ public static void TestACVPRejectionKATs(ж<testing.T> t) {
                     tΔ1.Errorf("Signature hash mismatch:\n  got:  %X\n  want: %X", sigHashGot, sigHashWant);
                 }
 
-                {
-                    var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
-                        tΔ1.Errorf("Verify: %v", errΔ1);
-                    }
+                var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
+                    tΔ1.Errorf("Verify: %v", errΔ1);
                 }
                 var wrong = new slice<byte>(len(μ));
-                {
-                    var errΔ2 = VerifyExternalMu(priv.PublicKey(), wrong, sig); if (errΔ2 == nil) {
-                        tΔ1.Errorf("Verify passed on wrong message");
-                    }
+                var errΔ2 = VerifyExternalMu(priv.PublicKey(), wrong, sig); if (errΔ2 == nil) {
+                    tΔ1.Errorf("Verify passed on wrong message");
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -370,10 +366,8 @@ public static void TestCASTRejectionPaths(ж<testing.T> t) {
         testingOnlyRejectionReason = default;
     });
 
-    {
-        var err = fips140CAST(); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = fips140CAST(); if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (reason, hit) in reached) {
@@ -411,10 +405,8 @@ public static void BenchmarkCAST(ж<testing.B> b) {
             if (sha256.Sum256(sig) != new array<byte>(sigHash, 32)) {
                 bΔ1.Fatalf("sig hash mismatch, got %x", sha256.Sum256(sig));
             }
-            {
-                var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
-                    bΔ1.Fatalf("Verify: %v", errΔ1);
-                }
+            var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
+                bΔ1.Fatalf("Verify: %v", errΔ1);
             }
         }
     });
@@ -443,10 +435,8 @@ public static void BenchmarkCAST(ж<testing.B> b) {
             if (sha256.Sum256(sig) != new array<byte>(sigHash, 32)) {
                 bΔ2.Fatalf("sig hash mismatch, got %x", sha256.Sum256(sig));
             }
-            {
-                var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
-                    bΔ2.Fatalf("Verify: %v", errΔ1);
-                }
+            var errΔ1 = VerifyExternalMu(priv.PublicKey(), μ, sig); if (errΔ1 != nil) {
+                bΔ2.Fatalf("Verify: %v", errΔ1);
             }
         }
     });

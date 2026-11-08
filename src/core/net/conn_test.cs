@@ -17,7 +17,7 @@ partial class net_internal_test_package {
 internal static time.Duration someTimeout => /* 1 * time.Hour */ 3600000000000;
 
 public static void TestConnAndListener(ж<testing.T> t) {
-    foreach (var (i, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+    foreach (var (i, network) in range(slice<@string>(["tcp", "unix", "unixpacket"]))) {
         t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -61,10 +61,8 @@ public static void TestConnAndListener(ж<testing.T> t) {
                     }
                 }
                 var rb = new slice<byte>(128);
-                {
-                    var (_, errΔ2) = c.Read(rb); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var (_, errΔ2) = c.Read(rb); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
 
                 foreach (var errΔ3 in ch) {

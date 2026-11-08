@@ -46,7 +46,7 @@ internal partial struct elt {
     internal nint @class;
 }
 
-internal static slice<elt> tokens = slice<elt>([
+internal static slice<elt> tokens = [
     // Special tokens
     new(token.COMMENT, "/* a comment */", special),
     new(token.COMMENT, "// a comment \n", special),
@@ -188,14 +188,14 @@ foo
     new(token.SWITCH, "switch", keyword),
     new(token.TYPE, "type", keyword),
     new(token.VAR, "var", keyword)
-]);
+];
 
 internal static ref readonly @string whitespace => ref whitespaceᵇ;
 private static readonly @string whitespaceᵇ = "  \t  \n\n\n"u8; // to separate tokens
 
 internal static slice<byte> source = func(slice<byte> () => {
     slice<byte> src = default;
-    foreach (var (_, t) in tokens) {
+    foreach (var (_, t) in range(tokens)) {
         src = append(src, t.lit.ꓸꓸꓸ);
         src = append(src, whitespace.ꓸꓸꓸ);
     }
@@ -333,7 +333,7 @@ internal partial struct TestStripCR_type /*dyn*/ {
 }
 
 public static void TestStripCR(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestStripCR_type>([
+    foreach (var (_, test) in range(slice<TestStripCR_type>([
         new("//\n", "//\n"),
         new("//\r\n", "//\n"),
         new("//\r\r\r\n", "//\n"),
@@ -344,7 +344,7 @@ public static void TestStripCR(ж<testing.T> t) {
         new("/**\r/*/", "/**\r/*/"),
         new("/*\r/\r*\r/*/", "/*/*\r/*/"),
         new("/*\r\r\r\r*/", "/**/")
-    ])) {
+    ]))) {
         @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == '*');
         if (got != test.want) {
             t.Errorf("stripCR(%q) = %q; want %q", test.have, got, test.want);
@@ -391,10 +391,8 @@ internal static void checkSemi(ж<testing.T> t, @string input, @string want, glo
         lit = tok.String(); // "\n" => ";"
         tokens = append(tokensᴷ, tokens, lit);
     }
-    {
-        @string got = strings.Join(tokens, " "); if (got != want) {
-            t.Errorf("scanning <<%s>>, got [%s], want [%s]", input, got, want);
-        }
+    @string got = strings.Join(tokens, " "); if (got != want) {
+        t.Errorf("scanning <<%s>>, got [%s], want [%s]", input, got, want);
     }
 }
 
@@ -524,7 +522,7 @@ internal static array<semicolonTestsᴛ1> semicolonTests = new semicolonTestsᴛ
 }.array();
 
 public static void TestSemicolons(ж<testing.T> t) {
-    foreach (var (_, test) in semicolonTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(semicolonTests.ΔRangeSnapshot())) {
         @string input = test.input;
         @string want = test.want;
         checkSemi(t, input, want, 0);
@@ -545,7 +543,7 @@ internal partial struct segment {
     internal nint line, column; // line and column for current token; error position for invalid line directives
 }
 
-internal static slice<segment> segments = slice<segment>([
+internal static slice<segment> segments = [
     // exactly one token per line since the test consumes one token per segment
     new("  line1", "TestLineDirectives", 1, 3),
     new("\nline2", "TestLineDirectives", 2, 1),
@@ -575,21 +573,21 @@ internal static slice<segment> segments = slice<segment>([
     new("\n/*line foo:100:10*/d2", "foo", 100, 10),
     new("\n/*line foo:100:10*/    e2", "foo", 100, 14), // line-directive relative column
     new("\n/*line foo:100:10*/\n\nf2", "foo", 102, 1)   // absolute column since on new line
-]);
+];
 
-internal static slice<segment> dirsegments = slice<segment>([
+internal static slice<segment> dirsegments = [
     // exactly one token per line since the test consumes one token per segment
     new("  line1", "TestLineDir/TestLineDirectives", 1, 3),
     new("\n//line File1.go:100\n  line100", "TestLineDir/File1.go", 100, 0)
-]);
+];
 
-internal static slice<segment> dirUnixSegments = slice<segment>([
+internal static slice<segment> dirUnixSegments = [
     new("\n//line /bar:42\n  line42", "/bar", 42, 0)
-]);
+];
 
-internal static slice<segment> dirWindowsSegments = slice<segment>([
+internal static slice<segment> dirWindowsSegments = [
     new("\n//line c:\\bar:42\n  line42", "c:\\bar", 42, 0)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testLineDirectivesˢ => ref testLineDirectivesˢᵇ;
@@ -610,7 +608,7 @@ public static void TestLineDirectives(ж<testing.T> t) {
 
 internal static void testSegments(ж<testing.T> t, slice<segment> segments, @string filename) {
     @string src = default;
-    foreach (var (_, e) in segments) {
+    foreach (var (_, e) in range(segments)) {
         src += e.srcline;
     }
 
@@ -620,7 +618,7 @@ internal static void testSegments(ж<testing.T> t, slice<segment> segments, @str
     S.Init(@file, slice<byte>(src), (tokenꓸPosition pos, @string msg) => {
         t.Error(new ΔError(pos, msg));
     }, dontInsertSemis);
-    foreach (var (_, s) in segments) {
+    foreach (var (_, s) in range(segments)) {
         var (p, _, lit) = S.Scan();
         var pos = @file.Position(p);
         checkPos(t, lit, p, new tokenꓸPosition(
@@ -638,13 +636,13 @@ internal static void testSegments(ж<testing.T> t, slice<segment> segments, @str
 
 // The filename is used for the error message in these test cases.
 // The first line directive is valid and used to control the expected error line.
-internal static slice<segment> invalidSegments = slice<segment>([
+internal static slice<segment> invalidSegments = [
     new("\n//line :1:1\n//line foo:42 extra text\ndummy", "invalid line number: 42 extra text", 1, 12),
     new("\n//line :2:1\n//line foobar:\ndummy", "invalid line number: ", 2, 15),
     new("\n//line :5:1\n//line :0\ndummy", "invalid line number: 0", 5, 9),
     new("\n//line :10:1\n//line :1:0\ndummy", "invalid column number: 0", 10, 11),
     new("\n//line :1:1\n//line :foo:0\ndummy", "invalid line number: 0", 1, 13) // foo is considered part of the filename
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dirˢ => ref dirˢᵇ;
@@ -654,7 +652,7 @@ private static readonly @string dirˢᵇ = "dir"u8;
 public static void TestInvalidLineDirectives(ж<testing.T> t) {
     // make source
     @string src = default;
-    foreach (var (_, e) in invalidSegments) {
+    foreach (var (_, e) in range(invalidSegments)) {
         src += e.srcline;
     }
 
@@ -670,7 +668,7 @@ public static void TestInvalidLineDirectives(ж<testing.T> t) {
             t.Errorf("got position %d:%d; want %d:%d", pos.Line, pos.Column, Ꮡs.Value.line, Ꮡs.Value.column);
         }
     }, dontInsertSemis);
-    foreach (var (_, vᴛ1) in invalidSegments) {
+    foreach (var (_, vᴛ1) in range(invalidSegments)) {
         s = vᴛ1;
 
         S.Scan();
@@ -749,10 +747,8 @@ public static void TestStdErrorHandler(ж<testing.T> t) {
     global::go.go.scanner_package.Scanner s = default;
     s.Init(fset.AddFile(file1ˢ, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), dontInsertSemis);
     for (;;) {
-        {
-            var (_, tok, _) = s.Scan(); if (tok == token.EOF) {
-                break;
-            }
+        var (_, tok, _) = s.Scan(); if (tok == token.EOF) {
+            break;
         }
     }
 
@@ -822,7 +818,7 @@ partial struct errorsᴛ1 /*dyn*/ {
     internal @string lit;
     internal @string err;
 }
-internal static slice<errorsᴛ1> errors = slice<errorsᴛ1>([
+internal static slice<errorsᴛ1> errors = [
     new("\a", token.ILLEGAL, 0, "", "illegal character U+0007"),
     new(@"#", token.ILLEGAL, 0, "", "illegal character U+0023 '#'"),
     new(@"…", token.ILLEGAL, 0, "", "illegal character U+2026 '…'"),
@@ -884,10 +880,10 @@ internal static slice<errorsᴛ1> errors = slice<errorsᴛ1>([
     new(((@string)(new byte[]{0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66})), token.IDENT, 3, "abc", "illegal character NUL"),
     new("abc\x00", token.IDENT, 3, "abc", "illegal character NUL"),
     new("“abc”", token.ILLEGAL, 0, "abc", @"curly quotation mark '“' (use neutral '""')")
-]);
+];
 
 public static void TestScanErrors(ж<testing.T> t) {
-    foreach (var (_, e) in errors) {
+    foreach (var (_, e) in range(errors)) {
         checkError(t, e.src, e.tok, e.pos, e.lit, e.err);
     }
 }
@@ -895,10 +891,10 @@ public static void TestScanErrors(ж<testing.T> t) {
 public static void TestUTF16(ж<testing.T> t) {
     // This test doesn't fit within TestScanErrors because
     // the latter assumes that there was only one error.
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         ((@string)(new byte[]{0xfe, 0xff, 0x00, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70})), // BOM + "package p" encoded as UTF-16 BE
         ((@string)(new byte[]{0xff, 0xfe, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70, 0x00}))  // BOM + "package p" encoded as UTF-16 LE
-    ])) {
+    ]))) {
         ref var got = ref heap<slice<@string>>(out var Ꮡgot);
         var eh = (tokenꓸPosition posn, @string msg) => {
             Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, fmt.Sprintf("#%d: %s"u8, posn.Offset, msg));
@@ -969,7 +965,7 @@ public static void TestIssue28112(ж<testing.T> t) {
     var tokens = slice<token.Token>([token.ELLIPSIS, token.PERIOD, token.PERIOD, token.FLOAT, token.PERIOD, token.PERIOD, token.PERIOD, token.EOF]);
     global::go.go.scanner_package.Scanner s = default;
     s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), default, 0);
-    foreach (var (_, want) in tokens) {
+    foreach (var (_, want) in range(tokens)) {
         var (pos, got, lit) = s.Scan();
         if (got != want) {
             t.Errorf("%s: got %s, want %s", fset.Position(pos), got, want);
@@ -1003,12 +999,12 @@ public static void BenchmarkScan(ж<testing.B> Ꮡb) {
 public static void BenchmarkScanFiles(ж<testing.B> b) {
     // Scan a few arbitrary large files, and one small one, to provide some
     // variety in benchmarks.
-    foreach (var (_, p) in slice<@string>([
+    foreach (var (_, p) in range(slice<@string>([
         "go/types/expr.go",
         "go/parser/parser.go",
         "net/http/server.go",
         "go/scanner/errors.go"
-    ])) {
+    ]))) {
         b.Run(p, (ж<testing.B> bΔ1) => {
             bΔ1.StopTimer();
             @string filename = filepath.Join("..", "..", filepath.FromSlash(p));
@@ -1040,7 +1036,7 @@ internal partial struct TestNumbers_type /*dyn*/ {
 }
 
 public static void TestNumbers(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestNumbers_type>([
+    foreach (var (_, test) in range(slice<TestNumbers_type>([
         // binaries
         new(token.INT, "0b0", "0b0", ""),
         new(token.INT, "0b1010", "0b1010", ""),
@@ -1189,7 +1185,7 @@ public static void TestNumbers(ж<testing.T> t) {
         new(token.IMAG, "10e+12_i", "10e+12_i", "'_' must separate successive digits"),
         new(token.INT, "0x___0", "0x___0", "'_' must separate successive digits"),
         new(token.FLOAT, "0x1.0_p0", "0x1.0_p0", "'_' must separate successive digits")
-    ])) {
+    ]))) {
         global::go.go.scanner_package.Scanner s = default;
         @string err = default;
         s.Init(fset.AddFile(""u8, fset.Base(), len(test.src)), slice<byte>(test.src), (tokenꓸPosition _Δp0, @string msg) => {
@@ -1197,7 +1193,7 @@ public static void TestNumbers(ж<testing.T> t) {
                 err = msg;
             }
         }, 0);
-        foreach (var (i, want) in strings.Split(test.tokens, " ")) {
+        foreach (var (i, want) in range(strings.Split(test.tokens, " "))) {
             err = ""u8;
             var (_, tokΔ1, lit) = s.Scan();
 

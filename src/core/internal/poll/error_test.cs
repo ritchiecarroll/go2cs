@@ -35,10 +35,8 @@ public static void TestReadError(ж<testing.T> t) {
 
             array<byte> b = new(1);
             (_, err) = f.Read(b[..]);
-            {
-                var perr = parseReadError(err, isBadStateFileError); if (perr != nil) {
-                    tΔ1.Fatal(perr);
-                }
+            var perr = parseReadError(err, isBadStateFileError); if (perr != nil) {
+                tΔ1.Fatal(perr);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -28,48 +28,38 @@ public static void TestQueue(ж<testing.T> t) {
     nint N = 32;
     for (nint i = 0; i < N; i++) {
         q.enqueue(i);
-        {
-            nint n = q.len; if (n != i + 1) {
-                t.Fatalf("after adding %d elements, queue has len %d", i, n);
-            }
+        nint n = q.len; if (n != i + 1) {
+            t.Fatalf("after adding %d elements, queue has len %d", i, n);
         }
-        {
-            var (v, ok) = q.peek(); if (!ok) {
-                t.Fatalf("couldn't peek after adding %d elements", i);
-            } else if (v._<nint>() != 0) {
-                t.Fatalf("after adding %d elements, peek is %d; want 0", i, v);
-            }
+        var (v, ok) = q.peek(); if (!ok) {
+            t.Fatalf("couldn't peek after adding %d elements", i);
+        } else if (v._<nint>() != 0) {
+            t.Fatalf("after adding %d elements, peek is %d; want 0", i, v);
         }
     }
 
     // As we remove and add elements, len should shrink and grow.
     // We should also remove elements in the same order they were added.
     nint want = 0;
-    foreach (var (_, r) in slice<nint>([1, 2, 3, 5, 8, 13, 21])) {
+    foreach (var (_, r) in range(slice<nint>([1, 2, 3, 5, 8, 13, 21]))) {
         var s = new slice<nint>(0, r);
         for (nint i = 0; i < r; i++) {
-            {
-                var (got, ok) = q.dequeue(); if (!ok) {
-                    t.Fatalf("after removing %d of %d elements, could not dequeue", i + 1, r);
-                } else if (!AreEqual(got, want)) {
-                    t.Fatalf("after removing %d of %d elements, got %d; want %d", i + 1, r, got, want);
-                } else {
-                    s = append(sᴷ, s, got._<nint>());
-                }
+            var (got, ok) = q.dequeue(); if (!ok) {
+                t.Fatalf("after removing %d of %d elements, could not dequeue", i + 1, r);
+            } else if (!AreEqual(got, want)) {
+                t.Fatalf("after removing %d of %d elements, got %d; want %d", i + 1, r, got, want);
+            } else {
+                s = append(sᴷ, s, got._<nint>());
             }
             want = rem((want + 1), N);
-            {
-                nint n = q.len; if (n != N - i - 1) {
-                    t.Fatalf("after removing %d of %d elements, len is %d; want %d", i + 1, r, n, N - i - 1);
-                }
+            nint n = q.len; if (n != N - i - 1) {
+                t.Fatalf("after removing %d of %d elements, len is %d; want %d", i + 1, r, n, N - i - 1);
             }
         }
-        foreach (var (i, v) in s) {
+        foreach (var (i, v) in range(s)) {
             q.enqueue(v);
-            {
-                nint n = q.len; if (n != N - r + i + 1) {
-                    t.Fatalf("after adding back %d of %d elements, len is %d; want %d", i + 1, r, n, n - r + i + 1);
-                }
+            nint n = q.len; if (n != N - r + i + 1) {
+                t.Fatalf("after adding back %d of %d elements, len is %d; want %d", i + 1, r, n, n - r + i + 1);
             }
         }
     }

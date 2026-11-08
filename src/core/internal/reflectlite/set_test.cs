@@ -50,16 +50,9 @@ internal static slice<implementsTestsᴛ1> implementsTests = slice<implementsTes
 partial struct notAnExpr {
 }
 
-internal static tokenꓸPos Pos(this notAnExpr _) {
-    return token.NoPos;
-}
-
-internal static tokenꓸPos End(this notAnExpr _) {
-    return token.NoPos;
-}
-
-internal static void exprNode(this notAnExpr _) {
-}
+internal static tokenꓸPos Pos(this notAnExpr _) { return token.NoPos; }
+internal static tokenꓸPos End(this notAnExpr _) { return token.NoPos; }
+internal static void exprNode(this notAnExpr _) { }
 
 partial interface notASTExpr :
     ast.Node
@@ -73,24 +66,19 @@ partial struct mapError /*map[@string, @string]*/;
 internal static ref readonly @string mapErrorˢ => ref mapErrorˢᵇ;
 private static readonly @string mapErrorˢᵇ = "mapError"u8;
 
-internal static @string Error(this mapError _) {
-    return mapErrorˢ;
-}
+internal static @string Error(this mapError _) { return mapErrorˢ; }
 
 internal static error _ᴛ1ʗ = new mapError(new map<@string, @string>{});
-
 internal static error _ᴛ2ʗ = new reflectlite_test_package.mapErrorжerror(@new<mapError>());
 
 public static void TestImplements(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, tt) in implementsTests) {
+    foreach (var (_, tt) in range(implementsTests)) {
         var xv = TypeOf(tt.x).Elem();
         var xt = TypeOf(tt.t).Elem();
-        {
-            var b = xv.Implements(xt); if (b != tt.b) {
-                Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v", TypeString(xv), TypeString(xt), b, tt.b);
-            }
+        var b = xv.Implements(xt); if (b != tt.b) {
+            Ꮡt.Errorf("(%s).Implements(%s) = %v, want %v", TypeString(xv), TypeString(xt), b, tt.b);
         }
     }
 }
@@ -106,21 +94,17 @@ internal static slice<implementsTestsᴛ1> assignableTests = slice<implementsTes
 ]);
 
 partial class IntPtr /*ж<nint>*/;
-
 partial class IntPtr1 /*ж<nint>*/;
-
 partial struct Ch /*<-chan any*/;
 
 public static void TestAssignableTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (i, tt) in appendꓸꓸꓸ(assignableTests, implementsTests)) {
+    foreach (var (i, tt) in range(appendꓸꓸꓸ(assignableTests, implementsTests))) {
         var xv = TypeOf(tt.x).Elem();
         var xt = TypeOf(tt.t).Elem();
-        {
-            var b = xv.AssignableTo(xt); if (b != tt.b) {
-                Ꮡt.Errorf("%d:AssignableTo: got %v, want %v", i, b, tt.b);
-            }
+        var b = xv.AssignableTo(xt); if (b != tt.b) {
+            Ꮡt.Errorf("%d:AssignableTo: got %v, want %v", i, b, tt.b);
         }
     }
 }

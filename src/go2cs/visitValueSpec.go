@@ -354,6 +354,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 					}
 
+					// A type ARGUMENT of the declared type, `var seen Set[struct{…}]` (see liftDeclaredAnonStructTypeArgs).
+					v.liftDeclaredAnonStructTypeArgs(valueSpecType, csIDName)
+
 					// Check if value spec type is an interface or a pointer to an interface
 					if subInterfaceType, exprType := v.extractInterfaceType(valueSpecType); subInterfaceType != nil && !v.liftedTypeExists(subInterfaceType) {
 						v.visitInterfaceType(subInterfaceType, exprType, csIDName, valueSpec.Comment, true, nil)
@@ -660,6 +663,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						if subStructType, exprType := v.extractStructType(valueSpec.Type); subStructType != nil && !v.liftedTypeExists(subStructType) {
 							v.visitStructType(subStructType, exprType, goIDName, valueSpec.Comment, true, nil)
 						}
+
+						v.liftDeclaredAnonStructTypeArgs(valueSpec.Type, goIDName)
 
 						if subInterfaceType, exprType := v.extractInterfaceType(valueSpec.Type); subInterfaceType != nil && !v.liftedTypeExists(subInterfaceType) {
 							v.visitInterfaceType(subInterfaceType, exprType, goIDName, valueSpec.Comment, true, nil)

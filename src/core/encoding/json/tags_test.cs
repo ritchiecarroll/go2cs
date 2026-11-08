@@ -23,11 +23,11 @@ public static void TestTagParsing(ж<testing.T> t) {
     if (name != "field"u8) {
         t.Fatalf("name = %q, want field", name);
     }
-    foreach (var (_, tt) in slice<TestTagParsing_type>([
+    foreach (var (_, tt) in range(slice<TestTagParsing_type>([
         new("foobar", true),
         new("foo", true),
         new("bar", false)
-    ])) {
+    ]))) {
         if (opts.Contains(tt.opt) != tt.want) {
             t.Errorf("Contains(%q) = %v, want %v", tt.opt, !tt.want, tt.want);
         }

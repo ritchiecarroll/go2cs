@@ -27,11 +27,9 @@ public static void TestURLNormalizer(ж<testing.T> t) {
         new("%z", "%25z"),
         new("/foo|bar/%5c\u1234", "/foo%7cbar/%5c%e1%88%b4")
     ]);
-    foreach (var (_, test) in tests) {
-        {
-            @string got = urlNormalizer(test.url); if (test.want != got) {
-                t.Errorf("%q: want\n\t%q\nbut got\n\t%q", test.url, test.want, got);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string got = urlNormalizer(test.url); if (test.want != got) {
+            t.Errorf("%q: want\n\t%q\nbut got\n\t%q", test.url, test.want, got);
         }
         if (test.want != urlNormalizer(test.want)) {
             t.Errorf("not idempotent: %q", test.want);
@@ -61,12 +59,10 @@ public static void TestURLFilters(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, test) in tests) {
-        {
-            @string s = test.escaper(input); if (s != test.escaped) {
-                t.Errorf("%s: want\n\t%q\ngot\n\t%q", test.name, test.escaped, s);
-                continue;
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string s = test.escaper(input); if (s != test.escaped) {
+            t.Errorf("%s: want\n\t%q\ngot\n\t%q", test.name, test.escaped, s);
+            continue;
         }
     }
 }
@@ -111,11 +107,9 @@ public static void TestSrcsetFilter(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, test) in tests) {
-        {
-            @string got = srcsetFilterAndEscaper(test.input); if (got != test.want) {
-                t.Errorf("%s: srcsetFilterAndEscaper(%q) want %q != %q", test.name, test.input, test.want, got);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string got = srcsetFilterAndEscaper(test.input); if (got != test.want) {
+            t.Errorf("%s: srcsetFilterAndEscaper(%q) want %q != %q", test.name, test.input, test.want, got);
         }
     }
 }

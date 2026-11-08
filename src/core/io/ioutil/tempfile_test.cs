@@ -54,7 +54,7 @@ public static void TestTempFile_pattern(ж<testing.T> t) {
             new("ioutil_test*", "ioutil_test", ""),
             new("ioutil_test*xyz", "ioutil_test", "xyz")
         ]);
-        foreach (var (_, test) in tests) {
+        foreach (var (_, test) in range(tests)) {
             var (f, err) = TempFile(""u8, test.pattern);
             if (err != nil) {
                 t.Errorf("TempFile(..., %q) error: %v", test.pattern, err);
@@ -105,7 +105,7 @@ public static void TestTempFile_BadPattern(ж<testing.T> t) {
             new(sep + "ioutil_test"u8 + sep + "*foo"u8, true),
             new("ioutil_test*foo"u8 + sep, true)
         ]);
-        foreach (var (_, vᴛ1) in tests) {
+        foreach (var (_, vᴛ1) in range(tests)) {
             ref var tt = ref heap(new TestTempFile_BadPattern_tests(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -182,7 +182,7 @@ public static void TestTempDir(ж<testing.T> t) {
         finally { ᒐ.Run(); }
     }
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestTempDir_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -226,10 +226,8 @@ public static void TestTempDir_BadDir(ж<testing.T> t) {
 
         @string badDir = filepath.Join(dir, notExistˢ);
         (_, err) = TempDir(badDir, fooˢ);
-        {
-            var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !os.IsNotExist(err) || pe.Path != badDir) {
-                t.Errorf("TempDir error = %#v; want PathError for path %q satisfying os.IsNotExist", err, badDir);
-            }
+        var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !os.IsNotExist(err) || pe.Path != badDir) {
+            t.Errorf("TempDir error = %#v; want PathError for path %q satisfying os.IsNotExist", err, badDir);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -264,7 +262,7 @@ public static void TestTempDir_BadPattern(ж<testing.T> t) {
             new(sep + "ioutil_test"u8 + sep + "*foo"u8, true),
             new("ioutil_test*foo"u8 + sep, true)
         ]);
-        foreach (var (_, vᴛ1) in tests) {
+        foreach (var (_, vᴛ1) in range(tests)) {
             ref var tt = ref heap(new TestTempDir_BadPattern_tests(), out var Ꮡtt);
             tt = vᴛ1;
 

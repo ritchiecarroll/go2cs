@@ -11,7 +11,7 @@ partial class xml_internal_test_package {
 internal static ж<Feed> atomValue = Ꮡ(new Feed(
     XMLName: new Name("http://www.w3.org/2005/Atom", "feed"),
     Title: "Example Feed",
-    Link: slice<Link>([new(Href: "http://example.org/")]),
+    Link: [new(Href: "http://example.org/")],
     Updated: ParseTime("2003-12-13T18:30:02Z"),
     Author: new Person(Name: "John Doe"),
     ID: "urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6",
@@ -19,7 +19,7 @@ internal static ж<Feed> atomValue = Ꮡ(new Feed(
     Entry: slice<Entry>([
         new(
             Title: "Atom-Powered Robots Run Amok",
-            Link: slice<Link>([new(Href: "http://example.org/2003/12/13/atom03")]),
+            Link: [new(Href: "http://example.org/2003/12/13/atom03")],
             ID: "urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a",
             Updated: ParseTime("2003-12-13T18:30:02Z"),
             Summary: NewText("Some text.")

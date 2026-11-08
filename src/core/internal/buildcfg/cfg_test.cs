@@ -44,10 +44,8 @@ public static void TestConfigFlags(ж<testing.T> t) {
     }
     Error = default;
     os.Setenv(goamd64ˢ, "1");
-    {
-        goamd64(); if (Error == nil) {
-            t.Errorf("Wrong parsing of GOAMD64=1");
-        }
+    goamd64(); if (Error == nil) {
+        t.Errorf("Wrong parsing of GOAMD64=1");
     }
 
     os.Setenv(goriscv64ˢ, rva20u64ˢ);
@@ -64,31 +62,23 @@ public static void TestConfigFlags(ж<testing.T> t) {
     }
     Error = default;
     os.Setenv(goriscv64ˢ, rva22ˢ);
-    {
-        _ = goriscv64(); if (Error == nil) {
-            t.Errorf("Wrong parsing of RISCV64=rva22");
-        }
+    _ = goriscv64(); if (Error == nil) {
+        t.Errorf("Wrong parsing of RISCV64=rva22");
     }
     Error = default;
     os.Setenv(goarm64ˢ, v70ˢ);
-    {
-        _ = goarm64(); if (Error == nil) {
-            t.Errorf("Wrong parsing of GOARM64=7.0");
-        }
+    _ = goarm64(); if (Error == nil) {
+        t.Errorf("Wrong parsing of GOARM64=7.0");
     }
     Error = default;
     os.Setenv(goarm64ˢ, "8.0");
-    {
-        _ = goarm64(); if (Error == nil) {
-            t.Errorf("Wrong parsing of GOARM64=8.0");
-        }
+    _ = goarm64(); if (Error == nil) {
+        t.Errorf("Wrong parsing of GOARM64=8.0");
     }
     Error = default;
     os.Setenv(goarm64ˢ, v80Lsbˢ);
-    {
-        _ = goarm64(); if (Error == nil) {
-            t.Errorf("Wrong parsing of GOARM64=v8.0,lsb");
-        }
+    _ = goarm64(); if (Error == nil) {
+        t.Errorf("Wrong parsing of GOARM64=v8.0,lsb");
     }
     os.Setenv(goarm64ˢ, v80Lseˢ);
     if (goarm64().Version != "v8.0"u8 || goarm64().LSE != true || goarm64().Crypto != false) {
@@ -169,7 +159,7 @@ public static void TestGogoarchTags(ж<testing.T> t) {
     if (len(tags) != len(want)) {
         t.Errorf("Wrong number of tags for GOARM64=v9.5");
     } else {
-        foreach (var (i, v) in tags) {
+        foreach (var (i, v) in range(tags)) {
             if (v != want[i]) {
                 t.Error(wrongTagsForGoarm64V95ˢ);
                 break;
@@ -181,19 +171,19 @@ public static void TestGogoarchTags(ж<testing.T> t) {
     GOARM64 = old_goarm64;
 }
 
-internal static slice<@string> goodFIPS = slice<@string>([
+internal static slice<@string> goodFIPS = [
     "v1.0.0",
     "v1.0.1",
     "v1.2.0",
     "v1.2.3"
-]);
+];
 
-internal static slice<@string> badFIPS = slice<@string>([
+internal static slice<@string> badFIPS = [
     "v1.0.0-fips",
     "v1.0.0+fips",
     "1.0.0",
     "x1.0.0"
-]);
+];
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string vᶜ => ref vᶜᵇ;
@@ -201,7 +191,7 @@ private static readonly @string vᶜᵇ = "v1.2.3"u8;
 
 public static void TestIsFIPSVersion(ж<testing.T> t) {
     // good
-    foreach (var (_, s) in goodFIPS) {
+    foreach (var (_, s) in range(goodFIPS)) {
         if (!isFIPSVersion(s)) {
             t.Errorf("isFIPSVersion(%q) = false, want true", s);
         }
@@ -214,7 +204,7 @@ public static void TestIsFIPSVersion(ж<testing.T> t) {
         }
     }
     // bad
-    foreach (var (_, s) in badFIPS) {
+    foreach (var (_, s) in range(badFIPS)) {
         if (isFIPSVersion(s)) {
             t.Errorf("isFIPSVersion(%q) = true, want false", s);
         }

@@ -10,8 +10,6 @@ using io = io_package;
 using strings = strings_package;
 using testing = testing_package;
 using iotest = go.testing.iotest_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.testing;
 using static go.net.http.internal_package;
 
@@ -199,7 +197,7 @@ public static void TestParseHexUint(ж<testing.T> t) {
     for (var i = (uint64)0; i <= 1234; i++) {
         tests = append(tests, new TestParseHexUint_testCase(@in: fmt.Sprintf("%x"u8, i), want: i));
     }
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (got, err) = parseHexUint(slice<byte>(tt.@in));
         if (tt.wantErr != ""u8) {
             if (!strings.Contains(fmt.Sprint(err), tt.wantErr)) {
@@ -225,11 +223,9 @@ public static void TestChunkReadingIgnoresExtensions(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("ReadAll = %q, %v", data, err);
     }
-    {
-        @string g = (@string)data;
-        @string e = helloWorldˢ; if (g != e) {
-            t.Errorf("read %q; want %q", g, e);
-        }
+    @string g = (@string)data;
+    @string e = helloWorldˢ; if (g != e) {
+        t.Errorf("read %q; want %q", g, e);
     }
 }
 
@@ -260,10 +256,8 @@ public static partial void TestChunkReadPartial(ж<testing.T> t) {
         pwʗ2.Write(slice<byte>("xx"u8));
     });
     (_, err) = cr.Read(readBuf);
-    {
-        @string got = fmt.Sprint(err); if (!strings.Contains(got, malformedˢ)) {
-            t.Fatalf("second read = %v; want malformed error", err);
-        }
+    @string got = fmt.Sprint(err); if (!strings.Contains(got, malformedˢ)) {
+        t.Fatalf("second read = %v; want malformed error", err);
     }
 }
 
@@ -278,10 +272,8 @@ public static void TestIncompleteChunk(ж<testing.T> t) {
     for (nint i = 0; i < len(valid); i++) {
         @string incomplete = valid.slice(0, i);
         var rΔ1 = NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(incomplete)));
-        {
-            var (_, err) = io.ReadAll(rΔ1); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-                t.Errorf("expected io.ErrUnexpectedEOF for %q, got %v", incomplete, err);
-            }
+        var (_, err) = io.ReadAll(rΔ1); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
+            t.Errorf("expected io.ErrUnexpectedEOF for %q, got %v", incomplete, err);
         }
     }
 
@@ -301,10 +293,8 @@ public static void TestChunkEndReadError(ж<testing.T> t) {
     var readErr = fmt.Errorf("chunk end read error"u8);
 
     var r = NewChunkedReader(io.MultiReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(abcdˢ)), iotest.ErrReader(readErr)));
-    {
-        var (_, err) = io.ReadAll(r); if (!AreEqual(err, readErr)) {
-            t.Errorf("expected %v, got %v", readErr, err);
-        }
+    var (_, err) = io.ReadAll(r); if (!AreEqual(err, readErr)) {
+        t.Errorf("expected %v, got %v", readErr, err);
     }
 }
 
@@ -356,7 +346,7 @@ internal partial struct TestChunkInvalidInputs_type /*dyn*/ {
 }
 
 public static void TestChunkInvalidInputs(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestChunkInvalidInputs_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestChunkInvalidInputs_type>([new(
         name: "bare LF in chunk size",
         b: "1\na\r\n0\r\n"
     ), new(
@@ -369,7 +359,7 @@ public static void TestChunkInvalidInputs(ж<testing.T> t) {
         name: "bare LF in chunk extension",
         b: "1;\na\r\n0\r\n"
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestChunkInvalidInputs_type(), out var Ꮡtest);
         test = vᴛ1;
 

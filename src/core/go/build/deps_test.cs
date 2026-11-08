@@ -907,7 +907,7 @@ public static void TestDependencies(ж<testing.T> t) {
     var sawImport = new map<@string, map<@string, bool>>{}; // from package => to package => true
     var policy = depsPolicy(t);
 
-    foreach (var (_, pkg) in all) {
+    foreach (var (_, pkg) in range(all)) {
         var (imports, errΔ1) = findImports(pkg);
         if (errΔ1 != nil) {
             t.Error(errΔ1);
@@ -917,7 +917,7 @@ public static void TestDependencies(ж<testing.T> t) {
             sawImport[pkg] = new map<@string, bool>{};
         }
         slice<@string> bad = default;
-        foreach (var (_, imp) in imports) {
+        foreach (var (_, imp) in range(imports)) {
             sawImport[pkg].Set(imp, true);
             if (!policy.HasEdge(pkg, imp)) {
                 bad = append(bad, imp);
@@ -951,7 +951,7 @@ internal static (slice<@string>, error) findImports(@string pkg) {
         haveImport["C"] = true; // kludge: prevent C from appearing in crypto/internal/boring imports
     }
     var fset = token.NewFileSet();
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         @string name = @file.Name();
         if (name == "slice_go14.go"u8 || name == "slice_go18.go"u8) {
             // These files are for compiler bootstrap with older versions of Go and not built in the standard build.
@@ -979,7 +979,7 @@ internal static (slice<@string>, error) findImports(@string pkg) {
         if (bytes.Contains(info.header, buildIgnore)) {
             continue;
         }
-        foreach (var (_, imp) in info.imports) {
+        foreach (var (_, imp) in range(info.imports)) {
             @string path = imp.path;
             if (!haveImport[path]) {
                 haveImport[path] = true;
@@ -1011,7 +1011,7 @@ public static void TestStdlibLowercase(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, pkgname) in all) {
+    foreach (var (_, pkgname) in range(all)) {
         if (strings.ToLower(pkgname) != pkgname) {
             t.Errorf("package %q should not use upper-case path", pkgname);
         }
@@ -1027,8 +1027,8 @@ public static void TestFindImports(ж<testing.T> t) {
     t.Logf("go/build imports %q", imports);
     var want = slice<@string>(["bytes", "os", "path/filepath", "strings"]);
 wantLoop:
-    foreach (var (_, w) in want) {
-        foreach (var (_, imp) in imports) {
+    foreach (var (_, w) in range(want)) {
+        foreach (var (_, imp) in range(imports)) {
             if (imp == w) {
                 goto continue_wantLoop;
             }

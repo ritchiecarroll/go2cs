@@ -15,7 +15,7 @@ using static go.regexp_package;
 
 partial class regexp_internal_test_package {
 
-internal static slice<@string> goodRe = slice<@string>([
+internal static slice<@string> goodRe = [
     @"",
     @".",
     @"^.$",
@@ -33,7 +33,7 @@ internal static slice<@string> goodRe = slice<@string>([
     @"[^1234]",
     @"[^\n]",
     @"\!\\"
-]);
+];
 
 internal partial struct stringError {
     internal @string re;
@@ -106,7 +106,7 @@ internal static void matchTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
 }
 
 public static void TestMatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -127,7 +127,7 @@ internal static void matchFunctionTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
 }
 
 public static void TestMatchFunction(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -151,7 +151,7 @@ internal static void copyMatchTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
 }
 
 public static void TestCopyMatch(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in findTests) {
+    foreach (var (_, vᴛ1) in range(findTests)) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -163,7 +163,7 @@ public partial struct ReplaceTest {
     internal @string pattern, replacement, input, output;
 }
 
-internal static slice<ReplaceTest> replaceTests = slice<ReplaceTest>([
+internal static slice<ReplaceTest> replaceTests = [
     // Test empty input and/or replacement, with pattern that matches the empty string.
     new("", "", "", ""),
     new("", "x", "", "x"),
@@ -253,9 +253,9 @@ internal static slice<ReplaceTest> replaceTests = slice<ReplaceTest>([
     new("(a)(((b))){0}c", ".$1.", "xacxacx", "x.a.x.a.x"),
     new("((a(b){0}){3}){5}(h)", "y caramb$2", "say aaaaaaaaaaaaaaaah", "say ay caramba"),
     new("((a(b){0}){3}){5}h", "y caramb$2", "say aaaaaaaaaaaaaaaah", "say ay caramba")
-]);
+];
 
-internal static slice<ReplaceTest> replaceLiteralTests = slice<ReplaceTest>([
+internal static slice<ReplaceTest> replaceLiteralTests = [
     // Substitutions
     new("a+", "($0)", "banana", "b($0)n($0)n($0)"),
     new("a+", "(${0})", "banana", "b(${0})n(${0})n(${0})"),
@@ -272,7 +272,7 @@ internal static slice<ReplaceTest> replaceLiteralTests = slice<ReplaceTest>([
     new("a+", "${oops", "aaa", "${oops"),
     new("a+", "$$", "aaa", "$$"),
     new("a+", "$", "aaa", "$")
-]);
+];
 
 public partial struct ReplaceFuncTest {
     internal @string pattern;
@@ -280,14 +280,14 @@ public partial struct ReplaceFuncTest {
     internal @string input, output;
 }
 
-internal static slice<ReplaceFuncTest> replaceFuncTests = slice<ReplaceFuncTest>([
+internal static slice<ReplaceFuncTest> replaceFuncTests = [
     new("[a-c]", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "defxayxbyxcydef"),
     new("[a-c]+", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "defxabcydef"),
     new("[a-c]*", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "xydxyexyfxabcydxyexyfxy")
-]);
+];
 
 public static void TestReplaceAll(ж<testing.T> t) {
-    foreach (var (_, tc) in replaceTests) {
+    foreach (var (_, tc) in range(replaceTests)) {
         var (re, err) = Compile(tc.pattern);
         if (err != nil) {
             t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
@@ -309,7 +309,7 @@ public static void TestReplaceAll(ж<testing.T> t) {
 
 public static void TestReplaceAllLiteral(ж<testing.T> t) {
     // Run ReplaceAll tests that do not have $ expansions.
-    foreach (var (_, tc) in replaceTests) {
+    foreach (var (_, tc) in range(replaceTests)) {
         if (strings.Contains(tc.replacement, "$")) {
             continue;
         }
@@ -332,7 +332,7 @@ public static void TestReplaceAllLiteral(ж<testing.T> t) {
     }
 
     // Run literal-specific tests.
-    foreach (var (_, tc) in replaceLiteralTests) {
+    foreach (var (_, tc) in range(replaceLiteralTests)) {
         var (re, err) = Compile(tc.pattern);
         if (err != nil) {
             t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
@@ -353,7 +353,7 @@ public static void TestReplaceAllLiteral(ж<testing.T> t) {
 }
 
 public static void TestReplaceAllFunc(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in replaceFuncTests) {
+    foreach (var (_, vᴛ1) in range(replaceFuncTests)) {
         ref var tc = ref heap(new ReplaceFuncTest(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -382,16 +382,16 @@ public partial struct MetaTest {
     internal bool isLiteral;
 }
 
-internal static slice<MetaTest> metaTests = slice<MetaTest>([
+internal static slice<MetaTest> metaTests = [
     new(@"", @"", @"", true),
     new(@"foo", @"foo", @"foo", true),
     new(@"日本語+", @"日本語\+", @"日本語", false),
     new(@"foo\.\$", @"foo\\\.\\\$", @"foo.$", true), // has meta but no operator
     new(@"foo.\$", @"foo\.\\\$", @"foo", false),     // has escaped operators and real operators
     new(@"!@#$%^&*()_+-=[{]}\|,<.>/?~", @"!@#\$%\^&\*\(\)_\+-=\[\{\]\}\\\|,<\.>/\?~", @"!@#", false)
-]);
+];
 
-internal static slice<MetaTest> literalPrefixTests = slice<MetaTest>([
+internal static slice<MetaTest> literalPrefixTests = [
     // See golang.org/issue/11175.
     // output is unused.
     new(@"^0^0$", @"", @"0", false),
@@ -405,7 +405,7 @@ internal static slice<MetaTest> literalPrefixTests = slice<MetaTest>([
     new(@"a\x{fffd}b", @"", @"a", false),
     new(@"\x{fffd}b", @"", @"", false),
     new("\ufffd", @"", @"", false)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xyzˢ => ref xyzˢᵇ;
@@ -414,7 +414,7 @@ internal static ref readonly @string abcxyzdefˢ => ref abcxyzdefˢᵇ;
 private static readonly @string abcxyzdefˢᵇ = "abcxyzdef"u8;
 
 public static void TestQuoteMeta(ж<testing.T> t) {
-    foreach (var (_, tc) in metaTests) {
+    foreach (var (_, tc) in range(metaTests)) {
         // Verify that QuoteMeta returns the expected string.
         @string quoted = QuoteMeta(tc.pattern);
         if (quoted != tc.output) {
@@ -444,7 +444,7 @@ public static void TestQuoteMeta(ж<testing.T> t) {
 }
 
 public static void TestLiteralPrefix(ж<testing.T> t) {
-    foreach (var (_, tc) in appendꓸꓸꓸ(metaTests, literalPrefixTests)) {
+    foreach (var (_, tc) in range(appendꓸꓸꓸ(metaTests, literalPrefixTests))) {
         // Literal method needs to scan the pattern.
         var re = MustCompile(tc.pattern);
         var (str, complete) = re.LiteralPrefix();
@@ -469,24 +469,24 @@ internal partial struct subexpCase {
     internal slice<subexpIndex> indices;
 }
 
-internal static slice<subexpIndex> emptySubexpIndices = slice<subexpIndex>([new("", -1), new("missing", -1)]);
+internal static slice<subexpIndex> emptySubexpIndices = [new("", -1), new("missing", -1)];
 
-internal static slice<subexpCase> subexpCases = slice<subexpCase>([
+internal static slice<subexpCase> subexpCases = [
     new(@"", 0, default, emptySubexpIndices),
     new(@".*", 0, default, emptySubexpIndices),
     new(@"abba", 0, default, emptySubexpIndices),
-    new(@"ab(b)a", 1, slice<@string>(["", ""]), emptySubexpIndices),
-    new(@"ab(.*)a", 1, slice<@string>(["", ""]), emptySubexpIndices),
-    new(@"(.*)ab(.*)a", 2, slice<@string>(["", "", ""]), emptySubexpIndices),
-    new(@"(.*)(ab)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
-    new(@"(.*)((a)b)(.*)a", 4, slice<@string>(["", "", "", "", ""]), emptySubexpIndices),
-    new(@"(.*)(\(ab)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
-    new(@"(.*)(\(a\)b)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
-    new(@"(?P<foo>.*)(?P<bar>(a)b)(?P<foo>.*)a", 4, slice<@string>(["", "foo", "bar", "", "foo"]), slice<subexpIndex>([new("", -1), new("missing", -1), new("foo", 1), new("bar", 2)]))
-]);
+    new(@"ab(b)a", 1, ["", ""], emptySubexpIndices),
+    new(@"ab(.*)a", 1, ["", ""], emptySubexpIndices),
+    new(@"(.*)ab(.*)a", 2, ["", "", ""], emptySubexpIndices),
+    new(@"(.*)(ab)(.*)a", 3, ["", "", "", ""], emptySubexpIndices),
+    new(@"(.*)((a)b)(.*)a", 4, ["", "", "", "", ""], emptySubexpIndices),
+    new(@"(.*)(\(ab)(.*)a", 3, ["", "", "", ""], emptySubexpIndices),
+    new(@"(.*)(\(a\)b)(.*)a", 3, ["", "", "", ""], emptySubexpIndices),
+    new(@"(?P<foo>.*)(?P<bar>(a)b)(?P<foo>.*)a", 4, ["", "foo", "bar", "", "foo"], [new("", -1), new("missing", -1), new("foo", 1), new("bar", 2)])
+];
 
 public static void TestSubexp(ж<testing.T> t) {
-    foreach (var (_, c) in subexpCases) {
+    foreach (var (_, c) in range(subexpCases)) {
         var re = MustCompile(c.input);
         nint n = re.NumSubexp();
         if (n != c.num) {
@@ -505,7 +505,7 @@ public static void TestSubexp(ж<testing.T> t) {
                 }
             }
         }
-        foreach (var (_, subexp) in c.indices) {
+        foreach (var (_, subexp) in range(c.indices)) {
             nint index = re.SubexpIndex(subexp.name);
             if (index != subexp.index) {
                 t.Errorf("%q: SubexpIndex(%q) = %d, want %d", c.input, subexp.name, index, subexp.index);
@@ -520,34 +520,34 @@ partial struct splitTestsᴛ1 /*dyn*/ {
     internal nint n;
     internal slice<@string> @out;
 }
-internal static slice<splitTestsᴛ1> splitTests = slice<splitTestsᴛ1>([
-    new("foo:and:bar", ":", -1, slice<@string>(["foo", "and", "bar"])),
-    new("foo:and:bar", ":", 1, slice<@string>(["foo:and:bar"])),
-    new("foo:and:bar", ":", 2, slice<@string>(["foo", "and:bar"])),
-    new("foo:and:bar", "foo", -1, slice<@string>(["", ":and:bar"])),
-    new("foo:and:bar", "bar", -1, slice<@string>(["foo:and:", ""])),
-    new("foo:and:bar", "baz", -1, slice<@string>(["foo:and:bar"])),
-    new("baabaab", "a", -1, slice<@string>(["b", "", "b", "", "b"])),
-    new("baabaab", "a*", -1, slice<@string>(["b", "b", "b"])),
-    new("baabaab", "ba*", -1, slice<@string>(["", "", "", ""])),
-    new("foobar", "f*b*", -1, slice<@string>(["", "o", "o", "a", "r"])),
-    new("foobar", "f+.*b+", -1, slice<@string>(["", "ar"])),
-    new("foobooboar", "o{2}", -1, slice<@string>(["f", "b", "boar"])),
-    new("a,b,c,d,e,f", ",", 3, slice<@string>(["a", "b", "c,d,e,f"])),
+internal static slice<splitTestsᴛ1> splitTests = [
+    new("foo:and:bar", ":", -1, ["foo", "and", "bar"]),
+    new("foo:and:bar", ":", 1, ["foo:and:bar"]),
+    new("foo:and:bar", ":", 2, ["foo", "and:bar"]),
+    new("foo:and:bar", "foo", -1, ["", ":and:bar"]),
+    new("foo:and:bar", "bar", -1, ["foo:and:", ""]),
+    new("foo:and:bar", "baz", -1, ["foo:and:bar"]),
+    new("baabaab", "a", -1, ["b", "", "b", "", "b"]),
+    new("baabaab", "a*", -1, ["b", "b", "b"]),
+    new("baabaab", "ba*", -1, ["", "", "", ""]),
+    new("foobar", "f*b*", -1, ["", "o", "o", "a", "r"]),
+    new("foobar", "f+.*b+", -1, ["", "ar"]),
+    new("foobooboar", "o{2}", -1, ["f", "b", "boar"]),
+    new("a,b,c,d,e,f", ",", 3, ["a", "b", "c,d,e,f"]),
     new("a,b,c,d,e,f", ",", 0, default),
-    new(",", ",", -1, slice<@string>(["", ""])),
-    new(",,,", ",", -1, slice<@string>(["", "", "", ""])),
-    new("", ",", -1, slice<@string>([""])),
-    new("", ".*", -1, slice<@string>([""])),
-    new("", ".+", -1, slice<@string>([""])),
-    new("", "", -1, slice<@string>([])),
-    new("foobar", "", -1, slice<@string>(["f", "o", "o", "b", "a", "r"])),
-    new("abaabaccadaaae", "a*", 5, slice<@string>(["", "b", "b", "c", "cadaaae"])),
-    new(":x:y:z:", ":", -1, slice<@string>(["", "x", "y", "z", ""]))
-]);
+    new(",", ",", -1, ["", ""]),
+    new(",,,", ",", -1, ["", "", "", ""]),
+    new("", ",", -1, [""]),
+    new("", ".*", -1, [""]),
+    new("", ".+", -1, [""]),
+    new("", "", -1, []),
+    new("foobar", "", -1, ["f", "o", "o", "b", "a", "r"]),
+    new("abaabaccadaaae", "a*", 5, ["", "b", "b", "c", "cadaaae"]),
+    new(":x:y:z:", ":", -1, ["", "x", "y", "z", ""])
+];
 
 public static void TestSplit(ж<testing.T> t) {
-    foreach (var (i, test) in splitTests) {
+    foreach (var (i, test) in range(splitTests)) {
         var (re, err) = Compile(test.r);
         if (err != nil) {
             t.Errorf("#%d: %q: compile error: %s", i, test.r, err.Error());
@@ -578,10 +578,10 @@ public static void TestParseAndCompile(ж<testing.T> t) {
     @string expr = "a$";
     @string s = "a\nb";
 
-    foreach (var (i, tc) in slice<TestParseAndCompile_type>([
+    foreach (var (i, tc) in range(slice<TestParseAndCompile_type>([
         new((syntax.Flags)(syntax.Perl | syntax.OneLine), false),
         new((syntax.Flags)(syntax.Perl & ~syntax.OneLine), true)
-    ])) {
+    ]))) {
         var (parsed, err) = syntax.Parse(expr, tc.reFlags);
         if (err != nil) {
             t.Fatalf("%d: parse: %v", i, err);
@@ -590,10 +590,8 @@ public static void TestParseAndCompile(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("%d: compile: %v", i, err);
         }
-        {
-            var Δmatch = re.MatchString(s); if (Δmatch != tc.expMatch) {
-                t.Errorf("%d: %q.MatchString(%q)=%t; expected=%t", i, re.OrTypedNil(), s, Δmatch, tc.expMatch);
-            }
+        var Δmatch = re.MatchString(s); if (Δmatch != tc.expMatch) {
+            t.Errorf("%d: %q.MatchString(%q)=%t; expected=%t", i, re.OrTypedNil(), s, Δmatch, tc.expMatch);
         }
     }
 }
@@ -1036,7 +1034,7 @@ internal static slice<compileBenchDataᴛ1> compileBenchData = slice<compileBenc
 ]);
 
 public static void BenchmarkCompile(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in compileBenchData) {
+    foreach (var (_, vᴛ1) in range(compileBenchData)) {
         ref var data = ref heap(new compileBenchDataᴛ1(), out var Ꮡdata);
         data = vᴛ1;
 
@@ -1044,10 +1042,8 @@ public static void BenchmarkCompile(ж<testing.B> b) {
         b.Run(data.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                {
-                    var (_, err) = Compile(dataʗ1.re); if (err != nil) {
-                        bΔ1.Fatal(err);
-                    }
+                var (_, err) = Compile(dataʗ1.re); if (err != nil) {
+                    bΔ1.Fatal(err);
                 }
             }
         });
@@ -1087,7 +1083,7 @@ partial struct minInputLenTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     internal nint min;
 }
-internal static slice<minInputLenTestsᴛ1> minInputLenTests = slice<minInputLenTestsᴛ1>([
+internal static slice<minInputLenTestsᴛ1> minInputLenTests = [
     new(@"", 0),
     new(@"a", 1),
     new(@"aa", 2),
@@ -1100,10 +1096,10 @@ internal static slice<minInputLenTestsᴛ1> minInputLenTests = slice<minInputLen
     new(@"(aa){3,5}", 6),
     new(@"[a-z]", 1),
     new(@"日", 3)
-]);
+];
 
 public static void TestMinInputLen(ж<testing.T> t) {
-    foreach (var (_, tt) in minInputLenTests) {
+    foreach (var (_, tt) in range(minInputLenTests)) {
         var (re, _) = syntax.Parse(tt.Regexp, syntax.Perl);
         nint m = minInputLen(ref (re).DerefOrNull());
         if (m != tt.min) {
@@ -1119,18 +1115,16 @@ internal static readonly object unexpectedSuccessˢ = (@string)"unexpected succe
 
 public static void TestUnmarshalText(ж<testing.T> t) {
     var unmarshaled = @new<global::go.regexp_package.Regexp>();
-    foreach (var i in range(goodRe)) {
+    foreach (var i in range(len(goodRe))) {
         var re = compileTest(t, goodRe[i], ""u8);
         var (marshaled, err) = re.MarshalText();
         if (err != nil) {
             t.Errorf("regexp %#q failed to marshal: %s", re.OrTypedNil(), err);
             continue;
         }
-        {
-            var errΔ1 = unmarshaled.UnmarshalText(marshaled); if (errΔ1 != nil) {
-                t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ1);
-                continue;
-            }
+        var errΔ1 = unmarshaled.UnmarshalText(marshaled); if (errΔ1 != nil) {
+            t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ1);
+            continue;
         }
         if (unmarshaled.String() != goodRe[i]) {
             t.Errorf("UnmarshalText returned unexpected value: %s", unmarshaled.String());
@@ -1143,11 +1137,9 @@ public static void TestUnmarshalText(ж<testing.T> t) {
             continue;
         }
         marshalAppend = marshalAppend[4..];
-        {
-            var errΔ2 = unmarshaled.UnmarshalText(marshalAppend); if (errΔ2 != nil) {
-                t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ2);
-                continue;
-            }
+        var errΔ2 = unmarshaled.UnmarshalText(marshalAppend); if (errΔ2 != nil) {
+            t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ2);
+            continue;
         }
         if (unmarshaled.String() != goodRe[i]) {
             t.Errorf("UnmarshalText returned unexpected value: %s", unmarshaled.String());

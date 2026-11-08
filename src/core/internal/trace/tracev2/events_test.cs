@@ -52,7 +52,7 @@ public static void TestSpecs(ж<testing.T> t) {
         }
 
         // Check arg types.
-        foreach (var (_, arg) in spec.Args) {
+        foreach (var (_, arg) in range(spec.Args)) {
             var matches = argNameRegexp.FindStringSubmatch(arg);
             if (len(matches) == 0) {
                 t.Errorf("malformed argument %s for event %s", arg, spec.Name);
@@ -60,12 +60,12 @@ public static void TestSpecs(ж<testing.T> t) {
         }
 
         // Check stacks.
-        foreach (var (_, i) in spec.StackIDs) {
+        foreach (var (_, i) in range(spec.StackIDs)) {
             if (!strings.HasSuffix(spec.Args[i], stackˢ)) {
                 t.Errorf("stack argument listed at %d in %s, but argument name %s does not imply stack type", i, spec.Name, spec.Args[i]);
             }
         }
-        foreach (var (i, arg) in spec.Args) {
+        foreach (var (i, arg) in range(spec.Args)) {
             if (!strings.HasSuffix(spec.Args[i], stackˢ)) {
                 continue;
             }
@@ -75,12 +75,12 @@ public static void TestSpecs(ж<testing.T> t) {
         }
 
         // Check strings.
-        foreach (var (_, i) in spec.StringIDs) {
+        foreach (var (_, i) in range(spec.StringIDs)) {
             if (!strings.HasSuffix(spec.Args[i], stringˢ)) {
                 t.Errorf("string argument listed at %d in %s, but argument name %s does not imply string type", i, spec.Name, spec.Args[i]);
             }
         }
-        foreach (var (i, arg) in spec.Args) {
+        foreach (var (i, arg) in range(spec.Args)) {
             if (!strings.HasSuffix(spec.Args[i], stringˢ)) {
                 continue;
             }

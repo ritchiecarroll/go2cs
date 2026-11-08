@@ -22,7 +22,7 @@ private static readonly @string specialFileˢᵇ = "SpecialFile"u8;
 public static void TestRead(ж<testing.T> t) {
     t.Run(specialFileˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
-        foreach (var (_, p) in specialFiles()) {
+        foreach (var (_, p) in range(specialFiles())) {
             for (nint i = 0; i < 4; i++) {
                 Ꮡwg.Add(1);
                 goǃ((@string pΔ1) => {
@@ -30,11 +30,9 @@ public static void TestRead(ж<testing.T> t) {
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
-                            {
-                                var (_, err) = os.ReadFile(pΔ1); if (err != nil) {
-                                    tΔ1.Error(err);
-                                    return;
-                                }
+                            var (_, err) = os.ReadFile(pΔ1); if (err != nil) {
+                                tΔ1.Error(err);
+                                return;
                             }
                             time.Sleep(time.ΔNanosecond);
                         }
@@ -53,21 +51,21 @@ internal static slice<@string> specialFiles() {
     var exprᴛ1 = Δruntime.GOOS;
     switch (ᐧ) {
     case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
-        ps = slice<@string>([
+        ps = [
             "/dev/null"
-        ]);
+        ];
         break;
     }
     case {} when exprᴛ1 == "linux"u8: {
-        ps = slice<@string>([
+        ps = [
             "/dev/null",
             "/proc/stat",
             "/sys/devices/system/cpu/online"
-        ]);
+        ];
         break;
     }}
     var nps = ps[..0];
-    foreach (var (_, p) in ps) {
+    foreach (var (_, p) in range(ps)) {
         var (f, err) = os.Open(p);
         if (err != nil) {
             continue;

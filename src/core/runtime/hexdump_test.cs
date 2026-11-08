@@ -105,7 +105,7 @@ public static void TestHexdumper(ж<testing.T> t) {
     }
 
     var data = new slice<byte>(32);
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = (byte)(0x10 + (byte)i);
     }
 
@@ -179,7 +179,7 @@ public static void TestHexdumpWords(ж<testing.T> t) {
         @string pcStr = fmt.Sprintf("%016x"u8, pc);
         pcStr = pcStr[..8] + " " + pcStr[8..]; // Add middle space
         var ascii = new slice<byte>(8);
-        foreach (var i in range(ascii)) {
+        foreach (var i in range(len(ascii))) {
             var b = (byte)(pc.Rsh((int64)(8 * i)));
             if (b >= ' ' && b <= '~') {
                 ascii[i] = b;

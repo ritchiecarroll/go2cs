@@ -65,7 +65,7 @@ public static void TestGZIPFilesHaveZeroMTimes(ж<testing.T> t) {
     if (len(files) == 0) {
         t.Fatal(expectedToFindSomeGzˢ);
     }
-    foreach (var (_, path) in files) {
+    foreach (var (_, path) in range(files)) {
         checkZeroMTime(t, path);
     }
 }

@@ -103,7 +103,7 @@ public static void TestInlining(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, want) in wantInlinable) {
+    foreach (var (_, want) in range(wantInlinable)) {
         if (!got[want]) {
             t.Errorf("%q is no longer inlinable", want);
             continue;

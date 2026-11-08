@@ -61,7 +61,7 @@ public static void TestServerTLSHandshakeTimeout(ж<testing.T> t) {
             want: 2 * time.ΔSecond
         )
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var got = tt.s.tlsHandshakeTimeout();
         if (got != tt.want) {
             t.Errorf("%d. got %v; want %v", i, got, tt.want);
@@ -73,8 +73,7 @@ internal partial struct Δhandler {
     internal nint i;
 }
 
-internal static void ServeHTTP(this Δhandler _Δp0, global::go.net.http_package.ResponseWriter _Δp1, ж<global::go.net.http_package.Request> _Δp2) {
-}
+internal static void ServeHTTP(this Δhandler _Δp0, global::go.net.http_package.ResponseWriter _Δp1, ж<global::go.net.http_package.Request> _Δp2) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exampleComˢ => ref exampleComˢᵇ;
@@ -93,17 +92,17 @@ internal partial struct TestFindHandler_typeᴛ1 /*dyn*/ {
 
 public static void TestFindHandler(ж<testing.T> t) {
     var mux = NewServeMux();
-    foreach (var (_, ph) in slice<TestFindHandler_type>([
+    foreach (var (_, ph) in range(slice<TestFindHandler_type>([
         new("/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(1)))),
         new("/foo/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(2)))),
         new("/foo", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(3)))),
         new("/bar/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(4)))),
         new("//foo", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(5))))
-    ])) {
+    ]))) {
         mux.Handle(ph.pat, ph.h);
     }
 
-    foreach (var (_, test) in slice<TestFindHandler_typeᴛ1>([
+    foreach (var (_, test) in range(slice<TestFindHandler_typeᴛ1>([
         new("GET", "/", "&http.handler{i:1}"),
         new("GET", "//", @"&http.redirectHandler{url:""/"", code:307}"),
         new("GET", "/foo/../bar/./..//baz", @"&http.redirectHandler{url:""/baz"", code:307}"),
@@ -120,7 +119,7 @@ public static void TestFindHandler(ж<testing.T> t) {
         new("CONNECT", "/foo/x", "&http.handler{i:2}"),
         new("CONNECT", "/bar/x", "&http.handler{i:4}"),
         new("CONNECT", "/bar", @"&http.redirectHandler{url:""/bar/"", code:307}")
-    ])) {
+    ]))) {
         ref var r = ref heap(new global::go.net.http_package.Request(), out var Ꮡr);
         r.Method = test.method;
         r.Host = exampleComˢ;
@@ -161,13 +160,13 @@ public static void TestRegisterErr(ж<testing.T> t) {
     var h = Ꮡ(new Δhandler());
     mux.Handle("/a", new http_internal_test_package.ΔhandlerжΔHandler(h));
 
-    foreach (var (_, vᴛ1) in slice<TestRegisterErr_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestRegisterErr_type>([
         new("", new http_internal_test_package.ΔhandlerжΔHandler(h), "invalid pattern"),
         new("/", default, "nil handler"),
         new("/", new http_test_package.http_HandlerFuncᴠΔHandler(default(global::go.net.http_package.HandlerFunc)!), "nil handler"),
         new("/{x", new http_internal_test_package.ΔhandlerжΔHandler(h), @"parsing ""/\{x"": at offset 1: bad wildcard segment"),
         new("/a", new http_internal_test_package.ΔhandlerжΔHandler(h), @"conflicts with pattern.* \(registered at .*/server_test.go:\d+")
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestRegisterErr_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -179,10 +178,8 @@ public static void TestRegisterErr(ж<testing.T> t) {
                 tΔ1.Fatal(gotNilErrorˢ);
             }
             var re = regexp.MustCompile(testʗ1.wantRegexp);
-            {
-                @string g = err.Error(); if (!re.MatchString(g)) {
-                    tΔ1.Errorf("\ngot %q\nwant string matching %q", g, testʗ1.wantRegexp);
-                }
+            @string g = err.Error(); if (!re.MatchString(g)) {
+                tΔ1.Errorf("\ngot %q\nwant string matching %q", g, testʗ1.wantRegexp);
             }
         });
     }
@@ -195,7 +192,7 @@ internal partial struct TestExactMatch_type /*dyn*/ {
 }
 
 public static void TestExactMatch(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestExactMatch_type>([
+    foreach (var (_, test) in range(slice<TestExactMatch_type>([
         new("", "/a", false),
         new("/", "/a", false),
         new("/a", "/a", true),
@@ -204,7 +201,7 @@ public static void TestExactMatch(ж<testing.T> t) {
         new("/a/b/", "/a/b/", true),
         new("/a/b/{$}", "/a/b/", true),
         new("/a/", "/a/b/", false)
-    ])) {
+    ]))) {
         ж<global::go.net.http_package.routingNode> n = default;
         if (test.pattern != ""u8) {
             var pat = mustParsePattern(new http_test_package.testing_TжTB(t), test.pattern);
@@ -231,25 +228,25 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> t) {
     var matches = slice<TestEscapedPathsAndPatterns_matches>([
         new(
             "/a", // this pattern matches a path that unescapes to "/a"
-            slice<@string>(["/a", "/%61"]),
-            slice<@string>(["/a", "/%61"])
+            ["/a", "/%61"],
+            ["/a", "/%61"]
         ),
         new(
             "/%62", // patterns are unescaped by segment; matches paths that unescape to "/b"
-            slice<@string>(["/b", "/%62"]),
-            slice<@string>(["/%2562"]) // In 1.21, patterns were not unescaped but paths were.
+            ["/b", "/%62"],
+            ["/%2562"] // In 1.21, patterns were not unescaped but paths were.
 
         ),
         new(
             "/%7B/%7D", // the only way to write a pattern that matches '{' or '}'
-            slice<@string>(["/{/}", "/%7b/}", "/{/%7d", "/%7B/%7D"]),
-            slice<@string>(["/%257B/%257D"]) // In 1.21, patterns were not unescaped.
+            ["/{/}", "/%7b/}", "/{/%7d", "/%7B/%7D"],
+            ["/%257B/%257D"] // In 1.21, patterns were not unescaped.
 
         ),
         new(
             "/%x", // patterns that do not unescape are left unchanged
-            slice<@string>(["/%25x"]),
-            slice<@string>(["/%25x"])
+            ["/%25x"],
+            ["/%25x"]
         )
     ]);
 
@@ -263,17 +260,17 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> t) {
             use121 = test121;
 
             var mux = NewServeMux();
-            foreach (var (_, m) in matchesʗ1) {
+            foreach (var (_, m) in range(matchesʗ1)) {
                 mux.HandleFunc(m.pattern, (global::go.net.http_package.ResponseWriter w, ж<global::go.net.http_package.Request> r) => {
                 });
             }
 
-            foreach (var (_, m) in matchesʗ1) {
+            foreach (var (_, m) in range(matchesʗ1)) {
                 var paths = m.paths;
                 if (use121) {
                     paths = m.paths121;
                 }
-                foreach (var (_, p) in paths) {
+                foreach (var (_, p) in range(paths)) {
                     var (u, err) = url.ParseRequestURI(p);
                     if (err != nil) {
                         tΔ1.Fatal(err);
@@ -282,11 +279,9 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> t) {
                         URL: u
                     ));
                     var (_, gotPattern) = mux.Handler(req);
-                    {
-                        @string g = gotPattern;
-                        @string w = m.pattern; if (g != w) {
-                            tΔ1.Errorf("%s: pattern: got %q, want %q", p, g, w);
-                        }
+                    @string g = gotPattern;
+                    @string w = m.pattern; if (g != w) {
+                        tΔ1.Errorf("%s: pattern: got %q, want %q", p, g, w);
                     }
                 }
             }
@@ -310,14 +305,14 @@ internal partial struct TestCleanPath_type /*dyn*/ {
 }
 
 public static void TestCleanPath(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestCleanPath_type>([
+    foreach (var (_, test) in range(slice<TestCleanPath_type>([
         new("//", "/"),
         new("/x", "/x"),
         new("//x", "/x"),
         new("x//", "/x/"),
         new("a//b/////c", "/a/b/c"),
         new("/foo/../bar/./..//baz", "/baz")
-    ])) {
+    ]))) {
         @string got = cleanPath(test.@in);
         if (got != test.want) {
             t.Errorf("%s: got %q, want %q", test.@in, got, test.want);
@@ -390,10 +385,8 @@ public static void BenchmarkServerMatch(ж<testing.B> Ꮡb) {
         if (err != nil) {
             Ꮡb.Fatal(err);
         }
-        {
-            var (h, p, _, _) = mux.findHandler(r); if (h != nil && p == ""u8) {
-                Ꮡb.Error(impossibleˢ);
-            }
+        var (h, p, _, _) = mux.findHandler(r); if (h != nil && p == ""u8) {
+            Ꮡb.Error(impossibleˢ);
         }
     }
     b.StopTimer();

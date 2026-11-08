@@ -49,7 +49,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
             }
         })));
         ts.TLS = Ꮡ(new tls.Config(
-            NextProtos: slice<@string>(["unhandled-proto", "tls-0.9"])
+            NextProtos: ["unhandled-proto", "tls-0.9"]
         ));
         ts.Config.TLSNextProto = new map<@string, Action<ж<Δhttp.Server>, ж<tls.Conn>, httpꓸHandler>>{
             ["tls-0.9"] = handleTLSProtocol09
@@ -69,10 +69,8 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
             if (err != nil) {
                 t.Fatal(err);
             }
-            {
-                @string want = pathProtoˢ; if (((sstring)body) != want) {
-                    t.Errorf("plain request = %q; want %q", body, want);
-                }
+            @string want = pathProtoˢ; if (((sstring)body) != want) {
+                t.Errorf("plain request = %q; want %q", body, want);
             }
         }
 
@@ -84,7 +82,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
             var tr = Ꮡ(new Transport(
                 TLSClientConfig: Ꮡ(new tls.Config(
                     RootCAs: certPool,
-                    NextProtos: slice<@string>(["unhandled-proto"])
+                    NextProtos: ["unhandled-proto"]
                 ))
             ));
             var trʗ1 = tr;
@@ -107,7 +105,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
         {
             var c = ts.Client();
             var tlsConfig = c.Transport._<ж<Δhttp.Transport>>().TLSClientConfig;
-            tlsConfig.NextProtos = slice<@string>(["tls-0.9"]);
+            tlsConfig.NextProtos = ["tls-0.9"];
             var (conn, err) = tls.Dial(tcpˢ, ts.Listener.Addr().String(), tlsConfig);
             if (err != nil) {
                 t.Fatal(err);
@@ -117,10 +115,8 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
             if (err != nil) {
                 t.Fatal(err);
             }
-            {
-                @string want = pathFooProtoTls09ˢ; if (((sstring)body) != want) {
-                    t.Errorf("plain request = %q; want %q", body, want);
-                }
+            @string want = pathFooProtoTls09ˢ; if (((sstring)body) != want) {
+                t.Errorf("plain request = %q; want %q", body, want);
             }
         }
     }
@@ -162,12 +158,8 @@ partial struct http09Writer {
     internal httpꓸHeader h;
 }
 
-internal static httpꓸHeader Header(this http09Writer w) {
-    return w.h;
-}
-
-internal static void WriteHeader(this http09Writer w, nint _) {
-}
+internal static httpꓸHeader Header(this http09Writer w) { return w.h; }
+internal static void WriteHeader(this http09Writer w, nint _) { }
 
 // no headers
 

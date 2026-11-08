@@ -40,7 +40,7 @@ public static ref slice<uintptr> AtomicFields => ref ((StaticBox<slice<uintptr>>
 // 64-bit atomic operations.
 public static readonly ж<slice<@unsafe.Pointer>> ᏑAtomicVariables = new StaticBox<slice<@unsafe.Pointer>>(default(slice<@unsafe.Pointer>));
 public static ref slice<@unsafe.Pointer> AtomicVariables => ref ((StaticBox<slice<@unsafe.Pointer>>)ᏑAtomicVariables).ValueSlot;
-internal static void initᴛAtomicVariables() { AtomicVariables = slice<@unsafe.Pointer>([
+internal static void initᴛAtomicVariables() { AtomicVariables = [
     @unsafe.Pointer.FromPinnedBox(Ꮡncgocall),
     @unsafe.Pointer.FromPinnedBox(Ꮡtest_z64),
     @unsafe.Pointer.FromPinnedBox(Ꮡblockprofilerate),
@@ -50,6 +50,6 @@ internal static void initᴛAtomicVariables() { AtomicVariables = slice<@unsafe.
     @unsafe.Pointer.FromPinnedBox(Ꮡsched),
     @unsafe.Pointer.FromPinnedBox(Ꮡticks),
     @unsafe.Pointer.FromPinnedBox(Ꮡwork)
-]); }
+]; }
 
 } // end runtime_internal_test_package

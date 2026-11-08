@@ -12,17 +12,15 @@ using os = os_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.compress.lzw_package;
 
 partial class lzw_internal_test_package {
 
-internal static slice<@string> filenames = slice<@string>([
+internal static slice<@string> filenames = [
     "../testdata/gettysburg.txt",
     "../testdata/e.txt",
     "../testdata/pi.txt"
-]);
+];
 
 // testFile tests that compressing and then decompressing the given file with
 // the given options yields equivalent bytes to the original file.
@@ -111,8 +109,8 @@ internal static partial void testFile(ж<testing.T> t, @string fn, global::go.co
 }
 
 public static void TestWriter(ж<testing.T> t) {
-    foreach (var (_, filename) in filenames) {
-        foreach (var (_, order) in new global::go.compress.lzw_package.Order[]{LSB, MSB}.array()) {
+    foreach (var (_, filename) in range(filenames)) {
+        foreach (var (_, order) in range(new global::go.compress.lzw_package.Order[]{LSB, MSB}.array())) {
             // The test data "2.71828 etcetera" is ASCII text requiring at least 6 bits.
             for (nint litWidth = 6; litWidth <= 8; litWidth++) {
                 if (filename == "../testdata/gettysburg.txt"u8 && litWidth == 6) {
@@ -128,14 +126,14 @@ public static void TestWriter(ж<testing.T> t) {
 }
 
 public static void TestWriterReset(ж<testing.T> t) {
-    foreach (var (_, order) in new global::go.compress.lzw_package.Order[]{LSB, MSB}.array()) {
+    foreach (var (_, order) in range(new global::go.compress.lzw_package.Order[]{LSB, MSB}.array())) {
         t.Run(fmt.Sprintf("Order %d"u8, order), (ж<testing.T> tΔ1) => {
             for (nint litWidthᴛ1 = 6; litWidthᴛ1 <= 8; litWidthᴛ1++) {
                 var litWidth = litWidthᴛ1;
                 tΔ1.Run(fmt.Sprintf("LitWidth %d"u8, litWidth), (ж<testing.T> tΔ2) => {
                     slice<byte> data = default;
                     if (litWidth == 6) {
-                        data = slice<byte>([1, 2, 3]);
+                        data = [1, 2, 3];
                     } else {
                         data = slice<byte>(@"lorem ipsum dolor sit amet"u8);
                     }
@@ -194,12 +192,12 @@ internal static readonly object writeAByte12GotNilErrorˢ = (@string)"write a by
 public static void TestSmallLitWidth(ж<testing.T> t) {
     var w = NewWriter(io.Discard, LSB, 2);
     {
-        var (_, err) = w.Write(slice<byte>([0x03])); if (err != nil) {
+        var (_, err) = w.Write([0x03]); if (err != nil) {
             t.Fatalf("write a byte < 1<<2: %v", err);
         }
     }
     {
-        var (_, err) = w.Write(slice<byte>([0x04])); if (err == nil) {
+        var (_, err) = w.Write([0x04]); if (err == nil) {
             t.Fatal(writeAByte12GotNilErrorˢ);
         }
     }
@@ -213,7 +211,7 @@ public static void TestStartsWithClearCode(ж<testing.T> t) {
     //  - 0x80 is the clear code,
     //  - 0x81 is the end code.
     //  - 0x82 and above are copy codes (unused in this test case).
-    foreach (var (_, empty) in slice<bool>([false, true])) {
+    foreach (var (_, empty) in range(slice<bool>([false, true]))) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), LSB, 7);
         if (!empty) {

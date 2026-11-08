@@ -12,7 +12,7 @@ partial class cmplx_internal_test_package {
 // The higher-precision values in vc26 were used to derive the
 // input arguments vc (see also comment below). For reference
 // only (do not delete).
-internal static slice<complex128> vc26 = slice<complex128>([
+internal static slice<complex128> vc26 = [
     (4.9790119248836735D + 7.738872474578105D.i()),
     (7.738872474578105D + -0.2768800571920016D.i()),
     (-0.2768800571920016D + -5.010603618271075D.i()),
@@ -23,9 +23,9 @@ internal static slice<complex128> vc26 = slice<complex128>([
     (2.7279399104360103D + 1.825308091680855D.i()),
     (1.825308091680855D + -8.685924768575601D.i()),
     (-8.685924768575601D + 4.9790119248836735D.i())
-]);
+];
 
-internal static slice<complex128> vc = slice<complex128>([
+internal static slice<complex128> vc = [
     (4.9790119248836735D + 7.738872474578105D.i()),
     (7.738872474578105D + -0.2768800571920016D.i()),
     (-0.2768800571920016D + -5.010603618271075D.i()),
@@ -36,14 +36,14 @@ internal static slice<complex128> vc = slice<complex128>([
     (2.7279399104360103D + 1.825308091680855D.i()),
     (1.825308091680855D + -8.685924768575601D.i()),
     (-8.685924768575601D + 4.9790119248836735D.i())
-]);
+];
 
 // The expected results below were computed by the high precision calculators
 // at https://keisan.casio.com/.  More exact input values (array vc[], above)
 // were obtained by printing them with "%.26f".  The answers were calculated
 // to 26 digits (by using the "Digit number" drop-down control of each
 // calculator).
-internal static slice<float64> abs = slice<float64>([
+internal static slice<float64> abs = [
     9.2022120669932650313380972e+00D,
     7.7438239742296106616261394e+00D,
     5.0182478202557746902556648e+00D,
@@ -54,9 +54,9 @@ internal static slice<float64> abs = slice<float64>([
     3.2822866700678709020367184e+00D,
     8.8756430028990417290744307e+00D,
     1.0011785496777731986390856e+01D
-]);
+];
 
-internal static slice<complex128> acos = slice<complex128>([
+internal static slice<complex128> acos = [
     (1.0017679804707456D + -2.9138232718554953D.i()),
     (0.036064276120414074D + 2.735858443457626D.i()),
     (1.6249365462333796D + 2.3159537454335903D.i()),
@@ -67,9 +67,8 @@ internal static slice<complex128> acos = slice<complex128>([
     (0.6116977071277574D + -1.8734458851737055D.i()),
     (1.3649311280370182D + 2.8793528632328798D.i()),
     (2.6189310485682986D + -2.995654330289877D.i())
-]);
-
-internal static slice<complex128> acosh = slice<complex128>([
+];
+internal static slice<complex128> acosh = [
     (2.9138232718554953D + 1.0017679804707456D.i()),
     (2.735858443457626D + -0.036064276120414074D.i()),
     (2.3159537454335903D + -1.6249365462333796D.i()),
@@ -80,9 +79,8 @@ internal static slice<complex128> acosh = slice<complex128>([
     (1.8734458851737055D + 0.6116977071277574D.i()),
     (2.8793528632328798D + -1.3649311280370182D.i()),
     (2.995654330289877D + 2.6189310485682986D.i())
-]);
-
-internal static slice<complex128> asin = slice<complex128>([
+];
+internal static slice<complex128> asin = [
     (0.569028346324151D + 2.9138232718554953D.i()),
     (1.5347320506744826D + -2.735858443457626D.i()),
     (-0.05414021943848305D + -2.3159537454335903D.i()),
@@ -93,9 +91,8 @@ internal static slice<complex128> asin = slice<complex128>([
     (0.9590986196671392D + 1.8734458851737055D.i()),
     (0.20586519875787848D + -2.8793528632328798D.i()),
     (-1.0481347217734023D + 2.995654330289877D.i())
-]);
-
-internal static slice<complex128> asinh = slice<complex128>([
+];
+internal static slice<complex128> asinh = [
     (2.9113760469415295D + 0.9963945954570432D.i()),
     (2.744175542399426D + -0.0354683087890005D.i()),
     (-2.296213646252069D + -1.5144663565690153D.i()),
@@ -106,9 +103,8 @@ internal static slice<complex128> asinh = slice<complex128>([
     (1.8910743588080159D + 0.568829255725636D.i()),
     (2.873542642336734D + -1.3623761496488913D.i()),
     (-2.9981750586172478D + 0.5183571985225367D.i())
-]);
-
-internal static slice<complex128> atan = slice<complex128>([
+];
+internal static slice<complex128> atan = [
     (1.5115747079332742D + 0.0913244036039545D.i()),
     (1.4424504323482603D + -0.004541613264280391D.i()),
     (-1.5593488703630534D + -0.20163295409248363D.i()),
@@ -119,9 +115,8 @@ internal static slice<complex128> atan = slice<complex128>([
     (1.3162236060498933D + 0.1603131300046753D.i()),
     (1.5473450684303705D + -0.11064907507939083D.i()),
     (-1.4841462340185254D + 0.0493418503050244D.i())
-]);
-
-internal static slice<complex128> atanh = slice<complex128>([
+];
+internal static slice<complex128> atanh = [
     (0.05837502793896851D + 1.4793488495105334D.i()),
     (0.1297734349779038D + -1.5661009410463562D.i()),
     (-0.010576456067347252D + -1.3743698658402284D.i()),
@@ -132,9 +127,8 @@ internal static slice<complex128> atanh = slice<complex128>([
     (0.2508207293399399D + 1.3920576653921874D.i()),
     (0.022896108815797137D + -1.4609224989282865D.i()),
     (-0.08665624101841876D + 1.5207902036935093D.i())
-]);
-
-internal static slice<complex128> conj = slice<complex128>([
+];
+internal static slice<complex128> conj = [
     (4.9790119248836735D + -7.738872474578105D.i()),
     (7.738872474578105D + 0.2768800571920016D.i()),
     (-0.2768800571920016D + 5.010603618271075D.i()),
@@ -145,9 +139,8 @@ internal static slice<complex128> conj = slice<complex128>([
     (2.7279399104360103D + -1.825308091680855D.i()),
     (1.825308091680855D + 8.685924768575601D.i()),
     (-8.685924768575601D + -4.9790119248836735D.i())
-]);
-
-internal static slice<complex128> cos = slice<complex128>([
+];
+internal static slice<complex128> cos = [
     (302.4540920601484D + 1107.3797572517071D.i()),
     (0.1192858682649065D + 0.27857554122333067D.i()),
     (72.1443943045283D + -20.500129667076045D.i()),
@@ -158,9 +151,8 @@ internal static slice<complex128> cos = slice<complex128>([
     (-2.914484073249887D + -1.214620271628003D.i()),
     (-745.1234825012997D + 2864.169231448808D.i()),
     (-53.719779670393194D + 48.93348341339376D.i())
-]);
-
-internal static slice<complex128> cosh = slice<complex128>([
+];
+internal static slice<complex128> cosh = [
     (8.346383835230183D + 72.18105788642585D.i()),
     (1104.2196737991937D + -313.79638689277573D.i()),
     (0.30514852067737014D + -0.26805384730105297D.i()),
@@ -171,9 +163,8 @@ internal static slice<complex128> cosh = slice<complex128>([
     (-1.934457815021494D + 7.372585961176723D.i()),
     (-2.352958770061749D + -2.0349820104408782D.i()),
     (779.7564575321347D + 2854.9350716819176D.i())
-]);
-
-internal static slice<complex128> exp = slice<complex128>([
+];
+internal static slice<complex128> exp = [
     (16.691977368646707D + 144.36895109507662D.i()),
     (2208.4389286252585D + -627.5928928490921D.i()),
     (0.22275382731227752D + 0.724682840283342D.i()),
@@ -184,9 +175,8 @@ internal static slice<complex128> exp = slice<complex128>([
     (-3.8524613158309595D + 14.808420423156074D.i()),
     (-4.586775503301407D + -4.178501081246873D.i()),
     (4.451337963005454e-05D + -0.00016297757420544293D.i())
-]);
-
-internal static slice<complex128> log = slice<complex128>([
+];
+internal static slice<complex128> log = [
     (2.2194438972179196D + 0.999091150469193D.i()),
     (2.046895619115417D + -0.03576257502185697D.i()),
     (1.613080832985386D + -1.625999007401906D.i()),
@@ -197,9 +187,8 @@ internal static slice<complex128> log = slice<complex128>([
     (1.1885403350045343D + 0.5896963416477666D.i()),
     (2.1833107837679084D + -1.3636647724582456D.i()),
     (2.303762948727326D + 2.621091389538601D.i())
-]);
-
-internal static slice<complex128> log10 = slice<complex128>([
+];
+internal static slice<complex128> log10 = [
     (0.9638922374555904D + 0.43389977356714193D.i()),
     (0.8889554724137658D + -0.015531488990643548D.i()),
     (0.7005521046294542D + -0.7061623964948124D.i()),
@@ -210,13 +199,13 @@ internal static slice<complex128> log10 = slice<complex128>([
     (0.5161765090119116D + 0.2561018671761598D.i()),
     (0.9481998256702664D + -0.5922320858444695D.i()),
     (1.0005115362454418D + 1.1383255270407413D.i())
-]);
+];
 
 internal partial struct ff {
     internal float64 r, theta;
 }
 
-internal static slice<ff> polar = slice<ff>([
+internal static slice<ff> polar = [
     new(9.2022120669932650313380972e+00D, 9.9909115046919291062461269e-01D),
     new(7.7438239742296106616261394e+00D, -3.5762575021856971295156489e-02D),
     new(5.0182478202557746902556648e+00D, -1.6259990074019058442232221e+00D),
@@ -227,9 +216,8 @@ internal static slice<ff> polar = slice<ff>([
     new(3.2822866700678709020367184e+00D, 5.8969634164776659423195222e-01D),
     new(8.8756430028990417290744307e+00D, -1.3636647724582455028314573e+00D),
     new(1.0011785496777731986390856e+01D, 2.6210913895386013290915234e+00D)
-]);
-
-internal static slice<complex128> pow = slice<complex128>([
+];
+internal static slice<complex128> pow = [
     (-2.4999567391975295D + 1.7597517243356502D.i()),
     (73570.94338218117D + -50899.73412479152D.i()),
     (13.207772960677685D + -31.656219143339015D.i()),
@@ -240,9 +228,8 @@ internal static slice<complex128> pow = slice<complex128>([
     (0.8355609228325059D + -12.26157194716724D.i()),
     (1582.2929721207693D + 12735.642635242782D.i()),
     (6.592208301642123e-08D + 2.584887236651662e-08D.i())
-]);
-
-internal static slice<complex128> sin = slice<complex128>([
+];
+internal static slice<complex128> sin = [
     (-1107.3801774240233D + 302.45397730025024D.i()),
     (1.031703752140076D + -0.03220897979992957D.i()),
     (-20.50195209727143D + -72.1379813482408D.i()),
@@ -253,9 +240,8 @@ internal static slice<complex128> sin = slice<complex128>([
     (1.2794028166657458D + -2.7669092099795782D.i()),
     (2864.169394953526D + 745.1234399649871D.i()),
     (-48.93811726244659D + -53.71469305562194D.i())
-]);
-
-internal static slice<complex128> sinh = slice<complex128>([
+];
+internal static slice<complex128> sinh = [
     (8.345593533416526D + 72.18789320865079D.i()),
     (1104.2192548260646D + -313.79650595631637D.i()),
     (-0.08239469336509264D + 0.9927366875843949D.i()),
@@ -266,9 +252,8 @@ internal static slice<complex128> sinh = slice<complex128>([
     (-1.9180035008094656D + 7.435834461979351D.i()),
     (-2.233816733239658D + -2.1435190708059952D.i()),
     (-779.7564130187551D + -2854.935234659492D.i())
-]);
-
-internal static slice<complex128> sqrt = slice<complex128>([
+];
+internal static slice<complex128> sqrt = [
     (2.662820308608613D + 1.4531345674282186D.i()),
     (2.7823278427251985D + -0.049756907317005224D.i()),
     (1.5397025302089642D + -1.6271336573016637D.i()),
@@ -279,9 +264,8 @@ internal static slice<complex128> sqrt = slice<complex128>([
     (1.733526258887341D + 0.5264725822072127D.i()),
     (2.3131094974708715D + -1.8775429304303786D.i()),
     (0.8142053574504808D + 3.0575897587277248D.i())
-]);
-
-internal static slice<complex128> tan = slice<complex128>([
+];
+internal static slice<complex128> tan = [
     (-1.928757919086441e-07D + 1.000000326749917D.i()),
     (1.2424126853641837D + -3.171496938831334D.i()),
     (-4.67451262515878e-05D + -0.9999243922526396D.i()),
@@ -292,9 +276,8 @@ internal static slice<complex128> tan = slice<complex128>([
     (-0.036918038479920486D + 0.9647507199346955D.i()),
     (-2.7819552567137292e-08D + -1.0000000498489106D.i()),
     (9.428159006403047e-05D + 0.9999911934086372D.i())
-]);
-
-internal static slice<complex128> tanh = slice<complex128>([
+];
+internal static slice<complex128> tanh = [
     (1.0000921981225144D + 2.160986245871518e-05D.i()),
     (0.9999996772753199D + -1.9953763222959658e-07D.i()),
     (-1.7654857395480372D + 1.7024216325552852D.i()),
@@ -305,10 +288,10 @@ internal static slice<complex128> tanh = slice<complex128>([
     (1.007478418931634D + -0.004194050814891698D.i()),
     (0.9938553422971833D + 0.05144217985914355D.i()),
     (-1.0000000491604983D + -2.9018731953744332e-08D.i())
-]);
+];
 
 // huge values along the real axis for testing reducePi in Tan
-internal static slice<complex128> hugeIn = slice<complex128>([
+internal static slice<complex128> hugeIn = [
     2.68435456e+08D + 0D.i(),
     5.36870912e+08D + 0D.i(),
     1.073741824e+09D + 0D.i(),
@@ -319,11 +302,11 @@ internal static slice<complex128> hugeIn = slice<complex128>([
     -3.1217485503159922e+144D + 0D.i(),
     1.8919697882131776e+69D + 0D.i(),
     -2.514859209672214e+105D + 0D.i()
-]);
+];
 
 // Results for tanHuge[i] calculated with https://github.com/robpike/ivy
 // using 4096 bits of working precision.
-internal static slice<complex128> tanHuge = slice<complex128>([
+internal static slice<complex128> tanHuge = [
     5.95641897939639421D,
     -0.34551069233430392D,
     -0.78469661331920043D,
@@ -334,7 +317,7 @@ internal static slice<complex128> tanHuge = slice<complex128>([
     3.39135965054779932D,
     -6.76813854009065030D,
     -0.76417695016604922D
-]);
+];
 
 // special cases conform to C99 standard appendix G.6 Complex arithmetic
 internal static float64 inf = math.Inf(1);
@@ -343,11 +326,9 @@ internal static float64 nan = math.NaN();
 internal static slice<complex128> vcAbsSC = slice<complex128>([
     NaN()
 ]);
-
 internal static slice<float64> absSC = slice<float64>([
     math.NaN()
 ]);
-
 partial struct acosSCᴛ1 /*dyn*/ {
     internal complex128 @in, want;
 }
@@ -385,7 +366,6 @@ internal static void initᴛacosSC() { acosSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> acoshSC;
 internal static void initᴛacoshSC() { acoshSC = slice<acosSCᴛ1>([
     // G.6.2.1
@@ -416,7 +396,6 @@ internal static void initᴛacoshSC() { acoshSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> asinSC;
 internal static void initᴛasinSC() { asinSC = slice<acosSCᴛ1>([
     // Derived from Asin(z) = -i * Asinh(i * z), G.6 #7
@@ -441,7 +420,6 @@ internal static void initᴛasinSC() { asinSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> asinhSC;
 internal static void initᴛasinhSC() { asinhSC = slice<acosSCᴛ1>([
     // G.6.2.2
@@ -466,7 +444,6 @@ internal static void initᴛasinhSC() { asinhSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> atanSC;
 internal static void initᴛatanSC() { atanSC = slice<acosSCᴛ1>([
     // Derived from Atan(z) = -i * Atanh(i * z), G.6 #7
@@ -493,7 +470,6 @@ internal static void initᴛatanSC() { atanSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> atanhSC;
 internal static void initᴛatanhSC() { atanhSC = slice<acosSCᴛ1>([
     // G.6.2.3
@@ -520,15 +496,12 @@ internal static void initᴛatanhSC() { atanhSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<complex128> vcConjSC = slice<complex128>([
     NaN()
 ]);
-
 internal static slice<complex128> conjSC = slice<complex128>([
     NaN()
 ]);
-
 internal static slice<acosSCᴛ1> cosSC;
 internal static void initᴛcosSC() { cosSC = slice<acosSCᴛ1>([
     // Derived from Cos(z) = Cosh(i * z), G.6 #7
@@ -559,7 +532,6 @@ internal static void initᴛcosSC() { cosSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> coshSC;
 internal static void initᴛcoshSC() { coshSC = slice<acosSCᴛ1>([
     // G.6.2.4
@@ -590,7 +562,6 @@ internal static void initᴛcoshSC() { coshSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> expSC;
 internal static void initᴛexpSC() { expSC = slice<acosSCᴛ1>([
     // G.6.3.1
@@ -625,7 +596,6 @@ internal static void initᴛexpSC() { expSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<complex128> vcIsNaNSC = slice<complex128>([
     complex(math.Inf(-1), math.Inf(-1)),
     complex(math.Inf(-1), math.NaN()),
@@ -637,8 +607,7 @@ internal static slice<complex128> vcIsNaNSC = slice<complex128>([
     complex(math.NaN(), math.Inf(1)),
     complex(math.NaN(), math.NaN())
 ]);
-
-internal static slice<bool> isNaNSC = slice<bool>([
+internal static slice<bool> isNaNSC = [
     false,
     false,
     false,
@@ -648,7 +617,7 @@ internal static slice<bool> isNaNSC = slice<bool>([
     false,
     false,
     true
-]);
+];
 
 internal static slice<acosSCᴛ1> logSC;
 internal static void initᴛlogSC() { logSC = slice<acosSCᴛ1>([
@@ -680,7 +649,6 @@ internal static void initᴛlogSC() { logSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> log10SC;
 internal static void initᴛlog10SC() { log10SC = slice<acosSCᴛ1>([
     // derived from Log special cases via Log10(x) = math.Log10E*Log(x)
@@ -711,25 +679,20 @@ internal static void initᴛlog10SC() { log10SC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<complex128> vcPolarSC = slice<complex128>([
     NaN()
 ]);
-
 internal static slice<ff> polarSC = slice<ff>([
     new(math.NaN(), math.NaN())
 ]);
-
 internal static slice<array<complex128>> vcPowSC = GoReflect.WithElemDims(new array<complex128>[]{
     new complex128[]{NaN(), NaN()}.array(),
     new complex128[]{0D, NaN()}.array()
 }.slice(), 2);
-
 internal static slice<complex128> powSC = slice<complex128>([
     NaN(),
     NaN()
 ]);
-
 internal static slice<acosSCᴛ1> sinSC;
 internal static void initᴛsinSC() { sinSC = slice<acosSCᴛ1>([
     // Derived from Sin(z) = -i * Sinh(i * z), G.6 #7
@@ -818,7 +781,6 @@ internal static void initᴛsqrtSC() { sqrtSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> tanSC;
 internal static void initᴛtanSC() { tanSC = slice<acosSCᴛ1>([
     // Derived from Tan(z) = -i * Tanh(i * z), G.6 #7
@@ -845,7 +807,6 @@ internal static void initᴛtanSC() { tanSC = slice<acosSCᴛ1>([
     new(NaN(),
         NaN())
 ]); }
-
 internal static slice<acosSCᴛ1> tanhSC;
 internal static void initᴛtanhSC() { tanhSC = slice<acosSCᴛ1>([
     // G.6.2.6
@@ -875,7 +836,6 @@ internal static void initᴛtanhSC() { tanhSC = slice<acosSCᴛ1>([
 // points on each axis at |z| > 1 are checked for one-sided continuity from both the positive and negative side
 // all possible branch cuts for the elementary functions are at one of these points
 internal static float64 zero = 0.0D;
-
 internal static float64 eps = 1.0D / (9007199254740992D);
 
 internal static slice<array<complex128>> branchPoints = GoReflect.WithElemDims(new array<complex128>[]{
@@ -906,11 +866,7 @@ internal static bool tolerance(float64 a, float64 b, float64 e) {
     }
     return d < e;
 }
-
-internal static bool veryclose(float64 a, float64 b) {
-    return tolerance(a, b, 4e-16D);
-}
-
+internal static bool veryclose(float64 a, float64 b) { return tolerance(a, b, 4e-16D); }
 internal static bool alike(float64 a, float64 b) {
     switch (ᐧ) {
     case {} when a != a && b != b: { // math.IsNaN(a) && math.IsNaN(b):
@@ -932,15 +888,8 @@ internal static bool cTolerance(complex128 a, complex128 b, float64 e) {
     }
     return d < e;
 }
-
-internal static bool cSoclose(complex128 a, complex128 b, float64 e) {
-    return cTolerance(a, b, e);
-}
-
-internal static bool cVeryclose(complex128 a, complex128 b) {
-    return cTolerance(a, b, 4e-16D);
-}
-
+internal static bool cSoclose(complex128 a, complex128 b, float64 e) { return cTolerance(a, b, e); }
+internal static bool cVeryclose(complex128 a, complex128 b) { return cTolerance(a, b, 4e-16D); }
 internal static bool cAlike(complex128 a, complex128 b) {
     bool realAlike = default;
     bool imagAlike = default;
@@ -958,7 +907,6 @@ internal static bool cAlike(complex128 a, complex128 b) {
     }
     return realAlike && imagAlike;
 }
-
 internal static bool isExact(float64 x) {
     // Special cases that should match exactly.  Other cases are multiples
     // of Pi that may not be last bit identical on all platforms.
@@ -967,30 +915,23 @@ internal static bool isExact(float64 x) {
 
 public static void TestAbs(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Abs(vc[i]); if (!veryclose(abs[i], f)) {
-                t.Errorf("Abs(%g) = %g, want %g", vc[i], f, abs[i]);
-            }
+        var f = Abs(vc[i]); if (!veryclose(abs[i], f)) {
+            t.Errorf("Abs(%g) = %g, want %g", vc[i], f, abs[i]);
         }
     }
     for (nint i = 0; i < len(vcAbsSC); i++) {
-        {
-            var f = Abs(vcAbsSC[i]); if (!alike(absSC[i], f)) {
-                t.Errorf("Abs(%g) = %g, want %g", vcAbsSC[i], f, absSC[i]);
-            }
+        var f = Abs(vcAbsSC[i]); if (!alike(absSC[i], f)) {
+            t.Errorf("Abs(%g) = %g, want %g", vcAbsSC[i], f, absSC[i]);
         }
     }
 }
-
 public static void TestAcos(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Acos(vc[i]); if (!cSoclose(acos[i], f, 1e-14D)) {
-                t.Errorf("Acos(%g) = %g, want %g", vc[i], f, acos[i]);
-            }
+        var f = Acos(vc[i]); if (!cSoclose(acos[i], f, 1e-14D)) {
+            t.Errorf("Acos(%g) = %g, want %g", vc[i], f, acos[i]);
         }
     }
-    foreach (var (_, v) in acosSC) {
+    foreach (var (_, v) in range(acosSC)) {
         {
             var f = Acos(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Acos(%g) = %g, want %g", v.@in, f, v.want);
@@ -1007,26 +948,21 @@ public static void TestAcos(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Acos(pt[0]), Acos(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Acos(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Acos(pt[0]), Acos(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Acos(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestAcosh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Acosh(vc[i]); if (!cSoclose(acosh[i], f, 1e-14D)) {
-                t.Errorf("Acosh(%g) = %g, want %g", vc[i], f, acosh[i]);
-            }
+        var f = Acosh(vc[i]); if (!cSoclose(acosh[i], f, 1e-14D)) {
+            t.Errorf("Acosh(%g) = %g, want %g", vc[i], f, acosh[i]);
         }
     }
-    foreach (var (_, v) in acoshSC) {
+    foreach (var (_, v) in range(acoshSC)) {
         {
             var f = Acosh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Acosh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1043,26 +979,21 @@ public static void TestAcosh(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Acosh(pt[0]), Acosh(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Acosh(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Acosh(pt[0]), Acosh(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Acosh(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestAsin(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Asin(vc[i]); if (!cSoclose(asin[i], f, 1e-14D)) {
-                t.Errorf("Asin(%g) = %g, want %g", vc[i], f, asin[i]);
-            }
+        var f = Asin(vc[i]); if (!cSoclose(asin[i], f, 1e-14D)) {
+            t.Errorf("Asin(%g) = %g, want %g", vc[i], f, asin[i]);
         }
     }
-    foreach (var (_, v) in asinSC) {
+    foreach (var (_, v) in range(asinSC)) {
         {
             var f = Asin(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Asin(%g) = %g, want %g", v.@in, f, v.want);
@@ -1089,26 +1020,21 @@ public static void TestAsin(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Asin(pt[0]), Asin(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Asin(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Asin(pt[0]), Asin(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Asin(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestAsinh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Asinh(vc[i]); if (!cSoclose(asinh[i], f, 4e-15D)) {
-                t.Errorf("Asinh(%g) = %g, want %g", vc[i], f, asinh[i]);
-            }
+        var f = Asinh(vc[i]); if (!cSoclose(asinh[i], f, 4e-15D)) {
+            t.Errorf("Asinh(%g) = %g, want %g", vc[i], f, asinh[i]);
         }
     }
-    foreach (var (_, v) in asinhSC) {
+    foreach (var (_, v) in range(asinhSC)) {
         {
             var f = Asinh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Asinh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1135,26 +1061,21 @@ public static void TestAsinh(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Asinh(pt[0]), Asinh(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Asinh(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Asinh(pt[0]), Asinh(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Asinh(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestAtan(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Atan(vc[i]); if (!cVeryclose(atan[i], f)) {
-                t.Errorf("Atan(%g) = %g, want %g", vc[i], f, atan[i]);
-            }
+        var f = Atan(vc[i]); if (!cVeryclose(atan[i], f)) {
+            t.Errorf("Atan(%g) = %g, want %g", vc[i], f, atan[i]);
         }
     }
-    foreach (var (_, v) in atanSC) {
+    foreach (var (_, v) in range(atanSC)) {
         {
             var f = Atan(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Atan(%g) = %g, want %g", v.@in, f, v.want);
@@ -1181,26 +1102,21 @@ public static void TestAtan(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Atan(pt[0]), Atan(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Atan(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Atan(pt[0]), Atan(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Atan(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestAtanh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Atanh(vc[i]); if (!cVeryclose(atanh[i], f)) {
-                t.Errorf("Atanh(%g) = %g, want %g", vc[i], f, atanh[i]);
-            }
+        var f = Atanh(vc[i]); if (!cVeryclose(atanh[i], f)) {
+            t.Errorf("Atanh(%g) = %g, want %g", vc[i], f, atanh[i]);
         }
     }
-    foreach (var (_, v) in atanhSC) {
+    foreach (var (_, v) in range(atanhSC)) {
         {
             var f = Atanh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Atanh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1227,43 +1143,33 @@ public static void TestAtanh(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Atanh(pt[0]), Atanh(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Atanh(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Atanh(pt[0]), Atanh(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Atanh(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestConj(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Conj(vc[i]); if (!cVeryclose(conj[i], f)) {
-                t.Errorf("Conj(%g) = %g, want %g", vc[i], f, conj[i]);
-            }
+        var f = Conj(vc[i]); if (!cVeryclose(conj[i], f)) {
+            t.Errorf("Conj(%g) = %g, want %g", vc[i], f, conj[i]);
         }
     }
     for (nint i = 0; i < len(vcConjSC); i++) {
-        {
-            var f = Conj(vcConjSC[i]); if (!cAlike(conjSC[i], f)) {
-                t.Errorf("Conj(%g) = %g, want %g", vcConjSC[i], f, conjSC[i]);
-            }
+        var f = Conj(vcConjSC[i]); if (!cAlike(conjSC[i], f)) {
+            t.Errorf("Conj(%g) = %g, want %g", vcConjSC[i], f, conjSC[i]);
         }
     }
 }
-
 public static void TestCos(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Cos(vc[i]); if (!cSoclose(cos[i], f, 3e-15D)) {
-                t.Errorf("Cos(%g) = %g, want %g", vc[i], f, cos[i]);
-            }
+        var f = Cos(vc[i]); if (!cSoclose(cos[i], f, 3e-15D)) {
+            t.Errorf("Cos(%g) = %g, want %g", vc[i], f, cos[i]);
         }
     }
-    foreach (var (_, v) in cosSC) {
+    foreach (var (_, v) in range(cosSC)) {
         {
             var f = Cos(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Cos(%g) = %g, want %g", v.@in, f, v.want);
@@ -1291,16 +1197,13 @@ public static void TestCos(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestCosh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Cosh(vc[i]); if (!cSoclose(cosh[i], f, 2e-15D)) {
-                t.Errorf("Cosh(%g) = %g, want %g", vc[i], f, cosh[i]);
-            }
+        var f = Cosh(vc[i]); if (!cSoclose(cosh[i], f, 2e-15D)) {
+            t.Errorf("Cosh(%g) = %g, want %g", vc[i], f, cosh[i]);
         }
     }
-    foreach (var (_, v) in coshSC) {
+    foreach (var (_, v) in range(coshSC)) {
         {
             var f = Cosh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Cosh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1328,16 +1231,13 @@ public static void TestCosh(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestExp(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Exp(vc[i]); if (!cSoclose(exp[i], f, 1e-15D)) {
-                t.Errorf("Exp(%g) = %g, want %g", vc[i], f, exp[i]);
-            }
+        var f = Exp(vc[i]); if (!cSoclose(exp[i], f, 1e-15D)) {
+            t.Errorf("Exp(%g) = %g, want %g", vc[i], f, exp[i]);
         }
     }
-    foreach (var (_, v) in expSC) {
+    foreach (var (_, v) in range(expSC)) {
         {
             var f = Exp(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Exp(%g) = %g, want %g", v.@in, f, v.want);
@@ -1355,26 +1255,20 @@ public static void TestExp(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestIsNaN(ж<testing.T> t) {
     for (nint i = 0; i < len(vcIsNaNSC); i++) {
-        {
-            var f = IsNaN(vcIsNaNSC[i]); if (isNaNSC[i] != f) {
-                t.Errorf("IsNaN(%v) = %v, want %v", vcIsNaNSC[i], f, isNaNSC[i]);
-            }
+        var f = IsNaN(vcIsNaNSC[i]); if (isNaNSC[i] != f) {
+            t.Errorf("IsNaN(%v) = %v, want %v", vcIsNaNSC[i], f, isNaNSC[i]);
         }
     }
 }
-
 public static void TestLog(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Log(vc[i]); if (!cVeryclose(log[i], f)) {
-                t.Errorf("Log(%g) = %g, want %g", vc[i], f, log[i]);
-            }
+        var f = Log(vc[i]); if (!cVeryclose(log[i], f)) {
+            t.Errorf("Log(%g) = %g, want %g", vc[i], f, log[i]);
         }
     }
-    foreach (var (_, v) in logSC) {
+    foreach (var (_, v) in range(logSC)) {
         {
             var f = Log(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Log(%g) = %g, want %g", v.@in, f, v.want);
@@ -1391,26 +1285,21 @@ public static void TestLog(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Log(pt[0]), Log(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Log(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Log(pt[0]), Log(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Log(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestLog10(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Log10(vc[i]); if (!cVeryclose(log10[i], f)) {
-                t.Errorf("Log10(%g) = %g, want %g", vc[i], f, log10[i]);
-            }
+        var f = Log10(vc[i]); if (!cVeryclose(log10[i], f)) {
+            t.Errorf("Log10(%g) = %g, want %g", vc[i], f, log10[i]);
         }
     }
-    foreach (var (_, v) in log10SC) {
+    foreach (var (_, v) in range(log10SC)) {
         {
             var f = Log10(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Log10(%g) = %g, want %g", v.@in, f, v.want);
@@ -1428,24 +1317,18 @@ public static void TestLog10(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestPolar(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var (r, theta) = Polar(vc[i]); if (!veryclose(polar[i].r, r) && !veryclose(polar[i].theta, theta)) {
-                t.Errorf("Polar(%g) = %g, %g want %g, %g", vc[i], r, theta, polar[i].r, polar[i].theta);
-            }
+        var (r, theta) = Polar(vc[i]); if (!veryclose(polar[i].r, r) && !veryclose(polar[i].theta, theta)) {
+            t.Errorf("Polar(%g) = %g, %g want %g, %g", vc[i], r, theta, polar[i].r, polar[i].theta);
         }
     }
     for (nint i = 0; i < len(vcPolarSC); i++) {
-        {
-            var (r, theta) = Polar(vcPolarSC[i]); if (!alike(polarSC[i].r, r) && !alike(polarSC[i].theta, theta)) {
-                t.Errorf("Polar(%g) = %g, %g, want %g, %g", vcPolarSC[i], r, theta, polarSC[i].r, polarSC[i].theta);
-            }
+        var (r, theta) = Polar(vcPolarSC[i]); if (!alike(polarSC[i].r, r) && !alike(polarSC[i].theta, theta)) {
+            t.Errorf("Polar(%g) = %g, %g, want %g, %g", vcPolarSC[i], r, theta, polarSC[i].r, polarSC[i].theta);
         }
     }
 }
-
 public static void TestPow(ж<testing.T> t) {
     // Special cases for Pow(0, c).
     complex128 zero = complex(0D, 0D);
@@ -1455,67 +1338,51 @@ public static void TestPow(ж<testing.T> t) {
         new complex128[]{-1.5D, complex(math.Inf(0), 0D)}.array(),
         new complex128[]{-1.5D + 1.5D.i(), Inf()}.array()
     }.slice(), 2);
-    foreach (var (_, vᴛ1) in zeroPowers) {
+    foreach (var (_, vᴛ1) in range(zeroPowers)) {
         var zp = vᴛ1.Clone();
 
-        {
-            var f = Pow(zero, zp[0]); if (f != zp[1]) {
-                t.Errorf("Pow(%g, %g) = %g, want %g", zero, zp[0], f, zp[1]);
-            }
+        var f = Pow(zero, zp[0]); if (f != zp[1]) {
+            t.Errorf("Pow(%g, %g) = %g, want %g", zero, zp[0], f, zp[1]);
         }
     }
     complex128 a = complex(3.0D, 3.0D);
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Pow(a, vc[i]); if (!cSoclose(pow[i], f, 4e-15D)) {
-                t.Errorf("Pow(%g, %g) = %g, want %g", a, vc[i], f, pow[i]);
-            }
+        var f = Pow(a, vc[i]); if (!cSoclose(pow[i], f, 4e-15D)) {
+            t.Errorf("Pow(%g, %g) = %g, want %g", a, vc[i], f, pow[i]);
         }
     }
     for (nint i = 0; i < len(vcPowSC); i++) {
-        {
-            var f = Pow(vcPowSC[i][0], vcPowSC[i][1]); if (!cAlike(powSC[i], f)) {
-                t.Errorf("Pow(%g, %g) = %g, want %g", vcPowSC[i][0], vcPowSC[i][1], f, powSC[i]);
-            }
+        var f = Pow(vcPowSC[i][0], vcPowSC[i][1]); if (!cAlike(powSC[i], f)) {
+            t.Errorf("Pow(%g, %g) = %g, want %g", vcPowSC[i][0], vcPowSC[i][1], f, powSC[i]);
         }
     }
-    foreach (var (_, vᴛ2) in branchPoints) {
+    foreach (var (_, vᴛ2) in range(branchPoints)) {
         var pt = vᴛ2.Clone();
 
-        {
-            var (f0, f1) = (Pow(pt[0], 0.1D), Pow(pt[1], 0.1D)); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Pow(%g, 0.1) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Pow(pt[0], 0.1D), Pow(pt[1], 0.1D)); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Pow(%g, 0.1) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestRect(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Rect(polar[i].r, polar[i].theta); if (!cVeryclose(vc[i], f)) {
-                t.Errorf("Rect(%g, %g) = %g want %g", polar[i].r, polar[i].theta, f, vc[i]);
-            }
+        var f = Rect(polar[i].r, polar[i].theta); if (!cVeryclose(vc[i], f)) {
+            t.Errorf("Rect(%g, %g) = %g want %g", polar[i].r, polar[i].theta, f, vc[i]);
         }
     }
     for (nint i = 0; i < len(vcPolarSC); i++) {
-        {
-            var f = Rect(polarSC[i].r, polarSC[i].theta); if (!cAlike(vcPolarSC[i], f)) {
-                t.Errorf("Rect(%g, %g) = %g, want %g", polarSC[i].r, polarSC[i].theta, f, vcPolarSC[i]);
-            }
+        var f = Rect(polarSC[i].r, polarSC[i].theta); if (!cAlike(vcPolarSC[i], f)) {
+            t.Errorf("Rect(%g, %g) = %g, want %g", polarSC[i].r, polarSC[i].theta, f, vcPolarSC[i]);
         }
     }
 }
-
 public static void TestSin(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Sin(vc[i]); if (!cSoclose(sin[i], f, 2e-15D)) {
-                t.Errorf("Sin(%g) = %g, want %g", vc[i], f, sin[i]);
-            }
+        var f = Sin(vc[i]); if (!cSoclose(sin[i], f, 2e-15D)) {
+            t.Errorf("Sin(%g) = %g, want %g", vc[i], f, sin[i]);
         }
     }
-    foreach (var (_, v) in sinSC) {
+    foreach (var (_, v) in range(sinSC)) {
         {
             var f = Sin(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Sin(%g) = %g, want %g", v.@in, f, v.want);
@@ -1543,16 +1410,13 @@ public static void TestSin(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestSinh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Sinh(vc[i]); if (!cSoclose(sinh[i], f, 2e-15D)) {
-                t.Errorf("Sinh(%g) = %g, want %g", vc[i], f, sinh[i]);
-            }
+        var f = Sinh(vc[i]); if (!cSoclose(sinh[i], f, 2e-15D)) {
+            t.Errorf("Sinh(%g) = %g, want %g", vc[i], f, sinh[i]);
         }
     }
-    foreach (var (_, v) in sinhSC) {
+    foreach (var (_, v) in range(sinhSC)) {
         {
             var f = Sinh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Sinh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1580,16 +1444,13 @@ public static void TestSinh(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestSqrt(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Sqrt(vc[i]); if (!cVeryclose(sqrt[i], f)) {
-                t.Errorf("Sqrt(%g) = %g, want %g", vc[i], f, sqrt[i]);
-            }
+        var f = Sqrt(vc[i]); if (!cVeryclose(sqrt[i], f)) {
+            t.Errorf("Sqrt(%g) = %g, want %g", vc[i], f, sqrt[i]);
         }
     }
-    foreach (var (_, v) in sqrtSC) {
+    foreach (var (_, v) in range(sqrtSC)) {
         {
             var f = Sqrt(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Sqrt(%g) = %g, want %g", v.@in, f, v.want);
@@ -1606,26 +1467,21 @@ public static void TestSqrt(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, vᴛ1) in branchPoints) {
+    foreach (var (_, vᴛ1) in range(branchPoints)) {
         var pt = vᴛ1.Clone();
 
-        {
-            var (f0, f1) = (Sqrt(pt[0]), Sqrt(pt[1])); if (!cVeryclose(f0, f1)) {
-                t.Errorf("Sqrt(%g) not continuous, got %g want %g", pt[0], f0, f1);
-            }
+        var (f0, f1) = (Sqrt(pt[0]), Sqrt(pt[1])); if (!cVeryclose(f0, f1)) {
+            t.Errorf("Sqrt(%g) not continuous, got %g want %g", pt[0], f0, f1);
         }
     }
 }
-
 public static void TestTan(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Tan(vc[i]); if (!cSoclose(tan[i], f, 3e-15D)) {
-                t.Errorf("Tan(%g) = %g, want %g", vc[i], f, tan[i]);
-            }
+        var f = Tan(vc[i]); if (!cSoclose(tan[i], f, 3e-15D)) {
+            t.Errorf("Tan(%g) = %g, want %g", vc[i], f, tan[i]);
         }
     }
-    foreach (var (_, v) in tanSC) {
+    foreach (var (_, v) in range(tanSC)) {
         {
             var f = Tan(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Tan(%g) = %g, want %g", v.@in, f, v.want);
@@ -1653,16 +1509,13 @@ public static void TestTan(ж<testing.T> t) {
         }
     }
 }
-
 public static void TestTanh(ж<testing.T> t) {
     for (nint i = 0; i < len(vc); i++) {
-        {
-            var f = Tanh(vc[i]); if (!cSoclose(tanh[i], f, 2e-15D)) {
-                t.Errorf("Tanh(%g) = %g, want %g", vc[i], f, tanh[i]);
-            }
+        var f = Tanh(vc[i]); if (!cSoclose(tanh[i], f, 2e-15D)) {
+            t.Errorf("Tanh(%g) = %g, want %g", vc[i], f, tanh[i]);
         }
     }
-    foreach (var (_, v) in tanhSC) {
+    foreach (var (_, v) in range(tanhSC)) {
         {
             var f = Tanh(v.@in); if (!cAlike(v.want, f)) {
                 t.Errorf("Tanh(%g) = %g, want %g", v.@in, f, v.want);
@@ -1694,10 +1547,8 @@ public static void TestTanh(ж<testing.T> t) {
 // See issue 17577
 public static void TestInfiniteLoopIntanSeries(ж<testing.T> t) {
     var want = Inf();
-    {
-        var got = Cot(0D); if (got != want) {
-            t.Errorf("Cot(0): got %g, want %g", got, want);
-        }
+    var got = Cot(0D); if (got != want) {
+        t.Errorf("Cot(0): got %g, want %g", got, want);
     }
 }
 
@@ -1708,7 +1559,6 @@ public static void BenchmarkAbs(ж<testing.B> Ꮡb) {
         Abs(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAcos(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1716,7 +1566,6 @@ public static void BenchmarkAcos(ж<testing.B> Ꮡb) {
         Acos(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAcosh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1724,7 +1573,6 @@ public static void BenchmarkAcosh(ж<testing.B> Ꮡb) {
         Acosh(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAsin(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1732,7 +1580,6 @@ public static void BenchmarkAsin(ж<testing.B> Ꮡb) {
         Asin(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAsinh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1740,7 +1587,6 @@ public static void BenchmarkAsinh(ж<testing.B> Ꮡb) {
         Asinh(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAtan(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1748,7 +1594,6 @@ public static void BenchmarkAtan(ж<testing.B> Ꮡb) {
         Atan(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkAtanh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1756,7 +1601,6 @@ public static void BenchmarkAtanh(ж<testing.B> Ꮡb) {
         Atanh(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkConj(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1764,7 +1608,6 @@ public static void BenchmarkConj(ж<testing.B> Ꮡb) {
         Conj(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkCos(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1772,7 +1615,6 @@ public static void BenchmarkCos(ж<testing.B> Ꮡb) {
         Cos(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkCosh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1780,7 +1622,6 @@ public static void BenchmarkCosh(ж<testing.B> Ꮡb) {
         Cosh(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkExp(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1788,7 +1629,6 @@ public static void BenchmarkExp(ж<testing.B> Ꮡb) {
         Exp(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkLog(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1796,7 +1636,6 @@ public static void BenchmarkLog(ж<testing.B> Ꮡb) {
         Log(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkLog10(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1804,7 +1643,6 @@ public static void BenchmarkLog10(ж<testing.B> Ꮡb) {
         Log10(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkPhase(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1812,7 +1650,6 @@ public static void BenchmarkPhase(ж<testing.B> Ꮡb) {
         Phase(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkPolar(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1820,7 +1657,6 @@ public static void BenchmarkPolar(ж<testing.B> Ꮡb) {
         Polar(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkPow(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1828,7 +1664,6 @@ public static void BenchmarkPow(ж<testing.B> Ꮡb) {
         Pow(complex(2.5D, 3.5D), complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkRect(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1836,7 +1671,6 @@ public static void BenchmarkRect(ж<testing.B> Ꮡb) {
         Rect(2.5D, 1.5D);
     }
 }
-
 public static void BenchmarkSin(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1844,7 +1678,6 @@ public static void BenchmarkSin(ж<testing.B> Ꮡb) {
         Sin(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkSinh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1852,7 +1685,6 @@ public static void BenchmarkSinh(ж<testing.B> Ꮡb) {
         Sinh(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkSqrt(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1860,7 +1692,6 @@ public static void BenchmarkSqrt(ж<testing.B> Ꮡb) {
         Sqrt(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkTan(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1868,7 +1699,6 @@ public static void BenchmarkTan(ж<testing.B> Ꮡb) {
         Tan(complex(2.5D, 3.5D));
     }
 }
-
 public static void BenchmarkTanh(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 

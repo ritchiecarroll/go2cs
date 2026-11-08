@@ -7,8 +7,6 @@ namespace go.go;
 
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.go.types_package;
 
 partial class types_internal_test_package {
@@ -18,7 +16,7 @@ internal static global::go.go.types_package.termlist maketl(@string s) {
     s = strings.ReplaceAll(s, " ", ""u8);
     var names = strings.Split(s, "|");
     var r = new global::go.go.types_package.termlist(len(names));
-    foreach (var (i, n) in names) {
+    foreach (var (i, n) in range(names)) {
         r[i] = testTerm(n);
     }
     return r;
@@ -31,7 +29,7 @@ public static partial void TestTermlistAll(ж<testing.T> t) {
 }
 
 public static void TestTermlistString(ж<testing.T> t) {
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "∅",
         "𝓤",
         "int",
@@ -41,11 +39,9 @@ public static void TestTermlistString(ж<testing.T> t) {
         "𝓤 | 𝓤",
         "∅ | 𝓤 | int",
         "∅ | 𝓤 | int | myInt"
-    ])) {
-        {
-            @string got = maketl(want).String(); if (got != want) {
-                t.Errorf("(%v).String() == %v", want, got);
-            }
+    ]))) {
+        @string got = maketl(want).String(); if (got != want) {
+            t.Errorf("(%v).String() == %v", want, got);
         }
     }
 }
@@ -92,7 +88,7 @@ internal partial struct TestTermlistNorm_type /*dyn*/ {
 }
 
 public static void TestTermlistNorm(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistNorm_type>([
+    foreach (var (_, test) in range(slice<TestTermlistNorm_type>([
         new("∅", "∅"),
         new("∅ | ∅", "∅"),
         new("∅ | int", "int"),
@@ -105,7 +101,7 @@ public static void TestTermlistNorm(ж<testing.T> t) {
         new("int | ~string | int", "int | ~string"),
         new("~int | string | 𝓤 | ~string | int", "𝓤"),
         new("~int | string | myInt | ~string | int", "~int | ~string")
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var got = maketl(test.xl).norm();
         if (got.String() != test.want) {
@@ -119,7 +115,7 @@ internal partial struct TestTermlistUnion_type /*dyn*/ {
 }
 
 public static void TestTermlistUnion(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistUnion_type>([
+    foreach (var (_, test) in range(slice<TestTermlistUnion_type>([
         new("∅", "∅", "∅"),
         new("∅", "𝓤", "𝓤"),
         new("∅", "int", "int"),
@@ -134,7 +130,7 @@ public static void TestTermlistUnion(ж<testing.T> t) {
         new("~int | myInt | ∅", "~string | int", "~int | ~string"),
         new("~int | string | 𝓤", "~string | int", "𝓤"),
         new("~int | string | myInt", "~string | int", "~int | ~string")
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var yl = maketl(test.yl);
         @string got = xl.union(yl).String();
@@ -149,7 +145,7 @@ internal partial struct TestTermlistIntersect_type /*dyn*/ {
 }
 
 public static void TestTermlistIntersect(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistIntersect_type>([
+    foreach (var (_, test) in range(slice<TestTermlistIntersect_type>([
         new("∅", "∅", "∅"),
         new("∅", "𝓤", "∅"),
         new("∅", "int", "∅"),
@@ -166,7 +162,7 @@ public static void TestTermlistIntersect(ж<testing.T> t) {
         new("~int | myInt | ∅", "~string | int", "int"),
         new("~int | string | 𝓤", "~string | int", "int | ~string"),
         new("~int | string | myInt", "~string | int", "int | string")
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var yl = maketl(test.yl);
         @string got = xl.intersect(yl).String();
@@ -182,7 +178,7 @@ internal partial struct TestTermlistEqual_type /*dyn*/ {
 }
 
 public static void TestTermlistEqual(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistEqual_type>([
+    foreach (var (_, test) in range(slice<TestTermlistEqual_type>([
         new("∅", "∅", true),
         new("∅", "𝓤", false),
         new("𝓤", "𝓤", true),
@@ -192,7 +188,7 @@ public static void TestTermlistEqual(ж<testing.T> t) {
         new("int | ~string", "string | int", false),
         new("~int | string", "string | myInt", false),
         new("int | ~string | ∅", "string | int | ~string", true)
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var yl = maketl(test.yl);
         var got = xl.equal(yl);
@@ -208,7 +204,7 @@ internal partial struct TestTermlistIncludes_type /*dyn*/ {
 }
 
 public static void TestTermlistIncludes(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistIncludes_type>([
+    foreach (var (_, test) in range(slice<TestTermlistIncludes_type>([
         new("∅", "int", false),
         new("𝓤", "int", true),
         new("~int", "int", true),
@@ -220,7 +216,7 @@ public static void TestTermlistIncludes(ж<testing.T> t) {
         new("~int | string", "myInt", true),
         new("~int | myInt | ∅", "myInt", true),
         new("myInt | ∅ | 𝓤", "int", true)
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var yl = testTerm(test.typ).typ;
         var got = xl.includes(yl);
@@ -236,7 +232,7 @@ internal partial struct TestTermlistSupersetOf_type /*dyn*/ {
 }
 
 public static void TestTermlistSupersetOf(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistSupersetOf_type>([
+    foreach (var (_, test) in range(slice<TestTermlistSupersetOf_type>([
         new("∅", "∅", true),
         new("∅", "𝓤", false),
         new("∅", "int", false),
@@ -258,7 +254,7 @@ public static void TestTermlistSupersetOf(ж<testing.T> t) {
         new("~int | string", "myInt", true),
         new("~int | string | ∅", "string", true),
         new("~string | ∅ | 𝓤", "myInt", true)
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var y = testTerm(test.typ);
         var got = xl.supersetOf(y);
@@ -274,7 +270,7 @@ internal partial struct TestTermlistSubsetOf_type /*dyn*/ {
 }
 
 public static void TestTermlistSubsetOf(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTermlistSubsetOf_type>([
+    foreach (var (_, test) in range(slice<TestTermlistSubsetOf_type>([
         new("∅", "∅", true),
         new("∅", "𝓤", true),
         new("𝓤", "∅", false),
@@ -291,7 +287,7 @@ public static void TestTermlistSubsetOf(ж<testing.T> t) {
         new("myInt | ~string", "string | int | 𝓤", true),
         new("int | ~string", "string | int | ∅ | string", false),
         new("int | myInt", "string | ~int | ∅ | string", true)
-    ])) {
+    ]))) {
         var xl = maketl(test.xl);
         var yl = maketl(test.yl);
         var got = xl.subsetOf(yl);

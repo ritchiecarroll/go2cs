@@ -45,7 +45,7 @@ using static global::go.net.http.pprof_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("pprof_test.cs", 244, 9, 1)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 242, 9, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +55,7 @@ using static global::go.net.http.pprof_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/pprof/pprof_test.go", "pprof_test.cs", "ACQ4ooKCggARCoIADCiykoKClIKAkraCgpSAkqSAkqSAkraClICSpIIACBCCgtyCgoKCgpSCAAQSwoKUgoKCgoKUgs6igoKCgoKC0oKipAAMBqKCpoKCytyCgqaCuIKSgoKkgqTIkoKmgoKCgpSClIKmgoKUgrSklIKCgoKUgqaCgoKUqsKCgoKCgriCgoK4AAwOwpSmlIKCpoKCuIKClIKCppSClIKUgpSClIKmgpSClII=", "59-92:1;149-152:1;163-165:1;186-197:2;198-201:3")]
+[assembly: GoPositionMap("net/http/pprof/pprof_test.go", "pprof_test.cs", "ACI4ooKCggARCoIADCiykoKClIKAkraCgpSAkqSAkqSAkraClICSpIIACBCCgtyCgoKCgpSCAAQSwoKUgoKCgoKUgs6igoKCgoKC0oKipAAMBqKCpoKCytyCgqaCuIKSgoKkgqTIkoKmgoKCgpSClIKmgoKUgrSklIKCgoKUgqaCgoKUqsKCgoKCgriCgoK4AAwOwpSmlIKCpoKCuIKClIKCppSClIKUgpSClIKmgpSClII=", "59-92:1;149-152:1;163-165:1;186-197:2;198-201:3", "", "", "", "218:21,219:13,258:21,259:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

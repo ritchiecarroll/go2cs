@@ -42,16 +42,16 @@ public static void TestExitHooks(ж<testing.T> t) {
         ),
         new(
             mode: "panics",
-            musthave: slice<@string>([
+            musthave: [
                 "fatal error: exit hook invoked panic",
                 "main.testPanics"
-            ])
+            ]
         ),
         new(
             mode: "callsexit",
-            musthave: slice<@string>([
+            musthave: [
                 "fatal error: exit hook invoked exit"
-            ])
+            ]
         ),
         new(
             mode: "exit2",
@@ -64,7 +64,7 @@ public static void TestExitHooks(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, s) in scenarios) {
+    foreach (var (_, s) in range(scenarios)) {
         var cmd = exec.Command(exe, slice<@string>(["-mode", s.mode]).ꓸꓸꓸ);
         var (@out, _) = cmd.CombinedOutput();
         @string outs = strings.ReplaceAll((@string)@out, "\n", " ");
@@ -73,7 +73,7 @@ public static void TestExitHooks(ж<testing.T> t) {
             t.Fatalf("failed %s: wanted %q\noutput:\n%s",
                 s.mode, s.expected, outs);
         }
-        foreach (var (_, need) in s.musthave) {
+        foreach (var (_, need) in range(s.musthave)) {
             if (!strings.Contains(outs, need)) {
                 t.Fatalf("failed mode %s: output does not contain %q\noutput:\n%s",
                     s.mode, need, outs);

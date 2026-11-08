@@ -92,7 +92,7 @@ internal static void testWriter(ж<testing.T> t, bool binary) {
         )
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var buf = @new<strings.Builder>();
         var w = NewWriter(new quotedprintable_test_package.strings_BuilderжWriter(buf));
 
@@ -126,15 +126,11 @@ internal static void testWriter(ж<testing.T> t, bool binary) {
 public static void TestRoundTrip(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new quotedprintable_test_package.bytes_BufferжWriter(buf));
-    {
-        var (_, errΔ1) = w.Write(testMsg); if (errΔ1 != nil) {
-            t.Fatalf("Write: %v", errΔ1);
-        }
+    var (_, errΔ1) = w.Write(testMsg); if (errΔ1 != nil) {
+        t.Fatalf("Write: %v", errΔ1);
     }
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Close: %v", errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Close: %v", errΔ2);
     }
 
     var r = NewReader(new quotedprintable_test_package.bytes_BufferжReader(buf));

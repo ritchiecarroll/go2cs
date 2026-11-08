@@ -12,7 +12,7 @@ partial struct compileTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Prog;
 }
-internal static slice<compileTestsᴛ1> compileTests = slice<compileTestsᴛ1>([
+internal static slice<compileTestsᴛ1> compileTests = [
     new("a", """
   0	fail
   1*	rune1 "a" -> 2
@@ -139,10 +139,10 @@ internal static slice<compileTestsᴛ1> compileTests = slice<compileTestsᴛ1>([
   6	match
 
 """u8.Raw())
-]);
+];
 
 public static void TestCompile(ж<testing.T> t) {
-    foreach (var (_, tt) in compileTests) {
+    foreach (var (_, tt) in range(compileTests)) {
         var (re, _) = Parse(tt.Regexp, Perl);
         var (p, _) = Compile(re);
         @string s = p.String();

@@ -27,16 +27,14 @@ public static void TestIsIdentifier(ж<testing.T> t) {
         new("UppercaseKeyword", "Func", true),
         new("LettersUnicode", "fóö", true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestIsIdentifier_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            {
-                var got = IsIdentifier(testʗ1.@in); if (got != testʗ1.want) {
-                    tΔ1.Fatalf("IsIdentifier(%q) = %t, want %v", testʗ1.@in, got, testʗ1.want);
-                }
+            var got = IsIdentifier(testʗ1.@in); if (got != testʗ1.want) {
+                tΔ1.Fatalf("IsIdentifier(%q) = %t, want %v", testʗ1.@in, got, testʗ1.want);
             }
         });
     }

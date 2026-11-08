@@ -29,9 +29,9 @@ using static go.compress.gzip_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABoiooKCgoKClIKClKaCgpSCgpSCgriCgoK4poKCgoKmlIKAgraAgraCgoKUgoKUgIKkgII=", "56-91:1")]
-[assembly: GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "AB40ANQC5AXYlIKUgoKCgpSSgpSCgoKUgoK4goKCgpSClIKCgpSCgsbk/IKClIKClJKCooKClJSUtAAICAAJBISSooKmlIKCgoCCuKSCgoKmgIKkgoKCpoCCyKaCggAICIIAEy6CgoKCgpSUgoCCpILcgpSCgoK4goI=", "463-471:1", "", "", "390:25,450:21")]
-[assembly: GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikpSAgraCgpSAgqSCgpSClICCAAwMopSCgoKCgoCCpICCtoKClIKClIKUgpSClIKUgpSAggAICpKCgoKCgpSCpoKCgIKkgoIACAyiAAsegpSCgoKCgpSCpoKCgpSCgoKUgoKUgIKCAAkKgpSCgoKClIKCpoCCtoKCppSCgqaAgraCgqaAgvySgoKCgoKClIKClIKCuIKCgoKCgoKCgoKCAAcQgoCCgqSCqJKUooKAgraC7oCC", "", "", "317=Now/1/1/3")]
+[assembly: GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABoiooKCgoKClIKClKaCgpSCgpSCgriCgoK4poKCgoKmlIKCpoKmgoKClIKClIKUgg==", "56-91:1")]
+[assembly: GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "ABw0ANQC5AXYlIKUgoKCgpSSgpSCgoKUgoK4goKCgpSClIKCgpSCgsbk/IKClIKClJKCooKClJSUtAAICAAJBISSooKmlIKCgoKopIKCgqaClIKCgqaCuKaCggAICIIAEy6CgoKCgpSUgoKUgtyClIKCgriCgg==", "463-471:1", "", "", "388:25,448:21")]
+[assembly: GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikpSCpoKClIKUgoKUgpSCAAsMopSCgoKCgoKUgqaCgpSCgpSClIKUgpSClIKUgvqSgoKCgoKUgqaCgoKUgoIACAyiAAsegpSCgoKCgpSCpoKCgpSCgoKUgoKUgoIACAqClIKCgoKUgoKmgIK2goKmlIKCpoCCtoKCpoCC/JKCgoKCgoKUgoKUgoK4goKCgoKCgoKCgoIABxCCgoKUgqiSlKKCgIK2gu6Agg==", "", "", "299=Now/1/1/3")]
 [assembly: GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABo0AAwIgpSUgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKCtA==", "40-48:1", "", "", "82:21,89:21")]
 // </GoSourcePositionMaps>
 

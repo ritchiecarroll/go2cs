@@ -17,8 +17,6 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using go.net;
 using static go.net.smtp_package;
@@ -33,14 +31,14 @@ internal partial struct authTest {
 }
 
 internal static slice<authTest> authTests = slice<authTest>([
-    new(PlainAuth("", "user", "pass", "testserver"), slice<@string>([]), "PLAIN", slice<@string>(["\x00user\x00pass"])),
-    new(PlainAuth("foo", "bar", "baz", "testserver"), slice<@string>([]), "PLAIN", slice<@string>([((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72, 0x00, 0x62, 0x61, 0x7a}))])),
-    new(CRAMMD5Auth("user", "pass"), slice<@string>(["<123456.1322876914@testserver>"]), "CRAM-MD5", slice<@string>(["", "user 287eb355114cf5c471c26a875f1ca4ae"]))
+    new(PlainAuth("", "user", "pass", "testserver"), [], "PLAIN", ["\x00user\x00pass"]),
+    new(PlainAuth("foo", "bar", "baz", "testserver"), [], "PLAIN", [((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72, 0x00, 0x62, 0x61, 0x7a}))]),
+    new(CRAMMD5Auth("user", "pass"), ["<123456.1322876914@testserver>"], "CRAM-MD5", ["", "user 287eb355114cf5c471c26a875f1ca4ae"])
 ]);
 
 public static void TestAuth(ж<testing.T> t) {
 testLoop:
-    foreach (var (i, test) in authTests) {
+    foreach (var (i, test) in range(authTests)) {
         var (name, resp, err) = test.auth.Start(Ꮡ(new ServerInfo("testserver", true, default)));
         if (name != test.name) {
             t.Errorf("#%d got name %s, expected %s", i, name, test.name);
@@ -51,7 +49,7 @@ testLoop:
         if (err != nil) {
             t.Errorf("#%d error: %s", i, err);
         }
-        foreach (var j in range(test.challenges)) {
+        foreach (var j in range(len(test.challenges))) {
             var challenge = slice<byte>(test.challenges[j]);
             var expected = slice<byte>(test.responses[j + 1]);
             var (respΔ1, errΔ1) = test.auth.Next(challenge, true);
@@ -98,12 +96,12 @@ public static void TestAuthPlain(ж<testing.T> t) {
             // NOT OK on non-localhost, even if server says PLAIN is OK.
             // (We don't know that the server is the real server.)
             authName: "servername",
-            server: Ꮡ(new ServerInfo(Name: "servername", Auth: slice<@string>(["PLAIN"]))),
+            server: Ꮡ(new ServerInfo(Name: "servername", Auth: ["PLAIN"])),
             err: "unencrypted connection"
         ),
         new(
             authName: "servername",
-            server: Ꮡ(new ServerInfo(Name: "servername", Auth: slice<@string>(["CRAM-MD5"]))),
+            server: Ꮡ(new ServerInfo(Name: "servername", Auth: ["CRAM-MD5"])),
             err: "unencrypted connection"
         ),
         new(
@@ -112,7 +110,7 @@ public static void TestAuthPlain(ж<testing.T> t) {
             err: "wrong host name"
         )
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var auth = PlainAuth(fooˢ, barˢ, bazˢ, tt.authName);
         var (_, _, err) = auth.Start(tt.server);
         @string got = ""u8;
@@ -153,11 +151,9 @@ public static void TestClientAuthTrimSpace(ж<testing.T> t) {
     c.didHello = true;
     c.Auth(new toServerEmptyAuth());
     c.Close();
-    {
-        @string got = wrote.String();
-        @string want = authFooauthQuitˢ; if (got != want) {
-            t.Errorf("wrote %q; want %q", got, want);
-        }
+    @string got = wrote.String();
+    @string want = authFooauthQuitˢ; if (got != want) {
+        t.Errorf("wrote %q; want %q", got, want);
     }
 }
 
@@ -184,29 +180,12 @@ internal partial struct faker {
     /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
-internal static error Close(this faker f) {
-    return default;
-}
-
-internal static netꓸAddr LocalAddr(this faker f) {
-    return default;
-}
-
-internal static netꓸAddr RemoteAddr(this faker f) {
-    return default;
-}
-
-internal static error SetDeadline(this faker f, time.Time _) {
-    return default;
-}
-
-internal static error SetReadDeadline(this faker f, time.Time _) {
-    return default;
-}
-
-internal static error SetWriteDeadline(this faker f, time.Time _) {
-    return default;
-}
+internal static error Close(this faker f) { return default; }
+internal static netꓸAddr LocalAddr(this faker f) { return default; }
+internal static netꓸAddr RemoteAddr(this faker f) { return default; }
+internal static error SetDeadline(this faker f, time.Time _) { return default; }
+internal static error SetReadDeadline(this faker f, time.Time _) { return default; }
+internal static error SetWriteDeadline(this faker f, time.Time _) { return default; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aUtHˢ => ref aUtHˢᵇ;
@@ -254,20 +233,14 @@ public static void TestBasic(ж<testing.T> t) {
     fake.ReadWriter = new smtp_test_package.bufio_ReadWriterжReadWriter(bufio.NewReadWriter(bufio.NewReader(new smtp_test_package.strings_ReaderжReader(strings.NewReader(server))), bcmdbuf));
     var c = Ꮡ(new Client(Text: textproto.NewConn(fake), localName: "localhost"));
 
-    {
-        var errΔ1 = c.helo(); if (errΔ1 != nil) {
-            t.Fatalf("HELO failed: %s", errΔ1);
-        }
+    var errΔ1 = c.helo(); if (errΔ1 != nil) {
+        t.Fatalf("HELO failed: %s", errΔ1);
     }
-    {
-        var errΔ2 = c.ehlo(); if (errΔ2 == nil) {
-            t.Fatalf("Expected first EHLO to fail");
-        }
+    var errΔ2 = c.ehlo(); if (errΔ2 == nil) {
+        t.Fatalf("Expected first EHLO to fail");
     }
-    {
-        var errΔ3 = c.ehlo(); if (errΔ3 != nil) {
-            t.Fatalf("Second EHLO failed: %s", errΔ3);
-        }
+    var errΔ3 = c.ehlo(); if (errΔ3 != nil) {
+        t.Fatalf("Second EHLO failed: %s", errΔ3);
     }
 
     c.didHello = true;
@@ -282,77 +255,53 @@ public static void TestBasic(ж<testing.T> t) {
         }
     }
 
-    {
-        var errΔ4 = c.Mail(userGmailComˢ); if (errΔ4 == nil) {
-            t.Fatalf("MAIL should require authentication");
-        }
+    var errΔ4 = c.Mail(userGmailComˢ); if (errΔ4 == nil) {
+        t.Fatalf("MAIL should require authentication");
     }
 
-    {
-        var errΔ5 = c.Verify(user1GmailComˢ); if (errΔ5 == nil) {
-            t.Fatalf("First VRFY: expected no verification");
-        }
+    var errΔ5 = c.Verify(user1GmailComˢ); if (errΔ5 == nil) {
+        t.Fatalf("First VRFY: expected no verification");
     }
-    {
-        var errΔ6 = c.Verify(user2GmailComDataAnotherˢ); if (errΔ6 == nil) {
-            t.Fatalf("VRFY should have failed due to a message injection attempt");
-        }
+    var errΔ6 = c.Verify(user2GmailComDataAnotherˢ); if (errΔ6 == nil) {
+        t.Fatalf("VRFY should have failed due to a message injection attempt");
     }
-    {
-        var errΔ7 = c.Verify(user2GmailComˢ); if (errΔ7 != nil) {
-            t.Fatalf("Second VRFY: expected verification, got %s", errΔ7);
-        }
+    var errΔ7 = c.Verify(user2GmailComˢ); if (errΔ7 != nil) {
+        t.Fatalf("Second VRFY: expected verification, got %s", errΔ7);
     }
 
     // fake TLS so authentication won't complain
     c.tls = true;
     c.serverName = smtpGoogleComˢ;
-    {
-        var errΔ8 = c.Auth(PlainAuth(""u8, userˢ, passˢ, smtpGoogleComˢ)); if (errΔ8 != nil) {
-            t.Fatalf("AUTH failed: %s", errΔ8);
-        }
+    var errΔ8 = c.Auth(PlainAuth(""u8, userˢ, passˢ, smtpGoogleComˢ)); if (errΔ8 != nil) {
+        t.Fatalf("AUTH failed: %s", errΔ8);
     }
 
-    {
-        var errΔ9 = c.Rcpt(golangNutsGooglegroupsˢ); if (errΔ9 == nil) {
-            t.Fatalf("RCPT should have failed due to a message injection attempt");
-        }
+    var errΔ9 = c.Rcpt(golangNutsGooglegroupsˢ); if (errΔ9 == nil) {
+        t.Fatalf("RCPT should have failed due to a message injection attempt");
     }
-    {
-        var errΔ10 = c.Mail(userGmailComDataAnotherˢ); if (errΔ10 == nil) {
-            t.Fatalf("MAIL should have failed due to a message injection attempt");
-        }
+    var errΔ10 = c.Mail(userGmailComDataAnotherˢ); if (errΔ10 == nil) {
+        t.Fatalf("MAIL should have failed due to a message injection attempt");
     }
-    {
-        var errΔ11 = c.Mail(userGmailComˢ); if (errΔ11 != nil) {
-            t.Fatalf("MAIL failed: %s", errΔ11);
-        }
+    var errΔ11 = c.Mail(userGmailComˢ); if (errΔ11 != nil) {
+        t.Fatalf("MAIL failed: %s", errΔ11);
     }
-    {
-        var errΔ12 = c.Rcpt(golangNutsGooglegroupsˢ2); if (errΔ12 != nil) {
-            t.Fatalf("RCPT failed: %s", errΔ12);
-        }
+    var errΔ12 = c.Rcpt(golangNutsGooglegroupsˢ2); if (errΔ12 != nil) {
+        t.Fatalf("RCPT failed: %s", errΔ12);
     }
     @string msg = fromUserGmailComToGolangˢ;
     var (w, err) = c.Data();
     if (err != nil) {
         t.Fatalf("DATA failed: %s", err);
     }
-    {
-        var (_, errΔ13) = w.Write(slice<byte>(msg)); if (errΔ13 != nil) {
-            t.Fatalf("Data write failed: %s", errΔ13);
-        }
+    var (_, errΔ13) = w.Write(slice<byte>(msg)); if (errΔ13 != nil) {
+        t.Fatalf("Data write failed: %s", errΔ13);
     }
-    {
-        var errΔ14 = w.Close(); if (errΔ14 != nil) {
-            t.Fatalf("Bad data response: %s", errΔ14);
-        }
+    var errΔ14 = w.Close(); if (errΔ14 != nil) {
+        t.Fatalf("Bad data response: %s", errΔ14);
     }
 
-    {
-        var errΔ15 = c.Quit(); if (errΔ15 != nil) {
-            t.Fatalf("QUIT failed: %s", errΔ15);
-        }
+    var errΔ15 = c.Quit(); if (errΔ15 != nil) {
+        t.Fatalf("QUIT failed: %s", errΔ15);
     }
 
     bcmdbuf.Flush();
@@ -814,10 +763,8 @@ public static void TestNewClient(ж<testing.T> t) {
                 t.Fatalf("Shouldn't support DSN");
             }
         }
-        {
-            var errΔ1 = c.Quit(); if (errΔ1 != nil) {
-                t.Fatalf("QUIT failed: %s", errΔ1);
-            }
+        var errΔ1 = c.Quit(); if (errΔ1 != nil) {
+            t.Fatalf("QUIT failed: %s", errΔ1);
         }
 
         @string actualcmds = @out();
@@ -861,15 +808,11 @@ public static void TestNewClient2(ж<testing.T> t) {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
-        {
-            var (ok, _) = c.Extension(dsnˢ); if (ok) {
-                t.Fatalf("Shouldn't support DSN");
-            }
+        var (ok, _) = c.Extension(dsnˢ); if (ok) {
+            t.Fatalf("Shouldn't support DSN");
         }
-        {
-            var errΔ1 = c.Quit(); if (errΔ1 != nil) {
-                t.Fatalf("QUIT failed: %s", errΔ1);
-            }
+        var errΔ1 = c.Quit(); if (errΔ1 != nil) {
+            t.Fatalf("QUIT failed: %s", errΔ1);
         }
 
         bcmdbuf.Flush();
@@ -908,7 +851,7 @@ public static partial void TestNewClientWithTLS(ж<testing.T> t) {
             t.Fatalf("loadcert: %v", err);
         }
 
-        ref var config = ref heap<tls.Config>(new tls.Config(Certificates: slice<tls.Certificate>([cert])), out var Ꮡconfig);
+        ref var config = ref heap<tls.Config>(new tls.Config(Certificates: [cert]), out var Ꮡconfig);
 
         (var ln, err) = tls.Listen(tcpˢ, "127.0.0.1:0", Ꮡconfig);
         if (err != nil) {
@@ -1080,7 +1023,7 @@ internal static @string baseHelloServer = """
 
 """u8.Raw();
 
-internal static slice<@string> helloServer = slice<@string>([
+internal static slice<@string> helloServer = [
     "",
     "502 Not implemented\n",
     "250 User is valid\n",
@@ -1091,7 +1034,7 @@ internal static slice<@string> helloServer = slice<@string>([
     "221 Goodbye\n",
     "250 Sender ok\n",
     "250 ok\n"
-]);
+];
 
 internal static @string baseHelloClient = """
 EHLO customhost
@@ -1099,7 +1042,7 @@ HELO customhost
 
 """u8.Raw();
 
-internal static slice<@string> helloClient = slice<@string>([
+internal static slice<@string> helloClient = [
     "",
     "STARTTLS\n",
     "VRFY test@example.com\n",
@@ -1110,7 +1053,7 @@ internal static slice<@string> helloClient = slice<@string>([
     "QUIT\n",
     "VRFY test@example.com\n",
     "NOOP\n"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fromTestExampleComToˢ => ref fromTestExampleComToˢᵇ;
@@ -1184,12 +1127,12 @@ public static partial void TestSendMail(ж<testing.T> t) {
             finally { ᒐ.Run(); }
         }, strings.Split(server, "\r\n"));
 
-        err = SendMail(l.Addr().String(), default, testExampleComˢ, slice<@string>(["other@example.com>\n\rDATA\r\nInjected message body\r\n.\r\nQUIT\r\n"]), slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
+        err = SendMail(l.Addr().String(), default, testExampleComˢ, ["other@example.com>\n\rDATA\r\nInjected message body\r\n.\r\nQUIT\r\n"], slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
         if (err == nil) {
             t.Errorf("Expected SendMail to be rejected due to a message injection attempt");
         }
 
-        err = SendMail(l.Addr().String(), default, testExampleComˢ, slice<@string>(["other@example.com"]), slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
+        err = SendMail(l.Addr().String(), default, testExampleComˢ, ["other@example.com"], slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
 
         if (err != nil) {
             t.Errorf("%v", err);
@@ -1292,7 +1235,7 @@ public static partial void TestSendMailWithAuth(ж<testing.T> t) {
             finally { ᒐ.Run(); }
         });
 
-        err = SendMail(l.Addr().String(), PlainAuth(""u8, userˢ, passˢ, smtpGoogleComˢ), testExampleComˢ, slice<@string>(["other@example.com"]), slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
+        err = SendMail(l.Addr().String(), PlainAuth(""u8, userˢ, passˢ, smtpGoogleComˢ), testExampleComˢ, ["other@example.com"], slice<byte>(strings.Replace(fromTestExampleComToˢ, "\n", "\r\n", -1)));
         if (err == nil) {
             t.Error(sendMailServerDoesnTˢ);
         }
@@ -1387,15 +1330,11 @@ public static partial void TestTLSClient(ж<testing.T> t) {
         }
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
-        {
-            var errΔ1 = serverHandle(conn, t); if (errΔ1 != nil) {
-                t.Fatalf("failed to handle connection: %v", errΔ1);
-            }
+        var errΔ1 = serverHandle(conn, t); if (errΔ1 != nil) {
+            t.Fatalf("failed to handle connection: %v", errΔ1);
         }
-        {
-            var errΔ2 = ᐸꟷ(errc); if (errΔ2 != nil) {
-                t.Fatalf("client error: %v", errΔ2);
-            }
+        var errΔ2 = ᐸꟷ(errc); if (errΔ2 != nil) {
+            t.Fatalf("client error: %v", errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1423,10 +1362,8 @@ public static partial void TestTLSConnState(ж<testing.T> t) {
                 }
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
-                {
-                    var errΔ1 = serverHandle(c, t); if (errΔ1 != nil) {
-                        t.Errorf("server error: %v", errΔ1);
-                    }
+                var errΔ1 = serverHandle(c, t); if (errΔ1 != nil) {
+                    t.Errorf("server error: %v", errΔ1);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1447,11 +1384,9 @@ public static partial void TestTLSConnState(ж<testing.T> t) {
                 defer(() => cʗ2.Quit(), ref ᒐ);
                 var cfg = Ꮡ(new tls.Config(ServerName: "example.com"));
                 testHookStartTLS(cfg); // set the RootCAs
-                {
-                    var errΔ1 = c.StartTLS(cfg); if (errΔ1 != nil) {
-                        t.Errorf("StartTLS: %v", errΔ1);
-                        return;
-                    }
+                var errΔ1 = c.StartTLS(cfg); if (errΔ1 != nil) {
+                    t.Errorf("StartTLS: %v", errΔ1);
+                    return;
                 }
                 ref var cs = ref heap<tlsꓸConnectionState>(out var Ꮡcs);
                 (cs, var ok) = c.TLSConnectionState();
@@ -1529,7 +1464,7 @@ internal static error serverHandle(net.Conn c, ж<testing.T> t) {
                 if (err != nil) {
                     return err;
                 }
-                var config = Ꮡ(new tls.Config(Certificates: slice<tls.Certificate>([keypair])));
+                var config = Ꮡ(new tls.Config(Certificates: [keypair]));
                 c = new tls.ConnжConn(tls.Server(c, config));
                 defer(() => c.Close(), ref ᒐ);
                 return serverHandleTLS(c, t);
@@ -1683,8 +1618,6 @@ YMR7L8AAn1wBFU5dioARmfBcVWBOpMZIHzHUqsnTqGzuIPTfnaZWxz13PbBxEiGS
 -----END RSA TESTING KEY-----
 """u8.Raw()));
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY"); }
 
 } // end smtp_internal_test_package

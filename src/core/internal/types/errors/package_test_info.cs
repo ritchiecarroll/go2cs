@@ -45,7 +45,7 @@ using static global::go.@internal.types.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABosgpSCgoKCgoKCgpSCgpSAggANDoKCgoKClILKgoKUgoKClIKCgpSCgIKClIKCAAoMgoIACgaCgoKClIKClLiCpqYAGTQABxCCgpSygpSCgpSClIKUgoKCpoKCgoKUgoKCyoKSgoKUgoKCgg==", "25-44:1;26-43:1.1;151-183:1", "", "129=Default/1/1/2")]
+[assembly: GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABosgpSCgoKCgoKCgpSCgpSCAAwOgoKCgoKUgsqCgpSCgoKUgoKClIKCgpSCggAJDIKCAAoGgoKCgpSCgpS4gqamABk0AAcQgoKUsoKUgoKUgpSClIKCgqaCgoKClIKCgsqCkoKClIKCgoI=", "25-44:1;26-43:1.1;151-183:1", "", "125=Default/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.types;

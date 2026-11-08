@@ -57,7 +57,7 @@ partial struct lookupGoogleSRVTestsᴛ1 /*dyn*/ {
     internal @string service, proto, name;
     internal @string cname, target;
 }
-internal static slice<lookupGoogleSRVTestsᴛ1> lookupGoogleSRVTests = slice<lookupGoogleSRVTestsᴛ1>([
+internal static slice<lookupGoogleSRVTestsᴛ1> lookupGoogleSRVTests = [
     new(
         "ldap", "tcp", "google.com",
         "google.com.", "google.com."
@@ -76,7 +76,7 @@ internal static slice<lookupGoogleSRVTestsᴛ1> lookupGoogleSRVTests = slice<loo
         "", "", "_ldap._tcp.google.com.",
         "google.com.", "google.com."
     )
-]);
+];
 
 internal static array<time.Duration> backoffDuration = new time.Duration[]{time.ΔSecond, (time.Duration)(5000000000L), (time.Duration)(30000000000L)}.array();
 
@@ -119,7 +119,7 @@ public static void TestLookupGoogleSRV(ж<testing.T> t) {
         if (!hasSuffixFold(cname, tt.cname)) {
             t.Errorf("got %s; want %s", cname, tt.cname);
         }
-        foreach (var (_, srv) in srvs) {
+        foreach (var (_, srv) in range(srvs)) {
             if (!hasSuffixFold(srv.Target, tt.target)) {
                 t.Errorf("got %v; want a record containing %s", srv.OrTypedNil(), tt.target);
             }
@@ -130,10 +130,10 @@ public static void TestLookupGoogleSRV(ж<testing.T> t) {
 partial struct lookupGmailMXTestsᴛ1 /*dyn*/ {
     internal @string name, host;
 }
-internal static slice<lookupGmailMXTestsᴛ1> lookupGmailMXTests = slice<lookupGmailMXTestsᴛ1>([
+internal static slice<lookupGmailMXTestsᴛ1> lookupGmailMXTests = [
     new("gmail.com", "google.com."),
     new("gmail.com.", "google.com.")
-]);
+];
 
 public static void TestLookupGmailMX(ж<testing.T> t) {
     t.Parallel();
@@ -166,7 +166,7 @@ public static void TestLookupGmailMX(ж<testing.T> t) {
         if (len(mxs) == 0) {
             t.Error(gotNoRecordˢ);
         }
-        foreach (var (_, mx) in mxs) {
+        foreach (var (_, mx) in range(mxs)) {
             if (!hasSuffixFold(mx.Host, tt.host)) {
                 t.Errorf("got %v; want a record containing %s", mx.OrTypedNil(), tt.host);
             }
@@ -174,10 +174,10 @@ public static void TestLookupGmailMX(ж<testing.T> t) {
     }
 }
 
-internal static slice<lookupGmailMXTestsᴛ1> lookupGmailNSTests = slice<lookupGmailMXTestsᴛ1>([
+internal static slice<lookupGmailMXTestsᴛ1> lookupGmailNSTests = [
     new("gmail.com", "google.com."),
     new("gmail.com.", "google.com.")
-]);
+];
 
 public static void TestLookupGmailNS(ж<testing.T> t) {
     t.Parallel();
@@ -210,7 +210,7 @@ public static void TestLookupGmailNS(ж<testing.T> t) {
         if (len(nss) == 0) {
             t.Error(gotNoRecordˢ);
         }
-        foreach (var (_, ns) in nss) {
+        foreach (var (_, ns) in range(nss)) {
             if (!hasSuffixFold(ns.Host, tt.host)) {
                 t.Errorf("got %v; want a record containing %s", ns.OrTypedNil(), tt.host);
             }
@@ -221,10 +221,10 @@ public static void TestLookupGmailNS(ж<testing.T> t) {
 partial struct lookupGmailTXTTestsᴛ1 /*dyn*/ {
     internal @string name, txt, host;
 }
-internal static slice<lookupGmailTXTTestsᴛ1> lookupGmailTXTTests = slice<lookupGmailTXTTestsᴛ1>([
+internal static slice<lookupGmailTXTTestsᴛ1> lookupGmailTXTTests = [
     new("gmail.com", "spf", "google.com"),
     new("gmail.com.", "spf", "google.com")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnPlan9SeeHttpsˢ = (@string)"skipping on plan9; see https://golang.org/issue/29722"u8;
@@ -271,12 +271,12 @@ public static void TestLookupGmailTXT(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> lookupGooglePublicDNSAddrTests = slice<@string>([
+internal static slice<@string> lookupGooglePublicDNSAddrTests = [
     "8.8.8.8",
     "8.8.4.4",
     "2001:4860:4860::8888",
     "2001:4860:4860::8844"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string googleComˢ => ref googleComˢᵇ;
@@ -295,7 +295,7 @@ public static void TestLookupGooglePublicDNSAddr(ж<testing.T> t) {
 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
-        foreach (var (_, ip) in lookupGooglePublicDNSAddrTests) {
+        foreach (var (_, ip) in range(lookupGooglePublicDNSAddrTests)) {
             var (names, err) = LookupAddr(ip);
             if (err != nil) {
                 t.Fatal(err);
@@ -303,7 +303,7 @@ public static void TestLookupGooglePublicDNSAddr(ж<testing.T> t) {
             if (len(names) == 0) {
                 t.Error(gotNoRecordˢ);
             }
-            foreach (var (_, name) in names) {
+            foreach (var (_, name) in range(names)) {
                 if (!hasSuffixFold(name, googleComˢ) && !hasSuffixFold(name, googleˢ)) {
                     t.Errorf("got %q; want a record ending in .google.com. or .google.", name);
                 }
@@ -335,10 +335,8 @@ public static void TestLookupIPv6LinkLocalAddr(ж<testing.T> t) {
         if (!slices.Contains(addrs, fe801Lo0ˢ)) {
             t.Skipf("not supported on %s", Δruntime.GOOS);
         }
-        {
-            var (_, errΔ1) = LookupAddr(fe801Lo0ˢ); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var (_, errΔ1) = LookupAddr(fe801Lo0ˢ); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -358,12 +356,10 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> t) {
     if (err != nil) {
         t.Error(err);
     }
-    foreach (var (_, addr) in ipaddrs) {
-        {
-            @string e = lo0ˢ;
-            @string a = addr.Zone; if (e != a) {
-                t.Errorf("wrong zone: want %q, got %q", e, a);
-            }
+    foreach (var (_, addr) in range(ipaddrs)) {
+        @string e = lo0ˢ;
+        @string a = addr.Zone; if (e != a) {
+            t.Errorf("wrong zone: want %q, got %q", e, a);
         }
     }
 
@@ -371,12 +367,10 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> t) {
     if (err != nil) {
         t.Error(err);
     }
-    foreach (var (_, addr) in addrs) {
-        {
-            @string e = fe801Lo0ˢ;
-            @string a = addr; if (e != a) {
-                t.Errorf("wrong host: want %q got %q", e, a);
-            }
+    foreach (var (_, addr) in range(addrs)) {
+        @string e = fe801Lo0ˢ;
+        @string a = addr; if (e != a) {
+            t.Errorf("wrong host: want %q got %q", e, a);
         }
     }
 }
@@ -384,13 +378,13 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> t) {
 partial struct lookupCNAMETestsᴛ1 /*dyn*/ {
     internal @string name, cname;
 }
-internal static slice<lookupCNAMETestsᴛ1> lookupCNAMETests = slice<lookupCNAMETestsᴛ1>([
+internal static slice<lookupCNAMETestsᴛ1> lookupCNAMETests = [
     new("www.golang.org", "golang.org."),
     new("www.golang.org.", "golang.org."),
     new("www.google.com", "google.com."),
     new("google.com", "google.com."),
     new("cname-to-txt.go4.org", "test-txt-record.go4.org.")
-]);
+];
 
 public static void TestLookupCNAME(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -432,10 +426,10 @@ public static void TestLookupCNAME(ж<testing.T> t) {
 partial struct lookupGoogleHostTestsᴛ1 /*dyn*/ {
     internal @string name;
 }
-internal static slice<lookupGoogleHostTestsᴛ1> lookupGoogleHostTests = slice<lookupGoogleHostTestsᴛ1>([
+internal static slice<lookupGoogleHostTestsᴛ1> lookupGoogleHostTests = [
     new("google.com"),
     new("google.com.")
-]);
+];
 
 public static void TestLookupGoogleHost(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -449,7 +443,7 @@ public static void TestLookupGoogleHost(ж<testing.T> t) {
 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
-        foreach (var (_, tt) in lookupGoogleHostTests) {
+        foreach (var (_, tt) in range(lookupGoogleHostTests)) {
             var (addrs, err) = LookupHost(tt.name);
             if (err != nil) {
                 t.Fatal(err);
@@ -457,7 +451,7 @@ public static void TestLookupGoogleHost(ж<testing.T> t) {
             if (len(addrs) == 0) {
                 t.Error(gotNoRecordˢ);
             }
-            foreach (var (_, addr) in addrs) {
+            foreach (var (_, addr) in range(addrs)) {
                 if (ParseIP(addr) == nil) {
                     t.Errorf("got %q; want a literal IP address", addr);
                 }
@@ -497,10 +491,10 @@ public static void TestLookupLongTXT(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<lookupGoogleHostTestsᴛ1> lookupGoogleIPTests = slice<lookupGoogleHostTestsᴛ1>([
+internal static slice<lookupGoogleHostTestsᴛ1> lookupGoogleIPTests = [
     new("google.com"),
     new("google.com.")
-]);
+];
 
 public static void TestLookupGoogleIP(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -514,7 +508,7 @@ public static void TestLookupGoogleIP(ж<testing.T> t) {
 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
-        foreach (var (_, tt) in lookupGoogleIPTests) {
+        foreach (var (_, tt) in range(lookupGoogleIPTests)) {
             var (ips, err) = LookupIP(tt.name);
             if (err != nil) {
                 t.Fatal(err);
@@ -522,7 +516,7 @@ public static void TestLookupGoogleIP(ж<testing.T> t) {
             if (len(ips) == 0) {
                 t.Error(gotNoRecordˢ);
             }
-            foreach (var (_, ip) in ips) {
+            foreach (var (_, ip) in range(ips)) {
                 if (ip.To4() == nil && ip.To16() == nil) {
                     t.Errorf("got %v; want an IP address", ip);
                 }
@@ -538,7 +532,7 @@ partial struct revAddrTestsᴛ1 /*dyn*/ {
     public @string Reverse;
     public @string ErrPrefix;
 }
-internal static slice<revAddrTestsᴛ1> revAddrTests = slice<revAddrTestsᴛ1>([
+internal static slice<revAddrTestsᴛ1> revAddrTests = [
     new("1.2.3.4", "4.3.2.1.in-addr.arpa.", ""),
     new("245.110.36.114", "114.36.110.245.in-addr.arpa.", ""),
     new("::ffff:12.34.56.78", "78.56.34.12.in-addr.arpa.", ""),
@@ -550,13 +544,13 @@ internal static slice<revAddrTestsᴛ1> revAddrTests = slice<revAddrTestsᴛ1>([
     new("1.2.3.4.5", "", "unrecognized address"),
     new("1234:567:bcbca::89a:bcde", "", "unrecognized address"),
     new("1234:567::bcbc:adad::89a:bcde", "", "unrecognized address")
-]);
+];
 
 public static void TestReverseAddress(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
-        foreach (var (i, tt) in revAddrTests) {
+        foreach (var (i, tt) in range(revAddrTests)) {
             var (a, err) = reverseaddr(tt.Addr);
             if (len(tt.ErrPrefix) > 0 && err == nil) {
                 t.Errorf("#%d: expected %q, got <nil> (error)", i, tt.ErrPrefix);
@@ -701,7 +695,7 @@ public static void TestLookupDotsWithLocalSource(ж<testing.T> t) {
 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
-        foreach (var (i, fn) in slice<Func<Action>>([forceGoDNS, forceCgoDNS])) {
+        foreach (var (i, fn) in range(slice<Func<Action>>([forceGoDNS, forceCgoDNS]))) {
             var fixup = fn();
             if (fixup == nil) {
                 continue;
@@ -717,9 +711,9 @@ public static void TestLookupDotsWithLocalSource(ж<testing.T> t) {
                 mode = netcgoˢ;
             }
 loop:
-            foreach (var (iΔ1, name) in names) {
+            foreach (var (iΔ1, name) in range(names)) {
                 if (strings.Index(name, ".") == len(name) - 1) { // "localhost" not "localhost."
-                    foreach (var j in range(names)) {
+                    foreach (var j in range(len(names))) {
                         if (j == iΔ1) {
                             continue;
                         }
@@ -795,7 +789,7 @@ internal static void testDots(ж<testing.T> t, @string mode) {
     if (err != nil) {
         t.Errorf("LookupAddr(8.8.8.8): %v (mode=%v)", err, mode);
     } else {
-        foreach (var (_, name) in names) {
+        foreach (var (_, name) in range(names)) {
             if (!hasSuffixFold(name, googleComˢ) && !hasSuffixFold(name, googleˢ)) {
                 t.Errorf("LookupAddr(8.8.8.8) = %v, want names ending in .google.com or .google with trailing dot (mode=%v)", names, mode);
                 break;
@@ -814,7 +808,7 @@ internal static void testDots(ж<testing.T> t, @string mode) {
     if (err != nil) {
         t.Errorf("LookupMX(google.com): %v (mode=%v)", err, mode);
     } else {
-        foreach (var (_, mx) in mxs) {
+        foreach (var (_, mx) in range(mxs)) {
             if (!hasSuffixFold(mx.Host, googleComˢ)) {
                 t.Errorf("LookupMX(google.com) = %v, want names ending in .google.com. with trailing dot (mode=%v)", mxString(mxs), mode);
                 break;
@@ -826,7 +820,7 @@ internal static void testDots(ж<testing.T> t, @string mode) {
     if (err != nil) {
         t.Errorf("LookupNS(google.com): %v (mode=%v)", err, mode);
     } else {
-        foreach (var (_, ns) in nss) {
+        foreach (var (_, ns) in range(nss)) {
             if (!hasSuffixFold(ns.Host, googleComˢ)) {
                 t.Errorf("LookupNS(google.com) = %v, want names ending in .google.com. with trailing dot (mode=%v)", nsString(nss), mode);
                 break;
@@ -841,7 +835,7 @@ internal static void testDots(ж<testing.T> t, @string mode) {
         if (!hasSuffixFold(cname, googleComˢ)) {
             t.Errorf("LookupSRV(ldap, tcp, google.com) returned cname=%v, want name ending in .google.com. with trailing dot (mode=%v)", cname, mode);
         }
-        foreach (var (_, srv) in srvs) {
+        foreach (var (_, srv) in range(srvs)) {
             if (!hasSuffixFold(srv.Target, googleComˢ)) {
                 t.Errorf("LookupSRV(ldap, tcp, google.com) returned addrs=%v, want names ending in .google.com. with trailing dot (mode=%v)", srvString(srvs), mode);
                 break;
@@ -854,7 +848,7 @@ internal static @string mxString(slice<ж<global::go.net_package.MX>> mxs) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     @string sep = ""u8;
     fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "["u8);
-    foreach (var (_, mx) in mxs) {
+    foreach (var (_, mx) in range(mxs)) {
         fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "%s%s:%d"u8, sep, mx.Host, mx.Pref);
         sep = " ";
     }
@@ -866,7 +860,7 @@ internal static @string nsString(slice<ж<global::go.net_package.NS>> nss) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     @string sep = ""u8;
     fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "["u8);
-    foreach (var (_, ns) in nss) {
+    foreach (var (_, ns) in range(nss)) {
         fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "%s%s"u8, sep, ns.Host);
         sep = " ";
     }
@@ -878,7 +872,7 @@ internal static @string srvString(slice<ж<global::go.net_package.SRV>> srvs) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     @string sep = ""u8;
     fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "["u8);
-    foreach (var (_, srv) in srvs) {
+    foreach (var (_, srv) in range(srvs)) {
         fmt.Fprintf(new net_test_package.strings_BuilderжWriter(Ꮡbuf), "%s%s:%d:%d:%d"u8, sep, srv.Target, srv.Port, srv.Priority, srv.Weight);
         sep = " ";
     }
@@ -935,16 +929,14 @@ public static void TestLookupPort(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (port, err) = LookupPort(tt.network, tt.name);
         if (port != tt.port || (err == nil) != tt.ok) {
             t.Errorf("LookupPort(%q, %q) = %d, %v; want %d, error=%t", tt.network, tt.name, port, err, tt.port, !tt.ok);
         }
         if (err != nil) {
-            {
-                var perr = parseLookupPortError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseLookupPortError(err); if (perr != nil) {
+                t.Error(perr);
             }
         }
     }
@@ -969,7 +961,7 @@ public static void TestLookupPort_Minimal(ж<testing.T> t) {
         new("tcp6", "http", 80)
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (port, err) = LookupPort(tt.network, tt.name);
         if (port != tt.port || err != nil) {
             t.Errorf("LookupPort(%q, %q) = %d, %v; want %d, error=nil", tt.network, tt.name, port, err, tt.port);
@@ -992,7 +984,7 @@ public static void TestLookupProtocol_Minimal(ж<testing.T> t) {
         new("ipv6-icmp", 58)
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (got, err) = lookupProtocol(context.Background(), tt.name);
         if (got != tt.want || err != nil) {
             t.Errorf("LookupProtocol(%q) = %d, %v; want %d, error=nil", tt.name, got, err, tt.want);
@@ -1093,21 +1085,17 @@ public static void TestLookupContextCancel(ж<testing.T> t) {
             // that the original call does not cancel the shared Context.
             // (See https://go.dev/issue/22724.) Explicitly check for
             // cancellation now, just in case fn itself doesn't notice it.
-            {
-                var errΔ2 = ctx.Err(); if (errΔ2 != nil) {
-                    t.Logf("testHookLookupIP canceled");
-                    return (default, errΔ2);
-                }
+            var errΔ2 = ctx.Err(); if (errΔ2 != nil) {
+                t.Logf("testHookLookupIP canceled");
+                return (default, errΔ2);
             }
             t.Logf("testHookLookupIP performing lookup");
             return fn(ctx, network, host);
         };
 
         var (_, err) = DefaultResolver.LookupIPAddr(lookupCtx, googleComˢ2);
-        {
-            var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok || dnsErr.Err != errCanceled.Error()) {
-                t.Errorf("unexpected error from canceled, blocked LookupIPAddr: %v", err);
-            }
+        var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok || dnsErr.Err != errCanceled.Error()) {
+            t.Errorf("unexpected error from canceled, blocked LookupIPAddr: %v", err);
         }
         builtin.close(unblockLookup);
     }
@@ -1231,7 +1219,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> t) 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
         var resolvers = new slice<ж<lookupCustomResolver>>(2);
-        foreach (var i in range(resolvers)) {
+        foreach (var i in range(len(resolvers))) {
             ref var cs = ref heap<lookupCustomResolver>(new lookupCustomResolver(Resolver: Ꮡ(new Resolver(PreferGo: true))), out var Ꮡcs);
             cs.Dial = Ꮡcs.dial();
             resolvers[i] = Ꮡcs;
@@ -1239,7 +1227,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> t) 
 
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(len(resolvers));
-        foreach (var (i, resolver) in resolvers) {
+        foreach (var (i, resolver) in range(resolvers)) {
             goǃ((ж<global::go.net_package.Resolver> r, nint index) => {
                 GoFrame ᒐ = default;
                 try {
@@ -1259,7 +1247,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> t) 
             t.FailNow();
         }
 
-        foreach (var (i, resolver) in resolvers) {
+        foreach (var (i, resolver) in range(resolvers)) {
             if (!resolver.dialed) {
                 t.Errorf("custom resolver %d not dialed during lookup", i);
             }
@@ -1273,7 +1261,7 @@ partial struct ipVersionTestsᴛ1 /*dyn*/ {
     internal @string network;
     internal byte version;
 }
-internal static slice<ipVersionTestsᴛ1> ipVersionTests = slice<ipVersionTestsᴛ1>([
+internal static slice<ipVersionTestsᴛ1> ipVersionTests = [
     new("tcp", 0),
     new("tcp4", (byte)'4'),
     new("tcp6", (byte)'6'),
@@ -1285,15 +1273,13 @@ internal static slice<ipVersionTestsᴛ1> ipVersionTests = slice<ipVersionTests�
     new("ip6", (byte)'6'),
     new("ip7", 0),
     new("", 0)
-]);
+];
 
 public static void TestIPVersion(ж<testing.T> t) {
-    foreach (var (_, tt) in ipVersionTests) {
-        {
-            var version = ipVersion(tt.network); if (version != tt.version) {
-                t.Errorf("Family for: %s. Expected: %s, Got: %s", tt.network,
-                    (@string)tt.version, (@string)version);
-            }
+    foreach (var (_, tt) in range(ipVersionTests)) {
+        var version = ipVersion(tt.network); if (version != tt.version) {
+            t.Errorf("Family for: %s. Expected: %s, Got: %s", tt.network,
+                (@string)tt.version, (@string)version);
         }
     }
 }
@@ -1326,7 +1312,7 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> t) {
             new(@new<float64>(), (nint)137)
         ]);
         var ctx = context.Background();
-        foreach (var (_, kv) in keyValues) {
+        foreach (var (_, kv) in range(keyValues)) {
             ctx = context.WithValue(ctx, kv.key, kv.value);
         }
 
@@ -1338,7 +1324,7 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> t) {
         var keyValuesʗ1 = keyValues;
         var wantIPsʗ1 = wantIPs;
         var checkCtxValues = (slice<global::go.net_package.IPAddr>, error) (context.Context ctx_, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
-            foreach (var (_, kv) in keyValuesʗ1) {
+            foreach (var (_, kv) in range(keyValuesʗ1)) {
                 var (g, w) = (ctx_.Value(kv.key), kv.value);
                 if (!reflect.DeepEqual(g, w)) {
                     t.Errorf("Value lookup:\n\tGot:  %v\n\tWant: %v", g, w);
@@ -1353,7 +1339,7 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> t) {
             @new<global::go.net_package.Resolver>()
         ]);
 
-        foreach (var (i, resolver) in resolvers) {
+        foreach (var (i, resolver) in range(resolvers)) {
             var (gotIPs, err) = resolver.LookupIPAddr(ctx, golangOrgˢ);
             if (err != nil) {
                 t.Errorf("Resolver #%d: unexpected error: %v", i, err);
@@ -1378,11 +1364,11 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
         }, ref ᒐ);
 
         var queries = slice<slice<@string>>([
-            slice<@string>(["udp", "golang.org"]),
-            slice<@string>(["udp4", "golang.org"]),
-            slice<@string>(["udp6", "golang.org"]),
-            slice<@string>(["udp", "golang.org"]),
-            slice<@string>(["udp", "golang.org"])
+            ["udp", "golang.org"],
+            ["udp4", "golang.org"],
+            ["udp6", "golang.org"],
+            ["udp", "golang.org"],
+            ["udp", "golang.org"]
         ]);
         var results = new map<array<@string>, slice<global::go.net_package.IPAddr>>{
             [new @string[]{"udp", "golang.org"}.array()] = slice<global::go.net_package.IPAddr>([
@@ -1390,8 +1376,8 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
                 new(IP: IPv6loopback)]),
             [new @string[]{"udp4", "golang.org"}.array()] = slice<global::go.net_package.IPAddr>([
                 new(IP: IPv4(127, 0, 0, 1))]),
-            [new @string[]{"udp6", "golang.org"}.array()] = slice<global::go.net_package.IPAddr>([
-                new(IP: IPv6loopback)])
+            [new @string[]{"udp6", "golang.org"}.array()] = [
+                new(IP: IPv6loopback)]
         };
         ref var calls = ref heap<int32>((int32)0, out var Ꮡcalls);
         var waitCh = new channel<EmptyStruct>(0);
@@ -1420,7 +1406,7 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         ref var wg = ref heap<Δsync.WaitGroup>(new Δsync.WaitGroup(), out var Ꮡwg);
-        foreach (var (_, q) in queries) {
+        foreach (var (_, q) in range(queries)) {
             @string network = q[0];
             @string host = q[1];
             Ꮡwg.Add(1);
@@ -1523,10 +1509,10 @@ public static void TestResolverLookupIP(ж<testing.T> t) {
 
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
-        foreach (var (_, vᴛ1) in slice<TestResolverLookupIP_type>([
+        foreach (var (_, vᴛ1) in range(slice<TestResolverLookupIP_type>([
             new("go", forceGoDNS),
             new("cgo", forceCgoDNS)
-        ])) {
+        ]))) {
             ref var impl = ref heap(new TestResolverLookupIP_type(), out var Ꮡimpl);
             impl = vᴛ1;
 
@@ -1541,7 +1527,7 @@ public static void TestResolverLookupIP(ж<testing.T> t) {
                     var fixupʗ1 = fixup;
                     defer(fixupʗ1, ref ᒐ);
 
-                    foreach (var (_, network) in slice<@string>(["ip", "ip4", "ip6"])) {
+                    foreach (var (_, network) in range(slice<@string>(["ip", "ip4", "ip6"]))) {
                         tΔ1.Run("network: "u8 + network, (ж<testing.T> tΔ2) => {
                             switch (ᐧ) {
                             case {} when network == "ip4"u8 && !v4Ok: {
@@ -1563,17 +1549,15 @@ public static void TestResolverLookupIP(ж<testing.T> t) {
 
                             slice<netipꓸAddr> v4Addrs = default;
                             slice<netipꓸAddr> v6Addrs = default;
-                            foreach (var (_, ip) in ips) {
-                                {
-                                    var (addr, ok) = netip.AddrFromSlice(ip); if (ok) {
-                                        if (addr.Is4()) {
-                                            v4Addrs = append(v4Addrs, addr);
-                                        } else {
-                                            v6Addrs = append(v6Addrs, addr);
-                                        }
+                            foreach (var (_, ip) in range(ips)) {
+                                var (addr, ok) = netip.AddrFromSlice(ip); if (ok) {
+                                    if (addr.Is4()) {
+                                        v4Addrs = append(v4Addrs, addr);
                                     } else {
-                                        tΔ2.Fatalf("IP=%q is neither IPv4 nor IPv6", ip);
+                                        v6Addrs = append(v6Addrs, addr);
                                     }
+                                } else {
+                                    tΔ2.Fatalf("IP=%q is neither IPv4 nor IPv6", ip);
                                 }
                             }
 
@@ -1637,16 +1621,12 @@ public static partial void TestDNSTimeout(ж<testing.T> t) {
             t.Helper();
             if (errΔ1 == nil) {
                 t.Error(expectedAnErrorˢ);
-            } else {
-                var (dnserr, ok) = errΔ1._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok) {
-                    t.Errorf("got error type %T, want %T", errΔ1, (ж<global::go.net_package.DNSError>)nil);
-                } else if (!dnserr.IsTimeout) {
-                    t.Errorf("got error %#v, want IsTimeout == true", dnserr.OrTypedNil());
-                } else {
-                    var isTimeout = dnserr.Timeout(); if (!isTimeout) {
-                        t.Errorf("got err.Timeout() == %t, want true", isTimeout);
-                    }
-                }
+            } else if (!errΔ1._<ж<global::go.net_package.DNSError>>(out var dnserr)) {
+                t.Errorf("got error type %T, want %T", errΔ1, (ж<global::go.net_package.DNSError>)nil);
+            } else if (!dnserr.IsTimeout) {
+                t.Errorf("got error %#v, want IsTimeout == true", dnserr.OrTypedNil());
+            } else if (dnserr.Timeout() is var isTimeout && !isTimeout) {
+                t.Errorf("got err.Timeout() == %t, want true", isTimeout);
             }
         }
 
@@ -1811,10 +1791,8 @@ private static readonly @string unknownServiceˢᵇ = "_-unknown-service-"u8;
 public static void TestLookupPortNotFound(ж<testing.T> t) {
     allResolvers(t, (ж<testing.T> tΔ1) => {
         var (_, err) = LookupPort(udpˢ, unknownServiceˢ);
-        {
-            var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !dnsErr.IsNotFound) {
-                tΔ1.Fatalf("unexpected error: %v", err);
-            }
+        var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !dnsErr.IsNotFound) {
+            tΔ1.Fatalf("unexpected error: %v", err);
         }
     });
 }
@@ -1832,10 +1810,8 @@ internal static @string tcpOnlyService = func(@string () => {
 public static void TestLookupPortDifferentNetwork(ж<testing.T> t) {
     allResolvers(t, (ж<testing.T> tΔ1) => {
         var (_, err) = LookupPort(udpˢ, tcpOnlyService);
-        {
-            var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !dnsErr.IsNotFound) {
-                tΔ1.Fatalf("unexpected error: %v", err);
-            }
+        var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !dnsErr.IsNotFound) {
+            tΔ1.Fatalf("unexpected error: %v", err);
         }
     });
 }
@@ -1955,7 +1931,7 @@ public static void TestLookupNoSuchHost(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var v = ref heap(new TestLookupNoSuchHost_tests(), out var Ꮡv);
         v = vᴛ1;
 
@@ -1970,20 +1946,18 @@ public static void TestLookupNoSuchHost(ж<testing.T> t) {
                         tΔ2.Errorf("unexpected success");
                         return;
                     }
-                    {
-                        var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (ok) {
-                            var succeeded = true;
-                            if (!dnsErr.IsNotFound) {
-                                succeeded = false;
-                                tΔ2.Log(isNotFoundIsSetToFalseˢ);
-                            }
-                            if (dnsErr.Err != errNoSuchHost.Error()) {
-                                succeeded = false;
-                                tΔ2.Logf("error message is not equal to: %v", errNoSuchHost.Error());
-                            }
-                            if (succeeded) {
-                                return;
-                            }
+                    var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (ok) {
+                        var succeeded = true;
+                        if (!dnsErr.IsNotFound) {
+                            succeeded = false;
+                            tΔ2.Log(isNotFoundIsSetToFalseˢ);
+                        }
+                        if (dnsErr.Err != errNoSuchHost.Error()) {
+                            succeeded = false;
+                            tΔ2.Logf("error message is not equal to: %v", errNoSuchHost.Error());
+                        }
+                        if (succeeded) {
+                            return;
                         }
                     }
                     testenv.SkipFlakyNet(new net_test_package.testing_TжTB(tΔ2));

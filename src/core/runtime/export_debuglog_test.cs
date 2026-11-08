@@ -20,41 +20,15 @@ internal static ж<Dlogger> Dlog() {
     return dlogImpl();
 }
 
-internal static void End(this ж<global::go.runtime_package.dloggerImpl> Ꮡl) {
-    Ꮡl.end();
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> B(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, bool x) {
-    return Ꮡl.b(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> I(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, nint x) {
-    return Ꮡl.i(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> I16(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, int16 x) {
-    return Ꮡl.i16(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> U64(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uint64 x) {
-    return Ꮡl.u64(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> Hex(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uint64 x) {
-    return Ꮡl.hex(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> P(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, any x) {
-    return Ꮡl.p(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> S(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, @string x) {
-    return Ꮡl.s(x);
-}
-
-internal static ж<global::go.runtime_package.dloggerImpl> PC(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uintptr x) {
-    return Ꮡl.pc(x);
-}
+internal static void End(this ж<global::go.runtime_package.dloggerImpl> Ꮡl) { Ꮡl.end(); }
+internal static ж<global::go.runtime_package.dloggerImpl> B(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, bool x) { return Ꮡl.b(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> I(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, nint x) { return Ꮡl.i(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> I16(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, int16 x) { return Ꮡl.i16(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> U64(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uint64 x) { return Ꮡl.u64(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> Hex(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uint64 x) { return Ꮡl.hex(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> P(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, any x) { return Ꮡl.p(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> S(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, @string x) { return Ꮡl.s(x); }
+internal static ж<global::go.runtime_package.dloggerImpl> PC(this ж<global::go.runtime_package.dloggerImpl> Ꮡl, uintptr x) { return Ꮡl.pc(x); }
 
 public static @string DumpDebugLog() {
     var gp = getg();

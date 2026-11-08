@@ -97,11 +97,11 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ1 = write;
     t.Run(basicWriteReadˢ, (ж<testing.T> tΔ5) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 11, 1);
-        writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        readʗ1(tΔ5, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 0))]));
+        writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        readʗ1(tΔ5, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 0))]);
         readʗ1(tΔ5, b, default, default); // release data returned by previous read
-        writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
-        readʗ1(tΔ5, b, slice<uint64>([8, 99, 101, 102, 201, 202, 203, 204]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2))]));
+        writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2)), 99, [101, 102], [201, 202, 203, 204]);
+        readʗ1(tΔ5, b, [8, 99, 101, 102, 201, 202, 203, 204], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2))]);
     });
 
     var myTagsʗ2 = myTags;
@@ -109,10 +109,10 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ2 = write;
     t.Run(readManyˢ, (ж<testing.T> tΔ6) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 50, 50);
-        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
-        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1)), 500, slice<uint64>([502, 504]), slice<uintptr>([506]));
-        readʗ2(tΔ6, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204, 5, 500, 502, 504, 506]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1))]));
+        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), 99, [101, 102], [201, 202, 203, 204]);
+        writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1)), 500, [502, 504], [506]);
+        readʗ2(tΔ6, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204, 5, 500, 502, 504, 506], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1))]);
     });
 
     var myTagsʗ3 = myTags;
@@ -120,9 +120,9 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ3 = write;
     t.Run(readManyShortDataˢ, (ж<testing.T> tΔ7) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 50, 50);
-        writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
-        readʗ3(tΔ7, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2))]));
+        writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2)), 99, [101, 102], [201, 202, 203, 204]);
+        readʗ3(tΔ7, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2))]);
     });
 
     var myTagsʗ4 = myTags;
@@ -130,9 +130,9 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ4 = write;
     t.Run(readManyShortTagsˢ, (ж<testing.T> tΔ8) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 50, 50);
-        writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
-        readʗ4(tΔ8, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2))]));
+        writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2)), 99, [101, 102], [201, 202, 203, 204]);
+        readʗ4(tΔ8, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2))]);
     });
 
     var myTagsʗ5 = myTags;
@@ -141,17 +141,17 @@ public static void TestProfBuf(ж<testing.T> t) {
     t.Run(readAfterOverflow1ˢ, (ж<testing.T> tΔ9) => {
         // overflow record synthesized by write
         var b = runtime_internal_test_package.NewProfBuf(2, 16, 5);
-        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));            // uses 10
-        readʗ5(tΔ9, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0))])); // reads 10 but still in use until next read
-        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5]));                        // uses 6
-        readʗ5(tΔ9, b, slice<uint64>([6, 1, 2, 3, 4, 5]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0))]));              // reads 6 but still in use until next read
+        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);    // uses 10
+        readʗ5(tΔ9, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0))]); // reads 10 but still in use until next read
+        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0)), 1, [2, 3], [4, 5]);                // uses 6
+        readʗ5(tΔ9, b, [6, 1, 2, 3, 4, 5], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 0))]);              // reads 6 but still in use until next read
         // now 10 available
-        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204, 205, 206, 207, 208, 209])); // no room
+        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 2)), 99, [101, 102], [201, 202, 203, 204, 205, 206, 207, 208, 209]); // no room
         for (nint i = 0; i < 299; i++) {
-            writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 3)), (int64)(100 + i), slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204])); // no room for overflow+this record
+            writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 3)), (int64)(100 + i), [101, 102], [201, 202, 203, 204]); // no room for overflow+this record
         }
-        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1)), 500, slice<uint64>([502, 504]), slice<uintptr>([506])); // room for overflow+this record
-        readʗ5(tΔ9, b, slice<uint64>([5, 99, 0, 0, 300, 5, 500, 502, 504, 506]), slice<@unsafe.Pointer>([default, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1))]));
+        writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1)), 500, [502, 504], [506]); // room for overflow+this record
+        readʗ5(tΔ9, b, [5, 99, 0, 0, 300, 5, 500, 502, 504, 506], [default, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1))]);
     });
 
     var myTagsʗ6 = myTags;
@@ -160,16 +160,16 @@ public static void TestProfBuf(ж<testing.T> t) {
     t.Run(readAfterOverflow2ˢ, (ж<testing.T> tΔ10) => {
         // overflow record synthesized by read
         var b = runtime_internal_test_package.NewProfBuf(2, 16, 5);
-        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213]));
+        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 2)), 99, [101, 102], [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213]);
         for (nint i = 0; i < 299; i++) {
-            writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 3)), 100, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
+            writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 3)), 100, [101, 102], [201, 202, 203, 204]);
         }
-        readʗ6(tΔ10, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 0))])); // reads 10 but still in use until next read
-        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, slice<uint64>([502, 504]), slice<uintptr>([]));                      // still overflow
-        readʗ6(tΔ10, b, slice<uint64>([5, 99, 0, 0, 301]), slice<@unsafe.Pointer>([default]));                                                    // overflow synthesized by read
-        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, slice<uint64>([502, 505]), slice<uintptr>([506]));                   // written
-        readʗ6(tΔ10, b, slice<uint64>([5, 500, 502, 505, 506]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1))]));
+        readʗ6(tΔ10, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 0))]); // reads 10 but still in use until next read
+        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, [502, 504], []);              // still overflow
+        readʗ6(tΔ10, b, [5, 99, 0, 0, 301], [default]);                                                    // overflow synthesized by read
+        writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, [502, 505], [506]);           // written
+        readʗ6(tΔ10, b, [5, 500, 502, 505, 506], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1))]);
     });
 
     var myTagsʗ7 = myTags;
@@ -177,15 +177,15 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ7 = write;
     t.Run(readAtEndAfterOverflowˢ, (ж<testing.T> tΔ11) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 12, 5);
-        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
+        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 2)), 99, [101, 102], [201, 202, 203, 204]);
         for (nint i = 0; i < 299; i++) {
-            writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 3)), 100, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
+            writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 3)), 100, [101, 102], [201, 202, 203, 204]);
         }
-        readʗ7(tΔ11, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 0))]));
-        readʗ7(tΔ11, b, slice<uint64>([5, 99, 0, 0, 300]), slice<@unsafe.Pointer>([default]));
-        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1)), 500, slice<uint64>([502, 504]), slice<uintptr>([506]));
-        readʗ7(tΔ11, b, slice<uint64>([5, 500, 502, 504, 506]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1))]));
+        readʗ7(tΔ11, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 0))]);
+        readʗ7(tΔ11, b, [5, 99, 0, 0, 300], [default]);
+        writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1)), 500, [502, 504], [506]);
+        readʗ7(tΔ11, b, [5, 500, 502, 504, 506], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1))]);
     });
 
     var myTagsʗ8 = myTags;
@@ -194,12 +194,12 @@ public static void TestProfBuf(ж<testing.T> t) {
     var writeʗ8 = write;
     t.Run(blockingWriteReadˢ, (ж<testing.T> tΔ12) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 11, 1);
-        var wait = readBlockʗ1(tΔ12, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 0))]));
-        writeʗ8(tΔ12, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
+        var wait = readBlockʗ1(tΔ12, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 0))]);
+        writeʗ8(tΔ12, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
         wait();
-        wait = readBlockʗ1(tΔ12, b, slice<uint64>([8, 99, 101, 102, 201, 202, 203, 204]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 2))]));
+        wait = readBlockʗ1(tΔ12, b, [8, 99, 101, 102, 201, 202, 203, 204], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 2))]);
         time.Sleep(10 * time.Millisecond);
-        writeʗ8(tΔ12, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 2)), 99, slice<uint64>([101, 102]), slice<uintptr>([201, 202, 203, 204]));
+        writeʗ8(tΔ12, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ8, 2)), 99, [101, 102], [201, 202, 203, 204]);
         wait();
         wait = readBlockʗ1(tΔ12, b, default, default);
         b.Close();
@@ -215,8 +215,8 @@ public static void TestProfBuf(ж<testing.T> t) {
     t.Run(dataWraparoundˢ, (ж<testing.T> tΔ13) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 16, 1024);
         for (nint i = 0; i < 10; i++) {
-            writeʗ9(tΔ13, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ9, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-            readʗ8(tΔ13, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ9, 0))]));
+            writeʗ9(tΔ13, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ9, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+            readʗ8(tΔ13, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ9, 0))]);
             readʗ8(tΔ13, b, default, default); // release data returned by previous read
         }
     });
@@ -227,8 +227,8 @@ public static void TestProfBuf(ж<testing.T> t) {
     t.Run(tagWraparoundˢ, (ж<testing.T> tΔ14) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 1024, 2);
         for (nint i = 0; i < 10; i++) {
-            writeʗ10(tΔ14, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ10, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-            readʗ9(tΔ14, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ10, 0))]));
+            writeʗ10(tΔ14, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ10, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+            readʗ9(tΔ14, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ10, 0))]);
             readʗ9(tΔ14, b, default, default); // release data returned by previous read
         }
     });
@@ -239,8 +239,8 @@ public static void TestProfBuf(ж<testing.T> t) {
     t.Run(bothWraparoundˢ, (ж<testing.T> tΔ15) => {
         var b = runtime_internal_test_package.NewProfBuf(2, 16, 2);
         for (nint i = 0; i < 10; i++) {
-            writeʗ11(tΔ15, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ11, 0)), 1, slice<uint64>([2, 3]), slice<uintptr>([4, 5, 6, 7, 8, 9]));
-            readʗ10(tΔ15, b, slice<uint64>([10, 1, 2, 3, 4, 5, 6, 7, 8, 9]), slice<@unsafe.Pointer>([@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ11, 0))]));
+            writeʗ11(tΔ15, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ11, 0)), 1, [2, 3], [4, 5, 6, 7, 8, 9]);
+            readʗ10(tΔ15, b, [10, 1, 2, 3, 4, 5, 6, 7, 8, 9], [@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ11, 0))]);
             readʗ10(tΔ15, b, default, default); // release data returned by previous read
         }
     });
@@ -251,7 +251,7 @@ public static partial void TestProfBufDoubleWakeup(ж<testing.T> t) {
     var bʗ1 = b;
     goǃ(() => {
         foreach (var _ᴛ1 in range(1000)) {
-            bʗ1.Write(nil, 1, slice<uint64>([5, 6]), slice<uintptr>([7, 8]));
+            bʗ1.Write(nil, 1, [5, 6], [7, 8]);
         }
         bʗ1.Close();
     });
@@ -315,7 +315,7 @@ public static void TestProfBufWakeup(ж<testing.T> t) {
     awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
     // NB: this writes 6 words not 4. Fine for the test.
     // The reader shouldn't wake up for this
-    b.Write(nil, 1, slice<uint64>([1, 2]), slice<uintptr>([3, 4]));
+    b.Write(nil, 1, [1, 2], [3, 4]);
 
     // The reader should still be blocked. The awaitBlockedGoroutine here
     // checks that and also gives a buggy implementation a chance to
@@ -326,7 +326,7 @@ public static void TestProfBufWakeup(ж<testing.T> t) {
     // pass. But if the implementation is broken, this test should fail
     // regularly, even if not 100% of the time.
     awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
-    b.Write(nil, 1, slice<uint64>([5, 6]), slice<uintptr>([7, 8]));
+    b.Write(nil, 1, [5, 6], [7, 8]);
     b.Close();
 
     // Wait here so we can be sure the reader got the data

@@ -29,10 +29,8 @@ public static void TestSyscallArgs(ж<testing.T> t) {
     }
 
     var cmd = testenv.Command(new runtime_test_package.testing_TжTB(t), exe);
-    {
-        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
-            t.Fatalf("test program failed: %v\n%s", errΔ1, @out);
-        }
+    var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
+        t.Fatalf("test program failed: %v\n%s", errΔ1, @out);
     }
 }
 

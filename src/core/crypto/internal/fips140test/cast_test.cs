@@ -43,7 +43,7 @@ using nistec = go.crypto.@internal.fips140.nistec_package;
 
 partial class fipstest_internal_test_package {
 
-internal static slice<@string> allCASTs = slice<@string>([
+internal static slice<@string> allCASTs = [
     "AES-CBC",
     "CTR_DRBG",
     "CounterKDF",
@@ -69,7 +69,7 @@ internal static slice<@string> allCASTs = slice<@string>([
     "TLSv1.2-SHA2-256",
     "TLSv1.3-SHA2-256",
     "cSHAKE128"
-]);
+];
 
 [GoInit] internal static void initΔ1() {
     if (fips140.Version() == "v1.0.0"u8) {
@@ -116,7 +116,7 @@ public static void TestAllCASTs(ж<testing.T> t) {
             if (errΔ2 != nil) {
                 return errΔ2;
             }
-            foreach (var (_, m) in castReʗ1.FindAllSubmatch(data, -1)) {
+            foreach (var (_, m) in range(castReʗ1.FindAllSubmatch(data, -1))) {
                 ᏑfoundCASTs.ValueSlot = append(ᏑfoundCASTs.ValueSlot, (@string)m[2]);
             }
             return default;
@@ -199,7 +199,7 @@ public static void TestCASTPasses(ж<testing.T> t) {
         t.Errorf("TestConditionals did not complete successfully");
     }
 
-    foreach (var (_, name) in allCASTs) {
+    foreach (var (_, name) in range(allCASTs)) {
         var outʗ1 = @out;
         t.Run(name, (ж<testing.T> tΔ1) => {
             if (!strings.Contains((@string)outʗ1, fmt.Sprintf("passed: %s\n"u8, name))) {
@@ -218,7 +218,7 @@ public static void TestCASTFailures(ж<testing.T> t) {
     moduleStatus(t);
     cryptotest.MustSupportFIPS140(t);
 
-    foreach (var (_, name) in allCASTs) {
+    foreach (var (_, name) in range(allCASTs)) {
         t.Run(name, (ж<testing.T> tΔ1) => {
             // Don't parallelize if running in verbose mode, to produce a less
             // confusing recoding for the validation lab.

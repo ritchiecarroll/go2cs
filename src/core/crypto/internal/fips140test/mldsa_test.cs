@@ -126,10 +126,8 @@ internal static void testMLDSAAccumulated(ж<testing.T> t, Func<slice<byte>, (ж
         if (pub.Value != dk.PublicKey().Value) {
             t.Fatalf("public key mismatch");
         }
-        {
-            var errΔ1 = Verify(dk.PublicKey(), msg, sig, ""u8); if (errΔ1 != nil) {
-                t.Fatalf("Verify: %v", errΔ1);
-            }
+        var errΔ1 = Verify(dk.PublicKey(), msg, sig, ""u8); if (errΔ1 != nil) {
+            t.Fatalf("Verify: %v", errΔ1);
         }
     }
 
@@ -207,10 +205,8 @@ public static void TestMLDSAAllocations(ж<testing.T> t) {
             if (err != nil) {
                 t.Fatalf("Sign: %v", err);
             }
-            {
-                var errΔ1 = Verify(pk, message, sig, context); if (errΔ1 != nil) {
-                    t.Fatalf("Verify: %v", errΔ1);
-                }
+            var errΔ1 = Verify(pk, message, sig, context); if (errΔ1 != nil) {
+                t.Fatalf("Verify: %v", errΔ1);
             }
         }); if (allocs > expected) {
             t.Errorf("expected %0.0f allocations, got %0.1f", expected, allocs);
@@ -248,10 +244,8 @@ internal static void benchmarkMLDSASign(ж<testing.B> b, Func<slice<byte>, (ж<m
     nint i = 0;
     while (b.Loop()) {
         @string msg = messages[i];
-        {
-            i++; if (i >= len(messages)) {
-                i = 0;
-            }
+        i++; if (i >= len(messages)) {
+            i = 0;
         }
         SignDeterministic(priv, slice<byte>(msg), ""u8);
     }
@@ -289,10 +283,8 @@ internal static void benchmarkMLDSAVerify(ж<testing.B> b, Func<ж<mldsa.Private
         if (errΔ1 != nil) {
             b.Fatalf("NewPublicKey: %v", errΔ1);
         }
-        {
-            var errΔ2 = Verify(pk, msg, sig, contextˢ); if (errΔ2 != nil) {
-                b.Fatalf("Verify: %v", errΔ2);
-            }
+        var errΔ2 = Verify(pk, msg, sig, contextˢ); if (errΔ2 != nil) {
+            b.Fatalf("Verify: %v", errΔ2);
         }
     }
 }
@@ -315,7 +307,7 @@ public static void BenchmarkMLDSAKeygen(ж<testing.B> b) {
     });
 }
 
-internal static slice<@string> benchmarkMessagesMLDSA44 = slice<@string>([
+internal static slice<@string> benchmarkMessagesMLDSA44 = [
     "BUS7IAZWYOZ4JHJQYDWRTJL4V7",
     "MK5HFFNP4TB5S6FM4KUFZSIXPD",
     "DBFETUV4O56J57FXTXTIVCDIAR",
@@ -504,9 +496,9 @@ internal static slice<@string> benchmarkMessagesMLDSA44 = slice<@string>([
     "UYE4IQPMSTXVQG7EJALKWWEGDN",
     "TIV2L5Z6K7SNGNUVWSNKTAF4UE",
     "I3FQOAW3PINUK26P62HCX657FO"
-]);
+];
 
-internal static slice<@string> benchmarkMessagesMLDSA65 = slice<@string>([
+internal static slice<@string> benchmarkMessagesMLDSA65 = [
     "NDGEUBUDWGRJJ3A4UNZZQOEKNL",
     "ACGYQUXN4POOFUENCLNCIPHFAZ",
     "Z3XETEYKROVJH7SIHOIAYCTO42",
@@ -654,9 +646,9 @@ internal static slice<@string> benchmarkMessagesMLDSA65 = slice<@string>([
     "AUYRBNVCOYYHOHUYOOFIZ2FWMD",
     "22EJVDEQ7PASLBAMTVKXOQP5RJ",
     "3S6NATWA57SFTZEW7UZUOUYAEU"
-]);
+];
 
-internal static slice<@string> benchmarkMessagesMLDSA87 = slice<@string>([
+internal static slice<@string> benchmarkMessagesMLDSA87 = [
     "LQQPGPNUME6QDNDTQTS4BA7I7M",
     "PTYEEJ7RMI6MXNN6PZH222Y6QI",
     "R6DTHAADKNMEADDK5ECPNOTOAT",
@@ -771,6 +763,6 @@ internal static slice<@string> benchmarkMessagesMLDSA87 = slice<@string>([
     "DIF373ML2RWZMEOIVUHFXKUG7O",
     "Z5PPIA3GJ74QXFFCOSUAQMN5YN",
     "PM6XIDECSS5S77UXMB55VZHZSE"
-]);
+];
 
 } // end fipstest_internal_test_package

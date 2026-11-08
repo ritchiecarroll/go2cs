@@ -41,8 +41,8 @@ using static global::go.@internal.cpu_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/cpu/cpu_test.go", "cpu_test.cs", "ABEggtbIuIKUlIKUgoIACAqCguaClIKmgoKAgg==")]
-[assembly: GoPositionMap("internal/cpu/cpu_x86_test.go", "cpu_x86_test.cs", "ABAegoK4goK4goK4goIACgiCgpTmgpSCpoKAgg==")]
+[assembly: GoPositionMap("internal/cpu/cpu_test.go", "cpu_test.cs", "ABEggtbIuIKUlIKUgoIACAqCguaClIKmgoKC")]
+[assembly: GoPositionMap("internal/cpu/cpu_x86_test.go", "cpu_x86_test.cs", "AA4egoK4goK4goK4goIACgiCgpTmgpSCpoKC")]
 [assembly: GoPositionMap("internal/cpu/datacache_x86_test.go", "datacache_x86_test.cs", "AA0i+oKC")]
 // </GoSourcePositionMaps>
 

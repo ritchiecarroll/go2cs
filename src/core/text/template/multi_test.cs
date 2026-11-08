@@ -27,16 +27,16 @@ internal partial struct multiParseTest {
     internal slice<@string> results;
 }
 
-internal static slice<multiParseTest> multiParseTests = slice<multiParseTest>([
+internal static slice<multiParseTest> multiParseTests = [
     new("empty", "", noError,
         default,
         default),
     new("one", @"{{define ""foo""}} FOO {{end}}", noError,
-        slice<@string>(["foo"]),
-        slice<@string>([" FOO "])),
+        ["foo"],
+        [" FOO "]),
     new("two", @"{{define ""foo""}} FOO {{end}}{{define ""bar""}} BAR {{end}}", noError,
-        slice<@string>(["foo", "bar"]),
-        slice<@string>([" FOO ", " BAR "])),
+        ["foo", "bar"],
+        [" FOO ", " BAR "]),
     // errors
     new("missing end", @"{{define ""foo""}} FOO ", hasError,
         default,
@@ -44,10 +44,10 @@ internal static slice<multiParseTest> multiParseTests = slice<multiParseTest>([
     new("malformed name", @"{{define ""foo}} FOO ", hasError,
         default,
         default)
-]);
+];
 
 public static void TestMultiParse(ж<testing.T> t) {
-    foreach (var (_, test) in multiParseTests) {
+    foreach (var (_, test) in range(multiParseTests)) {
         var (template, err) = New(rootˢ).Parse(test.input);
         switch (ᐧ) {
         case {} when err == nil && !test.ok: {
@@ -75,7 +75,7 @@ public static void TestMultiParse(ж<testing.T> t) {
             t.Errorf("%s: wrong number of templates; wanted %d got %d", test.name, len(test.names), len(template.tmpl));
             continue;
         }
-        foreach (var (i, name) in test.names) {
+        foreach (var (i, name) in range(test.names)) {
             var (tmpl, ok) = template.tmpl[name, ꟷ];
             if (!ok) {
                 t.Errorf("%s: can't find template %q", test.name, name);
@@ -90,7 +90,7 @@ public static void TestMultiParse(ж<testing.T> t) {
 }
 
 internal static slice<execTest> multiExecTests;
-internal static void initᴛmultiExecTests() { multiExecTests = slice<execTest>([
+internal static void initᴛmultiExecTests() { multiExecTests = [
     new("empty", "", "", default, true),
     new("text", "some text", "some text", default, true),
     new("invoke x", @"{{template ""x"" .SI}}", "TEXT", tVal.OrTypedNil(), true),
@@ -104,7 +104,7 @@ internal static void initᴛmultiExecTests() { multiExecTests = slice<execTest>(
     // User-defined function: test argument evaluator.
     new("testFunc literal", @"{{oneArg ""joe""}}", "oneArg=joe", tVal.OrTypedNil(), true),
     new("testFunc .", @"{{oneArg .}}", "oneArg=joe", (@string)"joe", true)
-]); }
+]; }
 
 // These strings are also in testdata/*.
 internal static ref readonly @string multiText1 => ref multiText1ᵇ;
@@ -220,9 +220,9 @@ public static void TestParseFS(ж<testing.T> t) {
 }
 
 // In these tests, actual content (not just template definitions) comes from the parsed files.
-internal static slice<execTest> templateFileExecTests = slice<execTest>([
+internal static slice<execTest> templateFileExecTests = [
     new("test", @"{{template ""tmpl1.tmpl""}}{{template ""tmpl2.tmpl""}}", "template1\n\ny\ntemplate2\n\nx\n", (nint)0, true)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataTmpl1Tmplˢ => ref testdataTmpl1Tmplˢᵇ;
@@ -394,20 +394,14 @@ private static readonly @string tmpl2ˢᵇ = "tmpl2"u8;
 public static void TestRedefinition(ж<testing.T> t) {
     ж<global::go.text.template_package.Template> tmpl = default;
     error err = default;
-    {
-        (tmpl, err) = New(tmpl1ˢ).Parse(defineTestFooEndˢ); if (err != nil) {
-            t.Fatalf("parse 1: %v", err);
-        }
+    (tmpl, err) = New(tmpl1ˢ).Parse(defineTestFooEndˢ); if (err != nil) {
+        t.Fatalf("parse 1: %v", err);
     }
-    {
-        (_, err) = tmpl.Parse(defineTestBarEndˢ); if (err != nil) {
-            t.Fatalf("got error %v, expected nil", err);
-        }
+    (_, err) = tmpl.Parse(defineTestBarEndˢ); if (err != nil) {
+        t.Fatalf("got error %v, expected nil", err);
     }
-    {
-        (_, err) = tmpl.New(tmpl2ˢ).Parse(defineTestBarEndˢ); if (err != nil) {
-            t.Fatalf("got error %v, expected nil", err);
-        }
+    (_, err) = tmpl.New(tmpl2ˢ).Parse(defineTestBarEndˢ); if (err != nil) {
+        t.Fatalf("got error %v, expected nil", err);
     }
 }
 
@@ -468,7 +462,7 @@ public static void TestNew(ж<testing.T> t) {
     }
 
     var containsT1 = false;
-    foreach (var (_, tmpl) in t1.Templates()) {
+    foreach (var (_, tmpl) in range(t1.Templates())) {
         if (tmpl == t2) {
             t.Error(templatesIncludedˢ);
         }
@@ -516,31 +510,29 @@ internal partial struct TestEmptyTemplate_cases /*dyn*/ {
 
 public static void TestEmptyTemplate(ж<testing.T> t) {
     var cases = slice<TestEmptyTemplate_cases>([
-        new(slice<@string>(["x", "y"]), "", "y"),
-        new(slice<@string>([""]), "once", ""),
-        new(slice<@string>(["", ""]), "twice", ""),
-        new(slice<@string>(["{{.}}", "{{.}}"]), "twice", "twice"),
-        new(slice<@string>(["{{/* a comment */}}", "{{/* a comment */}}"]), "comment", ""),
-        new(slice<@string>(["{{.}}", ""]), "twice", "")
+        new(["x", "y"], "", "y"),
+        new([""], "once", ""),
+        new(["", ""], "twice", ""),
+        new(["{{.}}", "{{.}}"], "twice", "twice"),
+        new(["{{/* a comment */}}", "{{/* a comment */}}"], "comment", ""),
+        new(["{{.}}", ""], "twice", "")
     ]);
 
-    foreach (var (i, c) in cases) {
+    foreach (var (i, c) in range(cases)) {
         var root = New(rootˢ);
 
         ж<global::go.text.template_package.Template> m = default;
         error err = default;
-        foreach (var (_, d) in c.defn) {
+        foreach (var (_, d) in range(c.defn)) {
             (m, err) = root.New(c.@in).Parse(d);
             if (err != nil) {
                 t.Fatal(err);
             }
         }
         var buf = Ꮡ(new strings.Builder());
-        {
-            var errΔ1 = m.Execute(new template_test_package.strings_BuilderжWriter(buf), c.@in); if (errΔ1 != nil) {
-                t.Error(i, errΔ1);
-                continue;
-            }
+        var errΔ1 = m.Execute(new template_test_package.strings_BuilderжWriter(buf), c.@in); if (errΔ1 != nil) {
+            t.Error(i, errΔ1);
+            continue;
         }
         if (buf.String() != c.want) {
             t.Errorf("expected string %q: got %q", c.want, buf.String());
@@ -573,7 +565,7 @@ public static void TestIssue19294(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        foreach (var (_, name) in all) {
+        foreach (var (_, name) in range(all)) {
             var (_, errΔ1) = res.New(name).Parse(inlined[name]);
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);

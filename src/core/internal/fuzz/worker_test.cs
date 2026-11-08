@@ -61,10 +61,8 @@ public static void BenchmarkWorkerFuzzOverhead(ж<testing.B> Ꮡb) {
         }
         var memʗ1 = mem;
         defer(() => {
-            {
-                var errΔ1 = memʗ1.Close(); if (errΔ1 != nil) {
-                    Ꮡb.Error(errΔ1);
-                }
+            var errΔ1 = memʗ1.Close(); if (errΔ1 != nil) {
+                Ꮡb.Error(errΔ1);
             }
         }, ref ᒐ);
 
@@ -98,10 +96,8 @@ public static void BenchmarkWorkerPing(ж<testing.B> Ꮡb) {
     b.SetParallelism(1);
     var w = newWorkerForTest(new fuzz_internal_test_package.testing_BжTB(Ꮡb));
     for (nint i = 0; i < b.N; i++) {
-        {
-            var err = w.client.ping(context.Background()); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var err = w.client.ping(context.Background()); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
     }
 }
@@ -119,7 +115,7 @@ public static void BenchmarkWorkerFuzz(ж<testing.B> Ꮡb) {
     }
     b.SetParallelism(1);
     var w = newWorkerForTest(new fuzz_internal_test_package.testing_BжTB(Ꮡb));
-    var entry = new CorpusEntry(Values: slice<any>([slice<byte>(default)]));
+    var entry = new CorpusEntry(Values: [slice<byte>(default)]);
     entry.Data = marshalCorpusFile(entry.Values.ꓸꓸꓸ);
     for (var i = (int64)0; i < (int64)b.N; ) {
         var args = new fuzzArgs(
@@ -163,23 +159,17 @@ internal static ж<global::go.@internal.fuzz_package.worker> newWorkerForTest(te
     }
     var wʗ1 = w;
     tb.Cleanup(() => {
-        {
-            var errΔ1 = wʗ1.cleanup(); if (errΔ1 != nil) {
-                tb.Error(errΔ1);
-            }
+        var errΔ1 = wʗ1.cleanup(); if (errΔ1 != nil) {
+            tb.Error(errΔ1);
         }
     });
-    {
-        var errΔ2 = w.startAndPing(context.Background()); if (errΔ2 != nil) {
-            tb.Fatal(errΔ2);
-        }
+    var errΔ2 = w.startAndPing(context.Background()); if (errΔ2 != nil) {
+        tb.Fatal(errΔ2);
     }
     var wʗ2 = w;
     tb.Cleanup(() => {
-        {
-            var errΔ3 = wʗ2.stop(); if (errΔ3 != nil) {
-                tb.Error(errΔ3);
-            }
+        var errΔ3 = wʗ2.stop(); if (errΔ3 != nil) {
+            tb.Error(errΔ3);
         }
     });
     return w;
@@ -192,10 +182,8 @@ internal static void runBenchmarkWorker() {
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         var fn = error (CorpusEntry _) => default;
-        {
-            var err = RunFuzzWorker(ctx, fn); if (err != nil && !AreEqual(err, ctx.Err())) {
-                throw panic(err);
-            }
+        var err = RunFuzzWorker(ctx, fn); if (err != nil && !AreEqual(err, ctx.Err())) {
+            throw panic(err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -223,10 +211,8 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> b) {
             b.Fatalf("failed to create temporary shared memory file: %s", err);
         }
         defer(() => {
-            {
-                var errΔ1 = Ꮡmem.ValueSlot.Close(); if (errΔ1 != nil) {
-                    b.Error(errΔ1);
-                }
+            var errΔ1 = Ꮡmem.ValueSlot.Close(); if (errΔ1 != nil) {
+                b.Error(errΔ1);
             }
         }, ref ᒐ);
         ws.memMu.ᐸꟷ(mem);

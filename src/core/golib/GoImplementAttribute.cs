@@ -9,6 +9,46 @@ using System;
 namespace go;
 
 /// <summary>
+/// Records that a GENERIC type, at every instantiation, implements an interface: the open-generic form of
+/// <see cref="GoImplementAttribute{TStruct, TInterface}"/>. The converter writes it for a conversion made at the
+/// type's own type parameters (<c>return &amp;sliceIter[T](values)</c> inside <c>NewIter[T]</c>), which an
+/// attribute's type argument cannot name, as <c>[assembly: GoImplement(typeof(sliceIter&lt;&gt;), typeof(Iter),
+/// Pointer = true)]</c>. go2cs-gen emits the same generic adapter (or value partial) it emits for closed records of
+/// the pair, and one adapter serves both.
+/// </summary>
+[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+public class GoImplementAttribute : Attribute
+{
+    /// <summary>
+    /// Creates a record that the generic type definition <paramref name="structDefinition"/> implements
+    /// <paramref name="interfaceType"/>.
+    /// </summary>
+    /// <param name="structDefinition">The unbound generic type definition, such as <c>typeof(sliceIter&lt;&gt;)</c>.</param>
+    /// <param name="interfaceType">The implemented interface, which has no type parameters.</param>
+    public GoImplementAttribute(Type structDefinition, Type interfaceType)
+    {
+        StructDefinition = structDefinition;
+        InterfaceType = interfaceType;
+    }
+
+    /// <summary>
+    /// Gets the unbound generic type definition the record names.
+    /// </summary>
+    public Type StructDefinition { get; }
+
+    /// <summary>
+    /// Gets the implemented interface.
+    /// </summary>
+    public Type InterfaceType { get; }
+
+    /// <summary>
+    /// Gets or sets flag indicating the Go interface cast source was a POINTER to the type, as on
+    /// <see cref="GoImplementAttribute{TStruct, TInterface}.Pointer"/>.
+    /// </summary>
+    public bool Pointer { get; set; }
+}
+
+/// <summary>
 /// Marks an assembly with a structure interface implementation mapping.
 /// </summary>
 /// <typeparam name="TStruct">Struct type that implements interface.</typeparam>

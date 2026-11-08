@@ -37,7 +37,7 @@ const (
 
 // goOneLineFunc reports whether Go writes the function, from `func` to its closing brace, on one line.
 func (v *Visitor) goOneLineFunc(funcDecl *ast.FuncDecl) bool {
-	return funcDecl.Body != nil && v.fset.Position(funcDecl.Pos()).Line == v.fset.Position(funcDecl.End()).Line
+	return funcDecl.Body != nil && v.goLine(funcDecl.Pos()) == v.goLine(funcDecl.End())
 }
 
 // collapseOneLineFunc writes the function emitted from start on one line when Go writes it on one line

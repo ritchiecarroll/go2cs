@@ -91,7 +91,7 @@ public static void TestReadFile(ж<testing.T> t) {
     ]);
     ref var runtimePlatform = ref heap<TestReadFile_platform>(new TestReadFile_platform(runtime.GOOS, runtime.GOARCH), out var ᏑruntimePlatform);
     var haveRuntimePlatform = false;
-    foreach (var (_, p) in platforms) {
+    foreach (var (_, p) in range(platforms)) {
         if (p == runtimePlatform) {
             haveRuntimePlatform = true;
             break;
@@ -134,10 +134,8 @@ public static void TestReadFile(ж<testing.T> t) {
         cmd.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
         {
             var err = cmd.Run(); if (err != nil) {
-                {
-                    @string badmodeMsg = badmodeʗ1(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
-                        tΔ1.Skip(badmodeMsg);
-                    }
+                @string badmodeMsg = badmodeʗ1(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
+                    tΔ1.Skip(badmodeMsg);
                 }
                 tΔ1.Fatalf("failed building test file: %v\n%s", err, stderr.String());
             }
@@ -169,10 +167,8 @@ public static void TestReadFile(ж<testing.T> t) {
         cmd.Stderr = new buildinfo_test_package.strings_BuilderжWriter(stderr);
         {
             var err = cmd.Run(); if (err != nil) {
-                {
-                    @string badmodeMsg = badmodeʗ2(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
-                        tΔ2.Skip(badmodeMsg);
-                    }
+                @string badmodeMsg = badmodeʗ2(goos, goarch, buildmode); if (strings.Contains(stderr.String(), badmodeMsg)) {
+                    tΔ2.Skip(badmodeMsg);
                 }
                 tΔ2.Fatalf("failed building test file: %v\n%s", err, stderr.String());
             }
@@ -190,10 +186,8 @@ public static void TestReadFile(ж<testing.T> t) {
             tΔ3.Fatal(goBuildinfNotFoundˢ);
         }
         data[i + 2] = (byte)'N';
-        {
-            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
-                tΔ3.Fatal(errΔ1);
-            }
+        var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
+            tΔ3.Fatal(errΔ1);
         }
     }
 
@@ -208,10 +202,8 @@ public static void TestReadFile(ж<testing.T> t) {
         }
         var verLen = data.slice(i + 32);
         binary.PutUvarint(verLen, (uint64)16 << 40); // 16TB ought to be enough for anyone.
-        {
-            var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
-                tΔ4.Fatal(errΔ1);
-            }
+        var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != nil) {
+            tΔ4.Fatal(errΔ1);
         }
     }
 
@@ -255,10 +247,8 @@ public static void TestReadFile(ж<testing.T> t) {
             build: (ж<testing.T> tΔ6, @string _Δp1, @string _Δp2, @string _Δp3) => {
                 @string dir = tΔ6.TempDir();
                 @string name = filepath.Join(dir, emptyˢ);
-                {
-                    var err = os.WriteFile(name, default, 438); if (err != nil) {
-                        tΔ6.Fatal(err);
-                    }
+                var err = os.WriteFile(name, default, 438); if (err != nil) {
+                    tΔ6.Fatal(err);
                 }
                 return name;
             },
@@ -303,7 +293,7 @@ public static void TestReadFile(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in platforms) {
+    foreach (var (_, vᴛ1) in range(platforms)) {
         ref var p = ref heap(new TestReadFile_platform(), out var Ꮡp);
         p = vᴛ1;
 
@@ -316,12 +306,12 @@ public static void TestReadFile(ж<testing.T> t) {
             if (pʗ1 != runtimePlatformʗ1 && !flagAll.Value) {
                 tΔ10.Skipf("skipping platforms other than %s_%s because -all was not set", runtimePlatformʗ1.goos, runtimePlatformʗ1.goarch);
             }
-            foreach (var (_, mode) in buildModesʗ1) {
+            foreach (var (_, mode) in range(buildModesʗ1)) {
                 var casesʗ2 = casesʗ1;
                 var cleanOutputForComparisonʗ2 = cleanOutputForComparisonʗ1;
                 var pʗ2 = pʗ1;
                 tΔ10.Run(mode, (ж<testing.T> tΔ11) => {
-                    foreach (var (_, vᴛ2) in casesʗ2) {
+                    foreach (var (_, vᴛ2) in range(casesʗ2)) {
                         ref var tc = ref heap(new TestReadFile_cases(), out var Ꮡtc);
                         tc = vᴛ2;
 
@@ -331,25 +321,21 @@ public static void TestReadFile(ж<testing.T> t) {
                         tΔ11.Run(tc.name, (ж<testing.T> tΔ12) => {
                             tΔ12.Parallel();
                             @string name = tcʗ1.build(tΔ12, pʗ3.goos, pʗ3.goarch, mode);
-                            {
-                                var (info, err) = buildinfo.ReadFile(name); if (err != nil) {
-                                    if (tcʗ1.wantErr == ""u8) {
-                                        tΔ12.Fatalf("unexpected error: %v", err);
-                                    } else {
-                                        @string errMsg = err.Error(); if (!strings.Contains(errMsg, tcʗ1.wantErr)) {
-                                            tΔ12.Fatalf("got error %q; want error containing %q", errMsg, tcʗ1.wantErr);
-                                        }
-                                    }
+                            var (info, err) = buildinfo.ReadFile(name); if (err != nil) {
+                                if (tcʗ1.wantErr == ""u8) {
+                                    tΔ12.Fatalf("unexpected error: %v", err);
                                 } else {
-                                    if (tcʗ1.wantErr != ""u8) {
-                                        tΔ12.Fatalf("unexpected success; want error containing %q", tcʗ1.wantErr);
+                                    @string errMsg = err.Error(); if (!strings.Contains(errMsg, tcʗ1.wantErr)) {
+                                        tΔ12.Fatalf("got error %q; want error containing %q", errMsg, tcʗ1.wantErr);
                                     }
-                                    @string got = info.String();
-                                    {
-                                        @string clean = cleanOutputForComparisonʗ3(got); if (got != tcʗ1.want && clean != tcʗ1.want) {
-                                            tΔ12.Fatalf("got:\n%s\nwant:\n%s", got, tcʗ1.want);
-                                        }
-                                    }
+                                }
+                            } else {
+                                if (tcʗ1.wantErr != ""u8) {
+                                    tΔ12.Fatalf("unexpected success; want error containing %q", tcʗ1.wantErr);
+                                }
+                                @string got = info.String();
+                                @string clean = cleanOutputForComparisonʗ3(got); if (got != tcʗ1.want && clean != tcʗ1.want) {
+                                    tΔ12.Fatalf("got:\n%s\nwant:\n%s", got, tcʗ1.want);
                                 }
                             }
                         });
@@ -440,12 +426,12 @@ public static void TestIssue54968(ж<testing.T> t) {
     // Construct a valid PE header.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
-    buf.Write(slice<byte>([(byte)'M', (byte)'Z']));
-    buf.Write(bytes.Repeat(slice<byte>([0]), 0x3c - 2));
+    buf.Write([(byte)'M', (byte)'Z']);
+    buf.Write(bytes.Repeat([0], 0x3c - 2));
     // At location 0x3c, the stub has the file offset to the PE signature.
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (int32)(0x3c + 4));
 
-    buf.Write(slice<byte>([(byte)'P', (byte)'E', 0, 0]));
+    buf.Write([(byte)'P', (byte)'E', 0, 0]);
 
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, new pe.FileHeader(NumberOfSections: 1));
 
@@ -459,7 +445,7 @@ public static void TestIssue54968(ж<testing.T> t) {
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, sh);
 
     nint start = buf.Len();
-    buf.Write(bytes.Repeat(slice<byte>([0]), paddingSize + len(buildInfoMagic)));
+    buf.Write(bytes.Repeat([0], paddingSize + len(buildInfoMagic)));
     var data = buf.Bytes();
 
     {
@@ -481,9 +467,9 @@ public static void TestIssue54968(ж<testing.T> t) {
         t.Run(fmt.Sprintf("start_at_%d"u8, i), (ж<testing.T> tΔ1) => {
             var d = dataʗ1.slice(0, start);
             // Construct intentionally-misaligned buildInfoMagic.
-            d = appendꓸꓸꓸ(d, bytes.Repeat(slice<byte>([0]), i));
+            d = appendꓸꓸꓸ(d, bytes.Repeat([0], i));
             d = appendꓸꓸꓸ(d, buildInfoMagicʗ1);
-            d = appendꓸꓸꓸ(d, bytes.Repeat(slice<byte>([0]), paddingSize - i));
+            d = appendꓸꓸꓸ(d, bytes.Repeat([0], paddingSize - i));
 
             var (_, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(d)));
 

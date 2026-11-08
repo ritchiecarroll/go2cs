@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAkilKKCuIKC6qKCgqaCgoLagoKmuIKCpsrYAAcQgsqCgoKWnLqGloKogqiEqKaW", "", "", "60=line/2/4/1,line/3/4/1,line/4/4/2;65=line/2/3/1,line/3/3/2;71=line/1/4/1,line/2/4/1,line/3/4/3,line/4/4/4;80=line/2/3/1,line/3/3/2;90=Add/2/3/1,Add/3/3/2,Done/1/1/3;92=line/2/3/1,line/3/3/2;96=line/2/3/1,line/3/3/2;100=Invoke/2/2/1;104=Line/2/2/1;107=line/2/2/1,rec/2/2/1;111=line/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAoilKKCuIKC6qKCgqaCgoLagoKmlMygpIKCyoKCpsrYAAcQgsqCgoKWnLqGloKogqiEqKaWmJSolA==", "", "", "77=line/2/4/1,line/3/4/1,line/4/4/2;82=line/2/3/1,line/3/3/2;88=line/1/4/1,line/2/4/1,line/3/4/3,line/4/4/4;97=line/2/3/1,line/3/3/2;107=Add/2/3/1,Add/3/3/2,Done/1/1/3;109=line/2/3/1,line/3/3/2;113=line/2/3/1,line/3/3/2;117=Invoke/2/2/1;121=Line/2/2/1;124=line/2/2/1,rec/2/2/1;128=line/2/2/1;135=Run/1/1/1;140=line/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +69,7 @@ public static partial class main_package
     internal partial struct chain {}
     internal partial struct impl {}
     internal partial struct pkgStructsᴛ1 {}
+    internal partial struct runner {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

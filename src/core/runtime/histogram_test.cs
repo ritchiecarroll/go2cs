@@ -51,10 +51,8 @@ public static void TestTimeHistogram(ж<testing.T> t) {
             var (cΔ1, okΔ1) = h.Count(i, j);
             if (!okΔ1) {
                 t.Errorf("unexpected invalid bucket: (%d, %d)", i, j);
-            } else {
-                var idx = (uint64)(i * (nint)runtime_internal_test_package.TimeHistNumSubBuckets + j); if (cΔ1 != idx) {
-                    t.Errorf("bucket (%d, %d) has count that is not %d: %d", i, j, idx, cΔ1);
-                }
+            } else if ((uint64)(i * (nint)runtime_internal_test_package.TimeHistNumSubBuckets + j) is var idx && cΔ1 != idx) {
+                t.Errorf("bucket (%d, %d) has count that is not %d: %d", i, j, idx, cΔ1);
             }
         }
     }
@@ -109,10 +107,8 @@ public static void TestTimeHistogramMetricsBuckets(ж<testing.T> t) {
         [expBucketsLen - 1] = Δmath.Inf(1)
     };
     foreach (var (idx, bucket) in idxToBucket) {
-        {
-            var (got, want) = (buckets[idx], bucket); if (got != want) {
-                t.Errorf("expected bucket %d to have value %e, got %e", idx, want, got);
-            }
+        var (got, want) = (buckets[idx], bucket); if (got != want) {
+            t.Errorf("expected bucket %d to have value %e, got %e", idx, want, got);
         }
     }
 }

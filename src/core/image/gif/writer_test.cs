@@ -14,8 +14,6 @@ using rand = math.rand_package;
 using os = os_package;
 using reflect = reflect_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.image;
 using go.image.color;
 using math;
@@ -97,14 +95,14 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal @string filename;
     internal int64 tolerance;
 }
-internal static slice<testCaseᴛ1> testCase = slice<testCaseᴛ1>([
+internal static slice<testCaseᴛ1> testCase = [
     new("../testdata/video-001.png", (int64)1 << 12),
     new("../testdata/video-001.gif", 0),
     new("../testdata/video-001.interlaced.gif", 0)
-]);
+];
 
 public static void TestWriter(ж<testing.T> t) {
-    foreach (var (_, tc) in testCase) {
+    foreach (var (_, tc) in range(testCase)) {
         var (m0, err) = readImg(tc.filename);
         if (err != nil) {
             t.Error(tc.filename, err);
@@ -184,10 +182,10 @@ internal static bool palettesEqual(Δcolor.Palette p, Δcolor.Palette q) {
     return true;
 }
 
-internal static slice<@string> frames = slice<@string>([
+internal static slice<@string> frames = [
     "../testdata/video-001.gif",
     "../testdata/video-005.gray.gif"
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object decodeConfigˢ = (@string)"DecodeConfig:"u8;
@@ -201,7 +199,7 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
         Delay: new slice<nint>(len(frames)),
         LoopCount: 5
     ));
-    foreach (var (i, f) in frames) {
+    foreach (var (i, f) in range(frames)) {
         var (g, errΔ1) = readGIF(f);
         if (errΔ1 != nil) {
             t.Fatal(f, errΔ1);
@@ -224,7 +222,7 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
     }
     if (go1Dot5Fields) {
         g0.Disposal = new slice<byte>(len(g0.Image));
-        foreach (var i in range(g0.Disposal)) {
+        foreach (var i in range(len(g0.Disposal))) {
             g0.Disposal[i] = DisposalNone;
         }
         g0.Config = new image.Config(
@@ -236,10 +234,8 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
     }
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ2 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ2 != nil) {
-            t.Fatal(encodeAllˢ, errΔ2);
-        }
+    var errΔ2 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ2 != nil) {
+        t.Fatal(encodeAllˢ, errΔ2);
     }
     var encoded = buf.Bytes();
     var (config, err) = DecodeConfig(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(encoded)));
@@ -257,11 +253,9 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
     if (!palettesEqual(g1.Config.ColorModel._<Δcolor.Palette>(), globalColorModel._<Δcolor.Palette>())) {
         t.Errorf("unexpected global color model");
     }
-    {
-        nint w = g1.Config.Width;
-        nint h = g1.Config.Height; if (w != width || h != height) {
-            t.Errorf("got config width * height = %d * %d, want %d * %d", w, h, (nint)(width), (nint)(height));
-        }
+    nint w = g1.Config.Width;
+    nint h = g1.Config.Height; if (w != width || h != height) {
+        t.Errorf("got config width * height = %d * %d, want %d * %d", w, h, (nint)(width), (nint)(height));
     }
 
     if (g0.LoopCount != g1.LoopCount) {
@@ -280,7 +274,7 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
         t.Fatalf("image and disposal lengths differ: %d and %d", len(g1.Image), len(g1.Disposal));
     }
 
-    foreach (var i in range(g0.Image)) {
+    foreach (var i in range(len(g0.Image))) {
         var (m0, m1) = (g0.Image[i], g1.Image[i]);
         if (m0.Bounds() != m1.Bounds()) {
             t.Errorf("frame %d: bounds differ: %v and %v", i, m0.Bounds(), m1.Bounds());
@@ -300,17 +294,9 @@ internal static void testEncodeAll(ж<testing.T> t, bool go1Dot5Fields, bool use
     }
 }
 
-public static void TestEncodeAllGo1Dot4(ж<testing.T> t) {
-    testEncodeAll(t, false, false);
-}
-
-public static void TestEncodeAllGo1Dot5(ж<testing.T> t) {
-    testEncodeAll(t, true, false);
-}
-
-public static void TestEncodeAllGo1Dot5GlobalColorModel(ж<testing.T> t) {
-    testEncodeAll(t, true, true);
-}
+public static void TestEncodeAllGo1Dot4(ж<testing.T> t) { testEncodeAll(t, false, false); }
+public static void TestEncodeAllGo1Dot5(ж<testing.T> t) { testEncodeAll(t, true, false); }
+public static void TestEncodeAllGo1Dot5GlobalColorModel(ж<testing.T> t) { testEncodeAll(t, true, true); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ = (@string)"expected error from mismatched delay and image slice lengths"u8;
@@ -318,7 +304,7 @@ internal static readonly object expectedErrorFromˢ2 = (@string)"expected error 
 
 public static void TestEncodeMismatchDelay(ж<testing.T> t) {
     var images = new slice<ж<image.Paletted>>(2);
-    foreach (var i in range(images)) {
+    foreach (var i in range(len(images))) {
         images[i] = image.NewPaletted(image.Rect(0, 0, 5, 5), palette.Plan9);
     }
 
@@ -337,7 +323,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> t) {
         Delay: new slice<nint>(len(images)),
         Disposal: new slice<byte>(1)
     ));
-    foreach (var i in range(g1.Disposal)) {
+    foreach (var i in range(len(g1.Disposal))) {
         g1.Disposal[i] = DisposalNone;
     }
     {
@@ -351,10 +337,8 @@ public static void TestEncodeMismatchDelay(ж<testing.T> t) {
 internal static readonly object expectedErrorFromˢ3 = (@string)"expected error from providing empty gif"u8;
 
 public static partial void TestEncodeZeroGIF(ж<testing.T> t) {
-    {
-        var err = EncodeAll(io.Discard, Ꮡ(new GIF())); if (err == nil) {
-            t.Error(expectedErrorFromˢ3);
-        }
+    var err = EncodeAll(io.Discard, Ꮡ(new GIF())); if (err == nil) {
+        t.Error(expectedErrorFromˢ3);
     }
 }
 
@@ -364,7 +348,7 @@ public static void TestEncodeAllFramesOutOfBounds(ж<testing.T> t) {
         image.NewPaletted(image.Rect(2, 2, 8, 8), palette.Plan9),
         image.NewPaletted(image.Rect(3, 3, 4, 4), palette.Plan9)
     ]);
-    foreach (var (_, upperBound) in slice<nint>([6, 10])) {
+    foreach (var (_, upperBound) in range(slice<nint>([6, 10]))) {
         var g = Ꮡ(new GIF(
             Image: images,
             Delay: new slice<nint>(len(images)),
@@ -395,27 +379,23 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> t) {
         new(+0, +0),
         new(+2, +2)
     ]);
-    foreach (var (_, p) in points) {
+    foreach (var (_, p) in range(points)) {
         var src = image.NewPaletted(new image.Rectangle(
             Min: p,
             Max: p.Add(new image.Point(6, 6))
         ), palette.Plan9);
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-        {
-            var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.PalettedжImage(src), nil); if (errΔ1 != nil) {
-                t.Errorf("p=%v: Encode: %v", p, errΔ1);
-                continue;
-            }
+        var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.PalettedжImage(src), nil); if (errΔ1 != nil) {
+            t.Errorf("p=%v: Encode: %v", p, errΔ1);
+            continue;
         }
         var (m, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(Ꮡbuf));
         if (err != nil) {
             t.Errorf("p=%v: Decode: %v", p, err);
             continue;
         }
-        {
-            var (got, want) = (m.Bounds(), image.Rect(0, 0, 6, 6)); if (got != want) {
-                t.Errorf("p=%v: got %v, want %v", p, got, want);
-            }
+        var (got, want) = (m.Bounds(), image.Rect(0, 0, 6, 6)); if (got != want) {
+            t.Errorf("p=%v: got %v, want %v", p, got, want);
         }
     }
 
@@ -435,11 +415,9 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> t) {
         src.SetRGBA(7, 7, new colorꓸRGBA(0x77, 0x77, 0x77, 0xFF));
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-        {
-            var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.ΔRGBAжImage(src), nil); if (errΔ1 != nil) {
-                t.Errorf("gray-diagonal: Encode: %v", errΔ1);
-                return;
-            }
+        var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.ΔRGBAжImage(src), nil); if (errΔ1 != nil) {
+            t.Errorf("gray-diagonal: Encode: %v", errΔ1);
+            return;
         }
         var (m, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(Ꮡbuf));
         if (err != nil) {
@@ -485,7 +463,7 @@ public static void TestEncodeImplicitConfigSize(ж<testing.T> t) {
     // For a gif.GIF, the overall bounds' top-left point is always implicitly
     // (0, 0), and any frame whose bounds have a negative X or Y will be
     // outside those overall bounds, so encoding should fail.
-    foreach (var (_, lowerBound) in slice<nint>([-1, 0, 1])) {
+    foreach (var (_, lowerBound) in range(slice<nint>([-1, 0, 1]))) {
         var images = slice<ж<image.Paletted>>([
             image.NewPaletted(image.Rect(lowerBound, lowerBound, 4, 4), palette.Plan9)
         ]);
@@ -542,10 +520,8 @@ public static void TestEncodePalettes(ж<testing.T> t) {
     ));
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var errΔ1 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ1 != nil) {
-            t.Fatalf("EncodeAll: %v", errΔ1);
-        }
+    var errΔ1 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ1 != nil) {
+        t.Fatalf("EncodeAll: %v", errΔ1);
     }
     var (g1, err) = DecodeAll(new gif_internal_test_package.bytes_BufferжReader(Ꮡbuf));
     if (err != nil) {
@@ -554,11 +530,9 @@ public static void TestEncodePalettes(ж<testing.T> t) {
     if (len(g0.Image) != len(g1.Image)) {
         t.Fatalf("image lengths differ: %d and %d", len(g0.Image), len(g1.Image));
     }
-    foreach (var (i, m) in g1.Image) {
-        {
-            var (got, want) = (m.Palette, pals[i]); if (!palettesEqual(got, want)) {
-                t.Errorf("frame %d:\ngot  %v\nwant %v", i, got, want);
-            }
+    foreach (var (i, m) in range(g1.Image)) {
+        var (got, want) = (m.Palette, pals[i]); if (!palettesEqual(got, want)) {
+            t.Errorf("frame %d:\ngot  %v\nwant %v", i, got, want);
         }
     }
 }
@@ -566,11 +540,11 @@ public static void TestEncodePalettes(ж<testing.T> t) {
 public static void TestEncodeBadPalettes(ж<testing.T> t) {
     const nint w = 5;
     const nint h = 5;
-    foreach (var (_, n) in slice<nint>([256, 257])) {
-        foreach (var (_, nilColors) in slice<bool>([false, true])) {
+    foreach (var (_, n) in range(slice<nint>([256, 257]))) {
+        foreach (var (_, nilColors) in range(slice<bool>([false, true]))) {
             var pal = new Δcolor.Palette(n);
             if (!nilColors) {
-                foreach (var i in range(pal)) {
+                foreach (var i in range(len(pal))) {
                     pal[i] = Δcolor.Black;
                 }
             }
@@ -604,10 +578,8 @@ internal static readonly object colorTablesMatchFalseˢ = (@string)"colorTablesM
 public static void TestColorTablesMatch(ж<testing.T> t) {
     const nint trIdx = 100;
     var global = (Δcolor.Palette)palette.Plan9;
-    {
-        var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
-            t.Fatalf("trIdx (%d) is already black", (nint)(trIdx));
-        }
+    var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
+        t.Fatalf("trIdx (%d) is already black", (nint)(trIdx));
     }
 
     // Make a copy of the palette, substituting trIdx's slot with transparent,
@@ -651,7 +623,7 @@ public static void TestEncodeCroppedSubImages(ж<testing.T> t) {
         image.Rect(0, 0, 50, 100),
         image.Rect(50, 0, 100, 100)
     ]);
-    foreach (var (_, sr) in subImages) {
+    foreach (var (_, sr) in range(subImages)) {
         var si = whole.SubImage(sr);
         var buf = bytes.NewBuffer(default);
         {
@@ -742,7 +714,7 @@ public static void BenchmarkEncodeRandomPaletted(ж<testing.B> Ꮡb) {
 
     var paletted = image.NewPaletted(image.Rect(0, 0, 640, 480), palette.Plan9);
     var rnd = rand.New(rand.NewSource(123));
-    foreach (var i in range(paletted.Pix)) {
+    foreach (var i in range(len(paletted.Pix))) {
         paletted.Pix[i] = (uint8)rnd.Intn(256);
     }
 

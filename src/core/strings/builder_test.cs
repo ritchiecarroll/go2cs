@@ -9,8 +9,6 @@ using static strings_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.unicode;
 using static go.strings_internal_test_package;
 using strings = strings_package;
@@ -56,10 +54,8 @@ public static void TestBuilder(ж<testing.T> t) {
         t.Errorf("WriteString: got %d,%s; want 5,nil", n, err);
     }
     check(t, Ꮡb, helloˢ);
-    {
-        err = Ꮡb.WriteByte((byte)' '); if (err != nil) {
-            t.Errorf("WriteByte: %s", err);
-        }
+    err = Ꮡb.WriteByte((byte)' '); if (err != nil) {
+        t.Errorf("WriteByte: %s", err);
     }
     check(t, Ꮡb, helloˢ2);
     (n, err) = Ꮡb.WriteString(worldˢ);
@@ -130,22 +126,20 @@ public static void TestBuilderReset(ж<testing.T> t) {
     // previously returned strings.
     Ꮡb.WriteString(bbbˢ);
     check(t, Ꮡb, bbbˢ);
-    {
-        @string want = aaaˢ; if (s != want) {
-            t.Errorf("previous String result changed after Reset: got %q; want %q", s, want);
-        }
+    @string want = aaaˢ; if (s != want) {
+        t.Errorf("previous String result changed after Reset: got %q; want %q", s, want);
     }
 }
 
 public static void TestBuilderGrow(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, growLen) in slice<nint>([0, 100, 1000, 10000, 100000])) {
+        foreach (var (_, growLen) in range(slice<nint>([0, 100, 1000, 10000, 100000]))) {
             if (asan.Enabled) {
                 t.Logf("skipping allocs check for growLen %d: extra allocs with -asan; see #70079", growLen);
                 continue;
             }
-            var p = bytes.Repeat(slice<byte>([(byte)'a']), growLen);
+            var p = bytes.Repeat([(byte)'a'], growLen);
             var pʗ1 = p;
             var allocs = testing.AllocsPerRun(100, () => {
                 ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -162,21 +156,17 @@ public static void TestBuilderGrow(ж<testing.T> t) {
             if (growLen == 0) {
                 wantAllocs = 0;
             }
-            {
-                nint g = (nint)allocs;
-                nint w = wantAllocs; if (g != w) {
-                    t.Errorf("growLen=%d: got %d allocs during Write; want %v", growLen, g, w);
-                }
+            nint g = (nint)allocs;
+            nint w = wantAllocs; if (g != w) {
+                t.Errorf("growLen=%d: got %d allocs during Write; want %v", growLen, g, w);
             }
         }
         // when growLen < 0, should panic
         ref var a = ref heap(new strings.Builder(), out var Ꮡa);
         nint n = -1;
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Errorf("a.Grow(%d) should panic()", n);
-                }
+            var r = recover(); if (r == nil) {
+                t.Errorf("a.Grow(%d) should panic()", n);
             }
         }, ref ᒐ);
         Ꮡa.Grow(n);
@@ -198,7 +188,7 @@ internal partial struct TestBuilderWrite2_type /*dyn*/ {
 
 public static void TestBuilderWrite2(ж<testing.T> t) {
     @string s0 = s0ᶜ;
-    foreach (var (_, vᴛ1) in slice<TestBuilderWrite2_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestBuilderWrite2_type>([
         new(
             "Write",
             (ж<strings.Builder> b) => b.Write(slice<byte>(s0)),
@@ -223,7 +213,7 @@ public static void TestBuilderWrite2(ж<testing.T> t) {
             len(s0),
             s0
         )
-    ])) {
+    ]))) {
         ref var tt = ref heap(new TestBuilderWrite2_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -388,7 +378,7 @@ public static partial void TestBuilderCopyPanic(ж<testing.T> t) {
             }
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBuilderCopyPanic_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -407,10 +397,8 @@ public static partial void TestBuilderCopyPanic(ж<testing.T> t) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        {
-            var got = ᐸꟷ(didPanic); if (got != tt.wantPanic) {
-                t.Errorf("%s: panicked = %v; want %v", tt.name, got, tt.wantPanic);
-            }
+        var got = ᐸꟷ(didPanic); if (got != tt.wantPanic) {
+            t.Errorf("%s: panicked = %v; want %v", tt.name, got, tt.wantPanic);
         }
     }
 }
@@ -418,7 +406,7 @@ public static partial void TestBuilderCopyPanic(ж<testing.T> t) {
 public static void TestBuilderWriteInvalidRune(ж<testing.T> t) {
     // Invalid runes, including negative ones, should be written as
     // utf8.RuneError.
-    foreach (var (_, r) in slice<rune>([-1, utf8.MaxRune + 1])) {
+    foreach (var (_, r) in range(slice<rune>([-1, utf8.MaxRune + 1]))) {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         Ꮡb.WriteRune(r);
         check(t, Ꮡb, "\uFFFD");

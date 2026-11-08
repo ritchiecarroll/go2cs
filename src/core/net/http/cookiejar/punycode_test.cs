@@ -124,13 +124,11 @@ internal static array<punycodeTestCasesᴛ1> punycodeTestCases = new punycodeTes
 }.array();
 
 public static void TestPunycode(ж<testing.T> t) {
-    foreach (var (_, tc) in punycodeTestCases.ΔRangeSnapshot()) {
-        {
-            var (got, err) = encode(""u8, tc.s); if (err != nil) {
-                t.Errorf(@"encode("""", %q): %v", tc.s, err);
-            } else if (got != tc.encoded) {
-                t.Errorf(@"encode("""", %q): got %q, want %q", tc.s, got, tc.encoded);
-            }
+    foreach (var (_, tc) in range(punycodeTestCases.ΔRangeSnapshot())) {
+        var (got, err) = encode(""u8, tc.s); if (err != nil) {
+            t.Errorf(@"encode("""", %q): %v", tc.s, err);
+        } else if (got != tc.encoded) {
+            t.Errorf(@"encode("""", %q): got %q, want %q", tc.s, got, tc.encoded);
         }
     }
 }

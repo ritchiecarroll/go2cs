@@ -57,13 +57,13 @@ internal static readonly object shouldHaveRejectedˢ = (@string)"Should have rej
 public static void TestInvalidEncoding(ж<testing.T> t) {
     // Initialize Huffman decoder to recognize "0".
     ref var h = ref heap(new global::go.compress.flate_package.huffmanDecoder(), out var Ꮡh);
-    if (!h.init(slice<nint>([1]))) {
+    if (!h.init([1])) {
         t.Fatal(failedToInitializeˢ);
     }
 
     // Initialize decompressor with invalid Huffman coding.
     global::go.compress.flate_package.decompressor f = new();
-    f.r = new flate_test_package.bytes_Readerжflate_Reader(bytes.NewReader(slice<byte>([0xff])));
+    f.r = new flate_test_package.bytes_Readerжflate_Reader(bytes.NewReader([0xff]));
 
     var (_, err) = f.huffSym(Ꮡh);
     if (err == nil) {
@@ -216,7 +216,7 @@ public static void TestStreams(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, tc) in testCases) {
+    foreach (var (i, tc) in range(testCases)) {
         var (data, err) = hex.DecodeString(tc.stream);
         if (err != nil) {
             t.Fatal(err);
@@ -231,10 +231,8 @@ public static void TestStreams(ж<testing.T> t) {
                 t.Errorf("#%d (%s): %v", i, tc.desc, err);
                 continue;
             }
-            {
-                @string got = hex.EncodeToString(data); if (got != tc.want) {
-                    t.Errorf("#%d (%s):\ngot  %q\nwant %q", i, tc.desc, got, tc.want);
-                }
+            @string got = hex.EncodeToString(data); if (got != tc.want) {
+                t.Errorf("#%d (%s):\ngot  %q\nwant %q", i, tc.desc, got, tc.want);
             }
         }
     }
@@ -276,7 +274,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> t) {
     ]);
 
     nint maxSize = default;
-    foreach (var (_, n) in testSizes) {
+    foreach (var (_, n) in range(testSizes)) {
         if (maxSize < n) {
             maxSize = n;
         }
@@ -284,15 +282,15 @@ public static void TestReaderEarlyEOF(ж<testing.T> t) {
 
     var readBuf = new slice<byte>(40);
     var data = new slice<byte>(maxSize);
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i] = (byte)i;
     }
 
-    foreach (var (_, sz) in testSizes) {
+    foreach (var (_, sz) in range(testSizes)) {
         if (testing.Short() && sz > windowSize) {
             continue;
         }
-        foreach (var (_, flush) in slice<bool>([true, false])) {
+        foreach (var (_, flush) in range(slice<bool>([true, false]))) {
             var earlyEOF = true; // Do we expect early io.EOF?
 
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

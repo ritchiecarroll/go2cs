@@ -150,11 +150,9 @@ internal partial struct ExampleWithValue_favContextKey /*@string*/;
 // and also how to retrieve it if it exists.
 public static void ExampleWithValue() {
     void f(context.Context ctxΔ1, ExampleWithValue_favContextKey kΔ1) {
-        {
-            var v = ctxΔ1.Value(kΔ1); if (v != nil) {
-                fmt.Println(foundValueˢ, v);
-                return;
-            }
+        var v = ctxΔ1.Value(kΔ1); if (v != nil) {
+            fmt.Println(foundValueˢ, v);
+            return;
         }
         fmt.Println(keyNotFoundˢ, kΔ1);
     }

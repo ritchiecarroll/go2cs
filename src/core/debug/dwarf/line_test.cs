@@ -43,7 +43,7 @@ public static void TestLineELFGCC(ж<testing.T> t) {
         new(Address: 0x40060f, File: file2C, Line: 6, IsStmt: true),
         new(Address: 0x400611, EndSequence: true)
     ]);
-    var files = slice<slice<ж<dwarf.LineFile>>>([slice<ж<dwarf.LineFile>>([default, file1H, file1C]), slice<ж<dwarf.LineFile>>([default, file2C])]);
+    var files = slice<slice<ж<dwarf.LineFile>>>([[default, file1H, file1C], [default, file2C]]);
 
     testLineTable(t, want, files, elfData(t, testdataLineGccElfˢ));
 }
@@ -79,8 +79,8 @@ public static void TestLineELFGCCZstd(ж<testing.T> t) {
         new(Address: 0x401180, EndSequence: true)
     ]);
     var files = slice<slice<ж<dwarf.LineFile>>>([
-        slice<ж<dwarf.LineFile>>([zfile1C, zfile1H, zfile1C]),
-        slice<ж<dwarf.LineFile>>([zfile2C, zfile2C])
+        [zfile1C, zfile1H, zfile1C],
+        [zfile2C, zfile2C]
     ]);
 
     testLineTable(t, want, files, elfData(t, testdataLineGccZstdElfˢ));
@@ -130,7 +130,7 @@ public static void TestLineGCCWindows(ж<testing.T> t) {
         new(Address: 0x401595, File: file2CΔ1, Line: 6, IsStmt: true),
         new(Address: 0x40159b, EndSequence: true)
     ]);
-    var files = slice<slice<ж<dwarf.LineFile>>>([slice<ж<dwarf.LineFile>>([default, file1HΔ1, file1CΔ1]), slice<ж<dwarf.LineFile>>([default, file2CΔ1])]);
+    var files = slice<slice<ж<dwarf.LineFile>>>([[default, file1HΔ1, file1CΔ1], [default, file2CΔ1]]);
 
     testLineTable(t, want, files, peData(t, testdataLineGccWinBinˢ));
 }
@@ -162,7 +162,7 @@ public static void TestLineELFClang(ж<testing.T> t) {
         new(Address: 0x4005a7, File: file2C, Line: 6, IsStmt: true),
         new(Address: 0x4005b0, EndSequence: true)
     ]);
-    var files = slice<slice<ж<dwarf.LineFile>>>([slice<ж<dwarf.LineFile>>([default, file1C, file1H]), slice<ж<dwarf.LineFile>>([default, file2C])]);
+    var files = slice<slice<ж<dwarf.LineFile>>>([[default, file1C, file1H], [default, file2C]]);
 
     testLineTable(t, want, files, elfData(t, testdataLineClangElfˢ));
 }
@@ -185,7 +185,7 @@ public static void TestLineRnglists(ж<testing.T> t) {
         new(Address: 0x40101c, File: @file, Line: 9, Column: 3),
         new(Address: 0x40101d, EndSequence: true)
     ]);
-    var files = slice<slice<ж<dwarf.LineFile>>>([slice<ж<dwarf.LineFile>>([@file])]);
+    var files = slice<slice<ж<dwarf.LineFile>>>([[@file]]);
 
     testLineTable(t, want, files, elfData(t, testdataRnglistxElfˢ));
 }
@@ -234,12 +234,10 @@ public static void TestLineSeek(ж<testing.T> t) {
 
     // Test that Reset returns to the first line.
     lr.Reset();
-    {
-        var errΔ2 = lr.Next(Ꮡline); if (errΔ2 != nil) {
-            t.Fatal(lrNextAfterResetFailedˢ, errΔ2);
-        } else if (line != table[0]) {
-            t.Fatal(lrNextAfterResetReturnedˢ, line, insteadOfˢ, table[0]);
-        }
+    var errΔ2 = lr.Next(Ꮡline); if (errΔ2 != nil) {
+        t.Fatal(lrNextAfterResetFailedˢ, errΔ2);
+    } else if (line != table[0]) {
+        t.Fatal(lrNextAfterResetReturnedˢ, line, insteadOfˢ, table[0]);
     }
 
     // Check that entries match when seeking backward.
@@ -258,29 +256,23 @@ public static void TestLineSeek(ж<testing.T> t) {
     }
 
     // Check that seeking to a PC returns the right line.
-    {
-        var errΔ4 = lr.SeekPC(table[0].Address - 1, Ꮡline); if (!AreEqual(errΔ4, ErrUnknownPC)) {
-            t.Fatalf("lr.SeekPC to %#x returned %v instead of ErrUnknownPC", table[0].Address - 1, errΔ4);
-        }
+    var errΔ4 = lr.SeekPC(table[0].Address - 1, Ꮡline); if (!AreEqual(errΔ4, ErrUnknownPC)) {
+        t.Fatalf("lr.SeekPC to %#x returned %v instead of ErrUnknownPC", table[0].Address - 1, errΔ4);
     }
-    foreach (var (i, testLine) in table) {
+    foreach (var (i, testLine) in range(table)) {
         if (testLine.EndSequence) {
-            {
-                var errΔ5 = lr.SeekPC(testLine.Address, Ꮡline); if (!AreEqual(errΔ5, ErrUnknownPC)) {
-                    t.Fatalf("lr.SeekPC to %#x returned %v instead of ErrUnknownPC", testLine.Address, errΔ5);
-                }
+            var errΔ5 = lr.SeekPC(testLine.Address, Ꮡline); if (!AreEqual(errΔ5, ErrUnknownPC)) {
+                t.Fatalf("lr.SeekPC to %#x returned %v instead of ErrUnknownPC", testLine.Address, errΔ5);
             }
             continue;
         }
 
         var nextPC = table[i + 1].Address;
         for (var pc = testLine.Address; pc < nextPC; pc++) {
-            {
-                var errΔ6 = lr.SeekPC(pc, Ꮡline); if (errΔ6 != nil) {
-                    t.Fatalf("lr.SeekPC to %#x failed: %v", pc, errΔ6);
-                } else if (line != testLine) {
-                    t.Fatalf("lr.SeekPC to %#x returned %v instead of %v", pc, line, testLine);
-                }
+            var errΔ6 = lr.SeekPC(pc, Ꮡline); if (errΔ6 != nil) {
+                t.Fatalf("lr.SeekPC to %#x failed: %v", pc, errΔ6);
+            } else if (line != testLine) {
+                t.Fatalf("lr.SeekPC to %#x returned %v instead of %v", pc, line, testLine);
             }
         }
     }
@@ -368,7 +360,7 @@ internal static bool compareFiles(slice<ж<dwarf.LineFile>> a, slice<ж<dwarf.Li
     if (len(a) != len(b)) {
         return false;
     }
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         if (a[i] == nil && b[i] == nil) {
             continue;
         }
@@ -385,7 +377,7 @@ internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
 internal static void dumpFiles(ж<testing.T> t, slice<ж<dwarf.LineFile>> files) {
-    foreach (var (i, f) in files) {
+    foreach (var (i, f) in range(files)) {
         @string name = nilˢ;
         if (f != nil) {
             name = f.Name;
@@ -401,7 +393,7 @@ internal static bool compareLines(ж<testing.T> t, slice<dwarf.LineEntry> a, sli
         return false;
     }
 
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         var (al, bl) = (a[i], b[i]);
         // If both are EndSequence, then the only other valid
         // field is Address. Otherwise, test equality of all
@@ -424,7 +416,7 @@ internal static bool compareLines(ж<testing.T> t, slice<dwarf.LineEntry> a, sli
 }
 
 internal static void dumpLines(ж<testing.T> t, slice<dwarf.LineEntry> lines) {
-    foreach (var (_, l) in lines) {
+    foreach (var (_, l) in range(lines)) {
         t.Logf("  %+v File:%+v", l, l.File.OrTypedNil());
     }
 }
@@ -434,7 +426,7 @@ partial struct joinTest {
     internal @string path;
 }
 
-internal static slice<joinTest> joinTests = slice<joinTest>([
+internal static slice<joinTest> joinTests = [
     new("a", "b", "a/b"),
     new("a", "", "a"),
     new("", "b", "b"),
@@ -465,10 +457,10 @@ internal static slice<joinTest> joinTests = slice<joinTest>([
     new(@"C:", @"a\b", @"C:a\b"),
     new(@"C:.", @"a", @"C:.\a"),
     new(@"C:a", @"b", @"C:a\b")
-]);
+];
 
 public static void TestPathJoin(ж<testing.T> t) {
-    foreach (var (_, test) in joinTests) {
+    foreach (var (_, test) in range(joinTests)) {
         @string got = dwarf_internal_test_package.PathJoin(test.dirname, test.filename);
         if (test.path != got) {
             t.Errorf("pathJoin(%q, %q) = %q, want %q", test.dirname, test.filename, got, test.path);

@@ -70,14 +70,12 @@ private static readonly @string smallRegularLargeˢᵇ = @"[""small"",""regular"
 public static void Example_textMarshalJSON() {
     @string blob = smallRegularLargeˢ;
     ref var inventory = ref heap<slice<Size>>(out var Ꮡinventory);
-    {
-        var err = json.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != nil) {
-            log.Fatal(err);
-        }
+    var err = json.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != nil) {
+        log.Fatal(err);
     }
 
     var counts = new map<Size, nint>();
-    foreach (var (_, size) in inventory) {
+    foreach (var (_, size) in range(inventory)) {
         counts[size] += 1;
     }
 

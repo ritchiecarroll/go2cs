@@ -16,7 +16,7 @@ using netip = go.net.netip_package;
 
 partial class netip_test_package {
 
-internal static slice<@string> corpus = slice<@string>([
+internal static slice<@string> corpus = [
     // Basic zero IPv4 address.
     "0.0.0.0",
     // Basic non-zero IPv4 address.
@@ -123,12 +123,12 @@ internal static slice<@string> corpus = slice<@string>([
     "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b/118",
     "::ffff:c000:0280/96",
     "::ffff:c000:0280%eth0/37"
-]);
+];
 
 public static void FuzzParse(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, seed) in corpus) {
+    foreach (var (_, seed) in range(corpus)) {
         f.Add(seed);
     }
 
@@ -352,10 +352,8 @@ internal static void checkEncoding(ж<testing.T> t, netipType x) {
         checkTextMarshalMatchesString(t, x);
     }
 
-    {
-        var (am, ok) = x._<appendMarshaler>(ᐧ); if (ok) {
-            checkTextMarshalMatchesAppendTo(t, am);
-        }
+    var (am, ok) = x._<appendMarshaler>(ᐧ); if (ok) {
+        checkTextMarshalMatchesAppendTo(t, am);
     }
 }
 

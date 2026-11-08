@@ -9,8 +9,6 @@ using io = io_package;
 using bits = go.math.bits_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using static go.math.big_package;
 
@@ -63,7 +61,7 @@ partial struct strTestsᴛ1 /*dyn*/ {
     internal nint b;                             // conversion base
     internal @string s;                          // expected result
 }
-internal static slice<strTestsᴛ1> strTests = slice<strTestsᴛ1>([
+internal static slice<strTestsᴛ1> strTests = [
     new(default, 2, "0"),
     new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, "1"),
     new(new Δnat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, "11000101"),
@@ -74,7 +72,7 @@ internal static slice<strTestsᴛ1> strTests = slice<strTestsᴛ1>([
     new(new Δnat(new global::go.math.big_package.Word[]{0x229be7}.slice()), 17, "1a2b3c"),
     new(new Δnat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 32, "o9cov6"),
     new(new Δnat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 62, "TakXI")
-]);
+];
 
 public static void TestString(ж<testing.T> t) {
     // test invalid base explicitly
@@ -94,7 +92,7 @@ public static void TestString(ж<testing.T> t) {
         t.Errorf("expected panic for invalid base");
     }
 
-    foreach (var (_, a) in strTests) {
+    foreach (var (_, a) in range(strTests)) {
         @string s = (@string)a.x.utoa(a.b);
         if (s != a.s) {
             t.Errorf("string%+v\n\tgot s = %s; want %s", a, s, a.s);
@@ -124,7 +122,7 @@ partial struct natScanTestsᴛ1 /*dyn*/ {
     internal rune next;                          // next character (or 0, if at EOF)
 }
 internal static slice<natScanTestsᴛ1> natScanTests;
-internal static void initᴛnatScanTests() { natScanTests = slice<natScanTestsᴛ1>([
+internal static void initᴛnatScanTests() { natScanTests = [
     // invalid: no digits
     new("", 0, false, default, 10, 0, errNoDigits, 0),
     new("_", 0, false, default, 10, 0, errNoDigits, 0),
@@ -234,10 +232,10 @@ internal static void initᴛnatScanTests() { natScanTests = slice<natScanTests�
     new("0x_f00d.1e", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 0),
     new("0x_f00d.1E2", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e2}.slice()), 16, -3, default, 0),
     new("0x_f00d.1eg", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 'g')
-]); }
+]; }
 
 public static void TestScanBase(ж<testing.T> t) {
-    foreach (var (_, a) in natScanTests) {
+    foreach (var (_, a) in range(natScanTests)) {
         var r = strings.NewReader(a.s);
         var (x, b, count, err) = ((global::go.math.big_package.Δnat)default).scan(new big_test_package.strings_ReaderжByteScanner(r), a.@base, a.frac);
         if (!AreEqual(err, a.err)) {
@@ -272,10 +270,8 @@ public static void TestScanPi(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("scanning pi: %s", err);
     }
-    {
-        @string s = (@string)z.utoa(10); if (s != pi) {
-            t.Errorf("scanning pi: got %s", s);
-        }
+    @string s = (@string)z.utoa(10); if (s != pi) {
+        t.Errorf("scanning pi: got %s", s);
     }
 }
 
@@ -325,8 +321,8 @@ public static void BenchmarkScan(ж<testing.B> b) {
         defer(stkʗ1.free, ref ᒐ);
 
         UntypedInt x = 9; // avoid tested bases, in case runs of 0s are handled specially
-        foreach (var (_, @base) in slice<nint>([2, 8, 10, 16])) {
-            foreach (var (_, y) in slice<global::go.math.big_package.Word>([10, 100, 1000, 10000, 100000])) {
+        foreach (var (_, @base) in range(slice<nint>([2, 8, 10, 16]))) {
+            foreach (var (_, y) in range(slice<global::go.math.big_package.Word>([10, 100, 1000, 10000, 100000]))) {
                 if (isRaceBuilder && y > 1000) {
                     continue;
                 }
@@ -337,10 +333,8 @@ public static void BenchmarkScan(ж<testing.B> b) {
                     z = z.expWW(stkʗ2, x, y);
 
                     var s = z.utoa(@base);
-                    {
-                        var t = itoa(z, @base); if (!bytes_package.Equal(s, t)) {
-                            bΔ1.Fatalf("scanning: got %s; want %s", s, t);
-                        }
+                    var t = itoa(z, @base); if (!bytes_package.Equal(s, t)) {
+                        bΔ1.Fatalf("scanning: got %s; want %s", s, t);
                     }
                     bΔ1.StartTimer();
 
@@ -363,8 +357,8 @@ public static void BenchmarkString(ж<testing.B> b) {
         defer(stkʗ1.free, ref ᒐ);
 
         UntypedInt x = 10;
-        foreach (var (_, @base) in slice<nint>([2, 8, 10, 16])) {
-            foreach (var (_, y) in slice<global::go.math.big_package.Word>([10, 100, 1000, 10000, 100000])) {
+        foreach (var (_, @base) in range(slice<nint>([2, 8, 10, 16]))) {
+            foreach (var (_, y) in range(slice<global::go.math.big_package.Word>([10, 100, 1000, 10000, 100000]))) {
                 if (isRaceBuilder && y > 1000) {
                     continue;
                 }
@@ -395,7 +389,7 @@ public static void BenchmarkLeafSize(ж<testing.B> b) {
         });
     }
     // Try some large lengths
-    foreach (var (_, n) in slice<nint>([32, 64])) {
+    foreach (var (_, n) in range(slice<nint>([32, 64]))) {
         b.Run(fmt.Sprint(n), (ж<testing.B> bΔ2) => {
             LeafSizeHelper(bΔ2, 10, n);
         });

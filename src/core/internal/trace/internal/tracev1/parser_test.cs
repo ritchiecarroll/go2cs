@@ -30,7 +30,7 @@ public static void TestCorruptedInputs(ж<testing.T> t) {
         ((@string)(new byte[]{0x67, 0x6f, 0x20, 0x31, 0x2e, 0x35, 0x20, 0x74, 0x72, 0x61, 0x63, 0x65, 0x00, 0x00, 0x00, 0x00, 0x54, 0x30, 0x30, 0x02, 0x30})),
         ((@string)(new byte[]{0x67, 0x6f, 0x20, 0x31, 0x2e, 0x35, 0x20, 0x74, 0x72, 0x61, 0x63, 0x65, 0x00, 0x00, 0x00, 0x00, 0xc3, 0x02, 0x30, 0x30}))
     ]);
-    foreach (var (_, data) in tests) {
+    foreach (var (_, data) in range(tests)) {
         var (res, err) = Parse(new tracev1_internal_test_package.strings_ReaderжReader(strings.NewReader(data)), 5);
         if (err == nil || res.Events.Len() != 0 || res.Stacks != nil) {
             t.Fatalf("no error on input: %q", data);
@@ -51,7 +51,7 @@ public static void TestParseCanned(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("failed to read ./testdata: %v", err);
     }
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         var (info, errΔ1) = f.Info();
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
@@ -112,16 +112,12 @@ public static void TestBuckets(ж<testing.T> t) {
         evs.append(new Event(Ts: ((global::go.@internal.trace.@internal.tracev1_package.Timestamp)(int64)i)));
     }
 
-    {
-        nint nΔ1 = len(evs.buckets); if (nΔ1 != 4) {
-            t.Fatalf("got %d buckets, want %d", nΔ1, (nint)4);
-        }
+    nint nΔ1 = len(evs.buckets); if (nΔ1 != 4) {
+        t.Fatalf("got %d buckets, want %d", nΔ1, (nint)4);
     }
 
-    {
-        nint nΔ2 = evs.Len(); if (nΔ2 != N) {
-            t.Fatalf("got %d events, want %d", nΔ2, (nint)(N));
-        }
+    nint nΔ2 = evs.Len(); if (nΔ2 != N) {
+        t.Fatalf("got %d events, want %d", nΔ2, (nint)(N));
     }
 
     nint n = default;
@@ -135,26 +131,22 @@ public static void TestBuckets(ж<testing.T> t) {
 
     UntypedInt consume = /* eventsBucketSize + 50 */ 524338;
     for (nint i = 0; i < consume; i++) {
-        {
-            var (_, ok) = evs.Pop(); if (!ok) {
-                t.Fatalf("iteration failed after %d events", i);
-            }
+        var (_, ok) = evs.Pop(); if (!ok) {
+            t.Fatalf("iteration failed after %d events", i);
         }
     }
 
     if (evs.buckets[0] != nil) {
         t.Fatalf("expected first bucket to have been dropped");
     }
-    foreach (var (i, b) in evs.buckets[1..]) {
+    foreach (var (i, b) in range(evs.buckets[1..])) {
         if (b == nil) {
             t.Fatalf("expected bucket %d to be non-nil", i + 1);
         }
     }
 
-    {
-        nint nΔ3 = evs.Len(); if (nΔ3 != (nint)(N - consume)) {
-            t.Fatalf("got %d remaining elements, expected %d", nΔ3, (nint)(N - consume));
-        }
+    nint nΔ3 = evs.Len(); if (nΔ3 != (nint)(N - consume)) {
+        t.Fatalf("got %d remaining elements, expected %d", nΔ3, (nint)(N - consume));
     }
 
     var ev = evs.Ptr(0);
@@ -169,7 +161,7 @@ public static void TestBuckets(ж<testing.T> t) {
         }
     }
 
-    foreach (var (i, b) in evs.buckets) {
+    foreach (var (i, b) in range(evs.buckets)) {
         if (b != nil) {
             t.Fatalf("expected bucket %d to be nil", i);
         }

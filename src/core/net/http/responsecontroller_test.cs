@@ -11,8 +11,6 @@ using os = os_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using net = net_package;
@@ -21,10 +19,7 @@ using Δhttp = global::go.net.http_package;
 
 partial class http_test_package {
 
-public static void TestResponseControllerFlush(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerFlush(Δp0, Δp1));
-}
-
+public static void TestResponseControllerFlush(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerFlush(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object oneˢ = (@string)"one"u8;
 internal static readonly object twoˢ = (@string)"two"u8;
@@ -37,11 +32,9 @@ internal static void testResponseControllerFlush(ж<testing.T> t, testMode mode)
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.Write(slice<byte>("one"u8));
-            {
-                var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
-                    t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
-                    return;
-                }
+            var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
+                t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
+                return;
             }
             ᐸꟷ(continuecʗ1);
             w.Write(slice<byte>("two"u8));
@@ -70,10 +63,7 @@ internal static void testResponseControllerFlush(ж<testing.T> t, testMode mode)
     finally { ᒐ.Run(); }
 }
 
-public static void TestResponseControllerHijack(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerHijack(Δp0, Δp1));
-}
-
+public static void TestResponseControllerHijack(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerHijack(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string headerᶜ => ref headerᶜᵇ;
 private static readonly @string headerᶜᵇ = "X-Header"u8;
@@ -105,55 +95,42 @@ internal static void testResponseControllerHijack(ж<testing.T> t, testMode mode
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = res.Header.Get(header);
-        @string want = value; if (got != want) {
-            t.Errorf("response header %q = %q, want %q", header, got, want);
-        }
+    @string got = res.Header.Get(header);
+    @string want = value; if (got != want) {
+        t.Errorf("response header %q = %q, want %q", header, got, want);
     }
 }
 
 public static void TestResponseControllerSetPastWriteDeadline(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerSetPastWriteDeadline(Δp0, Δp1));
 }
-
 internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.Write(slice<byte>("one"u8));
-            {
-                var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
-                    t.Errorf("before setting deadline: ctl.Flush() = %v, want nil", errΔ1);
-                }
+            var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
+                t.Errorf("before setting deadline: ctl.Flush() = %v, want nil", errΔ1);
             }
-            {
-                var errΔ2 = ctl.SetWriteDeadline(time.Now().Add((time.Duration)(-10000000000L))); if (errΔ2 != nil) {
-                    t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ2);
-                }
+            var errΔ2 = ctl.SetWriteDeadline(time.Now().Add((time.Duration)(-10000000000L))); if (errΔ2 != nil) {
+                t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ2);
             }
 
             w.Write(slice<byte>("two"u8));
-            {
-                var errΔ3 = ctl.Flush(); if (errΔ3 == nil) {
-                    t.Errorf("after setting deadline: ctl.Flush() = nil, want non-nil");
-                }
+            var errΔ3 = ctl.Flush(); if (errΔ3 == nil) {
+                t.Errorf("after setting deadline: ctl.Flush() = nil, want non-nil");
             }
             // Connection errors are sticky, so resetting the deadline does not permit
             // making more progress. We might want to change this in the future, but verify
             // the current behavior for now. If we do change this, we'll want to make sure
             // to do so only for writing the response body, not headers.
-            {
-                var errΔ4 = ctl.SetWriteDeadline(time.Now().Add((time.Duration)(3600000000000L))); if (errΔ4 != nil) {
-                    t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ4);
-                }
+            var errΔ4 = ctl.SetWriteDeadline(time.Now().Add((time.Duration)(3600000000000L))); if (errΔ4 != nil) {
+                t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ4);
             }
             w.Write(slice<byte>("three"u8));
-            {
-                var errΔ5 = ctl.Flush(); if (errΔ5 == nil) {
-                    t.Errorf("after resetting deadline: ctl.Flush() = nil, want non-nil");
-                }
+            var errΔ5 = ctl.Flush(); if (errΔ5 == nil) {
+                t.Errorf("after resetting deadline: ctl.Flush() = nil, want non-nil");
             }
         })));
 
@@ -175,7 +152,6 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> t,
 public static void TestResponseControllerSetFutureWriteDeadline(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerSetFutureWriteDeadline(Δp0, Δp1));
 }
-
 internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -186,16 +162,12 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.WriteHeader(200);
-            {
-                var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
-                    t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
-                }
+            var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
+                t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
             }
             ᐸꟷ(startwritecʗ1); // don't set the deadline until the client reads response headers
-            {
-                var errΔ2 = ctl.SetWriteDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ2 != nil) {
-                    t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ2);
-                }
+            var errΔ2 = ctl.SetWriteDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ2 != nil) {
+                t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ2);
             }
             var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), (neverEnding)(rune)'a');
             errcʗ1.ᐸꟷ(errΔ3);
@@ -224,7 +196,6 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
 public static void TestResponseControllerSetPastReadDeadline(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerSetPastReadDeadline(Δp0, Δp1));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string textFooˢ => ref textFooˢᵇ;
 private static readonly @string textFooˢᵇ = "text/foo"u8;
@@ -248,11 +219,9 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                     t.Errorf("before setting read deadline: Read = %v, %q, want nil, %q", errΔ1, (@string)b, oneˢ);
                     return;
                 }
-                {
-                    var errΔ2 = ctl.SetReadDeadline(time.Now()); if (errΔ2 != nil) {
-                        t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ2);
-                        return;
-                    }
+                var errΔ2 = ctl.SetReadDeadline(time.Now()); if (errΔ2 != nil) {
+                    t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ2);
+                    return;
                 }
                 (b, errΔ1) = io.ReadAll(r.Body);
                 if (errΔ1 == nil || ((sstring)b) != ""u8) {
@@ -262,11 +231,9 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 // Connection errors are sticky, so resetting the deadline does not permit
                 // making more progress. We might want to change this in the future, but verify
                 // the current behavior for now.
-                {
-                    var errΔ3 = ctl.SetReadDeadline(new time.Time()); if (errΔ3 != nil) {
-                        t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ3);
-                        return;
-                    }
+                var errΔ3 = ctl.SetReadDeadline(new time.Time()); if (errΔ3 != nil) {
+                    t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ3);
+                    return;
                 }
                 (b, errΔ1) = io.ReadAll(r.Body);
                 if (errΔ1 == nil) {
@@ -327,7 +294,6 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
 public static void TestResponseControllerSetFutureReadDeadline(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerSetFutureReadDeadline(Δp0, Δp1));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string responseBodyˢ => ref responseBodyˢᵇ;
 private static readonly @string responseBodyˢᵇ = "response body"u8;
@@ -340,10 +306,8 @@ internal static void testResponseControllerSetFutureReadDeadline(ж<testing.T> t
         @string respBody = responseBodyˢ;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
             var ctl = NewResponseController(w);
-            {
-                var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
-                    t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);
-                }
+            var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
+                t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);
             }
             var (_, errΔ2) = io.Copy(io.Discard, req.Body);
             if (!errors.Is(errΔ2, os.ErrDeadlineExceeded)) {
@@ -376,30 +340,21 @@ internal static Δhttp.ResponseWriter Unwrap(this wrapWriter w) {
     return w.ResponseWriter;
 }
 
-public static void TestWrappedResponseController(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testWrappedResponseController(Δp0, Δp1));
-}
-
+public static void TestWrappedResponseController(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testWrappedResponseController(Δp0, Δp1)); }
 internal static void testWrappedResponseController(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w = new wrapWriter(w);
             var ctl = NewResponseController(w);
-            {
-                var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
-                    t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
-                }
+            var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
+                t.Errorf("ctl.Flush() = %v, want nil", errΔ1);
             }
-            {
-                var errΔ2 = ctl.SetReadDeadline(new time.Time()); if (errΔ2 != nil) {
-                    t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ2);
-                }
+            var errΔ2 = ctl.SetReadDeadline(new time.Time()); if (errΔ2 != nil) {
+                t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ2);
             }
-            {
-                var errΔ3 = ctl.SetWriteDeadline(new time.Time()); if (errΔ3 != nil) {
-                    t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ3);
-                }
+            var errΔ3 = ctl.SetWriteDeadline(new time.Time()); if (errΔ3 != nil) {
+                t.Errorf("ctl.SetWriteDeadline() = %v, want nil", errΔ3);
             }
         })));
         var (res, err) = cst.c.Get(cst.ts.URL);
@@ -417,21 +372,18 @@ internal static void testWrappedResponseController(ж<testing.T> t, testMode mod
 public static void TestResponseControllerEnableFullDuplex(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseControllerEnableFullDuplex(Δp0, Δp1));
 }
-
 internal static void testResponseControllerEnableFullDuplex(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
             var ctl = NewResponseController(w);
-            {
-                var errΔ1 = ctl.EnableFullDuplex(); if (errΔ1 != nil) {
-                    // TODO: Drop test for HTTP/2 when x/net is updated to support
-                    // EnableFullDuplex. Since HTTP/2 supports full duplex by default,
-                    // the rest of the test is fine; it's just the EnableFullDuplex call
-                    // that fails.
-                    if (mode != http2Mode) {
-                        t.Errorf("ctl.EnableFullDuplex() = %v, want nil", errΔ1);
-                    }
+            var errΔ1 = ctl.EnableFullDuplex(); if (errΔ1 != nil) {
+                // TODO: Drop test for HTTP/2 when x/net is updated to support
+                // EnableFullDuplex. Since HTTP/2 supports full duplex by default,
+                // the rest of the test is fine; it's just the EnableFullDuplex call
+                // that fails.
+                if (mode != http2Mode) {
+                    t.Errorf("ctl.EnableFullDuplex() = %v, want nil", errΔ1);
                 }
             }
             w.WriteHeader(200);
@@ -454,16 +406,12 @@ internal static void testResponseControllerEnableFullDuplex(ж<testing.T> t, tes
         var resʗ1 = res;
         defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
         for (var i = (byte)0; i < 10; i++) {
-            {
-                var (_, errΔ3) = pw.Write(slice<byte>([i])); if (errΔ3 != nil) {
-                    t.Fatalf("Write: %v", errΔ3);
-                }
+            var (_, errΔ3) = pw.Write([i]); if (errΔ3 != nil) {
+                t.Fatalf("Write: %v", errΔ3);
             }
             array<byte> buf = new(1);
-            {
-                var (n, errΔ4) = res.Body.Read(buf[..]); if (n != 1 || errΔ4 != nil) {
-                    t.Fatalf("Read: %v, %v", n, errΔ4);
-                }
+            var (n, errΔ4) = res.Body.Read(buf[..]); if (n != 1 || errΔ4 != nil) {
+                t.Fatalf("Read: %v, %v", n, errΔ4);
             }
             if (buf[0] != i) {
                 t.Fatalf("read byte %v, want %v", buf[0], i);
@@ -478,10 +426,8 @@ internal static void testResponseControllerEnableFullDuplex(ж<testing.T> t, tes
 public static void TestIssue58237(ж<testing.T> t) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), http2Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         var ctl = NewResponseController(w);
-        {
-            var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
-                t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);
-            }
+        var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
+            t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);
         }
         time.Sleep(10 * time.Millisecond);
     })));

@@ -8,8 +8,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.log.slog_package;
 
 partial class slog_internal_test_package {
@@ -18,11 +16,9 @@ public static void TestRecordAttrs(ж<testing.T> t) {
     var @as = slice<global::go.log.slog_package.Attr>([Int("k1", 1), go.log.slog_package.String("k2", fooˢ), Int("k3", 3),
         go.log.slog_package.Int64("k4", -1), go.log.slog_package.Float64("f", 3.1D), go.log.slog_package.Uint64("u", 999)]);
     var r = newRecordWithAttrs(@as);
-    {
-        nint g = r.NumAttrs();
-        nint w = len(@as); if (g != w) {
-            t.Errorf("NumAttrs: got %d, want %d", g, w);
-        }
+    nint g = r.NumAttrs();
+    nint w = len(@as); if (g != w) {
+        t.Errorf("NumAttrs: got %d, want %d", g, w);
     }
     {
         var got = attrsSlice(r); if (!attrsEqual(got, @as)) {
@@ -32,7 +28,7 @@ public static void TestRecordAttrs(ж<testing.T> t) {
 
     // Early return.
     // Hit both loops in Record.Attrs: front and back.
-    foreach (var (_, stop) in slice<nint>([2, 6])) {
+    foreach (var (_, stop) in range(slice<nint>([2, 6]))) {
         ref var got = ref heap<slice<global::go.log.slog_package.Attr>>(out var Ꮡgot);
         r.Attrs((global::go.log.slog_package.Attr a) => {
             Ꮡgot.ValueSlot = builtin.append(Ꮡgot.ValueSlot, a);
@@ -55,12 +51,12 @@ internal partial struct TestRecordSource_type /*dyn*/ {
 
 public static void TestRecordSource(ж<testing.T> t) {
     // Zero call depth => nil *Source.
-    foreach (var (_, test) in slice<TestRecordSource_type>([
+    foreach (var (_, test) in range(slice<TestRecordSource_type>([
         new(0, "", "", false, true),
         new(-16, "", "", false, true),
         new(1, "log/slog.TestRecordSource", "record_test.go", true, false), // 1: caller of NewRecord
         new(2, "testing.tRunner", "testing.go", true, false)
-    ])) {
+    ]))) {
         uintptr pc = default;
         if (test.depth > 0) {
             pc = callerPC(test.depth + 1);
@@ -77,10 +73,8 @@ public static void TestRecordSource(ж<testing.T> t) {
             t.Errorf("depth %d: got nil Source, want non-nil", test.depth);
             continue;
         }
-        {
-            nint i = strings.LastIndexByte(got.File, (byte)'/'); if (i >= 0) {
-                got.File = got.File.slice(i + 1);
-            }
+        nint i = strings.LastIndexByte(got.File, (byte)'/'); if (i >= 0) {
+            got.File = got.File.slice(i + 1);
         }
         if (got.Function != test.wantFunction || got.File != test.wantFile || (got.Line > 0) != test.wantLinePositive) {
             t.Errorf("depth %d: got (%q, %q, %d), want (%q, %q, %t)",

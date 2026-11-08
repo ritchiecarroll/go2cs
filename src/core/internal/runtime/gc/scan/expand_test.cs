@@ -25,7 +25,7 @@ internal static void testExpand(ж<testing.T> t, Action<nint, ж<gc.ObjMask>, ж
         expRʗ1(sizeClass, objs, Ꮡwant);
         expF(sizeClass, objs, Ꮡgot);
 
-        foreach (var i in range(want)) {
+        foreach (var i in range(len(want))) {
             if (got[i] != want[i]) {
                 tΔ1.Errorf("expansion differs from reference at bit %d", i * (nint)goarch.PtrSize);
                 if (goarch.PtrSize == 4) {

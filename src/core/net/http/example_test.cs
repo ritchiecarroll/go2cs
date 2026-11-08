@@ -11,8 +11,6 @@ using Δhttp = global::go.net.http_package;
 using os = os_package;
 using signal = global::go.os.signal_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using global::go.net;
 using global::go.os;
@@ -113,8 +111,7 @@ public static void ExampleStripPrefix() {
 partial struct apiHandler {
 }
 
-internal static void ServeHTTP(this apiHandler _Δp0, Δhttp.ResponseWriter _Δp1, ж<Δhttp.Request> _Δp2) {
-}
+internal static void ServeHTTP(this apiHandler _Δp0, Δhttp.ResponseWriter _Δp1, ж<Δhttp.Request> _Δp2) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string apiˢ => ref apiˢᵇ;
@@ -189,11 +186,9 @@ public static partial void ExampleServer_Shutdown() {
         ᐸꟷ(sigint);
 
         // We received an interrupt signal, shut down.
-        {
-            var err = Ꮡsrv.Shutdown(context_package.Background()); if (err != nil) {
-                // Error from closing listeners, or context timeout:
-                log.Printf("HTTP server Shutdown: %v", err);
-            }
+        var err = Ꮡsrv.Shutdown(context_package.Background()); if (err != nil) {
+            // Error from closing listeners, or context timeout:
+            log.Printf("HTTP server Shutdown: %v", err);
         }
         builtin.close(idleConnsClosedʗ1);
     });

@@ -122,18 +122,14 @@ public static void TestRecorder(ж<testing.T> t) {
             return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasOldHeader(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            {
-                @string got = rec.HeaderMap.Get(key); if (got != want) {
-                    return fmt.Errorf("HeaderMap header %s = %q; want %q"u8, key, got, want);
-                }
+            @string got = rec.HeaderMap.Get(key); if (got != want) {
+                return fmt.Errorf("HeaderMap header %s = %q; want %q"u8, key, got, want);
             }
             return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasHeader(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            {
-                @string got = rec.Result().Header.Get(key); if (got != want) {
-                    return fmt.Errorf("final header %s = %q; want %q"u8, key, got, want);
-                }
+            @string got = rec.Result().Header.Get(key); if (got != want) {
+                return fmt.Errorf("final header %s = %q; want %q"u8, key, got, want);
             }
             return default;
         });
@@ -141,7 +137,7 @@ public static void TestRecorder(ж<testing.T> t) {
         var keys = keysʗp.slice();
         var keysʗ1 = keys;
         return (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            foreach (var (_, k) in keysʗ1) {
+            foreach (var (_, k) in range(keysʗ1)) {
                 var (v, ok) = rec.Result().Header[http.CanonicalHeaderKey(k), ꟷ];
                 if (ok) {
                     return fmt.Errorf("unexpected header %s with value %q"u8, k, v);
@@ -151,10 +147,8 @@ public static void TestRecorder(ж<testing.T> t) {
         });
     }
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasTrailer(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            {
-                @string got = rec.Result().Trailer.Get(key); if (got != want) {
-                    return fmt.Errorf("trailer %s = %q; want %q"u8, key, got, want);
-                }
+            @string got = rec.Result().Trailer.Get(key); if (got != want) {
+                return fmt.Errorf("trailer %s = %q; want %q"u8, key, got, want);
             }
             return default;
         });
@@ -163,7 +157,7 @@ public static void TestRecorder(ж<testing.T> t) {
         var keysʗ2 = keys;
         return (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             var trailers = rec.Result().Trailer;
-            foreach (var (_, k) in keysʗ2) {
+            foreach (var (_, k) in range(keysʗ2)) {
                 var (_, ok) = trailers[http.CanonicalHeaderKey(k), ꟷ];
                 if (ok) {
                     return fmt.Errorf("unexpected trailer %s"u8, k);
@@ -173,10 +167,8 @@ public static void TestRecorder(ж<testing.T> t) {
         });
     }
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasContentLength(int64 length) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            {
-                var got = rec.Result().ContentLength; if (got != length) {
-                    return fmt.Errorf("ContentLength = %d; want %d"u8, got, length);
-                }
+            var got = rec.Result().ContentLength; if (got != length) {
+                return fmt.Errorf("ContentLength = %d; want %d"u8, got, length);
             }
             return default;
         });
@@ -195,7 +187,7 @@ public static void TestRecorder(ж<testing.T> t) {
 
 
 
-    foreach (var (_, vᴛ1) in new TestRecorder_type[]{
+    foreach (var (_, vᴛ1) in range(new TestRecorder_type[]{
         new(
             "200 default",
             (http.ResponseWriter w, ж<http.Request> r) => {
@@ -359,7 +351,7 @@ public static void TestRecorder(ж<testing.T> t) {
             check(hasResultContents(""u8)) // check we don't crash reading the body
 
         )
-    }.array()) {
+    }.array())) {
         ref var tt = ref heap(new TestRecorder_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -369,11 +361,9 @@ public static void TestRecorder(ж<testing.T> t) {
             var h = NilSafeDelegateConversion<http.HandlerFunc, Action<http.ResponseWriter, ж<http.Request>>>(ttʗ1.h);
             var rec = NewRecorder();
             h.ServeHTTP(new httptest_test_package.httptest_ResponseRecorderжResponseWriter(rec), r);
-            foreach (var (_, checkΔ1) in ttʗ1.checks) {
-                {
-                    var err = checkΔ1(rec); if (err != nil) {
-                        tΔ1.Error(err);
-                    }
+            foreach (var (_, checkΔ1) in range(ttʗ1.checks)) {
+                var err = checkΔ1(rec); if (err != nil) {
+                    tΔ1.Error(err);
                 }
             }
         });
@@ -401,11 +391,9 @@ public static void TestBodyNotAllowed(ж<testing.T> t) {
         t.Errorf("expected BodyNotAllowed for WriteString after 204, got: %v", err);
     }
 
-    {
-        @string got = rw.Body.String();
-        @string want = helloWorldˢ; if (got != want) {
-            t.Errorf("got Body=%q, want %q", got, want);
-        }
+    @string got = rw.Body.String();
+    @string want = helloWorldˢ; if (got != want) {
+        t.Errorf("got Body=%q, want %q", got, want);
     }
 }
 
@@ -440,11 +428,9 @@ public static void TestParseContentLength(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, tt) in tests) {
-        {
-            var got = parseContentLength(tt.cl); if (got != tt.want) {
-                t.Errorf("%q:\n\tgot=%d\n\twant=%d", tt.cl, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        var got = parseContentLength(tt.cl); if (got != tt.want) {
+            t.Errorf("%q:\n\tgot=%d\n\twant=%d", tt.cl, got, tt.want);
         }
     }
 }
@@ -460,15 +446,13 @@ public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> t) {
     var badCodes = slice<nint>([
         -100, 0, 99, 1000, 20000
     ]);
-    foreach (var (_, badCode) in badCodes) {
+    foreach (var (_, badCode) in range(badCodes)) {
         t.Run(fmt.Sprintf("Code=%d"u8, badCode), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
-                    {
-                        var rΔ1 = recover(); if (rΔ1 == nil) {
-                            tΔ1.Fatal(expectedAPanicˢ);
-                        }
+                    var rΔ1 = recover(); if (rΔ1 == nil) {
+                        tΔ1.Fatal(expectedAPanicˢ);
                     }
                 }, ref ᒐ);
 

@@ -69,7 +69,7 @@ public static void BenchmarkNamed(ж<testing.B> b) {
 
     var testsʗ1 = tests;
     b.Run(underlyingˢ, (ж<testing.B> bΔ1) => {
-        foreach (var (_, vᴛ1) in testsʗ1) {
+        foreach (var (_, vᴛ1) in range(testsʗ1)) {
             ref var test = ref heap(new BenchmarkNamed_tests(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -87,7 +87,7 @@ public static void BenchmarkNamed(ж<testing.B> b) {
 
     var testsʗ2 = tests;
     b.Run(newMethodSetˢ, (ж<testing.B> bΔ3) => {
-        foreach (var (_, vᴛ2) in testsʗ2) {
+        foreach (var (_, vᴛ2) in range(testsʗ2)) {
             ref var test = ref heap(new BenchmarkNamed_tests(), out var Ꮡtest);
             test = vᴛ2;
 
@@ -143,10 +143,8 @@ public static void TestFiniteTypeExpansion(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var pkg = NewPackage("p", f.Name.Name);
-    {
-        var err = NewChecker(nil, fset, pkg, nil).Files(slice<ж<ast.File>>([f])); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = NewChecker(nil, fset, pkg, nil).Files([f]); if (err != nil) {
+        t.Fatal(err);
     }
 
     ж<types.Named> firstFieldType(ж<types.Named> n) => n.Underlying()._<ж<types.Struct>>().Field(0).Type()._<ж<types.Pointer>>().Elem()._<ж<types.Named>>();
@@ -189,7 +187,7 @@ public static void TestMethodOrdering(ж<testing.T> t) {
         var T = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
 
         // add a few more methods manually
-        foreach (var (_, name) in slice<@string>(["foo", "bar", "bal"])) {
+        foreach (var (_, name) in range(slice<@string>(["foo", "bar", "bal"]))) {
             var m = NewFunc(nopos, pkg, name, nil /* don't care about signature */);
             T.AddMethod(m);
         }
@@ -198,7 +196,7 @@ public static void TestMethodOrdering(ж<testing.T> t) {
         if (i == 0) {
             // first round: collect methods in given order
             methods = new slice<@string>(T.NumMethods());
-            foreach (var j in range(methods)) {
+            foreach (var j in range(len(methods))) {
                 methods[j] = T.Method(j).Name();
             }
         } else {
@@ -209,11 +207,9 @@ public static void TestMethodOrdering(ж<testing.T> t) {
                     continue;
                 }
             }
-            foreach (var (j, m) in methods) {
-                {
-                    @string got = T.Method(j).Name(); if (got != m) {
-                        t.Errorf("got method %s, want %s", got, m);
-                    }
+            foreach (var (j, m) in range(methods)) {
+                @string got = T.Method(j).Name(); if (got != m) {
+                    t.Errorf("got method %s, want %s", got, m);
                 }
             }
         }

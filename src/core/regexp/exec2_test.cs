@@ -5,8 +5,6 @@
 namespace go;
 
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.regexp_package;
 
 partial class regexp_internal_test_package {

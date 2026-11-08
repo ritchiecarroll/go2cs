@@ -49,7 +49,7 @@ internal static ref readonly @string serverClientˢ => ref serverClientˢᵇ;
 private static readonly @string serverClientˢᵇ = "ServerClient"u8;
 
 public static void TestServer(ж<testing.T> t) {
-    foreach (var (_, name) in slice<@string>(["NewServer", "NewServerManual"])) {
+    foreach (var (_, name) in range(slice<@string>(["NewServer", "NewServerManual"]))) {
         t.Run(name, (ж<testing.T> tΔ1) => {
             var newServer = newServers[name];
             var newServerʗ1 = newServer;
@@ -74,7 +74,7 @@ public static void TestServer(ж<testing.T> t) {
             });
         });
     }
-    foreach (var (_, name) in slice<@string>(["NewTLSServer", "NewTLSServerManual"])) {
+    foreach (var (_, name) in range(slice<@string>(["NewTLSServer", "NewTLSServerManual"]))) {
         t.Run(name, (ж<testing.T> tΔ7) => {
             var newServer = newServers[name];
             var newServerʗ6 = newServer;
@@ -235,10 +235,8 @@ internal static void testServerClientTransportType(ж<testing.T> t, Func<httpꓸ
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
         var client = ts.Client();
-        {
-            var (_, ok) = client.Transport._<ж<http.Transport>>(ᐧ); if (!ok) {
-                t.Errorf("got %T, want *http.Transport", client.Transport);
-            }
+        var (_, ok) = client.Transport._<ж<http.Transport>>(ᐧ); if (!ok) {
+            t.Errorf("got %T, want *http.Transport", client.Transport);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -255,10 +253,8 @@ internal static void testTLSServerClientTransportType(ж<testing.T> t, Func<http
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
         var client = ts.Client();
-        {
-            var (_, ok) = client.Transport._<ж<http.Transport>>(ᐧ); if (!ok) {
-                t.Errorf("got %T, want *http.Transport", client.Transport);
-            }
+        var (_, ok) = client.Transport._<ж<http.Transport>>(ᐧ); if (!ok) {
+            t.Errorf("got %T, want *http.Transport", client.Transport);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -269,9 +265,7 @@ internal partial struct onlyCloseListener {
     /*embed*/ public net_package.Listener Listener;
 }
 
-internal static error Close(this onlyCloseListener _) {
-    return default;
-}
+internal static error Close(this onlyCloseListener _) { return default; }
 
 // Issue 19729: panic in Server.Close for values created directly
 // without a constructor (so the unexported client field is nil).
@@ -379,7 +373,7 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> t) {
         new("http2", "HTTP/2.0")
     ]);
 
-    foreach (var (_, vᴛ1) in modes) {
+    foreach (var (_, vᴛ1) in range(modes)) {
         ref var tt = ref heap(new TestTLSServerWithHTTP2_modes(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -440,7 +434,7 @@ public static void TestClientExampleCom(ж<testing.T> t) {
         new("https", "foo.example.com")
     ]);
 
-    foreach (var (_, vᴛ1) in modes) {
+    foreach (var (_, vᴛ1) in range(modes)) {
         ref var tt = ref heap(new TestClientExampleCom_modes(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -470,11 +464,9 @@ public static void TestClientExampleCom(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Fatalf("Failed to make request: %v", err);
                 }
-                {
-                    @string got = res.Header.Get(requestedHostnameˢ);
-                    @string want = ttʗ1.host; if (got != want) {
-                        tΔ1.Fatalf("Requested hostname mismatch\ngot: %q\nwant: %q", got, want);
-                    }
+                @string got = res.Header.Get(requestedHostnameˢ);
+                @string want = ttʗ1.host; if (got != want) {
+                    tΔ1.Fatalf("Requested hostname mismatch\ngot: %q\nwant: %q", got, want);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

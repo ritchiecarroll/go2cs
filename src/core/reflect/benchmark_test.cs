@@ -122,7 +122,7 @@ public static void BenchmarkSliceCap(ж<Δtesting.B> Ꮡb) {
 }
 
 public static void BenchmarkDeepEqual(ж<Δtesting.B> b) {
-    foreach (var (_, vᴛ1) in deepEqualPerfTests) {
+    foreach (var (_, vᴛ1) in range(deepEqualPerfTests)) {
         ref var bb = ref heap(new deepEqualPerfTestsᴛ1(), out var Ꮡbb);
         bb = vᴛ1;
 
@@ -312,7 +312,7 @@ public static void BenchmarkZero(ж<Δtesting.B> b) {
         entry(timeˢ, new time.Time(), nonZeroTime().OrTypedNil())
     ]);
 
-    foreach (var (_, vᴛ1) in bms) {
+    foreach (var (_, vᴛ1) in range(bms)) {
         ref var bm = ref heap(new BenchmarkZero_bm(), out var Ꮡbm);
         bm = vᴛ1;
 
@@ -323,7 +323,7 @@ public static void BenchmarkZero(ж<Δtesting.B> b) {
             }
         });
     }
-    foreach (var (_, vᴛ2) in bms) {
+    foreach (var (_, vᴛ2) in range(bms)) {
         ref var bm = ref heap(new BenchmarkZero_bm(), out var Ꮡbm);
         bm = vᴛ2;
 
@@ -346,7 +346,7 @@ public static void BenchmarkSelect(ж<Δtesting.B> b) {
             Chan: ValueOf(Δchannel)
         ));
     }
-    foreach (var (_, numCases) in slice<nint>([1, 4, 8])) {
+    foreach (var (_, numCases) in range(slice<nint>([1, 4, 8]))) {
         var casesʗ1 = cases;
         b.Run(strconv.Itoa(numCases), (ж<Δtesting.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -414,7 +414,7 @@ public static void BenchmarkCallArgCopy(ж<Δtesting.B> b) {
             a = a.Clone();
         }), byteArray(65536))
     }.array();
-    foreach (var (_, vᴛ1) in sizes.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(sizes.ΔRangeSnapshot())) {
         ref var size = ref heap(new BenchmarkCallArgCopy_sizes(), out var Ꮡsize);
         size = vᴛ1;
 
@@ -586,7 +586,7 @@ public static void BenchmarkMap(ж<Δtesting.B> b) {
         new("UserStringKeys", ValueOf(mapOfUserStrings), ValueOf(userStringKeys), value)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new BenchmarkMap_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

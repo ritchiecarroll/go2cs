@@ -12,8 +12,6 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 using time = time_package;
 
@@ -89,7 +87,7 @@ public static void TestBuffers_consume(ж<testing.T> t) {
             want: new Buffers(new slice<byte>[]{}.slice())
         )
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var @in = tt.@in;
         @in.consume(tt.consume);
         if (!reflect.DeepEqual(@in, tt.want)) {
@@ -99,8 +97,8 @@ public static void TestBuffers_consume(ж<testing.T> t) {
 }
 
 public static void TestBuffers_WriteTo(ж<testing.T> t) {
-    foreach (var (_, name) in slice<@string>(["WriteTo", "Copy"])) {
-        foreach (var (_, size) in slice<nint>([0, 10, 1023, 1024, 1025])) {
+    foreach (var (_, name) in range(slice<@string>(["WriteTo", "Copy"]))) {
+        foreach (var (_, size) in range(slice<nint>([0, 10, 1023, 1024, 1025]))) {
             t.Run(fmt.Sprintf("%s/%d"u8, name, size), (ж<testing.T> tΔ1) => {
                 testBuffer_writeTo(tΔ1, size, name == "Copy"u8);
             });
@@ -135,7 +133,7 @@ internal static void testBuffer_writeTo(ж<testing.T> t, nint chunks, bool useCo
 
         withTCPConnPair(t, error (ж<global::go.net_package.TCPConn> c) => {
             ref var buffers = ref heap<global::go.net_package.Buffers>(new global::go.net_package.Buffers(chunks), out var Ꮡbuffers);
-            foreach (var i in range(buffers)) {
+            foreach (var i in range(len(buffers))) {
                 buffers[i] = Ꮡwant.Value.Bytes().slice(i, i + 1);
             }
             int64 n = default;
@@ -163,7 +161,7 @@ internal static void testBuffer_writeTo(ж<testing.T> t, nint chunks, bool useCo
 
             ᏑwriteLog.of(testBuffer_writeTo_writeLog.ᏑMutex).Lock(); // no need to unlock
             nint gotSum = default;
-            foreach (var (_, v) in ᏑwriteLog.Value.log) {
+            foreach (var (_, v) in range(ᏑwriteLog.Value.log)) {
                 gotSum += v;
             }
 
@@ -260,13 +258,11 @@ public static partial void TestWritevError(ж<testing.T> t) {
         // Arrange to reuse the same 1 MB buffer so that we don't allocate much.
         var buf = new slice<byte>((1 << 20));
         ref var buffers = ref heap<global::go.net_package.Buffers>(new global::go.net_package.Buffers((1 << 10)), out var Ꮡbuffers);
-        foreach (var i in range(buffers)) {
+        foreach (var i in range(len(buffers))) {
             buffers[i] = buf;
         }
-        {
-            var (_, errΔ2) = Ꮡbuffers.WriteTo(new net_test_package.net_ConnᴠWriter(c1)); if (errΔ2 == nil) {
-                t.Fatal(buffersWriteToClosedConnˢ);
-            }
+        var (_, errΔ2) = Ꮡbuffers.WriteTo(new net_test_package.net_ConnᴠWriter(c1)); if (errΔ2 == nil) {
+            t.Fatal(buffersWriteToClosedConnˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

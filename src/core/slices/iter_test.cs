@@ -92,7 +92,7 @@ internal static void testSeq(Func<nint, bool> yield) {
     }
 }
 
-internal static slice<nint> testSeqResult = slice<nint>([0, 2, 4, 6, 8]);
+internal static slice<nint> testSeqResult = [0, 2, 4, 6, 8];
 
 public static void TestAppendSeq(ж<testing.T> t) {
     var s = AppendSeq<slice<nint>, nint>(slice<nint>([1, 2]), new iter.Seq<nint>(testSeq));
@@ -111,17 +111,17 @@ public static void TestCollect(ж<testing.T> t) {
 }
 
 internal static slice<slice<@string>> iterTests;
-internal static void initᴛiterTests() { iterTests = slice<slice<@string>>([
+internal static void initᴛiterTests() { iterTests = [
     default,
-    slice<@string>(["a"]),
-    slice<@string>(["a", "b"]),
-    slice<@string>(["b", "a"]),
+    ["a"],
+    ["a", "b"],
+    ["b", "a"],
     strs[..]
-]); }
+]; }
 
 public static void TestValuesAppendSeq(ж<testing.T> t) {
-    foreach (var (_, prefix) in iterTests) {
-        foreach (var (_, s) in iterTests) {
+    foreach (var (_, prefix) in range(iterTests)) {
+        foreach (var (_, s) in range(iterTests)) {
             var got = AppendSeq(prefix, Values<slice<@string>, @string>(s));
             var want = appendꓸꓸꓸ(prefix, s);
             if (!Equal<slice<@string>, @string>(got, want)) {
@@ -132,7 +132,7 @@ public static void TestValuesAppendSeq(ж<testing.T> t) {
 }
 
 public static void TestValuesCollect(ж<testing.T> t) {
-    foreach (var (_, s) in iterTests) {
+    foreach (var (_, s) in range(iterTests)) {
         var got = Collect(Values<slice<@string>, @string>(s));
         if (!Equal<slice<@string>, @string>(got, s)) {
             t.Errorf("Collect(Values(%v)) == %v, want %v", s, got, s);
@@ -160,7 +160,7 @@ public static void TestSortedStableFunc(ж<testing.T> t) {
     nint n = 1000;
     nint m = 100;
     var data = new intPairs(n);
-    foreach (var i in range(data)) {
+    foreach (var i in range(len(data))) {
         data[i].a = rand.IntN(m);
     }
     data.initB();
@@ -208,37 +208,37 @@ public static void TestChunk(ж<testing.T> t) {
         ),
         new(
             name: "empty",
-            s: slice<nint>([]),
+            s: [],
             n: 1,
             chunks: default
         ),
         new(
             name: "short",
-            s: slice<nint>([1, 2]),
+            s: [1, 2],
             n: 3,
-            chunks: slice<slice<nint>>([slice<nint>([1, 2])])
+            chunks: [[1, 2]]
         ),
         new(
             name: "one",
-            s: slice<nint>([1, 2]),
+            s: [1, 2],
             n: 2,
-            chunks: slice<slice<nint>>([slice<nint>([1, 2])])
+            chunks: [[1, 2]]
         ),
         new(
             name: "even",
-            s: slice<nint>([1, 2, 3, 4]),
+            s: [1, 2, 3, 4],
             n: 2,
-            chunks: slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3, 4])])
+            chunks: [[1, 2], [3, 4]]
         ),
         new(
             name: "odd",
-            s: slice<nint>([1, 2, 3, 4, 5]),
+            s: [1, 2, 3, 4, 5],
             n: 2,
-            chunks: slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3, 4]), slice<nint>([5])])
+            chunks: [[1, 2], [3, 4], [5]]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tc = ref heap(new TestChunk_cases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -275,13 +275,13 @@ internal partial struct TestChunkPanics_type /*dyn*/ {
 }
 
 public static void TestChunkPanics(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestChunkPanics_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestChunkPanics_type>([
         new(
             name: "cannot be less than 1",
             x: new slice<EmptyStruct>(0),
             n: 0
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestChunkPanics_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -306,10 +306,8 @@ public static void TestChunkRange(ж<testing.T> t) {
         got = append(got, c);
     }
 
-    {
-        var want = slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3, 4])]); if (!chunkEqual<slice<nint>, nint>(got, want)) {
-            t.Errorf("Chunk iteration did not stop, got %v, want %v", got, want);
-        }
+    var want = slice<slice<nint>>([[1, 2], [3, 4]]); if (!chunkEqual<slice<nint>, nint>(got, want)) {
+        t.Errorf("Chunk iteration did not stop, got %v, want %v", got, want);
     }
 }
 

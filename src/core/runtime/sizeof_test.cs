@@ -30,7 +30,7 @@ public static void TestSizeof(ж<testing.T> t) {
         t.Errorf("unsafe.Sizeof(xRegPerG) = %d, want <= %d", xreg, (nint)(runtime_internal_test_package.PtrSize));
     }
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var want = tt._32bit;
         if (_64bit) {
             want = tt._64bit;

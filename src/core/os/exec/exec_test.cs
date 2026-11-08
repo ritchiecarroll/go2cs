@@ -32,8 +32,6 @@ using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.net;
 using go.net.http;
 using go.os;
@@ -115,11 +113,9 @@ public static void TestMain(ж<testing.M> m) {
         nint code = m.Run();
         if (code == 0 && (~flag.Lookup(testRunˢ)).Value.String() == ""u8 && (~flag.Lookup(testListˢ)).Value.String() == ""u8) {
             foreach (var (cmdΔ1, _) in helperCommands) {
-                {
-                    var (_, okΔ1) = ᏑhelperCommandUsed.Load(cmdΔ1); if (!okΔ1) {
-                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "helper command unused: %q\n"u8, cmdΔ1);
-                        code = 1;
-                    }
+                var (_, okΔ1) = ᏑhelperCommandUsed.Load(cmdΔ1); if (!okΔ1) {
+                    fmt.Fprintf(new os.FileжWriter(os.Stderr), "helper command unused: %q\n"u8, cmdΔ1);
+                    code = 1;
                 }
             }
         }
@@ -219,7 +215,7 @@ internal static void cmdEcho(params ꓸꓸꓸstring argsʗp) {
     var iargsᴷ = new stackAppend<any>();
 
     var iargs = slice<any>([]);
-    foreach (var (_, s) in args) {
+    foreach (var (_, s) in range(args)) {
         iargs = append(iargsᴷ, iargs, (any)(s));
     }
     fmt.Println(iargs.ꓸꓸꓸ);
@@ -228,7 +224,7 @@ internal static void cmdEcho(params ꓸꓸꓸstring argsʗp) {
 internal static void cmdEchoEnv(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
-    foreach (var (_, s) in args) {
+    foreach (var (_, s) in range(args)) {
         fmt.Println(os.Getenv(s));
     }
 }
@@ -243,7 +239,7 @@ internal static void cmdCat(params ꓸꓸꓸstring argsʗp) {
             return;
         }
         nint exit = 0;
-        foreach (var (_, fn) in args) {
+        foreach (var (_, fn) in range(args)) {
             var (f, err) = os.Open(fn);
             if (err != nil) {
                 fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: %v\n"u8, err);
@@ -271,10 +267,10 @@ internal static void cmdPipeTest(params ꓸꓸꓸstring ʗp) {
         }
         if (bytes.HasPrefix(line, slice<byte>("O:"u8))) {
             os.Stdout.Write(line);
-            os.Stdout.Write(slice<byte>([(byte)'\n']));
+            os.Stdout.Write([(byte)'\n']);
         } else if (bytes.HasPrefix(line, slice<byte>("E:"u8))) {
             os.Stderr.Write(line);
-            os.Stderr.Write(slice<byte>([(byte)'\n']));
+            os.Stderr.Write([(byte)'\n']);
         } else {
             os.Exit(1);
         }
@@ -287,11 +283,9 @@ internal static void cmdStdinClose(params ꓸꓸꓸstring ʗp) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: %v\n"u8, err);
         os.Exit(1);
     }
-    {
-        @string s = (@string)b; if (s != stdinCloseTestString) {
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: Read %q, want %q"u8, s, stdinCloseTestString);
-            os.Exit(1);
-        }
+    @string s = (@string)b; if (s != stdinCloseTestString) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: Read %q, want %q"u8, s, stdinCloseTestString);
+        os.Exit(1);
     }
 }
 
@@ -322,7 +316,7 @@ internal static void cmdYes(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
     if (len(args) == 0) {
-        args = slice<@string>(["y"]);
+        args = ["y"];
     }
     @string s = strings.Join(args, " ") + "\n"u8;
     for (;;) {
@@ -350,11 +344,9 @@ public static void TestEcho(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("echo: %v", err);
     }
-    {
-        @string g = (@string)bs;
-        @string e = fooBarBazˢ; if (g != e) {
-            t.Errorf("echo: want %q, got %q", e, g);
-        }
+    @string g = (@string)bs;
+    @string e = fooBarBazˢ; if (g != e) {
+        t.Errorf("echo: want %q, got %q", e, g);
     }
 }
 
@@ -390,11 +382,9 @@ public static void TestCommandRelativeName(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("echo: %v", err);
     }
-    {
-        @string g = (@string)@out;
-        @string e = fooˢ2; if (g != e) {
-            t.Errorf("echo: want %q, got %q", e, g);
-        }
+    @string g = (@string)@out;
+    @string e = fooˢ2; if (g != e) {
+        t.Errorf("echo: want %q, got %q", e, g);
     }
 }
 
@@ -432,10 +422,8 @@ public static partial void TestEchoFileRace(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("StdinPipe: %v", err);
     }
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            t.Fatalf("Start: %v", errΔ1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        t.Fatalf("Start: %v", errΔ1);
     }
     var wrote = new channel<bool>(0);
     var stdinʗ1 = stdin;
@@ -449,10 +437,8 @@ public static partial void TestEchoFileRace(ж<testing.T> t) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    {
-        var errΔ2 = cmd.Wait(); if (errΔ2 != nil) {
-            t.Fatalf("Wait: %v", errΔ2);
-        }
+    var errΔ2 = cmd.Wait(); if (errΔ2 != nil) {
+        t.Fatalf("Wait: %v", errΔ2);
     }
     ᐸꟷ(wrote);
 }
@@ -472,10 +458,8 @@ public static void TestCatGoodAndBadFile(ж<testing.T> t) {
 
     // Testing combined output and error values.
     var (bs, err) = helperCommand(t, catˢ, bogusFileFooˢ, execTestGoˢ).CombinedOutput();
-    {
-        var (_, okΔ1) = err._<ж<Δexec.ExitError>>(ᐧ); if (!okΔ1) {
-            t.Errorf("expected *exec.ExitError from cat combined; got %T: %v", err, err);
-        }
+    var (_, okΔ1) = err._<ж<Δexec.ExitError>>(ᐧ); if (!okΔ1) {
+        t.Errorf("expected *exec.ExitError from cat combined; got %T: %v", err, err);
     }
     var (errLine, body, ok) = strings.Cut((@string)bs, "\n");
     if (!ok) {
@@ -523,16 +507,12 @@ public static void TestExitStatus(ж<testing.T> t) {
         want = fmt.Sprintf("exit status: '%s %d: 42'"u8, filepath.Base(cmd.Path), cmd.ProcessState.Pid());
         break;
     }}
-    {
-        var (werr, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (ok) {
-            {
-                @string s = werr.Error(); if (s != want) {
-                    t.Errorf("from exit 42 got exit %q, want %q", s, want);
-                }
-            }
-        } else {
-            t.Fatalf("expected *exec.ExitError from exit 42; got %T: %v", err, err);
+    var (werr, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (ok) {
+        @string s = werr.Error(); if (s != want) {
+            t.Errorf("from exit 42 got exit %q, want %q", s, want);
         }
+    } else {
+        t.Fatalf("expected *exec.ExitError from exit 42; got %T: %v", err, err);
     }
 }
 
@@ -713,10 +693,8 @@ public static partial void TestStdinClose(ж<testing.T> t) {
         var (stdin, err) = cmd.StdinPipe();
         check(stdinPipeˢ, err);
         // Check that we can access methods of the underlying os.File.`
-        {
-            var (_, ok) = stdin._<TestStdinClose_type>(ᐧ); if (!ok) {
-                t.Error(canTAccessMethodsOfˢ);
-            }
+        var (_, ok) = stdin._<TestStdinClose_type>(ᐧ); if (!ok) {
+            t.Error(canTAccessMethodsOfˢ);
         }
         check(startˢ, cmd.Start());
 
@@ -734,10 +712,8 @@ public static partial void TestStdinClose(ж<testing.T> t) {
                 checkʗ1(copyˢ, errΔ2);
 
                 // Before the fix, this next line would race with cmd.Wait.
-                {
-                    var errΔ3 = stdinʗ1.Close(); if (errΔ3 != nil && !errors.Is(errΔ3, os.ErrClosed)) {
-                        t.Errorf("Close: %v", errΔ3);
-                    }
+                var errΔ3 = stdinʗ1.Close(); if (errΔ3 != nil && !errors.Is(errΔ3, os.ErrClosed)) {
+                    t.Errorf("Close: %v", errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -770,10 +746,8 @@ public static partial void TestStdinCloseRace(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("StdinPipe: %v", err);
         }
-        {
-            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                t.Fatalf("Start: %v", errΔ1);
-            }
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            t.Fatalf("Start: %v", errΔ1);
         }
 
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -808,20 +782,16 @@ public static partial void TestStdinCloseRace(ж<testing.T> t) {
                 // falsely report an error, so it doesn't matter how the
                 // child process fails.
                 io.Copy(stdinʗ1, new exec_test_package.strings_ReaderжReader(strings.NewReader(unexpectedStringˢ)));
-                {
-                    var errΔ2 = stdinʗ1.Close(); if (errΔ2 != nil && !errors.Is(errΔ2, os.ErrClosed)) {
-                        t.Errorf("stdin.Close: %v", errΔ2);
-                    }
+                var errΔ2 = stdinʗ1.Close(); if (errΔ2 != nil && !errors.Is(errΔ2, os.ErrClosed)) {
+                    t.Errorf("stdin.Close: %v", errΔ2);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
 
-        {
-            var errΔ3 = cmd.Wait(); if (errΔ3 == nil) {
-                t.Fatalf("Wait: succeeded unexpectedly");
-            }
+        var errΔ3 = cmd.Wait(); if (errΔ3 == nil) {
+            t.Fatalf("Wait: succeeded unexpectedly");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -854,7 +824,7 @@ public static void TestPipeLookPathLeak(ж<testing.T> t) {
     }
 
     var old = new map<uintptr, bool>{};
-    foreach (var (_, fd) in openFDs()) {
+    foreach (var (_, fd) in range(openFDs())) {
         old[fd] = true;
     }
 
@@ -863,10 +833,8 @@ public static void TestPipeLookPathLeak(ж<testing.T> t) {
         cmd.StdoutPipe();
         cmd.StderrPipe();
         cmd.StdinPipe();
-        {
-            var err = cmd.Run(); if (err == nil) {
-                t.Fatal(unexpectedSuccessˢ);
-            }
+        var err = cmd.Run(); if (err == nil) {
+            t.Fatal(unexpectedSuccessˢ);
         }
     }
 
@@ -875,7 +843,7 @@ public static void TestPipeLookPathLeak(ж<testing.T> t) {
     // FDs present at the start of the test (for example, opened by libc), those
     // may be closed due to a timeout of some sort. Allow those to go away, but
     // check that no new FDs are added.
-    foreach (var (_, fd) in openFDs()) {
+    foreach (var (_, fd) in range(openFDs())) {
         if (!old[fd]) {
             t.Errorf("leaked file descriptor %v", fd);
         }
@@ -999,11 +967,9 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
         // Build the test without cgo, so that C library functions don't
         // open descriptors unexpectedly. See issue 25628.
         c.Env = append(os.Environ(), (@string)"CGO_ENABLED=0");
-        {
-            var (output, errΔ1) = c.CombinedOutput(); if (errΔ1 != nil) {
-                Ꮡt.Logf("go build -o %s read3.go\n%s", exe, output);
-                Ꮡt.Fatalf("go build failed: %v", errΔ1);
-            }
+        var (output, errΔ1) = c.CombinedOutput(); if (errΔ1 != nil) {
+            Ꮡt.Logf("go build -o %s read3.go\n%s", exe, output);
+            Ꮡt.Fatalf("go build failed: %v", errΔ1);
         }
 
         // Use a deadline to try to get some output even if the program hangs.
@@ -1026,7 +992,7 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
         ref var stderr = ref heap(new strings.Builder(), out var Ꮡstderr);
         c.Stdout = new exec_test_package.strings_BuilderжWriter(Ꮡstdout);
         c.Stderr = new exec_test_package.strings_BuilderжWriter(Ꮡstderr);
-        c.ExtraFiles = slice<ж<os.File>>([tf]);
+        c.ExtraFiles = [tf];
         if (runtime.GOOS == "illumos"u8) {
             // Some facilities in illumos are implemented via access
             // to /proc by libc; such accesses can briefly occupy a
@@ -1116,10 +1082,10 @@ public static partial void TestExtraFilesRace(ж<testing.T> t) {
         }
         la.Close();
         lb.Close();
-        foreach (var (_, f) in ca.ExtraFiles) {
+        foreach (var (_, f) in range(ca.ExtraFiles)) {
             f.Close();
         }
-        foreach (var (_, f) in cb.ExtraFiles) {
+        foreach (var (_, f) in range(cb.ExtraFiles)) {
             f.Close();
         }
     }
@@ -1130,7 +1096,7 @@ partial struct delayedInfiniteReader {
 
 internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) {
     time.Sleep(100 * time.Millisecond);
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = (byte)'x';
     }
     return (len(b), default);
@@ -1151,16 +1117,12 @@ public static void TestIgnorePipeErrorOnSuccess(ж<testing.T> t) {
             ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
             cmd.Stdin = r;
             cmd.Stdout = new exec_test_package.strings_BuilderжWriter(Ꮡout);
-            {
-                var err = cmd.Run(); if (err != nil) {
-                    tΔ1.Fatal(err);
-                }
+            var err = cmd.Run(); if (err != nil) {
+                tΔ1.Fatal(err);
             }
-            {
-                @string got = @out.String();
-                @string want = fooˢ2; if (got != want) {
-                    tΔ1.Errorf("output = %q; want %q", got, want);
-                }
+            @string got = @out.String();
+            @string want = fooˢ2; if (got != want) {
+                tΔ1.Errorf("output = %q; want %q", got, want);
             }
         };
     t.Run("10MB", testWith(new exec_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("x", 10 << 20)))));
@@ -1227,16 +1189,12 @@ public static partial void TestContext(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = c.Start(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = c.Start(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
-    {
-        var (_, errΔ2) = stdin.Write(slice<byte>("O:hi\n"u8)); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var (_, errΔ2) = stdin.Write(slice<byte>("O:hi\n"u8)); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
     var buf = new slice<byte>(5);
     (var n, err) = io.ReadFull(stdout, buf);
@@ -1246,10 +1204,8 @@ public static partial void TestContext(ж<testing.T> t) {
     var cancelʗ1 = cancel;
     goǃ(() => cancelʗ1());
 
-    {
-        var errΔ3 = c.Wait(); if (errΔ3 == nil) {
-            t.Fatal(expectedWaitFailureˢ);
-        }
+    var errΔ3 = c.Wait(); if (errΔ3 == nil) {
+        t.Fatal(expectedWaitFailureˢ);
     }
 }
 
@@ -1282,17 +1238,13 @@ public static void TestContextCancel(ж<testing.T> t) {
         var stdinʗ1 = stdin;
         defer(() => stdinʗ1.Close(), ref ᒐ);
 
-        {
-            var errΔ1 = c.Start(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = c.Start(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         // At this point the process is alive. Ensure it by sending data to stdin.
-        {
-            var (_, errΔ2) = io.WriteString(stdin, echoˢ); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = io.WriteString(stdin, echoˢ); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         cancel();
@@ -1302,10 +1254,8 @@ public static void TestContextCancel(ж<testing.T> t) {
         var start = time.Now();
         var delay = 1 * time.Millisecond;
         for (;;) {
-            {
-                var (_, errΔ3) = io.WriteString(stdin, echoˢ); if (errΔ3 != nil) {
-                    break;
-                }
+            var (_, errΔ3) = io.WriteString(stdin, echoˢ); if (errΔ3 != nil) {
+                break;
             }
 
             if (time.Since(start) > time.ΔMinute) {
@@ -1324,12 +1274,10 @@ public static void TestContextCancel(ж<testing.T> t) {
             time.Sleep(delay);
         }
 
-        {
-            var errΔ4 = c.Wait(); if (errΔ4 == nil) {
-                t.Error(programUnexpectedlyˢ);
-            } else {
-                t.Logf("exit status: %v", errΔ4);
-            }
+        var errΔ4 = c.Wait(); if (errΔ4 == nil) {
+            t.Error(programUnexpectedlyˢ);
+        } else {
+            t.Logf("exit status: %v", errΔ4);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1354,11 +1302,9 @@ public static void TestDedupEnvEcho(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = strings.TrimSpace((@string)@out);
-        @string want = goodˢ; if (got != want) {
-            t.Errorf("output = %q; want %q", got, want);
-        }
+    @string got = strings.TrimSpace((@string)@out);
+    @string want = goodˢ; if (got != want) {
+        t.Errorf("output = %q; want %q", got, want);
     }
 }
 
@@ -1394,15 +1340,13 @@ public static void TestString(ж<testing.T> t) {
     }
     var tests = new TestString_tests[]{
         new("echo", default, echoPath),
-        new("echo", slice<@string>(["a"]), echoPath + " a"u8),
-        new("echo", slice<@string>(["a", "b"]), echoPath + " a b"u8)
+        new("echo", ["a"], echoPath + " a"u8),
+        new("echo", ["a", "b"], echoPath + " a b"u8)
     }.array();
-    foreach (var (_, test) in tests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(tests.ΔRangeSnapshot())) {
         var cmd = Δexec.Command(test.path, test.args.ꓸꓸꓸ);
-        {
-            @string got = cmd.String(); if (got != test.want) {
-                t.Errorf("String(%q, %q) = %q, want %q", test.path, test.args, got, test.want);
-            }
+        @string got = cmd.String(); if (got != test.want) {
+            t.Errorf("String(%q, %q) = %q, want %q", test.path, test.args, got, test.want);
         }
     }
 }
@@ -1426,10 +1370,8 @@ public static void TestStringPathNotResolved(ж<testing.T> t) {
 
     var cmd = Δexec.Command(makemeasandwichˢ, lettuceˢ);
     @string want = makemeasandwichLettuceˢ;
-    {
-        @string got = cmd.String(); if (got != want) {
-            t.Errorf("String(%q, %q) = %q, want %q", makemeasandwichˢ, lettuceˢ, got, want);
-        }
+    @string got = cmd.String(); if (got != want) {
+        t.Errorf("String(%q, %q) = %q, want %q", makemeasandwichˢ, lettuceˢ, got, want);
     }
 }
 
@@ -1469,24 +1411,18 @@ public static partial void TestDoubleStartLeavesPipesOpen(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var cmdʗ1 = cmd;
     t.Cleanup(() => {
-        {
-            var errΔ2 = cmdʗ1.Wait(); if (errΔ2 != nil) {
-                t.Error(errΔ2);
-            }
+        var errΔ2 = cmdʗ1.Wait(); if (errΔ2 != nil) {
+            t.Error(errΔ2);
         }
     });
 
-    {
-        var errΔ3 = cmd.Start(); if (errΔ3 == nil || !strings.HasSuffix(errΔ3.Error(), alreadyStartedˢ)) {
-            t.Fatalf("second call to Start returned a nil; want an 'already started' error");
-        }
+    var errΔ3 = cmd.Start(); if (errΔ3 == nil || !strings.HasSuffix(errΔ3.Error(), alreadyStartedˢ)) {
+        t.Fatalf("second call to Start returned a nil; want an 'already started' error");
     }
 
     var outc = new channel<slice<byte>>(1);
@@ -1532,7 +1468,7 @@ internal static partial void cmdHang(params ꓸꓸꓸstring argsʗp) {
     nint pid = os.Getpid();
 
     if (subsleep.Value != 0) {
-        var cmd = Δexec.Command(testenv.Executable(default), "hang", (~subsleep).String(), "-read=true", "-probe=" + (~probe).String());
+        var cmd = Δexec.Command(testenv.Executable(default), "hang", subsleep.String(), "-read=true", "-probe=" + probe.String());
         cmd.Stdin = new exec_test_package.os_FileжReader(os.Stdin);
         cmd.Stderr = new os.FileжWriter(os.Stderr);
         var (@out, errΔ1) = cmd.StdoutPipe();
@@ -1543,13 +1479,11 @@ internal static partial void cmdHang(params ꓸꓸꓸstring argsʗp) {
         cmd.Start();
 
         var buf = @new<strings.Builder>();
-        {
-            var (_, errΔ2) = io.Copy(new exec_test_package.strings_BuilderжWriter(buf), @out); if (errΔ2 != nil) {
-                fmt.Fprintln(new os.FileжWriter(os.Stderr), errΔ2);
-                cmd.Process.Kill();
-                cmd.Wait();
-                os.Exit(1);
-            }
+        var (_, errΔ2) = io.Copy(new exec_test_package.strings_BuilderжWriter(buf), @out); if (errΔ2 != nil) {
+            fmt.Fprintln(new os.FileжWriter(os.Stderr), errΔ2);
+            cmd.Process.Kill();
+            cmd.Wait();
+            os.Exit(1);
         }
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "%d: started %d: %v\n"u8, pid, cmd.Process.Pid, cmd.OrTypedNil());
         var cmdʗ1 = cmd;
@@ -1595,10 +1529,8 @@ internal static partial void cmdHang(params ꓸꓸꓸstring argsʗp) {
         var tickerʗ1 = ticker;
         goǃ(() => {
             foreach (var _ᴛ1 in tickerʗ1.C) {
-                {
-                    var (_, errΔ4) = fmt.Fprintf(new os.FileжWriter(os.Stderr), "%d: ok\n"u8, pid); if (errΔ4 != nil) {
-                        os.Exit(1);
-                    }
+                var (_, errΔ4) = fmt.Fprintf(new os.FileжWriter(os.Stderr), "%d: ok\n"u8, pid); if (errΔ4 != nil) {
+                    os.Exit(1);
                 }
             }
         });
@@ -1626,10 +1558,8 @@ internal static (nint n, error err) Read(this ref tickReader r, slice<byte> p) {
     nint n = default;
 
     if (len(r.s) == 0) {
-        {
-            var d = r.interval - time.Since(r.lastTick); if (d > 0) {
-                time.Sleep(d);
-            }
+        var d = r.interval - time.Since(r.lastTick); if (d > 0) {
+            time.Sleep(d);
         }
         r.lastTick = time.Now();
         r.s = r.lastTick.Format(time.RFC3339Nano + "\n");
@@ -1662,21 +1592,17 @@ internal static ж<Δexec.Cmd> startHang(ж<testing.T> t, context.Context ctx, t
     }
 
     t.Log(cmd.OrTypedNil());
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     // Wait for cmd to close stdout to signal that its handlers are installed.
     var buf = @new<strings.Builder>();
-    {
-        var (_, errΔ2) = io.Copy(new exec_test_package.strings_BuilderжWriter(buf), @out); if (errΔ2 != nil) {
-            t.Error(errΔ2);
-            cmd.Process.Kill();
-            cmd.Wait();
-            t.FailNow();
-        }
+    var (_, errΔ2) = io.Copy(new exec_test_package.strings_BuilderжWriter(buf), @out); if (errΔ2 != nil) {
+        t.Error(errΔ2);
+        cmd.Process.Kill();
+        cmd.Wait();
+        t.FailNow();
     }
     if (buf.Len() > 0) {
         t.Logf("stdout %v:\n%s", cmd.Args, buf.OrTypedNil());
@@ -1729,13 +1655,11 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         if (err != nil) {
             tΔ1.Errorf("Wait: %v; want <nil>", err);
         }
-        {
-            var ps = cmd.ProcessState; if (!ps.Exited()) {
-                tΔ1.Errorf("cmd did not exit: %v", ps.OrTypedNil());
-            } else {
-                nint code = ps.ExitCode(); if (code != 0) {
-                    tΔ1.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
-                }
+        var ps = cmd.ProcessState; if (!ps.Exited()) {
+            tΔ1.Errorf("cmd did not exit: %v", ps.OrTypedNil());
+        } else {
+            nint code = ps.ExitCode(); if (code != 0) {
+                tΔ1.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
             }
         }
     });
@@ -1756,10 +1680,8 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         // At this point cmd should still be running (because we passed nil to
         // startHang for the cancel signal). Sending it an explicit Interrupt signal
         // should succeed.
-        {
-            var errΔ1 = cmd.Process.Signal(os.Interrupt); if (errΔ1 != nil) {
-                tΔ2.Error(errΔ1);
-            }
+        var errΔ1 = cmd.Process.Signal(os.Interrupt); if (errΔ1 != nil) {
+            tΔ2.Error(errΔ1);
         }
 
         var err = cmd.Wait();
@@ -1774,13 +1696,11 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         if (err != nil) {
             tΔ2.Errorf("Wait: %v; want nil", err);
         }
-        {
-            var ps = cmd.ProcessState; if (!ps.Exited()) {
-                tΔ2.Errorf("cmd did not exit: %v", ps.OrTypedNil());
-            } else {
-                nint code = ps.ExitCode(); if (code != 0) {
-                    tΔ2.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
-                }
+        var ps = cmd.ProcessState; if (!ps.Exited()) {
+            tΔ2.Errorf("cmd did not exit: %v", ps.OrTypedNil());
+        } else {
+            nint code = ps.ExitCode(); if (code != 0) {
+                tΔ2.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
             }
         }
     });
@@ -1804,10 +1724,8 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         // The child process should be reported as failed,
         // and the grandchild will exit (or die by SIGPIPE) once the
         // stderr pipe is closed.
-        {
-            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
-                tΔ3.Errorf("Wait error = %v; want %T", err, ee.OrTypedNil());
-            }
+        var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+            tΔ3.Errorf("Wait error = %v; want %T", err, ee.OrTypedNil());
         }
     });
 
@@ -1851,10 +1769,8 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
 
         // This command ignores SIGINT, sleeping until it is killed.
         // Wait should return the usual error for a killed process.
-        {
-            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
-                tΔ5.Errorf("Wait error = %v; want %T", err, ee.OrTypedNil());
-            }
+        var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+            tΔ5.Errorf("Wait error = %v; want %T", err, ee.OrTypedNil());
         }
     });
 
@@ -1878,13 +1794,11 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         if (!errors.Is(err, ctx.Err())) {
             tΔ6.Errorf("Wait error = %v; want %v", err, ctx.Err());
         }
-        {
-            var ps = cmd.ProcessState; if (!ps.Exited()) {
-                tΔ6.Errorf("cmd did not exit: %v", ps.OrTypedNil());
-            } else {
-                nint code = ps.ExitCode(); if (code != 0) {
-                    tΔ6.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
-                }
+        var ps = cmd.ProcessState; if (!ps.Exited()) {
+            tΔ6.Errorf("cmd did not exit: %v", ps.OrTypedNil());
+        } else {
+            nint code = ps.ExitCode(); if (code != 0) {
+                tΔ6.Errorf("cmd.ProcessState.ExitCode() = %v; want 0", code);
             }
         }
     });
@@ -1905,20 +1819,16 @@ public static void TestWaitInterrupt(ж<testing.T> t) {
         tΔ7.Logf("stderr:\n%s", cmd.Stderr);
         tΔ7.Logf("[%d] %v", cmd.Process.Pid, err);
 
-        {
-            var (_, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
-                tΔ7.Errorf("Wait error = %v; want %v", err, ctx.Err());
-            }
+        var (_, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+            tΔ7.Errorf("Wait error = %v; want %v", err, ctx.Err());
         }
 
-        {
-            var ps = cmd.ProcessState; if (!ps.Exited()) {
-                tΔ7.Errorf("cmd did not exit: %v", ps.OrTypedNil());
-            } else {
-                nint code = ps.ExitCode(); if (code != 2) {
-                    // The default os/signal handler exits with code 2.
-                    tΔ7.Errorf("cmd.ProcessState.ExitCode() = %v; want 2", code);
-                }
+        var ps = cmd.ProcessState; if (!ps.Exited()) {
+            tΔ7.Errorf("cmd did not exit: %v", ps.OrTypedNil());
+        } else {
+            nint code = ps.ExitCode(); if (code != 2) {
+                // The default os/signal handler exits with code 2.
+                tΔ7.Errorf("cmd.ProcessState.ExitCode() = %v; want 2", code);
             }
         }
 
@@ -1970,10 +1880,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
                 tΔ1.Logf("Cancel returning %v", errArbitraryʗ1);
                 return errArbitraryʗ1;
             };
-            {
-                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
             cancel();
 
@@ -2025,10 +1933,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
                 return fmt.Errorf("%w: stdout closed"u8, os.ErrProcessDone);
             };
 
-            {
-                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                    tΔ2.Fatal(errΔ1);
-                }
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                tΔ2.Fatal(errΔ1);
             }
 
             cancel();
@@ -2076,10 +1982,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
                 return errArbitraryʗ2;
             };
             cmd.WaitDelay = 1 * time.Millisecond;
-            {
-                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                    tΔ3.Fatal(errΔ1);
-                }
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                tΔ3.Fatal(errΔ1);
             }
             cancel();
 
@@ -2095,10 +1999,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
             // This test should kill the child process after 1ms,
             // To maximize compatibility with existing uses of exec.CommandContext, the
             // resulting error should be an exec.ExitError without additional wrapping.
-            {
-                var (_, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok) {
-                    tΔ3.Errorf("Wait error = %v; want *exec.ExitError", err);
-                }
+            var (_, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok) {
+                tΔ3.Errorf("Wait error = %v; want *exec.ExitError", err);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2132,10 +2034,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
                 return fmt.Errorf("%w: stdout closed"u8, os.ErrProcessDone);
             };
             cmd.WaitDelay = 1 * time.Millisecond;
-            {
-                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                    tΔ4.Fatal(errΔ1);
-                }
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                tΔ4.Fatal(errΔ1);
             }
             cancel();
 
@@ -2151,10 +2051,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
             // This test should kill the child process after 1ms,
             // To maximize compatibility with existing uses of exec.CommandContext, the
             // resulting error should be an exec.ExitError without additional wrapping.
-            {
-                var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok) {
-                    tΔ4.Errorf("Wait error of type %T; want %T", err, ee.OrTypedNil());
-                }
+            var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok) {
+                tΔ4.Errorf("Wait error of type %T; want %T", err, ee.OrTypedNil());
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2187,10 +2085,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
                 close(interruptedʗ1);
                 return errArbitraryʗ3;
             };
-            {
-                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                    tΔ5.Fatal(errΔ1);
-                }
+            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                tΔ5.Fatal(errΔ1);
             }
             cancel();
             ᐸꟷ(interrupted);
@@ -2199,10 +2095,8 @@ public static void TestCancelErrors(ж<testing.T> t) {
             err = cmd.Wait();
             tΔ5.Logf("[%d] %v", cmd.Process.Pid, err);
 
-            {
-                var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok || ee.ProcessState.ExitCode() != 1) {
-                    tΔ5.Errorf("Wait error = %v; want exit status 1", err);
-                }
+            var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (!ok || ee.ProcessState.ExitCode() != 1) {
+                tΔ5.Errorf("Wait error = %v; want exit status 1", err);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2257,13 +2151,11 @@ public static partial void TestConcurrentExec(ж<testing.T> t) {
                 Ꮡready.Done();
 
                 Ꮡready.Wait();
-                {
-                    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                        if (!errors.Is(errΔ1, context.Canceled)) {
-                            t.Error(errΔ1);
-                        }
-                        return;
+                var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+                    if (!errors.Is(errΔ1, context.Canceled)) {
+                        t.Error(errΔ1);
                     }
+                    return;
                 }
 
                 cmd.Wait();
@@ -2284,10 +2176,8 @@ public static partial void TestConcurrentExec(ж<testing.T> t) {
                 Ꮡready.Done();
 
                 Ꮡready.Wait();
-                {
-                    var err = cmd.Run(); if (err != nil) {
-                        t.Error(err);
-                    }
+                var err = cmd.Run(); if (err != nil) {
+                    t.Error(err);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2369,7 +2259,7 @@ public static void TestAbsPathExec(ж<testing.T> t) {
         @string exe2 = filepath.Join(testenv.GOROOT(new exec_test_package.testing_TжTB(tΔ1)), binGofmtˢ);
         var cmdΔ1 = Δexec.Command(exe1);
         cmdΔ1.Path = exe2;
-        cmdΔ1.Args = slice<@string>([cmdΔ1.Path]);
+        cmdΔ1.Args = [cmdΔ1.Path];
         var errΔ1 = cmdΔ1.Run();
         if (errΔ1 != nil) {
             tΔ1.Error(ranWrongBinaryˢ);
@@ -2388,10 +2278,8 @@ public static void TestStart_twice(ж<testing.T> t) {
     testenv.MustHaveExec(new exec_test_package.testing_TжTB(t));
 
     var cmd = Δexec.Command(binNonesuchˢ);
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 == nil) {
-            t.Fatalf("running invalid command succeeded");
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 == nil) {
+        t.Fatalf("running invalid command succeeded");
     }
     var err = cmd.Start();
     @string got = fmt.Sprint(err);

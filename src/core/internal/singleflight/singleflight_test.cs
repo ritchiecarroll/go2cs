@@ -9,8 +9,6 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using go.sync;
 using static go.@internal.singleflight_package;
@@ -28,11 +26,9 @@ private static readonly @string barStringˢᵇ = "bar (string)"u8;
 public static void TestDo(ж<testing.T> t) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     var (v, err, _) = Ꮡg.Do(keyˢ, () => (barˢ, default));
-    {
-        @string got = fmt.Sprintf("%v (%T)"u8, v, v);
-        @string want = barStringˢ; if (got != want) {
-            t.Errorf("Do = %v; want %v", got, want);
-        }
+    @string got = fmt.Sprintf("%v (%T)"u8, v, v);
+    @string want = barStringˢ; if (got != want) {
+        t.Errorf("Do = %v; want %v", got, want);
     }
     if (err != nil) {
         t.Errorf("Do error = %v", err);
@@ -92,10 +88,8 @@ public static partial void TestDoDupSuppress(ж<testing.T> t) {
                     t.Errorf("Do error: %v", err);
                     return;
                 }
-                {
-                    var (s, _) = v._<@string>(ᐧ); if (s != "bar"u8) {
-                        t.Errorf("Do = %T %v; want %q", v, v, barˢ);
-                    }
+                var (s, _) = v._<@string>(ᐧ); if (s != "bar"u8) {
+                    t.Errorf("Do = %T %v; want %q", v, v, barˢ);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -107,10 +101,8 @@ public static partial void TestDoDupSuppress(ж<testing.T> t) {
     // least reached the line before the Do.
     c.ᐸꟷ(barˢ);
     Ꮡwg2.Wait();
-    {
-        var got = Ꮡcalls.Load(); if (got <= 0 || got >= n) {
-            t.Errorf("number of calls = %d; want over 0 and less than %d", got, (nint)(n));
-        }
+    var got = Ꮡcalls.Load(); if (got <= 0 || got >= n) {
+        t.Errorf("number of calls = %d; want over 0 and less than %d", got, (nint)(n));
     }
 }
 
@@ -172,10 +164,8 @@ public static partial void TestForgetUnshared(ж<testing.T> t) {
 
     secondCh.ᐸꟷ(new EmptyStruct());
 
-    {
-        var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)2)) {
-            t.Errorf("We should receive result produced by second call, expected: 2, got %d", result.Val);
-        }
+    var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)2)) {
+        t.Errorf("We should receive result produced by second call, expected: 2, got %d", result.Val);
     }
 }
 

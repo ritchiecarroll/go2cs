@@ -44,8 +44,8 @@ public static void TestEnv(ж<testing.T> t) {
 public static void TestExecErrPermutedFds(ж<testing.T> t) {
     testenv.MustHaveExec(new syscall_test_package.testing_TжTB(t));
 
-    var attr = Ꮡ(new Δos.ProcAttr(Files: slice<ж<Δos.File>>([Δos.Stdin, Δos.Stderr, Δos.Stdout])));
-    var (_, err) = Δos.StartProcess("/", slice<@string>(["/"]), attr);
+    var attr = Ꮡ(new Δos.ProcAttr(Files: [Δos.Stdin, Δos.Stderr, Δos.Stdout]));
+    var (_, err) = Δos.StartProcess("/", ["/"], attr);
     if (err == nil) {
         t.Fatalf("StartProcess of invalid program returned err = nil");
     }
@@ -59,10 +59,8 @@ public static void TestGettimeofday(ж<testing.T> t) {
         t.Skip("not implemented on " + Δruntime.GOOS);
     }
     var tv = Ꮡ(new syscall.Timeval());
-    {
-        var err = syscall.Gettimeofday(tv); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = syscall.Gettimeofday(tv); if (err != nil) {
+        t.Fatal(err);
     }
     if (tv.Sec == 0 && tv.Usec == 0) {
         t.Fatal(secAndUsecBothZeroˢ);

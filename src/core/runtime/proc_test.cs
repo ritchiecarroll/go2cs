@@ -377,7 +377,7 @@ public static partial void TestTimerFairness2(ж<testing.T> t) {
 internal static Func<nint> preempt = () => {
     array<nint> a = new(128);
     nint sum = 0;
-    foreach (var (_, v) in a.ΔRangeSnapshot()) {
+    foreach (var (_, v) in range(a.ΔRangeSnapshot())) {
         sum += v;
     }
     return sum;
@@ -676,7 +676,7 @@ internal static array<uint64> padData = new(128);
 internal static void stackGrowthRecursive(nint i) {
     array<uint64> pad = new(128);
     pad = padData.Clone();
-    foreach (var j in range(pad)) {
+    foreach (var j in range(len(pad))) {
         if (pad[j] != 0) {
             return;
         }
@@ -940,7 +940,7 @@ internal static void benchmarkWakeupParallel(ж<testing.B> b, Action<time.Durati
     }
 
     var wakeDelay = 5 * time.Microsecond;
-    foreach (var (_, delay) in slice<time.Duration>([
+    foreach (var (_, delay) in range(slice<time.Duration>([
         0,
         1 * time.Microsecond,
         2 * time.Microsecond,
@@ -949,7 +949,7 @@ internal static void benchmarkWakeupParallel(ж<testing.B> b, Action<time.Durati
         20 * time.Microsecond,
         50 * time.Microsecond,
         100 * time.Microsecond
-    ])) {
+    ]))) {
         b.Run(delay.String(), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             if ((~bΔ1).N == 0) {
                 return;
@@ -1298,7 +1298,7 @@ public static void TestPreemptionAfterSyscall(ж<testing.T> t) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 41015);
     }
 
-    foreach (var (_, i) in slice<time.Duration>([10, 100, 1000])) {
+    foreach (var (_, i) in range(slice<time.Duration>([10, 100, 1000]))) {
         var d = i * time.Microsecond;
         t.Run(fmt.Sprint(d), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             testPreemptionAfterSyscall(tΔ1, d);
@@ -1351,10 +1351,8 @@ loop:
 continue_loop:;
     }
 break_loop:;
-    {
-        var dur = time.Since(start); if (dur > (time.Duration)(5000000000L)) {
-            t.Errorf("netpollBreak did not interrupt netpoll: slept for: %v", dur);
-        }
+    var dur = time.Since(start); if (dur > (time.Duration)(5000000000L)) {
+        t.Errorf("netpollBreak did not interrupt netpoll: slept for: %v", dur);
     }
 }
 
@@ -1372,10 +1370,10 @@ public static void TestBigGOMAXPROCS(ж<testing.T> t) {
     t.Parallel();
     @string output = runTestProg(t, testprogˢ, nonexistentTestˢ, gomaxprocs1024ˢ);
     // Ignore error conditions on small machines.
-    foreach (var (_, errstr) in slice<@string>([
+    foreach (var (_, errstr) in range(slice<@string>([
         "failed to create new OS thread",
         "cannot allocate memory"
-    ])) {
+    ]))) {
         if (strings.Contains(output, errstr)) {
             t.Skipf("failed to create 1024 threads");
         }
@@ -1539,7 +1537,7 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> t, nint run, @strin
 
         ref var targetGoroutines = ref heap<slice<ж<goroutineState>>>(out var ᏑtargetGoroutines);
         ж<goroutineState> findGoroutine(trace.GoID goid) {
-            foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
+            foreach (var (_, gs) in range(ᏑtargetGoroutines.ValueSlot)) {
                 if (gs.G == goid) {
                     return gs;
                 }
@@ -1547,7 +1545,7 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> t, nint run, @strin
             return default;
         }
         ж<goroutineState> findProc(trace.ProcID pid) {
-            foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
+            foreach (var (_, gs) in range(ᏑtargetGoroutines.ValueSlot)) {
                 if (gs.P == pid) {
                     return gs;
                 }
@@ -1653,7 +1651,7 @@ break_findStart:;
         }
 
         t.Log(targetGoroutinesˢ);
-        foreach (var (_, gs) in targetGoroutines) {
+        foreach (var (_, gs) in range(targetGoroutines)) {
             t.Logf("%+v", gs.OrTypedNil());
         }
 
@@ -1661,7 +1659,7 @@ break_findStart:;
             t.Fatalf("len(targetGoroutines) got %d want 2", len(targetGoroutines));
         }
 
-        foreach (var (_, gs) in targetGoroutines) {
+        foreach (var (_, gs) in range(targetGoroutines)) {
             if (gs.P == trace.NoProc) {
                 t.Fatalf("Goroutine %+v not running on a P", gs.OrTypedNil());
             }

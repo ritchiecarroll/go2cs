@@ -133,7 +133,7 @@ public static void Example_rand() {
 }
 
 public static void ExamplePerm() {
-    foreach (var (_, value) in rand.Perm(3)) {
+    foreach (var (_, value) in range(rand.Perm(3))) {
         fmt.Println(value);
     }
 
@@ -173,7 +173,7 @@ public static void ExampleShuffle_slicesInUnison() {
         (numbersʗ1[i], numbersʗ1[j]) = (numbersʗ1[j], numbersʗ1[i]);
         (lettersʗ1[i], lettersʗ1[j]) = (lettersʗ1[j], lettersʗ1[i]);
     });
-    foreach (var i in range(numbers)) {
+    foreach (var i in range(len(numbers))) {
         fmt.Printf("%c: %c\n"u8, letters[i], numbers[i]);
     }
 }

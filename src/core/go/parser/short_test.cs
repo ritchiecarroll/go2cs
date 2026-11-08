@@ -9,7 +9,7 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-internal static slice<@string> valids = slice<@string>([
+internal static slice<@string> valids = [
     "package p\n",
     @"package p;",
     @"package p; import ""fmt""; func f() { fmt.Println(""Hello, World!"") };",
@@ -115,10 +115,10 @@ internal static slice<@string> valids = slice<@string>([
     @"package p; type I1[T any] interface{}; type I2[T any] interface{ I1[T] }",
     @"package p; type _ interface { N[T] }",
     @"package p; type T[P any] = T0"
-]);
+];
 
 public static void TestValid(ж<testing.T> t) {
-    foreach (var (_, src) in valids) {
+    foreach (var (_, src) in range(valids)) {
         checkErrors(t, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), false);
     }
 }
@@ -133,7 +133,7 @@ public static void TestSingle(ж<testing.T> t) {
     checkErrors(t, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), true);
 }
 
-internal static slice<@string> invalids = slice<@string>([
+internal static slice<@string> invalids = [
     @"foo /* ERROR ""expected 'package'"" */ !",
     @"package p; func f() { if { /* ERROR ""missing condition"" */ } };",
     @"package p; func f() { if ; /* ERROR ""missing condition"" */ {} };",
@@ -221,10 +221,10 @@ internal static slice<@string> invalids = slice<@string>([
     // go.dev/issue/70957
     @"package p; func f() {goto; /* ERROR ""expected 'IDENT', found ';'"" */ }",
     @"package p; func f() {goto} /* ERROR ""expected 'IDENT', found '}'"" */ }"
-]);
+];
 
 public static void TestInvalid(ж<testing.T> t) {
-    foreach (var (_, src) in invalids) {
+    foreach (var (_, src) in range(invalids)) {
         checkErrors(t, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), true);
     }
 }

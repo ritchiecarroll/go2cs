@@ -32,7 +32,7 @@ internal partial struct TestJSONHandler_type /*dyn*/ {
 }
 
 public static void TestJSONHandler(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestJSONHandler_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestJSONHandler_type>([
         new(
             "none",
             new HandlerOptions(),
@@ -43,7 +43,7 @@ public static void TestJSONHandler(ж<testing.T> t) {
             new HandlerOptions(ReplaceAttr: upperCaseKey),
             @"{""TIME"":""2000-01-02T03:04:05Z"",""LEVEL"":""INFO"",""MSG"":""m"",""A"":1,""M"":{""b"":2}}"
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestJSONHandler_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -52,10 +52,8 @@ public static void TestJSONHandler(ж<testing.T> t) {
             var h = NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡtest.of(TestJSONHandler_type.Ꮡopts));
             var r = NewRecord(testTime, LevelInfo, "m", 0);
             r.AddAttrs(Int("a", 1), go.log.slog_package.Any("m", new map<@string, nint>{["b"] = 2}));
-            {
-                var err = h.Handle(context.Background(), r); if (err != nil) {
-                    tΔ1.Fatal(err);
-                }
+            var err = h.Handle(context.Background(), r); if (err != nil) {
+                tΔ1.Fatal(err);
             }
             @string got = strings.TrimSuffix(Ꮡbuf.String(), "\n");
             if (got != Ꮡtest.Value.want) {
@@ -70,9 +68,7 @@ internal partial struct jsonMarshaler {
     internal @string s;
 }
 
-internal static @string String(this jsonMarshaler j) {
-    return j.s; // should be ignored
-}
+internal static @string String(this jsonMarshaler j) { return j.s; } // should be ignored
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jsonEmptyStringˢ => ref jsonEmptyStringˢᵇ;
@@ -93,9 +89,7 @@ internal partial struct jsonMarshalerError {
 internal static ref readonly @string oopsˢ => ref oopsˢᵇ;
 private static readonly @string oopsˢᵇ = "oops"u8;
 
-internal static @string Error(this jsonMarshalerError _) {
-    return oopsˢ;
-}
+internal static @string Error(this jsonMarshalerError _) { return oopsˢ; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello\r\n\t\a"u8;
@@ -104,7 +98,7 @@ internal static readonly object escapeHTMLˢ = (@string)"<escapeHTML&>"u8;
 
 public static void TestAppendJSONValue(ж<testing.T> t) {
     // jsonAppendAttrValue should always agree with json.Marshal.
-    foreach (var (_, value) in slice<any>([
+    foreach (var (_, value) in range(slice<any>([
         helloˢ,
         escapeˢ,
         escapeHTMLˢ,
@@ -122,7 +116,7 @@ public static void TestAppendJSONValue(ж<testing.T> t) {
         new jsonMarshaler("xyz"),
         new jsonMarshalerError(new jsonMarshaler("pqr")),
         LevelWarn
-    ])) {
+    ]))) {
         @string got = jsonValueString(AnyValue(value));
         var (want, err) = marshalJSON(value);
         if (err != nil) {
@@ -138,10 +132,8 @@ internal static (@string, error) marshalJSON(any x) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = json.NewEncoder(new slog_test_package.bytes_BufferжWriter(Ꮡbuf));
     enc.SetEscapeHTML(false);
-    {
-        var err = enc.Encode(x); if (err != nil) {
-            return ("", err);
-        }
+    var err = enc.Encode(x); if (err != nil) {
+        return ("", err);
     }
     return (strings.TrimSpace(Ꮡbuf.String()), default);
 }
@@ -153,12 +145,12 @@ internal partial struct TestJSONAppendAttrValueSpecial_type /*dyn*/ {
 
 public static void TestJSONAppendAttrValueSpecial(ж<testing.T> t) {
     // Attr values that render differently from json.Marshal.
-    foreach (var (_, test) in slice<TestJSONAppendAttrValueSpecial_type>([
+    foreach (var (_, test) in range(slice<TestJSONAppendAttrValueSpecial_type>([
         new(math.NaN(), @"""!ERROR:json: unsupported value: NaN"""),
         new(math.Inf(+1), @"""!ERROR:json: unsupported value: +Inf"""),
         new(math.Inf(-1), @"""!ERROR:json: unsupported value: -Inf"""),
         new(io.EOF, @"""EOF""")
-    ])) {
+    ]))) {
         @string got = jsonValueString(AnyValue(test.value));
         if (got != test.want) {
             t.Errorf("%v: got %s, want %s", test.value, got, test.want);
@@ -169,10 +161,8 @@ public static void TestJSONAppendAttrValueSpecial(ж<testing.T> t) {
 internal static @string jsonValueString(global::go.log.slog_package.Value v) {
     ref var buf = ref heap<slice<byte>>(out var Ꮡbuf);
     var s = Ꮡ(new handleState(h: Ꮡ(new commonHandler(json: true)), buf: Ꮡbuf.Reinterpret<slice<byte>, buffer.Buffer>()));
-    {
-        var err = appendJSONValue(s, v); if (err != nil) {
-            s.appendError(err);
-        }
+    var err = appendJSONValue(s, v); if (err != nil) {
+        s.appendError(err);
     }
     return (@string)buf;
 }
@@ -276,7 +266,7 @@ internal partial struct BenchmarkJSONHandler_type /*dyn*/ {
 }
 
 public static void BenchmarkJSONHandler(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in slice<BenchmarkJSONHandler_type>([
+    foreach (var (_, vᴛ1) in range(slice<BenchmarkJSONHandler_type>([
         new("defaults", new HandlerOptions()),
         new("time format", new HandlerOptions(
             ReplaceAttr: (slice<@string> _, global::go.log.slog_package.Attr a) => {
@@ -302,7 +292,7 @@ public static void BenchmarkJSONHandler(ж<testing.B> b) {
                 return a;
             }
         ))
-    ])) {
+    ]))) {
         ref var bench = ref heap(new BenchmarkJSONHandler_type(), out var Ꮡbench);
         bench = vᴛ1;
 
@@ -371,14 +361,12 @@ public static void BenchmarkPreformatting(ж<testing.B> b) {
         }
         var outFileʗ1 = outFile;
         defer(() => {
-            {
-                var errΔ1 = outFileʗ1.Close(); if (errΔ1 != nil) {
-                    b.Fatal(errΔ1);
-                }
+            var errΔ1 = outFileʗ1.Close(); if (errΔ1 != nil) {
+                b.Fatal(errΔ1);
             }
         }, ref ᒐ);
 
-        foreach (var (_, vᴛ1) in slice<BenchmarkPreformatting_type>([
+        foreach (var (_, vᴛ1) in range(slice<BenchmarkPreformatting_type>([
             new("separate", io.Discard, slice<any>([
                 go.log.slog_package.String(programˢ, myTestProgramˢ),
                 go.log.slog_package.String(packageˢ, logSlogˢ),
@@ -389,7 +377,7 @@ public static void BenchmarkPreformatting(ж<testing.B> b) {
             ])),
             new("struct", io.Discard, structAttrs),
             new("struct file", new os.FileжWriter(outFile), structAttrs)
-        ])) {
+        ]))) {
             ref var bench = ref heap(new BenchmarkPreformatting_type(), out var Ꮡbench);
             bench = vᴛ1;
 
@@ -443,10 +431,8 @@ public static void BenchmarkJSONEncoding(ж<testing.B> b) {
         b.Run(encoderEncodeˢ, (ж<testing.B> bΔ2) => {
             bΔ2.ReportAllocs();
             for (nint i = 0; i < (~bΔ2).N; i++) {
-                {
-                    var err = json.NewEncoder(new slog_test_package.buffer_BufferжWriter(bufʗ3)).Encode(value); if (err != nil) {
-                        bΔ2.Fatal(err);
-                    }
+                var err = json.NewEncoder(new slog_test_package.buffer_BufferжWriter(bufʗ3)).Encode(value); if (err != nil) {
+                    bΔ2.Fatal(err);
                 }
                 bufʗ3.ValueSlot = (bufʗ3.ValueSlot)[..0];
             }

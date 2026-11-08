@@ -306,7 +306,7 @@ internal static void testFIPS140Only(ж<testing.T> t) {
     expectErr(t, errRet2(ᴛ56, ᴛ57));
     var (ᴛ58, ᴛ59) = ecdh.X25519().NewPublicKey(new slice<byte>(32));
     expectErr(t, errRet2(ᴛ58, ᴛ59));
-    foreach (var (_, curve) in slice<ecdhꓸCurve>([ecdh.P256(), ecdh.P384(), ecdh.P521()])) {
+    foreach (var (_, curve) in range(slice<ecdhꓸCurve>([ecdh.P256(), ecdh.P384(), ecdh.P521()]))) {
         var (ᴛ60, ᴛ61) = curve.GenerateKey(new readerWrap(rand.Reader));
         expectErrIfCustomRand(t, errRet2(ᴛ60, ᴛ61));
         var (kΔ1, errΔ1) = curve.GenerateKey(rand.Reader);
@@ -319,7 +319,7 @@ internal static void testFIPS140Only(ж<testing.T> t) {
         expectNoErr(t, errRet2(ᴛ64, ᴛ65));
     }
 
-    foreach (var (_, curve) in slice<elliptic.Curve>([elliptic.P256(), elliptic.P384(), elliptic.P521()])) {
+    foreach (var (_, curve) in range(slice<elliptic.Curve>([elliptic.P256(), elliptic.P384(), elliptic.P521()]))) {
         var (ᴛ66, ᴛ67) = ecdsa.GenerateKey(curve, new readerWrap(rand.Reader));
         expectErrIfCustomRand(t, errRet2(ᴛ66, ᴛ67));
         var (kΔ2, errΔ2) = ecdsa.GenerateKey(curve, rand.Reader);
@@ -436,8 +436,8 @@ internal static void testFIPS140Only(ж<testing.T> t) {
     var (ᴛ129, ᴛ130, ᴛ131) = mlkemtest.Encapsulate1024(k1024.EncapsulationKey(), new slice<byte>(32));
     expectErr(t, errRet3(ᴛ129, ᴛ130, ᴛ131));
 
-    foreach (var (_, kem) in slice<hpkeꓸKEM>([hpke.DHKEM(ecdh.P256()), hpke.DHKEM(ecdh.P384()), hpke.DHKEM(ecdh.P521()), hpke.MLKEM768(), hpke.MLKEM1024(), hpke.MLKEM768P256(), hpke.MLKEM1024P384(), hpke.MLKEM768X25519()
-    ])) {
+    foreach (var (_, kem) in range(slice<hpkeꓸKEM>([hpke.DHKEM(ecdh.P256()), hpke.DHKEM(ecdh.P384()), hpke.DHKEM(ecdh.P521()), hpke.MLKEM768(), hpke.MLKEM1024(), hpke.MLKEM768P256(), hpke.MLKEM1024P384(), hpke.MLKEM768X25519()
+    ]))) {
         // allowed as hybrid
         var kemʗ1 = kem;
         t.Run(fmt.Sprintf("HKPE KEM %04x"u8, kem.ID()), (ж<testing.T> tΔ1) => {
@@ -518,15 +518,11 @@ internal static void expectPanic(ж<testing.T> t, Action f) {
         t.Helper();
         defer(() => {
             t.Helper();
-            {
-                var err = recover(); if (err == nil) {
-                    t.Errorf("expected panic");
-                } else {
-                    {
-                        var (s, ok) = err._<@string>(ᐧ); if (!ok || !strings.Contains(s, fips140Onlyˢ)) {
-                            t.Errorf("unexpected panic: %v", err);
-                        }
-                    }
+            var err = recover(); if (err == nil) {
+                t.Errorf("expected panic");
+            } else {
+                var (s, ok) = err._<@string>(ᐧ); if (!ok || !strings.Contains(s, fips140Onlyˢ)) {
+                    t.Errorf("unexpected panic: %v", err);
                 }
             }
         }, ref ᒐ);
@@ -577,9 +573,7 @@ private static readonly @string testingKeyˢᵇ = "TESTING KEY"u8;
 private static ref readonly @string privateKeyˢ => ref privateKeyˢᵇ;
 private static readonly @string privateKeyˢᵇ = "PRIVATE KEY"u8;
 
-internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ);
-}
+internal static @string testingKey(@string s) { return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ); }
 
 internal static ж<rsa.PrivateKey> parseKey(@string s) {
     var (p, _) = pem.Decode(slice<byte>(s));

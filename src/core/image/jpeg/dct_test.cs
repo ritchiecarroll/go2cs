@@ -18,7 +18,7 @@ partial class jpeg_internal_test_package {
 internal static void benchmarkDCT(ж<testing.B> b, Action<ж<global::go.image.jpeg_package.block>> f) {
     ref var blk = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡblk); // avoid potential allocation in loop
     while (b.Loop()) {
-        foreach (var (_, vᴛ1) in testBlocks.ΔRangeSnapshot()) {
+        foreach (var (_, vᴛ1) in range(testBlocks.ΔRangeSnapshot())) {
             blk = vᴛ1.Clone();
 
             f(Ꮡblk);
@@ -64,7 +64,7 @@ public static void TestDCT(ж<testing.T> t) {
 
     // All ones.
     global::go.image.jpeg_package.block ones = default;
-    foreach (var i in range(ones)) {
+    foreach (var i in range(len(ones))) {
         ones[i] = 255;
     }
     blocks = append(blocks, ones.Clone());
@@ -117,7 +117,7 @@ internal static void testDCT(ж<testing.T> t, @string name, slice<global::go.ima
     var blocksʗ1 = blocks;
     t.Run(name, (ж<testing.T> tΔ1) => {
         nint totalClose = 0;
-        foreach (var (i, vᴛ1) in blocksʗ1) {
+        foreach (var (i, vᴛ1) in range(blocksʗ1)) {
             ref var b = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡb);
             b = vᴛ1.Clone();
 

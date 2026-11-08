@@ -14,8 +14,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using io = io_package;
 using static go.runtime.pprof_package;
 
@@ -36,9 +34,9 @@ public static void TestConvertMemProfile(ж<testing.T> t) {
     var (a1, a2) = ((uintptr)addr1 + 1, (uintptr)addr2 + 1);
     var rate = (int64)(512 * 1024);
     var rec = slice<profilerecord.MemProfileRecord>([
-        new(AllocBytes: 4096, FreeBytes: 1024, AllocObjects: 4, FreeObjects: 1, Stack: slice<uintptr>([a1, a2])),
-        new(AllocBytes: 512 * 1024, FreeBytes: 0, AllocObjects: 1, FreeObjects: 0, Stack: slice<uintptr>([a2 + 1, a2 + 2])),
-        new(AllocBytes: 512 * 1024, FreeBytes: 512 * 1024, AllocObjects: 1, FreeObjects: 1, Stack: slice<uintptr>([a1 + 1, a1 + 2, a2 + 3]))
+        new(AllocBytes: 4096, FreeBytes: 1024, AllocObjects: 4, FreeObjects: 1, Stack: [a1, a2]),
+        new(AllocBytes: 512 * 1024, FreeBytes: 0, AllocObjects: 1, FreeObjects: 0, Stack: [a2 + 1, a2 + 2]),
+        new(AllocBytes: 512 * 1024, FreeBytes: 512 * 1024, AllocObjects: 1, FreeObjects: 1, Stack: [a1 + 1, a1 + 2, a2 + 3])
     ]);
 
     var periodType = Ꮡ(new profile.ValueType(Type: "space", Unit: "bytes"));
@@ -55,14 +53,14 @@ public static void TestConvertMemProfile(ж<testing.T> t) {
                 Ꮡ(new profile.Location(ID: 1, Mapping: map1, Address: addr1)),
                 Ꮡ(new profile.Location(ID: 2, Mapping: map2, Address: addr2))
             ]),
-            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([1024])})),
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = [1024]})),
         Ꮡ(new profile.Sample(
             Value: slice<int64>([1, 829411, 1, 829411]),
             Location: slice<ж<profile.Location>>([
                 Ꮡ(new profile.Location(ID: 3, Mapping: map2, Address: addr2 + 1)),
                 Ꮡ(new profile.Location(ID: 4, Mapping: map2, Address: addr2 + 2))
             ]),
-            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([512 * 1024])})),
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = [512 * 1024]})),
         Ꮡ(new profile.Sample(
             Value: slice<int64>([1, 829411, 0, 0]),
             Location: slice<ж<profile.Location>>([
@@ -70,12 +68,12 @@ public static void TestConvertMemProfile(ж<testing.T> t) {
                 Ꮡ(new profile.Location(ID: 6, Mapping: map1, Address: addr1 + 2)),
                 Ꮡ(new profile.Location(ID: 7, Mapping: map2, Address: addr2 + 3))
             ]),
-            NumLabel: new map<@string, slice<int64>>{["bytes"] = slice<int64>([512 * 1024])}))
+            NumLabel: new map<@string, slice<int64>>{["bytes"] = [512 * 1024]}))
     ]);
-    foreach (var (_, vᴛ1) in slice<TestConvertMemProfile_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestConvertMemProfile_type>([
         new("heap", ""),
         new("allocs", "alloc_space")
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestConvertMemProfile_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -86,10 +84,8 @@ public static void TestConvertMemProfile(ж<testing.T> t) {
         var tcʗ1 = tc;
         t.Run(tc.name, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            {
-                var errΔ1 = writeHeapProto(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), recʗ1, rate, tcʗ1.defaultSampleType); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("writing profile: %v", errΔ1);
-                }
+            var errΔ1 = writeHeapProto(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), recʗ1, rate, tcʗ1.defaultSampleType); if (errΔ1 != nil) {
+                tΔ1.Fatalf("writing profile: %v", errΔ1);
             }
 
             var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
@@ -113,7 +109,7 @@ internal static slice<@string> profileToStrings(ж<profile.Profile> Ꮡp) {
     var resᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> res = default;
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, s) in range(p.Sample)) {
         res = append(resᴷ, res, sampleToString(s));
     }
     res = move2heap(resᴷ, res);
@@ -135,7 +131,7 @@ internal static slice<@string> locationToStrings(ж<profile.Location> Ꮡloc, sl
     ref var loc = ref Ꮡloc.DerefOrNull();
     var funcsᴷ = new stackAppend<@string>(moves: true);
 
-    foreach (var j in range(loc.Line)) {
+    foreach (var j in range(len(loc.Line))) {
         var line = loc.Line[len(loc.Line) - 1 - j];
         funcs = append(funcsᴷ, funcs, line.Function.Name);
     }
@@ -155,19 +151,17 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> t) {
         defer(() => {
             runtime.MemProfileRate = previousRate;
         }, ref ᒐ);
-        foreach (var (_, sz) in slice<nint>([128, 256])) {
+        foreach (var (_, sz) in range(slice<nint>([128, 256]))) {
             genericAllocFunc<uint32>(sz / 4);
         }
-        foreach (var (_, sz) in slice<nint>([64, 128])) {
+        foreach (var (_, sz) in range(slice<nint>([64, 128]))) {
             genericAllocFunc<uint64>(sz / 8);
         }
 
         runtime.GC();
         var buf = bytes.NewBuffer(default);
-        {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
-                t.Fatalf("writing profile: %v", errΔ1);
-            }
+        var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+            t.Fatalf("writing profile: %v", errΔ1);
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
         if (err != nil) {
@@ -182,7 +176,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> t) {
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 128 0 0]"
         ]);
 
-        foreach (var (_, l) in expected) {
+        foreach (var (_, l) in range(expected)) {
             if (!slices.Contains(actual, l)) {
                 t.Errorf("profile = %v\nwant = %v", strings_package.Join(actual, "\n"), l);
             }
@@ -251,10 +245,8 @@ public static void TestGenericsInlineLocations(ж<testing.T> t) {
         runtime.GC();
 
         var buf = bytes.NewBuffer(default);
-        {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
-                t.Fatalf("writing profile: %v", errΔ1);
-            }
+        var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+            t.Fatalf("writing profile: %v", errΔ1);
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
         if (err != nil) {
@@ -265,7 +257,7 @@ public static void TestGenericsInlineLocations(ж<testing.T> t) {
         @string expectedLocation = expectedLocationᶜ;
         @string expectedLocationNewInliner = expectedLocationNewInlinerᶜ;
         ж<profile.Sample> s = default;
-        foreach (var (_, sample) in p.Sample) {
+        foreach (var (_, sample) in range(p.Sample)) {
             if (sampleToString(sample) == expectedSample) {
                 s = sample;
                 break;
@@ -312,10 +304,8 @@ public static void TestHeapRuntimeFrames(ж<testing.T> t) {
 
         runtime.GC();
         var buf = bytes.NewBuffer(default);
-        {
-            var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
-                t.Fatalf("writing profile: %v", errΔ1);
-            }
+        var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != nil) {
+            t.Fatalf("writing profile: %v", errΔ1);
         }
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(buf));
         if (err != nil) {
@@ -326,7 +316,7 @@ public static void TestHeapRuntimeFrames(ж<testing.T> t) {
 
         // We must see growMap at least once.
         var foundGrowMap = false;
-        foreach (var (_, l) in actual) {
+        foreach (var (_, l) in range(actual)) {
             if (!strings_package.Contains(l, runtimePprofGrowMapˢ)) {
                 continue;
             }

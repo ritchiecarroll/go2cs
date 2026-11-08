@@ -36,15 +36,11 @@ internal static void benchmarkEndToEnd(ж<testing.B> Ꮡb, Func<any> ctor, Func<
         var enc = NewEncoder(w);
         var dec = NewDecoder(r);
         while (pb.Next()) {
-            {
-                var errΔ1 = enc.Encode(v); if (errΔ1 != nil) {
-                    Ꮡb.Fatal(encodeErrorˢ, errΔ1);
-                }
+            var errΔ1 = enc.Encode(v); if (errΔ1 != nil) {
+                Ꮡb.Fatal(encodeErrorˢ, errΔ1);
             }
-            {
-                var errΔ2 = dec.Decode(v); if (errΔ2 != nil) {
-                    Ꮡb.Fatal(decodeErrorˢ, errΔ2);
-                }
+            var errΔ2 = dec.Decode(v); if (errΔ2 != nil) {
+                Ꮡb.Fatal(decodeErrorˢ, errΔ2);
             }
         }
     });
@@ -73,7 +69,7 @@ public static void BenchmarkEndToEndSliceByteBuffer(ж<testing.B> b) {
         var v = Ꮡ(new Bench(7, 3.2D, "now is the time", default));
         Register(v.OrTypedNil());
         ref var arr = ref heap<slice<any>>(new slice<any>(100), out var Ꮡarr);
-        foreach (var i in range(arr)) {
+        foreach (var i in range(len(arr))) {
             arr[i] = v.OrTypedNil();
         }
         return Ꮡarr;
@@ -172,7 +168,7 @@ internal static void benchmarkEncodeSlice(ж<testing.B> Ꮡb, any a) {
 
 public static void BenchmarkEncodeComplex128Slice(ж<testing.B> b) {
     var a = new slice<complex128>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 1.2D + 3.4D.i();
     }
     benchmarkEncodeSlice(b, a);
@@ -180,7 +176,7 @@ public static void BenchmarkEncodeComplex128Slice(ж<testing.B> b) {
 
 public static void BenchmarkEncodeFloat64Slice(ж<testing.B> b) {
     var a = new slice<float64>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 1.23e4D;
     }
     benchmarkEncodeSlice(b, a);
@@ -188,7 +184,7 @@ public static void BenchmarkEncodeFloat64Slice(ж<testing.B> b) {
 
 public static void BenchmarkEncodeInt32Slice(ж<testing.B> b) {
     var a = new slice<int32>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = (int32)(i * 100);
     }
     benchmarkEncodeSlice(b, a);
@@ -200,7 +196,7 @@ private static readonly @string nowIsTheTimeˢᵇ = "now is the time"u8;
 
 public static void BenchmarkEncodeStringSlice(ж<testing.B> b) {
     var a = new slice<@string>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkEncodeSlice(b, a);
@@ -208,7 +204,7 @@ public static void BenchmarkEncodeStringSlice(ж<testing.B> b) {
 
 public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> b) {
     var a = new slice<any>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkEncodeSlice(b, a);
@@ -286,7 +282,7 @@ internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
 
 public static void BenchmarkDecodeComplex128Slice(ж<testing.B> b) {
     var a = new slice<complex128>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 1.2D + 3.4D.i();
     }
     benchmarkDecodeSlice(b, a);
@@ -294,7 +290,7 @@ public static void BenchmarkDecodeComplex128Slice(ж<testing.B> b) {
 
 public static void BenchmarkDecodeFloat64Slice(ж<testing.B> b) {
     var a = new slice<float64>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 1.23e4D;
     }
     benchmarkDecodeSlice(b, a);
@@ -302,7 +298,7 @@ public static void BenchmarkDecodeFloat64Slice(ж<testing.B> b) {
 
 public static void BenchmarkDecodeInt32Slice(ж<testing.B> b) {
     var a = new slice<int32>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 1234;
     }
     benchmarkDecodeSlice(b, a);
@@ -310,23 +306,21 @@ public static void BenchmarkDecodeInt32Slice(ж<testing.B> b) {
 
 public static void BenchmarkDecodeStringSlice(ж<testing.B> b) {
     var a = new slice<@string>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkDecodeSlice(b, a);
 }
-
 public static void BenchmarkDecodeStringsSlice(ж<testing.B> b) {
     var a = new slice<slice<@string>>(1000);
-    foreach (var i in range(a)) {
-        a[i] = slice<@string>(["now is the time"]);
+    foreach (var i in range(len(a))) {
+        a[i] = ["now is the time"];
     }
     benchmarkDecodeSlice(b, a);
 }
-
 public static void BenchmarkDecodeBytesSlice(ж<testing.B> b) {
     var a = new slice<slice<byte>>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = slice<byte>("now is the time"u8);
     }
     benchmarkDecodeSlice(b, a);
@@ -334,7 +328,7 @@ public static void BenchmarkDecodeBytesSlice(ж<testing.B> b) {
 
 public static void BenchmarkDecodeInterfaceSlice(ж<testing.B> b) {
     var a = new slice<any>(1000);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkDecodeSlice(b, a);

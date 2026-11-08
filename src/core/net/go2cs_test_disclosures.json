@@ -30,6 +30,14 @@
       "want": "0 allocations per run for each address (net/ip_test.go:292-293)",
       "reading": "3 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 3,000 go2cs-runtime object allocations (152,000 bytes) over 1,000 runs, alloc-units-windows.tsv line 76 (claude/g-pass2-plan 966562828d); linux: 3,000 go2cs-runtime object allocations (152,000 bytes) over 1,000 runs, alloc-units-linux.tsv line 62 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
       "plan": "docs/phase4/DESIGN-nonescaping-locals.md (REC-B), constant-capacity make, for the closure's `make([]byte, 0, 64)` (net/ip_test.go:289) -- the nil IP's 1 is that make alone, since AppendText returns at once for an empty IP; and the net/netip append path (net/ip.cs:342-343), the family net/netip's 54 deferred entries carry: docs/phase4/DESIGN-zh-box-reduction.md (Phase A) and docs/phase4/DESIGN-zh-box-three-capabilities.md, with REC-B by X(2)'s membership extension. The IPv4 cases' other 2 and the IPv6 cases' 70-146 are that path's, UNATTRIBUTED per site here (net/netip reads AddrFrom4 1 and TestAddrStringAllocs/ipv6 106 per run). A want-0 entry retires only at ZERO BYTES (testing.cs:743)."
+    },
+    {
+      "name": "TestDialerFallbackDelay",
+      "class": "performance-margin",
+      "platforms": ["darwin"],
+      "signature": "; want <= 395ms",
+      "reason": "The test installs dial hooks under which the IPv6 attempt never completes, and measures how long the dual-stack Dialer takes to fall back to IPv4. With the default fallback delay of 300ms it requires the whole dial to finish within 395ms, a fixed 95ms margin over the delay. On osx-arm64 the converted dial finishes in about 445ms, so it misses the bound by about 50ms; on osx-x64 it meets it. Not a cannot, a not yet fast enough: the fallback happens, at the right delay, and the margin left for the rest of the dial is shorter than the managed runtime needs on that host. The signature pins the default-delay case's bound; a miss in either of the other two cases is a different failure.",
+      "history": "Read on the macOS CI runners at the 1.26.10.2 bank: 445.5ms (run 41665739974) and 443.9ms (run 41701297335) on osx-arm64, against the 395ms bound; osx-x64 validated (BOARD 2026-11-03). Ruled darwin performance-margin by COORD on 2026-11-07 (PLAN-rebank-1-26-10-3.md section 4.1, drafted as host-limit, written in performance-margin, the roster's class for a fixed deadline). Drafted ahead of the 1.26.10.3 darwin leg; it applies only when that reading matches this signature. Revisit when the converted dial on osx-arm64 completes within the bound, or when Go widens the margin."
     }
   ]
 }

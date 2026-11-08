@@ -15,20 +15,18 @@ internal partial struct TestDecimalString_type /*dyn*/ {
 }
 
 public static void TestDecimalString(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestDecimalString_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestDecimalString_type>([
         new(want: "0"),
         new(new @decimal(default, 1000), "0"), // exponent of 0 is ignored
         new(new @decimal(slice<byte>("12345"u8), 0), "0.12345"),
         new(new @decimal(slice<byte>("12345"u8), -3), "0.00012345"),
         new(new @decimal(slice<byte>("12345"u8), +3), "123.45"),
         new(new @decimal(slice<byte>("12345"u8), +10), "1234500000")
-    ])) {
+    ]))) {
         var test = vᴛ1;
 
-        {
-            @string got = test.x.String(); if (got != test.want) {
-                t.Errorf("%v == %s; want %s", test.x, got, test.want);
-            }
+        @string got = test.x.String(); if (got != test.want) {
+            t.Errorf("%v == %s; want %s", test.x, got, test.want);
         }
     }
 }
@@ -40,7 +38,7 @@ internal partial struct TestDecimalInit_type /*dyn*/ {
 }
 
 public static void TestDecimalInit(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestDecimalInit_type>([
+    foreach (var (_, test) in range(slice<TestDecimalInit_type>([
         new(0, 0, "0"),
         new(0, -100, "0"),
         new(0, 100, "0"),
@@ -52,13 +50,11 @@ public static void TestDecimalInit(ж<testing.T> t) {
         new(12345678, -8, "48225.3046875"),
         new(195312, 9, "99999744"),
         new(1953125, 9, "1000000000")
-    ])) {
+    ]))) {
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(new Δnat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
-        {
-            @string got = d.String(); if (got != test.want) {
-                t.Errorf("%d << %d == %s; want %s", test.x, test.shift, got, test.want);
-            }
+        @string got = d.String(); if (got != test.want) {
+            t.Errorf("%d << %d == %s; want %s", test.x, test.shift, got, test.want);
         }
     }
 }
@@ -70,7 +66,7 @@ internal partial struct TestDecimalRounding_type /*dyn*/ {
 }
 
 public static void TestDecimalRounding(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestDecimalRounding_type>([
+    foreach (var (_, test) in range(slice<TestDecimalRounding_type>([
         new(0, 0, "0", "0", "0"),
         new(0, 1, "0", "0", "0"),
 
@@ -96,7 +92,7 @@ public static void TestDecimalRounding(ж<testing.T> t) {
         new(12994999, 4, "12990000", "12990000", "13000000"),
         new(12995000, 4, "12990000", "13000000", "13000000"),
         new(12999999, 4, "12990000", "13000000", "13000000")
-    ])) {
+    ]))) {
         var x = ((global::go.math.big_package.Δnat)default).setUint64(test.x);
 
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
@@ -142,7 +138,7 @@ public static void BenchmarkDecimalConversion(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkFloatString(ж<testing.B> b) {
     var x = @new<global::go.math.big_package.Float>();
-    foreach (var (_, prec) in slice<nuint>([100, 1000, 10000, 100000])) {
+    foreach (var (_, prec) in range(slice<nuint>([100, 1000, 10000, 100000]))) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         var xʗ1 = x;
         b.Run(fmt.Sprintf("%v"u8, prec), (ж<testing.B> bΔ1) => {

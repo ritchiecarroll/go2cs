@@ -10,7 +10,6 @@ partial class fmt_internal_test_package {
 public static readonly ж<Func<rune, bool>> ᏑIsSpace = new StaticBox<Func<rune, bool>>(default(Func<rune, bool>));
 public static ref Func<rune, bool> IsSpace => ref ((StaticBox<Func<rune, bool>>)ᏑIsSpace).ValueSlot;
 internal static void initᴛIsSpace() { IsSpace = isSpace; }
-
 public static readonly ж<Func<@string, nint, nint, (nint, bool, nint)>> ᏑParsenum = new StaticBox<Func<@string, nint, nint, (nint, bool, nint)>>(parsenumᶠ);
 public static ref Func<@string, nint, nint, (nint, bool, nint)> Parsenum => ref ((StaticBox<Func<@string, nint, nint, (nint, bool, nint)>>)ᏑParsenum).ValueSlot;
 

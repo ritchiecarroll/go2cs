@@ -75,7 +75,7 @@ public static void Example() {
 
     // Print the results.
     fmt.Printf("%-14s %6s %6s %6s %6s\n"u8, binˢ, redˢ, greenˢ, blueˢ, alphaˢ);
-    foreach (var (i, vᴛ1) in histogram.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(histogram.ΔRangeSnapshot())) {
         var x = vᴛ1.Clone();
 
         fmt.Printf("0x%04x-0x%04x: %6d %6d %6d %6d\n"u8, i << 12, ((i + 1) << 12) - 1, x[0], x[1], x[2], x[3]);

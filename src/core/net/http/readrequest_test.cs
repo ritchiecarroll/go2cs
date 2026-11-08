@@ -25,12 +25,10 @@ internal partial struct reqTest {
 }
 
 internal static @string noError = "";
-
 internal static @string noBodyStr = "";
-
 internal static global::go.net.http_package.ΔHeader noTrailer = default;
 
-internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>(slice<reqTest>([
+internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>([
     // Baseline test; All Request fields included for template use
     new(
         "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Content-Length: 7\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8 + "abcdef\n???"u8,
@@ -46,14 +44,14 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             ProtoMajor: 1,
             ProtoMinor: 1,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Accept"] = slice<@string>(["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"]),
-                ["Accept-Language"] = slice<@string>(["en-us,en;q=0.5"]),
-                ["Accept-Encoding"] = slice<@string>(["gzip,deflate"]),
-                ["Accept-Charset"] = slice<@string>(["ISO-8859-1,utf-8;q=0.7,*;q=0.7"]),
-                ["Keep-Alive"] = slice<@string>(["300"]),
-                ["Proxy-Connection"] = slice<@string>(["keep-alive"]),
-                ["Content-Length"] = slice<@string>(["7"]),
-                ["User-Agent"] = slice<@string>(["Fake"])
+                ["Accept"] = ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+                ["Accept-Language"] = ["en-us,en;q=0.5"],
+                ["Accept-Encoding"] = ["gzip,deflate"],
+                ["Accept-Charset"] = ["ISO-8859-1,utf-8;q=0.7,*;q=0.7"],
+                ["Keep-Alive"] = ["300"],
+                ["Proxy-Connection"] = ["keep-alive"],
+                ["Content-Length"] = ["7"],
+                ["User-Agent"] = ["Fake"]
             }),
             Close: false,
             ContentLength: 7,
@@ -142,7 +140,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             URL: Ꮡ(new url.URL(
                 Path: "/"
             )),
-            TransferEncoding: slice<@string>(["chunked"]),
+            TransferEncoding: ["chunked"],
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
@@ -154,7 +152,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
 
         "foobar",
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Trailer-Key"] = slice<@string>(["Trailer-Value"])
+            ["Trailer-Key"] = ["Trailer-Value"]
         }),
         noError
     ),
@@ -168,7 +166,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             URL: Ꮡ(new url.URL(
                 Path: "/"
             )),
-            TransferEncoding: slice<@string>(["chunked"]),
+            TransferEncoding: ["chunked"],
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
@@ -277,7 +275,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             ProtoMajor: 1,
             ProtoMinor: 1,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Server"] = slice<@string>(["foo"])
+                ["Server"] = ["foo"]
             }),
             Close: false,
             ContentLength: 0,
@@ -301,7 +299,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             ProtoMajor: 1,
             ProtoMinor: 1,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Server"] = slice<@string>(["foo"])
+                ["Server"] = ["foo"]
             }),
             Close: false,
             ContentLength: 0,
@@ -325,7 +323,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
                 // This wasn't removed from Go 1.0 to
                 // Go 1.3, so locking it in that we
                 // keep this:
-                ["Connection"] = slice<@string>(["close"])
+                ["Connection"] = ["close"]
             }),
             Host: "issue8261.com",
             Proto: "HTTP/1.1",
@@ -350,8 +348,8 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
                 Path: "/"
             )),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"] = slice<@string>(["close"]),
-                ["Content-Length"] = slice<@string>(["0"])
+                ["Connection"] = ["close"],
+                ["Content-Length"] = ["0"]
             }),
             Host: "issue8261.com",
             Proto: "HTTP/1.1",
@@ -386,11 +384,11 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
         noTrailer,
         noError
     )
-]));
+]);
 internal static ref slice<reqTest> reqTests => ref ((StaticBox<slice<reqTest>>)ᏑreqTests).ValueSlot;
 
 public static void TestReadRequest(ж<testing.T> t) {
-    foreach (var i in range(reqTests)) {
+    foreach (var i in range(builtin.len(reqTests))) {
         var tt = Ꮡ(reqTests, i);
         var (req, err) = ReadRequest(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.Raw))));
         if (err != nil) {
@@ -461,7 +459,7 @@ GET / HTTP/1.1
 ]);
 
 public static void TestReadRequest_Bad(ж<testing.T> t) {
-    foreach (var (_, tt) in badRequestTests) {
+    foreach (var (_, tt) in range(badRequestTests)) {
         var (got, err) = ReadRequest(bufio.NewReader(new http_test_package.bytes_ReaderжReader(bytes.NewReader(tt.req))));
         if (err == nil) {
             var (all, errΔ1) = io.ReadAll(got.Body);

@@ -8,8 +8,6 @@ using fmt = fmt_package;
 using net = net_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.net.rpc_package;
 
 partial class rpc_internal_test_package {
@@ -19,14 +17,8 @@ internal partial struct shutdownCodec {
     internal bool closed;
 }
 
-internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) {
-    return default;
-}
-
-internal static error ReadResponseBody(this ref shutdownCodec c, any _) {
-    return default;
-}
-
+internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) { return default; }
+internal static error ReadResponseBody(this ref shutdownCodec c, any _) { return default; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string shutdownCodecˢ => ref shutdownCodecˢᵇ;
 private static readonly @string shutdownCodecˢᵇ = "shutdownCodec ReadResponseHeader"u8;
@@ -35,7 +27,6 @@ internal static error ReadResponseHeader(this ref shutdownCodec c, ж<global::go
     c.responded.ᐸꟷ(1);
     return errors.New(shutdownCodecˢ);
 }
-
 internal static error Close(this ref shutdownCodec c) {
     c.closed = true;
     return default;

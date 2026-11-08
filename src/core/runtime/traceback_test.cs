@@ -80,7 +80,7 @@ public static void TestTracebackInlined(ж<testing.T> t) {
         }
         frames = frames[1..];
         // Check the function sequence.
-        foreach (var (i, want) in funcs) {
+        foreach (var (i, want) in range(funcs)) {
             @string got = endˢ2;
             if (i < len(frames)) {
                 got = frames[i].funcName;
@@ -140,11 +140,9 @@ internal static partial ж<ttiResult> ttiLeaf() {
 internal static partial ж<ttiResult> ttiSimple1() {
     return ttiSimple2();
 }
-
 internal static partial ж<ttiResult> ttiSimple2() {
     return ttiSimple3();
 }
-
 internal static partial ж<ttiResult> ttiSimple3() {
     return ttiLeaf();
 }
@@ -171,11 +169,9 @@ internal static partial ж<ttiResult> /*res*/ ttiSigpanic1() {
     finally { ᒐ.Run(); }
     return res;
 }
-
 internal static void ttiSigpanic2() {
     ttiSigpanic3();
 }
-
 internal static void ttiSigpanic3() {
     ж<nint> p = default;
     p.Value = 3;
@@ -212,7 +208,6 @@ internal static partial ж<ttiResult> ttiExcluded1() {
 internal static partial ж<ttiResult> ttiExcluded2() {
     return ttiExcluded3();
 }
-
 internal static partial ж<ttiResult> ttiExcluded3() {
     return ttiLeaf();
 }
@@ -230,7 +225,7 @@ public static void TestTracebackElision(ж<testing.T> t) {
     // print any "elided" message, eliding exactly 1 so we have to pick back up
     // in the paused physical frame, and eliding 10 so we have to advance the
     // physical frame forward.
-    foreach (var (_, elided) in slice<nint>([0, 1, 10])) {
+    foreach (var (_, elided) in range(slice<nint>([0, 1, 10]))) {
         t.Run(fmt.Sprintf("elided=%d"u8, elided), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint n = elided + (nint)runtime_internal_test_package.TracebackInnerFrames + (nint)runtime_internal_test_package.TracebackOuterFrames;
 
@@ -319,15 +314,12 @@ internal static void tteStack(nint n, channel/*<-*/<@string> stack) {
         break;
     }}
 }
-
 internal static partial @string tte0(nint n) {
     return tte4(n - 1);
 }
-
 internal static partial @string tte1(nint n) {
     return tte0(n - 1);
 }
-
 internal static partial @string tte2(nint n) {
     // tte2 opens n%5 == 2 frames. It's also the base case of the recursion,
     // since we can open no fewer than two frames to call debug.Stack().
@@ -339,11 +331,9 @@ internal static partial @string tte2(nint n) {
     }
     return tte1(n - 1);
 }
-
 internal static partial @string tte3(nint n) {
     return tte2(n - 1);
 }
-
 internal static partial @string tte4(nint n) {
     return tte3(n - 1);
 }
@@ -534,7 +524,7 @@ public static void TestTracebackArgs(ж<testing.T> t) {
             fmt.Sprintf("testTracebackArgsSlice({%p, 0x2, "u8, ᏑtestTracebackArgsSliceBackingStore.at<nint>(0))
         )
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         nint n = test.fn();
         var got = testTracebackArgsBuf.slice(0, n);
         if (!bytes.Contains(got, slice<byte>(test.expect))) {
@@ -674,18 +664,15 @@ partial struct testArgsType8a {
     internal nint a, b, c, d, e, f, g, h;
     internal array<nint> i = new(2);
 }
-
 partial struct testArgsType8b {
     internal nint a, b, c, d, e, f, g, h;
     internal array<nint> i = new(3);
 }
-
 partial struct testArgsType8c {
     internal nint a, b, c, d, e, f, g, h;
     internal array<nint> i = new(2);
     internal nint j;
 }
-
 partial struct testArgsType8d {
     internal nint a, b, c, d, e, f, g, h;
     internal array<nint> i = new(3);
@@ -1022,7 +1009,7 @@ public static void TestTracebackGeneric(ж<testing.T> t) {
         )
     ]);
     array<byte> buf = new(1000);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         nint n = test.fn(buf[..]);
         var got = buf.slice(0, n);
         if (!bytes.Contains(got, slice<byte>(test.expect))) {
@@ -1084,7 +1071,7 @@ internal partial struct TestTracebackGoroutineLabels_type /*dyn*/ {
 
 public static void TestTracebackGoroutineLabels(ж<testing.T> t) {
     t.Setenv(godebugˢ, tracebacklabels1ˢ);
-    foreach (var (_, vᴛ1) in slice<TestTracebackGoroutineLabels_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestTracebackGoroutineLabels_type>([
         new(l: pprof.Labels(foobarˢ, bazˢ), expTB: @"{""foobar"": ""baz""}"),
         // Make sure the keys are sorted because the runtime/pprof package sorts for consistency
         new(l: pprof.Labels(foobarˢ, bazˢ, fizzleˢ, bitˢ), expTB: @"{""fizzle"": ""bit"", ""foobar"": ""baz""}"),
@@ -1098,7 +1085,7 @@ public static void TestTracebackGoroutineLabels(ж<testing.T> t) {
         new(l: pprof.Labels(fizzLeˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fizz\tle"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}"),
         // verify carriage returns and backslashes get escaped along with our nulls, newlines and a 32-bit unicode character
         new(l: pprof.Labels(fizZlEˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fiz\\zl\re"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}")
-    ])) {
+    ]))) {
         ref var tbl = ref heap(new TestTracebackGoroutineLabels_type(), out var Ꮡtbl);
         tbl = vᴛ1;
 

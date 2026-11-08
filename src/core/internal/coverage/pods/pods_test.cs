@@ -35,20 +35,16 @@ public static void TestPodCollection(ж<testing.T> t) {
 
     @string mkdir(@string d, fs.FileMode perm) {
         @string dp = filepath.Join(t.TempDir(), d);
-        {
-            var errΔ1 = os.Mkdir(dp, perm); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = os.Mkdir(dp, perm); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         return dp;
     }
 
     @string mkfile(@string d, @string fn) {
         @string fp = filepath.Join(d, fn);
-        {
-            var errΔ2 = os.WriteFile(fp, slice<byte>("foo"u8), 438); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = os.WriteFile(fp, slice<byte>("foo"u8), 438); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         return fp;
     }
@@ -81,7 +77,7 @@ public static void TestPodCollection(ж<testing.T> t) {
     var trimʗ1 = trim;
     @string podToString(pods.Pod p) {
         @string rv = trimʗ1(p.MetaFile) + " [\n"u8;
-        foreach (var (k, df) in p.CounterDataFiles) {
+        foreach (var (k, df) in range(p.CounterDataFiles)) {
             rv += trimʗ1(df);
             if (p.Origins != nil) {
                 rv += fmt.Sprintf(" o:%d"u8, p.Origins[k]);
@@ -123,7 +119,7 @@ public static void TestPodCollection(ж<testing.T> t) {
     mkcounter(o2, "m1", 11, 35);
 
     // Collect pods.
-    var (podlist, err) = pods.CollectPods(slice<@string>([o1, o2]), true);
+    var (podlist, err) = pods.CollectPods([o1, o2], true);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -133,7 +129,7 @@ public static void TestPodCollection(ж<testing.T> t) {
         t.Fatalf("expected 2 pods got %d pods", len(podlist));
     }
 
-    foreach (var (k, p) in podlist) {
+    foreach (var (k, p) in range(podlist)) {
         t.Logf("%d: mf=%s\n", k, p.MetaFile);
     }
 
@@ -154,7 +150,7 @@ o2/covcounters.0880952783ab1be95aa0733055a4d1a6.38.1 o:1
 ]
 """u8.Raw()
     ]);
-    foreach (var (k, exp) in expected) {
+    foreach (var (k, exp) in range(expected)) {
         @string got = podToString(podlist[k]);
         if (exp != got) {
             t.Errorf("pod %d: expected:\n%s\ngot:\n%s", k, exp, got);
@@ -164,7 +160,7 @@ o2/covcounters.0880952783ab1be95aa0733055a4d1a6.38.1 o:1
     // Check handling of bad/unreadable dir.
     if (runtime.GOOS == "linux"u8) {
         @string dbad = devNullˢ;
-        (_, err) = pods.CollectPods(slice<@string>([dbad]), true);
+        (_, err) = pods.CollectPods([dbad], true);
         if (err == nil) {
             t.Errorf("executed error due to unreadable dir");
         }

@@ -13,8 +13,6 @@ using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
 using go.sync;
 using static go.sync_internal_test_package;
@@ -180,10 +178,8 @@ internal static void testPool(ж<Δtesting.T> t, bool drain) {
             runtime_blockUntilEmptyCleanupQueue((int64)((time.Duration)(5000000000L)));
 
             // 1 pointer can remain on stack or elsewhere
-            {
-                cln1 = atomic.LoadUint32(Ꮡcln); if (cln1 < (uint32)(N - 1)) {
-                    t.Fatalf("only %v out of %v resources are cleaned up on try %v", cln1, (nint)(N), @try);
-                }
+            cln1 = atomic.LoadUint32(Ꮡcln); if (cln1 < (uint32)(N - 1)) {
+                t.Fatalf("only %v out of %v resources are cleaned up on try %v", cln1, (nint)(N), @try);
             }
         }
     }
@@ -261,10 +257,8 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> t, global::go.sync_
                 } else {
                     // Speed up the test by
                     // allowing the pusher to run.
-                    {
-                        fail++; if (fail % 100 == 0) {
-                            Δruntime.Gosched();
-                        }
+                    fail++; if (fail % 100 == 0) {
+                        Δruntime.Gosched();
                     }
                 }
             }
@@ -295,7 +289,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> t, global::go.sync_
     Ꮡwg.Wait();
 
     // Check results.
-    foreach (var (i, count) in have) {
+    foreach (var (i, count) in range(have)) {
         if (count != 1) {
             t.Errorf("expected have[%d] = 1, got %d", i, count);
         }
@@ -445,7 +439,7 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
         // Get pause time stats.
         slices.Sort<slice<uint64>, uint64>(pauses);
         uint64 total = default;
-        foreach (var (_, ns) in pauses) {
+        foreach (var (_, ns) in range(pauses)) {
             total += ns;
         }
         // ns/op for this benchmark is average STW time.
@@ -496,13 +490,13 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
             slice<byte> sink = default;
             while (pb.Next()) {
                 // Stress the pool.
-                foreach (var i in range(items)) {
+                foreach (var i in range(len(items))) {
                     items[i] = Ꮡp.Get();
                     // Simulate doing some work with this
                     // item checked out.
                     sink = new slice<byte>((32 << 10));
                 }
-                foreach (var (i, v) in items) {
+                foreach (var (i, v) in range(items)) {
                     Ꮡp.Put(v);
                     items[i] = default;
                 }

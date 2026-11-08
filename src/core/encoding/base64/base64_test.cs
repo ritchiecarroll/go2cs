@@ -26,7 +26,7 @@ internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
-internal static slice<testpair> pairs = slice<testpair>([
+internal static slice<testpair> pairs = [
     // RFC 3548 examples
     new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e})), "FPucA9l+"),
     new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9})), "FPucA9k="),
@@ -50,7 +50,7 @@ internal static slice<testpair> pairs = slice<testpair>([
     new("easure.", "ZWFzdXJlLg=="),
     new("asure.", "YXN1cmUu"),
     new("sure.", "c3VyZS4=")
-]);
+];
 
 // Do nothing to a reference base64 string (leave in standard format)
 internal static @string stdRef(@string @ref) {
@@ -79,7 +79,7 @@ private static readonly @string encodeStdᵇ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 
 // A nonstandard encoding with a funny padding character, for testing
 internal static ж<global::go.encoding.base64_package.Encoding> funnyEncoding;
-internal static void initᴛfunnyEncoding() { funnyEncoding = (~NewEncoding(encodeStd)).WithPadding((rune)'@'); }
+internal static void initᴛfunnyEncoding() { funnyEncoding = NewEncoding(encodeStd).WithPadding((rune)'@'); }
 
 internal static @string funnyRef(@string @ref) {
     return strings.ReplaceAll(@ref, "=", "@");
@@ -97,11 +97,11 @@ internal static void initᴛencodingTests() { encodingTests = slice<encodingTest
     new(RawStdEncoding, rawRef),
     new(RawURLEncoding, rawURLRef),
     new(funnyEncoding, funnyRef),
-    new((~StdEncoding).Strict(), stdRef),
-    new((~URLEncoding).Strict(), urlRef),
-    new((~RawStdEncoding).Strict(), rawRef),
-    new((~RawURLEncoding).Strict(), rawURLRef),
-    new((~funnyEncoding).Strict(), funnyRef)
+    new(StdEncoding.Strict(), stdRef),
+    new(URLEncoding.Strict(), urlRef),
+    new(RawStdEncoding.Strict(), rawRef),
+    new(RawURLEncoding.Strict(), rawURLRef),
+    new(funnyEncoding.Strict(), funnyRef)
 ]); }
 
 internal static testpair bigtest = new testpair(
@@ -127,8 +127,8 @@ internal static ref readonly @string appendEncodeLeadQQWantQˢ => ref appendEnco
 private static readonly @string appendEncodeLeadQQWantQˢᵇ = @"AppendEncode(""lead"", %q) = %q, want %q"u8;
 
 public static void TestEncode(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
-        foreach (var (_, tt) in encodingTests) {
+    foreach (var (_, p) in range(pairs)) {
+        foreach (var (_, tt) in range(encodingTests)) {
             @string got = tt.enc.EncodeToString(slice<byte>(p.decoded));
             testEqual(t, encodeQQWantQˢ, p.decoded, got, tt.conv(p.encoded));
             var dst = tt.enc.AppendEncode(slice<byte>("lead"u8), slice<byte>(p.decoded));
@@ -138,7 +138,7 @@ public static void TestEncode(ж<testing.T> t) {
 }
 
 public static void TestEncoder(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var bb = Ꮡ(new strings.Builder());
         var encoder = NewEncoder(StdEncoding, new base64_test_package.strings_BuilderжWriter(bb));
         encoder.Write(slice<byte>(p.decoded));
@@ -196,8 +196,8 @@ internal static ref readonly @string appendDecodeQQWantQˢ => ref appendDecodeQQ
 private static readonly @string appendDecodeQQWantQˢᵇ = @"AppendDecode("""", %q) = %q, want %q"u8;
 
 public static void TestDecode(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
-        foreach (var (_, tt) in encodingTests) {
+    foreach (var (_, p) in range(pairs)) {
+        foreach (var (_, tt) in range(encodingTests)) {
             @string encoded = tt.conv(p.encoded);
             var dbuf = new slice<byte>(tt.enc.DecodedLen(len(encoded)));
             var (count, err) = tt.enc.Decode(dbuf, slice<byte>(encoded));
@@ -233,7 +233,7 @@ internal static ref readonly @string readFromQVWantVˢ => ref readFromQVWantVˢ�
 private static readonly @string readFromQVWantVˢᵇ = "Read from %q = %v, want %v"u8;
 
 public static void TestDecoder(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var decoder = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(p.encoded)));
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(p.encoded)));
         var (count, err) = decoder.Read(dbuf);
@@ -309,7 +309,7 @@ public static void TestDecodeCorrupt(ж<testing.T> t) {
         new("A!\n", 1),
         new("A=\n", 1)
     ]);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(tc.input)));
         var (_, err) = StdEncoding.Decode(dbuf, slice<byte>(tc.input));
         if (tc.offset == -1) {
@@ -337,10 +337,8 @@ public static void TestDecodeBounds(ж<testing.T> t) {
         array<byte> buf = new(32);
         @string s = StdEncoding.EncodeToString(buf[..]);
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            {
-                var errΔ1 = recover(); if (errΔ1 != nil) {
-                    t.Fatalf("Decode panicked unexpectedly: %v\n%s", errΔ1, debug.Stack());
-                }
+            var errΔ1 = recover(); if (errΔ1 != nil) {
+                t.Fatalf("Decode panicked unexpectedly: %v\n%s", errΔ1, debug.Stack());
             }
         }, ref ᒐ);
         var (n, err) = StdEncoding.Decode(buf[..], slice<byte>(s));
@@ -386,11 +384,9 @@ public static void TestEncodedLen(ж<testing.T> t) {
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
         break;
     }}
-    foreach (var (_, tt) in tests) {
-        {
-            nint got = tt.enc.EncodedLen(tt.n); if ((int64)got != tt.want) {
-                t.Errorf("EncodedLen(%d): got %d, want %d", tt.n, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        nint got = tt.enc.EncodedLen(tt.n); if ((int64)got != tt.want) {
+            t.Errorf("EncodedLen(%d): got %d, want %d", tt.n, got, tt.want);
         }
     }
 }
@@ -426,11 +422,9 @@ public static void TestDecodedLen(ж<testing.T> t) {
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 6917529027641081855L));
         break;
     }}
-    foreach (var (_, tt) in tests) {
-        {
-            nint got = tt.enc.DecodedLen(tt.n); if ((int64)got != tt.want) {
-                t.Errorf("DecodedLen(%d): got %d, want %d", tt.n, got, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        nint got = tt.enc.DecodedLen(tt.n); if ((int64)got != tt.want) {
+            t.Errorf("DecodedLen(%d): got %d, want %d", tt.n, got, tt.want);
         }
     }
 }
@@ -492,16 +486,14 @@ public static void TestNewLineCharacters(ж<testing.T> t) {
         "c3VyZQ=\n=",
         "c3VyZQ=\r\n\r\n="
     ]);
-    foreach (var (_, e) in examples) {
+    foreach (var (_, e) in range(examples)) {
         var (buf, err) = StdEncoding.DecodeString(e);
         if (err != nil) {
             t.Errorf("Decode(%q) failed: %v", e, err);
             continue;
         }
-        {
-            @string s = (@string)buf; if (s != expected) {
-                t.Errorf("Decode(%q) = %q, want %q", e, s, expected);
-            }
+        @string s = (@string)buf; if (s != expected) {
+            t.Errorf("Decode(%q) = %q, want %q", e, s, expected);
         }
     }
 }
@@ -631,12 +623,12 @@ internal static ref readonly @string wvLTlMrX9NpYDQlEIFlnDAˢ => ref wvLTlMrX9Np
 private static readonly @string wvLTlMrX9NpYDQlEIFlnDAˢᵇ = "WvLTlMrX9NpYDQlEIFlnDA=="u8;
 
 public static void TestDecoderIssue15656(ж<testing.T> t) {
-    var (_, err) = (~StdEncoding).Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDBˢ);
+    var (_, err) = StdEncoding.Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDBˢ);
     var want = (global::go.encoding.base64_package.CorruptInputError)22;
     if (!reflect.DeepEqual(want, err)) {
         t.Errorf("Error = %v; want CorruptInputError(22)", err);
     }
-    (_, err) = (~StdEncoding).Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDAˢ);
+    (_, err) = StdEncoding.Strict().DecodeString(wvLTlMrX9NpYDQlEIFlnDAˢ);
     if (err != nil) {
         t.Errorf("Error = %v; want nil", err);
     }
@@ -666,7 +658,7 @@ public static void BenchmarkDecodeString(ж<testing.B> b) {
             StdEncoding.DecodeString(data);
         }
     }
-    foreach (var (_, size) in sizes) {
+    foreach (var (_, size) in range(sizes)) {
         var benchFuncʗ1 = benchFunc;
         b.Run(fmt.Sprintf("%d"u8, size), (ж<testing.B> bΔ2) => {
             benchFuncʗ1(bΔ2, size);
@@ -680,7 +672,7 @@ public static void BenchmarkNewEncoding(ж<testing.B> Ꮡb) {
     b.SetBytes((int64)len(new Encoding().decodeMap));
     for (nint i = 0; i < b.N; i++) {
         var e = NewEncoding(encodeStd);
-        foreach (var (_, v) in e.decodeMap.ΔRangeSnapshot()) {
+        foreach (var (_, v) in range(e.decodeMap.ΔRangeSnapshot())) {
             _ = v;
         }
     }

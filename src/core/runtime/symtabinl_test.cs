@@ -102,10 +102,8 @@ public static void XTestInlineUnwinder(TestingT t) {
 
             t.Logf("tiuTest+%#x: %s", pc - pc1, Δstack);
 
-            {
-                var (_, ok) = want[Δstack, ꟷ]; if (ok) {
-                    want[Δstack]++;
-                }
+            var (_, ok) = want[Δstack, ꟷ]; if (ok) {
+                want[Δstack]++;
             }
         }
     }
@@ -126,22 +124,18 @@ internal static nint lineNumber() {
 // Below here is the test data for XTestInlineUnwinder
 internal static nint tiuStart;
 internal static void initᴛtiuStart() { tiuStart = lineNumber(); } // +0
-
 internal static nint tiu2;                                        // +1
 internal static nint tiu3;
-
 internal static void tiuInlined1(nint i) {
     // +2
     tiu1[i]++; // +3
 }
-
 // +4
 internal static void tiuInlined2() {
     // +5
     tiuInlined1(1); // +6
     tiu2++;         // +7
 }
-
 // +8
 internal static void tiuTest() {
     // +9
@@ -149,7 +143,6 @@ internal static void tiuTest() {
     tiuInlined2();  // +11
     tiu3++;         // +12
 }
-
 // +13
 internal static array<nint> tiu1 = new(2); // +14
 

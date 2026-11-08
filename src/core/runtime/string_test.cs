@@ -143,11 +143,11 @@ public static void BenchmarkSliceByteToString(ж<testing.B> b) {
 partial struct stringdataᴛ1 /*dyn*/ {
     internal @string name, data;
 }
-internal static slice<stringdataᴛ1> stringdata = slice<stringdataᴛ1>([
+internal static slice<stringdataᴛ1> stringdata = [
     new("ASCII", "01234567890"),
     new("Japanese", "日本語日本語日本語"),
     new("MixedLength", "$Ѐࠀက퀀𐀀\U00040000\U0010FFFF")
-]);
+];
 
 internal static nint sinkInt;
 
@@ -162,7 +162,7 @@ private static readonly @string utf8RuneCountInStringˢᵇ = "utf8.RuneCountInSt
 public static void BenchmarkRuneCount(ж<testing.B> b) {
     // Each sub-benchmark counts the runes in a string in a different way.
     b.Run(lenrunesliceˢ, (ж<testing.B> bΔ1) => {
-        foreach (var (_, vᴛ1) in stringdata) {
+        foreach (var (_, vᴛ1) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ1;
 
@@ -175,7 +175,7 @@ public static void BenchmarkRuneCount(ж<testing.B> b) {
         }
     });
     b.Run(rangeloopˢ, (ж<testing.B> bΔ3) => {
-        foreach (var (_, vᴛ2) in stringdata) {
+        foreach (var (_, vᴛ2) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ2;
 
@@ -192,7 +192,7 @@ public static void BenchmarkRuneCount(ж<testing.B> b) {
         }
     });
     b.Run(utf8RuneCountInStringˢ, (ж<testing.B> bΔ5) => {
-        foreach (var (_, vᴛ3) in stringdata) {
+        foreach (var (_, vᴛ3) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ3;
 
@@ -216,7 +216,7 @@ private static readonly @string range2ˢᵇ = "range2"u8;
 
 public static void BenchmarkRuneIterate(ж<testing.B> b) {
     b.Run(rangeˢ, (ж<testing.B> bΔ1) => {
-        foreach (var (_, vᴛ1) in stringdata) {
+        foreach (var (_, vᴛ1) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ1;
 
@@ -230,7 +230,7 @@ public static void BenchmarkRuneIterate(ж<testing.B> b) {
         }
     });
     b.Run(range1ˢ, (ж<testing.B> bΔ3) => {
-        foreach (var (_, vᴛ2) in stringdata) {
+        foreach (var (_, vᴛ2) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ2;
 
@@ -244,7 +244,7 @@ public static void BenchmarkRuneIterate(ж<testing.B> b) {
         }
     });
     b.Run(range2ˢ, (ж<testing.B> bΔ5) => {
-        foreach (var (_, vᴛ3) in stringdata) {
+        foreach (var (_, vᴛ3) in range(stringdata)) {
             ref var sd = ref heap(new stringdataᴛ1(), out var Ꮡsd);
             sd = vᴛ3;
 
@@ -281,7 +281,7 @@ public static void TestStringW(ж<testing.T> t) {
         "a\u5566\u7788b"
     ]);
 
-    foreach (var (_, s) in strings) {
+    foreach (var (_, s) in range(strings)) {
         slice<uint16> b = default;
         foreach (var (_, c) in s) {
             b = append(b, (uint16)c);
@@ -400,10 +400,8 @@ public static void TestStringOnStack(ж<testing.T> t) {
         s = "a"u8 + s + "b"u8 + s + "c"u8;
     }
 
-    {
-        @string want = aaabcbabccbaabcbabcccˢ; if (s != want) {
-            t.Fatalf("want: '%v', got '%v'", want, s);
-        }
+    @string want = aaabcbabccbaabcbabcccˢ; if (s != want) {
+        t.Fatalf("want: '%v', got '%v'", want, s);
     }
 }
 
@@ -449,7 +447,7 @@ public static void TestIntStringAllocs(ж<testing.T> t) {
 public static void TestRangeStringCast(ж<testing.T> t) {
     @string s = strings.Repeat("x", sizeNoStack);
     var n = testing.AllocsPerRun(1000, () => {
-        foreach (var (i, c) in slice<byte>(s)) {
+        foreach (var (i, c) in range(slice<byte>(s))) {
             if (c != s[i]) {
                 t.Fatalf("want '%c' at pos %v, got '%c'", s[i], i, c);
             }
@@ -461,7 +459,7 @@ public static void TestRangeStringCast(ж<testing.T> t) {
 }
 
 internal static bool isZeroed(slice<byte> b) {
-    foreach (var (_, x) in b) {
+    foreach (var (_, x) in range(b)) {
         if (x != 0) {
             return false;
         }
@@ -470,7 +468,7 @@ internal static bool isZeroed(slice<byte> b) {
 }
 
 internal static bool isZeroedR(slice<rune> r) {
-    foreach (var (_, x) in r) {
+    foreach (var (_, x) in range(r)) {
         if (x != 0) {
             return false;
         }
@@ -504,7 +502,7 @@ internal partial struct TestParseByteCount_type /*dyn*/ {
 }
 
 public static void TestParseByteCount(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestParseByteCount_type>([
+    foreach (var (_, test) in range(slice<TestParseByteCount_type>([
         // Good numeric inputs.
         new("1", 1, true),
         new("12345", 12345, true),
@@ -613,7 +611,7 @@ public static void TestParseByteCount(ж<testing.T> t) {
         new("99999999999TB", 0, false),
         new("99999999999TiB", 0, false),
         new("555EB", 0, false)
-    ])) {
+    ]))) {
         var (@out, ok) = runtime_internal_test_package.ParseByteCount(test.@in);
         if (test.@out != @out || test.ok != ok) {
             t.Errorf("parseByteCount(%q) = (%v, %v) want (%v, %v)",

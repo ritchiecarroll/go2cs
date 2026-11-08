@@ -14,8 +14,6 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using synctest = global::go.testing.synctest_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using global::go.net;
 using global::go.net.http;
@@ -489,16 +487,14 @@ internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> t, 
             }
             var config = Ꮡ(new tls.Config(
                 InsecureSkipVerify: true,
-                NextProtos: slice<@string>(["h2", "http/1.1"])
+                NextProtos: ["h2", "http/1.1"]
             ));
             if (conn.protos != nil) {
                 config.NextProtos = conn.protos;
             }
             var tc = tls.Client(new http_test_package.transportDialTesterConnжConn(conn), config);
-            {
-                var errΔ1 = tc.Handshake(); if (errΔ1 != nil) {
-                    return (default, errΔ1);
-                }
+            var errΔ1 = tc.Handshake(); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
             return (new tls.ConnжConn(tc), default);
         };
@@ -519,7 +515,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
 
     dt.t.Helper();
     @string host = fakeTldˢ;
-    foreach (var (_, o) in opts) {
+    foreach (var (_, o) in range(opts)) {
         switch (o.type()) {
         case @string oΔ1: {
             host = oΔ1;
@@ -554,10 +550,8 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
         Ꮡctx.ValueSlot = httptrace.WithClientTrace(Ꮡctx.ValueSlot, Ꮡ(new httptrace.ClientTrace(
             GotConn: (httptrace.GotConnInfo info) => {
                 var c = info.Conn;
-                {
-                    var (tlsConn, ok) = c._<ж<tls.Conn>>(ᐧ); if (ok) {
-                        c = tlsConn.NetConn();
-                    }
+                var (tlsConn, ok) = c._<ж<tls.Conn>>(ᐧ); if (ok) {
+                    c = tlsConn.NetConn();
                 }
                 rtʗ3.conn = c._<ж<transportDialTesterConn>>();
             }

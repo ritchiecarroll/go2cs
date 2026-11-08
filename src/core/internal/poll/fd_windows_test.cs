@@ -37,11 +37,9 @@ public static void TestWSASocketConflict(ж<testing.T> t) {
             t.Fatal(err);
         }
         ref var fd = ref heap<poll.FD>(new poll.FD(Sysfd: s, IsStream: true, ZeroReadIsEOF: true), out var Ꮡfd);
-        {
-            err = Ꮡfd.Init(tcpˢ, true); if (err != nil) {
-                Δsyscall.CloseHandle(s);
-                t.Fatal(err);
-            }
+        err = Ꮡfd.Init(tcpˢ, true); if (err != nil) {
+            Δsyscall.CloseHandle(s);
+            t.Fatal(err);
         }
         defer(() => Ꮡfd.Close(), ref ᒐ);
 
@@ -59,27 +57,23 @@ public static void TestWSASocketConflict(ж<testing.T> t) {
         }
         defer(Δsyscall.CloseHandle, ov.HEvent, ref ᒐ);
 
-        {
-            err = Ꮡfd.WSAIoctl(
-                SIO_TCP_INFO,
-                Ꮡinbuf.Reinterpret<uint32, byte>(),
-                (uint32)/* unsafe.Sizeof(inbuf) */ (uintptr)4,
-                Ꮡoutbuf.Reinterpret<_TCP_INFO_v0, byte>(),
-                (uint32)/* unsafe.Sizeof(outbuf) */ (uintptr)88,
-                Ꮡcbbr,
-                Ꮡov,
-                0); if (err != nil && !errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
-                t.Fatalf("could not perform the WSAIoctl: %v", err);
-            }
+        err = Ꮡfd.WSAIoctl(
+            SIO_TCP_INFO,
+            Ꮡinbuf.Reinterpret<uint32, byte>(),
+            (uint32)/* unsafe.Sizeof(inbuf) */ (uintptr)4,
+            Ꮡoutbuf.Reinterpret<_TCP_INFO_v0, byte>(),
+            (uint32)/* unsafe.Sizeof(outbuf) */ (uintptr)88,
+            Ꮡcbbr,
+            Ꮡov,
+            0); if (err != nil && !errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
+            t.Fatalf("could not perform the WSAIoctl: %v", err);
         }
 
         if (err != nil && errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
             // It is possible that the overlapped I/O operation completed
             // immediately so there is no need to wait for it to complete.
-            {
-                var (res, errΔ1) = Δsyscall.WaitForSingleObject(ov.HEvent, Δsyscall.INFINITE); if (res != 0) {
-                    t.Fatalf("waiting for the completion of the overlapped IO failed: %v", errΔ1);
-                }
+            var (res, errΔ1) = Δsyscall.WaitForSingleObject(ov.HEvent, Δsyscall.INFINITE); if (res != 0) {
+                t.Fatalf("waiting for the completion of the overlapped IO failed: %v", errΔ1);
             }
         }
     }
@@ -191,10 +185,8 @@ internal static void benchmarkRead(ж<testing.B> b, bool overlapped) {
         if (errΔ1 != nil) {
             b.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = @file.Seek(0, io.SeekStart); if (errΔ2 != nil) {
-                b.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = @file.Seek(0, io.SeekStart); if (errΔ2 != nil) {
+            b.Fatal(errΔ2);
         }
     }
 }

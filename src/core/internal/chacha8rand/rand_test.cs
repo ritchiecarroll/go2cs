@@ -20,7 +20,7 @@ partial class chacha8rand_test_package {
 public static void TestOutput(ж<testing.T> t) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
-    foreach (var i in range(output)) {
+    foreach (var i in range(len(output))) {
         for (;;) {
             var (x, ok) = s.Next();
             if (ok) {
@@ -37,7 +37,7 @@ public static void TestOutput(ж<testing.T> t) {
 public static void TestMarshal(ж<testing.T> t) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
-    foreach (var i in range(output)) {
+    foreach (var i in range(len(output))) {
         for (;;) {
             var b = Marshal(Ꮡs);
             s = new State();
@@ -101,7 +101,7 @@ public static void TestBlockGeneric(ж<testing.T> t) {
     if (!slices.Equal<slice<uint64>, uint64>(b1[..], b2[..])) {
         ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
         fmt.Fprintf(new chacha8rand_test_package.bytes_BufferжWriter(Ꮡout), "%-18s %-18s\n"u8, blockˢ, blockGenericˢ);
-        foreach (var i in range(b1)) {
+        foreach (var i in range(len(b1))) {
             @string suffix = ""u8;
             if (b1[i] != b2[i]) {
                 suffix = mismatchˢ;
@@ -117,7 +117,7 @@ public static void TestBlockGeneric(ж<testing.T> t) {
 // See https://c2sp.org/chacha8rand.
 internal static array<byte> seed = new array<byte>(slice<byte>("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456"u8), 32);
 
-internal static slice<uint64> output = slice<uint64>([
+internal static slice<uint64> output = [
     0xb773b6063d4616a5UL, 0x1160af22a66abc3cUL, 0x8c2599d9418d287cUL, 0x7ee07e037edc5cd6UL,
     0xcfaa9ee02d1c16adUL, 0x0e090eef8febea79UL, 0x3c82d271128b5b3eUL, 0x9c5addc11252a34fUL,
     0xdf79bb617d6ceea6UL, 0x36d553591f9d736aUL, 0xeef0d14e181ee01fUL, 0x089bfc760ae58436UL,
@@ -211,6 +211,6 @@ internal static slice<uint64> output = slice<uint64>([
     0xf68901edaf00c46cUL, 0x8c630871b590de80UL, 0x05209c308991e091UL, 0x1f809f99b4788177UL,
     0x11170c2eb6c19fd8UL, 0x44433c779062ba58UL, 0xc0acb51af1874c45UL, 0x9f2e134284809fa1UL,
     0xedb523bd15c619faUL, 0x02d97fd53ecc23c0UL, 0xacaf05a34462374cUL, 0xddd9c6d34bffa11fUL
-]);
+];
 
 } // end chacha8rand_test_package

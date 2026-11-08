@@ -23,12 +23,12 @@ partial class net_internal_test_package {
 partial struct fileConnTestsᴛ1 /*dyn*/ {
     internal @string network;
 }
-internal static slice<fileConnTestsᴛ1> fileConnTests = slice<fileConnTestsᴛ1>([
+internal static slice<fileConnTestsᴛ1> fileConnTests = [
     new("tcp"),
     new("udp"),
     new("unix"),
     new("unixpacket")
-]);
+];
 
 public static void TestFileConn(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
@@ -38,7 +38,7 @@ public static void TestFileConn(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, vᴛ1) in fileConnTests) {
+    foreach (var (_, vᴛ1) in range(fileConnTests)) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -81,10 +81,8 @@ public static void TestFileConn(ж<testing.T> t) {
                     var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), ttʗ1.network);
                     var lsʗ1 = ls;
                     defer(() => lsʗ1.teardown(), ref ᒐ);
-                    {
-                        var errΔ4 = ls.buildup(handler); if (errΔ4 != nil) {
-                            tΔ1.Fatal(errΔ4);
-                        }
+                    var errΔ4 = ls.buildup(handler); if (errΔ4 != nil) {
+                        tΔ1.Fatal(errΔ4);
                     }
                     network = ls.Listener.Addr().Network();
                     address = ls.Listener.Addr().String();
@@ -93,10 +91,8 @@ public static void TestFileConn(ж<testing.T> t) {
 
                 var (c1, err) = Dial(network, address);
                 if (err != nil) {
-                    {
-                        var perr = parseDialError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseDialError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -116,36 +112,26 @@ public static void TestFileConn(ж<testing.T> t) {
                     (f, err) = c1Δ1.of(global::go.net_package.UnixConn.Ꮡconn).File();
                     break;
                 }}
-                {
-                    var errΔ1 = c1.Close(); if (errΔ1 != nil) {
-                        {
-                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Error(errΔ1);
+                var errΔ1 = c1.Close(); if (errΔ1 != nil) {
+                    var perr = parseCloseError(errΔ1, false); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Error(errΔ1);
                 }
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
 
                 (var c2, err) = FileConn(f);
-                {
-                    var errΔ2 = f.Close(); if (errΔ2 != nil) {
-                        tΔ1.Error(errΔ2);
-                    }
+                var errΔ2 = f.Close(); if (errΔ2 != nil) {
+                    tΔ1.Error(errΔ2);
                 }
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -154,10 +140,8 @@ public static void TestFileConn(ж<testing.T> t) {
 
                 {
                     var (_, errΔ3) = c2.Write(slice<byte>("FILECONN TEST"u8)); if (errΔ3 != nil) {
-                        {
-                            var perr = parseWriteError(errΔ3); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseWriteError(errΔ3); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ3);
                     }
@@ -172,11 +156,11 @@ public static void TestFileConn(ж<testing.T> t) {
     }
 }
 
-internal static slice<fileConnTestsᴛ1> fileListenerTests = slice<fileConnTestsᴛ1>([
+internal static slice<fileConnTestsᴛ1> fileListenerTests = [
     new("tcp"),
     new("unix"),
     new("unixpacket")
-]);
+];
 
 public static void TestFileListener(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
@@ -186,7 +170,7 @@ public static void TestFileListener(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, vᴛ1) in fileListenerTests) {
+    foreach (var (_, vᴛ1) in range(fileListenerTests)) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -226,33 +210,25 @@ public static void TestFileListener(ж<testing.T> t) {
                     break;
                 }
                 default: {
-                    {
-                        var errΔ2 = ln1.Close(); if (errΔ2 != nil) {
-                            tΔ1.Error(errΔ2);
-                        }
+                    var errΔ2 = ln1.Close(); if (errΔ2 != nil) {
+                        tΔ1.Error(errΔ2);
                     }
                     break;
                 }}
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
 
                 (var ln2, err) = FileListener(f);
-                {
-                    var errΔ3 = f.Close(); if (errΔ3 != nil) {
-                        tΔ1.Error(errΔ3);
-                    }
+                var errΔ3 = f.Close(); if (errΔ3 != nil) {
+                    tΔ1.Error(errΔ3);
                 }
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -268,10 +244,8 @@ public static void TestFileListener(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         var (cΔ1, errΔ4) = Dial(ln2ʗ2.Addr().Network(), ln2ʗ2.Addr().String());
                         if (errΔ4 != nil) {
-                            {
-                                var perr = parseDialError(errΔ4); if (perr != nil) {
-                                    tΔ1.Error(perr);
-                                }
+                            var perr = parseDialError(errΔ4); if (perr != nil) {
+                                tΔ1.Error(perr);
                             }
                             tΔ1.Error(errΔ4);
                             return;
@@ -283,10 +257,8 @@ public static void TestFileListener(ж<testing.T> t) {
                 });
                 (var c, err) = ln2.Accept();
                 if (err != nil) {
-                    {
-                        var perr = parseAcceptError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseAcceptError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -302,10 +274,10 @@ public static void TestFileListener(ж<testing.T> t) {
     }
 }
 
-internal static slice<fileConnTestsᴛ1> filePacketConnTests = slice<fileConnTestsᴛ1>([
+internal static slice<fileConnTestsᴛ1> filePacketConnTests = [
     new("udp"),
     new("unixgram")
-]);
+];
 
 public static void TestFilePacketConn(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
@@ -315,7 +287,7 @@ public static void TestFilePacketConn(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, vᴛ1) in filePacketConnTests) {
+    foreach (var (_, vᴛ1) in range(filePacketConnTests)) {
         ref var tt = ref heap(new fileConnTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -347,51 +319,37 @@ public static void TestFilePacketConn(ж<testing.T> t) {
                     (f, err) = c1Δ1.of(global::go.net_package.UnixConn.Ꮡconn).File();
                     break;
                 }}
-                {
-                    var errΔ1 = c1.Close(); if (errΔ1 != nil) {
-                        {
-                            var perr = parseCloseError(errΔ1, false); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Error(errΔ1);
+                var errΔ1 = c1.Close(); if (errΔ1 != nil) {
+                    var perr = parseCloseError(errΔ1, false); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Error(errΔ1);
                 }
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
 
                 (var c2, err) = FilePacketConn(f);
-                {
-                    var errΔ2 = f.Close(); if (errΔ2 != nil) {
-                        tΔ1.Error(errΔ2);
-                    }
+                var errΔ2 = f.Close(); if (errΔ2 != nil) {
+                    tΔ1.Error(errΔ2);
                 }
                 if (err != nil) {
-                    {
-                        var perr = parseCommonError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseCommonError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
                 var c2ʗ1 = c2;
                 defer(() => c2ʗ1.Close(), ref ᒐ);
 
-                {
-                    var (_, errΔ3) = c2.WriteTo(slice<byte>("FILEPACKETCONN TEST"u8), addr); if (errΔ3 != nil) {
-                        {
-                            var perr = parseWriteError(errΔ3); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
-                        }
-                        tΔ1.Fatal(errΔ3);
+                var (_, errΔ3) = c2.WriteTo(slice<byte>("FILEPACKETCONN TEST"u8), addr); if (errΔ3 != nil) {
+                    var perr = parseWriteError(errΔ3); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
+                    tΔ1.Fatal(errΔ3);
                 }
                 if (!reflect.DeepEqual(c2.LocalAddr(), addr)) {
                     tΔ1.Fatalf("got %#v; want %#v", c2.LocalAddr(), addr);

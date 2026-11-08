@@ -27,10 +27,8 @@ public static void BenchmarkParse(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)len(src));
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments); if (err != nil) {
-                Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
-            }
+        var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments); if (err != nil) {
+            Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
         }
     }
 }
@@ -40,10 +38,8 @@ public static void BenchmarkParseOnly(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)len(src));
     for (nint i = 0; i < b.N; i++) {
-        {
-            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution)); if (err != nil) {
-                Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
-            }
+        var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution)); if (err != nil) {
+            Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
         }
     }
 }

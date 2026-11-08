@@ -17,16 +17,16 @@ partial struct pow10Testsᴛ1 /*dyn*/ {
     internal nint exp2;
     internal bool ok;
 }
-internal static slice<pow10Testsᴛ1> pow10Tests = slice<pow10Testsᴛ1>([
+internal static slice<pow10Testsᴛ1> pow10Tests = [
     new(-349, new uint128(0, 0), 0, false),
     new(-348, new uint128(0xFA8FD5A0081C0288UL, 0x1732C869CD60E453UL), -1156, true),
     new(0, new uint128(0x8000000000000000UL, 0x0000000000000000), 1, true),
     new(347, new uint128(0xD13EB46469447567UL, 0x4B7195F2D2D1A9FBUL), 1153, true),
     new(348, new uint128(0, 0), 0, false)
-]);
+];
 
 public static void TestPow10(ж<testing.T> t) {
-    foreach (var (_, tt) in pow10Tests) {
+    foreach (var (_, tt) in range(pow10Tests)) {
         var (mant, exp2, ok) = pow10(tt.exp10);
         if (mant != tt.mant || exp2 != tt.exp2) {
             t.Errorf("pow10(%d) = %#016x, %#016x, %d, %v want %#016x,%#016x, %d, %v",
@@ -67,7 +67,7 @@ internal static slice<umul192Testsᴛ1> umul192Tests = slice<umul192Testsᴛ1>([
 ]);
 
 public static void TestUmul192(ж<testing.T> t) {
-    foreach (var (_, tt) in umul192Tests) {
+    foreach (var (_, tt) in range(umul192Tests)) {
         var (hi, mid, lo) = strconv_internal_test_package.Umul192(tt.x, tt.y);
         if (hi != tt.hi || mid != tt.mid || lo != tt.lo) {
             t.Errorf("umul192(%#x, {%#x,%#x}) = %#x, %#x, %#x, want %#x, %#x, %#x",
@@ -151,7 +151,7 @@ public static void TestDiv5Tab(ж<testing.T> t) {
 }
 
 public static void TestTrimZeros(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<uint64>([1, 2, 3, 4, 101, 123])) {
+    foreach (var (_, vᴛ1) in range(slice<uint64>([1, 2, 3, 4, 101, 123]))) {
         var x = vᴛ1;
 
         var want = x;

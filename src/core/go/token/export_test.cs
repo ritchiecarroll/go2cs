@@ -8,8 +8,6 @@ using static global::go.go.token_package;
 partial class token_internal_test_package {
 
 // exports for tests
-public static nint SearchInts(slice<nint> a, nint x) {
-    return searchInts(a, x);
-}
+public static nint SearchInts(slice<nint> a, nint x) { return searchInts(a, x); }
 
 } // end token_internal_test_package

@@ -30,10 +30,8 @@ internal static void setType(@string ext, @string typ) {
     if (!strings.HasPrefix(ext, ".")) {
         throw panic("missing leading dot");
     }
-    {
-        var err = setExtensionType(ext, typ); if (err != nil) {
-            throw panic("bad test data: " + err.Error());
-        }
+    var err = setExtensionType(ext, typ); if (err != nil) {
+        throw panic("bad test data: " + err.Error());
     }
 }
 
@@ -186,13 +184,13 @@ public static void TestExtensionsByType(ж<testing.T> t) {
         defer(cleanupʗ1, ref ᒐ);
 
         var tests = slice<TestExtensionsByType_tests>([
-            new(typ: "image/gif", want: slice<@string>([".gif"])),
-            new(typ: "image/png", want: slice<@string>([".png"])), // lowercase
-            new(typ: "foo/letter", want: slice<@string>([".a", ".b"])),
+            new(typ: "image/gif", want: [".gif"]),
+            new(typ: "image/png", want: [".png"]), // lowercase
+            new(typ: "foo/letter", want: [".a", ".b"]),
             new(typ: "x/unknown", want: default)
         ]);
 
-        foreach (var (_, tt) in tests) {
+        foreach (var (_, tt) in range(tests)) {
             var (got, err) = ExtensionsByType(tt.typ);
             if (err != nil && tt.wantErr != ""u8 && strings.Contains(err.Error(), tt.wantErr)) {
                 continue;
@@ -240,11 +238,11 @@ public static void BenchmarkTypeByExtension(ж<testing.B> Ꮡb) {
     initMime();
     b.ResetTimer();
 
-    foreach (var (_, ext) in slice<@string>([
+    foreach (var (_, ext) in range(slice<@string>([
         ".html",
         ".HTML",
         ".unused"
-    ])) {
+    ]))) {
         Ꮡb.Run(ext, (ж<testing.B> bΔ1) => {
             bΔ1.RunParallel((ж<testing.PB> pb) => {
                 while (pb.Next()) {
@@ -261,18 +259,16 @@ public static void BenchmarkExtensionsByType(ж<testing.B> Ꮡb) {
     initMime();
     b.ResetTimer();
 
-    foreach (var (_, typ) in slice<@string>([
+    foreach (var (_, typ) in range(slice<@string>([
         "text/html",
         "text/html; charset=utf-8",
         "application/octet-stream"
-    ])) {
+    ]))) {
         Ꮡb.Run(typ, (ж<testing.B> bΔ1) => {
             bΔ1.RunParallel((ж<testing.PB> pb) => {
                 while (pb.Next()) {
-                    {
-                        var (_, err) = ExtensionsByType(typ); if (err != nil) {
-                            bΔ1.Fatal(err);
-                        }
+                    var (_, err) = ExtensionsByType(typ); if (err != nil) {
+                        bΔ1.Fatal(err);
                     }
                 }
             });
@@ -297,54 +293,54 @@ public static void TestExtensionsByType2(ж<testing.T> t) {
         defer(cleanupʗ1, ref ᒐ);
 
         var tests = slice<TestExtensionsByType2_tests>([
-            new(typ: "application/postscript", want: slice<@string>([".ai", ".eps", ".ps"])),
-            new(typ: "application/vnd.android.package-archive", want: slice<@string>([".apk"])),
-            new(typ: "image/apng", want: slice<@string>([".apng"])),
-            new(typ: "image/avif", want: slice<@string>([".avif"])),
-            new(typ: "application/octet-stream", want: slice<@string>([".bin", ".com", ".exe"])),
-            new(typ: "image/bmp", want: slice<@string>([".bmp"])),
-            new(typ: "text/css; charset=utf-8", want: slice<@string>([".css"])),
-            new(typ: "text/csv; charset=utf-8", want: slice<@string>([".csv"])),
-            new(typ: "application/msword", want: slice<@string>([".doc"])),
-            new(typ: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", want: slice<@string>([".docx"])),
-            new(typ: "text/html; charset=utf-8", want: slice<@string>([".ehtml", ".htm", ".html", ".shtml"])),
-            new(typ: "message/rfc822", want: slice<@string>([".eml"])),
-            new(typ: "audio/flac", want: slice<@string>([".flac"])),
-            new(typ: "image/gif", want: slice<@string>([".gif"])),
-            new(typ: "application/gzip", want: slice<@string>([".gz"])),
-            new(typ: "image/vnd.microsoft.icon", want: slice<@string>([".ico"])),
-            new(typ: "text/calendar; charset=utf-8", want: slice<@string>([".ics"])),
-            new(typ: "image/jpeg", want: slice<@string>([".jfif", ".jpeg", ".jpg", ".pjp", ".pjpeg"])),
-            new(typ: "text/javascript; charset=utf-8", want: slice<@string>([".js", ".mjs"])),
-            new(typ: "application/json", want: slice<@string>([".json"])),
-            new(typ: "audio/mp4", want: slice<@string>([".m4a"])),
-            new(typ: "audio/mpeg", want: slice<@string>([".mp3"])),
-            new(typ: "video/mp4", want: slice<@string>([".mp4"])),
-            new(typ: "audio/ogg", want: slice<@string>([".oga", ".ogg", ".opus"])),
-            new(typ: "video/ogg", want: slice<@string>([".ogv"])),
-            new(typ: "application/pdf", want: slice<@string>([".pdf"])),
-            new(typ: "image/png", want: slice<@string>([".png"])),
-            new(typ: "application/vnd.ms-powerpoint", want: slice<@string>([".ppt"])),
-            new(typ: "application/vnd.openxmlformats-officedocument.presentationml.presentation", want: slice<@string>([".pptx"])),
-            new(typ: "application/rdf+xml", want: slice<@string>([".rdf"])),
-            new(typ: "application/rtf", want: slice<@string>([".rtf"])),
-            new(typ: "image/svg+xml", want: slice<@string>([".svg"])),
-            new(typ: "text/plain; charset=utf-8", want: slice<@string>([".text", ".txt"])),
-            new(typ: "image/tiff", want: slice<@string>([".tif", ".tiff"])),
-            new(typ: "text/vtt; charset=utf-8", want: slice<@string>([".vtt"])),
-            new(typ: "application/wasm", want: slice<@string>([".wasm"])),
-            new(typ: "audio/wav", want: slice<@string>([".wav"])),
-            new(typ: "audio/webm", want: slice<@string>([".webm"])),
-            new(typ: "image/webp", want: slice<@string>([".webp"])),
-            new(typ: "text/xml; charset=utf-8", want: slice<@string>([".xbl", ".xml", ".xsl"])),
-            new(typ: "image/x-xbitmap", want: slice<@string>([".xbm"])),
-            new(typ: "application/xhtml+xml", want: slice<@string>([".xht", ".xhtml"])),
-            new(typ: "application/vnd.ms-excel", want: slice<@string>([".xls"])),
-            new(typ: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", want: slice<@string>([".xlsx"])),
-            new(typ: "application/zip", want: slice<@string>([".zip"]))
+            new(typ: "application/postscript", want: [".ai", ".eps", ".ps"]),
+            new(typ: "application/vnd.android.package-archive", want: [".apk"]),
+            new(typ: "image/apng", want: [".apng"]),
+            new(typ: "image/avif", want: [".avif"]),
+            new(typ: "application/octet-stream", want: [".bin", ".com", ".exe"]),
+            new(typ: "image/bmp", want: [".bmp"]),
+            new(typ: "text/css; charset=utf-8", want: [".css"]),
+            new(typ: "text/csv; charset=utf-8", want: [".csv"]),
+            new(typ: "application/msword", want: [".doc"]),
+            new(typ: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", want: [".docx"]),
+            new(typ: "text/html; charset=utf-8", want: [".ehtml", ".htm", ".html", ".shtml"]),
+            new(typ: "message/rfc822", want: [".eml"]),
+            new(typ: "audio/flac", want: [".flac"]),
+            new(typ: "image/gif", want: [".gif"]),
+            new(typ: "application/gzip", want: [".gz"]),
+            new(typ: "image/vnd.microsoft.icon", want: [".ico"]),
+            new(typ: "text/calendar; charset=utf-8", want: [".ics"]),
+            new(typ: "image/jpeg", want: [".jfif", ".jpeg", ".jpg", ".pjp", ".pjpeg"]),
+            new(typ: "text/javascript; charset=utf-8", want: [".js", ".mjs"]),
+            new(typ: "application/json", want: [".json"]),
+            new(typ: "audio/mp4", want: [".m4a"]),
+            new(typ: "audio/mpeg", want: [".mp3"]),
+            new(typ: "video/mp4", want: [".mp4"]),
+            new(typ: "audio/ogg", want: [".oga", ".ogg", ".opus"]),
+            new(typ: "video/ogg", want: [".ogv"]),
+            new(typ: "application/pdf", want: [".pdf"]),
+            new(typ: "image/png", want: [".png"]),
+            new(typ: "application/vnd.ms-powerpoint", want: [".ppt"]),
+            new(typ: "application/vnd.openxmlformats-officedocument.presentationml.presentation", want: [".pptx"]),
+            new(typ: "application/rdf+xml", want: [".rdf"]),
+            new(typ: "application/rtf", want: [".rtf"]),
+            new(typ: "image/svg+xml", want: [".svg"]),
+            new(typ: "text/plain; charset=utf-8", want: [".text", ".txt"]),
+            new(typ: "image/tiff", want: [".tif", ".tiff"]),
+            new(typ: "text/vtt; charset=utf-8", want: [".vtt"]),
+            new(typ: "application/wasm", want: [".wasm"]),
+            new(typ: "audio/wav", want: [".wav"]),
+            new(typ: "audio/webm", want: [".webm"]),
+            new(typ: "image/webp", want: [".webp"]),
+            new(typ: "text/xml; charset=utf-8", want: [".xbl", ".xml", ".xsl"]),
+            new(typ: "image/x-xbitmap", want: [".xbm"]),
+            new(typ: "application/xhtml+xml", want: [".xht", ".xhtml"]),
+            new(typ: "application/vnd.ms-excel", want: [".xls"]),
+            new(typ: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", want: [".xlsx"]),
+            new(typ: "application/zip", want: [".zip"])
         ]);
 
-        foreach (var (_, tt) in tests) {
+        foreach (var (_, tt) in range(tests)) {
             var (got, err) = ExtensionsByType(tt.typ);
             if (err != nil) {
                 t.Errorf("ExtensionsByType(%q): %v", tt.typ, err);

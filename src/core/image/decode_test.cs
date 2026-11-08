@@ -24,7 +24,7 @@ partial struct imageTest {
     internal nint tolerance;
 }
 
-internal static slice<imageTest> imageTests = slice<imageTest>([
+internal static slice<imageTest> imageTests = [
     new("testdata/video-001.png", "testdata/video-001.png", 0),
     // GIF images are restricted to a 256-color palette and the conversion
     // to GIF loses significant image quality.
@@ -41,7 +41,7 @@ internal static slice<imageTest> imageTests = slice<imageTest>([
     // Grayscale images.
     new("testdata/video-005.gray.png", "testdata/video-005.gray.jpeg", 8 << 8),
     new("testdata/video-005.gray.png", "testdata/video-005.gray.png", 0)
-]);
+];
 
 internal static (Δimage.Image, @string, error) decode(@string filename) {
     GoFrame ᒐ = default;
@@ -99,7 +99,7 @@ public static void TestDecode(ж<testing.T> t) {
 
     var golden = new map<@string, Δimage.Image>();
 loop:
-    foreach (var (_, it) in imageTests) {
+    foreach (var (_, it) in range(imageTests)) {
         var g = golden[it.goldenFilename];
         if (g == nil) {
             error errΔ1 = default;

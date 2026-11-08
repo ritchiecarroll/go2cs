@@ -10,8 +10,6 @@ using Δrand = go.math.rand.rand_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using go.math.rand;
 using io = io_package;
@@ -23,7 +21,7 @@ partial struct cmpTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Δnat x, y;
     internal nint r;
 }
-internal static slice<cmpTestsᴛ1> cmpTests = slice<cmpTestsᴛ1>([
+internal static slice<cmpTestsᴛ1> cmpTests = [
     new(default, default, 0),
     new(default, (global::go.math.big_package.Δnat)default, 0),
     new((global::go.math.big_package.Δnat)default, default, 0),
@@ -38,10 +36,10 @@ internal static slice<cmpTestsᴛ1> cmpTests = slice<cmpTestsᴛ1>([
     new(new Δnat(new global::go.math.big_package.Word[]{0, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{1, _M}.slice()), -1),
     new(new Δnat(new global::go.math.big_package.Word[]{16, 571956, 8794, 68}.slice()), new Δnat(new global::go.math.big_package.Word[]{837, 9146, 1, 754489}.slice()), -1),
     new(new Δnat(new global::go.math.big_package.Word[]{34986, 41, 105, 1957}.slice()), new Δnat(new global::go.math.big_package.Word[]{56, 7458, 104, 1957}.slice()), 1)
-]);
+];
 
 public static void TestCmp(ж<testing.T> t) {
-    foreach (var (i, a) in cmpTests) {
+    foreach (var (i, a) in range(cmpTests)) {
         nint r = a.x.cmp(a.y);
         if (r != a.r) {
             t.Errorf("#%d got r = %v; want %v", i, r, a.r);
@@ -50,28 +48,26 @@ public static void TestCmp(ж<testing.T> t) {
 }
 
 // type funNN is a methodless func type — rendered inline as its base delegate
-
 // type funSNN is a methodless func type — rendered inline as its base delegate
-
 internal partial struct argNN {
     internal global::go.math.big_package.Δnat z, x, y;
 }
 
-internal static slice<argNN> sumNN = slice<argNN>([
+internal static slice<argNN> sumNN = [
     new(),
     new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), default, new Δnat(new global::go.math.big_package.Word[]{1}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{1111111110}.slice()), new Δnat(new global::go.math.big_package.Word[]{123456789}.slice()), new Δnat(new global::go.math.big_package.Word[]{987654321}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), default, new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1111111110}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 123456789}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 987654321}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 1}.slice()))
-]);
+];
 
 internal static slice<argNN> prodNN;
 internal static void initᴛprodNN() { prodNN = appendꓸꓸꓸ(prodTests(), prodNNExtra); }
 
 internal static void permute<E>(slice<E> x) {
     var @out = new slice<E>(len(x));
-    foreach (var (i, j) in Δrand.Perm(len(x))) {
+    foreach (var (i, j) in range(Δrand.Perm(len(x)))) {
         @out[i] = x[j];
     }
     copy(x, @out);
@@ -81,8 +77,8 @@ internal static void permute<E>(slice<E> x) {
 // as a reference implementation.
 internal static global::go.math.big_package.Δnat testMul(global::go.math.big_package.Δnat x, global::go.math.big_package.Δnat y) {
     var z = new global::go.math.big_package.Δnat(len(x) + len(y));
-    foreach (var (i, xi) in x) {
-        foreach (var (j, yj) in y) {
+    foreach (var (i, xi) in range<global::go.math.big_package.Word>(x)) {
+        foreach (var (j, yj) in range<global::go.math.big_package.Word>(y)) {
             var (hi, lo) = bits.Mul((nuint)xi, (nuint)yj);
             nint k = i + j;
             var (s, c) = bits.Add((nuint)z[k], lo, 0);
@@ -183,7 +179,7 @@ internal static global::go.math.big_package.Δnat natFromString(@string s) {
 }
 
 public static void TestSet(ж<testing.T> t) {
-    foreach (var (_, a) in sumNN) {
+    foreach (var (_, a) in range(sumNN)) {
         var z = ((global::go.math.big_package.Δnat)default).set(a.z);
         if (z.cmp(a.z) != 0) {
             t.Errorf("got z = %v; want %v", z, a.z);
@@ -230,7 +226,7 @@ internal static ref readonly @string addˢ => ref addˢᵇ;
 private static readonly @string addˢᵇ = "add"u8;
 
 public static void TestAdd(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in sumNN) {
+    foreach (var (_, vᴛ1) in range(sumNN)) {
         var a = vᴛ1;
 
         testFunNN(t, addˢ, new Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.add))), a);
@@ -244,7 +240,7 @@ internal static ref readonly @string subˢ => ref subˢᵇ;
 private static readonly @string subˢᵇ = "sub"u8;
 
 public static void TestSub(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in sumNN) {
+    foreach (var (_, vᴛ1) in range(sumNN)) {
         var a = vᴛ1;
 
         (a.x, a.z) = (a.z, a.x);
@@ -268,7 +264,7 @@ private static readonly @string mulˢ2ᵇ = "Mul"u8;
 public static void TestNatMul(ж<testing.T> t) {
     t.Run(basicˢ, (ж<testing.T> tΔ1) => {
         setDuringTest(tΔ1, ᏑkaratsubaThreshold, (nint)1000000000);
-        foreach (var (_, vᴛ1) in prodNN) {
+        foreach (var (_, vᴛ1) in range(prodNN)) {
             var a = vᴛ1;
 
             if (len(a.z) >= 100) {
@@ -281,7 +277,7 @@ public static void TestNatMul(ж<testing.T> t) {
     });
     t.Run(karatsubaˢ2, (ж<testing.T> tΔ2) => {
         setDuringTest(tΔ2, ᏑkaratsubaThreshold, 2);
-        foreach (var (_, vᴛ2) in prodNN) {
+        foreach (var (_, vᴛ2) in range(prodNN)) {
             var a = vᴛ2;
 
             testFunSNN(tΔ2, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
@@ -291,7 +287,7 @@ public static void TestNatMul(ж<testing.T> t) {
     });
 
     t.Run(mulˢ2, (ж<testing.T> tΔ3) => {
-        foreach (var (_, vᴛ3) in prodNN) {
+        foreach (var (_, vᴛ3) in range(prodNN)) {
             var a = vᴛ3;
 
             testFunSNN(tΔ3, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
@@ -328,7 +324,7 @@ public static void TestNatSqr(ж<testing.T> t) {
     t.Run(basicˢ, (ж<testing.T> tΔ1) => {
         setDuringTest(tΔ1, ᏑbasicSqrThreshold, 0);
         setDuringTest(tΔ1, ᏑkaratsubaSqrThreshold, (nint)1000000000);
-        foreach (var (_, a) in prodNN) {
+        foreach (var (_, a) in range(prodNN)) {
             if (len(a.z) >= 100) {
                 continue;
             }
@@ -340,14 +336,14 @@ public static void TestNatSqr(ж<testing.T> t) {
     t.Run(karatsubaˢ2, (ж<testing.T> tΔ2) => {
         setDuringTest(tΔ2, ᏑbasicSqrThreshold, 2);
         setDuringTest(tΔ2, ᏑkaratsubaSqrThreshold, 2);
-        foreach (var (_, a) in prodNN) {
+        foreach (var (_, a) in range(prodNN)) {
             testSqr(tΔ2, a.x);
             testSqr(tΔ2, a.y);
             testSqr(tΔ2, a.z);
         }
     });
     t.Run(sqrˢ, (ж<testing.T> tΔ3) => {
-        foreach (var (_, a) in prodNN) {
+        foreach (var (_, a) in range(prodNN)) {
             testSqr(tΔ3, a.x);
             testSqr(tΔ3, a.y);
             testSqr(tΔ3, a.z);
@@ -359,7 +355,7 @@ partial struct mulRangesNᴛ1 /*dyn*/ {
     internal uint64 a, b;
     internal @string prod;
 }
-internal static slice<mulRangesNᴛ1> mulRangesN = slice<mulRangesNᴛ1>([
+internal static slice<mulRangesNᴛ1> mulRangesN = [
     new(0, 0, "0"),
     new(1, 1, "1"),
     new(1, 2, "2"),
@@ -379,7 +375,7 @@ internal static slice<mulRangesNᴛ1> mulRangesN = slice<mulRangesNᴛ1>([
     new(math.MaxUint64 - 1, math.MaxUint64, "340282366920938463408034375210639556610"),
     new(math.MaxUint64 - 2, math.MaxUint64, "6277101735386680761794095221682035635525021984684230311930"),
     new(math.MaxUint64 - 3, math.MaxUint64, "115792089237316195360799967654821100226821973275796746098729803619699194331160")
-]);
+];
 
 public static void TestMulRangeN(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -388,7 +384,7 @@ public static void TestMulRangeN(ж<testing.T> t) {
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        foreach (var (i, r) in mulRangesN) {
+        foreach (var (i, r) in range(mulRangesN)) {
             @string prod = (@string)((global::go.math.big_package.Δnat)default).mulRange(stk, r.a, r.b).utoa(10);
             if (prod != r.prod) {
                 t.Errorf("#%d: got %s; want %s", i, prod, r.prod);
@@ -429,10 +425,8 @@ public static void TestMulUnbalanced(ж<testing.T> t) {
             ((global::go.math.big_package.Δnat)default).mul(stkʗ2, xʗ1, yʗ1);
         });
         var inputSize = (uint64)(len(x) + len(y)) * (uint64)_S;
-        {
-            var ratio = allocSize / (uint64)inputSize; if (ratio > 10) {
-                t.Errorf("multiplication uses too much memory (%d > %d times the size of inputs)", allocSize, ratio);
-            }
+        var ratio = allocSize / (uint64)inputSize; if (ratio > 10) {
+            t.Errorf("multiplication uses too much memory (%d > %d times the size of inputs)", allocSize, ratio);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -468,10 +462,10 @@ internal static void benchmarkNatMul(ж<testing.B> Ꮡb, nint nwords) {
     }
 }
 
-internal static slice<nint> mulBenchSizes = slice<nint>([10, 100, 1000, 10000, 100000]);
+internal static slice<nint> mulBenchSizes = [10, 100, 1000, 10000, 100000];
 
 public static void BenchmarkNatMul(ж<testing.B> b) {
-    foreach (var (_, n) in mulBenchSizes) {
+    foreach (var (_, n) in range(mulBenchSizes)) {
         if (isRaceBuilder && n > 1000) {
             continue;
         }
@@ -498,20 +492,20 @@ internal partial struct shiftTest {
 }
 
 internal static slice<shiftTest> leftShiftTests;
-internal static void initᴛleftShiftTests() { leftShiftTests = slice<shiftTest>([
+internal static void initᴛleftShiftTests() { leftShiftTests = [
     new(default, 0, default),
     new(default, 1, default),
     new(natOne, 0, natOne),
     new(natOne, 1, natTwo),
     new(new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{0}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), 0}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{0, 1}.slice()))
-]); }
+]; }
 
 public static void TestShiftLeft(ж<testing.T> t) {
-    foreach (var (i, test) in leftShiftTests) {
+    foreach (var (i, test) in range(leftShiftTests)) {
         global::go.math.big_package.Δnat z = default;
         z = z.lsh(test.@in, test.shift);
-        foreach (var (j, d) in test.@out) {
+        foreach (var (j, d) in range<global::go.math.big_package.Word>(test.@out)) {
             if (j >= len(z) || z[j] != d) {
                 t.Errorf("#%d: got: %v want: %v", i, z, test.@out);
                 break;
@@ -521,7 +515,7 @@ public static void TestShiftLeft(ж<testing.T> t) {
 }
 
 internal static slice<shiftTest> rightShiftTests;
-internal static void initᴛrightShiftTests() { rightShiftTests = slice<shiftTest>([
+internal static void initᴛrightShiftTests() { rightShiftTests = [
     new(default, 0, default),
     new(default, 1, default),
     new(natOne, 0, natOne),
@@ -529,13 +523,13 @@ internal static void initᴛrightShiftTests() { rightShiftTests = slice<shiftTes
     new(natTwo, 1, natOne),
     new(new Δnat(new global::go.math.big_package.Word[]{0, 1}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())),
     new(new Δnat(new global::go.math.big_package.Word[]{2, 1, 1}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()))
-]); }
+]; }
 
 public static void TestShiftRight(ж<testing.T> t) {
-    foreach (var (i, test) in rightShiftTests) {
+    foreach (var (i, test) in range(rightShiftTests)) {
         global::go.math.big_package.Δnat z = default;
         z = z.rsh(test.@in, test.shift);
-        foreach (var (j, d) in test.@out) {
+        foreach (var (j, d) in range<global::go.math.big_package.Word>(test.@out)) {
             if (j >= len(z) || z[j] != d) {
                 t.Errorf("#%d: got: %v want: %v", i, z, test.@out);
                 break;
@@ -592,16 +586,16 @@ internal partial struct modWTest {
     internal @string @out;
 }
 
-internal static slice<modWTest> modWTests32 = slice<modWTest>([
+internal static slice<modWTest> modWTests32 = [
     new("23492635982634928349238759823742", "252341", "220170")
-]);
+];
 
-internal static slice<modWTest> modWTests64 = slice<modWTest>([
+internal static slice<modWTest> modWTests64 = [
     new("6527895462947293856291561095690465243862946", "524326975699234", "375066989628668")
-]);
+];
 
 internal static void runModWTests(ж<testing.T> t, slice<modWTest> tests) {
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (d, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.dividend, 10);
         var (@out, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
@@ -627,7 +621,7 @@ partial struct montgomeryTestsᴛ1 /*dyn*/ {
     internal uint64 k0;
     internal @string out32, out64;
 }
-internal static slice<montgomeryTestsᴛ1> montgomeryTests = slice<montgomeryTestsᴛ1>([
+internal static slice<montgomeryTestsᴛ1> montgomeryTests = [
     new(
         "0xffffffffffffffffffffffffffffffffffffffffffffffffe",
         "0xffffffffffffffffffffffffffffffffffffffffffffffffe",
@@ -692,7 +686,7 @@ internal static slice<montgomeryTestsᴛ1> montgomeryTests = slice<montgomeryTes
         "0x5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d7a11c7772cba02c22f9711078d51a3797eb18e691295293284d988e349fa6deba46b25a4ecd9f715",
         "0x92fcad4b5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d799c32fe2f3cc5422f9711078d51a3797eb18e691295293284d8f5e69caf6decddfe1df6"
     )
-]);
+];
 
 public static void TestMontgomery(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -706,7 +700,7 @@ public static void TestMontgomery(ж<testing.T> t) {
 
         var one = NewInt(1);
         var _B = @new<global::go.math.big_package.ΔInt>().Lsh(one, _W);
-        foreach (var (i, test) in montgomeryTests) {
+        foreach (var (i, test) in range(montgomeryTests)) {
             var x = natFromString(test.x);
             var y = natFromString(test.y);
             var m = natFromString(test.m);
@@ -765,7 +759,7 @@ public static void TestMontgomery(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<expTestsᴛ1> expNNTests = slice<expTestsᴛ1>([
+internal static slice<expTestsᴛ1> expNNTests = [
     new("0", "0", "0", "1"),
     new("0", "0", "1", "0"),
     new("1", "1", "1", "0"),
@@ -795,7 +789,7 @@ internal static slice<expTestsᴛ1> expNNTests = slice<expTestsᴛ1>([
     new("0xeffffff900002f00", "0x40000000000000", "0x200", "0"),
     new("5", "1435700818", "72", "49"),
     new("0xffff", "0x300030003000300030003000300030003000302a3000300030003000300030003000300030003000300030003000300030003030623066307f3030783062303430383064303630343036", "0x300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "0xa3f94c08b0b90e87af637cacc9383f7ea032352b8961fc036a52b659b6c9b33491b335ffd74c927f64ddd62cfca0001")
-]);
+];
 
 public static void TestExpNN(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -804,7 +798,7 @@ public static void TestExpNN(ж<testing.T> t) {
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        foreach (var (i, test) in expNNTests) {
+        foreach (var (i, test) in range(expNNTests)) {
             var x = natFromString(test.x);
             var y = natFromString(test.y);
             var @out = natFromString(test.@out);
@@ -829,9 +823,9 @@ public static void FuzzExpMont(ж<testing.F> f) {
         if (m1 == 0 && m2 == 0 && m3 == 0) {
             return;
         }
-        var x = @new<global::go.math.big_package.ΔInt>().SetBits(slice<global::go.math.big_package.Word>([(global::go.math.big_package.Word)x1, (global::go.math.big_package.Word)x2, (global::go.math.big_package.Word)x3]));
-        var y = @new<global::go.math.big_package.ΔInt>().SetBits(slice<global::go.math.big_package.Word>([(global::go.math.big_package.Word)y1, (global::go.math.big_package.Word)y2, (global::go.math.big_package.Word)y3]));
-        var m = @new<global::go.math.big_package.ΔInt>().SetBits(slice<global::go.math.big_package.Word>([(global::go.math.big_package.Word)m1, (global::go.math.big_package.Word)m2, (global::go.math.big_package.Word)m3]));
+        var x = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)x1, (global::go.math.big_package.Word)x2, (global::go.math.big_package.Word)x3]);
+        var y = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)y1, (global::go.math.big_package.Word)y2, (global::go.math.big_package.Word)y3]);
+        var m = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)m1, (global::go.math.big_package.Word)m2, (global::go.math.big_package.Word)m3]);
         var @out = @new<global::go.math.big_package.ΔInt>().Exp(x, y, m);
         var want = @new<global::go.math.big_package.ΔInt>().expSlow(x, y, m);
         if (@out.Cmp(want) != 0) {
@@ -848,9 +842,9 @@ public static void BenchmarkExp3Power(ж<testing.B> b) {
         defer(stkʗ1.free, ref ᒐ);
 
         UntypedInt x = 3;
-        foreach (var (_, y) in slice<global::go.math.big_package.Word>([
+        foreach (var (_, y) in range(slice<global::go.math.big_package.Word>([
             0x10, 0x40, 0x100, 0x400, 0x1000, 0x4000, 0x10000, 0x40000, 0x100000, 0x400000
-        ])) {
+        ]))) {
             var stkʗ2 = stk;
             b.Run(fmt.Sprintf("%#x"u8, y), (ж<testing.B> bΔ1) => {
                 global::go.math.big_package.Δnat z = default;
@@ -882,7 +876,7 @@ internal static global::go.math.big_package.Δnat fibo(nint n) {
     return f1;
 }
 
-internal static slice<@string> fiboNums = slice<@string>([
+internal static slice<@string> fiboNums = [
     "0",
     "55",
     "6765",
@@ -894,10 +888,10 @@ internal static slice<@string> fiboNums = slice<@string>([
     "23416728348467685",
     "2880067194370816120",
     "354224848179261915075"
-]);
+];
 
 public static void TestFibo(ж<testing.T> t) {
-    foreach (var (i, want) in fiboNums) {
+    foreach (var (i, want) in range(fiboNums)) {
         nint n = i * 10;
         @string got = (@string)fibo(n).utoa(10);
         if (got != want) {
@@ -946,12 +940,10 @@ internal static slice<bitTestsᴛ1> bitTests = slice<bitTestsᴛ1>([
 ]);
 
 public static void TestBit(ж<testing.T> t) {
-    foreach (var (i, test) in bitTests) {
+    foreach (var (i, test) in range(bitTests)) {
         var x = natFromString(test.x);
-        {
-            nuint got = x.bit(test.i); if (got != test.want) {
-                t.Errorf("#%d: %s.bit(%d) = %v; want %v", i, test.x, test.i, got, test.want);
-            }
+        nuint got = x.bit(test.i); if (got != test.want) {
+            t.Errorf("#%d: %s.bit(%d) = %v; want %v", i, test.x, test.i, got, test.want);
         }
     }
 }
@@ -976,7 +968,7 @@ internal static slice<bitTestsᴛ1> stickyTests = slice<bitTestsᴛ1>([
 ]);
 
 public static void TestSticky(ж<testing.T> t) {
-    foreach (var (i, test) in stickyTests) {
+    foreach (var (i, test) in range(stickyTests)) {
         var x = natFromString(test.x);
         {
             nuint got = x.sticky(test.i); if (got != test.want) {
@@ -986,10 +978,8 @@ public static void TestSticky(ж<testing.T> t) {
         if (test.want == 1) {
             // all subsequent i's should also return 1
             for (nuint d = (nuint)1; d <= 3; d++) {
-                {
-                    nuint got = x.sticky(test.i + d); if (got != 1) {
-                        t.Errorf("#%d: %s.sticky(%d) = %v; want %v", i, test.x, test.i + d, got, (nint)1);
-                    }
+                nuint got = x.sticky(test.i + d); if (got != 1) {
+                    t.Errorf("#%d: %s.sticky(%d) = %v; want %v", i, test.x, test.i + d, got, (nint)1);
                 }
             }
         }
@@ -1008,14 +998,14 @@ internal static void benchmarkNatSqr(ж<testing.B> Ꮡb, nint nwords) {
     }
 }
 
-internal static slice<nint> sqrBenchSizes = slice<nint>([
+internal static slice<nint> sqrBenchSizes = [
     1, 2, 3, 5, 8, 10, 20, 30, 50, 80,
     100, 200, 300, 500, 800,
     1000, 10000, 100000
-]);
+];
 
 public static void BenchmarkNatSqr(ж<testing.B> b) {
-    foreach (var (_, n) in sqrBenchSizes) {
+    foreach (var (_, n) in range(sqrBenchSizes)) {
         if (isRaceBuilder && n > 1000) {
             continue;
         }
@@ -1031,7 +1021,7 @@ partial struct subMod2NTestsᴛ1 /*dyn*/ {
     internal nuint n;
     internal @string z;
 }
-internal static slice<subMod2NTestsᴛ1> subMod2NTests = slice<subMod2NTestsᴛ1>([
+internal static slice<subMod2NTestsᴛ1> subMod2NTests = [
     new("1", "2", 0, "0"),
     new("1", "0", 1, "1"),
     new("0", "1", 1, "1"),
@@ -1041,12 +1031,12 @@ internal static slice<subMod2NTestsᴛ1> subMod2NTests = slice<subMod2NTestsᴛ1
     new("36893488147419103232", "73786976294838206463", 67, "110680464442257309697"),
     // 2^66-1, 2^65, 2^65-1
     new("73786976294838206463", "36893488147419103232", 67, "36893488147419103231")
-]);
+];
 
 public static void TestNatSubMod2N(ж<testing.T> t) {
-    foreach (var (_, mode) in slice<@string>(["noalias", "aliasX", "aliasY"])) {
+    foreach (var (_, mode) in range(slice<@string>(["noalias", "aliasX", "aliasY"]))) {
         t.Run(mode, (ж<testing.T> tΔ1) => {
-            foreach (var (_, tt) in subMod2NTests) {
+            foreach (var (_, tt) in range(subMod2NTests)) {
                 var x0 = natFromString(tt.x);
                 var y0 = natFromString(tt.y);
                 var want = natFromString(tt.z);
@@ -1088,7 +1078,7 @@ public static void BenchmarkNatSetBytes(ж<testing.B> b) {
     ]);
     var n = new global::go.math.big_package.Δnat(maxLength / _W); // ensure n doesn't need to grow during the test
     var buf = new slice<byte>(maxLength);
-    foreach (var (_, l) in lengths) {
+    foreach (var (_, l) in range(lengths)) {
         var bufʗ1 = buf;
         var nʗ1 = n;
         b.Run(fmt.Sprint(l), (ж<testing.B> bΔ1) => {
@@ -1110,8 +1100,8 @@ public static void TestNatDiv(ж<testing.T> t) {
             1, 2, 5, 8, 15, 25, 40, 65, 100,
             200, 500, 800, 1500, 2500, 4000, 6500, 10000
         ]);
-        foreach (var (_, i) in sizes) {
-            foreach (var (_, j) in sizes) {
+        foreach (var (_, i) in range(sizes)) {
+            foreach (var (_, j) in range(sizes)) {
                 var a = rndNat1(i);
                 var b = rndNat1(j);
                 // the test requires b >= 2
@@ -1163,10 +1153,8 @@ public static void TestIssue37499(ж<testing.T> t) {
         var q = ((global::go.math.big_package.Δnat)default).make(8);
         q.divBasic(stk, u, v);
         q = q.norm();
-        {
-            @string s = (@string)q.utoa(16); if (s != "fffffffffffffffffffffffffffffffffffffffffffffffb"u8) {
-                t.Fatalf("incorrect quotient: %s", s);
-            }
+        @string s = (@string)q.utoa(16); if (s != "fffffffffffffffffffffffffffffffffffffffffffffffb"u8) {
+            t.Fatalf("incorrect quotient: %s", s);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

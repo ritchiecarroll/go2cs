@@ -21,9 +21,9 @@ namespace GolibTests;
 /// <remarks>
 /// The behavioral project CallerLineMultiLine runs Release, where the optimizing JIT maps calls that
 /// share an expression (array and struct elements, one call's arguments, a sum, a chain) to ONE IL
-/// offset, so it prints only the two shapes an optimized build answers exactly. This arm builds the same
-/// project Debug, runs it and Go's with GO2CS_CALLER_LINE_ALL_SHAPES=1, and compares all eleven shapes
-/// line for line. The control: Go must print every shape (twelve lines), or the switch did not reach the
+/// offset, so it prints only the three shapes an optimized build answers exactly. This arm builds the same
+/// project Debug, runs it and Go's with GO2CS_CALLER_LINE_ALL_SHAPES=1, and compares all thirteen shapes
+/// line for line. The control: Go must print every shape (fourteen lines), or the switch did not reach the
 /// programs and an equal two-line output would prove nothing. Inconclusive only where no pinned Go
 /// toolchain or no dotnet host resolves, naming which.
 /// </remarks>
@@ -31,7 +31,7 @@ namespace GolibTests;
 public class CallerLineMultiLineDebugTests
 {
     private const string AllShapes = "GO2CS_CALLER_LINE_ALL_SHAPES";
-    private const int ShapeLines = 12;
+    private const int ShapeLines = 14;
 
     [TestMethod]
     public void EveryShapeEqualsGoInADebugBuild()

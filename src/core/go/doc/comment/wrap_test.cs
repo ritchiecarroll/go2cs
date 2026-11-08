@@ -65,7 +65,7 @@ public static void TestWrap(ж<testing.T> t) {
                     if (seq[0] != 0) {
                         tΔ2.Fatalf("wrap seq does not start with 0");
                     }
-                    foreach (var (_, nΔ1) in seq[1..]) {
+                    foreach (var (_, nΔ1) in range(seq[1..])) {
                         if (nΔ1 <= start) {
                             tΔ2.Fatalf("wrap seq is non-increasing: %v", seq);
                         }
@@ -73,7 +73,7 @@ public static void TestWrap(ж<testing.T> t) {
                             tΔ2.Fatalf("wrap seq contains %d > %d: %v", nΔ1, len(wordsʗ2), seq);
                         }
                         nint size = -1;
-                        foreach (var (_, sΔ1) in wordsʗ2.slice(start, nΔ1)) {
+                        foreach (var (_, sΔ1) in range(wordsʗ2.slice(start, nΔ1))) {
                             size += 1 + utf8.RuneCountInString(sΔ1);
                         }
                         if (nΔ1 - start == 1 && size >= max) {
@@ -114,7 +114,7 @@ internal static (slice<nint> seq, int64 score) wrapSlow(slice<@string> words, ni
     var best = new slice<int64>(len(words) + 1);
     var bestleft = new slice<nint>(len(words) + 1);
     best[0] = 0;
-    foreach (var (i, w) in words) {
+    foreach (var (i, w) in range(words)) {
         if (utf8.RuneCountInString(w) >= max) {
             // Overlong word must appear on line by itself. No effect on score.
             best[i + 1] = best[i];

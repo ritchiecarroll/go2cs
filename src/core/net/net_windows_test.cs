@@ -17,8 +17,6 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
 using iter = iter_package;
 using static go.net_package;
@@ -110,17 +108,15 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> t) {
             finally { ᒐ.Run(); }
         }
 
-        {
-            @string envaddr = Δos.Getenv(gotestDialAddrˢ); if (envaddr != ""u8) {
-                // In child process.
-                var (c, errΔ3) = Dial(tcpˢ, envaddr);
-                if (errΔ3 != nil) {
-                    t.Fatal(errΔ3);
-                }
-                fmt.Printf("sleeping\n"u8);
-                time.Sleep(time.ΔMinute); // process will be killed here
-                c.Close();
+        @string envaddr = Δos.Getenv(gotestDialAddrˢ); if (envaddr != ""u8) {
+            // In child process.
+            var (c, errΔ3) = Dial(tcpˢ, envaddr);
+            if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
+            fmt.Printf("sleeping\n"u8);
+            time.Sleep(time.ΔMinute); // process will be killed here
+            c.Close();
         }
 
         var (ln, err) = Listen(tcpˢ, "127.0.0.1:0");
@@ -313,7 +309,7 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
     //Metric                             : 10
     //...
     @string name = default;
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, [(byte)'\r', (byte)'\n']).Invoke)) {
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
@@ -336,10 +332,8 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
             break;
         }}
         if (name != ""u8) {
-            {
-                var (v, ok) = ifaces[name, ꟷ]; if (ok && v != isup) {
-                    return fmt.Errorf("%s:%s isup=%v: ipv4 and ipv6 report different interface state"u8, ipver, name, isup);
-                }
+            var (v, ok) = ifaces[name, ꟷ]; if (ok && v != isup) {
+                return fmt.Errorf("%s:%s isup=%v: ipv4 and ipv6 report different interface state"u8, ipver, name, isup);
             }
             ifaces[name] = isup;
             name = ""u8;
@@ -369,7 +363,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> t) {
         t.Fatal(err);
     }
     var have = new slice<@string>(0);
-    foreach (var (_, ifi) in ift) {
+    foreach (var (_, ifi) in range(ift)) {
         have = append(have, toString(ifi.Name, (global::go.net_package.Flags)(ifi.Flags & FlagUp) != 0));
     }
     slices.Sort<slice<@string>, @string>(have);
@@ -417,7 +411,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
     @string addr = default;
     @string subnetprefix = default;
     bool processingOurInterface = default;
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, [(byte)'\r', (byte)'\n']).Invoke)) {
         if (!processingOurInterface) {
             if (!bytes.HasPrefix(line, slice<byte>("Configuration for interface"u8))) {
                 continue;
@@ -432,11 +426,11 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
             break;
         }
         if (bytes.Contains(line, slice<byte>("Subnet Prefix:"u8))) {
-            var f = bytes.Split(line, slice<byte>([(byte)':']));
+            var f = bytes.Split(line, [(byte)':']);
             if (len(f) == 2) {
-                f = bytes.Split(f[1], slice<byte>([(byte)'(']));
+                f = bytes.Split(f[1], [(byte)'(']);
                 if (len(f) == 2) {
-                    f = bytes.Split(f[0], slice<byte>([(byte)'/']));
+                    f = bytes.Split(f[0], [(byte)'/']);
                     if (len(f) == 2) {
                         subnetprefix = (@string)bytes.TrimSpace(f[1]);
                         if (addr != ""u8 && subnetprefix != ""u8) {
@@ -448,7 +442,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
         }
         addr = ""u8;
         if (bytes.Contains(line, slice<byte>("IP Address:"u8))) {
-            var f = bytes.Split(line, slice<byte>([(byte)':']));
+            var f = bytes.Split(line, [(byte)':']);
             if (len(f) == 2) {
                 addr = (@string)bytes.TrimSpace(f[1]);
             }
@@ -488,7 +482,7 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
     // TODO: need to test ipv6 netmask too, but netsh does not outputs it
     @string addr = default;
     var addrs = new slice<@string>(0);
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, [(byte)'\r', (byte)'\n']).Invoke)) {
         if (addr != ""u8) {
             if (len(line) == 0) {
                 addr = ""u8;
@@ -507,12 +501,12 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
         if (!bytes.HasSuffix(line, slice<byte>("Parameters"u8))) {
             continue;
         }
-        var f = bytes.Split(line, slice<byte>([(byte)' ']));
+        var f = bytes.Split(line, [(byte)' ']);
         if (len(f) != 3) {
             continue;
         }
         // remove scope ID if present
-        f = bytes.Split(f[1], slice<byte>([(byte)'%']));
+        f = bytes.Split(f[1], [(byte)'%']);
 
         // netsh can create IPv4-embedded IPv6 addresses, like fe80::5efe:192.168.140.1.
         // Convert these to all hexadecimal fe80::5efe:c0a8:8c01 for later string comparisons.
@@ -546,7 +540,7 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -559,7 +553,7 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> t) {
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
-        foreach (var (_, addr) in addrs) {
+        foreach (var (_, addr) in range(addrs)) {
             switch (addr.type()) {
             case ж<global::go.net_package.IPNet> addrΔ1: {
                 if (addrΔ1.IP.To4() != nil) {
@@ -634,7 +628,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> t) {
         t.Fatal(err);
     }
     var have = new map<@string, @string>();
-    foreach (var (_, ifi) in ift) {
+    foreach (var (_, ifi) in range(ift)) {
         if ((global::go.net_package.Flags)(ifi.Flags & FlagLoopback) != 0) {
             // no MAC address for loopback interfaces
             continue;
@@ -701,7 +695,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> t) {
         wantʗ1[cname] = addr;
         Ꮡgroup.ValueSlot = new map<@string, @string>();
     }
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, [(byte)'\r', (byte)'\n']).Invoke)) {
         if (len(line) == 0) {
             processGroup();
             continue;
@@ -716,10 +710,8 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> t) {
 
     var dups = new map<@string, slice<@string>>();
     foreach (var (name, addr) in want) {
-        {
-            var (_, ok) = dups[addr, ꟷ]; if (!ok) {
-                dups[addr] = new slice<@string>(0);
-            }
+        var (_, ok) = dups[addr, ꟷ]; if (!ok) {
+            dups[addr] = new slice<@string>(0);
         }
         dups[addr] = append(dups[addr], name);
     }
@@ -741,11 +733,9 @@ nextWant:
         // let's ignore the other names.
         {
             var (dupNames, ok) = dups[wantAddr, ꟷ]; if (ok && len(dupNames) > 1) {
-                foreach (var (_, dupName) in dupNames) {
-                    {
-                        var (haveAddr, okΔ1) = have[dupName, ꟷ]; if (okΔ1 && haveAddr == wantAddr) {
-                            goto continue_nextWant;
-                        }
+                foreach (var (_, dupName) in range(dupNames)) {
+                    var (haveAddr, okΔ1) = have[dupName, ꟷ]; if (okΔ1 && haveAddr == wantAddr) {
+                        goto continue_nextWant;
                     }
                 }
             }

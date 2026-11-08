@@ -43,11 +43,9 @@ public static void TestEncodeWord(ж<testing.T> t) {
         new(BEncoding, utf8, strings.Repeat(((@string)(new byte[]{0x80})), 48), "=?utf-8?b?"u8 + strings.Repeat(gICAˢ, 15) + "?= =?utf-8?b?gICA?="u8)
     ]);
 
-    foreach (var (_, test) in tests) {
-        {
-            @string s = test.enc.Encode(test.charset, test.src); if (s != test.exp) {
-                t.Errorf("Encode(%q) = %q, want %q", test.src, s, test.exp);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string s = test.enc.Encode(test.charset, test.src); if (s != test.exp) {
+            t.Errorf("Encode(%q) = %q, want %q", test.src, s, test.exp);
         }
     }
 }
@@ -67,7 +65,7 @@ public static void TestEncodedWordLength(ж<testing.T> t) {
         new(QEncoding, "{$firstname} Bienvendio a Apostolica, aquà inicia el camino de tu")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string s = test.enc.Encode(utf8ˢ2, test.src);
         nint wordLen = 0;
         for (nint i = 0; i < len(s); i++) {
@@ -107,7 +105,7 @@ public static void TestDecodeWord(ж<testing.T> t) {
         new("=?UTF-8?Q??=", "", false)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var dec = @new<global::go.mime_package.WordDecoder>();
         var (s, err) = dec.Decode(test.src);
         if (test.hasErr && err == nil) {
@@ -163,7 +161,7 @@ public static void TestDecodeHeader(ж<testing.T> t) {
         new("=?UTF-8?x?y?=?UTF-8?x?y=?", "=?UTF-8?x?y?=?UTF-8?x?y=?")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var dec = @new<global::go.mime_package.WordDecoder>();
         var (s, err) = dec.DecodeHeader(test.src);
         if (err != nil) {
@@ -192,12 +190,12 @@ public static void TestCharsetDecoder(ж<testing.T> t) {
         new(
             "=?ISO-8859-15?Q?f=F5=F6?=  =?windows-1252?Q?b=E0r?=",
             ((@string)(new byte[]{0x66, 0xf5, 0xf6, 0x62, 0xe0, 0x72})),
-            slice<@string>(["iso-8859-15", "windows-1252"]),
-            slice<@string>([((@string)(new byte[]{0x66, 0xf5, 0xf6})), ((@string)(new byte[]{0x62, 0xe0, 0x72}))])
+            ["iso-8859-15", "windows-1252"],
+            [((@string)(new byte[]{0x66, 0xf5, 0xf6})), ((@string)(new byte[]{0x62, 0xe0, 0x72}))]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestCharsetDecoder_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -243,10 +241,8 @@ public static void TestCharsetDecoderError(ж<testing.T> t) {
         CharsetReader: (@string charset, Δio.Reader input) => (default, errors.New(testErrorˢ))
     ));
 
-    {
-        var (_, err) = dec.DecodeHeader(charsetQFooˢ); if (err == nil) {
-            t.Error(decodeHeaderShouldReturnˢ);
-        }
+    var (_, err) = dec.DecodeHeader(charsetQFooˢ); if (err == nil) {
+        t.Error(decodeHeaderShouldReturnˢ);
     }
 }
 

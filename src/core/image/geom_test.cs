@@ -42,8 +42,8 @@ public static void TestRectangle(ж<testing.T> t) {
 
     // r.Eq(s) should be equivalent to every point in r being in s, and every
     // point in s being in r.
-    foreach (var (_, r) in rects) {
-        foreach (var (_, s) in rects) {
+    foreach (var (_, r) in range(rects)) {
+        foreach (var (_, s) in range(rects)) {
             var got = r.Eq(s);
             var want = @in(r, s) == nil && @in(s, r) == nil;
             if (got != want) {
@@ -54,8 +54,8 @@ public static void TestRectangle(ж<testing.T> t) {
 
     // The intersection should be the largest rectangle a such that every point
     // in a is both in r and in s.
-    foreach (var (_, r) in rects) {
-        foreach (var (_, s) in rects) {
+    foreach (var (_, r) in range(rects)) {
+        foreach (var (_, s) in range(rects)) {
             var a = r.Intersect(s);
             {
                 var err = @in(a, r); if (err != nil) {
@@ -67,18 +67,16 @@ public static void TestRectangle(ж<testing.T> t) {
                     t.Errorf("Intersect: r=%s, s=%s, a=%s, a not in s: %v", r, s, a, err);
                 }
             }
-            {
-                var (isZero, overlaps) = (a == (new Rectangle()), r.Overlaps(s)); if (isZero == overlaps) {
-                    t.Errorf("Intersect: r=%s, s=%s, a=%s: isZero=%t same as overlaps=%t",
-                        r, s, a, isZero, overlaps);
-                }
+            var (isZero, overlaps) = (a == (new Rectangle()), r.Overlaps(s)); if (isZero == overlaps) {
+                t.Errorf("Intersect: r=%s, s=%s, a=%s: isZero=%t same as overlaps=%t",
+                    r, s, a, isZero, overlaps);
             }
             var largerThanA = new global::go.image_package.Rectangle[]{a, a, a, a}.array();
             largerThanA[0].Min.X--;
             largerThanA[1].Min.Y--;
             largerThanA[2].Max.X++;
             largerThanA[3].Max.Y++;
-            foreach (var (i, b) in largerThanA.ΔRangeSnapshot()) {
+            foreach (var (i, b) in range(largerThanA.ΔRangeSnapshot())) {
                 if (b.Empty()) {
                     // b isn't actually larger than a.
                     continue;
@@ -93,8 +91,8 @@ public static void TestRectangle(ж<testing.T> t) {
 
     // The union should be the smallest rectangle a such that every point in r
     // is in a and every point in s is in a.
-    foreach (var (_, r) in rects) {
-        foreach (var (_, s) in rects) {
+    foreach (var (_, r) in range(rects)) {
+        foreach (var (_, s) in range(rects)) {
             var a = r.Union(s);
             {
                 var err = @in(r, a); if (err != nil) {
@@ -115,7 +113,7 @@ public static void TestRectangle(ж<testing.T> t) {
             smallerThanA[1].Min.Y++;
             smallerThanA[2].Max.X--;
             smallerThanA[3].Max.Y--;
-            foreach (var (i, b) in smallerThanA.ΔRangeSnapshot()) {
+            foreach (var (i, b) in range(smallerThanA.ΔRangeSnapshot())) {
                 if (@in(r, b) == nil && @in(s, b) == nil) {
                     t.Errorf("Union: r=%s, s=%s, a=%s, b=%s, i=%d: union could be smaller",
                         r, s, a, b, i);

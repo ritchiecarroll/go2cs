@@ -377,7 +377,7 @@ public static partial void TestSelfSelect(ж<testing.T> t) {
         // Ensure that send/recv on the same chan in select
         // does not crash nor deadlock.
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
-        foreach (var (_, chanCap) in slice<nint>([0, 10])) {
+        foreach (var (_, chanCap) in range(slice<nint>([0, 10]))) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var c = new channel<nint>(chanCap);
@@ -620,22 +620,20 @@ public static partial void TestSelectFairness(ж<testing.T> t) {
     nint cnt1 = 0;
     nint cnt2 = 0;
     for (nint i = 0; i < trials; i++) {
-        {
-            var b = (byte)(ᐸꟷ(@out));
-            switch (b) {
-            case 1: {
-                cnt1++;
-                break;
-            }
-            case 2: {
-                cnt2++;
-                break;
-            }
-            default: {
-                t.Fatalf("unexpected value %d on channel", b);
-                break;
-            }}
+        var b = (byte)(ᐸꟷ(@out));
+        switch (b) {
+        case 1: {
+            cnt1++;
+            break;
         }
+        case 2: {
+            cnt2++;
+            break;
+        }
+        default: {
+            t.Fatalf("unexpected value %d on channel", b);
+            break;
+        }}
     }
     // If the select in the goroutine is fair,
     // cnt1 and cnt2 should be about the same value.
@@ -683,7 +681,7 @@ public static void TestChanSendInterface(ж<testing.T> t) {
 
 public static partial void TestPseudoRandomSend(ж<testing.T> t) {
     nint n = 100;
-    foreach (var (_, chanCap) in slice<nint>([0, n])) {
+    foreach (var (_, chanCap) in range(slice<nint>([0, n]))) {
         var c = new channel<nint>(chanCap);
         var l = new slice<nint>(n);
         ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
@@ -711,7 +709,7 @@ public static partial void TestPseudoRandomSend(ж<testing.T> t) {
         Ꮡm.Lock(); // wait
         nint n0 = 0;
         nint n1 = 0;
-        foreach (var (_, i) in l) {
+        foreach (var (_, i) in range(l)) {
             n0 += (i + 1) % 2;
             n1 += i;
         }
@@ -1531,7 +1529,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
         });
     }
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, d) in a) {
+        foreach (var (_, d) in range(a)) {
             d.ᐸꟷ(true);
         }
     }

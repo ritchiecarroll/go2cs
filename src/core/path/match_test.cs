@@ -15,7 +15,7 @@ partial struct MatchTest {
     internal error err;
 }
 
-internal static slice<MatchTest> matchTests = slice<MatchTest>([
+internal static slice<MatchTest> matchTests = [
     new("abc", "abc", true, default),
     new("*", "abc", true, default),
     new("*c", "abc", true, default),
@@ -72,10 +72,10 @@ internal static slice<MatchTest> matchTests = slice<MatchTest>([
     new("a[", "x", false, ErrBadPattern),
     new("a/b[", "x", false, ErrBadPattern),
     new("*x", "xxx", true, default)
-]);
+];
 
 public static void TestMatch(ж<testing.T> t) {
-    foreach (var (_, tt) in matchTests) {
+    foreach (var (_, tt) in range(matchTests)) {
         var (ok, err) = Match(tt.pattern, tt.s);
         if (ok != tt.match || !AreEqual(err, tt.err)) {
             t.Errorf("Match(%#q, %#q) = %v, %v want %v, %v", tt.pattern, tt.s, ok, err, tt.match, tt.err);
@@ -84,7 +84,7 @@ public static void TestMatch(ж<testing.T> t) {
 }
 
 public static void BenchmarkMatch(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in matchTests) {
+    foreach (var (_, vᴛ1) in range(matchTests)) {
         ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
         tt = vᴛ1;
 

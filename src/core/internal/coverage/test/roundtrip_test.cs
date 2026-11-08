@@ -90,10 +90,10 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> t) {
     var f1 = new coverage.FuncDesc(
         Funcname: "func",
         Srcfile: "foo.go",
-        Units: slice<coverage.CoverableUnit>([
+        Units: [
             new coverage.CoverableUnit(StLine: 1, StCol: 2, EnLine: 3, EnCol: 4, NxStmts: 5),
             new coverage.CoverableUnit(StLine: 6, StCol: 7, EnLine: 8, EnCol: 9, NxStmts: 10)
-        ])
+        ]
     );
     nuint idx = b.AddFunc(f1);
     if (idx != 0) {
@@ -103,11 +103,11 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> t) {
     var f2 = new coverage.FuncDesc(
         Funcname: "xfunc",
         Srcfile: "bar.go",
-        Units: slice<coverage.CoverableUnit>([
+        Units: [
             new coverage.CoverableUnit(StLine: 1, StCol: 2, EnLine: 3, EnCol: 4, NxStmts: 5),
             new coverage.CoverableUnit(StLine: 6, StCol: 7, EnLine: 8, EnCol: 9, NxStmts: 10),
             new coverage.CoverableUnit(StLine: 11, StCol: 12, EnLine: 13, EnCol: 14, NxStmts: 15)
-        ])
+        ]
     );
     idx = b.AddFunc(f2);
     if (idx != 1) {
@@ -141,10 +141,8 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> t) {
     var cases = slice<coverage.FuncDesc>([f1, f2]);
     for (var i = (uint32)0; i < (uint32)len(cases); i++) {
         ref var fn = ref heap(new coverage.FuncDesc(), out var Ꮡfn);
-        {
-            var errΔ1 = dec.ReadFunc(i, Ꮡfn); if (errΔ1 != nil) {
-                t.Fatalf("err reading function %d: %v", i, errΔ1);
-            }
+        var errΔ1 = dec.ReadFunc(i, Ꮡfn); if (errΔ1 != nil) {
+            t.Fatalf("err reading function %d: %v", i, errΔ1);
         }
         @string res = cmpFuncDesc(cases[i], fn);
         if (res != ""u8) {
@@ -187,7 +185,7 @@ internal static slice<byte> createBlob(ж<testing.T> t, nint i) {
     }
 
     var funcs = createFuncs(i);
-    foreach (var (_, f) in funcs) {
+    foreach (var (_, f) in range(funcs)) {
         b.AddFunc(f);
     }
     var drws = Ꮡ(new slicewriter.WriteSeeker());
@@ -228,10 +226,8 @@ public static void TestMetaDataWriterReader(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("writing meta-file: %v", err);
     }
-    {
-        err = of.Close(); if (err != nil) {
-            t.Fatalf("closing meta-file: %v", err);
-        }
+    err = of.Close(); if (err != nil) {
+        t.Fatalf("closing meta-file: %v", err);
     }
 
     // ... then read it back in, first time without setting fileView,
@@ -251,15 +247,11 @@ public static void TestMetaDataWriterReader(ж<testing.T> t) {
                 t.Fatalf("stat() on meta-file: %v", errΔ2);
             }
             fileView = new slice<byte>((nint)(fi.Size()));
-            {
-                var (_, errΔ3) = inf.Read(fileView); if (errΔ3 != nil) {
-                    t.Fatalf("read() on meta-file: %v", errΔ3);
-                }
+            var (_, errΔ3) = inf.Read(fileView); if (errΔ3 != nil) {
+                t.Fatalf("read() on meta-file: %v", errΔ3);
             }
-            {
-                var (_, errΔ4) = inf.Seek((int64)0, io.SeekStart); if (errΔ4 != nil) {
-                    t.Fatalf("seek() on meta-file: %v", errΔ4);
-                }
+            var (_, errΔ4) = inf.Seek((int64)0, io.SeekStart); if (errΔ4 != nil) {
+                t.Fatalf("seek() on meta-file: %v", errΔ4);
             }
         }
 
@@ -298,11 +290,9 @@ public static void TestMetaDataWriterReader(ж<testing.T> t) {
             }
             ref var f = ref heap(new coverage.FuncDesc(), out var Ꮡf);
             for (nint fi = 0; fi < (nint)nf; fi++) {
-                {
-                    var errΔ6 = pd.ReadFunc((uint32)fi, Ꮡf); if (errΔ6 != nil) {
-                        t.Fatalf("ReadFunc(%d) pk %d got error %v",
-                            fi, pi, errΔ6);
-                    }
+                var errΔ6 = pd.ReadFunc((uint32)fi, Ꮡf); if (errΔ6 != nil) {
+                    t.Fatalf("ReadFunc(%d) pk %d got error %v",
+                        fi, pi, errΔ6);
                 }
                 @string res = cmpFuncDesc(efuncs[fi], f);
                 if (res != ""u8) {
@@ -333,9 +323,9 @@ public static void TestMetaDataDecodeLitFlagIssue57942(ж<testing.T> t) {
         var fd = new coverage.FuncDesc(
             Funcname: "func"u8 + fis,
             Srcfile: "foo"u8 + fis + ".go"u8,
-            Units: slice<coverage.CoverableUnit>([
+            Units: [
                 new coverage.CoverableUnit(StLine: ln + 1, StCol: 2, EnLine: ln + 3, EnCol: 4, NxStmts: fi + 2)
-            ]),
+            ],
             Lit: (fi % 2) == 0
         );
         wantfds = append(wantfds, fd);
@@ -358,10 +348,8 @@ public static void TestMetaDataDecodeLitFlagIssue57942(ж<testing.T> t) {
     }
     ref var fn = ref heap(new coverage.FuncDesc(), out var Ꮡfn);
     for (var i = (uint32)0; i < (uint32)NF; i++) {
-        {
-            var errΔ1 = dec.ReadFunc(i, Ꮡfn); if (errΔ1 != nil) {
-                t.Fatalf("err reading function %d: %v", i, errΔ1);
-            }
+        var errΔ1 = dec.ReadFunc(i, Ꮡfn); if (errΔ1 != nil) {
+            t.Fatalf("err reading function %d: %v", i, errΔ1);
         }
         @string res = cmpFuncDesc(wantfds[i], fn);
         if (res != ""u8) {

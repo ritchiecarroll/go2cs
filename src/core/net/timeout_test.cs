@@ -37,7 +37,7 @@ partial struct dialTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration initialTimeout;
     internal time.Duration initialDelta; // for deadline
 }
-internal static slice<dialTimeoutTestsᴛ1> dialTimeoutTests = slice<dialTimeoutTestsᴛ1>([
+internal static slice<dialTimeoutTestsᴛ1> dialTimeoutTests = [
     // Tests that dial timeouts, deadlines in the past work.
     new((time.Duration)(-5000000000L), 0),
     new(0, (time.Duration)(-5000000000L)),
@@ -48,7 +48,7 @@ internal static slice<dialTimeoutTestsᴛ1> dialTimeoutTests = slice<dialTimeout
     new(1 * time.Millisecond, 0),
     new(0, 1 * time.Millisecond),
     new(1 * time.Millisecond, (time.Duration)(5000000000L)) // timeout over deadline
-]);
+];
 
 public static void TestDialTimeout(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -65,14 +65,12 @@ public static void TestDialTimeout(ж<testing.T> t) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => {
-            {
-                var err = lnʗ1.Close(); if (err != nil) {
-                    t.Error(err);
-                }
+            var err = lnʗ1.Close(); if (err != nil) {
+                t.Error(err);
             }
         }, ref ᒐ);
 
-        foreach (var (_, vᴛ1) in dialTimeoutTests) {
+        foreach (var (_, vᴛ1) in range(dialTimeoutTests)) {
             ref var tt = ref heap(new dialTimeoutTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -137,15 +135,11 @@ public static void TestDialTimeout(ж<testing.T> t) {
                     }
                 }
 
-                {
-                    var perr = parseDialError(err); if (perr != nil) {
-                        tΔ1.Errorf("unexpected error from Dial: %v", perr);
-                    }
+                var perr = parseDialError(err); if (perr != nil) {
+                    tΔ1.Errorf("unexpected error from Dial: %v", perr);
                 }
-                {
-                    var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || !nerr.Timeout()) {
-                        tΔ1.Errorf("Dial: %v, want timeout", err);
-                    }
+                var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || !nerr.Timeout()) {
+                    tΔ1.Errorf("Dial: %v, want timeout", err);
                 }
             });
         }
@@ -165,18 +159,16 @@ public static void TestDialTimeoutMaxDuration(ж<testing.T> t) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => {
-            {
-                var err = lnʗ1.Close(); if (err != nil) {
-                    t.Error(err);
-                }
+            var err = lnʗ1.Close(); if (err != nil) {
+                t.Error(err);
             }
         }, ref ᒐ);
 
-        foreach (var (_, vᴛ1) in slice<TestDialTimeoutMaxDuration_type>([
+        foreach (var (_, vᴛ1) in range(slice<TestDialTimeoutMaxDuration_type>([
             // Large timeouts that will overflow an int64 unix nanos.
             new((time.Duration)(9223372036854775807L), 0),
             new(0, (time.Duration)(9223372036854775807L))
-        ])) {
+        ]))) {
             ref var tt = ref heap(new TestDialTimeoutMaxDuration_type(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -191,10 +183,8 @@ public static void TestDialTimeoutMaxDuration(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Fatal(err);
                 }
-                {
-                    var errΔ1 = c.Close(); if (errΔ1 != nil) {
-                        tΔ1.Error(errΔ1);
-                    }
+                var errΔ1 = c.Close(); if (errΔ1 != nil) {
+                    tΔ1.Error(errΔ1);
                 }
             });
         }
@@ -221,7 +211,7 @@ public static void TestAcceptTimeout(ж<testing.T> t) {
         10 * time.Millisecond
     ]);
 
-    foreach (var (_, timeout) in timeouts) {
+    foreach (var (_, timeout) in range(timeouts)) {
         t.Run(fmt.Sprintf("%v"u8, timeout), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -282,10 +272,8 @@ public static void TestAcceptTimeout(ж<testing.T> t) {
                     time.Sleep(10 * time.Millisecond);
                 }
 
-                {
-                    var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(timeout)); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(timeout)); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
                 tΔ1.Logf("ln.SetDeadline(time.Now().Add(%v))", timeout);
 
@@ -295,10 +283,8 @@ public static void TestAcceptTimeout(ж<testing.T> t) {
                 }
                 tΔ1.Logf("ln.Accept: %v", err);
 
-                {
-                    var perr = parseAcceptError(err); if (perr != nil) {
-                        tΔ1.Error(perr);
-                    }
+                var perr = parseAcceptError(err); if (perr != nil) {
+                    tΔ1.Error(perr);
                 }
                 if (!isDeadlineExceeded(err)) {
                     tΔ1.Error(wantedDeadlineExceededˢ);
@@ -326,25 +312,19 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> t) {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
-        {
-            var errΔ1 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(noDeadline); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(noDeadline); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
-        {
-            var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(10 * time.Millisecond)); if (errΔ2 != nil) {
-                t.Error(errΔ2);
-            }
+        var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(10 * time.Millisecond)); if (errΔ2 != nil) {
+            t.Error(errΔ2);
         }
         var (c, err) = ln.Accept();
         if (err == nil) {
             c.Close();
         }
 
-        {
-            var perr = parseAcceptError(err); if (perr != nil) {
-                t.Error(perr);
-            }
+        var perr = parseAcceptError(err); if (perr != nil) {
+            t.Error(perr);
         }
         if (!isDeadlineExceeded(err)) {
             t.Fatal(err);
@@ -376,15 +356,11 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> t) {
         var lnʗ2 = ln;
         var maxchʗ1 = maxch;
         goǃ(() => {
-            {
-                var errΔ1 = lnʗ2._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                }
+            var errΔ1 = lnʗ2._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
+                t.Error(errΔ1);
             }
-            {
-                var errΔ2 = lnʗ2._<ж<global::go.net_package.TCPListener>>().SetDeadline(noDeadline); if (errΔ2 != nil) {
-                    t.Error(errΔ2);
-                }
+            var errΔ2 = lnʗ2._<ж<global::go.net_package.TCPListener>>().SetDeadline(noDeadline); if (errΔ2 != nil) {
+                t.Error(errΔ2);
             }
             maxchʗ1.ᐸꟷ(time.NewTimer(100 * time.Millisecond));
             var (_, err) = lnʗ2.Accept();
@@ -399,10 +375,8 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> t) {
         var selᴛ16 = max.C;
         switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
         case 0 when selᴛ15.ꟷᐳ(out var err): {
-            {
-                var perr = parseAcceptError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseAcceptError(err); if (perr != nil) {
+                t.Error(perr);
             }
             t.Fatalf("expected Accept to not return, but it returned with %v", err);
             break;
@@ -421,13 +395,13 @@ partial struct readTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration timeout;
     internal array<error> xerrs = new(2); // expected errors in transition
 }
-internal static slice<readTimeoutTestsᴛ1> readTimeoutTests = slice<readTimeoutTestsᴛ1>([
+internal static slice<readTimeoutTestsᴛ1> readTimeoutTests = [
     // Tests that read deadlines work, even if there's data ready
     // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
 
     new(50 * time.Millisecond, new error[]{default, Δos.ErrDeadlineExceeded}.array())
-]);
+];
 
 // There is a very similar copy of this in os/timeout_test.go.
 public static void TestReadTimeout(ж<testing.T> t) {
@@ -451,10 +425,8 @@ public static void TestReadTimeout(ж<testing.T> t) {
         var ls = newLocalServer(new net_test_package.testing_TжTB(t), tcpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ2 = ls.buildup(handler); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = ls.buildup(handler); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
@@ -464,23 +436,19 @@ public static void TestReadTimeout(ж<testing.T> t) {
         var cʗ2 = c;
         defer(() => cʗ2.Close(), ref ᒐ);
 
-        foreach (var (i, vᴛ1) in readTimeoutTests) {
+        foreach (var (i, vᴛ1) in range(readTimeoutTests)) {
             var tt = vᴛ1.ΔClone();
 
-            {
-                var errΔ3 = c.SetReadDeadline(time.Now().Add(tt.timeout)); if (errΔ3 != nil) {
-                    t.Fatalf("#%d: %v", i, errΔ3);
-                }
+            var errΔ3 = c.SetReadDeadline(time.Now().Add(tt.timeout)); if (errΔ3 != nil) {
+                t.Fatalf("#%d: %v", i, errΔ3);
             }
             array<byte> b = new(1);
-            foreach (var (j, xerr) in tt.xerrs.ΔRangeSnapshot()) {
+            foreach (var (j, xerr) in range(tt.xerrs.ΔRangeSnapshot())) {
                 for (;;) {
                     var (n, errΔ4) = c.Read(b[..]);
                     if (xerr != nil) {
-                        {
-                            var perr = parseReadError(errΔ4); if (perr != nil) {
-                                t.Errorf("#%d/%d: %v", i, j, perr);
-                            }
+                        var perr = parseReadError(errΔ4); if (perr != nil) {
+                            t.Errorf("#%d/%d: %v", i, j, perr);
                         }
                         if (!isDeadlineExceeded(errΔ4)) {
                             t.Fatalf("#%d/%d: %v", i, j, errΔ4);
@@ -532,20 +500,14 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> t) {
         var chʗ1 = ch;
         var maxchʗ1 = maxch;
         goǃ(() => {
-            {
-                var errΔ1 = cʗ2.SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                }
+            var errΔ1 = cʗ2.SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
+                t.Error(errΔ1);
             }
-            {
-                var errΔ2 = cʗ2.SetWriteDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ2 != nil) {
-                    t.Error(errΔ2);
-                }
+            var errΔ2 = cʗ2.SetWriteDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ2 != nil) {
+                t.Error(errΔ2);
             }
-            {
-                var errΔ3 = cʗ2.SetReadDeadline(noDeadline); if (errΔ3 != nil) {
-                    t.Error(errΔ3);
-                }
+            var errΔ3 = cʗ2.SetReadDeadline(noDeadline); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
             maxchʗ1.ᐸꟷ(time.NewTimer(100 * time.Millisecond));
             ref var b = ref heap(new array<byte>(1), out var Ꮡb);
@@ -577,10 +539,8 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> t) {
                     t.Error(perr);
                 }
             }
-            {
-                var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
-                    t.Fatal(errΔ6);
-                }
+            var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
+                t.Fatal(errΔ6);
             }
             break;
         }}
@@ -589,13 +549,13 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<readTimeoutTestsᴛ1> readFromTimeoutTests = slice<readTimeoutTestsᴛ1>([
+internal static slice<readTimeoutTestsᴛ1> readFromTimeoutTests = [
     // Tests that read deadlines work, even if there's data ready
     // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
 
     new(50 * time.Millisecond, new error[]{default, Δos.ErrDeadlineExceeded}.array())
-]);
+];
 
 public static void TestReadFromTimeout(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -604,19 +564,15 @@ public static void TestReadFromTimeout(ж<testing.T> t) {
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
         var chʗ1 = ch;
         var handler = (ж<localPacketServer> lsΔ1, global::go.net_package.PacketConn cΔ1) => {
-            {
-                var (dst, ok) = ᐸꟷ(chʗ1, ꟷ); if (ok) {
-                    cΔ1.WriteTo(slice<byte>("READFROM TIMEOUT TEST"u8), dst);
-                }
+            var (dst, ok) = ᐸꟷ(chʗ1, ꟷ); if (ok) {
+                cΔ1.WriteTo(slice<byte>("READFROM TIMEOUT TEST"u8), dst);
             }
         };
         var ls = newLocalPacketServer(new net_test_package.testing_TжTB(t), udpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         var (host, _, err) = SplitHostPort(ls.PacketConn.LocalAddr().String());
@@ -631,23 +587,19 @@ public static void TestReadFromTimeout(ж<testing.T> t) {
         defer(() => cʗ1.Close(), ref ᒐ);
         ch.ᐸꟷ(c.LocalAddr());
 
-        foreach (var (i, vᴛ1) in readFromTimeoutTests) {
+        foreach (var (i, vᴛ1) in range(readFromTimeoutTests)) {
             var tt = vᴛ1.ΔClone();
 
-            {
-                var errΔ2 = c.SetReadDeadline(time.Now().Add(tt.timeout)); if (errΔ2 != nil) {
-                    t.Fatalf("#%d: %v", i, errΔ2);
-                }
+            var errΔ2 = c.SetReadDeadline(time.Now().Add(tt.timeout)); if (errΔ2 != nil) {
+                t.Fatalf("#%d: %v", i, errΔ2);
             }
             array<byte> b = new(1);
-            foreach (var (j, xerr) in tt.xerrs.ΔRangeSnapshot()) {
+            foreach (var (j, xerr) in range(tt.xerrs.ΔRangeSnapshot())) {
                 for (;;) {
                     var (n, _, errΔ3) = c.ReadFrom(b[..]);
                     if (xerr != nil) {
-                        {
-                            var perr = parseReadError(errΔ3); if (perr != nil) {
-                                t.Errorf("#%d/%d: %v", i, j, perr);
-                            }
+                        var perr = parseReadError(errΔ3); if (perr != nil) {
+                            t.Errorf("#%d/%d: %v", i, j, perr);
                         }
                         if (!isDeadlineExceeded(errΔ3)) {
                             t.Fatalf("#%d/%d: %v", i, j, errΔ3);
@@ -657,10 +609,8 @@ public static void TestReadFromTimeout(ж<testing.T> t) {
                         time.Sleep(tt.timeout / 3);
                         continue;
                     }
-                    {
-                        var (nerr, ok) = errΔ3._<ΔError>(ᐧ); if (ok && nerr.Timeout() && n != 0) {
-                            t.Fatalf("#%d/%d: read %d; want 0", i, j, n);
-                        }
+                    var (nerr, ok) = errΔ3._<ΔError>(ᐧ); if (ok && nerr.Timeout() && n != 0) {
+                        t.Fatalf("#%d/%d: read %d; want 0", i, j, n);
                     }
                     break;
                 }
@@ -671,13 +621,13 @@ public static void TestReadFromTimeout(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<readTimeoutTestsᴛ1> writeTimeoutTests = slice<readTimeoutTestsᴛ1>([
+internal static slice<readTimeoutTestsᴛ1> writeTimeoutTests = [
     // Tests that write deadlines work, even if there's buffer
     // space available to write.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
 
     new(10 * time.Millisecond, new error[]{default, Δos.ErrDeadlineExceeded}.array())
-]);
+];
 
 // There is a very similar copy of this in os/timeout_test.go.
 public static void TestWriteTimeout(ж<testing.T> t) {
@@ -689,7 +639,7 @@ public static void TestWriteTimeout(ж<testing.T> t) {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
-        foreach (var (i, vᴛ1) in writeTimeoutTests) {
+        foreach (var (i, vᴛ1) in range(writeTimeoutTests)) {
             var tt = vᴛ1.ΔClone();
 
             var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
@@ -699,19 +649,15 @@ public static void TestWriteTimeout(ж<testing.T> t) {
             var cʗ1 = c;
             defer(() => cʗ1.Close(), ref ᒐ);
 
-            {
-                var errΔ1 = c.SetWriteDeadline(time.Now().Add(tt.timeout)); if (errΔ1 != nil) {
-                    t.Fatalf("#%d: %v", i, errΔ1);
-                }
+            var errΔ1 = c.SetWriteDeadline(time.Now().Add(tt.timeout)); if (errΔ1 != nil) {
+                t.Fatalf("#%d: %v", i, errΔ1);
             }
-            foreach (var (j, xerr) in tt.xerrs.ΔRangeSnapshot()) {
+            foreach (var (j, xerr) in range(tt.xerrs.ΔRangeSnapshot())) {
                 for (;;) {
                     var (n, errΔ2) = c.Write(slice<byte>("WRITE TIMEOUT TEST"u8));
                     if (xerr != nil) {
-                        {
-                            var perr = parseWriteError(errΔ2); if (perr != nil) {
-                                t.Errorf("#%d/%d: %v", i, j, perr);
-                            }
+                        var perr = parseWriteError(errΔ2); if (perr != nil) {
+                            t.Errorf("#%d/%d: %v", i, j, perr);
                         }
                         if (!isDeadlineExceeded(errΔ2)) {
                             t.Fatalf("#%d/%d: %v", i, j, errΔ2);
@@ -763,29 +709,21 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> t) {
         var chʗ1 = ch;
         var maxchʗ1 = maxch;
         goǃ(() => {
-            {
-                var errΔ1 = cʗ2.SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                }
+            var errΔ1 = cʗ2.SetDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ1 != nil) {
+                t.Error(errΔ1);
             }
-            {
-                var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ2 != nil) {
-                    t.Error(errΔ2);
-                }
+            var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add((time.Duration)(-5000000000L))); if (errΔ2 != nil) {
+                t.Error(errΔ2);
             }
-            {
-                var errΔ3 = cʗ2.SetWriteDeadline(noDeadline); if (errΔ3 != nil) {
-                    t.Error(errΔ3);
-                }
+            var errΔ3 = cʗ2.SetWriteDeadline(noDeadline); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
             maxchʗ1.ᐸꟷ(time.NewTimer(100 * time.Millisecond));
             ref var b = ref heap(new array<byte>(1024), out var Ꮡb);
             for (;;) {
-                {
-                    var (_, errΔ4) = cʗ2.Write(b[..]); if (errΔ4 != nil) {
-                        chʗ1.ᐸꟷ(errΔ4);
-                        break;
-                    }
+                var (_, errΔ4) = cʗ2.Write(b[..]); if (errΔ4 != nil) {
+                    chʗ1.ᐸꟷ(errΔ4);
+                    break;
                 }
             }
         });
@@ -814,10 +752,8 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> t) {
                     t.Error(perr);
                 }
             }
-            {
-                var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
-                    t.Fatal(errΔ6);
-                }
+            var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
+                t.Fatal(errΔ6);
             }
             break;
         }}
@@ -845,7 +781,7 @@ public static void TestWriteToTimeout(ж<testing.T> t) {
             10 * time.Millisecond
         ]);
 
-        foreach (var (_, timeout) in timeouts) {
+        foreach (var (_, timeout) in range(timeouts)) {
             var c1ʗ2 = c1;
             t.Run(fmt.Sprint(timeout), (ж<testing.T> tΔ1) => {
                 GoFrame ᒐ = default;
@@ -857,10 +793,8 @@ public static void TestWriteToTimeout(ж<testing.T> t) {
                     var c2ʗ1 = c2;
                     defer(() => c2ʗ1.Close(), ref ᒐ);
 
-                    {
-                        var errΔ2 = c2.SetWriteDeadline(time.Now().Add(timeout)); if (errΔ2 != nil) {
-                            tΔ1.Fatalf("SetWriteDeadline: %v", errΔ2);
-                        }
+                    var errΔ2 = c2.SetWriteDeadline(time.Now().Add(timeout)); if (errΔ2 != nil) {
+                        tΔ1.Fatalf("SetWriteDeadline: %v", errΔ2);
                     }
                     var backoff = 1 * time.Millisecond;
                     nint nDeadlineExceeded = 0;
@@ -883,10 +817,8 @@ public static void TestWriteToTimeout(ж<testing.T> t) {
                             backoff *= 2;
                             continue;
                         }
-                        {
-                            var perr = parseWriteError(errΔ3); if (perr != nil) {
-                                tΔ1.Errorf("failed to parse error: %v", perr);
-                            }
+                        var perr = parseWriteError(errΔ3); if (perr != nil) {
+                            tΔ1.Errorf("failed to parse error: %v", perr);
                         }
                         if (!isDeadlineExceeded(errΔ3)) {
                             tΔ1.Errorf("error is not 'deadline exceeded'");
@@ -981,10 +913,8 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> t) {
             t.Logf("SetReadDeadline(+%v)", d);
             var t0 = time.Now();
             var deadline = t0.Add(d);
-            {
-                err = c.SetReadDeadline(deadline); if (err != nil) {
-                    t.Fatalf("SetReadDeadline(%v): %v", deadline, err);
-                }
+            err = c.SetReadDeadline(deadline); if (err != nil) {
+                t.Fatalf("SetReadDeadline(%v): %v", deadline, err);
             }
             nint n = default;
             (n, err) = c.Read(b);
@@ -993,10 +923,8 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> t) {
             if (n != 0 || err == nil || !err._<ΔError>().Timeout()) {
                 t.Errorf("Read did not return (0, timeout): (%d, %v)", n, err);
             }
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                t.Error(perr);
             }
             if (!isDeadlineExceeded(err)) {
                 t.Errorf("Read error is not DeadlineExceeded: %v", err);
@@ -1009,18 +937,16 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> t) {
             if (t.Failed()) {
                 return;
             }
-            {
-                var want = timeoutUpperBound(d); if (actual > want) {
-                    var (next, ok) = nextTimeout(actual);
-                    if (!ok) {
-                        t.Fatalf("Read took %s; expected at most %v", actual, want);
-                    }
-                    // Maybe this machine is too slow to reliably schedule goroutines within
-                    // the requested duration. Increase the timeout and try again.
-                    t.Logf("Read took %s (expected %s); trying with longer timeout", actual, d);
-                    d = next;
-                    continue;
+            var want = timeoutUpperBound(d); if (actual > want) {
+                var (next, ok) = nextTimeout(actual);
+                if (!ok) {
+                    t.Fatalf("Read took %s; expected at most %v", actual, want);
                 }
+                // Maybe this machine is too slow to reliably schedule goroutines within
+                // the requested duration. Increase the timeout and try again.
+                t.Logf("Read took %s (expected %s); trying with longer timeout", actual, d);
+                d = next;
+                continue;
             }
 
             break;
@@ -1051,10 +977,8 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> t) {
             t.Logf("SetReadDeadline(+%v)", d);
             var t0 = time.Now();
             var deadline = t0.Add(d);
-            {
-                err = c2.SetReadDeadline(deadline); if (err != nil) {
-                    t.Fatalf("SetReadDeadline(%v): %v", deadline, err);
-                }
+            err = c2.SetReadDeadline(deadline); if (err != nil) {
+                t.Fatalf("SetReadDeadline(%v): %v", deadline, err);
             }
             nint n = default;
             (n, _, err) = c2._<PacketConn>().ReadFrom(b);
@@ -1063,10 +987,8 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> t) {
             if (n != 0 || err == nil || !err._<ΔError>().Timeout()) {
                 t.Errorf("ReadFrom did not return (0, timeout): (%d, %v)", n, err);
             }
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                t.Error(perr);
             }
             if (!isDeadlineExceeded(err)) {
                 t.Errorf("ReadFrom error is not DeadlineExceeded: %v", err);
@@ -1079,18 +1001,16 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> t) {
             if (t.Failed()) {
                 return;
             }
-            {
-                var want = timeoutUpperBound(d); if (actual > want) {
-                    var (next, ok) = nextTimeout(actual);
-                    if (!ok) {
-                        t.Fatalf("ReadFrom took %s; expected at most %s", actual, want);
-                    }
-                    // Maybe this machine is too slow to reliably schedule goroutines within
-                    // the requested duration. Increase the timeout and try again.
-                    t.Logf("ReadFrom took %s (expected %s); trying with longer timeout", actual, d);
-                    d = next;
-                    continue;
+            var want = timeoutUpperBound(d); if (actual > want) {
+                var (next, ok) = nextTimeout(actual);
+                if (!ok) {
+                    t.Fatalf("ReadFrom took %s; expected at most %s", actual, want);
                 }
+                // Maybe this machine is too slow to reliably schedule goroutines within
+                // the requested duration. Increase the timeout and try again.
+                t.Logf("ReadFrom took %s (expected %s); trying with longer timeout", actual, d);
+                d = next;
+                continue;
             }
 
             break;
@@ -1126,10 +1046,8 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> t) {
             t.Logf("SetWriteDeadline(+%v)", d);
             var t0 = time.Now();
             var deadline = t0.Add(d);
-            {
-                var errΔ1 = c.SetWriteDeadline(deadline); if (errΔ1 != nil) {
-                    t.Fatalf("SetWriteDeadline(%v): %v", deadline, errΔ1);
-                }
+            var errΔ1 = c.SetWriteDeadline(deadline); if (errΔ1 != nil) {
+                t.Fatalf("SetWriteDeadline(%v): %v", deadline, errΔ1);
             }
             int64 n = default;
             error errΔ2 = default;
@@ -1146,10 +1064,8 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> t) {
             if (!errΔ2._<ΔError>().Timeout()) {
                 t.Fatalf("Write did not return (any, timeout): (%d, %v)", n, errΔ2);
             }
-            {
-                var perr = parseWriteError(errΔ2); if (perr != nil) {
-                    t.Error(perr);
-                }
+            var perr = parseWriteError(errΔ2); if (perr != nil) {
+                t.Error(perr);
             }
             if (!isDeadlineExceeded(errΔ2)) {
                 t.Errorf("Write error is not DeadlineExceeded: %v", errΔ2);
@@ -1162,32 +1078,28 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> t) {
             if (t.Failed()) {
                 return;
             }
-            {
-                var want = timeoutUpperBound(d); if (actual > want) {
-                    if (n > 0) {
-                        // SetWriteDeadline specifies a time “after which I/O operations fail
-                        // instead of blocking”. However, the kernel's send buffer is not yet
-                        // full, we may be able to write some arbitrary (but finite) number of
-                        // bytes to it without blocking.
-                        t.Logf("Wrote %d bytes into send buffer; retrying until buffer is full", n);
-                        if (d <= maxDynamicTimeout / 2) {
-                            // We don't know how long the actual write loop would have taken if
-                            // the buffer were full, so just guess and double the duration so that
-                            // the next attempt can make twice as much progress toward filling it.
-                            d *= 2;
-                        }
-                    } else {
-                        var (next, ok) = nextTimeout(actual); if (!ok) {
-                            t.Fatalf("Write took %s; expected at most %s", actual, want);
-                        } else {
-                            // Maybe this machine is too slow to reliably schedule goroutines within
-                            // the requested duration. Increase the timeout and try again.
-                            t.Logf("Write took %s (expected %s); trying with longer timeout", actual, d);
-                            d = next;
-                        }
+            var want = timeoutUpperBound(d); if (actual > want) {
+                if (n > 0) {
+                    // SetWriteDeadline specifies a time “after which I/O operations fail
+                    // instead of blocking”. However, the kernel's send buffer is not yet
+                    // full, we may be able to write some arbitrary (but finite) number of
+                    // bytes to it without blocking.
+                    t.Logf("Wrote %d bytes into send buffer; retrying until buffer is full", n);
+                    if (d <= maxDynamicTimeout / 2) {
+                        // We don't know how long the actual write loop would have taken if
+                        // the buffer were full, so just guess and double the duration so that
+                        // the next attempt can make twice as much progress toward filling it.
+                        d *= 2;
                     }
-                    continue;
+                } else if (nextTimeout(actual) is var (next, ok) && !ok) {
+                    t.Fatalf("Write took %s; expected at most %s", actual, want);
+                } else {
+                    // Maybe this machine is too slow to reliably schedule goroutines within
+                    // the requested duration. Increase the timeout and try again.
+                    t.Logf("Write took %s (expected %s); trying with longer timeout", actual, d);
+                    d = next;
                 }
+                continue;
             }
 
             break;
@@ -1258,7 +1170,7 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
             }
         }
 
-        foreach (var (_, timeout) in slice<time.Duration>([
+        foreach (var (_, timeout) in range(slice<time.Duration>([
             1 * time.ΔNanosecond,
             2 * time.ΔNanosecond,
             5 * time.ΔNanosecond,
@@ -1278,7 +1190,7 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
             250 * time.Millisecond,
             500 * time.Millisecond,
             1 * time.ΔSecond
-        ])) {
+        ]))) {
             nint numRuns = 3;
             if (testing.Short()) {
                 numRuns = 1;
@@ -1296,21 +1208,17 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
                 }
 
                 var t0 = time.Now();
-                {
-                    var errΔ1 = c.SetDeadline(t0.Add(timeout)); if (errΔ1 != nil) {
-                        t.Error(errΔ1);
-                    }
+                var errΔ1 = c.SetDeadline(t0.Add(timeout)); if (errΔ1 != nil) {
+                    t.Error(errΔ1);
                 }
                 (var n, err) = Δio.Copy(Δio.Discard, new net_test_package.net_ConnᴠReader(c));
                 var dt = time.Since(t0);
                 c.Close();
 
-                {
-                    var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Timeout()) {
-                        t.Logf("%v: good timeout after %v; %d bytes", name, dt, n);
-                    } else {
-                        t.Fatalf("%v: Copy = %d, %v; want timeout", name, n, err);
-                    }
+                var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Timeout()) {
+                    t.Logf("%v: good timeout after %v; %d bytes", name, dt, n);
+                } else {
+                    t.Fatalf("%v: Copy = %d, %v; want timeout", name, n, err);
                 }
             }
         }
@@ -1353,26 +1261,18 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var bΔ1 = ref heap(new array<byte>(1), out var ᏑbΔ1);
                         for (;;) {
-                            {
-                                var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add(time.ΔHour)); if (errΔ2 != nil) {
-                                    {
-                                        var perr = parseCommonError(errΔ2); if (perr != nil) {
-                                            t.Error(perr);
-                                        }
-                                    }
-                                    t.Error(errΔ2);
-                                    return;
+                            var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add(time.ΔHour)); if (errΔ2 != nil) {
+                                var perr = parseCommonError(errΔ2); if (perr != nil) {
+                                    t.Error(perr);
                                 }
+                                t.Error(errΔ2);
+                                return;
                             }
-                            {
-                                var (_, errΔ3) = cʗ2.Read(bΔ1[..]); if (errΔ3 != nil) {
-                                    {
-                                        var perr = parseReadError(errΔ3); if (perr != nil) {
-                                            t.Error(perr);
-                                        }
-                                    }
-                                    return;
+                            var (_, errΔ3) = cʗ2.Read(bΔ1[..]); if (errΔ3 != nil) {
+                                var perr = parseReadError(errΔ3); if (perr != nil) {
+                                    t.Error(perr);
                                 }
+                                return;
                             }
                         }
                     }
@@ -1386,26 +1286,18 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var bΔ2 = ref heap(new array<byte>(1), out var ᏑbΔ2);
                         for (;;) {
-                            {
-                                var errΔ4 = cʗ3.SetWriteDeadline(time.Now().Add(time.ΔHour)); if (errΔ4 != nil) {
-                                    {
-                                        var perr = parseCommonError(errΔ4); if (perr != nil) {
-                                            t.Error(perr);
-                                        }
-                                    }
-                                    t.Error(errΔ4);
-                                    return;
+                            var errΔ4 = cʗ3.SetWriteDeadline(time.Now().Add(time.ΔHour)); if (errΔ4 != nil) {
+                                var perr = parseCommonError(errΔ4); if (perr != nil) {
+                                    t.Error(perr);
                                 }
+                                t.Error(errΔ4);
+                                return;
                             }
-                            {
-                                var (_, errΔ5) = cʗ3.Write(bΔ2[..]); if (errΔ5 != nil) {
-                                    {
-                                        var perr = parseWriteError(errΔ5); if (perr != nil) {
-                                            t.Error(perr);
-                                        }
-                                    }
-                                    return;
+                            var (_, errΔ5) = cʗ3.Write(bΔ2[..]); if (errΔ5 != nil) {
+                                var perr = parseWriteError(errΔ5); if (perr != nil) {
+                                    t.Error(perr);
                                 }
+                                return;
                             }
                         }
                     }
@@ -1420,10 +1312,8 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> t) {
         var ls = newLocalServer(new net_test_package.testing_TжTB(t), tcpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
-        {
-            var errΔ6 = ls.buildup(handler); if (errΔ6 != nil) {
-                t.Fatal(errΔ6);
-            }
+        var errΔ6 = ls.buildup(handler); if (errΔ6 != nil) {
+            t.Fatal(errΔ6);
         }
 
         var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
@@ -1476,25 +1366,17 @@ public static partial void TestReadWriteDeadlineRace(ж<testing.T> t) {
                 var ticʗ1 = tic;
                 defer(ticʗ1.Stop, ref ᒐ);
                 for (nint i = 0; i < N; i++) {
-                    {
-                        var errΔ1 = cʗ2.SetReadDeadline(time.Now().Add(2 * time.Microsecond)); if (errΔ1 != nil) {
-                            {
-                                var perr = parseCommonError(errΔ1); if (perr != nil) {
-                                    t.Error(perr);
-                                }
-                            }
-                            break;
+                    var errΔ1 = cʗ2.SetReadDeadline(time.Now().Add(2 * time.Microsecond)); if (errΔ1 != nil) {
+                        var perr = parseCommonError(errΔ1); if (perr != nil) {
+                            t.Error(perr);
                         }
+                        break;
                     }
-                    {
-                        var errΔ2 = cʗ2.SetWriteDeadline(time.Now().Add(2 * time.Microsecond)); if (errΔ2 != nil) {
-                            {
-                                var perr = parseCommonError(errΔ2); if (perr != nil) {
-                                    t.Error(perr);
-                                }
-                            }
-                            break;
+                    var errΔ2 = cʗ2.SetWriteDeadline(time.Now().Add(2 * time.Microsecond)); if (errΔ2 != nil) {
+                        var perr = parseCommonError(errΔ2); if (perr != nil) {
+                            t.Error(perr);
                         }
+                        break;
                     }
                     ᐸꟷ(tic.C);
                 }

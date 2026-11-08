@@ -36,40 +36,38 @@ internal static float64 pow2(nint i) {
 // Wrapper around ParseFloat(x, 64).  Handles dddddp+ddd (binary exponent)
 // itself, passes the rest on to ParseFloat.
 internal static (float64 f, bool ok) myatof64(@string s) {
-    {
-        var (mant, exp, okΔ1) = strings.Cut(s, "p"); if (okΔ1) {
-            var (n, errΔ1) = ParseInt(mant, 10, 64);
-            if (errΔ1 != nil) {
-                return (0D, false);
-            }
-            var (e, err1) = Atoi(exp);
-            if (err1 != nil) {
-                println((@string)"bad e", exp);
-                return (0D, false);
-            }
-            var v = (float64)n;
-            // We expect that v*pow2(e) fits in a float64,
-            // but pow2(e) by itself may not. Be careful.
-            if (e <= -1000) {
-                v *= pow2(-1000);
-                e += 1000;
-                while (e < 0) {
-                    v /= 2D;
-                    e++;
-                }
-                return (v, true);
-            }
-            if (e >= 1000) {
-                v *= pow2(1000);
-                e -= 1000;
-                while (e > 0) {
-                    v *= 2D;
-                    e--;
-                }
-                return (v, true);
-            }
-            return (v * pow2(e), true);
+    var (mant, exp, okΔ1) = strings.Cut(s, "p"); if (okΔ1) {
+        var (n, errΔ1) = ParseInt(mant, 10, 64);
+        if (errΔ1 != nil) {
+            return (0D, false);
         }
+        var (e, err1) = Atoi(exp);
+        if (err1 != nil) {
+            println((@string)"bad e", exp);
+            return (0D, false);
+        }
+        var v = (float64)n;
+        // We expect that v*pow2(e) fits in a float64,
+        // but pow2(e) by itself may not. Be careful.
+        if (e <= -1000) {
+            v *= pow2(-1000);
+            e += 1000;
+            while (e < 0) {
+                v /= 2D;
+                e++;
+            }
+            return (v, true);
+        }
+        if (e >= 1000) {
+            v *= pow2(1000);
+            e -= 1000;
+            while (e > 0) {
+                v *= 2D;
+                e--;
+            }
+            return (v, true);
+        }
+        return (v * pow2(e), true);
     }
     var (f1, err) = ParseFloat(s, 64);
     if (err != nil) {
@@ -81,20 +79,18 @@ internal static (float64 f, bool ok) myatof64(@string s) {
 // Wrapper around strconv.ParseFloat(x, 32).  Handles dddddp+ddd (binary exponent)
 // itself, passes the rest on to strconv.ParseFloat.
 internal static (float32 f, bool ok) myatof32(@string s) {
-    {
-        var (mant, exp, okΔ1) = strings.Cut(s, "p"); if (okΔ1) {
-            var (n, err) = Atoi(mant);
-            if (err != nil) {
-                println((@string)"bad n", mant);
-                return (0F, false);
-            }
-            var (e, err1Δ1) = Atoi(exp);
-            if (err1Δ1 != nil) {
-                println((@string)"bad p", exp);
-                return (0F, false);
-            }
-            return ((float32)((float64)n * pow2(e)), true);
+    var (mant, exp, okΔ1) = strings.Cut(s, "p"); if (okΔ1) {
+        var (n, err) = Atoi(mant);
+        if (err != nil) {
+            println((@string)"bad n", mant);
+            return (0F, false);
         }
+        var (e, err1Δ1) = Atoi(exp);
+        if (err1Δ1 != nil) {
+            println((@string)"bad p", exp);
+            return (0F, false);
+        }
+        return ((float32)((float64)n * pow2(e)), true);
     }
     var (f64, err1) = ParseFloat(s, 32);
     var f1 = (float32)f64;
@@ -194,10 +190,8 @@ internal static (@string @file, @string data) openTestbase(ж<testing.T> t, @str
 
     // Use cached copy if present.
     @file = "testdata/"u8 + name + ".txt"u8;
-    {
-        var (dataΔ1, errΔ1) = os.ReadFile(@file); if (errΔ1 == nil) {
-            return (@file, (@string)dataΔ1);
-        }
+    var (dataΔ1, errΔ1) = os.ReadFile(@file); if (errΔ1 == nil) {
+        return (@file, (@string)dataΔ1);
     }
 
     // Download copy.
@@ -214,10 +208,8 @@ internal static (@string @file, @string data) openTestbase(ж<testing.T> t, @str
     if (err != nil) {
         t.Fatalf("%s: %s", url, err);
     }
-    {
-        var errΔ2 = os.WriteFile(@file, bytes, 438); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = os.WriteFile(@file, bytes, 438); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
     return (@file, (@string)bytes);
 }
@@ -248,19 +240,15 @@ public static void TestParseFloatTestdata(ж<testing.T> t) {
         }
         if (err2 != nil) {
             t.Errorf("ParseFloat(%#q): %v", s, err2);
-            {
-                fail++; if (fail > 100) {
-                    t.Fatalf("too many failures");
-                }
+            fail++; if (fail > 100) {
+                t.Fatalf("too many failures");
             }
             continue;
         }
         if (have != want) {
             t.Errorf("ParseFloat(%#q) = %#x, want %#x", s, have, want);
-            {
-                fail++; if (fail > 100) {
-                    t.Fatalf("too many failures");
-                }
+            fail++; if (fail > 100) {
+                t.Fatalf("too many failures");
             }
         }
     }
@@ -294,10 +282,8 @@ public static void TestFormatFloatTestdata(ж<testing.T> t) {
             @string have = FormatFloat(f, (byte)'e', i, 64);
             if (have != want) {
                 t.Errorf("FormatFloat(%#x, 'e', %d) = %s, want %s", f, i, have, want);
-                {
-                    fail++; if (fail > 100) {
-                        t.Fatalf("too many failures");
-                    }
+                fail++; if (fail > 100) {
+                    t.Fatalf("too many failures");
                 }
             }
         }

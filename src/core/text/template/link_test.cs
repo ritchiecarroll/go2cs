@@ -61,17 +61,13 @@ public static void TestLinkerGC(ж<testing.T> t) {
     @string prog = progᶜ;
     @string td = t.TempDir();
 
-    {
-        var errΔ1 = os.WriteFile(filepath.Join(td, xGoˢ), slice<byte>(prog), 420); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(filepath.Join(td, xGoˢ), slice<byte>(prog), 420); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var cmd = exec.Command(testenv.GoToolPath(new template_test_package.testing_TжTB(t)), buildˢ, "-o", xExeˢ, xGoˢ);
     cmd.Dir = td;
-    {
-        var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
-            t.Fatalf("go build: %v, %s", errΔ2, @out);
-        }
+    var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+        t.Fatalf("go build: %v, %s", errΔ2, @out);
     }
     var (slurp, err) = os.ReadFile(filepath.Join(td, xExeˢ));
     if (err != nil) {

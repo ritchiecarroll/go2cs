@@ -59,7 +59,7 @@ using static go.text.tabwriter_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqCgt6SgoKCgoKCADKEAQAPAoKUgoKCgoKUlJSUlKiSgoKCgoKUlAAIEoKCgpSCuIKCgpSogpaClIKmgoKClIK4ppSigoKmlIKUppSCuIKCgoKCpoKUgsqmgqamruKCgoKUggAJFIKmgoKCgoKmlIKmgtyCyoKCgriokoKokoIAChiSlLS0AAQQwpSCgvikgqqigoKCgqbigpSUgoKUtKzC6gAIAoKC7MSClJS4gqbaAAoCpoKClKaCgoKClILcgpT+goKCgpTIlIKCgtyUgoKUgoLcgoLaog==")]
-[assembly: GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABMmgKSApIKCgoKCgqaUpoCkgoKClIK4ooKCpoKCuIKClIKmgoKCpoKCgpSmgoKCgoKCpgAJBgCLA4wIgoLsgqbCgIKClLTm5KKCgoKCgoKi5KKCgoKCgqIACASClIKCgoKCgoKUgpS4goKClIKUAAcQgpSCkoKClIKClNyCgpSUgpKCgpSCgpQAFSaigoKmgg==", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
+[assembly: GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABMmlJSCgoKCgoKmlKaUgoKClIK4ooKCpoKCuIKClIKmgoKCpoKCgpSmgoKCgoKCpgAJBgCLA4wIgoLsgqbCgoKUtNbkooKCgoKCgqLkooKCgoKCogAIBIKUgoKCgoKCgpSClLiCgoKUgpQABxCClIKSgoKUgoKU3IKClJSCkoKClIKClAAVJqKCgqaC", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

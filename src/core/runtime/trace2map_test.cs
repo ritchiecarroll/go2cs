@@ -7,8 +7,6 @@ using static runtime_package;
 using strconv = strconv_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
 
@@ -28,7 +26,7 @@ public static void TestTraceMap(ж<testing.T> t) {
             "ba",
             "bb"
         }.array();
-        foreach (var (i, s) in d.ΔRangeSnapshot()) {
+        foreach (var (i, s) in range(d.ΔRangeSnapshot())) {
             var (id, inserted) = Ꮡm.PutString(s);
             if (!inserted) {
                 t.Errorf("expected to have inserted string %q, but did not", s);
@@ -37,7 +35,7 @@ public static void TestTraceMap(ж<testing.T> t) {
                 t.Errorf("expected string %q to have ID %d, but got %d instead", s, i + 1, id);
             }
         }
-        foreach (var (i, s) in d.ΔRangeSnapshot()) {
+        foreach (var (i, s) in range(d.ΔRangeSnapshot())) {
             var (id, inserted) = Ꮡm.PutString(s);
             if (inserted) {
                 t.Errorf("inserted string %q, but expected to have not done so", s);
@@ -74,14 +72,14 @@ public static partial void TestTraceMapConcurrent(ж<testing.T> t) {
                     "bb"u8 + si
                 }.array();
                 var ids = new slice<uint64>(0, len(d));
-                foreach (var (_, s) in d.ΔRangeSnapshot()) {
+                foreach (var (_, s) in range(d.ΔRangeSnapshot())) {
                     var (id, inserted) = Ꮡm.PutString(s);
                     if (!inserted) {
                         t.Errorf("expected to have inserted string %q, but did not", s);
                     }
                     ids = append(idsᴷ, ids, id);
                 }
-                foreach (var (iΔ2, s) in d.ΔRangeSnapshot()) {
+                foreach (var (iΔ2, s) in range(d.ΔRangeSnapshot())) {
                     var (id, inserted) = Ꮡm.PutString(s);
                     if (inserted) {
                         t.Errorf("inserted string %q, but expected to have not done so", s);

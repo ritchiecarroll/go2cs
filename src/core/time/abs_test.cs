@@ -28,14 +28,14 @@ partial struct InternalTestsᴛ1 /*dyn*/ {
     public @string Name;
     public Action<testingT> Test;
 }
-public static readonly ж<slice<InternalTestsᴛ1>> ᏑInternalTests = new StaticBox<slice<InternalTestsᴛ1>>(slice<InternalTestsᴛ1>([
+public static readonly ж<slice<InternalTestsᴛ1>> ᏑInternalTests = new StaticBox<slice<InternalTestsᴛ1>>([
     new("AbsDaysSplit", testAbsDaysSplit),
     new("AbsYdaySplit", testAbsYdaySplit),
     new("AbsDate", testAbsDate),
     new("DateToAbsDays", testDateToAbsDays),
     new("DaysIn", testDaysIn),
     new("DaysBefore", testDaysBefore)
-]));
+]);
 public static ref slice<InternalTestsᴛ1> InternalTests => ref ((StaticBox<slice<InternalTestsᴛ1>>)ᏑInternalTests).ValueSlot;
 
 internal static void testAbsDaysSplit(testingT t) {
@@ -49,21 +49,17 @@ internal static void testAbsDaysSplit(testingT t) {
             t.Errorf("absDays(%d).split() = %d, %d, %d, want %d, %d, %d",
                 days, century, cyear, yday,
                 wantYear / 100, wantYear % 100, wantYday);
-            {
-                bad++; if (bad >= 20) {
-                    t.Fatalf("too many errors");
-                }
+            bad++; if (bad >= 20) {
+                t.Fatalf("too many errors");
             }
         }
         global::go.time_package.absYday end = (global::go.time_package.absYday)365;
         if (isLeap(wantYear + 1)) {
             end = 366;
         }
-        {
-            wantYday++; if (wantYday == end) {
-                wantYear++;
-                wantYday = 0;
-            }
+        wantYday++; if (wantYday == end) {
+            wantYear++;
+            wantYday = 0;
         }
     }
 }
@@ -77,17 +73,13 @@ internal static void testAbsYdaySplit(testingT t) {
         var (month, day) = yday.split();
         if (month != wantMonth || day != wantDay) {
             t.Errorf("absYday(%d).split() = %d, %d, want %d, %d", yday, month, day, wantMonth, wantDay);
-            {
-                bad++; if (bad >= 20) {
-                    t.Fatalf("too many errors");
-                }
+            bad++; if (bad >= 20) {
+                t.Fatalf("too many errors");
             }
         }
-        {
-            wantDay++; if (wantDay > ends[wantMonth - 3]) {
-                wantMonth++;
-                wantDay = 1;
-            }
+        wantDay++; if (wantDay > ends[wantMonth - 3]) {
+            wantMonth++;
+            wantDay = 1;
         }
     }
 }
@@ -111,10 +103,8 @@ internal static void testAbsDate(testingT t) {
             t.Errorf("days(%d).date() = %v, %v, %v, want %v, %v, %v", days,
                 year, month, mday,
                 wantYear, wantMonth, wantMday);
-            {
-                bad++; if (bad >= 20) {
-                    t.Fatalf("too many errors");
-                }
+            bad++; if (bad >= 20) {
+                t.Fatalf("too many errors");
             }
         }
 
@@ -124,18 +114,14 @@ internal static void testAbsDate(testingT t) {
             t.Errorf("days(%d).yearYday() = %v, %v, want %v, %v, ", days,
                 year, yday,
                 wantYear, wantYday);
-            {
-                bad++; if (bad >= 20) {
-                    t.Fatalf("too many errors");
-                }
+            bad++; if (bad >= 20) {
+                t.Fatalf("too many errors");
             }
         }
 
-        {
-            wantMday++; if (wantMday == ends[wantMonth - 1] + 1 || wantMonth == February && wantMday == 29 && !isLeap(year)) {
-                wantMonth++;
-                wantMday = 1;
-            }
+        wantMday++; if (wantMday == ends[wantMonth - 1] + 1 || wantMonth == February && wantMday == 29 && !isLeap(year)) {
+            wantMonth++;
+            wantMday = 1;
         }
         wantYday++;
         if (wantMonth == December + 1) {
@@ -155,10 +141,8 @@ internal static void testDateToAbsDays(testingT t) {
         var days = dateToAbsDays(year - (int64)absoluteYears, January, 1);
         if (days != wantDays) {
             t.Errorf("dateToAbsDays(abs %d, Jan, 1) = %d, want %d", year, days, wantDays);
-            {
-                bad++; if (bad >= 20) {
-                    t.Fatalf("too many errors");
-                }
+            bad++; if (bad >= 20) {
+                t.Fatalf("too many errors");
             }
         }
         wantDays += 365;
@@ -181,10 +165,8 @@ internal static void testDaysIn(testingT t) {
             nint d = daysIn(m, year - 800);
             if (d != w) {
                 t.Errorf("daysIn(%v, %d) = %d, want %d", m, year - 800, d, w);
-                {
-                    bad++; if (bad >= 20) {
-                        t.Fatalf("too many errors");
-                    }
+                bad++; if (bad >= 20) {
+                    t.Fatalf("too many errors");
                 }
             }
         }
@@ -192,7 +174,7 @@ internal static void testDaysIn(testingT t) {
 }
 
 internal static void testDaysBefore(testingT t) {
-    foreach (var (m, want) in slice<nint>([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365])) {
+    foreach (var (m, want) in range(slice<nint>([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]))) {
         nint d = daysBefore((global::go.time_package.ΔMonth)(m + 1));
         if (d != want) {
             t.Errorf("daysBefore(%d) = %d, want %d", m, d, want);

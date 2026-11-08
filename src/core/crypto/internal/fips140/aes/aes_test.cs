@@ -61,10 +61,8 @@ public static void TestMul(ж<testing.T> t) {
                     }
                 }
             }
-            {
-                var x = mul(i, j); if (x != (uint32)s) {
-                    t.Fatalf("mul(%#x, %#x) = %#x, want %#x", i, j, x, s);
-                }
+            var x = mul(i, j); if (x != (uint32)s) {
+                t.Fatalf("mul(%#x, %#x) = %#x, want %#x", i, j, x, s);
             }
         }
     }
@@ -99,10 +97,8 @@ public static void TestTe(ж<testing.T> t) {
         var w = s2 << 24 | s << 16 | s << 8 | s3;
         var te = GoReflect.WithElemDims(new array<uint32>[]{te0.Clone(), te1.Clone(), te2.Clone(), te3.Clone()}.slice(), 256);
         for (nint j = 0; j < 4; j++) {
-            {
-                var x = te[j][i]; if (x != w) {
-                    t.Fatalf("te[%d][%d] = %#x, want %#x", j, i, x, w);
-                }
+            var x = te[j][i]; if (x != w) {
+                t.Fatalf("te[%d][%d] = %#x, want %#x", j, i, x, w);
             }
             w = w << 24 | w >> 8;
         }
@@ -121,10 +117,8 @@ public static void TestTd(ж<testing.T> t) {
         var w = se << 24 | s9 << 16 | sd << 8 | sb;
         var td = GoReflect.WithElemDims(new array<uint32>[]{td0.Clone(), td1.Clone(), td2.Clone(), td3.Clone()}.slice(), 256);
         for (nint j = 0; j < 4; j++) {
-            {
-                var x = td[j][i]; if (x != w) {
-                    t.Fatalf("td[%d][%d] = %#x, want %#x", j, i, x, w);
-                }
+            var x = td[j][i]; if (x != w) {
+                t.Fatalf("td[%d][%d] = %#x, want %#x", j, i, x, w);
             }
             w = w << 24 | w >> 8;
         }

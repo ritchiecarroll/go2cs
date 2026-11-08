@@ -33,10 +33,8 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     if (err != nil) {
         Ꮡf.Fatalf("failed to write file to archive: %s", err);
     }
-    {
-        var errΔ1 = w.Close(); if (errΔ1 != nil) {
-            Ꮡf.Fatalf("failed to write archive: %s", errΔ1);
-        }
+    var errΔ1 = w.Close(); if (errΔ1 != nil) {
+        Ꮡf.Fatalf("failed to write archive: %s", errΔ1);
     }
     f.Add(b.Bytes());
 
@@ -53,10 +51,8 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 return;
             }
             var buf = bytes.NewBuffer(default);
-            {
-                var (_, errΔ3) = io.Copy(new tar_test_package.bytes_BufferжWriter(buf), new global::go.archive.tar_package.ReaderжReader(r)); if (errΔ3 != nil) {
-                    continue;
-                }
+            var (_, errΔ3) = io.Copy(new tar_test_package.bytes_BufferжWriter(buf), new global::go.archive.tar_package.ReaderжReader(r)); if (errΔ3 != nil) {
+                continue;
             }
             files = append(filesᴷ, files, new FuzzReader_file(header: hdr, content: buf.Bytes()));
         }
@@ -70,22 +66,16 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         var @out = bytes.NewBuffer(default);
         var wΔ1 = NewWriter(new tar_test_package.bytes_BufferжWriter(@out));
         files = move2heap(filesᴷ, files);
-        foreach (var (_, fΔ1) in files) {
-            {
-                var errΔ4 = wΔ1.WriteHeader(fΔ1.header); if (errΔ4 != nil) {
-                    t.Fatalf("unable to write previously parsed header: %s", errΔ4);
-                }
+        foreach (var (_, fΔ1) in range(files)) {
+            var errΔ4 = wΔ1.WriteHeader(fΔ1.header); if (errΔ4 != nil) {
+                t.Fatalf("unable to write previously parsed header: %s", errΔ4);
             }
-            {
-                var (_, errΔ5) = wΔ1.Write(fΔ1.content); if (errΔ5 != nil) {
-                    t.Fatalf("unable to write previously parsed content: %s", errΔ5);
-                }
+            var (_, errΔ5) = wΔ1.Write(fΔ1.content); if (errΔ5 != nil) {
+                t.Fatalf("unable to write previously parsed content: %s", errΔ5);
             }
         }
-        {
-            var errΔ6 = wΔ1.Close(); if (errΔ6 != nil) {
-                t.Fatalf("Unable to write archive: %s", errΔ6);
-            }
+        var errΔ6 = wΔ1.Close(); if (errΔ6 != nil) {
+            t.Fatalf("Unable to write archive: %s", errΔ6);
         }
 
         // TODO: We may want to check if the archive roundtrips. This would require

@@ -39,7 +39,7 @@ using static global::go.crypto.@internal.fips140cache_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140cache/cache_test.go", "cache_test.cs", "ABcggoKCgoKCgqaClJKmgqaCkoKCgqaCpoKCkoKUppKCooKUgoKmgpKCgoKCuIKCgoKCgoLigpKClOKCkoKUgoKCkpSClAAKHLKmooKClIKCpqaCgpSCgoKClIKUlKbCgpKQkoKClIK0", "18-18:1;19-19:2;20-24:3;29-29:4;38-38:5;51-51:6;58-58:7;60-60:8;70-70:9;86-91:10;88-88:10.1;92-97:11;94-94:11.1;101-101:12;144-147:1;159-159:1", "", "", "195:21")]
+[assembly: GoPositionMap("crypto/internal/fips140cache/cache_test.go", "cache_test.cs", "ABUggoKCgoKCgqaClJKmgqaCkoKCgqaCpoKCkoKUppKCooKUgoKmgpKCgoKCuIKCgoKCgoLigpKClOKCkoKUgoKCkpSClAAKHLKmooKClIKCpqaCgpSCgoKClIKUlKbCgpKQkoKClIK0", "18-18:1;19-19:2;20-24:3;29-29:4;38-38:5;51-51:6;58-58:7;60-60:8;70-70:9;86-91:10;88-88:10.1;92-97:11;94-94:11.1;101-101:12;144-147:1;159-159:1", "", "", "193:21")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

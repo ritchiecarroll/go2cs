@@ -53,7 +53,7 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
 ]);
 
 public static void TestSearch(ж<testing.T> t) {
-    foreach (var (_, e) in tests) {
+    foreach (var (_, e) in range(tests)) {
         nint i = Search(e.n, e.f);
         if (i != e.i) {
             t.Errorf("%s: expected index %d; got %d", e.name, e.i, i);
@@ -81,8 +81,8 @@ public static void TestFind(ж<testing.T> t) {
     var strSame = slice<@string>(["xx", "xx", "xx"]);
 
     var tests = slice<TestFind_tests>([
-        new(slice<@string>([]), "foo", 0, false),
-        new(slice<@string>([]), "", 0, false),
+        new([], "foo", 0, false),
+        new([], "", 0, false),
 
         new(str1, "foo", 0, true),
         new(str1, "bar", 0, false),
@@ -123,7 +123,7 @@ public static void TestFind(ж<testing.T> t) {
         new(strSame, "zz", 3, false)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestFind_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -177,7 +177,6 @@ public static void TestSearchEfficiency(ж<testing.T> t) {
 
 // Smoke tests for convenience wrappers - not comprehensive.
 internal static slice<float64> fdata = new slice<float64>(5){[0] = -3.14D, [1] = 0D, [2] = 1D, [3] = 2D, [4] = 1000.7D};
-
 internal static slice<@string> sdata = new slice<@string>(4){[0] = "f", [1] = "foo", [2] = "foobar", [3] = "x"};
 
 partial struct wrappertestsᴛ1 /*dyn*/ {
@@ -195,7 +194,7 @@ internal static slice<wrappertestsᴛ1> wrappertests = slice<wrappertestsᴛ1>([
 ]);
 
 public static void TestSearchWrappers(ж<testing.T> t) {
-    foreach (var (_, e) in wrappertests) {
+    foreach (var (_, e) in range(wrappertests)) {
         if (e.result != e.i) {
             t.Errorf("%s: expected index %d; got %d", e.name, e.i, e.result);
         }

@@ -24,7 +24,7 @@ public static void TestResolveGoogle(ж<testing.T> t) {
         t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6"])) {
+    foreach (var (_, network) in range(slice<@string>(["tcp", "tcp4", "tcp6"]))) {
         var (addr, err) = ResolveTCPAddr(network, wwwGoogleComHttpˢ);
         if (err != nil) {
             t.Error(err);
@@ -50,23 +50,23 @@ partial struct dialGoogleTestsᴛ1 /*dyn*/ {
     internal slice<@string> addrs;
 }
 internal static slice<dialGoogleTestsᴛ1> dialGoogleTests;
-internal static void initᴛdialGoogleTests() { dialGoogleTests = slice<dialGoogleTestsᴛ1>([
+internal static void initᴛdialGoogleTests() { dialGoogleTests = [
     new(
         dial: (Ꮡ(new Dialer(DualStack: true))).Dial,
-        networks: slice<@string>(["tcp", "tcp4", "tcp6"]),
-        addrs: slice<@string>(["www.google.com:http"])
+        networks: ["tcp", "tcp4", "tcp6"],
+        addrs: ["www.google.com:http"]
     ),
     new(
         dial: Dial,
         unreachableNetwork: "tcp6",
-        networks: slice<@string>(["tcp", "tcp4"])
+        networks: ["tcp", "tcp4"]
     ),
     new(
         dial: Dial,
         unreachableNetwork: "tcp4",
-        networks: slice<@string>(["tcp", "tcp6"])
+        networks: ["tcp", "tcp6"]
     )
-]); }
+]; }
 
 public static void TestDialGoogle(ж<testing.T> t) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
@@ -80,14 +80,12 @@ public static void TestDialGoogle(ж<testing.T> t) {
     if (err != nil) {
         t.Error(err);
     }
-    foreach (var (_, tt) in dialGoogleTests) {
-        foreach (var (_, network) in tt.networks) {
+    foreach (var (_, tt) in range(dialGoogleTests)) {
+        foreach (var (_, network) in range(tt.networks)) {
             disableSocketConnect(tt.unreachableNetwork);
-            foreach (var (_, addr) in tt.addrs) {
-                {
-                    var errΔ1 = fetchGoogle(tt.dial, network, addr); if (errΔ1 != nil) {
-                        t.Error(errΔ1);
-                    }
+            foreach (var (_, addr) in range(tt.addrs)) {
+                var errΔ1 = fetchGoogle(tt.dial, network, addr); if (errΔ1 != nil) {
+                    t.Error(errΔ1);
                 }
             }
             enableSocketConnect();
@@ -131,7 +129,7 @@ internal static (slice<@string> lits4, slice<@string> lits6, error err) googleLi
     }
     global::go.net_package.IP ip4 = default;
     global::go.net_package.IP ip6 = default;
-    foreach (var (_, ip) in ips) {
+    foreach (var (_, ip) in range(ips)) {
         if (ip4 == nil && ip.To4() != nil) {
             ip4 = ip.To4();
         }
@@ -143,7 +141,7 @@ internal static (slice<@string> lits4, slice<@string> lits6, error err) googleLi
         }
     }
     if (ip4 != nil) {
-        foreach (var (i, lit4) in literalAddrs4.ΔRangeSnapshot()) {
+        foreach (var (i, lit4) in range(literalAddrs4.ΔRangeSnapshot())) {
             if (strings.Contains(lit4, "%")) {
                 literalAddrs4[i] = fmt.Sprintf(lit4, ip4[0], ip4[1], ip4[2], ip4[3]);
             }
@@ -151,7 +149,7 @@ internal static (slice<@string> lits4, slice<@string> lits6, error err) googleLi
         lits4 = literalAddrs4[..];
     }
     if (ip6 != nil) {
-        foreach (var (i, lit6) in literalAddrs6.ΔRangeSnapshot()) {
+        foreach (var (i, lit6) in range(literalAddrs6.ΔRangeSnapshot())) {
             if (strings.Contains(lit6, "%")) {
                 literalAddrs6[i] = fmt.Sprintf(lit6, ip6[0], ip6[1], ip6[2], ip6[3], ip6[4], ip6[5], ip6[6], ip6[7], ip6[8], ip6[9], ip6[10], ip6[11], ip6[12], ip6[13], ip6[14], ip6[15]);
             }
@@ -171,10 +169,8 @@ internal static error fetchGoogle(Func<@string, @string, (global::go.net_package
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
         var req = slice<byte>("GET /robots.txt HTTP/1.0\r\nHost: www.google.com\r\n\r\n"u8);
-        {
-            var (_, errΔ1) = c.Write(req); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var (_, errΔ1) = c.Write(req); if (errΔ1 != nil) {
+            return errΔ1;
         }
         var b = new slice<byte>(1000);
         (var n, err) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(c), b);

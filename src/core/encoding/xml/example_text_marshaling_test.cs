@@ -85,14 +85,12 @@ internal partial struct Example_textMarshalXML_inventory /*dyn*/ {
 public static void Example_textMarshalXML() {
     @string blob = sizesSizeSmallSizeSizeˢ;
     ref var inventory = ref heap(new Example_textMarshalXML_inventory(), out var Ꮡinventory);
-    {
-        var err = xml.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != nil) {
-            log.Fatal(err);
-        }
+    var err = xml.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != nil) {
+        log.Fatal(err);
     }
 
     var counts = new map<Size, nint>();
-    foreach (var (_, size) in inventory.Sizes) {
+    foreach (var (_, size) in range(inventory.Sizes)) {
         counts[size] += 1;
     }
 

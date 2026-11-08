@@ -19,7 +19,7 @@ partial class http_test_package {
 // by the http.FileSystem interface.
 internal static bool containsDotFile(@string name) {
     var parts = strings.Split(name, "/");
-    foreach (var (_, part) in parts) {
+    foreach (var (_, part) in range(parts)) {
         if (strings.HasPrefix(part, ".")) {
             return true;
         }
@@ -42,7 +42,7 @@ internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFi
     var fisᴷ = new stackAppend<fs.FileInfo>(moves: true);
 
     (var files, err) = f.File.Readdir(n);
-    foreach (var (_, @file) in files) { // Filters out the dot files
+    foreach (var (_, @file) in range(files)) { // Filters out the dot files
         if (!strings.HasPrefix(@file.Name(), ".")) {
             fis = append(fisᴷ, fis, @file);
         }

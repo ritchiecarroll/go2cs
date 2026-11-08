@@ -7,8 +7,6 @@ using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using hex = encoding.hex_package;
 using reflect = reflect_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.crypto.@internal.fips140.edwards25519;
 using static go.crypto.@internal.fips140.edwards25519_package;
@@ -17,7 +15,6 @@ partial class edwards25519_internal_test_package {
 
 public static ж<global::go.crypto.@internal.fips140.edwards25519_package.Point> B;
 internal static void initᴛB() { B = NewGeneratorPoint(); }
-
 public static ж<global::go.crypto.@internal.fips140.edwards25519_package.Point> I;
 internal static void initᴛI() { I = NewIdentityPoint(); }
 
@@ -25,7 +22,7 @@ internal static void checkOnCurve(ж<testing.T> t, params Span<ж<global::go.cry
     var points = pointsʗp.sslice();
 
     t.Helper();
-    foreach (var (i, p) in points) {
+    foreach (var (i, p) in range(points)) {
         ref var XX = ref heap(new field.Element(), out var ᏑXX);
         ref var YY = ref heap(new field.Element(), out var ᏑYY);
         ref var ZZ = ref heap(new field.Element(), out var ᏑZZ);
@@ -127,14 +124,12 @@ public static void TestInvalidEncodings(ж<testing.T> t) {
     // An invalid point, that also happens to have y > p.
     @string invalid = "efffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f";
     var p = NewGeneratorPoint();
-    {
-        var (@out, err) = p.SetBytes(decodeHex(invalid)); if (err == nil) {
-            t.Error(expectedErrorForInvalidˢ);
-        } else if (@out != nil) {
-            t.Error(setBytesDidNotReturnNilˢ);
-        } else if (p.Equal(B) != 1) {
-            t.Error(thePointWasModifiedWhileˢ);
-        }
+    var (@out, err) = p.SetBytes(decodeHex(invalid)); if (err == nil) {
+        t.Error(expectedErrorForInvalidˢ);
+    } else if (@out != nil) {
+        t.Error(setBytesDidNotReturnNilˢ);
+    } else if (p.Equal(B) != 1) {
+        t.Error(thePointWasModifiedWhileˢ);
     }
     checkOnCurve(t, p);
 }
@@ -289,7 +284,7 @@ public static void TestNonCanonicalPoints(ж<testing.T> t) {
             "1200000000000000000000000000000000000000000000000000000000000080"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNonCanonicalPoints_test(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -306,10 +301,8 @@ public static void TestNonCanonicalPoints(ж<testing.T> t) {
             if (p1.Equal(p2) != 1) {
                 tΔ1.Errorf("equivalent points are not equal: %v, %v", p1.OrTypedNil(), p2.OrTypedNil());
             }
-            {
-                @string encoding = hex.EncodeToString(p1.Bytes()); if (encoding != ttʗ1.canonical) {
-                    tΔ1.Errorf("re-encoding does not match canonical; got %q, expected %q", encoding, ttʗ1.canonical);
-                }
+            @string encoding = hex.EncodeToString(p1.Bytes()); if (encoding != ttʗ1.canonical) {
+                tΔ1.Errorf("re-encoding does not match canonical; got %q, expected %q", encoding, ttʗ1.canonical);
             }
             checkOnCurve(tΔ1, p1, p2);
         });

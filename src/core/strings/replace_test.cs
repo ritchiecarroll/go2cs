@@ -267,7 +267,7 @@ public static void TestReplacer(ж<testing.T> t) {
 
     // genAll maps "\x00\x01\x02...\xfe\xff" to "[all]", amongst other things.
     var allBytes = new slice<byte>(256);
-    foreach (var i in range(allBytes)) {
+    foreach (var i in range(len(allBytes))) {
         allBytes[i] = (byte)i;
     }
     @string allString = (@string)allBytes;
@@ -347,11 +347,9 @@ public static void TestReplacer(ж<testing.T> t) {
 
     // Run the test cases.
 
-    foreach (var (i, tc) in testCases) {
-        {
-            @string sΔ1 = tc.r.Replace(tc.@in); if (sΔ1 != tc.@out) {
-                t.Errorf("%d. Replace(%q) = %q, want %q", i, tc.@in, sΔ1, tc.@out);
-            }
+    foreach (var (i, tc) in range(testCases)) {
+        @string sΔ1 = tc.r.Replace(tc.@in); if (sΔ1 != tc.@out) {
+            t.Errorf("%d. Replace(%q) = %q, want %q", i, tc.@in, sΔ1, tc.@out);
         }
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var (n, err) = tc.r.WriteString(new strings_test_package.bytes_BufferжWriter(Ꮡbuf), tc.@in);
@@ -386,7 +384,7 @@ internal static slice<algorithmTestCasesᴛ1> algorithmTestCases = slice<algorit
 
 // TestPickAlgorithm tests that NewReplacer picks the correct algorithm.
 public static void TestPickAlgorithm(ж<testing.T> t) {
-    foreach (var (i, tc) in algorithmTestCases) {
+    foreach (var (i, tc) in range(algorithmTestCases)) {
         @string got = fmt.Sprintf("%T"u8, tc.r.ΔReplacer());
         if (got != tc.want) {
             t.Errorf("%d. algorithm = %s, want %s", i, got, tc.want);
@@ -404,7 +402,7 @@ internal static (nint n, error err) Write(this errWriter _, slice<byte> p) {
 // TestWriteStringError tests that WriteString returns an error
 // received from the underlying io.Writer.
 public static void TestWriteStringError(ж<testing.T> t) {
-    foreach (var (i, tc) in algorithmTestCases) {
+    foreach (var (i, tc) in range(algorithmTestCases)) {
         var (n, err) = tc.r.WriteString(new errWriter(), abcˢ);
         if (n != 0 || err == nil || err.Error() != "unwritable"u8) {
             t.Errorf("%d. WriteStringError = %d, %v, want 0, unwritable", i, n, err);
@@ -475,10 +473,10 @@ public static void TestGenericTrieBuilding(ж<testing.T> t) {
 """u8.Raw())
     ]);
 
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var keys = Split(tc.@in, ";");
         var args = new slice<@string>(len(keys) * 2);
-        foreach (var (i, key) in keys) {
+        foreach (var (i, key) in range(keys)) {
             args[i * 2] = key;
         }
 
@@ -664,10 +662,10 @@ public static void BenchmarkByteByteMap(ж<testing.B> Ꮡb) {
 partial struct mapdataᴛ1 /*dyn*/ {
     internal @string name, data;
 }
-internal static slice<mapdataᴛ1> mapdata = slice<mapdataᴛ1>([
+internal static slice<mapdataᴛ1> mapdata = [
     new("ASCII", "a b c d e f g h i j k l m n o p q r s t u v w x y z"),
     new("Greek", "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ ς σ τ υ φ χ ψ ω")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string identityˢ => ref identityˢᵇ;
@@ -680,7 +678,7 @@ public static void BenchmarkMap(ж<testing.B> b) {
 
     var mapidentityʗ1 = mapidentity;
     b.Run(identityˢ, (ж<testing.B> bΔ1) => {
-        foreach (var (_, vᴛ1) in mapdata) {
+        foreach (var (_, vᴛ1) in range(mapdata)) {
             ref var md = ref heap(new mapdataᴛ1(), out var Ꮡmd);
             md = vᴛ1;
 
@@ -706,7 +704,7 @@ public static void BenchmarkMap(ж<testing.B> b) {
 
     var mapchangeʗ1 = mapchange;
     b.Run(changeˢ, (ж<testing.B> bΔ3) => {
-        foreach (var (_, vᴛ2) in mapdata) {
+        foreach (var (_, vᴛ2) in range(mapdata)) {
             ref var md = ref heap(new mapdataᴛ1(), out var Ꮡmd);
             md = vᴛ2;
 

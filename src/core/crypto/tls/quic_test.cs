@@ -58,18 +58,14 @@ internal partial struct suiteSecret {
 }
 
 internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
-    {
-        var (_, ok) = q.writeSecret[level, ꟷ]; if (!ok && level != QUICEncryptionLevelEarly) {
-            q.t.Errorf("SetReadSecret for level %v called before SetWriteSecret", level);
-        }
+    var (_, ok) = q.writeSecret[level, ꟷ]; if (!ok && level != QUICEncryptionLevelEarly) {
+        q.t.Errorf("SetReadSecret for level %v called before SetWriteSecret", level);
     }
     if (level == QUICEncryptionLevelApplication && !q.complete) {
         q.t.Errorf("SetReadSecret for level %v called before HandshakeComplete", level);
     }
-    {
-        var (_, ok) = q.readSecret[level, ꟷ]; if (ok) {
-            q.t.Errorf("SetReadSecret for level %v called twice", level);
-        }
+    if (q.readSecret[level, ꟷ] is (_, true)) {
+        q.t.Errorf("SetReadSecret for level %v called twice", level);
     }
     if (q.readSecret == nil) {
         q.readSecret = new map<global::go.crypto.tls_package.QUICEncryptionLevel, suiteSecret>{};
@@ -86,10 +82,8 @@ internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tl
 }
 
 internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
-    {
-        var (_, ok) = q.writeSecret[level, ꟷ]; if (ok) {
-            q.t.Errorf("SetWriteSecret for level %v called twice", level);
-        }
+    var (_, ok) = q.writeSecret[level, ꟷ]; if (ok) {
+        q.t.Errorf("SetWriteSecret for level %v called twice", level);
     }
     if (q.writeSecret == nil) {
         q.writeSecret = new map<global::go.crypto.tls_package.QUICEncryptionLevel, suiteSecret>{};
@@ -119,12 +113,10 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
     ref var srv = ref Ꮡsrv.DerefOrNull();
 
     var (a, b) = (cli, Ꮡsrv);
-    foreach (var (_, c) in slice<ж<testQUICConn>>([a, b])) {
+    foreach (var (_, c) in range(slice<ж<testQUICConn>>([a, b]))) {
         if (!c.conn.conn.quic.started) {
-            {
-                var err = c.conn.Start(ctx); if (err != nil) {
-                    return err;
-                }
+            var err = c.conn.Start(ctx); if (err != nil) {
+                return err;
             }
         }
     }
@@ -168,7 +160,7 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
         case var ᴛ when ᴛ == QUICTransportParameters: {
             a.gotParams = e.Data;
             if (a.gotParams == nil) {
-                a.gotParams = slice<byte>([]);
+                a.gotParams = [];
             }
             break;
         }
@@ -178,10 +170,8 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
         case var ᴛ when ᴛ == QUICHandshakeDone: {
             a.complete = true;
             if (a == Ꮡsrv) {
-                {
-                    var err = srv.conn.SendSessionTicket(srv.ticketOpts); if (err != nil) {
-                        return err;
-                    }
+                var err = srv.conn.SendSessionTicket(srv.ticketOpts); if (err != nil) {
+                    return err;
                 }
             }
             break;
@@ -226,42 +216,28 @@ public static void TestQUICConnection(ж<testing.T> t) {
     var srv = newTestQUICServer(t, config);
     srv.conn.SetTransportParameters(default);
 
-    {
-        var err = runTestQUICConnection(context.Background(), cli, srv, default); if (err != nil) {
-            t.Fatalf("error during connection handshake: %v", err);
-        }
+    var err = runTestQUICConnection(context.Background(), cli, srv, default); if (err != nil) {
+        t.Fatalf("error during connection handshake: %v", err);
     }
 
-    {
-        var (_, ok) = cli.readSecret[QUICEncryptionLevelHandshake, ꟷ]; if (!ok) {
-            t.Errorf("client has no Handshake secret");
-        }
+    if (cli.readSecret[QUICEncryptionLevelHandshake, ꟷ] is not (_, true)) {
+        t.Errorf("client has no Handshake secret");
     }
-    {
-        var (_, ok) = cli.readSecret[QUICEncryptionLevelApplication, ꟷ]; if (!ok) {
-            t.Errorf("client has no Application secret");
-        }
+    if (cli.readSecret[QUICEncryptionLevelApplication, ꟷ] is not (_, true)) {
+        t.Errorf("client has no Application secret");
     }
-    {
-        var (_, ok) = srv.readSecret[QUICEncryptionLevelHandshake, ꟷ]; if (!ok) {
-            t.Errorf("server has no Handshake secret");
-        }
+    if (srv.readSecret[QUICEncryptionLevelHandshake, ꟷ] is not (_, true)) {
+        t.Errorf("server has no Handshake secret");
     }
-    {
-        var (_, ok) = srv.readSecret[QUICEncryptionLevelApplication, ꟷ]; if (!ok) {
-            t.Errorf("server has no Application secret");
-        }
+    if (srv.readSecret[QUICEncryptionLevelApplication, ꟷ] is not (_, true)) {
+        t.Errorf("server has no Application secret");
     }
-    foreach (var (_, level) in slice<global::go.crypto.tls_package.QUICEncryptionLevel>([QUICEncryptionLevelHandshake, QUICEncryptionLevelApplication])) {
-        {
-            var (_, ok) = cli.readSecret[level, ꟷ]; if (!ok) {
-                t.Errorf("client has no %v read secret", level);
-            }
+    foreach (var (_, level) in range(slice<global::go.crypto.tls_package.QUICEncryptionLevel>([QUICEncryptionLevelHandshake, QUICEncryptionLevelApplication]))) {
+        if (cli.readSecret[level, ꟷ] is not (_, true)) {
+            t.Errorf("client has no %v read secret", level);
         }
-        {
-            var (_, ok) = srv.readSecret[level, ꟷ]; if (!ok) {
-                t.Errorf("server has no %v read secret", level);
-            }
+        if (srv.readSecret[level, ꟷ] is not (_, true)) {
+            t.Errorf("server has no %v read secret", level);
         }
         if (!reflect.DeepEqual(cli.readSecret[level], srv.writeSecret[level])) {
             t.Errorf("client read secret does not match server write secret for level %v", level);
@@ -342,12 +318,10 @@ public static void TestQUICFragmentaryData(ж<testing.T> t) {
     var onEvent = (global::go.crypto.tls_package.QUICEvent e, ж<testQUICConn> src, ж<testQUICConn> dst) => {
         if (e.Kind == QUICWriteData) {
             // Provide the data one byte at a time.
-            foreach (var i in range(e.Data)) {
-                {
-                    var err = dst.conn.HandleData(e.Level, e.Data.slice(i, i + 1)); if (err != nil) {
-                        t.Errorf("HandleData: %v", err);
-                        break;
-                    }
+            foreach (var i in range(len(e.Data))) {
+                var err = dst.conn.HandleData(e.Level, e.Data.slice(i, i + 1)); if (err != nil) {
+                    t.Errorf("HandleData: %v", err);
+                    break;
                 }
             }
             return true;
@@ -369,10 +343,8 @@ public static void TestQUICPostHandshakeClientAuthentication(ж<testing.T> t) {
     cli.conn.SetTransportParameters(default);
     var srv = newTestQUICServer(t, config);
     srv.conn.SetTransportParameters(default);
-    {
-        var errΔ1 = runTestQUICConnection(context.Background(), cli, srv, default); if (errΔ1 != nil) {
-            t.Fatalf("error during connection handshake: %v", errΔ1);
-        }
+    var errΔ1 = runTestQUICConnection(context.Background(), cli, srv, default); if (errΔ1 != nil) {
+        t.Fatalf("error during connection handshake: %v", errΔ1);
     }
 
     var certReq = @new<global::go.crypto.tls_package.certificateRequestMsgTLS13>();
@@ -383,13 +355,11 @@ public static void TestQUICPostHandshakeClientAuthentication(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ2 = cli.conn.HandleData(QUICEncryptionLevelApplication, appendꓸꓸꓸ(slice<byte>([
-            (byte)typeCertificateRequest,
-            (byte)0, (byte)0, (byte)len(certReqBytes)
-        ]), certReqBytes)); if (errΔ2 == nil) {
-            t.Fatalf("post-handshake authentication request: got no error, want one");
-        }
+    var errΔ2 = cli.conn.HandleData(QUICEncryptionLevelApplication, appendꓸꓸꓸ(slice<byte>([
+        (byte)typeCertificateRequest,
+        (byte)0, (byte)0, (byte)len(certReqBytes)
+    ]), certReqBytes)); if (errΔ2 == nil) {
+        t.Fatalf("post-handshake authentication request: got no error, want one");
     }
 }
 
@@ -405,10 +375,8 @@ public static void TestQUICPostHandshakeKeyUpdate(ж<testing.T> t) {
     cli.conn.SetTransportParameters(default);
     var srv = newTestQUICServer(t, config);
     srv.conn.SetTransportParameters(default);
-    {
-        var errΔ1 = runTestQUICConnection(context.Background(), cli, srv, default); if (errΔ1 != nil) {
-            t.Fatalf("error during connection handshake: %v", errΔ1);
-        }
+    var errΔ1 = runTestQUICConnection(context.Background(), cli, srv, default); if (errΔ1 != nil) {
+        t.Fatalf("error during connection handshake: %v", errΔ1);
     }
 
     var keyUpdate = @new<global::go.crypto.tls_package.keyUpdateMsg>();
@@ -417,12 +385,10 @@ public static void TestQUICPostHandshakeKeyUpdate(ж<testing.T> t) {
         t.Fatal(err);
     }
     @string expectedErr = unexpectedKeyUpdateˢ;
-    {
-        err = cli.conn.HandleData(QUICEncryptionLevelApplication, keyUpdateBytes); if (err == nil) {
-            t.Fatalf("key update request: expected error from post-handshake key update, got nil");
-        } else if (!strings.Contains(err.Error(), expectedErr)) {
-            t.Fatalf("key update request: got error %v, expected substring %q", err, expectedErr);
-        }
+    err = cli.conn.HandleData(QUICEncryptionLevelApplication, keyUpdateBytes); if (err == nil) {
+        t.Fatalf("key update request: expected error from post-handshake key update, got nil");
+    } else if (!strings.Contains(err.Error(), expectedErr)) {
+        t.Fatalf("key update request: got error %v, expected substring %q", err, expectedErr);
     }
 }
 
@@ -441,12 +407,12 @@ public static void TestQUICPostHandshakeMessageTooLarge(ж<testing.T> t) {
 
     nint size = maxHandshake + 1;
     {
-        var err = cli.conn.HandleData(QUICEncryptionLevelApplication, slice<byte>([
+        var err = cli.conn.HandleData(QUICEncryptionLevelApplication, [
             (byte)typeNewSessionTicket,
             (byte)(size >> 16),
             (byte)(size >> 8),
             (byte)size
-        ])); if (err == nil) {
+        ]); if (err == nil) {
             t.Fatalf("%v-byte post-handshake message: got no error, want one", size);
         }
     }
@@ -473,10 +439,8 @@ public static void TestQUICHandshakeError(ж<testing.T> t) {
     if (!errors.Is(err, new tls_test_package.tls_AlertErrorᴠerror(((global::go.crypto.tls_package.AlertError)(uint8)alertBadCertificate)))) {
         t.Errorf("connection handshake terminated with error %q, want alertBadCertificate", err);
     }
-    {
-        var (_, ok) = errors.AsType<ж<global::go.crypto.tls_package.CertificateVerificationError>>(err); if (!ok) {
-            t.Errorf("connection handshake terminated with error %q, want CertificateVerificationError", err);
-        }
+    var (_, ok) = errors.AsType<ж<global::go.crypto.tls_package.CertificateVerificationError>>(err); if (!ok) {
+        t.Errorf("connection handshake terminated with error %q, want CertificateVerificationError", err);
     }
 
     var ev = cli.conn.NextEvent();
@@ -497,7 +461,7 @@ public static void TestQUICECHKeyError(ж<testing.T> t) {
     var getECHKeysError = errors.New(errorReturnedByˢ);
     var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     config.TLSConfig.MinVersion = VersionTLS13;
-    config.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    config.TLSConfig.NextProtos = ["h3"];
     var getECHKeysErrorʗ1 = getECHKeysError;
     config.TLSConfig.GetEncryptedClientHelloKeys = (slice<global::go.crypto.tls_package.EncryptedClientHelloKey>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> _Δp0) => (default, getECHKeysErrorʗ1);
     var cli = newTestQUICClient(t, config);
@@ -518,10 +482,8 @@ public static void TestQUICECHKeyError(ж<testing.T> t) {
     if (srv.gotError == nil) {
         t.Fatalf("after GetEncryptedClientHelloKeys error, server did not see QUICErrorEvent");
     }
-    {
-        var (_, ok) = errors.AsType<global::go.crypto.tls_package.AlertError>(srv.gotError); if (!ok) {
-            t.Errorf("connection handshake terminated with error %T, want AlertError", srv.gotError);
-        }
+    var (_, ok) = errors.AsType<global::go.crypto.tls_package.AlertError>(srv.gotError); if (!ok) {
+        t.Errorf("connection handshake terminated with error %T, want AlertError", srv.gotError);
     }
     if (!errors.Is(srv.gotError, getECHKeysError)) {
         t.Errorf("connection handshake terminated with error %v, want error returned by GetEncryptedClientHelloKeys", srv.gotError);
@@ -534,7 +496,7 @@ public static void TestQUICECHKeyError(ж<testing.T> t) {
 public static void TestQUICConnectionState(ж<testing.T> t) {
     var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     config.TLSConfig.MinVersion = VersionTLS13;
-    config.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    config.TLSConfig.NextProtos = ["h3"];
     var cli = newTestQUICClient(t, config);
     cli.conn.SetTransportParameters(default);
     var srv = newTestQUICServer(t, config);
@@ -543,33 +505,23 @@ public static void TestQUICConnectionState(ж<testing.T> t) {
     var srvʗ1 = srv;
     var onEvent = (global::go.crypto.tls_package.QUICEvent e, ж<testQUICConn> src, ж<testQUICConn> dst) => {
         var cliCS = cliʗ1.conn.ConnectionState();
-        {
-            var (_, ok) = cliʗ1.readSecret[QUICEncryptionLevelApplication, ꟷ]; if (ok) {
-                {
-                    @string want = cliCS.NegotiatedProtocol;
-                    @string got = "h3"; if (want != got) {
-                        t.Errorf("cli.ConnectionState().NegotiatedProtocol = %q, want %q", want, got);
-                    }
-                }
+        if (cliʗ1.readSecret[QUICEncryptionLevelApplication, ꟷ] is (_, true)) {
+            @string want = cliCS.NegotiatedProtocol;
+            @string got = "h3"; if (want != got) {
+                t.Errorf("cli.ConnectionState().NegotiatedProtocol = %q, want %q", want, got);
             }
         }
         var srvCS = srvʗ1.conn.ConnectionState();
-        {
-            var (_, ok) = srvʗ1.readSecret[QUICEncryptionLevelHandshake, ꟷ]; if (ok) {
-                {
-                    @string want = srvCS.NegotiatedProtocol;
-                    @string got = "h3"; if (want != got) {
-                        t.Errorf("srv.ConnectionState().NegotiatedProtocol = %q, want %q", want, got);
-                    }
-                }
+        if (srvʗ1.readSecret[QUICEncryptionLevelHandshake, ꟷ] is (_, true)) {
+            @string want = srvCS.NegotiatedProtocol;
+            @string got = "h3"; if (want != got) {
+                t.Errorf("srv.ConnectionState().NegotiatedProtocol = %q, want %q", want, got);
             }
         }
         return false;
     };
-    {
-        var err = runTestQUICConnection(context.Background(), cli, srv, onEvent); if (err != nil) {
-            t.Fatalf("error during connection handshake: %v", err);
-        }
+    var err = runTestQUICConnection(context.Background(), cli, srv, onEvent); if (err != nil) {
+        t.Fatalf("error during connection handshake: %v", err);
     }
 }
 
@@ -600,10 +552,8 @@ public static void TestQUICStartContextPropagation(ж<testing.T> t) {
     cli.conn.SetTransportParameters(default);
     var srv = newTestQUICServer(t, config);
     srv.conn.SetTransportParameters(default);
-    {
-        var err = runTestQUICConnection(ctx, cli, srv, default); if (err != nil) {
-            t.Fatalf("error during connection handshake: %v", err);
-        }
+    var err = runTestQUICConnection(ctx, cli, srv, default); if (err != nil) {
+        t.Fatalf("error during connection handshake: %v", err);
     }
     if (calls != 1) {
         t.Errorf("GetConfigForClient called %v times, want 1", calls);
@@ -691,10 +641,8 @@ public static void TestQUICEmptyTransportParameters(ж<testing.T> t) {
     cli.conn.SetTransportParameters(default);
     var srv = newTestQUICServer(t, config);
     srv.conn.SetTransportParameters(default);
-    {
-        var err = runTestQUICConnection(context.Background(), cli, srv, default); if (err != nil) {
-            t.Fatalf("error during connection handshake: %v", err);
-        }
+    var err = runTestQUICConnection(context.Background(), cli, srv, default); if (err != nil) {
+        t.Fatalf("error during connection handshake: %v", err);
     }
 
     if (cli.gotParams == nil) {
@@ -743,11 +691,11 @@ public static void TestQUICEarlyData(ж<testing.T> t) {
     clientConfig.TLSConfig.MinVersion = VersionTLS13;
     clientConfig.TLSConfig.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.TLSConfig.ServerName = exampleGoDevˢ;
-    clientConfig.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    clientConfig.TLSConfig.NextProtos = ["h3"];
 
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.TLSConfig.MinVersion = VersionTLS13;
-    serverConfig.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    serverConfig.TLSConfig.NextProtos = ["h3"];
 
     var cli = newTestQUICClient(t, clientConfig);
     cli.conn.SetTransportParameters(default);
@@ -811,12 +759,12 @@ internal static void testQUICEarlyDataDeclined(ж<testing.T> t, bool server) {
     clientConfig.TLSConfig.MinVersion = VersionTLS13;
     clientConfig.TLSConfig.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.TLSConfig.ServerName = exampleGoDevˢ;
-    clientConfig.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    clientConfig.TLSConfig.NextProtos = ["h3"];
 
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.EnableSessionEvents = true;
     serverConfig.TLSConfig.MinVersion = VersionTLS13;
-    serverConfig.TLSConfig.NextProtos = slice<@string>(["h3"]);
+    serverConfig.TLSConfig.NextProtos = ["h3"];
 
     var cli = newTestQUICClient(t, clientConfig);
     cli.conn.SetTransportParameters(default);
@@ -861,10 +809,8 @@ internal static void testQUICEarlyDataDeclined(ж<testing.T> t, bool server) {
             t.Errorf("client did not receive QUICEarlyDataRejected");
         }
     }
-    {
-        var (_, srvEarlyData) = srv2.readSecret[QUICEncryptionLevelEarly, ꟷ]; if (srvEarlyData) {
-            t.Errorf("server received early data read secret");
-        }
+    var (_, srvEarlyData) = srv2.readSecret[QUICEncryptionLevelEarly, ꟷ]; if (srvEarlyData) {
+        t.Errorf("server received early data read secret");
     }
 }
 

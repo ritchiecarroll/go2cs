@@ -19,10 +19,8 @@ public static void TestPrintfLine(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var err = w.PrintfLine(fooDˢ, (nint)123);
-    {
-        @string s = buf.String(); if (s != "foo 123\r\n"u8 || err != nil) {
-            t.Fatalf("s=%q; err=%s", s, err);
-        }
+    @string s = buf.String(); if (s != "foo 123\r\n"u8 || err != nil) {
+        t.Fatalf("s=%q; err=%s", s, err);
     }
 }
 
@@ -40,10 +38,8 @@ public static void TestDotWriter(ж<testing.T> t) {
     }
     d.Close();
     @string want = abcDefGhiJklˢ;
-    {
-        @string s = buf.String(); if (s != want) {
-            t.Fatalf("wrote %q", s);
-        }
+    @string s = buf.String(); if (s != want) {
+        t.Fatalf("wrote %q", s);
     }
 }
 
@@ -51,16 +47,14 @@ public static void TestDotWriterCloseEmptyWrite(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var d = w.DotWriter();
-    var (n, err) = d.Write(slice<byte>([]));
+    var (n, err) = d.Write([]);
     if (n != 0 || err != nil) {
         t.Fatalf("Write: %d, %s", n, err);
     }
     d.Close();
     @string want = "\r\n.\r\n";
-    {
-        @string s = buf.String(); if (s != want) {
-            t.Fatalf("wrote %q; want %q", s, want);
-        }
+    @string s = buf.String(); if (s != want) {
+        t.Fatalf("wrote %q; want %q", s, want);
     }
 }
 
@@ -70,10 +64,8 @@ public static void TestDotWriterCloseNoWrite(ж<testing.T> t) {
     var d = w.DotWriter();
     d.Close();
     @string want = "\r\n.\r\n";
-    {
-        @string s = buf.String(); if (s != want) {
-            t.Fatalf("wrote %q; want %q", s, want);
-        }
+    @string s = buf.String(); if (s != want) {
+        t.Fatalf("wrote %q; want %q", s, want);
     }
 }
 

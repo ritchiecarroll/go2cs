@@ -52,12 +52,12 @@ public static void TestPureGoTag(ж<testing.T> t) {
         Δlog.Fatalf("loading architecture list: %v\n%s", err, @out);
     }
     var allGOARCH = new map<@string, bool>();
-    foreach (var (_, pair) in strings.Split(strings.TrimSpace((@string)@out), "\n")) {
+    foreach (var (_, pair) in range(strings.Split(strings.TrimSpace((@string)@out), "\n"))) {
         @string GOARCH = strings.Split(pair, "/")[1];
         allGOARCH[GOARCH] = true;
     }
 
-    foreach (var (_, pkgName) in pkgs) {
+    foreach (var (_, pkgName) in range(pkgs)) {
         if (strings.Contains(pkgName, boringˢ2)) {
             continue;
         }
@@ -68,7 +68,7 @@ public static void TestPureGoTag(ж<testing.T> t) {
                 GOARCH: GOARCH,
                 GOROOT: testenv.GOROOT(new testing_TжTB(t)),
                 Compiler: build.Default.Compiler,
-                BuildTags: slice<@string>(["purego", "math_big_pure_go"])
+                BuildTags: ["purego", "math_big_pure_go"]
             ), out var Ꮡcontext);
 
             var (pkg, errΔ1) = Ꮡcontext.Import(pkgName, ""u8, 0);

@@ -65,18 +65,14 @@ public static void TestGenerated(ж<testing.T> t) {
 
     var (@out, err) = cmd.Output();
     if (err != nil) {
-        {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
-                t.Logf("stderr:\n%s", ee.Stderr);
-            }
+        var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+            t.Logf("stderr:\n%s", ee.Stderr);
         }
         t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
     }
     ref var entries = ref heap<slice<TestGenerated_listEntry>>(out var Ꮡentries);
-    {
-        var errΔ1 = json.Unmarshal(@out, Ꮡentries); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = json.Unmarshal(@out, Ꮡentries); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     var tmplOut = @new<bytes.Buffer>();
@@ -92,10 +88,8 @@ public static void TestGenerated(ж<testing.T> t) {
     (var want, err) = cmd.Output();
     if (err != nil) {
         t.Logf("stdin:\n%s", tmplOut.Bytes());
-        {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
-                t.Logf("stderr:\n%s", ee.Stderr);
-            }
+        var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+            t.Logf("stderr:\n%s", ee.Stderr);
         }
         t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
     }
@@ -114,10 +108,8 @@ public static void TestGenerated(ж<testing.T> t) {
         t.Fatalf("zosarch.go is missing or out of date; to regenerate, run\ngo generate internal/platform");
     }
 
-    {
-        var errΔ2 = os.WriteFile(zosarchGoˢ, want, 438); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = os.WriteFile(zosarchGoˢ, want, 438); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 }
 

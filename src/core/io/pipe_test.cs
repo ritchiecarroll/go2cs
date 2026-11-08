@@ -161,14 +161,14 @@ internal static @string String(this pipeTest p) {
     return fmt.Sprintf("async=%v err=%v closeWithError=%v"u8, p.async, p.err, p.closeWithError);
 }
 
-internal static slice<pipeTest> pipeTests = slice<pipeTest>([
+internal static slice<pipeTest> pipeTests = [
     new(true, default, false),
     new(true, default, true),
     new(true, ErrShortWrite, true),
     new(false, default, false),
     new(false, default, true),
     new(false, ErrShortWrite, true)
-]);
+];
 
 internal static void delayClose(ж<testing.T> t, closer cl, channel<nint> ch, pipeTest tt) {
     time.Sleep(1 * time.Millisecond);
@@ -185,7 +185,7 @@ internal static void delayClose(ж<testing.T> t, closer cl, channel<nint> ch, pi
 }
 
 public static partial void TestPipeReadClose(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in pipeTests) {
+    foreach (var (_, vᴛ1) in range(pipeTests)) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -209,10 +209,8 @@ public static partial void TestPipeReadClose(ж<testing.T> t) {
         if (n != 0) {
             t.Errorf("read on closed pipe returned %d", n);
         }
-        {
-            err = r.Close(); if (err != nil) {
-                t.Errorf("r.Close: %v", err);
-            }
+        err = r.Close(); if (err != nil) {
+            t.Errorf("r.Close: %v", err);
         }
     }
 }
@@ -235,7 +233,7 @@ private static readonly @string helloWorldˢ3ᵇ = "hello, world"u8;
 
 // Test write after/before reader close.
 public static partial void TestPipeWriteClose(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in pipeTests) {
+    foreach (var (_, vᴛ1) in range(pipeTests)) {
         ref var tt = ref heap(new pipeTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -258,10 +256,8 @@ public static partial void TestPipeWriteClose(ж<testing.T> t) {
         if (n != 0) {
             t.Errorf("write on closed pipe returned %d", n);
         }
-        {
-            err = w.Close(); if (err != nil) {
-                t.Errorf("w.Close: %v", err);
-            }
+        err = w.Close(); if (err != nil) {
+            t.Errorf("w.Close: %v", err);
         }
     }
 }
@@ -282,7 +278,7 @@ public static partial void TestWriteEmpty(ж<testing.T> t) {
     var (r, w) = Pipe();
     var wʗ1 = w;
     goǃ(() => {
-        wʗ1.Write(slice<byte>([]));
+        wʗ1.Write([]);
         wʗ1.Close();
     });
     array<byte> b = new(2);
@@ -400,20 +396,16 @@ public static void TestPipeConcurrent(ж<testing.T> t) {
             var wʗ1 = w;
             goǃ(() => {
                 time.Sleep(time.Millisecond); // Increase probability of race
-                {
-                    var (n, err) = wʗ1.Write(slice<byte>(input)); if (n != len(input) || err != nil) {
-                        tΔ1.Errorf("Write() = (%d, %v); want (%d, nil)", n, err, len(input));
-                    }
+                var (n, err) = wʗ1.Write(slice<byte>(input)); if (n != len(input) || err != nil) {
+                    tΔ1.Errorf("Write() = (%d, %v); want (%d, nil)", n, err, len(input));
                 }
             });
         }
 
         var buf = new slice<byte>((nint)count * len(input));
         for (nint i = 0; i < len(buf); i += readSize) {
-            {
-                var (n, err) = r.Read(buf.slice(i, i + (nint)readSize)); if (n != readSize || err != nil) {
-                    tΔ1.Errorf("Read() = (%d, %v); want (%d, nil)", n, err, (nint)(readSize));
-                }
+            var (n, err) = r.Read(buf.slice(i, i + (nint)readSize)); if (n != readSize || err != nil) {
+                tΔ1.Errorf("Read() = (%d, %v); want (%d, nil)", n, err, (nint)(readSize));
             }
         }
 
@@ -436,20 +428,16 @@ public static void TestPipeConcurrent(ж<testing.T> t) {
             goǃ(() => {
                 time.Sleep(time.Millisecond); // Increase probability of race
                 var buf = new slice<byte>(readSize);
-                {
-                    var (n, err) = rʗ1.Read(buf); if (n != readSize || err != nil) {
-                        tΔ2.Errorf("Read() = (%d, %v); want (%d, nil)", n, err, (nint)(readSize));
-                    }
+                var (n, err) = rʗ1.Read(buf); if (n != readSize || err != nil) {
+                    tΔ2.Errorf("Read() = (%d, %v); want (%d, nil)", n, err, (nint)(readSize));
                 }
                 cʗ1.ᐸꟷ(buf);
             });
         }
 
         for (nint i = 0; i < count; i++) {
-            {
-                var (n, err) = w.Write(slice<byte>(input)); if (n != len(input) || err != nil) {
-                    tΔ2.Errorf("Write() = (%d, %v); want (%d, nil)", n, err, len(input));
-                }
+            var (n, err) = w.Write(slice<byte>(input)); if (n != len(input) || err != nil) {
+                tΔ2.Errorf("Write() = (%d, %v); want (%d, nil)", n, err, len(input));
             }
         }
 

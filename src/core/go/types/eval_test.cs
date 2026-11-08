@@ -59,14 +59,14 @@ internal static void testEval(ж<testing.T> t, ж<token.FileSet> fset, ж<types.
 
 public static void TestEvalBasic(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    foreach (var (_, typ) in Typ[(int)(Bool)..(int)(ΔString + 1)]) {
+    foreach (var (_, typ) in range(Typ[(int)(Bool)..(int)(ΔString + 1)])) {
         testEval(t, fset, nil, nopos, typ.Name(), new types.BasicжΔType(typ), ""u8, ""u8);
     }
 }
 
 public static void TestEvalComposite(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    foreach (var (_, test) in independentTestTypes) {
+    foreach (var (_, test) in range(independentTestTypes)) {
         testEval(t, fset, nil, nopos, test.src, default, test.str, ""u8);
     }
 }
@@ -87,7 +87,7 @@ public static void TestEvalArith(ж<testing.T> t) {
         @"len([10]struct{}{}) == 2*5"
     ]);
     var fset = token.NewFileSet();
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         testEval(t, fset, nil, nopos, test, new types.BasicжΔType(Typ[UntypedBool]), ""u8, trueˢ);
     }
 }
@@ -186,7 +186,7 @@ public static void TestEvalPos(ж<testing.T> t) {
 
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default;
-    foreach (var (i, src) in sources) {
+    foreach (var (i, src) in range(sources)) {
         var (@file, errΔ1) = parser.ParseFile(fset, "p", src, parser.ParseComments);
         if (errΔ1 != nil) {
             t.Fatalf("could not parse file %d: %s", i, errΔ1);
@@ -213,9 +213,9 @@ public static void TestEvalPos(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, @file) in files) {
-        foreach (var (_, group) in @file.Comments) {
-            foreach (var (_, comment) in group.List) {
+    foreach (var (_, @file) in range(files)) {
+        foreach (var (_, group) in range(@file.Comments)) {
+            foreach (var (_, comment) in range(group.List)) {
                 @string s = comment.Text;
                 if (len(s) >= 4 && s[..2] == "/*" && s.slice(len(s) - 2) == "*/") {
                     var (str, typ) = split(s.slice(2, len(s) - 2), ", ");
@@ -287,7 +287,7 @@ public static void TestCheckExpr(ж<testing.T> t) {
     }
 
     ref var conf = ref heap<types.Config>(new Config(Importer: defaultImporter(fset)), out var Ꮡconf);
-    (var pkg, err) = Ꮡconf.Check("p", fset, slice<ж<ast.File>>([f]), nil);
+    (var pkg, err) = Ꮡconf.Check("p", fset, [f], nil);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -304,10 +304,8 @@ public static void TestCheckExpr(ж<testing.T> t) {
             Uses: new map<ж<ast.Ident>, types.Object>(),
             Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
         ));
-        {
-            var errΔ2 = CheckExpr(fsetʗ1, pkgʗ1, pos, expr, info); if (errΔ2 != nil) {
-                return (default, fmt.Errorf("CheckExpr(%q) failed: %s"u8, str, errΔ2));
-            }
+        var errΔ2 = CheckExpr(fsetʗ1, pkgʗ1, pos, expr, info); if (errΔ2 != nil) {
+            return (default, fmt.Errorf("CheckExpr(%q) failed: %s"u8, str, errΔ2));
         }
         switch (expr.type()) {
         case ж<ast.Ident> exprΔ1: {
@@ -319,10 +317,8 @@ public static void TestCheckExpr(ж<testing.T> t) {
             break;
         }
         case ж<ast.SelectorExpr> exprΔ1: {
-            {
-                var (sel, ok) = info.Selections[exprΔ1, ꟷ]; if (ok) {
-                    return (sel.Obj(), default);
-                }
+            if (info.Selections[exprΔ1, ꟷ] is (var sel, true)) {
+                return (sel.Obj(), default);
             }
             {
                 var (obj, ok) = info.Uses[exprΔ1.Sel, ꟷ]; if (ok) {
@@ -334,8 +330,8 @@ public static void TestCheckExpr(ж<testing.T> t) {
         return (default, fmt.Errorf("no object for %s"u8, str));
     }
 
-    foreach (var (_, group) in f.Comments) {
-        foreach (var (_, comment) in group.List) {
+    foreach (var (_, group) in range(f.Comments)) {
+        foreach (var (_, comment) in range(group.List)) {
             @string s = comment.Text;
             if (len(s) >= 4 && strings.HasPrefix(s, "/*") && strings.HasSuffix(s, "*/")) {
                 tokenꓸPos pos = comment.Pos();
@@ -374,26 +370,20 @@ public static void TestIssue65898(ж<testing.T> t) {
     var f = mustParse(fset, src);
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check(pkgName(src), fset, slice<ж<ast.File>>([f]), nil);
+    var (pkg, err) = Ꮡconf.Check(pkgName(src), fset, [f], nil);
     if (err != nil) {
         t.Fatal(err);
     }
 
-    foreach (var (_, d) in f.Decls) {
-        {
-            var (fun, _) = d._<ж<ast.FuncDecl>>(ᐧ); if (fun != nil) {
-                // type parameter A is not found at the start of the function type
-                {
-                    var errΔ1 = types.CheckExpr(fset, pkg, fun.Type.Pos(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ1 == nil || !strings.Contains(errΔ1.Error(), undefinedˢ)) {
-                        t.Fatalf("got %s, want undefined error", errΔ1);
-                    }
-                }
-                // type parameter A must be found at the end of the function type
-                {
-                    var errΔ2 = types.CheckExpr(fset, pkg, fun.Type.End(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ2 != nil) {
-                        t.Fatal(errΔ2);
-                    }
-                }
+    foreach (var (_, d) in range(f.Decls)) {
+        var (fun, _) = d._<ж<ast.FuncDecl>>(ᐧ); if (fun != nil) {
+            // type parameter A is not found at the start of the function type
+            var errΔ1 = types.CheckExpr(fset, pkg, fun.Type.Pos(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ1 == nil || !strings.Contains(errΔ1.Error(), undefinedˢ)) {
+                t.Fatalf("got %s, want undefined error", errΔ1);
+            }
+            // type parameter A must be found at the end of the function type
+            var errΔ2 = types.CheckExpr(fset, pkg, fun.Type.End(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
     }

@@ -35,7 +35,7 @@ using static global::go.@internal.coverage.slicereader_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/slicereader/slr_test.go", "slr_test.cs", "ABMagpSCgoKUgoKClIKCgoKCgoKCgpSCgqaCgoKClIKClIKClIKClIKClIKClICCpIKClIKCyoKCgoKClIKCpg==", "37-40:1")]
+[assembly: GoPositionMap("internal/coverage/slicereader/slr_test.go", "slr_test.cs", "ABMagpSCgoKUgoKClIKCgoKCgoKCgpSCgqaCgoKClIKClIKClIKClIKClIKClIKUgoKUgoLKgoKCgoKUgoKm", "37-40:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

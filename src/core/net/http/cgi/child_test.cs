@@ -134,11 +134,9 @@ public static void TestRequestWithTLS(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("RequestFromMap: %v", err);
     }
-    {
-        @string g = req.URL.String();
-        @string e = httpsExampleComPathABˢ; if (e != g) {
-            t.Errorf("expected URL %q; got %q", e, g);
-        }
+    @string g = req.URL.String();
+    @string e = httpsExampleComPathABˢ; if (e != g) {
+        t.Errorf("expected URL %q; got %q", e, g);
     }
     if (req.TLS == nil) {
         t.Errorf("expected non-nil TLS");
@@ -164,11 +162,9 @@ public static void TestRequestWithoutHost(ж<testing.T> t) {
     if (req.URL == nil) {
         t.Fatalf("unexpected nil URL");
     }
-    {
-        @string g = req.URL.String();
-        @string e = pathABˢ; if (e != g) {
-            t.Errorf("URL = %q; want %q", g, e);
-        }
+    @string g = req.URL.String();
+    @string e = pathABˢ; if (e != g) {
+        t.Errorf("URL = %q; want %q", g, e);
     }
 }
 
@@ -193,11 +189,9 @@ public static void TestRequestWithoutRequestURI(ж<testing.T> t) {
     if (req.URL == nil) {
         t.Fatalf("unexpected nil URL");
     }
-    {
-        @string g = req.URL.String();
-        @string e = httpExampleComDirˢ; if (e != g) {
-            t.Errorf("URL = %q; want %q", g, e);
-        }
+    @string g = req.URL.String();
+    @string e = httpExampleComDirˢ; if (e != g) {
+        t.Errorf("URL = %q; want %q", g, e);
     }
 }
 
@@ -214,11 +208,9 @@ public static void TestRequestWithoutRemotePort(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("RequestFromMap: %v", err);
     }
-    {
-        @string e = "5.6.7.8:0";
-        @string g = req.RemoteAddr; if (e != g) {
-            t.Errorf("RemoteAddr: got %q; want %q", g, e);
-        }
+    @string e = "5.6.7.8:0";
+    @string g = req.RemoteAddr; if (e != g) {
+        t.Errorf("RemoteAddr: got %q; want %q", g, e);
     }
 }
 
@@ -233,15 +225,11 @@ public static void TestIncludedServerProtocol(ж<testing.T> t) {
     if (req.Proto != "INCLUDED"u8) {
         t.Errorf("unexpected change to SERVER_PROTOCOL");
     }
-    {
-        nint major = req.ProtoMajor; if (major != 1) {
-            t.Errorf("ProtoMajor: got %d, want %d", major, (nint)1);
-        }
+    nint major = req.ProtoMajor; if (major != 1) {
+        t.Errorf("ProtoMajor: got %d, want %d", major, (nint)1);
     }
-    {
-        nint minor = req.ProtoMinor; if (minor != 0) {
-            t.Errorf("ProtoMinor: got %d, want %d", minor, (nint)0);
-        }
+    nint minor = req.ProtoMinor; if (minor != 0) {
+        t.Errorf("ProtoMinor: got %d, want %d", minor, (nint)0);
     }
     if (err != nil) {
         t.Fatalf("expected INCLUDED to be treated as HTTP/1.0 request");
@@ -280,7 +268,7 @@ public static void TestResponse(ж<testing.T> t) {
             wantCT: "image/jpeg"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestResponse_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -296,17 +284,13 @@ public static void TestResponse(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Errorf("Write: unexpected %v", err);
             }
-            {
-                nint want = len(ttʗ1.body); if (n != want) {
-                    tΔ1.Errorf("reported short Write: got %v want %v", n, want);
-                }
+            nint want = len(ttʗ1.body); if (n != want) {
+                tΔ1.Errorf("reported short Write: got %v want %v", n, want);
             }
             resp.writeCGIHeader(default);
             resp.Flush();
-            {
-                @string got = resp.Header().Get(contentTypeˢ2); if (got != ttʗ1.wantCT) {
-                    tΔ1.Errorf("wrong content-type: got %q, want %q", got, ttʗ1.wantCT);
-                }
+            @string got = resp.Header().Get(contentTypeˢ2); if (got != ttʗ1.wantCT) {
+                tΔ1.Errorf("wrong content-type: got %q, want %q", got, ttʗ1.wantCT);
             }
             if (!bytes.HasSuffix(buf.Bytes(), slice<byte>(ttʗ1.body))) {
                 tΔ1.Errorf("body was not correctly written");

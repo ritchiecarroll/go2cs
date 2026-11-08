@@ -16,12 +16,12 @@ partial struct truncateWriterTestsᴛ1 /*dyn*/ {
     internal int64 trunc;
     internal nint n;
 }
-internal static slice<truncateWriterTestsᴛ1> truncateWriterTests = slice<truncateWriterTestsᴛ1>([
+internal static slice<truncateWriterTestsᴛ1> truncateWriterTests = [
     new("hello", "", -1, 5),
     new("world", "", 0, 5),
     new("abcde", "abc", 3, 5),
     new("edcba", "edcba", 7, 5)
-]);
+];
 
 public static void TestTruncateWriter(ж<testing.T> t) {
     foreach (var (_, tt) in range(truncateWriterTests)) {

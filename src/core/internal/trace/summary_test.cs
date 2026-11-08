@@ -93,7 +93,7 @@ public static void TestSummarizeGoroutinesRegionsTrace(ж<testing.T> t) {
     };
     foreach (var (_, summary) in summaries) {
         basicGoroutineSummaryChecks(t, summary);
-        foreach (var (_, region) in summary.Regions) {
+        foreach (var (_, region) in range(summary.Regions)) {
             var (want, ok) = wantRegions[region.Name, ꟷ];
             if (!ok) {
                 continue;
@@ -129,53 +129,53 @@ public static void TestSummarizeTasksTrace(ж<testing.T> t) {
     var wantTasks = new map<Δtrace.TaskID, TestSummarizeTasksTrace_task>{
         [Δtrace.BackgroundTask] = new(
             // The background task (0) is never any task's parent.
-            logs: slice<traceꓸLog>([
+            logs: [
                 new(Task: Δtrace.BackgroundTask, Category: "log", Message: "before do"),
                 new(Task: Δtrace.BackgroundTask, Category: "log", Message: "before do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1])
+            ],
+            goroutines: [1]
         ),
         [1] = new(
             // This started before tracing started and has no parents.
             // Task 2 is technically a child, but we lost that information.
-            children: slice<Δtrace.TaskID>([3, 7, 16]),
-            logs: slice<traceꓸLog>([
+            children: [3, 7, 16],
+            logs: [
                 new(Task: 1, Category: "log", Message: "before do"),
                 new(Task: 1, Category: "log", Message: "before do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1])
+            ],
+            goroutines: [1]
         ),
         [2] = new(
             // This started before tracing started and its parent is technically (1), but that information was lost.
-            children: slice<Δtrace.TaskID>([8, 17]),
-            logs: slice<traceꓸLog>([
+            children: [8, 17],
+            logs: [
                 new(Task: 2, Category: "log", Message: "before do"),
                 new(Task: 2, Category: "log", Message: "before do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1])
+            ],
+            goroutines: [1]
         ),
         [3] = new(
             parent: parent(1),
-            children: slice<Δtrace.TaskID>([10, 19]),
-            logs: slice<traceꓸLog>([
+            children: [10, 19],
+            logs: [
                 new(Task: 3, Category: "log", Message: "before do"),
                 new(Task: 3, Category: "log", Message: "before do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1])
+            ],
+            goroutines: [1]
         ),
         [4] = new(
             // Explicitly, no parent.
-            children: slice<Δtrace.TaskID>([12, 21]),
-            logs: slice<traceꓸLog>([
+            children: [12, 21],
+            logs: [
                 new(Task: 4, Category: "log", Message: "before do"),
                 new(Task: 4, Category: "log", Message: "before do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1])
+            ],
+            goroutines: [1]
         ),
         [12] = new(
             parent: parent(4),
-            children: slice<Δtrace.TaskID>([13]),
-            logs: slice<traceꓸLog>([
+            children: [13],
+            logs: [
                 // TODO(mknyszek): This is computed asynchronously in the trace,
                 // which makes regenerating this test very annoying, since it will
                 // likely break this test. Resolve this by making the order not matter.
@@ -186,16 +186,16 @@ public static void TestSummarizeTasksTrace(ж<testing.T> t) {
                 new(Task: 12, Category: "log", Message: "fanout region2"),
                 new(Task: 12, Category: "log", Message: "before do"),
                 new(Task: 12, Category: "log", Message: "fanout region3")
-            ]),
-            goroutines: slice<Δtrace.GoID>([1, 5, 6, 7, 8, 9])
+            ],
+            goroutines: [1, 5, 6, 7, 8, 9]
         ),
         [13] = new(
             // Explicitly, no children.
             parent: parent(12),
-            logs: slice<traceꓸLog>([
+            logs: [
                 new(Task: 13, Category: "log2", Message: "do")
-            ]),
-            goroutines: slice<Δtrace.GoID>([7])
+            ],
+            goroutines: [7]
         )
     };
     foreach (var (id, summary) in summaries) {
@@ -220,16 +220,14 @@ public static void TestSummarizeTasksTrace(ж<testing.T> t) {
 
         // Check children.
         var gotChildren = new map<Δtrace.TaskID, EmptyStruct>();
-        foreach (var (_, child) in summary.Children) {
+        foreach (var (_, child) in range(summary.Children)) {
             gotChildren[child.ID] = new EmptyStruct();
         }
-        foreach (var (_, wantChild) in want.children) {
-            {
-                var (_, okΔ1) = gotChildren[wantChild, ꟷ]; if (okΔ1) {
-                    delete(gotChildren, wantChild);
-                } else {
-                    t.Errorf("expected child task %d for task %d not found", wantChild, id);
-                }
+        foreach (var (_, wantChild) in range(want.children)) {
+            var (_, okΔ1) = gotChildren[wantChild, ꟷ]; if (okΔ1) {
+                delete(gotChildren, wantChild);
+            } else {
+                t.Errorf("expected child task %d for task %d not found", wantChild, id);
             }
         }
         if (len(gotChildren) != 0) {
@@ -242,9 +240,9 @@ public static void TestSummarizeTasksTrace(ж<testing.T> t) {
         if (len(want.logs) != len(summary.Logs)) {
             t.Errorf("wanted %d logs for task %d, got %d logs instead", len(want.logs), id, len(summary.Logs));
         } else {
-            foreach (var i in range(want.logs)) {
-                if (want.logs[i] != (~summary.Logs[i]).Log()) {
-                    t.Errorf("log mismatch: want %#v, got %#v", want.logs[i], (~summary.Logs[i]).Log());
+            foreach (var i in range(len(want.logs))) {
+                if (want.logs[i] != summary.Logs[i].Log()) {
+                    t.Errorf("log mismatch: want %#v, got %#v", want.logs[i], summary.Logs[i].Log());
                 }
             }
         }
@@ -253,7 +251,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> t) {
         if (len(want.goroutines) != len(summary.Goroutines)) {
             t.Errorf("wanted %d goroutines for task %d, got %d goroutines instead", len(want.goroutines), id, len(summary.Goroutines));
         } else {
-            foreach (var (_, goid) in want.goroutines) {
+            foreach (var (_, goid) in range(want.goroutines)) {
                 var (g, okΔ2) = summary.Goroutines[goid, ꟷ];
                 if (!okΔ2) {
                     t.Errorf("want goroutine %d for task %d, not found", goid, id);
@@ -299,7 +297,7 @@ internal static void basicGoroutineSummaryChecks(ж<testing.T> t, ж<Δtrace.Gor
         t.Errorf("bad name and/or PC for G %d: pc=0x%x name=%q", summary.ID, summary.PC, summary.Name);
     }
     basicGoroutineExecStatsChecks(t, Ꮡsummary.ᏑGoroutineExecStats);
-    foreach (var (_, region) in summary.Regions) {
+    foreach (var (_, region) in range(summary.Regions)) {
         basicGoroutineExecStatsChecks(t, region.ᏑGoroutineExecStats);
     }
 }
@@ -342,7 +340,7 @@ internal static void checkRegionEvents(ж<testing.T> t, Δtrace.EventKind wantSt
     switch (wantStart) {
     case var ᴛ when ᴛ == Δtrace.EventBad: {
         if (region.Start != nil) {
-            t.Errorf("expected nil region start event, got\n%s", (~region.Start).String());
+            t.Errorf("expected nil region start event, got\n%s", region.Start.String());
         }
         break;
     }
@@ -350,26 +348,24 @@ internal static void checkRegionEvents(ж<testing.T> t, Δtrace.EventKind wantSt
         if (region.Start == nil) {
             t.Error(expectedNonNilRegionˢ);
         }
-        var kind = (~region.Start).Kind();
+        var kind = region.Start.Kind();
         if (kind != wantStart) {
             t.Errorf("wanted region start event %s, got %s", wantStart, kind);
         }
         if (kind == Δtrace.EventRegionBegin) {
-            if ((~region.Start).Region().Type != region.Name) {
-                t.Errorf("region name mismatch: event has %s, summary has %s", (~region.Start).Region().Type, region.Name);
+            if (region.Start.Region().Type != region.Name) {
+                t.Errorf("region name mismatch: event has %s, summary has %s", region.Start.Region().Type, region.Name);
             }
         } else {
-            var st = (~region.Start).StateTransition();
+            var st = region.Start.StateTransition();
             if (st.Resource.Kind != Δtrace.ResourceGoroutine) {
                 t.Errorf("found region start event for the wrong resource: %s", st.Resource);
             }
             if (st.Resource.Goroutine() != goid) {
                 t.Errorf("found region start event for the wrong resource: wanted goroutine %d, got %s", goid, st.Resource);
             }
-            {
-                var (old, _) = st.Goroutine(); if (old != Δtrace.GoNotExist && old != Δtrace.GoUndetermined) {
-                    t.Errorf("expected transition from GoNotExist or GoUndetermined, got transition from %s instead", old);
-                }
+            var (old, _) = st.Goroutine(); if (old != Δtrace.GoNotExist && old != Δtrace.GoUndetermined) {
+                t.Errorf("expected transition from GoNotExist or GoUndetermined, got transition from %s instead", old);
             }
         }
         break;
@@ -382,7 +378,7 @@ internal static void checkRegionEvents(ж<testing.T> t, Δtrace.EventKind wantSt
     switch (wantEnd) {
     case var ᴛ when ᴛ == Δtrace.EventBad: {
         if (region.End != nil) {
-            t.Errorf("expected nil region end event, got\n%s", (~region.End).String());
+            t.Errorf("expected nil region end event, got\n%s", region.End.String());
         }
         break;
     }
@@ -390,26 +386,24 @@ internal static void checkRegionEvents(ж<testing.T> t, Δtrace.EventKind wantSt
         if (region.End == nil) {
             t.Error(expectedNonNilRegionEndˢ);
         }
-        var kind = (~region.End).Kind();
+        var kind = region.End.Kind();
         if (kind != wantEnd) {
             t.Errorf("wanted region end event %s, got %s", wantEnd, kind);
         }
         if (kind == Δtrace.EventRegionEnd) {
-            if ((~region.End).Region().Type != region.Name) {
-                t.Errorf("region name mismatch: event has %s, summary has %s", (~region.End).Region().Type, region.Name);
+            if (region.End.Region().Type != region.Name) {
+                t.Errorf("region name mismatch: event has %s, summary has %s", region.End.Region().Type, region.Name);
             }
         } else {
-            var st = (~region.End).StateTransition();
+            var st = region.End.StateTransition();
             if (st.Resource.Kind != Δtrace.ResourceGoroutine) {
                 t.Errorf("found region end event for the wrong resource: %s", st.Resource);
             }
             if (st.Resource.Goroutine() != goid) {
                 t.Errorf("found region end event for the wrong resource: wanted goroutine %d, got %s", goid, st.Resource);
             }
-            {
-                var (_, @new) = st.Goroutine(); if (@new != Δtrace.GoNotExist) {
-                    t.Errorf("expected transition to GoNotExist, got transition to %s instead", @new);
-                }
+            var (_, @new) = st.Goroutine(); if (@new != Δtrace.GoNotExist) {
+                t.Errorf("expected transition to GoNotExist, got transition to %s instead", @new);
             }
         }
         break;
@@ -493,12 +487,10 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> t) {
         [((Δtrace.GoID)122)] = new()
     };
     foreach (var (goid, _) in got) {
-        {
-            var (_, ok) = want[goid, ꟷ]; if (ok) {
-                delete(want, goid);
-            } else {
-                t.Errorf("unexpected goroutine %d found in related goroutines for %d in test %s", goid, targetg, testPath);
-            }
+        var (_, ok) = want[goid, ꟷ]; if (ok) {
+            delete(want, goid);
+        } else {
+            t.Errorf("unexpected goroutine %d found in related goroutines for %d in test %s", goid, targetg, testPath);
         }
     }
     if (len(want) != 0) {

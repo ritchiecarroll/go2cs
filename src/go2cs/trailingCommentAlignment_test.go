@@ -251,3 +251,36 @@ func TestDeferredMarkersRepadAlignedRuns(t *testing.T) {
 		t.Fatalf("after the marker pass:\n%q\nwant:\n%q", data, want)
 	}
 }
+
+// A generated parser carries `//line` directives (goyacc writes `//line parser.go.y:N`). A line-only directive
+// leaves the ADJUSTED column of what follows unknown, 0, so the pass reads columns from the file as written: the
+// unadjusted position. Reading the adjusted one sliced the line's prefix at -1, and the converter dropped the whole
+// file ("visit file error", gojq's parser.go under -tests).
+func TestTrailingCommentsAfterALineDirectiveAlign(t *testing.T) {
+	lines := convertWithComments(t, `package main
+
+import "fmt"
+
+//line parser.go.y:2
+type token struct {
+	kind  int    // the kind
+	value string // the text
+}
+
+//line parser.go.y:40
+func main() {
+	t := token{kind: 1, value: "x"} // a token
+	n := 2                          // a count
+	fmt.Println(t, n)
+}
+`)
+	dump := strings.Join(lines, "\n")
+
+	for _, run := range [][]string{{"the kind", "the text"}, {"a token", "a count"}} {
+		first, _, _ := trailingCommentColumn(t, lines, run[0])
+
+		if second, _, line := trailingCommentColumn(t, lines, run[1]); second != first {
+			t.Errorf("run %q: the comment %q starts at column %d, want %d:\n%s\n\n%s", run[0], run[1], second, first, line, dump)
+		}
+	}
+}

@@ -7,8 +7,6 @@ using Δruntime = runtime_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -152,10 +150,8 @@ public static void TestPinnerMultiplePinsSame(ж<testing.T> t) {
     if (!runtime_internal_test_package.IsPinned(addr)) {
         t.Fatal(notMarkedAsPinnedˢ);
     }
-    {
-        var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != (uintptr)(N - 1)) {
-            t.Fatalf("pin counter incorrect: %d", cnt.Value);
-        }
+    var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != (uintptr)(N - 1)) {
+        t.Fatalf("pin counter incorrect: %d", cnt.Value);
     }
     pinner.Unpin();
     if (runtime_internal_test_package.IsPinned(addr)) {
@@ -185,10 +181,8 @@ public static void TestPinnerTwoPinner(ж<testing.T> t) {
     if (!runtime_internal_test_package.IsPinned(addr)) {
         t.Fatal(notMarkedAsPinnedˢ);
     }
-    {
-        var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != 1) {
-            t.Fatalf("pin counter incorrect: %d", cnt.Value);
-        }
+    var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != 1) {
+        t.Fatalf("pin counter incorrect: %d", cnt.Value);
     }
     pinner1.Unpin();
     if (!runtime_internal_test_package.IsPinned(addr)) {
@@ -247,10 +241,8 @@ public static void TestPinnerPinTinyObj(ж<testing.T> t) {
         if (!runtime_internal_test_package.IsPinned(addr[i])) {
             t.Fatalf("not marked as pinned: %d", i);
         }
-        {
-            var cnt = runtime_internal_test_package.GetPinCounter(addr[i]); if (cnt == nil || cnt.Value == 0) {
-                t.Fatalf("pin counter incorrect: %d, %d", cnt.Value, i);
-            }
+        var cnt = runtime_internal_test_package.GetPinCounter(addr[i]); if (cnt == nil || cnt.Value == 0) {
+            t.Fatalf("pin counter incorrect: %d, %d", cnt.Value, i);
         }
     }
     pinner.Unpin();

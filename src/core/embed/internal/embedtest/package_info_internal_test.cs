@@ -27,7 +27,7 @@ using static go.embed.@internal.embedtest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("embed/internal/embedtest/embed_test.go", "embed_test.cs", "AB40goKCgoKUgriCgoK4ooKCgoKUgoKCgpSUggAcEoKCgpSAgraCAB8MgoKCgoKUgoKCACAWgoKUlKaUpriigoKCgpSSgoKUgrQAGCqSgoKClJKCgoK4goKCggAIBoKCgqamgoKClIKUgqiSgoKUgriCgoKUgriCgoKClIKUgriCgoKCgpSClII=", "167-174:1", "", "", "212:21")]
+[assembly: GoPositionMap("embed/internal/embedtest/embed_test.go", "embed_test.cs", "ABw0goKCgoKUgriCgoK4ooKCgoKUgoKCgpSUggAaEoKCgpSCpoIAHwyCgoKCgpSCgoIAIBaCgpSUppSmuKKCgoKClJKCgpSCtAAVKpKCgoKUkoKCgriCgoKCAAgGgoKCpqaCgoKUgpSCqJKCgpSCuIKCgpSCuIKCgoKUgpSCuIKCgoKClIKUgg==", "167-174:1", "", "", "206:21")]
 // </GoSourcePositionMaps>
 
 namespace go.embed.@internal;

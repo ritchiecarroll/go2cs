@@ -9,8 +9,6 @@ using rand = global::go.math.rand_package;
 using static runtime_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -32,7 +30,7 @@ public static void TestGcPacer(ж<testing.T> t) {
     t.Parallel();
 
     const int64 initialHeapBytes = /* 256 << 10 */ 262144;
-    foreach (var (_, e) in slice<ж<gcExecTest>>([
+    foreach (var (_, e) in range(slice<ж<gcExecTest>>([
         Ꮡ(new gcExecTest(
             // The most basic test case: a steady-state heap.
             // Growth to an O(MiB) heap, then constant heap size, alloc/scan rates.
@@ -419,10 +417,8 @@ public static void TestGcPacer(ж<testing.T> t) {
             length: 50,
             checker: (ж<testing.T> tΔ14, slice<gcCycleResult> c) => {
                 nint n = len(c);
-                {
-                    var peak = c[n - 1].heapPeak; if (peak >= applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ14.Errorf("peak heap size reaches heap limit: %d", peak);
-                    }
+                var peak = c[n - 1].heapPeak; if (peak >= applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
+                    tΔ14.Errorf("peak heap size reaches heap limit: %d", peak);
                 }
                 if (n >= 25) {
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
@@ -449,10 +445,8 @@ public static void TestGcPacer(ж<testing.T> t) {
             length: 50,
             checker: (ж<testing.T> tΔ15, slice<gcCycleResult> c) => {
                 nint n = len(c);
-                {
-                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ15.Errorf("heap goal is not the heap limit: %d", goal);
-                    }
+                var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
+                    tΔ15.Errorf("heap goal is not the heap limit: %d", goal);
                 }
                 if (n >= 25) {
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
@@ -482,10 +476,8 @@ public static void TestGcPacer(ж<testing.T> t) {
                 if (n > 12) {
                     // We're way over the memory limit, so we want to make sure our goal is set
                     // as low as it possibly can be.
-                    {
-                        var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
-                            tΔ16.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
-                        }
+                    var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
+                        tΔ16.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
                     }
                 }
                 if (n >= 25) {
@@ -515,19 +507,15 @@ public static void TestGcPacer(ж<testing.T> t) {
             checker: (ж<testing.T> tΔ17, slice<gcCycleResult> c) => {
                 nint n = len(c);
                 if (n < 10) {
-                    {
-                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                            tΔ17.Errorf("heap goal is not the heap limit: %d", goal);
-                        }
+                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
+                        tΔ17.Errorf("heap goal is not the heap limit: %d", goal);
                     }
                 }
                 if (n > 12) {
                     // We're way over the memory limit, so we want to make sure our goal is set
                     // as low as it possibly can be.
-                    {
-                        var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
-                            tΔ17.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
-                        }
+                    var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
+                        tΔ17.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
                     }
                 }
                 if (n >= 25) {
@@ -558,10 +546,8 @@ public static void TestGcPacer(ж<testing.T> t) {
                 nint n = len(c);
                 if (n > 12) {
                     // We're trying to saturate the memory limit.
-                    {
-                        var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                            tΔ18.Errorf("heap goal is not the heap limit: %d", goal);
-                        }
+                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
+                        tΔ18.Errorf("heap goal is not the heap limit: %d", goal);
                     }
                 }
                 if (n >= 25) {
@@ -590,10 +576,8 @@ public static void TestGcPacer(ж<testing.T> t) {
             length: 50,
             checker: (ж<testing.T> tΔ19, slice<gcCycleResult> c) => {
                 nint n = len(c);
-                {
-                    var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ19.Errorf("heap goal is not the heap limit: %d", goal);
-                    }
+                var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
+                    tΔ19.Errorf("heap goal is not the heap limit: %d", goal);
                 }
                 if (n >= 25) {
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization,
@@ -612,7 +596,7 @@ public static void TestGcPacer(ж<testing.T> t) {
         // to the runway for the case of the expected work.
         // However, it is still possible to trigger this case if something exceptional
         // happens between calls to revise; the framework just doesn't support this yet.
-    ])) {
+    ]))) {
         var eʗ1 = e;
         t.Run(e.name, (ж<testing.T> tΔ20) => {
             tΔ20.Parallel();
@@ -640,7 +624,7 @@ public static void TestGcPacer(ж<testing.T> t) {
                     array<int64> deltas = new(3);
 
                     // Do globals work first, then stacks, then heap.
-                    foreach (var (iΔ1, workLeft) in slice<ж<int64>>([ᏑglobalsScanWorkLeft, ᏑstackScanWorkLeft, ᏑheapScanWorkLeft])) {
+                    foreach (var (iΔ1, workLeft) in range(slice<ж<int64>>([ᏑglobalsScanWorkLeft, ᏑstackScanWorkLeft, ᏑheapScanWorkLeft]))) {
                         if (workLeft.Value == 0) {
                             continue;
                         }
@@ -717,13 +701,11 @@ public static void TestGcPacer(ж<testing.T> t) {
                     // Let's figure out when, exactly, and adjust bytesAllocated too.
                     var actualElapsed = revisePeriod;
                     var actualAllocated = bytesAllocated;
-                    {
-                        var actualScanned = globalsScanned + stackScanned + heapScanned; if (actualScanned < bytesScanned) {
-                            // actualScanned = scanRate * rateConv * (t / revisePeriod) * nCores * u
-                            // => t = actualScanned * revisePeriod / (scanRate * rateConv * nCores * u)
-                            actualElapsed = (time.Duration)(int64)((float64)actualScanned * (float64)revisePeriod / (cycle.scanRate * rateConv * (float64)eʗ1.nCores * utilization));
-                            actualAllocated = (int64)(cycle.allocRate * rateConv * (float64)actualElapsed / (float64)revisePeriod * (float64)eʗ1.nCores * (1D - utilization));
-                        }
+                    var actualScanned = globalsScanned + stackScanned + heapScanned; if (actualScanned < bytesScanned) {
+                        // actualScanned = scanRate * rateConv * (t / revisePeriod) * nCores * u
+                        // => t = actualScanned * revisePeriod / (scanRate * rateConv * nCores * u)
+                        actualElapsed = (time.Duration)(int64)((float64)actualScanned * (float64)revisePeriod / (cycle.scanRate * rateConv * (float64)eʗ1.nCores * utilization));
+                        actualAllocated = (int64)(cycle.allocRate * rateConv * (float64)actualElapsed / (float64)revisePeriod * (float64)eʗ1.nCores * (1D - utilization));
                     }
 
                     // Ask the pacer to revise.
@@ -824,15 +806,11 @@ internal static void check(this ref gcExecTest e, ж<testing.T> t, slice<gcCycle
         }
         break;
     }}
-    {
-        var u = results[n - 1].gcUtilization; if (u < 0D || u > 1D) {
-            t.Fatal(gcUtilizationNotWithinˢ);
-        }
+    var u = results[n - 1].gcUtilization; if (u < 0D || u > 1D) {
+        t.Fatal(gcUtilizationNotWithinˢ);
     }
-    {
-        var s = results[n - 1].heapScannable; if (s < 0) {
-            t.Fatal(heapScannableIsNegativeˢ);
-        }
+    var s = results[n - 1].heapScannable; if (s < 0) {
+        t.Fatal(heapScannableIsNegativeˢ);
     }
     if (e.checker == nil) {
         t.Fatal(testSpecificCheckerIsˢ);
@@ -987,7 +965,7 @@ internal static float64Stream sum(this float64Stream f, params ꓸꓸꓸfloat64S
     var fsʗ1 = fs;
     return () => {
         var sum = f();
-        foreach (var (_, s) in fsʗ1) {
+        foreach (var (_, s) in range(fsʗ1)) {
             sum += s();
         }
         return sum;

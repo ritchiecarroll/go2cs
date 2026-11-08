@@ -6,8 +6,6 @@ namespace go.sync;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 
 partial class atomic_test_package {

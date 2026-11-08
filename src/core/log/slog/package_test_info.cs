@@ -56,9 +56,9 @@ using static global::go.log.slog_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABUstICCpKqiqLKokqiSqJIACBYACAKCgpSUgoKC", "65-70:1")]
-[assembly: GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABYm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
-[assembly: GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABskggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgIKkAAIS4oKCgoKCgpSUgoKCgoKClIKCqJSClA==", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
+[assembly: GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABUstIKUqqKosqiSqJKokgAIFgAIAoKClJSCgoI=", "65-70:1")]
+[assembly: GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABQm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
+[assembly: GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABskggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgpQAAhLigoKCgoKClJSCgoKCgoKUgoKolIKU", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
 // </GoSourcePositionMaps>
 
 namespace go.log;

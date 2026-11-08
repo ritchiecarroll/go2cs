@@ -41,30 +41,28 @@ public static void TestMMU(ж<testing.T> t) {
     // 0.5      *   *   *   *
     // 0.0      *****   *****
     //      0   1   2   3   4   5
-    var util = slice<slice<Δtrace.MutatorUtil>>([slice<Δtrace.MutatorUtil>([
+    var util = slice<slice<Δtrace.MutatorUtil>>([[
         new(0, 1D),
         new(1000000000, 0D),
         new(2000000000, 1D),
         new(3000000000, 0D),
         new(4000000000, 1D),
-        new(5000000000, 0D)])
+        new(5000000000, 0D)]
     ]);
     var mmuCurve = Δtrace.NewMMUCurve(util);
 
-    foreach (var (_, test) in slice<TestMMU_type>([
-        new(0, 0D, slice<float64>([])),
-        new(time.Millisecond, 0D, slice<float64>([0D, 0D])),
-        new(time.ΔSecond, 0D, slice<float64>([0D, 0D])),
-        new(2 * time.ΔSecond, 0.5D, slice<float64>([0.5D, 0.5D])),
-        new((time.Duration)(3000000000L), 1D / 3.0D, slice<float64>([1D / 3.0D])),
-        new((time.Duration)(4000000000L), 0.5D, slice<float64>([0.5D])),
-        new((time.Duration)(5000000000L), 3D / 5.0D, slice<float64>([3D / 5.0D])),
-        new((time.Duration)(6000000000L), 3D / 5.0D, slice<float64>([3D / 5.0D]))
-    ])) {
-        {
-            var got = mmuCurve.MMU(test.window); if (!aeq(test.want, got)) {
-                t.Errorf("for %s window, want mu = %f, got %f", test.window, test.want, got);
-            }
+    foreach (var (_, test) in range(slice<TestMMU_type>([
+        new(0, 0D, []),
+        new(time.Millisecond, 0D, [0D, 0D]),
+        new(time.ΔSecond, 0D, [0D, 0D]),
+        new(2 * time.ΔSecond, 0.5D, [0.5D, 0.5D]),
+        new((time.Duration)(3000000000L), 1D / 3.0D, [1D / 3.0D]),
+        new((time.Duration)(4000000000L), 0.5D, [0.5D]),
+        new((time.Duration)(5000000000L), 3D / 5.0D, [3D / 5.0D]),
+        new((time.Duration)(6000000000L), 3D / 5.0D, [3D / 5.0D])
+    ]))) {
+        var got = mmuCurve.MMU(test.window); if (!aeq(test.want, got)) {
+            t.Errorf("for %s window, want mu = %f, got %f", test.window, test.want, got);
         }
         var worst = mmuCurve.Examples(test.window, 2);
         // Which exact windows are returned is unspecified
@@ -74,7 +72,7 @@ public static void TestMMU(ж<testing.T> t) {
         if (len(worst) != len(test.worst)) {
             t.Errorf("for %s window, want worst %v, got %v", test.window, test.worst, worst);
         } else {
-            foreach (var i in range(worst)) {
+            foreach (var i in range(len(worst))) {
                 if (worst[i].MutatorUtil != test.worst[i]) {
                     t.Errorf("for %s window, want worst %v, got %v", test.window, test.worst, worst);
                     break;
@@ -124,7 +122,7 @@ public static void TestMMUTrace(ж<testing.T> t) {
             for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);
-                foreach (var i in range(mud1)) {
+                foreach (var i in range(len(mud1))) {
                     if (!aeq(mud1[i], mud2[i])) {
                         tΔ1.Errorf("for quantiles %v at window %v, want %v, got %v", quantiles, window, mud2, mud1);
                         break;
@@ -165,10 +163,8 @@ public static void TestMMUTrace(ж<testing.T> t) {
 internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Duration window) {
     float64 mmu = default;
 
-    {
-        var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
-            window = max;
-        }
+    var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
+        window = max;
     }
 
     mmu = 1.0D;
@@ -178,7 +174,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     float64 muInWindow(slice<Δtrace.MutatorUtil> utilΔ1, int64 end) {
         var total = 0.0D;
         Δtrace.MutatorUtil prevU = default;
-        foreach (var (_, u) in utilΔ1) {
+        foreach (var (_, u) in range(utilΔ1)) {
             if (u.Time > end) {
                 total += prevU.Util * (float64)(end - prevU.Time);
                 break;
@@ -190,7 +186,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     }
     var muInWindowʗ1 = muInWindow;
     void update() {
-        foreach (var (i, u) in util) {
+        foreach (var (i, u) in range(util)) {
             if (u.Time + (int64)window > util[len(util) - 1].Time) {
                 break;
             }
@@ -206,7 +202,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     if (util[len(util) - 1].Util != 0D) {
         throw panic("irreversible trace");
     }
-    foreach (var (i, u) in util) {
+    foreach (var (i, u) in range(util)) {
         var util1 = 0.0D;
         if (i != 0) {
             util1 = util[i - 1].Util;

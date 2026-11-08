@@ -62,11 +62,11 @@ public static void TestInit0(ж<testing.T> t) {
         h.Push((nint)0); // all elements are the same
     }
     Init(new heap_internal_test_package.myHeapжInterface(h));
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 1; h.Len() > 0; i++) {
         nint x = go.container.heap_package.Pop(new heap_internal_test_package.myHeapжInterface(h))._<nint>();
-        (~h).verify(t, 0);
+        h.verify(t, 0);
         if (x != 0) {
             t.Errorf("%d.th pop got %d; want %d", i, x, (nint)0);
         }
@@ -79,11 +79,11 @@ public static void TestInit1(ж<testing.T> t) {
         h.Push(i); // all elements are different
     }
     Init(new heap_internal_test_package.myHeapжInterface(h));
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 1; h.Len() > 0; i++) {
         nint x = go.container.heap_package.Pop(new heap_internal_test_package.myHeapжInterface(h))._<nint>();
-        (~h).verify(t, 0);
+        h.verify(t, 0);
         if (x != i) {
             t.Errorf("%d.th pop got %d; want %d", i, x, i);
         }
@@ -92,17 +92,17 @@ public static void TestInit1(ж<testing.T> t) {
 
 public static void Test(ж<testing.T> t) {
     var h = @new<myHeap>();
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 20; i > 10; i--) {
         h.Push(i);
     }
     Init(new heap_internal_test_package.myHeapжInterface(h));
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 10; i > 0; i--) {
         go.container.heap_package.Push(new heap_internal_test_package.myHeapжInterface(h), i);
-        (~h).verify(t, 0);
+        h.verify(t, 0);
     }
 
     for (nint i = 1; h.Len() > 0; i++) {
@@ -110,7 +110,7 @@ public static void Test(ж<testing.T> t) {
         if (i < 20) {
             go.container.heap_package.Push(new heap_internal_test_package.myHeapжInterface(h), 20 + i);
         }
-        (~h).verify(t, 0);
+        h.verify(t, 0);
         if (x != i) {
             t.Errorf("%d.th pop got %d; want %d", i, x, i);
         }
@@ -122,7 +122,7 @@ public static void TestRemove0(ж<testing.T> t) {
     for (nint i = 0; i < 10; i++) {
         h.Push(i);
     }
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     while (h.Len() > 0) {
         nint i = h.Len() - 1;
@@ -130,7 +130,7 @@ public static void TestRemove0(ж<testing.T> t) {
         if (x != i) {
             t.Errorf("Remove(%d) got %d; want %d", i, x, i);
         }
-        (~h).verify(t, 0);
+        h.verify(t, 0);
     }
 }
 
@@ -139,14 +139,14 @@ public static void TestRemove1(ж<testing.T> t) {
     for (nint i = 0; i < 10; i++) {
         h.Push(i);
     }
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 0; h.Len() > 0; i++) {
         nint x = Remove(new heap_internal_test_package.myHeapжInterface(h), 0)._<nint>();
         if (x != i) {
             t.Errorf("Remove(0) got %d; want %d", x, i);
         }
-        (~h).verify(t, 0);
+        h.verify(t, 0);
     }
 }
 
@@ -157,12 +157,12 @@ public static void TestRemove2(ж<testing.T> t) {
     for (nint i = 0; i < N; i++) {
         h.Push(i);
     }
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     var m = new map<nint, bool>();
     while (h.Len() > 0) {
         m[Remove(new heap_internal_test_package.myHeapжInterface(h), (h.Len() - 1) / 2)._<nint>()] = true;
-        (~h).verify(t, 0);
+        h.verify(t, 0);
     }
 
     if (len(m) != N) {
@@ -192,19 +192,19 @@ public static void BenchmarkDup(ж<testing.B> Ꮡb) {
 
 public static void TestFix(ж<testing.T> t) {
     var h = @new<myHeap>();
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 200; i > 0; i -= 10) {
         go.container.heap_package.Push(new heap_internal_test_package.myHeapжInterface(h), i);
     }
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     if ((h.ValueSlot)[0] != 10) {
         t.Fatalf("Expected head to be 10, was %d", (h.ValueSlot)[0]);
     }
     (h.ValueSlot)[0] = 210;
     Fix(new heap_internal_test_package.myHeapжInterface(h), 0);
-    (~h).verify(t, 0);
+    h.verify(t, 0);
 
     for (nint i = 100; i > 0; i--) {
         nint elem = rand.Intn(h.Len());
@@ -214,7 +214,7 @@ public static void TestFix(ж<testing.T> t) {
             (h.ValueSlot)[elem] /= 2;
         }
         Fix(new heap_internal_test_package.myHeapжInterface(h), elem);
-        (~h).verify(t, 0);
+        h.verify(t, 0);
     }
 }
 

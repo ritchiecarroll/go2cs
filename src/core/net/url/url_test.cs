@@ -659,10 +659,8 @@ internal static @string ufmt(ж<global::go.net.url_package.URL> Ꮡu) {
     any pass = default;
     if (u.User != nil) {
         user = u.User.Username();
-        {
-            var (p, ok) = u.User.Password(); if (ok) {
-                pass = p;
-            }
+        var (p, ok) = u.User.Password(); if (ok) {
+            pass = p;
         }
     }
     return fmt.Sprintf("opaque=%q, scheme=%q, user=%#v, pass=%#v, host=%q, path=%q, rawpath=%q, rawq=%q, frag=%q, rawfrag=%q, forcequery=%v, omithost=%t"u8,
@@ -674,7 +672,7 @@ public static void BenchmarkString(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     b.ReportAllocs();
-    foreach (var (_, tt) in urltests) {
+    foreach (var (_, tt) in range(urltests)) {
         var (u, err) = Parse(tt.@in);
         if (err != nil) {
             Ꮡb.Errorf("Parse(%q) returned error %s", tt.@in, err);
@@ -689,16 +687,14 @@ public static void BenchmarkString(ж<testing.B> Ꮡb) {
             g = u.String();
         }
         b.StopTimer();
-        {
-            @string w = tt.roundtrip; if (b.N > 0 && g != w) {
-                Ꮡb.Errorf("Parse(%q).String() == %q, want %q", tt.@in, g, w);
-            }
+        @string w = tt.roundtrip; if (b.N > 0 && g != w) {
+            Ꮡb.Errorf("Parse(%q).String() == %q, want %q", tt.@in, g, w);
         }
     }
 }
 
 public static void TestParse(ж<testing.T> t) {
-    foreach (var (_, tt) in urltests) {
+    foreach (var (_, tt) in range(urltests)) {
         var (u, err) = Parse(tt.@in);
         if (err != nil) {
             t.Errorf("Parse(%q) returned error %v", tt.@in, err);
@@ -717,7 +713,7 @@ partial struct parseRequestURLTestsᴛ1 /*dyn*/ {
     internal @string url;
     internal bool expectedValid;
 }
-internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = slice<parseRequestURLTestsᴛ1>([
+internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = [
     new("http://foo.com", true),
     new("http://foo.com/", true),
     new("http://foo.com/path", true),
@@ -773,10 +769,10 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = slice<par
     new("https://1:2:3:4:5:6:7:8", false),
     new("https://1:2:3:4:5:6:7:8:80", false),
     new("https://example.com:80:", false)
-]);
+];
 
 public static void TestParseRequestURI(ж<testing.T> t) {
-    foreach (var (_, test) in parseRequestURLTests) {
+    foreach (var (_, test) in range(parseRequestURLTests)) {
         var (_, errΔ1) = ParseRequestURI(test.url);
         if (test.expectedValid && errΔ1 != nil) {
             t.Errorf("ParseRequestURI(%q) gave err %v; want no error", test.url, errΔ1);
@@ -798,7 +794,7 @@ partial struct stringURLTestsᴛ1 /*dyn*/ {
     internal global::go.net.url_package.URL url;
     internal @string want;
 }
-internal static slice<stringURLTestsᴛ1> stringURLTests = slice<stringURLTestsᴛ1>([
+internal static slice<stringURLTestsᴛ1> stringURLTests = [
     // No leading slash on path should prepend slash on String() call
     new(
         url: new URL(
@@ -831,10 +827,10 @@ internal static slice<stringURLTestsᴛ1> stringURLTests = slice<stringURLTests�
         ),
         want: "http://www.google.com/this:that"
     )
-]);
+];
 
 public static void TestURLString(ж<testing.T> t) {
-    foreach (var (_, tt) in urltests) {
+    foreach (var (_, tt) in range(urltests)) {
         var (u, err) = Parse(tt.@in);
         if (err != nil) {
             t.Errorf("Parse(%q) returned error %s", tt.@in, err);
@@ -850,13 +846,11 @@ public static void TestURLString(ж<testing.T> t) {
         }
     }
 
-    foreach (var (_, vᴛ1) in stringURLTests) {
+    foreach (var (_, vᴛ1) in range(stringURLTests)) {
         var tt = vᴛ1;
 
-        {
-            @string got = tt.url.String(); if (got != tt.want) {
-                t.Errorf("%+v.String() = %q; want %q", tt.url, got, tt.want);
-            }
+        @string got = tt.url.String(); if (got != tt.want) {
+            t.Errorf("%+v.String() = %q; want %q", tt.url, got, tt.want);
         }
     }
 }
@@ -926,17 +920,15 @@ public static void TestURLRedacted(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in cases) {
+    foreach (var (_, vᴛ1) in range(cases)) {
         ref var tt = ref heap(new TestURLRedacted_cases(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
-            {
-                @string g = ttʗ1.url.Redacted();
-                @string w = ttʗ1.want; if (g != w) {
-                    tΔ1.Fatalf("got: %q\nwant: %q", g, w);
-                }
+            @string g = ttʗ1.url.Redacted();
+            @string w = ttʗ1.want; if (g != w) {
+                tΔ1.Fatalf("got: %q\nwant: %q", g, w);
             }
         });
     }
@@ -948,7 +940,7 @@ public partial struct EscapeTest {
     internal error err;
 }
 
-internal static slice<EscapeTest> unescapeTests = slice<EscapeTest>([
+internal static slice<EscapeTest> unescapeTests = [
     new(
         "",
         "",
@@ -1014,14 +1006,14 @@ internal static slice<EscapeTest> unescapeTests = slice<EscapeTest>([
         "a b",
         default
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xxxˢ => ref xxxˢᵇ;
 private static readonly @string xxxˢᵇ = "XXX"u8;
 
 public static void TestUnescape(ж<testing.T> t) {
-    foreach (var (_, tt) in unescapeTests) {
+    foreach (var (_, tt) in range(unescapeTests)) {
         var (actual, err) = QueryUnescape(tt.@in);
         if (actual != tt.@out || (err != nil) != (tt.err != nil)) {
             t.Errorf("QueryUnescape(%q) = %q, %s; want %q, %s", tt.@in, actual, err, tt.@out, tt.err);
@@ -1052,7 +1044,7 @@ public static void TestUnescape(ж<testing.T> t) {
     }
 }
 
-internal static slice<EscapeTest> queryEscapeTests = slice<EscapeTest>([
+internal static slice<EscapeTest> queryEscapeTests = [
     new(
         "",
         "",
@@ -1078,13 +1070,13 @@ internal static slice<EscapeTest> queryEscapeTests = slice<EscapeTest>([
         "+%3F%26%3D%23%2B%25%21%3C%3E%23%22%7B%7D%7C%5C%5E%5B%5D%60%E2%98%BA%09%3A%2F%40%24%27%28%29%2A%2C%3B",
         default
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noErrorˢ = (@string)"[no error]"u8;
 
 public static void TestQueryEscape(ж<testing.T> t) {
-    foreach (var (_, tt) in queryEscapeTests) {
+    foreach (var (_, tt) in range(queryEscapeTests)) {
         @string actual = QueryEscape(tt.@in);
         if (tt.@out != actual) {
             t.Errorf("QueryEscape(%q) = %q, want %q", tt.@in, actual, tt.@out);
@@ -1098,7 +1090,7 @@ public static void TestQueryEscape(ж<testing.T> t) {
     }
 }
 
-internal static slice<EscapeTest> pathEscapeTests = slice<EscapeTest>([
+internal static slice<EscapeTest> pathEscapeTests = [
     new(
         "",
         "",
@@ -1134,10 +1126,10 @@ internal static slice<EscapeTest> pathEscapeTests = slice<EscapeTest>([
         "%20%3F&=%23+%25%21%3C%3E%23%22%7B%7D%7C%5C%5E%5B%5D%60%E2%98%BA%09:%2F@$%27%28%29%2A%2C%3B",
         default
     )
-]);
+];
 
 public static void TestPathEscape(ж<testing.T> t) {
-    foreach (var (_, tt) in pathEscapeTests) {
+    foreach (var (_, tt) in range(pathEscapeTests)) {
         @string actual = PathEscape(tt.@in);
         if (tt.@out != actual) {
             t.Errorf("PathEscape(%q) = %q, want %q", tt.@in, actual, tt.@out);
@@ -1161,41 +1153,39 @@ public partial struct EncodeQueryTest {
     internal @string expected;
 }
 
-internal static slice<EncodeQueryTest> encodeQueryTests = slice<EncodeQueryTest>([
+internal static slice<EncodeQueryTest> encodeQueryTests = [
     new(default, ""),
     new(new Values(new map<@string, slice<@string>>{}), ""),
-    new(new Values(new map<@string, slice<@string>>{["q"] = slice<@string>(["puppies"]), ["oe"] = slice<@string>(["utf8"])}), "oe=utf8&q=puppies"),
-    new(new Values(new map<@string, slice<@string>>{["q"] = slice<@string>(["dogs", "&", "7"])}), "q=dogs&q=%26&q=7"),
+    new(new Values(new map<@string, slice<@string>>{["q"] = ["puppies"], ["oe"] = ["utf8"]}), "oe=utf8&q=puppies"),
+    new(new Values(new map<@string, slice<@string>>{["q"] = ["dogs", "&", "7"]}), "q=dogs&q=%26&q=7"),
     new(new Values(new map<@string, slice<@string>>{
-        ["a"] = slice<@string>(["a1", "a2", "a3"]),
-        ["b"] = slice<@string>(["b1", "b2", "b3"]),
-        ["c"] = slice<@string>(["c1", "c2", "c3"])
+        ["a"] = ["a1", "a2", "a3"],
+        ["b"] = ["b1", "b2", "b3"],
+        ["c"] = ["c1", "c2", "c3"]
     }), "a=a1&a=a2&a=a3&b=b1&b=b2&b=b3&c=c1&c=c2&c=c3"),
     new(new Values(new map<@string, slice<@string>>{
-        ["a"] = slice<@string>(["a"]),
-        ["b"] = slice<@string>(["b"]),
-        ["c"] = slice<@string>(["c"]),
-        ["d"] = slice<@string>(["d"]),
-        ["e"] = slice<@string>(["e"]),
-        ["f"] = slice<@string>(["f"]),
-        ["g"] = slice<@string>(["g"]),
-        ["h"] = slice<@string>(["h"]),
-        ["i"] = slice<@string>(["i"])
+        ["a"] = ["a"],
+        ["b"] = ["b"],
+        ["c"] = ["c"],
+        ["d"] = ["d"],
+        ["e"] = ["e"],
+        ["f"] = ["f"],
+        ["g"] = ["g"],
+        ["h"] = ["h"],
+        ["i"] = ["i"]
     }), "a=a&b=b&c=c&d=d&e=e&f=f&g=g&h=h&i=i")
-]);
+];
 
 public static void TestEncodeQuery(ж<testing.T> t) {
-    foreach (var (_, tt) in encodeQueryTests) {
-        {
-            @string q = tt.m.Encode(); if (q != tt.expected) {
-                t.Errorf(@"EncodeQuery(%+v) = %q, want %q", tt.m, q, tt.expected);
-            }
+    foreach (var (_, tt) in range(encodeQueryTests)) {
+        @string q = tt.m.Encode(); if (q != tt.expected) {
+            t.Errorf(@"EncodeQuery(%+v) = %q, want %q", tt.m, q, tt.expected);
         }
     }
 }
 
 public static void BenchmarkEncodeQuery(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in encodeQueryTests) {
+    foreach (var (_, vᴛ1) in range(encodeQueryTests)) {
         ref var tt = ref heap(new EncodeQueryTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1212,7 +1202,7 @@ public static void BenchmarkEncodeQuery(ж<testing.B> b) {
 partial struct resolvePathTestsᴛ1 /*dyn*/ {
     internal @string @base, @ref, expected;
 }
-internal static slice<resolvePathTestsᴛ1> resolvePathTests = slice<resolvePathTestsᴛ1>([
+internal static slice<resolvePathTestsᴛ1> resolvePathTests = [
     new("a/b", ".", "/a/"),
     new("a/b", "c", "/a/c"),
     new("a/b", "..", "/"),
@@ -1225,10 +1215,10 @@ internal static slice<resolvePathTestsᴛ1> resolvePathTests = slice<resolvePath
     new("a/./b", ".", "/a/"),
     new("a/../", ".", "/"),
     new("a/.././b", "c", "/c")
-]);
+];
 
 public static void TestResolvePath(ж<testing.T> t) {
-    foreach (var (_, test) in resolvePathTests) {
+    foreach (var (_, test) in range(resolvePathTests)) {
         @string got = resolvePath(test.@base, test.@ref);
         if (got != test.expected) {
             t.Errorf("For %q + %q got %q; expected %q", test.@base, test.@ref, got, test.expected);
@@ -1273,7 +1263,7 @@ public static void BenchmarkResolvePath(ж<testing.B> b) {
 partial struct resolveReferenceTestsᴛ1 /*dyn*/ {
     internal @string @base, rel, expected;
 }
-internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = slice<resolveReferenceTestsᴛ1>([
+internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = [
     // Absolute URL references
     new("http://foo.com?a=b", "https://bar.com/", "https://bar.com/"),
     new("http://foo.com/", "https://bar.com/?a=b", "https://bar.com/?a=b"),
@@ -1404,7 +1394,7 @@ internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = slice<r
     new("http:opaque?x=y#zzz", "https:bar/baz?a=b#frag", "https:bar/baz?a=b#frag"),
     new("http:opaque?x=y#zzz", "https://user@host:1234?a=b#frag", "https://user@host:1234?a=b#frag"),
     new("http:opaque?x=y#zzz", "?a=b#frag", "http:opaque?a=b#frag")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string schemeOpaqueˢ => ref schemeOpaqueˢᵇ;
@@ -1419,7 +1409,7 @@ public static void TestResolveReference(ж<testing.T> t) {
         return u;
     }
     var opaque = Ꮡ(new URL(Scheme: "scheme", Opaque: "opaque"));
-    foreach (var (_, test) in resolveReferenceTests) {
+    foreach (var (_, test) in range(resolveReferenceTests)) {
         var @base = mustParse(test.@base);
         var rel = mustParse(test.rel);
         var url = @base.ResolveReference(rel);
@@ -1542,25 +1532,25 @@ internal partial struct parseTest {
     internal bool ok;
 }
 
-internal static slice<parseTest> parseTests = slice<parseTest>([
+internal static slice<parseTest> parseTests = [
     new(
         query: "a=1",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"]}),
         ok: true
     ),
     new(
         query: "a=1&b=2",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"]), ["b"] = slice<@string>(["2"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"], ["b"] = ["2"]}),
         ok: true
     ),
     new(
         query: "a=1&a=2&a=banana",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1", "2", "banana"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1", "2", "banana"]}),
         ok: true
     ),
     new(
         query: "ascii=%3Ckey%3A+0x90%3E",
-        @out: new Values(new map<@string, slice<@string>>{["ascii"] = slice<@string>(["<key: 0x90>"])}),
+        @out: new Values(new map<@string, slice<@string>>{["ascii"] = ["<key: 0x90>"]}),
         ok: true
     ), new(
     query: "a=1;b=2",
@@ -1572,32 +1562,32 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
     ok: false
 ), new(
     query: "a=%3B", // hex encoding for semicolon
-    @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>([";"])}),
+    @out: new Values(new map<@string, slice<@string>>{["a"] = [";"]}),
     ok: true
 ),
     new(
         query: "a%3Bb=1",
-        @out: new Values(new map<@string, slice<@string>>{["a;b"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a;b"] = ["1"]}),
         ok: true
     ),
     new(
         query: "a=1&a=2;a=banana",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"]}),
         ok: false
     ),
     new(
         query: "a;b&c=1",
-        @out: new Values(new map<@string, slice<@string>>{["c"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["c"] = ["1"]}),
         ok: false
     ),
     new(
         query: "a=1&b=2;a=3&c=4",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"]), ["c"] = slice<@string>(["4"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"], ["c"] = ["4"]}),
         ok: false
     ),
     new(
         query: "a=1&b=2;c=3",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"]}),
         ok: false
     ),
     new(
@@ -1612,20 +1602,20 @@ internal static slice<parseTest> parseTests = slice<parseTest>([
     ),
     new(
         query: "a=1&;",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"]}),
         ok: false
     ),
     new(
         query: ";a=1&b=2",
-        @out: new Values(new map<@string, slice<@string>>{["b"] = slice<@string>(["2"])}),
+        @out: new Values(new map<@string, slice<@string>>{["b"] = ["2"]}),
         ok: false
     ),
     new(
         query: "a=1&b=2;",
-        @out: new Values(new map<@string, slice<@string>>{["a"] = slice<@string>(["1"])}),
+        @out: new Values(new map<@string, slice<@string>>{["a"] = ["1"]}),
         ok: false
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errorˢ => ref errorˢᵇ;
@@ -1634,7 +1624,7 @@ internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static void TestParseQuery(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in parseTests) {
+    foreach (var (_, vᴛ1) in range(parseTests)) {
         ref var test = ref heap(new parseTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1661,11 +1651,9 @@ public static void TestParseQuery(ж<testing.T> t) {
                     tΔ1.Errorf("len(form[%q]) = %d, want %d", k, len(vs), len(evs));
                     continue;
                 }
-                foreach (var (j, ev) in evs) {
-                    {
-                        @string v = vs[j]; if (v != ev) {
-                            tΔ1.Errorf("form[%q][%d] = %q, want %q", k, j, v, ev);
-                        }
+                foreach (var (j, ev) in range(evs)) {
+                    @string v = vs[j]; if (v != ev) {
+                        tΔ1.Errorf("form[%q][%d] = %q, want %q", k, j, v, ev);
                     }
                 }
             }
@@ -1684,7 +1672,7 @@ internal partial struct TestParseQueryLimits_type /*dyn*/ {
 }
 
 public static void TestParseQueryLimits(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestParseQueryLimits_type>([new(
+    foreach (var (_, test) in range(slice<TestParseQueryLimits_type>([new(
         @params: 10,
         wantErr: false
     ), new(
@@ -1702,7 +1690,7 @@ public static void TestParseQueryLimits(ж<testing.T> t) {
         godebug: "urlmaxqueryparams=0",
         wantErr: false
     )
-    ])) {
+    ]))) {
         t.Setenv(godebugˢ, test.godebug);
         var want = new Values(new map<@string, slice<@string>>{});
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -1712,23 +1700,19 @@ public static void TestParseQueryLimits(ж<testing.T> t) {
             }
             @string p = fmt.Sprintf("p%v"u8, i);
             Ꮡb.WriteString(p);
-            want[p] = slice<@string>([""]);
+            want[p] = [""];
         }
         @string query = b.String();
         var (got, err) = ParseQuery(query);
-        {
-            var (gotErr, wantErr) = (err != nil, test.wantErr); if (gotErr != wantErr) {
-                t.Errorf("GODEBUG=%v ParseQuery(%v params) = %v, want error: %v", test.godebug, test.@params, err, wantErr);
-            }
+        var (gotErr, wantErr) = (err != nil, test.wantErr); if (gotErr != wantErr) {
+            t.Errorf("GODEBUG=%v ParseQuery(%v params) = %v, want error: %v", test.godebug, test.@params, err, wantErr);
         }
         if (err != nil) {
             continue;
         }
-        {
-            nint gotΔ1 = len(got);
-            nint wantΔ1 = test.@params; if (gotΔ1 != wantΔ1) {
-                t.Errorf("GODEBUG=%v ParseQuery(%v params): got %v params, want %v", test.godebug, test.@params, gotΔ1, wantΔ1);
-            }
+        nint gotΔ1 = len(got);
+        nint wantΔ1 = test.@params; if (gotΔ1 != wantΔ1) {
+            t.Errorf("GODEBUG=%v ParseQuery(%v params): got %v params, want %v", test.godebug, test.@params, gotΔ1, wantΔ1);
         }
     }
 }
@@ -1738,7 +1722,7 @@ public partial struct RequestURITest {
     internal @string @out;
 }
 
-internal static slice<RequestURITest> requritests = slice<RequestURITest>([
+internal static slice<RequestURITest> requritests = [
     new(
         Ꮡ(new URL(
             Scheme: "http",
@@ -1853,10 +1837,10 @@ internal static slice<RequestURITest> requritests = slice<RequestURITest>([
         )),
         "/foo?"
     )
-]);
+];
 
 public static void TestRequestURI(ж<testing.T> t) {
-    foreach (var (_, tt) in requritests) {
+    foreach (var (_, tt) in range(requritests)) {
         @string s = tt.url.RequestURI();
         if (s != tt.@out) {
             t.Errorf("%#v.RequestURI() == %q (expected %q)", tt.url.OrTypedNil(), s, tt.@out);
@@ -1933,7 +1917,7 @@ public static void TestParseErrors(ж<testing.T> t) {
         new("http:// [::1]", true),
         new("hxxp://mathepqo[.]serveftp(.)com:9059", true)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (u, err) = Parse(tt.@in);
         if (tt.wantErr) {
             if (err == nil) {
@@ -1953,11 +1937,9 @@ public static void TestStarRequest(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        @string got = u.RequestURI();
-        @string want = "*"; if (got != want) {
-            t.Errorf("RequestURI = %q; want %q", got, want);
-        }
+    @string got = u.RequestURI();
+    @string want = "*"; if (got != want) {
+        t.Errorf("RequestURI = %q; want %q", got, want);
     }
 }
 
@@ -1967,7 +1949,7 @@ internal partial struct shouldEscapeTest {
     internal bool escape;
 }
 
-internal static slice<shouldEscapeTest> shouldEscapeTests = slice<shouldEscapeTest>([
+internal static slice<shouldEscapeTest> shouldEscapeTests = [
     // Unreserved characters (§2.3)
     new((byte)'a', encodePath, false),
     new((byte)'a', encodeUserPassword, false),
@@ -2021,10 +2003,10 @@ internal static slice<shouldEscapeTest> shouldEscapeTests = slice<shouldEscapeTe
     new((byte)'_', encodeHost, false),
     new((byte)'-', encodeHost, false),
     new((byte)'.', encodeHost, false)
-]);
+];
 
 public static void TestShouldEscape(ж<testing.T> t) {
-    foreach (var (_, tt) in shouldEscapeTests) {
+    foreach (var (_, tt) in range(shouldEscapeTests)) {
         if (shouldEscape(tt.@in, tt.mode) != tt.escape) {
             t.Errorf("shouldEscape(%q, %v) returned %v; expected %v", tt.@in, tt.mode, !tt.escape, tt.escape);
         }
@@ -2039,13 +2021,8 @@ internal partial struct timeoutError {
 internal static ref readonly @string timeoutErrorˢ => ref timeoutErrorˢᵇ;
 private static readonly @string timeoutErrorˢᵇ = "timeout error"u8;
 
-internal static @string Error(this ref timeoutError e) {
-    return timeoutErrorˢ;
-}
-
-internal static bool Timeout(this ref timeoutError e) {
-    return e.timeout;
-}
+internal static @string Error(this ref timeoutError e) { return timeoutErrorˢ; }
+internal static bool Timeout(this ref timeoutError e) { return e.timeout; }
 
 internal partial struct temporaryError {
     internal bool temporary;
@@ -2055,13 +2032,8 @@ internal partial struct temporaryError {
 internal static ref readonly @string temporaryErrorˢ => ref temporaryErrorˢᵇ;
 private static readonly @string temporaryErrorˢᵇ = "temporary error"u8;
 
-internal static @string Error(this ref temporaryError e) {
-    return temporaryErrorˢ;
-}
-
-internal static bool Temporary(this ref temporaryError e) {
-    return e.temporary;
-}
+internal static @string Error(this ref temporaryError e) { return temporaryErrorˢ; }
+internal static bool Temporary(this ref temporaryError e) { return e.temporary; }
 
 internal partial struct timeoutTemporaryError {
     /*embed*/ internal timeoutError timeoutError;
@@ -2072,16 +2044,14 @@ internal partial struct timeoutTemporaryError {
 internal static ref readonly @string timeoutTemporaryErrorˢ => ref timeoutTemporaryErrorˢᵇ;
 private static readonly @string timeoutTemporaryErrorˢᵇ = "timeout/temporary error"u8;
 
-internal static @string Error(this ref timeoutTemporaryError e) {
-    return timeoutTemporaryErrorˢ;
-}
+internal static @string Error(this ref timeoutTemporaryError e) { return timeoutTemporaryErrorˢ; }
 
 partial struct netErrorTestsᴛ1 /*dyn*/ {
     internal error err;
     internal bool timeout;
     internal bool temporary;
 }
-internal static slice<netErrorTestsᴛ1> netErrorTests = slice<netErrorTestsᴛ1>([new(
+internal static slice<netErrorTestsᴛ1> netErrorTests = [new(
     err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutErrorжerror(Ꮡ(new timeoutError(timeout: true)))))),
     timeout: true,
     temporary: false
@@ -2118,11 +2088,11 @@ internal static slice<netErrorTestsᴛ1> netErrorTests = slice<netErrorTestsᴛ1
     timeout: false,
     temporary: false
 )
-]);
+];
 
 // Test that url.Error implements net.Error and that it forwards
 public static void TestURLErrorImplementsNetError(ж<testing.T> t) {
-    foreach (var (i, tt) in netErrorTests) {
+    foreach (var (i, tt) in range(netErrorTests)) {
         var (err, ok) = tt.err._<netꓸError>(ᐧ);
         if (!ok) {
             t.Errorf("%d: %T does not implement net.Error", i + 1, tt.err);
@@ -2172,7 +2142,7 @@ public static void TestURLHostnameAndPort(ж<testing.T> t) {
         new("[::1]extra]:80", "::1]extra", "80"),
         new("google.com]extra:extra", "google.com]extra:extra", "")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var u = Ꮡ(new URL(Host: tt.@in));
         @string host = u.Hostname();
         @string port = u.Port();
@@ -2186,9 +2156,7 @@ public static void TestURLHostnameAndPort(ж<testing.T> t) {
 }
 
 internal static encodingPkg.BinaryMarshaler _ᴛ1ʗ = new url_test_package.url_URLжBinaryMarshaler(((ж<global::go.net.url_package.URL>)nil));
-
 internal static encodingPkg.BinaryUnmarshaler _ᴛ2ʗ = new url_test_package.url_URLжBinaryUnmarshaler(((ж<global::go.net.url_package.URL>)nil));
-
 internal static encodingPkg.BinaryAppender _ᴛ3ʗ = new url_test_package.url_URLжBinaryAppender(((ж<global::go.net.url_package.URL>)nil));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2251,10 +2219,8 @@ public static void TestNilUser(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var v = recover(); if (v != nil) {
-                    t.Fatalf("unexpected panic: %v", v);
-                }
+            var v = recover(); if (v != nil) {
+                t.Fatalf("unexpected panic: %v", v);
             }
         }, ref ᒐ);
 
@@ -2292,11 +2258,9 @@ private static readonly @string httpUserPasswoRdFooComˢᵇ = "http://user^:pass
 
 public static void TestInvalidUserPassword(ж<testing.T> t) {
     var (_, err) = Parse(httpUserPasswoRdFooComˢ);
-    {
-        @string got = fmt.Sprint(err);
-        @string wantsub = netUrlInvalidUserinfoˢ; if (!strings.Contains(got, wantsub)) {
-            t.Errorf("error = %q; want substring %q", got, wantsub);
-        }
+    @string got = fmt.Sprint(err);
+    @string wantsub = netUrlInvalidUserinfoˢ; if (!strings.Contains(got, wantsub)) {
+        t.Errorf("error = %q; want substring %q", got, wantsub);
     }
 }
 
@@ -2310,13 +2274,11 @@ public static void TestRejectControlCharacters(ж<testing.T> t) {
         "http\r://foo.com/",
         "http://foo\x7f.com/"
     ]);
-    foreach (var (_, s) in tests) {
+    foreach (var (_, s) in range(tests)) {
         var (_, err) = Parse(s);
         @string wantSub = wantSubᶜ;
-        {
-            @string got = fmt.Sprint(err); if (!strings.Contains(got, wantSub)) {
-                t.Errorf("Parse(%q) error = %q; want substring %q", s, got, wantSub);
-            }
+        @string got = fmt.Sprint(err); if (!strings.Contains(got, wantSub)) {
+            t.Errorf("Parse(%q) error = %q; want substring %q", s, got, wantSub);
         }
     }
 
@@ -2365,7 +2327,7 @@ internal static slice<escapeBenchmarksᴛ1> escapeBenchmarks = slice<escapeBench
 ]);
 
 public static void BenchmarkQueryEscape(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in escapeBenchmarks) {
+    foreach (var (_, vᴛ1) in range(escapeBenchmarks)) {
         ref var tc = ref heap(new escapeBenchmarksᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2385,7 +2347,7 @@ public static void BenchmarkQueryEscape(ж<testing.B> b) {
 }
 
 public static void BenchmarkPathEscape(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in escapeBenchmarks) {
+    foreach (var (_, vᴛ1) in range(escapeBenchmarks)) {
         ref var tc = ref heap(new escapeBenchmarksᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2405,7 +2367,7 @@ public static void BenchmarkPathEscape(ж<testing.B> b) {
 }
 
 public static void BenchmarkQueryUnescape(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in escapeBenchmarks) {
+    foreach (var (_, vᴛ1) in range(escapeBenchmarks)) {
         ref var tc = ref heap(new escapeBenchmarksᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2425,7 +2387,7 @@ public static void BenchmarkQueryUnescape(ж<testing.B> b) {
 }
 
 public static void BenchmarkPathUnescape(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in escapeBenchmarks) {
+    foreach (var (_, vᴛ1) in range(escapeBenchmarks)) {
         ref var tc = ref heap(new escapeBenchmarksᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -2460,22 +2422,22 @@ public static void TestJoinPath(ж<testing.T> t) {
     var tests = slice<TestJoinPath_tests>([
         new(
             @base: "https://go.googlesource.com",
-            elem: slice<@string>(["go"]),
+            elem: ["go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
             @base: "https://go.googlesource.com/a/b/c",
-            elem: slice<@string>(["../../../go"]),
+            elem: ["../../../go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
             @base: "https://go.googlesource.com/",
-            elem: slice<@string>(["../go"]),
+            elem: ["../go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
             @base: "https://go.googlesource.com",
-            elem: slice<@string>(["../go", "../../go", "../../../go"]),
+            elem: ["../go", "../../go", "../../../go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
@@ -2485,31 +2447,31 @@ public static void TestJoinPath(ж<testing.T> t) {
         ),
         new(
             @base: "https://go.googlesource.com/",
-            elem: slice<@string>(["./go"]),
+            elem: ["./go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
             @base: "https://go.googlesource.com//",
-            elem: slice<@string>(["/go"]),
+            elem: ["/go"],
             @out: "https://go.googlesource.com/go"
         ),
         new(
             @base: "https://go.googlesource.com//",
-            elem: slice<@string>(["/go", "a", "b", "c"]),
+            elem: ["/go", "a", "b", "c"],
             @out: "https://go.googlesource.com/go/a/b/c"
         ),
         new(
             @base: "http://[fe80::1%en0]:8080/",
-            elem: slice<@string>(["/go"])
+            elem: ["/go"]
         ),
         new(
             @base: "https://go.googlesource.com",
-            elem: slice<@string>(["go/"]),
+            elem: ["go/"],
             @out: "https://go.googlesource.com/go/"
         ),
         new(
             @base: "https://go.googlesource.com",
-            elem: slice<@string>(["go//"]),
+            elem: ["go//"],
             @out: "https://go.googlesource.com/go/"
         ),
         new(
@@ -2524,22 +2486,22 @@ public static void TestJoinPath(ж<testing.T> t) {
         ),
         new(
             @base: "https://go.googlesource.com/a%2fb",
-            elem: slice<@string>(["c"]),
+            elem: ["c"],
             @out: "https://go.googlesource.com/a%2fb/c"
         ),
         new(
             @base: "https://go.googlesource.com/a%2fb",
-            elem: slice<@string>(["c%2fd"]),
+            elem: ["c%2fd"],
             @out: "https://go.googlesource.com/a%2fb/c%2fd"
         ),
         new(
             @base: "https://go.googlesource.com/a/b",
-            elem: slice<@string>(["/go"]),
+            elem: ["/go"],
             @out: "https://go.googlesource.com/a/b/go"
         ),
         new(
             @base: "https://go.googlesource.com/",
-            elem: slice<@string>(["100%"])
+            elem: ["100%"]
         ),
         new(
             @base: "/",
@@ -2553,31 +2515,31 @@ public static void TestJoinPath(ж<testing.T> t) {
         ),
         new(
             @base: "a",
-            elem: slice<@string>(["b"]),
+            elem: ["b"],
             @out: "a/b"
         ),
         new(
             @base: "a",
-            elem: slice<@string>(["../b"]),
+            elem: ["../b"],
             @out: "b"
         ),
         new(
             @base: "a",
-            elem: slice<@string>(["../../b"]),
+            elem: ["../../b"],
             @out: "b"
         ),
         new(
             @base: "",
-            elem: slice<@string>(["a"]),
+            elem: ["a"],
             @out: "a"
         ),
         new(
             @base: "",
-            elem: slice<@string>(["../a"]),
+            elem: ["../a"],
             @out: "a"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var tt = vᴛ1;
 
         @string wantErr = nilˢ2;
@@ -2624,7 +2586,7 @@ public static void TestParseStrictIpv6(ж<testing.T> t) {
         new("https://1:2:3:4:5:6:7:8:80"),
         new("https://example.com:80:")
     ]);
-    foreach (var (i, vᴛ1) in tests) {
+    foreach (var (i, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestParseStrictIpv6_tests(), out var Ꮡtc);
         tc = vᴛ1;
 

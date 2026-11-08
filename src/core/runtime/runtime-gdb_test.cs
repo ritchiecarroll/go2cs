@@ -143,7 +143,7 @@ internal static void checkCleanBacktrace(ж<testing.T> t, @string backtrace) {
     if (len(lines) == 0) {
         t.Fatalf("empty backtrace");
     }
-    foreach (var (i, l) in lines) {
+    foreach (var (i, l) in range(lines)) {
         if (!strings.HasPrefix(l, fmt.Sprintf("#%v  "u8, i))) {
             t.Fatalf("malformed backtrace at line %v: %v", i, l);
         }
@@ -173,10 +173,8 @@ internal static void checkPtraceScope(ж<testing.T> t) {
     // If the Linux kernel does not have the YAMA module enabled,
     // there will be no ptrace_scope file, which does not affect the tests.
     @string path = procSysKernelYamaPtraceˢ;
-    {
-        var (_, errΔ1) = Δos.Stat(path); if (Δos.IsNotExist(errΔ1)) {
-            return;
-        }
+    var (_, errΔ1) = Δos.Stat(path); if (Δos.IsNotExist(errΔ1)) {
+        return;
     }
 
     var (data, err) = Δos.ReadFile(path);
@@ -241,7 +239,7 @@ func main() {
 
 internal static nint lastLine(slice<byte> src) {
     var eop = slice<byte>("END_OF_PROGRAM"u8);
-    foreach (var (i, l) in bytes.Split(src, slice<byte>("\n"u8))) {
+    foreach (var (i, l) in range(bytes.Split(src, slice<byte>("\n"u8)))) {
         if (bytes.Contains(l, eop)) {
             return i;
         }
@@ -256,7 +254,7 @@ internal static void gdbArgsFixup(slice<@string> args) {
     // On Windows, some gdb flavors expect -ex and -iex arguments
     // containing spaces to be double quoted.
     bool quote = default;
-    foreach (var (i, arg) in args) {
+    foreach (var (i, arg) in range(args)) {
         if (arg == "-iex"u8 || arg == "-ex"u8) {
             quote = true;
         } else if (quote) {
@@ -374,7 +372,7 @@ internal static void testGdbPython(ж<testing.T> t, bool cgo) {
     // Locate breakpoint line
     nint bp = default;
     var lines = bytes.Split(src, slice<byte>("\n"u8));
-    foreach (var (i, line) in lines) {
+    foreach (var (i, line) in range(lines)) {
         if (bytes.Contains(line, slice<byte>("breakpoint"u8))) {
             bp = i;
             break;
@@ -463,7 +461,7 @@ internal static void testGdbPython(ж<testing.T> t, bool cgo) {
     // Extract named BEGIN...END blocks from output
     var partRe = Δregexp.MustCompile(msBeginNNNENDˢ);
     var blocks = new map<@string, @string>{};
-    foreach (var (_, subs) in partRe.FindAllSubmatch(got, -1)) {
+    foreach (var (_, subs) in range(partRe.FindAllSubmatch(got, -1))) {
         blocks[((@string)subs[1])] = (@string)subs[2];
     }
 
@@ -709,13 +707,11 @@ public static void TestGdbBacktrace(ж<testing.T> t) {
         "aaa",
         "main"
     ]);
-    foreach (var (i, name) in bt) {
+    foreach (var (i, name) in range(bt)) {
         @string s = fmt.Sprintf("#%v.*main\\.%v"u8, i, name);
         var re = Δregexp.MustCompile(s);
-        {
-            var found = re.Find(got) != nil; if (!found) {
-                t.Fatalf("could not find '%v' in backtrace", s);
-            }
+        var found = re.Find(got) != nil; if (!found) {
+            t.Fatalf("could not find '%v' in backtrace", s);
         }
     }
 }
@@ -801,7 +797,7 @@ public static void TestGdbAutotmpTypes(ж<testing.T> t) {
         "map<string,main.astruct>",
         "map<string,main.astruct> * map[string]main.astruct"
     ]);
-    foreach (var (_, name) in types) {
+    foreach (var (_, name) in range(types)) {
         if (!strings.Contains(sgot, name)) {
             t.Fatalf("could not find %q in 'info typrs astruct' output", name);
         }
@@ -939,13 +935,11 @@ public static void TestGdbPanic(ж<testing.T> t) {
         @"crash",
         @"main"
     ]);
-    foreach (var (_, name) in bt) {
+    foreach (var (_, name) in range(bt)) {
         @string s = fmt.Sprintf("(#.* .* in )?main\\.%v"u8, name);
         var re = Δregexp.MustCompile(s);
-        {
-            var found = re.Find(got) != nil; if (!found) {
-                t.Fatalf("could not find '%v' in backtrace", s);
-            }
+        var found = re.Find(got) != nil; if (!found) {
+            t.Fatalf("could not find '%v' in backtrace", s);
         }
     }
 }
@@ -1029,13 +1023,11 @@ public static void TestGdbInfCallstack(ж<testing.T> t) {
         @"crosscall1",
         @"threadentry"
     ]);
-    foreach (var (i, name) in bt) {
+    foreach (var (i, name) in range(bt)) {
         @string s = fmt.Sprintf("#%v.*%v"u8, i, name);
         var re = Δregexp.MustCompile(s);
-        {
-            var found = re.Find(got) != nil; if (!found) {
-                t.Fatalf("could not find '%v' in backtrace", s);
-            }
+        var found = re.Find(got) != nil; if (!found) {
+            t.Fatalf("could not find '%v' in backtrace", s);
         }
     }
 }

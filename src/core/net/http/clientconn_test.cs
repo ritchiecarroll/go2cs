@@ -22,10 +22,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class http_test_package {
 
-public static void TestTransportNewClientConnRoundTrip(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testTransportNewClientConnRoundTrip(Δp0, Δp1));
-}
-
+public static void TestTransportNewClientConnRoundTrip(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testTransportNewClientConnRoundTrip(Δp0, Δp1)); }
 internal static void testTransportNewClientConnRoundTrip(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -43,7 +40,7 @@ internal static void testTransportNewClientConnRoundTrip(ж<testing.T> t, testMo
 
         // Send requests for a couple different domains.
         // All use the same connection.
-        foreach (var (_, host) in slice<@string>(["example.tld", "go.dev"])) {
+        foreach (var (_, host) in range(slice<@string>(["example.tld", "go.dev"]))) {
             var (reqΔ2, _) = Δhttp.NewRequest(getˢ2, fmt.Sprintf("%v://%v/"u8, scheme, host), default);
             var (respΔ1, errΔ1) = cc.RoundTrip(reqΔ2);
             if (errΔ1 != nil) {
@@ -59,17 +56,13 @@ internal static void testTransportNewClientConnRoundTrip(ж<testing.T> t, testMo
             cst.tr.CloseIdleConnections();
         }
 
-        {
-            var errΔ2 = cc.Err(); if (errΔ2 != nil) {
-                t.Errorf("before close: ClientConn.Err() = %v, want nil", errΔ2);
-            }
+        var errΔ2 = cc.Err(); if (errΔ2 != nil) {
+            t.Errorf("before close: ClientConn.Err() = %v, want nil", errΔ2);
         }
 
         cc.Close();
-        {
-            var errΔ3 = cc.Err(); if (errΔ3 == nil) {
-                t.Errorf("after close: ClientConn.Err() = nil, want error");
-            }
+        var errΔ3 = cc.Err(); if (errΔ3 == nil) {
+            t.Errorf("after close: ClientConn.Err() = nil, want error");
         }
 
         var (req, _) = Δhttp.NewRequest(getˢ2, scheme + "://example.tld/"u8, default);
@@ -105,10 +98,7 @@ internal static (ж<clientServerTest>, ж<Δhttp.ClientConn>) newClientConnTest(
 }
 
 // TestClientConnReserveAll reserves every concurrency slot on a connection.
-public static void TestClientConnReserveAll(ж<testing.T> t) {
-    runSynctest(t, testClientConnReserveAll);
-}
-
+public static void TestClientConnReserveAll(ж<testing.T> t) { runSynctest(t, testClientConnReserveAll); }
 internal static void testClientConnReserveAll(ж<testing.T> t, testMode mode) {
     var (cst, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, default, optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
         s.HTTP2 = Ꮡ(new Δhttp.HTTP2Config(
@@ -130,10 +120,8 @@ internal static void testClientConnReserveAll(ж<testing.T> t, testMode mode) {
 
     // Reserve every available concurrency slot on the connection.
     foreach (var i in range(available)) {
-        {
-            var err = cc.Reserve(); if (err != nil) {
-                t.Fatalf("cc.Reserve() #%v = %v, want nil", i, err);
-            }
+        var err = cc.Reserve(); if (err != nil) {
+            t.Fatalf("cc.Reserve() #%v = %v, want nil", i, err);
         }
         {
             nint got = cc.Available();
@@ -159,10 +147,7 @@ internal static void testClientConnReserveAll(ж<testing.T> t, testMode mode) {
 
 // TestClientConnReserveParallel starts concurrent goroutines which reserve every
 // concurrency slot on a connection.
-public static void TestClientConnReserveParallel(ж<testing.T> t) {
-    runSynctest(t, testClientConnReserveParallel);
-}
-
+public static void TestClientConnReserveParallel(ж<testing.T> t) { runSynctest(t, testClientConnReserveParallel); }
 internal static void testClientConnReserveParallel(ж<testing.T> t, testMode mode) {
     var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, default, optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
         s.HTTP2 = Ꮡ(new Δhttp.HTTP2Config(
@@ -210,10 +195,7 @@ internal static void testClientConnReserveParallel(ж<testing.T> t, testMode mod
 }
 
 // TestClientConnReserveRelease repeatedly reserves and releases concurrency slots.
-public static void TestClientConnReserveRelease(ж<testing.T> t) {
-    runSynctest(t, testClientConnReserveRelease);
-}
-
+public static void TestClientConnReserveRelease(ж<testing.T> t) { runSynctest(t, testClientConnReserveRelease); }
 internal static void testClientConnReserveRelease(ж<testing.T> t, testMode mode) {
     var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, default, optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
         s.HTTP2 = Ꮡ(new Δhttp.HTTP2Config(
@@ -223,19 +205,15 @@ internal static void testClientConnReserveRelease(ж<testing.T> t, testMode mode
 
     nint available = cc.Available();
     foreach (var i in range(2 * available)) {
-        {
-            var err = cc.Reserve(); if (err != nil) {
-                t.Fatalf("cc.Reserve() #%v = %v, want nil", i, err);
-            }
+        var err = cc.Reserve(); if (err != nil) {
+            t.Fatalf("cc.Reserve() #%v = %v, want nil", i, err);
         }
         cc.Release();
     }
 
-    {
-        nint got = cc.Available();
-        nint want = available; if (got != want) {
-            t.Fatalf("cc.Available() = %v, want %v", available, want);
-        }
+    nint got = cc.Available();
+    nint want = available; if (got != want) {
+        t.Fatalf("cc.Available() = %v, want %v", available, want);
     }
 }
 
@@ -255,7 +233,7 @@ internal partial struct TestClientConnReserveAndConsume_type /*dyn*/ {
 public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
 
 
-    foreach (var (_, vᴛ1) in slice<TestClientConnReserveAndConsume_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<TestClientConnReserveAndConsume_type>([new(
         // Explicit release.
         name: "release",
         consume: (ж<testing.T> tΔ1, ж<Δhttp.ClientConn> cc, testMode mode) => {
@@ -266,7 +244,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
         name: "invalid field name",
         consume: (ж<testing.T> tΔ2, ж<Δhttp.ClientConn> cc, testMode mode) => {
             var (req, _) = Δhttp.NewRequest(getˢ2, mode.Scheme() + "://example.tld/"u8, default);
-            req.Header[invalidFieldNameˢ] = slice<@string>(["x"]);
+            req.Header[invalidFieldNameˢ] = ["x"];
             var (_, err) = cc.RoundTrip(req);
             if (err == nil) {
                 tΔ2.Fatalf("RoundTrip succeeded, want failure");
@@ -324,7 +302,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
         // An HTTP/1 connection is closed after a request is canceled on it.
         h1Closed: true
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestClientConnReserveAndConsume_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -389,10 +367,8 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
                                 tΔ7.Errorf("cc.InFlight() = %v, want %v", got, want);
                             }
                         }
-                        {
-                            var err = cc.Err(); if (err == nil) {
-                                tΔ7.Errorf("cc.Err() = nil, want closed connection");
-                            }
+                        var err = cc.Err(); if (err == nil) {
+                            tΔ7.Errorf("cc.Err() = nil, want closed connection");
                         }
                     } else {
                         {
@@ -407,18 +383,14 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
                                 tΔ7.Errorf("cc.InFlight() = %v, want %v", got, want);
                             }
                         }
-                        {
-                            var err = cc.Err(); if (err != nil) {
-                                tΔ7.Errorf("cc.Err() = %v, want nil", err);
-                            }
+                        var err = cc.Err(); if (err != nil) {
+                            tΔ7.Errorf("cc.Err() = %v, want nil", err);
                         }
                     }
 
                     if (cc.Available() > 0) {
-                        {
-                            var err = cc.Reserve(); if (err != nil) {
-                                tΔ7.Errorf("cc.Reserve() = %v, want success", err);
-                            }
+                        var err = cc.Reserve(); if (err != nil) {
+                            tΔ7.Errorf("cc.Reserve() = %v, want success", err);
                         }
                     }
                 }
@@ -431,10 +403,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
 
 // TestClientConnRoundTripBlocks verifies that RoundTrip blocks until a concurrency
 // slot is available on a connection.
-public static void TestClientConnRoundTripBlocks(ж<testing.T> t) {
-    runSynctest(t, testClientConnRoundTripBlocks);
-}
-
+public static void TestClientConnRoundTripBlocks(ж<testing.T> t) { runSynctest(t, testClientConnRoundTripBlocks); }
 internal static partial void testClientConnRoundTripBlocks(ж<testing.T> t, testMode mode) {
     ref var handlerCalls = ref heap(new atomic.Int64(), out var ᏑhandlerCalls);
     var requestc = new channel<EmptyStruct>(0);
@@ -483,11 +452,9 @@ internal static partial void testClientConnRoundTripBlocks(ж<testing.T> t, test
     foreach (var i in range(available + extra)) {
         requestc.ᐸꟷ(new EmptyStruct());
         synctest.Wait();
-        {
-            nint got = (nint)Ꮡresponses.Load();
-            nint want = i + 1; if (got != want) {
-                t.Errorf("got %v responses, want %v", got, want);
-            }
+        nint got = (nint)Ꮡresponses.Load();
+        nint want = i + 1; if (got != want) {
+            t.Errorf("got %v responses, want %v", got, want);
         }
     }
 }

@@ -63,16 +63,14 @@ public static void TestIs(ж<testing.T> t) {
         new(new multiErr(new error[]{new poserжerror(poser)}.slice()), err3, true),
         new(new multiErr(new error[]{default}.slice()), default, false)
     ]);
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestIs_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
         t.Run(""u8, (ж<testing.T> tΔ1) => {
-            {
-                var got = errors.Is(tcʗ1.err, tcʗ1.target); if (got != tcʗ1.match) {
-                    tΔ1.Errorf("Is(%v, %v) = %v, want %v", tcʗ1.err, tcʗ1.target, got, tcʗ1.match);
-                }
+            var got = errors.Is(tcʗ1.err, tcʗ1.target); if (got != tcʗ1.match) {
+                tΔ1.Errorf("Is(%v, %v) = %v, want %v", tcʗ1.err, tcʗ1.target, got, tcʗ1.match);
             }
         });
     }
@@ -85,14 +83,8 @@ partial struct poser {
 
 internal static ж<fs.PathError> poserPathErr = Ꮡ(new fs.PathError(Op: "poser"));
 
-internal static @string Error(this ref poser p) {
-    return p.msg;
-}
-
-internal static bool Is(this ref poser p, error err) {
-    return p.f(err);
-}
-
+internal static @string Error(this ref poser p) { return p.msg; }
+internal static bool Is(this ref poser p, error err) { return p.f(err); }
 internal static bool As(this ж<poser> Ꮡp, any err) {
     switch (err.type()) {
     case ж<ж<poser>> x: {
@@ -229,7 +221,7 @@ public static void TestAs(ж<testing.T> t) {
         default
     )
     ]);
-    foreach (var (i, vᴛ1) in testCases) {
+    foreach (var (i, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestAs_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -247,10 +239,8 @@ public static void TestAs(ж<testing.T> t) {
             if (!match) {
                 return;
             }
-            {
-                var got = rtargetʗ1.Elem().Interface(); if (!AreEqual(got, tcʗ1.want)) {
-                    tΔ1.Fatalf("got %#v, want %#v", got, tcʗ1.want);
-                }
+            var got = rtargetʗ1.Elem().Interface(); if (!AreEqual(got, tcʗ1.want)) {
+                tΔ1.Fatalf("got %#v, want %#v", got, tcʗ1.want);
             }
         });
     }
@@ -269,7 +259,7 @@ public static void TestAsValidation(ж<testing.T> t) {
         Ꮡs
     ]);
     var err = errors.New(errorˢ2);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var errʗ1 = err;
         var tcʗ1 = tc;
         t.Run(fmt.Sprintf("%T(%v)"u8, tc, tc), (ж<testing.T> tΔ1) => {
@@ -431,10 +421,8 @@ public static void BenchmarkAsType(ж<testing.B> Ꮡb) {
 
     var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"), new errorT("a")}.slice()), new errorT("b")}.slice())}.slice());
     foreach (var _ᴛ1 in range(b.N)) {
-        {
-            var (_, ok) = errors.AsType<errorT>(err); if (!ok) {
-                Ꮡb.Fatal(asTypeFailedˢ);
-            }
+        var (_, ok) = errors.AsType<errorT>(err); if (!ok) {
+            Ꮡb.Fatal(asTypeFailedˢ);
         }
     }
 }
@@ -455,11 +443,9 @@ public static void TestUnwrap(ж<testing.T> t) {
         new(erra, err1),
         new(new wrapped("wrap 3", erra), erra)
     ]);
-    foreach (var (_, tc) in testCases) {
-        {
-            var got = errors.Unwrap(tc.err); if (!AreEqual(got, tc.want)) {
-                t.Errorf("Unwrap(%v) = %v, want %v", tc.err, got, tc.want);
-            }
+    foreach (var (_, tc) in range(testCases)) {
+        var got = errors.Unwrap(tc.err); if (!AreEqual(got, tc.want)) {
+            t.Errorf("Unwrap(%v) = %v, want %v", tc.err, got, tc.want);
         }
     }
 }
@@ -468,22 +454,15 @@ partial struct errorT {
     internal @string s;
 }
 
-internal static @string Error(this errorT e) {
-    return fmt.Sprintf("errorT(%s)"u8, e.s);
-}
+internal static @string Error(this errorT e) { return fmt.Sprintf("errorT(%s)"u8, e.s); }
 
 partial struct wrapped {
     internal @string msg;
     internal error err;
 }
 
-internal static @string Error(this wrapped e) {
-    return e.msg;
-}
-
-internal static error Unwrap(this wrapped e) {
-    return e.err;
-}
+internal static @string Error(this wrapped e) { return e.msg; }
+internal static error Unwrap(this wrapped e) { return e.err; }
 
 partial struct multiErr /*[]error*/;
 
@@ -491,13 +470,8 @@ partial struct multiErr /*[]error*/;
 private static ref readonly @string multiErrorˢ => ref multiErrorˢᵇ;
 private static readonly @string multiErrorˢᵇ = "multiError"u8;
 
-internal static @string Error(this multiErr m) {
-    return multiErrorˢ;
-}
-
-internal static slice<error> Unwrap(this multiErr m) {
-    return (slice<error>)m;
-}
+internal static @string Error(this multiErr m) { return multiErrorˢ; }
+internal static slice<error> Unwrap(this multiErr m) { return (slice<error>)m; }
 
 partial struct errorUncomparable {
     internal slice<@string> f;

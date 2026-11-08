@@ -13,7 +13,7 @@ partial class json_internal_test_package {
 public static void FuzzEqualFold(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<@string>[]{
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<@string>[]{
         new @string[]{"", ""}.array(),
         new @string[]{"123abc", "123ABC"}.array(),
         new @string[]{"αβδ", "ΑΒΔ"}.array(),
@@ -39,7 +39,7 @@ public static void FuzzEqualFold(ж<testing.F> Ꮡf) {
         new @string[]{"AESKey", "aeskey"}.array(),
         new @string[]{"DESKey", "aeskey"}.array(),
         new @string[]{"AES Key", "aeskey"}.array()
-    }.slice(), 2)) {
+    }.slice(), 2))) {
         var ss = vᴛ1.Clone();
 
         f.Add(slice<byte>(ss[0]), slice<byte>(ss[1]));

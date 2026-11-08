@@ -126,7 +126,7 @@ public static void TestSearchMagic(ж<testing.T> t) {
             want: searchChunkSize - buildInfoAlign
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestSearchMagic_tests(), out var Ꮡtc);
         tc = vᴛ1;
 

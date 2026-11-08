@@ -56,7 +56,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMinor: 0,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"] = slice<@string>(["close"]) // TODO(rsc): Delete?
+                ["Connection"] = ["close"] // TODO(rsc): Delete?
             }),
             Close: true,
             ContentLength: -1
@@ -122,8 +122,8 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMinor: 0,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"] = slice<@string>(["close"]),
-                ["Content-Length"] = slice<@string>(["10"])
+                ["Connection"] = ["close"],
+                ["Content-Length"] = ["10"]
             }),
             Close: true,
             ContentLength: 10
@@ -148,7 +148,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             Header: new ΔHeader(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: -1,
-            TransferEncoding: slice<@string>(["chunked"])
+            TransferEncoding: ["chunked"]
         ),
 
         "Body here\ncontinued"
@@ -168,9 +168,9 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMinor: 0,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"] = slice<@string>(["close"]),
-                ["Content-Length"] = slice<@string>(["10"]),
-                ["Trailer"] = slice<@string>(["Content-MD5, Content-Sources"])
+                ["Connection"] = ["close"],
+                ["Content-Length"] = ["10"],
+                ["Trailer"] = ["Content-MD5, Content-Sources"]
             }),
             Close: true,
             ContentLength: 10
@@ -195,7 +195,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             Header: new ΔHeader(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: -1,
-            TransferEncoding: slice<@string>(["chunked"])
+            TransferEncoding: ["chunked"]
         ),
 
         "Body here\n"
@@ -215,7 +215,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
             Header: new ΔHeader(new map<@string, slice<@string>>{}),
-            TransferEncoding: slice<@string>(["chunked"]),
+            TransferEncoding: ["chunked"],
             Close: false,
             ContentLength: -1
         ),
@@ -236,7 +236,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = slice<@string>(["256"])}),
+            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
             TransferEncoding: default,
             Close: true,
             ContentLength: 256
@@ -258,7 +258,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = slice<@string>(["256"])}),
+            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
             TransferEncoding: default,
             Close: false,
             ContentLength: 256
@@ -303,7 +303,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMinor: 1,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["0"])
+                ["Content-Length"] = ["0"]
             }),
             Close: false,
             ContentLength: 0
@@ -376,7 +376,7 @@ some body
             ProtoMinor: 1,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Type"] = slice<@string>(["multipart/byteranges; boundary=18a75608c8f47cef"])
+                ["Content-Type"] = ["multipart/byteranges; boundary=18a75608c8f47cef"]
             }),
             Close: true,
             ContentLength: -1
@@ -398,7 +398,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 0,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"] = slice<@string>(["close"]) // TODO(rsc): Delete?
+                ["Connection"] = ["close"] // TODO(rsc): Delete?
             }),
             Close: true,
             ContentLength: -1
@@ -421,10 +421,10 @@ some body
             ProtoMinor: 1,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Accept-Ranges"] = slice<@string>(["bytes"]),
-                ["Content-Length"] = slice<@string>(["6"]),
-                ["Content-Type"] = slice<@string>(["text/plain; charset=utf-8"]),
-                ["Content-Range"] = slice<@string>(["bytes 0-5/1862"])
+                ["Accept-Ranges"] = ["bytes"],
+                ["Content-Length"] = ["6"],
+                ["Content-Type"] = ["text/plain; charset=utf-8"],
+                ["Content-Range"] = ["bytes 0-5/1862"]
             }),
             ContentLength: 6
         ),
@@ -446,7 +446,7 @@ some body
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["256"])
+                ["Content-Length"] = ["256"]
             }),
             TransferEncoding: default,
             Close: true,
@@ -470,7 +470,7 @@ some body
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["256"])
+                ["Content-Length"] = ["256"]
             }),
             TransferEncoding: default,
             Close: true,
@@ -517,7 +517,7 @@ some body
             ProtoMinor: 0,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["10"])
+                ["Content-Length"] = ["10"]
             }),
             Close: true,
             ContentLength: 10
@@ -539,10 +539,10 @@ some body
             ProtoMinor: 1,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"] = slice<@string>(["23"]),
-                ["Content-Encoding"] = slice<@string>(["gzip"]),
-                ["Connection"] = slice<@string>(["keep-alive"]),
-                ["Keep-Alive"] = slice<@string>(["timeout=7200"])
+                ["Content-Length"] = ["23"],
+                ["Content-Encoding"] = ["gzip"],
+                ["Connection"] = ["keep-alive"],
+                ["Keep-Alive"] = ["timeout=7200"]
             }),
             Close: false,
             ContentLength: 23
@@ -564,8 +564,8 @@ some body
             ProtoMinor: 0,
             Request: dummyReq("GET"),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Type"] = slice<@string>(["text/html"]),
-                ["Www-Authenticate"] = slice<@string>([@"Basic realm="""""])
+                ["Content-Type"] = ["text/html"],
+                ["Www-Authenticate"] = [@"Basic realm="""""]
             }),
             Close: true,
             ContentLength: -1
@@ -577,7 +577,7 @@ some body
 // tests successful calls to ReadResponse, and inspects the returned Response.
 // For error cases, see TestReadResponseErrors below.
 public static void TestReadResponse(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in respTests) {
+    foreach (var (i, vᴛ1) in range(respTests)) {
         ref var tt = ref heap(new respTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -606,7 +606,7 @@ public static void TestReadResponse(ж<testing.T> t) {
 }
 
 public static void TestWriteResponse(ж<testing.T> t) {
-    foreach (var (i, tt) in respTests) {
+    foreach (var (i, tt) in range(respTests)) {
         var (resp, err) = ReadResponse(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.Raw))), tt.Resp.Request);
         if (err != nil) {
             t.Errorf("#%d: %v", i, err);
@@ -618,14 +618,12 @@ public static void TestWriteResponse(ж<testing.T> t) {
             t.Errorf("#%d: %v", i, err);
             continue;
         }
-        {
-            @string got = Ꮡbuf.String();
-            @string want = tt.RawOut; if (got != want) {
-                t.Errorf("#%d: response differs; got:\n----\n%v\n----\nwant:\n----\n%v\n----\n",
-                    i,
-                    strings.ReplaceAll(got, "\r", "\\r"),
-                    strings.ReplaceAll(want, "\r", "\\r"));
-            }
+        @string got = Ꮡbuf.String();
+        @string want = tt.RawOut; if (got != want) {
+            t.Errorf("#%d: response differs; got:\n----\n%v\n----\nwant:\n----\n%v\n----\n",
+                i,
+                strings.ReplaceAll(got, "\r", "\\r"),
+                strings.ReplaceAll(want, "\r", "\\r"));
         }
     }
 }
@@ -633,11 +631,11 @@ public static void TestWriteResponse(ж<testing.T> t) {
 partial struct readResponseCloseInMiddleTestsᴛ1 /*dyn*/ {
     internal bool chunked, compressed;
 }
-internal static slice<readResponseCloseInMiddleTestsᴛ1> readResponseCloseInMiddleTests = slice<readResponseCloseInMiddleTestsᴛ1>([
+internal static slice<readResponseCloseInMiddleTestsᴛ1> readResponseCloseInMiddleTests = [
     new(false, false),
     new(true, false),
     new(true, true)
-]);
+];
 
 internal partial struct readerAndCloser {
     /*embed*/ public io_package.Reader Reader;
@@ -671,7 +669,7 @@ private static readonly @string readAllOnRemainderˢᵇ = "ReadAll on remainder"
 // the request, right up until the next request.
 public static void TestReadResponseCloseInMiddle(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, vᴛ1) in readResponseCloseInMiddleTests) {
+    foreach (var (_, vᴛ1) in range(readResponseCloseInMiddleTests)) {
         ref var test = ref heap(new readResponseCloseInMiddleTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -705,7 +703,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> t) {
         }
         buf.WriteString("\r\n");
 
-        var chunk = bytes.Repeat(slice<byte>([(byte)'x']), 1000);
+        var chunk = bytes.Repeat([(byte)'x'], 1000);
         for (nint i = 0; i < 1000; i++) {
             if (test.compressed) {
                 // Otherwise this compresses too well.
@@ -748,7 +746,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> t) {
         if (n != 2500) {
             fatalf("ReadFull only read %d bytes", n);
         }
-        if (test.compressed == false && !bytes.Equal(bytes.Repeat(slice<byte>([(byte)'x']), 2500), rbuf)) {
+        if (test.compressed == false && !bytes.Equal(bytes.Repeat([(byte)'x'], 2500), rbuf)) {
             fatalf("ReadFull didn't read 2500 'x'; got %q", (@string)rbuf);
         }
         resp.Body.Close();
@@ -793,15 +791,15 @@ internal partial struct responseLocationTest {
 }
 
 internal static slice<responseLocationTest> responseLocationTests;
-internal static void initᴛresponseLocationTests() { responseLocationTests = slice<responseLocationTest>([
+internal static void initᴛresponseLocationTests() { responseLocationTests = [
     new("/foo", "http://bar.com/baz", "http://bar.com/foo", default),
     new("http://foo.com/", "http://bar.com/baz", "http://foo.com/", default),
     new("", "http://bar.com/baz", "", ErrNoLocation),
     new("/bar", "", "/bar", default)
-]); }
+]; }
 
 public static void TestLocationResponse(ж<testing.T> t) {
-    foreach (var (i, tt) in responseLocationTests) {
+    foreach (var (i, tt) in range(responseLocationTests)) {
         var res = @new<global::go.net.http_package.Response>();
         res.Header = new global::go.net.http_package.ΔHeader(0);
         res.Header.Set(locationˢ, tt.location);
@@ -820,12 +818,10 @@ public static void TestLocationResponse(ж<testing.T> t) {
                 t.Errorf("%d. err=nil; want %q", i, tt.wantErr);
                 continue;
             }
-            {
-                @string g = err.Error();
-                @string e = tt.wantErr.Error(); if (g != e) {
-                    t.Errorf("%d. err=%q; want %q", i, g, e);
-                    continue;
-                }
+            @string g = err.Error();
+            @string e = tt.wantErr.Error(); if (g != e) {
+                t.Errorf("%d. err=%q; want %q", i, g, e);
+                continue;
             }
             continue;
         }
@@ -1030,17 +1026,15 @@ public static void TestReadResponseErrors(ж<testing.T> t) {
         new("leading tab in header", "HTTP/1.1 200 OK\r\n\tContent-type: text/html\r\nFoo: bar\r\n\r\n", malformedMimeˢ)
     ]);
 
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var br = bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         var (_, rerr) = ReadResponse(br, nil);
-        {
-            var err = matchErr(rerr, tt.wantErr); if (err != nil) {
-                @string name = tt.name;
-                if (name == ""u8) {
-                    name = fmt.Sprintf("%d. input %q"u8, i, tt.@in);
-                }
-                t.Errorf("%s: %v", name, err);
+        var err = matchErr(rerr, tt.wantErr); if (err != nil) {
+            @string name = tt.name;
+            if (name == ""u8) {
+                name = fmt.Sprintf("%d. input %q"u8, i, tt.@in);
             }
+            t.Errorf("%s: %v", name, err);
         }
     }
 }
@@ -1052,10 +1046,8 @@ internal static error matchErr(error err, any wantErr) {
         if (wantErr == nil) {
             return default;
         }
-        {
-            var (sub, ok) = wantErr._<@string>(ᐧ); if (ok) {
-                return fmt.Errorf("unexpected success; want error with substring %q"u8, sub);
-            }
+        var (sub, ok) = wantErr._<@string>(ᐧ); if (ok) {
+            return fmt.Errorf("unexpected success; want error with substring %q"u8, sub);
         }
         return fmt.Errorf("unexpected success; want error %v"u8, wantErr);
     }
@@ -1094,27 +1086,19 @@ public static void TestResponseWritesOnlySingleConnectionClose(ж<testing.T> t) 
     }
 
     ref var buf1 = ref heap(new bytes.Buffer(), out var Ꮡbuf1);
-    {
-        err = res.Write(new http_test_package.bytes_BufferжWriter(Ꮡbuf1)); if (err != nil) {
-            t.Fatalf("Write failed %v", err);
-        }
+    err = res.Write(new http_test_package.bytes_BufferжWriter(Ꮡbuf1)); if (err != nil) {
+        t.Fatalf("Write failed %v", err);
     }
-    {
-        (res, err) = ReadResponse(bufio.NewReader(new http_test_package.bytes_BufferжReader(Ꮡbuf1)), nil); if (err != nil) {
-            t.Fatalf("ReadResponse failed %v", err);
-        }
+    (res, err) = ReadResponse(bufio.NewReader(new http_test_package.bytes_BufferжReader(Ꮡbuf1)), nil); if (err != nil) {
+        t.Fatalf("ReadResponse failed %v", err);
     }
 
     ref var buf2 = ref heap(new strings.Builder(), out var Ꮡbuf2);
-    {
-        err = res.Write(new http_test_package.strings_BuilderжWriter(Ꮡbuf2)); if (err != nil) {
-            t.Fatalf("Write failed %v", err);
-        }
+    err = res.Write(new http_test_package.strings_BuilderжWriter(Ꮡbuf2)); if (err != nil) {
+        t.Fatalf("Write failed %v", err);
     }
-    {
-        nint count = strings.Count(buf2.String(), connectionCloseHeader); if (count != 1) {
-            t.Errorf("Found %d %q header", count, connectionCloseHeader);
-        }
+    nint count = strings.Count(buf2.String(), connectionCloseHeader); if (count != 1) {
+        t.Errorf("Found %d %q header", count, connectionCloseHeader);
     }
 }
 

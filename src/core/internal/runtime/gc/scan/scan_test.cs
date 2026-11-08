@@ -34,7 +34,7 @@ internal static void testScanSpanPacked(ж<testing.T> t, Func<@unsafe.Pointer, �
         var (mem, free) = makeMem(new testing_TжTB(t), 1);
         var freeʗ1 = free;
         defer(freeʗ1, ref ᒐ);
-        foreach (var i in range(mem)) {
+        foreach (var i in range(len(mem))) {
             // Use values > heap.PageSize because a scan function can discard
             // pointers smaller than this.
             mem[i] = (uintptr)((nint)gc.PageSize + i + 1);
@@ -43,7 +43,7 @@ internal static void testScanSpanPacked(ж<testing.T> t, Func<@unsafe.Pointer, �
         // Construct a random pointer mask
         var rnd = rand.New(new rand.PCGжSource(rand.NewPCG(42, 42)));
         ref var ptrs = ref heap(new gc.PtrMask(), out var Ꮡptrs);
-        foreach (var i in range(ptrs)) {
+        foreach (var i in range(len(ptrs))) {
             ptrs[i] = (uintptr)rnd.Uint64();
         }
 
@@ -94,7 +94,7 @@ internal static void testObjs(ж<testing.T> t, Action<ж<testing.T>, nint, ж<gc
 
 internal static Func<slice<uintptr>> dataCacheSizes = sync.OnceValue(slice<uintptr> () => {
     var cs = cpu.DataCacheSizes();
-    foreach (var (i, c) in cs) {
+    foreach (var (i, c) in range(cs)) {
         fmt.Printf("# L%d cache: %d (%d Go pages)\n"u8, i + 1, c, c / (uintptr)gc.PageSize);
     }
     return cs;
@@ -113,7 +113,7 @@ internal static void benchmarkCacheSizes(ж<testing.B> b, Action<ж<testing.B>, 
     b.Run(cacheTinyPages1ˢ, (ж<testing.B> bΔ1) => {
         fn(bΔ1, 1);
     });
-    foreach (var (i, cacheBytes) in cacheSizes) {
+    foreach (var (i, cacheBytes) in range(cacheSizes)) {
         nint pages = (nint)(cacheBytes * 3 / 4) / (nint)gc.PageSize;
         b.Run(fmt.Sprintf("cache=L%d/pages=%d"u8, i + 1, pages), (ж<testing.B> bΔ2) => {
             fn(bΔ2, pages);
@@ -160,7 +160,7 @@ internal static void benchmarkScanSpanPacked(ж<testing.B> b, nint nPages, nint 
         var (mem, free) = makeMem(new testing_BжTB(b), nPages);
         var freeʗ1 = free;
         defer(freeʗ1, ref ᒐ);
-        foreach (var i in range(mem)) {
+        foreach (var i in range(len(mem))) {
             // Use values > heap.PageSize because a scan function can discard
             // pointers smaller than this.
             mem[i] = (uintptr)((nint)gc.PageSize + i + 1);
@@ -168,8 +168,8 @@ internal static void benchmarkScanSpanPacked(ж<testing.B> b, nint nPages, nint 
 
         // Construct a random pointer mask
         var ptrs = GoReflect.WithElemDims(new slice<gc.PtrMask>(nPages), 16);
-        foreach (var i in range(ptrs)) {
-            foreach (var j in range(ptrs[i])) {
+        foreach (var i in range(len(ptrs))) {
+            foreach (var j in range(len(ptrs[i]))) {
                 ptrs[i][j] = (uintptr)rnd.Uint64();
             }
         }
@@ -191,11 +191,11 @@ internal static void benchmarkScanSpanPacked(ж<testing.B> b, nint nPages, nint 
             // Set frac marks.
             nint nMarks = (nint)((float64)len(markOrder) * frac + 0.5D);
             ref var objMarks = ref heap(new gc.ObjMask(), out var ᏑobjMarks);
-            foreach (var (_, mark) in markOrder.slice(0, nMarks)) {
+            foreach (var (_, mark) in range(markOrder.slice(0, nMarks))) {
                 objMarks[mark / (nint)goarch.PtrBits] |= (uintptr)(((uintptr)1).Lsh((int64)(mark % (nint)goarch.PtrBits)));
             }
             nint greyClusters = 0;
-            foreach (var page in range(ptrs)) {
+            foreach (var page in range(len(ptrs))) {
                 greyClusters += countGreyClusters(sizeClass, ᏑobjMarks, Ꮡ(ptrs, page));
             }
 
@@ -293,7 +293,7 @@ public static void BenchmarkScanMaxBandwidth(ж<testing.B> b) {
             var (mem, free) = makeMem(new testing_BжTB(bΔ1), heapPages);
             var freeʗ1 = free;
             defer(freeʗ1, ref ᒐ);
-            foreach (var i in range(mem)) {
+            foreach (var i in range(len(mem))) {
                 mem[i] = (uintptr)((nint)gc.PageSize + i + 1);
             }
             var buf = new slice<uintptr>(gc.PageWords);

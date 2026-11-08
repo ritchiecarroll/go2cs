@@ -42,7 +42,7 @@ using static global::go.@internal.trace.@internal.tracev1_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/internal/tracev1/parser_test.go", "parser_test.cs", "ABQglAAJFIKCggAMCoKCgpSCgoKUgpSCgoKUgoKClIKUgpS0gsbeooKCgoLcgpSCgqaAgraAgraCgoKUgqaCgoCCyIKUgoK4gIK2goKmgoKCuIKC", "106-109:1")]
+[assembly: GoPositionMap("internal/trace/internal/tracev1/parser_test.go", "parser_test.cs", "ABQglAAJFIKCggAMCoKCgpSCgoKUgpSCgoKUgoKClIKUgpS0gsbeooKCgoLcgpSCgqaCpoKmgoKClIKmgoKCuIKUgoK4gqaCgqaCgoK4goI=", "106-109:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;

@@ -14,8 +14,6 @@ using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.@internal;
 using global::go.path;
@@ -64,7 +62,7 @@ public static partial void TestMatch(ж<testing.T> t) {
     nomatch(runtime.GOOS + ","u8 + runtime.GOARCH + ",foo"u8, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true, ["foo"] = true});
 
     what = modifiedˢ;
-    ctxt.BuildTags = slice<@string>(["foo"]);
+    ctxt.BuildTags = ["foo"];
     match(runtime.GOOS + ","u8 + runtime.GOARCH, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true});
     match(runtime.GOOS + ","u8 + runtime.GOARCH + ",foo"u8, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true, ["foo"] = true});
     nomatch(runtime.GOOS + ","u8 + runtime.GOARCH + ",!foo"u8, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true, ["foo"] = true});
@@ -127,10 +125,8 @@ internal static readonly object importTestdataEmptyDidˢ = (@string)@"Import(""t
 
 public static void TestEmptyFolderImport(ж<testing.T> t) {
     var (_, err) = Import(".", testdataEmptyˢ, 0);
-    {
-        var (_, ok) = err._<ж<global::go.go.build_package.NoGoError>>(ᐧ); if (!ok) {
-            t.Fatal(importTestdataEmptyDidˢ);
-        }
+    var (_, ok) = err._<ж<global::go.go.build_package.NoGoError>>(ᐧ); if (!ok) {
+        t.Fatal(importTestdataEmptyDidˢ);
     }
 }
 
@@ -150,30 +146,24 @@ public static void TestMultiplePackageImport(ж<testing.T> t) {
     }
     var want = Ꮡ(new MultiplePackageError(
         Dir: filepath.FromSlash(testdataMultiˢ),
-        Packages: slice<@string>(["main", "test_package"]),
-        Files: slice<@string>(["file.go", "file_appengine.go"])
+        Packages: ["main", "test_package"],
+        Files: ["file.go", "file_appengine.go"]
     ));
     if (!reflect.DeepEqual(mpe.OrTypedNil(), want.OrTypedNil())) {
         t.Errorf("err = %#v; want %#v", mpe.OrTypedNil(), want.OrTypedNil());
     }
 
     // TODO(#45999): Since the name is ambiguous, pkg.Name should be left empty.
-    {
-        @string wantName = mainˢ; if (pkg.Name != wantName) {
-            t.Errorf("pkg.Name = %q; want %q", pkg.Name, wantName);
-        }
+    @string wantName = mainˢ; if (pkg.Name != wantName) {
+        t.Errorf("pkg.Name = %q; want %q", pkg.Name, wantName);
     }
 
-    {
-        var wantGoFiles = slice<@string>(["file.go", "file_appengine.go"]); if (!slices.Equal<slice<@string>, @string>(pkg.GoFiles, wantGoFiles)) {
-            t.Errorf("pkg.GoFiles = %q; want %q", pkg.GoFiles, wantGoFiles);
-        }
+    var wantGoFiles = slice<@string>(["file.go", "file_appengine.go"]); if (!slices.Equal<slice<@string>, @string>(pkg.GoFiles, wantGoFiles)) {
+        t.Errorf("pkg.GoFiles = %q; want %q", pkg.GoFiles, wantGoFiles);
     }
 
-    {
-        var wantInvalidFiles = slice<@string>(["file_appengine.go"]); if (!slices.Equal<slice<@string>, @string>(pkg.InvalidGoFiles, wantInvalidFiles)) {
-            t.Errorf("pkg.InvalidGoFiles = %q; want %q", pkg.InvalidGoFiles, wantInvalidFiles);
-        }
+    var wantInvalidFiles = slice<@string>(["file_appengine.go"]); if (!slices.Equal<slice<@string>, @string>(pkg.InvalidGoFiles, wantInvalidFiles)) {
+        t.Errorf("pkg.InvalidGoFiles = %q; want %q", pkg.InvalidGoFiles, wantInvalidFiles);
     }
 }
 
@@ -208,7 +198,7 @@ partial struct shouldBuildTestsᴛ1 /*dyn*/ {
     internal bool shouldBuild;
     internal error err;
 }
-internal static slice<shouldBuildTestsᴛ1> shouldBuildTests = slice<shouldBuildTestsᴛ1>([
+internal static slice<shouldBuildTestsᴛ1> shouldBuildTests = [
     new(
         name: "Yes",
         content: "// +build yes\n\n"u8 + "package main\n"u8,
@@ -343,16 +333,16 @@ internal static slice<shouldBuildTestsᴛ1> shouldBuildTests = slice<shouldBuild
         tags: new map<@string, bool>{["no"] = true},
         shouldBuild: false
     )
-]);
+];
 
 public static void TestShouldBuild(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in shouldBuildTests) {
+    foreach (var (_, vᴛ1) in range(shouldBuildTests)) {
         ref var tt = ref heap(new shouldBuildTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
-            var ctx = Ꮡ(new Context(BuildTags: slice<@string>(["yes"])));
+            var ctx = Ꮡ(new Context(BuildTags: ["yes"]));
             var tags = new map<@string, bool>{};
             var (shouldBuild, binaryOnly, err) = ctx.shouldBuild(slice<byte>(ttʗ1.content), tags);
             if (shouldBuild != ttʗ1.shouldBuild || binaryOnly != ttʗ1.binaryOnly || !maps.Equal<map<@string, bool>, map<@string, bool>, @string, bool>(tags, ttʗ1.tags) || !AreEqual(err, ttʗ1.err)) {
@@ -369,7 +359,7 @@ internal static ref readonly @string helloLinuxGoˢ => ref helloLinuxGoˢᵇ;
 private static readonly @string helloLinuxGoˢᵇ = "hello_linux.go"u8;
 
 public static void TestGoodOSArchFile(ж<testing.T> t) {
-    var ctx = Ꮡ(new Context(BuildTags: slice<@string>(["linux"]), GOOS: "darwin"));
+    var ctx = Ꮡ(new Context(BuildTags: ["linux"], GOOS: "darwin"));
     var m = new map<@string, bool>{};
     var want = new map<@string, bool>{["linux"] = true};
     if (!ctx.goodOSArchFile(helloLinuxGoˢ, m)) {
@@ -397,7 +387,7 @@ partial struct matchFileTestsᴛ1 /*dyn*/ {
     internal @string data;
     internal bool match;
 }
-internal static slice<matchFileTestsᴛ1> matchFileTests = slice<matchFileTestsᴛ1>([
+internal static slice<matchFileTestsᴛ1> matchFileTests = [
     new(ctxtP9, "foo_arm.go", "", true),
     new(ctxtP9, "foo1_arm.go", "// +build linux\n\npackage main\n", false),
     new(ctxtP9, "foo_darwin.go", "", false),
@@ -412,10 +402,10 @@ internal static slice<matchFileTestsᴛ1> matchFileTests = slice<matchFileTests�
     new(ctxtAndroid, "plan9_test.go", "", true),
     new(ctxtAndroid, "arm.s", "", true),
     new(ctxtAndroid, "amd64.s", "", true)
-]);
+];
 
 public static void TestMatchFile(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in matchFileTests) {
+    foreach (var (_, vᴛ1) in range(matchFileTests)) {
         ref var tt = ref heap(new matchFileTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -464,7 +454,7 @@ internal static @string expandSrcDirPath = filepath.Join(((@string)(rune)filepat
 partial struct expandSrcDirTestsᴛ1 /*dyn*/ {
     internal @string input, expected;
 }
-internal static slice<expandSrcDirTestsᴛ1> expandSrcDirTests = slice<expandSrcDirTestsᴛ1>([
+internal static slice<expandSrcDirTestsᴛ1> expandSrcDirTests = [
     new("-L ${SRCDIR}/libs -ladd", "-L /projects/src/add/libs -ladd"),
     new("${SRCDIR}/add_linux_386.a -pthread -lstdc++", "/projects/src/add/add_linux_386.a -pthread -lstdc++"),
     new("Nothing to expand here!", "Nothing to expand here!"),
@@ -475,10 +465,10 @@ internal static slice<expandSrcDirTestsᴛ1> expandSrcDirTests = slice<expandSrc
     new("$FOO ${BAR}", "$FOO ${BAR}"),
     new("Find me the $SRCDIRECTORY.", "Find me the $SRCDIRECTORY."),
     new("$SRCDIR is missing braces", "$SRCDIR is missing braces")
-]);
+];
 
 public static void TestExpandSrcDir(ж<testing.T> t) {
-    foreach (var (_, test) in expandSrcDirTests) {
+    foreach (var (_, test) in range(expandSrcDirTests)) {
         var (output, _) = expandSrcDir(test.input, expandSrcDirPath);
         if (output != test.expected) {
             t.Errorf("%q expands to %q with SRCDIR=%q when %q is expected", test.input, output, expandSrcDirPath, test.expected);
@@ -504,7 +494,7 @@ public static void TestShellSafety(ж<testing.T> t) {
         new("-I${SRCDIR}/dir", "/tmp/go go", "-I/tmp/go go/dir", true),
         new("-I${SRCDIR}/dir dir", "/tmp/go", "-I/tmp/go/dir dir", true)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (output, ok) = expandSrcDir(test.input, test.srcdir);
         if (ok != test.result) {
             t.Errorf("Expected %t while %q expands to %q with SRCDIR=%q; got %t", test.result, test.input, output, test.srcdir, ok);
@@ -555,12 +545,12 @@ public static void TestImportDirNotExist(ж<testing.T> t) {
 
         defer(os.Setenv, go111moduleˢ, os.Getenv(go111moduleˢ), ref ᒐ);
 
-        foreach (var (_, GO111MODULE) in slice<@string>(["off", "on"])) {
+        foreach (var (_, GO111MODULE) in range(slice<@string>(["off", "on"]))) {
             var testsʗ1 = tests;
             t.Run("GO111MODULE="u8 + GO111MODULE, (ж<testing.T> tΔ1) => {
                 os.Setenv(go111moduleˢ, GO111MODULE);
 
-                foreach (var (_, test) in testsʗ1) {
+                foreach (var (_, test) in range(testsʗ1)) {
                     var (p, err) = Ꮡctxt.Import(test.path, test.srcDir, test.mode);
 
                     var errOk = (err != nil && strings.HasPrefix(err.Error(), cannotFindPackageˢ));
@@ -812,10 +802,8 @@ private static readonly @string goGet1ˢᵇ = "://...?go-get=1"u8;
 public static void TestMissingImportErrorRepetition(ж<testing.T> t) {
     testenv.MustHaveGoBuild(new build_internal_test_package.testing_TжTB(t)); // need 'go list' internally
     @string tmp = t.TempDir();
-    {
-        var errΔ1 = os.WriteFile(filepath.Join(tmp, goModˢ), slice<byte>("module m"u8), 438); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(filepath.Join(tmp, goModˢ), slice<byte>("module m"u8), 438); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     t.Setenv(go111moduleˢ, "on");
     t.Setenv(goproxyˢ, offˢ);
@@ -839,10 +827,8 @@ public static void TestMissingImportErrorRepetition(ж<testing.T> t) {
     // follows a semicolon.
     (errStr, _, _) = strings.Cut(errStr, ";");
 
-    {
-        nint n = strings.Count(errStr, pkgPath); if (n != 1) {
-            t.Fatalf("package path %q appears in error %d times; should appear once\nerror: %v", pkgPath, n, err);
-        }
+    nint n = strings.Count(errStr, pkgPath); if (n != 1) {
+        t.Fatalf("package path %q appears in error %d times; should appear once\nerror: %v", pkgPath, n, err);
     }
 }
 
@@ -860,7 +846,7 @@ public static void TestCgoImportsIgnored(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, path) in p.Imports) {
+    foreach (var (_, path) in range(p.Imports)) {
         if (path == "should/be/ignored"u8) {
             t.Errorf("found import %q in ignored cgo file", path);
         }
@@ -909,7 +895,7 @@ public static void TestAllTags(ж<testing.T> t) {
     if (!slices.Equal<slice<@string>, @string>(p.AllTags, want)) {
         t.Errorf("AllTags = %v, want %v", p.AllTags, want);
     }
-    wantFiles = slice<@string>(["alltags.go"]);
+    wantFiles = ["alltags.go"];
     if (!slices.Equal<slice<@string>, @string>(p.GoFiles, wantFiles)) {
         t.Errorf("GoFiles = %v, want %v", p.GoFiles, wantFiles);
     }

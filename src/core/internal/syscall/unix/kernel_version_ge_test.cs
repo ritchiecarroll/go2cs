@@ -58,7 +58,7 @@ public static void TestKernelVersionGE(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestKernelVersionGE_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

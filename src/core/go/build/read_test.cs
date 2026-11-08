@@ -22,7 +22,7 @@ internal partial struct readTest {
     internal @string err;
 }
 
-internal static slice<readTest> readGoInfoTests = slice<readTest>([
+internal static slice<readTest> readGoInfoTests = [
     new(
         @"package p",
         ""
@@ -80,9 +80,9 @@ package p
         "\ufeff𝔻"u8 + @"package p; import ""x"";ℙvar x = 1"u8,
         ""
     )
-]);
+];
 
-internal static slice<readTest> readCommentsTests = slice<readTest>([
+internal static slice<readTest> readCommentsTests = [
     new(
         @"ℙpackage p",
         ""
@@ -129,19 +129,17 @@ internal static slice<readTest> readCommentsTests = slice<readTest>([
 """u8.Raw(),
         ""
     )
-]);
+];
 
 internal static void testRead(ж<testing.T> t, slice<readTest> tests, Func<io.Reader, (slice<byte>, error)> read) {
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (beforeP, afterP, _) = strings.Cut(tt.@in, "ℙ");
         @string @in = beforeP + afterP;
         @string testOut = beforeP;
 
-        {
-            var (beforeD, afterD, ok) = strings.Cut(beforeP, "𝔻"); if (ok) {
-                @in = beforeD + afterD + afterP;
-                testOut = afterD;
-            }
+        var (beforeD, afterD, ok) = strings.Cut(beforeP, "𝔻"); if (ok) {
+            @in = beforeD + afterD + afterP;
+            testOut = afterD;
         }
 
         var r = strings.NewReader(@in);
@@ -178,7 +176,7 @@ public static void TestReadComments(ж<testing.T> t) {
     testRead(t, readCommentsTests, readComments);
 }
 
-internal static slice<readTest> readFailuresTests = slice<readTest>([
+internal static slice<readTest> readFailuresTests = [
     new(
         @"package",
         "syntax error"
@@ -243,7 +241,7 @@ internal static slice<readTest> readFailuresTests = slice<readTest>([
         @"package p; import (""x""",
         "syntax error"
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nulˢ => ref nulˢᵇ;
@@ -255,7 +253,7 @@ public static void TestReadFailuresIgnored(ж<testing.T> t) {
     // Convert tests not to return syntax errors.
     var tests = new slice<readTest>(len(readFailuresTests));
     copy(tests, readFailuresTests);
-    foreach (var i in range(tests)) {
+    foreach (var i in range(len(tests))) {
         var tt = Ꮡ(tests, i);
         if (!strings.Contains(tt.err, nulˢ)) {
             tt.err = ""u8;
@@ -271,7 +269,7 @@ public static void TestReadFailuresIgnored(ж<testing.T> t) {
 partial struct readEmbedTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<readEmbedTestsᴛ1> readEmbedTests = slice<readEmbedTestsᴛ1>([
+internal static slice<readEmbedTestsᴛ1> readEmbedTests = [
     new(
         "package p\n",
         ""
@@ -358,11 +356,11 @@ package p
         "\ufeffpackage p\n//go:embed x y z\nvar files embed.FS", // no import, no scan
         ""
     )
-]);
+];
 
 public static void TestReadEmbed(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    foreach (var (i, tt) in readEmbedTests) {
+    foreach (var (i, tt) in range(readEmbedTests)) {
         ref var info = ref heap<global::go.go.build_package.fileInfo>(new fileInfo(
             name: "test",
             fset: fset
@@ -374,7 +372,7 @@ public static void TestReadEmbed(ж<testing.T> t) {
         }
         var b = Ꮡ(new strings.Builder());
         @string sep = ""u8;
-        foreach (var (_, emb) in info.embeds) {
+        foreach (var (_, emb) in range(info.embeds)) {
             fmt.Fprintf(new build_internal_test_package.strings_BuilderжWriter(b), "%s%v:%s"u8, sep, emb.pos, emb.pattern);
             sep = "\n";
         }

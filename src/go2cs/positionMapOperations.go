@@ -767,7 +767,8 @@ func positionMapCsName(outputFileName string) string {
 // The FIRST binding of an emitted line wins, and bindings only ever advance, so the table stays
 // strictly ascending in the C# line — which is what gives the runtime's predecessor search its
 // meaning. On a `for` header that means the `for` statement itself wins over its own init clause,
-// which is the frame Go reports.
+// which is the frame Go reports. A later mark on the same line from the same Go line still gives the
+// entry its per-call payload when the first carried none (an `if` and the init emitted onto its line).
 // Line boundaries are counted by splitting on bare LF, never on the caller's own newline
 // convention: the converter emits CRLF everywhere EXCEPT inside a multi-line string literal,
 // where it preserves the Go source's bare LF verbatim (autocrlf gotcha, CLAUDE.md) — so a
@@ -859,7 +860,20 @@ func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []t
 				csLine++
 			}
 
-			if csLine > len(lines) || csLine <= bound {
+			if csLine > len(lines) {
+				continue
+			}
+
+			if csLine <= bound {
+				// The line's first binding stands, but a later-line call payload it lacks is kept: an init
+				// emitted onto its `if`'s line (`init; if (cond) {`) follows the if's own mark, which carries
+				// none, and its calls key to this line as the init's sequence point does. Only from the same
+				// Go line, whose deltas the payload counts from.
+				if last := len(entries) - 1; last >= 0 && entries[last].csLine == csLine &&
+					entries[last].goLine == mark.goLine && entries[last].calls == "" {
+					entries[last].calls = mark.calls
+				}
+
 				continue
 			}
 

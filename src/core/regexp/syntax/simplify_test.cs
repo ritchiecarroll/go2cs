@@ -12,7 +12,7 @@ partial struct simplifyTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Simple;
 }
-internal static slice<simplifyTestsᴛ1> simplifyTests = slice<simplifyTestsᴛ1>([
+internal static slice<simplifyTestsᴛ1> simplifyTests = [
     // Already-simple constructs
     new(@"a", @"a"),
     new(@"ab", @"ab"),
@@ -139,10 +139,10 @@ internal static slice<simplifyTestsᴛ1> simplifyTests = slice<simplifyTestsᴛ1
     new(@"(){1}", @"()"),
     new(@"(){1,}", @"()+"),
     new(@"(){0,2}", @"(?:()()?)?")
-]);
+];
 
 public static void TestSimplify(ж<testing.T> t) {
-    foreach (var (_, tt) in simplifyTests) {
+    foreach (var (_, tt) in range(simplifyTests)) {
         var (re, err) = Parse(tt.Regexp, (global::go.regexp.syntax_package.Flags)(MatchNL | (global::go.regexp.syntax_package.Flags)(Perl & ~OneLine)));
         if (err != nil) {
             t.Errorf("Parse(%#q) = error %v", tt.Regexp, err);
