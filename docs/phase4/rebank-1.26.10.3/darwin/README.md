@@ -102,10 +102,20 @@ listings got: no data-dependent branch on a limb value.
   - osx-arm64: `TestTraceCPUProfile/Default` and `/AsyncPreemptOff` both read Go=skip C#=pass.
   - osx-x64: `/AsyncPreemptOff` reads Go=skip C#=pass, and `/Default` reads Go=pass C#=skip, the reverse of D-W1's
     shape.
+- **`net`, unbanked as expected** (C1-15, run 42486683115).
+  - osx-arm64 reads ORACLE ("oracle unstable on this host"): two runs, oracle-side failures only. Final record:
+    "matched 550 of 555 Go / 555 C# verdicts; disclosed 4; undisclosed divergences 1". The one is
+    `TestLookupNoSuchHost/LookupNS_NXDOMAIN/forced_cgo_resolver` Go=fail C#=pass, and `TestDialerFallbackDelay`'s
+    darwin entry fires.
+  - osx-x64 FAILS: "matched 539 of 555; disclosed 3; undisclosed divergences 13". That is 12 NXDOMAIN lines,
+    Go=fail C#=pass, plus `TestDialerFallbackDelay` case #1, "got 307.0874ms; want <= 295ms", which the entry's
+    "; want <= 395ms" signature (case #0) does not absorb. Not re-read, so (u).
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
   MISS on `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof` (above). Predicted `internal/synctest` validated 59 on both
   RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
   Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. Predicted `syscall` failing exactly
   `TestGetdirentries/n=10`, `/n=1000` and the parent on both RIDs: HIT (unbanked, as ruled). Predicted `testing`
-  82 + 3 on both RIDs: it banks (HIT), but at 80 + 5 on both RIDs (the split MISSED; the total, 85, matches). The predicted total moves from 233 to 229,
+  82 + 3 on both RIDs: it banks (HIT), but at 80 + 5 on both RIDs (the split MISSED; the total, 85, matches).
+  Predicted `net` unbanked (HIT), with x64 validating at 552 + 3 (MISS: x64 fails on the resolver and on a second
+  timing case). The predicted total moves from 233 to 229,
   three BELOW the plan's 232 to 234.
