@@ -34591,4 +34591,38 @@ bubble in `p256Add`, `p256Sub`, `p256Selectznz` and the domain conversions.
 
 — H (2026-11-07)
 
+## 2026-11-08 — C2 (TS readiness C7, claude/c2-named-value-clash): a Go type named `Value` yields its wrapper's `Value` property to `Value‿` — CLOSED; the interface-member names OPEN for .4
+
+**Defect:** every named non-struct wrapper (slice, map, chan, array, numeric) exposes its underlying value as a
+property named `Value`, and C# forbids a member sharing its type's name (CS0542). `type Value []byte`
+(go-json-experiment/json's jsontext.Value) blocks 79 packages under TypeScript's compiler (i7's
+EXPERIMENT-ts-readiness-2026-11-07, row C7). Measured on master dab0675bd9 with a 9-package probe: CS0542 on all
+six wrapper classes named Value ([]byte, []int, map, [3]int, int, chan); a func type builds.
+
+**Fix:** such a wrapper declares the property as `Value‿` (symbols.json `NamedWrapperValue`, projected to Go and
+C#). It follows MapWrapperSet's door `Set‿` (COORD's ruling): U+203F is legal in C#, illegal in Go. Four readers
+take the one rule: the wrapper templates (Common.WrapperValueMember), the implicit-conversion records
+(`src.Value‿`), golib's private TypeParamCaster probe (second name tried), and the converter's named-wrapper unwrap
+sites (`v.Value‿[i]`, `range(v.Value‿)`, `v.Value‿[..2]`; wrapperValueMember). A Value type the converter
+collision-renames keeps the plain property. Every other wrapper is byte-identical.
+
+**Footprint:** zero, as predicted. The two-seeded -stdlib reconvert (base dab0675bd9 against the seat,
+windows/linux/darwin amd64, each arm into its own seed) differs in 0 files, and CNR is byte-identical across all 974
+behavioral packages. std has no non-struct type named Value in the corpus: encoding/json/jsontext's
+`type Value []byte` is behind `//go:build goexperiment.jsonv2`, and database/sql/driver.Value is `any`.
+
+**OPEN (.4, COORD ruling): the interface-member names.** `type Wrap []int` (ISliceWrap's static `Wrap`) and
+`type Length []byte` still fail CS0542 (measured with the same probe after the fix). The slice wrapper declares 19
+member names, the map 14 and the channel 15. Map and channel wrappers already move a claimed interface member to its
+explicit implementation (InheritedTypeTemplate.GoMethodNames); slice and array wrappers do not. The fix is explicit
+interface implementations across those templates: not low-hanging. Also out of scope: a named POINTER type named
+`Value` (its `Value` is the ref accessor every dereference emits).
+
+**Guards:** GenTests NamedWrapperValueMemberTests (each of six wrapper classes named Value compiles against golib, and
+its text equals a control's with only the property renamed; plus a conversion record; all 7 red with the rule reverted
+to master's behavior). Behavioral NamedValueTypeClash, output-compared with Go: master's emission fails CS0542 in
+arrval, mapval and numval's generated Value wrappers.
+
+— C2 (2026-11-08)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

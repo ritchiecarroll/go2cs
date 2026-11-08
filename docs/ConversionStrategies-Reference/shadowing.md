@@ -819,6 +819,42 @@ Every non-function predeclared Go identifier, the golib public top-level type su
 
 Census rows verified fine with **no action needed** (each proven by a transpile-run-compare repro): locals named any predeclared identifier (`nil`, `iota`, `error`, `any`, `comparable`, `rune`, the numeric type names — Go-consistent shadowing carries over); user types named `error` or a predeclared type name in the common self-consistent cases; embedded predeclared fields (`struct{ float64; rune; any; int; string }` — the color-color form `internal rune rune;` compiles, with keyword-mapped embeds escaping only the field NAME: `internal nint @int;`); the golib `Defer`/`Recover` delegates (never spelled in emitted code — the defer machinery's lambda parameters are inferred); and a local named `heap` alongside heap-boxing machinery (`heap<nint>(out var Ꮡx)` is a *generic* invocation, which a non-generic local simple name cannot shadow) — but only the generic form is immune: the ARGUMENT-CARRYING form `heap(new T(), out var Ꮡx)` carries no type argument and does collide (see [A declaration named `heap` qualifies the boxing intrinsic](#a-declaration-named-heap-qualifies-the-boxing-intrinsic)).<!-- history: corrected 2026-08-28; the census row's repro never reached the argument-carrying form. --> Known residuals, documented rather than fixed (unreachable under default flags in any constructed repro, or pathological): a user TYPE named a numeric alias name (`float64`, `int32`, `uintptr`, `complex64`, …) in a package where an emission would be *forced* to spell that predeclared name through inference; and `type string struct{}` (the golib `@string` spelling is escape-identical to the keyword-escaped user name).
 
+## A Go type named `Value` yields its wrapper's `Value` property to the door `Value‿`
+
+Every named non-struct wrapper (slice, map, chan, array, numeric) exposes its underlying value through a generated
+property named `Value`, and C# forbids a member that shares its enclosing type's name (CS0542). So a Go type NAMED
+`Value` did not build. The shape is common: `type Value []byte` is go-json-experiment/json's `jsontext.Value`, which
+TypeScript's compiler depends on.
+
+Such a wrapper declares the property as `Value‿` (`NamedWrapperValue` in `symbols.json`, projected to Go and C#).
+This is the precedent `MapWrapperSet` set for a named map named `Set`, whose generated `Set` yields to `Set‿`.
+U+203F is a connector punctuation character, legal in C# and illegal in Go, so no Go name can collide with the door.
+Every other wrapper keeps the plain `Value`, byte for byte.
+
+Four places read the property by name, and all four apply the one rule:
+
+- the wrapper templates (InheritedTypeTemplate, IArrayTypeTemplate and the array-view template), through
+  `Common.WrapperValueMember`;
+- the implicit-conversion records, whose operator reads `src.Value‿` on a source named `Value`;
+- golib's private TypeParamCaster probe, which tries `Value‿` when a type has no `Value` property;
+- the converter's unwrap sites, through `wrapperValueMember`. A named array's pointer receiver (or deref-aliased
+  pointer parameter) that is indexed, ranged or sliced emits `v.Value‿[i]`, `range(v.Value‿)` and `v.Value‿[..2]`.
+
+A `Value` type the converter collision-renames to `ΔValue` (a same-package method or function named `Value`) no
+longer clashes, so it keeps the plain property; the converter's rule reads `nameCollisions` for that, as the
+generator reads the declared C# name.
+
+Out of scope, and measured: a named POINTER type named `Value` (its `Value` is the ref accessor every dereference
+emits), and the interface-member names the wrappers also declare. `type Wrap []int` (ISliceWrap's static `Wrap`) and
+`type Length []byte` still fail CS0542. The slice wrapper declares 19 member names, the map 14 and the channel 15.
+Map and channel wrappers already move an interface member to its explicit implementation when the Go type's own name
+or a Go method claims it; the slice and array wrappers do not yet. That is the explicit-interface fix, after
+1.26.10.3.
+
+Guarded by the `NamedValueTypeClash` behavioral test (a byte-slice root, and numeric, array and map sub-packages),
+output-compared against `go run`, and by GenTests `NamedWrapperValueMemberTests`. In that test each wrapper class
+named `Value` compiles, and its generated text equals a control's with only the property renamed.
+
 ## A parameter that shadows an imported package is renamed at its declaration too
 A function parameter whose name equals an imported package the function references — crypto/rsa's `func emsaPSSEncode(…, hash hash.Hash)`, where `hash` shadows the `hash` package named in the signature type `hash.Hash` — is shadow-renamed by the variable analysis (`hash` → `hashΔ1`) so it does not bind the `using hash = hash_package;` alias. Every **usage** renders the renamed name (convIdent reads `v.varNames`), and the parameter **declaration** resolves through the same `v.varNames` map, so it matches the usages; emitted from the raw `param.Name()`, the signature would keep `hash.Hash hash` while its uses are `hashΔ1` — CS0103 at every use:<!-- at the fix: 40 sites in crypto/rsa, 27 in testing/quick's rand. -->
 
