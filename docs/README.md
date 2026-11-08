@@ -17,15 +17,19 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — Another package's variables by address, and converted code that reads like Go
+## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
-**November 4, 2026, NuGet 1.26.10.2.** The first fix release on the Go 1.26 line, still built from Go 1.26.10.
-Taking the address of a variable another package exports now reaches the variable, as in Go, and converted C#
-reads closer to the Go it came from: `p.f` through a pointer, `err != nil`, and slice literals as C# collection
-expressions. Two changes break compiled C#, so an assembly built against an earlier package must be rebuilt.
-go2cs now installs as a .NET tool, `dotnet tool install -g go2cs`, and needs no Go installed. A goroutine's crash
-is no longer lost when `main` returns, and a converted program optimizes its hot methods sooner.
-[Full announcement](NEWS.md#november-4-2026--another-packages-variables-by-address-and-converted-code-that-reads-like-go).
+<!-- HELD for release day with the NEWS.md entry (the .2 precedent): "November XX" and the anchor's "november-xx" both
+     become the publish date as the last change before the release tag. The gojq sentence is PENDING on the publish
+     (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e). -->
+**November XX, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
+Native AOT now inlines a slice read as the JIT does, so the same programs run faster there, and the P-256, P-384 and
+P-521 curves are faster under ReadyToRun. A program converted against local standard-library sources builds and
+publishes in Release, and a plain single-file publish starts fast. A slice's `foreach` now gives its values, so an
+assembly built against 1.26.10.2 must be rebuilt; from this release, revisions within one Go release stay
+compatible except for a break the notes announce. **PENDING (the publish):** gojq, a jq implementation in Go, ships
+as a NuGet package.
+[Full announcement](NEWS.md#november-xx-2026--faster-native-aot-and-a-release-standard-library-from-source).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
