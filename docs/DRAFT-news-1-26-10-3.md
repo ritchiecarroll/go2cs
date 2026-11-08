@@ -136,16 +136,27 @@ a jq implementation in Go, is a NuGet package: `nugetgo.github.com.itchyny.gojq`
 in-process, fully managed jq, with no native binary per platform. Its one dependency,
 [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go), ships with it as `nugetgo.github.com.itchyny.timefmt-go`
 0.1.8. The package is gojq's library. Its command-line package is not included: gojq's own `gojq` command already does
-that job. Each package's tests are converted and compared with Go's, and the result ships in the package as
-VALIDATION.md. The converted sources are in
+that job. Every package in gojq 0.12.19 converts with no change to its Go source. The library's own tests are
+converted and run against Go's: all 164 results match, with no exceptions, and that proof ships in the package as
+VALIDATION.md. The command-line package's tests convert and pass in full too, 914 of 914, even though the package
+ships the library only. The converted sources are in
 [ritchiecarroll/gojq-cs](https://github.com/ritchiecarroll/gojq-cs) and
 [ritchiecarroll/timefmt-go-cs](https://github.com/ritchiecarroll/timefmt-go-cs).
 <!-- source: OQ-4 RULED 2026-11-07 (DESIGN-multi-package-modules.md; the owner on 4e: "Yes, command line deffered is fine,
      lib focus for .3"), PLAN-rebank-1-26-10-3.md section 8 (the closure plan: -ExcludePackage github.com/itchyny/gojq/cli;
      timefmt-go first, then gojq against it), SCOUT-gojq.md (P1) and SCOUT-timefmt-go.md (C2). The conversion repositories
-     were created empty by the owner on 2026-11-07. PENDING until both packages publish in the wave: gojq needs seats A-H.
-     Before release, replace "Each package's tests ..." with the validated counts from each MODULE.md, and delete the item
-     if gojq misses the wave. -->
+     were created empty by the owner on 2026-11-07. PENDING until both packages publish in the wave; delete the item if
+     gojq misses it.
+     Counts filled 2026-11-07 from COORD's relay of P1's read at master 663561b7a3, where every gojq seat A-H had landed,
+     with no source patches:
+     - gojq v0.12.19 converted 16/16 packages;
+     - the library root validated 164/164 Go test verdicts, 0 disclosed (the figure its package proof carries);
+     - the cli validated 914/914, 0 disclosed, and is not packed at .3;
+     - only standing-rule exclusions apply (benchmarks, examples, a fuzz target).
+     COORD's ask was visitor voice, with no exact corpus count beyond the two validated figures; the 16 stays here. Before
+     release, re-read the 164 against the published package's VALIDATION.md. timefmt-go's own count is not quoted:
+     its package carries it. -->
+
 
 **Also in this release:**
 
