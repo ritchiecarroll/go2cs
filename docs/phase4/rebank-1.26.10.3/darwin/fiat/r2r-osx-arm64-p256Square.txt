@@ -1,0 +1,25 @@
+; Assembly listing for method go.crypto.internal.fips140.nistec.fiat_package:p256Square(byref,byref) (FullOpts)
+; Emitting BLENDED_CODE for generic ARM64 on Apple
+; FullOpts code
+; ReadyToRun compilation
+; optimized code
+; fp based frame
+; fully interruptible
+; No PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+            stp     fp, lr, [sp, #-0x10]!
+            mov     fp, sp
+ 
+G_M000_IG02:                ;; offset=0x0008
+            mov     x2, x1
+            adrp    x11, [HIGH RELOC #0x420568]
+            add     x11, x11, [LOW RELOC #0x420568]
+            ldr     x3, [x11]
+ 
+G_M000_IG03:                ;; offset=0x0018
+            ldp     fp, lr, [sp], #0x10
+            br      x3
+ 
+; Total bytes of code 32
+
