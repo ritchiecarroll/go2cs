@@ -1,0 +1,37 @@
+# WITHDRAWN 2026-11-08 (see the CORRECTION block at the end): the done / started / per_case_s_max figures of the read1, solo and direct-full rows below, and their "case-bound wait" reading, were read from a TRUNCATED record. They are kept as posted, never deleted.
+# crypto/tls TestBogoSuite on H at 72043c1a66: the BoGo fields COORD asked for (2026-11-08) and the measurement-only arms. Nothing on the box was changed.
+# status = the BoGo runner's last status line, failed/unimplemented/done/started/total (runner.go:2067). per_case_s_max = workers x 600 / done, an upper bound (the 600 s also covers the runner build). Runner -idle-timeout default 15 s (runner.go:70).
+arm	where	logical_cores	physical_cores	shim_workers	bogo_elapsed_s	verdict	status	done	started	total	per_case_s_max
+read1	sweep row 41 of the shard	8	4	8	602.0	FAIL host-limit (disclosed)	0/206/324/331/6473	324	331	6473	14.8
+solo	declared solo re-read, sweep	8	4	8	601.9	FAIL host-limit (disclosed)	0/206/324/332/6473	324	332	6473	14.8
+direct-full	published shim, -test.run=^TestBogoSuite$, no filter	8	4	8	601.1	FAIL	0/206/324/331/6473	324	331	6473	14.8
+direct-verify	published shim, -bogo-filter=*-Verify-*	8	4	8	19.7	PASS (54 cases)	-	54	54	54	2.6
+direct-one	published shim, -bogo-filter=Client-Verify-ECDSA-TLS1	8	4	8	2.65	PASS (1 case)	-	1	1	1	-
+#
+# direct shim launch, -test.run=^$ (rc 0 each), ms: label, launch 1..6
+# pre (existing exe):	1275/991/955/983/946/1053
+# post (freshly republished exe):	916/1028/945/945/1036/1023
+# CPU during BoGo in the solo (63 samples, 10 s apart, percent of one core, 800 = box): shims mean 158 max 585; MsMpEng mean 10 max 23; other Defender/EDR 0; one svchost ~100 during BoGo only (service UNRESOLVED, the mapper was faulty).
+#
+# CORRECTION 2026-11-08 (H; accepted by COORD the same day). Appended; nothing above was rewritten.
+# WITHDRAWN: "done 324 / started 331-332 at the 600 s wall", "per_case_s_max 14.8", the 15 s idle-timeout reading
+# (8 x 600 / 15 = 320 was a coincidence), "not capacity", and the CPU split's "shims mostly WAITING".
+# CAUSE: the converted testing package caps ONE log record at 65,536 chars and appends " [record truncated]"
+# (src/core/testing/TestExecution.cs, MaxRecordCharacters = 1 << 16). The TestBogoSuite record ends with that suffix
+# in every run, so the status line read above is the last one before the cut (about 70-160 s in), not the state at
+# the wall. Output is deterministic up to the cut, hence the same 324 every run. The CPU split came from
+# \Process(*) counters read under heavy process churn (13 of 52 BoGo-phase reads partial); it is withdrawn too,
+# including the one-core svchost observation.
+# RE-MEASURED (BoGo runner built as its own binary, run directly with -pipe, nothing else on the box):
+arm	shim	shim_workers	cases_done	of	seconds	note
+direct-runner-full	converted	8	1145	6473	600	steady 1.9 cases/s, no stall; the 2 FAILED rows finished at +600.7 and +601.0 s, i.e. at the timeout kill
+direct-runner-full	Go (go test -c crypto/tls)	8	6473	6473	<120	exit 0
+alone-1-98	converted	1	98	6473	120.1	list order, stopped by my 120 s timeout; max 2.17 s per case
+alone-230-345	converted	1	116	116	134.3	max 3.00 s per case (one); no 15 s case
+alone-340-516	converted	1	177	177	239.6	none over 3 s
+alone-1-516	Go (go test -c crypto/tls)	1	516	6473	20	list order, stopped by my 20 s timeout; about 38 ms per case
+# Box CPU during the converted 8-worker 600 s run: 99% busy (272 samples, \Processor(_Total)); MsMpEng mean 30, max 58 (% of one core),
+# about 4% of the box. One converted shim launch is about 0.77 s wall and 0.77 s CPU (DOTNET_TieredCompilation=0 adds about 0.1 s).
+# In the test-host path the runner keeps running after the cut (+219 ms runner CPU over 8 s mid-run, every shim brand new).
+# The ::1 / -ipv6 dial path is clean: no SYN_SENT at any probe, up to 12 ESTABLISHED.
+# READING (COORD ruling, 2026-11-08): (h) host capacity. At 1.9 cases/s the matrix needs about 3,400 s, 5.7x the 600 s wall.
