@@ -55,8 +55,8 @@ is UTC (`parse.go` reads `time.Local`).
 
 ## Converted tests against Go
 
-`go2cs -tests -recurse -test-action all -platforms linux/amd64 -go2cspath <tree>/src -module-disclosures
-<tree>/src/tests/ModuleDisclosures <module copy> <scratch root>`, rc 0 in 30 s:
+`go2cs -tests -recurse -test-action all -platforms linux/amd64 -go2cspath <tree>/src
+-module-disclosures <tree>/src/tests/ModuleDisclosures <module copy> <scratch root>`, rc 0 in 30 s:
 
 - **417 matched, 0 disclosed**: the 4 tests and their 413 subtests. Both sides were built with
   `-tags purego,math_big_pure_go,safe`, at `Release` with the tiered JIT off.
