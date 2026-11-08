@@ -75,11 +75,24 @@ All Go steps ran pinned to logical CPUs 6-11 (mask 0xFC0), sharing the box with 
 | 2 | slow-package notices (checker, ast > 2 m) | perf only |
 | 1 | package license unspecified (tsc module root LICENSE not referenced) | packaging only |
 
+| 1b. stdlib rebuild at the stage-2 tip | a0fba9b08a | 0 | 1,116 s | 363/363 |
+| 3A. `dotnet build _all.slnx` over the 138 converted csproj, emitted tree as-is | a0fba9b08a | 1 | 175 s | **36 built / 7 failed / 95 blocked** downstream. 36 unique errors, all first causes (C5-C11). The 8 raw-Go sites (C1, C2) are never compiled: their packages are all downstream of a failure. |
+| 3B. same, C1 + C2 hand-patched (`passB-handpatch.diff`, 30 lines / 14 files, CRLF kept) | a0fba9b08a | 1 | 179 s | identical to 3A (same 36 errors, same 7 projects), as expected: the C1/C2 packages sit downstream of C5-C11. |
+
+**Prediction scored as worded.**
+- go-json-experiment/json: RIGHT package, WRONG reason. It is a name clash (C7), not reflect or generics.
+- go-cmp: WRONG. All 5 packages build.
+- x/sys/windows + go-winio: HALF. x/sys/windows builds; go-winio/internal/socket fails (C11).
+- core + collections cascading: RIGHT that they are blocked, but by tspath (C6) and jsontext (C7) upstream. Their own constructs are not yet measured.
+- Not predicted at all: C5 (vendored-path mapping), C8, C9, C10.
+
+Downstream reach of each first cause, over the 140-package test closure: jsontext 79, tspath 78, x/text/internal/language 64, cpuid 60, go-winio/internal/socket 42, x/text/unicode/norm 17, gotest.tools/internal/format 13. Any one of them blocks 95.
+
 Box-sharing datum: CPU affinity (0xFC0 vs COORD's 0-5) protects CPU but **not disk or memory bandwidth**. While this experiment's go test baseline and the stdlib cold build ran on the upper half, COORD's repoguard step on the lower half took 2,880 s against its usual 200-340 s.
 
 ## Defect catalogue
 
-One row per ROOT CAUSE. Repro modules live in `H:\go2cs-ts-exp\repros\<name>` on the i7. Each one is quoted below in full, so the record stands alone.
+One row per ROOT CAUSE. Repro modules are saved file by file as `EXPERIMENT-ts-readiness-2026-11-07-data/repros/<module>_<path>.txt`; the `.txt` suffix keeps repo tooling off them. Each one is also quoted below.
 
 ### C1: anonymous interface parameter type, satisfied across a package boundary (converter, S-M)
 
@@ -117,6 +130,60 @@ One row per ROOT CAUSE. Repro modules live in `H:\go2cs-ts-exp\repros\<name>` on
   }
   ```
 - **Blast radius:** 1 file (ls), so only ls and its dependents.
+- **Reach:** modules with the shape (an anonymous struct as a type argument of a declared var). This is general Go set/map idiom.
+
+C1 **reach:** modules with the shape (an anonymous-interface parameter satisfied from another package); a common "duck-typed debug helper" idiom.
+
+### C5: a third-party import of a std-VENDORED path maps to std's vendor namespace (converter, S-M) — reach: ANY -recurse user
+
+- **Mechanism:** in a converted module package, `import "golang.org/x/text/transform"` emits `using transform = vendor.golang.org.x.text.transform_package;` and `using vendor.golang.org.x.text;`, which is std's vendored copy (`GOROOT/src/vendor/golang.org/x/text/transform`), instead of the converted third-party module `go.golang.org.x.text.transform_package`. The project does not reference std's vendor assembly, so it fails with CS0246 'vendor' (27 errors, including 25 in go2cs-gen output that inherits the usings). x/text packages that std does NOT vendor (`internal/language`, `language`) map correctly.
+- **TS site:** `golang.org/x/text/unicode/norm` (normalize.go, transform.go), imported by tsc for locale handling.
+- **Repro** (`c5vendoredpath`; requires golang.org/x/text v0.42.0): `lib` imports `golang.org/x/text/transform` and returns `transform.Nop`; main calls `transform.String(lib.Nop(), "abc")`. Go prints `abc`; conversion rc=0; build gives CS0246 'vendor'.
+- **Blast radius:** 17 TS-closure packages. Ecosystem-wide, it hits every module that imports a path std vendors: x/text transform/unicode/norm/unicode/bidi/secure/bidirule, x/net idna/http/httpguts/http2/hpack/dns/dnsmessage, x/crypto chacha20/chacha20poly1305/cryptobyte/hkdf, x/sys/cpu. These are among the most-imported modules in Go.
+
+### C6: `cmp.Ordered` over a named string type (converter / go2cs-gen, S-M) — reach: ANY -recurse user with the shape
+
+- **Mechanism:** `slices.Sort` on `[]Path` (`type Path string`) emits `slices.Sort<slice<Path>, Path>(...)`. Sort's E constraint is `IAdditionOperators<E,E,E>, IEqualityOperators<E,E,bool>, IComparisonOperators<E,E,bool>`, but the generated `Path` wrapper implements only `IGoEquatable`, so CS0315. Every `cmp.Ordered` consumer (slices.Sort/Max/Min/BinarySearch, cmp.Compare, maps sorted keys) is affected when it is instantiated with a named string type, and likely any named numeric type too (not measured).
+- **TS site:** `internal/tspath/path.go:1234`, `slices.Sort(orderedGroups)` (3 errors, one site).
+- **Repro** (`c6namedstringsort`): `type P string; s := []P{"b","c","a"}; slices.Sort(s)`. Go prints `a b c`; build gives CS0315.
+- **Blast radius:** tspath is at the root of tsc: 78 packages downstream.
+
+### C7: a Go type NAMED `Value` collides with the generated `Value` property (go2cs-gen TypeGenerator, S) — reach: ANY -recurse user with the shape
+
+- **Mechanism:** every named-slice wrapper gets `public slice<T> Value => m_value;`. For `type Value []byte`, C# rejects a member named like its enclosing type (CS0542).
+- **TS site:** `github.com/go-json-experiment/json/jsontext.Value` (1 error), which blocks all of go-json-experiment/json and therefore tsc's `internal/json` and everything above it: 79 packages downstream. `Value` is a common type name, e.g. any `type Value []byte` or `type Value map[...]...`.
+- **Repro** (`c7typenamedvalue`): `type Value []byte; func (v Value) Len() int`. Go prints `3 abc`; build gives CS0542.
+
+### C8: a value receiver calling a pointer method whose receiver is boxed (converter, M) — reach: modules with the shape
+
+- **Mechanism:** when a pointer method's receiver is emitted boxed (`this ж<T> Ꮡt`), a call on an addressable VALUE receiver/parameter needs a heap box or a `ref` overload, and neither is emitted.
+  - It emits `t.M()`, which gives CS1929 (repro `c8d`).
+  - After `(t, err) = f(t)` it emits `Ꮡt.M()` with no `Ꮡt` declared, which gives CS0103 (repros `c8b`, `c8c`; the real site).
+  - Without the boxed receiver it converts and runs correctly (`c8valuerecvptrcall`).
+- **What boxes the receiver here:** a stack array sliced through a method call in the body (`var buf [8]byte; b := buf[:t.gen(buf[:])]`, shaped like x/text `(*Tag).RemakeString`).
+- **TS site:** `golang.org/x/text/internal/language/match.go:202` `Tag.minimize` (1 error); 64 packages downstream.
+
+### C9: a `:=`-bound variadic closure passed as a func-typed argument (converter, S) — reach: modules with the shape
+
+- **Mechanism:** `writeFormat := func(format string, args ...interface{}) {...}; formatHeader(writeFormat, conf)`. The local is emitted as `var`, so C# infers an anonymous delegate (it has a `params` parameter) that does not convert to `go.Actionꓸꓸꓸ<@string, object>` (CS1503).
+- **TS site:** `gotest.tools/v3/internal/format/diff.go` (2 errors); 13 test-side packages downstream.
+- **Repro** (`c9variadicclosurearg`). Go prints `n=2 x`; build gives CS1503.
+
+### C10: a named POINTER type converted to its underlying pointer at a call (converter, S) — reach: modules with the shape
+
+- **Mechanism:** with `type Features *flagSet`, passing `f Features` to a `*flagSet` parameter emits `Ꮡf`, as if the conversion were `&f`. No such local exists, so CS0103.
+- **TS site:** `github.com/klauspost/cpuid/v2/cpuid.go:457` `(*CPUInfo).HasAll` (1 error); 60 packages downstream (via xxh3).
+- **Repro** (`c10namedpointertype`). Go prints `true false`; build gives CS0103.
+
+### C11: a keyed literal of a named struct defined over a foreign struct (converter / go2cs-gen, S-M; repro not yet cut) — reach: modules with the shape
+
+- **Mechanism:** `type GUID windows.GUID` becomes a value wrapper (`partial struct GUID /*...windows_package.GUID*/`, `[GoValueClone("Value")]`). The keyed literal `guid.GUID{Data1: ..., Data2: ..., Data3: ..., Data4: [8]byte{...}}` emits field-named constructor arguments that the wrapper does not have (CS1739).
+- **Repro status:** a 2-package repro with a small local struct compiles AND runs correctly (`c11namedforeignstruct`), so the real ingredient is x/sys/windows.GUID's shape or its converted form. Not yet isolated.
+- **TS site:** `github.com/Microsoft/go-winio/internal/socket/socket.go:113` (1 error); 42 packages downstream.
+
+### Stage-2 warnings, status after stage 3
+
+C3 (variadic promoted `Trace` forwarders), C4 (non-erased union pointer constraint in checker `relater.go`), the 4 `unsafe.Sizeof` consts and the 64 move2heap notes: NOT YET CONFIRMED OR CLEARED, except one point: x/sys/windows BUILT, so its two `unsafe.Sizeof` consts at least compile (their run-time values are unmeasured). Everything else (execute, checker, go-winio hvsock) is downstream of the first walls.
 
 ## Closing planning read
 

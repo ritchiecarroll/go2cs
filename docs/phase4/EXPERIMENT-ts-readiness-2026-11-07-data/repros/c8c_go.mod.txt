@@ -1,0 +1,3 @@
+module repro/c8c
+
+go 1.26
