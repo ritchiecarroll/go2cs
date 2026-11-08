@@ -131,8 +131,38 @@ public class TestExecutionOutputCapTests
         Assert.IsTrue(output.Length <= TestExecution.MaxLogCharacters + TestExecution.MaxRecordCharacters + 256,
             $"a single oversize record went unbounded at {output.Length} characters");
 
-        StringAssert.Contains(output, TestExecution.RecordTruncatedSuffix,
+        StringAssert.Contains(output, " [record truncated: ",
             "an oversize record was truncated without saying so");
+    }
+
+    // An oversize record keeps its TAIL too, and says how much it dropped. A long-running test's last
+    // state is its record's last line: crypto/tls's TestBogoSuite reports the BoGo runner's progress
+    // as one record that grows past the cap, and a head-only cut showed the runner's state ~70-160 s
+    // in as if it were the state at the runner's 600 s wall (H, 2026-11-08: "324 done" read off the
+    // cut, against 1,145 measured directly).
+    [TestMethod]
+    public void AnOversizeRecordKeepsItsTailAndStatesWhatItDropped()
+    {
+        (TestRunner runner, TestReporter reporter) = NewRunner();
+        TestExecution execution = NewExecution(runner, "TestLongProgress");
+
+        const string Head = "FIRST-LINE-OF-THE-RECORD";
+        const string Last = "LAST-LINE-OF-THE-RECORD 0/206/1145/1153/6473";
+        string record = $"{Head}{new string('p', 2 * TestExecution.MaxRecordCharacters)}{Last}";
+
+        execution.Log(record);
+        execution.RecordGoroutinePanic("panic: long progress");
+
+        string output = PanicOutput(reporter, execution.Name);
+
+        StringAssert.StartsWith(output, record[..TestExecution.MaxRecordCharacters],
+            "the head changed, which can unpin a disclosure signature");
+        StringAssert.Contains(output, Last, "the record's last line was dropped by the cap");
+
+        int dropped = record.Length - TestExecution.MaxRecordCharacters - TestExecution.RecordTailCharacters;
+
+        StringAssert.Contains(output, string.Format(TestExecution.RecordTruncatedMarker, dropped),
+            "the marker did not state the dropped character count");
     }
 
     // The bound must be invisible to every real test, which is what keeps it off the corpus's
