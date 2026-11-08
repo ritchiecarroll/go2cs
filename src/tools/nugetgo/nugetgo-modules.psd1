@@ -79,4 +79,35 @@
         Kit               = ''
         Expect            = @{ 'github.com/spf13/cobra' = @(405, 0); 'github.com/spf13/cobra/doc' = @(19, 0) }
     }
+    # The two closure packages of the go.* 1.26.10.3 wave (PLAN-rebank-1-26-10-3.md section 8; COORD ruling 2026-11-08):
+    # new IDs, so neither has a published package or a kit yet. Upstream is the holder both LICENSE files name.
+    # timefmt-go's count is C2's scout reading (SCOUT-timefmt-go.md, linux/amd64 at c6cddb6903).
+    'github.com/itchyny/timefmt-go@v0.1.8' = @{
+        RepositoryUrl     = 'https://github.com/ritchiecarroll/timefmt-go-cs'
+        Upstream          = 'itchyny'
+        UpstreamPublishes = $false
+        LicenseSpdx       = 'MIT'
+        ExcludePackage    = @()
+        ConversionReadme  = ''
+        Kit               = ''
+        Expect            = @{ 'github.com/itchyny/timefmt-go' = @(417, 0) }
+    }
+    # The library root only: cli and its closure are deferred (owner ruling 2026-11-07), so cli is validated and
+    # excluded, as cobra/doc is; cmd/gojq is a main package, which the pack leaves out by itself. The edge to timefmt-go
+    # is not a row field: it moves with each wave, so the run passes it, -ThirdPartyPackage
+    # github.com/itchyny/timefmt-go=nugetgo.github.com.itchyny.timefmt-go@0.1.8, as cobra's run passes pflag's.
+    # The root's 164 + 0 is a PREDICTION, not a reading: P1 read 162 of 164 at a0fba9b08a, before class E (batch 246),
+    # and the two were E's TestCodeCompile_OptimizeTailRec_While and _CallRec. If either fails again, the run's 1.3 check
+    # refuses and nothing is packed (COORD ruling 2026-11-08). cli's 914 + 0 is P1's reading at a0fba9b08a, with class
+    # G's fix and without it.
+    'github.com/itchyny/gojq@v0.12.19' = @{
+        RepositoryUrl     = 'https://github.com/ritchiecarroll/gojq-cs'
+        Upstream          = 'itchyny'
+        UpstreamPublishes = $false
+        LicenseSpdx       = 'MIT'
+        ExcludePackage    = @('github.com/itchyny/gojq/cli')
+        ConversionReadme  = ''
+        Kit               = ''
+        Expect            = @{ 'github.com/itchyny/gojq' = @(164, 0); 'github.com/itchyny/gojq/cli' = @(914, 0) }
+    }
 }
