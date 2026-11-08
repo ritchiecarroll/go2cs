@@ -1,0 +1,33 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# 1.26.10.3 RE-BANK at 72043c1a66 (tip 72043c1a6639d460bf98a9cab270dac6ec743fd6), lane P1, shard P1-2, linux cloud container
+# toolchain: go1.26.10 linux/amd64, GOROOT spelled as go env GOROOT prints it (the kit checks it), GOTOOLCHAIN=local; dotnet SDK 10.0.403, runtime 10.0.14
+# host: free disk 18 GB at P1-2 start (the box has no 25 GB; kit floor 10 GB, after P1-1's floor stop at 15); 4 cores, 15 GiB; TMPDIR /tmp; GOROOT test/ 3458 files; nslookup invalid.invalid -> NXDOMAIN; avx512f/bw/vl/vbmi/bitalg + gfni present
+# kit: linux-kit at the tip, sha256 rebank-linux.sh 99cdef2e8d0b, classify_row.py 81e543608d9c, derive-argv.ps1 0ea6f0b90f91 (equal to the README)
+bytes	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:48:41Z
+crypto/internal/boring	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:49:08Z
+go/ast	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:49:47Z
+crypto/sha256	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:50:20Z
+crypto/hpke	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:51:24Z
+net/mail	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:52:03Z
+go/doc/comment	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:52:38Z
+crypto/internal/fips140/edwards25519/field	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:53:24Z
+encoding/binary	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:53:47Z
+fmt	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:54:34Z
+crypto/sha3	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:55:35Z
+net/url	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:56:05Z
+crypto/internal/fips140only	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:56:55Z
+syscall	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:57:53Z
+regexp	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T12:59:55Z
+net/rpc/jsonrpc	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:02:04Z
+crypto/rsa	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:03:47Z
+encoding/json	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:06:02Z
+os/exec	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:07:54Z
+internal/testenv	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:08:15Z
+internal/runtime/gc/scan	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	DIVERGED	1	2026-11-08T13:08:35Z
+runtime/pprof	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:18:30Z
+testing	72043c1a6639d460bf98a9cab270dac6ec743fd6	72043c1a6639d460bf98a9cab270dac6ec743fd6	1794141860	PASS	0	2026-11-08T13:19:46Z
+# finding internal/runtime/gc/scan DIVERGED (rc 1), as predicted: this host's CPU reports avx512f/bw/vl/vbmi/bitalg and gfni, so Go runs TestExpandAVX512, TestFilterNilAVX512 and TestScanSpanPackedAVX512 (9261 verdicts) while C# skips them (3095): 6169 differ (6166 subtests Go=pass with no C# verdict, plus the 3 parents Go=pass C#=skip); the 3092 shared verdicts agree. The BOARD's 2026-10-16 host-conditional FEATURE GAP; .2 read the same 9261 / 3095 / 6169 on this box
+# re-read 2026-11-08 13:21Z-13:25:09Z, DECLARED, as its own kit invocation in the same tree at the same tip: DIVERGED rc 1, 9261 / 6169 diverged, identical. Class (h), host truth (CPU features), the row's banked linux 3095 being a reading from a host without AVX-512
+# runtime/pprof PASS 148 with 14 disclosed, as at .2 on this box and as predicted (banked linux 148 + 8)
+# moved/untracked lists: equal to .2's for all 23 rows (docs/validation pages and READMEs aside, which move only on a PASS row)
+# end 2026-11-08 13:20:03Z: 23 of 23 rows read in one kit invocation, testing last; PASS 22, each at its banked linux count (runtime/pprof's disclosed 14 above); DIVERGED 1 (gc/scan, (h)); walls 2,106 s; residue-after 0, tracked-deleted 0; container restarts during the shard: 0
