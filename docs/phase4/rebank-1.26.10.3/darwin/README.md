@@ -139,3 +139,21 @@ listings got: no data-dependent branch on a limb value.
   - Every other row read as predicted, and no count moved for any row that banks at its old segment.
 - `annotate_darwin.py` can run over this directory once the relay fills `runtime/pprof`'s `relay` cells: it reads
   `divergent` and `new` as integers for every validated row.
+
+## The SIGINT census re-read at 30ad20e17e (`reread/`, COORD 2026-11-08, after batch 257)
+
+Ten rows on both RIDs at master `30ad20e17e8c823b80855ba74bcebc2faa01f289`, from `claude/c1-tip-30ad20e17e-1` and `-2`,
+in `reread/`. That is a wave the guard declares, so `annotate_darwin.py` takes these readings as the rows' latest. The
+re-dispatch stem rule lets a re-read named `SIG-1R` supersede `SIG-1`.
+- SIG-1 (run 42497815515): `runtime`.
+  - osx-arm64 validated at 11062 + 58, as at 72043c1a66.
+  - osx-x64 FAILS, with one undisclosed line: `TestPingPongHog` Go="fail" C#="pass", the Go ORACLE failing a
+    scheduler-fairness timing test. Record: "matched 11061 of 11120 Go / 11120 C# verdicts; disclosed 64;
+    undisclosed divergences 1".
+  - The sweep did not re-run it as an oracle flake, because a "fatal error: " text appears outside any named test's
+    verdict.
+  - One DECLARED re-read follows, as SIG-1R, before this is called (h).
+- SIG-2 (run 42497834152), as at 72043c1a66 on both RIDs:
+  - database/sql, internal/fuzz, net/http, os, os/exec, os/signal and go/internal/gccgoimporter at their segments;
+  - runtime/pprof validated at 146;
+  - syscall FAIL on exactly the `TestGetdirentries` residue.
