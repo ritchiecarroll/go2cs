@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/sha1` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-08 · converter `f5d713799`*
 
 **13 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/sha1`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/sha1).
@@ -46,6 +46,15 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | Test | Class | Pinned reason |
 |:--|:--|:--|
 | `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [5]uint32 state and [64]byte block -- golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident. The converted path counts 9 per run on windows and linux: the copy's array storage, non-escaping local buffers and the heap box for the digest. New() is outside the measured closure, so no hash.Hash shell is created per run. Deferred: .NET has value-typed fixed-size storage for a Go array value, and planned work removes the local buffers and the box; the entry retires only at zero bytes. |
+
+## Withdrawn where a shipped architecture does not build the test
+
+One converted build of a GOOS serves every RID it ships, and the roster banks one count for it.
+A test whose file one of those architectures does not build is therefore withdrawn from **both**
+sides on that GOOS, on every RID, and is not claimed by that GOOS's count. It still runs, and is
+compared, on every GOOS that builds it:
+
+- darwin: `TestOutOfBoundsRead` — issue15617_test.go is not built for darwin/arm64 (//go:build amd64 && (linux || darwin)); one darwin build serves both RIDs
 
 ## Excluded declarations
 
