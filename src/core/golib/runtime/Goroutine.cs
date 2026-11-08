@@ -206,6 +206,12 @@ public sealed class Goroutine
     private int m_blockedDepth;
     private int m_blockSequence;
 
+    // The native-call transition depth GoNativeCall keeps (docs/phase4/DESIGN-native-call-seam.md §12.3): even while
+    // this goroutine runs managed code, odd while it is inside a native call, one more level per callback. Written only
+    // on this goroutine's own thread. It lives HERE rather than in a thread-static so that it follows the goroutine and
+    // not its carrier (§12.1), and a goroutine adopted by a thread another one left starts at 0.
+    internal int m_nativeDepth;
+
     /// <summary>MainExit counts this goroutine in runningPanicDefers, or stops counting it; the marks follow.</summary>
     internal void SetPanicDefersCounted(bool counted) => Volatile.Write(ref m_panicDefersCounted, counted ? 1 : 0);
 
