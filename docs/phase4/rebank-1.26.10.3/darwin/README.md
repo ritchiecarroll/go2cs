@@ -119,3 +119,23 @@ listings got: no data-dependent branch on a limb value.
   Predicted `net` unbanked (HIT), with x64 validating at 552 + 3 (MISS: x64 fails on the resolver and on a second
   timing case). The predicted total moves from 233 to 229,
   three BELOW the plan's 232 to 234.
+
+## The tally (C1, at DONE)
+
+- 15 dispatches, all at the tip, 236 rows, 472 lines, every row named once. Row-wall totals: osx-arm64 21,179 s,
+  osx-x64 36,897 s.
+- **229 of 236 rows read banked under the arch-strict rule** (both RIDs validated, equal matched and disclosed-divergent,
+  or crypto/subtle's arch-strict form):
+  - 226 at their existing darwin segment;
+  - 3 NEW segments: `runtime` 11062 + 58, `runtime/pprof` 146 (its disclosed half is COORD's relay) and `testing`
+    80 + 5.
+- **7 do not bank:**
+  - (s), GOARCH: `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof`, each losing its 1.26.10.2 segment;
+  - (c), the thread cap: `internal/synctest`;
+  - as ruled: `internal/trace`, `syscall` and `net`.
+- **Predicted 233; read 229, three below the plan's 232 to 234.** Two causes:
+  - (s) explains three of the four misses;
+  - (c) explains `internal/synctest`.
+  - Every other row read as predicted, and no count moved for any row that banks at its old segment.
+- `annotate_darwin.py` can run over this directory once the relay fills `runtime/pprof`'s `relay` cells: it reads
+  `divergent` and `new` as integers for every validated row.
