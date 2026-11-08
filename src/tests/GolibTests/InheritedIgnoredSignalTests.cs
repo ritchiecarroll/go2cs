@@ -252,6 +252,22 @@ public class InheritedIgnoredSignalTests
             $"SIGCONT is in .NET's start-up three; Notify must deliver it over an inherited SIG_IGN (its default action continues, so the defect reads as a lost delivery, not a death) (exit {child.ExitCode}):\n{child.Output}");
     }
 
+    // The fix borrows System.Native's SignalHandler from a signal .NET did install (the bridge's donors) and
+    // refuses unless two donors agree. On the RUNNING runtime they must, or a servicing change that moved or
+    // split the handler would silently disarm every inherited-ignored Notify: this reds the test instead.
+    // The reading is printed either way -- the observable diagnostic a refusal also writes to stderr.
+    [TestMethod]
+    public void DotNetSignalHandlerDonorsAgreeOnThisRuntime()
+    {
+        SkipOffUnix();
+        EnsureRuntimeInitialized();
+
+        (bool agree, string detail, string? lastRefusal) = runtime.GoSignalHandlerDonorProbe();
+        Console.WriteLine($"donor probe on {RuntimeInformation.FrameworkDescription}: {detail}; last arm refusal: {lastRefusal ?? "none"}");
+
+        Assert.IsTrue(agree, $"at least two of the bridge's donor signals must hold the same SA_SIGINFO handler (System.Native's SignalHandler) on this runtime: {detail}");
+    }
+
     // CONTROLS, green before and after the fix: the default disposition, and SIGHUP -- inherited ignored
     // like the arms above, but installed LAZILY by .NET, so the bridge's clear-then-Create already serves it.
     [TestMethod]

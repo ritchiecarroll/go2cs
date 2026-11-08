@@ -119,6 +119,167 @@ partial class runtime_package
     // handler's die decision and are never cleared.
     private static uint s_bridgeIgnoredMask;
 
+    // .NET's START-UP THREE, and the handler the bridge borrows for them (2026-11-08).
+    //
+    // dotnet/dotnet 0427b9abbead (the 10.0.14 source), src/runtime/src/native/libs/System.Native/pal_signal.c:
+    // InitializeSignalHandlingCore installs SIGINT, SIGQUIT and SIGCONT at START-UP (HAS_CONSOLE_SIGNALS),
+    // and InstallSignalHandler, finding SIG_IGN, sets g_handlerIsInstalled[sig-1] = true and returns WITHOUT
+    // installing. Every later EnablePosixSignalHandling of that signal returns early on the flag, so a
+    // PosixSignalRegistration.Create installs nothing, and DisablePosixSignalHandling never restores a signal
+    // console input still needs. For these three an inherited SIG_IGN is therefore FINAL on .NET's side:
+    // clearing it to SIG_DFL (the clear below, which serves every LAZILY installed signal) leaves SIG_DFL with
+    // no handler, and the process dies by -- or never receives -- the signal. strace, 2026-11-08: inherited
+    // ignored, three reads of SIG_IGN, the clear, no install, "killed by SIGINT"; at the default, .NET's
+    // SA_SIGINFO handler installed and the kill delivered. Go keeps an inherited SIG_IGN on SIGHUP/SIGINT
+    // until Notify (initsig) and installs over it on Notify (sigenable); the bridge now does the same:
+    //   - installPosixSignal never clears an inherited SIG_IGN on these three (the registration is still
+    //     created, which sets .NET's per-signal registration flag), so the ignore survives until Notify;
+    //   - sigenable on one of them that was born ignored ARMS it: installs .NET's OWN SignalHandler, its
+    //     whole sigaction copied byte for byte from a signal .NET did install through the bridge's eager
+    //     registrations. A delivery then takes .NET's own path (the pipe, its worker thread, the managed
+    //     callback below); an uncancelled one meets HandleNonCanceledPosixSignal with the original SIG_IGN
+    //     .NET recorded, which does nothing -- Go's ignore;
+    //   - sigdisable on an armed SIGINT puts the kernel SIG_IGN back: Go's sigdisable restores fwdSig for a
+    //     signal it would not otherwise handle (sigInstallGoHandler is false only for SIGHUP and SIGINT).
+    // A managed handler of our own is not an option: it would run managed code in signal context.
+    private static bool sigNetDecidesAtStartup(uint32 sig) => sig == 2 || sig == 3 || sig == 18;
+
+    // The start-up signals sigenable has armed with the borrowed handler. Under s_sigPosixLock.
+    private static uint s_armedMask;
+
+    // Why the last arm was refused, or null. Read by GoSignalHandlerDonorProbe; never silent (see armStartupSignal).
+    private static string? s_armRefusal;
+
+    // The donors: signals the bridge registers eagerly that NEITHER the CLR's PAL owns (it may own SIGTERM, and
+    // SIGRTMIN is its activation signal) NOR are among the start-up three. Whatever handler they hold after
+    // Create is System.Native's SignalHandler, installed by InstallSignalHandler with SA_SIGINFO. Two must agree
+    // before anything is installed, so a donor that was ignored, displaced or re-pointed refuses instead of
+    // lending the wrong handler.
+    private static readonly int[] s_signalHandlerDonors = { 12, 28, 1 };   // SIGUSR2, SIGWINCH, SIGHUP
+
+    // glibc's linux-x64 struct sigaction: sa_handler at 0, sa_mask (128 bytes) at 8, sa_flags at 136,
+    // sa_restorer at 144. SA_SIGINFO is 4.
+    private const int SigactionBytes = 160;
+    private const int SaFlagsOffset = 136;
+    private const int SA_SIGINFO = 4;
+
+    // The libc sigaction INSTALL side, used ONLY to install .NET's own handler (borrowed, never ours) on a
+    // start-up signal .NET skipped.
+    [DllImport("libc", EntryPoint = "sigaction", SetLastError = false)]
+    private static extern int sys_sigaction_install(int signum, IntPtr act, IntPtr oldact);
+
+    // Reads every donor's current sigaction and, when at least two hold the SAME SA_SIGINFO handler, copies one
+    // whole into `into` and returns true. The detail names each donor's reading either way.
+    private static bool readAgreeingDonor(IntPtr into, out string detail)
+    {
+        IntPtr buffer = Marshal.AllocHGlobal(SigactionBytes);
+        try
+        {
+            StringBuilder readings = new StringBuilder();
+            IntPtr agreed = IntPtr.Zero;
+            int agreeing = 0;
+
+            foreach (int donor in s_signalHandlerDonors)
+            {
+                for (int i = 0; i < SigactionBytes; i += 8)
+                    Marshal.WriteInt64(buffer, i, 0L);
+
+                if (sys_sigaction_read(donor, IntPtr.Zero, buffer) != 0)
+                {
+                    readings.Append(donor).Append(":unreadable ");
+                    continue;
+                }
+
+                IntPtr handler = Marshal.ReadIntPtr(buffer);
+                bool siginfo = (Marshal.ReadInt32(buffer, SaFlagsOffset) & SA_SIGINFO) != 0;
+                readings.Append(donor).Append(":0x").Append(((long)handler).ToString("x")).Append(siginfo ? "/siginfo " : "/plain ");
+
+                if (handler == IntPtr.Zero || handler == SIG_IGN_HANDLER || !siginfo)
+                    continue;
+
+                if (agreeing == 0)
+                {
+                    agreed = handler;
+                    agreeing = 1;
+                    byte[] copy = new byte[SigactionBytes];
+                    Marshal.Copy(buffer, copy, 0, SigactionBytes);
+                    Marshal.Copy(copy, 0, into, SigactionBytes);
+                }
+                else if (handler == agreed)
+                {
+                    agreeing++;
+                }
+                else
+                {
+                    detail = "donors disagree: " + readings.ToString().TrimEnd();
+                    return false;
+                }
+            }
+
+            detail = (agreeing >= 2 ? "agreeing donors: " : "fewer than two agreeing donors: ") + readings.ToString().TrimEnd();
+            return agreeing >= 2;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(buffer);
+        }
+    }
+
+    // armStartupSignal (under s_sigPosixLock) installs .NET's SignalHandler on a start-up signal that was born
+    // ignored, once. A refusal leaves the inherited SIG_IGN in place -- the signal is not delivered, but nothing
+    // dies of it -- and is NEVER silent: one stderr line names the signal and the donors' readings.
+    private static void armStartupSignal(uint32 sig)
+    {
+        uint bit = 1u << (int)sig;
+        if (!sigNetDecidesAtStartup(sig) || ((s_inheritedIgnoredMask >> (int)sig) & 1) == 0 || (s_armedMask & bit) != 0)
+            return;
+
+        IntPtr donor = Marshal.AllocHGlobal(SigactionBytes);
+        try
+        {
+            if (!readAgreeingDonor(donor, out string detail))
+            {
+                s_armRefusal = "signal " + sig + ": " + detail;
+                Console.Error.WriteLine("[go2cs] signal bridge: signal " + sig + " was inherited ignored and .NET installs no handler for it after start-up; Notify cannot deliver it (" + detail + ")");
+                return;
+            }
+
+            if (sys_sigaction_install((int)sig, donor, IntPtr.Zero) != 0)
+            {
+                s_armRefusal = "signal " + sig + ": sigaction install failed";
+                Console.Error.WriteLine("[go2cs] signal bridge: signal " + sig + " was inherited ignored and installing .NET's handler for it failed; Notify cannot deliver it");
+                return;
+            }
+
+            s_armedMask |= bit;
+            s_armRefusal = null;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(donor);
+        }
+    }
+
+    // TEST SEAM (GolibTests is outside runtime's InternalsVisibleTo grant): the donors' agreement on THIS
+    // runtime, so a servicing change that moves or splits System.Native's SignalHandler reds a test rather than
+    // a user, and the last arm refusal, if any.
+    public static (bool Agree, string Detail, string? LastRefusal) GoSignalHandlerDonorProbe()
+    {
+        lock (s_sigPosixLock)
+        {
+            IntPtr scratch = Marshal.AllocHGlobal(SigactionBytes);
+            try
+            {
+                bool agree = readAgreeingDonor(scratch, out string detail);
+                return (agree, detail, s_armRefusal);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(scratch);
+            }
+        }
+    }
+
     // MapPosixSignal maps a Linux/amd64 signal number to the .NET PosixSignal value that carries it,
     // or null for the residual. Numbers are the stable Linux ABI values mirrored by
     // defs_linux_amd64.cs. Positive values ride .NET's raw-number pass-through (see THE RESIDUAL in
@@ -239,10 +400,17 @@ partial class runtime_package
     // UNCONDITIONAL signal(sig, SIG_DFL) here CLOBBERED a live .NET install and the following
     // Create was a native no-op — the disposition stayed SIG_DFL and delivery never reached any
     // handler (TestSIGCONT's timeout; TestNotifyContextNotifications' child dying from a SIGINT it
-    // had asked for). For the inherited-IGN case the clear is safe by the same fact: .NET respected
-    // that SIG_IGN and installed nothing there to clobber. Module init has already seeded
-    // sig.ignored from the same read, so nothing observable is lost: an inherited-ignored SIGHUP
-    // keeps surviving (the handler swallows via signal_ignored) exactly as under Go.
+    // had asked for). For the inherited-IGN case the clear serves only a signal .NET installs LAZILY,
+    // at its first Create, which then reads the SIG_DFL the clear left and installs: SIGHUP and the
+    // rest of the mapped set. CORRECTED 2026-11-08: the earlier claim that the clear is safe for EVERY
+    // inherited ignore was wrong for .NET's start-up three (SIGINT, SIGQUIT, SIGCONT). .NET decided
+    // those at start-up, found SIG_IGN and installed nothing it will ever install later (see
+    // sigNetDecidesAtStartup), so the clear left SIG_DFL with no handler and the process died by the
+    // signal even without a Notify -- strace on the linux re-bank's os/signal host, and pal_signal.c at
+    // dotnet/dotnet 0427b9abbead. Their inherited SIG_IGN is now kept until a Notify arms them. Module
+    // init has already seeded sig.ignored from the same read, so nothing observable is lost: an
+    // inherited-ignored SIGHUP keeps surviving (the handler swallows via signal_ignored) exactly as
+    // under Go.
     private static void installPosixSignal(uint32 sig, PosixSignal ps)
     {
         int key = (int)sig;
@@ -251,7 +419,7 @@ partial class runtime_package
             return;
         }
         uint32 s = sig;
-        if ((((s_inheritedIgnoredMask | s_bridgeIgnoredMask) >> (int)sig) & 1) != 0)
+        if ((((s_inheritedIgnoredMask | s_bridgeIgnoredMask) >> (int)sig) & 1) != 0 && !sigNetDecidesAtStartup(sig))
         {
             sys_signal((int)sig, SIG_DFL);
         }
@@ -395,6 +563,9 @@ partial class runtime_package
             {
                 atomic.Cas(ᏑhandlingSig.at<uint32>((nint)(sig)), 0, 1);
                 installPosixSignal(sig, ps.Value);
+                // Go's Notify installs over an inherited SIG_IGN; for .NET's start-up three only the
+                // borrowed handler can (see sigNetDecidesAtStartup). A no-op for every other signal.
+                armStartupSignal(sig);
             }
         }
     }
@@ -422,6 +593,17 @@ partial class runtime_package
             lock (s_sigPosixLock)
             {
                 atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
+
+                // Go's sigdisable restores fwdSig for a signal sigInstallGoHandler declines -- an
+                // inherited SIG_IGN on SIGHUP or SIGINT. SIGHUP's swallow already reads as that ignore
+                // (the handler consults the inherited bit); an ARMED SIGINT gets its kernel SIG_IGN back,
+                // and the next Notify re-arms it. SIGQUIT and SIGCONT keep the handler, as Go keeps its own.
+                uint bit = 1u << (int)sig;
+                if (sig == 2 && (s_armedMask & bit) != 0)
+                {
+                    sys_signal((int)sig, SIG_IGN_HANDLER);
+                    s_armedMask &= ~bit;
+                }
             }
         }
     }
