@@ -33,11 +33,29 @@ own time (`thread_info`), per wait.
   with a long tail on x64. The kernel coalesces their timers, and no plain sleep call avoids that here.
 - The kqueue timer with `NOTE_CRITICAL` stays within 0.3 ms of 1 ms at p99 on both runners.
   - `sys/event.h` documents `NOTE_CRITICAL` as asking for minimal timer coalescing.
-  - The same timer WITHOUT that flag was not measured. That axis was not varied, so the flag is chosen on the
-    documented meaning, not on an A/B reading.
+  - The flag is what does it, measured: see *The flag, measured* below.
 - The spin is accurate at the median, but it burns the processor (865 us of CPU per 1 ms wait on arm64). It still
   takes a 10 ms tail whenever the thread is preempted. It defeats the escalation's purpose, which is to leave the run
   queue so a starved peer can run.
+
+## The flag, measured
+
+`GoschedEscalationClockCandidatesProbe` on this seat at 168f78242 ran as os-matrix run 42447510950, 500 waits each,
+in ms, with CPU per wait:
+
+| arm | osx-arm64: mean / p50 / p90 / p99, CPU | osx-x64: same |
+|:--|:--|:--|
+| `Thread.Sleep(1)` | 8.24 / 9.02 / 9.05 / 10.02, 36 us | 2.84 / 2.04 / 6.81 / 8.58, 60 us |
+| kqueue timer, **no** `NOTE_CRITICAL` | 6.30 / 7.31 / 9.06 / 9.25, 21 us | 2.59 / 1.93 / 6.19 / 7.65, 56 us |
+| kqueue timer, `NOTE_CRITICAL` | 1.04 / 1.03 / 1.06 / 1.18, 15 us | 1.14 / 1.13 / 1.17 / 1.25, 53 us |
+| `GoCriticalTimer.TrySleep` (shipping) | 1.05 / 1.04 / 1.06 / 1.58, 23 us | 1.36 / 1.16 / 1.69 / 4.27, 117 us |
+
+- Without the flag, the kqueue timer coalesces as `Thread.Sleep(1)` does: p90 9.06 ms on arm64, 6.19 ms on x64.
+  `NOTE_CRITICAL` is therefore kept on a measurement, not only on its documented meaning.
+- `GoCriticalTimer.TrySleep` answered false 0 times in 501 calls on each runner, so no wait fell back to Sleep(1).
+- Its x64 tail and CPU (p99 4.27 ms, 117 us) sit above the bare critical arm's in the same process. The shipping
+  timer adds the per-wait `kqueue` and `close`, and this one reading does not separate that cost from the runner's
+  noise.
 
 ## Choice
 
@@ -84,6 +102,24 @@ form golib already uses on darwin (`GoTimer`'s `nanosleep`, `ThreadCpuTime`, the
 
 Unchanged. `Thread.Sleep(1)` measured 1.09 ms p50 and 1.18 ms p99 on a local linux x64 host (a stand-in loop, not
 golib). That is already the ratified 1 ms, and the latency arm stays Inconclusive there.
+
+## At the fix
+
+At 168f78242:
+- `GoschedBackoffEscalationLatencyTests` PASSES on both mac runners (run 42447510950). One escalation, timed:
+  - osx-arm64: n=368, mean 1.115, p50 1.042, p90 1.527, p99 1.607 ms;
+  - osx-x64: n=380, mean 1.167, p50 1.158, p90 1.218, p99 1.402 ms.
+- At the red-first commit 77c1b1395 (Sleep(1) still), the same arm read RED on both runners (run 42446158491):
+  - osx-arm64: mean 5.645 ms, over the 5 ms bound; its p90 of 7.52 ms is over the 3 ms bound too;
+  - osx-x64: p90 7.258 ms, over the 3 ms bound.
+- runtime/pprof's `TestGoroutineSwitch` completes on osx-arm64. stack-probe ran as run 42447513135 on
+  claude/c1-clock-stackprobe, the stack-probe stage merged with this seat:
+  - the row reads CVAC at count 1 (the one filtered verdict passed), in 426 s of row wall time including conversion
+    and build;
+  - the 120 s dump shows the test thread in `GoCriticalTimer.TrySleep` under `GoschedBackoff.Yield`;
+  - the host exited before the 870 s dump.
+
+  Before the fix, it was abandoned at the 900 s deadline. osx-x64 also passes (CVAC count 1, 934 s of row wall time).
 
 ## Not rooted, and not chased here
 
