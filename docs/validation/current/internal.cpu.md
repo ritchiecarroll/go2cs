@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/cpu` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-11-08 · converter `f5d713799`*
+*Validated 2026-11-08 · converter `485051f31`*
 
 **9 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/cpu`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/cpu).
@@ -36,10 +36,10 @@ A test whose file one of those architectures does not build is therefore withdra
 sides on that GOOS, on every RID, and is not claimed by that GOOS's count. It still runs, and is
 compared, on every GOOS that builds it:
 
-- darwin: `TestDataCacheSizes` — datacache_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestDisableSSE3` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestSSE3DebugOption` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestX86ifAVX2hasAVX` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestX86ifAVX512BWhasAVX512F` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestX86ifAVX512FhasAVX2` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
-- darwin: `TestX86ifAVX512VLhasAVX512F` — cpu_x86_test.go is not built for darwin/arm64 (//go:build 386 || amd64); one darwin build serves both RIDs
+- darwin: `TestDataCacheSizes` — datacache_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestDisableSSE3` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestSSE3DebugOption` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestX86ifAVX2hasAVX` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestX86ifAVX512BWhasAVX512F` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestX86ifAVX512FhasAVX2` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs
+- darwin: `TestX86ifAVX512VLhasAVX512F` — cpu_x86_test.go is not built for darwin/arm64 (`//go:build 386 || amd64`); one darwin build serves both RIDs

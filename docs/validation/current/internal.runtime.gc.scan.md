@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/runtime/gc/scan` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-11-08 · converter `f5d713799`*
+*Validated 2026-11-08 · converter `485051f31`*
 
 **19 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/runtime/gc/scan`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/runtime/gc/scan).
@@ -46,9 +46,9 @@ A test whose file one of those architectures does not build is therefore withdra
 sides on that GOOS, on every RID, and is not claimed by that GOOS's count. It still runs, and is
 compared, on every GOOS that builds it:
 
-- darwin: `TestExpandAVX512` — expand_amd64_test.go is not built for darwin/arm64 (//go:build amd64); one darwin build serves both RIDs
-- darwin: `TestFilterNilAVX512` — filter_amd64_test.go is not built for darwin/arm64 (//go:build amd64); one darwin build serves both RIDs
-- darwin: `TestScanSpanPackedAVX512` — scan_amd64_test.go is not built for darwin/arm64 (//go:build amd64); one darwin build serves both RIDs
+- darwin: `TestExpandAVX512` — expand_amd64_test.go is not built for darwin/arm64 (`//go:build amd64`); one darwin build serves both RIDs
+- darwin: `TestFilterNilAVX512` — filter_amd64_test.go is not built for darwin/arm64 (`//go:build amd64`); one darwin build serves both RIDs
+- darwin: `TestScanSpanPackedAVX512` — scan_amd64_test.go is not built for darwin/arm64 (`//go:build amd64`); one darwin build serves both RIDs
 
 ## Excluded declarations
 

@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/sha1` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-11-08 · converter `f5d713799`*
+*Validated 2026-11-08 · converter `485051f31`*
 
 **13 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/sha1`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/sha1).
@@ -54,7 +54,7 @@ A test whose file one of those architectures does not build is therefore withdra
 sides on that GOOS, on every RID, and is not claimed by that GOOS's count. It still runs, and is
 compared, on every GOOS that builds it:
 
-- darwin: `TestOutOfBoundsRead` — issue15617_test.go is not built for darwin/arm64 (//go:build amd64 && (linux || darwin)); one darwin build serves both RIDs
+- darwin: `TestOutOfBoundsRead` — issue15617_test.go is not built for darwin/arm64 (`//go:build amd64 && (linux || darwin)`); one darwin build serves both RIDs
 
 ## Excluded declarations
 
