@@ -155,6 +155,14 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 					}
 				}
 			}
+
+			// unsafe.Pointer's code-body spelling, `@unsafe.Pointer`, resolves only through each
+			// file's `using @unsafe = unsafe_package;`, so rooted it reads `go.@unsafe.Pointer`, a
+			// namespace that does not exist: CS0234, cascading into go2cs-gen output (zeebo/xxh3's
+			// `type ptr = unsafe.Pointer`). Name the package class instead, in every position the
+			// target nests it (`[]unsafe.Pointer`, a map value, a func parameter): the same spelling
+			// the defined-type arm below writes into its GoType string.
+			typeName = strings.ReplaceAll(typeName, rootPrefix+"@unsafe.", rootPrefix+"unsafe_package.")
 		}
 
 		// A function-local type declaration is scoped to its function; the `global using` this

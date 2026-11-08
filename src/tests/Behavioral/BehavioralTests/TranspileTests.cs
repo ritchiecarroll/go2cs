@@ -2608,6 +2608,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
 
     [TestMethod]
+    public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
+
+    [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");
 
     [TestMethod]
