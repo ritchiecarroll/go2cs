@@ -146,6 +146,11 @@ param(
     # read Rosetta's behaviour as the package's (COORD's osx-arm64 oracle seat, ruling (A)). Empty, the default, adds
     # nothing to any row's arguments.
     [string] $TestOracleGoarch = '',
+    # DIAGNOSTIC ONLY: a regex handed to the converter's -test-filter, which filters BOTH sides of the compare (go test
+    # -run and the converted host --run). The os-matrix stack-probe stage runs one test of one row this way, so a hang
+    # can be dumped (COORD's ruling, 2026-11-08). A filtered row's counts are not its banked counts, so such a sweep
+    # reads COUNT or FAIL by design and never banks anything. Empty, the default, changes nothing.
+    [string] $TestFilter = '',
     # Split the (already Filter/Exact/Applicable-filtered) row set into -ShardCount contiguous,
     # roster-order pieces and run only the -ShardIndex'th (1-based) -- owner ruling 2026-09-02, this
     # host's own known thermal limit: a ~2-hour continuous full-roster run is exactly the load that
@@ -1488,6 +1493,11 @@ foreach ($row in $rows) {
     if ($TestOracleGoarch) {
         $execArgs += @('-test-oracle-goarch', $TestOracleGoarch)
         $execSuffix += " [oracle-goarch=$TestOracleGoarch]"
+    }
+
+    if ($TestFilter) {
+        $execArgs += @('-test-filter', $TestFilter)
+        $execSuffix += " [test-filter=$TestFilter, diagnostic]"
     }
 
     # The per-test deadline, in the converter arguments of every row so a re-run repeats it exactly.
