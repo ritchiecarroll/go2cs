@@ -84,6 +84,18 @@ listings got: no data-dependent branch on a limb value.
     osx-x64 validates at its segment, 211. At 1.26.10.2 both RIDs read 211 / 211.
   - BANK, for both rows: neither banks darwin at 1.26.10.3; each loses its 1.26.10.2 segment, with a note naming this
     class.
+- **(c) the converted runtime's goroutine-per-OS-thread model meets darwin's thread cap** (C1-8, run 42485762191).
+  `internal/synctest`'s `TestWaitGroupManyBubbles` holds up to 100 x 100 goroutines alive at once. Each is an OS thread
+  here, and on both mac RIDs thread creation fails: x64's record names "unhandled OutOfMemoryException ... at
+  System.Threading.Thread.StartCore() at go.golib.GoroutineThreadPool.Worker.Start". The binary dies, and
+  `TestHappensBefore` and `TestWeak` lose their verdicts. Records: "matched 56 of 59 Go / 59 C#" (arm64) and "/ 58
+  C#" (x64). Linux validates 59. The cap's value on the runner was not read. The row stays darwin-unbanked at
+  1.26.10.3.
+- **`internal/trace`, unbanked as ruled** (route 1, scored by the divergence line).
+  - osx-arm64: `TestTraceCPUProfile/Default` and `/AsyncPreemptOff` both read Go=skip C#=pass.
+  - osx-x64: `/AsyncPreemptOff` reads Go=skip C#=pass, and `/Default` reads Go=pass C#=skip, the reverse of D-W1's
+    shape.
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
-  MISS on `go/internal/gcimporter` and `debug/buildinfo` (above). The predicted total moves from 233 to 231, one BELOW
-  the plan's 232 to 234.
+  MISS on `go/internal/gcimporter` and `debug/buildinfo` (above). Predicted `internal/synctest` validated 59 on both
+  RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
+  The predicted total moves from 233 to 230, two BELOW the plan's 232 to 234.
