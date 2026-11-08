@@ -47,6 +47,27 @@ On macOS, the escalation waits on a one-shot kqueue `EVFILT_TIMER` (`NOTE_USECON
 to classify or leak. Any failure answers false, and the caller falls back to `Thread.Sleep(1)`. An interrupted wait
 (`EINTR`) counts as having slept, because a backoff that wakes early is still a backoff.
 
+## Native AOT and single-file
+
+`GoCriticalTimer` declares its three calls (`kqueue`, `kevent`, `close`) with `[LibraryImport("libc")]`, the same
+form golib already uses on darwin (`GoTimer`'s `nanosleep`, `ThreadCpuTime`, the startup `fstat`).
+- The stubs are source-generated over blittable arguments (`int`, a 32-byte sequential struct passed `in`/`out`,
+  `nint`). Nothing needs runtime marshalling, so the declarations are trim- and AOT-safe.
+- Neither golib nor any consumer sets `DirectPInvoke` or a `DllImportResolver`, and nothing calls
+  `NativeLibrary.Load`. The runtime resolves the module at the first call, by name: under the JIT, under single-file
+  (a system library is never bundled, so resolution is the framework-dependent run's), and under Native AOT, whose
+  P/Invokes bind lazily unless `DirectPInvoke` names the library.
+- On macOS, `libc` resolves to libSystem in the dyld shared cache, which exports all three symbols. The measured runs
+  resolved it this way under the JIT.
+- If resolution fails in any deployment, the `DllNotFoundException` or `EntryPointNotFoundException` is caught once.
+  The class then answers false for the life of the process, and the escalation keeps `Thread.Sleep(1)`, which is
+  this seat's base behaviour. A failure costs latency, never correctness.
+- NOT exercised under Native AOT by this seat. aot-smoke packs on Windows and publishes on four RIDs (osx-x64 has
+  taken up to 293 min), and its consumer (`PackageSymbols`) never escalates a Gosched. golib's startup `fstat` does
+  reach a `libc` import under AOT, but inside a try/catch that swallows failure, so a passing osx-arm64 aot-smoke is
+  not evidence that the name resolved. The cheap route is a Gosched loop in `PackageSymbols` that prints its cost,
+  riding the next aot-smoke the release procedure runs.
+
 ## Cost model
 
 - **Latency saved**, per escalation:
