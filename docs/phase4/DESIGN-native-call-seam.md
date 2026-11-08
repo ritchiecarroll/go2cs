@@ -11,6 +11,9 @@
 > **AMENDED 2026-11-08 (§12): G's M:N read is folded in (the contract HOLDS; M2 and M7 amended, a §4.1 rule added),
 > and COORD ruled Q2 (Go's shape, with a once-per-transition assertion) and Q4 (`GoNativeCall`). Increments S-a..S-d
 > are released, red-first, landing after `.3`.**
+>
+> **AMENDED 2026-11-08 (§13): S-a's cost reading is scored, and §5.2's absolute bounds are withdrawn in favour of the
+> ratio to A0 (the lesson). §13.2 is the S-b2 brief for the linux and darwin rows.**
 
 ## 1. What this is, and why now
 
@@ -373,3 +376,87 @@ how many native calls can block **concurrently**. G's M:N design states it.
   odd and fails by name. The counter lives on the goroutine (§12.1's §4.1 addition), and a thread with no goroutine
   identity stays inert.
 - **S-b carries F-2 by construction**, because the Q2 ruling is F-2's fix: `callNative` → runtime family → `GoNativeCall`.
+
+## 13. Amendment 2026-11-08 — S-a's cost reading, the lesson it taught, and the S-b2 brief
+
+*A dated block, not a rewrite.*
+
+### 13.1 §5.2's prediction, scored (S-a, `claude/h-native-seam-sa` `af1dd6c059`)
+
+The first reading was taken on H (windows x64), Release, with the opt-in `GoNativeCallCostProbe`: five processes ×
+1,000,000 calls × 5 rounds, reported as the floor over processes in ns per call. The windows anchor is
+`GetProcessTimes`, not the `SwitchToThread` §5.2 named, because a yield can switch threads and so adds
+load-dependent noise to the base arm. The deviation was stated and accepted.
+
+| Configuration | A0 | A1 | A2 | A3 | C+ | SPIN |
+|---|---|---|---|---|---|---|
+| default tiering | 465.57 | 471.51 | 472.32 | 475.99 | 519.76 | 38.23 |
+| `TieredCompilation=0` | 468.85 | 466.89 | 471.03 | 479.26 | 510.38 | 37.71 |
+
+- **The relative bound held:** every seam arm is within +2.2% of A0, on both configurations.
+- **The absolute bounds missed:** A1 − A0 = +5.94 ns at default against "under 3 ns"; A2 − A0 = +6.75 against
+  "under 5"; A3 − A1 = +4.48 / +12.37 against "under 3".
+- **The positive control read:** C+ − A1 = 48.25 / 43.49 against SPIN 38.23 / 37.71.
+
+**The lesson (COORD's ruling).** A0's own per-process spread on that host was 10.71 / 5.80 ns, the same size as every
+delta. A bound in absolute nanoseconds below the instrument's resolution can be neither met nor missed meaningfully.
+**Bound a transition's cost by its ratio to a real kernel transition on the binding host, and state A0's spread
+beside the figure.** §5.2's absolute clauses are withdrawn. Its "under 5% of A0" clause is the criterion of record.
+
+S-b folds the seam's two current-goroutine reads per operation into one (`Goroutine.EnterBlockedOn` /
+`ExitBlockedOn`) and re-runs the probe at `8565d61e5a`, same protocol:
+
+| Configuration | A0 | A1 | A2 | A3 | C+ | SPIN | A0's spread |
+|---|---|---|---|---|---|---|---|
+| default tiering | 459.71 | 469.93 | 471.60 | 479.10 | 509.87 | 38.25 | 37.24 |
+| `TieredCompilation=0` | 468.62 | 467.96 | 470.77 | 478.45 | 513.40 | 38.24 | 22.10 |
+
+The prediction written before the run was "A1 − A0 at default not above S-a's +5.94 ns". It **MISSED as
+worded** (+10.22). This run's A0 floor came in 5.9 ns lower than S-a's, and A0's own spread was 37 ns, so the
+delta moved with the base, not with the seam. A1's absolute floor fell 1.6 ns (471.51 → 469.93). The fold's
+effect is **below this instrument's resolution on H**, as §13.1's lesson predicts for any absolute bound. The
+criterion of record held: every seam arm is within **4.2% of A0** (A3 at default), and the positive control read
+(C+ − A1 = 39.94 / 45.44 against SPIN 38.25 / 38.24). One goroutine lookup per transition stays, because it is the
+obvious shape, not because a number showed it.
+
+### 13.2 S-b2: the brief, for a linux or darwin lane picking it up cold
+
+**Routing (COORD).** Linux goes to G-WSL, beside F-1. Darwin goes through C1's darwin CI. Both run after `.3`. H
+cannot build or run these flavours.
+
+**What S-b did on windows** (`claude/h-native-seam-sb`), which is the pattern to copy:
+
+- The runtime's hand-owned entersyscall family (`runtime/syscall_managed_impl.cs`) moves the `g` status, then calls
+  `GoNativeCall.Enter(hint)`. Its exit refuses a non-`_Gsyscall` status first, then calls `GoNativeCall.Exit()`,
+  then moves the status back.
+- The runtime has public `syscallEntersyscall()` / `syscallEntersyscallblock()` / `syscallExitsyscall()`
+  forwarders for the `syscall` package.
+- Every hand-owned site whose Go original reaches `cgocall` or `entersyscall` is bracketed with them, with the last
+  error read **inside** the window:
+
+  ```text
+  runtime_package.syscallEntersyscall();
+  try { result = <native call>; lastError = Marshal.GetLastSystemError(); }
+  finally { runtime_package.syscallExitsyscall(); }
+  ```
+
+**The S-b2 sites:**
+
+| Flavour | Site | Go original's bracket | Note |
+|---|---|---|---|
+| darwin | `syscall/darwin/exec_libc2_impl.cs`, the `posix_spawn*` and `execve` path | `forkExec` → the runtime's `syscall_rawSyscall` family for the child; the parent's `posix_spawn` is a go2cs seam, not a Go call | **decide per call** whether Go's shape is Raw (no bracket) or `syscall_syscall` (bracketed); read `GOROOT/src/syscall/exec_libc2.go` first |
+| linux | `syscall/linux/cgocaller_linux_impl.cs`, the nine credential `[LibraryImport]`s behind `[UnmanagedCallersOnly]` shims | Go's `cgocaller` → `runtime.cgocall` → `entersyscall` | the shims run managed code between the function-pointer call and the import: bracket the IMPORT, inside the shim, and read errno there |
+| linux | F-1: `syscall/linux/syscall_linux_impl.cs:72-78`, the empty `runtime_entersyscall` / `runtime_exitsyscall` bodies | Go linknames them to `runtime.entersyscall` / `exitsyscall` | forward them to the runtime forwarders; this one fix brackets every linux `syscall.Syscall` |
+
+**The red for each.** Where a site can call a function pointer (darwin's `libcCall` family, the cgocaller shims),
+use S-b's shape: point the call at an `[UnmanagedCallersOnly]` probe that reads
+`runtime_package.GoCurrentGStatus()` and `GoNativeCall.TransitionDepth` from INSIDE the native window, and expect
+`_Gsyscall` and 1. F-1 cannot: the linux keystone takes a syscall NUMBER, not an address, and a blocked goroutine's
+status cannot be read from another thread through any seam that exists today. G-WSL designs that red. The
+candidates are a goroutine dump's header for a goroutine blocked in `read(2)` on a pipe (if the converted traceback
+reads the status) and a new test seam reading a goroutine's status by id.
+
+**Watch for double entry.** `GoNativeCall` refuses a second `Enter` by name. If a linux or darwin path already
+reaches the runtime family through converted Go code (darwin's `libcCall` callers do, through `entersyscall()` in
+the converted runtime), bracketing its bottom again **fails loudly**. That loud failure is the intended assertion,
+not a test bug. Census each funnel's callers first.
