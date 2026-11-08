@@ -152,7 +152,11 @@ re-dispatch stem rule lets a re-read named `SIG-1R` supersede `SIG-1`.
     undisclosed divergences 1".
   - The sweep did not re-run it as an oracle flake, because a "fatal error: " text appears outside any named test's
     verdict.
-  - One DECLARED re-read follows, as SIG-1R, before this is called (h).
+  - One DECLARED re-read followed, as SIG-1R (run 42504958622, same tip), with the rule fixed before it read: validate on
+    both RIDs and `runtime` banks from SIG-1R, or the oracle fails again and it is (h) with `runtime` unbanked. It
+    VALIDATES on both RIDs at 11062 + 58 ("matched 11062 of 11120 Go / 11120 C# verdicts; disclosed 64; undisclosed
+    divergences 0"), the Go side passing `TestPingPongHog`. So `runtime` banks from SIG-1R, and its stem supersedes
+    SIG-1's in the wave.
 - SIG-2 (run 42497834152), as at 72043c1a66 on both RIDs:
   - database/sql, internal/fuzz, net/http, os, os/exec, os/signal and go/internal/gccgoimporter at their segments;
   - runtime/pprof validated at 146;
