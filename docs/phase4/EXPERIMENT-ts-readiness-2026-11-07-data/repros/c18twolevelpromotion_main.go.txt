@@ -1,0 +1,24 @@
+package main
+
+import "io"
+
+type file struct{ n int }
+
+func (f *file) Close() error { f.n++; return nil }
+
+type pipe struct {
+	*file
+	path string
+}
+
+type msgPipe struct { // TS dep: go-winio win32MessageBytePipe { win32Pipe { *win32File } }
+	pipe
+	closed bool
+}
+
+func main() {
+	f := &file{}
+	var c io.Closer = &msgPipe{pipe: pipe{file: f}}
+	c.Close()
+	println(f.n)
+}

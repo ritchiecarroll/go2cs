@@ -66,7 +66,7 @@ All Go steps ran pinned to logical CPUs 6-11 (mask 0xFC0), sharing the box with 
 
 | Count | Warning | Catalogue |
 |---|---|---|
-| 51 | move2heap not emitted: appends at more than one site without observing capacity | informational (see C-notes) |
+| 51 | move2heap not emitted: appends at more than one site without observing capacity | informational; run-time effect unmeasured |
 | 13 | move2heap not emitted: targets or an inlined copy disagree on its appends | informational |
 | 7 + 1 | Unresolved dynamic struct type (`interface{KindString() string}` ×7, anonymous struct ×1) | C1, C2 |
 | 2 | embedded-interface promoted method `watchCompilerHost.Trace` / `cachedCompilerHost.Trace` is variadic: pointer-form forwarder not emitted | C3 (stage 3 decides) |
@@ -78,6 +78,8 @@ All Go steps ran pinned to logical CPUs 6-11 (mask 0xFC0), sharing the box with 
 | 1b. stdlib rebuild at the stage-2 tip | a0fba9b08a | 0 | 1,116 s | 363/363 |
 | 3A. `dotnet build _all.slnx` over the 138 converted csproj, emitted tree as-is | a0fba9b08a | 1 | 175 s | **36 built / 7 failed / 95 blocked** downstream. 36 unique errors, all first causes (C5-C11). The 8 raw-Go sites (C1, C2) are never compiled: their packages are all downstream of a failure. |
 | 3B. same, C1 + C2 hand-patched (`passB-handpatch.diff`, 30 lines / 14 files, CRLF kept) | a0fba9b08a | 1 | 179 s | identical to 3A (same 36 errors, same 7 projects), as expected: the C1/C2 packages sit downstream of C5-C11. |
+
+| 3C. same, plus C5-C11 hand-patched (`passC-handpatch-C5-C11.diff`, 420 lines / 51 files; 380+ of them the C7 rename `jsontext.Value`→`ΔValue`) | a0fba9b08a | 1 | 699 s | **46 built / 7 failed** (116 unique errors). First causes: C8 again (x/text/language, 14), C11 again (go-winio hvsock, 4), and the new C12, C13, C14, C15, C16, C17. The compile frontier moved from 36 to 46 projects. tsc's own root (tspath → core → ast → ...) is still blocked: jsontext (C12/C16) and vfs/internal (C14) sit under it. |
 
 **Prediction scored as worded.**
 - go-json-experiment/json: RIGHT package, WRONG reason. It is a name clash (C7), not reflect or generics.
@@ -92,7 +94,7 @@ Box-sharing datum: CPU affinity (0xFC0 vs COORD's 0-5) protects CPU but **not di
 
 ## Defect catalogue
 
-One row per ROOT CAUSE. Repro modules are saved file by file as `EXPERIMENT-ts-readiness-2026-11-07-data/repros/<module>_<path>.txt`; the `.txt` suffix keeps repo tooling off them. Each one is also quoted below.
+One row per ROOT CAUSE. Repro modules are saved file by file as `EXPERIMENT-ts-readiness-2026-11-07-data/repros/<module>_<path>.txt`; the `.txt` suffix keeps repo tooling off them. Each one is also quoted below. Four repro modules carry the numeral they had before the catalogue was renumbered: `c15recvshadowsimport` is C14, `c16typeswitchbinding` is C15, `c17namedbytesconstraint` is C16, `c18twolevelpromotion` is C17.
 
 ### C1: anonymous interface parameter type, satisfied across a package boundary (converter, S-M)
 
@@ -181,10 +183,104 @@ C1 **reach:** modules with the shape (an anonymous-interface parameter satisfied
 - **Repro status:** a 2-package repro with a small local struct compiles AND runs correctly (`c11namedforeignstruct`), so the real ingredient is x/sys/windows.GUID's shape or its converted form. Not yet isolated.
 - **TS site:** `github.com/Microsoft/go-winio/internal/socket/socket.go:113` (1 error); 42 packages downstream.
 
+### Pass-C layer (behind C5-C11)
+
+**C8 and C11 again.**
+- x/text/language: 14× CS1929. `Tag.tag()` / `Tag.lang()` are boxed-receiver pointer methods called on value receivers: the C8 mechanism at more sites.
+- go-winio `hvsock.go`: 4× CS1739, more keyed literals of `guid.GUID`: the C11 mechanism.
+
+#### C12: the generated named-STRING wrapper is incomplete as a string (go2cs-gen TypeGenerator, M) — reach: ANY -recurse user with a named string type
+
+- **Same family as C6, same site** (the named-string wrapper). The wrapper converts only from `@string`, `ReadOnlySpan<byte>` and nil. That leaves three gaps:
+  - (a) no operator interfaces, so `cmp.Ordered` fails (C6);
+  - (b) no conversion from `slice<byte>`, so Go `Pointer(b)` gives CS0030;
+  - (c) no `GetEnumerator`, so `for i, r := range p` gives CS1579.
+- **TS site:** `go-json-experiment/json/jsontext` `type Pointer string` (errors.go, state.go, decode.go; 8 errors).
+- **Repro** (`c12namedstringbytesrange`): `type Pointer string; p := Pointer([]byte("/a/b")); for i, r := range p {...}`. Go prints `/a/b 2`; build gives CS0030 + CS1579.
+- **Planning:** fix C6 and C12 together, as one wrapper completeness change, with a behavioral project covering every string operation over a named string.
+
+#### C13: a package-level alias to `unsafe.Pointer` emits a namespace path (converter, S) — reach: modules with the shape (common in hashing/serialization code)
+
+- **Mechanism:** `type ptr = unsafe.Pointer` emits `global using ptr = go.@unsafe.Pointer;`. That namespace does not exist (`unsafe` is `go.unsafe_package`), so CS0234. The resulting broken alias then cascades through xxh3: 64 errors, including go2cs-gen output (CS0715 "static classes cannot contain user-defined operators", CS0426 `Pointer` not found).
+- **TS site:** `github.com/zeebo/xxh3/utils.go` (xxh3 is the asm-bearing dependency; its asm was NOT the blocker).
+- **Repro** (`c13aliasunsafeptr`): `type ptr = unsafe.Pointer`. Go prints `42`; build gives CS0234.
+
+#### C14: a receiver named like an import is renamed at its uses but not at its declaration (converter, S) — reach: modules with the shape
+
+- **Mechanism:** `func (vfs *Common) Stat(path string) vfs.FileInfo { ... vfs.RootAndPath(path) ... }`. The body's receiver uses are emitted as `vfsΔ1.RootAndPath(...)`, but the receiver parameter is declared `this ref Common vfs`, so CS0103.
+- **TS site:** `internal/vfs/internal/internal.go` (6) and `internal/bundled/embed.go` (2). vfs/internal is under tsc's whole VFS layer.
+- **Repro** (`c15recvshadowsimport`). Go prints `/r/x`; build gives CS0103 `vfsΔ1`.
+
+#### C15: a type-switch binding collides with a sibling case's `out var` (converter, S; small form does not reproduce) — reach: modules with the shape
+
+- **Mechanism:** `switch expectedType := expected.(type) { case func(error) bool: ...; case reflect.Type: ... }` emits the second case as `case {} ΔexpectedType when ΔexpectedType._<reflectꓸType>(out var expectedType)`, which collides with the first case's pattern variable `expectedType` (CS0136).
+- **Repro status:** the small form (`c16typeswitchbinding`) compiles AND runs correctly (`func:true type:int nil other`), so the real site's extra ingredient (closure context: the switch sits inside a returned `func() Result`) is not yet isolated.
+- **TS site:** `gotest.tools/v3/assert/cmp/compare.go:312` (2 errors); test-side only.
+
+#### C16: a named `[]byte` does not satisfy a `~[]byte | ~string` constraint (go2cs-gen / golib IByteSeq, S-M) — reach: modules with the shape (json/encoding libraries)
+
+- **Mechanism:** batch 241 maps a string-or-bytes constraint to `IByteSeq`, but the generated named-slice wrapper (`type Value []byte`) does not implement `IByteSeq`, so CS0315 at `jsonwire.NewInvalidCharacterError[Bytes ~[]byte | ~string]`. The same family covers the go2cs-gen `Clone` receiver (CS0266 `object`→`ΔValue`) and `(ΔValue)src` from a type parameter (CS0030).
+- **TS site:** `go-json-experiment/json/jsontext` (encode.go ×4, value.go, the generated Clone).
+- **Repro** (`c17namedbytesconstraint`): `type Val []byte; prefix[Bytes ~[]byte | ~string](b Bytes, n int)` called with `v[1:]`. Go prints `bc x`; build gives CS0315.
+
+#### C17: a two-level promotion through an embedded pointer, used for an interface implementation (go2cs-gen ImplementGenerator, M; small form does not reproduce) — reach: modules with the shape
+
+- **Mechanism:** `type win32MessageBytePipe struct { win32Pipe; ... }` with `type win32Pipe struct { *win32File; path string }`. The generated `net.Conn` implementation for `*win32MessageBytePipe` calls `Close`/`SetReadDeadline`/`SetWriteDeadline` on `ж<win32MessageBytePipe>`, but the promoted extension it expects (from `*win32File`, two levels down) does not exist (CS1929, 5 errors).
+- **Repro status:** the small form (`c18twolevelpromotion`, satisfying `io.Closer`) compiles AND runs correctly (`1`). The real ingredients are probably the larger interface (`net.Conn`) and the outer type overriding some of the methods (`CloseWrite`, `Read`, `Write`).
+- **TS site:** `github.com/Microsoft/go-winio/pipe.go`.
+
 ### Stage-2 warnings, status after stage 3
 
 C3 (variadic promoted `Trace` forwarders), C4 (non-erased union pointer constraint in checker `relater.go`), the 4 `unsafe.Sizeof` consts and the 64 move2heap notes: NOT YET CONFIRMED OR CLEARED, except one point: x/sys/windows BUILT, so its two `unsafe.Sizeof` consts at least compile (their run-time values are unmeasured). Everything else (execute, checker, go-winio hvsock) is downstream of the first walls.
 
+## Catalogue summary
+
+| Id | Mechanism | Class | Size | Reach | Repro | First seen | TS packages downstream |
+|---|---|---|---|---|---|---|---|
+| C1 | anonymous-interface parameter satisfied across packages | converter | S-M | shape | yes | stage 2 | (ast, scanner …; behind C6/C7) |
+| C2 | anonymous struct as a type argument in a `var` | converter | S-M | shape | yes | stage 2 | ls |
+| C3 | variadic promoted `Trace` forwarder not emitted | go2cs-gen | ? | shape | — | stage 2 warning | not yet compiled |
+| C4 | non-erased union pointer constraint (checker `relater.go`) | converter | ? | shape | — | stage 2 warning | not yet compiled |
+| **C5** | **third-party import of a std-vendored path → std vendor namespace** | converter | S-M | **ANY -recurse user** | yes | 3A | 17 |
+| **C6 + C12** | **named-string wrapper incomplete: Ordered ops, `[]byte` conversion, range** | go2cs-gen | M | **ANY -recurse user** | yes | 3A / 3C | 78 (tspath), + jsontext |
+| **C7** | **Go type named `Value` vs the generated `Value` property** | go2cs-gen | S | **ANY -recurse user** | yes | 3A | 79 |
+| C8 | value receiver → boxed-receiver pointer method | converter | M | shape | yes | 3A, 3C | 64 |
+| C9 | `:=`-bound variadic closure as a func argument | converter | S | shape | yes | 3A | 13 (test side) |
+| C10 | named pointer type passed as its underlying pointer | converter | S | shape | yes | 3A | 60 |
+| C11 | keyed literal of a named struct over a foreign struct | converter / gen | S-M | shape | not yet | 3A, 3C | 42 |
+| C13 | alias to `unsafe.Pointer` emits a namespace path | converter | S | shape | yes | 3C | (xxh3 → 60) |
+| C14 | receiver named like an import: uses renamed, declaration not | converter | S | shape | yes | 3C | vfs layer |
+| C15 | type-switch binding vs sibling `out var` | converter | S | shape | not yet | 3C | test side |
+| C16 | named `[]byte` vs `~[]byte \| ~string` (IByteSeq) | gen / golib | S-M | shape | yes | 3C | jsontext |
+| C17 | two-level promotion through an embedded pointer, for an interface | go2cs-gen | M | shape | not yet | 3C | go-winio |
+
+- **No wrong-answer class was found.** Every defect is a compile-time failure, and every repro that compiled also ran with Go's output: C8 small form, C11 small form, C15 small form, C17 small form, plus the two same-package controls. Nothing seen so far touches .3's shipped bits: all 17 rows are emission shapes the stdlib corpus does not exercise, which is why the corpus is green.
+- **Not reached:** stage 4 (tests) and stage 5 (the bonus .ts run). No tsc-owned package above tspath compiled, so there is no test host to run. 46 of 138 projects compile with C1-C11 hand-patched.
+
 ## Closing planning read
 
-<!-- headline: tracking TypeScript past 2026-09-16 requires Go 1.27 generic methods plus encoding/json/v2 -->
+**Headline: tracking TypeScript past 2026-09-16 requires Go 1.27 generic methods plus `encoding/json/v2`.**
+- TS HEAD's own bump commit rewrote code to 31 generic-method declarations in 15 files; it cannot be pinned back to 1.26 without a source revert.
+- Every TS commit since 2026-09-16 (254 touch `tsc/`) is out of reach of a 1.26-line go2cs.
+
+**What gates the most.**
+- Three rows are general defects that any `-recurse` user meets, independent of TypeScript:
+  - C5: std-vendored import paths. x/text, x/net, x/crypto and x/sys/cpu are among the most-imported modules in the ecosystem.
+  - C6 + C12: the named-string wrapper.
+  - C7: a type named `Value`.
+- Their downstream reach is 17, 78 and 79 of the 140 closure packages. Together with C8-C11, the seven pass-A first causes block 95. All three general rows are cheap: S to M each, each at a single converter or go2cs-gen site.
+- After them, the frontier is C8, C10 and C13 (shape rows, S-M), then the jsontext pair (C12/C16) and the vfs receiver (C14). Those sit directly under tsc's own root.
+
+**What a .4 needs, in order.**
+1. C5, C6+C12 and C7: the general rows, each a red-first behavioral project from the repros here.
+2. C8, C10, C13, C14 and C16: shape rows with ready repros.
+3. Isolate C11, C15 and C17 (the real site compiles where the small form does not), then fix them.
+4. Re-run this experiment at the same TS commit to read the NEXT layer. tsc's own packages (core, ast, checker) are not yet measured at all, and they hold most of the reflect/iter/generics weight. Expect at least one more layer of comparable size.
+
+**For or against 1.27 first.**
+- For TypeScript specifically, 1.27 is mandatory to follow upstream past 2026-09-16, but it does not unblock anything measured here. Every wall above is on the 1.26 commit and would persist on a 1.27 base.
+- Ordering argument: fix the general rows on the current line first (.4). They raise every `-recurse` user, and they are prerequisite to measuring tsc's own packages on ANY Go version.
+- Then take the 1.27 hop with generic methods. C# has generic methods natively, so the mapping is plausibly direct; the design is already listed in the Roadmap.
+- A 1.27-first plan would re-measure into the same C5/C6/C7 walls.
+
+**Box-sharing note for the fleet.** Pinning to 0xFC0 kept CPU apart but not disk or memory bandwidth. Heavy work on both halves slowed COORD's timing-sensitive step about 10×. Schedule heavy experiment work around timing gates, not beside them.

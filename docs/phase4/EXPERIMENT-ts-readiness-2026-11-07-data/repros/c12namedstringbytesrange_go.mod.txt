@@ -1,0 +1,3 @@
+module repro/c12namedstringbytesrange
+
+go 1.26
