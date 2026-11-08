@@ -1,0 +1,18 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# 1.26.10.3 POST-FIX LINUX RE-READ, the DEFAULT column -- THE BANK'S (COORD ruling 2026-11-08): the SIGINT seat's tree ea18c77337 (2e3c8dd78b; landed as batch 257, master 30ad20e17e, the same tree), lane G, G-WSL (Ubuntu 22.04 under WSL2 on G-LAPTOP), the same 10 census rows as GWSL-RR-ign
+# toolchain: go1.26.10 linux/amd64, GOROOT spelled as go env GOROOT prints it (the kit checks it), GOTOOLCHAIN=local; dotnet SDK 10.0.403, runtime 10.0.14 (10.0.12 also present)
+# host: AMD Ryzen 5 PRO 6650U, 10 logical cores visible, 15 GiB; TMPDIR /tmp; GOROOT test/ 3458 files; nslookup invalid.invalid -> NXDOMAIN; host C: 59 GB at launch
+# kit: linux-kit at the tip, sha256 rebank-linux.sh 99cdef2e8d0b, classify_row.py 81e543608d9c, derive-argv.ps1 0ea6f0b90f91 (P1-1's), UNCHANGED, the same scratch worktree; derived deadlines as the kit reads the tree's floors (runtime: -test-timeout 120m, -test-deadline 60m; net/http 60m/15m; the rest 30m/15m)
+# signals: the kit launched with SIGINT and SIGQUIT RESET to default (coreutils env --default-signal=INT,QUIT), the shape cmd/go gives Go's test binary. SigIgn read from /proc: the kit's own bash 0x4 (bash's own SIGQUIT ignore, which it resets for its children), the converter it starts for row 1 0x0, so every converted host starts at 0x0 (COORD's standing rule: the SigIgn line goes in every linux/darwin bank ledger)
+go/internal/gccgoimporter	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:48:30Z
+internal/fuzz	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:49:01Z
+os/signal	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:49:54Z
+os	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:52:02Z
+os/exec	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:54:46Z
+syscall	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:55:21Z
+database/sql	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T15:56:07Z
+runtime/pprof	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T16:02:39Z
+net/http	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T16:06:40Z
+runtime	2e3c8dd78b293c98aac66dbea365da960df28981	2e3c8dd78b293c98aac66dbea365da960df28981	1794152680	PASS	0	2026-11-08T16:51:40Z
+# All 10 PASS at their banked linux counts. os (3831 + 2) and syscall pass here where the IGNORE column read the oracle asymmetry (GWSL-RR-ign.ledger.tsv; Go-direct control in GWSL-RR-godirect-log.txt). runtime/pprof's 14 and runtime's 73 disclosed are the roster's 8 and 67 plus their host-fatal entries; syscall's 40 + 19 is its banked row by the kit's accounting (word PASS).
+# end 2026-11-08 16:51:42Z: 10 of 10 rows read; PASS 10; residue-after 0, tracked-deleted 0.

@@ -1,0 +1,10 @@
+2026-11-08T14:26:59Z built os.test with go version go1.26.10 linux/amd64
+2026-11-08T14:27:00Z (1) go test, SIGINT inherited ignored: rc=0 SigIgn:	0000000000000002 --- PASS: TestProcessWithHandleLinux (0.00s) ok  	os	0.004s 
+2026-11-08T14:27:57Z (2) os.test DIRECT, SIGINT inherited ignored: rc=1 SigIgn:	0000000000000002     pidfd_linux_test.go:197: Wait: want error, got nil --- FAIL: TestProcessWithHandleLinux (60.07s) FAIL 
+2026-11-08T14:27:57Z (3) os.test DIRECT, SIGINT default: rc=0 SigIgn:	0000000000000000 --- PASS: TestProcessWithHandleLinux (0.00s) PASS 
+2026-11-08T14:27:57Z END
+2026-11-08T14:57:06Z built syscall test binary with go version go1.26.10 linux/amd64; run regex: ^(TestPidFD|TestPidFDClone3)$
+2026-11-08T14:57:06Z (1) go test, SIGINT inherited ignored: rc=0 SigIgn:	0000000000000002     exec_linux_test.go:531: got pidfd: 11 --- PASS: TestPidFD (0.00s)     exec_linux_test.go:531: got pidfd: 11 --- PASS: TestPidFDClone3 (0.00s) PASS ok  	syscall	0.004s 
+2026-11-08T15:23:08Z (2') syscall test binary DIRECT, SIGINT inherited ignored, -test.timeout 120s: rc=1 SigIgn:	0000000000000002     exec_linux_test.go:531: got pidfd: 11     exec_linux_test.go:549: unexpected child error: exit status 2 --- FAIL: TestPidFD (108.08s)     exec_linux_test.go:531: got pidfd: 11     exec_linux_test.go:549: unexpected child error: exit status 2 --- FAIL: TestPidFDClone3 (10.73s) FAIL 
+2026-11-08T15:23:08Z (3) syscall test binary DIRECT, SIGINT default: rc=0 SigIgn:	0000000000000000     exec_linux_test.go:531: got pidfd: 11 --- PASS: TestPidFD (0.00s)     exec_linux_test.go:531: got pidfd: 11 --- PASS: TestPidFDClone3 (0.00s) PASS 
+2026-11-08T15:23:08Z END
