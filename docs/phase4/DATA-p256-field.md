@@ -246,3 +246,34 @@ the hosted runner (COORD's ruling, 2026-11-08).
 - No `csel` or `cset`: the final reduction's select is arithmetic.
 - win-x64 reads 13 conditional jumps: the same null tests, plus one `jne` for its prolog's frame-zeroing loop,
   which arm64 does not emit.
+
+**Corrected 2026-11-08 (C1), section 11 above.** The branch tally there searched only the dotted spelling `b.cond`, and
+the .NET JIT's arm64 listings spell a conditional branch without the dot (`bge`, `ble`, `bhs`). Each ReadyToRun body has
+ONE more conditional branch than section 11 says: a `bge` closing the prolog's frame-zeroing loop, which counts `x10`
+down from a constant 320 bytes by 64. It is the arm64 form of win-x64's `jne`, so section 11's sentence that arm64 does
+not emit that loop is wrong. The verdict stands: the loop's trip count is a compile-time constant, and no branch tests a
+limb value. Re-counted with both spellings, the ReadyToRun body's conditional branches are 12 `cbz` and 1 `bge`, and
+nothing else.
+
+## 12. osx-arm64 under the JIT (C1, 2026-11-08, appended)
+
+**Method.** The os-matrix `golib-tests` stage's `jit_disasm` input (batch 249) on the hosted osx-arm64 runner, run
+42438679073: GolibTests' `P256FieldDifferential` and `P384FieldDifferential` classes (8 tests, all passing) under
+`DOTNET_TieredCompilation=0` with `DOTNET_JitDisasm="p256Mul p384Mul"`. That is FullOpts code, the form the corpus's
+Release default runs. A tiered program's tier-1 body, which dynamic PGO can shape differently, was not read. The
+listing reads "ARM64 on Apple", and it was taken from the job log, which reads it from the host's `JitStdOutFile`.
+
+**The body** ([`listings/jit-osx-arm64-p256Mul.txt`](data/p256-field/listings/jit-osx-arm64-p256Mul.txt)):
+- 6,108 bytes of code, 60 `mul`/`umulh`, and 49 calls (the JIT keeps the golib array accessors' slow paths and the
+  static-base helper out of line).
+
+**Constant time, checked.** Every conditional branch, by what it tests:
+- 12 `tbz` after an `ldapr`: the class-initialization flag of a static base, read once per access site.
+- 12 `cbz` on `x0` just loaded from `[x19]`, `[x20]` or `[x21]`: the three byref arguments' wrapper
+  references, as in the ReadyToRun body.
+- 12 `ble` comparing an array's length with a constant index (0 to 3), and 12 `cbnz` on that array's
+  reference right after: the golib array accessor's length check and null test.
+- 12 `bhs` comparing a slice offset plus a constant with the array's length (`[ref, #8]`): the bounds check.
+- 1 `bge`: the prolog's frame-zeroing loop (a `subs x10, x10, #64` countdown), to a constant bound.
+- None tests a limb value. There is no `udiv` or `sdiv`, no `csel` or `cset`, and no register-indexed load of limb
+  data. The limb arithmetic is straight-line.
