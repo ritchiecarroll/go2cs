@@ -82,8 +82,14 @@ listings got: no data-dependent branch on a limb value.
     - 17 `TestReadFile/darwin_amd64/...` lines with Go absent or skip and C# pass;
     - 17 `TestReadFile/darwin_arm64/...` lines with Go pass and C# absent or skip.
     osx-x64 validates at its segment, 211. At 1.26.10.2 both RIDs read 211 / 211.
-  - BANK, for both rows: neither banks darwin at 1.26.10.3; each loses its 1.26.10.2 segment, with a note naming this
-    class.
+  - `net/http/pprof` (C1-10, run 42486625026), a GOARCH-GATED SKIP, the same root. `TestDeltaProfile` reads
+    `if strings.HasPrefix(runtime.GOARCH, "arm") { testenv.SkipFlaky(t, 50218) }` (pprof_test.go:158), so the arm64
+    oracle skips while the C# side (GOARCH amd64) runs it and passes. The osx-arm64 record: "matched 14 of 15 Go / 15
+    C# verdicts; undisclosed divergences 1", `TestDeltaProfile` Go="skip" C#="pass". osx-x64 validates at its
+    segment, 15. At 1.26.10.2 both RIDs read 15 / 15. Filed under (s) pending COORD's word on the widening from
+    "enumerating" to "gated".
+  - BANK, for every row in this class: none banks darwin at 1.26.10.3; each loses its 1.26.10.2 segment, with a note
+    naming this class.
 - **(c) the converted runtime's goroutine-per-OS-thread model meets darwin's thread cap** (C1-8, run 42485762191).
   `internal/synctest`'s `TestWaitGroupManyBubbles` holds up to 100 x 100 goroutines alive at once. Each is an OS thread
   here, and on both mac RIDs thread creation fails: x64's record names "unhandled OutOfMemoryException ... at
@@ -96,7 +102,7 @@ listings got: no data-dependent branch on a limb value.
   - osx-x64: `/AsyncPreemptOff` reads Go=skip C#=pass, and `/Default` reads Go=pass C#=skip, the reverse of D-W1's
     shape.
 - **The prediction, scored as it goes.** Predicted: the 229 segmented rows read PASS at their segment on both RIDs.
-  MISS on `go/internal/gcimporter` and `debug/buildinfo` (above). Predicted `internal/synctest` validated 59 on both
+  MISS on `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof` (above). Predicted `internal/synctest` validated 59 on both
   RIDs: MISS, it fails on both (above). `internal/trace`: unbanked as predicted, with the specifics missed (above).
-  Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. The predicted total moves from 233 to 230,
-  two BELOW the plan's 232 to 234.
+  Predicted `runtime` and `runtime/pprof` validated on both RIDs: HIT, both. The predicted total moves from 233 to 229,
+  three BELOW the plan's 232 to 234.
