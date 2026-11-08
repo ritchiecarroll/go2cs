@@ -131,6 +131,21 @@ converted standard library is built for `amd64` and runs as a native arm64 proce
 reads the processor's AES and PMULL support from arm64.
 <!-- source: src/core/crypto/tls/go2cs_test_disclosures.json note (batch 216, C1); DESIGN-aeshash-arm64.md. -->
 
+**PENDING (the darwin bank). On Apple silicon, `runtime.GOARCH` still reports `amd64`.** The macOS packages are built
+once, for `darwin/amd64`, and serve both Macs, so a converted program on an Apple-silicon Mac reports `amd64` where Go
+reports `arm64` ([Known issues](KnownIssues.md#on-apple-silicon-runtimegoarch-reports-amd64)). From this release each
+Mac's results are compared with Go's own build for that Mac, so the difference now shows in validation. On `osx-arm64`,
+the tests of `go/internal/gcimporter`, `debug/buildinfo` and `net/http/pprof` read the architecture and differ from Go's
+there, and those three packages are not validated on macOS in this release. Reporting the real architecture on Apple
+silicon is planned work.
+<!-- source: COORD 2026-11-08 (the docs gap the .3 darwin leg exposed). The per-Mac oracle is batch 208 (C1 (A),
+     claude/c1-oracle-arch, -test-oracle-goarch) and the arch-strict banking rule (ledger 2026-11-06 09:06, ruling (1);
+     check-roster-format section 2h). The constant is BOARD 2026-11-05 (C1), measured on the GitHub-hosted osx-arm64
+     runner (run 41964964302); KnownIssues.md carries the at-master constant citations. PENDING until the darwin bank
+     lands; fill in the C1 darwin-leg run ids for the three rows. Whether osx-x64 banks them is not stated here: under
+     arch-strict banking a darwin segment needs both RIDs, so check each row's darwin segment at the bank before adding
+     a sentence about which platforms validate them. -->
+
 **PENDING (the gojq seats and the nugetgo wave). gojq for .NET.** [`itchyny/gojq`](https://github.com/itchyny/gojq),
 a jq implementation in Go, is a NuGet package: `nugetgo.github.com.itchyny.gojq` 0.12.19 gives a .NET program an
 in-process, fully managed jq, with no native binary per platform. Its one dependency,
