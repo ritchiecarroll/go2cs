@@ -1,0 +1,9 @@
+== CGO_ENABLED=0 mode=coord load err=<nil> packages=1
+pkg example.com/cgofixture
+  error: -: build constraints exclude all Go files in <scratch>/fixture
+  GoFiles: []
+  CompiledGoFiles: []
+  OtherFiles: []
+  Syntax files: 0
+  scope names: 0
+  uses of _C* identifiers in the package's syntax: 0

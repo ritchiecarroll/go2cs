@@ -1,0 +1,76 @@
+== CGO_ENABLED=1 mode=coord load err=<nil> packages=1
+pkg example.com/cgofixture
+  GoFiles: [fixture.go]
+  CompiledGoFiles: [abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d (build cache) a571e9cb760b2a62606130858044a759a04d00a6a447a52a7e592c67672984d9-d (build cache) bad65b53e83353f030341d0b37e107488b0b47235fabcf7fc601ebca41ce532a-d (build cache)]
+  OtherFiles: []
+  Syntax files: 3
+    abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d  decls=46 importC=false
+    fixture.go  decls=4 importC=false
+    bad65b53e83353f030341d0b37e107488b0b47235fabcf7fc601ebca41ce532a-d  decls=0 importC=false
+  scope names: 43
+    [go] Add: func(a int, b int) int
+    [go] Use: func() (int, float64, string)
+    [*types.Const] _Cfconst_FCONST: untyped float = 5/2
+    [*types.Func] _Cfunc_CString: func(s string) *example.com/cgofixture._Ctype_char
+    [*types.Func] _Cfunc_GoString: func(p *example.com/cgofixture._Ctype_char) string
+    [*types.Func] _Cfunc_add: func(p0 example.com/cgofixture._Ctype_int, p1 example.com/cgofixture._Ctype_int) (r1 example.com/cgofixture._Ctype_int)
+    [*types.Func] _Cfunc_free: func(p0 unsafe.Pointer) (r1 example.com/cgofixture._Ctype_void)
+    [*types.Func] _Cfunc_scale: func(p0 *example.com/cgofixture._Ctype_struct_x) (r1 example.com/cgofixture._Ctype_double)
+    [*types.Var] _Cgo_always_false: bool
+    [*types.Func] _Cgo_keepalive: func(interface{})
+    [*types.Func] _Cgo_no_callback: func(bool)
+    [*types.Func] _Cgo_ptr: func(ptr unsafe.Pointer) unsafe.Pointer
+    [*types.Func] _Cgo_use: func(interface{})
+    [*types.Const] _Ciconst_BLUE: untyped int = 6
+    [*types.Const] _Ciconst_CONST: untyped int = 42
+    [*types.Const] _Ciconst_GREEN: untyped int = 5
+    [*types.Const] _Csconst_SCONST: untyped string = "hi"
+    [*types.TypeName] _Ctype__GoString_: type -> string
+    [*types.TypeName] _Ctype_char: type -> int8
+    [*types.TypeName] _Ctype_double: type -> float64
+    [*types.TypeName] _Ctype_enum_color: type -> uint32
+    [*types.TypeName] _Ctype_int: type -> int32
+    [*types.TypeName] _Ctype_intgo: type -> int64
+    [*types.TypeName] _Ctype_long: type -> int64
+    [*types.TypeName] _Ctype_ptrdiff_t: type -> int64
+    [*types.TypeName] _Ctype_struct_x: type -> struct{a example.com/cgofixture._Ctype_int; b example.com/cgofixture._Ctype_double; name [8]example.com/cgofixture._Ctype_char; flag example.com/cgofixture._Ctype_uchar; next *example.com/cgofixture._Ctype_struct_x}
+    [*types.TypeName] _Ctype_uchar: type -> uint8
+    [*types.TypeName] _Ctype_void: type -> [0]byte
+    [*types.TypeName] _Ctype_xptr: type -> *example.com/cgofixture._Ctype_struct_x
+    [go] __cgofn__cgo_995dfc01489d_Cfunc__Cmalloc: byte
+    [go] __cgofn__cgo_995dfc01489d_Cfunc_add: byte
+    [go] __cgofn__cgo_995dfc01489d_Cfunc_free: byte
+    [go] __cgofn__cgo_995dfc01489d_Cfunc_scale: byte
+    [go] _cgoCheckPointer: func(interface{}, interface{})
+    [go] _cgoCheckResult: func(interface{})
+    [go] _cgo_995dfc01489d_Cfunc__Cmalloc: unsafe.Pointer
+    [go] _cgo_995dfc01489d_Cfunc_add: unsafe.Pointer
+    [go] _cgo_995dfc01489d_Cfunc_free: unsafe.Pointer
+    [go] _cgo_995dfc01489d_Cfunc_scale: unsafe.Pointer
+    [go] _cgo_cmalloc: func(p0 uint64) (r1 unsafe.Pointer)
+    [go] _cgo_runtime_cgocall: func(unsafe.Pointer, uintptr) int32
+    [go] _cgo_runtime_gostring: func(*example.com/cgofixture._Ctype_char) string
+    [go] runtime_throw: func(string)
+  uses of _C* identifiers in the package's syntax: 22
+    _Cfconst_FCONST @ fixture.go:36 : untyped float = 5/2
+    _Cfunc_CString @ fixture.go:39 : func(s string) *example.com/cgofixture._Ctype_char
+    _Cfunc_GoString @ fixture.go:41 : func(p *example.com/cgofixture._Ctype_char) string
+    _Cfunc_add @ fixture.go:31 : func(p0 example.com/cgofixture._Ctype_int, p1 example.com/cgofixture._Ctype_int) (r1 example.com/cgofixture._Ctype_int)
+    _Cfunc_free @ fixture.go:40 : func(p0 unsafe.Pointer) (r1 example.com/cgofixture._Ctype_void)
+    _Cfunc_scale @ fixture.go:41 : func(p0 *example.com/cgofixture._Ctype_struct_x) (r1 example.com/cgofixture._Ctype_double)
+    _Cgo_always_false @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:124 : bool
+    _Cgo_use @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:125 : func(interface{})
+    _Ciconst_BLUE @ fixture.go:41 : untyped int = 6
+    _Ciconst_CONST @ fixture.go:35 : untyped int = 42
+    _Ciconst_GREEN @ fixture.go:38 : untyped int = 5
+    _Csconst_SCONST @ fixture.go:39 : untyped string = "hi"
+    _Ctype_char @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:99 : example.com/cgofixture._Ctype_char
+    _Ctype_double @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:44 : example.com/cgofixture._Ctype_double
+    _Ctype_enum_color @ fixture.go:38 : example.com/cgofixture._Ctype_enum_color
+    _Ctype_int @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:108 : example.com/cgofixture._Ctype_int
+    _Ctype_long @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:40 : example.com/cgofixture._Ctype_long
+    _Ctype_ptrdiff_t @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:36 : example.com/cgofixture._Ctype_ptrdiff_t
+    _Ctype_struct_x @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:47 : example.com/cgofixture._Ctype_struct_x
+    _Ctype_uchar @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:46 : example.com/cgofixture._Ctype_uchar
+    _Ctype_void @ abbd329f925c3795d6df4fac1ff7956de763deaaba4391c80c6e718623fb0ec1-d:122 : example.com/cgofixture._Ctype_void
+    _Ctype_xptr @ fixture.go:37 : example.com/cgofixture._Ctype_xptr
